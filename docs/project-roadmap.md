@@ -31,7 +31,7 @@
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
 | 01 | Landing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — all 12 sections, verified |
-| 02 | Pricing Page | ✅ Complete | 🔴 Not Started | — | — | Revenue path |
+| 02 | Pricing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — 4-tier cards, toggle, comparison, FAQ |
 | 03 | Auth Pages | ✅ Complete | 🔴 Not Started | — | — | Clerk-powered sign-in/up |
 | 04 | Onboarding Flow | ✅ Complete | 🔴 Not Started | #03 | — | First-run workspace creation |
 | 05 | Workflow Canvas | ✅ Complete | 🔴 Not Started | #03, #04 | — | Core product — ReactFlow canvas |
