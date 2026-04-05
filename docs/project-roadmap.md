@@ -13,12 +13,12 @@
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 (all features fully designed via Blueprint) |
 | 🟢 Complete (Development) | 0 |
-| 🟡 In Progress | 0 |
-| 🔴 Not Started | 38 |
+| 🟡 In Progress (awaiting merge) | 1 |
+| 🔴 Not Started | 37 |
 | ⏸️ On Hold | 0 |
 
 **Design Progress**: ██████████ 100%
-**Development Progress**: ░░░░░░░░░░ 0%
+**Development Progress**: ▓░░░░░░░░░ ~3%
 
 ---
 
@@ -30,7 +30,7 @@
 
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
-| 01 | Landing Page | ✅ Complete | 🔴 Not Started | — | — | First impression, conversion |
+| 01 | Landing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — all 12 sections, verified |
 | 02 | Pricing Page | ✅ Complete | 🔴 Not Started | — | — | Revenue path |
 | 03 | Auth Pages | ✅ Complete | 🔴 Not Started | — | — | Clerk-powered sign-in/up |
 | 04 | Onboarding Flow | ✅ Complete | 🔴 Not Started | #03 | — | First-run workspace creation |
