@@ -38,40 +38,69 @@ const defaultNodes: Node[] = [
   {
     id: '1',
     type: 'task',
-    position: { x: 100, y: 100 },
-    data: { title: 'Set up CI/CD', status: 'in_progress', assignee: 'AP' },
+    position: { x: 100, y: 80 },
+    data: {
+      title: 'Ship onboarding v2',
+      status: 'in_progress',
+      assignee: 'AP',
+      dueDate: 'Apr 10',
+      priority: 'high',
+    },
   },
   {
     id: '2',
-    type: 'decision',
-    position: { x: 400, y: 80 },
-    data: { title: 'Choose auth provider', status: 'decided', qualityScore: 82 },
+    type: 'task',
+    position: { x: 100, y: 280 },
+    data: {
+      title: 'Fix auth redirect bug',
+      status: 'done',
+      assignee: 'PK',
+      priority: 'urgent',
+    },
   },
   {
     id: '3',
     type: 'doc',
-    position: { x: 250, y: 280 },
-    data: { title: 'API Design Spec v2', status: 'draft' },
+    position: { x: 420, y: 80 },
+    data: {
+      title: 'Product Requirements Doc',
+      status: 'draft',
+      updatedAt: '2h ago',
+      wordCount: '1,240',
+    },
   },
   {
     id: '4',
-    type: 'task',
-    position: { x: 600, y: 250 },
-    data: { title: 'Implement node creation', status: 'todo', assignee: 'PS' },
+    type: 'decision',
+    position: { x: 420, y: 280 },
+    data: {
+      title: 'Use Neon vs Supabase for DB?',
+      status: 'decided',
+      qualityScore: 84,
+      resolution: 'Neon — serverless Postgres, scales to zero, DB branching per PR, India region available.',
+      rationale: 'Supabase Auth was appealing but Clerk handles auth better. Neon\'s serverless model means zero cost at rest.',
+      options: ['Neon', 'Supabase', 'PlanetScale'],
+      decisionType: 'Irreversible',
+      outcome: 'Pending',
+    },
   },
   {
     id: '5',
-    type: 'automation',
-    position: { x: 500, y: 400 },
-    data: { title: 'Auto-assign reviewer', trigger: 'task.status → in_review' },
+    type: 'decision',
+    position: { x: 740, y: 180 },
+    data: {
+      title: 'Pricing: freemium vs trial?',
+      status: 'open',
+      qualityScore: 62,
+    },
   },
 ]
 
 const defaultEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3' },
-  { id: 'e2-4', source: '2', target: '4' },
-  { id: 'e4-5', source: '4', target: '5', style: { strokeDasharray: '5 5' } },
+  { id: 'e1-3', source: '1', target: '3', animated: true },
+  { id: 'e3-4', source: '3', target: '4' },
+  { id: 'e4-5', source: '4', target: '5', style: { strokeDasharray: '6 6' } },
+  { id: 'e2-4', source: '2', target: '4', animated: true },
 ]
 
 export function WorkflowCanvas() {
