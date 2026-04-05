@@ -13,6 +13,7 @@ import {
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { useCanvasStore } from '@/stores/canvas.store'
+import { NodeListView } from './mobile/NodeListView'
 import { TaskNode } from './nodes/TaskNode'
 import { DocNode } from './nodes/DocNode'
 import { DecisionNode } from './nodes/DecisionNode'
@@ -139,27 +140,7 @@ export function WorkflowCanvas() {
   }, [selectNode])
 
   if (isMobile) {
-    return (
-      <div className="px-4 py-6">
-        <h2 className="text-lg font-semibold text-slate-50">Workflow Nodes</h2>
-        <p className="mt-1 text-sm text-slate-400">Canvas view is available on larger screens.</p>
-        <div className="mt-4 space-y-2">
-          {nodes.map((node) => (
-            <button
-              key={node.id}
-              onClick={() => selectNode(node.id)}
-              className="w-full rounded-xl border border-slate-800 bg-slate-900 p-4 text-left hover:border-slate-700 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-500" />
-                <span className="text-xs font-medium uppercase text-slate-500">{node.type}</span>
-              </div>
-              <p className="mt-1 text-sm font-medium text-slate-200">{(node.data as Record<string, string>).title}</p>
-            </button>
-          ))}
-        </div>
-      </div>
-    )
+    return <NodeListView />
   }
 
   return (

@@ -7,6 +7,7 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import { ToastProvider } from '@/components/ui/ToastProvider'
 import { LazyMindPanel } from '@/components/lazymind/LazyMindPanel'
+import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
 
@@ -33,6 +34,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         <MobileBottomNav workspaceSlug={slug} />
         <CommandPalette />
         <LazyMindPanel />
+        <KeyboardShortcutsModal />
       </div>
     </ToastProvider>
   )
