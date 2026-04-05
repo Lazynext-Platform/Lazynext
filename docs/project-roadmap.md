@@ -39,14 +39,14 @@
 | 09 | Node Detail Panels | ✅ Complete | 🔴 Not Started | #05 | — | Side panel for node editing |
 | 10 | LazyMind AI Panel | ✅ Complete | 🔴 Not Started | #05, #09 | — | Context-aware AI sidebar |
 | 11 | Thread Comments Panel | ✅ Complete | 🔴 Not Started | #05, #09 | — | Conversations on any node |
-| 14 | Command Palette & Search | ✅ Complete | 🔴 Not Started | #05 | — | ⌘K power navigation |
+| 14 | Command Palette & Search | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — ⌘K palette with search, Quick Actions, Recent, Navigation |
 | 20 | Empty & Error States | ✅ Complete | 🔴 Not Started | #05 | — | UX polish for all empty views |
 | 23 | Notification Center | ✅ Complete | 🔴 Not Started | #05 | — | Activity notifications |
 | 24 | Keyboard Shortcuts | ✅ Complete | 🔴 Not Started | #05 | — | Power user efficiency |
-| 26 | Workspace Home | ✅ Complete | 🔴 Not Started | #05 | — | Dashboard landing page |
-| 28 | Toast Notifications | ✅ Complete | 🔴 Not Started | #05 | — | Sonner-powered feedback |
-| 29 | Node Creation Menu | ✅ Complete | 🔴 Not Started | #05 | — | Add nodes to canvas |
-| 33 | Canvas Context Controls | ✅ Complete | 🔴 Not Started | #05 | — | Right-click menu, zoom controls |
+| 26 | Workspace Home | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — greeting, stats, workflows, activity, due soon, LazyMind |
+| 28 | Toast Notifications | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 6 variants with progress bars, action buttons |
+| 29 | Node Creation Menu | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 2-col grid, kbd shortcuts (N/T/D/Q/H/P/A) |
+| 33 | Canvas Context Controls | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — right-click context menus, create submenu |
 
 **Phase 1 Total**: 17 features
 

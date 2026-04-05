@@ -22,7 +22,9 @@ import { AutomationNode } from './nodes/AutomationNode'
 import { TableNode } from './nodes/TableNode'
 import { CanvasToolbar } from './panels/CanvasToolbar'
 import { NodeDetailPanel } from './panels/NodeDetailPanel'
+import { CanvasContextMenu } from './panels/CanvasContextMenu'
 import { useUIStore } from '@/stores/ui.store'
+import type { NodeType } from '@/lib/utils/constants'
 
 const nodeTypes = {
   task: TaskNode,
@@ -111,6 +113,7 @@ export function WorkflowCanvas() {
     onEdgesChange,
     onConnect,
     selectNode,
+    addNode,
     hydrateCanvas,
     selectedNodeId,
     isNodePanelOpen,
@@ -189,6 +192,18 @@ export function WorkflowCanvas() {
       </ReactFlow>
 
       <CanvasToolbar />
+
+      <CanvasContextMenu
+        onCreateNode={(type: NodeType, pos) => {
+          const id = `node-${Date.now()}`
+          addNode({
+            id,
+            type,
+            position: { x: pos.x - 200, y: pos.y - 100 },
+            data: { title: `New ${type}`, status: type === 'task' ? 'todo' : undefined },
+          })
+        }}
+      />
 
       {isNodePanelOpen && selectedNodeId && (
         <NodeDetailPanel nodeId={selectedNodeId} />
