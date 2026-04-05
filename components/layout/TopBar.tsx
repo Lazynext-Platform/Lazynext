@@ -1,8 +1,9 @@
 'use client'
 
 import { UserButton } from '@clerk/nextjs'
-import { Search, Bell, Menu, Command, ChevronDown, Sparkles, Share2, Plus } from 'lucide-react'
+import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
+import { NotificationCenter } from '@/components/ui/NotificationCenter'
 import { cn } from '@/lib/utils/cn'
 
 const presenceAvatars = [
@@ -12,7 +13,7 @@ const presenceAvatars = [
 ]
 
 export function TopBar() {
-  const { isSidebarOpen, toggleSidebar, toggleCommandPalette } = useUIStore()
+  const { isSidebarOpen, toggleSidebar, toggleCommandPalette, toggleLazyMind } = useUIStore()
 
   return (
     <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm px-4">
@@ -78,15 +79,12 @@ export function TopBar() {
         </button>
 
         {/* LazyMind AI */}
-        <button className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
+        <button onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
           <Sparkles className="h-3.5 w-3.5" /> LazyMind
         </button>
 
         {/* Notifications */}
-        <button className="relative rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Notifications">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-brand" />
-        </button>
+        <NotificationCenter />
 
         {/* User */}
         <UserButton
