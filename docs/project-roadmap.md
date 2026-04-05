@@ -13,12 +13,12 @@
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 (all features fully designed via Blueprint) |
 | 🟢 Complete (Development) | 0 |
-| 🟡 In Progress (awaiting merge) | 1 |
-| 🔴 Not Started | 37 |
+| 🟡 In Progress (awaiting merge) | 17 |
+| 🔴 Not Started | 21 |
 | ⏸️ On Hold | 0 |
 
 **Design Progress**: ██████████ 100%
-**Development Progress**: ▓░░░░░░░░░ ~3%
+**Development Progress**: █████░░░░░ ~45%
 
 ---
 
@@ -35,14 +35,14 @@
 | 03 | Auth Pages | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — split-panel layout + Clerk customization |
 | 04 | Onboarding Flow | ✅ Complete | 🟡 Awaiting Merge | #03 | `feature/01-landing-page` | Built — 3-step wizard, confetti, score reveal |
 | 05 | Workflow Canvas | ✅ Complete | 🟡 Awaiting Merge | #03, #04 | `feature/01-landing-page` | Built — 5 nodes, Decision DNA panel, enhanced TopBar/Sidebar |
-| 06 | Mobile App View | ✅ Complete | 🔴 Not Started | #05 | — | NodeListView for <640px |
-| 09 | Node Detail Panels | ✅ Complete | 🔴 Not Started | #05 | — | Side panel for node editing |
-| 10 | LazyMind AI Panel | ✅ Complete | 🔴 Not Started | #05, #09 | — | Context-aware AI sidebar |
-| 11 | Thread Comments Panel | ✅ Complete | 🔴 Not Started | #05, #09 | — | Conversations on any node |
+| 06 | Mobile App View | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — NodeListView with filter pills, type-colored cards |
+| 09 | Node Detail Panels | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — Task/Doc/Decision panels with full fields |
+| 10 | LazyMind AI Panel | ✅ Complete | � Awaiting Merge | #05, #09 | `feature/01-landing-page` | Built — structured messages, quick actions, typing indicator |
+| 11 | Thread Comments Panel | ✅ Complete | � Awaiting Merge | #05, #09 | `feature/01-landing-page` | Built — messages, @mentions, reactions, comparison tables |
 | 14 | Command Palette & Search | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — ⌘K palette with search, Quick Actions, Recent, Navigation |
-| 20 | Empty & Error States | ✅ Complete | 🔴 Not Started | #05 | — | UX polish for all empty views |
-| 23 | Notification Center | ✅ Complete | 🔴 Not Started | #05 | — | Activity notifications |
-| 24 | Keyboard Shortcuts | ✅ Complete | 🔴 Not Started | #05 | — | Power user efficiency |
+| 20 | Empty & Error States | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — 12 states (empty/error/loading/maintenance/rate-limit) |
+| 23 | Notification Center | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — bell dropdown, all/unread tabs, mark-all-read, type badges |
+| 24 | Keyboard Shortcuts | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — ? key modal, 23 shortcuts in 4 categories |
 | 26 | Workspace Home | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — greeting, stats, workflows, activity, due soon, LazyMind |
 | 28 | Toast Notifications | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 6 variants with progress bars, action buttons |
 | 29 | Node Creation Menu | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 2-col grid, kbd shortcuts (N/T/D/Q/H/P/A) |
