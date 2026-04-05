@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
+import { CommandPalette } from '@/components/ui/CommandPalette'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
 
@@ -27,6 +28,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
       </div>
 
       <MobileBottomNav workspaceSlug={slug} />
+      <CommandPalette />
     </div>
   )
 }
