@@ -46,3 +46,43 @@
     border-radius: 3px;
   }
 }
+
+/* Marketing page styles */
+html {
+  scroll-behavior: smooth;
+}
+
+.gradient-hero {
+  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 50%, #f5f0ff 100%);
+}
+
+.gradient-decision {
+  background: linear-gradient(135deg, #fdf4ff 0%, #f0f4ff 50%, #f0fdf4 100%);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-anim {
+  animation: float 3s ease-in-out infinite;
+}
+
+.consolidation-line {
+  stroke-dasharray: 6 4;
+  animation: dash 20s linear infinite;
+}
+
+@keyframes dash {
+  to { stroke-dashoffset: -200; }
+}
