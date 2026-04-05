@@ -33,7 +33,7 @@
 | 01 | Landing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — all 12 sections, verified |
 | 02 | Pricing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — 4-tier cards, toggle, comparison, FAQ |
 | 03 | Auth Pages | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — split-panel layout + Clerk customization |
-| 04 | Onboarding Flow | ✅ Complete | 🔴 Not Started | #03 | — | First-run workspace creation |
+| 04 | Onboarding Flow | ✅ Complete | 🟡 Awaiting Merge | #03 | `feature/01-landing-page` | Built — 3-step wizard, confetti, score reveal |
 | 05 | Workflow Canvas | ✅ Complete | 🔴 Not Started | #03, #04 | — | Core product — ReactFlow canvas |
 | 06 | Mobile App View | ✅ Complete | 🔴 Not Started | #05 | — | NodeListView for <640px |
 | 09 | Node Detail Panels | ✅ Complete | 🔴 Not Started | #05 | — | Side panel for node editing |
