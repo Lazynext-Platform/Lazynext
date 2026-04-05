@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Empty, Error & Maintenance States</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+
+  <!-- Tab Navigation -->
+  <div class="sticky top-0 z-50 bg-slate-900 border-b border-slate-700 px-4 py-3">
+    <h1 class="text-sm font-semibold mb-2">State Mockups</h1>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="show('emptyCanvas')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-[#4F6EF7] text-white font-medium">Empty Canvas</button>
+      <button onclick="show('emptyDecisions')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Empty Decisions</button>
+      <button onclick="show('emptySearch')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Empty Search</button>
+      <button onclick="show('emptyTasks')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Empty Tasks</button>
+      <button onclick="show('emptyThread')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Empty Thread</button>
+      <button onclick="show('emptyPulse')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Empty PULSE</button>
+      <button onclick="show('errorGeneral')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Error Page</button>
+      <button onclick="show('error404')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">404</button>
+      <button onclick="show('maintenance')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Maintenance</button>
+      <button onclick="show('rateLimit')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Rate Limit</button>
+      <button onclick="show('aiUnavailable')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">AI Unavailable</button>
+      <button onclick="show('loadingSkeleton')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Loading Skeleton</button>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto py-12 px-4">
+
+    <!-- EMPTY: Canvas -->
+    <div id="emptyCanvas" class="state-panel">
+      <div class="text-center py-20 px-8 border-2 border-dashed border-slate-700 rounded-xl">
+        <div class="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl opacity-50">&#9638;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">Your canvas is empty</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">Start by adding your first node. Drag a primitive from the sidebar or use keyboard shortcuts.</p>
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">+ Add First Node</button>
+          <button class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md hover:bg-slate-700 border border-slate-700">Use a Template</button>
+        </div>
+        <div class="flex items-center justify-center gap-4 mt-4 text-[10px] text-slate-600">
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-400">T</kbd> Task</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-400">D</kbd> Doc</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-400">X</kbd> Decision</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY: Decisions -->
+    <div id="emptyDecisions" class="state-panel hidden">
+      <div class="text-center py-20 px-8">
+        <div class="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl text-orange-400">&#10003;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">No decisions logged yet</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">Decision DNA is what makes Lazynext unique. Log your team's decisions with rationale, and never repeat the same mistakes.</p>
+        <button class="mt-6 px-5 py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">+ Log First Decision</button>
+        <p class="text-[10px] text-slate-600 mt-3">Every decision gets a quality score and becomes searchable forever.</p>
+      </div>
+    </div>
+
+    <!-- EMPTY: Search Results -->
+    <div id="emptySearch" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">No results for "microservices architecture"</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">Try different keywords, or log a past decision so it's searchable next time.</p>
+        <div class="flex items-center justify-center gap-3 mt-5">
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-md">Log a Past Decision</button>
+          <button class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Clear Search</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY: Tasks -->
+    <div id="emptyTasks" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl text-blue-400">&#128203;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">Nothing assigned yet</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">Create your first task or import from Notion, Linear, or Trello.</p>
+        <div class="flex items-center justify-center gap-3 mt-5">
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-md">+ Add Task</button>
+          <button class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY: Thread -->
+    <div id="emptyThread" class="state-panel hidden">
+      <div class="text-center py-12 px-8">
+        <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center mx-auto mb-3">
+          <span class="text-xl text-purple-400">&#128172;</span>
+        </div>
+        <h2 class="text-sm font-semibold text-slate-300">No messages yet</h2>
+        <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Threads stay attached to this node forever. Start a conversation.</p>
+        <div class="mt-4 max-w-xs mx-auto">
+          <input type="text" placeholder="Write the first comment..." autofocus
+            class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50">
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY: PULSE -->
+    <div id="emptyPulse" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl text-cyan-400">&#128202;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">PULSE shows you what your team built</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">Once you have tasks, decisions, and docs in your workflows, PULSE will auto-generate your status dashboard. No setup required.</p>
+        <button class="mt-5 px-5 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Go to Canvas &rarr;</button>
+      </div>
+    </div>
+
+    <!-- ERROR: General Error -->
+    <div id="errorGeneral" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+          <span class="text-3xl text-red-400">&#9888;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">Something went wrong</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">We hit an unexpected error. This has been automatically reported to our team.</p>
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-3 mt-4 max-w-sm mx-auto text-left">
+          <p class="text-[10px] font-mono text-red-400">Error: Failed to fetch workflow data</p>
+          <p class="text-[10px] font-mono text-slate-600 mt-0.5">Request ID: req_a8f2k4j9x</p>
+        </div>
+        <div class="flex items-center justify-center gap-3 mt-5">
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-md">Try Again</button>
+          <button class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Go Home</button>
+        </div>
+        <p class="text-[10px] text-slate-600 mt-3">If this keeps happening, <a href="#" class="text-[#4F6EF7] underline">contact support</a>.</p>
+      </div>
+    </div>
+
+    <!-- ERROR: 404 -->
+    <div id="error404" class="state-panel hidden">
+      <div class="text-center py-20 px-8">
+        <p class="text-7xl font-extrabold text-slate-800">404</p>
+        <h2 class="text-lg font-semibold text-slate-300 mt-4">Page not found</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">The page you're looking for doesn't exist or has been moved.</p>
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-md">Go to Dashboard</button>
+          <button class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Go Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINTENANCE PAGE -->
+    <div id="maintenance" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-5">
+          <span class="text-4xl">&#128736;</span>
+        </div>
+        <h2 class="text-xl font-bold text-slate-200">We'll be right back</h2>
+        <p class="text-sm text-slate-400 mt-2 max-w-md mx-auto">Lazynext is currently undergoing scheduled maintenance. We're upgrading our systems to make things faster and more reliable.</p>
+        <div class="bg-slate-900 border border-slate-700 rounded-lg p-4 mt-6 max-w-sm mx-auto">
+          <p class="text-xs text-slate-400"><strong class="text-slate-300">Estimated downtime:</strong> 30 minutes</p>
+          <p class="text-xs text-slate-400 mt-1"><strong class="text-slate-300">Started:</strong> Apr 4, 2026 at 2:00 AM IST</p>
+          <p class="text-xs text-slate-400 mt-1"><strong class="text-slate-300">Expected return:</strong> 2:30 AM IST</p>
+        </div>
+        <div class="flex items-center justify-center gap-3 mt-5">
+          <a href="#" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Check Status Page</a>
+          <a href="#" class="px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Follow @lazynext</a>
+        </div>
+        <div class="mt-6">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center mx-auto text-white font-bold text-sm">L</div>
+          <p class="text-[10px] text-slate-600 mt-2">Built in India. Priced for humans.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RATE LIMIT -->
+    <div id="rateLimit" class="state-panel hidden">
+      <div class="text-center py-16 px-8">
+        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+          <span class="text-2xl text-amber-400">&#9202;</span>
+        </div>
+        <h2 class="text-lg font-semibold text-slate-300">Slow down there</h2>
+        <p class="text-sm text-slate-500 mt-2 max-w-sm mx-auto">You've hit the rate limit. This protects our servers (and your workflow). Please wait a moment.</p>
+        <div class="bg-slate-900 border border-amber-500/20 rounded-lg p-4 mt-4 max-w-xs mx-auto">
+          <p class="text-xs text-amber-400 font-medium">Rate limit: 100 requests / minute</p>
+          <p class="text-xs text-slate-500 mt-1">Try again in <strong class="text-slate-300">23 seconds</strong></p>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2">
+            <div class="bg-amber-500 h-1.5 rounded-full" style="width: 60%"></div>
+          </div>
+        </div>
+        <button class="mt-5 px-4 py-2 bg-slate-800 text-slate-300 text-sm rounded-md border border-slate-700">Try Again</button>
+      </div>
+    </div>
+
+    <!-- AI UNAVAILABLE -->
+    <div id="aiUnavailable" class="state-panel hidden">
+      <div class="text-center py-12 px-8 bg-slate-900 border border-slate-700 rounded-xl max-w-sm mx-auto">
+        <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+          <span class="text-xl">&#128564;</span>
+        </div>
+        <h2 class="text-sm font-semibold text-slate-300">LazyMind is resting</h2>
+        <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">AI features are temporarily unavailable. Everything else works normally — your data is safe.</p>
+        <div class="bg-slate-800 rounded-md p-2 mt-3 text-[10px] text-slate-500">
+          Groq API: <span class="text-red-400">unavailable</span> &middot; Together AI: <span class="text-red-400">unavailable</span>
+        </div>
+        <p class="text-[10px] text-slate-600 mt-2">We'll automatically reconnect. No action needed.</p>
+      </div>
+    </div>
+
+    <!-- LOADING SKELETON -->
+    <div id="loadingSkeleton" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-4 text-center">Canvas loading skeleton</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-6 space-y-4">
+        <!-- Top bar skeleton -->
+        <div class="flex items-center gap-3">
+          <div class="w-24 h-4 bg-slate-800 rounded animate-pulse"></div>
+          <div class="w-px h-4 bg-slate-800"></div>
+          <div class="w-32 h-4 bg-slate-800 rounded animate-pulse"></div>
+          <div class="ml-auto flex gap-2">
+            <div class="w-7 h-7 rounded-full bg-slate-800 animate-pulse"></div>
+            <div class="w-7 h-7 rounded-full bg-slate-800 animate-pulse"></div>
+            <div class="w-16 h-7 bg-slate-800 rounded animate-pulse"></div>
+          </div>
+        </div>
+        <div class="border-b border-slate-800"></div>
+        <!-- Canvas skeleton -->
+        <div class="flex gap-4">
+          <!-- Sidebar skeleton -->
+          <div class="w-40 space-y-3 shrink-0">
+            <div class="w-full h-3 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-32 h-8 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-28 h-8 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-32 h-8 bg-slate-800 rounded animate-pulse"></div>
+            <div class="border-b border-slate-800 my-2"></div>
+            <div class="w-full h-3 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-24 h-6 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-24 h-6 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-24 h-6 bg-slate-800 rounded animate-pulse"></div>
+          </div>
+          <!-- Canvas skeleton -->
+          <div class="flex-1 space-y-4">
+            <div class="flex gap-6">
+              <div class="w-48 h-20 bg-slate-800 rounded-lg animate-pulse"></div>
+              <div class="w-48 h-20 bg-slate-800 rounded-lg animate-pulse" style="animation-delay: 0.1s"></div>
+            </div>
+            <div class="flex gap-6 ml-12">
+              <div class="w-48 h-20 bg-slate-800 rounded-lg animate-pulse" style="animation-delay: 0.2s"></div>
+              <div class="w-48 h-20 bg-slate-800 rounded-lg animate-pulse" style="animation-delay: 0.3s"></div>
+            </div>
+            <div class="flex gap-6 ml-24">
+              <div class="w-48 h-20 bg-slate-800 rounded-lg animate-pulse" style="animation-delay: 0.4s"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-500 mb-4 mt-8 text-center">Decision list loading skeleton</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 space-y-3">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse"></div>
+          <div class="flex-1 space-y-1.5">
+            <div class="w-3/4 h-3 bg-slate-800 rounded animate-pulse"></div>
+            <div class="w-1/2 h-2 bg-slate-800 rounded animate-pulse"></div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse"></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse" style="animation-delay: 0.1s"></div>
+          <div class="flex-1 space-y-1.5">
+            <div class="w-2/3 h-3 bg-slate-800 rounded animate-pulse" style="animation-delay: 0.1s"></div>
+            <div class="w-2/5 h-2 bg-slate-800 rounded animate-pulse" style="animation-delay: 0.1s"></div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse" style="animation-delay: 0.1s"></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse" style="animation-delay: 0.2s"></div>
+          <div class="flex-1 space-y-1.5">
+            <div class="w-4/5 h-3 bg-slate-800 rounded animate-pulse" style="animation-delay: 0.2s"></div>
+            <div class="w-1/3 h-2 bg-slate-800 rounded animate-pulse" style="animation-delay: 0.2s"></div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-slate-800 animate-pulse" style="animation-delay: 0.2s"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function show(id) {
+      document.querySelectorAll('.state-panel').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400';
+      });
+      event.target.className = 'tab-btn px-2.5 py-1 text-[10px] rounded bg-[#4F6EF7] text-white font-medium';
+    }
+  </script>
+</body>
+</html>

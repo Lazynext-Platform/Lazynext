@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing &amp; Subscription — Lazynext</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { primary: '#4F6EF7' }
+        }
+      }
+    }
+  </script>
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 h-screen sticky top-0">
+    <div class="p-5 border-b border-slate-800">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">L</div>
+        <span class="text-lg font-semibold">Lazynext</span>
+      </div>
+    </div>
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Projects
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        LazyMind AI
+      </a>
+      <div class="pt-4 mt-4 border-t border-slate-800">
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Settings
+        </a>
+        <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-white font-medium ml-4">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+          Billing
+        </a>
+      </div>
+    </nav>
+    <div class="p-4 border-t border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center text-primary font-semibold text-sm">AP</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium truncate">Avas Patel</p>
+          <p class="text-xs text-slate-500 truncate">Admin</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="flex-1 flex flex-col min-h-screen">
+    <!-- Top Bar -->
+    <header class="h-14 bg-slate-900 border-b border-slate-800 flex items-center px-6 shrink-0">
+      <div class="flex items-center gap-2 text-sm text-slate-400">
+        <span>Acme Corp</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span>Settings</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-100">Billing &amp; Subscription</span>
+      </div>
+      <div class="ml-auto flex items-center gap-4">
+        <button class="text-slate-400 hover:text-slate-200 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <div class="max-w-6xl mx-auto space-y-8">
+        <h1 class="text-2xl font-bold">Billing &amp; Subscription</h1>
+
+        <!-- ===================== CURRENT PLAN ===================== -->
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <h2 class="text-xl font-semibold">Starter</h2>
+                <span class="bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1 rounded-full">Current Plan</span>
+              </div>
+              <div class="space-y-1">
+                <p class="text-2xl font-bold text-slate-100">&#8377;499<span class="text-base font-normal text-slate-400">/seat/month</span></p>
+                <p class="text-sm text-slate-400">4 seats &times; &#8377;499 = <span class="text-slate-200 font-medium">&#8377;1,996/month</span></p>
+                <p class="text-sm text-slate-500">Next billing date: <span class="text-slate-300">May 4, 2026</span></p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-5 py-2.5 rounded-lg text-sm font-medium transition">Manage Subscription</button>
+              <button onclick="document.getElementById('planSection').scrollIntoView({behavior:'smooth'})" class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">Change Plan</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================== PLAN COMPARISON ===================== -->
+        <section id="planSection">
+          <h2 class="text-lg font-semibold mb-4">Available Plans</h2>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Free -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col">
+              <h3 class="text-lg font-semibold mb-1">Free</h3>
+              <p class="text-3xl font-bold mb-1">&#8377;0</p>
+              <p class="text-sm text-slate-500 mb-5">Forever free</p>
+              <ul class="space-y-2 text-sm text-slate-400 flex-1 mb-6">
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 3 members</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>100 nodes</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>10 AI queries/day</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>500 MB storage</li>
+              </ul>
+              <button class="w-full py-2.5 rounded-lg text-sm font-medium border border-slate-700 text-slate-400 cursor-default">Downgrade</button>
+            </div>
+
+            <!-- Starter (Current) -->
+            <div class="bg-slate-900 border-2 border-primary rounded-xl p-6 flex flex-col relative">
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full">Current Plan</div>
+              <h3 class="text-lg font-semibold mb-1">Starter</h3>
+              <p class="text-3xl font-bold mb-1">&#8377;499<span class="text-base font-normal text-slate-400">/seat</span></p>
+              <p class="text-sm text-slate-500 mb-5">per month</p>
+              <ul class="space-y-2 text-sm text-slate-400 flex-1 mb-6">
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 10 members</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited nodes</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>100 AI queries/day</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-primary mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>5 GB storage</li>
+              </ul>
+              <button class="w-full py-2.5 rounded-lg text-sm font-medium bg-primary/20 text-primary cursor-default">Current Plan</button>
+            </div>
+
+            <!-- Pro -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col">
+              <h3 class="text-lg font-semibold mb-1">Pro</h3>
+              <p class="text-3xl font-bold mb-1">&#8377;1,499<span class="text-base font-normal text-slate-400">/seat</span></p>
+              <p class="text-sm text-slate-500 mb-5">per month</p>
+              <ul class="space-y-2 text-sm text-slate-400 flex-1 mb-6">
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 50 members</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited nodes</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited AI queries</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>50 GB storage</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Advanced analytics</li>
+              </ul>
+              <button class="w-full py-2.5 rounded-lg text-sm font-medium bg-primary hover:bg-primary/90 text-white transition">Upgrade</button>
+            </div>
+
+            <!-- Business -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col">
+              <h3 class="text-lg font-semibold mb-1">Business</h3>
+              <p class="text-3xl font-bold mb-1">Custom</p>
+              <p class="text-sm text-slate-500 mb-5">tailored pricing</p>
+              <ul class="space-y-2 text-sm text-slate-400 flex-1 mb-6">
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited members</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited everything</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>SSO &amp; SAML</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Priority support</li>
+                <li class="flex items-start gap-2"><svg class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Custom integrations</li>
+              </ul>
+              <button class="w-full py-2.5 rounded-lg text-sm font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">Contact Sales</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================== PAYMENT METHOD ===================== -->
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <h2 class="text-lg font-semibold mb-4">Payment Method</h2>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-slate-800/50 rounded-lg mb-4">
+            <div class="flex items-center gap-4">
+              <!-- Visa icon -->
+              <div class="w-12 h-8 bg-white rounded flex items-center justify-center">
+                <svg viewBox="0 0 48 32" class="w-10 h-6">
+                  <rect width="48" height="32" rx="4" fill="#1A1F71"/>
+                  <text x="24" y="20" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Inter, sans-serif">VISA</text>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium">Visa ending in 4242</p>
+                <p class="text-xs text-slate-500">Expires 12/2028</p>
+              </div>
+            </div>
+            <span class="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2.5 py-1 rounded-full w-fit">Default</span>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium transition">Update Payment Method</button>
+            <button class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+              Add UPI (Razorpay)
+            </button>
+          </div>
+        </section>
+
+        <!-- ===================== BILLING HISTORY ===================== -->
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <h2 class="text-lg font-semibold mb-4">Billing History</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-slate-500 border-b border-slate-800">
+                  <th class="pb-3 font-medium">Date</th>
+                  <th class="pb-3 font-medium">Description</th>
+                  <th class="pb-3 font-medium">Amount</th>
+                  <th class="pb-3 font-medium">Status</th>
+                  <th class="pb-3 font-medium text-right">Invoice</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800">
+                <tr>
+                  <td class="py-4 text-slate-300">Apr 4, 2026</td>
+                  <td class="py-4">Starter Plan &mdash; 4 seats</td>
+                  <td class="py-4">&#8377;1,996</td>
+                  <td class="py-4"><span class="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded">Paid</span></td>
+                  <td class="py-4 text-right"><a href="#" class="text-primary hover:text-primary/80 text-xs font-medium transition">Download PDF</a></td>
+                </tr>
+                <tr>
+                  <td class="py-4 text-slate-300">Mar 4, 2026</td>
+                  <td class="py-4">Starter Plan &mdash; 4 seats</td>
+                  <td class="py-4">&#8377;1,996</td>
+                  <td class="py-4"><span class="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded">Paid</span></td>
+                  <td class="py-4 text-right"><a href="#" class="text-primary hover:text-primary/80 text-xs font-medium transition">Download PDF</a></td>
+                </tr>
+                <tr>
+                  <td class="py-4 text-slate-300">Feb 4, 2026</td>
+                  <td class="py-4">Starter Plan &mdash; 3 seats</td>
+                  <td class="py-4">&#8377;1,497</td>
+                  <td class="py-4"><span class="bg-emerald-500/20 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded">Paid</span></td>
+                  <td class="py-4 text-right"><a href="#" class="text-primary hover:text-primary/80 text-xs font-medium transition">Download PDF</a></td>
+                </tr>
+                <tr>
+                  <td class="py-4 text-slate-300">Jan 4, 2026</td>
+                  <td class="py-4">Pro Trial</td>
+                  <td class="py-4">&#8377;0</td>
+                  <td class="py-4"><span class="bg-slate-700 text-slate-400 text-xs font-medium px-2 py-0.5 rounded">Trial</span></td>
+                  <td class="py-4 text-right text-slate-600">&mdash;</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===================== USAGE METRICS ===================== -->
+        <section class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <h2 class="text-lg font-semibold mb-5">Usage Metrics</h2>
+          <div class="grid sm:grid-cols-2 gap-6">
+            <!-- Nodes -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-medium">Nodes Used</p>
+                <p class="text-sm text-slate-400">847 / Unlimited</p>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-primary rounded-full" style="width: 42%"></div>
+              </div>
+            </div>
+
+            <!-- Decisions -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-medium">Decisions Logged</p>
+                <p class="text-sm text-slate-400">47 / Unlimited</p>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full" style="width: 24%"></div>
+              </div>
+            </div>
+
+            <!-- AI Queries -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-medium">LazyMind Queries Today</p>
+                <p class="text-sm text-slate-400">34 / 100</p>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-amber-500 rounded-full" style="width: 34%"></div>
+              </div>
+            </div>
+
+            <!-- Storage -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-sm font-medium">File Storage</p>
+                <p class="text-sm text-slate-400">245 MB / 5 GB</p>
+              </div>
+              <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-violet-500 rounded-full" style="width: 4.8%"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

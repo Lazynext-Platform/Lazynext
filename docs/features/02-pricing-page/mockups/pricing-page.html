@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing - Lazynext</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eef1fe',
+              100: '#dde3fd',
+              200: '#bbc7fb',
+              300: '#99abf9',
+              400: '#778ff7',
+              500: '#4F6EF7',
+              600: '#3f58c6',
+              700: '#2f4294',
+              800: '#202c63',
+              900: '#101631',
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .toggle-switch { transition: background-color 0.2s ease; }
+    .toggle-knob { transition: transform 0.2s ease; }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+    .faq-answer.open { max-height: 200px; }
+    .faq-chevron { transition: transform 0.2s ease; }
+    .faq-chevron.open { transform: rotate(180deg); }
+    .price-transition { transition: opacity 0.2s ease; }
+  </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+  <!-- ============================================================
+       HEADER
+       ============================================================ -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="#" class="flex items-center gap-2">
+          <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-slate-900">Lazynext</span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Product</a>
+          <a href="#" class="text-sm font-medium text-primary-500">Pricing</a>
+          <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Docs</a>
+          <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Blog</a>
+          <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Changelog</a>
+        </nav>
+
+        <!-- CTA Buttons -->
+        <div class="hidden md:flex items-center gap-3">
+          <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign In</a>
+          <a href="#" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+            Start Free
+          </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100" aria-label="Open menu">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white">
+      <div class="px-4 py-4 space-y-3">
+        <a href="#" class="block text-sm font-medium text-slate-600 hover:text-slate-900">Product</a>
+        <a href="#" class="block text-sm font-medium text-primary-500">Pricing</a>
+        <a href="#" class="block text-sm font-medium text-slate-600 hover:text-slate-900">Docs</a>
+        <a href="#" class="block text-sm font-medium text-slate-600 hover:text-slate-900">Blog</a>
+        <a href="#" class="block text-sm font-medium text-slate-600 hover:text-slate-900">Changelog</a>
+        <hr class="border-slate-200">
+        <a href="#" class="block text-sm font-medium text-slate-600 hover:text-slate-900">Sign In</a>
+        <a href="#" class="block w-full text-center px-4 py-2 text-sm font-semibold text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors">Start Free</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       PRICING HERO
+       ============================================================ -->
+  <section class="pt-20 pb-10 sm:pt-28 sm:pb-14">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900">
+        Simple, transparent pricing
+      </h1>
+      <p class="mt-5 text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto">
+        Start free. Upgrade when you're ready. No credit card required.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       BILLING TOGGLE
+       ============================================================ -->
+  <section class="pb-12">
+    <div class="flex items-center justify-center gap-3">
+      <span id="label-monthly" class="text-sm font-semibold text-slate-900">Monthly</span>
+      <button
+        id="billing-toggle"
+        role="switch"
+        aria-checked="false"
+        aria-label="Toggle annual billing"
+        class="toggle-switch relative inline-flex h-7 w-12 items-center rounded-full bg-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
+      >
+        <span id="toggle-knob" class="toggle-knob inline-block h-5 w-5 transform rounded-full bg-white shadow-sm translate-x-1"></span>
+      </button>
+      <span id="label-annual" class="text-sm font-medium text-slate-500">Annual</span>
+      <span class="ml-1 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+        Save 17%
+      </span>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRICING TIERS
+       ============================================================ -->
+  <section class="pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-5">
+
+        <!-- FREE TIER -->
+        <div class="relative rounded-2xl border border-slate-200 bg-white p-7 flex flex-col">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Free</h3>
+            <p class="mt-1 text-sm text-slate-500">For individuals getting started</p>
+          </div>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-slate-900">&#8377;0</span>
+              <span class="text-sm text-slate-500">/month</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-400">Free forever</p>
+          </div>
+          <ul class="mt-7 space-y-3 flex-1">
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">1 workspace</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">3 members max</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">50 nodes per workspace</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">10 decisions</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Basic LazyMind (10 queries/day)</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Community support</span>
+            </li>
+          </ul>
+          <a href="#" class="mt-8 block w-full text-center px-4 py-2.5 text-sm font-semibold text-primary-500 bg-white border-2 border-primary-500 rounded-lg hover:bg-primary-50 transition-colors">
+            Start Free
+          </a>
+        </div>
+
+        <!-- STARTER TIER (Most Popular) -->
+        <div class="relative rounded-2xl border-2 border-primary-500 bg-white p-7 flex flex-col shadow-lg shadow-primary-500/10">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2">
+            <span class="inline-flex items-center rounded-full bg-primary-500 px-3.5 py-1 text-xs font-bold text-white uppercase tracking-wide">
+              Most Popular
+            </span>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Starter</h3>
+            <p class="mt-1 text-sm text-slate-500">For small teams shipping fast</p>
+          </div>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-slate-900 price-transition" data-monthly="499" data-annual="415">&#8377;<span class="price-value">499</span></span>
+              <span class="text-sm text-slate-500">/seat/month</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-400 price-usd-transition" data-monthly="~$5.99 USD" data-annual="~$4.99 USD">
+              <span class="usd-note">~$5.99 USD</span>
+              <span class="billing-note annual-note hidden"> &middot; billed annually</span>
+            </p>
+          </div>
+          <ul class="mt-7 space-y-3 flex-1">
+            <li class="flex items-start gap-2.5">
+              <span class="text-sm font-semibold text-primary-500 shrink-0 mt-0.5">+</span>
+              <span class="text-sm text-slate-600 font-medium">Everything in Free, plus:</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Unlimited workspaces</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Unlimited members</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Unlimited nodes</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">100 decisions/workspace</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Decision DNA search</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Full LazyMind AI (100 queries/day)</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Email support</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Import from Notion/Linear/Trello</span>
+            </li>
+          </ul>
+          <a href="#" class="mt-8 block w-full text-center px-4 py-2.5 text-sm font-semibold text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+            Start Free Trial
+          </a>
+        </div>
+
+        <!-- PRO TIER -->
+        <div class="relative rounded-2xl border border-slate-200 bg-white p-7 flex flex-col">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Pro</h3>
+            <p class="mt-1 text-sm text-slate-500">For teams that need the full picture</p>
+          </div>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-slate-900 price-transition" data-monthly="999" data-annual="832">&#8377;<span class="price-value">999</span></span>
+              <span class="text-sm text-slate-500">/seat/month</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-400 price-usd-transition" data-monthly="~$11.99 USD" data-annual="~$9.99 USD">
+              <span class="usd-note">~$11.99 USD</span>
+              <span class="billing-note annual-note hidden"> &middot; billed annually</span>
+            </p>
+          </div>
+          <ul class="mt-7 space-y-3 flex-1">
+            <li class="flex items-start gap-2.5">
+              <span class="text-sm font-semibold text-primary-500 shrink-0 mt-0.5">+</span>
+              <span class="text-sm text-slate-600 font-medium">Everything in Starter, plus:</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Unlimited decisions</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Decision Health Dashboard</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Decision quality analytics</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Outcome tracking &amp; trends</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">PULSE dashboards</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Automation engine</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Priority support</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Custom templates</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Data export (JSON/CSV)</span>
+            </li>
+          </ul>
+          <a href="#" class="mt-8 block w-full text-center px-4 py-2.5 text-sm font-semibold text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+            Start Free Trial
+          </a>
+        </div>
+
+        <!-- BUSINESS TIER -->
+        <div class="relative rounded-2xl border border-slate-200 bg-white p-7 flex flex-col">
+          <div>
+            <h3 class="text-lg font-bold text-slate-900">Business</h3>
+            <p class="mt-1 text-sm text-slate-500">For organizations at scale</p>
+          </div>
+          <div class="mt-5">
+            <div class="flex items-baseline gap-1">
+              <span class="text-4xl font-extrabold text-slate-900 price-transition" data-monthly="2,999" data-annual="2,499">&#8377;<span class="price-value">2,999</span></span>
+              <span class="text-sm text-slate-500">/seat/month</span>
+            </div>
+            <p class="mt-1 text-xs text-slate-400 price-usd-transition" data-monthly="~$35.99 USD" data-annual="~$29.99 USD">
+              <span class="usd-note">~$35.99 USD</span>
+              <span class="billing-note annual-note hidden"> &middot; billed annually</span>
+            </p>
+          </div>
+          <ul class="mt-7 space-y-3 flex-1">
+            <li class="flex items-start gap-2.5">
+              <span class="text-sm font-semibold text-primary-500 shrink-0 mt-0.5">+</span>
+              <span class="text-sm text-slate-600 font-medium">Everything in Pro, plus:</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">SSO / SAML</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Advanced admin controls</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Dedicated account manager</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Custom integrations</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">SLA guarantee</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Audit logs</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <svg class="w-5 h-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+              <span class="text-sm text-slate-600">Unlimited LazyMind queries</span>
+            </li>
+          </ul>
+          <a href="#" class="mt-8 block w-full text-center px-4 py-2.5 text-sm font-semibold text-primary-500 bg-white border-2 border-primary-500 rounded-lg hover:bg-primary-50 transition-colors">
+            Contact Sales
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURE COMPARISON TABLE
+       ============================================================ -->
+  <section class="pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-slate-900 text-center mb-12">Compare all features</h2>
+
+      <div class="overflow-x-auto -mx-4 sm:mx-0">
+        <table class="w-full min-w-[640px] text-sm">
+          <thead>
+            <tr class="border-b-2 border-slate-200">
+              <th class="text-left py-4 px-4 font-semibold text-slate-500 w-1/5">Feature</th>
+              <th class="text-center py-4 px-4 font-semibold text-slate-900 w-1/5">Free</th>
+              <th class="text-center py-4 px-4 font-semibold text-primary-500 w-1/5">
+                Starter
+                <span class="block text-xs font-normal text-primary-400">Most Popular</span>
+              </th>
+              <th class="text-center py-4 px-4 font-semibold text-slate-900 w-1/5">Pro</th>
+              <th class="text-center py-4 px-4 font-semibold text-slate-900 w-1/5">Business</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Workspaces</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">1</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Members</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">3</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Nodes</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">50</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Decisions</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">10</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">100/workspace</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Decision DNA Search</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center bg-primary-50/30"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Quality Scores</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Outcome Tracking</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Health Dashboard</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">LazyMind AI queries</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">10/day</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">100/day</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">100/day</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Unlimited</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">PULSE</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Automation</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Import</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center bg-primary-50/30"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Export</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">JSON/CSV</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">JSON/CSV</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Templates</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Custom</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Custom</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">Support</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Community</td>
+              <td class="py-3.5 px-4 text-center text-slate-600 bg-primary-50/30">Email</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Priority</td>
+              <td class="py-3.5 px-4 text-center text-slate-600">Dedicated</td>
+            </tr>
+            <tr class="hover:bg-slate-50">
+              <td class="py-3.5 px-4 font-medium text-slate-700">SSO</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400 bg-primary-50/30">&mdash;</td>
+              <td class="py-3.5 px-4 text-center text-slate-400">&mdash;</td>
+              <td class="py-3.5 px-4 text-center"><svg class="w-5 h-5 text-primary-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FAQ SECTION
+       ============================================================ -->
+  <section class="pb-20 bg-slate-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
+      <h2 class="text-3xl font-bold text-slate-900 text-center mb-12">Frequently asked questions</h2>
+
+      <div class="space-y-3" id="faq-list">
+
+        <!-- FAQ 1 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">Can I try before I buy?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">Yes! Every paid plan comes with a free 14-day Pro trial. No credit card required to get started. Explore every feature risk-free, then pick the plan that fits your team.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">How does per-seat pricing work?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">Each team member who accesses Lazynext counts as one seat. You only pay for the seats you use. Add or remove seats anytime, and your bill adjusts automatically on the next cycle.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">Can I switch plans?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">Absolutely. You can upgrade or downgrade your plan at any time from your Workspace Settings. When you upgrade, you get immediate access to new features. When you downgrade, the change takes effect at the end of your current billing period.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">Do you support UPI / Indian payments?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">Yes. We process payments through Razorpay, which supports UPI, credit/debit cards, net banking, and popular wallets like Paytm, PhonePe, and Google Pay. International cards (Visa, Mastercard) are also accepted.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">Is there a discount for startups?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">Yes! We have a startup program offering discounted rates for early-stage teams. Contact us at <a href="mailto:hello@lazynext.com" class="text-primary-500 underline hover:text-primary-600">hello@lazynext.com</a> with your company details and we'll get you set up.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 6 -->
+        <div class="faq-item bg-white rounded-xl border border-slate-200">
+          <button class="faq-trigger w-full flex items-center justify-between px-6 py-5 text-left" aria-expanded="false">
+            <span class="text-base font-semibold text-slate-900 pr-4">What happens when I hit the free plan limit?</span>
+            <svg class="faq-chevron w-5 h-5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-answer px-6">
+            <p class="pb-5 text-sm text-slate-600 leading-relaxed">You won't lose any data. When you reach a limit, you'll see a friendly upgrade prompt with options to move to a paid plan. Your existing work stays intact and accessible &mdash; you just can't create new items beyond the limit until you upgrade.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CTA SECTION
+       ============================================================ -->
+  <section class="py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold text-slate-900">Still have questions?</h2>
+      <p class="mt-4 text-lg text-slate-500">We're happy to help you find the right plan for your team.</p>
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#" class="inline-flex items-center px-6 py-3 text-base font-semibold text-white bg-primary-500 rounded-lg hover:bg-primary-600 transition-colors shadow-sm">
+          Talk to Us
+        </a>
+      </div>
+      <p class="mt-4 text-sm text-slate-400">Or start free &mdash; no credit card required.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="border-t border-slate-200 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+
+        <!-- Brand -->
+        <div class="col-span-2 md:col-span-4 lg:col-span-1 mb-4 lg:mb-0">
+          <a href="#" class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <span class="text-lg font-bold text-slate-900">Lazynext</span>
+          </a>
+          <p class="text-sm text-slate-500 max-w-xs">Decisions deserve structure. Lazynext gives your team the clarity to move fast and decide well.</p>
+        </div>
+
+        <!-- Product -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-4">Product</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Features</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Pricing</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Integrations</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Changelog</a></li>
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-4">Resources</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Documentation</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Blog</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Templates</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Community</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-4">Company</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">About</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Careers</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Contact</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Brand</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-4">Legal</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Privacy Policy</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Terms of Service</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">Security</a></li>
+            <li><a href="#" class="text-sm text-slate-500 hover:text-slate-700 transition-colors">GDPR</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="mt-12 pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-slate-400">&copy; 2026 Lazynext. All rights reserved.</p>
+        <div class="flex items-center gap-5">
+          <!-- Twitter / X -->
+          <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="Twitter">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <!-- GitHub -->
+          <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="GitHub">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+          <!-- LinkedIn -->
+          <a href="#" class="text-slate-400 hover:text-slate-600 transition-colors" aria-label="LinkedIn">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    // ---- Mobile Menu Toggle ----
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // ---- Billing Toggle ----
+    const billingToggle = document.getElementById('billing-toggle');
+    const toggleKnob = document.getElementById('toggle-knob');
+    const labelMonthly = document.getElementById('label-monthly');
+    const labelAnnual = document.getElementById('label-annual');
+    let isAnnual = false;
+
+    billingToggle.addEventListener('click', () => {
+      isAnnual = !isAnnual;
+      billingToggle.setAttribute('aria-checked', isAnnual.toString());
+
+      if (isAnnual) {
+        billingToggle.classList.remove('bg-slate-300');
+        billingToggle.classList.add('bg-primary-500');
+        toggleKnob.classList.remove('translate-x-1');
+        toggleKnob.classList.add('translate-x-6');
+        labelMonthly.classList.remove('text-slate-900', 'font-semibold');
+        labelMonthly.classList.add('text-slate-500', 'font-medium');
+        labelAnnual.classList.remove('text-slate-500', 'font-medium');
+        labelAnnual.classList.add('text-slate-900', 'font-semibold');
+      } else {
+        billingToggle.classList.remove('bg-primary-500');
+        billingToggle.classList.add('bg-slate-300');
+        toggleKnob.classList.remove('translate-x-6');
+        toggleKnob.classList.add('translate-x-1');
+        labelMonthly.classList.remove('text-slate-500', 'font-medium');
+        labelMonthly.classList.add('text-slate-900', 'font-semibold');
+        labelAnnual.classList.remove('text-slate-900', 'font-semibold');
+        labelAnnual.classList.add('text-slate-500', 'font-medium');
+      }
+
+      // Update prices
+      document.querySelectorAll('.price-transition').forEach(el => {
+        const priceSpan = el.querySelector('.price-value');
+        if (priceSpan) {
+          priceSpan.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
+        }
+      });
+
+      // Update USD notes
+      document.querySelectorAll('.price-usd-transition').forEach(el => {
+        const usdSpan = el.querySelector('.usd-note');
+        if (usdSpan) {
+          usdSpan.textContent = isAnnual ? el.dataset.annual : el.dataset.monthly;
+        }
+        const annualNote = el.querySelector('.annual-note');
+        if (annualNote) {
+          annualNote.classList.toggle('hidden', !isAnnual);
+        }
+      });
+    });
+
+    // ---- FAQ Accordion ----
+    document.querySelectorAll('.faq-trigger').forEach(trigger => {
+      trigger.addEventListener('click', () => {
+        const item = trigger.closest('.faq-item');
+        const answer = item.querySelector('.faq-answer');
+        const chevron = trigger.querySelector('.faq-chevron');
+        const isOpen = answer.classList.contains('open');
+
+        // Close all others
+        document.querySelectorAll('.faq-item').forEach(other => {
+          other.querySelector('.faq-answer').classList.remove('open');
+          other.querySelector('.faq-chevron').classList.remove('open');
+          other.querySelector('.faq-trigger').setAttribute('aria-expanded', 'false');
+        });
+
+        // Toggle current
+        if (!isOpen) {
+          answer.classList.add('open');
+          chevron.classList.add('open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Keyboard Shortcuts</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    .scale-in { animation: scaleIn 0.2s ease-out; }
+    kbd { font-family: 'Inter', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen flex items-center justify-center">
+
+  <!-- Backdrop -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm fade-in" onclick="document.querySelector('.scale-in').style.display='none'"></div>
+
+  <!-- Shortcuts Modal -->
+  <div class="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl shadow-black/50 scale-in overflow-hidden mx-4">
+    <!-- Header -->
+    <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/></svg>
+        </div>
+        <h2 class="text-base font-semibold">Keyboard Shortcuts</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] text-slate-500">Press</span>
+        <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-[10px] text-slate-400 font-medium">?</kbd>
+        <span class="text-[10px] text-slate-500">to toggle</span>
+      </div>
+    </div>
+
+    <!-- Shortcuts Grid -->
+    <div class="p-6 max-h-[60vh] overflow-y-auto space-y-6">
+
+      <!-- Navigation -->
+      <div>
+        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Navigation</h3>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Open command palette</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">K</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Global search</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8679;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">F</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Toggle sidebar</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">\\</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Go to Decisions</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">G</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">D</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Go to PULSE</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">G</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">P</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Go to Settings</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">G</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">S</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div>
+        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Canvas</h3>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Add new node</span>
+            <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">N</kbd>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Add Task node</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-blue-900/40 border border-blue-700/50 rounded text-xs text-blue-300 font-medium min-w-[28px] text-center">N</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-blue-900/40 border border-blue-700/50 rounded text-xs text-blue-300 font-medium min-w-[28px] text-center">T</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Add Doc node</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-emerald-900/40 border border-emerald-700/50 rounded text-xs text-emerald-300 font-medium min-w-[28px] text-center">N</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-emerald-900/40 border border-emerald-700/50 rounded text-xs text-emerald-300 font-medium min-w-[28px] text-center">D</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Add Decision node</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-orange-900/40 border border-orange-700/50 rounded text-xs text-orange-300 font-medium min-w-[28px] text-center">N</kbd>
+              <span class="text-[10px] text-slate-600 mx-0.5">then</span>
+              <kbd class="px-2 py-1 bg-orange-900/40 border border-orange-700/50 rounded text-xs text-orange-300 font-medium min-w-[28px] text-center">Q</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Select all nodes</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">A</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Delete selected</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#9003;</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Duplicate node</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">D</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Zoom to fit</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">1</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Undo</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">Z</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Redo</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8679;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">Z</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editing -->
+      <div>
+        <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Editing</h3>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Open node detail panel</span>
+            <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">Enter</kbd>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Close panel / Cancel</span>
+            <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">Esc</kbd>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Bold text (in editor)</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">B</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Slash command (in editor)</span>
+            <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">/</kbd>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">@mention</span>
+            <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">@</kbd>
+          </div>
+        </div>
+      </div>
+
+      <!-- LazyMind -->
+      <div>
+        <h3 class="text-xs font-semibold text-blue-400/80 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          LazyMind AI
+        </h3>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Open LazyMind</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">J</kbd>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1.5">
+            <span class="text-sm text-slate-300">Generate weekly digest</span>
+            <div class="flex items-center gap-1">
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8984;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">&#8679;</kbd>
+              <kbd class="px-2 py-1 bg-slate-800 border border-slate-600 rounded text-xs text-slate-300 font-medium min-w-[28px] text-center">W</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-3 border-t border-slate-700 bg-slate-800/50 flex items-center justify-between">
+      <span class="text-[10px] text-slate-500">Use <kbd class="px-1 py-0.5 bg-slate-700 border border-slate-600 rounded text-[9px]">Ctrl</kbd> on Windows/Linux</span>
+      <button class="text-xs text-slate-400 hover:text-slate-200">Close</button>
+    </div>
+  </div>
+</body>
+</html>

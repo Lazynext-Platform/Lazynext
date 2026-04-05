@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Integrations</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 text-sm space-y-1">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">General</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Members</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Billing</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-white font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+          Integrations
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Data Export</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-6 sticky top-0 z-10">
+        <span class="text-sm text-slate-500">Settings</span>
+        <svg class="w-3 h-3 text-slate-600 mx-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="text-sm font-semibold text-slate-200">Integrations</span>
+      </header>
+
+      <div class="p-6 max-w-4xl mx-auto space-y-8">
+
+        <!-- Header -->
+        <div>
+          <h1 class="text-lg font-bold text-white">Integrations</h1>
+          <p class="text-sm text-slate-400 mt-1">Connect your favorite tools with Lazynext to streamline your workflow.</p>
+        </div>
+
+        <!-- Connected Integrations -->
+        <div>
+          <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Connected</h2>
+          <div class="space-y-3">
+            <!-- Slack -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-[#4A154B] flex items-center justify-center">
+                  <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-semibold text-slate-200">Slack</h3>
+                    <span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Connected</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Send notifications and decision alerts to Slack channels</p>
+                  <p class="text-[10px] text-slate-500 mt-1">Connected to #product-team &middot; Since Mar 15, 2026</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 bg-slate-800 border border-slate-700 text-xs text-slate-400 rounded-lg hover:bg-slate-700">Configure</button>
+                <button class="px-3 py-1.5 text-xs text-red-400 hover:text-red-300">Disconnect</button>
+              </div>
+            </div>
+
+            <!-- Notion (Import) -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center">
+                  <svg class="w-7 h-7" viewBox="0 0 24 24"><path fill="#000" d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.1 2.168c-.42-.326-.979-.7-2.055-.607L3.01 2.725c-.467.047-.56.28-.374.466l1.823 1.017zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.934-.56.934-1.166V6.354c0-.606-.233-.933-.747-.886l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.747 0-.934-.234-1.495-.933l-4.577-7.186v6.952l1.448.327s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.093-.514.28-.886.747-.933l3.222-.186z"/></svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-sm font-semibold text-slate-200">Notion</h3>
+                    <span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Connected</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Import pages, databases, and content from Notion</p>
+                  <p class="text-[10px] text-slate-500 mt-1">Last import: 45 docs, 23 tasks &middot; Apr 1, 2026</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 bg-slate-800 border border-slate-700 text-xs text-slate-400 rounded-lg hover:bg-slate-700">Re-import</button>
+                <button class="px-3 py-1.5 text-xs text-red-400 hover:text-red-300">Disconnect</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Available Integrations -->
+        <div>
+          <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Available</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Linear -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-[#5E6AD2]/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-[#5E6AD2]" viewBox="0 0 24 24" fill="currentColor"><path d="M2.513 12.833c.18.29.382.566.605.825l8.057-8.057a7.466 7.466 0 00-.825-.605L2.513 12.833zm1.628 1.882l7.528-7.528a7.486 7.486 0 00-1.282-.862L3.28 13.432c.26.453.55.88.86 1.283zm2.135 2.135a9.486 9.486 0 001.283.86l7.107-7.107a7.481 7.481 0 00-.862-1.282L6.276 16.85z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">Linear</h3>
+                  <p class="text-[10px] text-slate-500">Import issues and projects</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+
+            <!-- Trello -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-[#0079BF]/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-[#0079BF]" viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM10 17H5V7h5v10zm9-4h-5V7h5v6z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">Trello</h3>
+                  <p class="text-[10px] text-slate-500">Import boards and cards</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+
+            <!-- Asana -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-[#F06A6A]/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-[#F06A6A]" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="4"/><circle cx="6" cy="18" r="4"/><circle cx="18" cy="18" r="4"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">Asana</h3>
+                  <p class="text-[10px] text-slate-500">Import projects and tasks</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+
+            <!-- GitHub -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">GitHub</h3>
+                  <p class="text-[10px] text-slate-500">Link PRs and issues to tasks</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+
+            <!-- Google Calendar -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-[#4285F4]/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-[#4285F4]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">Google Calendar</h3>
+                  <p class="text-[10px] text-slate-500">Sync due dates and meetings</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+
+            <!-- Figma -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-[#A259FF]/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-[#A259FF]" viewBox="0 0 24 24" fill="currentColor"><path d="M8 24c2.2 0 4-1.8 4-4v-4H8c-2.2 0-4 1.8-4 4s1.8 4 4 4zM4 12c0-2.2 1.8-4 4-4h4v8H8c-2.2 0-4-1.8-4-4zM4 4c0-2.2 1.8-4 4-4h4v8H8C5.8 8 4 6.2 4 4zM12 0h4c2.2 0 4 1.8 4 4s-1.8 4-4 4h-4V0zM20 12c0 2.2-1.8 4-4 4s-4-1.8-4-4 1.8-4 4-4 4 1.8 4 4z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200">Figma</h3>
+                  <p class="text-[10px] text-slate-500">Embed design files in docs</p>
+                </div>
+              </div>
+              <button class="w-full px-3 py-2 bg-slate-800 border border-slate-700 text-xs text-slate-300 rounded-lg hover:bg-slate-700 font-medium">Connect</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Access -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-sm font-semibold text-slate-200">API Access</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Build custom integrations with the Lazynext API</p>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full font-medium">Business Plan</span>
+          </div>
+          <div class="bg-slate-800 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">API Key</span>
+              <button class="text-[10px] text-[#4F6EF7] font-medium">Regenerate</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <code class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-xs text-slate-400 font-mono">lnx_sk_••••••••••••••••••••••••</code>
+              <button class="px-3 py-2 bg-slate-700 text-xs text-slate-300 rounded hover:bg-slate-600">Copy</button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-2">Keep this key secret. It provides full access to your workspace data.</p>
+          </div>
+          <div class="mt-4">
+            <a href="#" class="text-xs text-[#4F6EF7] hover:text-blue-300 font-medium">View API Documentation &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

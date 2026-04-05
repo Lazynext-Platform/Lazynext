@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Node Creation Menu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    @keyframes fabPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(79,110,247,0.4); } 50% { box-shadow: 0 0 0 12px rgba(79,110,247,0); } }
+    .scale-in { animation: scaleIn 0.15s ease-out; }
+    .fab-pulse { animation: fabPulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+
+  <!-- Simulated Canvas Background -->
+  <div class="relative" style="height: 100vh; background: #020617;">
+    <!-- Grid -->
+    <svg class="absolute inset-0 w-full h-full opacity-[0.03]">
+      <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+
+    <!-- Existing nodes for context -->
+    <div class="absolute" style="top: 120px; left: 200px;">
+      <div class="w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden opacity-50">
+        <div class="px-3 py-1.5 bg-blue-500/10 border-b border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+          <span class="text-[10px] font-semibold text-blue-400 uppercase">Task</span>
+        </div>
+        <div class="p-3"><p class="text-xs text-slate-400">Ship onboarding v2</p></div>
+      </div>
+    </div>
+
+    <div class="absolute" style="top: 250px; left: 500px;">
+      <div class="w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden opacity-50">
+        <div class="px-3 py-1.5 bg-orange-500/10 border-b border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+          <span class="text-[10px] font-semibold text-orange-400 uppercase">Decision</span>
+        </div>
+        <div class="p-3"><p class="text-xs text-slate-400">Use Neon vs Supabase?</p></div>
+      </div>
+    </div>
+
+    <!-- FAB Button (Floating Action Button) -->
+    <button onclick="toggleMenu()" id="fabBtn" class="fixed bottom-8 right-8 w-14 h-14 bg-[#4F6EF7] rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20 hover:bg-[#3D5BD4] transition-all z-50 fab-pulse">
+      <svg id="fabIcon" class="w-6 h-6 text-white transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg>
+    </button>
+
+    <!-- Node Creation Menu (radial/grid) -->
+    <div id="creationMenu" class="hidden fixed bottom-28 right-8 z-50 scale-in">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl shadow-black/40 p-4 w-72">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Add Node</h3>
+          <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded text-[9px] text-slate-500">N</kbd>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <!-- Task -->
+          <button onclick="selectNode('task')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-blue-500/50 hover:bg-blue-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center shrink-0 group-hover:bg-blue-500/25">
+              <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">Task</div>
+              <div class="text-[10px] text-slate-500">N then T</div>
+            </div>
+          </button>
+
+          <!-- Doc -->
+          <button onclick="selectNode('doc')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/25">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">Doc</div>
+              <div class="text-[10px] text-slate-500">N then D</div>
+            </div>
+          </button>
+
+          <!-- Decision -->
+          <button onclick="selectNode('decision')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-orange-500/50 hover:bg-orange-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0 group-hover:bg-orange-500/25">
+              <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">Decision</div>
+              <div class="text-[10px] text-slate-500">N then Q</div>
+            </div>
+          </button>
+
+          <!-- Thread -->
+          <button onclick="selectNode('thread')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-purple-500/50 hover:bg-purple-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 group-hover:bg-purple-500/25">
+              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">Thread</div>
+              <div class="text-[10px] text-slate-500">N then H</div>
+            </div>
+          </button>
+
+          <!-- PULSE -->
+          <button onclick="selectNode('pulse')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-cyan-500/15 flex items-center justify-center shrink-0 group-hover:bg-cyan-500/25">
+              <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">PULSE</div>
+              <div class="text-[10px] text-slate-500">N then P</div>
+            </div>
+          </button>
+
+          <!-- Automation -->
+          <button onclick="selectNode('automation')" class="flex items-center gap-3 p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-500/50 hover:bg-amber-500/5 transition-colors group text-left">
+            <div class="w-10 h-10 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0 group-hover:bg-amber-500/25">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-medium text-slate-200">Automation</div>
+              <div class="text-[10px] text-slate-500">N then A</div>
+            </div>
+          </button>
+        </div>
+
+        <!-- TABLE (Phase 3 badge) -->
+        <button class="w-full mt-2 flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-dashed border-slate-700 text-left opacity-60 cursor-not-allowed">
+          <div class="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-teal-400/60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M3 14h18M3 6h18M3 18h18"/></svg>
+          </div>
+          <div class="flex-1">
+            <div class="text-sm font-medium text-slate-400">Table</div>
+            <div class="text-[10px] text-slate-600">Coming in Phase 3</div>
+          </div>
+          <span class="text-[9px] text-teal-400/60 bg-teal-500/10 px-1.5 py-0.5 rounded-full">Soon</span>
+        </button>
+
+        <!-- Quick Edge hint -->
+        <div class="mt-3 pt-3 border-t border-slate-700">
+          <p class="text-[10px] text-slate-500 flex items-center gap-2">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Drag from a node handle to create an edge
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placement Ghost (shown after selecting type) -->
+    <div id="placementGhost" class="hidden absolute pointer-events-none z-40" style="top: 200px; left: 650px;">
+      <div class="w-48 border-2 border-dashed border-[#4F6EF7] rounded-xl p-4 bg-[#4F6EF7]/5">
+        <p class="text-xs text-[#4F6EF7] text-center font-medium" id="ghostLabel">Click to place Task</p>
+      </div>
+      <p class="text-[10px] text-slate-500 text-center mt-2">Click anywhere on canvas to place</p>
+    </div>
+  </div>
+
+  <script>
+    let menuOpen = false;
+
+    function toggleMenu() {
+      menuOpen = !menuOpen;
+      const menu = document.getElementById('creationMenu');
+      const icon = document.getElementById('fabIcon');
+      const fab = document.getElementById('fabBtn');
+
+      if (menuOpen) {
+        menu.classList.remove('hidden');
+        icon.style.transform = 'rotate(45deg)';
+        fab.classList.remove('fab-pulse');
+      } else {
+        menu.classList.add('hidden');
+        icon.style.transform = 'rotate(0deg)';
+        fab.classList.add('fab-pulse');
+        document.getElementById('placementGhost').classList.add('hidden');
+      }
+    }
+
+    function selectNode(type) {
+      const colors = { task: 'blue', doc: 'emerald', decision: 'orange', thread: 'purple', pulse: 'cyan', automation: 'amber' };
+      const labels = { task: 'Task', doc: 'Doc', decision: 'Decision', thread: 'Thread', pulse: 'PULSE', automation: 'Automation' };
+
+      document.getElementById('ghostLabel').textContent = `Click to place ${labels[type]}`;
+      document.getElementById('placementGhost').classList.remove('hidden');
+
+      // Close menu
+      document.getElementById('creationMenu').classList.add('hidden');
+      document.getElementById('fabIcon').style.transform = 'rotate(0deg)';
+      document.getElementById('fabBtn').classList.add('fab-pulse');
+      menuOpen = false;
+    }
+
+    // Close menu on outside click
+    document.addEventListener('click', (e) => {
+      if (menuOpen && !e.target.closest('#creationMenu') && !e.target.closest('#fabBtn')) {
+        toggleMenu();
+      }
+    });
+  </script>
+</body>
+</html>

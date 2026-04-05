@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Team Member Management</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-up { animation: slideUp 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 text-sm space-y-1">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">General</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-white font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/></svg>
+          Members
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Billing</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Integrations</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto">
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-6 sticky top-0 z-10">
+        <span class="text-sm text-slate-500">Settings</span>
+        <svg class="w-3 h-3 text-slate-600 mx-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="text-sm font-semibold text-slate-200">Members</span>
+      </header>
+
+      <div class="p-6 max-w-4xl mx-auto space-y-6">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-lg font-bold text-white">Team Members</h1>
+            <p class="text-sm text-slate-400 mt-0.5">Manage who has access to this workspace.</p>
+          </div>
+          <button onclick="document.getElementById('inviteModal').classList.remove('hidden')" class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-lg hover:bg-[#3D5BD4] flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v12m6-6H6"/></svg>
+            Invite members
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-2xl font-bold text-white">8</div>
+            <div class="text-xs text-slate-400 mt-0.5">Total members</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-2xl font-bold text-white">2</div>
+            <div class="text-xs text-slate-400 mt-0.5">Pending invites</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-2xl font-bold text-white">10</div>
+            <div class="text-xs text-slate-400 mt-0.5">Seat limit <span class="text-[10px] text-amber-400">(Pro plan)</span></div>
+          </div>
+        </div>
+
+        <!-- Search + Filter -->
+        <div class="flex items-center gap-3">
+          <div class="flex-1 relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="Search members..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#4F6EF7]">
+          </div>
+          <select class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-400 focus:outline-none">
+            <option>All roles</option>
+            <option>Owner</option>
+            <option>Admin</option>
+            <option>Member</option>
+            <option>Guest</option>
+          </select>
+        </div>
+
+        <!-- Members List -->
+        <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+          <!-- Table Header -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3 border-b border-slate-800 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+            <div class="col-span-5">Member</div>
+            <div class="col-span-2">Role</div>
+            <div class="col-span-3">Last active</div>
+            <div class="col-span-2 text-right">Actions</div>
+          </div>
+
+          <!-- Owner (You) -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center hover:bg-slate-800/30">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold text-white">AP</div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-white">Avas Patel</span>
+                  <span class="text-[9px] px-1.5 py-0.5 bg-[#4F6EF7]/15 text-[#4F6EF7] rounded-full font-medium">You</span>
+                </div>
+                <span class="text-[11px] text-slate-500">avas@lazynext.com</span>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full font-medium">Owner</span>
+            </div>
+            <div class="col-span-3">
+              <span class="text-xs text-slate-400">Now</span>
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
+            </div>
+            <div class="col-span-2 text-right">
+              <span class="text-[10px] text-slate-600">—</span>
+            </div>
+          </div>
+
+          <!-- Admin -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center hover:bg-slate-800/30">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-xs font-bold text-white">PS</div>
+              <div>
+                <span class="text-sm font-medium text-white">Priya Sharma</span>
+                <div class="text-[11px] text-slate-500">priya@acmecorp.com</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-purple-500/15 text-purple-400 rounded-full font-medium">Admin</span>
+            </div>
+            <div class="col-span-3"><span class="text-xs text-slate-400">2 hours ago</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-slate-400 hover:text-white mr-3">Edit</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Remove</button>
+            </div>
+          </div>
+
+          <!-- Member -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center hover:bg-slate-800/30">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-xs font-bold text-white">RK</div>
+              <div>
+                <span class="text-sm font-medium text-white">Raj Kumar</span>
+                <div class="text-[11px] text-slate-500">raj@acmecorp.com</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Member</span>
+            </div>
+            <div class="col-span-3"><span class="text-xs text-slate-400">1 day ago</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-slate-400 hover:text-white mr-3">Edit</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Remove</button>
+            </div>
+          </div>
+
+          <!-- Member -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center hover:bg-slate-800/30">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-xs font-bold text-white">NK</div>
+              <div>
+                <span class="text-sm font-medium text-white">Neha Krishnan</span>
+                <div class="text-[11px] text-slate-500">neha@acmecorp.com</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Member</span>
+            </div>
+            <div class="col-span-3"><span class="text-xs text-slate-400">3 days ago</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-slate-400 hover:text-white mr-3">Edit</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Remove</button>
+            </div>
+          </div>
+
+          <!-- Guest -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center hover:bg-slate-800/30">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-slate-400">DM</div>
+              <div>
+                <span class="text-sm font-medium text-white">David Miller</span>
+                <div class="text-[11px] text-slate-500">david@client.com</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-slate-700 text-slate-400 rounded-full font-medium">Guest</span>
+            </div>
+            <div class="col-span-3"><span class="text-xs text-slate-400">1 week ago</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-slate-400 hover:text-white mr-3">Edit</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Remove</button>
+            </div>
+          </div>
+
+          <!-- Pending Invites Section -->
+          <div class="px-5 py-2.5 bg-slate-800/30 border-b border-slate-800">
+            <span class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Pending Invitations (2)</span>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 border-b border-slate-800/50 items-center opacity-60">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-slate-800 border border-dashed border-slate-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <span class="text-sm text-slate-400">ankit@acmecorp.com</span>
+                <div class="text-[11px] text-slate-600">Invited 2 days ago</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Member</span>
+            </div>
+            <div class="col-span-3"><span class="text-[10px] px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full">Pending</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-[#4F6EF7] hover:text-blue-300 mr-3">Resend</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Revoke</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-3.5 items-center opacity-60">
+            <div class="col-span-5 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-slate-800 border border-dashed border-slate-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <span class="text-sm text-slate-400">sara@acmecorp.com</span>
+                <div class="text-[11px] text-slate-600">Invited 5 days ago</div>
+              </div>
+            </div>
+            <div class="col-span-2">
+              <span class="text-[10px] px-2 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Member</span>
+            </div>
+            <div class="col-span-3"><span class="text-[10px] px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full">Pending</span></div>
+            <div class="col-span-2 text-right">
+              <button class="text-[10px] text-[#4F6EF7] hover:text-blue-300 mr-3">Resend</button>
+              <button class="text-[10px] text-red-400 hover:text-red-300">Revoke</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== INVITE MODAL ========== -->
+  <div id="inviteModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('inviteModal').classList.add('hidden')"></div>
+    <div class="relative bg-slate-900 border border-slate-700 rounded-2xl w-[480px] shadow-2xl slide-up">
+      <div class="p-6 border-b border-slate-800">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-white">Invite team members</h2>
+          <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="text-slate-500 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Invite people to join your workspace. They'll receive an email invitation.</p>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <!-- Email input -->
+        <div>
+          <label class="text-xs text-slate-400 font-medium block mb-1.5">Email addresses</label>
+          <div class="bg-slate-800 border border-slate-700 rounded-lg p-2 flex flex-wrap gap-2 min-h-[44px]">
+            <span class="inline-flex items-center gap-1.5 bg-slate-700 text-xs text-slate-200 px-2 py-1 rounded-md">
+              ankit@acmecorp.com
+              <svg class="w-3 h-3 text-slate-400 cursor-pointer hover:text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </span>
+            <input type="text" placeholder="Add email..." class="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-600 focus:outline-none min-w-[120px]">
+          </div>
+          <p class="text-[10px] text-slate-600 mt-1">Separate multiple emails with commas or Enter</p>
+        </div>
+
+        <!-- Role select -->
+        <div>
+          <label class="text-xs text-slate-400 font-medium block mb-1.5">Role</label>
+          <select class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-[#4F6EF7]">
+            <option>Member — Can view and edit all content</option>
+            <option>Admin — Can manage members and settings</option>
+            <option>Guest — Read-only access to shared content</option>
+          </select>
+        </div>
+
+        <!-- Optional message -->
+        <div>
+          <label class="text-xs text-slate-400 font-medium block mb-1.5">Personal message <span class="text-slate-600">(optional)</span></label>
+          <textarea class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-[#4F6EF7] resize-none h-20" placeholder="Hey! Join our workspace on Lazynext..."></textarea>
+        </div>
+
+        <!-- Seat info -->
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg px-3 py-2 flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span class="text-[11px] text-slate-500">You're using <strong class="text-slate-400">8 of 10 seats</strong> on the Pro plan. Adding 1 invite will use 9 seats.</span>
+        </div>
+      </div>
+
+      <div class="p-6 border-t border-slate-800 flex items-center justify-between">
+        <button class="text-xs text-slate-400 hover:text-white flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          Copy invite link
+        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="document.getElementById('inviteModal').classList.add('hidden')" class="px-4 py-2 text-sm text-slate-400 hover:text-white">Cancel</button>
+          <button class="px-4 py-2 bg-[#4F6EF7] text-white text-sm font-medium rounded-lg hover:bg-[#3D5BD4]">Send invitations</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Upgrade & Paywall Modals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    .scale-in { animation: scaleIn 0.2s ease-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+
+  <!-- Tab Switcher -->
+  <div class="sticky top-0 z-50 bg-slate-900 border-b border-slate-700 px-4 py-3">
+    <h1 class="text-sm font-semibold mb-2">Upgrade & Paywall Mockups</h1>
+    <div class="flex gap-2 flex-wrap">
+      <button onclick="show('decisionSearch')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-[#4F6EF7] text-white font-medium">Decision Search Paywall</button>
+      <button onclick="show('nodeLimit')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Node Limit</button>
+      <button onclick="show('aiLimit')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">AI Query Limit</button>
+      <button onclick="show('healthDashboard')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Health Dashboard Gate</button>
+      <button onclick="show('upgradeModal')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Full Upgrade Modal</button>
+      <button onclick="show('trialBanner')" class="tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400">Trial Banner</button>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto py-10 px-4 space-y-8">
+
+    <!-- 1: Decision Search Paywall -->
+    <div id="decisionSearch" class="state-panel">
+      <p class="text-xs text-slate-500 mb-3 text-center">Triggered when free user searches decisions beyond last 10</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden max-w-lg mx-auto">
+        <!-- Search bar (context) -->
+        <div class="px-5 py-3 border-b border-slate-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span class="text-sm text-slate-300">Why did we choose Neon?</span>
+        </div>
+        <!-- Blurred results -->
+        <div class="px-5 py-3 space-y-2 relative">
+          <div class="flex items-center gap-3 opacity-30 blur-[2px]">
+            <div class="w-6 h-6 rounded-full bg-orange-500/20"></div>
+            <div class="flex-1"><div class="h-3 bg-slate-700 rounded w-3/4"></div><div class="h-2 bg-slate-800 rounded w-1/2 mt-1"></div></div>
+          </div>
+          <div class="flex items-center gap-3 opacity-30 blur-[2px]">
+            <div class="w-6 h-6 rounded-full bg-orange-500/20"></div>
+            <div class="flex-1"><div class="h-3 bg-slate-700 rounded w-2/3"></div><div class="h-2 bg-slate-800 rounded w-2/5 mt-1"></div></div>
+          </div>
+          <div class="flex items-center gap-3 opacity-30 blur-[2px]">
+            <div class="w-6 h-6 rounded-full bg-orange-500/20"></div>
+            <div class="flex-1"><div class="h-3 bg-slate-700 rounded w-4/5"></div><div class="h-2 bg-slate-800 rounded w-1/3 mt-1"></div></div>
+          </div>
+        </div>
+        <!-- Paywall card -->
+        <div class="px-5 py-6 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent text-center -mt-8 relative z-10">
+          <div class="bg-slate-800 border border-[#4F6EF7]/30 rounded-xl p-5 max-w-sm mx-auto">
+            <div class="w-10 h-10 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center mx-auto mb-3">
+              <span class="text-[#4F6EF7]">&#128270;</span>
+            </div>
+            <h3 class="text-sm font-semibold">Search all 47 decisions</h3>
+            <p class="text-xs text-slate-400 mt-1">Free plan searches the last 10 decisions. Upgrade to search your team's entire decision history with semantic search.</p>
+            <div class="bg-slate-900/50 rounded-md p-2.5 mt-3 text-left">
+              <p class="text-[10px] text-slate-500 font-medium mb-1.5">With Starter you also get:</p>
+              <div class="space-y-1 text-[10px] text-slate-400">
+                <p>&#10003; Unlimited nodes &amp; workspaces</p>
+                <p>&#10003; Full Decision DNA search</p>
+                <p>&#10003; 100 LazyMind queries/day</p>
+                <p>&#10003; Import from Notion/Linear/Trello</p>
+              </div>
+            </div>
+            <button class="w-full mt-4 py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">Upgrade to Starter — &#8377;499/seat/mo</button>
+            <p class="text-[10px] text-slate-600 mt-2">14-day free trial &middot; Cancel anytime</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2: Node Limit -->
+    <div id="nodeLimit" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-3 text-center">Triggered when free user hits 50 node limit</p>
+      <div class="bg-slate-900 border border-amber-500/30 rounded-xl p-6 max-w-md mx-auto text-center">
+        <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-3">
+          <span class="text-amber-400 text-xl">&#9888;</span>
+        </div>
+        <h3 class="text-sm font-semibold">Node limit reached</h3>
+        <p class="text-xs text-slate-400 mt-1">You've used <strong class="text-slate-200">50 of 50</strong> nodes on the Free plan.</p>
+        <div class="w-full bg-slate-800 rounded-full h-2 mt-3">
+          <div class="bg-amber-500 h-2 rounded-full" style="width: 100%"></div>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">Upgrade to Starter for <strong class="text-slate-300">unlimited nodes</strong>, plus Decision DNA search, LazyMind AI, and imports.</p>
+        <button class="w-full mt-4 py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">Upgrade to Starter — &#8377;499/seat/mo</button>
+        <button class="w-full mt-2 py-2 text-xs text-slate-500 hover:text-slate-300">Maybe later</button>
+      </div>
+    </div>
+
+    <!-- 3: AI Query Limit -->
+    <div id="aiLimit" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-3 text-center">Triggered when user exhausts daily LazyMind queries</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 max-w-sm mx-auto">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <span class="text-amber-400">&#10024;</span>
+          </div>
+          <div>
+            <p class="text-sm font-semibold">LazyMind daily limit reached</p>
+            <p class="text-[10px] text-slate-500">10 / 10 queries used today</p>
+          </div>
+        </div>
+        <div class="w-full bg-slate-800 rounded-full h-1.5 mb-3">
+          <div class="bg-amber-500 h-1.5 rounded-full" style="width: 100%"></div>
+        </div>
+        <p class="text-xs text-slate-400">Resets at midnight IST. Or upgrade for more queries:</p>
+        <div class="bg-slate-800/50 rounded-md p-3 mt-3 space-y-1.5 text-[10px]">
+          <div class="flex justify-between text-slate-400">
+            <span>Free</span><span>10/day</span>
+          </div>
+          <div class="flex justify-between text-[#4F6EF7] font-medium">
+            <span>Starter</span><span>100/day</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Pro</span><span>500/day</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Business</span><span>Unlimited</span>
+          </div>
+        </div>
+        <button class="w-full mt-4 py-2 bg-[#4F6EF7] text-white text-xs font-medium rounded-md hover:bg-[#3D5BD4]">Upgrade for More Queries</button>
+      </div>
+    </div>
+
+    <!-- 4: Health Dashboard Gate -->
+    <div id="healthDashboard" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-3 text-center">Business-plan feature shown as blurred preview on lower plans</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden max-w-lg mx-auto">
+        <!-- Blurred dashboard preview -->
+        <div class="p-5 relative">
+          <div class="blur-[3px] opacity-40 space-y-4">
+            <div class="grid grid-cols-4 gap-3">
+              <div class="bg-slate-800 rounded-lg p-3 h-20"></div>
+              <div class="bg-slate-800 rounded-lg p-3 h-20"></div>
+              <div class="bg-slate-800 rounded-lg p-3 h-20"></div>
+              <div class="bg-slate-800 rounded-lg p-3 h-20"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-slate-800 rounded-lg p-3 h-36"></div>
+              <div class="bg-slate-800 rounded-lg p-3 h-36"></div>
+            </div>
+          </div>
+          <!-- Overlay -->
+          <div class="absolute inset-0 flex items-center justify-center bg-slate-900/60">
+            <div class="bg-slate-800 border border-purple-500/30 rounded-xl p-6 max-w-xs text-center shadow-xl">
+              <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mx-auto mb-3">
+                <span class="text-purple-400">&#128202;</span>
+              </div>
+              <h3 class="text-sm font-semibold">Decision Health Dashboard</h3>
+              <p class="text-xs text-slate-400 mt-1">See quality trends, outcome distribution, top decision makers, and AI insights across your team.</p>
+              <span class="inline-block mt-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[9px] rounded-full font-medium">Business Plan</span>
+              <button class="w-full mt-4 py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">Upgrade to Business — &#8377;2,999/seat/mo</button>
+              <p class="text-[10px] text-slate-600 mt-2">or start with Pro at &#8377;999/seat/mo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5: Full Upgrade Modal -->
+    <div id="upgradeModal" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-3 text-center">Full plan comparison upgrade modal</p>
+      <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden max-w-xl mx-auto scale-in">
+        <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+          <h2 class="text-base font-semibold">Choose Your Plan</h2>
+          <button class="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-200 rounded hover:bg-slate-800">&times;</button>
+        </div>
+
+        <!-- Toggle -->
+        <div class="flex items-center justify-center gap-3 py-3 border-b border-slate-800">
+          <span class="text-xs text-slate-400">Monthly</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" class="sr-only peer" checked>
+            <div class="w-9 h-5 bg-slate-700 peer-checked:bg-[#4F6EF7] rounded-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+          </label>
+          <span class="text-xs text-slate-200 font-medium">Annual</span>
+          <span class="px-1.5 py-0.5 bg-green-500/15 text-green-400 text-[9px] rounded-full font-medium">Save 17%</span>
+        </div>
+
+        <!-- Plans -->
+        <div class="p-5 grid grid-cols-3 gap-3">
+          <!-- Starter -->
+          <div class="border border-[#4F6EF7] rounded-lg p-4 relative bg-[#4F6EF7]/5">
+            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#4F6EF7] text-white text-[9px] rounded-full font-medium">Most Popular</span>
+            <h3 class="text-sm font-semibold mt-1">Starter</h3>
+            <p class="text-xl font-bold mt-1">&#8377;415<span class="text-xs text-slate-400 font-normal">/seat/mo</span></p>
+            <p class="text-[9px] text-slate-500">billed annually</p>
+            <ul class="mt-3 space-y-1.5 text-[10px] text-slate-400">
+              <li>&#10003; Unlimited everything</li>
+              <li>&#10003; Decision DNA search</li>
+              <li>&#10003; LazyMind AI (100/day)</li>
+              <li>&#10003; Import tools</li>
+              <li>&#10003; Email support</li>
+            </ul>
+            <button class="w-full mt-4 py-2 bg-[#4F6EF7] text-white text-xs font-medium rounded-md">Start Free Trial</button>
+          </div>
+
+          <!-- Pro -->
+          <div class="border border-slate-700 rounded-lg p-4">
+            <h3 class="text-sm font-semibold">Pro</h3>
+            <p class="text-xl font-bold mt-1">&#8377;832<span class="text-xs text-slate-400 font-normal">/seat/mo</span></p>
+            <p class="text-[9px] text-slate-500">billed annually</p>
+            <ul class="mt-3 space-y-1.5 text-[10px] text-slate-400">
+              <li>&#10003; Everything in Starter</li>
+              <li>&#10003; Health Dashboard</li>
+              <li>&#10003; PULSE dashboards</li>
+              <li>&#10003; Automation engine</li>
+              <li>&#10003; Priority support</li>
+            </ul>
+            <button class="w-full mt-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-md border border-slate-700 hover:bg-slate-700">Start Free Trial</button>
+          </div>
+
+          <!-- Business -->
+          <div class="border border-slate-700 rounded-lg p-4">
+            <h3 class="text-sm font-semibold">Business</h3>
+            <p class="text-xl font-bold mt-1">&#8377;2,499<span class="text-xs text-slate-400 font-normal">/seat/mo</span></p>
+            <p class="text-[9px] text-slate-500">billed annually</p>
+            <ul class="mt-3 space-y-1.5 text-[10px] text-slate-400">
+              <li>&#10003; Everything in Pro</li>
+              <li>&#10003; SSO / SAML</li>
+              <li>&#10003; Audit logs</li>
+              <li>&#10003; Unlimited AI</li>
+              <li>&#10003; Dedicated support</li>
+            </ul>
+            <button class="w-full mt-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-md border border-slate-700 hover:bg-slate-700">Contact Sales</button>
+          </div>
+        </div>
+
+        <div class="px-5 pb-4 text-center">
+          <p class="text-[10px] text-slate-600">14-day free trial on all paid plans &middot; No credit card required &middot; Cancel anytime</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6: Trial Banner -->
+    <div id="trialBanner" class="state-panel hidden">
+      <p class="text-xs text-slate-500 mb-3 text-center">Shown at top of app during 14-day trial</p>
+
+      <!-- Active trial -->
+      <div class="bg-[#4F6EF7]/10 border border-[#4F6EF7]/30 rounded-lg px-4 py-2.5 flex items-center justify-between max-w-xl mx-auto mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-[#4F6EF7] text-sm">&#10024;</span>
+          <p class="text-xs text-slate-300"><strong>Pro trial</strong> &mdash; 11 days remaining</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-24 bg-slate-800 rounded-full h-1.5">
+            <div class="bg-[#4F6EF7] h-1.5 rounded-full" style="width: 21%"></div>
+          </div>
+          <button class="px-3 py-1 bg-[#4F6EF7] text-white text-[10px] font-medium rounded-md">Upgrade Now</button>
+        </div>
+      </div>
+
+      <!-- Expiring soon -->
+      <div class="bg-amber-500/10 border border-amber-500/30 rounded-lg px-4 py-2.5 flex items-center justify-between max-w-xl mx-auto mb-4">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 text-sm">&#9888;</span>
+          <p class="text-xs text-slate-300"><strong>Pro trial expires in 2 days</strong> &mdash; upgrade to keep Decision DNA search, PULSE, and 100 AI queries/day</p>
+        </div>
+        <button class="px-3 py-1 bg-amber-500 text-white text-[10px] font-medium rounded-md shrink-0">Upgrade Now</button>
+      </div>
+
+      <!-- Expired -->
+      <div class="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 flex items-center justify-between max-w-xl mx-auto">
+        <div class="flex items-center gap-2">
+          <span class="text-red-400 text-sm">&#9888;</span>
+          <p class="text-xs text-slate-300"><strong>Your Pro trial has ended.</strong> You're now on the Free plan. Upgrade to restore full access.</p>
+        </div>
+        <button class="px-3 py-1 bg-[#4F6EF7] text-white text-[10px] font-medium rounded-md shrink-0">Upgrade</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function show(id) {
+      document.querySelectorAll('.state-panel').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = 'tab-btn px-2.5 py-1 text-[10px] rounded bg-slate-800 text-slate-400';
+      });
+      event.target.className = 'tab-btn px-2.5 py-1 text-[10px] rounded bg-[#4F6EF7] text-white font-medium';
+    }
+  </script>
+</body>
+</html>

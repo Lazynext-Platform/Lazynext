@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Public Shared Canvas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans h-screen overflow-hidden">
+
+  <!-- Top Bar — Public View -->
+  <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-4 z-20 relative">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-xs">L</div>
+      <div class="h-5 w-px bg-slate-700"></div>
+      <div>
+        <span class="text-sm font-semibold text-white">Q2 Product Sprint</span>
+        <span class="text-[10px] text-slate-500 ml-2">Shared by Acme Corp</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span class="text-[10px] text-slate-400 font-medium">Read-only</span>
+      </div>
+      <div class="h-5 w-px bg-slate-700"></div>
+      <span class="text-[10px] text-slate-500">5 nodes &middot; Last updated Apr 3, 2026</span>
+      <button class="px-3 py-1.5 bg-[#4F6EF7] text-white text-xs font-medium rounded-lg hover:bg-[#3D5BD4]">Sign up free</button>
+    </div>
+  </header>
+
+  <!-- Canvas Area -->
+  <div class="relative w-full" style="height: calc(100vh - 48px);">
+    <!-- Grid -->
+    <svg class="absolute inset-0 w-full h-full opacity-[0.03]">
+      <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+
+    <!-- Nodes -->
+    <!-- TASK node -->
+    <div class="absolute" style="left: 120px; top: 80px;">
+      <div class="w-60 bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-lg cursor-default">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <span class="text-[10px] text-blue-400 font-semibold uppercase">Task</span>
+        </div>
+        <h3 class="text-sm font-medium text-white">Ship new landing page</h3>
+        <p class="text-[10px] text-slate-500 mt-1">Redesign and deploy the marketing landing page with new hero section.</p>
+        <div class="flex items-center gap-2 mt-3">
+          <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded">Done</span>
+          <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[8px] font-bold text-white">AP</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECISION node -->
+    <div class="absolute" style="left: 460px; top: 60px;">
+      <div class="w-60 bg-slate-900 border border-orange-500/30 rounded-xl p-4 shadow-lg cursor-default">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+          <span class="text-[10px] text-orange-400 font-semibold uppercase">Decision</span>
+        </div>
+        <h3 class="text-sm font-medium text-white">Use Neon vs Supabase for DB</h3>
+        <div class="flex items-center gap-3 mt-2">
+          <div class="text-center">
+            <div class="text-xl font-bold text-emerald-400">84</div>
+            <div class="text-[8px] text-slate-500">Quality</div>
+          </div>
+          <div class="flex-1 h-1.5 bg-slate-700 rounded-full">
+            <div class="h-1.5 bg-emerald-500 rounded-full" style="width:84%"></div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded">Decided</span>
+          <span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded">Good Outcome</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOC node -->
+    <div class="absolute" style="left: 180px; top: 300px;">
+      <div class="w-60 bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-lg cursor-default">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-[10px] text-emerald-400 font-semibold uppercase">Doc</span>
+        </div>
+        <h3 class="text-sm font-medium text-white">Technical Architecture v2</h3>
+        <p class="text-[10px] text-slate-500 mt-1">System design for the new API layer and database schema.</p>
+        <div class="text-[10px] text-slate-600 mt-2">Last updated 2 days ago</div>
+      </div>
+    </div>
+
+    <!-- THREAD node -->
+    <div class="absolute" style="left: 540px; top: 280px;">
+      <div class="w-60 bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-lg cursor-default">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+          <span class="text-[10px] text-purple-400 font-semibold uppercase">Thread</span>
+        </div>
+        <h3 class="text-sm font-medium text-white">API schema discussion</h3>
+        <div class="flex items-center gap-2 mt-2">
+          <span class="text-[10px] text-slate-500">12 messages</span>
+          <span class="text-[10px] text-slate-600">&middot;</span>
+          <span class="text-[10px] text-slate-500">3 participants</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PULSE node -->
+    <div class="absolute" style="left: 340px; top: 480px;">
+      <div class="w-60 bg-slate-900 border border-slate-700 rounded-xl p-4 shadow-lg cursor-default">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+          <span class="text-[10px] text-cyan-400 font-semibold uppercase">Pulse</span>
+        </div>
+        <h3 class="text-sm font-medium text-white">Sprint retrospective</h3>
+        <div class="flex gap-3 mt-2">
+          <div class="text-center">
+            <div class="text-sm font-bold text-emerald-400">4.2</div>
+            <div class="text-[8px] text-slate-500">Avg</div>
+          </div>
+          <div class="text-center">
+            <div class="text-sm font-bold text-white">8</div>
+            <div class="text-[8px] text-slate-500">Votes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edges -->
+    <svg class="absolute inset-0 w-full h-full pointer-events-none">
+      <line x1="380" y1="140" x2="460" y2="120" stroke="#334155" stroke-width="2"/>
+      <line x1="250" y1="200" x2="280" y2="300" stroke="#334155" stroke-width="2"/>
+      <line x1="440" y1="360" x2="540" y2="330" stroke="#334155" stroke-width="2"/>
+      <line x1="380" y1="380" x2="400" y2="480" stroke="#334155" stroke-width="2"/>
+      <line x1="630" y1="210" x2="620" y2="280" stroke="#334155" stroke-width="2"/>
+    </svg>
+
+    <!-- Watermark / Brand Footer -->
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+      <div class="bg-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-full px-4 py-2 flex items-center gap-2.5">
+        <div class="w-5 h-5 rounded-md bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-[8px]">L</div>
+        <span class="text-[11px] text-slate-400">Built with <span class="text-white font-medium">Lazynext</span></span>
+        <div class="h-4 w-px bg-slate-700"></div>
+        <a href="#" class="text-[11px] text-[#4F6EF7] font-medium hover:text-blue-300">Try it free &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Share Link Modal (shown) -->
+    <div class="absolute top-20 right-6 z-30">
+      <div class="w-80 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+          <h3 class="text-xs font-semibold text-white">Share this canvas</h3>
+          <span class="text-[9px] px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded-full font-medium">Public link active</span>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex items-center gap-2">
+            <code class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-[10px] text-slate-400 font-mono truncate">https://app.lazynext.com/s/q2-sprint-a8f3k</code>
+            <button class="px-2.5 py-2 bg-slate-700 text-[10px] text-white rounded-lg hover:bg-slate-600 shrink-0">Copy</button>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span class="text-[10px] text-slate-400">Anyone with the link can view</span>
+            </div>
+            <div class="w-9 h-5 bg-emerald-500 rounded-full relative cursor-pointer">
+              <div class="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow"></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 pt-1 border-t border-slate-800">
+            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span class="text-[10px] text-slate-500">142 views &middot; Created Apr 1, 2026</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zoom controls -->
+    <div class="absolute bottom-6 right-6 z-20">
+      <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+        <button class="w-9 h-9 flex items-center justify-center hover:bg-slate-800 text-slate-400 border-b border-slate-700">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v12m6-6H6"/></svg>
+        </button>
+        <div class="w-9 h-6 flex items-center justify-center text-[9px] text-slate-500 font-mono">85%</div>
+        <button class="w-9 h-9 flex items-center justify-center hover:bg-slate-800 text-slate-400 border-t border-slate-700">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 12H6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

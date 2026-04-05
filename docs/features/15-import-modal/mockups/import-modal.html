@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Import Modal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    .scale-in { animation: scaleIn 0.2s ease-out; }
+    @keyframes progress { from { width: 0%; } }
+    .progress-animate { animation: progress 3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans h-screen flex items-center justify-center">
+
+  <!-- Dimmed background -->
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm fade-in"></div>
+
+  <!-- Import Modal -->
+  <div class="relative z-10 w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-xl shadow-2xl scale-in overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-700">
+      <div>
+        <h2 class="text-lg font-semibold">Import Your Data</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Bring your existing work into Lazynext</p>
+      </div>
+      <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-200 rounded-md hover:bg-slate-800">&times;</button>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="px-6 py-3 border-b border-slate-800 bg-slate-900/50">
+      <div class="flex items-center gap-2" id="stepIndicator">
+        <div class="flex items-center gap-1.5" id="step1ind">
+          <div class="w-6 h-6 rounded-full bg-[#4F6EF7] text-white text-xs flex items-center justify-center font-medium">1</div>
+          <span class="text-xs font-medium text-[#4F6EF7]">Choose Source</span>
+        </div>
+        <div class="flex-1 h-px bg-slate-700"></div>
+        <div class="flex items-center gap-1.5" id="step2ind">
+          <div class="w-6 h-6 rounded-full bg-slate-700 text-slate-400 text-xs flex items-center justify-center font-medium">2</div>
+          <span class="text-xs text-slate-500">Connect</span>
+        </div>
+        <div class="flex-1 h-px bg-slate-700"></div>
+        <div class="flex items-center gap-1.5" id="step3ind">
+          <div class="w-6 h-6 rounded-full bg-slate-700 text-slate-400 text-xs flex items-center justify-center font-medium">3</div>
+          <span class="text-xs text-slate-500">Import</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="p-6" id="stepContent">
+
+      <!-- STEP 1: Choose Source -->
+      <div id="step1">
+        <p class="text-sm text-slate-300 mb-4">Where is your data coming from?</p>
+        <div class="grid grid-cols-2 gap-3">
+
+          <button onclick="goToStep(2, 'notion-api')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-[#4F6EF7]/50 hover:bg-slate-800/80 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-lg shrink-0">N</div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">Notion (API)</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Connect via OAuth. Imports pages as Docs, databases as Tasks.</p>
+              <span class="inline-block mt-1.5 px-1.5 py-0.5 bg-green-500/10 text-green-400 text-[9px] rounded font-medium">Recommended</span>
+            </div>
+          </button>
+
+          <button onclick="goToStep(2, 'notion-zip')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-lg shrink-0">N</div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">Notion (ZIP Export)</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Upload a Notion export ZIP. No OAuth needed.</p>
+            </div>
+          </button>
+
+          <button onclick="goToStep(2, 'linear')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg shrink-0">
+              <span class="text-purple-400 font-bold text-sm">Li</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">Linear</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Import issues as Tasks with status, priority, and assignee.</p>
+            </div>
+          </button>
+
+          <button onclick="goToStep(2, 'trello')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-lg shrink-0">
+              <span class="text-blue-400 font-bold text-sm">Tr</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">Trello</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Import boards as workflows, cards as Tasks.</p>
+            </div>
+          </button>
+
+          <button onclick="goToStep(2, 'asana')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center text-lg shrink-0">
+              <span class="text-rose-400 font-bold text-sm">As</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">Asana</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Import projects as workflows, tasks with subtasks.</p>
+            </div>
+          </button>
+
+          <button onclick="goToStep(2, 'csv')" class="flex items-start gap-3 p-4 bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 text-left group">
+            <div class="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center text-lg shrink-0">
+              <span class="text-emerald-400 font-bold text-sm">CSV</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200 group-hover:text-white">CSV / Spreadsheet</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">Upload CSV or TSV files. Map columns to Task fields.</p>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- STEP 2: Connect (Notion API example) -->
+      <div id="step2" class="hidden">
+        <div id="step2-notion-api">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-lg">N</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-200">Connect to Notion</p>
+              <p class="text-[10px] text-slate-400">OAuth connection — we'll request read access to your pages</p>
+            </div>
+          </div>
+
+          <div class="bg-slate-800 border border-slate-700 rounded-lg p-4 mb-4">
+            <p class="text-xs text-slate-400 mb-3">Lazynext will import:</p>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded bg-green-500/20 text-green-400 flex items-center justify-center text-xs">&#10003;</span>
+                <span class="text-xs text-slate-300">Pages &rarr; DOC nodes</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded bg-green-500/20 text-green-400 flex items-center justify-center text-xs">&#10003;</span>
+                <span class="text-xs text-slate-300">Database rows &rarr; TASK nodes (if status/assignee columns found)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded bg-green-500/20 text-green-400 flex items-center justify-center text-xs">&#10003;</span>
+                <span class="text-xs text-slate-300">Nested pages &rarr; Edges (parent-child connections)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-5 h-5 rounded bg-slate-700 text-slate-500 flex items-center justify-center text-xs">&mdash;</span>
+                <span class="text-xs text-slate-500">Images and files are not imported (yet)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-xs text-slate-400 mb-1.5">Import into workflow</label>
+            <select class="w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50">
+              <option>Q2 Product Sprint</option>
+              <option>Client Onboarding</option>
+              <option>+ Create new workflow</option>
+            </select>
+          </div>
+
+          <button onclick="goToStep(3)" class="w-full py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">
+            Connect Notion &amp; Start Import
+          </button>
+          <button onclick="goToStep(1)" class="w-full mt-2 py-2 text-sm text-slate-400 hover:text-slate-200">&larr; Back to sources</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Import Progress -->
+      <div id="step3" class="hidden">
+        <div class="text-center mb-6">
+          <div class="w-14 h-14 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center mx-auto mb-3">
+            <svg class="w-7 h-7 text-[#4F6EF7] animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold">Importing from Notion...</h3>
+          <p class="text-xs text-slate-400 mt-1">This may take a minute depending on your workspace size</p>
+        </div>
+
+        <!-- Progress -->
+        <div class="space-y-3 mb-6">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Pages (Docs)</span>
+              <span class="text-slate-400" id="docCount">12 / 18</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2">
+              <div class="bg-green-500 h-2 rounded-full progress-animate" style="width: 67%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Database rows (Tasks)</span>
+              <span class="text-slate-400" id="taskCount">24 / 35</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2">
+              <div class="bg-blue-500 h-2 rounded-full progress-animate" style="width: 69%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-300">Connections (Edges)</span>
+              <span class="text-slate-400" id="edgeCount">8 / 12</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2">
+              <div class="bg-purple-500 h-2 rounded-full progress-animate" style="width: 67%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Log -->
+        <div class="bg-slate-800 border border-slate-700 rounded-lg p-3 max-h-32 overflow-y-auto font-mono text-[10px] text-slate-400 space-y-0.5">
+          <p><span class="text-green-400">&#10003;</span> Imported: "Product Roadmap" as DOC</p>
+          <p><span class="text-green-400">&#10003;</span> Imported: "Sprint Backlog" → 12 tasks</p>
+          <p><span class="text-green-400">&#10003;</span> Imported: "Meeting Notes Q1" as DOC</p>
+          <p><span class="text-amber-400">&#9888;</span> Skipped: "Untitled" (empty page)</p>
+          <p><span class="text-green-400">&#10003;</span> Imported: "API Design" as DOC</p>
+          <p><span class="text-green-400">&#10003;</span> Created 8 edges from page hierarchy</p>
+          <p class="text-slate-500">Importing remaining pages...</p>
+        </div>
+
+        <!-- Success State (hidden until complete) -->
+        <div id="successState" class="hidden mt-4">
+          <div class="bg-green-500/5 border border-green-500/20 rounded-lg p-4 text-center">
+            <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-2">
+              <span class="text-green-400 text-lg">&#10003;</span>
+            </div>
+            <h3 class="text-sm font-semibold text-green-400">Import Complete!</h3>
+            <p class="text-xs text-slate-400 mt-1">18 docs, 35 tasks, and 12 connections imported</p>
+            <div class="flex gap-2 justify-center mt-3">
+              <button class="px-4 py-2 bg-[#4F6EF7] text-white text-xs font-medium rounded-md hover:bg-[#3D5BD4]">Go to Workflow</button>
+              <button class="px-4 py-2 bg-slate-800 text-slate-300 text-xs rounded-md hover:bg-slate-700">Import More</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function goToStep(step, source) {
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step3').classList.add('hidden');
+      document.getElementById('step' + step).classList.remove('hidden');
+
+      // Update step indicators
+      for (let i = 1; i <= 3; i++) {
+        const ind = document.getElementById('step' + i + 'ind');
+        const circle = ind.querySelector('div');
+        const label = ind.querySelector('span');
+        if (i < step) {
+          circle.className = 'w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-medium';
+          circle.innerHTML = '&#10003;';
+          label.className = 'text-xs text-green-400';
+        } else if (i === step) {
+          circle.className = 'w-6 h-6 rounded-full bg-[#4F6EF7] text-white text-xs flex items-center justify-center font-medium';
+          circle.textContent = i;
+          label.className = 'text-xs font-medium text-[#4F6EF7]';
+        } else {
+          circle.className = 'w-6 h-6 rounded-full bg-slate-700 text-slate-400 text-xs flex items-center justify-center font-medium';
+          circle.textContent = i;
+          label.className = 'text-xs text-slate-500';
+        }
+      }
+
+      // Simulate import progress
+      if (step === 3) {
+        setTimeout(() => {
+          document.getElementById('successState').classList.remove('hidden');
+          document.querySelector('.animate-spin')?.closest('div')?.classList.add('hidden');
+          document.querySelector('#step3 h3').textContent = 'Import Complete!';
+          document.querySelector('#step3 h3').nextElementSibling.classList.add('hidden');
+        }, 4000);
+      }
+    }
+  </script>
+
+</body>
+</html>

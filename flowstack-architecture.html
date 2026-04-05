@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowStack — Complete Technical Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0b0d;
+    --bg2: #111318;
+    --bg3: #181c24;
+    --bg4: #1e2330;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #8b92a8;
+    --text3: #555e75;
+    --accent: #4f8ef7;
+    --accent2: #7c5af7;
+    --accent3: #2dd4a0;
+    --accent4: #f7a84f;
+    --accent5: #f75a8e;
+    --red: #f75a5a;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-mark {
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-section {
+    padding: 16px 0 8px;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 0 20px;
+    margin-bottom: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: rgba(79,142,247,0.08); color: var(--accent); border-left-color: var(--accent); }
+
+  .nav-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor; opacity: 0.5; flex-shrink: 0;
+  }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .section {
+    display: none;
+    padding: 40px 48px;
+    max-width: 900px;
+  }
+
+  .section.active { display: block; }
+
+  .section-header {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 8px;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .badge {
+    font-size: 10px;
+    font-family: var(--sans);
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge-free { background: rgba(45,212,160,0.1); color: var(--accent3); }
+  .badge-managed { background: rgba(79,142,247,0.1); color: var(--accent); }
+  .badge-critical { background: rgba(247,90,90,0.1); color: var(--red); }
+  .badge-ai { background: rgba(124,90,247,0.1); color: var(--accent2); }
+
+  /* TECH GRID */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tech-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    transition: border-color 0.2s;
+  }
+
+  .tech-card:hover { border-color: var(--border2); }
+
+  .tech-layer {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+
+  .tech-name {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .tech-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+  .tech-cost {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(45,212,160,0.08);
+    color: var(--accent3);
+  }
+
+  /* CODE BLOCKS */
+  pre {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #c8cfe8;
+  }
+
+  .kw { color: #7c5af7; }
+  .str { color: #2dd4a0; }
+  .cmt { color: #434a62; }
+  .fn { color: #4f8ef7; }
+  .num { color: #f7a84f; }
+  .type { color: #f75a8e; }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-diagram {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text2);
+    vertical-align: top;
+  }
+
+  .data-table td:first-child { color: var(--text); font-family: var(--mono); font-size: 12px; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* PHASE TIMELINE */
+  .timeline { margin: 20px 0; }
+
+  .phase {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+
+  .phase-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+  }
+
+  .phase-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .phase-line {
+    width: 1px;
+    flex: 1;
+    min-height: 20px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  .phase-content {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    flex: 1;
+    margin-bottom: 16px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .phase-name {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .phase-weeks {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--text3);
+    background: var(--bg4);
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+
+  .checklist { list-style: none; }
+  .checklist li {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 3px 0;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .checklist li::before {
+    content: '';
+    width: 14px; height: 14px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    display: inline-block;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* FLOW DIAGRAM - pure CSS boxes */
+  .flow-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 10px;
+  }
+
+  .flow-box {
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    text-align: center;
+    min-width: 180px;
+    position: relative;
+  }
+
+  .flow-box.accent { border-color: var(--accent); background: rgba(79,142,247,0.08); color: var(--accent); }
+  .flow-box.green { border-color: var(--accent3); background: rgba(45,212,160,0.08); color: var(--accent3); }
+  .flow-box.purple { border-color: var(--accent2); background: rgba(124,90,247,0.08); color: var(--accent2); }
+  .flow-box.orange { border-color: var(--accent4); background: rgba(247,168,79,0.08); color: var(--accent4); }
+
+  .flow-arrow {
+    width: 1px; height: 20px;
+    background: var(--border2);
+    position: relative;
+  }
+
+  .flow-arrow::after {
+    content: '▼';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: var(--text3);
+  }
+
+  .flow-row { display: flex; gap: 12px; align-items: center; }
+  .flow-or { font-size: 11px; color: var(--text3); padding: 0 4px; }
+
+  /* SECURITY MODEL */
+  .security-layer {
+    border-left: 3px solid var(--border2);
+    padding-left: 16px;
+    margin-bottom: 20px;
+  }
+
+  .security-layer.l1 { border-color: var(--red); }
+  .security-layer.l2 { border-color: var(--accent4); }
+  .security-layer.l3 { border-color: var(--accent); }
+  .security-layer.l4 { border-color: var(--accent3); }
+
+  .security-name {
+    font-family: var(--display);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  /* PILL TAGS */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    margin: 2px;
+  }
+
+  .pill.blue { border-color: rgba(79,142,247,0.3); color: var(--accent); background: rgba(79,142,247,0.06); }
+  .pill.green { border-color: rgba(45,212,160,0.3); color: var(--accent3); background: rgba(45,212,160,0.06); }
+  .pill.purple { border-color: rgba(124,90,247,0.3); color: var(--accent2); background: rgba(124,90,247,0.06); }
+  .pill.orange { border-color: rgba(247,168,79,0.3); color: var(--accent4); background: rgba(247,168,79,0.06); }
+  .pill.red { border-color: rgba(247,90,90,0.3); color: var(--red); background: rgba(247,90,90,0.06); }
+
+  /* COST TABLE */
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .cost-row:last-child { border-bottom: none; }
+  .cost-label { color: var(--text2); }
+  .cost-value { font-family: var(--mono); color: var(--accent3); font-size: 13px; }
+
+  /* ARCH SVG container */
+  .svg-wrap { width: 100%; overflow-x: auto; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 28px 0 12px;
+  }
+
+  h3:first-child { margin-top: 0; }
+
+  p { color: var(--text2); font-size: 13.5px; margin-bottom: 12px; line-height: 1.65; }
+
+  /* NODE TYPE CARDS */
+  .primitive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .primitive-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .primitive-icon {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .primitive-name {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .primitive-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .primitive-replaces { font-size: 11px; color: var(--text3); margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">FlowStack</div>
+    <div class="logo-sub">Technical Architecture v1.0</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Foundation</div>
+    <div class="nav-item active" onclick="show('overview')"><div class="nav-dot"></div>Overview</div>
+    <div class="nav-item" onclick="show('stack')"><div class="nav-dot"></div>Tech Stack</div>
+    <div class="nav-item" onclick="show('primitives')"><div class="nav-dot"></div>Core Primitives</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Architecture</div>
+    <div class="nav-item" onclick="show('system')"><div class="nav-dot"></div>System Architecture</div>
+    <div class="nav-item" onclick="show('frontend')"><div class="nav-dot"></div>Frontend Architecture</div>
+    <div class="nav-item" onclick="show('backend')"><div class="nav-dot"></div>Backend Architecture</div>
+    <div class="nav-item" onclick="show('realtime')"><div class="nav-dot"></div>Real-time & Sync</div>
+    <div class="nav-item" onclick="show('ai')"><div class="nav-dot"></div>AI Layer (FlowMind)</div>
+    <div class="nav-item" onclick="show('automations')"><div class="nav-dot"></div>Automations Engine</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Data</div>
+    <div class="nav-item" onclick="show('schema')"><div class="nav-dot"></div>Database Schema</div>
+    <div class="nav-item" onclick="show('api')"><div class="nav-dot"></div>API Design</div>
+    <div class="nav-item" onclick="show('multitenancy')"><div class="nav-dot"></div>Multi-tenancy</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Operations</div>
+    <div class="nav-item" onclick="show('security')"><div class="nav-dot"></div>Security Model</div>
+    <div class="nav-item" onclick="show('deployment')"><div class="nav-dot"></div>Deployment & CI/CD</div>
+    <div class="nav-item" onclick="show('cost')"><div class="nav-dot"></div>Cost Architecture</div>
+    <div class="nav-item" onclick="show('roadmap')"><div class="nav-dot"></div>Build Roadmap</div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="sec-overview">
+    <div class="section-header">
+      <div class="section-tag">01 — Foundation</div>
+      <div class="section-title">FlowStack Overview</div>
+      <div class="section-desc">A unified spatial canvas platform that replaces Asana, Notion, Airtable, Slack (contextual), and Zapier — built for zero infrastructure cost at launch, scalable to 1M+ users without a rewrite.</div>
+    </div>
+
+    <h3>Platform Philosophy</h3>
+    <p>FlowStack is built on a single architectural insight: every workflow tool in existence is just one of seven fundamental primitives dressed up with a brand name. By unifying these primitives into a shared graph — where every object can reference, trigger, or embed every other object — FlowStack eliminates the coordination tax teams pay switching between disconnected tools.</p>
+
+    <div class="card">
+      <div class="card-title">Design Principles</div>
+      <div class="data-table" style="margin:0">
+        <table class="data-table" style="margin:0">
+          <tr><td>Graph-first</td><td>Every primitive is a node. Every relationship is an edge. The entire platform is a queryable graph.</td></tr>
+          <tr><td>Real-time native</td><td>Multiplayer collaboration is not a feature — it is the default state of every object.</td></tr>
+          <tr><td>AI-readable</td><td>The workflow graph is always serializable to JSON and passable directly to Claude for analysis.</td></tr>
+          <tr><td>Zero infrastructure ownership</td><td>Every backend service is managed. No servers, no DevOps, no ops team required to launch.</td></tr>
+          <tr><td>JSONB flexibility</td><td>Each node stores type-specific data in a JSONB column. New node types require zero schema migrations.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <h3>India-Safe Stack Constraint</h3>
+    <p>The architecture explicitly avoids Supabase (blocked in India under IT Act Section 69A) and uses Neon.tech + Clerk.dev as direct replacements with identical or superior developer experience.</p>
+
+    <div class="card">
+      <div class="card-title">What Gets Replaced at Each Seat</div>
+      <table class="data-table">
+        <thead><tr><th>FlowStack Module</th><th>Replaces</th><th>Savings/seat/mo</th></tr></thead>
+        <tbody>
+          <tr><td>TASK</td><td>Asana, Linear, Trello, Monday</td><td>$10–24</td></tr>
+          <tr><td>DOC</td><td>Notion, Confluence</td><td>$8–15</td></tr>
+          <tr><td>TABLE</td><td>Airtable, Google Sheets</td><td>$10–20</td></tr>
+          <tr><td>THREAD</td><td>Slack (contextual)</td><td>$7–12</td></tr>
+          <tr><td>DECISION</td><td>Nothing — doesn't exist yet</td><td>—</td></tr>
+          <tr><td>AUTOMATION</td><td>Zapier, Make</td><td>$20–100/mo flat</td></tr>
+          <tr><td>PULSE</td><td>Status meetings, Databox</td><td>Priceless</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px">Total replaced: $55–$171/seat/month → FlowStack price: $19/seat/month</div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section" id="sec-stack">
+    <div class="section-header">
+      <div class="section-tag">02 — Foundation</div>
+      <div class="section-title">Complete Tech Stack</div>
+      <div class="section-desc">Every tool, library, and service in the platform — chosen for zero CAPEX, managed infrastructure, and India availability.</div>
+    </div>
+
+    <h3>Frontend Layer</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-layer">Framework</div>
+        <div class="tech-name">Next.js 14</div>
+        <div class="tech-desc">App Router, Server Components, API Routes. Full-stack in one repo — no separate backend needed. TypeScript throughout.</div>
+        <span class="tech-cost">Free — Vercel hosting</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Canvas Engine</div>
+        <div class="tech-name">React Flow</div>
+        <div class="tech-desc">Open-source node-based canvas. Handles drag/drop, pan/zoom, custom nodes, and edges. Powers the entire workflow canvas.</div>
+        <span class="tech-cost">Free / MIT License</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Styling</div>
+        <div class="tech-name">Tailwind CSS + shadcn/ui</div>
+        <div class="tech-desc">Utility-first styling with pre-built accessible components. No design system to build from scratch.</div>
+        <span class="tech-cost">Free</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">State Management</div>
+        <div class="tech-name">Zustand</div>
+        <div class="tech-desc">Lightweight global state. Manages canvas state, selection, and UI state. Far simpler than Redux for this use case.</div>
+        <span class="tech-cost">Free / MIT License</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Rich Text (Docs)</div>
+        <div class="tech-name">Tiptap</div>
+        <div class="tech-desc">Open-source headless rich-text editor. Supports slash commands, embeds, and collaborative editing out of the box.</div>
+        <span class="tech-cost">Free (core)</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Multiplayer Presence</div>
+        <div class="tech-name">Liveblocks</div>
+        <div class="tech-desc">Real-time collaboration — live cursors, presence indicators, and conflict resolution for the canvas. Free up to 50 MAU.</div>
+        <span class="tech-cost">Free tier (50 MAU)</span>
+      </div>
+    </div>
+
+    <h3>Backend & Database Layer</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-layer">Database (India-Safe)</div>
+        <div class="tech-name">Neon.tech</div>
+        <div class="tech-desc">Serverless Postgres. Same SQL as Supabase under the hood. Scales to zero — no idle compute cost. Supports DB branching per PR.</div>
+        <span class="tech-cost">Free: 3GB + 10hr compute</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">ORM</div>
+        <div class="tech-name">Drizzle ORM</div>
+        <div class="tech-desc">TypeScript-first, lightweight ORM. SQL-like syntax, full type safety, and seamless Neon integration. Zero runtime overhead.</div>
+        <span class="tech-cost">Free / MIT License</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Authentication (India-Safe)</div>
+        <div class="tech-name">Clerk.dev</div>
+        <div class="tech-desc">Drop-in auth with email, Google, GitHub, and SSO. Handles sessions, tokens, and org management. Replaces Supabase Auth entirely.</div>
+        <span class="tech-cost">Free: up to 10k MAU</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">File Storage</div>
+        <div class="tech-name">Cloudflare R2</div>
+        <div class="tech-desc">Zero egress fees. Globally distributed. Compatible with S3 SDK. Perfect for file attachments on doc and table nodes.</div>
+        <span class="tech-cost">~$0 at early scale</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Vector Search</div>
+        <div class="tech-name">Neon pgvector</div>
+        <div class="tech-desc">Semantic search over workflows, decisions, and docs. Built into Neon — no separate vector DB needed. Powers AI retrieval.</div>
+        <span class="tech-cost">Included in Neon</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">API Layer</div>
+        <div class="tech-name">Next.js API Routes</div>
+        <div class="tech-desc">Serverless edge functions co-located with the frontend. No Express, no separate API server. One repo, one deploy.</div>
+        <span class="tech-cost">Free on Vercel</span>
+      </div>
+    </div>
+
+    <h3>Automation & Event Layer</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-layer">Event Queue</div>
+        <div class="tech-name">Inngest</div>
+        <div class="tech-desc">Serverless event-driven functions. Handles automation triggers, retries, delays, and fan-outs. Write functions in TypeScript — Inngest handles the queue.</div>
+        <span class="tech-cost">Free: 50k runs/month</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Background Jobs</div>
+        <div class="tech-name">Trigger.dev</div>
+        <div class="tech-desc">Long-running background jobs (AI analysis, bulk exports, report generation). Open source, self-hostable later if needed.</div>
+        <span class="tech-cost">Free tier available</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Email</div>
+        <div class="tech-name">Resend</div>
+        <div class="tech-desc">Transactional email via React Email templates. Notification emails, invites, and digests. Clean API, developer-first.</div>
+        <span class="tech-cost">Free: 3k emails/month</span>
+      </div>
+    </div>
+
+    <h3>AI Layer</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-layer">Primary LLM</div>
+        <div class="tech-name">Anthropic Claude API</div>
+        <div class="tech-desc">claude-sonnet-4-20250514 for all AI features. Workflow graph analysis, natural language query, auto-generation. Called server-side only.</div>
+        <span class="tech-cost">Pay per token</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Embeddings</div>
+        <div class="tech-name">OpenAI text-embedding-3-small</div>
+        <div class="tech-desc">Embed workflow nodes, decisions, and docs for semantic search. Vectors stored in Neon pgvector. ~$0.02 per 1M tokens.</div>
+        <span class="tech-cost">~$0 at early scale</span>
+      </div>
+    </div>
+
+    <h3>Observability & DevOps</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-layer">Hosting & Deploy</div>
+        <div class="tech-name">Vercel</div>
+        <div class="tech-desc">Zero-config deployment for Next.js. Preview deployments on every PR. Edge network, auto-scaling. No infra to manage.</div>
+        <span class="tech-cost">Free tier → Pro at scale</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Error Tracking</div>
+        <div class="tech-name">Sentry</div>
+        <div class="tech-desc">Error monitoring, performance tracing, and session replay. Know what's broken before users report it.</div>
+        <span class="tech-cost">Free: 5k errors/month</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Product Analytics</div>
+        <div class="tech-name">PostHog</div>
+        <div class="tech-desc">Feature flags, funnels, session replay, and event tracking. Self-hostable when volume increases. Replaces Mixpanel + LaunchDarkly.</div>
+        <span class="tech-cost">Free: 1M events/month</span>
+      </div>
+      <div class="tech-card">
+        <div class="tech-layer">Uptime Monitoring</div>
+        <div class="tech-name">Better Uptime</div>
+        <div class="tech-desc">Status page, incident management, and uptime checks. Shows customers you take reliability seriously.</div>
+        <span class="tech-cost">Free tier</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIMITIVES -->
+  <div class="section" id="sec-primitives">
+    <div class="section-header">
+      <div class="section-tag">03 — Foundation</div>
+      <div class="section-title">Core Primitives</div>
+      <div class="section-desc">Seven fundamental building blocks from which every workflow is composed. Every other tool in existence is just one of these seven dressed up with a brand name.</div>
+    </div>
+
+    <p>All seven primitives share a single database table (<code>nodes</code>) with a <code>type</code> discriminator column and a <code>data JSONB</code> field that stores type-specific properties. This means new primitives require zero schema migrations.</p>
+
+    <div class="primitive-grid">
+      <div class="primitive-card">
+        <div class="primitive-icon">📋</div>
+        <div class="primitive-name">TASK</div>
+        <div class="primitive-desc">Assignable, trackable unit of work with status, due date, subtasks, and priority.</div>
+        <div class="primitive-replaces">Replaces: Asana, Linear, Trello, Monday</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">📄</div>
+        <div class="primitive-name">DOC</div>
+        <div class="primitive-desc">Living document that can embed tasks, tables, decisions, and other nodes inline.</div>
+        <div class="primitive-replaces">Replaces: Notion, Confluence</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">🗃️</div>
+        <div class="primitive-name">TABLE</div>
+        <div class="primitive-desc">Structured relational data with custom fields, filters, views, and row-level actions.</div>
+        <div class="primitive-replaces">Replaces: Airtable, Google Sheets</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">💬</div>
+        <div class="primitive-name">THREAD</div>
+        <div class="primitive-desc">Contextual conversation attached directly to any node — not a global channel.</div>
+        <div class="primitive-replaces">Replaces: Slack (contextual only)</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">✅</div>
+        <div class="primitive-name">DECISION</div>
+        <div class="primitive-desc">Logged, attributed choice with rationale, options considered, and downstream outcomes tracked.</div>
+        <div class="primitive-replaces">Replaces: Nothing — doesn't exist yet</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">⚙️</div>
+        <div class="primitive-name">AUTOMATION</div>
+        <div class="primitive-desc">If/then logic node: trigger → condition → action. Connects any primitive to any other.</div>
+        <div class="primitive-replaces">Replaces: Zapier, Make</div>
+      </div>
+      <div class="primitive-card">
+        <div class="primitive-icon">📊</div>
+        <div class="primitive-name">PULSE</div>
+        <div class="primitive-desc">Auto-generated real-time status view computed from any combination of other nodes.</div>
+        <div class="primitive-replaces">Replaces: Status meetings, Databox</div>
+      </div>
+    </div>
+
+    <h3>Node Data Schema — JSONB Examples</h3>
+    <pre><span class="cmt">-- TASK node data column (JSONB)</span>
+{
+  <span class="str">"title"</span>: <span class="str">"Design onboarding flow"</span>,
+  <span class="str">"status"</span>: <span class="str">"in_progress"</span>,
+  <span class="str">"priority"</span>: <span class="str">"high"</span>,
+  <span class="str">"due_at"</span>: <span class="str">"2026-04-15T00:00:00Z"</span>,
+  <span class="str">"assigned_to"</span>: <span class="str">"user_abc123"</span>,
+  <span class="str">"subtasks"</span>: [<span class="str">"node_x"</span>, <span class="str">"node_y"</span>],
+  <span class="str">"estimate_hours"</span>: <span class="num">4</span>
+}
+
+<span class="cmt">-- AUTOMATION node data column (JSONB)</span>
+{
+  <span class="str">"trigger"</span>: {
+    <span class="str">"type"</span>: <span class="str">"node_status_change"</span>,
+    <span class="str">"node_type"</span>: <span class="str">"task"</span>,
+    <span class="str">"condition"</span>: { <span class="str">"status"</span>: <span class="str">"done"</span> }
+  },
+  <span class="str">"actions"</span>: [
+    {
+      <span class="str">"type"</span>: <span class="str">"create_node"</span>,
+      <span class="str">"node_type"</span>: <span class="str">"task"</span>,
+      <span class="str">"template_data"</span>: { <span class="str">"title"</span>: <span class="str">"Review completed work"</span> },
+      <span class="str">"assign_to"</span>: <span class="str">"user_manager"</span>
+    },
+    {
+      <span class="str">"type"</span>: <span class="str">"send_notification"</span>,
+      <span class="str">"channel"</span>: <span class="str">"email"</span>,
+      <span class="str">"template"</span>: <span class="str">"task_completed"</span>
+    }
+  ]
+}</pre>
+  </div>
+
+  <!-- SYSTEM ARCHITECTURE -->
+  <div class="section" id="sec-system">
+    <div class="section-header">
+      <div class="section-tag">04 — Architecture</div>
+      <div class="section-title">System Architecture</div>
+      <div class="section-desc">The complete request lifecycle and service topology — from browser to database and back.</div>
+    </div>
+
+    <div class="arch-diagram">
+      <svg width="100%" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',sans-serif">
+
+        <!-- Client Layer -->
+        <rect x="20" y="20" width="760" height="90" rx="10" fill="rgba(79,142,247,0.05)" stroke="rgba(79,142,247,0.2)" stroke-width="0.5"/>
+        <text x="36" y="40" font-size="10" fill="rgba(79,142,247,0.6)" font-weight="500" letter-spacing="0.08em">CLIENT LAYER</text>
+        <rect x="40" y="50" width="140" height="44" rx="8" fill="rgba(79,142,247,0.12)" stroke="rgba(79,142,247,0.3)" stroke-width="0.5"/>
+        <text x="110" y="70" text-anchor="middle" font-size="12" fill="#4f8ef7" font-weight="500">Next.js App</text>
+        <text x="110" y="86" text-anchor="middle" font-size="10" fill="rgba(79,142,247,0.6)">React + Tailwind</text>
+        <rect x="210" y="50" width="140" height="44" rx="8" fill="rgba(79,142,247,0.12)" stroke="rgba(79,142,247,0.3)" stroke-width="0.5"/>
+        <text x="280" y="70" text-anchor="middle" font-size="12" fill="#4f8ef7" font-weight="500">React Flow Canvas</text>
+        <text x="280" y="86" text-anchor="middle" font-size="10" fill="rgba(79,142,247,0.6)">Workflow editor</text>
+        <rect x="380" y="50" width="140" height="44" rx="8" fill="rgba(79,142,247,0.12)" stroke="rgba(79,142,247,0.3)" stroke-width="0.5"/>
+        <text x="450" y="70" text-anchor="middle" font-size="12" fill="#4f8ef7" font-weight="500">Zustand Store</text>
+        <text x="450" y="86" text-anchor="middle" font-size="10" fill="rgba(79,142,247,0.6)">Client state</text>
+        <rect x="550" y="50" width="140" height="44" rx="8" fill="rgba(79,142,247,0.12)" stroke="rgba(79,142,247,0.3)" stroke-width="0.5"/>
+        <text x="620" y="70" text-anchor="middle" font-size="12" fill="#4f8ef7" font-weight="500">Liveblocks</text>
+        <text x="620" y="86" text-anchor="middle" font-size="10" fill="rgba(79,142,247,0.6)">Multiplayer/cursors</text>
+
+        <!-- Arrow down -->
+        <line x1="400" y1="112" x2="400" y2="138" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <polygon points="395,135 405,135 400,142" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Edge/API Layer -->
+        <rect x="20" y="145" width="760" height="90" rx="10" fill="rgba(45,212,160,0.05)" stroke="rgba(45,212,160,0.2)" stroke-width="0.5"/>
+        <text x="36" y="165" font-size="10" fill="rgba(45,212,160,0.6)" font-weight="500" letter-spacing="0.08em">EDGE / API LAYER — VERCEL</text>
+        <rect x="40" y="175" width="140" height="44" rx="8" fill="rgba(45,212,160,0.1)" stroke="rgba(45,212,160,0.25)" stroke-width="0.5"/>
+        <text x="110" y="195" text-anchor="middle" font-size="12" fill="#2dd4a0" font-weight="500">API Routes</text>
+        <text x="110" y="211" text-anchor="middle" font-size="10" fill="rgba(45,212,160,0.6)">/api/* endpoints</text>
+        <rect x="210" y="175" width="140" height="44" rx="8" fill="rgba(45,212,160,0.1)" stroke="rgba(45,212,160,0.25)" stroke-width="0.5"/>
+        <text x="280" y="195" text-anchor="middle" font-size="12" fill="#2dd4a0" font-weight="500">Clerk Auth</text>
+        <text x="280" y="211" text-anchor="middle" font-size="10" fill="rgba(45,212,160,0.6)">JWT middleware</text>
+        <rect x="380" y="175" width="140" height="44" rx="8" fill="rgba(45,212,160,0.1)" stroke="rgba(45,212,160,0.25)" stroke-width="0.5"/>
+        <text x="450" y="195" text-anchor="middle" font-size="12" fill="#2dd4a0" font-weight="500">Edge Functions</text>
+        <text x="450" y="211" text-anchor="middle" font-size="10" fill="rgba(45,212,160,0.6)">Serverless workers</text>
+        <rect x="550" y="175" width="140" height="44" rx="8" fill="rgba(45,212,160,0.1)" stroke="rgba(45,212,160,0.25)" stroke-width="0.5"/>
+        <text x="620" y="195" text-anchor="middle" font-size="12" fill="#2dd4a0" font-weight="500">Rate Limiting</text>
+        <text x="620" y="211" text-anchor="middle" font-size="10" fill="rgba(45,212,160,0.6)">Upstash Redis</text>
+
+        <!-- Arrow down -->
+        <line x1="400" y1="237" x2="400" y2="263" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <polygon points="395,260 405,260 400,267" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Services Layer -->
+        <rect x="20" y="270" width="760" height="90" rx="10" fill="rgba(124,90,247,0.05)" stroke="rgba(124,90,247,0.2)" stroke-width="0.5"/>
+        <text x="36" y="290" font-size="10" fill="rgba(124,90,247,0.6)" font-weight="500" letter-spacing="0.08em">SERVICES LAYER</text>
+        <rect x="40" y="300" width="130" height="44" rx="8" fill="rgba(124,90,247,0.1)" stroke="rgba(124,90,247,0.25)" stroke-width="0.5"/>
+        <text x="105" y="320" text-anchor="middle" font-size="12" fill="#7c5af7" font-weight="500">Drizzle ORM</text>
+        <text x="105" y="336" text-anchor="middle" font-size="10" fill="rgba(124,90,247,0.6)">Query builder</text>
+        <rect x="190" y="300" width="130" height="44" rx="8" fill="rgba(124,90,247,0.1)" stroke="rgba(124,90,247,0.25)" stroke-width="0.5"/>
+        <text x="255" y="320" text-anchor="middle" font-size="12" fill="#7c5af7" font-weight="500">Inngest</text>
+        <text x="255" y="336" text-anchor="middle" font-size="10" fill="rgba(124,90,247,0.6)">Event queue</text>
+        <rect x="340" y="300" width="130" height="44" rx="8" fill="rgba(124,90,247,0.1)" stroke="rgba(124,90,247,0.25)" stroke-width="0.5"/>
+        <text x="405" y="320" text-anchor="middle" font-size="12" fill="#7c5af7" font-weight="500">Claude API</text>
+        <text x="405" y="336" text-anchor="middle" font-size="10" fill="rgba(124,90,247,0.6)">FlowMind AI</text>
+        <rect x="490" y="300" width="130" height="44" rx="8" fill="rgba(124,90,247,0.1)" stroke="rgba(124,90,247,0.25)" stroke-width="0.5"/>
+        <text x="555" y="320" text-anchor="middle" font-size="12" fill="#7c5af7" font-weight="500">Resend</text>
+        <text x="555" y="336" text-anchor="middle" font-size="10" fill="rgba(124,90,247,0.6)">Email service</text>
+        <rect x="640" y="300" width="130" height="44" rx="8" fill="rgba(124,90,247,0.1)" stroke="rgba(124,90,247,0.25)" stroke-width="0.5"/>
+        <text x="705" y="320" text-anchor="middle" font-size="12" fill="#7c5af7" font-weight="500">Cloudflare R2</text>
+        <text x="705" y="336" text-anchor="middle" font-size="10" fill="rgba(124,90,247,0.6)">File storage</text>
+
+        <!-- Arrow down -->
+        <line x1="400" y1="362" x2="400" y2="388" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+        <polygon points="395,385 405,385 400,392" fill="rgba(255,255,255,0.2)"/>
+
+        <!-- Data Layer -->
+        <rect x="20" y="395" width="760" height="90" rx="10" fill="rgba(247,168,79,0.05)" stroke="rgba(247,168,79,0.2)" stroke-width="0.5"/>
+        <text x="36" y="415" font-size="10" fill="rgba(247,168,79,0.6)" font-weight="500" letter-spacing="0.08em">DATA LAYER</text>
+        <rect x="40" y="425" width="200" height="44" rx="8" fill="rgba(247,168,79,0.1)" stroke="rgba(247,168,79,0.25)" stroke-width="0.5"/>
+        <text x="140" y="445" text-anchor="middle" font-size="12" fill="#f7a84f" font-weight="500">Neon.tech (Postgres)</text>
+        <text x="140" y="461" text-anchor="middle" font-size="10" fill="rgba(247,168,79,0.6)">Primary database + pgvector</text>
+        <rect x="270" y="425" width="180" height="44" rx="8" fill="rgba(247,168,79,0.1)" stroke="rgba(247,168,79,0.25)" stroke-width="0.5"/>
+        <text x="360" y="445" text-anchor="middle" font-size="12" fill="#f7a84f" font-weight="500">Neon Read Replicas</text>
+        <text x="360" y="461" text-anchor="middle" font-size="10" fill="rgba(247,168,79,0.6)">Analytics queries</text>
+        <rect x="480" y="425" width="160" height="44" rx="8" fill="rgba(247,168,79,0.1)" stroke="rgba(247,168,79,0.25)" stroke-width="0.5"/>
+        <text x="560" y="445" text-anchor="middle" font-size="12" fill="#f7a84f" font-weight="500">Upstash Redis</text>
+        <text x="560" y="461" text-anchor="middle" font-size="10" fill="rgba(247,168,79,0.6)">Cache + rate limit</text>
+        <rect x="660" y="425" width="110" height="44" rx="8" fill="rgba(247,168,79,0.1)" stroke="rgba(247,168,79,0.25)" stroke-width="0.5"/>
+        <text x="715" y="445" text-anchor="middle" font-size="12" fill="#f7a84f" font-weight="500">Backups</text>
+        <text x="715" y="461" text-anchor="middle" font-size="10" fill="rgba(247,168,79,0.6)">Neon PITR</text>
+
+        <!-- Observability row -->
+        <text x="36" y="510" font-size="10" fill="rgba(255,255,255,0.2)" font-weight="500" letter-spacing="0.08em">OBSERVABILITY</text>
+        <rect x="40" y="520" width="110" height="28" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+        <text x="95" y="537" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.35)">Sentry</text>
+        <rect x="165" y="520" width="110" height="28" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+        <text x="220" y="537" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.35)">PostHog</text>
+        <rect x="290" y="520" width="130" height="28" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+        <text x="355" y="537" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.35)">Better Uptime</text>
+        <rect x="435" y="520" width="110" height="28" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+        <text x="490" y="537" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.35)">Vercel Logs</text>
+      </svg>
+    </div>
+
+    <h3>Request Lifecycle</h3>
+    <p>A typical mutation request (e.g. user creates a task node) flows through each layer as follows:</p>
+
+    <pre><span class="num">1.</span> User drags a TASK node onto canvas (React Flow)
+<span class="num">2.</span> Zustand optimistic update → canvas renders immediately
+<span class="num">3.</span> POST /api/nodes → Next.js API Route
+<span class="num">4.</span> Clerk middleware validates JWT → extracts workspace_id
+<span class="num">5.</span> Drizzle INSERT into nodes table with workspace_id guard
+<span class="num">6.</span> Inngest event dispatched: <span class="str">"node.created"</span>
+<span class="num">7.</span> Inngest evaluates automation triggers for this workspace
+<span class="num">8.</span> If automation matches → executes action (creates edge, notifies, etc.)
+<span class="num">9.</span> Liveblocks broadcasts canvas delta to all connected users
+<span class="num">10.</span> Other users' canvases update in real-time without refresh</pre>
+  </div>
+
+  <!-- FRONTEND ARCHITECTURE -->
+  <div class="section" id="sec-frontend">
+    <div class="section-header">
+      <div class="section-tag">05 — Architecture</div>
+      <div class="section-title">Frontend Architecture</div>
+      <div class="section-desc">The complete component tree, state management strategy, and canvas rendering approach.</div>
+    </div>
+
+    <h3>Directory Structure</h3>
+    <pre><span class="fn">flowstack/</span>
+<span class="fn">├── app/</span>                          <span class="cmt"># Next.js App Router</span>
+<span class="fn">│   ├── (auth)/</span>                   <span class="cmt"># Auth group (sign-in, sign-up)</span>
+<span class="fn">│   ├── (app)/</span>                    <span class="cmt"># Protected app routes</span>
+<span class="fn">│   │   ├── workspace/[slug]/</span>
+<span class="fn">│   │   │   ├── canvas/[id]/</span>      <span class="cmt"># Workflow canvas view</span>
+<span class="fn">│   │   │   ├── pulse/</span>            <span class="cmt"># Dashboard/status view</span>
+<span class="fn">│   │   │   └── decisions/</span>        <span class="cmt"># Decision DNA view</span>
+<span class="fn">│   └── api/</span>                      <span class="cmt"># API routes</span>
+<span class="fn">│       ├── nodes/</span>                <span class="cmt"># CRUD for all primitives</span>
+<span class="fn">│       ├── workflows/</span>            <span class="cmt"># Workflow operations</span>
+<span class="fn">│       ├── ai/</span>                   <span class="cmt"># FlowMind AI endpoints</span>
+<span class="fn">│       └── webhooks/inngest</span>      <span class="cmt"># Automation callbacks</span>
+<span class="fn">├── components/</span>
+<span class="fn">│   ├── canvas/</span>                   <span class="cmt"># React Flow + custom nodes</span>
+<span class="fn">│   │   ├── nodes/</span>                <span class="cmt"># TaskNode, DocNode, etc.</span>
+<span class="fn">│   │   ├── edges/</span>                <span class="cmt"># Custom edge renderers</span>
+<span class="fn">│   │   └── panels/</span>               <span class="cmt"># Toolbars, sidebars</span>
+<span class="fn">│   ├── ui/</span>                       <span class="cmt"># shadcn/ui primitives</span>
+<span class="fn">│   └── flowmind/</span>                 <span class="cmt"># AI chat panel</span>
+<span class="fn">├── lib/</span>
+<span class="fn">│   ├── db/</span>                       <span class="cmt"># Drizzle schema + queries</span>
+<span class="fn">│   ├── inngest/</span>                  <span class="cmt"># Event functions</span>
+<span class="fn">│   └── ai/</span>                       <span class="cmt"># Claude API helpers</span>
+<span class="fn">└── stores/</span>
+    <span class="fn">├── canvas.store.ts</span>           <span class="cmt"># Workflow canvas state</span>
+    <span class="fn">└── workspace.store.ts</span>        <span class="cmt"># Workspace/user state</span></pre>
+
+    <h3>Canvas State Management</h3>
+    <pre><span class="cmt">// stores/canvas.store.ts</span>
+<span class="kw">import</span> { <span class="fn">create</span> } <span class="kw">from</span> <span class="str">'zustand'</span>
+<span class="kw">import</span> { <span class="type">Node</span>, <span class="type">Edge</span> } <span class="kw">from</span> <span class="str">'reactflow'</span>
+
+<span class="kw">interface</span> <span class="type">CanvasStore</span> {
+  nodes: <span class="type">Node</span>[]
+  edges: <span class="type">Edge</span>[]
+  selectedNodes: <span class="type">string</span>[]
+  isAIPanelOpen: <span class="type">boolean</span>
+
+  <span class="cmt">// Optimistic mutation — update local state THEN sync to DB</span>
+  <span class="fn">addNode</span>: (node: <span class="type">Partial&lt;Node&gt;</span>) =&gt; <span class="type">void</span>
+  <span class="fn">updateNode</span>: (id: <span class="type">string</span>, data: <span class="type">Partial&lt;Node&gt;</span>) =&gt; <span class="type">void</span>
+  <span class="fn">removeNode</span>: (id: <span class="type">string</span>) =&gt; <span class="type">void</span>
+  <span class="fn">connectNodes</span>: (source: <span class="type">string</span>, target: <span class="type">string</span>) =&gt; <span class="type">void</span>
+
+  <span class="cmt">// Sync from server (called on load + Liveblocks updates)</span>
+  <span class="fn">hydrateCanvas</span>: (nodes: <span class="type">Node</span>[], edges: <span class="type">Edge</span>[]) =&gt; <span class="type">void</span>
+}</pre>
+
+    <h3>Custom Node Architecture</h3>
+    <pre><span class="cmt">// components/canvas/nodes/TaskNode.tsx</span>
+<span class="kw">export function</span> <span class="fn">TaskNode</span>({ data, selected }: <span class="type">NodeProps</span>) {
+  <span class="kw">const</span> { <span class="fn">updateNode</span> } = <span class="fn">useCanvasStore</span>()
+
+  <span class="kw">return</span> (
+    &lt;<span class="type">NodeWrapper</span> selected={selected} type=<span class="str">"task"</span>&gt;
+      &lt;<span class="type">NodeHeader</span>
+        icon=<span class="str">"📋"</span>
+        title={data.title}
+        status={data.status}
+        onTitleChange={(t) =&gt; <span class="fn">updateNode</span>(data.id, { title: t })}
+      /&gt;
+      &lt;<span class="type">AssigneeAvatar</span> userId={data.assigned_to} /&gt;
+      &lt;<span class="type">DueDate</span> date={data.due_at} /&gt;
+      &lt;<span class="type">ThreadButton</span> nodeId={data.id} count={data.thread_count} /&gt;
+      <span class="cmt">{/* React Flow handles ports */}</span>
+      &lt;<span class="type">Handle</span> type=<span class="str">"target"</span> position={<span class="type">Position</span>.Top} /&gt;
+      &lt;<span class="type">Handle</span> type=<span class="str">"source"</span> position={<span class="type">Position</span>.Bottom} /&gt;
+    &lt;/<span class="type">NodeWrapper</span>&gt;
+  )
+}</pre>
+  </div>
+
+  <!-- BACKEND ARCHITECTURE -->
+  <div class="section" id="sec-backend">
+    <div class="section-header">
+      <div class="section-tag">06 — Architecture</div>
+      <div class="section-title">Backend Architecture</div>
+      <div class="section-desc">API design, database query patterns, and the workspace scoping layer that enforces multi-tenancy at the application level.</div>
+    </div>
+
+    <h3>API Route Structure</h3>
+    <table class="data-table">
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>/api/workflows</td><td>GET, POST</td><td>List / create workflows for current workspace</td></tr>
+        <tr><td>/api/workflows/[id]</td><td>GET, PATCH, DELETE</td><td>Get / update / delete single workflow</td></tr>
+        <tr><td>/api/nodes</td><td>GET, POST</td><td>List / create nodes within a workflow</td></tr>
+        <tr><td>/api/nodes/[id]</td><td>GET, PATCH, DELETE</td><td>Get / update / delete single node</td></tr>
+        <tr><td>/api/edges</td><td>POST, DELETE</td><td>Create / delete connections between nodes</td></tr>
+        <tr><td>/api/threads/[nodeId]</td><td>GET, POST</td><td>Get thread + post message on a node</td></tr>
+        <tr><td>/api/decisions</td><td>GET, POST</td><td>Decision DNA — log and query decisions</td></tr>
+        <tr><td>/api/ai/analyze</td><td>POST</td><td>FlowMind — analyze workflow graph</td></tr>
+        <tr><td>/api/ai/generate</td><td>POST</td><td>FlowMind — generate workflow from description</td></tr>
+        <tr><td>/api/webhooks/inngest</td><td>POST</td><td>Inngest automation callbacks</td></tr>
+        <tr><td>/api/templates</td><td>GET, POST</td><td>Template marketplace</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Workspace Scoping Pattern</h3>
+    <p>Since we're not using Supabase Row Level Security, workspace isolation is enforced by a shared query helper that wraps every database operation:</p>
+
+    <pre><span class="cmt">// lib/db/scoped-query.ts</span>
+<span class="kw">import</span> { auth } <span class="kw">from</span> <span class="str">'@clerk/nextjs/server'</span>
+<span class="kw">import</span> { db } <span class="kw">from</span> <span class="str">'./client'</span>
+<span class="kw">import</span> { <span class="fn">eq</span>, <span class="fn">and</span> } <span class="kw">from</span> <span class="str">'drizzle-orm'</span>
+
+<span class="cmt">// Every query in the codebase goes through this helper</span>
+<span class="cmt">// It's IMPOSSIBLE to forget workspace scoping</span>
+<span class="kw">export async function</span> <span class="fn">scopedQuery</span>() {
+  <span class="kw">const</span> { userId, orgId } = <span class="fn">auth</span>()
+  <span class="kw">if</span> (!userId || !orgId) <span class="kw">throw new</span> <span class="type">Error</span>(<span class="str">'Unauthorized'</span>)
+
+  <span class="kw">return</span> {
+    workspaceId: orgId,
+
+    <span class="cmt">// Usage: const { findNodes } = await scopedQuery()</span>
+    <span class="cmt">// findNodes() ALWAYS includes workspace_id filter</span>
+    <span class="fn">findNodes</span>: (workflowId: <span class="type">string</span>) =&gt;
+      db.select().from(nodes).where(
+        <span class="fn">and</span>(
+          <span class="fn">eq</span>(nodes.workspaceId, orgId),  <span class="cmt">// ← always present</span>
+          <span class="fn">eq</span>(nodes.workflowId, workflowId)
+        )
+      ),
+
+    <span class="fn">createNode</span>: (data: <span class="type">NewNode</span>) =&gt;
+      db.insert(nodes).values({
+        ...data,
+        workspaceId: orgId,  <span class="cmt">// ← injected, not caller-supplied</span>
+      }).returning()
+  }
+}</pre>
+
+    <h3>Database Query Examples — Drizzle ORM</h3>
+    <pre><span class="cmt">// Get full workflow graph (nodes + edges) in one query</span>
+<span class="kw">const</span> workflow = <span class="kw">await</span> db.query.workflows.<span class="fn">findFirst</span>({
+  where: <span class="fn">and</span>(
+    <span class="fn">eq</span>(workflows.id, workflowId),
+    <span class="fn">eq</span>(workflows.workspaceId, workspaceId)
+  ),
+  with: {
+    nodes: {
+      with: { threads: <span class="kw">true</span> }
+    },
+    edges: <span class="kw">true</span>
+  }
+})
+
+<span class="cmt">// Serialize for AI context window</span>
+<span class="kw">const</span> graphJSON = <span class="type">JSON</span>.<span class="fn">stringify</span>({
+  nodes: workflow.nodes.<span class="fn">map</span>(n =&gt; ({
+    id: n.id, type: n.type, status: n.data?.status,
+    title: n.data?.title, assignee: n.data?.assigned_to,
+    dueAt: n.data?.due_at, threadCount: n.threads.length
+  })),
+  edges: workflow.edges.<span class="fn">map</span>(e =&gt; ({
+    from: e.sourceNodeId, to: e.targetNodeId,
+    condition: e.condition
+  }))
+})</pre>
+  </div>
+
+  <!-- REALTIME -->
+  <div class="section" id="sec-realtime">
+    <div class="section-header">
+      <div class="section-tag">07 — Architecture</div>
+      <div class="section-title">Real-time & Sync</div>
+      <div class="section-desc">How multiple users collaborate on a canvas simultaneously without conflicts or stale state.</div>
+    </div>
+
+    <h3>Two-layer Real-time Strategy</h3>
+    <div class="card">
+      <div class="card-title">Layer 1 — Presence (Liveblocks) <span class="badge badge-managed">Managed</span></div>
+      <p style="margin:0;font-size:13px;color:var(--text2)">Handles ephemeral, high-frequency events: cursor positions, hover states, active selections, typing indicators. These don't touch the database — they're pure presence signals.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Layer 2 — Data Sync (Optimistic + Server Reconciliation)</div>
+      <p style="margin:0;font-size:13px;color:var(--text2)">Mutations flow as: optimistic local update → API write to Neon → broadcast to other connected clients. Last-write-wins on position. Operational transforms (via Liveblocks) for collaborative text editing inside Doc nodes.</p>
+    </div>
+
+    <h3>Canvas Sync Flow</h3>
+    <pre><span class="cmt">// Optimistic node move — user drags a node</span>
+<span class="kw">function</span> <span class="fn">onNodeDragStop</span>(event, node) {
+  <span class="cmt">// 1. Update Zustand immediately (instant render)</span>
+  <span class="fn">updateNode</span>(node.id, { position: node.position })
+
+  <span class="cmt">// 2. Debounced DB write (500ms) to avoid hammering API</span>
+  <span class="fn">debouncedSave</span>(node.id, {
+    position_x: node.position.x,
+    position_y: node.position.y
+  })
+
+  <span class="cmt">// 3. Liveblocks broadcasts position to co-editors via presence</span>
+  updatePresence({ dragging: { nodeId: node.id, pos: node.position } })
+}</pre>
+
+    <h3>Conflict Resolution Strategy</h3>
+    <table class="data-table">
+      <thead><tr><th>Content Type</th><th>Strategy</th><th>Rationale</th></tr></thead>
+      <tbody>
+        <tr><td>Node position (x, y)</td><td>Last-write-wins</td><td>No meaningful merge possible. Last user to move wins.</td></tr>
+        <tr><td>Node status, priority</td><td>Last-write-wins with timestamp</td><td>Scalar field, latest timestamp wins</td></tr>
+        <tr><td>Doc content (rich text)</td><td>OT via Liveblocks</td><td>Google Docs-style — character-level merging</td></tr>
+        <tr><td>Table cell content</td><td>Last-write-wins per cell</td><td>Cell-level granularity avoids row-level conflicts</td></tr>
+        <tr><td>Thread messages</td><td>Append-only</td><td>Messages never merge — just append</td></tr>
+        <tr><td>Decision rationale</td><td>Versioned snapshots</td><td>Audit trail preserved, no destructive edits</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AI LAYER -->
+  <div class="section" id="sec-ai">
+    <div class="section-header">
+      <div class="section-tag">08 — Architecture</div>
+      <div class="section-title">AI Layer — FlowMind</div>
+      <div class="section-desc">How Claude reads, analyzes, and generates workflow graphs. No fine-tuning required — the graph serializes directly into context.</div>
+    </div>
+
+    <h3>Core Architecture Principle</h3>
+    <p>FlowMind doesn't need a vector database, fine-tuning, or embeddings for primary features. The entire workflow graph serializes to a compact JSON representation that fits in Claude's context window. This makes it trivially simple to build AI features — serialize the graph, pass it to Claude with a task-specific system prompt, parse the response.</p>
+
+    <h3>FlowMind API Route</h3>
+    <pre><span class="cmt">// app/api/ai/analyze/route.ts</span>
+<span class="kw">export async function</span> <span class="fn">POST</span>(req: <span class="type">Request</span>) {
+  <span class="kw">const</span> { workflowId, question } = <span class="kw">await</span> req.<span class="fn">json</span>()
+  <span class="kw">const</span> { workspaceId, <span class="fn">findWorkflow</span> } = <span class="kw">await</span> <span class="fn">scopedQuery</span>()
+
+  <span class="cmt">// Serialize entire graph to compact JSON</span>
+  <span class="kw">const</span> workflow = <span class="kw">await</span> <span class="fn">findWorkflow</span>(workflowId)
+  <span class="kw">const</span> graphContext = <span class="fn">serializeForAI</span>(workflow)
+
+  <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.anthropic.com/v1/messages'</span>, {
+    method: <span class="str">'POST'</span>,
+    headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+    body: <span class="type">JSON</span>.<span class="fn">stringify</span>({
+      model: <span class="str">'claude-sonnet-4-20250514'</span>,
+      max_tokens: <span class="num">1000</span>,
+      system: <span class="str">`You are FlowMind, an AI assistant that reads and analyzes
+workflow graphs for teams. You understand 7 node types: task, doc,
+table, thread, decision, automation, and pulse. You identify
+bottlenecks (nodes with no downstream connections and status "stuck"),
+overloaded assignees (users with >5 open tasks), and stalled paths
+(nodes unchanged >7 days with incomplete status). Always cite specific
+node titles and assignees. Be direct and actionable.`</span>,
+      messages: [{
+        role: <span class="str">'user'</span>,
+        content: <span class="str">`Workflow graph:\n${graphContext}\n\nQuestion: ${question}`</span>
+      }]
+    })
+  })
+
+  <span class="kw">const</span> data = <span class="kw">await</span> response.<span class="fn">json</span>()
+  <span class="kw">return</span> <span class="type">Response</span>.<span class="fn">json</span>({
+    answer: data.content[<span class="num">0</span>].text
+  })
+}</pre>
+
+    <h3>FlowMind Capability Matrix</h3>
+    <table class="data-table">
+      <thead><tr><th>User Query</th><th>What Claude Does</th><th>System Prompt Focus</th></tr></thead>
+      <tbody>
+        <tr><td>"Why is this project stuck?"</td><td>Identifies nodes with blocked status + no active downstream edges</td><td>Bottleneck detection</td></tr>
+        <tr><td>"Who is overloaded?"</td><td>Counts open tasks per assignee, ranks by count + priority</td><td>Workload analysis</td></tr>
+        <tr><td>"Build me a launch workflow"</td><td>Generates a JSON graph of nodes + edges from description</td><td>Graph generation</td></tr>
+        <tr><td>"Summarize this week"</td><td>Reads all status changes + decisions from past 7 days</td><td>Activity digest</td></tr>
+        <tr><td>"What decisions are pending?"</td><td>Finds all DECISION nodes with no resolution field</td><td>Decision analysis</td></tr>
+        <tr><td>"What's the risk here?"</td><td>Finds tasks with due dates in past, no assignee, or no dependencies</td><td>Risk identification</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Workflow Generation — AI Output Parsing</h3>
+    <pre><span class="cmt">// FlowMind generates a structured JSON graph</span>
+<span class="cmt">// System prompt instructs Claude to output ONLY JSON, no prose</span>
+
+<span class="cmt">// Example AI-generated workflow for "SaaS customer onboarding":</span>
+{
+  <span class="str">"nodes"</span>: [
+    { <span class="str">"type"</span>: <span class="str">"task"</span>, <span class="str">"title"</span>: <span class="str">"Send welcome email"</span>, <span class="str">"position"</span>: { <span class="str">"x"</span>: <span class="num">100</span>, <span class="str">"y"</span>: <span class="num">100</span> } },
+    { <span class="str">"type"</span>: <span class="str">"decision"</span>, <span class="str">"title"</span>: <span class="str">"Custom setup needed?"</span>, <span class="str">"position"</span>: { <span class="str">"x"</span>: <span class="num">100</span>, <span class="str">"y"</span>: <span class="num">220</span> } },
+    { <span class="str">"type"</span>: <span class="str">"task"</span>, <span class="str">"title"</span>: <span class="str">"Engineering scoping call"</span>, <span class="str">"position"</span>: { <span class="str">"x"</span>: <span class="num">0</span>, <span class="str">"y"</span>: <span class="num">340</span> } },
+    { <span class="str">"type"</span>: <span class="str">"task"</span>, <span class="str">"title"</span>: <span class="str">"Standard config walkthrough"</span>, <span class="str">"position"</span>: { <span class="str">"x"</span>: <span class="num">220</span>, <span class="str">"y"</span>: <span class="num">340</span> } },
+    { <span class="str">"type"</span>: <span class="str">"pulse"</span>, <span class="str">"title"</span>: <span class="str">"Onboarding status"</span>, <span class="str">"position"</span>: { <span class="str">"x"</span>: <span class="num">100</span>, <span class="str">"y"</span>: <span class="num">460</span> } }
+  ],
+  <span class="str">"edges"</span>: [
+    { <span class="str">"from"</span>: <span class="num">0</span>, <span class="str">"to"</span>: <span class="num">1</span> },
+    { <span class="str">"from"</span>: <span class="num">1</span>, <span class="str">"to"</span>: <span class="num">2</span>, <span class="str">"label"</span>: <span class="str">"Yes"</span> },
+    { <span class="str">"from"</span>: <span class="num">1</span>, <span class="str">"to"</span>: <span class="num">3</span>, <span class="str">"label"</span>: <span class="str">"No"</span> },
+    { <span class="str">"from"</span>: <span class="num">2</span>, <span class="str">"to"</span>: <span class="num">4</span> },
+    { <span class="str">"from"</span>: <span class="num">3</span>, <span class="str">"to"</span>: <span class="num">4</span> }
+  ]
+}</pre>
+  </div>
+
+  <!-- AUTOMATIONS -->
+  <div class="section" id="sec-automations">
+    <div class="section-header">
+      <div class="section-tag">09 — Architecture</div>
+      <div class="section-title">Automations Engine</div>
+      <div class="section-desc">How AUTOMATION nodes execute — from trigger detection to action execution — powered by Inngest.</div>
+    </div>
+
+    <h3>Automation Execution Pipeline</h3>
+    <pre><span class="cmt">// Step 1: Database webhook fires when any node is updated</span>
+<span class="cmt">// (configured in Neon via pg_notify or Trigger.dev)</span>
+
+<span class="cmt">// Step 2: Inngest function receives event</span>
+<span class="kw">export const</span> processAutomation = <span class="fn">inngest</span>.<span class="fn">createFunction</span>(
+  { id: <span class="str">'process-automation-trigger'</span> },
+  { event: <span class="str">'flowstack/node.updated'</span> },
+
+  <span class="kw">async</span> ({ event, step }) =&gt; {
+    <span class="kw">const</span> { nodeId, workspaceId, changes } = event.data
+
+    <span class="cmt">// Step 3: Find all automations in this workspace</span>
+    <span class="kw">const</span> automations = <span class="kw">await</span> step.<span class="fn">run</span>(<span class="str">'fetch-automations'</span>, <span class="kw">async</span> () =&gt;
+      <span class="fn">getAutomationNodes</span>(workspaceId)
+    )
+
+    <span class="cmt">// Step 4: Evaluate each automation's trigger condition</span>
+    <span class="kw">for</span> (<span class="kw">const</span> automation <span class="kw">of</span> automations) {
+      <span class="kw">const</span> trigger = automation.data.trigger
+      <span class="kw">if</span> (<span class="fn">matchesTrigger</span>(trigger, changes)) {
+        <span class="cmt">// Step 5: Execute each action</span>
+        <span class="kw">await</span> step.<span class="fn">run</span>(`execute-${automation.id}`, <span class="kw">async</span> () =&gt;
+          <span class="fn">executeActions</span>(automation.data.actions, workspaceId)
+        )
+      }
+    }
+  }
+)
+
+<span class="cmt">// matchesTrigger — pure function, easy to test</span>
+<span class="kw">function</span> <span class="fn">matchesTrigger</span>(trigger: <span class="type">TriggerConfig</span>, changes: <span class="type">NodeChanges</span>) {
+  <span class="kw">if</span> (trigger.type === <span class="str">'node_status_change'</span>) {
+    <span class="kw">return</span> changes.status?.new === trigger.condition.status
+  }
+  <span class="kw">if</span> (trigger.type === <span class="str">'due_date_passed'</span>) {
+    <span class="kw">return</span> changes.due_at?.new &lt; <span class="kw">new</span> <span class="type">Date</span>()
+  }
+  <span class="kw">return false</span>
+}</pre>
+
+    <h3>Built-in Automation Types</h3>
+    <table class="data-table">
+      <thead><tr><th>Trigger</th><th>Actions Available</th></tr></thead>
+      <tbody>
+        <tr><td>node_status_change</td><td>create_node, send_notification, update_node, create_edge</td></tr>
+        <tr><td>due_date_passed</td><td>send_notification, escalate_to, update_priority</td></tr>
+        <tr><td>node_created</td><td>assign_to, send_notification, create_thread</td></tr>
+        <tr><td>decision_logged</td><td>notify_stakeholders, create_followup_task</td></tr>
+        <tr><td>schedule (cron)</td><td>create_node, send_digest, generate_pulse</td></tr>
+        <tr><td>webhook (external)</td><td>Any action — triggered by external HTTP POST</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SCHEMA -->
+  <div class="section" id="sec-schema">
+    <div class="section-header">
+      <div class="section-tag">10 — Data</div>
+      <div class="section-title">Database Schema</div>
+      <div class="section-desc">The complete Drizzle ORM schema. Eight tables. workspace_id on every row. JSONB for flexibility.</div>
+    </div>
+
+    <h3>Complete Schema — Drizzle ORM</h3>
+    <pre><span class="cmt">// lib/db/schema.ts</span>
+<span class="kw">import</span> { pgTable, uuid, text, timestamp, jsonb, integer, boolean } <span class="kw">from</span> <span class="str">'drizzle-orm/pg-core'</span>
+
+<span class="kw">export const</span> workspaces = <span class="fn">pgTable</span>(<span class="str">'workspaces'</span>, {
+  id:         uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  clerkOrgId: text(<span class="str">'clerk_org_id'</span>).<span class="fn">notNull</span>().<span class="fn">unique</span>(),
+  name:       text(<span class="str">'name'</span>).<span class="fn">notNull</span>(),
+  slug:       text(<span class="str">'slug'</span>).<span class="fn">notNull</span>().<span class="fn">unique</span>(),
+  plan:       text(<span class="str">'plan'</span>).<span class="fn">notNull</span>().<span class="fn">default</span>(<span class="str">'free'</span>),
+  createdAt:  timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="kw">export const</span> workflows = <span class="fn">pgTable</span>(<span class="str">'workflows'</span>, {
+  id:           uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  workspaceId:  uuid(<span class="str">'workspace_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; workspaces.id),
+  name:         text(<span class="str">'name'</span>).<span class="fn">notNull</span>(),
+  description:  text(<span class="str">'description'</span>),
+  canvasState:  jsonb(<span class="str">'canvas_state'</span>),    <span class="cmt">-- viewport position, zoom</span>
+  isTemplate:   boolean(<span class="str">'is_template'</span>).<span class="fn">default</span>(<span class="kw">false</span>),
+  isPublic:     boolean(<span class="str">'is_public'</span>).<span class="fn">default</span>(<span class="kw">false</span>),
+  createdBy:    text(<span class="str">'created_by'</span>).<span class="fn">notNull</span>(),  <span class="cmt">-- Clerk user ID</span>
+  createdAt:    timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+  updatedAt:    timestamp(<span class="str">'updated_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="kw">export const</span> nodes = <span class="fn">pgTable</span>(<span class="str">'nodes'</span>, {
+  id:          uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  workspaceId: uuid(<span class="str">'workspace_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; workspaces.id),
+  workflowId:  uuid(<span class="str">'workflow_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; workflows.id),
+  <span class="cmt">-- Node type discriminator</span>
+  type:        text(<span class="str">'type'</span>).<span class="fn">notNull</span>(),    <span class="cmt">-- task|doc|table|thread|decision|automation|pulse</span>
+  <span class="cmt">-- Canvas position</span>
+  positionX:   integer(<span class="str">'position_x'</span>).<span class="fn">notNull</span>().<span class="fn">default</span>(<span class="num">0</span>),
+  positionY:   integer(<span class="str">'position_y'</span>).<span class="fn">notNull</span>().<span class="fn">default</span>(<span class="num">0</span>),
+  <span class="cmt">-- Type-specific data — no schema migrations for new node types</span>
+  data:        jsonb(<span class="str">'data'</span>).<span class="fn">notNull</span>().<span class="fn">default</span>({}),
+  <span class="cmt">-- Shared fields surfaced for performance (avoid JSONB scan)</span>
+  status:      text(<span class="str">'status'</span>),
+  assignedTo:  text(<span class="str">'assigned_to'</span>),
+  dueAt:       timestamp(<span class="str">'due_at'</span>),
+  createdBy:   text(<span class="str">'created_by'</span>).<span class="fn">notNull</span>(),
+  createdAt:   timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+  updatedAt:   timestamp(<span class="str">'updated_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="kw">export const</span> edges = <span class="fn">pgTable</span>(<span class="str">'edges'</span>, {
+  id:           uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  workspaceId:  uuid(<span class="str">'workspace_id'</span>).<span class="fn">notNull</span>(),
+  workflowId:   uuid(<span class="str">'workflow_id'</span>).<span class="fn">notNull</span>(),
+  sourceNodeId: uuid(<span class="str">'source_node_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; nodes.id),
+  targetNodeId: uuid(<span class="str">'target_node_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; nodes.id),
+  condition:    jsonb(<span class="str">'condition'</span>),        <span class="cmt">-- { "label": "Yes", "when": {...} }</span>
+  createdAt:    timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="kw">export const</span> threads = <span class="fn">pgTable</span>(<span class="str">'threads'</span>, {
+  id:          uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  workspaceId: uuid(<span class="str">'workspace_id'</span>).<span class="fn">notNull</span>(),
+  nodeId:      uuid(<span class="str">'node_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; nodes.id),
+  createdBy:   text(<span class="str">'created_by'</span>).<span class="fn">notNull</span>(),
+  createdAt:   timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="kw">export const</span> messages = <span class="fn">pgTable</span>(<span class="str">'messages'</span>, {
+  id:        uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  threadId:  uuid(<span class="str">'thread_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; threads.id),
+  content:   text(<span class="str">'content'</span>).<span class="fn">notNull</span>(),
+  createdBy: text(<span class="str">'created_by'</span>).<span class="fn">notNull</span>(),
+  createdAt: timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+})
+
+<span class="cmt">-- THE DECISION DNA TABLE — FlowStack's unique moat</span>
+<span class="kw">export const</span> decisions = <span class="fn">pgTable</span>(<span class="str">'decisions'</span>, {
+  id:                uuid(<span class="str">'id'</span>).<span class="fn">primaryKey</span>().<span class="fn">defaultRandom</span>(),
+  workspaceId:       uuid(<span class="str">'workspace_id'</span>).<span class="fn">notNull</span>(),
+  nodeId:            uuid(<span class="str">'node_id'</span>).<span class="fn">notNull</span>().<span class="fn">references</span>(() =&gt; nodes.id),
+  workflowId:        uuid(<span class="str">'workflow_id'</span>).<span class="fn">notNull</span>(),
+  madeBy:            text(<span class="str">'made_by'</span>).<span class="fn">notNull</span>(),
+  question:          text(<span class="str">'question'</span>).<span class="fn">notNull</span>(),
+  resolution:        text(<span class="str">'resolution'</span>),
+  rationale:         text(<span class="str">'rationale'</span>),
+  optionsConsidered: jsonb(<span class="str">'options_considered'</span>),  <span class="cmt">-- array of strings</span>
+  informationAtTime: jsonb(<span class="str">'information_at_time'</span>),  <span class="cmt">-- snapshot of context</span>
+  outcome:           text(<span class="str">'outcome'</span>),                <span class="cmt">-- retroactively tagged: good|bad|neutral</span>
+  outcomeTaggedBy:   text(<span class="str">'outcome_tagged_by'</span>),
+  embedding:         jsonb(<span class="str">'embedding'</span>),            <span class="cmt">-- pgvector for semantic search</span>
+  createdAt:         timestamp(<span class="str">'created_at'</span>).<span class="fn">defaultNow</span>(),
+})</pre>
+
+    <h3>Key Indexes</h3>
+    <pre><span class="cmt">-- Performance indexes for common query patterns</span>
+<span class="type">CREATE INDEX</span> idx_nodes_workspace_workflow <span class="type">ON</span> nodes (workspace_id, workflow_id);
+<span class="type">CREATE INDEX</span> idx_nodes_workspace_status   <span class="type">ON</span> nodes (workspace_id, status);
+<span class="type">CREATE INDEX</span> idx_nodes_assignee           <span class="type">ON</span> nodes (workspace_id, assigned_to);
+<span class="type">CREATE INDEX</span> idx_edges_workflow           <span class="type">ON</span> edges (workflow_id);
+<span class="type">CREATE INDEX</span> idx_decisions_workspace      <span class="type">ON</span> decisions (workspace_id, created_at DESC);
+
+<span class="cmt">-- JSONB index for common data queries</span>
+<span class="type">CREATE INDEX</span> idx_nodes_data_gin <span class="type">ON</span> nodes <span class="type">USING</span> gin(data);
+
+<span class="cmt">-- pgvector index for semantic search on decisions</span>
+<span class="type">CREATE INDEX</span> idx_decisions_embedding <span class="type">ON</span> decisions
+  <span class="type">USING</span> ivfflat (embedding vector_cosine_ops) WITH (lists = 100);</pre>
+  </div>
+
+  <!-- API DESIGN -->
+  <div class="section" id="sec-api">
+    <div class="section-header">
+      <div class="section-tag">11 — Data</div>
+      <div class="section-title">API Design</div>
+      <div class="section-desc">REST conventions, request/response shapes, and error handling patterns across all endpoints.</div>
+    </div>
+
+    <h3>Standard Response Envelope</h3>
+    <pre><span class="cmt">// All API responses follow this shape</span>
+<span class="kw">type</span> <span class="type">ApiResponse</span>&lt;<span class="type">T</span>&gt; = {
+  data: <span class="type">T</span> | <span class="kw">null</span>
+  error: { code: <span class="type">string</span>; message: <span class="type">string</span> } | <span class="kw">null</span>
+  meta?: { total?: <span class="type">number</span>; cursor?: <span class="type">string</span> }
+}
+
+<span class="cmt">// Success: 200/201</span>
+{ <span class="str">"data"</span>: { <span class="str">"id"</span>: <span class="str">"node_abc"</span>, <span class="str">"type"</span>: <span class="str">"task"</span>, ... }, <span class="str">"error"</span>: <span class="kw">null</span> }
+
+<span class="cmt">// Error: 400/401/403/404/500</span>
+{ <span class="str">"data"</span>: <span class="kw">null</span>, <span class="str">"error"</span>: { <span class="str">"code"</span>: <span class="str">"NOT_FOUND"</span>, <span class="str">"message"</span>: <span class="str">"Node not found"</span> } }</pre>
+
+    <h3>Node CRUD — Complete Example</h3>
+    <pre><span class="cmt">// POST /api/nodes — Create any node type</span>
+<span class="type">Request</span>:
+{
+  <span class="str">"workflowId"</span>: <span class="str">"wf_123"</span>,
+  <span class="str">"type"</span>: <span class="str">"task"</span>,
+  <span class="str">"positionX"</span>: <span class="num">200</span>,
+  <span class="str">"positionY"</span>: <span class="num">300</span>,
+  <span class="str">"data"</span>: {
+    <span class="str">"title"</span>: <span class="str">"Review PRD draft"</span>,
+    <span class="str">"status"</span>: <span class="str">"todo"</span>,
+    <span class="str">"priority"</span>: <span class="str">"high"</span>,
+    <span class="str">"due_at"</span>: <span class="str">"2026-04-20T18:00:00Z"</span>
+  }
+}
+
+<span class="type">Response</span> 201:
+{
+  <span class="str">"data"</span>: {
+    <span class="str">"id"</span>: <span class="str">"node_xyz789"</span>,
+    <span class="str">"workflowId"</span>: <span class="str">"wf_123"</span>,
+    <span class="str">"workspaceId"</span>: <span class="str">"ws_abc"</span>,
+    <span class="str">"type"</span>: <span class="str">"task"</span>,
+    <span class="str">"positionX"</span>: <span class="num">200</span>, <span class="str">"positionY"</span>: <span class="num">300</span>,
+    <span class="str">"data"</span>: { <span class="str">"title"</span>: <span class="str">"Review PRD draft"</span>, ... },
+    <span class="str">"createdAt"</span>: <span class="str">"2026-03-29T12:00:00Z"</span>
+  },
+  <span class="str">"error"</span>: <span class="kw">null</span>
+}</pre>
+
+    <h3>Error Codes</h3>
+    <table class="data-table">
+      <thead><tr><th>Code</th><th>HTTP Status</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>UNAUTHORIZED</td><td>401</td><td>Missing or invalid Clerk token</td></tr>
+        <tr><td>FORBIDDEN</td><td>403</td><td>Resource exists but belongs to different workspace</td></tr>
+        <tr><td>NOT_FOUND</td><td>404</td><td>Resource not found in this workspace</td></tr>
+        <tr><td>VALIDATION_ERROR</td><td>400</td><td>Request body failed Zod validation</td></tr>
+        <tr><td>PLAN_LIMIT</td><td>402</td><td>Action requires a higher plan tier</td></tr>
+        <tr><td>AI_UNAVAILABLE</td><td>503</td><td>Claude API temporarily unavailable</td></tr>
+        <tr><td>INTERNAL_ERROR</td><td>500</td><td>Unexpected server error (logged to Sentry)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MULTI-TENANCY -->
+  <div class="section" id="sec-multitenancy">
+    <div class="section-header">
+      <div class="section-tag">12 — Data</div>
+      <div class="section-title">Multi-tenancy Model</div>
+      <div class="section-desc">How complete workspace isolation is enforced without Supabase RLS — using application-level guards and Clerk organizations.</div>
+    </div>
+
+    <h3>Isolation Architecture</h3>
+    <div class="card">
+      <div class="card-title">Shared Database, Logical Isolation <span class="badge badge-managed">Recommended for solo founder</span></div>
+      <p style="color:var(--text2);font-size:13px;margin:0">All workspaces share one Neon Postgres instance. Isolation is enforced by including workspace_id in every query — injected automatically by the scopedQuery() helper, never supplied by the API caller. This is the right model until ~$5M ARR when enterprise compliance requirements may demand schema-per-tenant.</p>
+    </div>
+
+    <h3>Clerk Organizations → Workspace Mapping</h3>
+    <pre><span class="cmt">// Clerk org ID maps 1:1 to FlowStack workspace</span>
+<span class="cmt">// When a user signs up, middleware creates workspace automatically</span>
+
+<span class="kw">export async function</span> <span class="fn">middleware</span>(req: <span class="type">NextRequest</span>) {
+  <span class="kw">const</span> { userId, orgId } = <span class="fn">getAuth</span>(req)
+
+  <span class="kw">if</span> (userId && !orgId) {
+    <span class="cmt">// User exists but has no org → redirect to workspace creation</span>
+    <span class="kw">return</span> <span class="type">NextResponse</span>.<span class="fn">redirect</span>(<span class="str">'/onboarding/create-workspace'</span>)
+  }
+
+  <span class="kw">if</span> (userId && orgId) {
+    <span class="cmt">// Ensure workspace record exists in DB</span>
+    <span class="kw">await</span> <span class="fn">ensureWorkspaceExists</span>(orgId, userId)
+  }
+}</pre>
+
+    <h3>Escalation Path to Enterprise Isolation</h3>
+    <table class="data-table">
+      <thead><tr><th>Scale</th><th>Model</th><th>Trigger</th></tr></thead>
+      <tbody>
+        <tr><td>0 → $1M ARR</td><td>Shared DB, workspace_id column isolation</td><td>Default — ship day one</td></tr>
+        <tr><td>$1M → $5M ARR</td><td>Shared DB + dedicated Neon compute per enterprise customer</td><td>First enterprise contract</td></tr>
+        <tr><td>$5M+ ARR</td><td>Schema-per-tenant on dedicated Postgres cluster</td><td>SOC2 Type II requirement</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="section" id="sec-security">
+    <div class="section-header">
+      <div class="section-tag">13 — Operations</div>
+      <div class="section-title">Security Model</div>
+      <div class="section-desc">Defense in depth — four layers of security from network edge to database row.</div>
+    </div>
+
+    <div class="security-layer l1">
+      <div class="security-name">Layer 1 — Network Edge (Vercel + Cloudflare)</div>
+      <ul style="list-style:none;margin:8px 0 0">
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">DDoS protection via Cloudflare in front of Vercel</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Automatic HTTPS — no HTTP allowed</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Rate limiting on all API routes via Upstash Redis (100 req/min per user)</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Bot detection on auth endpoints</li>
+      </ul>
+    </div>
+
+    <div class="security-layer l2">
+      <div class="security-name">Layer 2 — Authentication (Clerk.dev)</div>
+      <ul style="list-style:none;margin:8px 0 0">
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">JWT-based sessions with automatic rotation</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">MFA available on all plans, enforced on Enterprise</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">SSO (SAML/OIDC) for Enterprise tier</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Session revocation on password change or suspicious activity</li>
+      </ul>
+    </div>
+
+    <div class="security-layer l3">
+      <div class="security-name">Layer 3 — Authorization (Application Layer)</div>
+      <ul style="list-style:none;margin:8px 0 0">
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">workspace_id injected into every query via scopedQuery() helper</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Role-based access: owner, admin, member, guest</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Guest access: read-only, scoped to specific workflows only</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">API keys for external integrations — scoped per workspace</li>
+      </ul>
+    </div>
+
+    <div class="security-layer l4">
+      <div class="security-name">Layer 4 — Data (Neon Postgres)</div>
+      <ul style="list-style:none;margin:8px 0 0">
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Encryption at rest (AES-256) — Neon default</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Encryption in transit (TLS 1.3) on all DB connections</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Point-in-time recovery (PITR) — 7 days on free, 30 days on Pro</li>
+        <li style="font-size:13px;color:var(--text2);padding:3px 0">Connection pooling via Neon serverless driver</li>
+      </ul>
+    </div>
+
+    <h3>OWASP Top 10 Mitigations</h3>
+    <table class="data-table">
+      <thead><tr><th>Risk</th><th>Mitigation</th></tr></thead>
+      <tbody>
+        <tr><td>SQL Injection</td><td>Drizzle ORM — all queries parameterized, no raw SQL in hot paths</td></tr>
+        <tr><td>Broken Auth</td><td>Clerk handles all auth — proven, audited, battle-tested</td></tr>
+        <tr><td>Sensitive Data</td><td>No PII in logs. JSONB node data encrypted at rest.</td></tr>
+        <tr><td>IDOR</td><td>workspace_id guard on every query via scopedQuery()</td></tr>
+        <tr><td>XSS</td><td>Next.js Server Components + React escape by default. Tiptap sanitizes HTML.</td></tr>
+        <tr><td>CSRF</td><td>Clerk JWT in Authorization header — not cookies. CSRF is N/A.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- DEPLOYMENT -->
+  <div class="section" id="sec-deployment">
+    <div class="section-header">
+      <div class="section-tag">14 — Operations</div>
+      <div class="section-title">Deployment & CI/CD</div>
+      <div class="section-desc">Zero-config deployment pipeline — one push deploys everything.</div>
+    </div>
+
+    <h3>CI/CD Pipeline</h3>
+    <pre><span class="cmt"># GitHub Actions — .github/workflows/ci.yml</span>
+<span class="kw">on:</span> [push, pull_request]
+
+<span class="kw">jobs:</span>
+  <span class="kw">test:</span>
+    <span class="fn">runs-on:</span> ubuntu-latest
+    <span class="kw">steps:</span>
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run type-check      <span class="cmt"># TypeScript check</span>
+      - run: npm run lint            <span class="cmt"># ESLint</span>
+      - run: npm run test            <span class="cmt"># Vitest unit tests</span>
+      - run: npm run db:push:test    <span class="cmt"># Test against Neon branch</span>
+
+<span class="cmt"># Vercel deploys automatically on:</span>
+<span class="cmt"># main branch → production (flowstack.app)</span>
+<span class="cmt"># any PR      → preview URL (pr-123.flowstack.app)</span></pre>
+
+    <h3>Environment Setup</h3>
+    <pre><span class="cmt"># .env.local</span>
+<span class="cmt"># --- Clerk Auth ---</span>
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+
+<span class="cmt"># --- Neon Database ---</span>
+DATABASE_URL=postgresql://...@ep-...neon.tech/flowstack?sslmode=require
+DATABASE_URL_UNPOOLED=postgresql://...@ep-...neon.tech/flowstack
+
+<span class="cmt"># --- AI ---</span>
+ANTHROPIC_API_KEY=sk-ant-...
+
+<span class="cmt"># --- Automations ---</span>
+INNGEST_EVENT_KEY=...
+INNGEST_SIGNING_KEY=...
+
+<span class="cmt"># --- Storage ---</span>
+CLOUDFLARE_R2_ACCOUNT_ID=...
+CLOUDFLARE_R2_ACCESS_KEY=...
+CLOUDFLARE_R2_SECRET_KEY=...
+CLOUDFLARE_R2_BUCKET=flowstack-uploads
+
+<span class="cmt"># --- Email ---</span>
+RESEND_API_KEY=re_...
+
+<span class="cmt"># --- Real-time ---</span>
+LIVEBLOCKS_SECRET_KEY=sk_...
+
+<span class="cmt"># --- Rate limiting ---</span>
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...</pre>
+
+    <h3>Database Migrations</h3>
+    <pre><span class="cmt"># Drizzle migration workflow</span>
+npm run db:generate    <span class="cmt"># Generate migration files from schema changes</span>
+npm run db:push        <span class="cmt"># Push to development database</span>
+npm run db:studio      <span class="cmt"># Open Drizzle Studio (GUI for the DB)</span>
+
+<span class="cmt"># Neon branching — create a branch per PR (no cost if under 10GB)</span>
+neon branches create --name pr-123
+DATABASE_URL=<branch-connection-string> npm run db:push</pre>
+  </div>
+
+  <!-- COST -->
+  <div class="section" id="sec-cost">
+    <div class="section-header">
+      <div class="section-tag">15 — Operations</div>
+      <div class="section-title">Cost Architecture</div>
+      <div class="section-desc">Monthly infrastructure spend at each growth stage — built to stay $0 until product-market fit.</div>
+    </div>
+
+    <h3>Free Tier Coverage</h3>
+    <div class="card">
+      <div class="cost-row"><span class="cost-label">Vercel (hosting + edge functions)</span><span class="cost-value">$0 → 100GB bandwidth</span></div>
+      <div class="cost-row"><span class="cost-label">Neon (Postgres)</span><span class="cost-value">$0 → 3GB + 10 compute hrs/mo</span></div>
+      <div class="cost-row"><span class="cost-label">Clerk (auth)</span><span class="cost-value">$0 → 10,000 MAU</span></div>
+      <div class="cost-row"><span class="cost-label">Liveblocks (real-time)</span><span class="cost-value">$0 → 50 MAU</span></div>
+      <div class="cost-row"><span class="cost-label">Inngest (automations)</span><span class="cost-value">$0 → 50,000 runs/mo</span></div>
+      <div class="cost-row"><span class="cost-label">Cloudflare R2 (storage)</span><span class="cost-value">$0 → 10GB + zero egress</span></div>
+      <div class="cost-row"><span class="cost-label">Resend (email)</span><span class="cost-value">$0 → 3,000 emails/mo</span></div>
+      <div class="cost-row"><span class="cost-label">PostHog (analytics)</span><span class="cost-value">$0 → 1M events/mo</span></div>
+      <div class="cost-row"><span class="cost-label">Sentry (errors)</span><span class="cost-value">$0 → 5,000 errors/mo</span></div>
+    </div>
+
+    <h3>Cost at Scale</h3>
+    <table class="data-table">
+      <thead><tr><th>Stage</th><th>MAU</th><th>Monthly Infra Cost</th><th>Estimated ARR</th><th>Infra % of ARR</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-launch</td><td>0 – 500</td><td style="color:var(--accent3)">$0</td><td>$0</td><td>—</td></tr>
+        <tr><td>Early traction</td><td>500 – 5k</td><td style="color:var(--accent3)">$25–50</td><td>$50k</td><td>0.1%</td></tr>
+        <tr><td>Growth</td><td>5k – 50k</td><td style="color:var(--accent3)">$200–500</td><td>$500k</td><td>0.1%</td></tr>
+        <tr><td>Scale</td><td>50k – 200k</td><td style="color:var(--accent4)">$1,500</td><td>$2M</td><td>0.9%</td></tr>
+        <tr><td>PMF+</td><td>200k – 1M</td><td style="color:var(--accent4)">$5,000</td><td>$10M</td><td>0.6%</td></tr>
+        <tr><td>Hypergrowth</td><td>1M+</td><td style="color:var(--accent4)">$15,000</td><td>$50M+</td><td>0.03%</td></tr>
+      </tbody>
+    </table>
+
+    <p>Infrastructure cost stays below 1% of ARR all the way to $50M. This is the leverage of a serverless, managed stack. Every dollar raised goes to product and growth, not DevOps.</p>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="section" id="sec-roadmap">
+    <div class="section-header">
+      <div class="section-tag">16 — Build Plan</div>
+      <div class="section-title">Build Roadmap</div>
+      <div class="section-desc">Phased 16-week plan to take FlowStack from zero to a product that genuinely replaces six tools.</div>
+    </div>
+
+    <div class="timeline">
+
+      <div class="phase">
+        <div class="phase-marker">
+          <div class="phase-dot" style="background:rgba(79,142,247,0.15);border:1px solid var(--accent);color:var(--accent)">1</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-header">
+            <div class="phase-name">The Skeleton</div>
+            <div class="phase-weeks">Weeks 1–4</div>
+          </div>
+          <ul class="checklist">
+            <li>Next.js project setup — TypeScript, Tailwind, shadcn/ui</li>
+            <li>Clerk auth — sign up, org creation, session middleware</li>
+            <li>Neon + Drizzle — schema push, first migration</li>
+            <li>React Flow canvas — pan, zoom, custom node component</li>
+            <li>TASK nodes only — create, move, update status</li>
+            <li>Edge connections between task nodes</li>
+            <li>Liveblocks — multiplayer cursor presence</li>
+            <li>Deploy to Vercel — accessible URL, preview deploys on PRs</li>
+          </ul>
+          <div style="margin-top:10px;font-size:12px;color:var(--accent)">Goal: Two people can build a workflow together in real time.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-marker">
+          <div class="phase-dot" style="background:rgba(45,212,160,0.15);border:1px solid var(--accent3);color:var(--accent3)">2</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-header">
+            <div class="phase-name">All Seven Primitives</div>
+            <div class="phase-weeks">Weeks 5–8</div>
+          </div>
+          <ul class="checklist">
+            <li>DOC nodes — Tiptap rich text editor embedded in canvas</li>
+            <li>TABLE nodes — spreadsheet-style grid view</li>
+            <li>THREAD nodes — contextual comments on any node</li>
+            <li>DECISION nodes — question, options, rationale capture</li>
+            <li>PULSE view — auto-generated status dashboard</li>
+            <li>Node sidebar — detailed edit panel for any node type</li>
+            <li>Search — find nodes by title across all workflows</li>
+          </ul>
+          <div style="margin-top:10px;font-size:12px;color:var(--accent3)">Goal: Replace Notion + Trello + basic Airtable in one canvas.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-marker">
+          <div class="phase-dot" style="background:rgba(124,90,247,0.15);border:1px solid var(--accent2);color:var(--accent2)">3</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-header">
+            <div class="phase-name">Intelligence Layer</div>
+            <div class="phase-weeks">Weeks 9–12</div>
+          </div>
+          <ul class="checklist">
+            <li>AUTOMATION nodes — Inngest-powered trigger/action engine</li>
+            <li>FlowMind AI — Claude API workflow analysis panel</li>
+            <li>FlowMind Generate — create workflow from text description</li>
+            <li>Decision DNA — searchable decision log per workspace</li>
+            <li>Template system — save and load workflow templates</li>
+            <li>Guest access — external collaborators via invite link</li>
+            <li>Notifications — email digests via Resend</li>
+          </ul>
+          <div style="margin-top:10px;font-size:12px;color:var(--accent2)">Goal: The product is now better than the sum of the tools it replaces.</div>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-marker">
+          <div class="phase-dot" style="background:rgba(247,168,79,0.15);border:1px solid var(--accent4);color:var(--accent4)">4</div>
+          <div class="phase-line"></div>
+        </div>
+        <div class="phase-content">
+          <div class="phase-header">
+            <div class="phase-name">Monetization & Growth</div>
+            <div class="phase-weeks">Weeks 13–16</div>
+          </div>
+          <ul class="checklist">
+            <li>Stripe billing — Free / Team / Business plans</li>
+            <li>Plan enforcement — feature gates per tier</li>
+            <li>Template marketplace — browse and install community workflows</li>
+            <li>Workspace analytics — PostHog dashboards for internal use</li>
+            <li>Onboarding flow — guided tour for new workspaces</li>
+            <li>Public workflow showcase — shareable canvas URLs</li>
+            <li>Performance audit — Lighthouse, query profiling</li>
+          </ul>
+          <div style="margin-top:10px;font-size:12px;color:var(--accent4)">Goal: First paying customer. Organic growth loop activated.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <h3>Monetization Tiers</h3>
+    <table class="data-table">
+      <thead><tr><th>Tier</th><th>Price</th><th>Limits</th><th>Key Features</th></tr></thead>
+      <tbody>
+        <tr><td>Free</td><td>$0</td><td>≤3 users, 5 workflows</td><td>All 7 primitives, 1 automation</td></tr>
+        <tr><td>Team</td><td>$19/seat/mo</td><td>Unlimited</td><td>Unlimited workflows, FlowMind AI, automations</td></tr>
+        <tr><td>Business</td><td>$39/seat/mo</td><td>Unlimited</td><td>Decision DNA, advanced analytics, priority support</td></tr>
+        <tr><td>Enterprise</td><td>Custom</td><td>Unlimited</td><td>SSO, data residency, custom AI, SLA, audit logs</td></tr>
+        <tr><td>Templates</td><td>Revenue share</td><td>—</td><td>30% to creator, 70% to platform</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Solo Founder Survival Rules</h3>
+    <div class="card">
+      <div class="cost-row"><span class="cost-label">Rule 1</span><span style="font-size:13px;color:var(--text2)">Ship the canvas first. Everything else is a feature.</span></div>
+      <div class="cost-row"><span class="cost-label">Rule 2</span><span style="font-size:13px;color:var(--text2)">JSONB is your superpower. Avoid schema migrations as long as possible.</span></div>
+      <div class="cost-row"><span class="cost-label">Rule 3</span><span style="font-size:13px;color:var(--text2)">One repo, one deploy. Frontend + API + edge functions in Next.js.</span></div>
+      <div class="cost-row"><span class="cost-label">Rule 4</span><span style="font-size:13px;color:var(--text2)">Never build what Neon + Clerk + Inngest give you free.</span></div>
+      <div class="cost-row"><span class="cost-label">Rule 5</span><span style="font-size:13px;color:var(--text2)">Don't build automations in Week 1. Validate the canvas first.</span></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'))
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
+  document.getElementById('sec-' + id).classList.add('active')
+  event.currentTarget.classList.add('active')
+  document.querySelector('.main').scrollTop = 0
+}
+</script>
+
+</body>
+</html>

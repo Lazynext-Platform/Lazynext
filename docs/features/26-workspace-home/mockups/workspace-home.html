@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Workspace Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <div>
+            <div class="font-semibold text-sm">Acme Corp</div>
+            <div class="text-[10px] text-slate-500">Pro Plan</div>
+          </div>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 text-sm space-y-1">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-white font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Home
+        </a>
+        <div class="pt-3 pb-1">
+          <div class="flex items-center justify-between px-3">
+            <span class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Workflows</span>
+            <button class="text-slate-600 hover:text-slate-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            </button>
+          </div>
+        </div>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-300 hover:bg-slate-800">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span>Q2 Product Sprint
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-300 hover:bg-slate-800">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>Marketing Launch
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-300 hover:bg-slate-800">
+          <span class="w-2 h-2 rounded-full bg-purple-400"></span>Infrastructure
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-300 hover:bg-slate-800">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>Hiring Pipeline
+        </a>
+        <div class="pt-3 pb-1">
+          <span class="px-3 text-[10px] text-slate-500 uppercase tracking-wider font-medium">Quick Access</span>
+        </div>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">
+          <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01"/></svg>
+          All Decisions
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">
+          <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          PULSE
+        </a>
+      </nav>
+      <div class="p-3 border-t border-slate-700">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+          Settings
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto">
+      <!-- Top Bar -->
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-6 sticky top-0 z-10">
+        <span class="text-sm font-semibold text-slate-200">Home</span>
+        <div class="ml-auto flex items-center gap-3">
+          <div class="relative">
+            <input type="text" placeholder="Search... (⌘K)" class="w-56 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50">
+          </div>
+          <button class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 relative">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-[8px] font-bold flex items-center justify-center">3</span>
+          </button>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold cursor-pointer">AP</div>
+        </div>
+      </header>
+
+      <div class="p-6 max-w-6xl mx-auto space-y-8">
+
+        <!-- Welcome Section -->
+        <div>
+          <h1 class="text-xl font-bold text-white">Good morning, Avas</h1>
+          <p class="text-sm text-slate-400 mt-1">Here's what's happening across your workspace.</p>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-medium mb-1">Assigned to you</div>
+            <div class="text-2xl font-bold text-white">7</div>
+            <div class="text-[10px] text-blue-400 mt-1">3 due this week</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-medium mb-1">Open Decisions</div>
+            <div class="text-2xl font-bold text-white">4</div>
+            <div class="text-[10px] text-orange-400 mt-1">2 need your input</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-medium mb-1">Unread Threads</div>
+            <div class="text-2xl font-bold text-white">5</div>
+            <div class="text-[10px] text-purple-400 mt-1">2 @mentions</div>
+          </div>
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4">
+            <div class="text-[10px] text-slate-500 uppercase tracking-wider font-medium mb-1">Decision Health</div>
+            <div class="text-2xl font-bold text-emerald-400">76</div>
+            <div class="text-[10px] text-emerald-400 mt-1">+4 from last week</div>
+          </div>
+        </div>
+
+        <!-- Workflows Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-slate-300">Your Workflows</h2>
+            <button class="flex items-center gap-1.5 px-3 py-1.5 bg-[#4F6EF7] text-white text-xs rounded-lg hover:bg-[#3D5BD4] font-medium">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              New Workflow
+            </button>
+          </div>
+          <div class="grid grid-cols-3 gap-4">
+            <!-- Workflow 1 -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 cursor-pointer group transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-500/15 flex items-center justify-center">
+                  <span class="w-3 h-3 rounded-full bg-blue-400"></span>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200 group-hover:text-white">Q2 Product Sprint</h3>
+                  <p class="text-[10px] text-slate-500">Updated 2 hours ago</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 text-[10px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1"><span class="text-blue-400">18</span> Tasks</span>
+                <span class="flex items-center gap-1"><span class="text-emerald-400">6</span> Docs</span>
+                <span class="flex items-center gap-1"><span class="text-orange-400">8</span> Decisions</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5">
+                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 62%"></div>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-[10px] text-slate-500">62% complete</span>
+                <div class="flex -space-x-1.5">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">AP</div>
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">RK</div>
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">MJ</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Workflow 2 -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 cursor-pointer group transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                  <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200 group-hover:text-white">Marketing Launch</h3>
+                  <p class="text-[10px] text-slate-500">Updated yesterday</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 text-[10px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1"><span class="text-blue-400">12</span> Tasks</span>
+                <span class="flex items-center gap-1"><span class="text-emerald-400">4</span> Docs</span>
+                <span class="flex items-center gap-1"><span class="text-orange-400">3</span> Decisions</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5">
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 35%"></div>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-[10px] text-slate-500">35% complete</span>
+                <div class="flex -space-x-1.5">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">PS</div>
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">AP</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Workflow 3 -->
+            <div class="bg-slate-900 border border-slate-700 rounded-xl p-5 hover:border-slate-600 cursor-pointer group transition-colors">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-purple-500/15 flex items-center justify-center">
+                  <span class="w-3 h-3 rounded-full bg-purple-400"></span>
+                </div>
+                <div>
+                  <h3 class="text-sm font-semibold text-slate-200 group-hover:text-white">Infrastructure</h3>
+                  <p class="text-[10px] text-slate-500">Updated 3 days ago</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-4 text-[10px] text-slate-400 mb-3">
+                <span class="flex items-center gap-1"><span class="text-blue-400">9</span> Tasks</span>
+                <span class="flex items-center gap-1"><span class="text-emerald-400">2</span> Docs</span>
+                <span class="flex items-center gap-1"><span class="text-orange-400">5</span> Decisions</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5">
+                <div class="bg-purple-500 h-1.5 rounded-full" style="width: 78%"></div>
+              </div>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-[10px] text-slate-500">78% complete</span>
+                <div class="flex -space-x-1.5">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 border border-slate-900 flex items-center justify-center text-[7px] font-bold">RK</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Create New Workflow Card -->
+            <div class="border border-dashed border-slate-700 rounded-xl p-5 flex flex-col items-center justify-center text-center hover:border-slate-500 cursor-pointer group transition-colors min-h-[180px]">
+              <div class="w-10 h-10 rounded-full bg-slate-800 group-hover:bg-slate-700 flex items-center justify-center mb-3 transition-colors">
+                <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              </div>
+              <span class="text-xs text-slate-500 group-hover:text-slate-300">Create new workflow</span>
+              <span class="text-[10px] text-slate-600 mt-1">or use a template</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column: Recent Activity + Upcoming -->
+        <div class="grid grid-cols-2 gap-6">
+          <!-- Recent Activity -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-300 mb-4">Recent Activity</h3>
+            <div class="space-y-4">
+              <div class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5">RK</div>
+                <div>
+                  <p class="text-xs text-slate-300"><span class="font-medium">Raj Kumar</span> completed <span class="text-blue-400">Fix auth redirect bug</span></p>
+                  <span class="text-[10px] text-slate-600">2 hours ago in Q2 Product Sprint</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5">RK</div>
+                <div>
+                  <p class="text-xs text-slate-300"><span class="font-medium">Raj Kumar</span> logged decision <span class="text-orange-400">Use Neon vs Supabase?</span> <span class="text-emerald-400 text-[10px]">(Score: 84)</span></p>
+                  <span class="text-[10px] text-slate-600">3 hours ago in Infrastructure</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5">PS</div>
+                <div>
+                  <p class="text-xs text-slate-300"><span class="font-medium">Priya Sharma</span> assigned <span class="text-blue-400">Ship onboarding v2</span> to you</p>
+                  <span class="text-[10px] text-slate-600">5 hours ago in Q2 Product Sprint</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-[8px] font-bold shrink-0 mt-0.5">MJ</div>
+                <div>
+                  <p class="text-xs text-slate-300"><span class="font-medium">Meera Joshi</span> tagged outcome <span class="text-emerald-400">Good</span> for <span class="text-orange-400">Switch to monorepo?</span></p>
+                  <span class="text-[10px] text-slate-600">Yesterday in Infrastructure</span>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-300"><span class="font-medium text-blue-400">LazyMind</span> generated weekly digest</p>
+                  <span class="text-[10px] text-slate-600">Yesterday, 9:00 AM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upcoming & Due Soon -->
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-5">
+            <h3 class="text-sm font-semibold text-slate-300 mb-4">Due Soon</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                  <div>
+                    <p class="text-xs text-slate-200 font-medium">Fix auth redirect bug</p>
+                    <span class="text-[10px] text-red-400">Overdue — Apr 5</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">TASK</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                  <div>
+                    <p class="text-xs text-slate-200 font-medium">Set up CI/CD pipeline</p>
+                    <span class="text-[10px] text-orange-400">Due tomorrow — Apr 8</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">TASK</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                  <div>
+                    <p class="text-xs text-slate-200 font-medium">Ship onboarding v2</p>
+                    <span class="text-[10px] text-slate-500">Apr 10 — 5 days</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">TASK</span>
+              </div>
+              <div class="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                  <div>
+                    <p class="text-xs text-slate-200 font-medium">Pricing model?</p>
+                    <span class="text-[10px] text-orange-400">Open — needs resolution</span>
+                  </div>
+                </div>
+                <span class="text-[10px] text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded">DECISION</span>
+              </div>
+            </div>
+
+            <!-- LazyMind Suggestion -->
+            <div class="mt-4 p-3 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+              <div class="flex items-center gap-2 mb-1">
+                <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                <span class="text-[10px] text-blue-400 font-medium">LazyMind Suggestion</span>
+              </div>
+              <p class="text-xs text-slate-400">The "Pricing model?" decision has been open for 5 days. Consider scheduling a sync to resolve it — unresolved decisions slow team velocity.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</body>
+</html>

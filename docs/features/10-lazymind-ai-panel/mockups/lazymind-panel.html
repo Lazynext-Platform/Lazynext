@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — LazyMind AI Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }
+  </script>
+  <style>
+    @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes typing { 0%, 80% { opacity: 1; } 40% { opacity: 0.3; } }
+    .slide-in { animation: slideInRight 0.2s ease-out; }
+    .fade-in { animation: fadeIn 0.15s ease-out; }
+    .typing-dot { animation: typing 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans h-screen overflow-hidden">
+
+  <div class="flex h-full">
+
+    <!-- Simplified Left Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 space-y-1 text-sm">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-slate-200 font-medium">&#9638; Q2 Sprint</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">&#9638; Client Onboarding</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">&#10003; Decisions</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">&#9881; Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main Canvas (dimmed) -->
+    <div class="flex-1 relative">
+      <!-- Top Bar -->
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-4">
+        <span class="text-sm text-slate-400">Q2 Product Sprint</span>
+        <div class="ml-auto flex items-center gap-3">
+          <div class="flex -space-x-2">
+            <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-medium">AP</div>
+            <div class="w-7 h-7 rounded-full bg-purple-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-medium">PS</div>
+          </div>
+          <button class="px-3 py-1.5 bg-[#4F6EF7] text-white text-xs rounded-md font-medium flex items-center gap-1.5">
+            &#10024; LazyMind
+          </button>
+        </div>
+      </header>
+
+      <!-- Canvas with nodes (dimmed overlay) -->
+      <div class="absolute inset-0 top-12 bg-slate-950 opacity-40" style="background-image: radial-gradient(circle, #1e293b 1px, transparent 1px); background-size: 20px 20px;">
+        <!-- Simplified node representations -->
+        <div class="absolute left-20 top-16 w-56 p-3 rounded-lg bg-[#EFF6FF] border-l-4 border-[#BFDBFE]">
+          <p class="text-[10px] text-[#1E40AF] font-medium">TASK</p>
+          <p class="text-xs text-[#1E40AF] font-semibold">Ship onboarding v2</p>
+        </div>
+        <div class="absolute left-20 top-40 w-56 p-3 rounded-lg bg-[#FFF7ED] border-l-4 border-[#FED7AA]">
+          <p class="text-[10px] text-[#9A3412] font-medium">DECISION</p>
+          <p class="text-xs text-[#9A3412] font-semibold">Use Neon vs Supabase?</p>
+        </div>
+        <div class="absolute left-96 top-24 w-56 p-3 rounded-lg bg-[#F0FDF4] border-l-4 border-[#BBF7D0]">
+          <p class="text-[10px] text-[#166534] font-medium">DOC</p>
+          <p class="text-xs text-[#166534] font-semibold">Product Requirements</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LazyMind AI Panel -->
+    <div class="w-96 bg-slate-900 border-l border-slate-700 flex flex-col slide-in shrink-0">
+      <!-- Panel Header -->
+      <div class="h-14 px-4 flex items-center gap-3 border-b border-slate-700 shrink-0">
+        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+          <span class="text-amber-400">&#10024;</span>
+        </div>
+        <div>
+          <h2 class="text-sm font-semibold">LazyMind</h2>
+          <p class="text-[10px] text-slate-400">AI Assistant &middot; Llama 3.3 70B</p>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <span class="text-[10px] text-slate-500 bg-slate-800 px-2 py-0.5 rounded">34/100 today</span>
+          <button onclick="document.querySelector('.slide-in').style.display='none'" class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-200 rounded hover:bg-slate-800">&times;</button>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+
+        <!-- System Welcome -->
+        <div class="text-center py-3 fade-in">
+          <div class="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-2">
+            <span class="text-2xl">&#10024;</span>
+          </div>
+          <p class="text-sm font-medium text-slate-300">How can I help with your workflow?</p>
+          <p class="text-xs text-slate-500 mt-1">I can analyze decisions, suggest tasks, and generate insights.</p>
+        </div>
+
+        <!-- User Message 1 -->
+        <div class="flex justify-end">
+          <div class="max-w-[80%] bg-[#4F6EF7] text-white rounded-lg rounded-br-sm px-3 py-2">
+            <p class="text-sm">Analyze our Q2 sprint workflow</p>
+          </div>
+        </div>
+
+        <!-- AI Response 1 -->
+        <div class="flex gap-2">
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-xs">&#10024;</span>
+          </div>
+          <div class="max-w-[85%] bg-slate-800 border border-slate-700 rounded-lg rounded-bl-sm px-3 py-2.5 space-y-2">
+            <p class="text-sm text-slate-200">Here's my analysis of your <strong>Q2 Product Sprint</strong>:</p>
+
+            <div class="bg-slate-900/50 rounded-md p-2.5 space-y-1.5">
+              <p class="text-xs font-medium text-slate-300">&#128202; Status Summary</p>
+              <div class="grid grid-cols-2 gap-1 text-xs">
+                <span class="text-slate-400">Tasks:</span><span class="text-slate-200">12 total (4 done, 5 active, 2 todo, 1 blocked)</span>
+                <span class="text-slate-400">Decisions:</span><span class="text-slate-200">8 logged, avg quality: 78/100</span>
+                <span class="text-slate-400">Docs:</span><span class="text-slate-200">3 in progress</span>
+              </div>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-md p-2.5 space-y-1.5">
+              <p class="text-xs font-medium text-amber-400">&#9888; Observations</p>
+              <ul class="text-xs text-slate-300 space-y-1 list-disc pl-3">
+                <li>Blocked task <strong>"API integration"</strong> has no linked decision. Consider logging one to unblock.</li>
+                <li>2 decisions from last month still have <strong>Pending</strong> outcomes. Tag them to improve quality tracking.</li>
+                <li><strong>Priya</strong> has 6 tasks assigned. <strong>Raj</strong> has 2. Consider rebalancing.</li>
+              </ul>
+            </div>
+
+            <div class="bg-slate-900/50 rounded-md p-2.5 space-y-1.5">
+              <p class="text-xs font-medium text-green-400">&#10003; Recommended Actions</p>
+              <ol class="text-xs text-slate-300 space-y-1 list-decimal pl-3">
+                <li>Tag outcomes for 2 pending decisions</li>
+                <li>Create a decision for the blocked API task</li>
+                <li>Rebalance task assignments</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Message 2 -->
+        <div class="flex justify-end">
+          <div class="max-w-[80%] bg-[#4F6EF7] text-white rounded-lg rounded-br-sm px-3 py-2">
+            <p class="text-sm">Generate a weekly digest</p>
+          </div>
+        </div>
+
+        <!-- AI Response 2 -->
+        <div class="flex gap-2">
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5">
+            <span class="text-xs">&#10024;</span>
+          </div>
+          <div class="max-w-[85%] bg-slate-800 border border-slate-700 rounded-lg rounded-bl-sm px-3 py-2.5 space-y-2">
+            <p class="text-xs font-medium text-slate-400">Weekly Digest &middot; Mar 28 &ndash; Apr 4</p>
+
+            <div class="space-y-2 text-xs">
+              <div class="flex items-start gap-2">
+                <span class="text-green-400 mt-0.5">&#10003;</span>
+                <div>
+                  <p class="text-slate-300 font-medium">Completed</p>
+                  <p class="text-slate-400">4 tasks shipped, 3 decisions logged</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-blue-400 mt-0.5">&#9654;</span>
+                <div>
+                  <p class="text-slate-300 font-medium">In Progress</p>
+                  <p class="text-slate-400">5 tasks active across 2 workflows</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-amber-400 mt-0.5">&#9733;</span>
+                <div>
+                  <p class="text-slate-300 font-medium">Decision Quality</p>
+                  <p class="text-slate-400">Trending up: 78 &rarr; 82 avg score</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-red-400 mt-0.5">&#9888;</span>
+                <div>
+                  <p class="text-slate-300 font-medium">Action Needed</p>
+                  <p class="text-slate-400">1 blocked task, 2 untagged outcomes</p>
+                </div>
+              </div>
+            </div>
+
+            <button class="w-full mt-1 px-3 py-1.5 bg-slate-700 text-slate-300 text-xs rounded-md hover:bg-slate-600">Send as email digest &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Typing indicator -->
+        <div class="flex gap-2 hidden" id="typing">
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
+            <span class="text-xs">&#10024;</span>
+          </div>
+          <div class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 flex gap-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-400 typing-dot"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-400 typing-dot"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-slate-400 typing-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="px-4 py-2 border-t border-slate-800 shrink-0">
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          <button class="px-3 py-1 text-xs bg-slate-800 text-slate-300 rounded-full whitespace-nowrap hover:bg-slate-700 border border-slate-700">&#128202; Analyze Workflow</button>
+          <button class="px-3 py-1 text-xs bg-slate-800 text-slate-300 rounded-full whitespace-nowrap hover:bg-slate-700 border border-slate-700">&#128231; Weekly Digest</button>
+          <button class="px-3 py-1 text-xs bg-slate-800 text-slate-300 rounded-full whitespace-nowrap hover:bg-slate-700 border border-slate-700">&#128161; Suggest Tasks</button>
+          <button class="px-3 py-1 text-xs bg-slate-800 text-slate-300 rounded-full whitespace-nowrap hover:bg-slate-700 border border-slate-700">&#128270; Find Decisions</button>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="px-4 py-3 border-t border-slate-700 shrink-0">
+        <div class="flex gap-2">
+          <input type="text" placeholder="Ask LazyMind anything..."
+            class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50 focus:border-[#4F6EF7]"
+            id="aiInput">
+          <button onclick="sendMessage()" class="w-10 h-10 bg-[#4F6EF7] rounded-lg flex items-center justify-center text-white hover:bg-[#3D5BD4] shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-600 mt-1.5 text-center">Powered by Llama 3.3 70B via Groq &middot; <kbd class="px-1 py-0.5 bg-slate-800 rounded text-slate-500">&#8984;L</kbd> to toggle</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById('aiInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const chatArea = document.querySelector('.overflow-y-auto');
+
+      // Add user message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'flex justify-end fade-in';
+      userDiv.innerHTML = `<div class="max-w-[80%] bg-[#4F6EF7] text-white rounded-lg rounded-br-sm px-3 py-2"><p class="text-sm">${msg}</p></div>`;
+      chatArea.appendChild(userDiv);
+
+      input.value = '';
+
+      // Show typing indicator
+      const typing = document.getElementById('typing');
+      typing.classList.remove('hidden');
+      chatArea.scrollTop = chatArea.scrollHeight;
+
+      // Simulate response after delay
+      setTimeout(() => {
+        typing.classList.add('hidden');
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'flex gap-2 fade-in';
+        aiDiv.innerHTML = `
+          <div class="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 mt-0.5"><span class="text-xs">&#10024;</span></div>
+          <div class="max-w-[85%] bg-slate-800 border border-slate-700 rounded-lg rounded-bl-sm px-3 py-2.5">
+            <p class="text-sm text-slate-200">I'll look into that for you. Based on your current workflow data, here's what I found relevant to "<strong>${msg}</strong>" — let me know if you'd like me to dig deeper into any area.</p>
+          </div>`;
+        chatArea.appendChild(aiDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+      }, 1500);
+    }
+
+    document.getElementById('aiInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') sendMessage();
+    });
+  </script>
+
+</body>
+</html>

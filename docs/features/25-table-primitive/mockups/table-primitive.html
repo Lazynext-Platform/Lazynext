@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — TABLE Primitive</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    .cell-edit:focus { outline: 2px solid #4F6EF7; outline-offset: -2px; border-radius: 2px; }
+    .col-resize { cursor: col-resize; }
+    .col-resize:hover { background: #4F6EF7; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 text-sm space-y-1">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z"/></svg>
+          Canvas
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-slate-200 font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M3 14h18M3 6h18M3 18h18"/></svg>
+          Tables
+        </a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/></svg>
+          Decisions
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <!-- Top Bar -->
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-4 shrink-0">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 10h18M3 14h18M3 6h18M3 18h18"/></svg>
+          <span class="text-sm font-semibold">Sprint Backlog</span>
+          <span class="text-[10px] text-teal-400 bg-teal-500/10 px-1.5 py-0.5 rounded font-medium">TABLE</span>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <!-- Filter -->
+          <button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-slate-400 hover:text-slate-200">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+            Filter
+          </button>
+          <!-- Sort -->
+          <button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-slate-400 hover:text-slate-200">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+            Sort
+          </button>
+          <!-- Group -->
+          <button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-slate-400 hover:text-slate-200">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            Group
+          </button>
+          <!-- Hide fields -->
+          <button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-slate-400 hover:text-slate-200">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
+            Hide
+          </button>
+          <div class="w-px h-6 bg-slate-700 mx-1"></div>
+          <!-- Export CSV -->
+          <button class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-xs text-slate-400 hover:text-slate-200">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </header>
+
+      <!-- Table Grid -->
+      <div class="flex-1 overflow-auto">
+        <table class="w-full border-collapse min-w-[900px]">
+          <thead class="sticky top-0 z-10">
+            <tr class="bg-slate-900 border-b border-slate-700 text-xs text-slate-400 font-medium">
+              <th class="w-10 px-3 py-2.5 text-center border-r border-slate-700/50">
+                <input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800">
+              </th>
+              <th class="px-3 py-2.5 text-left border-r border-slate-700/50 relative group cursor-pointer hover:bg-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <span class="uppercase tracking-wider">Title</span>
+                  <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                </div>
+                <div class="absolute right-0 top-0 bottom-0 w-1 col-resize opacity-0 group-hover:opacity-100"></div>
+              </th>
+              <th class="w-28 px-3 py-2.5 text-left border-r border-slate-700/50 cursor-pointer hover:bg-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <span class="uppercase tracking-wider">Status</span>
+                  <svg class="w-3 h-3 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+                </div>
+              </th>
+              <th class="w-28 px-3 py-2.5 text-left border-r border-slate-700/50 cursor-pointer hover:bg-slate-800">
+                <span class="uppercase tracking-wider">Priority</span>
+              </th>
+              <th class="w-36 px-3 py-2.5 text-left border-r border-slate-700/50 cursor-pointer hover:bg-slate-800">
+                <span class="uppercase tracking-wider">Assignee</span>
+              </th>
+              <th class="w-28 px-3 py-2.5 text-left border-r border-slate-700/50 cursor-pointer hover:bg-slate-800">
+                <span class="uppercase tracking-wider">Due Date</span>
+              </th>
+              <th class="w-24 px-3 py-2.5 text-left border-r border-slate-700/50 cursor-pointer hover:bg-slate-800">
+                <span class="uppercase tracking-wider">Points</span>
+              </th>
+              <th class="w-40 px-3 py-2.5 text-left cursor-pointer hover:bg-slate-800">
+                <span class="uppercase tracking-wider">Tags</span>
+              </th>
+              <th class="w-10 px-2 py-2.5 text-center">
+                <button class="text-slate-600 hover:text-slate-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <!-- Row 1 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Ship onboarding v2</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>In Progress
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/15 text-red-400">Urgent</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[8px] font-bold">AP</div>
+                  <span class="text-slate-300 text-xs">Avas Patel</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 10</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">5</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[10px]">frontend</span>
+                  <span class="px-1.5 py-0.5 bg-purple-500/10 text-purple-400 rounded text-[10px]">ux</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+            <!-- Row 2 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Fix auth redirect bug</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/15 text-emerald-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Done
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-500/15 text-orange-400">High</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold">RK</div>
+                  <span class="text-slate-300 text-xs">Raj Kumar</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 5</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">3</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-red-500/10 text-red-400 rounded text-[10px]">bug</span>
+                  <span class="px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded text-[10px]">auth</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+            <!-- Row 3 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Design landing page</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-500/15 text-slate-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Todo
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-500/15 text-yellow-400">Medium</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[8px] font-bold">AP</div>
+                  <span class="text-slate-300 text-xs">Avas Patel</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 15</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">8</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-purple-500/10 text-purple-400 rounded text-[10px]">design</span>
+                  <span class="px-1.5 py-0.5 bg-pink-500/10 text-pink-400 rounded text-[10px]">marketing</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+            <!-- Row 4 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Set up CI/CD pipeline</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-500/15 text-purple-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>In Review
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-500/15 text-orange-400">High</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold">RK</div>
+                  <span class="text-slate-300 text-xs">Raj Kumar</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 8</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">5</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded text-[10px]">infra</span>
+                  <span class="px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded text-[10px]">devops</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+            <!-- Row 5 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Write API documentation</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>In Progress
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-500/15 text-slate-400">Low</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-[8px] font-bold">MJ</div>
+                  <span class="text-slate-300 text-xs">Meera Joshi</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 20</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">3</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-green-500/10 text-green-400 rounded text-[10px]">docs</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+            <!-- Row 6 -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/50 group">
+              <td class="px-3 py-2.5 text-center border-r border-slate-800/50"><input type="checkbox" class="w-3.5 h-3.5 rounded border-slate-600 bg-slate-800"></td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 cell-edit" contenteditable="true">
+                <span class="text-slate-200 font-medium">Implement Decision DNA scoring</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/15 text-blue-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>In Progress
+                </span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/15 text-red-400">Urgent</span>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50">
+                <div class="flex items-center gap-2">
+                  <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold">PS</div>
+                  <span class="text-slate-300 text-xs">Priya Sharma</span>
+                </div>
+              </td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-400">Apr 12</td>
+              <td class="px-3 py-2.5 border-r border-slate-800/50 text-xs text-slate-300 text-center">13</td>
+              <td class="px-3 py-2.5">
+                <div class="flex gap-1">
+                  <span class="px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded text-[10px]">core</span>
+                  <span class="px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[10px]">backend</span>
+                </div>
+              </td>
+              <td class="px-2 py-2.5 text-center"></td>
+            </tr>
+
+            <!-- Add Row -->
+            <tr class="border-b border-slate-800 hover:bg-slate-900/30 cursor-pointer group">
+              <td colspan="9" class="px-3 py-2.5">
+                <button class="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                  New row
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="h-8 bg-slate-900 border-t border-slate-700 flex items-center px-4 text-[10px] text-slate-500 shrink-0 gap-4">
+        <span>6 rows</span>
+        <span class="text-slate-700">|</span>
+        <span>Sum Points: <strong class="text-slate-400">37</strong></span>
+        <span class="text-slate-700">|</span>
+        <span>3 In Progress, 1 Done, 1 In Review, 1 Todo</span>
+        <div class="ml-auto flex items-center gap-3">
+          <span class="text-teal-400/60">Phase 3 Feature</span>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

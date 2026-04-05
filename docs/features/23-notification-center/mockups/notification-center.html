@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Notification Center</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .slide-down { animation: slideDown 0.2s ease-out; }
+    @keyframes badgePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    .badge-pulse { animation: badgePulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+
+  <!-- App Top Bar (context) -->
+  <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-xs">L</div>
+      <span class="text-sm font-semibold text-slate-200">Q2 Product Sprint</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- LazyMind -->
+      <button class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      </button>
+      <!-- Notification Bell -->
+      <div class="relative">
+        <button onclick="toggleNotifications()" id="bellBtn" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 relative">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <!-- Badge -->
+          <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] font-bold flex items-center justify-center badge-pulse">5</span>
+        </button>
+
+        <!-- Notification Dropdown -->
+        <div id="notifDropdown" class="hidden absolute right-0 top-10 w-96 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black/40 z-50 slide-down overflow-hidden">
+          <!-- Header -->
+          <div class="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+            <h3 class="text-sm font-semibold">Notifications</h3>
+            <div class="flex items-center gap-2">
+              <button onclick="switchTab('all')" id="tabAll" class="text-xs px-2 py-1 rounded-md bg-slate-700 text-white font-medium">All</button>
+              <button onclick="switchTab('unread')" id="tabUnread" class="text-xs px-2 py-1 rounded-md text-slate-400 hover:bg-slate-800">Unread (5)</button>
+              <button onclick="markAllRead()" class="text-[10px] text-[#4F6EF7] hover:text-blue-300 font-medium">Mark all read</button>
+            </div>
+          </div>
+
+          <!-- Notification List -->
+          <div class="max-h-[420px] overflow-y-auto" id="notifList">
+
+            <!-- Today section -->
+            <div class="px-4 py-2 bg-slate-800/50">
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Today</span>
+            </div>
+
+            <!-- Notification 1: Unread - Task assigned -->
+            <div class="notif-item unread px-4 py-3 border-b border-slate-800 bg-[#4F6EF7]/5 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="false">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[10px] font-bold">PS</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-200"><span class="font-medium">Priya Sharma</span> assigned you to <span class="text-blue-400 font-medium">Ship onboarding v2</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded font-medium">TASK</span>
+                  <span class="text-[10px] text-slate-500">5 min ago</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-[#4F6EF7] mt-2 shrink-0"></div>
+            </div>
+
+            <!-- Notification 2: Unread - Decision logged -->
+            <div class="notif-item unread px-4 py-3 border-b border-slate-800 bg-[#4F6EF7]/5 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="false">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[10px] font-bold">RK</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-200"><span class="font-medium">Raj Kumar</span> logged a decision: <span class="text-orange-400 font-medium">Use Neon vs Supabase?</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded font-medium">DECISION</span>
+                  <span class="text-[10px] text-slate-500">Quality: 84</span>
+                  <span class="text-[10px] text-slate-500">18 min ago</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-[#4F6EF7] mt-2 shrink-0"></div>
+            </div>
+
+            <!-- Notification 3: Unread - @mention in thread -->
+            <div class="notif-item unread px-4 py-3 border-b border-slate-800 bg-[#4F6EF7]/5 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="false">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-[10px] font-bold">MJ</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-200"><span class="font-medium">Meera Joshi</span> mentioned you in <span class="text-purple-400 font-medium">Database migration thread</span></p>
+                <p class="text-xs text-slate-400 mt-0.5 truncate">"@Avas can you review the schema changes before we..."</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded font-medium">THREAD</span>
+                  <span class="text-[10px] text-slate-500">42 min ago</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-[#4F6EF7] mt-2 shrink-0"></div>
+            </div>
+
+            <!-- Notification 4: Unread - LazyMind insight -->
+            <div class="notif-item unread px-4 py-3 border-b border-slate-800 bg-[#4F6EF7]/5 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="false">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-200"><span class="font-medium text-blue-400">LazyMind</span> detected a pattern: 3 decisions this week lack rationale</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded font-medium">AI INSIGHT</span>
+                  <span class="text-[10px] text-slate-500">1 hour ago</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-[#4F6EF7] mt-2 shrink-0"></div>
+            </div>
+
+            <!-- Notification 5: Unread - Automation triggered -->
+            <div class="notif-item unread px-4 py-3 border-b border-slate-800 bg-[#4F6EF7]/5 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="false">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-sm">&#9889;</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-200">Automation <span class="font-medium text-green-400">Overdue task escalation</span> triggered — priority changed to Urgent</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded font-medium">AUTOMATION</span>
+                  <span class="text-[10px] text-slate-500">2 hours ago</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-[#4F6EF7] mt-2 shrink-0"></div>
+            </div>
+
+            <!-- Yesterday section -->
+            <div class="px-4 py-2 bg-slate-800/50">
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider font-medium">Yesterday</span>
+            </div>
+
+            <!-- Notification 6: Read - Task completed -->
+            <div class="notif-item read px-4 py-3 border-b border-slate-800 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="true">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[10px] font-bold">RK</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-400"><span class="font-medium text-slate-300">Raj Kumar</span> completed <span class="text-slate-300">Fix auth redirect bug</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-blue-400/60 bg-blue-500/5 px-1.5 py-0.5 rounded font-medium">TASK</span>
+                  <span class="text-[10px] text-slate-600">Yesterday, 4:30 PM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notification 7: Read - Decision outcome tagged -->
+            <div class="notif-item read px-4 py-3 border-b border-slate-800 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="true">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[10px] font-bold">PS</div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-400"><span class="font-medium text-slate-300">Priya Sharma</span> tagged outcome for <span class="text-slate-300">Switch to monorepo?</span> as <span class="text-emerald-400">Good</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-orange-400/60 bg-orange-500/5 px-1.5 py-0.5 rounded font-medium">DECISION</span>
+                  <span class="text-[10px] text-slate-600">Yesterday, 11:15 AM</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notification 8: Read - Weekly digest -->
+            <div class="notif-item read px-4 py-3 hover:bg-slate-800/60 cursor-pointer flex gap-3" data-read="true">
+              <div class="shrink-0 mt-0.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-400"><span class="font-medium text-blue-400/80">Weekly Digest</span> — 12 tasks completed, 3 decisions logged, team velocity up 15%</p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-cyan-400/60 bg-cyan-500/5 px-1.5 py-0.5 rounded font-medium">PULSE</span>
+                  <span class="text-[10px] text-slate-600">Yesterday, 9:00 AM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-4 py-2.5 border-t border-slate-700 bg-slate-900">
+            <button class="text-xs text-[#4F6EF7] hover:text-blue-300 font-medium w-full text-center">View all notifications</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Avatar -->
+      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xs font-bold cursor-pointer">AP</div>
+    </div>
+  </header>
+
+  <!-- Backdrop for canvas context -->
+  <div class="p-8 flex items-center justify-center" style="min-height: calc(100vh - 48px);">
+    <div class="text-center text-slate-600">
+      <p class="text-sm mb-2">Click the bell icon above to see the notification center</p>
+      <p class="text-xs text-slate-700">5 unread notifications with blue dot indicators</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleNotifications() {
+      const dropdown = document.getElementById('notifDropdown');
+      dropdown.classList.toggle('hidden');
+    }
+
+    function switchTab(tab) {
+      const tabAll = document.getElementById('tabAll');
+      const tabUnread = document.getElementById('tabUnread');
+      const items = document.querySelectorAll('.notif-item');
+
+      if (tab === 'all') {
+        tabAll.className = 'text-xs px-2 py-1 rounded-md bg-slate-700 text-white font-medium';
+        tabUnread.className = 'text-xs px-2 py-1 rounded-md text-slate-400 hover:bg-slate-800';
+        items.forEach(item => item.style.display = 'flex');
+      } else {
+        tabUnread.className = 'text-xs px-2 py-1 rounded-md bg-slate-700 text-white font-medium';
+        tabAll.className = 'text-xs px-2 py-1 rounded-md text-slate-400 hover:bg-slate-800';
+        items.forEach(item => {
+          item.style.display = item.dataset.read === 'false' ? 'flex' : 'none';
+        });
+        // Hide yesterday header
+        document.querySelectorAll('.bg-slate-800\\/50').forEach((el, i) => {
+          if (i > 0) el.style.display = tab === 'unread' ? 'none' : 'block';
+        });
+      }
+    }
+
+    function markAllRead() {
+      document.querySelectorAll('.notif-item.unread').forEach(item => {
+        item.classList.remove('unread', 'bg-\\[\\#4F6EF7\\]\\/5');
+        item.style.background = '';
+        item.dataset.read = 'true';
+        const dot = item.querySelector('.bg-\\[\\#4F6EF7\\]');
+        if (dot) dot.remove();
+      });
+      const badge = document.querySelector('.badge-pulse');
+      if (badge) badge.style.display = 'none';
+      document.getElementById('tabUnread').textContent = 'Unread (0)';
+    }
+
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('notifDropdown');
+      const bell = document.getElementById('bellBtn');
+      if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

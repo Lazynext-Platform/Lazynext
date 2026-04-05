@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — The Anti-Software Workflow Platform</title>
+  <meta name="description" content="One platform that replaces every tool your team is already misusing. Tasks, docs, decisions, and AI in one unified graph.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            primary: '#4F6EF7',
+            'primary-dark': '#3B5AE0',
+          },
+          maxWidth: {
+            'site': '1280px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { font-family: 'Inter', system-ui, sans-serif; }
+    .gradient-hero { background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 50%, #f5f0ff 100%); }
+    .gradient-decision { background: linear-gradient(135deg, #fdf4ff 0%, #f0f4ff 50%, #f0fdf4 100%); }
+    .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+    .consolidation-line { stroke-dasharray: 6 4; animation: dash 20s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -200; } }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .float-anim { animation: float 3s ease-in-out infinite; }
+    .toggle-active { background-color: #4F6EF7; }
+    .toggle-inactive { background-color: #e2e8f0; }
+  </style>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+  <!-- ============ HEADER ============ -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100">
+    <div class="max-w-site mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="text-xl font-bold text-primary tracking-tight">Lazynext</a>
+      <nav class="hidden md:flex items-center gap-8">
+        <a href="#features" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Features</a>
+        <a href="#pricing" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Pricing</a>
+        <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Templates</a>
+        <a href="#" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Blog</a>
+      </nav>
+      <div class="flex items-center gap-4">
+        <a href="#" class="hidden sm:inline-block text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">Sign In</a>
+        <a href="#" class="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors shadow-sm shadow-primary/25">Start Free</a>
+      </div>
+      <!-- Mobile menu button -->
+      <button class="md:hidden ml-2 p-2 text-slate-600" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-6 py-4 space-y-3">
+      <a href="#features" class="block text-sm font-medium text-slate-600">Features</a>
+      <a href="#pricing" class="block text-sm font-medium text-slate-600">Pricing</a>
+      <a href="#" class="block text-sm font-medium text-slate-600">Templates</a>
+      <a href="#" class="block text-sm font-medium text-slate-600">Blog</a>
+      <a href="#" class="block text-sm font-medium text-slate-600">Sign In</a>
+    </div>
+  </header>
+
+  <!-- ============ HERO ============ -->
+  <section class="gradient-hero pt-32 pb-24 md:pt-40 md:pb-32">
+    <div class="max-w-site mx-auto px-6 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 mb-6 rounded-full bg-primary/10 text-primary text-xs font-semibold tracking-wide uppercase">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        The Anti-Software Workflow Platform
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight max-w-4xl mx-auto">
+        One platform that replaces every tool your team is <span class="text-primary">already misusing.</span>
+      </h1>
+      <p class="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        Stop switching apps. Start shipping work. Lazynext is the operating system for work &mdash; tasks, docs, decisions, and AI in one unified graph.
+      </p>
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#" class="inline-flex items-center px-8 py-3.5 rounded-xl bg-primary text-white font-semibold text-base hover:bg-primary-dark transition-colors shadow-lg shadow-primary/25">
+          Start Free
+          <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+        </a>
+        <a href="#" class="inline-flex items-center px-8 py-3.5 rounded-xl border-2 border-slate-200 text-slate-700 font-semibold text-base hover:border-primary hover:text-primary transition-colors">
+          <i data-lucide="play-circle" class="w-5 h-5 mr-2"></i>
+          Watch Demo
+        </a>
+      </div>
+
+      <!-- Canvas Mockup -->
+      <div class="mt-16 max-w-4xl mx-auto">
+        <div class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
+          <!-- Window chrome -->
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-700/50">
+            <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+            <span class="ml-4 text-xs text-slate-500 font-medium">Lazynext Canvas &mdash; Q4 Product Launch</span>
+          </div>
+          <!-- Canvas content -->
+          <div class="p-8 md:p-12 relative min-h-[340px]">
+            <!-- Grid dots -->
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle, #64748b 1px, transparent 1px); background-size: 24px 24px;"></div>
+
+            <!-- Node cards -->
+            <div class="relative flex flex-wrap justify-center gap-6 md:gap-8">
+              <!-- Task node -->
+              <div class="bg-blue-500/20 border border-blue-500/30 rounded-xl px-5 py-4 w-44 text-left float-anim" style="animation-delay: 0s;">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center"><i data-lucide="clipboard-list" class="w-3.5 h-3.5 text-white"></i></div>
+                  <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider">Task</span>
+                </div>
+                <p class="text-sm text-slate-300 font-medium">Finalize launch copy</p>
+                <div class="mt-2 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-yellow-400"></span>
+                  <span class="text-xs text-slate-500">In Progress</span>
+                </div>
+              </div>
+
+              <!-- Doc node -->
+              <div class="bg-green-500/20 border border-green-500/30 rounded-xl px-5 py-4 w-44 text-left float-anim" style="animation-delay: 0.4s;">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-6 h-6 rounded bg-green-500 flex items-center justify-center"><i data-lucide="file-text" class="w-3.5 h-3.5 text-white"></i></div>
+                  <span class="text-xs font-semibold text-green-400 uppercase tracking-wider">Doc</span>
+                </div>
+                <p class="text-sm text-slate-300 font-medium">PRD v2.1</p>
+                <div class="mt-2 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                  <span class="text-xs text-slate-500">Published</span>
+                </div>
+              </div>
+
+              <!-- Decision node -->
+              <div class="bg-orange-500/20 border border-orange-500/30 rounded-xl px-5 py-4 w-44 text-left float-anim" style="animation-delay: 0.8s;">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-6 h-6 rounded bg-orange-500 flex items-center justify-center"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-white"></i></div>
+                  <span class="text-xs font-semibold text-orange-400 uppercase tracking-wider">Decision</span>
+                </div>
+                <p class="text-sm text-slate-300 font-medium">Go with Stripe</p>
+                <div class="mt-2 flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-400">84/100</span>
+                </div>
+              </div>
+
+              <!-- Thread node -->
+              <div class="bg-purple-500/20 border border-purple-500/30 rounded-xl px-5 py-4 w-44 text-left float-anim" style="animation-delay: 1.2s;">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-6 h-6 rounded bg-purple-500 flex items-center justify-center"><i data-lucide="message-circle" class="w-3.5 h-3.5 text-white"></i></div>
+                  <span class="text-xs font-semibold text-purple-400 uppercase tracking-wider">Thread</span>
+                </div>
+                <p class="text-sm text-slate-300 font-medium">Pricing debate</p>
+                <div class="mt-2 flex items-center gap-1.5">
+                  <span class="text-xs text-slate-500">12 replies</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Connection lines (SVG) -->
+            <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 0;">
+              <line x1="25%" y1="60%" x2="42%" y2="40%" stroke="#4F6EF7" stroke-width="1" opacity="0.3" class="consolidation-line"/>
+              <line x1="55%" y1="40%" x2="72%" y2="55%" stroke="#4F6EF7" stroke-width="1" opacity="0.3" class="consolidation-line"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SOCIAL PROOF BAR ============ -->
+  <section class="py-12 border-b border-slate-100">
+    <div class="max-w-site mx-auto px-6 text-center">
+      <p class="text-sm font-medium text-slate-400 mb-8">Trusted by 1,200+ teams across India and beyond</p>
+      <div class="flex flex-wrap items-center justify-center gap-6 md:gap-10">
+        <div class="h-8 w-24 bg-slate-100 rounded-full"></div>
+        <div class="h-8 w-28 bg-slate-100 rounded-full"></div>
+        <div class="h-8 w-20 bg-slate-100 rounded-full"></div>
+        <div class="h-8 w-32 bg-slate-100 rounded-full"></div>
+        <div class="h-8 w-24 bg-slate-100 rounded-full"></div>
+        <div class="h-8 w-28 bg-slate-100 rounded-full"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROBLEM SECTION ============ -->
+  <section class="py-24">
+    <div class="max-w-site mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">The graveyard of <span class="text-primary">half-used tools</span></h2>
+        <p class="mt-4 text-lg text-slate-500 max-w-xl mx-auto">Your team pays for everything and finishes nothing. Sound familiar?</p>
+      </div>
+
+      <div class="flex flex-col lg:flex-row items-center justify-center gap-8">
+        <!-- Tool cards -->
+        <div class="grid grid-cols-2 gap-4 max-w-md">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center card-hover">
+            <div class="w-10 h-10 mx-auto mb-3 bg-slate-900 rounded-lg flex items-center justify-center"><i data-lucide="file-text" class="w-5 h-5 text-white"></i></div>
+            <p class="font-semibold text-sm">Notion</p>
+            <p class="text-xs text-slate-500 mt-1">"Docs no one reads"</p>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center card-hover">
+            <div class="w-10 h-10 mx-auto mb-3 bg-indigo-600 rounded-lg flex items-center justify-center"><i data-lucide="list-todo" class="w-5 h-5 text-white"></i></div>
+            <p class="font-semibold text-sm">Linear</p>
+            <p class="text-xs text-slate-500 mt-1">"Tasks that drift"</p>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center card-hover">
+            <div class="w-10 h-10 mx-auto mb-3 bg-purple-600 rounded-lg flex items-center justify-center"><i data-lucide="hash" class="w-5 h-5 text-white"></i></div>
+            <p class="font-semibold text-sm">Slack</p>
+            <p class="text-xs text-slate-500 mt-1">"Decisions lost in threads"</p>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-center card-hover">
+            <div class="w-10 h-10 mx-auto mb-3 bg-teal-600 rounded-lg flex items-center justify-center"><i data-lucide="table" class="w-5 h-5 text-white"></i></div>
+            <p class="font-semibold text-sm">Airtable</p>
+            <p class="text-xs text-slate-500 mt-1">"Spreadsheets with lipstick"</p>
+          </div>
+        </div>
+
+        <!-- Arrow -->
+        <div class="flex flex-col items-center gap-2 py-4 lg:py-0">
+          <i data-lucide="arrow-right" class="w-8 h-8 text-primary hidden lg:block"></i>
+          <i data-lucide="arrow-down" class="w-8 h-8 text-primary lg:hidden"></i>
+        </div>
+
+        <!-- Lazynext card -->
+        <div class="bg-primary/5 border-2 border-primary rounded-2xl p-8 text-center max-w-xs card-hover shadow-lg shadow-primary/10">
+          <div class="w-14 h-14 mx-auto mb-4 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+            <i data-lucide="layers" class="w-7 h-7 text-white"></i>
+          </div>
+          <p class="text-xl font-bold text-primary">Lazynext</p>
+          <p class="text-sm text-slate-600 mt-2 font-medium">Replace them all.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEVEN PRIMITIVES ============ -->
+  <section id="features" class="py-24 bg-slate-50">
+    <div class="max-w-site mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Built from seven <span class="text-primary">powerful primitives</span></h2>
+        <p class="mt-4 text-lg text-slate-500 max-w-xl mx-auto">Everything in Lazynext is a node. Combine them infinitely.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+        <!-- TASK -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center mb-4">
+            <i data-lucide="clipboard-list" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">TASK</h3>
+          <p class="text-sm text-slate-500 mt-1">Track work with status, priority, and deadlines.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Linear, Asana</p>
+        </div>
+
+        <!-- DOC -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center mb-4">
+            <i data-lucide="file-text" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">DOC</h3>
+          <p class="text-sm text-slate-500 mt-1">Rich documents linked to everything else.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Notion, Google Docs</p>
+        </div>
+
+        <!-- DECISION (hero) -->
+        <div class="bg-white border-2 border-orange-400 rounded-xl p-6 card-hover relative ring-2 ring-orange-100 sm:col-span-2 lg:col-span-1">
+          <div class="absolute -top-3 left-4 px-2.5 py-0.5 bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider rounded-full">Nothing else does this</div>
+          <div class="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center mb-4">
+            <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">DECISION</h3>
+          <p class="text-sm text-slate-500 mt-1">First-class decisions with quality scoring.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: nothing (it's new)</p>
+        </div>
+
+        <!-- THREAD -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center mb-4">
+            <i data-lucide="message-circle" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">THREAD</h3>
+          <p class="text-sm text-slate-500 mt-1">Contextual conversations, not noisy channels.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Slack threads</p>
+        </div>
+
+        <!-- PULSE -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center mb-4">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">PULSE</h3>
+          <p class="text-sm text-slate-500 mt-1">Real-time status updates and check-ins.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Standups, Geekbot</p>
+        </div>
+
+        <!-- AUTOMATION -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-slate-500 flex items-center justify-center mb-4">
+            <i data-lucide="settings" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">AUTOMATION</h3>
+          <p class="text-sm text-slate-500 mt-1">If-this-then-that workflows, built in.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Zapier, Make</p>
+        </div>
+
+        <!-- TABLE -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 card-hover relative">
+          <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center mb-4">
+            <i data-lucide="grid-3x3" class="w-5 h-5 text-white"></i>
+          </div>
+          <h3 class="font-bold text-base">TABLE</h3>
+          <p class="text-sm text-slate-500 mt-1">Structured data with relations and views.</p>
+          <p class="text-xs text-slate-400 mt-3 font-medium">Replaces: Airtable, Sheets</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DECISION DNA ============ -->
+  <section class="py-24 gradient-decision relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+    <div class="max-w-site mx-auto px-6 relative">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <!-- Decision card mockup -->
+        <div class="order-2 lg:order-1">
+          <div class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 max-w-md mx-auto lg:mx-0">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-4 h-4 text-white"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold text-orange-500 uppercase tracking-wider">Decision</span>
+                <span class="text-xs text-slate-400 ml-2">D-127</span>
+              </div>
+              <div class="ml-auto px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">Resolved</div>
+            </div>
+            <h4 class="font-bold text-lg mb-2">Which payment processor for India launch?</h4>
+            <div class="bg-slate-50 rounded-lg p-4 mb-4">
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Resolution</p>
+              <p class="text-sm text-slate-700">Go with Razorpay for Phase 1 (India), Stripe for international. Revisit in Q3 when volume exceeds 10K txns/month.</p>
+            </div>
+            <div class="flex items-center gap-3 mb-4">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs text-slate-500">Quality Score</span>
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-green-500 text-white text-sm font-bold">84/100</span>
+              </div>
+              <div class="flex items-center gap-1.5 ml-auto">
+                <span class="text-xs text-slate-500">Outcome</span>
+                <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">Validated</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-400">
+              <i data-lucide="users" class="w-3.5 h-3.5"></i>
+              <span>5 participants</span>
+              <span class="mx-1">&middot;</span>
+              <i data-lucide="link" class="w-3.5 h-3.5"></i>
+              <span>3 linked nodes</span>
+              <span class="mx-1">&middot;</span>
+              <span>Mar 15, 2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text content -->
+        <div class="order-1 lg:order-2">
+          <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold tracking-wide uppercase">
+            Hero Feature
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            Decision DNA &mdash; Your team's <span class="text-orange-500">institutional memory</span>
+          </h2>
+          <p class="mt-6 text-lg text-slate-600 leading-relaxed">
+            Every decision your team makes is logged as a first-class node. Who decided, why, what options were considered, and what the outcome was &mdash; all searchable, scoreable, and connected to tasks and docs.
+          </p>
+          <ul class="mt-8 space-y-4">
+            <li class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i></div>
+              <span class="text-sm text-slate-700"><strong>Quality scoring</strong> &mdash; AI rates every decision on data, reversibility, and alignment</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i></div>
+              <span class="text-sm text-slate-700"><strong>Outcome tracking</strong> &mdash; revisit decisions and see if they paid off</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <div class="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5"><i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i></div>
+              <span class="text-sm text-slate-700"><strong>Full lineage</strong> &mdash; see every task, doc, and thread that led to or resulted from a decision</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAZYMIND AI ============ -->
+  <section class="py-24">
+    <div class="max-w-site mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">AI that understands your <span class="text-primary">entire workflow</span></h2>
+        <p class="mt-4 text-lg text-slate-500 max-w-xl mx-auto">LazyMind isn't a chatbot bolted on. It sees your graph.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
+        <!-- AI Chat mockup -->
+        <div class="bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-slate-800">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-700/50">
+            <div class="w-6 h-6 rounded-lg bg-primary flex items-center justify-center">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
+            </div>
+            <span class="text-sm font-semibold text-slate-300">LazyMind</span>
+            <span class="ml-auto px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold">Online</span>
+          </div>
+          <div class="p-5 space-y-4 min-h-[300px]">
+            <!-- User message -->
+            <div class="flex justify-end">
+              <div class="bg-primary/20 text-slate-200 text-sm px-4 py-2.5 rounded-2xl rounded-br-md max-w-[80%]">
+                What decisions have we made about pricing this quarter?
+              </div>
+            </div>
+            <!-- AI response -->
+            <div class="flex justify-start">
+              <div class="bg-slate-800 text-slate-300 text-sm px-4 py-3 rounded-2xl rounded-bl-md max-w-[85%] space-y-2">
+                <p>Found <strong class="text-white">3 decisions</strong> about pricing in Q1:</p>
+                <div class="bg-slate-700/50 rounded-lg p-2.5 text-xs space-y-1">
+                  <p class="text-orange-400 font-semibold">D-127: Freemium vs. trial model</p>
+                  <p class="text-slate-400">Resolved: Freemium. Score: 91/100</p>
+                </div>
+                <div class="bg-slate-700/50 rounded-lg p-2.5 text-xs space-y-1">
+                  <p class="text-orange-400 font-semibold">D-134: Price point for Pro tier</p>
+                  <p class="text-slate-400">Resolved: Rs.499/seat. Score: 78/100</p>
+                </div>
+                <div class="bg-slate-700/50 rounded-lg p-2.5 text-xs space-y-1">
+                  <p class="text-orange-400 font-semibold">D-141: Annual discount percentage</p>
+                  <p class="text-slate-400">Resolved: 17%. Score: 84/100</p>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">Average decision quality: <span class="text-green-400 font-semibold">84.3/100</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 border-t border-slate-700/50">
+            <div class="flex items-center gap-3 bg-slate-800 rounded-xl px-4 py-2.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-primary"></i>
+              <span class="text-sm text-slate-500">Ask LazyMind anything...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features list -->
+        <div class="space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="scan-search" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-base">Analyze workflows</h4>
+              <p class="text-sm text-slate-500 mt-1">Ask questions about your workspace and get instant answers grounded in your real data.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="wand-2" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-base">Generate from descriptions</h4>
+              <p class="text-sm text-slate-500 mt-1">Describe a project and LazyMind scaffolds tasks, docs, and decisions for you.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="mail" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-base">Weekly digest</h4>
+              <p class="text-sm text-slate-500 mt-1">Every Monday: what shipped, what stalled, which decisions need revisiting.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <i data-lucide="award" class="w-5 h-5 text-primary"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-base">Decision quality scoring</h4>
+              <p class="text-sm text-slate-500 mt-1">AI evaluates each decision on data quality, reversibility, stakeholder alignment, and outcome clarity.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONSOLIDATION MAP ============ -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-site mx-auto px-6 text-center">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">One tool. <span class="text-primary">One price.</span></h2>
+      <p class="text-lg text-slate-500 max-w-xl mx-auto mb-16">Stop paying six subscriptions for six half-solutions.</p>
+
+      <div class="max-w-3xl mx-auto relative">
+        <svg class="w-full" viewBox="0 0 800 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Left tool icons -->
+          <!-- Notion -->
+          <rect x="20" y="20" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="70" y="45" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Notion</text>
+          <!-- Linear -->
+          <rect x="20" y="75" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="70" y="100" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Linear</text>
+          <!-- Trello -->
+          <rect x="20" y="130" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="70" y="155" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Trello</text>
+          <!-- Slack -->
+          <rect x="20" y="185" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="70" y="210" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Slack</text>
+          <!-- Zapier -->
+          <rect x="20" y="240" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="70" y="265" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Zapier</text>
+
+          <!-- Lines -->
+          <line x1="120" y1="40" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+          <line x1="120" y1="95" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+          <line x1="120" y1="150" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+          <line x1="120" y1="205" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+          <line x1="120" y1="260" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+
+          <!-- Sheets (below Zapier, 6th tool) -->
+          <rect x="160" y="240" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" stroke-width="1.5"/>
+          <text x="210" y="265" text-anchor="middle" fill="#64748b" font-size="13" font-family="Inter" font-weight="600">Sheets</text>
+          <line x1="260" y1="260" x2="540" y2="150" stroke="#4F6EF7" stroke-width="1.5" opacity="0.3" class="consolidation-line"/>
+
+          <!-- Lazynext logo -->
+          <rect x="540" y="110" width="220" height="80" rx="16" fill="#4F6EF7" stroke="#3B5AE0" stroke-width="2"/>
+          <text x="650" y="147" text-anchor="middle" fill="white" font-size="20" font-family="Inter" font-weight="800">Lazynext</text>
+          <text x="650" y="170" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="12" font-family="Inter" font-weight="500">Everything. One place.</text>
+        </svg>
+      </div>
+
+      <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-8">
+        <div class="text-center">
+          <p class="text-4xl font-extrabold text-slate-300 line-through">$171</p>
+          <p class="text-sm text-slate-400 mt-1">/seat/month (6 tools)</p>
+        </div>
+        <div class="text-4xl font-extrabold text-primary">
+          <i data-lucide="arrow-right" class="w-8 h-8 hidden sm:inline-block"></i>
+          <i data-lucide="arrow-down" class="w-8 h-8 sm:hidden"></i>
+        </div>
+        <div class="text-center">
+          <p class="text-5xl font-extrabold text-primary">$19</p>
+          <p class="text-sm text-slate-500 mt-1">/seat/month (1 tool)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PRICING ============ -->
+  <section id="pricing" class="py-24">
+    <div class="max-w-site mx-auto px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simple, transparent pricing</h2>
+        <p class="mt-4 text-lg text-slate-500">Start free. Scale when you're ready.</p>
+
+        <!-- Toggle -->
+        <div class="mt-8 inline-flex items-center gap-3 bg-slate-100 rounded-full p-1">
+          <button id="btn-monthly" onclick="togglePricing('monthly')" class="px-5 py-2 rounded-full text-sm font-semibold bg-white text-slate-900 shadow-sm transition-all">Monthly</button>
+          <button id="btn-annual" onclick="togglePricing('annual')" class="px-5 py-2 rounded-full text-sm font-semibold text-slate-500 transition-all">Annual <span class="text-xs text-green-600 font-bold ml-1">Save 17%</span></button>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <!-- Free -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 card-hover">
+          <h3 class="text-lg font-bold">Free</h3>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold" id="price-free">&#8377;0</span>
+            <span class="text-slate-500 text-sm">/month</span>
+          </div>
+          <p class="text-sm text-slate-500 mt-2">For individuals and small experiments.</p>
+          <a href="#" class="mt-6 block w-full py-3 rounded-xl border-2 border-slate-200 text-center font-semibold text-sm text-slate-700 hover:border-primary hover:text-primary transition-colors">Get Started</a>
+          <ul class="mt-8 space-y-3">
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>1 workspace</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>3 members</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>50 nodes</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>10 decisions</li>
+            <li class="flex items-center gap-2 text-sm text-slate-400"><i data-lucide="x" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>LazyMind AI</li>
+            <li class="flex items-center gap-2 text-sm text-slate-400"><i data-lucide="x" class="w-4 h-4 text-slate-300 flex-shrink-0"></i>Decision DNA search</li>
+          </ul>
+        </div>
+
+        <!-- Pro (featured) -->
+        <div class="bg-primary text-white rounded-2xl p-8 card-hover relative shadow-xl shadow-primary/20 ring-2 ring-primary">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-primary-dark rounded-full text-xs font-bold uppercase tracking-wider">Most Popular</div>
+          <h3 class="text-lg font-bold">Pro</h3>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold" id="price-pro">&#8377;499</span>
+            <span class="text-white/70 text-sm">/seat/month</span>
+          </div>
+          <p class="text-sm text-white/70 mt-2">For growing teams that ship fast.</p>
+          <a href="#" class="mt-6 block w-full py-3 rounded-xl bg-white text-primary text-center font-semibold text-sm hover:bg-slate-50 transition-colors">Start Free Trial</a>
+          <ul class="mt-8 space-y-3">
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>Unlimited workspaces</li>
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>Unlimited members</li>
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>Unlimited nodes</li>
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>Decision DNA search</li>
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>LazyMind AI</li>
+            <li class="flex items-center gap-2 text-sm"><i data-lucide="check" class="w-4 h-4 text-green-300 flex-shrink-0"></i>Priority email support</li>
+          </ul>
+        </div>
+
+        <!-- Business -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 card-hover">
+          <h3 class="text-lg font-bold">Business</h3>
+          <div class="mt-4">
+            <span class="text-4xl font-extrabold" id="price-business">&#8377;999</span>
+            <span class="text-slate-500 text-sm">/seat/month</span>
+          </div>
+          <p class="text-sm text-slate-500 mt-2">For orgs that need control and scale.</p>
+          <a href="#" class="mt-6 block w-full py-3 rounded-xl border-2 border-slate-200 text-center font-semibold text-sm text-slate-700 hover:border-primary hover:text-primary transition-colors">Contact Sales</a>
+          <ul class="mt-8 space-y-3">
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>Everything in Pro</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>Decision Health Dashboard</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>Advanced analytics</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>Priority support</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>SSO / SAML</li>
+            <li class="flex items-center gap-2 text-sm text-slate-600"><i data-lucide="check" class="w-4 h-4 text-green-500 flex-shrink-0"></i>Custom integrations</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS ============ -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-site mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Loved by teams who <span class="text-primary">ship</span></h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <!-- Testimonial 1 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 card-hover">
+          <div class="flex gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed">"We killed 5 subscriptions in one week. Decision DNA alone is worth the switch &mdash; we finally know <em>why</em> we made the choices we did."</p>
+          <div class="flex items-center gap-3 mt-6">
+            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500">PR</div>
+            <div>
+              <p class="text-sm font-semibold">Priya Raghavan</p>
+              <p class="text-xs text-slate-400">Head of Product, FlowStack</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 card-hover">
+          <div class="flex gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed">"LazyMind is scary good. I asked it what decisions were blocking our launch and it gave me a perfectly prioritized list with context I'd forgotten."</p>
+          <div class="flex items-center gap-3 mt-6">
+            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500">AK</div>
+            <div>
+              <p class="text-sm font-semibold">Arjun Krishnamurthy</p>
+              <p class="text-xs text-slate-400">CTO, NexaBuild</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 card-hover">
+          <div class="flex gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+            <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
+          </div>
+          <p class="text-sm text-slate-600 leading-relaxed">"My team went from 4 tabs to 1. Our Monday planning went from 45 minutes to 12 minutes. I'm not exaggerating &mdash; we timed it."</p>
+          <div class="flex items-center gap-3 mt-6">
+            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500">SM</div>
+            <div>
+              <p class="text-sm font-semibold">Sara Mehta</p>
+              <p class="text-xs text-slate-400">Engineering Manager, DevCraft</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA SECTION ============ -->
+  <section class="py-24">
+    <div class="max-w-site mx-auto px-6">
+      <div class="relative overflow-hidden bg-primary rounded-3xl px-8 py-16 md:py-20 text-center">
+        <div class="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+        <div class="relative">
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Ready to stop switching apps?</h2>
+          <p class="mt-4 text-lg text-white/70 max-w-lg mx-auto">Join 1,200+ teams who consolidated their stack and started shipping faster.</p>
+          <a href="#" class="mt-8 inline-flex items-center px-8 py-4 rounded-xl bg-white text-primary font-bold text-base hover:bg-slate-50 transition-colors shadow-lg">
+            Start Free &mdash; No credit card required
+            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="bg-slate-900 text-slate-400 py-16">
+    <div class="max-w-site mx-auto px-6">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-12">
+        <!-- Brand -->
+        <div class="col-span-2 md:col-span-1">
+          <a href="#" class="text-xl font-bold text-white tracking-tight">Lazynext</a>
+          <p class="mt-3 text-sm leading-relaxed">The operating system for work. Tasks, docs, decisions, and AI &mdash; one graph.</p>
+        </div>
+
+        <!-- Product -->
+        <div>
+          <h4 class="text-sm font-semibold text-white mb-4">Product</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#features" class="text-sm hover:text-white transition-colors">Features</a></li>
+            <li><a href="#pricing" class="text-sm hover:text-white transition-colors">Pricing</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Templates</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Changelog</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <h4 class="text-sm font-semibold text-white mb-4">Company</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm hover:text-white transition-colors">About</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Blog</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Careers</a></li>
+          </ul>
+        </div>
+
+        <!-- Legal -->
+        <div>
+          <h4 class="text-sm font-semibold text-white mb-4">Legal</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Privacy</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div>
+          <h4 class="text-sm font-semibold text-white mb-4">Support</h4>
+          <ul class="space-y-2.5">
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Docs</a></li>
+            <li><a href="#" class="text-sm hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-sm">Built in India. Priced for humans.</p>
+        <p class="text-sm">&copy; 2026 Lazynext. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Pricing toggle
+    function togglePricing(mode) {
+      const btnMonthly = document.getElementById('btn-monthly');
+      const btnAnnual = document.getElementById('btn-annual');
+      const priceFree = document.getElementById('price-free');
+      const pricePro = document.getElementById('price-pro');
+      const priceBusiness = document.getElementById('price-business');
+
+      if (mode === 'annual') {
+        btnAnnual.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+        btnAnnual.classList.remove('text-slate-500');
+        btnMonthly.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+        btnMonthly.classList.add('text-slate-500');
+        priceFree.innerHTML = '&#8377;0';
+        pricePro.innerHTML = '&#8377;415';
+        priceBusiness.innerHTML = '&#8377;829';
+      } else {
+        btnMonthly.classList.add('bg-white', 'text-slate-900', 'shadow-sm');
+        btnMonthly.classList.remove('text-slate-500');
+        btnAnnual.classList.remove('bg-white', 'text-slate-900', 'shadow-sm');
+        btnAnnual.classList.add('text-slate-500');
+        priceFree.innerHTML = '&#8377;0';
+        pricePro.innerHTML = '&#8377;499';
+        priceBusiness.innerHTML = '&#8377;999';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Real-time Collaboration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes cursorMove1 { 0% { top: 180px; left: 420px; } 50% { top: 220px; left: 480px; } 100% { top: 180px; left: 420px; } }
+    @keyframes cursorMove2 { 0% { top: 340px; left: 620px; } 50% { top: 300px; left: 580px; } 100% { top: 340px; left: 620px; } }
+    @keyframes typingDots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+    .cursor-animate-1 { animation: cursorMove1 8s ease-in-out infinite; }
+    .cursor-animate-2 { animation: cursorMove2 10s ease-in-out infinite; }
+    .typing-indicator span { animation: cursorBlink 1s ease-in-out infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes selectionPulse { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.25; } }
+    .selection-pulse { animation: selectionPulse 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+
+  <!-- Top Bar -->
+  <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-4 justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-xs">L</div>
+      <span class="text-sm font-semibold text-slate-200">Q2 Product Sprint</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <!-- Live Users Indicator -->
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg">
+        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+        <span class="text-[10px] text-slate-400">3 online</span>
+        <div class="flex -space-x-2 ml-1">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold ring-2 ring-green-400/40">AP</div>
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold ring-2 ring-green-400/40">PS</div>
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 border-2 border-slate-900 flex items-center justify-center text-[8px] font-bold ring-2 ring-green-400/40">RK</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Canvas Area with Collaboration Indicators -->
+  <div class="relative" style="height: calc(100vh - 48px); overflow: hidden; background: #020617;">
+
+    <!-- Grid Background -->
+    <svg class="absolute inset-0 w-full h-full opacity-[0.03]">
+      <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M 32 0 L 0 0 0 32" fill="none" stroke="white" stroke-width="0.5"/></pattern></defs>
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+    </svg>
+
+    <!-- Node 1: TASK (with Priya's selection ring) -->
+    <div class="absolute" style="top: 100px; left: 200px;">
+      <!-- Priya's selection indicator -->
+      <div class="absolute -inset-2 rounded-xl border-2 border-rose-400 selection-pulse" style="background: rgba(244,63,94,0.15);"></div>
+      <div class="absolute -top-6 left-0 flex items-center gap-1">
+        <div class="w-4 h-4 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[6px] font-bold">PS</div>
+        <span class="text-[9px] text-rose-400 font-medium bg-rose-500/10 px-1.5 py-0.5 rounded">Priya is editing</span>
+      </div>
+      <div class="w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-3 py-1.5 bg-blue-500/10 border-b border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+          <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">Task</span>
+        </div>
+        <div class="p-3">
+          <p class="text-sm font-medium text-slate-200">Ship onboarding v2</p>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-[10px] bg-blue-500/15 text-blue-400 px-1.5 py-0.5 rounded">In Progress</span>
+            <div class="w-4 h-4 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[6px] font-bold">AP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Node 2: DECISION -->
+    <div class="absolute" style="top: 100px; left: 540px;">
+      <div class="w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-3 py-1.5 bg-orange-500/10 border-b border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-orange-400"></span>
+          <span class="text-[10px] font-semibold text-orange-400 uppercase tracking-wider">Decision</span>
+        </div>
+        <div class="p-3">
+          <p class="text-sm font-medium text-slate-200">Use Neon vs Supabase?</p>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-[10px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded">84</span>
+            <span class="text-[10px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded">Decided</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Node 3: DOC (with Raj's selection ring) -->
+    <div class="absolute" style="top: 300px; left: 350px;">
+      <div class="absolute -inset-2 rounded-xl border-2 border-amber-400 selection-pulse" style="background: rgba(245,158,11,0.15);"></div>
+      <div class="absolute -top-6 left-0 flex items-center gap-1">
+        <div class="w-4 h-4 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[6px] font-bold">RK</div>
+        <span class="text-[9px] text-amber-400 font-medium bg-amber-500/10 px-1.5 py-0.5 rounded">Raj is viewing</span>
+      </div>
+      <div class="w-56 bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
+        <div class="px-3 py-1.5 bg-emerald-500/10 border-b border-slate-700 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Doc</span>
+        </div>
+        <div class="p-3">
+          <p class="text-sm font-medium text-slate-200">Product Requirements Doc</p>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-[10px] text-slate-500">1,240 words</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SVG Edges -->
+    <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+      <line x1="456" y1="140" x2="540" y2="140" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+      <line x1="328" y1="200" x2="400" y2="300" stroke="#334155" stroke-width="2" stroke-dasharray="6,4"/>
+    </svg>
+
+    <!-- Priya's Cursor -->
+    <div class="absolute cursor-animate-1 pointer-events-none" style="z-index: 50; top: 180px; left: 420px;">
+      <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+        <path d="M1 1L1 16L5 12L9 19L12 17.5L8 11L14 11L1 1Z" fill="#F43F5E" stroke="#1E293B" stroke-width="1"/>
+      </svg>
+      <div class="ml-4 -mt-1 px-2 py-0.5 bg-rose-500 rounded text-[9px] text-white font-medium whitespace-nowrap shadow-lg">Priya Sharma</div>
+    </div>
+
+    <!-- Raj's Cursor -->
+    <div class="absolute cursor-animate-2 pointer-events-none" style="z-index: 50; top: 340px; left: 620px;">
+      <svg width="16" height="20" viewBox="0 0 16 20" fill="none">
+        <path d="M1 1L1 16L5 12L9 19L12 17.5L8 11L14 11L1 1Z" fill="#F59E0B" stroke="#1E293B" stroke-width="1"/>
+      </svg>
+      <div class="ml-4 -mt-1 px-2 py-0.5 bg-amber-500 rounded text-[9px] text-white font-medium whitespace-nowrap shadow-lg">Raj Kumar</div>
+    </div>
+
+    <!-- Thread Panel (right side) with typing indicator -->
+    <div class="absolute right-0 top-0 bottom-0 w-80 bg-slate-900 border-l border-slate-700 z-20" style="height: calc(100vh - 48px);">
+      <div class="px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded font-medium">DECISION</span>
+          <span class="text-xs font-semibold text-slate-200">Thread</span>
+        </div>
+        <span class="text-[10px] text-slate-500">4 messages</span>
+      </div>
+
+      <div class="p-4 space-y-4 overflow-y-auto" style="height: calc(100% - 140px);">
+        <!-- Message 1 -->
+        <div class="flex gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[8px] font-bold shrink-0">RK</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-200">Raj Kumar</span>
+              <span class="text-[10px] text-slate-600">10:30 AM</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">I've been comparing Neon and Supabase. Neon has better serverless scaling for our use case.</p>
+          </div>
+        </div>
+
+        <!-- Message 2 -->
+        <div class="flex gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[8px] font-bold shrink-0">AP</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-200">Avas Patel</span>
+              <span class="text-[10px] text-slate-600">10:45 AM</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Agreed. The branching feature is crucial for our preview environments too.</p>
+          </div>
+        </div>
+
+        <!-- Message 3 -->
+        <div class="flex gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[8px] font-bold shrink-0">PS</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-200">Priya Sharma</span>
+              <span class="text-[10px] text-slate-600">11:02 AM</span>
+              <!-- Live indicator -->
+              <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">What about the Drizzle ORM integration? Does Neon work well with it?</p>
+          </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="flex gap-2.5">
+          <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[8px] font-bold shrink-0">RK</div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-medium text-slate-300">Raj Kumar</span>
+            <div class="typing-indicator flex items-center gap-0.5 px-2 py-1 bg-slate-800 rounded-lg">
+              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+              <span class="w-1.5 h-1.5 bg-slate-500 rounded-full"></span>
+            </div>
+            <span class="text-[9px] text-slate-600">typing...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thread Input -->
+      <div class="absolute bottom-0 left-0 right-0 p-3 border-t border-slate-700 bg-slate-900">
+        <div class="flex items-center gap-2">
+          <input type="text" placeholder="Reply to thread..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50">
+          <button class="w-8 h-8 bg-[#4F6EF7] rounded-lg flex items-center justify-center hover:bg-[#3D5BD4]">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+          </button>
+        </div>
+        <!-- Active users in thread -->
+        <div class="flex items-center gap-2 mt-2">
+          <div class="flex -space-x-1">
+            <div class="w-4 h-4 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 border border-slate-900 flex items-center justify-center text-[5px] font-bold">PS</div>
+            <div class="w-4 h-4 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 border border-slate-900 flex items-center justify-center text-[5px] font-bold">RK</div>
+          </div>
+          <span class="text-[9px] text-slate-600">Priya and Raj are in this thread</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- "Join" notification toast -->
+    <div class="absolute bottom-6 left-6 z-30">
+      <div class="flex items-center gap-2 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg shadow-lg">
+        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[7px] font-bold">RK</div>
+        <span class="text-xs text-slate-400"><span class="text-slate-300 font-medium">Raj Kumar</span> joined the canvas</span>
+        <span class="text-[10px] text-slate-600">just now</span>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

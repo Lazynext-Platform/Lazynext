@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Data Export</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+  <style>
+    @keyframes progress { from { width: 0%; } to { width: 100%; } }
+    .progress-bar { animation: progress 3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 space-y-1 text-sm">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">&#9638; Canvas</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">&#10003; Decisions</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-slate-200 font-medium">&#9881; Settings</a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto">
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center px-4 sticky top-0 z-10">
+        <span class="text-sm font-semibold">Settings</span>
+        <span class="text-slate-600 mx-2">/</span>
+        <span class="text-sm text-slate-400">Data Export</span>
+      </header>
+
+      <div class="p-6 max-w-3xl mx-auto space-y-6">
+
+        <!-- Header -->
+        <div>
+          <h1 class="text-lg font-bold">Export Your Data</h1>
+          <p class="text-sm text-slate-400 mt-1">Download a complete copy of your workspace data. Your data is always yours.</p>
+        </div>
+
+        <!-- Data Portability Notice -->
+        <div class="bg-[#4F6EF7]/5 border border-[#4F6EF7]/20 rounded-lg p-4 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-[#4F6EF7]/10 flex items-center justify-center shrink-0">
+            <span class="text-[#4F6EF7] text-sm">&#128274;</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-[#4F6EF7]">Your data, your rules</p>
+            <p class="text-xs text-slate-400 mt-0.5">Lazynext supports full data portability. Export everything at any time, in standard formats. No vendor lock-in.</p>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="space-y-4">
+
+          <!-- Full Workspace Export -->
+          <div class="bg-slate-900 border border-slate-700 rounded-lg p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-sm font-semibold flex items-center gap-2">
+                  Full Workspace Export
+                  <span class="px-1.5 py-0.5 bg-green-500/15 text-green-400 text-[9px] rounded font-medium">Recommended</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-1">Export everything — all workflows, nodes, edges, decisions, threads, and metadata.</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <div>
+                <label class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Format</label>
+                <select id="exportFormat" class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-[#4F6EF7]/50">
+                  <option value="json">JSON (recommended)</option>
+                  <option value="csv">CSV (flat tables)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Scope</label>
+                <select class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none">
+                  <option>All workflows</option>
+                  <option>Q2 Product Sprint</option>
+                  <option>Client Onboarding</option>
+                  <option>Bug Triage</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-md p-3 mt-4">
+              <p class="text-[10px] text-slate-500 font-medium uppercase mb-2">Export includes</p>
+              <div class="grid grid-cols-2 gap-1.5 text-xs text-slate-400">
+                <span>&#10003; 3 workflows</span>
+                <span>&#10003; 47 decisions</span>
+                <span>&#10003; 84 nodes</span>
+                <span>&#10003; 56 edges</span>
+                <span>&#10003; 23 threads (128 messages)</span>
+                <span>&#10003; 12 docs</span>
+                <span>&#10003; Quality scores &amp; outcomes</span>
+                <span>&#10003; All metadata &amp; timestamps</span>
+              </div>
+            </div>
+
+            <button onclick="startExport()" id="exportBtn" class="mt-4 w-full py-2.5 bg-[#4F6EF7] text-white text-sm font-medium rounded-md hover:bg-[#3D5BD4]">
+              Export Full Workspace
+            </button>
+
+            <!-- Progress (hidden initially) -->
+            <div id="exportProgress" class="hidden mt-4">
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="text-slate-300">Preparing export...</span>
+                <span class="text-slate-500" id="exportPercent">0%</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-2">
+                <div class="bg-[#4F6EF7] h-2 rounded-full progress-bar" id="exportBar"></div>
+              </div>
+            </div>
+
+            <!-- Success (hidden initially) -->
+            <div id="exportSuccess" class="hidden mt-4 bg-green-500/5 border border-green-500/20 rounded-lg p-4 text-center">
+              <span class="text-green-400 text-xl">&#10003;</span>
+              <h4 class="text-sm font-semibold text-green-400 mt-1">Export Ready!</h4>
+              <p class="text-xs text-slate-400 mt-0.5">acme-corp-export-2026-04-04.json (2.4 MB)</p>
+              <button class="mt-3 px-5 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600">Download File</button>
+            </div>
+          </div>
+
+          <!-- Decisions-Only Export -->
+          <div class="bg-slate-900 border border-slate-700 rounded-lg p-5">
+            <h3 class="text-sm font-semibold">Decisions Only Export</h3>
+            <p class="text-xs text-slate-400 mt-1">Export just your decision log — questions, resolutions, rationale, quality scores, and outcomes.</p>
+            <div class="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Format</label>
+                <select class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none">
+                  <option>JSON</option>
+                  <option>CSV</option>
+                  <option>PDF Report</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] text-slate-400 uppercase tracking-wider font-medium">Date Range</label>
+                <select class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none">
+                  <option>All time</option>
+                  <option>Last 30 days</option>
+                  <option>Last 90 days</option>
+                  <option>This year</option>
+                </select>
+              </div>
+            </div>
+            <button class="mt-4 w-full py-2 bg-slate-800 text-slate-300 text-sm rounded-md hover:bg-slate-700 border border-slate-700">Export 47 Decisions</button>
+          </div>
+
+          <!-- Export History -->
+          <div class="bg-slate-900 border border-slate-700 rounded-lg p-5">
+            <h3 class="text-sm font-semibold mb-3">Export History</h3>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between px-3 py-2 bg-slate-800/50 rounded-md">
+                <div>
+                  <p class="text-xs text-slate-300">Full workspace export (JSON)</p>
+                  <p class="text-[10px] text-slate-500">Apr 1, 2026 &middot; 2.1 MB</p>
+                </div>
+                <button class="text-xs text-[#4F6EF7] hover:underline">Re-download</button>
+              </div>
+              <div class="flex items-center justify-between px-3 py-2 bg-slate-800/50 rounded-md">
+                <div>
+                  <p class="text-xs text-slate-300">Decisions export (CSV)</p>
+                  <p class="text-[10px] text-slate-500">Mar 15, 2026 &middot; 48 KB</p>
+                </div>
+                <button class="text-xs text-[#4F6EF7] hover:underline">Re-download</button>
+              </div>
+              <div class="flex items-center justify-between px-3 py-2 bg-slate-800/50 rounded-md">
+                <div>
+                  <p class="text-xs text-slate-300">Decisions report (PDF)</p>
+                  <p class="text-[10px] text-slate-500">Mar 1, 2026 &middot; 320 KB</p>
+                </div>
+                <button class="text-xs text-[#4F6EF7] hover:underline">Re-download</button>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-600 mt-3">Exports are available for 30 days after creation.</p>
+          </div>
+
+          <!-- API Export Note -->
+          <div class="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-slate-500 text-sm mt-0.5">&#128268;</span>
+              <div>
+                <p class="text-xs text-slate-400"><strong class="text-slate-300">API access:</strong> You can also export data programmatically via the Lazynext API. Available on Pro and Business plans.</p>
+                <p class="text-[10px] text-slate-500 mt-1">GET /api/v1/export/workspace &middot; GET /api/v1/export/decisions</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function startExport() {
+      const btn = document.getElementById('exportBtn');
+      const progress = document.getElementById('exportProgress');
+      const success = document.getElementById('exportSuccess');
+      btn.disabled = true;
+      btn.textContent = 'Preparing...';
+      btn.classList.add('opacity-50');
+      progress.classList.remove('hidden');
+
+      let pct = 0;
+      const interval = setInterval(() => {
+        pct += Math.random() * 15;
+        if (pct >= 100) {
+          pct = 100;
+          clearInterval(interval);
+          setTimeout(() => {
+            progress.classList.add('hidden');
+            success.classList.remove('hidden');
+            btn.classList.add('hidden');
+          }, 500);
+        }
+        document.getElementById('exportPercent').textContent = Math.round(pct) + '%';
+        document.getElementById('exportBar').style.width = pct + '%';
+      }, 400);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazynext — Activity Feed & Audit Log</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] } } } }</script>
+</head>
+<body class="bg-slate-950 text-slate-50 font-sans min-h-screen">
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-60 bg-slate-900 border-r border-slate-700 flex flex-col shrink-0">
+      <div class="p-4 border-b border-slate-700">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#4F6EF7] flex items-center justify-center text-white font-bold text-sm">L</div>
+          <span class="font-semibold text-sm">Acme Corp</span>
+        </div>
+      </div>
+      <nav class="flex-1 p-3 text-sm space-y-1">
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Home</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Canvas</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Tasks</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md text-slate-400 hover:bg-slate-800">Decisions</a>
+        <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-800 text-white font-medium">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Activity
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 overflow-y-auto">
+      <header class="h-12 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-6 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <h1 class="text-sm font-semibold text-white">Activity</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <!-- View Toggle -->
+          <div class="bg-slate-800 border border-slate-700 rounded-lg p-0.5 flex">
+            <button onclick="switchTab('feed')" id="btnFeed" class="px-3 py-1.5 rounded-md text-xs font-medium bg-slate-700 text-white">Feed</button>
+            <button onclick="switchTab('audit')" id="btnAudit" class="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white">Audit Log</button>
+          </div>
+          <!-- Filter -->
+          <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-400 focus:outline-none">
+            <option>All activity</option>
+            <option>Tasks</option>
+            <option>Decisions</option>
+            <option>Docs</option>
+            <option>Threads</option>
+            <option>Members</option>
+          </select>
+        </div>
+      </header>
+
+      <!-- ========== ACTIVITY FEED ========== -->
+      <div id="tabFeed" class="p-6 max-w-3xl mx-auto">
+
+        <!-- Today -->
+        <div class="mb-8">
+          <div class="flex items-center gap-3 mb-4">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Today</h2>
+            <div class="flex-1 h-px bg-slate-800"></div>
+          </div>
+
+          <div class="space-y-0">
+            <!-- Activity item -->
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[9px] font-bold text-white">AP</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 6v12m6-6H6"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Avas Patel</span> created task <span class="text-blue-400 font-medium cursor-pointer hover:underline">Set up monitoring alerts</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">10 minutes ago</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded">TASK</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[9px] font-bold text-white">PS</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-orange-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Priya Sharma</span> logged decision <span class="text-orange-400 font-medium cursor-pointer hover:underline">Switch to Turborepo for monorepo</span> with quality score <span class="text-emerald-400 font-bold">78</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">32 minutes ago</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded">DECISION</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[9px] font-bold text-white">RK</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Raj Kumar</span> replied in thread <span class="text-purple-400 font-medium cursor-pointer hover:underline">API schema discussion</span></p>
+                <div class="bg-slate-800/50 rounded-lg p-2 mt-1.5 border-l-2 border-purple-500/30">
+                  <p class="text-xs text-slate-400">"I think we should go with REST for v1 and add GraphQL later once we have more complex queries..."</p>
+                </div>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">1 hour ago</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-purple-500/10 text-purple-400 rounded">THREAD</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[9px] font-bold text-white">AP</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Avas Patel</span> updated doc <span class="text-emerald-400 font-medium cursor-pointer hover:underline">Technical Architecture v2</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">2 hours ago</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded">DOC</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-[9px] font-bold text-white">NK</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Neha Krishnan</span> moved <span class="text-blue-400 font-medium cursor-pointer hover:underline">User auth with Clerk</span> to <span class="text-purple-400 font-medium">In Review</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">3 hours ago</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded">TASK</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Yesterday -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Yesterday</h2>
+            <div class="flex-1 h-px bg-slate-800"></div>
+          </div>
+
+          <div class="space-y-0">
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[9px] font-bold text-white">PS</div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-cyan-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">Priya Sharma</span> created pulse <span class="text-cyan-400 font-medium cursor-pointer hover:underline">Sprint retrospective</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">Yesterday at 5:30 PM</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded">PULSE</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-3 py-3 border-b border-slate-800/50">
+              <div class="relative">
+                <div class="w-8 h-8 rounded-full bg-[#4F6EF7]/20 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-[#4F6EF7]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
+                </div>
+                <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 6v12m6-6H6"/></svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-slate-300"><span class="font-medium text-white">David Miller</span> joined the workspace as <span class="text-slate-400 font-medium">Guest</span></p>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] text-slate-600">Yesterday at 2:15 PM</span>
+                  <span class="text-[10px] px-1.5 py-0.5 bg-slate-500/10 text-slate-400 rounded">MEMBER</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== AUDIT LOG ========== -->
+      <div id="tabAudit" class="hidden p-6 max-w-4xl mx-auto">
+        <!-- Audit log header -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] px-2 py-0.5 bg-amber-500/15 text-amber-400 rounded-full font-medium">Business Plan</span>
+            <span class="text-xs text-slate-500">Detailed log of all workspace actions</span>
+          </div>
+          <button class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-400 hover:text-white">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Export CSV
+          </button>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden">
+          <!-- Table Header -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-3 border-b border-slate-800 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+            <div class="col-span-2">Timestamp</div>
+            <div class="col-span-2">User</div>
+            <div class="col-span-2">Action</div>
+            <div class="col-span-3">Target</div>
+            <div class="col-span-2">Details</div>
+            <div class="col-span-1">IP</div>
+          </div>
+
+          <!-- Audit rows -->
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 5, 10:32 AM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[7px] font-bold text-white">AP</div>
+              <span class="text-slate-300">Avas Patel</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-blue-500/10 text-blue-400 rounded">created</span></div>
+            <div class="col-span-3 text-slate-400">Task: Set up monitoring alerts</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">Priority: High</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">103.21.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 5, 10:00 AM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[7px] font-bold text-white">PS</div>
+              <span class="text-slate-300">Priya Sharma</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded">decided</span></div>
+            <div class="col-span-3 text-slate-400">Decision: Switch to Turborepo</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">Score: 78</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">103.21.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 5, 09:28 AM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-[7px] font-bold text-white">RK</div>
+              <span class="text-slate-300">Raj Kumar</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-purple-500/10 text-purple-400 rounded">replied</span></div>
+            <div class="col-span-3 text-slate-400">Thread: API schema discussion</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">Message #12</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">49.37.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 5, 08:15 AM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-[7px] font-bold text-white">AP</div>
+              <span class="text-slate-300">Avas Patel</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded">updated</span></div>
+            <div class="col-span-3 text-slate-400">Doc: Technical Architecture v2</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">Section 3 edited</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">103.21.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 5, 07:45 AM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-[7px] font-bold text-white">NK</div>
+              <span class="text-slate-300">Neha Krishnan</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded">moved</span></div>
+            <div class="col-span-3 text-slate-400">Task: User auth with Clerk</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">→ In Review</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">49.37.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 border-b border-slate-800/50 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 4, 05:30 PM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-gradient-to-br from-rose-500 to-pink-500 flex items-center justify-center text-[7px] font-bold text-white">PS</div>
+              <span class="text-slate-300">Priya Sharma</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded">created</span></div>
+            <div class="col-span-3 text-slate-400">Pulse: Sprint retrospective</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">5 questions</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">103.21.x.x</div>
+          </div>
+
+          <div class="grid grid-cols-12 gap-4 px-5 py-2.5 items-center text-xs hover:bg-slate-800/30">
+            <div class="col-span-2 text-slate-500 font-mono text-[10px]">Apr 4, 02:15 PM</div>
+            <div class="col-span-2 flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center text-[7px] font-bold text-slate-400">DM</div>
+              <span class="text-slate-300">David Miller</span>
+            </div>
+            <div class="col-span-2"><span class="text-[10px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded">joined</span></div>
+            <div class="col-span-3 text-slate-400">Workspace: Acme Corp</div>
+            <div class="col-span-2 text-slate-600 text-[10px]">Role: Guest</div>
+            <div class="col-span-1 text-slate-600 font-mono text-[9px]">72.14.x.x</div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-4">
+          <span class="text-[10px] text-slate-500">Showing 1–7 of 156 events</span>
+          <div class="flex items-center gap-1">
+            <button class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[10px] text-slate-500 cursor-not-allowed opacity-50">Previous</button>
+            <button class="px-2.5 py-1.5 bg-slate-700 border border-slate-600 rounded-md text-[10px] text-white">1</button>
+            <button class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[10px] text-slate-400 hover:text-white">2</button>
+            <button class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[10px] text-slate-400 hover:text-white">3</button>
+            <button class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-md text-[10px] text-slate-400 hover:text-white">Next</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function switchTab(tab) {
+      document.getElementById('tabFeed').classList.toggle('hidden', tab !== 'feed');
+      document.getElementById('tabAudit').classList.toggle('hidden', tab !== 'audit');
+      document.getElementById('btnFeed').className = tab === 'feed'
+        ? 'px-3 py-1.5 rounded-md text-xs font-medium bg-slate-700 text-white'
+        : 'px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white';
+      document.getElementById('btnAudit').className = tab === 'audit'
+        ? 'px-3 py-1.5 rounded-md text-xs font-medium bg-slate-700 text-white'
+        : 'px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-white';
+    }
+  </script>
+</body>
+</html>
