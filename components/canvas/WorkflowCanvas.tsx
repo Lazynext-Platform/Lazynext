@@ -24,6 +24,7 @@ import { TableNode } from './nodes/TableNode'
 import { CanvasToolbar } from './panels/CanvasToolbar'
 import { NodeDetailPanel } from './panels/NodeDetailPanel'
 import { CanvasContextMenu } from './panels/CanvasContextMenu'
+import { WorkflowEdge } from './edges/WorkflowEdge'
 import { useUIStore } from '@/stores/ui.store'
 import type { NodeType } from '@/lib/utils/constants'
 
@@ -35,6 +36,10 @@ const nodeTypes = {
   pulse: PulseNode,
   automation: AutomationNode,
   table: TableNode,
+}
+
+const edgeTypes = {
+  workflow: WorkflowEdge,
 }
 
 const defaultNodes: Node[] = [
@@ -154,11 +159,12 @@ export function WorkflowCanvas() {
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         className="bg-slate-950"
         defaultEdgeOptions={{
           style: { stroke: '#475569', strokeWidth: 2 },
-          type: 'smoothstep',
+          type: 'workflow',
         }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#1E293B" />
