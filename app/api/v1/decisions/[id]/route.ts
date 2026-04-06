@@ -1,6 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db/client'
+import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { decisions } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -18,6 +18,7 @@ const updateSchema = z.object({
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const decision = await db.query.decisions.findFirst({
     where: eq(decisions.id, params.id),
@@ -30,6 +31,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = updateSchema.safeParse(body)
@@ -58,6 +60,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   await db.delete(decisions).where(eq(decisions.id, params.id))
   return NextResponse.json({ data: { deleted: true }, error: null })

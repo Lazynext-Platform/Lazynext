@@ -1,6 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db/client'
+import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { decisions } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { z } from 'zod'
@@ -20,6 +20,7 @@ const createSchema = z.object({
 export async function GET(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
@@ -38,6 +39,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)

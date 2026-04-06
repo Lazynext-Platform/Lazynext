@@ -1,6 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db/client'
+import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { messages, threads } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
@@ -17,6 +17,7 @@ export async function GET(
 ) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const { nodeId } = params
 
@@ -40,6 +41,7 @@ export async function POST(
 ) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const { nodeId } = params
   const body = await req.json()

@@ -1,6 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db/client'
+import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { decisions } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
@@ -10,6 +10,7 @@ import { DECISION_QUALITY_PROMPT } from '@/lib/ai/prompts'
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
 
   const decision = await db.query.decisions.findFirst({
     where: eq(decisions.id, params.id),

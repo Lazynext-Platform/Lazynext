@@ -2,10 +2,17 @@ import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
 import * as schema from './schema'
 
+const hasValidDatabaseUrl =
+  !!process.env.DATABASE_URL &&
+  !process.env.DATABASE_URL.includes('placeholder') &&
+  process.env.DATABASE_URL.startsWith('postgres')
+
+export { hasValidDatabaseUrl }
+
 function createDb() {
   const url = process.env.DATABASE_URL
-  if (!url) {
-    throw new Error('DATABASE_URL is not set')
+  if (!url || !hasValidDatabaseUrl) {
+    throw new Error('DATABASE_URL is not configured. Set a valid Neon PostgreSQL connection string in .env.local')
   }
   const sql = neon(url)
   return drizzle(sql, { schema })
