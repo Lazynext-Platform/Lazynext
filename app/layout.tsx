@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import './globals.css'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
   title: 'Lazynext — The Anti-Software Workflow Platform',
@@ -29,7 +32,7 @@ export default function RootLayout({
       }}
     >
       <html lang="en" className="dark">
-        <body className="min-h-screen bg-[#020617] font-sans antialiased">
+        <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
           {children}
           <Toaster
             theme="dark"

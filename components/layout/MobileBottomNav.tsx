@@ -2,14 +2,15 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Network, GitBranch, Activity, Settings } from 'lucide-react'
+import { LayoutDashboard, Network, ListTodo, GitBranch, Activity, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 const items = [
   { href: '', icon: LayoutDashboard, label: 'Home' },
   { href: '/canvas/default', icon: Network, label: 'Canvas' },
+  { href: '/tasks', icon: ListTodo, label: 'Tasks' },
   { href: '/decisions', icon: GitBranch, label: 'Decisions' },
-  { href: '/pulse', icon: Activity, label: 'Pulse' },
+  { href: '/activity', icon: Activity, label: 'Activity' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
