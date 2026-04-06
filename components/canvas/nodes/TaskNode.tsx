@@ -2,19 +2,27 @@
 
 import { memo } from 'react'
 import { type NodeProps } from '@xyflow/react'
-import { CheckSquare, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import { NodeWrapper } from './NodeWrapper'
+
+const priorityColors: Record<string, string> = {
+  urgent: 'bg-red-500',
+  high: 'bg-orange-500',
+  medium: 'bg-yellow-500',
+  low: 'bg-slate-400',
+}
+
+const statusColors: Record<string, string> = {
+  backlog: 'bg-slate-400',
+  todo: 'bg-slate-400',
+  in_progress: 'bg-blue-500',
+  in_review: 'bg-purple-500',
+  done: 'bg-emerald-500',
+  cancelled: 'bg-red-500',
+}
 
 export const TaskNode = memo(function TaskNode({ data, selected }: NodeProps) {
   const d = data as Record<string, string>
-  const statusColors: Record<string, string> = {
-    backlog: 'bg-slate-400',
-    todo: 'bg-slate-400',
-    in_progress: 'bg-blue-500',
-    in_review: 'bg-purple-500',
-    done: 'bg-emerald-500',
-    cancelled: 'bg-red-500',
-  }
 
   return (
     <NodeWrapper type="task" selected={selected}>
@@ -26,11 +34,17 @@ export const TaskNode = memo(function TaskNode({ data, selected }: NodeProps) {
             {d.status.replace('_', ' ')}
           </span>
         )}
+        {d.priority && (
+          <span className={`h-2 w-2 rounded-full ${priorityColors[d.priority] || 'bg-slate-400'}`} title={d.priority} />
+        )}
         {d.assignee && (
           <span className="flex items-center gap-1 text-[10px] text-slate-600">
             <User className="h-3 w-3" />
             {d.assignee}
           </span>
+        )}
+        {d.dueDate && (
+          <span className="text-[10px] text-slate-500">{d.dueDate}</span>
         )}
       </div>
     </NodeWrapper>
