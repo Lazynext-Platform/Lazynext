@@ -2,7 +2,7 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Current Milestone**: v1.0 MVP
-> **Last Updated**: 2026-04-05
+> **Last Updated**: 2026-04-06
 
 ---
 
@@ -12,13 +12,13 @@
 |---|---|
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 (all features fully designed via Blueprint) |
-| 🟢 Complete (Development) | 0 |
-| 🟡 In Progress (awaiting merge) | 17 |
-| 🔴 Not Started | 21 |
+| 🟢 Complete (Development) | 38 |
+| 🟡 In Progress (awaiting merge) | 38 (all on `feature/01-landing-page`) |
+| 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 
 **Design Progress**: ██████████ 100%
-**Development Progress**: █████░░░░░ ~45%
+**Development Progress**: ██████████ 100%
 
 ---
 
@@ -58,24 +58,24 @@
 
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
-| 07 | Decision DNA View | ✅ Complete | 🔴 Not Started | #05, #09 | — | Log + view structured decisions |
-| 08 | Decision Health Dashboard | ✅ Complete | 🔴 Not Started | #07 | — | Analytics for decision quality |
-| 12 | Workspace Settings | ✅ Complete | 🔴 Not Started | #05 | — | Workspace config |
-| 13 | Billing & Subscription | ✅ Complete | 🔴 Not Started | #12 | — | Stripe + Razorpay |
-| 15 | Import Modal | ✅ Complete | 🔴 Not Started | #05 | — | CSV, JSON, Notion import |
-| 16 | Pulse Dashboard | ✅ Complete | 🔴 Not Started | #05 | — | Team activity metrics |
-| 17 | Automation Builder | ✅ Complete | 🔴 Not Started | #05 | — | Trigger-action workflows |
-| 18 | Template Marketplace | ✅ Complete | 🔴 Not Started | #05 | — | Share and reuse canvases |
-| 19 | Email Templates | ✅ Complete | 🔴 Not Started | — | — | Transactional emails (Resend) |
-| 21 | Data Export | ✅ Complete | 🔴 Not Started | #05 | — | PDF, CSV, JSON export |
-| 22 | Upgrade & Paywall Modal | ✅ Complete | 🔴 Not Started | #13 | — | Free-to-paid conversion |
-| 27 | Real-time Collaboration | ✅ Complete | 🔴 Not Started | #05, #11 | — | Multi-cursor, presence |
-| 30 | Profile & Account Settings | ✅ Complete | 🔴 Not Started | #03 | — | User profile management |
-| 31 | Integrations Settings | ✅ Complete | 🔴 Not Started | #12 | — | Third-party connections |
-| 32 | Marketing Pages | ✅ Complete | 🔴 Not Started | #01 | — | About, blog, legal, etc. |
-| 34 | Team Member Management | ✅ Complete | 🔴 Not Started | #12 | — | Invite, roles, permissions |
-| 37 | Task Views (Kanban + List) | ✅ Complete | 🔴 Not Started | #05 | — | Alternative task views |
-| 38 | Activity Feed & Audit Log | ✅ Complete | 🔴 Not Started | #05 | — | Compliance / history |
+| 07 | Decision DNA View | ✅ Complete | � Awaiting Merge | #05, #09 | `feature/01-landing-page` | Built — Log Decision Modal, quality bars, health overview |
+| 08 | Decision Health Dashboard | ✅ Complete | 🟡 Awaiting Merge | #07 | `feature/01-landing-page` | Built — quality trends, outcome donut, burndown, makers table |
+| 12 | Workspace Settings | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 5-tab settings (general/members/billing/notifications/security) |
+| 13 | Billing & Subscription | ✅ Complete | 🟡 Awaiting Merge | #12 | `feature/01-landing-page` | Built — plan comparison, payment method, usage metrics |
+| 15 | Import Modal | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — 3-step wizard (Notion, Linear, Trello, CSV) |
+| 16 | Pulse Dashboard | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — workload bars, burndown SVG, LazyMind summary |
+| 17 | Automation Builder | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — WHEN/THEN rules, run history |
+| 18 | Template Marketplace | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — featured, install modal, gradient previews, categories |
+| 19 | Email Templates | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — invite, task assignment, weekly digest, decision digest |
+| 21 | Data Export | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — workspace/decisions export, history, API access |
+| 22 | Upgrade & Paywall Modal | ✅ Complete | 🟡 Awaiting Merge | #13 | `feature/01-landing-page` | Built — 4 variants (node/ai/health/full), plan cards |
+| 27 | Real-time Collaboration | ✅ Complete | 🟡 Awaiting Merge | #05, #11 | `feature/01-landing-page` | Built — cursor overlays, presence, typing indicators |
+| 30 | Profile & Account Settings | ✅ Complete | 🟡 Awaiting Merge | #03 | `feature/01-landing-page` | Built — 4 tabs (profile/security/preferences/sessions) |
+| 31 | Integrations Settings | ✅ Complete | 🟡 Awaiting Merge | #12 | `feature/01-landing-page` | Built — connected/available, API key, Business gating |
+| 32 | Marketing Pages | ✅ Complete | 🟡 Awaiting Merge | #01 | `feature/01-landing-page` | Built — About, Features, Changelog, Comparison, Blog |
+| 34 | Team Member Management | ✅ Complete | 🟡 Awaiting Merge | #12 | `feature/01-landing-page` | Built — role badges, stat bar, email chip invites |
+| 37 | Task Views (Kanban + List) | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — Kanban board + List table with filters |
+| 38 | Activity Feed & Audit Log | ✅ Complete | 🟡 Awaiting Merge | #05 | `feature/01-landing-page` | Built — Feed timeline + Audit table with pagination |
 
 **Phase 2 Total**: 18 features
 
@@ -87,8 +87,8 @@
 
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
-| 25 | Table Primitive | ✅ Complete | 🔴 Not Started | #05, #09 | — | Spreadsheet-like node type |
-| 36 | Decision Outcome Review | ✅ Complete | 🔴 Not Started | #07, #08 | — | Outcome tagging at scale |
+| 25 | Table Primitive | ✅ Complete | 🟡 Awaiting Merge | #05, #09 | `feature/01-landing-page` | Built — TablePanel with toolbar, inline editing, summary footer |
+| 36 | Decision Outcome Review | ✅ Complete | 🟡 Awaiting Merge | #07, #08 | `feature/01-landing-page` | Built — emoji outcomes, queue navigation, LazyMind suggestions |
 
 **Phase 3 Total**: 2 features
 
@@ -100,7 +100,7 @@
 
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
-| 35 | Public Shared Canvas | ✅ Complete | 🔴 Not Started | #05, #34 | — | Public/embed canvas sharing |
+| 35 | Public Shared Canvas | ✅ Complete | 🟡 Awaiting Merge | #05, #34 | `feature/01-landing-page` | Built — read-only view, share modal, watermark, analytics |
 
 **Phase 4 Total**: 1 feature
 
@@ -153,15 +153,23 @@
 
 | Criterion | Status |
 |---|---|
-| All Phase 1 features merged | ⬜ |
+| All Phase 1 features merged | ⬜ Awaiting merge to main |
 | All test plans passing | ⬜ |
-| Documentation complete | ⬜ |
+| Documentation complete | ✅ |
 | Deployment ready | ⬜ |
 
 ### Growth / v2.0
 
-**Target**: When Phase 2 features are complete
-**Features Included**: Phase 1 + Phase 2 (35 features)
+**Target**: When Phase 2-4 features are complete
+**Features Included**: All 38 features
+
+| Criterion | Status |
+|---|---|
+| All 38 features built | ✅ Complete |
+| All features on feature branch | ✅ `feature/01-landing-page` |
+| Merge to main | ⬜ Requires human approval |
+| Test coverage | ⬜ |
+| Deployment | ⬜ |
 
 ---
 

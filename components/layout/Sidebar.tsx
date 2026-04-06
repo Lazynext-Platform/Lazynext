@@ -17,6 +17,11 @@ import {
   MessageCircle,
   Plus,
   Users,
+  ListTodo,
+  CreditCard,
+  Download,
+  Puzzle,
+  Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui.store'
@@ -25,9 +30,19 @@ import { WorkspaceSelector } from './WorkspaceSelector'
 const navItems = [
   { href: '', icon: LayoutDashboard, label: 'Home' },
   { href: '/canvas/default', icon: Network, label: 'Canvas' },
+  { href: '/tasks', icon: ListTodo, label: 'Tasks' },
   { href: '/decisions', icon: GitBranch, label: 'Decisions' },
   { href: '/pulse', icon: Activity, label: 'Pulse' },
+  { href: '/automations', icon: Zap, label: 'Automations' },
   { href: '/templates', icon: FileText, label: 'Templates' },
+  { href: '/activity', icon: Clock, label: 'Activity' },
+]
+
+const settingsItems = [
+  { href: '/settings', icon: Settings, label: 'Settings' },
+  { href: '/members', icon: Users, label: 'Members' },
+  { href: '/billing', icon: CreditCard, label: 'Billing' },
+  { href: '/integrations', icon: Puzzle, label: 'Integrations' },
 ]
 
 const workflows = [
@@ -71,8 +86,36 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
       {/* Main nav */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin px-2 py-3">
-        {/* Workflows section */}
+        {/* Navigation */}
         <div>
+          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            Navigation
+          </p>
+          <div className="mt-2 space-y-0.5">
+            {navItems.map((item) => {
+              const href = `${base}${item.href}`
+              const isActive = item.href === '' ? pathname === base : pathname.startsWith(href)
+              return (
+                <Link
+                  key={item.label}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-brand/10 text-brand'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Workflows section */}
+        <div className="mt-6">
           <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
             Workflows
           </p>
@@ -124,28 +167,25 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
             Workspace
           </p>
           <div className="mt-2 space-y-0.5">
-            <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
-              <Users className="h-4 w-4" />
-              <span>Members</span>
-              <span className="ml-auto flex items-center -space-x-1">
-                <span className="h-4 w-4 rounded-full bg-indigo-500 border border-slate-900" />
-                <span className="h-4 w-4 rounded-full bg-emerald-500 border border-slate-900" />
-                <span className="h-4 w-4 rounded-full bg-amber-500 border border-slate-900" />
-                <span className="ml-1 text-[10px] text-slate-500">4</span>
-              </span>
-            </button>
-            <Link
-              href={`${base}/settings`}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                pathname.includes('/settings')
-                  ? 'bg-brand/10 text-brand'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-              )}
-            >
-              <Settings className="h-4 w-4" />
-              Settings
-            </Link>
+            {settingsItems.map((item) => {
+              const href = `${base}${item.href}`
+              const isActive = pathname === href || (item.href !== '' && pathname.startsWith(href))
+              return (
+                <Link
+                  key={item.label}
+                  href={href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-brand/10 text-brand'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  )}
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </Link>
+              )
+            })}
           </div>
         </div>
       </nav>

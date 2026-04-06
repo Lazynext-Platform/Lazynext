@@ -5,10 +5,11 @@ import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 
 const navLinks = [
-  { label: 'Features', href: '/#features' },
-  { label: 'Pricing', href: '/#pricing' },
-  { label: 'Templates', href: '/templates' },
+  { label: 'Features', href: '/features' },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Compare', href: '/comparison' },
   { label: 'Blog', href: '/blog' },
+  { label: 'About', href: '/about' },
 ]
 
 export default function MarketingHeader() {

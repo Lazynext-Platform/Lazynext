@@ -3,9 +3,9 @@ import MarketingHeader from '@/components/marketing/MarketingHeader'
 
 const footerLinks = {
   Product: [
-    { label: 'Features', href: '/#features' },
+    { label: 'Features', href: '/features' },
     { label: 'Pricing', href: '/pricing' },
-    { label: 'Templates', href: '/templates' },
+    { label: 'Compare', href: '/comparison' },
     { label: 'Changelog', href: '/changelog' },
   ],
   Company: [
