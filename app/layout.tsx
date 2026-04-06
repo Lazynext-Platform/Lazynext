@@ -17,11 +17,35 @@ export const metadata: Metadata = {
   },
 }
 
+const hasValidClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_')
+  && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const content = (
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
+        {children}
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: '#1E293B',
+              border: '1px solid #334155',
+              color: '#F8FAFC',
+            },
+          }}
+        />
+      </body>
+    </html>
+  )
+
+  if (!hasValidClerkKeys) return content
+
   return (
     <ClerkProvider
       appearance={{
@@ -31,22 +55,7 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en" className="dark">
-        <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
-          {children}
-          <Toaster
-            theme="dark"
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: '#1E293B',
-                border: '1px solid #334155',
-                color: '#F8FAFC',
-              },
-            }}
-          />
-        </body>
-      </html>
+      {content}
     </ClerkProvider>
   )
 }

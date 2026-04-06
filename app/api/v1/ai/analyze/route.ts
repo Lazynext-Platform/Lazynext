@@ -1,10 +1,10 @@
-import { auth } from '@clerk/nextjs/server'
+import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { callLazyMind } from '@/lib/ai/lazymind'
 import { SUMMARIZE_DECISION_PROMPT, SUGGEST_NEXT_ACTIONS_PROMPT } from '@/lib/ai/prompts'
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const { action, context } = await req.json()

@@ -1,11 +1,11 @@
-import { auth } from '@clerk/nextjs/server'
+import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { nodes, decisions, workflows } from '@/lib/db/schema'
 import { eq, or, ilike, desc } from 'drizzle-orm'
 
 export async function GET(req: Request) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const url = new URL(req.url)

@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { workflows, workspaceMembers, workspaces } from '@/lib/db/schema'
@@ -12,7 +12,7 @@ const createSchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const url = new URL(req.url)
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const body = await req.json()

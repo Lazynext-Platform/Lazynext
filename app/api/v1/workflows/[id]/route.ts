@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { workflows } from '@/lib/db/schema'
@@ -11,7 +11,7 @@ const updateSchema = z.object({
 })
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const workflow = await db.query.workflows.findFirst({
@@ -24,7 +24,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const body = await req.json()
@@ -42,7 +42,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   await db.delete(workflows).where(eq(workflows.id, params.id))

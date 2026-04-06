@@ -1,10 +1,19 @@
 'use client'
 
-import { UserButton } from '@clerk/nextjs'
-import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus } from 'lucide-react'
+import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus, User } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { NotificationCenter } from '@/components/ui/NotificationCenter'
 import { cn } from '@/lib/utils/cn'
+
+const hasValidClerkKeys =
+  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_') &&
+  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
+
+let UserButton: React.ComponentType<{ appearance?: Record<string, unknown> }> | null = null
+if (hasValidClerkKeys) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  UserButton = require('@clerk/nextjs').UserButton
+}
 
 const presenceAvatars = [
   { initials: 'AP', color: 'bg-indigo-500' },
@@ -87,13 +96,19 @@ export function TopBar() {
         <NotificationCenter />
 
         {/* User */}
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: 'h-7 w-7',
-            },
-          }}
-        />
+        {UserButton ? (
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: 'h-7 w-7',
+              },
+            }}
+          />
+        ) : (
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-700 text-xs text-slate-300">
+            <User className="h-3.5 w-3.5" />
+          </div>
+        )}
       </div>
     </header>
   )

@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { decisions } from '@/lib/db/schema'
@@ -8,7 +8,7 @@ import { callLazyMind } from '@/lib/ai/lazymind'
 import { DECISION_QUALITY_PROMPT } from '@/lib/ai/prompts'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await auth()
+  const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const decision = await db.query.decisions.findFirst({
