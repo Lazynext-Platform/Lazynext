@@ -45,10 +45,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'NO_STRIPE_CUSTOMER', message: 'Workspace has no Stripe customer.' }, { status: 400 })
     }
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
     const session = await stripe.billingPortal.sessions.create({
       customer: workspace.stripeCustomerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${workspaceId}/billing`,
+      return_url: `${appUrl}/workspace/${workspaceId}/billing`,
     })
     return NextResponse.json({ url: session.url })
   } catch (err) {
