@@ -2,6 +2,7 @@ import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
+import Stripe from 'stripe'
 
 const checkoutSchema = z.object({
   plan: z.enum(['starter', 'pro', 'business']),
@@ -35,25 +36,28 @@ export async function POST(req: Request) {
     )
   }
 
-  // When Stripe is installed, create a checkout session:
-  // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-  // const session = await stripe.checkout.sessions.create({
-  //   mode: 'subscription',
-  //   line_items: [{ price: priceId, quantity: 1 }],
-  //   success_url: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${workspaceId}/settings?billing=success`,
-  //   cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${workspaceId}/billing`,
-  //   metadata: { workspaceId, userId },
-  // })
-  // return NextResponse.json({ url: session.url })
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: 'STRIPE_NOT_CONFIGURED', message: 'Set STRIPE_SECRET_KEY env var.' },
+      { status: 503 }
+    )
+  }
 
-  return NextResponse.json(
-    {
-      error: 'STRIPE_SDK_MISSING',
-      message: 'Install stripe package and uncomment checkout logic to enable billing.',
-      plan,
-      interval,
-      priceId,
-    },
-    { status: 501 }
-  )
+  try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${workspaceId}/settings?billing=success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/workspace/${workspaceId}/billing`,
+      metadata: { workspaceId, userId },
+    })
+    return NextResponse.json({ url: session.url })
+  } catch (err) {
+    console.error('Stripe checkout error:', err)
+    return NextResponse.json(
+      { error: 'STRIPE_ERROR', message: 'Failed to create checkout session.' },
+      { status: 500 }
+    )
+  }
 }

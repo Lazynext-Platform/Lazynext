@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
+import Stripe from 'stripe'
+import { db } from '@/lib/db/client'
+import { hasValidDatabaseUrl } from '@/lib/db/client'
+import { workspaces } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -9,13 +14,60 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'MISSING_SIGNATURE' }, { status: 400 })
   }
 
-  // Stripe webhook verification would go here
-  // For now, acknowledge the webhook
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'STRIPE_NOT_CONFIGURED' }, { status: 503 })
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
+
+  let event: Stripe.Event
   try {
-    // const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
-    // Handle: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted
+    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
+  } catch (err) {
+    console.error('Stripe webhook signature verification failed:', err)
+    return NextResponse.json({ error: 'WEBHOOK_SIGNATURE_INVALID' }, { status: 400 })
+  }
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+        const workspaceId = session.metadata?.workspaceId
+        if (workspaceId && hasValidDatabaseUrl) {
+          await db.update(workspaces).set({
+            stripeCustomerId: session.customer as string,
+            stripeSubscriptionId: session.subscription as string,
+            plan: (session.metadata?.plan as 'starter' | 'pro' | 'business') ?? 'starter',
+            updatedAt: new Date(),
+          }).where(eq(workspaces.id, workspaceId))
+        }
+        break
+      }
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
+        if (hasValidDatabaseUrl) {
+          await db.update(workspaces).set({
+            updatedAt: new Date(),
+          }).where(eq(workspaces.stripeSubscriptionId, subscription.id))
+        }
+        break
+      }
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+        if (hasValidDatabaseUrl) {
+          await db.update(workspaces).set({
+            plan: 'free',
+            stripeSubscriptionId: null,
+            updatedAt: new Date(),
+          }).where(eq(workspaces.stripeSubscriptionId, subscription.id))
+        }
+        break
+      }
+    }
+
     return NextResponse.json({ received: true })
-  } catch {
-    return NextResponse.json({ error: 'WEBHOOK_ERROR' }, { status: 400 })
+  } catch (err) {
+    console.error('Stripe webhook processing error:', err)
+    return NextResponse.json({ error: 'WEBHOOK_PROCESSING_ERROR' }, { status: 500 })
   }
 }

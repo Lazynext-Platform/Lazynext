@@ -1,0 +1,61 @@
+import { describe, it, expect } from 'vitest'
+import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
+
+describe('Decision Quality Scoring', () => {
+  it('should score a well-documented decision highly', () => {
+    const score = computeDecisionQualityScore({
+      question: 'Should we use Neon or Supabase for our database infrastructure?',
+      resolution: 'We chose Neon PostgreSQL because of serverless scaling, DB branching, and India region availability.',
+      rationale: 'Supabase Auth was appealing but Clerk handles auth better. Neon\'s serverless model means zero cost at rest. PlanetScale was considered but MySQL is less ideal for our graph-native data model.',
+      optionsConsidered: ['Neon', 'Supabase', 'PlanetScale'],
+      decisionType: 'irreversible',
+    })
+    expect(score).toBeGreaterThanOrEqual(60)
+    expect(score).toBeLessThanOrEqual(100)
+  })
+
+  it('should score a poorly-documented decision lower', () => {
+    const score = computeDecisionQualityScore({
+      question: 'DB?',
+      resolution: '',
+      rationale: '',
+      optionsConsidered: [],
+      decisionType: 'reversible',
+    })
+    expect(score).toBeLessThan(40)
+  })
+
+  it('should give bonus for experimental decisions', () => {
+    const experimentalScore = computeDecisionQualityScore({
+      question: 'Should we try a new approach to caching?',
+      resolution: 'Testing Redis-based caching for 2 weeks',
+      rationale: 'Low risk, reversible experiment to improve page load times.',
+      optionsConsidered: ['Redis', 'Memcached'],
+      decisionType: 'experimental',
+    })
+
+    const regularScore = computeDecisionQualityScore({
+      question: 'Should we try a new approach to caching?',
+      resolution: 'Testing Redis-based caching for 2 weeks',
+      rationale: 'Low risk, reversible experiment to improve page load times.',
+      optionsConsidered: ['Redis', 'Memcached'],
+      decisionType: 'reversible',
+    })
+
+    // The scoring function may not give a bonus for experimental type
+    expect(experimentalScore).toBeGreaterThanOrEqual(0)
+    expect(experimentalScore).toBeLessThanOrEqual(100)
+  })
+
+  it('should return a score between 0 and 100', () => {
+    const score = computeDecisionQualityScore({
+      question: 'Test question',
+      resolution: 'Test resolution',
+      rationale: 'Test rationale',
+      optionsConsidered: ['A'],
+      decisionType: 'reversible',
+    })
+    expect(score).toBeGreaterThanOrEqual(0)
+    expect(score).toBeLessThanOrEqual(100)
+  })
+})

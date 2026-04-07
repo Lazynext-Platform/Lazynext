@@ -2,6 +2,7 @@ import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { callLazyMind } from '@/lib/ai/lazymind'
 import { z } from 'zod'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const generateSchema = z.object({
   prompt: z.string().min(1).max(2000),
@@ -19,6 +20,9 @@ const systemPrompts: Record<string, string> = {
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   const body = await req.json()
   const parsed = generateSchema.safeParse(body)
