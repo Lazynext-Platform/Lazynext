@@ -7,7 +7,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  const { workspaceId } = await req.json()
+  let body: Record<string, unknown>
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
+  const { workspaceId } = body
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
 
   // Fetch the template workflow with nodes and edges

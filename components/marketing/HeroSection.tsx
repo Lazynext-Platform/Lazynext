@@ -130,6 +130,8 @@ export default function HeroSection() {
                 {heroNodes.map((node) => (
                   <div
                     key={node.type}
+                    role="article"
+                    aria-label={`${node.type}: ${node.title}`}
                     className={`float-anim w-44 rounded-xl border ${node.bg} ${node.border} px-5 py-4 text-left`}
                     style={{ animationDelay: node.delay }}
                   >

@@ -24,7 +24,8 @@ export async function POST(req: Request) {
   const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
-  const body = await req.json()
+  let body: unknown
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
   const parsed = generateSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })

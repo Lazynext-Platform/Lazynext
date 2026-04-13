@@ -11,14 +11,16 @@ export async function POST(req: Request) {
   const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
-  const { action, context } = await req.json()
+  let body: Record<string, unknown>
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
+  const { action, context } = body
 
   const prompts: Record<string, string> = {
     summarize: SUMMARIZE_DECISION_PROMPT,
     suggest: SUGGEST_NEXT_ACTIONS_PROMPT,
   }
 
-  const systemPrompt = prompts[action]
+  const systemPrompt = prompts[action as string]
   if (!systemPrompt) {
     return NextResponse.json({ error: 'INVALID_ACTION' }, { status: 400 })
   }

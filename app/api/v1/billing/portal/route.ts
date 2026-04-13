@@ -14,7 +14,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   }
 
-  const body = await req.json()
+  let body: unknown
+  try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
   const parsed = portalSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(

@@ -37,18 +37,18 @@ export function TopBar() {
         )}
 
         {/* Breadcrumb */}
-        <div className="hidden items-center gap-1 text-sm sm:flex">
-          <button className="flex items-center gap-1 font-semibold text-white hover:text-slate-300">
+        <nav aria-label="Breadcrumb" className="hidden items-center gap-1 text-sm sm:flex">
+          <button aria-label="Switch workspace" className="flex items-center gap-1 font-semibold text-white hover:text-slate-300">
             Acme Corp <ChevronDown className="h-3 w-3 text-slate-500" />
           </button>
-          <span className="text-slate-600">/</span>
-          <button className="flex items-center gap-1 font-medium text-slate-300 hover:text-white">
+          <span className="text-slate-600" aria-hidden="true">/</span>
+          <button aria-label="Switch workflow" className="flex items-center gap-1 font-medium text-slate-300 hover:text-white">
             Q2 Product Sprint <ChevronDown className="h-3 w-3 text-slate-500" />
           </button>
-        </div>
+        </nav>
 
         {/* New Workflow button */}
-        <button className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-800 hover:text-slate-300 lg:flex">
+        <button aria-label="Create new workflow" className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-800 hover:text-slate-300 lg:flex">
           <Plus className="h-3 w-3" /> New Workflow
         </button>
 
@@ -67,10 +67,11 @@ export function TopBar() {
 
       <div className="flex items-center gap-2">
         {/* Presence avatars */}
-        <div className="hidden items-center -space-x-2 lg:flex">
+        <div aria-label="Team members online" className="hidden items-center -space-x-2 lg:flex">
           {presenceAvatars.map((a) => (
             <div
               key={a.initials}
+              aria-label={`${a.initials} is online`}
               className={cn(
                 'flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-900 text-2xs font-bold text-white',
                 a.color
@@ -82,12 +83,12 @@ export function TopBar() {
         </div>
 
         {/* Share */}
-        <button className="hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 lg:flex">
+        <button aria-label="Share workflow" className="hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 lg:flex">
           <Share2 className="h-3.5 w-3.5" /> Share
         </button>
 
         {/* LazyMind AI */}
-        <button onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
+        <button aria-label="Open LazyMind AI assistant" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
           <Sparkles className="h-3.5 w-3.5" /> LazyMind
         </button>
 
