@@ -38,10 +38,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   try {
     const aiResponse = await callLazyMind(DECISION_QUALITY_PROMPT, prompt, 200)
     const parsed = JSON.parse(aiResponse.content)
-    qualityScore = parsed.score
-    qualityFeedback = parsed.feedback
+    if (typeof parsed.score === 'number' && typeof parsed.feedback === 'string') {
+      qualityScore = parsed.score
+      qualityFeedback = parsed.feedback
+    }
   } catch {
-    // Fall back to local score silently
+    // Fall back to local score — AI unavailable or returned invalid JSON
   }
 
   await db

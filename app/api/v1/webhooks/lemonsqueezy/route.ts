@@ -31,6 +31,18 @@ export async function POST(req: Request) {
     const eventName = event.meta?.event_name
     const customData = event.meta?.custom_data
     const attrs = event.data?.attributes
+    const eventId = event.meta?.event_id
+
+    // Idempotency: skip if we've already processed this event
+    if (eventId && hasValidDatabaseUrl) {
+      const { data: existing } = await db
+        .from('webhook_events')
+        .select('id')
+        .eq('event_id', String(eventId))
+        .maybeSingle()
+      if (existing) return NextResponse.json({ received: true, duplicate: true })
+      await db.from('webhook_events').insert({ event_id: String(eventId), event_name: eventName, processed_at: new Date().toISOString() }).select().maybeSingle()
+    }
 
     switch (eventName) {
       case 'subscription_created': {
