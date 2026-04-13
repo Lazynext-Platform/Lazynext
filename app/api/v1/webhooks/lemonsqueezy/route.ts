@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ received: true })
   } catch (err) {
-    console.error('Lemon Squeezy webhook processing error:', err)
+    if (process.env.NODE_ENV === 'development') console.error('Lemon Squeezy webhook processing error:', err)
     return NextResponse.json({ error: 'WEBHOOK_PROCESSING_ERROR' }, { status: 500 })
   }
 }

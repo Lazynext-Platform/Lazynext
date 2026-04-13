@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url: data?.data.attributes.url })
   } catch (err) {
-    console.error('Lemon Squeezy checkout error:', err)
+    if (process.env.NODE_ENV === 'development') console.error('Lemon Squeezy checkout error:', err)
     return NextResponse.json(
       { error: 'BILLING_ERROR', message: 'Failed to create checkout session.' },
       { status: 500 }

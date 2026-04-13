@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     // Lemon Squeezy provides a customer portal URL directly on the subscription
     return NextResponse.json({ url: workspace.ls_customer_portal_url })
   } catch (err) {
-    console.error('Billing portal error:', err)
+    if (process.env.NODE_ENV === 'development') console.error('Billing portal error:', err)
     return NextResponse.json({ error: 'BILLING_ERROR', message: 'Failed to get portal URL.' }, { status: 500 })
   }
 }
