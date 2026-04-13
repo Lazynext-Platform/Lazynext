@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const importSchema = z.object({
   source: z.enum(['notion-api', 'notion-zip', 'linear', 'trello', 'asana', 'csv']),
@@ -21,6 +22,9 @@ const importSchema = z.object({
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }

@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import crypto from 'crypto'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 function verifySignature(body: string, signature: string, secret: string): boolean {
   const hmac = crypto.createHmac('sha256', secret)
@@ -11,6 +12,10 @@ function verifySignature(body: string, signature: string, secret: string): boole
 }
 
 export async function POST(req: Request) {
+  const ip = headers().get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const rl = rateLimit(`webhook:${ip}`, RATE_LIMITS.webhook)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   const body = await req.text()
   const sig = headers().get('x-signature')
 

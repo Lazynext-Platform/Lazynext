@@ -2,6 +2,7 @@ import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const updateSchema = z.object({
   name: z.string().min(1).max(255).optional(),
@@ -11,6 +12,10 @@ const updateSchema = z.object({
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { data: workflow, error } = await db
@@ -30,6 +35,10 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   // Verify ownership before update
@@ -59,6 +68,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   // Verify ownership before delete

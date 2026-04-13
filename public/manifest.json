@@ -1,0 +1,16 @@
+{
+  "name": "Lazynext",
+  "short_name": "Lazynext",
+  "description": "The Anti-Software Workflow Platform — Tasks, docs, decisions, and AI unified in one graph.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#4F6EF7",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

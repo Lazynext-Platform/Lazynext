@@ -2,6 +2,7 @@ import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const messageSchema = z.object({
   content: z.string().min(1).max(5000),
@@ -15,6 +16,10 @@ export async function GET(
 ) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { nodeId } = params
@@ -52,6 +57,10 @@ export async function POST(
 ) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { nodeId } = params

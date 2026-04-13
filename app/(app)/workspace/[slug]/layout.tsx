@@ -1,15 +1,17 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useParams } from 'next/navigation'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { TopBar } from '@/components/layout/TopBar'
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import { ToastProvider } from '@/components/ui/ToastProvider'
-import { LazyMindPanel } from '@/components/lazymind/LazyMindPanel'
-import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
+
+const LazyMindPanel = dynamic(() => import('@/components/lazymind/LazyMindPanel').then(m => ({ default: m.LazyMindPanel })), { ssr: false })
+const KeyboardShortcutsModal = dynamic(() => import('@/components/ui/KeyboardShortcutsModal').then(m => ({ default: m.KeyboardShortcutsModal })), { ssr: false })
 
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const params = useParams()

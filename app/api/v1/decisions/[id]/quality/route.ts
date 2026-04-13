@@ -4,10 +4,15 @@ import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
 import { callLazyMind } from '@/lib/ai/lazymind'
 import { DECISION_QUALITY_PROMPT } from '@/lib/ai/prompts'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { data: decision, error: fetchError } = await db

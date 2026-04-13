@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
 import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const checkoutSchema = z.object({
   plan: z.enum(['starter', 'pro', 'business']),
@@ -15,6 +16,9 @@ export async function POST(req: Request) {
   if (!userId) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   }
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
