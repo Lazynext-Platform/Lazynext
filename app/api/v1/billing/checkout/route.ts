@@ -2,6 +2,7 @@ import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
+import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
@@ -34,6 +35,10 @@ export async function POST(req: Request) {
 
   const authorized = await verifyWorkspaceMember(userId, workspaceId)
   if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  if (!hasValidDatabaseUrl) {
+    return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
+  }
 
   const planConfig = PLANS[plan as Exclude<PlanId, 'free'>]
   const variantId = planConfig[interval]

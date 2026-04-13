@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, Copy, Check, Eye, Clock, Lock, Share2 } from 'lucide-react'
+import { useParams, notFound } from 'next/navigation'
+import { ExternalLink, Copy, Check, Eye, Lock, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Link from 'next/link'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const sampleNodes = [
   { id: '1', label: 'Product Roadmap', type: 'doc', x: 80, y: 60, color: 'bg-emerald-500' },
@@ -22,10 +25,19 @@ const sampleEdges = [
 ]
 
 export default function SharedCanvasPage() {
+  const params = useParams<{ id: string }>()
+  const shareId = params.id
+
+  if (!UUID_RE.test(shareId)) {
+    notFound()
+  }
   const [showShareModal, setShowShareModal] = useState(false)
   const [copied, setCopied] = useState(false)
 
   function handleCopy() {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href).catch(() => {})
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -42,11 +54,11 @@ export default function SharedCanvasPage() {
         <div className="flex items-center gap-3">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-2xs font-bold text-white">L</div>
           <div>
-            <h1 className="text-sm font-semibold text-slate-100">Sprint Planning — Q2 2026</h1>
+            <h1 className="text-sm font-semibold text-slate-100">Shared Canvas</h1>
             <div className="flex items-center gap-2 text-2xs text-slate-500">
               <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Read-only</span>
               <span>·</span>
-              <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Updated 2 hours ago</span>
+              <span className="font-mono">{shareId.slice(0, 8)}</span>
               <span>·</span>
               <span>5 nodes</span>
             </div>
