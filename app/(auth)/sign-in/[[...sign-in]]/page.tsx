@@ -66,7 +66,7 @@ export default function SignInPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
         </div>
@@ -76,7 +76,7 @@ export default function SignInPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
         </div>
@@ -84,7 +84,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-[#4F6EF7] px-4 py-3 text-sm font-semibold text-white hover:bg-[#3D5BD4] transition-colors disabled:opacity-50"
+          className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover transition-colors disabled:opacity-50"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>
@@ -92,7 +92,7 @@ export default function SignInPage() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Don&apos;t have an account?{' '}
-        <a href="/sign-up" className="text-[#4F6EF7] hover:text-[#3D5BD4]">Sign up</a>
+        <a href="/sign-up" className="text-brand hover:text-brand-hover">Sign up</a>
       </p>
     </div>
   )

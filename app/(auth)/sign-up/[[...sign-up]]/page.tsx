@@ -49,7 +49,7 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h2>
         <p className="text-slate-500 mb-4">We sent a confirmation link to <strong>{email}</strong></p>
-        <a href="/sign-in" className="text-[#4F6EF7] hover:text-[#3D5BD4]">← Back to sign in</a>
+        <a href="/sign-in" className="text-brand hover:text-brand-hover">← Back to sign in</a>
       </div>
     )
   }
@@ -86,7 +86,7 @@ export default function SignUpPage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
         </div>
@@ -96,7 +96,7 @@ export default function SignUpPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
         </div>
@@ -106,7 +106,7 @@ export default function SignUpPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             minLength={6}
             required
           />
@@ -115,7 +115,7 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-[#4F6EF7] px-4 py-3 text-sm font-semibold text-white hover:bg-[#3D5BD4] transition-colors disabled:opacity-50"
+          className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover transition-colors disabled:opacity-50"
         >
           {loading ? 'Creating account...' : 'Sign Up'}
         </button>
@@ -123,7 +123,7 @@ export default function SignUpPage() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Already have an account?{' '}
-        <a href="/sign-in" className="text-[#4F6EF7] hover:text-[#3D5BD4]">Sign in</a>
+        <a href="/sign-in" className="text-brand hover:text-brand-hover">Sign in</a>
       </p>
     </div>
   )

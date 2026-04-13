@@ -6,7 +6,7 @@ export default function ConsolidationMap() {
       <div className="mx-auto max-w-[1280px] px-6 text-center">
         <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           One tool.{' '}
-          <span className="text-[#4F6EF7]">One price.</span>
+          <span className="text-brand">One price.</span>
         </h2>
         <p className="mx-auto mb-16 max-w-xl text-lg text-slate-500">
           Stop paying six subscriptions for six half-solutions.
@@ -66,11 +66,11 @@ export default function ConsolidationMap() {
             </p>
           </div>
           <div>
-            <ArrowRight className="hidden h-8 w-8 text-[#4F6EF7] sm:inline-block" />
-            <ArrowDown className="h-8 w-8 text-[#4F6EF7] sm:hidden" />
+            <ArrowRight className="hidden h-8 w-8 text-brand sm:inline-block" />
+            <ArrowDown className="h-8 w-8 text-brand sm:hidden" />
           </div>
           <div className="text-center">
-            <p className="text-5xl font-extrabold text-[#4F6EF7]">$19</p>
+            <p className="text-5xl font-extrabold text-brand">$19</p>
             <p className="mt-1 text-sm text-slate-500">
               /seat/month (1 tool)
             </p>

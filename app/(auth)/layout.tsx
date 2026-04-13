@@ -32,7 +32,7 @@ export default function AuthLayout({
   return (
     <div className="flex min-h-screen">
       {/* Left Brand Panel — Desktop only */}
-      <div className="hidden bg-gradient-to-br from-[#4F6EF7] to-[#3D5BD4] lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
+      <div className="hidden bg-gradient-to-br from-brand to-brand-hover lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
         <div>
           {/* Logo */}
           <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export default function AuthLayout({
       <div className="flex w-full flex-col items-center justify-center bg-white p-6 sm:p-12 lg:w-1/2">
         {/* Mobile logo */}
         <div className="mb-8 flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#4F6EF7]">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
             <Zap className="h-4 w-4 text-white" />
           </div>
           <span className="text-xl font-bold text-slate-900">Lazynext</span>

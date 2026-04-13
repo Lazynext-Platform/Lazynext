@@ -65,15 +65,15 @@ export default function HeroSection() {
     <section className="gradient-hero pt-32 pb-24 md:pt-40 md:pb-32">
       <div className="mx-auto max-w-[1280px] px-6 text-center">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#4F6EF7]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#4F6EF7]">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#4F6EF7]" />
+        <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand" />
           The Anti-Software Workflow Platform
         </div>
 
         {/* Headline */}
         <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
           One platform that replaces every tool your team is{' '}
-          <span className="text-[#4F6EF7]">already misusing.</span>
+          <span className="text-brand">already misusing.</span>
         </h1>
 
         {/* Subtitle */}
@@ -87,14 +87,14 @@ export default function HeroSection() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/sign-up"
-            className="inline-flex items-center rounded-xl bg-[#4F6EF7] px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-blue-500/25 transition-colors hover:bg-[#3D5BD4]"
+            className="inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-colors hover:bg-brand-hover"
           >
             Start Free
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <Link
             href="#features"
-            className="inline-flex items-center rounded-xl border-2 border-slate-200 px-8 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:border-[#4F6EF7] hover:text-[#4F6EF7]"
+            className="inline-flex items-center rounded-xl border-2 border-slate-200 px-8 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:border-brand hover:text-brand"
           >
             <PlayCircle className="mr-2 h-5 w-5" />
             Watch Demo

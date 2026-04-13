@@ -147,7 +147,7 @@ const faqItems = [
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={className || 'mx-auto h-5 w-5 text-[#4F6EF7]'}
+      className={className || 'mx-auto h-5 w-5 text-brand'}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -199,8 +199,8 @@ export default function PricingPage() {
             aria-checked={isAnnual ? 'true' : 'false'}
             aria-label="Toggle annual billing"
             onClick={() => setBilling(isAnnual ? 'monthly' : 'annual')}
-            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4F6EF7] focus-visible:ring-offset-2 ${
-              isAnnual ? 'bg-[#4F6EF7]' : 'bg-slate-300'
+            className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
+              isAnnual ? 'bg-brand' : 'bg-slate-300'
             }`}
           >
             <span
@@ -231,13 +231,13 @@ export default function PricingPage() {
                 key={tier.name}
                 className={`relative flex flex-col rounded-2xl bg-white p-7 ${
                   tier.highlighted
-                    ? 'border-2 border-[#4F6EF7] shadow-lg shadow-[#4F6EF7]/10'
+                    ? 'border-2 border-brand shadow-lg shadow-brand/10'
                     : 'border border-slate-200'
                 }`}
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center rounded-full bg-[#4F6EF7] px-3.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                    <span className="inline-flex items-center rounded-full bg-brand px-3.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
                       Most Popular
                     </span>
                   </div>
@@ -270,7 +270,7 @@ export default function PricingPage() {
                 <ul className="mt-7 flex-1 space-y-3">
                   {tier.inheritLabel && (
                     <li className="flex items-start gap-2.5">
-                      <span className="mt-0.5 shrink-0 text-sm font-semibold text-[#4F6EF7]">
+                      <span className="mt-0.5 shrink-0 text-sm font-semibold text-brand">
                         +
                       </span>
                       <span className="text-sm font-medium text-slate-600">
@@ -280,7 +280,7 @@ export default function PricingPage() {
                   )}
                   {tier.features.map((f) => (
                     <li key={f} className="flex items-start gap-2.5">
-                      <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#4F6EF7]" />
+                      <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                       <span className="text-sm text-slate-600">{f}</span>
                     </li>
                   ))}
@@ -290,8 +290,8 @@ export default function PricingPage() {
                   href={tier.ctaLink}
                   className={`mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
                     tier.ctaStyle === 'filled'
-                      ? 'bg-[#4F6EF7] text-white shadow-sm hover:bg-[#3D5BD4]'
-                      : 'border-2 border-[#4F6EF7] bg-white text-[#4F6EF7] hover:bg-[#4F6EF7]/5'
+                      ? 'bg-brand text-white shadow-sm hover:bg-brand-hover'
+                      : 'border-2 border-brand bg-white text-brand hover:bg-brand/5'
                   }`}
                 >
                   {tier.cta}
@@ -319,9 +319,9 @@ export default function PricingPage() {
                   <th className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Free
                   </th>
-                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-[#4F6EF7]">
+                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-brand">
                     Starter
-                    <span className="block text-xs font-normal text-[#4F6EF7]/70">
+                    <span className="block text-xs font-normal text-brand/70">
                       Most Popular
                     </span>
                   </th>
@@ -342,7 +342,7 @@ export default function PricingPage() {
                     <td className="px-4 py-3.5 text-center text-slate-600">
                       {renderCellValue(row.free)}
                     </td>
-                    <td className="bg-[#4F6EF7]/[0.03] px-4 py-3.5 text-center text-slate-600">
+                    <td className="bg-brand/[0.03] px-4 py-3.5 text-center text-slate-600">
                       {renderCellValue(row.starter)}
                     </td>
                     <td className="px-4 py-3.5 text-center text-slate-600">
@@ -416,7 +416,7 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/contact"
-              className="inline-flex items-center rounded-lg bg-[#4F6EF7] px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-[#3D5BD4]"
+              className="inline-flex items-center rounded-lg bg-brand px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover"
             >
               Talk to Us
             </Link>

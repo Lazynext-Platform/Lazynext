@@ -30,7 +30,7 @@ export default function AppError({
       <div className="flex gap-3">
         <button
           onClick={reset}
-          className="rounded-lg bg-[#4F6EF7] px-4 py-2 text-sm font-medium text-white hover:bg-[#4F6EF7]/90 transition-colors"
+          className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand/90 transition-colors"
         >
           Try again
         </button>

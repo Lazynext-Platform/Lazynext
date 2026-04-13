@@ -111,7 +111,7 @@ export default function PricingSection() {
               key={tier.name}
               className={`card-hover rounded-2xl p-8 ${
                 tier.featured
-                  ? 'relative bg-[#4F6EF7] text-white shadow-xl shadow-[#4F6EF7]/20 ring-2 ring-[#4F6EF7]'
+                  ? 'relative bg-brand text-white shadow-xl shadow-brand/20 ring-2 ring-brand'
                   : 'border border-slate-200 bg-white'
               }`}
             >
@@ -150,8 +150,8 @@ export default function PricingSection() {
                 href={tier.ctaLink}
                 className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-semibold transition-colors ${
                   tier.featured
-                    ? 'bg-white text-[#4F6EF7] hover:bg-slate-50'
-                    : 'border-2 border-slate-200 text-slate-700 hover:border-[#4F6EF7] hover:text-[#4F6EF7]'
+                    ? 'bg-white text-brand hover:bg-slate-50'
+                    : 'border-2 border-slate-200 text-slate-700 hover:border-brand hover:text-brand'
                 }`}
               >
                 {tier.cta}

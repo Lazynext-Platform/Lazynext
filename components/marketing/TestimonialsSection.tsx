@@ -31,7 +31,7 @@ export default function TestimonialsSection() {
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             Loved by teams who{' '}
-            <span className="text-[#4F6EF7]">ship</span>
+            <span className="text-brand">ship</span>
           </h2>
         </div>
 

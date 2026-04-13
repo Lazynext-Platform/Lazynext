@@ -42,7 +42,7 @@ export default function ProblemSection() {
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             The graveyard of{' '}
-            <span className="text-[#4F6EF7]">half-used tools</span>
+            <span className="text-brand">half-used tools</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
             Your team pays for everything and finishes nothing. Sound familiar?
@@ -72,16 +72,16 @@ export default function ProblemSection() {
 
           {/* Arrow */}
           <div className="flex flex-col items-center gap-2 py-4 lg:py-0">
-            <ArrowRight className="hidden h-8 w-8 text-[#4F6EF7] lg:block" />
-            <ArrowDown className="h-8 w-8 text-[#4F6EF7] lg:hidden" />
+            <ArrowRight className="hidden h-8 w-8 text-brand lg:block" />
+            <ArrowDown className="h-8 w-8 text-brand lg:hidden" />
           </div>
 
           {/* Lazynext card */}
-          <div className="card-hover max-w-xs rounded-2xl border-2 border-[#4F6EF7] bg-[#4F6EF7]/5 p-8 text-center shadow-lg shadow-[#4F6EF7]/10">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-[#4F6EF7] shadow-lg shadow-[#4F6EF7]/30">
+          <div className="card-hover max-w-xs rounded-2xl border-2 border-brand bg-brand/5 p-8 text-center shadow-lg shadow-brand/10">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-brand shadow-lg shadow-brand/30">
               <Layers className="h-7 w-7 text-white" />
             </div>
-            <p className="text-xl font-bold text-[#4F6EF7]">Lazynext</p>
+            <p className="text-xl font-bold text-brand">Lazynext</p>
             <p className="mt-2 text-sm font-medium text-slate-600">
               Replace them all.
             </p>

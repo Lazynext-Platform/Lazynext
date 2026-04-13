@@ -49,7 +49,7 @@ function ProgressIndicator({ step }: { step: number }) {
               step > s
                 ? 'border-emerald-500 bg-emerald-500 text-white'
                 : step === s
-                  ? 'border-[#4F6EF7] bg-[#4F6EF7] text-white'
+                  ? 'border-brand bg-brand text-white'
                   : 'border-slate-700 bg-transparent text-slate-500'
             }`}
           >
@@ -169,7 +169,7 @@ export default function CreateWorkspacePage() {
 
       {/* Logo */}
       <div className="mb-8 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#4F6EF7]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
           <Zap className="h-5 w-5 text-white" />
         </div>
         <span className="text-xl font-bold text-white">Lazynext</span>
@@ -204,7 +204,7 @@ export default function CreateWorkspacePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Acme Corp"
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-[#4F6EF7] focus:outline-none focus:ring-1 focus:ring-[#4F6EF7]"
+                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   autoFocus
                 />
                 {slug && (
@@ -218,7 +218,7 @@ export default function CreateWorkspacePage() {
               <button
                 type="submit"
                 disabled={!name.trim()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#4F6EF7] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3D5BD4] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continue <ArrowRight className="h-4 w-4" />
               </button>
@@ -250,7 +250,7 @@ export default function CreateWorkspacePage() {
                   onClick={() => handleOptionSelect(opt.id)}
                   className={`flex w-full items-center gap-4 rounded-xl border px-5 py-4 text-left transition-all ${
                     selectedOption === opt.id
-                      ? 'border-[#4F6EF7] bg-[#4F6EF7]/10 shadow-lg shadow-[#4F6EF7]/5'
+                      ? 'border-brand bg-brand/10 shadow-lg shadow-brand/5'
                       : 'border-slate-700 bg-slate-800/50 hover:border-slate-600'
                   }`}
                 >
@@ -263,7 +263,7 @@ export default function CreateWorkspacePage() {
                         {opt.title}
                       </span>
                       {opt.badge && (
-                        <span className="rounded-full bg-[#4F6EF7]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#4F6EF7]">
+                        <span className="rounded-full bg-brand/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand">
                           {opt.badge}
                         </span>
                       )}
@@ -308,7 +308,7 @@ export default function CreateWorkspacePage() {
                   type="text"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-[#4F6EF7] focus:outline-none focus:ring-1 focus:ring-[#4F6EF7]"
+                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
               <div>
@@ -321,7 +321,7 @@ export default function CreateWorkspacePage() {
                   value={resolution}
                   onChange={(e) => setResolution(e.target.value)}
                   placeholder="What was decided?"
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-[#4F6EF7] focus:outline-none focus:ring-1 focus:ring-[#4F6EF7]"
+                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
               <div>
@@ -334,14 +334,14 @@ export default function CreateWorkspacePage() {
                   onChange={(e) => setRationale(e.target.value)}
                   placeholder="Why was this the right choice?"
                   rows={3}
-                  className="mt-1.5 w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-[#4F6EF7] focus:outline-none focus:ring-1 focus:ring-[#4F6EF7]"
+                  className="mt-1.5 w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={!question.trim()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#4F6EF7] py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#3D5BD4] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Log Decision <ArrowRight className="h-4 w-4" />
               </button>
@@ -378,7 +378,7 @@ export default function CreateWorkspacePage() {
             <button
               onClick={handleGoToWorkspace}
               disabled={loading}
-              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-[#4F6EF7] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#3D5BD4]"
+              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
