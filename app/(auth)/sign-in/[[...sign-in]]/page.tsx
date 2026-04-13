@@ -42,12 +42,14 @@ export default function SignInPage() {
       <div className="space-y-3 mb-6">
         <button
           onClick={() => handleOAuth('google')}
+          aria-label="Continue with Google"
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
         >
           Continue with Google
         </button>
         <button
           onClick={() => handleOAuth('github')}
+          aria-label="Continue with GitHub"
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
         >
           Continue with GitHub
@@ -79,10 +81,12 @@ export default function SignInPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
+            minLength={6}
+            maxLength={128}
             required
           />
         </div>
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && <p className="text-sm text-red-500" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={loading}

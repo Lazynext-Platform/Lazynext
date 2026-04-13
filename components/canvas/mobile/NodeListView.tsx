@@ -45,8 +45,14 @@ const priorityDot: Record<string, string> = {
 export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => void }) {
   const { nodes, selectNode } = useCanvasStore()
   const [activeFilter, setActiveFilter] = useState('all')
+  const [sortAsc, setSortAsc] = useState(true)
 
   const filtered = activeFilter === 'all' ? nodes : nodes.filter((n) => n.type === activeFilter)
+  const sorted = [...filtered].sort((a, b) => {
+    const aTitle = String((a.data as Record<string, unknown>).title || '')
+    const bTitle = String((b.data as Record<string, unknown>).title || '')
+    return sortAsc ? aTitle.localeCompare(bTitle) : bTitle.localeCompare(aTitle)
+  })
 
   const handleNodeClick = (id: string) => {
     selectNode(id)
@@ -69,19 +75,25 @@ export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => 
             {f.label}
           </button>
         ))}
-        <button aria-label="Sort nodes" className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-slate-300">
+        <button
+          aria-label={`Sort nodes ${sortAsc ? 'descending' : 'ascending'}`}
+          onClick={() => setSortAsc(!sortAsc)}
+          className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
+        >
           <ArrowUpDown className="h-4 w-4" />
         </button>
       </div>
 
       {/* Node cards */}
       <div className="flex-1 overflow-y-auto px-4 py-3 pb-24 space-y-2.5">
-        {filtered.length === 0 ? (
+        {sorted.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-sm text-slate-500">No nodes match this filter</p>
+            <ArrowUpDown className="mx-auto h-8 w-8 text-slate-600 mb-3" />
+            <p className="text-sm font-medium text-slate-400">No nodes match this filter</p>
+            <p className="mt-1 text-xs text-slate-500">Try selecting a different type above</p>
           </div>
         ) : (
-          filtered.map((node) => {
+          sorted.map((node) => {
             const d = node.data as Record<string, string | number | undefined>
             const type = node.type as NodeType
             const status = statusBadge[String(d.status)] || null
