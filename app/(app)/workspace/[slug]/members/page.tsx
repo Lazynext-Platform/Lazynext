@@ -93,6 +93,7 @@ export default function MembersPage() {
       <div className="relative mt-6">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
         <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+          aria-label="Search members"
           placeholder="Search members..."
           className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
       </div>
@@ -175,7 +176,7 @@ export default function MembersPage() {
                   {emailChips.map(chip => (
                     <span key={chip} className="flex items-center gap-1 rounded-full bg-brand/20 px-2.5 py-0.5 text-xs font-medium text-brand">
                       {chip}
-                      <button onClick={() => setEmailChips(prev => prev.filter(c => c !== chip))} className="rounded-full hover:bg-brand/30"><X className="h-3 w-3" /></button>
+                      <button onClick={() => setEmailChips(prev => prev.filter(c => c !== chip))} aria-label={`Remove ${chip}`} className="rounded-full hover:bg-brand/30"><X className="h-3 w-3" /></button>
                     </span>
                   ))}
                   <input type="text" value={emailInput} onChange={e => setEmailInput(e.target.value)} onKeyDown={handleEmailKeyDown}

@@ -248,7 +248,7 @@ export function LazyMindPanel() {
             placeholder="Ask LazyMind anything..."
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
           />
-          <button onClick={() => sendMessage(input)} disabled={!input.trim()} className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white disabled:opacity-30 hover:bg-brand-hover transition-colors">
+          <button onClick={() => sendMessage(input)} disabled={!input.trim()} aria-label="Send message" className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white disabled:opacity-30 hover:bg-brand-hover transition-colors">
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>

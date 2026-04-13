@@ -31,7 +31,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                'Upgrade Your Plan'}
             </h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} aria-label="Close upgrade dialog" className="rounded-lg p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
         </div>
 
         <div className="px-6 py-5">

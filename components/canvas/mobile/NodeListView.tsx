@@ -69,7 +69,7 @@ export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => 
             {f.label}
           </button>
         ))}
-        <button className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-slate-300">
+        <button aria-label="Sort nodes" className="ml-auto shrink-0 rounded-lg p-2 text-slate-500 hover:bg-slate-800 hover:text-slate-300">
           <ArrowUpDown className="h-4 w-4" />
         </button>
       </div>

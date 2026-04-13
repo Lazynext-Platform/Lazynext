@@ -176,17 +176,17 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Resolution</label>
-                <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="What was decided?" rows={2} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="What was decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Rationale</label>
-                <textarea value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder="Why was this decided?" rows={2} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                <textarea value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder="Why was this decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Options Considered</label>
                 <div className="mt-1.5 space-y-2">
                   {options.map((opt, i) => (
-                    <input key={i} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                    <input key={i} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} maxLength={200} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   ))}
                   <button onClick={() => setOptions([...options, ''])} className="text-xs text-brand hover:text-brand-hover">+ Add option</button>
                 </div>
@@ -205,7 +205,7 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
                   <div className="mt-1.5 flex gap-1">
                     <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} placeholder="Add tag" className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   </div>
-                  {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map(t => <span key={t} className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400"><Tag className="h-2.5 w-2.5" />{t}<button onClick={() => setTags(tags.filter(x => x !== t))} className="text-slate-500 hover:text-slate-300">×</button></span>)}</div>}
+                  {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map(t => <span key={t} className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400"><Tag className="h-2.5 w-2.5" />{t}<button onClick={() => setTags(tags.filter(x => x !== t))} aria-label={`Remove tag ${t}`} className="text-slate-500 hover:text-slate-300">×</button></span>)}</div>}
                 </div>
               </div>
             </div>

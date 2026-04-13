@@ -131,6 +131,7 @@ export function CanvasToolbar() {
       {/* FAB */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Close node picker' : 'Add node'}
         className={cn(
           'flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg transition-all',
           isOpen
