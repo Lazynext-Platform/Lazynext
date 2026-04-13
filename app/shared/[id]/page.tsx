@@ -103,7 +103,7 @@ export default function SharedCanvasPage() {
             <p className="mt-1 text-sm text-slate-400">Anyone with the link can view this canvas.</p>
 
             <div className="mt-4 flex items-center gap-2">
-              <input type="text" readOnly value="https://lazynext.com/shared/abc123" className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-300 focus:outline-none" />
+              <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : ''} className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-300 focus:outline-none" />
               <button onClick={handleCopy} className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">
                 {copied ? <><Check className="h-4 w-4" /> Copied</> : <><Copy className="h-4 w-4" /> Copy</>}
               </button>

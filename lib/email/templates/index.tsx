@@ -7,7 +7,7 @@ import * as React from 'react'
 
 const BRAND_COLOR = '#4F6EF7'
 const BRAND_NAME = 'Lazynext'
-const BASE_URL = 'https://lazynext.com'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lazynext.com'
 
 // Shared layout wrapper
 function EmailLayout({ children, preheader }: { children: React.ReactNode; preheader?: string }) {

@@ -19,8 +19,7 @@ export const handleWorkspaceInvite = inngest.createFunction(
     }
     const resend = getResend()
     if (!resend) {
-      console.log('[inngest] Resend not configured, skipping invite email')
-      return { skipped: true }
+      return { skipped: true, reason: 'resend_not_configured' }
     }
     const result = await resend.emails.send({
       from: 'Lazynext <noreply@lazynext.com>',
@@ -91,8 +90,7 @@ export const handleOutcomeTagged = inngest.createFunction(
   { id: 'handle-outcome-tagged', triggers: [{ event: EVENTS.DECISION_OUTCOME_TAGGED }] },
   async ({ event }) => {
     const { decisionId, outcome } = event.data as { decisionId: string; outcome: string }
-    console.log(`[inngest] Outcome tagged for decision ${decisionId}: ${outcome}`)
-    return { processed: true }
+    return { processed: true, decisionId, outcome }
   }
 )
 
@@ -132,7 +130,6 @@ export const handleWeeklyDigest = inngest.createFunction(
       activeMembers: 3,
     }
 
-    console.log(`[inngest] Weekly digest for workspace ${workspace.name}:`, stats)
     return { processed: true, stats }
   }
 )
@@ -148,8 +145,7 @@ export const handleExportRequested = inngest.createFunction(
     const { data: allNodes } = await db.from('nodes').select('*').eq('workspace_id', workspaceId)
     const { data: allDecisions } = await db.from('decisions').select('*').eq('workspace_id', workspaceId)
 
-    console.log(`[inngest] Export for workspace ${workspaceId}: ${(allWorkflows || []).length} workflows, ${(allNodes || []).length} nodes, ${(allDecisions || []).length} decisions`)
-    return { processed: true, format, nodeCount: (allNodes || []).length }
+    return { processed: true, format, nodeCount: (allNodes || []).length, workflowCount: (allWorkflows || []).length, decisionCount: (allDecisions || []).length }
   }
 )
 

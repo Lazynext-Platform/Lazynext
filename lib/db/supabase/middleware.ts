@@ -45,7 +45,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/sign-up') ||
     request.nextUrl.pathname.startsWith('/auth/callback') ||
-    request.nextUrl.pathname.startsWith('/api/webhooks')
+    request.nextUrl.pathname.startsWith('/shared/') ||
+    request.nextUrl.pathname.startsWith('/api/')
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
