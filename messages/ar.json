@@ -70,27 +70,60 @@
     "free": {
       "name": "Free",
       "description": "For individuals and small teams getting started.",
-      "features": ["5 workflows", "100 nodes", "3 members", "20 AI queries/day"]
+      "features": [
+        "5 workflows",
+        "100 nodes",
+        "3 members",
+        "20 AI queries/day"
+      ]
     },
     "starter": {
       "name": "Starter",
       "description": "For growing teams who need more power.",
-      "features": ["25 workflows", "1,000 nodes", "10 members", "100 AI queries/day", "Decision DNA"]
+      "features": [
+        "25 workflows",
+        "1,000 nodes",
+        "10 members",
+        "100 AI queries/day",
+        "Decision DNA"
+      ]
     },
     "pro": {
       "name": "Pro",
       "description": "For teams who ship fast and make better decisions.",
-      "features": ["100 workflows", "10,000 nodes", "25 members", "500 AI queries/day", "Decision DNA", "Pulse analytics", "Priority support"]
+      "features": [
+        "100 workflows",
+        "10,000 nodes",
+        "25 members",
+        "500 AI queries/day",
+        "Decision DNA",
+        "Pulse analytics",
+        "Priority support"
+      ]
     },
     "business": {
       "name": "Business",
       "description": "For organizations that need enterprise features.",
-      "features": ["Unlimited workflows", "Unlimited nodes", "100 members", "Unlimited AI", "SSO/SAML", "SLA", "Dedicated support"]
+      "features": [
+        "Unlimited workflows",
+        "Unlimited nodes",
+        "100 members",
+        "Unlimited AI",
+        "SSO/SAML",
+        "SLA",
+        "Dedicated support"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "description": "Custom solutions for large organizations.",
-      "features": ["Everything in Business", "Custom integrations", "Custom SLA", "Dedicated CSM", "On-premise option"]
+      "features": [
+        "Everything in Business",
+        "Custom integrations",
+        "Custom SLA",
+        "Dedicated CSM",
+        "On-premise option"
+      ]
     }
   },
   "billing": {
@@ -158,52 +191,52 @@
     "changeCurrency": "Change currency"
   },
   "tour": {
-    "tourLabel": "Platform guided tour",
-    "stepOf": "Step {current} of {total}",
-    "next": "Next",
-    "previous": "Back",
-    "skipTour": "Skip tour",
-    "finishTour": "Finish tour",
+    "tourLabel": "جولة المنصة الإرشادية",
+    "stepOf": "الخطوة {current} من {total}",
+    "next": "التالي",
+    "previous": "السابق",
+    "skipTour": "تخطي",
+    "finishTour": "إنهاء",
     "steps": {
       "welcome": {
-        "title": "Welcome to Lazynext!",
-        "description": "Let us show you around. This quick tour will help you discover how to manage tasks, docs, decisions, and AI — all in one place. Use arrow keys or click Next to continue."
+        "title": "!مرحباً بك في Lazynext",
+        "description": "دعنا نعرض لك المنصة. ستساعدك هذه الجولة السريعة على اكتشاف كيفية إدارة المهام والمستندات والقرارات والذكاء الاصطناعي في مكان واحد."
       },
       "sidebar": {
-        "title": "Navigation Sidebar",
-        "description": "This is your command center. Access your canvas, tasks, decisions, pulse dashboard, automations, and more. Everything is one click away."
+        "title": "شريط التنقل الجانبي",
+        "description": "مركز التحكم الخاص بك. الوصول إلى اللوحة والمهام والقرارات ولوحة Pulse والمزيد."
       },
       "workspace": {
-        "title": "Workspace Selector",
-        "description": "Switch between workspaces or create new ones. Each workspace has its own canvas, members, and settings."
+        "title": "محدد مساحة العمل",
+        "description": "التبديل بين مساحات العمل أو إنشاء جديدة."
       },
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your visual workspace. Drag and drop nodes (tasks, docs, decisions) onto an infinite canvas. Connect them to build workflows that actually make sense."
+        "title": "لوحة سير العمل",
+        "description": "اسحب وأفلت العقد على لوحة لا نهائية لبناء سير العمل."
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Our hero feature. Log every decision, track quality scores, and review outcomes over time. Learn from your team's choices."
+        "title": "DNA القرارات",
+        "description": "سجل كل قرار وتتبع نقاط الجودة وراجع النتائج."
       },
       "tasks": {
-        "title": "Task Views",
-        "description": "See all your tasks in Kanban boards or list views. Filter, sort, and track progress across workflows."
+        "title": "عرض المهام",
+        "description": "عرض جميع المهام في لوحات كانبان أو قوائم."
       },
       "pulse": {
-        "title": "Pulse Dashboard",
-        "description": "Real-time analytics on your team's work. Workload distribution, sprint burndown, and activity trends — updated automatically."
+        "title": "لوحة Pulse",
+        "description": "تحليلات فورية لعمل فريقك."
       },
       "lazymind": {
-        "title": "LazyMind AI Assistant",
-        "description": "Your AI co-pilot. Press ⌘L to open. Get workflow analysis, task suggestions, weekly digests, and decision insights."
+        "title": "LazyMind مساعد الذكاء الاصطناعي",
+        "description": "مساعدك الذكي. اضغط ⌘L للفتح."
       },
       "commandPalette": {
-        "title": "Command Palette",
-        "description": "Press ⌘K for instant access to any action. Search nodes, switch views, create new items — all without touching the mouse."
+        "title": "لوحة الأوامر",
+        "description": "اضغط ⌘K للوصول الفوري."
       },
       "finish": {
-        "title": "You're all set!",
-        "description": "You now know the essentials. Start by creating your first workflow on the canvas, or explore Decision DNA to track your team's choices. You can replay this tour anytime from Settings."
+        "title": "!أنت جاهز",
+        "description": "تعرفت على الأساسيات. ابدأ بإنشاء أول سير عمل."
       }
     }
   },

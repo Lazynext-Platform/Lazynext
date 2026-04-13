@@ -70,27 +70,60 @@
     "free": {
       "name": "Free",
       "description": "For individuals and small teams getting started.",
-      "features": ["5 workflows", "100 nodes", "3 members", "20 AI queries/day"]
+      "features": [
+        "5 workflows",
+        "100 nodes",
+        "3 members",
+        "20 AI queries/day"
+      ]
     },
     "starter": {
       "name": "Starter",
       "description": "For growing teams who need more power.",
-      "features": ["25 workflows", "1,000 nodes", "10 members", "100 AI queries/day", "Decision DNA"]
+      "features": [
+        "25 workflows",
+        "1,000 nodes",
+        "10 members",
+        "100 AI queries/day",
+        "Decision DNA"
+      ]
     },
     "pro": {
       "name": "Pro",
       "description": "For teams who ship fast and make better decisions.",
-      "features": ["100 workflows", "10,000 nodes", "25 members", "500 AI queries/day", "Decision DNA", "Pulse analytics", "Priority support"]
+      "features": [
+        "100 workflows",
+        "10,000 nodes",
+        "25 members",
+        "500 AI queries/day",
+        "Decision DNA",
+        "Pulse analytics",
+        "Priority support"
+      ]
     },
     "business": {
       "name": "Business",
       "description": "For organizations that need enterprise features.",
-      "features": ["Unlimited workflows", "Unlimited nodes", "100 members", "Unlimited AI", "SSO/SAML", "SLA", "Dedicated support"]
+      "features": [
+        "Unlimited workflows",
+        "Unlimited nodes",
+        "100 members",
+        "Unlimited AI",
+        "SSO/SAML",
+        "SLA",
+        "Dedicated support"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "description": "Custom solutions for large organizations.",
-      "features": ["Everything in Business", "Custom integrations", "Custom SLA", "Dedicated CSM", "On-premise option"]
+      "features": [
+        "Everything in Business",
+        "Custom integrations",
+        "Custom SLA",
+        "Dedicated CSM",
+        "On-premise option"
+      ]
     }
   },
   "billing": {

@@ -9,6 +9,8 @@ interface UIState {
   isLazyMindOpen: boolean
   isNotificationOpen: boolean
   isMobile: boolean
+  isTourActive: boolean
+  isTourCompleted: boolean
   currency: Currency
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
@@ -17,6 +19,8 @@ interface UIState {
   toggleNotification: () => void
   setMobile: (isMobile: boolean) => void
   setCurrency: (currency: Currency) => void
+  setTourActive: (active: boolean) => void
+  completeTour: () => void
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -25,6 +29,10 @@ export const useUIStore = create<UIState>((set) => ({
   isLazyMindOpen: false,
   isNotificationOpen: false,
   isMobile: false,
+  isTourActive: false,
+  isTourCompleted: (typeof document !== 'undefined'
+    ? document.cookie.includes('TOUR_COMPLETED=1')
+    : false),
   currency: (typeof document !== 'undefined'
     ? (document.cookie.match(/NEXT_CURRENCY=(\w+)/)?.[1] as Currency) ?? 'USD'
     : 'USD') as Currency,
@@ -37,5 +45,10 @@ export const useUIStore = create<UIState>((set) => ({
   setCurrency: (currency) => {
     document.cookie = `NEXT_CURRENCY=${currency}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
     set({ currency })
+  },
+  setTourActive: (active) => set({ isTourActive: active }),
+  completeTour: () => {
+    document.cookie = `TOUR_COMPLETED=1; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
+    set({ isTourActive: false, isTourCompleted: true })
   },
 }))

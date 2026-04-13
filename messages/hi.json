@@ -70,27 +70,60 @@
     "free": {
       "name": "Free",
       "description": "For individuals and small teams getting started.",
-      "features": ["5 workflows", "100 nodes", "3 members", "20 AI queries/day"]
+      "features": [
+        "5 workflows",
+        "100 nodes",
+        "3 members",
+        "20 AI queries/day"
+      ]
     },
     "starter": {
       "name": "Starter",
       "description": "For growing teams who need more power.",
-      "features": ["25 workflows", "1,000 nodes", "10 members", "100 AI queries/day", "Decision DNA"]
+      "features": [
+        "25 workflows",
+        "1,000 nodes",
+        "10 members",
+        "100 AI queries/day",
+        "Decision DNA"
+      ]
     },
     "pro": {
       "name": "Pro",
       "description": "For teams who ship fast and make better decisions.",
-      "features": ["100 workflows", "10,000 nodes", "25 members", "500 AI queries/day", "Decision DNA", "Pulse analytics", "Priority support"]
+      "features": [
+        "100 workflows",
+        "10,000 nodes",
+        "25 members",
+        "500 AI queries/day",
+        "Decision DNA",
+        "Pulse analytics",
+        "Priority support"
+      ]
     },
     "business": {
       "name": "Business",
       "description": "For organizations that need enterprise features.",
-      "features": ["Unlimited workflows", "Unlimited nodes", "100 members", "Unlimited AI", "SSO/SAML", "SLA", "Dedicated support"]
+      "features": [
+        "Unlimited workflows",
+        "Unlimited nodes",
+        "100 members",
+        "Unlimited AI",
+        "SSO/SAML",
+        "SLA",
+        "Dedicated support"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "description": "Custom solutions for large organizations.",
-      "features": ["Everything in Business", "Custom integrations", "Custom SLA", "Dedicated CSM", "On-premise option"]
+      "features": [
+        "Everything in Business",
+        "Custom integrations",
+        "Custom SLA",
+        "Dedicated CSM",
+        "On-premise option"
+      ]
     }
   },
   "billing": {
@@ -158,52 +191,52 @@
     "changeCurrency": "Change currency"
   },
   "tour": {
-    "tourLabel": "Platform guided tour",
-    "stepOf": "Step {current} of {total}",
-    "next": "Next",
-    "previous": "Back",
-    "skipTour": "Skip tour",
-    "finishTour": "Finish tour",
+    "tourLabel": "प्लेटफ़ॉर्म गाइडेड टूर",
+    "stepOf": "चरण {current}/{total}",
+    "next": "अगला",
+    "previous": "पिछला",
+    "skipTour": "छोड़ें",
+    "finishTour": "पूरा करें",
     "steps": {
       "welcome": {
-        "title": "Welcome to Lazynext!",
-        "description": "Let us show you around. This quick tour will help you discover how to manage tasks, docs, decisions, and AI — all in one place. Use arrow keys or click Next to continue."
+        "title": "Lazynext में आपका स्वागत है!",
+        "description": "हम आपको प्लेटफ़ॉर्म दिखाते हैं। यह क्विक टूर आपको कार्य, दस्तावेज़, निर्णय और AI को एक ही जगह पर प्रबंधित करना सिखाएगा।"
       },
       "sidebar": {
-        "title": "Navigation Sidebar",
-        "description": "This is your command center. Access your canvas, tasks, decisions, pulse dashboard, automations, and more. Everything is one click away."
+        "title": "नेविगेशन साइडबार",
+        "description": "आपका कमांड सेंटर। कैनवास, कार्य, निर्णय, Pulse डैशबोर्ड और अधिक तक पहुंचें।"
       },
       "workspace": {
-        "title": "Workspace Selector",
-        "description": "Switch between workspaces or create new ones. Each workspace has its own canvas, members, and settings."
+        "title": "वर्कस्पेस सिलेक्टर",
+        "description": "वर्कस्पेस के बीच स्विच करें या नए बनाएं।"
       },
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your visual workspace. Drag and drop nodes (tasks, docs, decisions) onto an infinite canvas. Connect them to build workflows that actually make sense."
+        "title": "वर्कफ़्लो कैनवास",
+        "description": "अनंत कैनवास पर नोड्स को ड्रैग और ड्रॉप करके वर्कफ़्लो बनाएं।"
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Our hero feature. Log every decision, track quality scores, and review outcomes over time. Learn from your team's choices."
+        "title": "डिसीज़न DNA",
+        "description": "हर निर्णय को रिकॉर्ड करें, गुणवत्ता स्कोर ट्रैक करें और परिणामों की समीक्षा करें।"
       },
       "tasks": {
-        "title": "Task Views",
-        "description": "See all your tasks in Kanban boards or list views. Filter, sort, and track progress across workflows."
+        "title": "कार्य दृश्य",
+        "description": "कानबन बोर्ड या सूची में सभी कार्य देखें।"
       },
       "pulse": {
-        "title": "Pulse Dashboard",
-        "description": "Real-time analytics on your team's work. Workload distribution, sprint burndown, and activity trends — updated automatically."
+        "title": "Pulse डैशबोर्ड",
+        "description": "टीम के काम का रियल-टाइम विश्लेषण।"
       },
       "lazymind": {
-        "title": "LazyMind AI Assistant",
-        "description": "Your AI co-pilot. Press ⌘L to open. Get workflow analysis, task suggestions, weekly digests, and decision insights."
+        "title": "LazyMind AI सहायक",
+        "description": "आपका AI कोपायलट। ⌘L दबाकर खोलें।"
       },
       "commandPalette": {
-        "title": "Command Palette",
-        "description": "Press ⌘K for instant access to any action. Search nodes, switch views, create new items — all without touching the mouse."
+        "title": "कमांड पैलेट",
+        "description": "⌘K दबाकर तुरंत एक्सेस करें।"
       },
       "finish": {
-        "title": "You're all set!",
-        "description": "You now know the essentials. Start by creating your first workflow on the canvas, or explore Decision DNA to track your team's choices. You can replay this tour anytime from Settings."
+        "title": "आप तैयार हैं!",
+        "description": "आपने मूल बातें सीख लीं। अपना पहला वर्कफ़्लो बनाना शुरू करें।"
       }
     }
   },

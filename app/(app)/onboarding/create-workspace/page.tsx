@@ -162,7 +162,7 @@ export default function CreateWorkspacePage() {
         setError(body?.error || 'Failed to create workspace. Please try again.')
         return
       }
-      router.push(`/workspace/${slug}`)
+      router.push(`/workspace/${slug}/guide`)
     } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {

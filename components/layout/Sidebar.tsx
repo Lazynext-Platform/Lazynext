@@ -21,6 +21,7 @@ import {
   CreditCard,
   Puzzle,
   Clock,
+  BookOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui.store'
@@ -44,6 +45,7 @@ const settingsItems = [
   { href: '/members', icon: Users, label: 'Members' },
   { href: '/billing', icon: CreditCard, label: 'Billing' },
   { href: '/integrations', icon: Puzzle, label: 'Integrations' },
+  { href: '/guide', icon: BookOpen, label: 'Platform Guide' },
 ]
 
 const workflows = [

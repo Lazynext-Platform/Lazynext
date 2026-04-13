@@ -70,27 +70,60 @@
     "free": {
       "name": "Free",
       "description": "For individuals and small teams getting started.",
-      "features": ["5 workflows", "100 nodes", "3 members", "20 AI queries/day"]
+      "features": [
+        "5 workflows",
+        "100 nodes",
+        "3 members",
+        "20 AI queries/day"
+      ]
     },
     "starter": {
       "name": "Starter",
       "description": "For growing teams who need more power.",
-      "features": ["25 workflows", "1,000 nodes", "10 members", "100 AI queries/day", "Decision DNA"]
+      "features": [
+        "25 workflows",
+        "1,000 nodes",
+        "10 members",
+        "100 AI queries/day",
+        "Decision DNA"
+      ]
     },
     "pro": {
       "name": "Pro",
       "description": "For teams who ship fast and make better decisions.",
-      "features": ["100 workflows", "10,000 nodes", "25 members", "500 AI queries/day", "Decision DNA", "Pulse analytics", "Priority support"]
+      "features": [
+        "100 workflows",
+        "10,000 nodes",
+        "25 members",
+        "500 AI queries/day",
+        "Decision DNA",
+        "Pulse analytics",
+        "Priority support"
+      ]
     },
     "business": {
       "name": "Business",
       "description": "For organizations that need enterprise features.",
-      "features": ["Unlimited workflows", "Unlimited nodes", "100 members", "Unlimited AI", "SSO/SAML", "SLA", "Dedicated support"]
+      "features": [
+        "Unlimited workflows",
+        "Unlimited nodes",
+        "100 members",
+        "Unlimited AI",
+        "SSO/SAML",
+        "SLA",
+        "Dedicated support"
+      ]
     },
     "enterprise": {
       "name": "Enterprise",
       "description": "Custom solutions for large organizations.",
-      "features": ["Everything in Business", "Custom integrations", "Custom SLA", "Dedicated CSM", "On-premise option"]
+      "features": [
+        "Everything in Business",
+        "Custom integrations",
+        "Custom SLA",
+        "Dedicated CSM",
+        "On-premise option"
+      ]
     }
   },
   "billing": {
@@ -158,52 +191,52 @@
     "changeCurrency": "Change currency"
   },
   "tour": {
-    "tourLabel": "Platform guided tour",
-    "stepOf": "Step {current} of {total}",
-    "next": "Next",
-    "previous": "Back",
-    "skipTour": "Skip tour",
-    "finishTour": "Finish tour",
+    "tourLabel": "平台引导游览",
+    "stepOf": "第 {current} 步，共 {total} 步",
+    "next": "下一步",
+    "previous": "上一步",
+    "skipTour": "跳过",
+    "finishTour": "完成",
     "steps": {
       "welcome": {
-        "title": "Welcome to Lazynext!",
-        "description": "Let us show you around. This quick tour will help you discover how to manage tasks, docs, decisions, and AI — all in one place. Use arrow keys or click Next to continue."
+        "title": "欢迎来到 Lazynext！",
+        "description": "让我们带您了解平台。这个快速导览将帮助您了解如何在一个地方管理任务、文档、决策和AI。"
       },
       "sidebar": {
-        "title": "Navigation Sidebar",
-        "description": "This is your command center. Access your canvas, tasks, decisions, pulse dashboard, automations, and more. Everything is one click away."
+        "title": "导航侧边栏",
+        "description": "您的控制中心。访问画布、任务、决策、Pulse仪表板等。"
       },
       "workspace": {
-        "title": "Workspace Selector",
-        "description": "Switch between workspaces or create new ones. Each workspace has its own canvas, members, and settings."
+        "title": "工作区选择器",
+        "description": "在工作区之间切换或创建新的工作区。"
       },
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your visual workspace. Drag and drop nodes (tasks, docs, decisions) onto an infinite canvas. Connect them to build workflows that actually make sense."
+        "title": "工作流画布",
+        "description": "拖放节点到无限画布上，构建工作流程。"
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Our hero feature. Log every decision, track quality scores, and review outcomes over time. Learn from your team's choices."
+        "title": "决策DNA",
+        "description": "记录每个决策，跟踪质量分数，回顾结果。"
       },
       "tasks": {
-        "title": "Task Views",
-        "description": "See all your tasks in Kanban boards or list views. Filter, sort, and track progress across workflows."
+        "title": "任务视图",
+        "description": "在看板或列表中查看所有任务。"
       },
       "pulse": {
-        "title": "Pulse Dashboard",
-        "description": "Real-time analytics on your team's work. Workload distribution, sprint burndown, and activity trends — updated automatically."
+        "title": "Pulse仪表板",
+        "description": "团队工作的实时分析。"
       },
       "lazymind": {
-        "title": "LazyMind AI Assistant",
-        "description": "Your AI co-pilot. Press ⌘L to open. Get workflow analysis, task suggestions, weekly digests, and decision insights."
+        "title": "LazyMind AI助手",
+        "description": "AI副驾驶。按⌘L打开。"
       },
       "commandPalette": {
-        "title": "Command Palette",
-        "description": "Press ⌘K for instant access to any action. Search nodes, switch views, create new items — all without touching the mouse."
+        "title": "命令面板",
+        "description": "按⌘K即时访问。"
       },
       "finish": {
-        "title": "You're all set!",
-        "description": "You now know the essentials. Start by creating your first workflow on the canvas, or explore Decision DNA to track your team's choices. You can replay this tour anytime from Settings."
+        "title": "一切就绪！",
+        "description": "您已了解基础知识。开始创建您的第一个工作流吧。"
       }
     }
   },
