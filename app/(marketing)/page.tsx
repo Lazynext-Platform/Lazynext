@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import HeroSection from '@/components/marketing/HeroSection'
 import SocialProofBar from '@/components/marketing/SocialProofBar'
-import ProblemSection from '@/components/marketing/ProblemSection'
-import PrimitivesSection from '@/components/marketing/PrimitivesSection'
-import DecisionDNASection from '@/components/marketing/DecisionDNASection'
-import LazyMindSection from '@/components/marketing/LazyMindSection'
-import ConsolidationMap from '@/components/marketing/ConsolidationMap'
-import PricingSection from '@/components/marketing/PricingSection'
-import TestimonialsSection from '@/components/marketing/TestimonialsSection'
-import CTABanner from '@/components/marketing/CTABanner'
+
+const ProblemSection = dynamic(() => import('@/components/marketing/ProblemSection'))
+const PrimitivesSection = dynamic(() => import('@/components/marketing/PrimitivesSection'))
+const DecisionDNASection = dynamic(() => import('@/components/marketing/DecisionDNASection'))
+const LazyMindSection = dynamic(() => import('@/components/marketing/LazyMindSection'))
+const ConsolidationMap = dynamic(() => import('@/components/marketing/ConsolidationMap'))
+const PricingSection = dynamic(() => import('@/components/marketing/PricingSection'))
+const TestimonialsSection = dynamic(() => import('@/components/marketing/TestimonialsSection'))
+const CTABanner = dynamic(() => import('@/components/marketing/CTABanner'))
 
 export const metadata: Metadata = {
   title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
