@@ -10,7 +10,8 @@
     "lib/db/client.ts",
     "lib/email/templates/index.tsx",
     "lib/utils/constants.ts",
-    "lib/utils/format.ts"
+    "lib/utils/format.ts",
+    "lib/billing/plans.ts"
   ],
   "project": [
     "app/**/*.{ts,tsx}",

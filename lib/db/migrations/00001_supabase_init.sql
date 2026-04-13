@@ -278,3 +278,17 @@ CREATE TRIGGER nodes_updated_at BEFORE UPDATE ON nodes
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER decisions_updated_at BEFORE UPDATE ON decisions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ─── Webhook Events (idempotency) ───────────────────────────
+CREATE TABLE IF NOT EXISTS webhook_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id VARCHAR(255) NOT NULL UNIQUE,
+  event_name VARCHAR(255),
+  processed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE webhook_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role only" ON webhook_events
+  FOR ALL USING (auth.role() = 'service_role');

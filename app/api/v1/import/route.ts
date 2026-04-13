@@ -1,5 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
+import crypto from 'crypto'
 import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
