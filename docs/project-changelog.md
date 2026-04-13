@@ -12,7 +12,7 @@
 
 ### Added
 
-- **Production Quality Pass (2026-04-13 → 2026-04-14)** — 32 cleanup commits covering:
+- **Production Quality Pass (2026-04-13 → 2026-04-14)** — 39 cleanup commits covering:
   - **Security**: Fixed 15 IDOR vulnerabilities, hardened CSP (removed unsafe-eval, added media/object/base-uri/form-action directives), rate limiting on all 19 API routes, webhook HMAC idempotency, open redirect protection, template install access control, export UUID validation
   - **Accessibility**: WCAG 2.1 AA — heading hierarchy, form labels (htmlFor/id), aria-labels on OAuth/workspace buttons, role="alert" on errors, error boundary dev-only console.error, keyboard handlers, password constraints (minLength/maxLength)
   - **i18n**: next-intl with 40 locales, 57 currencies, locale-aware pricing, LocaleSwitcher, Accept-Language detection

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ExternalLink, Copy, Check, Eye, Clock, Lock, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import Link from 'next/link'
 
 const sampleNodes = [
   { id: '1', label: 'Product Roadmap', type: 'doc', x: 80, y: 60, color: 'bg-emerald-500' },
@@ -55,9 +56,9 @@ export default function SharedCanvasPage() {
           <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700">
             <Share2 className="h-3 w-3" /> Share
           </button>
-          <a href="/" className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover">
+          <Link href="/" className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover">
             Try Lazynext <ExternalLink className="h-3 w-3" />
-          </a>
+          </Link>
         </div>
       </div>
 

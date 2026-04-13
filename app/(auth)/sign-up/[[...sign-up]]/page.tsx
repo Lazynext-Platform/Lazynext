@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/db/supabase/client'
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
@@ -49,7 +50,7 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm text-center">
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h2>
         <p className="text-slate-500 mb-4">We sent a confirmation link to <strong>{email}</strong></p>
-        <a href="/sign-in" className="text-brand hover:text-brand-hover">← Back to sign in</a>
+        <Link href="/sign-in" className="text-brand hover:text-brand-hover">← Back to sign in</Link>
       </div>
     )
   }
@@ -129,7 +130,7 @@ export default function SignUpPage() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Already have an account?{' '}
-        <a href="/sign-in" className="text-brand hover:text-brand-hover">Sign in</a>
+        <Link href="/sign-in" className="text-brand hover:text-brand-hover">Sign in</Link>
       </p>
     </div>
   )
