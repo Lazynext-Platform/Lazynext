@@ -23,13 +23,12 @@ lazynext/
 │   └── ui/                   # Shared UI primitives
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI
-│   ├── billing/              # Stripe + Razorpay
+│   ├── billing/              # Lemon Squeezy
 │   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
 │   ├── inngest/              # Background jobs
 │   └── utils/                # Utilities
 ├── stores/                   # Zustand state stores
-├── hooks/                    # Custom React hooks
 ├── docs/                     # Documentation
 │   ├── mastery.md            # Development process framework (READ-ONLY)
 │   ├── mastery-compact.md    # Compact rules for AI sessions

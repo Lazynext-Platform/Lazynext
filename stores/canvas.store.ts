@@ -37,6 +37,8 @@ interface CanvasState {
   toggleNodePanel: () => void
 }
 
+const MAX_HISTORY = 50
+
 export const useCanvasStore = create<CanvasState>((set, get) => ({
   nodes: [],
   edges: [],
@@ -64,10 +66,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   addNode: (node) => {
     const { nodes, edges, history, historyIndex } = get()
     const newNodes = [...nodes, node]
+    const newHistory = [...history.slice(0, historyIndex + 1), { nodes: newNodes, edges }].slice(-MAX_HISTORY)
     set({
       nodes: newNodes,
-      history: [...history.slice(0, historyIndex + 1), { nodes: newNodes, edges }],
-      historyIndex: historyIndex + 1,
+      history: newHistory,
+      historyIndex: newHistory.length - 1,
     })
   },
 

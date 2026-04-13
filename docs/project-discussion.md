@@ -62,7 +62,7 @@ Lazynext takes the "anti-software" approach — do less, but do it right. One gr
 | **State** | Redux, Zustand, Jotai | Zustand | Minimal boilerplate, great with React 18, simple for canvas state |
 | **Styling** | Tailwind, CSS Modules, styled-components | Tailwind CSS 3 | Fast iteration, consistent design tokens, design team preference |
 | **Animation** | Framer Motion, GSAP | Framer Motion | React-native, declarative, great for panel transitions |
-| **Payments** | Stripe, Razorpay | Both (Stripe intl + Razorpay India) | Dual-provider for global + India-specific UPI support |
+| **Payments** | Stripe, Razorpay | Lemon Squeezy | Global MoR (merchant of record), handles tax/compliance, simple API |
 | **AI** | OpenAI, Groq, Together | Groq (primary) + Together (fallback) | Fastest inference for real-time AI panel, cost-effective |
 | **Email** | SendGrid, Resend | Resend | Modern API, React email templates, great DX |
 | **Monitoring** | PostHog, Sentry | Both | PostHog for analytics, Sentry for error tracking |
@@ -88,7 +88,7 @@ Lazynext takes the "anti-software" approach — do less, but do it right. One gr
 | 7 node primitives | Task, Doc, Decision, Thread, Pulse, Automation, Table | Covers 95% of team workflow needs without complexity |
 | Canvas + Mobile | Canvas (desktop 1024px+), NodeListView (mobile <640px) | Canvas doesn't work on mobile, list view is natural alternative |
 | Multi-tenant | Workspace-level with Supabase RLS policies | Clean tenant isolation, row-level security built-in |
-| Dual payments | Stripe (international) + Razorpay (India/UPI) | India market is primary, but need global reach |
+| Dual payments | Stripe (international) + Razorpay (India/UPI) | Lemon Squeezy (global MoR) | Single provider handles all markets, tax, and compliance |
 | Decision DNA as core | First-class decision tracking with quality scores | This is the differentiator — no competitor does this well |
 | AI panel (LazyMind) | Context-aware AI sidebar, not chatbot | AI should understand the workflow graph, not just answer questions |
 
