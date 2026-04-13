@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
@@ -17,6 +17,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     .single()
 
   if (fetchError || !decision) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+
+  const authorized = await verifyWorkspaceMember(userId, decision.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const prompt = JSON.stringify({
     question: decision.question,

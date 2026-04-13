@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -18,6 +18,12 @@ export async function GET(
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { nodeId } = params
+
+  // Verify user has access to this node's workspace
+  const { data: node } = await db.from('nodes').select('workspace_id').eq('id', nodeId).single()
+  if (!node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, node.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: thread } = await db
     .from('threads')
@@ -49,6 +55,13 @@ export async function POST(
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const { nodeId } = params
+
+  // Verify user has access to this node's workspace
+  const { data: ownerNode } = await db.from('nodes').select('workspace_id').eq('id', nodeId).single()
+  if (!ownerNode) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, ownerNode.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
   const parsed = messageSchema.safeParse(body)

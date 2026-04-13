@@ -39,6 +39,7 @@ vi.mock('@/lib/db/client', () => ({
 // Mock auth
 vi.mock('@/lib/utils/auth', () => ({
   safeAuth: vi.fn(() => Promise.resolve({ userId: 'test-user-123' })),
+  verifyWorkspaceMember: vi.fn(() => Promise.resolve(true)),
 }))
 
 // Mock AI

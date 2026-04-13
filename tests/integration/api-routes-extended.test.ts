@@ -6,7 +6,7 @@ vi.mock('@/lib/db/client', () => ({
     from: vi.fn(() => ({
       select: vi.fn(() => ({
         eq: vi.fn(() => ({
-          single: vi.fn(() => Promise.resolve({ data: { id: 'test-id', question: 'test', status: 'active' }, error: null })),
+          single: vi.fn(() => Promise.resolve({ data: { id: 'test-id', question: 'test', status: 'active', workspace_id: 'ws-1' }, error: null })),
           order: vi.fn(() => ({
             limit: vi.fn(() => Promise.resolve({ data: [], error: null })),
           })),
@@ -36,6 +36,7 @@ vi.mock('@/lib/db/client', () => ({
 
 vi.mock('@/lib/utils/auth', () => ({
   safeAuth: vi.fn(() => Promise.resolve({ userId: 'test-user-123' })),
+  verifyWorkspaceMember: vi.fn(() => Promise.resolve(true)),
 }))
 
 vi.mock('@/lib/utils/rate-limit', () => ({

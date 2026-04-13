@@ -33,15 +33,15 @@ export async function POST(req: Request) {
     const attrs = event.data?.attributes
     const eventId = event.meta?.event_id
 
-    // Idempotency: skip if we've already processed this event
+    // Idempotency: atomically insert event_id (unique constraint prevents duplicates)
     if (eventId && hasValidDatabaseUrl) {
-      const { data: existing } = await db
+      const { error: insertError } = await db
         .from('webhook_events')
-        .select('id')
-        .eq('event_id', String(eventId))
-        .maybeSingle()
-      if (existing) return NextResponse.json({ received: true, duplicate: true })
-      await db.from('webhook_events').insert({ event_id: String(eventId), event_name: eventName, processed_at: new Date().toISOString() }).select().maybeSingle()
+        .insert({ event_id: String(eventId), event_name: eventName, processed_at: new Date().toISOString() })
+      if (insertError?.code === '23505') {
+        // Unique violation — already processed
+        return NextResponse.json({ received: true, duplicate: true })
+      }
     }
 
     switch (eventName) {

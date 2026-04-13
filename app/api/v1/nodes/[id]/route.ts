@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -24,6 +24,10 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     .single()
 
   if (error || !node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+
+  const authorized = await verifyWorkspaceMember(userId, node.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
   return NextResponse.json({ data: node, error: null })
 }
 
@@ -31,6 +35,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  // Verify ownership before update
+  const { data: existing } = await db.from('nodes').select('workspace_id').eq('id', params.id).single()
+  if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
@@ -62,6 +72,12 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  // Verify ownership before delete
+  const { data: existing } = await db.from('nodes').select('workspace_id').eq('id', params.id).single()
+  if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   await db.from('nodes').delete().eq('id', params.id)
   return NextResponse.json({ data: { deleted: true }, error: null })
