@@ -12,18 +12,19 @@
 
 ### Added
 
-- **Production Quality Pass (2026-04-13 → 2026-04-14)** — 39 cleanup commits covering:
-  - **Security**: Fixed 15 IDOR vulnerabilities, hardened CSP (removed unsafe-eval, added media/object/base-uri/form-action directives), rate limiting on all 19 API routes, webhook HMAC idempotency, open redirect protection, template install access control, export UUID validation
-  - **Accessibility**: WCAG 2.1 AA — heading hierarchy, form labels (htmlFor/id), aria-labels on OAuth/workspace buttons, role="alert" on errors, error boundary dev-only console.error, keyboard handlers, password constraints (minLength/maxLength)
-  - **i18n**: next-intl with 40 locales, 57 currencies, locale-aware pricing, LocaleSwitcher, Accept-Language detection
-  - **SEO**: sitemap.ts, robots.ts, manifest.json, viewport metadata with themeColor, OpenGraph/Twitter cards
-  - **Testing**: 95 Vitest unit/integration tests (12 files), 92 Playwright E2E tests (4 files)
+- **Production Quality Pass (2026-04-13 → 2026-04-14)** — 48 cleanup commits covering:
+  - **Security**: Fixed 15 IDOR vulnerabilities, hardened CSP (removed unsafe-eval, added media/object/base-uri/form-action directives), rate limiting on all 19 API routes, webhook HMAC idempotency, open redirect protection, template install access control, export UUID validation, `hasValidDatabaseUrl` guard on billing checkout, shared canvas UUID validation, `poweredByHeader: false`
+  - **Accessibility**: WCAG 2.1 AA — heading hierarchy, form labels (htmlFor/id), aria-labels on OAuth/workspace/icon-only buttons, role="alert" on errors, keyboard handlers, password constraints, prefers-reduced-motion for all CSS animations
+  - **i18n**: next-intl with 40 locales, 57 currencies, locale-aware pricing, LocaleSwitcher with SSR guard, native guide translations for 8 languages (es/fr/de/ja/ko/zh/hi/ar)
+  - **SEO**: sitemap.ts, robots.ts, manifest.json, viewport metadata, OpenGraph/Twitter cards, apple-icon.tsx
+  - **Testing**: 95 Vitest unit/integration tests (12 files), 92 Playwright E2E tests (4 files) — all passing
   - **Billing Migration**: Stripe+Razorpay → Lemon Squeezy (global MoR), updated all docs/schema refs
-  - **Performance**: Canvas undo history capped at 50 entries, decision search moved to server-side ilike, lazy loading
+  - **Performance**: Canvas undo history capped at 50, decision search server-side ilike, lazy loading marketing sections via next/dynamic, crypto.randomUUID for toast IDs
+  - **Reliability**: Timer cleanup in LazyMindPanel/ImportModal (useRef + cleanup on unmount), SSR guards on Zustand store methods (setCurrency/completeTour), favicon moved from app/ to public/ (was 500-ing)
+  - **Feature Completion**: Weekly digest Inngest function now sends emails to workspace members, export handler generates JSON/CSV and stores in DB, AI fallback JSON parsing error handling
+  - **Error Handling**: 23 error boundaries (all routes), onboarding workspace creation, Inngest retries (all 6 functions), workspace name maxLength validation
+  - **Platform Guide**: Interactive tour (GuidedTour spotlight overlay, 10-step WorkspaceTour), PlatformGuide page with 6 sections, onboarding redirect, sidebar link, cookie-persisted tour state
   - **DX**: Added type-check, test:e2e npm scripts, hardened Playwright config (retries, trace, video)
-  - **Error Handling**: Onboarding workspace creation, Inngest retries (all 6 functions), outcome tagging DB update, weekly digest real stats
-  - **UI Polish**: WorkspaceSelector title tooltip, NodeListView sort handler + empty state, loading skeletons
-  - **Doc Sync**: README, AGENTS.md, project-discussion.md all reference Lemon Squeezy
 
 - **Supabase Auth Migration** — Migrated from Clerk to Supabase Auth (SSR). Added Supabase server/client/middleware helpers, OAuth callback route, updated all API routes and middleware for Supabase session management, replaced `@clerk/nextjs` with `@supabase/ssr`, updated Drizzle config and schema for Supabase PostgreSQL. 81 files changed, all tests passing.
 
