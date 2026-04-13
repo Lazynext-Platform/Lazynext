@@ -86,7 +86,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
       </div>
 
       {/* Main nav */}
-      <nav className="flex-1 overflow-y-auto scrollbar-thin px-2 py-3">
+      <nav aria-label="Main navigation" className="flex-1 overflow-y-auto scrollbar-thin px-2 py-3">
         {/* Navigation */}
         <div>
           <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
@@ -124,6 +124,8 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
             {workflows.map((wf) => (
               <button
                 key={wf.name}
+                aria-label={`Workflow: ${wf.name}`}
+                aria-current={wf.active ? 'true' : undefined}
                 className={cn(
                   'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
                   wf.active
@@ -136,6 +138,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
               </button>
             ))}
             <button
+              aria-label="Create new workflow"
               className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors"
             >
               <Plus className="h-3.5 w-3.5" /> New Workflow
@@ -153,6 +156,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
               <button
                 key={item.type}
                 draggable
+                aria-label={`Drag to add ${item.label} node`}
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 transition-colors cursor-grab"
               >
                 <span className={cn('h-2 w-2 rounded-full', item.dot)} />
@@ -194,7 +198,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
       {/* Bottom section */}
       <div className="border-t border-slate-800 p-2 space-y-0.5">
         <TrialBanner />
-        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
+        <button aria-label="Open LazyMind AI assistant" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
           <Sparkles className="h-4 w-4 text-brand" />
           LazyMind AI
         </button>

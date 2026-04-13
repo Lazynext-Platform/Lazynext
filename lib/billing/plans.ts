@@ -19,3 +19,10 @@ export const PLANS = {
 } as const
 
 export type PlanId = keyof typeof PLANS
+
+export function getVariantId(planId: PlanId, interval: 'monthly' | 'yearly'): string {
+  if (planId === 'free') throw new Error('Free plan has no variant ID')
+  const id = PLANS[planId][interval]
+  if (!id) throw new Error(`Missing LEMONSQUEEZY_${planId.toUpperCase()}_${interval.toUpperCase()}_ID env var`)
+  return id
+}

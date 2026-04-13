@@ -13,6 +13,16 @@ export const metadata: Metadata = {
     title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
     description: 'Tasks, docs, decisions, and AI in one unified workspace. Decision DNA tracks every choice your team makes.',
     type: 'website',
+    siteName: 'Lazynext',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
+    description: 'Tasks, docs, decisions, and AI in one unified workspace.',
+  },
+  icons: {
+    icon: '/icon.svg',
+    apple: '/apple-icon',
   },
 }
 

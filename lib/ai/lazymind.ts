@@ -1,6 +1,9 @@
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions'
 
+const hasAIKeys = !!process.env.GROQ_API_KEY || !!process.env.TOGETHER_API_KEY
+export { hasAIKeys }
+
 interface LLMResponse {
   content: string
   provider: 'groq' | 'together'
@@ -11,6 +14,10 @@ export async function callLazyMind(
   userMessage: string,
   maxTokens = 500
 ): Promise<LLMResponse> {
+  if (!hasAIKeys) {
+    throw new Error('AI is not configured. Set GROQ_API_KEY or TOGETHER_API_KEY in .env.local')
+  }
+
   // Primary: Groq (fast)
   try {
     const res = await fetch(GROQ_API_URL, {
