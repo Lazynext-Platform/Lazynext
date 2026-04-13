@@ -193,7 +193,7 @@ test.describe('Responsive Behavior', () => {
     await page.setViewportSize({ width: 375, height: 812 })
     await page.goto('/')
     // The desktop nav links should be hidden
-    const desktopNav = page.locator('header nav.hidden.md\\:flex')
+    const _desktopNav = page.locator('header nav.hidden.md\\:flex')
     // There should be a hamburger menu instead
     const hamburger = page.getByRole('button', { name: /toggle menu/i })
     if (await hamburger.isVisible()) {

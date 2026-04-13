@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { X, CheckCircle2, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -29,11 +29,18 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
   const [selectedSource, setSelectedSource] = useState<string | null>(null)
   const [status, setStatus] = useState<ImportStatus>('idle')
   const [progress, setProgress] = useState({ docs: 0, tasks: 0, edges: 0 })
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [])
 
   const handleImport = () => {
     setStep(3)
     setStatus('importing')
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setProgress(prev => {
         const next = {
           docs: Math.min(prev.docs + Math.random() * 15, 100),
@@ -41,7 +48,8 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
           edges: Math.min(prev.edges + Math.random() * 10, 100),
         }
         if (next.docs >= 100 && next.tasks >= 100 && next.edges >= 100) {
-          clearInterval(timer)
+          if (timerRef.current) clearInterval(timerRef.current)
+          timerRef.current = null
           setTimeout(() => setStatus('success'), 500)
         }
         return next

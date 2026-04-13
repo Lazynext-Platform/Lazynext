@@ -69,6 +69,7 @@ export async function DELETE(req: Request) {
   const id = url.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'MISSING_ID' }, { status: 400 })
 
-  await db.from('edges').delete().eq('id', id)
+  const { error } = await db.from('edges').delete().eq('id', id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

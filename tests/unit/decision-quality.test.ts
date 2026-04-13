@@ -34,7 +34,7 @@ describe('Decision Quality Scoring', () => {
       decisionType: 'experimental',
     })
 
-    const regularScore = computeDecisionQualityScore({
+    const _regularScore = computeDecisionQualityScore({
       question: 'Should we try a new approach to caching?',
       resolution: 'Testing Redis-based caching for 2 weeks',
       rationale: 'Low risk, reversible experiment to improve page load times.',
