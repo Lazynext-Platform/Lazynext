@@ -1,6 +1,6 @@
 import { inngest, EVENTS } from '../client'
 import { Resend } from 'resend'
-import { WorkspaceInviteEmail, TaskAssignmentEmail } from '@/lib/email/templates/index'
+import { WorkspaceInviteEmail, TaskAssignmentEmail, WeeklyDigestEmail } from '@/lib/email/templates/index'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
@@ -157,7 +157,35 @@ export const handleWeeklyDigest = inngest.createFunction(
       activeMembers: memberCount ?? 0,
     }
 
-    return { processed: true, stats }
+    // Get workspace members' emails for digest
+    const { data: members } = await db
+      .from('workspace_members')
+      .select('email')
+      .eq('workspace_id', workspaceId)
+
+    if (!members?.length) return { skipped: true, reason: 'no_members' }
+
+    const now = new Date()
+    const weekStart = new Date(now)
+    weekStart.setDate(now.getDate() - 7)
+    const weekOf = `${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || ''
+    const digestUrl = `${appUrl}/workspace/${workspaceId}/pulse`
+
+    const results = await Promise.allSettled(
+      members.map((m) =>
+        resend.emails.send({
+          from: 'Lazynext <noreply@lazynext.com>',
+          to: m.email,
+          subject: `Weekly Digest — ${weekOf}`,
+          react: WeeklyDigestEmail({ weekOf, stats, digestUrl }),
+        })
+      )
+    )
+
+    const sent = results.filter((r) => r.status === 'fulfilled').length
+    return { processed: true, stats, sent, total: members.length }
   }
 )
 
@@ -172,7 +200,34 @@ export const handleExportRequested = inngest.createFunction(
     const { data: allNodes } = await db.from('nodes').select('*').eq('workspace_id', workspaceId)
     const { data: allDecisions } = await db.from('decisions').select('*').eq('workspace_id', workspaceId)
 
-    return { processed: true, format, nodeCount: (allNodes || []).length, workflowCount: (allWorkflows || []).length, decisionCount: (allDecisions || []).length }
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      workspaceId,
+      workflows: allWorkflows ?? [],
+      nodes: allNodes ?? [],
+      decisions: allDecisions ?? [],
+    }
+
+    let content: string
+    if (format === 'csv') {
+      const rows = (allNodes ?? []).map((n) =>
+        [n.id, n.type, n.label, n.status, n.created_at].map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')
+      )
+      content = ['id,type,label,status,created_at', ...rows].join('\n')
+    } else {
+      content = JSON.stringify(exportData, null, 2)
+    }
+
+    // Store the export in the exports table for the user to download
+    await db.from('exports').insert({
+      workspace_id: workspaceId,
+      user_id: _userId,
+      format,
+      content,
+      created_at: new Date().toISOString(),
+    })
+
+    return { processed: true, format, nodeCount: (allNodes ?? []).length, workflowCount: (allWorkflows ?? []).length, decisionCount: (allDecisions ?? []).length }
   }
 )
 

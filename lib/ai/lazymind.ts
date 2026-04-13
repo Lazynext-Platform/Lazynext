@@ -70,6 +70,11 @@ export async function callLazyMind(
     const errBody = await res.json().catch(() => null)
     throw new Error(`Together error: ${res.status}${errBody?.error?.message ? ` — ${errBody.error.message}` : ''}`)
   }
-  const data = await res.json()
+  let data: { choices: { message: { content: string } }[] }
+  try {
+    data = await res.json()
+  } catch {
+    throw new Error('Together AI returned invalid JSON')
+  }
   return { content: data.choices[0].message.content, provider: 'together' }
 }
