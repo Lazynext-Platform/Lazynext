@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "Bienvenue sur Lazynext",
+    "subtitle": "Apprenez à utiliser chaque fonctionnalité de la plateforme. Ce guide couvre tout, de la création de workflows au suivi de la qualité des décisions.",
+    "startTour": "Démarrer la visite interactive",
+    "skipToWorkspace": "Aller à l'espace de travail",
+    "progress": "{completed} sur {total} sections terminées",
+    "allComplete": "Tout est fait !",
+    "sectionComplete": "Terminé",
+    "gotIt": "Compris, suivant",
+    "completionTitle": "Vous êtes prêt !",
+    "completionDescription": "Vous avez appris toutes les fonctionnalités clés. Commencez à construire votre premier workflow.",
+    "takeInteractiveTour": "Visite interactive",
+    "goToWorkspace": "Aller à l'espace de travail",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "Canevas de workflow",
+        "description": "Votre espace visuel infini pour organiser le travail",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "Glisser-déposer des nœuds",
+            "description": "Appuyez sur N pour le menu de création, puis glissez des nœuds Tâche, Doc, Décision, Discussion, Pulse, Automatisation ou Tableau."
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "Connecter avec des arêtes",
+            "description": "Dessinez des connexions entre les nœuds pour montrer les relations et dépendances."
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "Naviguer dans le canevas",
+            "description": "Défilez pour zoomer, cliquez et glissez pour vous déplacer. Utilisez la mini-carte."
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7 Types de nœuds",
+        "description": "Les éléments de base de vos workflows",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "Nœuds Tâche (Bleu)",
+            "description": "Suivez les éléments de travail avec assignés, dates limites, priorité et sous-tâches. Raccourci : T."
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "Nœuds Document (Vert)",
+            "description": "Créez des documents riches avec une barre d'outils complète. Raccourci : D."
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "Nœuds Décision (Orange)",
+            "description": "Enregistrez les décisions avec question, options, justification et résultat. Raccourci : Q."
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "Nœuds Discussion (Violet)",
+            "description": "Discutez avec @mentions, réactions emoji et tableaux comparatifs. Raccourci : H."
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "Nœuds Tableau (Sarcelle)",
+            "description": "Tableaux de données structurés avec édition en ligne et tri."
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "ADN des Décisions",
+        "description": "Suivez et apprenez de chaque décision",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "Enregistrer les décisions",
+            "description": "Notez la question, les options, votre choix et la justification. Taguez par type et catégorie."
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "Scores de qualité",
+            "description": "Chaque décision reçoit un score basé sur la complétude."
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "Revue des résultats",
+            "description": "Examinez comment les décisions ont tourné. Marquez comme bon, mauvais ou neutre."
           }
         }
       },
       "lazymind": {
-        "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "title": "LazyMind IA",
+        "description": "Votre assistant IA qui comprend votre workflow",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "Analyse de workflow",
+            "description": "LazyMind lit votre canevas et identifie les goulots d'étranglement. Ouvrez avec ⌘L."
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "Suggestions intelligentes",
+            "description": "Priorisation de tâches et recommandations de décisions par IA."
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "Résumés hebdomadaires",
+            "description": "Résumés automatiques — tâches terminées, décisions prises et tendances."
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "Collaboration d'équipe",
+        "description": "Travaillez ensemble en temps réel",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "Curseurs en temps réel",
+            "description": "Voyez les curseurs de vos coéquipiers sur le canevas en temps réel."
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "Discussions en fils",
+            "description": "Attachez des conversations à n'importe quel nœud."
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@Mentionner quelqu'un",
+            "description": "Tapez @ pour mentionner des membres dans les discussions."
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "Outils de productivité",
+        "description": "Raccourcis, palette de commandes et automatisations",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "Palette de commandes (⌘K)",
+            "description": "Recherchez tout instantanément — nœuds, actions, vues."
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "Raccourcis clavier",
+            "description": "Appuyez sur ? pour voir les 23 raccourcis."
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "Automatisations",
+            "description": "Créez des règles QUAND/ALORS pour automatiser le travail répétitif."
           }
         }
       }

@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "欢迎来到 Lazynext",
+    "subtitle": "了解平台的每一项功能。本指南涵盖从创建工作流到跟踪决策质量的所有内容。",
+    "startTour": "开始互动导览",
+    "skipToWorkspace": "跳转到工作区",
+    "progress": "已完成 {completed}/{total} 个部分",
+    "allComplete": "全部完成！",
+    "sectionComplete": "已完成",
+    "gotIt": "明白了，下一步",
+    "completionTitle": "一切就绪！",
+    "completionDescription": "您已学习了所有关键功能。开始构建您的第一个工作流或进行互动导览。",
+    "takeInteractiveTour": "进行互动导览",
+    "goToWorkspace": "前往工作区",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "工作流画布",
+        "description": "用于组织工作的无限视觉工作空间",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "拖放节点",
+            "description": "按N键打开创建菜单，然后将任务、文档、决策、线程、脉冲、自动化或表格节点拖到画布上。"
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "用边连接",
+            "description": "在节点之间绘制连接以显示关系和依赖关系。"
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "画布导航",
+            "description": "滚动缩放，点击拖动平移。使用角落的小地图获取概览。"
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7种节点类型",
+        "description": "工作流的构建模块",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "任务节点（蓝色）",
+            "description": "跟踪工作项目的负责人、截止日期、优先级和子任务。快捷键：T"
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "文档节点（绿色）",
+            "description": "使用完整工具栏创建富文本文档。快捷键：D"
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "决策节点（橙色）",
+            "description": "记录决策的问题、选项、理由和结果。快捷键：Q"
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "线程节点（紫色）",
+            "description": "使用@提及、表情反应和比较表进行讨论。快捷键：H"
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "表格节点（青色）",
+            "description": "带有内联编辑、排序和摘要页脚的结构化数据表。"
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "决策DNA",
+        "description": "跟踪和学习团队的每一个决策",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "记录决策",
+            "description": "记录问题、考虑的选项、选择和理由。"
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "质量分数",
+            "description": "每个决策根据完整性获得评分。"
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "结果审查",
+            "description": "审查决策的结果。标记为好、坏或中性。"
           }
         }
       },
       "lazymind": {
         "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "description": "理解您工作流的AI助手",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "工作流分析",
+            "description": "LazyMind读取您的画布，识别瓶颈和被阻塞的任务。按⌘L打开。"
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "智能建议",
+            "description": "AI驱动的任务优先级排序和决策建议。"
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "每周摘要",
+            "description": "已完成任务、已做决策和已解决线程的自动摘要。"
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "团队协作",
+        "description": "实时协同工作",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "实时光标",
+            "description": "在画布上实时查看队友的光标。"
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "线程讨论",
+            "description": "将对话附加到任何节点。在工作旁边保留上下文。"
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@提及任何人",
+            "description": "输入@在线程中提及团队成员。"
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "生产力工具",
+        "description": "键盘快捷键、命令面板和自动化",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "命令面板（⌘K）",
+            "description": "即时搜索任何内容——节点、操作、视图。"
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "键盘快捷键",
+            "description": "按?查看所有23个快捷键。"
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "自动化",
+            "description": "构建何时/那么规则来自动化重复工作。"
           }
         }
       }

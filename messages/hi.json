@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "Lazynext में आपका स्वागत है",
+    "subtitle": "प्लेटफ़ॉर्म की हर सुविधा सीखें। यह गाइड वर्कफ़्लो बनाने से लेकर निर्णय गुणवत्ता ट्रैक करने तक सब कुछ कवर करती है।",
+    "startTour": "इंटरैक्टिव टूर शुरू करें",
+    "skipToWorkspace": "वर्कस्पेस पर जाएं",
+    "progress": "{total} में से {completed} सेक्शन पूरे",
+    "allComplete": "सब पूरा!",
+    "sectionComplete": "पूरा हुआ",
+    "gotIt": "समझ गया, अगला",
+    "completionTitle": "आप तैयार हैं!",
+    "completionDescription": "आपने सभी मुख्य सुविधाएं सीख ली हैं। अपना पहला वर्कफ़्लो बनाना शुरू करें।",
+    "takeInteractiveTour": "इंटरैक्टिव टूर लें",
+    "goToWorkspace": "वर्कस्पेस पर जाएं",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "वर्कफ़्लो कैनवास",
+        "description": "काम व्यवस्थित करने के लिए अनंत विज़ुअल वर्कस्पेस",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "नोड्स ड्रैग और ड्रॉप करें",
+            "description": "N दबाकर मेनू खोलें, फिर टास्क, डॉक, डिसीज़न, थ्रेड, पल्स, ऑटोमेशन या टेबल नोड्स ड्रैग करें।"
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "एज से जोड़ें",
+            "description": "संबंध और निर्भरता दिखाने के लिए नोड्स के बीच कनेक्शन बनाएं।"
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "कैनवास नेविगेट करें",
+            "description": "ज़ूम के लिए स्क्रॉल करें, मूव के लिए क्लिक और ड्रैग करें।"
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7 नोड प्रकार",
+        "description": "वर्कफ़्लो के बिल्डिंग ब्लॉक्स",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "टास्क नोड (नीला)",
+            "description": "असाइनी, ड्यू डेट, प्रायोरिटी और सबटास्क के साथ ट्रैक करें। शॉर्टकट: T"
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "डॉक नोड (हरा)",
+            "description": "फुल टूलबार के साथ रिच डॉक्यूमेंट बनाएं। शॉर्टकट: D"
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "डिसीज़न नोड (नारंगी)",
+            "description": "प्रश्न, विकल्प, तर्क और परिणाम रिकॉर्ड करें। शॉर्टकट: Q"
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "थ्रेड नोड (बैंगनी)",
+            "description": "@मेंशन, इमोजी रिएक्शन और तुलना टेबल के साथ चर्चा करें। शॉर्टकट: H"
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "टेबल नोड (टील)",
+            "description": "इनलाइन एडिटिंग, सॉर्टिंग और सारांश के साथ डेटा टेबल।"
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "डिसीज़न DNA",
+        "description": "टीम के हर निर्णय को ट्रैक करें और सीखें",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "निर्णय रिकॉर्ड करें",
+            "description": "प्रश्न, विकल्प, चुनाव और तर्क दर्ज करें।"
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "गुणवत्ता स्कोर",
+            "description": "हर निर्णय को पूर्णता के आधार पर स्कोर मिलता है।"
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "परिणाम समीक्षा",
+            "description": "निर्णयों के परिणाम की जांच करें। अच्छा, बुरा या तटस्थ चिह्नित करें।"
           }
         }
       },
       "lazymind": {
         "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "description": "आपके वर्कफ़्लो को समझने वाला AI सहायक",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "वर्कफ़्लो विश्लेषण",
+            "description": "LazyMind आपका कैनवास पढ़ता है और बाधाओं की पहचान करता है। ⌘L से खोलें।"
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "स्मार्ट सुझाव",
+            "description": "AI-संचालित टास्क प्राथमिकता और निर्णय सिफारिशें।"
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "साप्ताहिक सारांश",
+            "description": "पूर्ण कार्यों, लिए गए निर्णयों और रुझानों का स्वचालित सारांश।"
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "टीम सहयोग",
+        "description": "रियल-टाइम में साथ काम करें",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "रियल-टाइम कर्सर",
+            "description": "कैनवास पर टीम साथियों के कर्सर देखें।"
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "थ्रेड चर्चा",
+            "description": "किसी भी नोड पर बातचीत जोड़ें।"
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@किसी को मेंशन करें",
+            "description": "@ टाइप करके थ्रेड में टीम सदस्यों को मेंशन करें।"
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "उत्पादकता उपकरण",
+        "description": "कीबोर्ड शॉर्टकट, कमांड पैलेट और ऑटोमेशन",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "कमांड पैलेट (⌘K)",
+            "description": "तुरंत कुछ भी खोजें — नोड्स, एक्शन, व्यू।"
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "कीबोर्ड शॉर्टकट",
+            "description": "? दबाकर सभी 23 शॉर्टकट देखें।"
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "ऑटोमेशन",
+            "description": "कब/तब नियम बनाकर दोहराव वाला काम स्वचालित करें।"
           }
         }
       }

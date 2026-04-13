@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "Lazynextへようこそ",
+    "subtitle": "プラットフォームのすべての機能を学びましょう。ワークフローの作成から意思決定の品質追跡まで、すべてをカバーします。",
+    "startTour": "インタラクティブツアーを開始",
+    "skipToWorkspace": "ワークスペースへ",
+    "progress": "{total}セクション中{completed}完了",
+    "allComplete": "すべて完了！",
+    "sectionComplete": "完了",
+    "gotIt": "了解、次へ",
+    "completionTitle": "準備完了！",
+    "completionDescription": "すべての主要機能を学びました。最初のワークフローを作成するか、インタラクティブツアーに参加しましょう。",
+    "takeInteractiveTour": "インタラクティブツアーを受ける",
+    "goToWorkspace": "ワークスペースへ",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "ワークフローキャンバス",
+        "description": "作業を整理するための無限のビジュアルワークスペース",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "ノードのドラッグ＆ドロップ",
+            "description": "Nキーで作成メニューを開き、タスク、ドキュメント、意思決定、スレッド、パルス、自動化、テーブルノードをキャンバスにドラッグします。"
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "エッジで接続",
+            "description": "ノード間に接続を描いて関係と依存関係を示します。"
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "キャンバスのナビゲーション",
+            "description": "スクロールでズーム、クリック＆ドラッグで移動。ミニマップで全体を確認。"
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7つのノードタイプ",
+        "description": "ワークフローの構成要素",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "タスクノード（青）",
+            "description": "担当者、期限、優先度、ステータス、サブタスクで作業を追跡。ショートカット：T"
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "ドキュメントノード（緑）",
+            "description": "フルツールバー付きのリッチドキュメントを作成。ショートカット：D"
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "意思決定ノード（オレンジ）",
+            "description": "質問、選択肢、根拠、結果を記録。ショートカット：Q"
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "スレッドノード（紫）",
+            "description": "@メンション、絵文字リアクション、比較表で議論。ショートカット：H"
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "テーブルノード（ティール）",
+            "description": "インライン編集、ソート、サマリーフッター付きの構造化データテーブル。"
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "意思決定DNA",
+        "description": "チームのすべての意思決定を追跡し学ぶ",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "意思決定を記録",
+            "description": "質問、検討した選択肢、選択、根拠を記録します。"
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "品質スコア",
+            "description": "すべての意思決定は完全性に基づいてスコアが付けられます。"
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "結果レビュー",
+            "description": "意思決定の結果を確認。良い、悪い、中立で評価。"
           }
         }
       },
       "lazymind": {
         "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "description": "ワークフローを理解するAIアシスタント",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "ワークフロー分析",
+            "description": "LazyMindがキャンバスを読み取り、ボトルネックとブロックされたタスクを特定。⌘Lで開く。"
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "スマート提案",
+            "description": "AI駆動のタスク優先順位付けと意思決定の推奨。"
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "週次ダイジェスト",
+            "description": "完了したタスク、行われた意思決定、解決されたスレッドの自動サマリー。"
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "チームコラボレーション",
+        "description": "リアルタイムで一緒に作業",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "リアルタイムカーソル",
+            "description": "キャンバス上のチームメイトのカーソルをリアルタイムで確認。"
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "スレッドディスカッション",
+            "description": "任意のノードに会話を添付。作業の横にコンテキストを保持。"
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@メンション",
+            "description": "@を入力してスレッドでチームメンバーをメンション。"
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "生産性ツール",
+        "description": "キーボードショートカット、コマンドパレット、自動化",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "コマンドパレット（⌘K）",
+            "description": "ノード、アクション、ビューを即座に検索。"
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "キーボードショートカット",
+            "description": "?キーで23のショートカットを表示。"
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "自動化",
+            "description": "いつ/それなら ルールで繰り返し作業を自動化。"
           }
         }
       }

@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "مرحباً بك في Lazynext",
+    "subtitle": "تعلم كيفية استخدام كل ميزة في المنصة. يغطي هذا الدليل كل شيء من إنشاء سير العمل إلى تتبع جودة القرارات.",
+    "startTour": "بدء الجولة التفاعلية",
+    "skipToWorkspace": "الانتقال إلى مساحة العمل",
+    "progress": "{completed} من {total} أقسام مكتملة",
+    "allComplete": "تم الكل!",
+    "sectionComplete": "مكتمل",
+    "gotIt": "فهمت، التالي",
+    "completionTitle": "أنت جاهز!",
+    "completionDescription": "لقد تعلمت جميع الميزات الرئيسية. ابدأ ببناء أول سير عمل.",
+    "takeInteractiveTour": "أخذ جولة تفاعلية",
+    "goToWorkspace": "الذهاب إلى مساحة العمل",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "لوحة سير العمل",
+        "description": "مساحة عمل مرئية لا نهائية لتنظيم العمل",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "سحب وإفلات العقد",
+            "description": "اضغط N لفتح قائمة الإنشاء، ثم اسحب عقد المهام والمستندات والقرارات والمحادثات والنبض والأتمتة والجداول."
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "الربط بالحواف",
+            "description": "ارسم اتصالات بين العقد لإظهار العلاقات والتبعيات."
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "تصفح اللوحة",
+            "description": "مرر للتكبير، انقر واسحب للتحريك. استخدم الخريطة المصغرة."
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7 أنواع من العقد",
+        "description": "اللبنات الأساسية لسير العمل",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "عقد المهام (أزرق)",
+            "description": "تتبع عناصر العمل مع المكلفين والمواعيد والأولوية. اختصار: T"
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "عقد المستندات (أخضر)",
+            "description": "إنشاء مستندات غنية مع شريط أدوات كامل. اختصار: D"
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "عقد القرارات (برتقالي)",
+            "description": "تسجيل القرارات مع السؤال والخيارات والمبرر والنتيجة. اختصار: Q"
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "عقد المحادثات (بنفسجي)",
+            "description": "ناقش مع @إشارات وتفاعلات إيموجي وجداول مقارنة. اختصار: H"
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "عقد الجداول (أزرق مخضر)",
+            "description": "جداول بيانات منظمة مع تحرير مباشر وترتيب."
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "DNA القرارات",
+        "description": "تتبع وتعلم من كل قرار",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "تسجيل القرارات",
+            "description": "سجل السؤال والخيارات واختيارك والمبرر."
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "نقاط الجودة",
+            "description": "كل قرار يحصل على نقاط بناءً على الاكتمال."
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "مراجعة النتائج",
+            "description": "راجع كيف سارت القرارات. حدد كجيد أو سيئ أو محايد."
           }
         }
       },
       "lazymind": {
         "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "description": "مساعد ذكاء اصطناعي يفهم سير عملك",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "تحليل سير العمل",
+            "description": "LazyMind يقرأ لوحتك ويحدد الاختناقات. افتح بـ ⌘L."
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "اقتراحات ذكية",
+            "description": "ترتيب المهام حسب الأولوية وتوصيات القرارات بالذكاء الاصطناعي."
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "ملخصات أسبوعية",
+            "description": "ملخصات تلقائية للمهام المكتملة والقرارات المتخذة."
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "تعاون الفريق",
+        "description": "اعمل معاً في الوقت الفعلي",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "مؤشرات في الوقت الفعلي",
+            "description": "شاهد مؤشرات زملائك على اللوحة في الوقت الفعلي."
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "مناقشات مترابطة",
+            "description": "أرفق المحادثات بأي عقدة."
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@ذكر أي شخص",
+            "description": "اكتب @ لذكر أعضاء الفريق في المحادثات."
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "أدوات الإنتاجية",
+        "description": "اختصارات لوحة المفاتيح ولوحة الأوامر والأتمتة",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "لوحة الأوامر (⌘K)",
+            "description": "ابحث عن أي شيء فوراً — عقد وإجراءات وعروض."
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "اختصارات لوحة المفاتيح",
+            "description": "اضغط ? لعرض جميع الاختصارات الـ23."
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "الأتمتة",
+            "description": "أنشئ قواعد متى/ثم لأتمتة العمل المتكرر."
           }
         }
       }

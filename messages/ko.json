@@ -241,132 +241,132 @@
     }
   },
   "guide": {
-    "title": "Welcome to Lazynext",
-    "subtitle": "Learn how to use every feature of the platform. This guide covers everything from creating workflows to tracking decision quality.",
-    "startTour": "Start Interactive Tour",
-    "skipToWorkspace": "Skip to Workspace",
-    "progress": "{completed} of {total} sections completed",
-    "allComplete": "All done!",
-    "sectionComplete": "Completed",
-    "gotIt": "Got it, next",
-    "completionTitle": "You're ready to go!",
-    "completionDescription": "You've learned all the key features. Start building your first workflow or take an interactive tour of the actual workspace.",
-    "takeInteractiveTour": "Take Interactive Tour",
-    "goToWorkspace": "Go to Workspace",
+    "title": "Lazynext에 오신 것을 환영합니다",
+    "subtitle": "플랫폼의 모든 기능을 배워보세요. 워크플로 생성부터 의사결정 품질 추적까지 모든 것을 다룹니다.",
+    "startTour": "인터랙티브 투어 시작",
+    "skipToWorkspace": "워크스페이스로 이동",
+    "progress": "{total}개 섹션 중 {completed}개 완료",
+    "allComplete": "모두 완료!",
+    "sectionComplete": "완료됨",
+    "gotIt": "이해했습니다, 다음",
+    "completionTitle": "준비 완료!",
+    "completionDescription": "모든 핵심 기능을 배웠습니다. 첫 워크플로를 만들거나 인터랙티브 투어를 해보세요.",
+    "takeInteractiveTour": "인터랙티브 투어 하기",
+    "goToWorkspace": "워크스페이스로 이동",
     "sections": {
       "canvas": {
-        "title": "Workflow Canvas",
-        "description": "Your infinite visual workspace for organizing work",
+        "title": "워크플로 캔버스",
+        "description": "작업을 정리하는 무한 시각적 워크스페이스",
         "features": {
           "dragDrop": {
-            "title": "Drag & Drop Nodes",
-            "description": "Press N to open the creation menu, then drag Task, Doc, Decision, Thread, Pulse, Automation, or Table nodes onto your canvas. Each node type has its own color and icon."
+            "title": "노드 드래그 앤 드롭",
+            "description": "N키로 생성 메뉴를 열고 작업, 문서, 의사결정, 스레드, 펄스, 자동화, 테이블 노드를 캔버스에 드래그하세요."
           },
           "connect": {
-            "title": "Connect with Edges",
-            "description": "Draw connections between nodes to show relationships and dependencies. Hover over a node handle and drag to another node to create an edge."
+            "title": "엣지로 연결",
+            "description": "노드 간 연결을 그려 관계와 종속성을 표시하세요."
           },
           "zoom": {
-            "title": "Navigate the Canvas",
-            "description": "Scroll to zoom, click and drag the background to pan. Use the minimap in the corner for an overview. On mobile, tap the list view to see all nodes."
+            "title": "캔버스 탐색",
+            "description": "스크롤로 줌, 클릭 앤 드래그로 이동. 미니맵으로 전체 보기."
           }
         }
       },
       "nodes": {
-        "title": "7 Node Types",
-        "description": "The building blocks of your workflows",
+        "title": "7가지 노드 유형",
+        "description": "워크플로의 구성 요소",
         "features": {
           "task": {
-            "title": "Task Nodes (Blue)",
-            "description": "Track work items with assignees, due dates, priority, status, and subtasks. Keyboard shortcut: press T on the canvas."
+            "title": "작업 노드 (파란색)",
+            "description": "담당자, 마감일, 우선순위, 하위 작업으로 작업 추적. 단축키: T"
           },
           "doc": {
-            "title": "Doc Nodes (Green)",
-            "description": "Create rich documents with a full toolbar — formatting, headings, lists, and code blocks. Keyboard shortcut: press D."
+            "title": "문서 노드 (녹색)",
+            "description": "풀 툴바로 리치 문서 생성. 단축키: D"
           },
           "decision": {
-            "title": "Decision Nodes (Orange)",
-            "description": "Log decisions with question, options, rationale, and outcome. Quality is scored automatically. Keyboard shortcut: press Q."
+            "title": "의사결정 노드 (주황색)",
+            "description": "질문, 옵션, 근거, 결과 기록. 단축키: Q"
           },
           "thread": {
-            "title": "Thread Nodes (Purple)",
-            "description": "Discuss anything with @mentions, emoji reactions, and comparison tables. Attach threads to any node. Keyboard shortcut: press H."
+            "title": "스레드 노드 (보라색)",
+            "description": "@멘션, 이모지 리액션, 비교 테이블로 토론. 단축키: H"
           },
           "table": {
-            "title": "Table Nodes (Teal)",
-            "description": "Structured data tables with inline editing, sorting, and summary footers. Perfect for tracking lists and matrices."
+            "title": "테이블 노드 (틸)",
+            "description": "인라인 편집, 정렬, 요약이 포함된 구조화된 데이터 테이블."
           }
         }
       },
       "decisions": {
-        "title": "Decision DNA",
-        "description": "Track and learn from every decision your team makes",
+        "title": "의사결정 DNA",
+        "description": "팀의 모든 의사결정을 추적하고 학습",
         "features": {
           "log": {
-            "title": "Log Decisions",
-            "description": "Record the question, options considered, your choice, and the rationale behind it. Tag with type (reversible, irreversible, experimental) and category."
+            "title": "의사결정 기록",
+            "description": "질문, 검토한 옵션, 선택, 근거를 기록하세요."
           },
           "quality": {
-            "title": "Quality Scores",
-            "description": "Every decision gets a quality score based on completeness — did you consider alternatives? Document rationale? Set expected outcomes? Higher scores mean better decision hygiene."
+            "title": "품질 점수",
+            "description": "모든 의사결정은 완성도에 따라 점수가 매겨집니다."
           },
           "outcomes": {
-            "title": "Outcome Reviews",
-            "description": "After time passes, review how decisions turned out. Mark outcomes as good, bad, or neutral. LazyMind AI learns from patterns and suggests improvements."
+            "title": "결과 검토",
+            "description": "의사결정 결과를 확인. 좋음, 나쁨, 중립으로 표시."
           }
         }
       },
       "lazymind": {
         "title": "LazyMind AI",
-        "description": "Your AI assistant that understands your workflow",
+        "description": "워크플로를 이해하는 AI 어시스턴트",
         "features": {
           "analyze": {
-            "title": "Workflow Analysis",
-            "description": "LazyMind reads your canvas and identifies bottlenecks, blocked tasks, and decisions needing attention. Open with ⌘L."
+            "title": "워크플로 분석",
+            "description": "LazyMind가 캔버스를 읽고 병목과 차단된 작업을 식별. ⌘L로 열기."
           },
           "suggest": {
-            "title": "Smart Suggestions",
-            "description": "Get AI-powered task prioritization, decision recommendations, and next steps based on your workflow state."
+            "title": "스마트 제안",
+            "description": "AI 기반 작업 우선순위 지정 및 의사결정 추천."
           },
           "digest": {
-            "title": "Weekly Digests",
-            "description": "Automatic summaries of what happened — tasks completed, decisions made, threads resolved, and trends to watch."
+            "title": "주간 다이제스트",
+            "description": "완료된 작업, 내린 결정, 해결된 스레드의 자동 요약."
           }
         }
       },
       "collaboration": {
-        "title": "Team Collaboration",
-        "description": "Work together in real-time across your workspace",
+        "title": "팀 협업",
+        "description": "실시간으로 함께 작업",
         "features": {
           "realtime": {
-            "title": "Real-Time Cursors",
-            "description": "See your teammates' cursors on the canvas in real time. Know who's looking at what, who's typing, and what's being edited."
+            "title": "실시간 커서",
+            "description": "캔버스에서 팀원의 커서를 실시간으로 확인."
           },
           "threads": {
-            "title": "Threaded Discussions",
-            "description": "Attach conversations to any node. Keep context next to the work. No more hunting through Slack for that one message."
+            "title": "스레드 토론",
+            "description": "모든 노드에 대화를 첨부. 작업 옆에 컨텍스트 유지."
           },
           "mentions": {
-            "title": "@Mention Anyone",
-            "description": "Type @ to mention team members in threads. They'll get a notification and can jump straight to the relevant context."
+            "title": "@멘션",
+            "description": "@을 입력하여 스레드에서 팀원을 멘션."
           }
         }
       },
       "productivity": {
-        "title": "Productivity Tools",
-        "description": "Keyboard shortcuts, command palette, and automations",
+        "title": "생산성 도구",
+        "description": "키보드 단축키, 명령 팔레트, 자동화",
         "features": {
           "command": {
-            "title": "Command Palette (⌘K)",
-            "description": "Instantly search anything — nodes, actions, views. Create, navigate, and control the platform without touching the mouse."
+            "title": "명령 팔레트 (⌘K)",
+            "description": "노드, 액션, 뷰를 즉시 검색."
           },
           "shortcuts": {
-            "title": "Keyboard Shortcuts",
-            "description": "Press ? to see all 23 shortcuts. Create nodes (N/T/D/Q/H), toggle panels (⌘L for AI, ⌘K for search), and navigate with speed."
+            "title": "키보드 단축키",
+            "description": "?키로 23개 단축키 보기."
           },
           "automations": {
-            "title": "Automations",
-            "description": "Build WHEN/THEN rules to automate repetitive work. Auto-assign tasks, trigger notifications, update statuses when conditions are met."
+            "title": "자동화",
+            "description": "언제/그때 규칙으로 반복 작업 자동화."
           }
         }
       }
