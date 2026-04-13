@@ -70,24 +70,30 @@ html {
 }
 
 /* Marketing utility classes — animations defined in tailwind.config.ts */
-.float-anim {
-  animation: float 3s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .float-anim {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .consolidation-line {
+    stroke-dasharray: 6 4;
+    animation: dash 20s linear infinite;
+  }
+
+  .animate-confetti {
+    animation: confettiFall 2s ease-in forwards;
+  }
+
+  .animate-fadeIn {
+    animation: fadeInUp 0.35s ease;
+  }
+
+  .animate-scaleIn {
+    animation: scaleIn 0.15s ease-out;
+  }
 }
 
 .consolidation-line {
   stroke-dasharray: 6 4;
-  animation: dash 20s linear infinite;
-}
-
-.animate-confetti {
-  animation: confettiFall 2s ease-in forwards;
-}
-
-.animate-fadeIn {
-  animation: fadeInUp 0.35s ease;
-}
-
-.animate-scaleIn {
-  animation: scaleIn 0.15s ease-out;
 }
 
