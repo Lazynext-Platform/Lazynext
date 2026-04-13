@@ -117,9 +117,9 @@ export default function LazyMindSection() {
                   <f.icon className="h-5 w-5 text-brand" />
                 </div>
                 <div>
-                  <h4 className="text-base font-bold text-slate-900">
+                  <h3 className="text-base font-bold text-slate-900">
                     {f.title}
-                  </h4>
+                  </h3>
                   <p className="mt-1 text-sm text-slate-500">{f.desc}</p>
                 </div>
               </div>

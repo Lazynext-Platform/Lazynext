@@ -81,8 +81,9 @@ export default function SignUpPage() {
 
       <form onSubmit={handleSignUp} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+          <label htmlFor="signup-name" className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
           <input
+            id="signup-name"
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
@@ -91,8 +92,9 @@ export default function SignUpPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+          <label htmlFor="signup-email" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
           <input
+            id="signup-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -101,8 +103,9 @@ export default function SignUpPage() {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700 mb-1">Password</label>
           <input
+            id="signup-password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

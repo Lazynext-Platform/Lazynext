@@ -2,6 +2,12 @@ import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { z } from 'zod'
+
+const searchSchema = z.object({
+  query: z.string().min(1).max(500),
+  workspaceId: z.string().uuid(),
+})
 
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
@@ -12,12 +18,14 @@ export async function POST(req: Request) {
 
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  let body: Record<string, unknown>
+  let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
-  const { query, workspaceId } = body
-  if (!query || !workspaceId) {
-    return NextResponse.json({ error: 'MISSING_PARAMS' }, { status: 400 })
+  const parsed = searchSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
+
+  const { query, workspaceId } = parsed.data
 
   const { data: results, error } = await db
     .from('decisions')
@@ -31,7 +39,7 @@ export async function POST(req: Request) {
   // Filter client-side for now (full-text search can use Supabase textSearch later)
   const filtered = (results || []).filter((d: { question: string; resolution: string | null; rationale: string | null }) => {
     const searchable = `${d.question} ${d.resolution || ''} ${d.rationale || ''}`.toLowerCase()
-    return searchable.includes((query as string).toLowerCase())
+    return searchable.includes(query.toLowerCase())
   })
 
   return NextResponse.json({ data: filtered, error: null })

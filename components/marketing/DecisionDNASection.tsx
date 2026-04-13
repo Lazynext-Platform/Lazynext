@@ -42,9 +42,9 @@ export default function DecisionDNASection() {
                 </div>
               </div>
 
-              <h4 className="mb-2 text-lg font-bold text-slate-900">
+              <h3 className="mb-2 text-lg font-bold text-slate-900">
                 Which payment processor for global launch?
-              </h4>
+              </h3>
 
               <div className="mb-4 rounded-lg bg-slate-50 p-4">
                 <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-500">

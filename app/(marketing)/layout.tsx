@@ -55,9 +55,9 @@ export default function MarketingLayout({
             {/* Link columns */}
             {Object.entries(footerLinks).map(([title, links]) => (
               <div key={title}>
-                <h4 className="mb-4 text-sm font-semibold text-white">
+                <h3 className="mb-4 text-sm font-semibold text-white">
                   {title}
-                </h4>
+                </h3>
                 <ul className="space-y-2.5">
                   {links.map((link) => (
                     <li key={link.label}>
