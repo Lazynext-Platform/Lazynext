@@ -9,12 +9,13 @@ interface RateLimitEntry {
 const store = new Map<string, RateLimitEntry>()
 
 // Periodic cleanup to prevent memory leaks
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now()
   for (const [key, entry] of store) {
     if (entry.resetAt < now) store.delete(key)
   }
 }, 60_000)
+if (typeof cleanupInterval.unref === 'function') cleanupInterval.unref()
 
 export interface RateLimitConfig {
   /** Max requests per window */

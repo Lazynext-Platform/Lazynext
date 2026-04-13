@@ -30,10 +30,11 @@ export default function DataExportPage() {
 
   const handleFullExport = () => {
     setFullExportStatus('exporting')
-    const timer = setInterval(() => {
+    let timer: ReturnType<typeof setInterval> | null = null
+    timer = setInterval(() => {
       setFullExportProgress(prev => {
         if (prev >= 100) {
-          clearInterval(timer)
+          if (timer) clearInterval(timer)
           setFullExportStatus('ready')
           return 100
         }

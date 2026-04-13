@@ -179,7 +179,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
               <p className="mt-0.5 text-sm text-slate-400">
                 {msg.mention
                   ? msg.content.split(`@${msg.mention}`).map((part, i, arr) => (
-                      <span key={i}>
+                      <span key={`${msg.id}-mention-${i}`}>
                         {part}
                         {i < arr.length - 1 && (
                           <span className="inline-flex items-center rounded bg-brand/10 px-1.5 py-0.5 text-xs font-medium text-brand">@{msg.mention}</span>

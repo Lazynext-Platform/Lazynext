@@ -54,7 +54,13 @@ export async function POST(req: Request) {
 
   try {
     lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY })
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!appUrl) {
+      return NextResponse.json(
+        { error: 'APP_URL_NOT_CONFIGURED', message: 'Set NEXT_PUBLIC_APP_URL env var.' },
+        { status: 503 }
+      )
+    }
 
     const { data, error } = await createCheckout(process.env.LEMONSQUEEZY_STORE_ID, variantId, {
       checkoutData: {

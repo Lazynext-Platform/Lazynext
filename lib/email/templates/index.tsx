@@ -40,7 +40,7 @@ function EmailLayout({ children, preheader }: { children: React.ReactNode; prehe
                       {BRAND_NAME} · Graph-native workflows · <a href={BASE_URL} style={{ color: BRAND_COLOR }}>lazynext.com</a>
                     </p>
                     <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8' }}>
-                      You received this because you&apos;re part of a {BRAND_NAME} workspace. <a href="#" style={{ color: '#94a3b8' }}>Unsubscribe</a>
+                      You received this because you&apos;re part of a {BRAND_NAME} workspace. <a href={`${BASE_URL}/settings`} style={{ color: '#94a3b8' }}>Unsubscribe</a>
                     </p>
                   </td>
                 </tr>

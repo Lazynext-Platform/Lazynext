@@ -201,7 +201,7 @@ export function GeneralError({ error, requestId, onRetry }: { error?: string; re
         <SecondaryButton href="/">Go Home</SecondaryButton>
       </div>
       <p className="mt-4 text-xs text-slate-500">
-        If this keeps happening, <a href="#" className="text-brand underline hover:text-brand-hover">contact support</a>.
+        If this keeps happening, <a href="/about" className="text-brand underline hover:text-brand-hover">contact support</a>.
       </p>
     </StateContainer>
   )

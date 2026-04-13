@@ -16,7 +16,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Lazynext — The Anti-Software Workflow Platform',
   description: 'One platform that replaces every tool your team is already misusing. Tasks, docs, decisions, and AI — unified in one graph.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://lazynext.com'),
   openGraph: {
     title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
     description: 'Tasks, docs, decisions, and AI in one unified workspace. Decision DNA tracks every choice your team makes.',
