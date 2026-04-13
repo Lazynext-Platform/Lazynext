@@ -84,7 +84,7 @@ export function CanvasToolbar() {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2.5">
             <span className="text-sm font-semibold text-slate-200">Add Node</span>
-            <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+            <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-2xs font-medium text-slate-400">
               N
             </kbd>
           </div>
@@ -103,7 +103,7 @@ export function CanvasToolbar() {
                     <opt.icon className="h-5 w-5 text-white" />
                   </div>
                   <span className="text-xs font-medium">{opt.label}</span>
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">
+                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">
                     {opt.shortcut}
                   </kbd>
                 </button>
@@ -115,7 +115,7 @@ export function CanvasToolbar() {
           <div className="mx-2 mb-2 flex items-center gap-3 rounded-lg bg-slate-800/30 px-3 py-2 opacity-50">
             <Table className="h-4 w-4 text-teal-400" />
             <span className="flex-1 text-xs text-slate-500">Table</span>
-            <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[9px] font-medium text-slate-400">
+            <span className="rounded-full bg-slate-700 px-2 py-0.5 text-3xs font-medium text-slate-400">
               Soon
             </span>
           </div>
@@ -123,7 +123,7 @@ export function CanvasToolbar() {
           {/* Footer hint */}
           <div className="flex items-center gap-1.5 border-t border-slate-800 px-3 py-2">
             <Info className="h-3 w-3 text-slate-500" />
-            <span className="text-[10px] text-slate-500">Drag from a node handle to create an edge</span>
+            <span className="text-2xs text-slate-500">Drag from a node handle to create an edge</span>
           </div>
         </div>
       )}

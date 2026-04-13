@@ -4,15 +4,10 @@ import { useState } from 'react'
 import {
   BarChart3,
   TrendingUp,
-  TrendingDown,
-  Users,
   Target,
   Tag,
   Sparkles,
   AlertTriangle,
-  CheckCircle2,
-  Clock,
-  XCircle,
   ArrowLeft,
 } from 'lucide-react'
 import Link from 'next/link'
@@ -112,7 +107,7 @@ export default function DecisionHealthPage() {
         {statCards.map((s) => (
           <div key={s.label} className="rounded-xl border border-slate-800 bg-slate-900 p-5 hover:-translate-y-0.5 hover:shadow-lg transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider text-slate-500">{s.label}</span>
+              <span className="text-2xs uppercase tracking-wider text-slate-500">{s.label}</span>
               <s.icon className="h-4 w-4 text-slate-500" />
             </div>
             <p className="mt-2 text-2xl font-bold text-slate-50">{s.value}</p>
@@ -145,7 +140,7 @@ export default function DecisionHealthPage() {
               <div className="h-5 w-full rounded-md bg-slate-800 overflow-hidden">
                 <div className={cn('h-full rounded-md transition-all duration-700', q.color)} style={{ width: `${q.pct}%` }} />
               </div>
-              <p className="mt-0.5 text-[10px] text-slate-500">{q.helper}</p>
+              <p className="mt-0.5 text-2xs text-slate-500">{q.helper}</p>
             </div>
           ))}
         </div>
@@ -176,7 +171,7 @@ export default function DecisionHealthPage() {
                 })}
                 <circle cx="70" cy="70" r="30" fill="#0F172A" />
                 <text x="70" y="66" textAnchor="middle" className="fill-slate-50 text-lg font-bold">{donutTotal}</text>
-                <text x="70" y="80" textAnchor="middle" className="fill-slate-500 text-[10px]">total</text>
+                <text x="70" y="80" textAnchor="middle" className="fill-slate-500 text-2xs">total</text>
               </svg>
             </div>
             <div className="space-y-2">
@@ -215,7 +210,7 @@ export default function DecisionHealthPage() {
             </svg>
             <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
               {trendPoints.map((p) => (
-                <span key={p.week} className="text-[9px] text-slate-600">{p.week}</span>
+                <span key={p.week} className="text-3xs text-slate-600">{p.week}</span>
               ))}
             </div>
           </div>
@@ -240,7 +235,7 @@ export default function DecisionHealthPage() {
                 <tr key={m.name} className="border-b border-slate-800/50 last:border-0">
                   <td className="py-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">{m.initials}</div>
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-2xs font-bold text-white">{m.initials}</div>
                       <span className="text-slate-200">{m.name}</span>
                     </div>
                   </td>
@@ -268,7 +263,7 @@ export default function DecisionHealthPage() {
                 <div className="h-4 w-full rounded bg-slate-800 overflow-hidden">
                   <div className={cn('h-full rounded transition-all duration-700', t.color)} style={{ width: `${t.pct}%` }} />
                 </div>
-                <p className="mt-0.5 text-[10px] text-slate-500">{t.insight}</p>
+                <p className="mt-0.5 text-2xs text-slate-500">{t.insight}</p>
               </div>
             ))}
           </div>
@@ -296,7 +291,7 @@ export default function DecisionHealthPage() {
                 <div key={d.title} className="flex items-center justify-between rounded-lg bg-slate-900/50 px-3 py-2">
                   <div>
                     <p className="text-sm text-slate-200">{d.title}</p>
-                    <p className="text-[10px] text-slate-500">{d.age}</p>
+                    <p className="text-2xs text-slate-500">{d.age}</p>
                   </div>
                   <button className="text-xs font-medium text-brand hover:text-brand-hover">Tag outcome</button>
                 </div>

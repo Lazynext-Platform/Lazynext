@@ -5,7 +5,7 @@ import {
   Plus,
   Clipboard,
   Maximize2,
-  Image,
+  Image as ImageIcon,
   Pencil,
   Copy,
   Link,
@@ -84,7 +84,7 @@ export function CanvasContextMenu({
         >
           <Plus className="h-4 w-4 text-slate-400" />
           <span className="flex-1 text-left">Create node</span>
-          <span className="text-[10px] text-slate-500">▸</span>
+          <span className="text-2xs text-slate-500">▸</span>
         </button>
 
         {showCreateSub && (
@@ -103,7 +103,7 @@ export function CanvasContextMenu({
                 >
                   <span className={cn('h-2 w-2 rounded-full', colors.dot)} />
                   <span className="flex-1 text-left">{item.label}</span>
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">
+                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">
                     {item.shortcut}
                   </kbd>
                 </button>
@@ -116,7 +116,7 @@ export function CanvasContextMenu({
       <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Clipboard className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Paste</span>
-        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">⌘V</kbd>
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">⌘V</kbd>
       </button>
 
       <div className="my-1 h-px bg-slate-800" />
@@ -124,11 +124,11 @@ export function CanvasContextMenu({
       <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Maximize2 className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Fit to view</span>
-        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">⌘1</kbd>
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">⌘1</kbd>
       </button>
 
       <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
-        <Image className="h-4 w-4 text-slate-400" />
+        <ImageIcon className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Export PNG</span>
       </button>
     </div>
@@ -136,7 +136,7 @@ export function CanvasContextMenu({
 }
 
 export function NodeContextMenu({
-  nodeId,
+  nodeId: _nodeId,
   onEdit,
   onDuplicate,
   onDelete,
@@ -151,12 +151,12 @@ export function NodeContextMenu({
       <button onClick={onEdit} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Pencil className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Edit</span>
-        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">E</kbd>
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">E</kbd>
       </button>
       <button onClick={onDuplicate} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Copy className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Duplicate</span>
-        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-slate-500">⌘D</kbd>
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-slate-500">⌘D</kbd>
       </button>
       <button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Link className="h-4 w-4 text-slate-400" />
@@ -172,7 +172,7 @@ export function NodeContextMenu({
       <button onClick={onDelete} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
         <Trash2 className="h-4 w-4" />
         <span className="flex-1 text-left">Delete</span>
-        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[9px] text-red-400">⌫</kbd>
+        <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-3xs text-red-400">⌫</kbd>
       </button>
     </div>
   )

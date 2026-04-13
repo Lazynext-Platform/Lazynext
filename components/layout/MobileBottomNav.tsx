@@ -33,7 +33,7 @@ export function MobileBottomNav({ workspaceSlug }: { workspaceSlug: string }) {
             )}
           >
             <item.icon className="h-5 w-5" />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <span className="text-2xs font-medium">{item.label}</span>
           </Link>
         )
       })}

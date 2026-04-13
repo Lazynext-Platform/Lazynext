@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Lock, FileText, Shield, Database, Check, ArrowLeft, ExternalLink } from 'lucide-react'
+import { Shield, Database, Check, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { cn } from '@/lib/utils/cn'
 
 type ExportStatus = 'idle' | 'exporting' | 'ready'
 
@@ -66,7 +65,7 @@ export default function DataExportPage() {
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-slate-100">Full Workspace Export</h2>
-          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-medium text-emerald-400">Recommended</span>
+          <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-3xs font-medium text-emerald-400">Recommended</span>
         </div>
         <p className="mt-1 text-sm text-slate-400">Export all workflows, nodes, decisions, and metadata.</p>
 
@@ -100,7 +99,7 @@ export default function DataExportPage() {
             </div>
 
             <div className="mt-4 rounded-md bg-slate-800/50 p-3">
-              <p className="text-[10px] font-medium uppercase text-slate-500 mb-2">Export includes</p>
+              <p className="text-2xs font-medium uppercase text-slate-500 mb-2">Export includes</p>
               <div className="grid grid-cols-2 gap-1">
                 {exportIncludes.map(item => (
                   <div key={item} className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -161,13 +160,13 @@ export default function DataExportPage() {
             <div key={i} className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2">
               <div>
                 <p className="text-sm text-slate-200">{h.name} <span className="text-xs text-slate-500">({h.format})</span></p>
-                <p className="text-[10px] text-slate-500">{h.date} · {h.size}</p>
+                <p className="text-2xs text-slate-500">{h.date} · {h.size}</p>
               </div>
               <button className="text-xs text-brand hover:text-brand-hover">Re-download</button>
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[10px] text-slate-600">Exports available for 30 days.</p>
+        <p className="mt-2 text-2xs text-slate-600">Exports available for 30 days.</p>
       </div>
 
       {/* API note */}
@@ -177,9 +176,9 @@ export default function DataExportPage() {
           <span className="text-xs text-slate-400">API access: Programmatic export via REST API</span>
         </div>
         <div className="mt-2 space-y-0.5">
-          <p className="font-mono text-[10px] text-slate-500">GET /api/v1/export/workspace</p>
-          <p className="font-mono text-[10px] text-slate-500">GET /api/v1/export/decisions</p>
-          <p className="text-[10px] text-slate-600">Requires Pro or Business plan.</p>
+          <p className="font-mono text-2xs text-slate-500">GET /api/v1/export/workspace</p>
+          <p className="font-mono text-2xs text-slate-500">GET /api/v1/export/decisions</p>
+          <p className="text-2xs text-slate-600">Requires Pro or Business plan.</p>
         </div>
       </div>
     </div>

@@ -1,7 +1,6 @@
 'use client'
 
-import Link from 'next/link'
-import { ArrowRight, Clock, Tag } from 'lucide-react'
+import { ArrowRight, Clock } from 'lucide-react'
 
 const posts = [
   { slug: 'decision-dna', title: 'Introducing Decision DNA', excerpt: 'How AI-scored decisions help teams learn from every choice.', date: 'April 2, 2026', tag: 'Product', featured: true },
@@ -34,7 +33,7 @@ export default function BlogPage() {
         <section className="mx-auto max-w-4xl px-6 pb-12">
           <div className="group rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 to-white p-8 hover:border-indigo-200 transition-colors">
             <div className="flex items-center gap-2 mb-3">
-              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${tagColors[featured.tag] || 'bg-slate-100 text-slate-500'}`}>{featured.tag}</span>
+              <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${tagColors[featured.tag] || 'bg-slate-100 text-slate-500'}`}>{featured.tag}</span>
               <span className="flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" />{featured.date}</span>
             </div>
             <h2 className="text-2xl font-bold group-hover:text-indigo-700 transition-colors">{featured.title}</h2>
@@ -51,7 +50,7 @@ export default function BlogPage() {
         {rest.map(post => (
           <article key={post.slug} className="group rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${tagColors[post.tag] || 'bg-slate-100 text-slate-500'}`}>{post.tag}</span>
+              <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold ${tagColors[post.tag] || 'bg-slate-100 text-slate-500'}`}>{post.tag}</span>
             </div>
             <h3 className="text-base font-bold group-hover:text-indigo-700 transition-colors">{post.title}</h3>
             <p className="mt-1 text-sm text-slate-500 line-clamp-2">{post.excerpt}</p>

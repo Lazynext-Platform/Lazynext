@@ -8,7 +8,6 @@ import {
   MiniMap,
   type Node,
   type Edge,
-  type Connection,
   BackgroundVariant,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronRight, Menu, Plus, ArrowUpDown } from 'lucide-react'
+import { ChevronRight, ArrowUpDown } from 'lucide-react'
 import { useCanvasStore } from '@/stores/canvas.store'
 import { NODE_COLORS, type NodeType } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
@@ -101,7 +101,7 @@ export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => 
                 {/* Type label */}
                 <div className="flex items-center gap-1.5">
                   <span className={cn('h-1.5 w-1.5 rounded-full', NODE_COLORS[type]?.dot || 'bg-slate-500')} />
-                  <span className={cn('text-[10px] font-semibold uppercase tracking-wider', `text-${type === 'task' ? 'blue' : type === 'doc' ? 'emerald' : type === 'decision' ? 'orange' : type === 'thread' ? 'purple' : type === 'pulse' ? 'cyan' : type === 'automation' ? 'amber' : 'teal'}-400`)}>
+                  <span className={cn('text-2xs font-semibold uppercase tracking-wider', `text-${type === 'task' ? 'blue' : type === 'doc' ? 'emerald' : type === 'decision' ? 'orange' : type === 'thread' ? 'purple' : type === 'pulse' ? 'cyan' : type === 'automation' ? 'amber' : 'teal'}-400`)}>
                     {type}
                   </span>
                 </div>
@@ -114,29 +114,29 @@ export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => 
                 {/* Metadata row */}
                 <div className="mt-2 flex items-center gap-2">
                   {d.assignee && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-[8px] font-bold text-white">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-4xs font-bold text-white">
                       {String(d.assignee)}
                     </span>
                   )}
                   {d.dueDate && (
-                    <span className="text-[10px] text-slate-500">{String(d.dueDate)}</span>
+                    <span className="text-2xs text-slate-500">{String(d.dueDate)}</span>
                   )}
                   {priority && <span className={cn('h-1.5 w-1.5 rounded-full', priority)} />}
                   {status && (
-                    <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', status.color)}>
+                    <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', status.color)}>
                       {status.label}
                     </span>
                   )}
                   {isDecision && qualityScore !== undefined && (
                     <span className={cn(
-                      'rounded-full px-2 py-0.5 text-[10px] font-bold',
+                      'rounded-full px-2 py-0.5 text-2xs font-bold',
                       qualityScore >= 70 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
                     )}>
                       Q: {qualityScore}
                     </span>
                   )}
                   {d.wordCount && (
-                    <span className="text-[10px] text-slate-500">{String(d.wordCount)} words</span>
+                    <span className="text-2xs text-slate-500">{String(d.wordCount)} words</span>
                   )}
                   <ChevronRight className="ml-auto h-4 w-4 text-slate-600" />
                 </div>

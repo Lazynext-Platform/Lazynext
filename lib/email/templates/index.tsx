@@ -13,6 +13,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lazynext.com'
 function EmailLayout({ children, preheader }: { children: React.ReactNode; preheader?: string }) {
   return (
     <html>
+      {/* eslint-disable-next-line @next/next/no-head-element */}
       <head><meta charSet="utf-8" /><meta name="viewport" content="width=device-width" /></head>
       <body style={{ margin: 0, padding: 0, backgroundColor: '#f8fafc', fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif' }}>
         {preheader && <div style={{ display: 'none', maxHeight: 0, overflow: 'hidden' }}>{preheader}</div>}

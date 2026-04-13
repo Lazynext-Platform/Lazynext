@@ -3,18 +3,13 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import {
-  Network,
   GitBranch,
-  Activity,
   Plus,
   ArrowRight,
   CheckSquare,
-  FileText,
-  Clock,
   MessageCircle,
   Heart,
   Sparkles,
-  TrendingUp,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -154,13 +149,13 @@ export default function WorkspaceHomePage() {
                 {wf.team.slice(0, 3).map((t) => (
                   <div
                     key={t}
-                    className={cn('flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-900 text-[9px] font-bold text-white', teamColors[t] || 'bg-slate-500')}
+                    className={cn('flex h-6 w-6 items-center justify-center rounded-full border-2 border-slate-900 text-3xs font-bold text-white', teamColors[t] || 'bg-slate-500')}
                   >
                     {t}
                   </div>
                 ))}
                 {wf.team.length > 3 && (
-                  <span className="ml-1 text-[10px] text-slate-500">+{wf.team.length - 3}</span>
+                  <span className="ml-1 text-2xs text-slate-500">+{wf.team.length - 3}</span>
                 )}
               </div>
             </Link>
@@ -194,7 +189,7 @@ export default function WorkspaceHomePage() {
           <div className="mt-4 space-y-2">
             {activity.map((a, i) => (
               <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
-                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', a.color)}>
+                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', a.color)}>
                   {a.initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -205,8 +200,8 @@ export default function WorkspaceHomePage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium capitalize', typeBadgeColor[a.type] || 'text-slate-400 bg-slate-500/10')}>{a.type}</span>
-                  <span className="text-[10px] text-slate-500">{a.time}</span>
+                  <span className={cn('rounded-full px-1.5 py-0.5 text-2xs font-medium capitalize', typeBadgeColor[a.type] || 'text-slate-400 bg-slate-500/10')}>{a.type}</span>
+                  <span className="text-2xs text-slate-500">{a.time}</span>
                 </div>
               </div>
             ))}
@@ -222,7 +217,7 @@ export default function WorkspaceHomePage() {
               <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-200 truncate">{d.title}</p>
-                  <span className={cn('rounded-full px-1.5 py-0.5 text-[10px] font-medium capitalize', typeBadgeColor[d.type] || 'text-slate-400')}>{d.type}</span>
+                  <span className={cn('rounded-full px-1.5 py-0.5 text-2xs font-medium capitalize', typeBadgeColor[d.type] || 'text-slate-400')}>{d.type}</span>
                 </div>
                 <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', d.urgency)}>
                   {d.due}

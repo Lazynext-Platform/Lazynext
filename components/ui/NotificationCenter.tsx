@@ -71,7 +71,7 @@ export function NotificationCenter() {
       <button onClick={toggleNotification} className="relative rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-3xs font-bold text-white animate-pulse">
             {unreadCount}
           </span>
         )}
@@ -84,10 +84,10 @@ export function NotificationCenter() {
           <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
             <h3 className="flex-1 text-sm font-semibold text-slate-200">Notifications</h3>
             <div className="flex items-center gap-1 rounded-lg bg-slate-800 p-0.5">
-              <button onClick={() => setTab('all')} className={cn('rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors', tab === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>All</button>
-              <button onClick={() => setTab('unread')} className={cn('rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors', tab === 'unread' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>Unread</button>
+              <button onClick={() => setTab('all')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>All</button>
+              <button onClick={() => setTab('unread')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'unread' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>Unread</button>
             </div>
-            <button onClick={markAllRead} className="flex items-center gap-1 text-[11px] text-brand hover:text-brand-hover transition-colors">
+            <button onClick={markAllRead} className="flex items-center gap-1 text-2xs+ text-brand hover:text-brand-hover transition-colors">
               <CheckCheck className="h-3 w-3" />Mark all read
             </button>
           </div>
@@ -96,16 +96,16 @@ export function NotificationCenter() {
           <div className="max-h-[420px] overflow-y-auto scrollbar-thin">
             {todayItems.length > 0 && (
               <>
-                <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Today</p>
+                <p className="px-4 pt-3 pb-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">Today</p>
                 {todayItems.map((n) => (
                   <div key={n.id} className={cn('flex items-start gap-3 px-4 py-3 hover:bg-slate-800/50 transition-colors cursor-pointer', n.unread && 'bg-brand/5')}>
                     {n.unread && <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand" />}
-                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', n.avatarColor)}>{n.initials}</div>
+                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', n.avatarColor)}>{n.initials}</div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-slate-300"><span className="font-medium text-slate-200">{n.actor}</span> {n.action}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-medium', typeBadge[n.type].color)}>{typeBadge[n.type].label}</span>
-                        <span className="text-[10px] text-slate-500">{n.time}</span>
+                        <span className={cn('rounded-full px-1.5 py-0.5 text-3xs font-medium', typeBadge[n.type].color)}>{typeBadge[n.type].label}</span>
+                        <span className="text-2xs text-slate-500">{n.time}</span>
                       </div>
                     </div>
                   </div>
@@ -114,15 +114,15 @@ export function NotificationCenter() {
             )}
             {yesterdayItems.length > 0 && (
               <>
-                <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">Yesterday</p>
+                <p className="px-4 pt-3 pb-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">Yesterday</p>
                 {yesterdayItems.map((n) => (
                   <div key={n.id} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-800/50 transition-colors cursor-pointer">
-                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', n.avatarColor)}>{n.initials}</div>
+                    <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', n.avatarColor)}>{n.initials}</div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm text-slate-400"><span className="font-medium text-slate-300">{n.actor}</span> {n.action}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        <span className={cn('rounded-full px-1.5 py-0.5 text-[9px] font-medium', typeBadge[n.type].color)}>{typeBadge[n.type].label}</span>
-                        <span className="text-[10px] text-slate-500">{n.time}</span>
+                        <span className={cn('rounded-full px-1.5 py-0.5 text-3xs font-medium', typeBadge[n.type].color)}>{typeBadge[n.type].label}</span>
+                        <span className="text-2xs text-slate-500">{n.time}</span>
                       </div>
                     </div>
                   </div>

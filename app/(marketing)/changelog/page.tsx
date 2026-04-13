@@ -64,12 +64,12 @@ export default function ChangelogPage() {
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-lg font-bold">{entry.version}</h3>
                 <span className="text-sm text-slate-500">{entry.date}</span>
-                {entry.tag && <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">{entry.tag}</span>}
+                {entry.tag && <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-2xs font-semibold text-indigo-700">{entry.tag}</span>}
               </div>
               <ul className="space-y-2">
                 {entry.items.map((item, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${typeBadge[item.type] || 'bg-slate-100 text-slate-500'}`}>{item.type}</span>
+                    <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-2xs font-bold uppercase ${typeBadge[item.type] || 'bg-slate-100 text-slate-500'}`}>{item.type}</span>
                     <span className="text-sm text-slate-600">{item.text}</span>
                   </li>
                 ))}

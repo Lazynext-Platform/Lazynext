@@ -43,7 +43,7 @@ export function WorkflowEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'all',
             }}
-            className="rounded-md border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400"
+            className="rounded-md border border-slate-700 bg-slate-800 px-2 py-0.5 text-2xs text-slate-400"
           >
             {label}
           </div>

@@ -117,7 +117,7 @@ export function KeyboardShortcutsModal() {
                     <div className="flex items-center gap-1">
                       {sc.keys.map((k, ki) =>
                         k.label === 'then' ? (
-                          <span key={ki} className="text-[10px] text-slate-600 mx-0.5">then</span>
+                          <span key={ki} className="text-2xs text-slate-600 mx-0.5">then</span>
                         ) : (
                           <kbd
                             key={ki}
@@ -140,8 +140,8 @@ export function KeyboardShortcutsModal() {
 
         {/* Footer */}
         <div className="border-t border-slate-800 px-6 py-3">
-          <p className="text-[10px] text-slate-600">
-            Press <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-[10px] text-slate-400">?</kbd> to toggle this panel
+          <p className="text-2xs text-slate-600">
+            Press <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5 text-2xs text-slate-400">?</kbd> to toggle this panel
           </p>
         </div>
       </div>

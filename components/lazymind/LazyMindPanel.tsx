@@ -128,9 +128,9 @@ export function LazyMindPanel() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-slate-200">LazyMind</p>
-          <p className="text-[10px] text-slate-500">AI Assistant · Llama 3.3 70B</p>
+          <p className="text-2xs text-slate-500">AI Assistant · Llama 3.3 70B</p>
         </div>
-        <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-400">34/100 today</span>
+        <span className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs font-medium text-slate-400">34/100 today</span>
         <button onClick={toggleLazyMind} aria-label="Close LazyMind panel" className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
           <X className="h-4 w-4" />
         </button>
@@ -168,7 +168,7 @@ export function LazyMindPanel() {
                     <div className="mt-3 grid grid-cols-2 gap-2">
                       {msg.structured.statusSummary.map((s) => (
                         <div key={s.label} className="rounded-lg bg-slate-900 p-2">
-                          <p className="text-[10px] text-slate-500">{s.label}</p>
+                          <p className="text-2xs text-slate-500">{s.label}</p>
                           <p className={cn('text-sm font-semibold', s.color)}>{s.value}</p>
                         </div>
                       ))}
@@ -176,7 +176,7 @@ export function LazyMindPanel() {
                   )}
                   {msg.structured?.observations && (
                     <div className="mt-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 mb-1.5">⚠ Observations</p>
+                      <p className="text-2xs font-semibold uppercase tracking-wider text-amber-400 mb-1.5">⚠ Observations</p>
                       <ul className="space-y-1">
                         {msg.structured.observations.map((o, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-400">
@@ -188,11 +188,11 @@ export function LazyMindPanel() {
                   )}
                   {msg.structured?.actions && (
                     <div className="mt-3">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">✓ Recommended Actions</p>
+                      <p className="text-2xs font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">✓ Recommended Actions</p>
                       <ol className="space-y-1">
                         {msg.structured.actions.map((a, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-400">
-                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-[9px] font-bold text-emerald-400">{i + 1}</span>{a}
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-3xs font-bold text-emerald-400">{i + 1}</span>{a}
                           </li>
                         ))}
                       </ol>
@@ -253,8 +253,8 @@ export function LazyMindPanel() {
           </button>
         </div>
         <div className="mt-1.5 flex items-center justify-between px-1">
-          <span className="text-[9px] text-slate-600">Powered by Llama 3.3 70B via Groq</span>
-          <span className="flex items-center gap-0.5 text-[9px] text-slate-600"><Command className="h-2.5 w-2.5" />L to toggle</span>
+          <span className="text-3xs text-slate-600">Powered by Llama 3.3 70B via Groq</span>
+          <span className="flex items-center gap-0.5 text-3xs text-slate-600"><Command className="h-2.5 w-2.5" />L to toggle</span>
         </div>
       </div>
     </div>

@@ -42,7 +42,7 @@ export default function FeaturesPage() {
       </section>
 
       <section className="mx-auto max-w-5xl px-6 py-12 space-y-20">
-        {features.map((f, i) => (
+        {features.map((f) => (
           <div key={f.title} className={`flex flex-col gap-8 md:flex-row md:items-center ${f.reverse ? 'md:flex-row-reverse' : ''}`}>
             <div className="flex-1">
               <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">

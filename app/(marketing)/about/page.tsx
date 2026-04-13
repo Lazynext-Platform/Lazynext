@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Users, Sparkles, Target, Globe } from 'lucide-react'
+import { ArrowRight, Users, Target, Globe } from 'lucide-react'
 
 const team = [
   { name: 'Avas Patel', role: 'Founder & CEO', initials: 'AP', color: 'bg-indigo-500' },

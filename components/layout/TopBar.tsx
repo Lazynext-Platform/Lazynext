@@ -59,7 +59,7 @@ export function TopBar() {
         >
           <Search className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Search...</span>
-          <kbd className="ml-4 hidden items-center gap-0.5 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-300 sm:flex">
+          <kbd className="ml-4 hidden items-center gap-0.5 rounded border border-slate-600 bg-slate-700 px-1.5 py-0.5 text-2xs font-medium text-slate-300 sm:flex">
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         </button>
@@ -72,7 +72,7 @@ export function TopBar() {
             <div
               key={a.initials}
               className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-900 text-[10px] font-bold text-white',
+                'flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-900 text-2xs font-bold text-white',
                 a.color
               )}
             >

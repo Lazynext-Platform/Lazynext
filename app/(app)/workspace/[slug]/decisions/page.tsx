@@ -5,14 +5,10 @@ import {
   GitBranch,
   Plus,
   Search,
-  Filter,
-  ChevronDown,
-  BarChart3,
   Clock,
   CheckCircle2,
   XCircle,
   X,
-  Sparkles,
   Tag,
   Lock,
 } from 'lucide-react'
@@ -238,7 +234,7 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
                   <div className="mt-1.5 flex gap-1">
                     <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} placeholder="Add tag" className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   </div>
-                  {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map(t => <span key={t} className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400"><Tag className="h-2.5 w-2.5" />{t}<button onClick={() => setTags(tags.filter(x => x !== t))} className="text-slate-500 hover:text-slate-300">×</button></span>)}</div>}
+                  {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map(t => <span key={t} className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400"><Tag className="h-2.5 w-2.5" />{t}<button onClick={() => setTags(tags.filter(x => x !== t))} className="text-slate-500 hover:text-slate-300">×</button></span>)}</div>}
                 </div>
               </div>
             </div>
@@ -295,24 +291,24 @@ export default function DecisionsPage() {
       {/* Stats row */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500">Decisions This Month</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500">Decisions This Month</p>
           <p className="mt-1 text-2xl font-bold text-slate-50">{sampleDecisions.length}</p>
-          <p className="text-[10px] text-emerald-400">+3 from last month</p>
+          <p className="text-2xs text-emerald-400">+3 from last month</p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500">Avg Quality Score</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500">Avg Quality Score</p>
           <p className={cn('mt-1 text-2xl font-bold', avgQuality >= 70 ? 'text-emerald-400' : avgQuality >= 40 ? 'text-amber-400' : 'text-red-400')}>{avgQuality}</p>
           <div className="mt-1 h-1.5 w-full rounded-full bg-slate-800"><div className="h-1.5 rounded-full bg-emerald-500 transition-all" style={{ width: `${avgQuality}%` }} /></div>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500">Outcomes Tagged</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500">Outcomes Tagged</p>
           <p className="mt-1 text-2xl font-bold text-amber-400">{sampleDecisions.filter(d => d.outcome !== 'pending').length}/{sampleDecisions.length}</p>
-          <p className="text-[10px] text-amber-400">{sampleDecisions.filter(d => d.outcome === 'pending').length} need tagging</p>
+          <p className="text-2xs text-amber-400">{sampleDecisions.filter(d => d.outcome === 'pending').length} need tagging</p>
         </div>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500">Top Decision Maker</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500">Top Decision Maker</p>
           <p className="mt-1 text-lg font-bold text-slate-50">Avas Patel</p>
-          <p className="text-[10px] text-slate-500">5 decisions</p>
+          <p className="text-2xs text-slate-500">5 decisions</p>
         </div>
       </div>
 
@@ -324,7 +320,7 @@ export default function DecisionsPage() {
             <div className="absolute -inset-1 rounded-lg bg-slate-800/50 blur-sm" />
             <div className="relative flex items-center gap-1 rounded-md bg-slate-800 px-2 py-1">
               <Lock className="h-3 w-3 text-amber-400" />
-              <span className="text-[10px] text-amber-400">Business plan</span>
+              <span className="text-2xs text-amber-400">Business plan</span>
             </div>
           </div>
         </div>
@@ -336,7 +332,7 @@ export default function DecisionsPage() {
                 <div className={cn('h-full rounded-md transition-all duration-700', q.color)} style={{ width: `${(q.count / q.total) * 100}%` }} />
               </div>
               <span className="w-10 text-right text-xs font-semibold text-slate-300">{q.count}</span>
-              <span className="w-12 text-right text-[10px] text-slate-500">{Math.round((q.count / q.total) * 100)}%</span>
+              <span className="w-12 text-right text-2xs text-slate-500">{Math.round((q.count / q.total) * 100)}%</span>
             </div>
           ))}
         </div>
@@ -392,14 +388,14 @@ export default function DecisionsPage() {
                     <Clock className="h-4 w-4 text-amber-400" />
                   )}
                   <span className={cn(
-                    'inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase',
+                    'inline-flex rounded-full px-2 py-0.5 text-2xs font-semibold uppercase',
                     decision.status === 'open' ? 'bg-orange-400/10 text-orange-400' :
                     decision.status === 'decided' ? 'bg-emerald-400/10 text-emerald-400' :
                     'bg-red-400/10 text-red-400'
                   )}>
                     {decision.status}
                   </span>
-                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-500 capitalize">{decision.type}</span>
+                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-500 capitalize">{decision.type}</span>
                 </div>
                 <h3 className="mt-2 text-base font-semibold text-slate-100">{decision.question}</h3>
                 {decision.resolution && (
@@ -412,7 +408,7 @@ export default function DecisionsPage() {
                   <span className="text-xs text-slate-600">·</span>
                   <OutcomeBadge outcome={decision.outcome} />
                   {decision.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-400">
+                    <span key={tag} className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400">
                       {tag}
                     </span>
                   ))}

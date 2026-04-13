@@ -34,10 +34,11 @@ const toolbarGroups = [
 export function DocDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const { nodes, updateNodeData } = useCanvasStore()
   const node = nodes.find((n) => n.id === nodeId)
-  if (!node) return null
 
-  const d = node.data as Record<string, unknown>
+  const d = (node?.data ?? {}) as Record<string, unknown>
   const [title, setTitle] = useState(String(d.title || ''))
+
+  if (!node) return null
 
   return (
     <div className="flex h-full flex-col">
@@ -65,13 +66,13 @@ export function DocDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: (
       <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-2">
         <div className="flex -space-x-1.5">
           {collaborators.map((c) => (
-            <span key={c.initials} className={cn('flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold text-white ring-2 ring-slate-900', c.color)}>
+            <span key={c.initials} className={cn('flex h-6 w-6 items-center justify-center rounded-full text-3xs font-bold text-white ring-2 ring-slate-900', c.color)}>
               {c.initials}
             </span>
           ))}
         </div>
-        <button className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-slate-600 text-[10px] text-slate-500 hover:border-slate-500 hover:text-slate-400">+</button>
-        <span className="text-[10px] text-slate-500">3 collaborators</span>
+        <button className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-slate-600 text-2xs text-slate-500 hover:border-slate-500 hover:text-slate-400">+</button>
+        <span className="text-2xs text-slate-500">3 collaborators</span>
       </div>
 
       {/* Toolbar */}
@@ -90,7 +91,7 @@ export function DocDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: (
             ))}
           </div>
         ))}
-        <span className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-[10px] text-slate-500">
+        <span className="ml-auto flex items-center gap-1 rounded px-2 py-1 text-2xs text-slate-500">
           <span className="font-mono">/</span> commands
         </span>
       </div>

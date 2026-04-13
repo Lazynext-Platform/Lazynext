@@ -68,7 +68,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
         {/* Status */}
         {status && (
           <div className="mt-4">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
               <Clock className="h-3 w-3" /> Status
             </label>
             {isDecision ? (
@@ -105,7 +105,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
         {/* Assignee (tasks only) */}
         {type === 'task' && (
           <div className="mt-4">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
               <User className="h-3 w-3" /> Assignee
             </label>
             <input
@@ -123,7 +123,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
           <>
             {/* Question */}
             <div className="mt-5">
-              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                 Question
               </label>
               <p className="mt-1.5 text-sm text-slate-300">{title}</p>
@@ -132,7 +132,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Resolution */}
             {resolution && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Resolution
                 </label>
                 <div className="mt-1.5 rounded-lg border border-slate-700 bg-slate-800/50 p-3">
@@ -144,7 +144,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Rationale */}
             {rationale && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Rationale
                 </label>
                 <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{rationale}</p>
@@ -154,7 +154,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Options Considered */}
             {options.length > 0 && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Options Considered
                 </label>
                 <div className="mt-1.5 flex flex-wrap gap-2">
@@ -176,7 +176,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Decision Type */}
             {decisionType && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Decision Type
                 </label>
                 <span className="mt-1.5 block text-sm text-slate-300">{decisionType}</span>
@@ -186,7 +186,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Quality Score */}
             {qualityScore !== undefined && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Quality Score
                 </label>
                 <div className="mt-1.5 flex items-center gap-3">
@@ -216,7 +216,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             {/* Outcome */}
             {outcome && (
               <div className="mt-5">
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
                   Outcome
                 </label>
                 <span className="mt-1.5 inline-flex items-center rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-400">
@@ -230,7 +230,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
         {/* Description (non-decision types) */}
         {!isDecision && (
           <div className="mt-4">
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
               Description
             </label>
             <textarea
@@ -243,7 +243,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
 
         {/* Links */}
         <div className="mt-6">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <div className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <Link className="h-3 w-3" /> Linked Nodes
           </div>
           <div className="mt-2 rounded-lg border border-dashed border-slate-700 py-6 text-center">
@@ -256,7 +256,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
 
         {/* Thread */}
         <div className="mt-6">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <div className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <MessageCircle className="h-3 w-3" /> Thread
           </div>
 
@@ -264,13 +264,13 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
           <div className="mt-3 space-y-3">
             {sampleThread.map((msg) => (
               <div key={msg.id} className="flex gap-2.5">
-                <div className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', msg.color)}>
+                <div className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', msg.color)}>
                   {msg.initials}
                 </div>
                 <div>
                   <div className="flex items-baseline gap-2">
                     <span className="text-sm font-medium text-slate-200">{msg.author}</span>
-                    <span className="text-[10px] text-slate-500">{msg.time}</span>
+                    <span className="text-2xs text-slate-500">{msg.time}</span>
                   </div>
                   <p className="mt-0.5 text-sm text-slate-400">{msg.message}</p>
                 </div>

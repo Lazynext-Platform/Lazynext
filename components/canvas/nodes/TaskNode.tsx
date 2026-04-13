@@ -29,7 +29,7 @@ export const TaskNode = memo(function TaskNode({ data, selected }: NodeProps) {
       <p className="text-sm font-semibold text-slate-900">{d.title}</p>
       <div className="mt-2 flex items-center gap-2">
         {d.status && (
-          <span className="flex items-center gap-1 rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-medium text-slate-700">
+          <span className="flex items-center gap-1 rounded-full bg-white/60 px-2 py-0.5 text-2xs font-medium text-slate-700">
             <span className={`h-1.5 w-1.5 rounded-full ${statusColors[d.status] || 'bg-slate-400'}`} />
             {d.status.replace('_', ' ')}
           </span>
@@ -38,13 +38,13 @@ export const TaskNode = memo(function TaskNode({ data, selected }: NodeProps) {
           <span className={`h-2 w-2 rounded-full ${priorityColors[d.priority] || 'bg-slate-400'}`} title={d.priority} />
         )}
         {d.assignee && (
-          <span className="flex items-center gap-1 text-[10px] text-slate-600">
+          <span className="flex items-center gap-1 text-2xs text-slate-600">
             <User className="h-3 w-3" />
             {d.assignee}
           </span>
         )}
         {d.dueDate && (
-          <span className="text-[10px] text-slate-500">{d.dueDate}</span>
+          <span className="text-2xs text-slate-500">{d.dueDate}</span>
         )}
       </div>
     </NodeWrapper>

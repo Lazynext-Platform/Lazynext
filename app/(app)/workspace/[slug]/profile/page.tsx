@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { User, Shield, Bell, Monitor, Key, Trash2, Globe, Laptop, Smartphone, LogOut, X, Settings } from 'lucide-react'
+import { User, Shield, Monitor, Laptop, Smartphone, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 type Tab = 'profile' | 'security' | 'preferences' | 'sessions'
@@ -84,10 +84,10 @@ export default function ProfilePage() {
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand/10 text-xs font-bold text-brand">{ws.name[0]}</div>
                     <div>
                       <p className="text-sm font-medium text-slate-200">{ws.name}</p>
-                      <p className="text-[10px] text-slate-500">{ws.plan} · {ws.role}</p>
+                      <p className="text-2xs text-slate-500">{ws.plan} · {ws.role}</p>
                     </div>
                   </div>
-                  {ws.active && <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Active</span>}
+                  {ws.active && <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-medium text-emerald-400">Active</span>}
                 </div>
               ))}
             </div>
@@ -107,7 +107,7 @@ export default function ProfilePage() {
           <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
             <div className="flex items-center justify-between">
               <div><h3 className="text-sm font-semibold text-slate-200">Two-Factor Authentication</h3><p className="text-xs text-slate-500">Managed via Supabase Auth</p></div>
-              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Enabled</span>
+              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-medium text-emerald-400">Enabled</span>
             </div>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
@@ -118,7 +118,7 @@ export default function ProfilePage() {
                   <span className="text-sm text-slate-200">{a.name}</span>
                   {a.connected ? (
                     <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">Connected</span>
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs text-emerald-400">Connected</span>
                       <button className="text-xs text-red-400 hover:text-red-300">Disconnect</button>
                     </div>
                   ) : (
@@ -192,11 +192,11 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-200">{s.device}</p>
-                  <p className="text-[10px] text-slate-500">{s.location} · {s.ip} · {s.lastActive}</p>
+                  <p className="text-2xs text-slate-500">{s.location} · {s.ip} · {s.lastActive}</p>
                 </div>
               </div>
               {s.current ? (
-                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Current</span>
+                <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-medium text-emerald-400">Current</span>
               ) : (
                 <button className="text-xs text-red-400 hover:text-red-300">Revoke</button>
               )}

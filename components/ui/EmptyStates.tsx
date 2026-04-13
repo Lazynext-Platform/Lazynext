@@ -68,7 +68,7 @@ export function EmptyCanvas({ onAddNode, onUseTemplate }: { onAddNode?: () => vo
             { key: 'D', label: 'Doc' },
             { key: 'X', label: 'Decision' },
           ].map((s) => (
-            <span key={s.key} className="flex items-center gap-1 text-[10px] text-slate-500">
+            <span key={s.key} className="flex items-center gap-1 text-2xs text-slate-500">
               <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 font-mono text-slate-400">{s.key}</kbd>
               {s.label}
             </span>
@@ -93,7 +93,7 @@ export function EmptyDecisions({ onLogDecision }: { onLogDecision?: () => void }
       <div className="mt-5">
         <PrimaryButton onClick={onLogDecision}>+ Log First Decision</PrimaryButton>
       </div>
-      <p className="mt-4 text-[10px] text-slate-600">
+      <p className="mt-4 text-2xs text-slate-600">
         Every decision gets a quality score and becomes searchable forever.
       </p>
     </StateContainer>
@@ -192,8 +192,8 @@ export function GeneralError({ error, requestId, onRetry }: { error?: string; re
       <p className="mt-2 text-sm text-slate-500">We&apos;ve automatically reported this error.</p>
       {(error || requestId) && (
         <div className="mt-4 w-full max-w-sm rounded-lg border border-slate-700 bg-slate-900 p-3 text-left">
-          {error && <p className="font-mono text-[10px] text-red-400">{error}</p>}
-          {requestId && <p className="mt-1 font-mono text-[10px] text-slate-600">Request ID: {requestId}</p>}
+          {error && <p className="font-mono text-2xs text-red-400">{error}</p>}
+          {requestId && <p className="mt-1 font-mono text-2xs text-slate-600">Request ID: {requestId}</p>}
         </div>
       )}
       <div className="mt-5 flex flex-wrap justify-center gap-3">
@@ -308,16 +308,16 @@ export function AIUnavailable() {
       <h3 className="mt-3 text-sm font-semibold text-slate-300">LazyMind is resting</h3>
       <p className="mt-1 text-xs text-slate-500">Everything else works normally — your data is safe.</p>
       <div className="mt-4 space-y-1 rounded-md bg-slate-800 p-2">
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-2xs">
           <span className="text-slate-400">Groq API</span>
           <span className="text-red-400">unavailable</span>
         </div>
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-2xs">
           <span className="text-slate-400">Together AI</span>
           <span className="text-red-400">unavailable</span>
         </div>
       </div>
-      <p className="mt-3 text-[10px] text-slate-600">We&apos;ll automatically reconnect. No action needed.</p>
+      <p className="mt-3 text-2xs text-slate-600">We&apos;ll automatically reconnect. No action needed.</p>
     </div>
   )
 }

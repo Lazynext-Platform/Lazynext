@@ -99,7 +99,7 @@ export default function MembersPage() {
 
       {/* Members table */}
       <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-        <div className="grid grid-cols-[1fr,auto,auto,auto,auto] items-center gap-4 border-b border-slate-800 px-4 py-2.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+        <div className="grid grid-cols-[1fr,auto,auto,auto,auto] items-center gap-4 border-b border-slate-800 px-4 py-2.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
           <span>Member</span>
           <span>Role</span>
           <span className="text-center">Tasks</span>
@@ -112,7 +112,7 @@ export default function MembersPage() {
           return (
             <div key={m.id} className="grid grid-cols-[1fr,auto,auto,auto,auto] items-center gap-4 border-b border-slate-800 px-4 py-3 last:border-0 hover:bg-slate-800/50 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
-                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', m.color)}>
+                <div className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', m.color)}>
                   {m.avatar}
                 </div>
                 <div className="min-w-0">
@@ -182,7 +182,7 @@ export default function MembersPage() {
                     placeholder={emailChips.length === 0 ? 'teammate@company.com (press Enter to add)' : 'Add more...'}
                     className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-50 placeholder-slate-500 outline-none" />
                 </div>
-                <p className="mt-1 text-[10px] text-slate-600">Separate multiple emails with Enter or comma</p>
+                <p className="mt-1 text-2xs text-slate-600">Separate multiple emails with Enter or comma</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Role</label>

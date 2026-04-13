@@ -69,14 +69,14 @@ export default function TablePanel({ onClose }: TablePanelProps) {
       <div className="flex items-center justify-between border-b border-teal-800/30 bg-teal-900/10 px-3 py-2">
         <div className="flex items-center gap-1">
           <span className="mr-2 text-sm font-semibold text-teal-300">Sprint Tasks</span>
-          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800"><Filter className="h-3 w-3" /> Filter</button>
-          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800"><ArrowUpDown className="h-3 w-3" /> Sort</button>
-          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800"><Layers className="h-3 w-3" /> Group</button>
-          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800"><EyeOff className="h-3 w-3" /> Hide</button>
-          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-[10px] text-slate-400 hover:bg-slate-800"><Download className="h-3 w-3" /> Export</button>
+          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs text-slate-400 hover:bg-slate-800"><Filter className="h-3 w-3" /> Filter</button>
+          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs text-slate-400 hover:bg-slate-800"><ArrowUpDown className="h-3 w-3" /> Sort</button>
+          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs text-slate-400 hover:bg-slate-800"><Layers className="h-3 w-3" /> Group</button>
+          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs text-slate-400 hover:bg-slate-800"><EyeOff className="h-3 w-3" /> Hide</button>
+          <button className="flex items-center gap-1 rounded-md px-2 py-1 text-2xs text-slate-400 hover:bg-slate-800"><Download className="h-3 w-3" /> Export</button>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-slate-500">{rows.length} rows</span>
+          <span className="text-2xs text-slate-500">{rows.length} rows</span>
           {onClose && <button onClick={onClose} aria-label="Close table panel" className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-3.5 w-3.5" /></button>}
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function TablePanel({ onClose }: TablePanelProps) {
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-slate-800/80 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+            <tr className="bg-slate-800/80 text-2xs font-medium uppercase tracking-wider text-slate-500">
               <th className="w-8 px-2 py-2"><GripVertical className="h-3 w-3 text-slate-700" /></th>
               {columns.map(col => (
                 <th key={col.id} className="px-3 py-2 text-left whitespace-nowrap cursor-col-resize" style={{ minWidth: col.width }}>
@@ -103,14 +103,14 @@ export default function TablePanel({ onClose }: TablePanelProps) {
                   if (col.type === 'status') {
                     return (
                       <td key={col.id} className="px-3 py-2">
-                        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', statusColors[val] || 'bg-slate-700 text-slate-300')}>{val}</span>
+                        <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', statusColors[val] || 'bg-slate-700 text-slate-300')}>{val}</span>
                       </td>
                     )
                   }
                   if (col.type === 'priority') {
                     return (
                       <td key={col.id} className="px-3 py-2">
-                        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', priorityColors[val] || 'bg-slate-700 text-slate-300')}>{val}</span>
+                        <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', priorityColors[val] || 'bg-slate-700 text-slate-300')}>{val}</span>
                       </td>
                     )
                   }
@@ -118,7 +118,7 @@ export default function TablePanel({ onClose }: TablePanelProps) {
                     return (
                       <td key={col.id} className="px-3 py-2">
                         <div className="flex items-center gap-1.5">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-4xs font-bold text-white">
                             {val.slice(0, 2).toUpperCase()}
                           </div>
                           <span className="text-slate-300">{val}</span>

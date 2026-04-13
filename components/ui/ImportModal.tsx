@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Upload, FileText, Database, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react'
+import { X, CheckCircle2, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 type Step = 1 | 2 | 3
@@ -62,7 +62,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-center gap-4 border-b border-slate-800 py-3">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
-              <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold', step >= s ? (step > s ? 'bg-emerald-500 text-white' : 'bg-brand text-white') : 'bg-slate-700 text-slate-400')}>
+              <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-2xs font-bold', step >= s ? (step > s ? 'bg-emerald-500 text-white' : 'bg-brand text-white') : 'bg-slate-700 text-slate-400')}>
                 {step > s ? <CheckCircle2 className="h-3.5 w-3.5" /> : s}
               </div>
               <span className={cn('text-xs hidden sm:block', step >= s ? 'text-slate-200' : 'text-slate-500')}>
@@ -83,7 +83,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                   onClick={() => { setSelectedSource(src.id); setStep(2) }}
                   className={cn('relative flex items-start gap-3 rounded-xl border bg-slate-800 p-4 text-left transition-all hover:border-slate-600', selectedSource === src.id ? 'border-brand' : 'border-slate-700')}
                 >
-                  {src.recommended && <span className="absolute -top-2 right-3 rounded-full bg-brand/20 px-2 py-0.5 text-[9px] font-medium text-brand">Recommended</span>}
+                  {src.recommended && <span className="absolute -top-2 right-3 rounded-full bg-brand/20 px-2 py-0.5 text-3xs font-medium text-brand">Recommended</span>}
                   <span className="text-2xl">{src.icon}</span>
                   <div>
                     <p className="text-sm font-semibold text-slate-200">{src.name}</p>
@@ -163,7 +163,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                       </div>
                     </div>
                   ))}
-                  <div className="mt-2 max-h-24 overflow-y-auto rounded-lg bg-slate-800 p-3 font-mono text-[10px] text-slate-400 space-y-0.5">
+                  <div className="mt-2 max-h-24 overflow-y-auto rounded-lg bg-slate-800 p-3 font-mono text-2xs text-slate-400 space-y-0.5">
                     <p><span className="text-emerald-400">✓</span> Connected to Notion workspace</p>
                     <p><span className="text-emerald-400">✓</span> Importing pages as DOC nodes...</p>
                     <p><span className="text-emerald-400">✓</span> Importing databases as TASK nodes...</p>
@@ -179,7 +179,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
         {/* Footer */}
         {step === 1 && (
           <div className="border-t border-slate-800 px-6 py-3">
-            <p className="text-[10px] text-slate-500">Your data is encrypted in transit and at rest.</p>
+            <p className="text-2xs text-slate-500">Your data is encrypted in transit and at rest.</p>
           </div>
         )}
       </div>

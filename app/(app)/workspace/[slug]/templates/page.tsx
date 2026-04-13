@@ -83,7 +83,7 @@ export default function TemplatesPage() {
         {featured.map(t => (
           <button key={t.id} onClick={() => { setInstalled(false); setInstallModal(t) }}
             className={cn('relative overflow-hidden rounded-xl border bg-gradient-to-br p-5 text-left transition-all hover:scale-[1.01]', t.gradient, t.borderColor)}>
-            <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+            <div className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-2xs font-semibold text-amber-400">
               <Sparkles className="h-2.5 w-2.5" /> Featured
             </div>
             {/* Mini node tiles */}
@@ -135,7 +135,7 @@ export default function TemplatesPage() {
             </div>
             <div className="p-4">
               <div className="flex items-start justify-between">
-                <span className={cn('rounded-full border px-2.5 py-0.5 text-[10px] font-semibold', catColors[t.category] || 'bg-brand/10 text-brand border-brand/30')}>{t.category}</span>
+                <span className={cn('rounded-full border px-2.5 py-0.5 text-2xs font-semibold', catColors[t.category] || 'bg-brand/10 text-brand border-brand/30')}>{t.category}</span>
                 <div className="flex items-center gap-1 text-xs text-slate-500"><Star className="h-3 w-3" />{t.stars}</div>
               </div>
               <h3 className="mt-2 text-base font-semibold text-slate-100">{t.name}</h3>

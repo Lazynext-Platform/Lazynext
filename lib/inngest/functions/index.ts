@@ -1,6 +1,6 @@
 import { inngest, EVENTS } from '../client'
 import { Resend } from 'resend'
-import { WorkspaceInviteEmail, TaskAssignmentEmail, WeeklyDigestEmail, DecisionDigestEmail } from '@/lib/email/templates/index'
+import { WorkspaceInviteEmail, TaskAssignmentEmail } from '@/lib/email/templates/index'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
@@ -138,7 +138,7 @@ export const handleWeeklyDigest = inngest.createFunction(
 export const handleExportRequested = inngest.createFunction(
   { id: 'handle-export-requested', triggers: [{ event: EVENTS.EXPORT_REQUESTED }] },
   async ({ event }) => {
-    const { workspaceId, format, userId } = event.data as { workspaceId: string; format: string; userId: string }
+    const { workspaceId, format, userId: _userId } = event.data as { workspaceId: string; format: string; userId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }
 
     const { data: allWorkflows } = await db.from('workflows').select('*').eq('workspace_id', workspaceId)

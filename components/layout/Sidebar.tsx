@@ -12,14 +12,12 @@ import {
   Settings,
   Sparkles,
   CheckSquare,
-  Table,
   ChevronLeft,
   MessageCircle,
   Plus,
   Users,
   ListTodo,
   CreditCard,
-  Download,
   Puzzle,
   Clock,
 } from 'lucide-react'
@@ -88,7 +86,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
       <nav className="flex-1 overflow-y-auto scrollbar-thin px-2 py-3">
         {/* Navigation */}
         <div>
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Navigation
           </p>
           <div className="mt-2 space-y-0.5">
@@ -116,7 +114,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
         {/* Workflows section */}
         <div className="mt-6">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Workflows
           </p>
           <div className="mt-2 space-y-0.5">
@@ -144,7 +142,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
         {/* Primitives section */}
         <div className="mt-6">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Primitives
           </p>
           <div className="mt-2 space-y-0.5">
@@ -163,7 +161,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
         {/* Workspace section */}
         <div className="mt-6">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Workspace
           </p>
           <div className="mt-2 space-y-0.5">

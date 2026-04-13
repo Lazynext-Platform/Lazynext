@@ -35,9 +35,8 @@ interface Subtask {
 export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const { nodes, updateNodeData } = useCanvasStore()
   const node = nodes.find((n) => n.id === nodeId)
-  if (!node) return null
 
-  const d = node.data as Record<string, unknown>
+  const d = (node?.data ?? {}) as Record<string, unknown>
   const [title, setTitle] = useState(String(d.title || ''))
   const [status, setStatus] = useState(String(d.status || 'todo'))
   const [priority, setPriority] = useState(String(d.priority || 'medium'))
@@ -47,6 +46,8 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
     { id: '3', text: 'QA testing', done: false },
   ])
   const [newSubtask, setNewSubtask] = useState('')
+
+  if (!node) return null
 
   const handleTitleBlur = () => updateNodeData(nodeId, { title })
   const handleStatusChange = (val: string) => {
@@ -93,7 +94,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Status */}
         <div>
-          <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <Clock className="h-3 w-3" /> Status
           </label>
           <select
@@ -109,7 +110,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Priority */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Priority</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Priority</label>
           <div className="mt-1.5 flex gap-1">
             {priorityOptions.map((opt) => (
               <button
@@ -128,7 +129,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Assignee */}
         <div>
-          <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <User className="h-3 w-3" /> Assignee
           </label>
           <select
@@ -145,7 +146,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Due Date */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Due Date</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Due Date</label>
           <input
             type="date"
             defaultValue=""
@@ -155,7 +156,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Description */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Description</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Description</label>
           <textarea
             placeholder="Add a description..."
             rows={3}
@@ -165,7 +166,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Subtasks */}
         <div>
-          <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <CheckSquare className="h-3 w-3" /> Subtasks
           </label>
           <div className="mt-2 space-y-1.5">
@@ -200,7 +201,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Tags */}
         <div>
-          <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <Tag className="h-3 w-3" /> Tags
           </label>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -212,7 +213,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
 
         {/* Attachments */}
         <div>
-          <label className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <label className="flex items-center gap-1.5 text-2xs+ font-semibold uppercase tracking-wider text-slate-500">
             <Paperclip className="h-3 w-3" /> Attachments
           </label>
           <button className="mt-1.5 w-full rounded-lg border border-dashed border-slate-700 py-4 text-xs text-slate-500 hover:border-slate-600 hover:text-slate-400 transition-colors">

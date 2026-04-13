@@ -92,7 +92,7 @@ export default function PrimitivesSection() {
               }`}
             >
               {p.highlight && (
-                <div className="absolute -top-3 left-4 rounded-full bg-orange-500 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div className="absolute -top-3 left-4 rounded-full bg-orange-500 px-2.5 py-0.5 text-2xs font-bold uppercase tracking-wider text-white">
                   Nothing else does this
                 </div>
               )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Handle, Position } from '@xyflow/react'
 import { cn } from '@/lib/utils/cn'
 import { NODE_COLORS, type NodeType } from '@/lib/utils/constants'
 
@@ -26,7 +26,7 @@ export function NodeWrapper({ type, children, selected }: NodeWrapperProps) {
       >
         <div className="flex items-center gap-2 mb-2">
           <span className={cn('h-2 w-2 rounded-full', colors.dot)} />
-          <span className={cn('text-[10px] font-bold uppercase tracking-wider', colors.text)}>
+          <span className={cn('text-2xs font-bold uppercase tracking-wider', colors.text)}>
             {type}
           </span>
         </div>

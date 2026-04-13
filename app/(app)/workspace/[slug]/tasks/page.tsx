@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { LayoutGrid, List, Plus, Filter, ArrowUpDown, CheckSquare, GripVertical } from 'lucide-react'
+import { LayoutGrid, List, Plus, Filter, ArrowUpDown, CheckSquare } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 type ViewMode = 'board' | 'list'
@@ -44,7 +44,7 @@ export default function TasksPage() {
   const toggleSelect = (id: string) => {
     setSelected(prev => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      if (next.has(id)) { next.delete(id) } else { next.add(id) }
       return next
     })
   }
@@ -93,8 +93,8 @@ export default function TasksPage() {
                   {colTasks.map(task => (
                     <div key={task.id} className="rounded-lg border border-slate-800 bg-slate-900 p-3 hover:border-slate-700 cursor-pointer transition-all hover:-translate-y-0.5">
                       <div className="flex items-center justify-between mb-2">
-                        <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium capitalize', priorityStyles[task.priority])}>{task.priority}</span>
-                        <div className={cn('flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold text-white', avatarColors[task.assignee])}>{task.assignee}</div>
+                        <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium capitalize', priorityStyles[task.priority])}>{task.priority}</span>
+                        <div className={cn('flex h-5 w-5 items-center justify-center rounded-full text-4xs font-bold text-white', avatarColors[task.assignee])}>{task.assignee}</div>
                       </div>
                       <p className={cn('text-sm font-medium', col.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-100')}>{task.title}</p>
                       {task.desc && <p className="mt-1 text-xs text-slate-500 line-clamp-2">{task.desc}</p>}
@@ -103,7 +103,7 @@ export default function TasksPage() {
                           <div className="h-1 rounded-full bg-brand" style={{ width: `${task.progress}%` }} />
                         </div>
                       )}
-                      {task.due && <p className="mt-2 text-[10px] text-slate-500">Due {task.due}</p>}
+                      {task.due && <p className="mt-2 text-2xs text-slate-500">Due {task.due}</p>}
                     </div>
                   ))}
                   <button className="w-full rounded-lg border border-dashed border-slate-700 py-2 text-xs text-slate-500 hover:border-slate-600 hover:text-slate-400">+ Add task</button>
@@ -117,7 +117,7 @@ export default function TasksPage() {
       {/* List View */}
       {view === 'list' && (
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
-          <div className="grid grid-cols-12 items-center gap-2 border-b border-slate-800 px-4 py-2.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+          <div className="grid grid-cols-12 items-center gap-2 border-b border-slate-800 px-4 py-2.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
             <span className="col-span-1"><input type="checkbox" className="rounded border-slate-600" /></span>
             <span className="col-span-4">Task</span>
             <span className="col-span-2">Status</span>
@@ -130,16 +130,16 @@ export default function TasksPage() {
               <span className="col-span-1"><input type="checkbox" checked={selected.has(task.id)} onChange={() => toggleSelect(task.id)} className="rounded border-slate-600" /></span>
               <span className={cn('col-span-4 text-sm font-medium', task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-100')}>{task.title}</span>
               <span className="col-span-2">
-                <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium capitalize',
+                <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium capitalize',
                   task.status === 'done' ? 'bg-emerald-500/10 text-emerald-400' :
                   task.status === 'in-progress' ? 'bg-blue-500/10 text-blue-400' :
                   task.status === 'review' ? 'bg-amber-500/10 text-amber-400' :
                   'bg-slate-500/10 text-slate-400'
                 )}>{task.status.replace('-', ' ')}</span>
               </span>
-              <span className="col-span-1"><span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium capitalize', priorityStyles[task.priority])}>{task.priority}</span></span>
+              <span className="col-span-1"><span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium capitalize', priorityStyles[task.priority])}>{task.priority}</span></span>
               <span className="col-span-2 flex items-center gap-1.5">
-                <div className={cn('flex h-5 w-5 items-center justify-center rounded-full text-[8px] font-bold text-white', avatarColors[task.assignee])}>{task.assignee}</div>
+                <div className={cn('flex h-5 w-5 items-center justify-center rounded-full text-4xs font-bold text-white', avatarColors[task.assignee])}>{task.assignee}</div>
                 <span className="text-xs text-slate-400">{task.assignee}</span>
               </span>
               <span className="col-span-2 text-xs text-slate-500">{task.due}</span>

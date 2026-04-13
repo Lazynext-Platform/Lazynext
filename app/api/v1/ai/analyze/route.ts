@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   try {
     const response = await callLazyMind(systemPrompt, JSON.stringify(context), 500)
     return NextResponse.json({ data: { content: response.content, provider: response.provider }, error: null })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'AI_UNAVAILABLE' }, { status: 503 })
   }
 }

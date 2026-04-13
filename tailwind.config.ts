@@ -40,6 +40,12 @@ const config: Config = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      fontSize: {
+        '2xs': ['0.625rem', { lineHeight: '0.875rem' }],   // 10px
+        '2xs+': ['0.6875rem', { lineHeight: '1rem' }],     // 11px
+        '3xs': ['0.5625rem', { lineHeight: '0.75rem' }],   // 9px
+        '4xs': ['0.5rem', { lineHeight: '0.75rem' }],      // 8px
+      },
       animation: {
         'slide-in-right': 'slideInRight 200ms ease-out',
         'slide-in-up': 'slideInUp 200ms ease-out',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plug, Copy, CheckCircle2, RefreshCw, Lock, ExternalLink } from 'lucide-react'
+import { Plug, Copy, CheckCircle2, RefreshCw, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 const connectedIntegrations = [
@@ -45,7 +45,7 @@ export default function IntegrationsPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-slate-200">{int.name}</p>
-                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-medium text-emerald-400">Connected</span>
+                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-3xs font-medium text-emerald-400">Connected</span>
                   </div>
                   <p className="text-xs text-slate-500">{int.desc}</p>
                 </div>
@@ -83,7 +83,7 @@ export default function IntegrationsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-slate-200">API Access</h2>
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold text-amber-400">Business Plan</span>
+            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-3xs font-bold text-amber-400">Business Plan</span>
           </div>
           <Lock className="h-4 w-4 text-slate-500" />
         </div>

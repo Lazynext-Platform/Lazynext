@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Lock, Sparkles, Check, Zap, ArrowRight, Crown } from 'lucide-react'
+import { X, Lock, Sparkles, Check, Crown } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 type ModalVariant = 'node-limit' | 'ai-limit' | 'health-gate' | 'full-upgrade'
@@ -73,7 +73,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {plans.map((plan) => (
               <div key={plan.name} className={cn('rounded-xl border-2 bg-slate-800 p-4 relative', plan.popular ? plan.accent : 'border-slate-700 hover:border-slate-600')}>
-                {plan.popular && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[9px] font-bold text-white">Popular</span>}
+                {plan.popular && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2.5 py-0.5 text-3xs font-bold text-white">Popular</span>}
                 <h3 className="text-sm font-bold text-slate-100">{plan.name}</h3>
                 <div className="mt-1">
                   <span className="text-2xl font-bold text-slate-50">
@@ -96,7 +96,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
 
         <div className="border-t border-slate-800 px-6 py-3 flex justify-between items-center">
           <button onClick={onClose} className="text-xs text-slate-500 hover:text-slate-300">Maybe later</button>
-          <p className="text-[10px] text-slate-600">All plans include 14-day free trial</p>
+          <p className="text-2xs text-slate-600">All plans include 14-day free trial</p>
         </div>
       </div>
     </div>

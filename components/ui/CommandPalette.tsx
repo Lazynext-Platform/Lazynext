@@ -9,7 +9,6 @@ import {
   Sparkles,
   ArrowRight,
   Command,
-  X,
 } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
@@ -89,7 +88,7 @@ export function CommandPalette() {
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
             autoFocus
           />
-          <kbd className="flex items-center gap-0.5 rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+          <kbd className="flex items-center gap-0.5 rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 text-2xs font-medium text-slate-400">
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         </div>
@@ -99,7 +98,7 @@ export function CommandPalette() {
           {/* Quick Actions */}
           {filteredActions.length > 0 && (
             <div className="mb-2">
-              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">
                 Quick Actions
               </p>
               {filteredActions.map((a, i) => (
@@ -119,7 +118,7 @@ export function CommandPalette() {
                     <p className="font-medium text-slate-200">{a.label}</p>
                     <p className="text-xs text-slate-500">{a.desc}</p>
                   </div>
-                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                  <kbd className="rounded border border-slate-700 bg-slate-800 px-1.5 py-0.5 text-2xs font-medium text-slate-400">
                     {a.shortcut}
                   </kbd>
                 </button>
@@ -130,7 +129,7 @@ export function CommandPalette() {
           {/* Recent */}
           {filteredRecent.length > 0 && (
             <div className="mb-2">
-              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">
                 Recent
               </p>
               {filteredRecent.map((r) => (
@@ -145,7 +144,7 @@ export function CommandPalette() {
                     <p className="font-medium text-slate-200">{r.title}</p>
                     <p className="text-xs text-slate-500">{r.meta}</p>
                   </div>
-                  <span className="text-[10px] text-slate-500">{r.time}</span>
+                  <span className="text-2xs text-slate-500">{r.time}</span>
                 </button>
               ))}
             </div>
@@ -154,7 +153,7 @@ export function CommandPalette() {
           {/* Navigation */}
           {!query && (
             <div>
-              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              <p className="px-2 py-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">
                 Navigation
               </p>
               {navItems.map((n) => (
@@ -178,7 +177,7 @@ export function CommandPalette() {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center gap-4 border-t border-slate-800 px-4 py-2 text-[10px] text-slate-500">
+        <div className="flex items-center gap-4 border-t border-slate-800 px-4 py-2 text-2xs text-slate-500">
           <span className="flex items-center gap-1">
             <kbd className="rounded border border-slate-700 bg-slate-800 px-1 py-0.5">↑↓</kbd> Navigate
           </span>

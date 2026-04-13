@@ -1,6 +1,5 @@
 'use client'
 
-import { GitBranch, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface DecisionCardProps {
@@ -20,7 +19,7 @@ export function DecisionCard({
   status,
   resolution,
   qualityScore,
-  outcome,
+  outcome: _outcome,
   madeBy,
   createdAt,
   tags = [],
@@ -46,7 +45,7 @@ export function DecisionCard({
       className="rounded-xl border border-slate-800 bg-slate-900 p-5 hover:border-slate-700 transition-colors cursor-pointer"
     >
       <div className="flex items-center gap-2">
-        <span className={cn('inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase', statusStyle)}>
+        <span className={cn('inline-flex rounded-full px-2 py-0.5 text-2xs font-semibold uppercase', statusStyle)}>
           {status}
         </span>
         {qualityScore !== null && qualityScore !== undefined && (
@@ -64,7 +63,7 @@ export function DecisionCard({
         <span className="text-slate-600">·</span>
         <span>{createdAt}</span>
         {tags.map((tag) => (
-          <span key={tag} className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px]">
+          <span key={tag} className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs">
             {tag}
           </span>
         ))}

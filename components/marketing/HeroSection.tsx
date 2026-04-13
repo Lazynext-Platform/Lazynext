@@ -150,7 +150,7 @@ export default function HeroSection() {
                     </p>
                     <div className="mt-2 flex items-center gap-1.5">
                       {node.score ? (
-                        <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-[10px] font-bold text-green-400">
+                        <span className="rounded bg-green-500/20 px-1.5 py-0.5 text-2xs font-bold text-green-400">
                           {node.score}
                         </span>
                       ) : node.meta ? (

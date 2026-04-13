@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowRight,
@@ -263,7 +263,7 @@ export default function CreateWorkspacePage() {
                         {opt.title}
                       </span>
                       {opt.badge && (
-                        <span className="rounded-full bg-brand/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand">
+                        <span className="rounded-full bg-brand/20 px-2 py-0.5 text-2xs font-bold uppercase tracking-wide text-brand">
                           {opt.badge}
                         </span>
                       )}

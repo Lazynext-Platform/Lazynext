@@ -39,10 +39,10 @@ export default function SharedCanvasPage() {
       {/* Top bar */}
       <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-[10px] font-bold text-white">L</div>
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-2xs font-bold text-white">L</div>
           <div>
             <h1 className="text-sm font-semibold text-slate-100">Sprint Planning — Q2 2026</h1>
-            <div className="flex items-center gap-2 text-[10px] text-slate-500">
+            <div className="flex items-center gap-2 text-2xs text-slate-500">
               <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Read-only</span>
               <span>·</span>
               <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Updated 2 hours ago</span>
@@ -81,7 +81,7 @@ export default function SharedCanvasPage() {
               <div className="rounded-lg border border-slate-700 bg-slate-800/90 px-4 py-3 shadow-lg backdrop-blur min-w-[120px]">
                 <div className="flex items-center gap-2">
                   <div className={cn('h-2.5 w-2.5 rounded-full', node.color)} />
-                  <span className="text-[10px] font-medium uppercase tracking-wider text-slate-500">{node.type}</span>
+                  <span className="text-2xs font-medium uppercase tracking-wider text-slate-500">{node.type}</span>
                 </div>
                 <p className="mt-1 text-sm font-medium text-slate-200">{node.label}</p>
               </div>
@@ -90,7 +90,7 @@ export default function SharedCanvasPage() {
         </div>
 
         {/* Watermark */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1.5 text-[10px] text-slate-500 backdrop-blur">
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1.5 text-2xs text-slate-500 backdrop-blur">
           <Lock className="h-3 w-3" /> Built with Lazynext · Read-only view
         </div>
       </div>
@@ -112,9 +112,9 @@ export default function SharedCanvasPage() {
             <div className="mt-4 rounded-lg border border-slate-800 bg-slate-800/50 p-3">
               <p className="text-xs font-medium text-slate-400">Analytics</p>
               <div className="mt-2 grid grid-cols-3 gap-3">
-                <div><p className="text-lg font-bold text-slate-100">24</p><p className="text-[10px] text-slate-500">Total views</p></div>
-                <div><p className="text-lg font-bold text-slate-100">8</p><p className="text-[10px] text-slate-500">Unique visitors</p></div>
-                <div><p className="text-lg font-bold text-slate-100">2m</p><p className="text-[10px] text-slate-500">Avg time</p></div>
+                <div><p className="text-lg font-bold text-slate-100">24</p><p className="text-2xs text-slate-500">Total views</p></div>
+                <div><p className="text-lg font-bold text-slate-100">8</p><p className="text-2xs text-slate-500">Unique visitors</p></div>
+                <div><p className="text-lg font-bold text-slate-100">2m</p><p className="text-2xs text-slate-500">Avg time</p></div>
               </div>
             </div>
 

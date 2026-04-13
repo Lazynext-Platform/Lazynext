@@ -4,10 +4,8 @@ import { useState } from 'react'
 import {
   CreditCard,
   Check,
-  X,
   Download,
   ArrowLeft,
-  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -115,7 +113,7 @@ export default function BillingPage() {
         <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => (
             <div key={plan.name} className={cn('rounded-xl border-2 bg-slate-900 p-5 transition-all relative', plan.current ? plan.accent : 'border-slate-800 hover:border-slate-600')}>
-              {plan.current && <span className="absolute -top-3 left-4 rounded-full bg-brand px-3 py-0.5 text-[10px] font-bold text-white">Current Plan</span>}
+              {plan.current && <span className="absolute -top-3 left-4 rounded-full bg-brand px-3 py-0.5 text-2xs font-bold text-white">Current Plan</span>}
               <h3 className="text-lg font-bold text-slate-100">{plan.name}</h3>
               <div className="mt-2">
                 <span className="text-3xl font-bold text-slate-50">{billingCycle === 'annual' && plan.price !== '₹0' ? `₹${Math.round(parseInt(plan.price.replace(/[₹,]/g, '')) * 0.8).toLocaleString('en-IN')}` : plan.price}</span>
@@ -141,12 +139,12 @@ export default function BillingPage() {
         <h2 className="text-lg font-semibold text-slate-100">Payment Method</h2>
         <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-12 items-center justify-center rounded bg-white text-[10px] font-bold text-blue-600">VISA</div>
+            <div className="flex h-8 w-12 items-center justify-center rounded bg-white text-2xs font-bold text-blue-600">VISA</div>
             <div>
               <p className="text-sm text-slate-200">•••• •••• •••• 4242</p>
               <p className="text-xs text-slate-500">Expires 12/2027</p>
             </div>
-            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Default</span>
+            <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-medium text-emerald-400">Default</span>
           </div>
           <div className="flex gap-2">
             <button className="text-xs text-brand hover:text-brand-hover">Update</button>
@@ -176,7 +174,7 @@ export default function BillingPage() {
                   <td className="py-3 text-slate-200">{h.desc}</td>
                   <td className="py-3 text-right text-slate-200">{h.amount}</td>
                   <td className="py-3 text-center">
-                    <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', h.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{h.status}</span>
+                    <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', h.status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{h.status}</span>
                   </td>
                   <td className="py-3 text-right"><button className="text-xs text-brand hover:text-brand-hover"><Download className="inline h-3 w-3" /> PDF</button></td>
                 </tr>

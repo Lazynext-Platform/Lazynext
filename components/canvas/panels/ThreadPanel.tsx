@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { X, MessageCircle, Send, Paperclip, Check, Circle, ThumbsUp, PartyPopper } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { X, MessageCircle, Send, Paperclip, Check, Circle } from 'lucide-react'
 import { useCanvasStore } from '@/stores/canvas.store'
 import { cn } from '@/lib/utils/cn'
 
@@ -131,17 +131,17 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
         <p className="text-sm font-semibold text-slate-200">{title}</p>
         <div className="mt-1.5 flex items-center gap-2">
           {status === 'decided' && (
-            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Decided</span>
+            <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-2xs font-medium text-emerald-400">Decided</span>
           )}
           {qualityScore !== undefined && (
             <span className={cn(
-              'flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold',
+              'flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-bold',
               qualityScore >= 70 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
             )}>
               {qualityScore} Quality
             </span>
           )}
-          <span className="text-[10px] text-slate-500">Apr 2, 2026</span>
+          <span className="text-2xs text-slate-500">Apr 2, 2026</span>
         </div>
       </div>
 
@@ -150,7 +150,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
         <div className="flex items-center gap-2">
           <MessageCircle className="h-3.5 w-3.5 text-slate-400" />
           <span className="text-xs font-medium text-slate-300">Thread</span>
-          <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">{sampleMessages.length}</span>
+          <span className="rounded bg-slate-700 px-1.5 py-0.5 text-2xs font-medium text-slate-400">{sampleMessages.length}</span>
         </div>
         <button
           onClick={() => setIsResolved(!isResolved)}
@@ -168,13 +168,13 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
       <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4" role="log" aria-label="Thread messages">
         {sampleMessages.map((msg) => (
           <div key={msg.id} className="flex gap-2.5">
-            <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', msg.avatarColor)}>
+            <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', msg.avatarColor)}>
               {msg.initials}
             </span>
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline gap-2">
                 <span className="text-sm font-medium text-slate-200">{msg.author}</span>
-                <span className="text-[10px] text-slate-500">{msg.time}</span>
+                <span className="text-2xs text-slate-500">{msg.time}</span>
               </div>
               <p className="mt-0.5 text-sm text-slate-400">
                 {msg.mention
@@ -192,7 +192,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
               {/* Comparison table */}
               {msg.table && (
                 <div className="mt-2 overflow-x-auto rounded-lg border border-slate-700">
-                  <table className="w-full text-[11px]">
+                  <table className="w-full text-2xs+">
                     <thead>
                       <tr className="border-b border-slate-700 bg-slate-800/50">
                         {msg.table.headers.map((h) => (
@@ -241,18 +241,18 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
         {/* @mention popover */}
         {showMentions && (
           <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
-            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-500">Mention a teammate</p>
+            <p className="px-3 py-1.5 text-2xs font-semibold uppercase tracking-wider text-slate-500">Mention a teammate</p>
             {mentionOptions.map((m) => (
               <button
                 key={m.name}
                 onClick={() => insertMention(m.name)}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-700 transition-colors"
               >
-                <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold text-white', m.color)}>
+                <span className={cn('flex h-6 w-6 items-center justify-center rounded-full text-3xs font-bold text-white', m.color)}>
                   {m.initials}
                 </span>
                 <span className="flex-1 text-sm text-slate-200">{m.name}</span>
-                <span className="text-[10px] text-slate-500">{m.role}</span>
+                <span className="text-2xs text-slate-500">{m.role}</span>
               </button>
             ))}
           </div>
@@ -274,7 +274,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
             <Send className="h-4 w-4" />
           </button>
         </div>
-        <p className="mt-1 text-[10px] text-slate-600">Threads stay attached to this decision forever.</p>
+        <p className="mt-1 text-2xs text-slate-600">Threads stay attached to this decision forever.</p>
       </div>
     </div>
   )

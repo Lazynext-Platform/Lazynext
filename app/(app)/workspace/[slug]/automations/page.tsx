@@ -4,16 +4,12 @@ import { useState } from 'react'
 import {
   Zap,
   Plus,
-  Play,
-  Pause,
-  ChevronDown,
   Trash2,
   Check,
   X,
   ArrowDown,
   Save,
   ArrowLeft,
-  Clock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -78,7 +74,7 @@ export default function AutomationsPage() {
           {/* Filter pills */}
           <div className="mt-4 flex gap-1">
             {(['all', 'active', 'paused'] as const).map((f) => (
-              <button key={f} onClick={() => setFilterMode(f)} className={cn('rounded-md px-3 py-1 text-[10px] font-medium capitalize transition-colors', filterMode === f ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200')}>
+              <button key={f} onClick={() => setFilterMode(f)} className={cn('rounded-md px-3 py-1 text-2xs font-medium capitalize transition-colors', filterMode === f ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200')}>
                 {f}
               </button>
             ))}
@@ -93,10 +89,10 @@ export default function AutomationsPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold text-slate-200">{auto.name}</p>
-                      {!auto.active && <span className="rounded-full bg-slate-700 px-2 py-0.5 text-[9px] text-slate-400">Paused</span>}
+                      {!auto.active && <span className="rounded-full bg-slate-700 px-2 py-0.5 text-3xs text-slate-400">Paused</span>}
                     </div>
                     <p className="text-xs text-slate-500">{auto.desc}</p>
-                    <p className="text-[10px] text-slate-600 mt-0.5">{auto.trigger} · {auto.runs} runs</p>
+                    <p className="text-2xs text-slate-600 mt-0.5">{auto.trigger} · {auto.runs} runs</p>
                   </div>
                 </div>
                 <label className="relative" onClick={e => e.stopPropagation()}>
@@ -117,7 +113,7 @@ export default function AutomationsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <input defaultValue={selected?.name || 'New Automation'} className="bg-transparent text-xl font-bold text-slate-100 border-b border-transparent focus:border-brand focus:outline-none" />
-              <span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium', selected?.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{selected?.active ? 'Active' : 'Paused'}</span>
+              <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', selected?.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{selected?.active ? 'Active' : 'Paused'}</span>
             </div>
             <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover"><Save className="inline h-3.5 w-3.5 mr-1" /> Save</button>
           </div>
@@ -159,7 +155,7 @@ export default function AutomationsPage() {
               {actions.map((action, i) => (
                 <div key={i} className="rounded-xl border border-slate-700 bg-slate-800 p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-medium text-slate-500">Action {i + 1}</span>
+                    <span className="text-2xs font-medium text-slate-500">Action {i + 1}</span>
                     {actions.length > 1 && <button onClick={() => setActions(actions.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300"><Trash2 className="h-3 w-3" /></button>}
                   </div>
                   <select defaultValue={action.type} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">

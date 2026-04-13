@@ -66,7 +66,7 @@ export default function ImportPage() {
                 <span className="text-xl">{source.icon}</span>
                 <div>
                   <p className="text-xs font-medium text-slate-200">{source.name}</p>
-                  <p className="text-[10px] text-slate-500">{source.desc}</p>
+                  <p className="text-2xs text-slate-500">{source.desc}</p>
                 </div>
               </div>
             ))}
@@ -78,15 +78,15 @@ export default function ImportPage() {
           <h3 className="text-sm font-semibold text-slate-200">How Import Works</h3>
           <ol className="mt-3 space-y-2 text-xs text-slate-400">
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand">1</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-2xs font-bold text-brand">1</span>
               Choose your source tool and connect via OAuth or file upload
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand">2</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-2xs font-bold text-brand">2</span>
               Preview the mapping — pages become DOC nodes, tasks become TASK nodes
             </li>
             <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand">3</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand/10 text-2xs font-bold text-brand">3</span>
               Import runs in the background — nodes and edges are created automatically
             </li>
           </ol>

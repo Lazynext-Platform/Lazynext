@@ -47,7 +47,7 @@ export default function LazyMindSection() {
               <span className="text-sm font-semibold text-slate-300">
                 LazyMind
               </span>
-              <span className="ml-auto rounded-full bg-green-500/20 px-2 py-0.5 text-[10px] font-bold text-green-400">
+              <span className="ml-auto rounded-full bg-green-500/20 px-2 py-0.5 text-2xs font-bold text-green-400">
                 Online
               </span>
             </div>

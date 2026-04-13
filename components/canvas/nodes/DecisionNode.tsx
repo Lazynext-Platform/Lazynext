@@ -17,12 +17,12 @@ export const DecisionNode = memo(function DecisionNode({ data, selected }: NodeP
       <p className="text-sm font-semibold text-slate-900">{title}</p>
       <div className="mt-2 flex items-center gap-2">
         {status && (
-          <span className="rounded-full bg-white/60 px-2 py-0.5 text-[10px] font-medium capitalize text-slate-700">
+          <span className="rounded-full bg-white/60 px-2 py-0.5 text-2xs font-medium capitalize text-slate-700">
             {status}
           </span>
         )}
         {score !== undefined && (
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${scoreColor}`}>
+          <span className={`rounded-full px-2 py-0.5 text-2xs font-bold ${scoreColor}`}>
             Q: {score}
           </span>
         )}

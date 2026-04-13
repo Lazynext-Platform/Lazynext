@@ -27,15 +27,16 @@ const sampleThread = [
 export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const { nodes, updateNodeData } = useCanvasStore()
   const node = nodes.find((n) => n.id === nodeId)
-  if (!node) return null
 
-  const d = node.data as Record<string, unknown>
+  const d = (node?.data ?? {}) as Record<string, unknown>
   const [title, setTitle] = useState(String(d.title || ''))
   const [status, setStatus] = useState(String(d.status || 'open'))
   const [resolution, setResolution] = useState(String(d.resolution || ''))
   const [rationale, setRationale] = useState(String(d.rationale || ''))
   const [outcome, setOutcome] = useState(String(d.outcome || 'pending'))
   const [threadOpen, setThreadOpen] = useState(false)
+
+  if (!node) return null
   const qualityScore = typeof d.qualityScore === 'number' ? d.qualityScore : undefined
   const options = Array.isArray(d.options) ? (d.options as string[]) : []
   const decisionType = String(d.decisionType || 'Reversible')
@@ -77,7 +78,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Status */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Status</label>
           <select
             value={status}
             onChange={(e) => { setStatus(e.target.value); updateNodeData(nodeId, { status: e.target.value }) }}
@@ -91,7 +92,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Question */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Question</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Question</label>
           <div className="mt-1.5 rounded-lg bg-slate-800 p-3">
             <p className="text-sm text-slate-300">{title || 'No question defined'}</p>
           </div>
@@ -99,7 +100,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Resolution */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Resolution</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Resolution</label>
           <textarea
             value={resolution}
             onChange={(e) => setResolution(e.target.value)}
@@ -112,7 +113,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Rationale */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Rationale</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Rationale</label>
           <textarea
             value={rationale}
             onChange={(e) => setRationale(e.target.value)}
@@ -125,7 +126,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Options Considered */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Options Considered</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Options Considered</label>
           <div className="mt-1.5 flex flex-wrap gap-2">
             {options.map((opt, i) => (
               <span
@@ -144,7 +145,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Decision Type */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Decision Type</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Decision Type</label>
           <select
             defaultValue={decisionType}
             onChange={(e) => updateNodeData(nodeId, { decisionType: e.target.value })}
@@ -158,7 +159,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
         {/* Quality Score */}
         {qualityScore !== undefined && (
           <div>
-            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Quality Score</label>
+            <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Quality Score</label>
             <div className={cn('mt-1.5 rounded-xl bg-gradient-to-br p-4', scoreBg)}>
               <div className="flex items-baseline gap-1">
                 <span className={cn('text-4xl font-bold', scoreColor)}>{qualityScore}</span>
@@ -174,7 +175,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Outcome */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Outcome</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Outcome</label>
           <select
             value={outcome}
             onChange={(e) => { setOutcome(e.target.value); updateNodeData(nodeId, { outcome: e.target.value }) }}
@@ -188,12 +189,12 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
         {/* Made by */}
         <div>
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Made by</label>
+          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Made by</label>
           <div className="mt-1.5 flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">AP</span>
             <div>
               <p className="text-sm font-medium text-slate-200">Avas Patel</p>
-              <p className="text-[10px] text-slate-500">Apr 2, 2026</p>
+              <p className="text-2xs text-slate-500">Apr 2, 2026</p>
             </div>
           </div>
         </div>
@@ -202,12 +203,12 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
         <div className="border-t border-slate-800 pt-4">
           <button
             onClick={() => setThreadOpen(!threadOpen)}
-            className="flex w-full items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+            className="flex w-full items-center justify-between text-2xs+ font-semibold uppercase tracking-wider text-slate-500"
           >
             <div className="flex items-center gap-1.5">
               <MessageCircle className="h-3 w-3" />
               Thread
-              <span className="rounded bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">{sampleThread.length}</span>
+              <span className="rounded bg-slate-700 px-1.5 py-0.5 text-2xs font-medium text-slate-400">{sampleThread.length}</span>
             </div>
             {threadOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -216,13 +217,13 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
             <div className="mt-3 space-y-3">
               {sampleThread.map((msg) => (
                 <div key={msg.id} className="flex gap-2.5">
-                  <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white', msg.color)}>
+                  <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', msg.color)}>
                     {msg.initials}
                   </span>
                   <div>
                     <div className="flex items-baseline gap-2">
                       <span className="text-sm font-medium text-slate-200">{msg.author}</span>
-                      <span className="text-[10px] text-slate-500">{msg.time}</span>
+                      <span className="text-2xs text-slate-500">{msg.time}</span>
                     </div>
                     <p className="mt-0.5 text-sm text-slate-400">{msg.message}</p>
                   </div>

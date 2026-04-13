@@ -61,7 +61,7 @@ export default function CollaborationOverlay({ collaborators, isMobile = false }
               <div className="pointer-events-none absolute z-50 transition-all duration-75"
                 style={{ left: collab.cursor.x, top: collab.cursor.y }}>
                 <CursorArrow color={colors.cursor} />
-                <div className={cn('ml-3 -mt-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium shadow-lg whitespace-nowrap', colors.bg, colors.text)}>
+                <div className={cn('ml-3 -mt-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium shadow-lg whitespace-nowrap', colors.bg, colors.text)}>
                   {collab.name}
                   {collab.isTyping && <TypingIndicator color={colors.bg + '/30'} />}
                 </div>
@@ -83,14 +83,14 @@ export default function CollaborationOverlay({ collaborators, isMobile = false }
           const colors = colorMap[collab.color] || colorMap.blue
           return (
             <div key={collab.id}
-              className={cn('flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-950 text-[9px] font-bold text-white', colors.bg)}
+              className={cn('flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-950 text-3xs font-bold text-white', colors.bg)}
               title={collab.name}>
               {collab.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
           )
         })}
         {collaborators.length > 4 && (
-          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-950 bg-slate-700 text-[9px] font-bold text-slate-300">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-950 bg-slate-700 text-3xs font-bold text-slate-300">
             +{collaborators.length - 4}
           </div>
         )}

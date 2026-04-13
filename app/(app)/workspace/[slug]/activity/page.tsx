@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Activity, FileText, Download, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
+import { Activity, Download, ChevronLeft, ChevronRight, Filter } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 type Tab = 'feed' | 'audit'
@@ -54,12 +54,12 @@ export default function ActivityPage() {
       {/* Feed */}
       {tab === 'feed' && (
         <div className="mt-6">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 mb-3">Today</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500 mb-3">Today</p>
           <div className="relative ml-4 border-l border-slate-800 pl-6 space-y-5">
             {feedItems.slice(0, 3).map((item, i) => (
               <div key={i} className="relative">
                 <div className="absolute -left-[33px] flex items-center">
-                  <div className={cn('relative flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold text-white', item.color)}>
+                  <div className={cn('relative flex h-8 w-8 items-center justify-center rounded-full text-2xs font-bold text-white', item.color)}>
                     {item.initials}
                     <div className={cn('absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-slate-950', item.typeColor)} />
                   </div>
@@ -73,18 +73,18 @@ export default function ActivityPage() {
                       {item.detail}
                     </div>
                   )}
-                  <p className="mt-1 text-[10px] text-slate-600">{item.time}</p>
+                  <p className="mt-1 text-2xs text-slate-600">{item.time}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 mt-6 mb-3">Yesterday</p>
+          <p className="text-2xs uppercase tracking-wider text-slate-500 mt-6 mb-3">Yesterday</p>
           <div className="relative ml-4 border-l border-slate-800 pl-6 space-y-5">
             {feedItems.slice(3).map((item, i) => (
               <div key={i} className="relative">
                 <div className="absolute -left-[33px] flex items-center">
-                  <div className={cn('relative flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-bold text-white', item.color)}>
+                  <div className={cn('relative flex h-8 w-8 items-center justify-center rounded-full text-2xs font-bold text-white', item.color)}>
                     {item.initials}
                     <div className={cn('absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-slate-950', item.typeColor)} />
                   </div>
@@ -98,7 +98,7 @@ export default function ActivityPage() {
                       {item.detail}
                     </div>
                   )}
-                  <p className="mt-1 text-[10px] text-slate-600">{item.time}</p>
+                  <p className="mt-1 text-2xs text-slate-600">{item.time}</p>
                 </div>
               </div>
             ))}
@@ -116,7 +116,7 @@ export default function ActivityPage() {
           <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-800 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                <tr className="border-b border-slate-800 text-2xs font-medium uppercase tracking-wider text-slate-500">
                   <th className="px-4 py-3 text-left">Time</th>
                   <th className="px-4 py-3 text-left">User</th>
                   <th className="px-4 py-3 text-left">Action</th>
@@ -130,10 +130,10 @@ export default function ActivityPage() {
                   <tr key={i} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30">
                     <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{row.time}</td>
                     <td className="px-4 py-3 text-slate-200 whitespace-nowrap">{row.user}</td>
-                    <td className="px-4 py-3"><span className={cn('rounded-full px-2 py-0.5 text-[10px] font-medium capitalize', row.badge)}>{row.action}</span></td>
+                    <td className="px-4 py-3"><span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium capitalize', row.badge)}>{row.action}</span></td>
                     <td className="px-4 py-3 text-slate-300">{row.target}</td>
                     <td className="px-4 py-3 text-xs text-slate-500">{row.detail}</td>
-                    <td className="px-4 py-3 text-[10px] text-slate-600 font-mono">{row.ip}</td>
+                    <td className="px-4 py-3 text-2xs text-slate-600 font-mono">{row.ip}</td>
                   </tr>
                 ))}
               </tbody>
@@ -147,7 +147,7 @@ export default function ActivityPage() {
               <button onClick={() => setPage(p => p + 1)} className="rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-400"><ChevronRight className="h-3 w-3" /></button>
             </div>
           </div>
-          <p className="mt-2 text-[10px] text-slate-600">IP addresses are partially masked for privacy.</p>
+          <p className="mt-2 text-2xs text-slate-600">IP addresses are partially masked for privacy.</p>
         </div>
       )}
     </div>

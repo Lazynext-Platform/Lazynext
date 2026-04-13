@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Activity, Users, CheckSquare, TrendingUp, TrendingDown, Minus, AlertTriangle, Sparkles, Clock } from 'lucide-react'
+import { Activity, CheckSquare, TrendingUp, TrendingDown, Minus, AlertTriangle, Sparkles, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 const metrics = [
@@ -107,9 +107,9 @@ export default function PulsePage() {
               <div key={w.name}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-[9px] font-bold text-white', w.color)}>{w.initials}</div>
+                    <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-3xs font-bold text-white', w.color)}>{w.initials}</div>
                     <span className="text-sm text-slate-200">{w.name}</span>
-                    {overloaded && <span className="flex items-center gap-0.5 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400"><AlertTriangle className="h-2.5 w-2.5" /> Overloaded</span>}
+                    {overloaded && <span className="flex items-center gap-0.5 rounded-full bg-red-500/10 px-2 py-0.5 text-2xs font-medium text-red-400"><AlertTriangle className="h-2.5 w-2.5" /> Overloaded</span>}
                   </div>
                   <span className="text-xs text-slate-500">{w.tasks}/{w.capacity} tasks</span>
                 </div>
@@ -131,11 +131,11 @@ export default function PulsePage() {
             {[0, 10, 20, 30].map(v => (
               <g key={v}>
                 <line x1={padX} y1={toY(v)} x2={chartW - padX} y2={toY(v)} stroke="#1e293b" strokeWidth={1} />
-                <text x={padX - 6} y={toY(v) + 4} textAnchor="end" className="fill-slate-600 text-[10px]">{v}</text>
+                <text x={padX - 6} y={toY(v) + 4} textAnchor="end" className="fill-slate-600 text-2xs">{v}</text>
               </g>
             ))}
             {burndownData.map((d, i) => (
-              <text key={i} x={toX(i)} y={chartH - 2} textAnchor="middle" className={cn('fill-slate-500 text-[9px]', d.day === 'Today' && 'fill-cyan-400 font-medium')}>{d.day}</text>
+              <text key={i} x={toX(i)} y={chartH - 2} textAnchor="middle" className={cn('fill-slate-500 text-3xs', d.day === 'Today' && 'fill-cyan-400 font-medium')}>{d.day}</text>
             ))}
             {/* Ideal line */}
             <path d={idealLine} fill="none" stroke="#334155" strokeWidth={1.5} strokeDasharray="6 4" />
@@ -147,7 +147,7 @@ export default function PulsePage() {
             ))}
           </svg>
         </div>
-        <div className="mt-3 flex gap-4 text-[10px] text-slate-500">
+        <div className="mt-3 flex gap-4 text-2xs text-slate-500">
           <div className="flex items-center gap-1"><div className="h-px w-4 border-t border-dashed border-slate-500" /> Ideal</div>
           <div className="flex items-center gap-1"><div className="h-0.5 w-4 bg-cyan-500 rounded" /> Actual</div>
         </div>
@@ -162,7 +162,7 @@ export default function PulsePage() {
               <div className={cn('mt-0.5 h-2 w-2 rounded-full shrink-0', a.typeColor)} />
               <div>
                 <p className="text-sm text-slate-300"><strong className="text-slate-100">{a.actor}</strong> {a.action} <span className="text-cyan-400">{a.target}</span></p>
-                <p className="text-[10px] text-slate-600">{a.time}</p>
+                <p className="text-2xs text-slate-600">{a.time}</p>
               </div>
             </div>
           ))}
@@ -177,9 +177,9 @@ export default function PulsePage() {
             const diff = w.thisWeek - w.lastWeek
             return (
               <div key={w.label} className="rounded-lg border border-slate-800 p-3">
-                <p className="text-[10px] text-slate-500">{w.label}</p>
+                <p className="text-2xs text-slate-500">{w.label}</p>
                 <p className="mt-1 text-lg font-bold text-slate-100">{w.thisWeek}</p>
-                <p className={cn('text-[10px]', diff > 0 ? 'text-emerald-400' : diff < 0 ? 'text-red-400' : 'text-slate-500')}>
+                <p className={cn('text-2xs', diff > 0 ? 'text-emerald-400' : diff < 0 ? 'text-red-400' : 'text-slate-500')}>
                   {diff > 0 ? '+' : ''}{diff} vs last week
                 </p>
               </div>

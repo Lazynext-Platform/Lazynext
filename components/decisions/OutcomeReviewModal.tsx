@@ -69,8 +69,8 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
           {/* Decision context card */}
           <div className="rounded-xl border-l-4 border-orange-500 bg-slate-800/50 p-4">
             <div className="flex items-center gap-2 mb-1">
-              <span className="rounded-full bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold text-orange-400">{decision.type}</span>
-              <span className="text-[10px] text-slate-600">{decision.madeAt}</span>
+              <span className="rounded-full bg-orange-500/10 px-2 py-0.5 text-2xs font-semibold text-orange-400">{decision.type}</span>
+              <span className="text-2xs text-slate-600">{decision.madeAt}</span>
             </div>
             <h3 className="text-base font-semibold text-slate-100">{decision.title}</h3>
             <p className="mt-1 text-sm text-slate-400">{decision.context}</p>
@@ -112,7 +112,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
           <div className="mt-4 rounded-lg border border-indigo-800/30 bg-indigo-900/20 p-3">
             <div className="flex items-center gap-1.5 mb-1">
               <Sparkles className="h-3 w-3 text-indigo-400" />
-              <span className="text-[10px] font-semibold text-indigo-300">LazyMind Suggestion</span>
+              <span className="text-2xs font-semibold text-indigo-300">LazyMind Suggestion</span>
             </div>
             <p className="text-xs text-slate-400">
               Similar decisions in your workspace had <strong className="text-indigo-300">72% good outcomes</strong> when the team involved 3+ stakeholders. Consider broader input for future {decision.type.toLowerCase()} decisions.
