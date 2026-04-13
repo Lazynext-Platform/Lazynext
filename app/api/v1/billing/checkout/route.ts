@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
@@ -31,6 +31,10 @@ export async function POST(req: Request) {
   }
 
   const { plan, interval, workspaceId } = parsed.data
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
   const planConfig = PLANS[plan as Exclude<PlanId, 'free'>]
   const variantId = planConfig[interval]
 

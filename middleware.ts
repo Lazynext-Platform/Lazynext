@@ -34,13 +34,16 @@ export async function middleware(request: NextRequest) {
   const response = await updateSession(request)
 
   // Set locale cookie if not already present so next-intl can read it
-  const locale = detectLocale(request)
-  if (!request.cookies.get('NEXT_LOCALE')?.value) {
-    response.cookies.set('NEXT_LOCALE', locale, {
-      path: '/',
-      maxAge: 365 * 24 * 60 * 60, // 1 year
-      sameSite: 'lax',
-    })
+  // Skip for API routes — no need to set cookies on programmatic requests
+  if (!request.nextUrl.pathname.startsWith('/api')) {
+    const locale = detectLocale(request)
+    if (!request.cookies.get('NEXT_LOCALE')?.value) {
+      response.cookies.set('NEXT_LOCALE', locale, {
+        path: '/',
+        maxAge: 365 * 24 * 60 * 60, // 1 year
+        sameSite: 'lax',
+      })
+    }
   }
 
   return response

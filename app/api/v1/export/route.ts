@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
@@ -14,6 +14,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const [workflowRes, nodeRes, decisionRes] = await Promise.all([
     db.from('workflows').select('*').eq('workspace_id', workspaceId),

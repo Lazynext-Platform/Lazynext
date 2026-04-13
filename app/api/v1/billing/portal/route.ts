@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db/client'
@@ -29,6 +29,9 @@ export async function POST(req: Request) {
   }
 
   const { workspaceId } = parsed.data
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   if (!hasValidDatabaseUrl) {
     return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })

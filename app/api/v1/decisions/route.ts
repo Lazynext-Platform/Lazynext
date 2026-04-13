@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -28,6 +28,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: results, error } = await db
     .from('decisions')
@@ -62,6 +65,9 @@ export async function POST(req: Request) {
     optionsConsidered: parsed.data.optionsConsidered,
     decisionType: parsed.data.decisionType,
   })
+
+  const authorized = await verifyWorkspaceMember(userId, parsed.data.workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: decision, error } = await db.from('decisions').insert({
     workspace_id: parsed.data.workspaceId,

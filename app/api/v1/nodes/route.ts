@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -29,6 +29,11 @@ export async function GET(req: Request) {
   const workflowId = url.searchParams.get('workflowId')
   if (!workflowId) return NextResponse.json({ error: 'MISSING_WORKFLOW_ID' }, { status: 400 })
 
+  const { data: workflow } = await db.from('workflows').select('workspace_id').eq('id', workflowId).single()
+  if (!workflow) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, workflow.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
   const { data: results, error } = await db.from('nodes').select('*').eq('workflow_id', workflowId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: results, error: null })
@@ -49,6 +54,9 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
+
+  const authorized = await verifyWorkspaceMember(userId, parsed.data.workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: node, error } = await db.from('nodes').insert({
     workflow_id: parsed.data.workflowId,

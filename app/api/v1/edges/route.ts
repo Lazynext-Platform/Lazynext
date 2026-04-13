@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -24,6 +24,11 @@ export async function GET(req: Request) {
   const workflowId = url.searchParams.get('workflowId')
   if (!workflowId) return NextResponse.json({ error: 'MISSING_WORKFLOW_ID' }, { status: 400 })
 
+  const { data: workflow } = await db.from('workflows').select('workspace_id').eq('id', workflowId).single()
+  if (!workflow) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorized = await verifyWorkspaceMember(userId, workflow.workspace_id)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
   const { data: results, error } = await db.from('edges').select('*').eq('workflow_id', workflowId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: results, error: null })
@@ -44,6 +49,11 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
+
+  const { data: wf } = await db.from('workflows').select('workspace_id').eq('id', parsed.data.workflowId).single()
+  if (!wf) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorizedPost = await verifyWorkspaceMember(userId, wf.workspace_id)
+  if (!authorizedPost) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: edge, error } = await db.from('edges').insert({
     workflow_id: parsed.data.workflowId,
@@ -68,6 +78,13 @@ export async function DELETE(req: Request) {
   const url = new URL(req.url)
   const id = url.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'MISSING_ID' }, { status: 400 })
+
+  const { data: existing } = await db.from('edges').select('workflow_id').eq('id', id).single()
+  if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const { data: workflow } = await db.from('workflows').select('workspace_id').eq('id', existing.workflow_id).single()
+  if (!workflow) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  const authorizedDel = await verifyWorkspaceMember(userId, workflow.workspace_id)
+  if (!authorizedDel) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { error } = await db.from('edges').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

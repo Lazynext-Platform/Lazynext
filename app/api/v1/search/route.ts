@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
@@ -18,6 +18,9 @@ export async function GET(req: Request) {
   if (!q || !workspaceId) {
     return NextResponse.json({ error: 'MISSING_PARAMS' }, { status: 400 })
   }
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const [nodeRes, decisionRes, workflowRes] = await Promise.all([
     db.from('nodes').select('*').eq('workspace_id', workspaceId).ilike('title', `%${q}%`).limit(10),

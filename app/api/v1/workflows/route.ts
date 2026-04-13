@@ -1,4 +1,4 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -22,6 +22,9 @@ export async function GET(req: Request) {
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: results, error } = await db
     .from('workflows')
@@ -50,6 +53,9 @@ export async function POST(req: Request) {
   }
 
   const { name, description, workspaceId } = parsed.data
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   const { data: workflow, error } = await db
     .from('workflows')
