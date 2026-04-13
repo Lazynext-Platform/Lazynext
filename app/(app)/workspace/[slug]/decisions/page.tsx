@@ -81,9 +81,9 @@ const sampleDecisions = [
   },
   {
     id: '6',
-    question: 'Should we support Razorpay alongside Stripe for INR billing?',
+    question: 'Should we use Lemon Squeezy for billing?',
     status: 'decided' as const,
-    resolution: 'Yes — Razorpay for INR domestic, Stripe for international cards and subscriptions',
+    resolution: 'Yes — Lemon Squeezy handles global payments, tax, and works without company registration',
     qualityScore: 84,
     outcome: 'good' as const,
     madeBy: 'Priya Shah',

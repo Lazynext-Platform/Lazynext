@@ -33,10 +33,9 @@ export type Workspace = {
   logo: string | null
   plan: typeof PLAN_VALUES[number]
   trial_ends_at: string | null
-  stripe_customer_id: string | null
-  stripe_subscription_id: string | null
-  razorpay_customer_id: string | null
-  razorpay_subscription_id: string | null
+  ls_customer_id: string | null
+  ls_subscription_id: string | null
+  ls_customer_portal_url: string | null
   region: string | null
   created_by: string
   created_at: string

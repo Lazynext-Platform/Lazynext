@@ -11,7 +11,7 @@ vi.mock('@/lib/db/client', () => ({
             name: 'Test Workspace',
             slug: 'test-ws',
             plan: 'free',
-            stripeCustomerId: null,
+            lsCustomerId: null,
           }])),
           orderBy: vi.fn(() => Promise.resolve([])),
         })),

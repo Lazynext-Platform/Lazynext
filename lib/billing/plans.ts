@@ -1,20 +1,20 @@
-// Stripe price IDs — update with real values after creating products in Stripe dashboard
+// Lemon Squeezy variant IDs — update with real values after creating products in LS dashboard
 export const PLANS = {
-  free: { name: 'Free', priceId: null },
+  free: { name: 'Free', variantId: null },
   starter: {
     name: 'Starter',
-    monthly: process.env.STRIPE_STARTER_MONTHLY_ID ?? '',
-    yearly: process.env.STRIPE_STARTER_YEARLY_ID ?? '',
+    monthly: process.env.LEMONSQUEEZY_STARTER_MONTHLY_ID ?? '',
+    yearly: process.env.LEMONSQUEEZY_STARTER_YEARLY_ID ?? '',
   },
   pro: {
     name: 'Pro',
-    monthly: process.env.STRIPE_PRO_MONTHLY_ID ?? '',
-    yearly: process.env.STRIPE_PRO_YEARLY_ID ?? '',
+    monthly: process.env.LEMONSQUEEZY_PRO_MONTHLY_ID ?? '',
+    yearly: process.env.LEMONSQUEEZY_PRO_YEARLY_ID ?? '',
   },
   business: {
     name: 'Business',
-    monthly: process.env.STRIPE_BUSINESS_MONTHLY_ID ?? '',
-    yearly: process.env.STRIPE_BUSINESS_YEARLY_ID ?? '',
+    monthly: process.env.LEMONSQUEEZY_BUSINESS_MONTHLY_ID ?? '',
+    yearly: process.env.LEMONSQUEEZY_BUSINESS_YEARLY_ID ?? '',
   },
 } as const
 

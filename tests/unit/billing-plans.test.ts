@@ -9,8 +9,8 @@ describe('Billing Plans', () => {
     expect(PLANS).toHaveProperty('business')
   })
 
-  it('free plan has no priceId', () => {
-    expect(PLANS.free.priceId).toBeNull()
+  it('free plan has no variantId', () => {
+    expect(PLANS.free.variantId).toBeNull()
   })
 
   it('paid plans have monthly and yearly keys', () => {

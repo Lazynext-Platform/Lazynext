@@ -2,7 +2,7 @@ import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { PLANS, type PlanId } from '@/lib/billing/plans'
-import Stripe from 'stripe'
+import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
 
 const checkoutSchema = z.object({
   plan: z.enum(['starter', 'pro', 'business']),
@@ -27,37 +27,47 @@ export async function POST(req: Request) {
 
   const { plan, interval, workspaceId } = parsed.data
   const planConfig = PLANS[plan as Exclude<PlanId, 'free'>]
-  const priceId = planConfig[interval]
+  const variantId = planConfig[interval]
 
-  if (!priceId) {
+  if (!variantId) {
     return NextResponse.json(
-      { error: 'STRIPE_NOT_CONFIGURED', message: 'Stripe price IDs are not set. Configure STRIPE_*_ID env vars.' },
+      { error: 'BILLING_NOT_CONFIGURED', message: 'Lemon Squeezy variant IDs are not set. Configure LEMONSQUEEZY_*_ID env vars.' },
       { status: 503 }
     )
   }
 
-  if (!process.env.STRIPE_SECRET_KEY) {
+  if (!process.env.LEMONSQUEEZY_API_KEY || !process.env.LEMONSQUEEZY_STORE_ID) {
     return NextResponse.json(
-      { error: 'STRIPE_NOT_CONFIGURED', message: 'Set STRIPE_SECRET_KEY env var.' },
+      { error: 'BILLING_NOT_CONFIGURED', message: 'Set LEMONSQUEEZY_API_KEY and LEMONSQUEEZY_STORE_ID env vars.' },
       { status: 503 }
     )
   }
 
   try {
+    lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY })
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
-    const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/workspace/${workspaceId}/settings?billing=success`,
-      cancel_url: `${appUrl}/workspace/${workspaceId}/billing`,
-      metadata: { workspaceId, userId },
+
+    const { data, error } = await createCheckout(process.env.LEMONSQUEEZY_STORE_ID, variantId, {
+      checkoutData: {
+        custom: { workspace_id: workspaceId, user_id: userId, plan },
+      },
+      productOptions: {
+        redirectUrl: `${appUrl}/workspace/${workspaceId}/settings?billing=success`,
+      },
     })
-    return NextResponse.json({ url: session.url })
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'BILLING_ERROR', message: error.message },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ url: data?.data.attributes.url })
   } catch (err) {
-    console.error('Stripe checkout error:', err)
+    console.error('Lemon Squeezy checkout error:', err)
     return NextResponse.json(
-      { error: 'STRIPE_ERROR', message: 'Failed to create checkout session.' },
+      { error: 'BILLING_ERROR', message: 'Failed to create checkout session.' },
       { status: 500 }
     )
   }

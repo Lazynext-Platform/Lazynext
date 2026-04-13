@@ -12,7 +12,7 @@ const team = [
 const mission = [
   { icon: Target, title: 'Decision Quality', body: 'Most tools track tasks. We track the decisions behind them — so teams learn from their choices, not just check boxes.' },
   { icon: Users, title: 'Team Intelligence', body: 'Every decision, discussion, and outcome builds a knowledge graph unique to your team. Over time, Lazynext gets smarter with you.' },
-  { icon: Globe, title: 'India-First, Global-Ready', body: 'Built in India with INR-first pricing, Razorpay integration, and design for the 1000+ startups launching every year.' },
+  { icon: Globe, title: 'India-First, Global-Ready', body: 'Built in India with global pricing, Lemon Squeezy payments, and design for the 1000+ startups launching every year.' },
 ]
 
 export default function AboutPage() {

@@ -131,8 +131,8 @@ const faqItems = [
     a: "Absolutely. You can upgrade or downgrade your plan at any time from your Workspace Settings. When you upgrade, you get immediate access to new features. When you downgrade, the change takes effect at the end of your current billing period.",
   },
   {
-    q: 'Do you support UPI / Indian payments?',
-    a: 'Yes. We process payments through Razorpay, which supports UPI, credit/debit cards, net banking, and popular wallets like Paytm, PhonePe, and Google Pay. International cards (Visa, Mastercard) are also accepted.',
+    q: 'What payment methods do you accept?',
+    a: 'We process payments through Lemon Squeezy, which supports credit/debit cards (Visa, Mastercard, Amex), PayPal, and other local payment methods worldwide. All pricing is in USD with automatic tax handling.',
   },
   {
     q: 'Is there a discount for startups?',

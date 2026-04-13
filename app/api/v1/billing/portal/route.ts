@@ -1,7 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import Stripe from 'stripe'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 
@@ -26,13 +25,6 @@ export async function POST(req: Request) {
 
   const { workspaceId } = parsed.data
 
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return NextResponse.json(
-      { error: 'STRIPE_NOT_CONFIGURED', message: 'Set STRIPE_SECRET_KEY env var to enable billing portal.' },
-      { status: 503 }
-    )
-  }
-
   if (!hasValidDatabaseUrl) {
     return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
   }
@@ -44,19 +36,14 @@ export async function POST(req: Request) {
       .eq('id', workspaceId)
       .single()
 
-    if (!workspace?.stripe_customer_id) {
-      return NextResponse.json({ error: 'NO_STRIPE_CUSTOMER', message: 'Workspace has no Stripe customer.' }, { status: 400 })
+    if (!workspace?.ls_customer_portal_url) {
+      return NextResponse.json({ error: 'NO_BILLING_CUSTOMER', message: 'Workspace has no active subscription. Subscribe first.' }, { status: 400 })
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
-    const session = await stripe.billingPortal.sessions.create({
-      customer: workspace.stripe_customer_id,
-      return_url: `${appUrl}/workspace/${workspaceId}/billing`,
-    })
-    return NextResponse.json({ url: session.url })
+    // Lemon Squeezy provides a customer portal URL directly on the subscription
+    return NextResponse.json({ url: workspace.ls_customer_portal_url })
   } catch (err) {
-    console.error('Stripe portal error:', err)
-    return NextResponse.json({ error: 'STRIPE_ERROR', message: 'Failed to create portal session.' }, { status: 500 })
+    console.error('Billing portal error:', err)
+    return NextResponse.json({ error: 'BILLING_ERROR', message: 'Failed to get portal URL.' }, { status: 500 })
   }
 }
