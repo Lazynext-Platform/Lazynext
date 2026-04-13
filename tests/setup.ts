@@ -1,2 +1,2 @@
-// Test setup — add DOM matchers when jsdom/happy-dom environment is used
-// import '@testing-library/jest-dom/vitest'
+// Test setup — add DOM matchers for jsdom environment
+import '@testing-library/jest-dom/vitest'

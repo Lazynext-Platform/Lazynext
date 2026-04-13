@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import { CheckCircle, Users, TrendingUp, Zap } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Sign In — Lazynext',
-  description: 'Sign in to your Lazynext workspace. Tasks, docs, decisions, and AI in one place.',
+  title: 'Auth — Lazynext',
+  description: 'Sign in or create your Lazynext account. Tasks, docs, decisions, and AI in one place.',
 }
 
 const features = [

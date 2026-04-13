@@ -119,7 +119,7 @@ lazynext/
 │   └── ui/                   # Shared UI primitives
 ├── lib/
 │   ├── ai/                   # Groq/Together integration
-│   ├── billing/              # Stripe + Razorpay
+│   ├── billing/              # Lemon Squeezy
 │   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
 │   ├── inngest/              # Background job processing

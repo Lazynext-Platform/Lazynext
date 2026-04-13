@@ -18,9 +18,13 @@ export function TopBar() {
   const [showMenu, setShowMenu] = useState(false)
 
   const handleSignOut = async () => {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    window.location.href = '/sign-in'
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      window.location.href = '/sign-in'
+    } catch {
+      window.location.href = '/sign-in'
+    }
   }
 
   return (

@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import MarketingHeader from '@/components/marketing/MarketingHeader'
+
+export const metadata: Metadata = {
+  title: 'Lazynext — The Anti-Software Workflow Platform',
+  description: 'One platform that replaces every tool your team is already misusing. Tasks, docs, decisions, and AI — unified in one graph.',
+}
 
 const footerLinks = {
   Product: [
