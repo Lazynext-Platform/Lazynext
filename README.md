@@ -20,7 +20,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 | Database | Supabase PostgreSQL |
 | State | Zustand |
 | AI | Groq + Together AI |
-| Payments | Stripe + Razorpay |
+| Payments | Lemon Squeezy |
 | Email | Resend |
 | Testing | Vitest + Testing Library |
 
@@ -67,8 +67,9 @@ Copy `.env.example` to `.env.local` and fill in:
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server only) |
 | `GROQ_API_KEY` | For AI | Groq API key for LazyMind |
 | `TOGETHER_API_KEY` | Fallback | Together AI fallback key |
-| `STRIPE_SECRET_KEY` | For billing | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | For billing | Stripe webhook signing secret |
+| `LEMONSQUEEZY_API_KEY` | For billing | Lemon Squeezy API key |
+| `LEMONSQUEEZY_STORE_ID` | For billing | Lemon Squeezy store ID |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | For billing | Lemon Squeezy webhook signing secret |
 | `RESEND_API_KEY` | For email | Resend API key |
 | `NEXT_PUBLIC_APP_URL` | Recommended | Your app URL (default: http://localhost:3000) |
 
@@ -108,6 +109,8 @@ npm run lint         # ESLint
 npm test             # Run tests (Vitest)
 npm run test:watch   # Tests in watch mode
 npm run db:types     # Generate Supabase TypeScript types
+npm run type-check   # TypeScript type checking
+npm run test:e2e     # Playwright E2E tests
 ```
 
 ## Features (38 total)

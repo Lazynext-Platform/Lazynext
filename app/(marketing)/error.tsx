@@ -10,7 +10,7 @@ export default function MarketingError({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Marketing error:', error)
+    if (process.env.NODE_ENV === 'development') { console.error('Marketing error:', error) }
   }, [error])
 
   return (

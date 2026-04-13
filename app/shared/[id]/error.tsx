@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Shared view error:', error)
+    if (process.env.NODE_ENV === 'development') { console.error('Shared view error:', error) }
   }, [error])
 
   return (

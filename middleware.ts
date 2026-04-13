@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server'
 function detectLocale(request: NextRequest): string {
   // 1. Check cookie (user explicitly chose a language)
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value
-  if (cookieLocale && (locales as readonly string[]).includes(cookieLocale)) {
+  if (cookieLocale && locales.includes(cookieLocale as typeof locales[number])) {
     return cookieLocale
   }
 
@@ -21,7 +21,7 @@ function detectLocale(request: NextRequest): string {
       .sort((a, b) => b.q - a.q)
 
     for (const { lang } of preferred) {
-      if ((locales as readonly string[]).includes(lang)) {
+      if (locales.includes(lang as typeof locales[number])) {
         return lang
       }
     }
