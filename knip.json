@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@latest/schema.json",
+  "entry": [
+    "app/**/*.{ts,tsx}",
+    "lib/inngest/functions/index.ts"
+  ],
+  "project": [
+    "app/**/*.{ts,tsx}",
+    "components/**/*.{ts,tsx}",
+    "hooks/**/*.ts",
+    "lib/**/*.{ts,tsx}",
+    "stores/**/*.ts"
+  ],
+  "ignoreExportsUsedInFile": true
+}

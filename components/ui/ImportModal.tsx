@@ -186,5 +186,3 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
     </div>
   )
 }
-
-export default ImportModal
