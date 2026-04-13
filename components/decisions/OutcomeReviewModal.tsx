@@ -61,8 +61,8 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
         <div className="p-6">
           {/* Progress dots */}
           <div className="flex items-center justify-center gap-1.5 mb-5">
-            {decisions.map((_, i) => (
-              <div key={i} className={cn('h-2 rounded-full transition-all', i === currentIndex ? 'w-6 bg-orange-500' : i < currentIndex ? 'w-2 bg-orange-500/50' : 'w-2 bg-slate-700')} />
+            {decisions.map((d, i) => (
+              <div key={d.id} className={cn('h-2 rounded-full transition-all', i === currentIndex ? 'w-6 bg-orange-500' : i < currentIndex ? 'w-2 bg-orange-500/50' : 'w-2 bg-slate-700')} />
             ))}
           </div>
 
