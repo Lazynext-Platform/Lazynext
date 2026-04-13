@@ -1,0 +1,160 @@
+{
+  "common": {
+    "appName": "Lazynext",
+    "tagline": "The Anti-Software Workflow Platform",
+    "cta": {
+      "startFree": "Start Free",
+      "watchDemo": "Watch Demo",
+      "getStarted": "Get Started",
+      "upgrade": "Upgrade to Pro",
+      "contactSales": "Contact Sales",
+      "learnMore": "Learn More",
+      "signIn": "Sign In",
+      "signUp": "Sign Up",
+      "signOut": "Sign out"
+    },
+    "loading": "Loading...",
+    "loadingWorkspace": "Loading workspace...",
+    "loadingPage": "Loading page...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "goHome": "Go Home",
+    "notFound": "Page not found",
+    "builtForTeams": "Built for teams. Priced for humans."
+  },
+  "nav": {
+    "home": "Home",
+    "canvas": "Canvas",
+    "tasks": "Tasks",
+    "decisions": "Decisions",
+    "pulse": "Pulse",
+    "automations": "Automations",
+    "templates": "Templates",
+    "activity": "Activity",
+    "settings": "Settings",
+    "members": "Members",
+    "billing": "Billing",
+    "integrations": "Integrations",
+    "navigation": "Navigation",
+    "workflows": "Workflows",
+    "primitives": "Primitives",
+    "workspace": "Workspace",
+    "newWorkflow": "New Workflow"
+  },
+  "nodeTypes": {
+    "task": "Task",
+    "doc": "Doc",
+    "decision": "Decision",
+    "thread": "Thread",
+    "pulse": "Pulse",
+    "automation": "Automation",
+    "table": "Table"
+  },
+  "hero": {
+    "badge": "The Anti-Software Workflow Platform",
+    "headline": "One platform that replaces every tool your team is {highlight}",
+    "headlineHighlight": "already misusing.",
+    "subtitle": "Stop switching apps. Start shipping work. Lazynext is the operating system for work — tasks, docs, decisions, and AI in one unified graph."
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Start free. Scale as you grow. No hidden fees.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "annualSave": "Save 20%",
+    "perSeatMonth": "/seat/month",
+    "perMonth": "/month",
+    "currentPlan": "Current Plan",
+    "popular": "Most Popular",
+    "custom": "Custom",
+    "free": {
+      "name": "Free",
+      "description": "For individuals and small teams getting started.",
+      "features": ["5 workflows", "100 nodes", "3 members", "20 AI queries/day"]
+    },
+    "starter": {
+      "name": "Starter",
+      "description": "For growing teams who need more power.",
+      "features": ["25 workflows", "1,000 nodes", "10 members", "100 AI queries/day", "Decision DNA"]
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "For teams who ship fast and make better decisions.",
+      "features": ["100 workflows", "10,000 nodes", "25 members", "500 AI queries/day", "Decision DNA", "Pulse analytics", "Priority support"]
+    },
+    "business": {
+      "name": "Business",
+      "description": "For organizations that need enterprise features.",
+      "features": ["Unlimited workflows", "Unlimited nodes", "100 members", "Unlimited AI", "SSO/SAML", "SLA", "Dedicated support"]
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "Custom solutions for large organizations.",
+      "features": ["Everything in Business", "Custom integrations", "Custom SLA", "Dedicated CSM", "On-premise option"]
+    }
+  },
+  "billing": {
+    "title": "Billing & Plans",
+    "currentPlan": "Current Plan",
+    "nextBilling": "Next billing",
+    "changePlan": "Change Plan",
+    "cancelPlan": "Cancel Plan",
+    "billingHistory": "Billing History",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Amount",
+    "status": "Status",
+    "paid": "Paid",
+    "trial": "Trial",
+    "seats": "seats",
+    "perSeatMonth": "/seat/month"
+  },
+  "decisions": {
+    "title": "Decision DNA",
+    "qualityScore": "Quality Score",
+    "outcome": "Outcome",
+    "status": {
+      "open": "Open",
+      "decided": "Decided",
+      "reversed": "Reversed",
+      "deferred": "Deferred"
+    },
+    "outcomes": {
+      "good": "Good",
+      "bad": "Bad",
+      "neutral": "Neutral",
+      "pending": "Pending"
+    }
+  },
+  "about": {
+    "title": "About Lazynext",
+    "mission": "We believe teams deserve better tools — ones that track the decisions behind the work, not just the work itself.",
+    "globalFirst": "Global-First",
+    "globalDesc": "Built for teams worldwide with transparent pricing, global payments, and design for the 1000+ startups launching every year."
+  },
+  "footer": {
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "support": "Support",
+    "allRightsReserved": "All rights reserved."
+  },
+  "accessibility": {
+    "openSidebar": "Open sidebar",
+    "collapseSidebar": "Collapse sidebar",
+    "switchWorkspace": "Switch workspace",
+    "switchWorkflow": "Switch workflow",
+    "createNewWorkflow": "Create new workflow",
+    "shareWorkflow": "Share workflow",
+    "openLazyMind": "Open LazyMind AI assistant",
+    "userMenu": "User menu",
+    "teamOnline": "Team members online",
+    "isOnline": "{name} is online",
+    "dragToAdd": "Drag to add {type} node",
+    "searchOrPress": "Search..."
+  },
+  "locale": {
+    "changeLanguage": "Change language",
+    "changeCurrency": "Change currency"
+  }
+}

@@ -3,14 +3,16 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Check, X } from 'lucide-react'
+import { formatPrice } from '@/lib/i18n'
+import { useUIStore } from '@/stores/ui.store'
 
 type BillingCycle = 'monthly' | 'annual'
 
 const tiers = [
   {
     name: 'Free',
-    monthlyPrice: '$0',
-    annualPrice: '$0',
+    monthlyPrice: 0,
+    annualPrice: 0,
     period: '/month',
     desc: 'For individuals and small experiments.',
     cta: 'Get Started',
@@ -27,8 +29,8 @@ const tiers = [
   },
   {
     name: 'Pro',
-    monthlyPrice: '$9',
-    annualPrice: '$7',
+    monthlyPrice: 9,
+    annualPrice: 7,
     period: '/seat/month',
     desc: 'For growing teams that ship fast.',
     cta: 'Start Free Trial',
@@ -45,8 +47,8 @@ const tiers = [
   },
   {
     name: 'Business',
-    monthlyPrice: '$19',
-    annualPrice: '$15',
+    monthlyPrice: 19,
+    annualPrice: 15,
     period: '/seat/month',
     desc: 'For orgs that need control and scale.',
     cta: 'Contact Sales',
@@ -65,6 +67,7 @@ const tiers = [
 
 export default function PricingSection() {
   const [billing, setBilling] = useState<BillingCycle>('monthly')
+  const currency = useUIStore((s) => s.currency)
 
   return (
     <section id="pricing" className="py-24">
@@ -125,9 +128,10 @@ export default function PricingSection() {
 
               <div className="mt-4">
                 <span className="text-4xl font-extrabold">
-                  {billing === 'monthly'
-                    ? tier.monthlyPrice
-                    : tier.annualPrice}
+                  {formatPrice(
+                    billing === 'monthly' ? tier.monthlyPrice : tier.annualPrice,
+                    currency
+                  )}
                 </span>
                 <span
                   className={`text-sm ${

@@ -2,6 +2,8 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": [
     "app/**/*.{ts,tsx}",
+    "i18n.ts",
+    "lib/i18n/request.ts",
     "lib/inngest/functions/index.ts",
     "components/ui/EmptyStates.tsx",
     "components/ui/ToastProvider.tsx",
@@ -21,6 +23,8 @@
   ],
   "ignoreExportsUsedInFile": true,
   "ignore": [
-    "lib/db/schema.ts"
+    "lib/db/schema.ts",
+    "lib/i18n/format.ts",
+    "lib/i18n/config.ts"
   ]
 }

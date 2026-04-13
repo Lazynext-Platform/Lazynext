@@ -13,6 +13,7 @@ export function formatDateTime(date: Date | string) {
 }
 
 export function formatCurrencyUSD(amount: number) {
+  // Legacy helper — prefer formatCurrency/formatPrice from '@/lib/i18n' for multi-currency
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',

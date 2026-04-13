@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
+import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher'
 
 const navLinks = [
   { label: 'Features', href: '/features' },
@@ -39,6 +40,9 @@ export default function MarketingHeader() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <div className="hidden sm:block">
+            <LocaleSwitcher compact />
+          </div>
           <Link
             href="/sign-in"
             className="hidden text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 sm:inline-block"

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
+import { formatPrice } from '@/lib/i18n'
+import { useUIStore } from '@/stores/ui.store'
 
 type BillingCycle = 'monthly' | 'annual'
 
@@ -32,8 +34,8 @@ const tiers = [
     desc: 'For small teams shipping fast',
     monthlyPrice: '9',
     annualPrice: '7',
-    monthlyUsd: '$9/seat/month',
-    annualUsd: '$7/seat/month',
+    monthlyUsd: null as string | null,
+    annualUsd: null as string | null,
     cta: 'Start Free Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
@@ -55,8 +57,8 @@ const tiers = [
     desc: 'For teams that need the full picture',
     monthlyPrice: '19',
     annualPrice: '15',
-    monthlyUsd: '$19/seat/month',
-    annualUsd: '$15/seat/month',
+    monthlyUsd: null as string | null,
+    annualUsd: null as string | null,
     cta: 'Start Free Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
@@ -79,8 +81,8 @@ const tiers = [
     desc: 'For organizations at scale',
     monthlyPrice: '49',
     annualPrice: '39',
-    monthlyUsd: '$49/seat/month',
-    annualUsd: '$39/seat/month',
+    monthlyUsd: null as string | null,
+    annualUsd: null as string | null,
     cta: 'Contact Sales',
     ctaLink: '/sign-up',
     ctaStyle: 'outline' as const,
@@ -167,6 +169,7 @@ function renderCellValue(val: string | boolean | null) {
 export default function PricingPage() {
   const [billing, setBilling] = useState<BillingCycle>('monthly')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const currency = useUIStore((s) => s.currency)
 
   const isAnnual = billing === 'annual'
 
@@ -253,7 +256,7 @@ export default function PricingPage() {
                 <div className="mt-5">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-extrabold text-slate-900">
-                      ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                      {formatPrice(parseInt(isAnnual ? tier.annualPrice : tier.monthlyPrice), currency)}
                     </span>
                     <span className="text-sm text-slate-500">
                       {tier.monthlyPrice === '0' ? '/month' : '/seat/month'}

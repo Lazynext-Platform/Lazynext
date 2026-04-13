@@ -1,6 +1,12 @@
+'use client'
+
 import { ArrowRight, ArrowDown } from 'lucide-react'
+import { formatPrice } from '@/lib/i18n'
+import { useUIStore } from '@/stores/ui.store'
 
 export default function ConsolidationMap() {
+  const currency = useUIStore((s) => s.currency)
+
   return (
     <section className="bg-slate-50 py-24">
       <div className="mx-auto max-w-[1280px] px-6 text-center">
@@ -59,7 +65,7 @@ export default function ConsolidationMap() {
         <div className="mt-12 flex flex-col items-center justify-center gap-8 sm:flex-row">
           <div className="text-center">
             <p className="text-4xl font-extrabold text-slate-300 line-through">
-              $171
+              {formatPrice(171, currency)}
             </p>
             <p className="mt-1 text-sm text-slate-400">
               /seat/month (6 tools)
@@ -70,7 +76,7 @@ export default function ConsolidationMap() {
             <ArrowDown className="h-8 w-8 text-brand sm:hidden" />
           </div>
           <div className="text-center">
-            <p className="text-5xl font-extrabold text-brand">$19</p>
+            <p className="text-5xl font-extrabold text-brand">{formatPrice(19, currency)}</p>
             <p className="mt-1 text-sm text-slate-500">
               /seat/month (1 tool)
             </p>

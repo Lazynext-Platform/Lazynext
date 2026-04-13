@@ -3,17 +3,20 @@
 import { useState } from 'react'
 import { X, Lock, Sparkles, Check, Crown } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { formatPrice } from '@/lib/i18n'
+import { useUIStore } from '@/stores/ui.store'
 
 type ModalVariant = 'node-limit' | 'ai-limit' | 'health-gate' | 'full-upgrade'
 
 const plans = [
-  { name: 'Starter', price: '$9', period: '/seat/mo', features: ['10 members', '1,000 nodes', '50 AI/day'], accent: 'border-brand', popular: false },
-  { name: 'Pro', price: '$19', period: '/seat/mo', features: ['50 members', 'Unlimited nodes', '200 AI/day', 'Analytics'], accent: 'border-emerald-500', popular: true },
-  { name: 'Business', price: '$49', period: '/seat/mo', features: ['Unlimited', 'SSO/SAML', '1000 AI/day', 'SLA'], accent: 'border-purple-500/30', popular: false },
+  { name: 'Starter', price: 9, period: '/seat/mo', features: ['10 members', '1,000 nodes', '50 AI/day'], accent: 'border-brand', popular: false },
+  { name: 'Pro', price: 19, period: '/seat/mo', features: ['50 members', 'Unlimited nodes', '200 AI/day', 'Analytics'], accent: 'border-emerald-500', popular: true },
+  { name: 'Business', price: 49, period: '/seat/mo', features: ['Unlimited', 'SSO/SAML', '1000 AI/day', 'SLA'], accent: 'border-purple-500/30', popular: false },
 ]
 
 export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: ModalVariant; onClose: () => void }) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const currency = useUIStore((s) => s.currency)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -77,7 +80,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                 <h3 className="text-sm font-bold text-slate-100">{plan.name}</h3>
                 <div className="mt-1">
                   <span className="text-2xl font-bold text-slate-50">
-                    {billingCycle === 'annual' ? `$${Math.round(parseInt(plan.price.replace(/[$,]/g, '')) * 0.8)}` : plan.price}
+                    {formatPrice(billingCycle === 'annual' ? Math.round(plan.price * 0.8) : plan.price, currency)}
                   </span>
                   <span className="text-xs text-slate-500">{plan.period}</span>
                 </div>
