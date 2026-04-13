@@ -25,7 +25,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui.store'
 import { WorkspaceSelector } from './WorkspaceSelector'
-import { UpgradeModal } from '@/components/ui/UpgradeModal'
+import { UpgradeModal, TrialBanner } from '@/components/ui/UpgradeModal'
 
 const navItems = [
   { href: '', icon: LayoutDashboard, label: 'Home' },
@@ -193,6 +193,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
       {/* Bottom section */}
       <div className="border-t border-slate-800 p-2 space-y-0.5">
+        <TrialBanner />
         <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
           <Sparkles className="h-4 w-4 text-brand" />
           LazyMind AI

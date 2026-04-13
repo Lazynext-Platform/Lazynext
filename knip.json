@@ -2,14 +2,24 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "entry": [
     "app/**/*.{ts,tsx}",
-    "lib/inngest/functions/index.ts"
+    "lib/inngest/functions/index.ts",
+    "components/ui/EmptyStates.tsx",
+    "components/ui/ToastProvider.tsx",
+    "components/canvas/panels/CanvasContextMenu.tsx",
+    "lib/ai/prompts.ts",
+    "lib/db/client.ts",
+    "lib/email/templates/index.tsx",
+    "lib/utils/constants.ts",
+    "lib/utils/format.ts"
   ],
   "project": [
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
-    "hooks/**/*.ts",
     "lib/**/*.{ts,tsx}",
     "stores/**/*.ts"
   ],
-  "ignoreExportsUsedInFile": true
+  "ignoreExportsUsedInFile": true,
+  "ignore": [
+    "lib/db/schema.ts"
+  ]
 }

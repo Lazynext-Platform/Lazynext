@@ -120,5 +120,3 @@ export function TrialBanner({ daysLeft = 7 }: { daysLeft?: number }) {
     </div>
   )
 }
-
-export default UpgradeModal

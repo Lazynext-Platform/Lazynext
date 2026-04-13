@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils/cn'
+import { DecisionQualityBadge } from '@/components/decisions/DecisionQualityBadge'
 
 interface DecisionCardProps {
   question: string
@@ -25,13 +26,6 @@ export function DecisionCard({
   tags = [],
   onClick,
 }: DecisionCardProps) {
-  const scoreColor =
-    qualityScore !== null && qualityScore !== undefined
-      ? qualityScore >= 70 ? 'text-emerald-400 bg-emerald-400/10'
-        : qualityScore >= 40 ? 'text-amber-400 bg-amber-400/10'
-        : 'text-red-400 bg-red-400/10'
-      : ''
-
   const statusStyle = {
     open: 'bg-orange-400/10 text-orange-400',
     decided: 'bg-emerald-400/10 text-emerald-400',
@@ -49,9 +43,7 @@ export function DecisionCard({
           {status}
         </span>
         {qualityScore !== null && qualityScore !== undefined && (
-          <span className={cn('inline-flex rounded-full px-2 py-0.5 text-xs font-semibold', scoreColor)}>
-            {qualityScore}
-          </span>
+          <DecisionQualityBadge score={qualityScore} />
         )}
       </div>
       <h3 className="mt-2 text-base font-semibold text-slate-100">{question}</h3>
