@@ -173,9 +173,11 @@ export function EmptyPulse({ workspaceSlug }: { workspaceSlug?: string }) {
         Dashboards are auto-generated from your workflow activity. No setup required — just start working.
       </p>
       <div className="mt-5">
-        <SecondaryButton href={workspaceSlug ? `/workspace/${workspaceSlug}/canvas/default` : '#'}>
-          Go to Canvas →
-        </SecondaryButton>
+        {workspaceSlug && (
+          <SecondaryButton href={`/workspace/${workspaceSlug}/canvas/default`}>
+            Go to Canvas →
+          </SecondaryButton>
+        )}
       </div>
     </StateContainer>
   )

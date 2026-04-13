@@ -113,7 +113,7 @@ export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => 
                 {/* Type label */}
                 <div className="flex items-center gap-1.5">
                   <span className={cn('h-1.5 w-1.5 rounded-full', NODE_COLORS[type]?.dot || 'bg-slate-500')} />
-                  <span className={cn('text-2xs font-semibold uppercase tracking-wider', `text-${type === 'task' ? 'blue' : type === 'doc' ? 'emerald' : type === 'decision' ? 'orange' : type === 'thread' ? 'purple' : type === 'pulse' ? 'cyan' : type === 'automation' ? 'amber' : 'teal'}-400`)}>
+                  <span className={cn('text-2xs font-semibold uppercase tracking-wider', NODE_COLORS[type]?.label || 'text-slate-400')}>
                     {type}
                   </span>
                 </div>

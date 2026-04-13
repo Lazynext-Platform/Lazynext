@@ -186,7 +186,7 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
                 <label className="block text-sm font-medium text-slate-300">Options Considered</label>
                 <div className="mt-1.5 space-y-2">
                   {options.map((opt, i) => (
-                    <input key={i} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} maxLength={200} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                    <input key={`option-${i}`} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} maxLength={200} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   ))}
                   <button onClick={() => setOptions([...options, ''])} className="text-xs text-brand hover:text-brand-hover">+ Add option</button>
                 </div>

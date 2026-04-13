@@ -44,7 +44,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className="dark">
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}
