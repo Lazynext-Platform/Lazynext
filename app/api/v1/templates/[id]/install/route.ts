@@ -31,6 +31,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: 'TEMPLATE_NOT_FOUND' }, { status: 404 })
   }
 
+  // Prevent installing private templates from other workspaces
+  if (!template.is_public && template.workspace_id !== workspaceId) {
+    return NextResponse.json({ error: 'TEMPLATE_NOT_FOUND' }, { status: 404 })
+  }
+
   // Create a copy of the workflow
   const { data: newWorkflow, error: wfError } = await db
     .from('workflows')

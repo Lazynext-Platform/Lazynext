@@ -15,6 +15,10 @@ export async function GET(req: Request) {
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
 
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(workspaceId)) return NextResponse.json({ error: 'INVALID_WORKSPACE_ID' }, { status: 400 })
+
   const authorized = await verifyWorkspaceMember(userId, workspaceId)
   if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 

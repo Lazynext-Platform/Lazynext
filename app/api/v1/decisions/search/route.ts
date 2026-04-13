@@ -34,16 +34,11 @@ export async function POST(req: Request) {
     .from('decisions')
     .select('*')
     .eq('workspace_id', workspaceId)
+    .or(`question.ilike.%${query}%,resolution.ilike.%${query}%,rationale.ilike.%${query}%`)
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(20)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Filter client-side for now (full-text search can use Supabase textSearch later)
-  const filtered = (results || []).filter((d: { question: string; resolution: string | null; rationale: string | null }) => {
-    const searchable = `${d.question} ${d.resolution || ''} ${d.rationale || ''}`.toLowerCase()
-    return searchable.includes(query.toLowerCase())
-  })
-
-  return NextResponse.json({ data: filtered, error: null })
+  return NextResponse.json({ data: results || [], error: null })
 }
