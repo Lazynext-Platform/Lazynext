@@ -43,12 +43,16 @@ export const useUIStore = create<UIState>((set) => ({
   toggleNotification: () => set((s) => ({ isNotificationOpen: !s.isNotificationOpen })),
   setMobile: (isMobile) => set({ isMobile }),
   setCurrency: (currency) => {
-    document.cookie = `NEXT_CURRENCY=${currency}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
+    if (typeof document !== 'undefined') {
+      document.cookie = `NEXT_CURRENCY=${currency}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
+    }
     set({ currency })
   },
   setTourActive: (active) => set({ isTourActive: active }),
   completeTour: () => {
-    document.cookie = `TOUR_COMPLETED=1; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
+    if (typeof document !== 'undefined') {
+      document.cookie = `TOUR_COMPLETED=1; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
+    }
     set({ isTourActive: false, isTourCompleted: true })
   },
 }))

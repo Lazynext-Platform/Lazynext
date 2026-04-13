@@ -30,10 +30,12 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
   const [status, setStatus] = useState<ImportStatus>('idle')
   const [progress, setProgress] = useState({ docs: 0, tasks: 0, edges: 0 })
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
+      if (successTimerRef.current) clearTimeout(successTimerRef.current)
     }
   }, [])
 
@@ -50,7 +52,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
         if (next.docs >= 100 && next.tasks >= 100 && next.edges >= 100) {
           if (timerRef.current) clearInterval(timerRef.current)
           timerRef.current = null
-          setTimeout(() => setStatus('success'), 500)
+          successTimerRef.current = setTimeout(() => setStatus('success'), 500)
         }
         return next
       })

@@ -76,6 +76,13 @@ export function LazyMindPanel() {
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
+  const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (aiTimerRef.current) clearTimeout(aiTimerRef.current)
+    }
+  }, [])
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
@@ -99,7 +106,7 @@ export function LazyMindPanel() {
     setInput('')
     setIsTyping(true)
 
-    setTimeout(() => {
+    aiTimerRef.current = setTimeout(() => {
       setIsTyping(false)
       const aiMsg: Message = {
         id: `ai-${Date.now()}`,

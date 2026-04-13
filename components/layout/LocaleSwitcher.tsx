@@ -59,6 +59,7 @@ export function LocaleSwitcher({ compact = false }: { compact?: boolean }) {
   }, [open])
 
   const setLocale = (locale: string) => {
+    if (typeof document === 'undefined') return
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${365 * 24 * 60 * 60}; samesite=lax`
     window.location.reload()
   }
