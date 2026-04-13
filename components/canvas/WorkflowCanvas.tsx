@@ -24,6 +24,7 @@ import { CanvasToolbar } from './panels/CanvasToolbar'
 import { NodeDetailPanel } from './panels/NodeDetailPanel'
 import { CanvasContextMenu } from './panels/CanvasContextMenu'
 import { WorkflowEdge } from './edges/WorkflowEdge'
+import CollaborationOverlay from './CollaborationOverlay'
 import { useUIStore } from '@/stores/ui.store'
 import type { NodeType } from '@/lib/utils/constants'
 
@@ -194,6 +195,8 @@ export function WorkflowCanvas() {
       {isNodePanelOpen && selectedNodeId && (
         <NodeDetailPanel nodeId={selectedNodeId} />
       )}
+
+      <CollaborationOverlay collaborators={[]} isMobile={false} />
     </div>
   )
 }

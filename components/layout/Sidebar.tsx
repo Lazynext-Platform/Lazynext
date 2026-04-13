@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -24,6 +25,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui.store'
 import { WorkspaceSelector } from './WorkspaceSelector'
+import { UpgradeModal } from '@/components/ui/UpgradeModal'
 
 const navItems = [
   { href: '', icon: LayoutDashboard, label: 'Home' },
@@ -61,6 +63,7 @@ const primitiveItems = [
 export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const pathname = usePathname()
   const { isSidebarOpen, toggleSidebar } = useUIStore()
+  const [showUpgrade, setShowUpgrade] = useState(false)
   const base = `/workspace/${workspaceSlug}`
 
   return (
@@ -194,10 +197,15 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
           <Sparkles className="h-4 w-4 text-brand" />
           LazyMind AI
         </button>
-        <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-brand/30 px-3 py-2 text-sm font-medium text-brand hover:bg-brand/10 transition-colors">
+        <button
+          onClick={() => setShowUpgrade(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-brand/30 px-3 py-2 text-sm font-medium text-brand hover:bg-brand/10 transition-colors"
+        >
           Upgrade to Pro
         </button>
       </div>
+
+      {showUpgrade && <UpgradeModal variant="full-upgrade" onClose={() => setShowUpgrade(false)} />}
     </aside>
   )
 }

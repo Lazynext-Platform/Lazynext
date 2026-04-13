@@ -4,6 +4,8 @@ import { useCanvasStore } from '@/stores/canvas.store'
 import { TaskDetailPanel } from './TaskDetailPanel'
 import { DocDetailPanel } from './DocDetailPanel'
 import { DecisionDetailPanel } from './DecisionDetailPanel'
+import { ThreadPanel } from './ThreadPanel'
+import TablePanel from './TablePanel'
 import { NodeDetailPanelLegacy } from './NodeDetailPanelLegacy'
 
 export function NodeDetailPanel({ nodeId }: { nodeId: string }) {
@@ -22,6 +24,10 @@ export function NodeDetailPanel({ nodeId }: { nodeId: string }) {
         return <DocDetailPanel nodeId={nodeId} onClose={onClose} />
       case 'decision':
         return <DecisionDetailPanel nodeId={nodeId} onClose={onClose} />
+      case 'thread':
+        return <ThreadPanel nodeId={nodeId} onClose={onClose} />
+      case 'table':
+        return <TablePanel onClose={onClose} />
       default:
         return <NodeDetailPanelLegacy nodeId={nodeId} />
     }

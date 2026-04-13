@@ -5,14 +5,15 @@ import {
   GitBranch,
   Plus,
   Search,
-  Clock,
   CheckCircle2,
-  XCircle,
   X,
   Tag,
   Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { DecisionCard } from '@/components/decisions/DecisionCard'
+import OutcomeReviewModal from '@/components/decisions/OutcomeReviewModal'
+import { EmptyDecisions } from '@/components/ui/EmptyStates'
 
 type DecisionStatus = 'all' | 'open' | 'decided' | 'reversed'
 type DecisionType = 'reversible' | 'irreversible' | 'experimental'
@@ -109,36 +110,6 @@ const qualityDistribution = [
   { range: '40–69', label: 'Medium quality', count: 2, total: 7, color: 'bg-amber-500' },
   { range: '0–39', label: 'Low quality', count: 0, total: 7, color: 'bg-red-500' },
 ]
-
-function QualityBadge({ score }: { score: number | null }) {
-  if (score === null) return <span className="text-xs text-slate-500">—</span>
-  const color =
-    score >= 70 ? 'text-emerald-400 bg-emerald-400/10' :
-    score >= 40 ? 'text-amber-400 bg-amber-400/10' :
-    'text-red-400 bg-red-400/10'
-  return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${color}`}>
-      {score}
-    </span>
-  )
-}
-
-function OutcomeBadge({ outcome }: { outcome: string }) {
-  const styles = {
-    good: 'text-emerald-400 bg-emerald-400/10',
-    bad: 'text-red-400 bg-red-400/10',
-    neutral: 'text-slate-400 bg-slate-400/10',
-    pending: 'text-slate-500 bg-slate-500/10',
-  }
-  const icons = { good: CheckCircle2, bad: XCircle, neutral: Clock, pending: Clock }
-  const Icon = icons[outcome as keyof typeof icons] || Clock
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${styles[outcome as keyof typeof styles] || styles.pending}`}>
-      <Icon className="h-3 w-3" />
-      {outcome}
-    </span>
-  )
-}
 
 function LogDecisionModal({ onClose }: { onClose: () => void }) {
   const [question, setQuestion] = useState('')
@@ -253,6 +224,7 @@ export default function DecisionsPage() {
   const [filter, setFilter] = useState<DecisionStatus>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [showLogModal, setShowLogModal] = useState(false)
+  const [showOutcomeReview, setShowOutcomeReview] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'quality'>('date')
 
   const filtered = sampleDecisions.filter((d) => {
@@ -300,11 +272,11 @@ export default function DecisionsPage() {
           <p className={cn('mt-1 text-2xl font-bold', avgQuality >= 70 ? 'text-emerald-400' : avgQuality >= 40 ? 'text-amber-400' : 'text-red-400')}>{avgQuality}</p>
           <div className="mt-1 h-1.5 w-full rounded-full bg-slate-800"><div className="h-1.5 rounded-full bg-emerald-500 transition-all" style={{ width: `${avgQuality}%` }} /></div>
         </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <button onClick={() => setShowOutcomeReview(true)} className="rounded-xl border border-slate-800 bg-slate-900 p-4 text-left hover:border-slate-700 transition-colors">
           <p className="text-2xs uppercase tracking-wider text-slate-500">Outcomes Tagged</p>
           <p className="mt-1 text-2xl font-bold text-amber-400">{sampleDecisions.filter(d => d.outcome !== 'pending').length}/{sampleDecisions.length}</p>
           <p className="text-2xs text-amber-400">{sampleDecisions.filter(d => d.outcome === 'pending').length} need tagging</p>
-        </div>
+        </button>
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <p className="text-2xs uppercase tracking-wider text-slate-500">Top Decision Maker</p>
           <p className="mt-1 text-lg font-bold text-slate-50">Avas Patel</p>
@@ -375,62 +347,33 @@ export default function DecisionsPage() {
       {/* Decision list */}
       <div className="mt-6 space-y-3">
         {filtered.map((decision) => (
-          <div
+          <DecisionCard
             key={decision.id}
-            className="rounded-xl border-l-4 border-l-orange-500 border border-slate-800 bg-slate-900 p-5 hover:border-slate-700 transition-all cursor-pointer hover:-translate-y-0.5 hover:shadow-lg"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  {decision.status === 'decided' ? (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  ) : (
-                    <Clock className="h-4 w-4 text-amber-400" />
-                  )}
-                  <span className={cn(
-                    'inline-flex rounded-full px-2 py-0.5 text-2xs font-semibold uppercase',
-                    decision.status === 'open' ? 'bg-orange-400/10 text-orange-400' :
-                    decision.status === 'decided' ? 'bg-emerald-400/10 text-emerald-400' :
-                    'bg-red-400/10 text-red-400'
-                  )}>
-                    {decision.status}
-                  </span>
-                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-500 capitalize">{decision.type}</span>
-                </div>
-                <h3 className="mt-2 text-base font-semibold text-slate-100">{decision.question}</h3>
-                {decision.resolution && (
-                  <p className="mt-1 text-sm text-slate-400 line-clamp-2">{decision.resolution}</p>
-                )}
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <span className="text-xs text-slate-500">{decision.madeBy}</span>
-                  <span className="text-xs text-slate-600">·</span>
-                  <span className="text-xs text-slate-500">{decision.createdAt}</span>
-                  <span className="text-xs text-slate-600">·</span>
-                  <OutcomeBadge outcome={decision.outcome} />
-                  {decision.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="shrink-0">
-                <QualityBadge score={decision.qualityScore} />
-              </div>
-            </div>
-          </div>
+            question={decision.question}
+            status={decision.status}
+            resolution={decision.resolution}
+            qualityScore={decision.qualityScore}
+            outcome={decision.outcome}
+            madeBy={decision.madeBy}
+            createdAt={decision.createdAt}
+            tags={decision.tags}
+          />
         ))}
 
         {filtered.length === 0 && (
-          <div className="rounded-xl border border-dashed border-slate-700 py-12 text-center">
-            <GitBranch className="mx-auto h-8 w-8 text-slate-600" />
-            <p className="mt-3 text-sm text-slate-500">No decisions found</p>
-            <p className="text-xs text-slate-600">Try adjusting your filters</p>
-          </div>
+          <EmptyDecisions onLogDecision={() => setShowLogModal(true)} />
         )}
       </div>
 
       {showLogModal && <LogDecisionModal onClose={() => setShowLogModal(false)} />}
+      {showOutcomeReview && (
+        <OutcomeReviewModal
+          decisions={sampleDecisions
+            .filter(d => d.outcome === 'pending')
+            .map(d => ({ id: d.id, title: d.question, type: d.type, madeAt: d.createdAt, context: d.resolution || '' }))}
+          onClose={() => setShowOutcomeReview(false)}
+        />
+      )}
     </div>
   )
 }
