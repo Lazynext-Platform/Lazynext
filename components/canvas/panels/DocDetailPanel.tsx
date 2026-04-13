@@ -53,7 +53,7 @@ export function DocDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: (
           <span className="text-xs text-slate-500">Last edited 2h ago</span>
         </div>
         <div className="flex items-center gap-2">
-          <button className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+          <button aria-label="Share" className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
             <Share2 className="h-4 w-4" />
           </button>
           <button onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200" aria-label="Close panel">
@@ -71,7 +71,7 @@ export function DocDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: (
             </span>
           ))}
         </div>
-        <button className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-slate-600 text-2xs text-slate-500 hover:border-slate-500 hover:text-slate-400">+</button>
+        <button aria-label="Add collaborator" className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-slate-600 text-2xs text-slate-500 hover:border-slate-500 hover:text-slate-400">+</button>
         <span className="text-2xs text-slate-500">3 collaborators</span>
       </div>
 

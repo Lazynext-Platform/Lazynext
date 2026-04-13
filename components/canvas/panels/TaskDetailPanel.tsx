@@ -193,7 +193,7 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
               placeholder="Add subtask..."
               className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
             />
-            <button onClick={addSubtask} className="text-xs text-brand hover:text-brand-hover">
+            <button onClick={addSubtask} aria-label="Add subtask" className="text-xs text-brand hover:text-brand-hover">
               <Plus className="h-4 w-4" />
             </button>
           </div>
