@@ -12,7 +12,7 @@ function getResend() {
 
 // 1. Send workspace invite email
 export const handleWorkspaceInvite = inngest.createFunction(
-  { id: 'send-workspace-invite', triggers: [{ event: EVENTS.WORKSPACE_INVITE_SENT }] },
+  { id: 'send-workspace-invite', retries: 3, triggers: [{ event: EVENTS.WORKSPACE_INVITE_SENT }] },
   async ({ event }) => {
     const { email, inviterName, workspaceName, inviteUrl } = event.data as {
       email: string; inviterName: string; workspaceName: string; inviteUrl: string
@@ -33,7 +33,7 @@ export const handleWorkspaceInvite = inngest.createFunction(
 
 // 2. Send task assignment notification
 export const handleTaskAssigned = inngest.createFunction(
-  { id: 'send-task-assigned', triggers: [{ event: EVENTS.TASK_ASSIGNED }] },
+  { id: 'send-task-assigned', retries: 3, triggers: [{ event: EVENTS.TASK_ASSIGNED }] },
   async ({ event }) => {
     const { assigneeEmail, assignerName, taskTitle, taskUrl } = event.data as {
       assigneeEmail: string; assignerName: string; taskTitle: string; taskUrl: string
@@ -52,7 +52,7 @@ export const handleTaskAssigned = inngest.createFunction(
 
 // 3. Score decision quality after logging
 export const handleDecisionLogged = inngest.createFunction(
-  { id: 'score-decision-quality', triggers: [{ event: EVENTS.DECISION_LOGGED }] },
+  { id: 'score-decision-quality', retries: 3, triggers: [{ event: EVENTS.DECISION_LOGGED }] },
   async ({ event }) => {
     const { decisionId } = event.data as { decisionId: string; workspaceId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }
@@ -85,18 +85,28 @@ export const handleDecisionLogged = inngest.createFunction(
   }
 )
 
-// 4. Handle outcome tagging
+// 4. Handle outcome tagging — update the decision with the outcome
 export const handleOutcomeTagged = inngest.createFunction(
-  { id: 'handle-outcome-tagged', triggers: [{ event: EVENTS.DECISION_OUTCOME_TAGGED }] },
+  { id: 'handle-outcome-tagged', retries: 3, triggers: [{ event: EVENTS.DECISION_OUTCOME_TAGGED }] },
   async ({ event }) => {
     const { decisionId, outcome } = event.data as { decisionId: string; outcome: string }
+    if (!hasValidDatabaseUrl) return { skipped: true }
+
+    await db
+      .from('decisions')
+      .update({
+        outcome,
+        outcome_tagged_at: new Date().toISOString(),
+      })
+      .eq('id', decisionId)
+
     return { processed: true, decisionId, outcome }
   }
 )
 
 // 5. Weekly digest cron job
 export const handleWeeklyDigest = inngest.createFunction(
-  { id: 'send-weekly-digest', triggers: [{ event: EVENTS.WEEKLY_DIGEST_CRON }] },
+  { id: 'send-weekly-digest', retries: 3, triggers: [{ event: EVENTS.WEEKLY_DIGEST_CRON }] },
   async ({ event }) => {
     const { workspaceId } = event.data as { workspaceId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }
@@ -123,11 +133,28 @@ export const handleWeeklyDigest = inngest.createFunction(
       .select('*', { count: 'exact', head: true })
       .eq('workspace_id', workspaceId)
 
+    // Compute average decision quality from scored decisions
+    const { data: scoredDecisions } = await db
+      .from('decisions')
+      .select('quality_score')
+      .eq('workspace_id', workspaceId)
+      .not('quality_score', 'is', null)
+
+    const avgQuality = scoredDecisions?.length
+      ? Math.round(scoredDecisions.reduce((sum, d) => sum + (d.quality_score ?? 0), 0) / scoredDecisions.length)
+      : 0
+
+    // Count active workspace members
+    const { count: memberCount } = await db
+      .from('workspace_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
+
     const stats = {
       tasksCompleted: nodeCount ?? 0,
       decisionsLogged: decisionCount ?? 0,
-      avgQuality: 72,
-      activeMembers: 3,
+      avgQuality,
+      activeMembers: memberCount ?? 0,
     }
 
     return { processed: true, stats }
@@ -136,7 +163,7 @@ export const handleWeeklyDigest = inngest.createFunction(
 
 // 6. Build export file in background
 export const handleExportRequested = inngest.createFunction(
-  { id: 'handle-export-requested', triggers: [{ event: EVENTS.EXPORT_REQUESTED }] },
+  { id: 'handle-export-requested', retries: 3, triggers: [{ event: EVENTS.EXPORT_REQUESTED }] },
   async ({ event }) => {
     const { workspaceId, format, userId: _userId } = event.data as { workspaceId: string; format: string; userId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }

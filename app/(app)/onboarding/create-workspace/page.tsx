@@ -122,6 +122,7 @@ export default function CreateWorkspacePage() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [scoreVisible, setScoreVisible] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const slug = name
     .toLowerCase()
@@ -149,15 +150,21 @@ export default function CreateWorkspacePage() {
 
   async function handleGoToWorkspace() {
     setLoading(true)
+    setError(null)
     try {
       const res = await fetch('/api/v1/workflows', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), slug }),
       })
-      if (res.ok) {
-        router.push(`/workspace/${slug}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        setError(body?.error || 'Failed to create workspace. Please try again.')
+        return
       }
+      router.push(`/workspace/${slug}`)
+    } catch {
+      setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -388,6 +395,12 @@ export default function CreateWorkspacePage() {
                 </>
               )}
             </button>
+
+            {error && (
+              <p className="mt-3 text-center text-sm text-red-400" role="alert">
+                {error}
+              </p>
+            )}
           </div>
         )}
       </div>

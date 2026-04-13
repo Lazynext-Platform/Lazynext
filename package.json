@@ -10,7 +10,9 @@
     "lint": "next lint",
     "db:types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/db/database.types.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
