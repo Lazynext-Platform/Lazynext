@@ -16,7 +16,7 @@ const rows = [
   { feature: 'Automation builder', lazynext: true, notion: 'partial', linear: true, asana: true },
   { feature: 'Pulse / Analytics', lazynext: true, notion: false, linear: 'partial', asana: 'partial' },
   { feature: 'Template marketplace', lazynext: true, notion: true, linear: false, asana: true },
-  { feature: 'INR pricing', lazynext: true, notion: false, linear: false, asana: false },
+  { feature: 'Global pricing', lazynext: true, notion: false, linear: false, asana: false },
   { feature: 'Free tier', lazynext: true, notion: true, linear: true, asana: true },
 ]
 

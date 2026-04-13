@@ -9,7 +9,7 @@ type Tab = 'feed' | 'audit'
 const feedItems = [
   { actor: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', action: 'completed', target: 'Fix auth redirect bug', type: 'task', typeColor: 'bg-blue-500', time: '2 hours ago', detail: null },
   { actor: 'Priya Shah', initials: 'PS', color: 'bg-emerald-500', action: 'decided', target: 'Use Supabase for database', type: 'decision', typeColor: 'bg-orange-500', time: '4 hours ago', detail: 'Quality score: 91' },
-  { actor: 'Rahul Dev', initials: 'RD', color: 'bg-amber-500', action: 'replied in', target: 'Pricing strategy thread', type: 'thread', typeColor: 'bg-purple-500', time: '5 hours ago', detail: '"I think ₹499 is the right entry point for Indian startups..."' },
+  { actor: 'Rahul Dev', initials: 'RD', color: 'bg-amber-500', action: 'replied in', target: 'Pricing strategy thread', type: 'thread', typeColor: 'bg-purple-500', time: '5 hours ago', detail: '"I think $9 is the right entry point for startups..."' },
   { actor: 'Sana Malik', initials: 'SM', color: 'bg-pink-500', action: 'created', target: 'API Design Spec v3', type: 'doc', typeColor: 'bg-emerald-500', time: 'Yesterday', detail: null },
   { actor: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', action: 'updated', target: 'Ship onboarding v2', type: 'task', typeColor: 'bg-blue-500', time: 'Yesterday', detail: 'Status: In Progress → Review' },
   { actor: 'Priya Shah', initials: 'PS', color: 'bg-emerald-500', action: 'moved', target: 'Design tokens doc', type: 'doc', typeColor: 'bg-emerald-500', time: '2 days ago', detail: null },

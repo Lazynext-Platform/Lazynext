@@ -30,10 +30,10 @@ const tiers = [
   {
     name: 'Starter',
     desc: 'For small teams shipping fast',
-    monthlyPrice: '499',
-    annualPrice: '415',
-    monthlyUsd: '~$5.99 USD',
-    annualUsd: '~$4.99 USD',
+    monthlyPrice: '9',
+    annualPrice: '7',
+    monthlyUsd: '$9/seat/month',
+    annualUsd: '$7/seat/month',
     cta: 'Start Free Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
@@ -53,10 +53,10 @@ const tiers = [
   {
     name: 'Pro',
     desc: 'For teams that need the full picture',
-    monthlyPrice: '999',
-    annualPrice: '832',
-    monthlyUsd: '~$11.99 USD',
-    annualUsd: '~$9.99 USD',
+    monthlyPrice: '19',
+    annualPrice: '15',
+    monthlyUsd: '$19/seat/month',
+    annualUsd: '$15/seat/month',
     cta: 'Start Free Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
@@ -77,10 +77,10 @@ const tiers = [
   {
     name: 'Business',
     desc: 'For organizations at scale',
-    monthlyPrice: '2,999',
-    annualPrice: '2,499',
-    monthlyUsd: '~$35.99 USD',
-    annualUsd: '~$29.99 USD',
+    monthlyPrice: '49',
+    annualPrice: '39',
+    monthlyUsd: '$49/seat/month',
+    annualUsd: '$39/seat/month',
     cta: 'Contact Sales',
     ctaLink: '/sign-up',
     ctaStyle: 'outline' as const,
@@ -253,17 +253,20 @@ export default function PricingPage() {
                 <div className="mt-5">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-extrabold text-slate-900">
-                      ₹{isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                      ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
                     </span>
                     <span className="text-sm text-slate-500">
                       {tier.monthlyPrice === '0' ? '/month' : '/seat/month'}
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-400">
-                    {isAnnual ? tier.annualUsd : tier.monthlyUsd}
                     {isAnnual && tier.monthlyPrice !== '0' && (
-                      <span> &middot; billed annually</span>
+                      <span>billed annually</span>
                     )}
+                    {!isAnnual && tier.monthlyPrice !== '0' && (
+                      <span>billed monthly</span>
+                    )}
+                    {tier.monthlyPrice === '0' && 'Free forever'}
                   </p>
                 </div>
 

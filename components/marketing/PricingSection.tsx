@@ -9,8 +9,8 @@ type BillingCycle = 'monthly' | 'annual'
 const tiers = [
   {
     name: 'Free',
-    monthlyPrice: '₹0',
-    annualPrice: '₹0',
+    monthlyPrice: '$0',
+    annualPrice: '$0',
     period: '/month',
     desc: 'For individuals and small experiments.',
     cta: 'Get Started',
@@ -27,8 +27,8 @@ const tiers = [
   },
   {
     name: 'Pro',
-    monthlyPrice: '₹499',
-    annualPrice: '₹415',
+    monthlyPrice: '$9',
+    annualPrice: '$7',
     period: '/seat/month',
     desc: 'For growing teams that ship fast.',
     cta: 'Start Free Trial',
@@ -45,8 +45,8 @@ const tiers = [
   },
   {
     name: 'Business',
-    monthlyPrice: '₹999',
-    annualPrice: '₹832',
+    monthlyPrice: '$19',
+    annualPrice: '$15',
     period: '/seat/month',
     desc: 'For orgs that need control and scale.',
     cta: 'Contact Sales',

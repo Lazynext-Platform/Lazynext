@@ -75,7 +75,7 @@ export default function MarketingLayout({
           </div>
 
           <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-8 sm:flex-row">
-            <p className="text-sm">Built in India. Priced for humans.</p>
+            <p className="text-sm">Built for teams. Priced for humans.</p>
             <p className="text-sm">
               &copy; {new Date().getFullYear()} Lazynext. All rights reserved.
             </p>

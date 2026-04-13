@@ -79,7 +79,7 @@ export default function LazyMindSection() {
                       D-134: Price point for Pro tier
                     </p>
                     <p className="text-slate-400">
-                      Resolved: ₹499/seat. Score: 78/100
+                      Resolved: $9/seat. Score: 78/100
                     </p>
                   </div>
                   <div className="space-y-1 rounded-lg bg-slate-700/50 p-2.5 text-xs">

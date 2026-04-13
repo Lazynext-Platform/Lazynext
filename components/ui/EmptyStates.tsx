@@ -259,7 +259,7 @@ export function MaintenancePage() {
       </div>
       <div className="mt-8 flex items-center gap-2 text-xs text-slate-600">
         <span className="font-semibold text-brand">Lazynext</span>
-        Built in India. Priced for humans.
+        Built for teams. Priced for humans.
       </div>
     </StateContainer>
   )

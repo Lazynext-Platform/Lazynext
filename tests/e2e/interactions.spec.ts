@@ -63,8 +63,8 @@ test.describe('Pricing Page Interactions', () => {
     await expect(page.getByText('Starter').first()).toBeVisible()
     await expect(page.getByText('Business').first()).toBeVisible()
     // Verify pricing amounts are shown
-    await expect(page.getByText(/₹0/).first()).toBeVisible()
-    await expect(page.getByText(/₹499/).first()).toBeVisible()
+    await expect(page.getByText(/\$0/).first()).toBeVisible()
+    await expect(page.getByText(/\$9/).first()).toBeVisible()
   })
 
   test('FAQ accordion expands on click', async ({ page }) => {

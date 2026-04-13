@@ -12,7 +12,7 @@ const team = [
 const mission = [
   { icon: Target, title: 'Decision Quality', body: 'Most tools track tasks. We track the decisions behind them — so teams learn from their choices, not just check boxes.' },
   { icon: Users, title: 'Team Intelligence', body: 'Every decision, discussion, and outcome builds a knowledge graph unique to your team. Over time, Lazynext gets smarter with you.' },
-  { icon: Globe, title: 'India-First, Global-Ready', body: 'Built in India with global pricing, Lemon Squeezy payments, and design for the 1000+ startups launching every year.' },
+  { icon: Globe, title: 'Global-First', body: 'Built for teams worldwide with transparent USD pricing, Lemon Squeezy payments, and design for the 1000+ startups launching every year.' },
 ]
 
 export default function AboutPage() {
@@ -43,7 +43,7 @@ export default function AboutPage() {
       {/* Team */}
       <section className="mx-auto max-w-4xl px-6 py-16 text-center">
         <h2 className="text-2xl font-bold">The Team</h2>
-        <p className="mt-2 text-slate-600">A small team building something big from India.</p>
+        <p className="mt-2 text-slate-600">A small team building something big.</p>
         <div className="mt-8 flex justify-center gap-8">
           {team.map(t => (
             <div key={t.name} className="flex flex-col items-center">

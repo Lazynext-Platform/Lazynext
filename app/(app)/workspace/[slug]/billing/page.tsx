@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils/cn'
 const plans = [
   {
     name: 'Free',
-    price: '₹0',
+    price: '$0',
     period: '/forever',
     features: ['3 members', '5 workflows', '100 nodes', '10 AI queries/day', '100MB storage'],
     current: false,
@@ -24,7 +24,7 @@ const plans = [
   },
   {
     name: 'Starter',
-    price: '₹499',
+    price: '$9',
     period: '/seat/month',
     features: ['10 members', '25 workflows', '1,000 nodes', '50 AI queries/day', '5GB storage', 'Email support'],
     current: true,
@@ -34,7 +34,7 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '₹999',
+    price: '$19',
     period: '/seat/month',
     features: ['50 members', 'Unlimited workflows', 'Unlimited nodes', '200 AI queries/day', '50GB storage', 'Priority support', 'Advanced analytics', 'API access'],
     current: false,
@@ -44,7 +44,7 @@ const plans = [
   },
   {
     name: 'Business',
-    price: '₹2,999',
+    price: '$49',
     period: '/seat/month',
     features: ['Unlimited members', 'Unlimited everything', '1000 AI queries/day', '500GB storage', 'SSO/SAML', 'Dedicated support', 'Custom integrations', 'SLA guarantee'],
     current: false,
@@ -55,10 +55,10 @@ const plans = [
 ]
 
 const billingHistory = [
-  { date: 'Apr 1, 2026', desc: 'Starter Plan — 3 seats', amount: '₹1,497', status: 'Paid' },
-  { date: 'Mar 1, 2026', desc: 'Starter Plan — 3 seats', amount: '₹1,497', status: 'Paid' },
-  { date: 'Feb 1, 2026', desc: 'Starter Plan — 2 seats', amount: '₹998', status: 'Paid' },
-  { date: 'Jan 15, 2026', desc: 'Starter Plan — Trial', amount: '₹0', status: 'Trial' },
+  { date: 'Apr 1, 2026', desc: 'Starter Plan — 3 seats', amount: '$27', status: 'Paid' },
+  { date: 'Mar 1, 2026', desc: 'Starter Plan — 3 seats', amount: '$27', status: 'Paid' },
+  { date: 'Feb 1, 2026', desc: 'Starter Plan — 2 seats', amount: '$18', status: 'Paid' },
+  { date: 'Jan 15, 2026', desc: 'Starter Plan — Trial', amount: '$0', status: 'Trial' },
 ]
 
 const usage = [
@@ -92,7 +92,7 @@ export default function BillingPage() {
               <h2 className="text-lg font-semibold text-slate-100">Starter Plan</h2>
               <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">Current Plan</span>
             </div>
-            <p className="mt-1 text-sm text-slate-400">₹499/seat/month · 3 seats · Next billing: May 1, 2026</p>
+            <p className="mt-1 text-sm text-slate-400">$9/seat/month · 3 seats · Next billing: May 1, 2026</p>
           </div>
           <div className="flex gap-2">
             <button className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Manage Subscription</button>
@@ -116,7 +116,7 @@ export default function BillingPage() {
               {plan.current && <span className="absolute -top-3 left-4 rounded-full bg-brand px-3 py-0.5 text-2xs font-bold text-white">Current Plan</span>}
               <h3 className="text-lg font-bold text-slate-100">{plan.name}</h3>
               <div className="mt-2">
-                <span className="text-3xl font-bold text-slate-50">{billingCycle === 'annual' && plan.price !== '₹0' ? `₹${Math.round(parseInt(plan.price.replace(/[₹,]/g, '')) * 0.8).toLocaleString('en-IN')}` : plan.price}</span>
+                <span className="text-3xl font-bold text-slate-50">{billingCycle === 'annual' && plan.price !== '$0' ? `$${Math.round(parseInt(plan.price.replace(/[$,]/g, '')) * 0.8)}` : plan.price}</span>
                 <span className="text-sm text-slate-500">{plan.period}</span>
               </div>
               <ul className="mt-4 space-y-2">

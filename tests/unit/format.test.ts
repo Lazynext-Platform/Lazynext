@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { timeAgo, formatDate, formatCurrencyINR, qualityLabel } from '@/lib/utils/format'
+import { timeAgo, formatDate, formatCurrencyUSD, qualityLabel } from '@/lib/utils/format'
 
 describe('Format Utilities', () => {
   it('timeAgo should handle recent dates', () => {
@@ -15,8 +15,8 @@ describe('Format Utilities', () => {
     expect(typeof result).toBe('string')
   })
 
-  it('formatCurrencyINR should format correctly', () => {
-    expect(formatCurrencyINR(999)).toContain('999')
+  it('formatCurrencyUSD should format correctly', () => {
+    expect(formatCurrencyUSD(19)).toContain('19')
   })
 
   it('qualityLabel should categorize scores', () => {

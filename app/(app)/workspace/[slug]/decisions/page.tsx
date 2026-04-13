@@ -69,9 +69,9 @@ const sampleDecisions = [
   },
   {
     id: '5',
-    question: 'INR pricing tiers — what price points?',
+    question: 'Pricing tiers — what price points?',
     status: 'decided' as const,
-    resolution: '₹0/₹499/₹999/₹2999 per seat per month',
+    resolution: '$0/$9/$19/$49 per seat per month',
     qualityScore: 68,
     outcome: 'pending' as const,
     madeBy: 'Avas Patel',

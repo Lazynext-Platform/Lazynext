@@ -12,9 +12,9 @@ const workspaces = [
 ]
 
 const sessions = [
-  { device: 'MacBook Air — Chrome', location: 'Mumbai, India', ip: '103.xx.xx.42', lastActive: 'Now', current: true },
-  { device: 'iPhone 15 — Safari', location: 'Mumbai, India', ip: '103.xx.xx.42', lastActive: '2 hours ago', current: false },
-  { device: 'Windows PC — Firefox', location: 'Delhi, India', ip: '49.xx.xx.88', lastActive: '3 days ago', current: false },
+  { device: 'MacBook Air — Chrome', location: 'San Francisco, US', ip: '104.xx.xx.42', lastActive: 'Now', current: true },
+  { device: 'iPhone 15 — Safari', location: 'San Francisco, US', ip: '104.xx.xx.42', lastActive: '2 hours ago', current: false },
+  { device: 'Windows PC — Firefox', location: 'London, UK', ip: '82.xx.xx.88', lastActive: '3 days ago', current: false },
 ]
 
 export default function ProfilePage() {

@@ -5,7 +5,7 @@ import { ArrowRight, Clock } from 'lucide-react'
 const posts = [
   { slug: 'decision-dna', title: 'Introducing Decision DNA', excerpt: 'How AI-scored decisions help teams learn from every choice.', date: 'April 2, 2026', tag: 'Product', featured: true },
   { slug: 'graph-native', title: 'Why Graph-Native Workflows?', excerpt: 'Tasks in a list are easy. But work is messy — it branches, loops, and connects. Here\'s how a canvas changes everything.', date: 'March 20, 2026', tag: 'Engineering', featured: false },
-  { slug: 'india-first', title: 'Why We\'re Building India-First', excerpt: '₹499/seat, UPI payments, and local infrastructure — our thesis on building for India\'s startup ecosystem.', date: 'March 10, 2026', tag: 'Company', featured: false },
+  { slug: 'global-first', title: 'Why We\'re Building Global-First', excerpt: '$9/seat, transparent pricing, and global infrastructure — our thesis on building for today\'s startup ecosystem.', date: 'March 10, 2026', tag: 'Company', featured: false },
   { slug: 'launch', title: 'Lazynext is Live', excerpt: 'After 3 months of building, Lazynext v0.1 is here. Here\'s what we shipped and what\'s next.', date: 'February 20, 2026', tag: 'Launch', featured: false },
 ]
 

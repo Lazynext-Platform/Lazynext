@@ -43,7 +43,7 @@ export default function DecisionDNASection() {
               </div>
 
               <h4 className="mb-2 text-lg font-bold text-slate-900">
-                Which payment processor for India launch?
+                Which payment processor for global launch?
               </h4>
 
               <div className="mb-4 rounded-lg bg-slate-50 p-4">

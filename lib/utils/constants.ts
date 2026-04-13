@@ -18,11 +18,11 @@ export const PLAN_LIMITS = {
   enterprise: { members: -1, workflows: -1, nodes: -1, aiQueries: -1 },
 } as const
 
-export const PLAN_PRICING_INR = {
+export const PLAN_PRICING_USD = {
   free: 0,
-  starter: 499,
-  pro: 999,
-  business: 2999,
+  starter: 9,
+  pro: 19,
+  business: 49,
   enterprise: null, // custom
 } as const
 

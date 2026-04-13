@@ -12,10 +12,10 @@ export function formatDateTime(date: Date | string) {
   return format(new Date(date), 'MMM d, yyyy h:mm a')
 }
 
-export function formatCurrencyINR(amount: number) {
-  return new Intl.NumberFormat('en-IN', {
+export function formatCurrencyUSD(amount: number) {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'INR',
+    currency: 'USD',
     maximumFractionDigits: 0,
   }).format(amount)
 }
