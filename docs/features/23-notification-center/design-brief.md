@@ -90,7 +90,7 @@
 |---|---|---|
 | **Badge count** | Dynamic | "5" (unread count) |
 | **Task assigned** | Dynamic | "Priya Sharma assigned you to Ship onboarding v2" |
-| **Decision logged** | Dynamic | "Raj Kumar logged a decision: Use Neon vs Supabase?" with quality score |
+| **Decision logged** | Dynamic | "Raj Kumar logged a decision: Use Supabase for Auth + DB?" with quality score |
 | **@mention** | Dynamic | "Meera Joshi mentioned you in Database migration thread" with preview |
 | **AI insight** | Dynamic | "LazyMind detected a pattern: 3 decisions this week lack rationale" |
 | **Automation** | Dynamic | "Automation Overdue task escalation triggered" |

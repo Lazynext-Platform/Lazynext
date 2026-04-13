@@ -27,7 +27,7 @@
 - [x] Decision summary header: title, status badge (Decided), quality score (84), date
 - [x] Thread section header with message count badge and resolve toggle button
 - [x] Message list with avatar, author name, timestamp, and message body
-- [x] Embedded comparison table within a message (Neon vs Supabase vs PlanetScale with feature rows)
+- [x] Embedded comparison table within a message (Supabase vs Firebase vs PlanetScale with feature rows)
 - [x] @mention inline styling (blue highlight with @ prefix)
 - [x] Emoji reactions on messages (thumbs up, party) with counts and active/inactive states
 - [x] @mention popover triggered by typing "@" with teammate list (avatar, name, role)
@@ -97,10 +97,10 @@
 
 | Element | Content Type | Example/Notes |
 |---|---|---|
-| **Decision title** | User-generated | "Use Neon vs Supabase for DB?" |
+| **Decision title** | User-generated | "Use Supabase for Auth + DB?" |
 | **Decision status** | Enum badge | "Decided" (green) |
 | **Quality score** | Computed | "84" in green circle |
-| **Messages** | User-generated | Discussion about Neon vs Supabase vs PlanetScale |
+| **Messages** | User-generated | Discussion about Supabase vs Firebase vs PlanetScale |
 | **Comparison table** | Embedded rich content | Feature matrix: Serverless, India Region, Branching, Free Tier, SQL Flavor across 3 providers |
 | **@Mentions** | User references | "@Priya Sharma" styled as blue pill |
 | **Reactions** | Emoji + count | Thumbs up (1, 3), Party (2) |

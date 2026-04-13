@@ -58,8 +58,8 @@
 ### Added
 
 - **Project Scaffolding** — Next.js 14 App Router setup with TypeScript, Tailwind CSS 3, ESLint
-- **Auth Integration (Clerk)** — Sign-in, sign-up, middleware protection, workspace-based routing
-- **Database Schema (Drizzle + Neon)** — Full schema with workspaces, members, workflows, nodes, edges, threads, messages, decisions, automation runs, and all relations
+- **Auth Integration (Supabase Auth)** — Sign-in, sign-up, middleware protection, workspace-based routing
+- **Database Schema (Supabase PostgreSQL)** — Full schema with workspaces, members, workflows, nodes, edges, threads, messages, decisions, automation runs, and RLS policies
 - **Canvas State (Zustand)** — Canvas store with nodes, edges, selection, history (undo/redo), LazyMind toggle
 - **Design System** — Complete design token system in docs/design-system.md and tailwind.config.ts
 - **Blueprint Design Docs** — 38 features fully designed with mockups, briefs, specs, reviews, and handoffs

@@ -32,7 +32,7 @@
 |---|---|---|---|---|---|---|
 | 01 | Landing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — all 12 sections, verified |
 | 02 | Pricing Page | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — 4-tier cards, toggle, comparison, FAQ |
-| 03 | Auth Pages | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — split-panel layout + Clerk customization |
+| 03 | Auth Pages | ✅ Complete | 🟡 Awaiting Merge | — | `feature/01-landing-page` | Built — split-panel layout + Supabase Auth |
 | 04 | Onboarding Flow | ✅ Complete | 🟡 Awaiting Merge | #03 | `feature/01-landing-page` | Built — 3-step wizard, confetti, score reveal |
 | 05 | Workflow Canvas | ✅ Complete | 🟡 Awaiting Merge | #03, #04 | `feature/01-landing-page` | Built — 5 nodes, Decision DNA panel, enhanced TopBar/Sidebar |
 | 06 | Mobile App View | ✅ Complete | � Awaiting Merge | #05 | `feature/01-landing-page` | Built — NodeListView with filter pills, type-colored cards |

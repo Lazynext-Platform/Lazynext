@@ -1,19 +1,11 @@
 'use client'
 
-import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus, User } from 'lucide-react'
+import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus, User, LogOut } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { NotificationCenter } from '@/components/ui/NotificationCenter'
 import { cn } from '@/lib/utils/cn'
-
-const hasValidClerkKeys =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_') &&
-  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
-
-let UserButton: React.ComponentType<{ appearance?: Record<string, unknown> }> | null = null
-if (hasValidClerkKeys) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  UserButton = require('@clerk/nextjs').UserButton
-}
+import { createClient } from '@/lib/db/supabase/client'
+import { useState } from 'react'
 
 const presenceAvatars = [
   { initials: 'AP', color: 'bg-indigo-500' },
@@ -23,6 +15,13 @@ const presenceAvatars = [
 
 export function TopBar() {
   const { isSidebarOpen, toggleSidebar, toggleCommandPalette, toggleLazyMind } = useUIStore()
+  const [showMenu, setShowMenu] = useState(false)
+
+  const handleSignOut = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = '/sign-in'
+  }
 
   return (
     <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm px-4">
@@ -96,19 +95,24 @@ export function TopBar() {
         <NotificationCenter />
 
         {/* User */}
-        {UserButton ? (
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'h-7 w-7',
-              },
-            }}
-          />
-        ) : (
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-700 text-xs text-slate-300">
+        <div className="relative">
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-700 text-xs text-slate-300 hover:bg-slate-600"
+          >
             <User className="h-3.5 w-3.5" />
-          </div>
-        )}
+          </button>
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-1 w-36 rounded-md border border-slate-700 bg-slate-800 py-1 shadow-lg z-50">
+              <button
+                onClick={handleSignOut}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-700"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Sign out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   )

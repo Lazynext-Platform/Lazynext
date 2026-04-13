@@ -1,8 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { edges } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -15,20 +13,21 @@ const createSchema = z.object({
 export async function GET(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workflowId = url.searchParams.get('workflowId')
   if (!workflowId) return NextResponse.json({ error: 'MISSING_WORKFLOW_ID' }, { status: 400 })
 
-  const results = await db.select().from(edges).where(eq(edges.workflowId, workflowId))
+  const { data: results, error } = await db.from('edges').select('*').eq('workflow_id', workflowId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: results, error: null })
 }
 
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
@@ -36,19 +35,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [edge] = await db.insert(edges).values(parsed.data).returning()
+  const { data: edge, error } = await db.from('edges').insert({
+    workflow_id: parsed.data.workflowId,
+    source_id: parsed.data.sourceId,
+    target_id: parsed.data.targetId,
+    condition: parsed.data.condition || null,
+  }).select().single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: edge, error: null }, { status: 201 })
 }
 
 export async function DELETE(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const id = url.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'MISSING_ID' }, { status: 400 })
 
-  await db.delete(edges).where(eq(edges.id, id))
+  await db.from('edges').delete().eq('id', id)
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

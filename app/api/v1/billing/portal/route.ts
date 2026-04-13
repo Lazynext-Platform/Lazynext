@@ -4,8 +4,6 @@ import { z } from 'zod'
 import Stripe from 'stripe'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
-import { workspaces } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 
 const portalSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -40,15 +38,20 @@ export async function POST(req: Request) {
   }
 
   try {
-    const [workspace] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1)
-    if (!workspace?.stripeCustomerId) {
+    const { data: workspace } = await db
+      .from('workspaces')
+      .select('*')
+      .eq('id', workspaceId)
+      .single()
+
+    if (!workspace?.stripe_customer_id) {
       return NextResponse.json({ error: 'NO_STRIPE_CUSTOMER', message: 'Workspace has no Stripe customer.' }, { status: 400 })
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2025-03-31.basil' })
     const session = await stripe.billingPortal.sessions.create({
-      customer: workspace.stripeCustomerId,
+      customer: workspace.stripe_customer_id,
       return_url: `${appUrl}/workspace/${workspaceId}/billing`,
     })
     return NextResponse.json({ url: session.url })

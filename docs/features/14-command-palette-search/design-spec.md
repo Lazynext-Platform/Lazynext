@@ -64,7 +64,7 @@
 
 **Key elements:**
 - "Ship onboarding v2" — Task, In Progress, Q2 Sprint, 2h ago
-- "Use Neon vs Supabase for DB?" — Decision, Decided, Score 84, 1d ago
+- "Use Supabase for Auth + DB?" — Decision, Decided, Score 84, 1d ago
 - "Product Requirements Doc" — Doc, 1,240 words, Q2 Sprint, 3d ago
 - Timestamps in 10px slate-600
 
@@ -146,7 +146,7 @@
 **Key elements:**
 - Sparkle emoji icon
 - "Semantic search" in primary bold
-- Example queries: "Why did we choose Neon?" or "What decisions about pricing?"
+- Example queries: "Why did we choose Supabase?" or "What decisions about pricing?"
 - Box: primary/5 bg, primary/20 border, rounded-md
 
 **Rationale:** Positioned at the end of keyword results to suggest AI search as a next step. Non-intrusive styling avoids competing with actual results.

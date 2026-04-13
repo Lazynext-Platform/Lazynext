@@ -73,7 +73,7 @@
 - TASK 1 "Ship onboarding v2" (left:100, top:80): Blue left border, EFF6FF bg, AP avatar, Apr 10, orange priority dot, "In Progress" badge
 - TASK 2 "Fix auth redirect bug" (left:100, top:280): Blue left border, PK avatar, red priority dot, "Done" badge
 - DOC "Product Requirements Doc" (left:420, top:80): Green left border, F0FDF4 bg, "Updated 2h ago", "1,240 words"
-- DECISION 1 "Use Neon vs Supabase for DB?" (left:420, top:280): Orange left border, FFF7ED bg, score 84 badge, "Decided" status, **selected state** (blue outline)
+- DECISION 1 "Use Supabase for Auth + DB?" (left:420, top:280): Orange left border, FFF7ED bg, score 84 badge, "Decided" status, **selected state** (blue outline)
 - DECISION 2 "Pricing: freemium vs trial?" (left:740, top:180): Orange left border, score 62 badge, "Open" status
 
 **SVG edges** (4 connections):
@@ -101,16 +101,16 @@
 **Panel header**: Orange dot + "DECISION" label + X close button
 
 **Content sections** (scrollable):
-- Title: "Use Neon vs Supabase for DB?" in lg bold
+- Title: "Use Supabase for Auth + DB?" in lg bold
 - Status: "Decided" in emerald pill with dot indicator
 - Question: Full question text
-- Resolution: Highlighted box (bg-slate-800/50, border, p-3): "Neon -- serverless Postgres, scales to zero, DB branching per PR, India region available."
-- Rationale: "Supabase Auth was appealing but Clerk handles auth better. Neon's serverless model means zero cost at rest."
-- Options Considered: 3 tags (Neon, Supabase, PlanetScale) + "+ Add" dashed button
+- Resolution: Highlighted box (bg-slate-800/50, border, p-3): "Supabase -- unified Auth + PostgreSQL, RLS policies, real-time subscriptions, generous free tier."
+- Rationale: "Supabase provides auth, database, and storage in one platform. RLS policies give row-level security out of the box."
+- Options Considered: 3 tags (Supabase, Firebase, PlanetScale) + "+ Add" dashed button
 - Decision Type: "Irreversible" dropdown
 - Quality Score: Progress bar (84% fill, emerald-500) + "84/100" text + "Good options coverage. Strong rationale." description
 - Outcome: "Pending" dropdown + Tag button
-- Thread: 2 messages (Priya: "Why not PlanetScale?", Avas: "MySQL syntax + no branching. Neon wins on DX.") + comment input with send button
+- Thread: 2 messages (Priya: "Why not PlanetScale?", Avas: "MySQL syntax + no RLS. Supabase wins on DX.") + comment input with send button
 
 **Rationale**: Panel width (384px) provides comfortable reading without dominating the canvas. Thread integration below decision details creates contextual discussion. Quality score progress bar provides at-a-glance assessment. All field labels use consistent 11px uppercase tracking-wider style.
 

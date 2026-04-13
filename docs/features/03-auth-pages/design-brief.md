@@ -118,6 +118,6 @@
 
 ## References
 
-- Auth patterns: Clerk, Auth0, Linear sign-in pages
+- Auth patterns: Supabase, Auth0, Linear sign-in pages
 - Split-panel layout: Vercel, Supabase auth pages
 - Social login: Google and GitHub OAuth button styling

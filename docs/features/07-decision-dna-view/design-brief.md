@@ -97,8 +97,8 @@
 
 | Element | Content Type | Example/Notes |
 |---|---|---|
-| **Decision title** | User-generated text | "Use Neon vs Supabase for DB?" |
-| **Resolution** | User-generated text, truncated | "Chose Neon for its serverless Postgres with branching..." |
+| **Decision title** | User-generated text | "Use Supabase for Auth + DB?" |
+| **Resolution** | User-generated text, truncated | "Chose Supabase for unified Auth + PostgreSQL with RLS..." |
 | **Quality score** | Computed 0-100 | Displayed in colored circle (green 70+, amber 40-69, red 0-39) |
 | **Outcome badge** | Enum pill | Good (green), Bad (red), Neutral (gray), Pending (amber) |
 | **Author** | Avatar + name | Pravatar image + "Priya S." |

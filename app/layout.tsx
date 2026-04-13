@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'sonner'
 import './globals.css'
 
@@ -17,15 +16,12 @@ export const metadata: Metadata = {
   },
 }
 
-const hasValidClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_')
-  && !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const content = (
+  return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
         {children}
@@ -42,20 +38,5 @@ export default function RootLayout({
         />
       </body>
     </html>
-  )
-
-  if (!hasValidClerkKeys) return content
-
-  return (
-    <ClerkProvider
-      appearance={{
-        variables: {
-          colorPrimary: '#4F6EF7',
-          colorBackground: '#0F172A',
-        },
-      }}
-    >
-      {content}
-    </ClerkProvider>
   )
 }

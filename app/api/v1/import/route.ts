@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
-import { nodes, workflows } from '@/lib/db/schema'
 
 const importSchema = z.object({
   source: z.enum(['notion-api', 'notion-zip', 'linear', 'trello', 'asana', 'csv']),
@@ -38,31 +37,37 @@ export async function POST(req: Request) {
   if (importItems && importItems.length > 0) {
     let targetWorkflowId = workflowId
     if (!targetWorkflowId) {
-      const [wf] = await db.insert(workflows).values({
-        workspaceId,
-        name: `Import from ${source}`,
-        createdBy: userId,
-      }).returning()
+      const { data: wf, error: wfError } = await db
+        .from('workflows')
+        .insert({ workspace_id: workspaceId, name: `Import from ${source}`, created_by: userId })
+        .select()
+        .single()
+      if (wfError) return NextResponse.json({ error: wfError.message }, { status: 500 })
       targetWorkflowId = wf.id
     }
 
-    const created = await db.insert(nodes).values(
-      importItems.map((item, i) => ({
-        workflowId: targetWorkflowId!,
-        workspaceId,
-        type: item.type as 'task' | 'doc' | 'decision' | 'thread' | 'pulse' | 'automation' | 'table',
-        title: item.title,
-        data: item.data ?? {},
-        positionX: 100 + (i % 3) * 320,
-        positionY: 100 + Math.floor(i / 3) * 200,
-        createdBy: userId,
-      }))
-    ).returning()
+    const { data: created, error: nodeError } = await db
+      .from('nodes')
+      .insert(
+        importItems.map((item, i) => ({
+          workflow_id: targetWorkflowId!,
+          workspace_id: workspaceId,
+          type: item.type,
+          title: item.title,
+          data: item.data ?? {},
+          position_x: 100 + (i % 3) * 320,
+          position_y: 100 + Math.floor(i / 3) * 200,
+          created_by: userId,
+        }))
+      )
+      .select()
+
+    if (nodeError) return NextResponse.json({ error: nodeError.message }, { status: 500 })
 
     return NextResponse.json({
       data: {
         workflowId: targetWorkflowId,
-        imported: created.length,
+        imported: created?.length ?? 0,
         source,
         status: 'completed',
       },

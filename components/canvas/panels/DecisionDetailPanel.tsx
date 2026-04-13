@@ -21,7 +21,7 @@ const outcomeOptions = [
 
 const sampleThread = [
   { id: '1', author: 'Priya Sharma', initials: 'PS', color: 'bg-emerald-500', message: "Why not PlanetScale? Their free tier is more generous.", time: '3 days ago' },
-  { id: '2', author: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', message: "PlanetScale uses MySQL. Our ORM queries are Postgres-specific. Plus Neon has DB branching.", time: '2 days ago' },
+  { id: '2', author: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', message: "PlanetScale uses MySQL. Our queries are Postgres-specific. Plus Supabase has Auth + RLS built in.", time: '2 days ago' },
 ]
 
 export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {

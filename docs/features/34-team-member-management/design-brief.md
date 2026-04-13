@@ -63,11 +63,11 @@
 - Seat limits vary by plan (Free: 3, Starter: 10, Pro: 25, Business: unlimited)
 - Owner cannot be removed
 - Guest role is read-only access
-- Clerk manages authentication — member management is workspace-level
+- Supabase Auth manages authentication — member management is workspace-level
 
 ---
 
 ## References
 - Feature 12 (Workspace Settings) — parent settings context
 - Feature 30 (Profile & Account Settings) — user-level counterpart
-- Clerk documentation for auth/role management
+- Supabase Auth documentation for auth/role management

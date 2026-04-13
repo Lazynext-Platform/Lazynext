@@ -122,15 +122,15 @@
 | **Task priority** | Enum | Low (gray), Medium (blue), High (orange), Urgent (red) |
 | **Task assignee** | User | "Avas Patel" with AP avatar |
 | **Task due date** | Date | "2026-04-10" |
-| **Task subtasks** | Checkbox list | "Set up Clerk integration" (done), "Build onboarding UI" (pending) |
+| **Task subtasks** | Checkbox list | "Set up Supabase Auth integration" (done), "Build onboarding UI" (pending) |
 | **Task tags** | Pills | "frontend", "onboarding" |
 | **Doc title** | User-generated | "Product Requirements Doc" |
 | **Doc word count** | Computed | "1,240 words" |
 | **Doc content** | Rich text | Overview, Key Requirements, Timeline sections |
-| **Decision title** | User-generated | "Use Neon vs Supabase for DB?" |
+| **Decision title** | User-generated | "Use Supabase for Auth + DB?" |
 | **Decision status** | Enum | Open, In Discussion, Decided, Revisit |
 | **Quality score** | Computed 0-100 | "84/100" with green progress bar |
-| **Options considered** | Pill chips | Neon (chosen, green border), Supabase, PlanetScale |
+| **Options considered** | Pill chips | Supabase (chosen, green border), Firebase, PlanetScale |
 | **Decision type** | Enum | Reversible, Irreversible |
 | **Outcome** | Enum | Pending, Good, Bad, Neutral |
 

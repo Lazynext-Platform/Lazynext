@@ -9,8 +9,8 @@
 ## Build
 
 - [x] Rewrite `app/(auth)/layout.tsx` with split-panel layout (brand left + form right)
-- [x] Update `app/(auth)/sign-in/` with Clerk appearance customization
-- [x] Update `app/(auth)/sign-up/` with Clerk appearance customization
+- [x] Update `app/(auth)/sign-in/` with Supabase Auth form
+- [x] Update `app/(auth)/sign-up/` with Supabase Auth form
 
 ## Verification
 

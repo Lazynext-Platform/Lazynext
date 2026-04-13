@@ -16,8 +16,8 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 | Language | TypeScript 5.9 |
 | Styling | Tailwind CSS 3.4 |
 | Canvas | ReactFlow (@xyflow/react) |
-| Auth | Clerk |
-| Database | Neon PostgreSQL + Drizzle ORM |
+| Auth | Supabase Auth |
+| Database | Supabase PostgreSQL |
 | State | Zustand |
 | AI | Groq + Together AI |
 | Payments | Stripe + Razorpay |
@@ -30,8 +30,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 
 - Node.js 18+
 - npm 9+
-- A [Clerk](https://clerk.com) account
-- A [Neon](https://neon.tech) database
+- A [Supabase](https://supabase.com) project
 
 ### Setup
 
@@ -48,11 +47,8 @@ cp .env.example .env.local
 
 # Fill in your keys in .env.local (see Environment Variables below)
 
-# Generate database migrations (already included, but if schema changes)
-npm run db:generate
-
-# Push schema to your Neon database
-npm run db:push
+# Run the SQL migration in your Supabase SQL Editor
+# See lib/db/migrations/00001_supabase_init.sql
 
 # Start the dev server
 npm run dev
@@ -66,9 +62,9 @@ Copy `.env.example` to `.env.local` and fill in:
 
 | Variable | Required | Description |
 |---|---|---|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes | Clerk public key |
-| `CLERK_SECRET_KEY` | Yes | Clerk secret key |
-| `DATABASE_URL` | Yes | Neon PostgreSQL connection string |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server only) |
 | `GROQ_API_KEY` | For AI | Groq API key for LazyMind |
 | `TOGETHER_API_KEY` | Fallback | Together AI fallback key |
 | `STRIPE_SECRET_KEY` | For billing | Stripe secret key |
@@ -81,7 +77,7 @@ Copy `.env.example` to `.env.local` and fill in:
 ```
 app/
   (marketing)/     Landing, pricing, features, blog, about, comparison, changelog
-  (auth)/          Sign-in and sign-up (Clerk)
+  (auth)/          Sign-in and sign-up (Supabase Auth)
   (app)/           Protected workspace routes
     onboarding/    First-time setup wizard
     workspace/     Dynamic [slug] routes — canvas, tasks, decisions, pulse, etc.
@@ -95,7 +91,7 @@ components/
 lib/
   ai/              Groq/Together AI integration + decision quality scoring
   billing/         Plan definitions
-  db/              Drizzle schema, client, migrations
+  db/              Supabase client, schema types, migrations
   email/           Transactional email templates
 stores/            Zustand state (canvas, ui, workspace)
 hooks/             Custom React hooks
@@ -111,9 +107,7 @@ npm run start        # Start production server
 npm run lint         # ESLint
 npm test             # Run tests (Vitest)
 npm run test:watch   # Tests in watch mode
-npm run db:generate  # Generate Drizzle migrations
-npm run db:push      # Push schema to database
-npm run db:studio    # Open Drizzle Studio
+npm run db:types     # Generate Supabase TypeScript types
 ```
 
 ## Features (38 total)
@@ -135,7 +129,7 @@ npm run db:studio    # Open Drizzle Studio
 - Data import (Notion, Linear, Trello, CSV) and export
 
 ### Platform
-- Clerk auth with SSO
+- Supabase Auth with email/password and OAuth (Google, GitHub)
 - 4-tier billing (Free/Starter/Pro/Business)
 - Workspace settings, member management, integrations
 - Keyboard shortcuts, notifications, toast system

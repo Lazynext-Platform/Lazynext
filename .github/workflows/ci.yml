@@ -59,9 +59,8 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npm run build
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
-          CLERK_SECRET_KEY: sk_test_placeholder
-          DATABASE_URL: placeholder
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
           NEXT_PUBLIC_APP_URL: http://localhost:3000
 
   e2e-tests:
@@ -78,9 +77,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run build
         env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
-          CLERK_SECRET_KEY: sk_test_placeholder
-          DATABASE_URL: placeholder
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
           NEXT_PUBLIC_APP_URL: http://localhost:3000
       - run: npx playwright test
         env:

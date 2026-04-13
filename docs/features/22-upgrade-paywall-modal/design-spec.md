@@ -21,7 +21,7 @@
 - **Purpose:** Convert free users who search decisions beyond the 10-decision free limit
 - **Layout:** bg-slate-900 border rounded-xl panel (max-w-lg), stacked: search bar > blurred results > gradient fade > upgrade card
 - **Key elements:**
-  - Search bar context (px-5 py-3 border-b): magnifying glass SVG + search query text "Why did we choose Neon?" in text-sm text-slate-300
+  - Search bar context (px-5 py-3 border-b): magnifying glass SVG + search query text "Why did we choose Supabase?" in text-sm text-slate-300
   - 3 blurred result rows (opacity-30 blur-[2px]): orange circle placeholders + skeleton text lines simulating real search results
   - Gradient fade overlay (bg-gradient-to-t from-slate-900) transitioning from results to upgrade card
   - Upgrade card (bg-slate-800 border border-[#4F6EF7]/30 rounded-xl p-5, max-w-sm centered):

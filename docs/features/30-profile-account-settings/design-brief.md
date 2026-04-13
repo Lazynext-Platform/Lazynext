@@ -27,18 +27,18 @@
 - [x] Profile header: large avatar (w-20 h-20), name, email, Admin/Owner role badges
 - [x] 4 tab pills: Profile, Security, Preferences, Active Sessions
 - [x] Profile tab: name/email/role/timezone inputs, workspaces list with active/switch
-- [x] Security tab: password (Clerk-managed), 2FA toggle (enabled via authenticator), connected accounts (Google connected, GitHub not), delete account (red border)
+- [x] Security tab: password (Supabase Auth-managed), 2FA toggle (enabled via authenticator), connected accounts (Google connected, GitHub not), delete account (red border)
 - [x] Preferences tab: theme (dark only), compact mode toggle, minimap toggle, LazyMind auto-score toggle, weekly digest toggle
 - [x] Sessions tab: current session (green "Current" badge), other sessions with revoke, "Revoke all other sessions" link
 
 ### Nice to Have
 - [x] Avatar change button overlay
-- [x] "Managed by Clerk" note on email
+- [x] "Managed by Supabase Auth" note on email
 - [x] Google/GitHub brand icons for connected accounts
 - [x] Session device info (OS, browser, location, IP)
 
 ### Out of Scope
-- Email change flow (managed by Clerk)
+- Email change flow (managed by Supabase Auth)
 - Avatar upload/crop modal
 - Notification preferences (handled in Feature 12)
 
@@ -77,7 +77,7 @@
 ---
 
 ## Constraints
-- Email managed by Clerk — shown as info, not directly editable
+- Email managed by Supabase Auth — shown as info, not directly editable
 - Dark theme is the only option (light disabled with cursor-not-allowed)
 - Delete account is in a red-bordered danger zone section
 
@@ -85,4 +85,4 @@
 
 ## References
 - Feature 12 (Workspace Settings) — workspace-level settings
-- Clerk documentation for auth/profile management
+- Supabase Auth documentation for auth/profile management

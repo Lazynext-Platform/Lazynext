@@ -112,9 +112,9 @@
 | **Node: Task 1** | Dynamic | "Ship onboarding v2", AP assignee, Apr 10, High priority (orange dot), In Progress |
 | **Node: Task 2** | Dynamic | "Fix auth redirect bug", PK assignee, Urgent (red dot), Done |
 | **Node: Doc 1** | Dynamic | "Product Requirements Doc", Updated 2h ago, 1,240 words |
-| **Node: Decision 1** | Dynamic | "Use Neon vs Supabase for DB?", Score 84, Decided |
+| **Node: Decision 1** | Dynamic | "Use Supabase for Auth + DB?", Score 84, Decided |
 | **Node: Decision 2** | Dynamic | "Pricing: freemium vs trial?", Score 62, Open |
-| **Detail panel** | Dynamic | Full decision detail: question, resolution (Neon), rationale, options (Neon/Supabase/PlanetScale), type (Irreversible), score 84/100, outcome (Pending), thread (2 messages from Priya and Avas) |
+| **Detail panel** | Dynamic | Full decision detail: question, resolution (Supabase), rationale, options (Supabase/Firebase/PlanetScale), type (Irreversible), score 84/100, outcome (Pending), thread (2 messages from Priya and Avas) |
 | **Presence avatars** | Dynamic | AP, PK, JR (3 online users) |
 
 ---

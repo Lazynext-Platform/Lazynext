@@ -55,9 +55,9 @@ Lazynext takes the "anti-software" approach — do less, but do it right. One gr
 |---|---|---|---|
 | **Language** | TypeScript, JavaScript | TypeScript | Type safety critical for complex graph data models, better DX |
 | **Framework** | Next.js, Remix, Nuxt | Next.js 14 (App Router) | SSR + API routes + React ecosystem, strongest community |
-| **Database** | Supabase, PlanetScale, Neon | Neon PostgreSQL | Serverless Postgres, branching for dev, generous free tier, India region |
-| **ORM** | Prisma, Drizzle | Drizzle ORM | Lightweight, SQL-like, better serverless cold starts than Prisma |
-| **Auth** | Clerk, NextAuth, Auth0 | Clerk | Best DX, org/workspace support built-in, India compliance |
+| **Database** | Supabase, PlanetScale, Firebase | Supabase PostgreSQL | Unified Auth + DB, RLS policies, real-time, generous free tier |
+| **ORM** | Prisma, Drizzle, Supabase JS | Supabase JS Client | Query builder built-in, no separate ORM needed |
+| **Auth** | Supabase Auth, NextAuth, Auth0 | Supabase Auth | Built-in with DB, RLS integration, OAuth support |
 | **Canvas** | ReactFlow, Konva, custom | ReactFlow (@xyflow/react) | Purpose-built for node-graph UIs, active community, performant |
 | **State** | Redux, Zustand, Jotai | Zustand | Minimal boilerplate, great with React 18, simple for canvas state |
 | **Styling** | Tailwind, CSS Modules, styled-components | Tailwind CSS 3 | Fast iteration, consistent design tokens, design team preference |
@@ -87,7 +87,7 @@ Lazynext takes the "anti-software" approach — do less, but do it right. One gr
 | Graph visualization | ReactFlow with custom node types | Native support for node-edge graphs, drag-and-drop, zoom/pan |
 | 7 node primitives | Task, Doc, Decision, Thread, Pulse, Automation, Table | Covers 95% of team workflow needs without complexity |
 | Canvas + Mobile | Canvas (desktop 1024px+), NodeListView (mobile <640px) | Canvas doesn't work on mobile, list view is natural alternative |
-| Multi-tenant | Workspace-level with Clerk org mapping | Clean tenant isolation, Clerk handles user management |
+| Multi-tenant | Workspace-level with Supabase RLS policies | Clean tenant isolation, row-level security built-in |
 | Dual payments | Stripe (international) + Razorpay (India/UPI) | India market is primary, but need global reach |
 | Decision DNA as core | First-class decision tracking with quality scores | This is the differentiator — no competitor does this well |
 | AI panel (LazyMind) | Context-aware AI sidebar, not chatbot | AI should understand the workflow graph, not just answer questions |
@@ -98,7 +98,7 @@ Lazynext takes the "anti-software" approach — do less, but do it right. One gr
 lazynext/
 ├── app/
 │   ├── (marketing)/          # Landing page, pricing — public routes
-│   ├── (auth)/               # Sign-in, sign-up — Clerk-powered
+│   ├── (auth)/               # Sign-in, sign-up — Supabase-powered
 │   ├── (app)/                # Authenticated app — workspace/canvas
 │   │   ├── onboarding/       # First-time workspace creation
 │   │   └── workspace/[slug]/ # Dynamic workspace routes
@@ -120,7 +120,7 @@ lazynext/
 ├── lib/
 │   ├── ai/                   # Groq/Together integration
 │   ├── billing/              # Stripe + Razorpay
-│   ├── db/                   # Drizzle schema + client
+│   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
 │   ├── inngest/              # Background job processing
 │   └── utils/                # Shared utilities
@@ -173,7 +173,7 @@ lazynext/
 - **Canvas limitation**: ReactFlow does NOT render on viewports <640px — mobile uses NodeListView instead
 - **Single region**: Initial deployment in ap-south-1 (India) — expand later
 - **AI rate limits**: Groq free tier has rate limits — need paid plan for production
-- **Clerk pricing**: Free tier supports up to 10,000 MAU — plan tier change at scale
+- **Supabase pricing**: Free tier supports generous limits — plan for paid plan at scale
 - **Solo developer**: Initial velocity constrained — prioritize ruthlessly
 
 ## Feature Brainstorm
@@ -244,7 +244,7 @@ lazynext/
 | Monday.com | Competitor | Feature-heavy but feels corporate and bloated |
 | Miro | Competitor | Canvas model works, but it's presentation not workflow |
 | ReactFlow docs | Docs | Excellent node-graph library, handles canvas well |
-| Clerk documentation | Docs | Org-based multi-tenancy maps to workspace model |
+| Supabase documentation | Docs | Auth + DB + RLS in one platform, workspace model via RLS |
 
 ### Key Findings
 
@@ -276,7 +276,7 @@ lazynext/
 
 ## Discussion Complete ✅
 
-**Summary**: Lazynext is a graph-native workflow platform replacing fragmented SaaS tools for remote teams. Built with Next.js 14, ReactFlow, Clerk, Neon, and Drizzle. Its hero feature is Decision DNA — structured decision tracking with quality scores and outcome tagging. 38 features are fully designed via Blueprint; the Mastery framework is being adopted to govern the development process going forward.
+**Summary**: Lazynext is a graph-native workflow platform replacing fragmented SaaS tools for remote teams. Built with Next.js 14, ReactFlow, Supabase (Auth + PostgreSQL), and Tailwind CSS. Its hero feature is Decision DNA — structured decision tracking with quality scores and outcome tagging. 38 features are fully designed via Blueprint; the Mastery framework is being adopted to govern the development process going forward.
 
 **Completed**: 2026-04-05 (reconstructed from existing codebase)
 

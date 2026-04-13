@@ -12,7 +12,7 @@
 
 **What was designed**: A 4-tabbed user account page covering personal info, security (2FA, connected accounts), preferences (theme, AI settings), and active session management.
 **Design brief**: [design-brief.md](design-brief.md)
-**Key decisions**: User-level settings separate from workspace settings; Clerk integration noted where applicable; dark theme locked (light shown as disabled); LazyMind preferences in user settings since they're per-user, not per-workspace.
+**Key decisions**: User-level settings separate from workspace settings; Supabase Auth integration noted where applicable; dark theme locked (light shown as disabled); LazyMind preferences in user settings since they're per-user, not per-workspace.
 
 ---
 
@@ -21,7 +21,7 @@
 ### Profile Tab — Personal Info
 **Purpose**: Edit basic user information
 **Layout**: bg-slate-900 rounded-xl p-6 with 2-column grid
-**Key elements**: First name, last name, email (with Clerk note), role/title, timezone select, Save button
+**Key elements**: First name, last name, email (with Supabase Auth note), role/title, timezone select, Save button
 **Rationale**: Standard profile form. Timezone is important for IST-first platform.
 
 ### Profile Tab — Workspaces
@@ -33,7 +33,7 @@
 ### Security Tab
 **Purpose**: Account security management
 **Layout**: 4 stacked cards: Password, 2FA, Connected Accounts, Delete Account
-**Key elements**: Clerk-managed password with "Change Password" button, 2FA toggle (enabled, green checkmark), Google (connected), GitHub (not connected, "Connect" button), Delete account danger zone (red border, bg-red-600 button)
+**Key elements**: Supabase Auth-managed password with "Change Password" button, 2FA toggle (enabled, green checkmark), Google (connected), GitHub (not connected, "Connect" button), Delete account danger zone (red border, bg-red-600 button)
 **Rationale**: Progressive severity — password at top, deletion at bottom with visual escalation (red border).
 
 ### Preferences Tab

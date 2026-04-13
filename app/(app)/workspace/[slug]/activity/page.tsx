@@ -8,7 +8,7 @@ type Tab = 'feed' | 'audit'
 
 const feedItems = [
   { actor: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', action: 'completed', target: 'Fix auth redirect bug', type: 'task', typeColor: 'bg-blue-500', time: '2 hours ago', detail: null },
-  { actor: 'Priya Shah', initials: 'PS', color: 'bg-emerald-500', action: 'decided', target: 'Use Neon for database', type: 'decision', typeColor: 'bg-orange-500', time: '4 hours ago', detail: 'Quality score: 91' },
+  { actor: 'Priya Shah', initials: 'PS', color: 'bg-emerald-500', action: 'decided', target: 'Use Supabase for database', type: 'decision', typeColor: 'bg-orange-500', time: '4 hours ago', detail: 'Quality score: 91' },
   { actor: 'Rahul Dev', initials: 'RD', color: 'bg-amber-500', action: 'replied in', target: 'Pricing strategy thread', type: 'thread', typeColor: 'bg-purple-500', time: '5 hours ago', detail: '"I think ₹499 is the right entry point for Indian startups..."' },
   { actor: 'Sana Malik', initials: 'SM', color: 'bg-pink-500', action: 'created', target: 'API Design Spec v3', type: 'doc', typeColor: 'bg-emerald-500', time: 'Yesterday', detail: null },
   { actor: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', action: 'updated', target: 'Ship onboarding v2', type: 'task', typeColor: 'bg-blue-500', time: 'Yesterday', detail: 'Status: In Progress → Review' },
@@ -18,7 +18,7 @@ const feedItems = [
 
 const auditRows = [
   { time: 'Apr 5, 2:14 PM', user: 'Avas Patel', action: 'created', target: 'Task: Fix auth bug', detail: 'Priority: High', ip: '103.xx.xx.42', badge: 'bg-blue-500/10 text-blue-400' },
-  { time: 'Apr 5, 11:30 AM', user: 'Priya Shah', action: 'decided', target: 'Decision: Use Neon', detail: 'Score: 91', ip: '103.xx.xx.42', badge: 'bg-orange-500/10 text-orange-400' },
+  { time: 'Apr 5, 11:30 AM', user: 'Priya Shah', action: 'decided', target: 'Decision: Use Supabase', detail: 'Score: 91', ip: '103.xx.xx.42', badge: 'bg-orange-500/10 text-orange-400' },
   { time: 'Apr 5, 9:15 AM', user: 'Rahul Dev', action: 'replied', target: 'Thread: Pricing', detail: 'Comment #4', ip: '49.xx.xx.88', badge: 'bg-purple-500/10 text-purple-400' },
   { time: 'Apr 4, 4:05 PM', user: 'Sana Malik', action: 'created', target: 'Doc: API Spec v3', detail: '12 sections', ip: '103.xx.xx.42', badge: 'bg-emerald-500/10 text-emerald-400' },
   { time: 'Apr 4, 2:30 PM', user: 'Avas Patel', action: 'updated', target: 'Task: Ship onboarding', detail: 'Status change', ip: '103.xx.xx.42', badge: 'bg-amber-500/10 text-amber-400' },

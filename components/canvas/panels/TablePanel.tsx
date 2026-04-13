@@ -28,7 +28,7 @@ const defaultColumns: Column[] = [
 ]
 
 const defaultRows: Row[] = [
-  { id: '1', cells: { name: 'Setup auth provider', status: 'Done', priority: 'High', assignee: 'Avas', due: 'Apr 2', effort: '3', tags: 'auth', notes: 'Clerk integration done' } },
+  { id: '1', cells: { name: 'Setup auth provider', status: 'Done', priority: 'High', assignee: 'Avas', due: 'Apr 2', effort: '3', tags: 'auth', notes: 'Supabase Auth integration done' } },
   { id: '2', cells: { name: 'Design canvas nodes', status: 'In Progress', priority: 'High', assignee: 'Priya', due: 'Apr 5', effort: '5', tags: 'design, canvas', notes: '' } },
   { id: '3', cells: { name: 'Build API routes', status: 'In Progress', priority: 'Medium', assignee: 'Rahul', due: 'Apr 7', effort: '8', tags: 'api', notes: 'REST + tRPC' } },
   { id: '4', cells: { name: 'Write unit tests', status: 'Todo', priority: 'Medium', assignee: 'Sana', due: 'Apr 10', effort: '4', tags: 'testing', notes: '' } },

@@ -47,7 +47,7 @@ const teamColors: Record<string, string> = {
 
 const activity = [
   { actor: 'Raj Kumar', initials: 'RK', color: 'bg-amber-500', action: 'completed', target: 'Fix auth redirect bug', type: 'task', time: '2 hours ago' },
-  { actor: 'Priya', initials: 'PK', color: 'bg-emerald-500', action: 'decided', target: 'Use Neon for DB', type: 'decision', time: '4 hours ago' },
+  { actor: 'Priya', initials: 'PK', color: 'bg-emerald-500', action: 'decided', target: 'Use Supabase for DB', type: 'decision', time: '4 hours ago' },
   { actor: 'Avas', initials: 'AP', color: 'bg-indigo-500', action: 'commented on', target: 'Pricing strategy thread', type: 'thread', time: '5 hours ago' },
   { actor: 'Sana', initials: 'SM', color: 'bg-pink-500', action: 'created', target: 'API Design Spec v3', type: 'doc', time: 'Yesterday' },
   { actor: 'Avas', initials: 'AP', color: 'bg-indigo-500', action: 'updated', target: 'Ship onboarding v2', type: 'task', time: 'Yesterday' },

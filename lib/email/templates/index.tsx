@@ -165,7 +165,7 @@ export function WeeklyDigestEmail({
 // ========================================
 export function DecisionDigestEmail({
   decisions = [
-    { title: 'Use Neon for database', quality: 91, outcome: 'Good', type: 'Irreversible' },
+    { title: 'Use Supabase for database', quality: 91, outcome: 'Good', type: 'Irreversible' },
     { title: 'Pricing at ₹499/seat', quality: 78, outcome: 'Pending', type: 'Reversible' },
     { title: 'Ship MVP without export', quality: 45, outcome: 'Bad', type: 'Experimental' },
   ],

@@ -160,7 +160,7 @@ export default function SettingsPage() {
                 <p className="text-sm font-semibold text-slate-200">Two-factor authentication</p>
                 <p className="text-xs text-slate-500">Add an extra layer of security</p>
               </div>
-              <span className="text-xs text-slate-500">Managed by Clerk</span>
+              <span className="text-xs text-slate-500">Managed by Supabase Auth</span>
             </div>
             <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 p-4">
               <div>

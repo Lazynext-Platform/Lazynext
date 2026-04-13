@@ -97,7 +97,7 @@
 | **Header title** | Dynamic | "Q2 Product Sprint" (current workflow name) |
 | **Filter pills** | Static | All, Tasks, Docs, Decisions, Threads |
 | **Node 1** | Dynamic | TASK: "Ship onboarding v2", AP avatar, Due Apr 10, orange priority, "In Progress" |
-| **Node 2** | Dynamic | DECISION: "Use Neon vs Supabase?", Score 84 (emerald), "Decided", "2d ago" |
+| **Node 2** | Dynamic | DECISION: "Use Supabase for Auth + DB?", Score 84 (emerald), "Decided", "2d ago" |
 | **Node 3** | Dynamic | DOC: "Product Requirements Doc", "1,240 words", "Updated 2h ago" |
 | **Node 4** | Dynamic | TASK: "Fix auth redirect bug", RK avatar, Due Apr 5, red priority, "Done" |
 | **Node 5** | Dynamic | DECISION: "Pricing model?", Score 62 (amber), "Open" |

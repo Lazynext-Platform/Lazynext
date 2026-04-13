@@ -4,10 +4,10 @@ import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
 describe('Decision Quality Scoring', () => {
   it('should score a well-documented decision highly', () => {
     const score = computeDecisionQualityScore({
-      question: 'Should we use Neon or Supabase for our database infrastructure?',
-      resolution: 'We chose Neon PostgreSQL because of serverless scaling, DB branching, and India region availability.',
-      rationale: 'Supabase Auth was appealing but Clerk handles auth better. Neon\'s serverless model means zero cost at rest. PlanetScale was considered but MySQL is less ideal for our graph-native data model.',
-      optionsConsidered: ['Neon', 'Supabase', 'PlanetScale'],
+      question: 'Should we use Supabase or separate services for auth and database?',
+      resolution: 'We chose Supabase because it unifies Auth + PostgreSQL + RLS in one platform with a generous free tier.',
+      rationale: 'Supabase provides auth, database, real-time, and storage in one platform. RLS policies give row-level security out of the box. The JS client simplifies queries compared to a separate ORM.',
+      optionsConsidered: ['Supabase', 'Firebase', 'PlanetScale'],
       decisionType: 'irreversible',
     })
     expect(score).toBeGreaterThanOrEqual(60)

@@ -1,8 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { decisions } from '@/lib/db/schema'
-import { eq, and, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
 
@@ -20,26 +18,26 @@ const createSchema = z.object({
 export async function GET(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
 
-  const status = url.searchParams.get('status')
+  const { data: results, error } = await db
+    .from('decisions')
+    .select('*')
+    .eq('workspace_id', workspaceId)
+    .order('created_at', { ascending: false })
 
-  let query = db.select().from(decisions)
-    .where(eq(decisions.workspaceId, workspaceId))
-    .orderBy(desc(decisions.createdAt))
-
-  const results = await query
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: results, error: null })
 }
 
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
@@ -55,14 +53,20 @@ export async function POST(req: Request) {
     decisionType: parsed.data.decisionType,
   })
 
-  const [decision] = await db.insert(decisions).values({
-    ...parsed.data,
-    optionsConsidered: parsed.data.optionsConsidered || [],
+  const { data: decision, error } = await db.from('decisions').insert({
+    workspace_id: parsed.data.workspaceId,
+    question: parsed.data.question,
+    resolution: parsed.data.resolution || null,
+    rationale: parsed.data.rationale || null,
+    options_considered: parsed.data.optionsConsidered || [],
+    decision_type: parsed.data.decisionType || null,
     tags: parsed.data.tags || [],
-    qualityScore,
-    qualityScoredAt: new Date(),
-    madeBy: userId,
-  }).returning()
+    node_id: parsed.data.nodeId || null,
+    quality_score: qualityScore,
+    quality_scored_at: new Date().toISOString(),
+    made_by: userId,
+  }).select().single()
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: decision, error: null }, { status: 201 })
 }

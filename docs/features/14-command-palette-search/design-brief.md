@@ -116,12 +116,12 @@
 |---|---|
 | Palette placeholder | "Type a command or search..." |
 | Quick Actions | Create Task, Create Doc, Log Decision, Open LazyMind |
-| Recent items | "Ship onboarding v2" (Task, In Progress, 2h ago), "Use Neon vs Supabase for DB?" (Decision, Decided, Score 84, 1d ago), "Product Requirements Doc" (Doc, 1,240 words, 3d ago) |
+| Recent items | "Ship onboarding v2" (Task, In Progress, 2h ago), "Use Supabase for Auth + DB?" (Decision, Decided, Score 84, 1d ago), "Product Requirements Doc" (Doc, 1,240 words, 3d ago) |
 | Navigation items | Go to Decision DNA, Go to Settings, Go to Templates |
-| Search query example | "neon database" |
+| Search query example | "supabase database" |
 | Tab counts | All: 12, Tasks: 3, Docs: 4, Decisions: 5 |
-| Result examples | "Use Neon vs Supabase for DB?" (Decision, Quality 84), "Technical Architecture" (Doc, 3,450 words), "Set up Neon database" (Task, Done), "Database migration strategy?" (Decision, Quality 56, Open), "Cost Analysis" (Doc, 890 words), "Configure Neon branching for CI" (Task, In Progress) |
-| Semantic hint | 'Try asking questions like "Why did we choose Neon?" or "What decisions about pricing?"' |
+| Result examples | "Use Supabase for Auth + DB?" (Decision, Quality 84), "Technical Architecture" (Doc, 3,450 words), "Set up Supabase database" (Task, Done), "Database migration strategy?" (Decision, Quality 56, Open), "Cost Analysis" (Doc, 890 words), "Configure Supabase RLS policies" (Task, In Progress) |
+| Semantic hint | 'Try asking questions like "Why did we choose Supabase?" or "What decisions about pricing?"' |
 
 ---
 

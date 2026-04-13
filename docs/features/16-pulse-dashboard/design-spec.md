@@ -106,11 +106,11 @@
 | Event | Icon Color | Detail |
 |---|---|---|
 | Task completed | green-500/20 | "Avas completed Fix auth redirect bug" — 2h ago |
-| Decision logged | orange-500/20 | "Priya logged decision Use Neon vs Supabase?" — 5h ago, Quality 84 |
+| Decision logged | orange-500/20 | "Priya logged decision Use Supabase for Auth + DB?" — 5h ago, Quality 84 |
 | Doc updated | green-500/20 | "Raj updated Product Requirements Doc" — 8h ago, +340 words |
 | Task started | blue-500/20 | "Neha started Design landing page" — 1d ago |
 | Comment | purple-500/20 | "Priya commented on API integration" — 1d ago, with quote |
-| Outcome tagged | green-500/20 | "Avas tagged outcome Good on Use Clerk vs Auth0" — 2d ago |
+| Outcome tagged | green-500/20 | "Avas tagged outcome Good on Choose auth provider" — 2d ago |
 
 - "View full activity log" link at bottom (primary color, hover underline)
 

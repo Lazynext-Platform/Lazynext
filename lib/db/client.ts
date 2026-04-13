@@ -1,25 +1,30 @@
-import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
-import * as schema from './schema'
+import { createClient } from '@supabase/supabase-js'
 
 const hasValidDatabaseUrl =
-  !!process.env.DATABASE_URL &&
-  !process.env.DATABASE_URL.includes('placeholder') &&
-  process.env.DATABASE_URL.startsWith('postgres')
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder') &&
+  !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export { hasValidDatabaseUrl }
 
 function createDb() {
-  const url = process.env.DATABASE_URL
-  if (!url || !hasValidDatabaseUrl) {
-    throw new Error('DATABASE_URL is not configured. Set a valid Neon PostgreSQL connection string in .env.local')
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key || !hasValidDatabaseUrl) {
+    throw new Error('Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local')
   }
-  const sql = neon(url)
-  return drizzle(sql, { schema })
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }
 
 // Lazy singleton — only connects when first accessed
 let _db: ReturnType<typeof createDb> | null = null
+
+export function getDb() {
+  if (!_db) _db = createDb()
+  return _db
+}
 
 export const db = new Proxy({} as ReturnType<typeof createDb>, {
   get(_target, prop) {

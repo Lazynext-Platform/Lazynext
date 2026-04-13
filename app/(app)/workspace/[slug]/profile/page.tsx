@@ -106,7 +106,7 @@ export default function ProfilePage() {
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900 p-5">
             <div className="flex items-center justify-between">
-              <div><h3 className="text-sm font-semibold text-slate-200">Two-Factor Authentication</h3><p className="text-xs text-slate-500">Managed via Clerk</p></div>
+              <div><h3 className="text-sm font-semibold text-slate-200">Two-Factor Authentication</h3><p className="text-xs text-slate-500">Managed via Supabase Auth</p></div>
               <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">Enabled</span>
             </div>
           </div>

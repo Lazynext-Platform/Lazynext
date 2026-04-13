@@ -47,7 +47,7 @@
 **Purpose**: Enable finding and narrowing decisions
 **Layout**: Search input full-width, filter row with flex-wrap below
 **Key elements**:
-- Search input with magnifying glass icon, placeholder "Search decisions... (e.g., 'Why did we choose Neon?')"
+- Search input with magnifying glass icon, placeholder "Search decisions... (e.g., 'Why did we choose Supabase?')"
 - Filter selects: Outcome, Quality, Date Range, Tags
 - Sort select: right-aligned with ml-auto
 **Rationale**: Search-first approach; filters as secondary refinement; sort separated to right

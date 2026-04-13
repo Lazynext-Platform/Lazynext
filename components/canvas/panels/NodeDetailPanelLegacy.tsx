@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils/cn'
 
 const sampleThread = [
   { id: 't1', author: 'Priya', initials: 'PK', color: 'bg-emerald-500', message: 'Why not PlanetScale?', time: '2h ago' },
-  { id: 't2', author: 'Avas', initials: 'AP', color: 'bg-indigo-500', message: 'MySQL syntax + no branching. Neon wins on DX.', time: '1h ago' },
+  { id: 't2', author: 'Avas', initials: 'AP', color: 'bg-indigo-500', message: 'MySQL syntax + no RLS. Supabase wins on DX.', time: '1h ago' },
 ]
 
 export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {

@@ -23,7 +23,7 @@ const quickActions = [
 
 const recentItems = [
   { type: 'task', icon: CheckSquare, color: 'bg-blue-500', title: 'Ship onboarding v2', meta: 'In Progress', time: '2h ago' },
-  { type: 'decision', icon: GitBranch, color: 'bg-orange-500', title: 'Use Neon vs Supabase for DB?', meta: 'Decided · Score 84', time: '1d ago' },
+  { type: 'decision', icon: GitBranch, color: 'bg-orange-500', title: 'Use Supabase for Auth + DB?', meta: 'Decided · Score 84', time: '1d ago' },
   { type: 'doc', icon: FileText, color: 'bg-emerald-500', title: 'Product Requirements Doc', meta: '1,240 words', time: '3d ago' },
 ]
 

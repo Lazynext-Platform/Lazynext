@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions, threads, and automations on an infinite canvas. Built with Next.js 14, ReactFlow, Clerk auth, Neon PostgreSQL, and Tailwind CSS. Its hero feature — Decision DNA — tracks decision quality and outcomes to help teams learn from their choices.
+Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions, threads, and automations on an infinite canvas. Built with Next.js 14, ReactFlow, Supabase (Auth + PostgreSQL), and Tailwind CSS. Its hero feature — Decision DNA — tracks decision quality and outcomes to help teams learn from their choices.
 
 ## Project Structure
 
@@ -8,7 +8,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 lazynext/
 ├── app/                      # Next.js App Router
 │   ├── (marketing)/          # Public — landing, pricing
-│   ├── (auth)/               # Auth — Clerk sign-in/up
+│   ├── (auth)/               # Auth — Supabase sign-in/up
 │   ├── (app)/                # Protected — workspace
 │   │   ├── onboarding/       # First-time workspace setup
 │   │   └── workspace/[slug]/ # Dynamic workspace routes
@@ -24,7 +24,7 @@ lazynext/
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI
 │   ├── billing/              # Stripe + Razorpay
-│   ├── db/                   # Drizzle schema + Neon client
+│   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
 │   ├── inngest/              # Background jobs
 │   └── utils/                # Utilities

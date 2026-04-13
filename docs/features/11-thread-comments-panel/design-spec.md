@@ -29,7 +29,7 @@
 **Purpose**: Show the decision this thread is attached to without requiring navigation away
 **Layout**: Compact card (px-4, py-3), border-bottom, bg-slate-900/50
 **Key elements**:
-- Decision title: "Use Neon vs Supabase for DB?" (text-sm, font-semibold)
+- Decision title: "Use Supabase for Auth + DB?" (text-sm, font-semibold)
 - Status badge: "Decided" (green pill)
 - Quality score: "84" in small green circle with "Quality" label
 - Date: "Apr 2, 2026" (right-aligned)
@@ -49,8 +49,8 @@
 **Key elements**:
 
 **Message 1 (Avas Patel, 3 days ago)**:
-- Text: Research summary recommending Neon
-- Embedded comparison table: 5 features across 3 providers (Neon, Supabase, PlanetScale)
+- Text: Research summary recommending Supabase
+- Embedded comparison table: 5 features across 3 providers (Supabase, Firebase, PlanetScale)
 - Table uses checkmark (green), X (red), tilde (amber) indicators
 - Features: Serverless, India Region, Branching, Free Tier, SQL Flavor
 
@@ -59,14 +59,14 @@
 - Reaction: thumbs up (1)
 
 **Message 3 (Avas Patel, 2 days ago)**:
-- Text: Explains PlanetScale's MySQL issue and Neon's branching advantage
+- Text: Explains PlanetScale's MySQL issue and Supabase's RLS advantage
 
 **Message 4 (Raj Kumar, 2 days ago)**:
-- Text: Agreement with Neon choice + @mention of Priya Sharma
+- Text: Agreement with Supabase choice + @mention of Priya Sharma
 - @mention styled as blue pill (bg-[#4F6EF7]/10, text-[#4F6EF7])
 
 **Message 5 (Priya Sharma, 1 day ago)**:
-- Text: Consensus to go with Neon + thumbs up emoji
+- Text: Consensus to go with Supabase + thumbs up emoji
 - Reactions: thumbs up (3, active/blue state) + party (2)
 
 **Rationale**: Real conversation demonstrates natural decision discussion flow — research, challenge, response, consensus. Embedded table shows rich content capability.

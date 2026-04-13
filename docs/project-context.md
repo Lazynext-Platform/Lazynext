@@ -29,9 +29,9 @@ Target audience: remote-first teams, SaaS companies, agencies, indie hackers, an
 | **Language** | TypeScript | 5.9.x | Type safety for complex graph data models |
 | **Framework** | Next.js (App Router) | 14.2.x | SSR + API routes + React ecosystem |
 | **React** | React | 18.3.x | Stable, ReactFlow compatible |
-| **Database** | Neon PostgreSQL | Serverless | Serverless Postgres, branching, India region |
-| **ORM** | Drizzle ORM | 0.45.x | Lightweight, SQL-like, fast serverless cold starts |
-| **Auth** | Clerk | 7.0.x | Org/workspace support, India compliance |
+| **Database** | Supabase PostgreSQL | — | Unified Auth + DB, RLS policies, real-time |
+| **ORM** | Supabase JS Client | 2.49.x | Query builder, no separate ORM needed |
+| **Auth** | Supabase Auth | — | Built-in auth with RLS, OAuth support |
 | **Canvas** | ReactFlow (@xyflow/react) | 12.10.x | Purpose-built for node-graph UIs |
 | **State** | Zustand | 5.0.x | Minimal boilerplate, great with React 18 |
 | **Styling** | Tailwind CSS | 3.4.x | Consistent design tokens, fast iteration |
@@ -62,7 +62,7 @@ Target audience: remote-first teams, SaaS companies, agencies, indie hackers, an
 lazynext/
 ├── app/                      # Next.js App Router pages + API
 │   ├── (marketing)/          # Public routes — landing, pricing
-│   ├── (auth)/               # Auth routes — Clerk sign-in/up
+│   ├── (auth)/               # Auth routes — Supabase sign-in/up
 │   ├── (app)/                # Protected routes — workspace
 │   │   ├── onboarding/       # First-time workspace setup
 │   │   └── workspace/[slug]/ # Dynamic workspace routes
@@ -84,7 +84,7 @@ lazynext/
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI integration
 │   ├── billing/              # Stripe + Razorpay
-│   ├── db/                   # Drizzle schema + Neon client
+│   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend email templates
 │   ├── inngest/              # Background job definitions
 │   └── utils/                # Shared utility functions
@@ -100,8 +100,8 @@ lazynext/
 │   ├── design-system.md      # Design tokens and patterns
 │   └── features/             # 38 feature folders (design + development)
 ├── public/                   # Static assets
-├── middleware.ts             # Clerk auth middleware
-├── drizzle.config.ts         # DB config
+├── middleware.ts             # Supabase auth middleware
+├── drizzle.config.ts         # Deprecated — kept for reference
 ├── tailwind.config.ts        # Design tokens
 └── next.config.js            # Next.js config
 ```
@@ -114,7 +114,7 @@ lazynext/
 | 7 node primitives | TASK, DOC, DECISION, THREAD, PULSE, AUTOMATION, TABLE | Covers 95% of team workflow needs |
 | Graph data model | Nodes + Edges tables with JSONB data | Flexible per-type data without separate tables per primitive |
 | Mobile canvas fallback | NodeListView below 640px | ReactFlow doesn't render on small viewports |
-| Multi-tenant isolation | Workspace-level with Clerk org mapping | Clean tenant isolation, Clerk handles user management |
+| Multi-tenant isolation | Workspace-level with Supabase RLS policies | Clean tenant isolation, row-level security |
 | Decision DNA | First-class decisions with quality scoring + outcome tracking | Core differentiator — no competitor does this |
 | AI integration | Context-aware sidebar (LazyMind), not generic chatbot | AI should understand the workflow graph |
 | Dual payment providers | Stripe (international) + Razorpay (India/UPI) | Primary market is India, need global reach |
@@ -150,10 +150,10 @@ npm install
 
 # 3. Set up environment
 cp .env.example .env.local
-# Fill in Clerk, Neon, Groq, Razorpay, Stripe, Resend keys
+# Fill in Supabase, Groq, Razorpay, Stripe, Resend keys
 
-# 4. Push database schema
-npm run db:push
+# 4. Run Supabase migration
+# Apply lib/db/migrations/00001_supabase_init.sql via Supabase Dashboard
 
 # 5. Start dev server
 npm run dev
@@ -163,13 +163,9 @@ npm run dev
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes | — | Clerk public key |
-| `CLERK_SECRET_KEY` | Yes | — | Clerk secret key |
-| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | Yes | `/sign-in` | Sign-in route |
-| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | Yes | `/sign-up` | Sign-up route |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | Yes | `/onboarding/create-workspace` | Post-auth redirect |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | Yes | `/onboarding/create-workspace` | Post-signup redirect |
-| `DATABASE_URL` | Yes | — | Neon PostgreSQL connection string |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | — | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | — | Supabase anonymous/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | — | Supabase service role key (server-only) |
 | `GROQ_API_KEY` | Yes | — | Groq AI API key |
 | `TOGETHER_API_KEY` | No | — | Together AI fallback key |
 | `RAZORPAY_KEY_ID` | No | — | Razorpay key (India payments) |
@@ -187,7 +183,7 @@ npm run dev
 ### In Scope (v1.0)
 
 - Marketing pages (landing, pricing)
-- Auth + onboarding (Clerk-powered)
+- Auth + onboarding (Supabase-powered)
 - Workflow canvas with 7 node types
 - Node detail editing panels
 - LazyMind AI assistant panel
@@ -215,8 +211,8 @@ npm run dev
 - ReactFlow does NOT render below 640px — mobile uses NodeListView
 - Solo developer — velocity constrained, must prioritize ruthlessly
 - Groq free tier has rate limits — production needs paid plan
-- Clerk free tier up to 10,000 MAU — plan for tier upgrade at scale
-- India-first market — latency-sensitive, Neon ap-south-1 region
+- Supabase free tier has generous limits — plan for paid plan at scale
+- India-first market — latency-sensitive, choose closest Supabase region
 
 ## Team & Roles
 

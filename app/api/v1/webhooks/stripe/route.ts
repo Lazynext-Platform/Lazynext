@@ -3,8 +3,6 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
-import { workspaces } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -34,32 +32,30 @@ export async function POST(req: Request) {
         const session = event.data.object as Stripe.Checkout.Session
         const workspaceId = session.metadata?.workspaceId
         if (workspaceId && hasValidDatabaseUrl) {
-          await db.update(workspaces).set({
-            stripeCustomerId: session.customer as string,
-            stripeSubscriptionId: session.subscription as string,
+          await db.from('workspaces').update({
+            stripe_customer_id: session.customer as string,
+            stripe_subscription_id: session.subscription as string,
             plan: (session.metadata?.plan as 'starter' | 'pro' | 'business') ?? 'starter',
-            updatedAt: new Date(),
-          }).where(eq(workspaces.id, workspaceId))
+          }).eq('id', workspaceId)
         }
         break
       }
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
         if (hasValidDatabaseUrl) {
-          await db.update(workspaces).set({
-            updatedAt: new Date(),
-          }).where(eq(workspaces.stripeSubscriptionId, subscription.id))
+          await db.from('workspaces').update({
+            updated_at: new Date().toISOString(),
+          }).eq('stripe_subscription_id', subscription.id)
         }
         break
       }
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription
         if (hasValidDatabaseUrl) {
-          await db.update(workspaces).set({
+          await db.from('workspaces').update({
             plan: 'free',
-            stripeSubscriptionId: null,
-            updatedAt: new Date(),
-          }).where(eq(workspaces.stripeSubscriptionId, subscription.id))
+            stripe_subscription_id: null,
+          }).eq('stripe_subscription_id', subscription.id)
         }
         break
       }

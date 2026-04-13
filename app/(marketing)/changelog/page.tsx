@@ -34,7 +34,7 @@ const entries = [
     items: [
       { type: 'feat', text: 'Initial launch — Landing page, pricing, and auth' },
       { type: 'feat', text: 'Onboarding flow with workspace creation' },
-      { type: 'feat', text: 'Clerk authentication with Google & GitHub SSO' },
+      { type: 'feat', text: 'Supabase authentication with Google & GitHub SSO' },
     ],
   },
 ]

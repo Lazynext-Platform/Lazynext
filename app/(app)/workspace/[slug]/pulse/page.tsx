@@ -30,7 +30,7 @@ const burndownData = [
 
 const activityTimeline = [
   { actor: 'Avas', action: 'completed', target: 'Auth redirect fix', type: 'task', typeColor: 'bg-blue-500', time: '2h ago' },
-  { actor: 'Priya', action: 'decided', target: 'Use Neon for DB', type: 'decision', typeColor: 'bg-orange-500', time: '3h ago' },
+  { actor: 'Priya', action: 'decided', target: 'Use Supabase for DB', type: 'decision', typeColor: 'bg-orange-500', time: '3h ago' },
   { actor: 'Rahul', action: 'moved to Review', target: 'Canvas zoom', type: 'task', typeColor: 'bg-blue-500', time: '5h ago' },
   { actor: 'Sana', action: 'created doc', target: 'API Spec v3', type: 'doc', typeColor: 'bg-emerald-500', time: '6h ago' },
 ]

@@ -1,8 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { nodes } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 const createSchema = z.object({
@@ -20,20 +18,21 @@ const createSchema = z.object({
 export async function GET(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workflowId = url.searchParams.get('workflowId')
   if (!workflowId) return NextResponse.json({ error: 'MISSING_WORKFLOW_ID' }, { status: 400 })
 
-  const results = await db.select().from(nodes).where(eq(nodes.workflowId, workflowId))
+  const { data: results, error } = await db.from('nodes').select('*').eq('workflow_id', workflowId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: results, error: null })
 }
 
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
@@ -41,11 +40,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [node] = await db.insert(nodes).values({
-    ...parsed.data,
+  const { data: node, error } = await db.from('nodes').insert({
+    workflow_id: parsed.data.workflowId,
+    workspace_id: parsed.data.workspaceId,
+    type: parsed.data.type,
+    title: parsed.data.title,
     data: parsed.data.data || {},
-    createdBy: userId,
-  }).returning()
+    position_x: parsed.data.positionX,
+    position_y: parsed.data.positionY,
+    status: parsed.data.status || null,
+    assigned_to: parsed.data.assignedTo || null,
+    created_by: userId,
+  }).select().single()
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: node, error: null }, { status: 201 })
 }

@@ -1,10 +1,6 @@
-import type { Config } from 'drizzle-kit'
+// This file is no longer used.
+// Database is managed via Supabase Dashboard and SQL migrations.
+// See lib/db/migrations/00001_supabase_init.sql for the schema.
+// Use `npx supabase gen types typescript` to generate TypeScript types.
 
-export default {
-  schema: './lib/db/schema.ts',
-  out: './lib/db/migrations',
-  dialect: 'postgresql',
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-  },
-} satisfies Config
+export {}

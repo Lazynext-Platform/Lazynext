@@ -3,8 +3,6 @@ import { Resend } from 'resend'
 import { WorkspaceInviteEmail, TaskAssignmentEmail, WeeklyDigestEmail, DecisionDigestEmail } from '@/lib/email/templates/index'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
-import { decisions, nodes, workflows, workspaces } from '@/lib/db/schema'
-import { eq, desc, count } from 'drizzle-orm'
 import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
 
 function getResend() {
@@ -60,22 +58,29 @@ export const handleDecisionLogged = inngest.createFunction(
     const { decisionId } = event.data as { decisionId: string; workspaceId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }
 
-    const [decision] = await db.select().from(decisions).where(eq(decisions.id, decisionId)).limit(1)
+    const { data: decision } = await db
+      .from('decisions')
+      .select('*')
+      .eq('id', decisionId)
+      .single()
+
     if (!decision) return { error: 'Decision not found' }
 
     const score = computeDecisionQualityScore({
       question: decision.question,
       resolution: decision.resolution ?? '',
       rationale: decision.rationale ?? '',
-      optionsConsidered: (decision.optionsConsidered as string[]) ?? [],
-      decisionType: decision.decisionType ?? 'reversible',
+      optionsConsidered: (decision.options_considered as string[]) ?? [],
+      decisionType: decision.decision_type ?? 'reversible',
     })
 
-    await db.update(decisions).set({
-      qualityScore: score,
-      qualityScoredAt: new Date(),
-      updatedAt: new Date(),
-    }).where(eq(decisions.id, decisionId))
+    await db
+      .from('decisions')
+      .update({
+        quality_score: score,
+        quality_scored_at: new Date().toISOString(),
+      })
+      .eq('id', decisionId)
 
     return { scored: true, score }
   }
@@ -101,21 +106,32 @@ export const handleWeeklyDigest = inngest.createFunction(
     const resend = getResend()
     if (!resend) return { skipped: true }
 
-    const [workspace] = await db.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1)
+    const { data: workspace } = await db
+      .from('workspaces')
+      .select('*')
+      .eq('id', workspaceId)
+      .single()
+
     if (!workspace) return { error: 'Workspace not found' }
 
     // Gather stats
-    const [nodeCount] = await db.select({ value: count() }).from(nodes).where(eq(nodes.workspaceId, workspaceId))
-    const [decisionCount] = await db.select({ value: count() }).from(decisions).where(eq(decisions.workspaceId, workspaceId))
+    const { count: nodeCount } = await db
+      .from('nodes')
+      .select('*', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
+
+    const { count: decisionCount } = await db
+      .from('decisions')
+      .select('*', { count: 'exact', head: true })
+      .eq('workspace_id', workspaceId)
 
     const stats = {
-      tasksCompleted: nodeCount?.value ?? 0,
-      decisionsLogged: decisionCount?.value ?? 0,
+      tasksCompleted: nodeCount ?? 0,
+      decisionsLogged: decisionCount ?? 0,
       avgQuality: 72,
       activeMembers: 3,
     }
 
-    // For now we log; in production, fetch member emails and send to each
     console.log(`[inngest] Weekly digest for workspace ${workspace.name}:`, stats)
     return { processed: true, stats }
   }
@@ -128,12 +144,12 @@ export const handleExportRequested = inngest.createFunction(
     const { workspaceId, format, userId } = event.data as { workspaceId: string; format: string; userId: string }
     if (!hasValidDatabaseUrl) return { skipped: true }
 
-    const allWorkflows = await db.select().from(workflows).where(eq(workflows.workspaceId, workspaceId))
-    const allNodes = await db.select().from(nodes).where(eq(nodes.workspaceId, workspaceId))
-    const allDecisions = await db.select().from(decisions).where(eq(decisions.workspaceId, workspaceId))
+    const { data: allWorkflows } = await db.from('workflows').select('*').eq('workspace_id', workspaceId)
+    const { data: allNodes } = await db.from('nodes').select('*').eq('workspace_id', workspaceId)
+    const { data: allDecisions } = await db.from('decisions').select('*').eq('workspace_id', workspaceId)
 
-    console.log(`[inngest] Export for workspace ${workspaceId}: ${allWorkflows.length} workflows, ${allNodes.length} nodes, ${allDecisions.length} decisions`)
-    return { processed: true, format, nodeCount: allNodes.length }
+    console.log(`[inngest] Export for workspace ${workspaceId}: ${(allWorkflows || []).length} workflows, ${(allNodes || []).length} nodes, ${(allDecisions || []).length} decisions`)
+    return { processed: true, format, nodeCount: (allNodes || []).length }
   }
 )
 

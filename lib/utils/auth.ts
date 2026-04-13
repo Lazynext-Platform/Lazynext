@@ -1,15 +1,14 @@
-import { auth } from '@clerk/nextjs/server'
-
-const hasValidClerkKeys =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_') &&
-  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
+import { createClient } from '@/lib/db/supabase/server'
 
 /**
- * Safe auth wrapper — returns a dev userId when Clerk keys are placeholder
+ * Safe auth wrapper — returns userId from Supabase session
  */
 export async function safeAuth(): Promise<{ userId: string | null }> {
-  if (!hasValidClerkKeys) {
-    return { userId: 'dev-user' }
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return { userId: user?.id ?? null }
+  } catch {
+    return { userId: null }
   }
-  return auth()
 }

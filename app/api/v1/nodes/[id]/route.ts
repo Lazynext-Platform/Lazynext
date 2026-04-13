@@ -1,8 +1,6 @@
 import { safeAuth } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { nodes } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -17,21 +15,22 @@ const updateSchema = z.object({
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  const node = await db.query.nodes.findFirst({
-    where: eq(nodes.id, params.id),
-    with: { threads: true },
-  })
+  const { data: node, error } = await db
+    .from('nodes')
+    .select('*, threads(*)')
+    .eq('id', params.id)
+    .single()
 
-  if (!node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+  if (error || !node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
   return NextResponse.json({ data: node, error: null })
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const body = await req.json()
   const parsed = updateSchema.safeParse(body)
@@ -39,19 +38,30 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const [updated] = await db.update(nodes)
-    .set({ ...parsed.data, updatedAt: new Date(), updatedBy: userId })
-    .where(eq(nodes.id, params.id))
-    .returning()
+  const updateData: Record<string, unknown> = { updated_by: userId }
+  if (parsed.data.title !== undefined) updateData.title = parsed.data.title
+  if (parsed.data.data !== undefined) updateData.data = parsed.data.data
+  if (parsed.data.positionX !== undefined) updateData.position_x = parsed.data.positionX
+  if (parsed.data.positionY !== undefined) updateData.position_y = parsed.data.positionY
+  if (parsed.data.status !== undefined) updateData.status = parsed.data.status
+  if (parsed.data.assignedTo !== undefined) updateData.assigned_to = parsed.data.assignedTo
 
+  const { data: updated, error } = await db
+    .from('nodes')
+    .update(updateData)
+    .eq('id', params.id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ data: updated, error: null })
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set DATABASE_URL in .env.local to connect to a Neon PostgreSQL database.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  await db.delete(nodes).where(eq(nodes.id, params.id))
+  await db.from('nodes').delete().eq('id', params.id)
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

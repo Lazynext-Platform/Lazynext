@@ -1,38 +1,130 @@
-import { SignUp } from '@clerk/nextjs'
+'use client'
 
-const hasValidClerkKeys =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.startsWith('pk_') &&
-  !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.includes('placeholder')
+import { createClient } from '@/lib/db/supabase/client'
+import { useState } from 'react'
 
 export default function SignUpPage() {
-  if (!hasValidClerkKeys) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setLoading(true)
+
+    const supabase = createClient()
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    setSuccess(true)
+    setLoading(false)
+  }
+
+  const handleOAuth = async (provider: 'google' | 'github') => {
+    const supabase = createClient()
+    await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    })
+  }
+
+  if (success) {
     return (
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign Up</h2>
-        <p className="text-slate-500 mb-4">Authentication is not configured yet.</p>
-        <p className="text-sm text-slate-400">Set <code className="bg-slate-100 px-1.5 py-0.5 rounded">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> in your <code className="bg-slate-100 px-1.5 py-0.5 rounded">.env.local</code> to enable sign up.</p>
-        <a href="/" className="mt-6 inline-block text-[#4F6EF7] hover:underline">← Back to home</a>
+      <div className="w-full max-w-sm text-center">
+        <h2 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h2>
+        <p className="text-slate-500 mb-4">We sent a confirmation link to <strong>{email}</strong></p>
+        <a href="/sign-in" className="text-[#4F6EF7] hover:text-[#3D5BD4]">← Back to sign in</a>
       </div>
     )
   }
 
   return (
-    <SignUp
-      appearance={{
-        elements: {
-          rootBox: 'w-full',
-          card: 'w-full shadow-none border-0 p-0',
-          headerTitle: 'text-2xl font-bold text-slate-900',
-          headerSubtitle: 'text-slate-500',
-          socialButtonsBlockButton:
-            'border border-slate-200 hover:bg-slate-50 transition-colors',
-          formFieldInput:
-            'rounded-lg border-slate-200 focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent',
-          formButtonPrimary:
-            'bg-[#4F6EF7] hover:bg-[#3D5BD4] rounded-lg py-3 text-sm font-semibold',
-          footerActionLink: 'text-[#4F6EF7] hover:text-[#3D5BD4]',
-        },
-      }}
-    />
+    <div className="w-full max-w-sm">
+      <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign Up</h2>
+      <p className="text-slate-500 mb-6">Create your Lazynext account</p>
+
+      <div className="space-y-3 mb-6">
+        <button
+          onClick={() => handleOAuth('google')}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+        >
+          Continue with Google
+        </button>
+        <button
+          onClick={() => handleOAuth('github')}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+        >
+          Continue with GitHub
+        </button>
+      </div>
+
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">or</span></div>
+      </div>
+
+      <form onSubmit={handleSignUp} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-[#4F6EF7] focus:border-transparent outline-none"
+            minLength={6}
+            required
+          />
+        </div>
+        {error && <p className="text-sm text-red-500">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-lg bg-[#4F6EF7] px-4 py-3 text-sm font-semibold text-white hover:bg-[#3D5BD4] transition-colors disabled:opacity-50"
+        >
+          {loading ? 'Creating account...' : 'Sign Up'}
+        </button>
+      </form>
+
+      <p className="mt-6 text-center text-sm text-slate-500">
+        Already have an account?{' '}
+        <a href="/sign-in" className="text-[#4F6EF7] hover:text-[#3D5BD4]">Sign in</a>
+      </p>
+    </div>
   )
 }

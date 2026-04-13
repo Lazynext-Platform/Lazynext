@@ -30,7 +30,7 @@ const typeBadge: Record<NotifType, { label: string; color: string }> = {
 
 const notifications: Notification[] = [
   { id: '1', actor: 'Priya Sharma', initials: 'PS', avatarColor: 'bg-emerald-500', action: 'assigned you to Ship onboarding v2', type: 'task', time: '10m ago', unread: true, group: 'Today' },
-  { id: '2', actor: 'Raj Kumar', initials: 'RK', avatarColor: 'bg-amber-500', action: 'logged a decision: Use Neon vs Supabase? · Score 84', type: 'decision', time: '1h ago', unread: true, group: 'Today' },
+  { id: '2', actor: 'Raj Kumar', initials: 'RK', avatarColor: 'bg-amber-500', action: 'logged a decision: Use Supabase for Auth + DB? · Score 84', type: 'decision', time: '1h ago', unread: true, group: 'Today' },
   { id: '3', actor: 'Meera Joshi', initials: 'MJ', avatarColor: 'bg-pink-500', action: 'mentioned you in Database migration thread', type: 'thread', time: '2h ago', unread: true, group: 'Today' },
   { id: '4', actor: 'LazyMind', initials: 'AI', avatarColor: 'bg-brand', action: 'detected a pattern: 3 decisions this week lack rationale', type: 'ai', time: '3h ago', unread: true, group: 'Today' },
   { id: '5', actor: 'System', initials: 'SY', avatarColor: 'bg-emerald-600', action: 'Automation Overdue task escalation triggered', type: 'automation', time: '4h ago', unread: true, group: 'Today' },

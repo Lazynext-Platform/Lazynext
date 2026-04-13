@@ -8,18 +8,18 @@
 
 ## What Are We Building?
 
-Split-panel auth layout wrapping Clerk's `<SignIn />` and `<SignUp />` components. Left panel shows brand messaging (blue gradient, logo, tagline, 3 feature cards). Right panel centers the Clerk form. Left panel hidden on mobile with a compact logo shown instead.
+Split-panel auth layout with custom Supabase Auth forms. Left panel shows brand messaging (blue gradient, logo, tagline, 3 feature cards). Right panel centers the auth form with email/password + OAuth buttons. Left panel hidden on mobile with a compact logo shown instead.
 
 ## Why?
 
-Auth pages are the trust-building moment. The branded left panel reinforces value while the user creates their account. Using Clerk handles auth logic while we control the visual experience.
+Auth pages are the trust-building moment. The branded left panel reinforces value while the user creates their account. Using Supabase Auth handles auth logic while we control the visual experience.
 
 ## Decisions
 
 | Decision | Choice | Rationale |
 | --- | --- | --- |
-| Form approach | Clerk components with customized appearance | Clerk handles OAuth, email/password, validation, and security. Customized with brand colors via `appearance` prop. |
-| Layout | Server component layout + Clerk client components | Layout is static (server), Clerk handles interactivity |
+| Form approach | Custom forms with Supabase Auth | Supabase handles OAuth, email/password, and session management. Custom forms give us full control over the UI. |
+| Layout | Server component layout + client auth forms | Layout is static (server), auth forms handle interactivity |
 | Left panel content | 3 feature highlights | Mirrors landing page selling points without overwhelming |
 
 ## Discussion Complete ✅
