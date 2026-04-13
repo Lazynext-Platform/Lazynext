@@ -1,11 +1,8 @@
 {
   "name": "lazynext",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "The anti-software workflow platform. Tasks, docs, decisions, and AI on an infinite canvas.",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -24,9 +21,6 @@
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^25.5.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
     "@xyflow/react": "^12.10.2",
     "autoprefixer": "^10.4.27",
     "clsx": "^2.1.1",
@@ -52,6 +46,9 @@
     "@playwright/test": "^1.49.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/node": "^25.5.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.2.0",
     "eslint-config-next": "^16.2.2",

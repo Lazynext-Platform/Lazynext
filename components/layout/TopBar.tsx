@@ -98,6 +98,8 @@ export function TopBar() {
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
+            aria-label="User menu"
+            aria-expanded={showMenu}
             className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-700 text-xs text-slate-300 hover:bg-slate-600"
           >
             <User className="h-3.5 w-3.5" />

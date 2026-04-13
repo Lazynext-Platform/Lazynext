@@ -53,7 +53,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
             <h2 className="text-lg font-semibold text-slate-100">Review Outcome</h2>
             <p className="text-xs text-slate-500">{currentIndex + 1} of {decisions.length} decisions</p>
           </div>
-          <button onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-800">
+          <button onClick={onClose} aria-label="Close outcome review" className="rounded-md p-1 text-slate-400 hover:bg-slate-800">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -82,6 +82,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
             <div className="grid grid-cols-3 gap-3">
               {outcomes.map(o => (
                 <button key={o.value} onClick={() => setSelectedOutcome(o.value)}
+                  aria-pressed={selectedOutcome === o.value}
                   className={cn('flex flex-col items-center gap-1.5 rounded-xl border-2 py-4 transition-all',
                     selectedOutcome === o.value ? o.color : 'border-slate-700 bg-slate-800/50 hover:border-slate-600')}>
                   <span className="text-2xl">{o.emoji}</span>

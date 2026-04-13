@@ -18,6 +18,8 @@ export default function ConsolidationMap() {
             viewBox="0 0 800 300"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="Diagram showing 6 tools (Notion, Jira, Slack, Google Docs, Miro, Confluence) consolidating into Lazynext"
           >
             {/* Tool boxes */}
             <rect x="20" y="20" width="100" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0" strokeWidth="1.5" />

@@ -131,7 +131,7 @@ export function LazyMindPanel() {
           <p className="text-[10px] text-slate-500">AI Assistant · Llama 3.3 70B</p>
         </div>
         <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] font-medium text-slate-400">34/100 today</span>
-        <button onClick={toggleLazyMind} className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
+        <button onClick={toggleLazyMind} aria-label="Close LazyMind panel" className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
           <X className="h-4 w-4" />
         </button>
       </div>

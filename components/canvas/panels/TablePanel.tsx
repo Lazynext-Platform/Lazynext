@@ -77,7 +77,7 @@ export default function TablePanel({ onClose }: TablePanelProps) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-slate-500">{rows.length} rows</span>
-          {onClose && <button onClick={onClose} className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-3.5 w-3.5" /></button>}
+          {onClose && <button onClick={onClose} aria-label="Close table panel" className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-3.5 w-3.5" /></button>}
         </div>
       </div>
 
