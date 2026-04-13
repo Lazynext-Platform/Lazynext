@@ -38,7 +38,10 @@ export async function callLazyMind(
       signal: AbortSignal.timeout(10000),
     })
 
-    if (!res.ok) throw new Error(`Groq error: ${res.status}`)
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => null)
+      throw new Error(`Groq error: ${res.status}${errBody?.error?.message ? ` — ${errBody.error.message}` : ''}`)
+    }
     const data = await res.json()
     return { content: data.choices[0].message.content, provider: 'groq' }
   } catch {
@@ -63,7 +66,10 @@ export async function callLazyMind(
     signal: AbortSignal.timeout(15000),
   })
 
-  if (!res.ok) throw new Error(`Together error: ${res.status}`)
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => null)
+    throw new Error(`Together error: ${res.status}${errBody?.error?.message ? ` — ${errBody.error.message}` : ''}`)
+  }
   const data = await res.json()
   return { content: data.choices[0].message.content, provider: 'together' }
 }

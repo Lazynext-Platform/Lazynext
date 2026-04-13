@@ -79,13 +79,13 @@ export function NotificationCenter() {
 
       {/* Dropdown */}
       {isNotificationOpen && (
-        <div className="absolute right-0 top-10 z-50 w-96 animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+        <div role="dialog" aria-label="Notifications" className="absolute right-0 top-10 z-50 w-96 animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
           {/* Header */}
           <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
-            <h3 className="flex-1 text-sm font-semibold text-slate-200">Notifications</h3>
-            <div className="flex items-center gap-1 rounded-lg bg-slate-800 p-0.5">
-              <button onClick={() => setTab('all')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>All</button>
-              <button onClick={() => setTab('unread')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'unread' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>Unread</button>
+            <h3 id="notif-title" className="flex-1 text-sm font-semibold text-slate-200">Notifications</h3>
+            <div role="tablist" className="flex items-center gap-1 rounded-lg bg-slate-800 p-0.5">
+              <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>All</button>
+              <button role="tab" aria-selected={tab === 'unread'} onClick={() => setTab('unread')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'unread' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>Unread</button>
             </div>
             <button onClick={markAllRead} className="flex items-center gap-1 text-2xs+ text-brand hover:text-brand-hover transition-colors">
               <CheckCheck className="h-3 w-3" />Mark all read

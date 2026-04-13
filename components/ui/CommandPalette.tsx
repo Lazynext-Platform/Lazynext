@@ -86,6 +86,7 @@ export function CommandPalette() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command or search..."
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
+            aria-label="Search commands and recent items"
             autoFocus
           />
           <kbd className="flex items-center gap-0.5 rounded border border-slate-600 bg-slate-800 px-1.5 py-0.5 text-2xs font-medium text-slate-400">
