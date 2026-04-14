@@ -16,13 +16,13 @@
 | 🟢 Complete | 38 (all merged to `main`) |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
-| ✅ Cleanup/Polish Commits | 59 |
+| ✅ Cleanup/Polish Commits | 62 |
 
 **Design Progress**: ██████████ 100%
 **Development Progress**: ██████████ 100%
 **Quality/Polish**: ██████████ 100%
 
-> **v1.0 Status**: Ship-ready. All 38 features built, 59 cleanup commits covering security hardening, accessibility (WCAG 2.1 AA — focus traps, aria-current, semantic time, skip-nav, ARIA landmarks, form labels, table scope/captions, nav list semantics, aria-live regions, motion-safe animations, aria-describedby, quality badge labels), i18n (40 locales + native translations), SEO (og:image, page metadata), rate limiting, error boundaries (23 files), prefers-reduced-motion, timer leak fixes, SSR safety, platform guide/tour system, lazy loading, page-specific skeleton screens, print styles, and comprehensive testing (95 Vitest + 92 Playwright E2E — all passing).
+> **v1.0 Status**: Ship-ready. All 38 features built, 62 cleanup commits covering security hardening, accessibility (WCAG 2.1 AA — focus traps, aria-current, semantic time, skip-nav, ARIA landmarks, form labels, table scope/captions, nav list semantics, aria-live regions, motion-safe animations, aria-describedby, quality badge labels, noValidate on custom-validated forms), i18n (40 locales + native translations), SEO (og:image, page metadata), performance (Zustand selectors preventing unnecessary re-renders across all stores), rate limiting, error boundaries (23 files), prefers-reduced-motion, timer leak fixes, SSR safety, platform guide/tour system, lazy loading, page-specific skeleton screens, print styles, and comprehensive testing (95 Vitest + 92 Playwright E2E — all passing).
 
 ---
 
