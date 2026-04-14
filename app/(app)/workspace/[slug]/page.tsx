@@ -193,7 +193,7 @@ export default function WorkspaceHomePage() {
                   {a.initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-slate-300 truncate">
+                  <p className="text-sm text-slate-300 truncate" title={`${a.actor} ${a.action} ${a.target}`}>
                     <span className="font-medium text-slate-200">{a.actor}</span>{' '}
                     {a.action}{' '}
                     <span className="font-medium text-slate-200">{a.target}</span>
@@ -216,7 +216,7 @@ export default function WorkspaceHomePage() {
             {dueSoon.map((d, i) => (
               <div key={i} className="flex items-center gap-3 rounded-lg border border-slate-800 bg-slate-900 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-200 truncate">{d.title}</p>
+                  <p className="text-sm font-medium text-slate-200 truncate" title={d.title}>{d.title}</p>
                   <span className={cn('rounded-full px-1.5 py-0.5 text-2xs font-medium capitalize', typeBadgeColor[d.type] || 'text-slate-400')}>{d.type}</span>
                 </div>
                 <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', d.urgency)}>

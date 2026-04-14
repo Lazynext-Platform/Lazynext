@@ -46,7 +46,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className="dark" suppressHydrationWarning>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
         <noscript>
           <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontFamily: 'system-ui' }}>

@@ -117,8 +117,8 @@ export default function MembersPage() {
                   {m.avatar}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate">{m.name}</p>
-                  <p className="text-xs text-slate-500 truncate">{m.email}</p>
+                  <p className="text-sm font-medium text-slate-200 truncate" title={m.name}>{m.name}</p>
+                  <p className="text-xs text-slate-500 truncate" title={m.email}>{m.email}</p>
                 </div>
               </div>
               <span className={cn('flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-semibold', role.color)}>

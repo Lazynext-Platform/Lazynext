@@ -231,7 +231,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
                 </div>
               ))}
               <div className="flex gap-2">
-                <input type="text" placeholder="Reply..." className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                <input type="text" placeholder="Reply..." maxLength={500} className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
                 <button className="rounded-lg bg-brand p-1.5 text-white hover:bg-brand-hover" aria-label="Send">
                   <Send className="h-4 w-4" />
                 </button>
