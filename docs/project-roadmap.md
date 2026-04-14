@@ -16,13 +16,13 @@
 | 🟢 Complete | 38 (all merged to `main`) |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
-| ✅ Cleanup/Polish Commits | 52 |
+| ✅ Cleanup/Polish Commits | 56 |
 
 **Design Progress**: ██████████ 100%
 **Development Progress**: ██████████ 100%
 **Quality/Polish**: ██████████ 100%
 
-> **v1.0 Status**: Ship-ready. All 38 features built, 52 cleanup commits covering security hardening, accessibility (WCAG 2.1 AA), i18n (40 locales + native translations), SEO, rate limiting, error boundaries (23 files), prefers-reduced-motion, timer leak fixes, SSR safety, platform guide/tour system, lazy loading, page-specific skeleton screens, skip-to-content navigation, and comprehensive testing (95 Vitest + 92 Playwright E2E — all passing).
+> **v1.0 Status**: Ship-ready. All 38 features built, 56 cleanup commits covering security hardening, accessibility (WCAG 2.1 AA — focus traps, aria-current, semantic time, skip-nav, ARIA landmarks, form labels), i18n (40 locales + native translations), SEO (og:image, page metadata), rate limiting, error boundaries (23 files), prefers-reduced-motion, timer leak fixes, SSR safety, platform guide/tour system, lazy loading, page-specific skeleton screens, print styles, and comprehensive testing (95 Vitest + 92 Playwright E2E — all passing).
 
 ---
 
