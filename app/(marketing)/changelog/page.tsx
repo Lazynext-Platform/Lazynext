@@ -47,7 +47,7 @@ const typeBadge: Record<string, string> = {
 
 export default function ChangelogPage() {
   return (
-    <main className="bg-white text-slate-900">
+    <main id="main-content" className="bg-white text-slate-900">
       <section className="mx-auto max-w-3xl px-6 pt-24 pb-16">
         <span className="inline-block rounded-full bg-indigo-50 px-4 py-1 text-xs font-semibold text-indigo-600">Changelog</span>
         <h1 className="mt-4 text-4xl font-bold tracking-tight">What&apos;s new in Lazynext</h1>

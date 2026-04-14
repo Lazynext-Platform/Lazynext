@@ -32,7 +32,7 @@ const features = [
 
 export default function FeaturesPage() {
   return (
-    <main className="bg-white text-slate-900">
+    <main id="main-content" className="bg-white text-slate-900">
       <section className="mx-auto max-w-4xl px-6 pt-24 pb-12 text-center">
         <span className="inline-block rounded-full bg-indigo-50 px-4 py-1 text-xs font-semibold text-indigo-600">Features</span>
         <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Everything you need, nothing you don&apos;t</h1>

@@ -37,7 +37,7 @@ export default function SignInPage() {
 
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign In</h2>
+      <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign In</h1>
       <p className="text-slate-500 mb-6">Welcome back to Lazynext</p>
 
       <div className="space-y-3 mb-6">

@@ -19,7 +19,7 @@ export function MobileBottomNav({ workspaceSlug }: { workspaceSlug: string }) {
   const base = `/workspace/${workspaceSlug}`
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe md:hidden">
+    <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe md:hidden">
       {items.map((item) => {
         const href = `${base}${item.href}`
         const isActive = pathname === href || (item.href && pathname.startsWith(href))

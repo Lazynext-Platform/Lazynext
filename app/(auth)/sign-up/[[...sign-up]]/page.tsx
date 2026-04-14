@@ -48,7 +48,7 @@ export default function SignUpPage() {
   if (success) {
     return (
       <div className="w-full max-w-sm text-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h2>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h1>
         <p className="text-slate-500 mb-4">We sent a confirmation link to <strong>{email}</strong></p>
         <Link href="/sign-in" className="text-brand hover:text-brand-hover">← Back to sign in</Link>
       </div>
@@ -57,7 +57,7 @@ export default function SignUpPage() {
 
   return (
     <div className="w-full max-w-sm">
-      <h2 className="text-2xl font-bold text-slate-900 mb-2">Sign Up</h2>
+      <h1 className="text-2xl font-bold text-slate-900 mb-2">Sign Up</h1>
       <p className="text-slate-500 mb-6">Create your Lazynext account</p>
 
       <div className="space-y-3 mb-6">

@@ -31,6 +31,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-screen">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">
+        Skip to main content
+      </a>
       {/* Left Brand Panel — Desktop only */}
       <div className="hidden bg-gradient-to-br from-brand to-brand-hover lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
         <div>
@@ -43,11 +46,11 @@ export default function AuthLayout({
           </div>
 
           {/* Headline */}
-          <h1 className="mt-12 text-4xl font-bold leading-tight text-white">
+          <h2 className="mt-12 text-4xl font-bold leading-tight text-white">
             The operating system
             <br />
             for work.
-          </h1>
+          </h2>
           <p className="mt-4 max-w-md text-lg text-blue-100">
             Everything your team needs to move fast and stay aligned.
           </p>
@@ -75,7 +78,7 @@ export default function AuthLayout({
       </div>
 
       {/* Right Form Panel */}
-      <div className="flex w-full flex-col items-center justify-center bg-white p-6 sm:p-12 lg:w-1/2">
+      <main id="main-content" className="flex w-full flex-col items-center justify-center bg-white p-6 sm:p-12 lg:w-1/2">
         {/* Mobile logo */}
         <div className="mb-8 flex items-center gap-2 lg:hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
@@ -85,7 +88,7 @@ export default function AuthLayout({
         </div>
 
         <div className="w-full max-w-md">{children}</div>
-      </div>
+      </main>
     </div>
   )
 }

@@ -22,6 +22,9 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
   return (
     <ToastProvider>
       <div className="min-h-screen bg-[#020617]">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">
+          Skip to main content
+        </a>
         <Sidebar workspaceSlug={slug} />
 
         <div
@@ -31,7 +34,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
           )}
         >
           <TopBar />
-          <main className="flex-1 pb-16 md:pb-0">{children}</main>
+          <main id="main-content" className="flex-1 pb-16 md:pb-0">{children}</main>
         </div>
 
         <MobileBottomNav workspaceSlug={slug} />

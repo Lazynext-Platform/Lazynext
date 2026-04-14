@@ -21,7 +21,7 @@ export default function BlogPage() {
   const rest = posts.filter(p => !p.featured)
 
   return (
-    <main className="bg-white text-slate-900">
+    <main id="main-content" className="bg-white text-slate-900">
       <section className="mx-auto max-w-4xl px-6 pt-24 pb-12">
         <span className="inline-block rounded-full bg-indigo-50 px-4 py-1 text-xs font-semibold text-indigo-600">Blog</span>
         <h1 className="mt-4 text-4xl font-bold tracking-tight">Stories & insights</h1>

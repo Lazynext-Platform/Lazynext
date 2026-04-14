@@ -71,6 +71,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
 
   return (
     <aside
+      aria-label="Sidebar"
       className={cn(
         'fixed left-0 top-0 z-30 flex h-screen w-60 flex-col border-r border-slate-800 bg-slate-900 transition-transform duration-200',
         !isSidebarOpen && '-translate-x-full'

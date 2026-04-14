@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function LandingPage() {
   return (
-    <main>
+    <main id="main-content">
       <HeroSection />
       <SocialProofBar />
       <ProblemSection />

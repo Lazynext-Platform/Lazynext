@@ -174,7 +174,7 @@ export default function PricingPage() {
   const isAnnual = billing === 'annual'
 
   return (
-    <main>
+    <main id="main-content">
       {/* PRICING HERO */}
       <section className="pb-10 pt-20 sm:pb-14 sm:pt-28">
         <div className="mx-auto max-w-4xl px-6 text-center">

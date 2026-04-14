@@ -36,12 +36,15 @@ export default function MarketingLayout({
 }) {
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">
+        Skip to main content
+      </a>
       <MarketingHeader />
 
       {children}
 
       {/* Marketing Footer */}
-      <footer className="bg-slate-900 py-16 text-slate-400">
+      <footer aria-label="Site footer" className="bg-slate-900 py-16 text-slate-400">
         <div className="mx-auto max-w-[1280px] px-6">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-5 md:gap-12">
             {/* Brand */}
