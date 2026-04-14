@@ -125,6 +125,7 @@ export function LocaleSwitcher({ compact = false }: { compact?: boolean }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={tab === 'language' ? 'Search language...' : 'Search currency...'}
+              maxLength={50}
               className="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-500 focus:border-brand focus:outline-none"
             />
           </div>

@@ -63,6 +63,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
           type="text"
           defaultValue={title}
           onBlur={(e) => updateNodeData(nodeId, { title: e.target.value })}
+          maxLength={200}
           className="w-full bg-transparent text-lg font-semibold text-slate-50 placeholder-slate-600 focus:outline-none"
           placeholder="Untitled"
         />
@@ -115,6 +116,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
               defaultValue={assignee}
               onBlur={(e) => updateNodeData(nodeId, { assignee: e.target.value })}
               placeholder="Assign to..."
+              maxLength={100}
               className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
             />
           </div>
@@ -238,6 +240,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             <textarea
               placeholder="Add a description..."
               rows={4}
+              maxLength={2000}
               className="mt-1 w-full resize-none rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
             />
           </div>
@@ -285,6 +288,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
             <input
               type="text"
               placeholder="Write a comment..."
+              maxLength={500}
               className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
             />
             <button className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors" aria-label="Send comment">

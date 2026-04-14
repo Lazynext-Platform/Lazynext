@@ -254,6 +254,7 @@ export function LazyMindPanel() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) } }}
             placeholder="Ask LazyMind anything..."
+            maxLength={1000}
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
           />
           <button onClick={() => sendMessage(input)} disabled={!input.trim()} aria-label="Send message" className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white disabled:opacity-30 hover:bg-brand-hover transition-colors">

@@ -73,6 +73,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={() => updateNodeData(nodeId, { title })}
+          maxLength={200}
           className="w-full bg-transparent text-xl font-bold text-slate-50 placeholder-slate-600 focus:outline-none"
           placeholder="What's the decision?"
         />
