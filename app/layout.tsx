@@ -22,11 +22,13 @@ export const metadata: Metadata = {
     description: 'Tasks, docs, decisions, and AI in one unified workspace. Decision DNA tracks every choice your team makes.',
     type: 'website',
     siteName: 'Lazynext',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Lazynext — The Anti-Software Workflow Platform' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
     description: 'Tasks, docs, decisions, and AI in one unified workspace.',
+    images: ['/og-image.png'],
   },
   icons: {
     icon: '/icon.svg',
