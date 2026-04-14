@@ -78,7 +78,7 @@ export function CommandPalette() {
       {/* Modal */}
       <div
         ref={modalRef}
-        className="relative w-full max-w-lg animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
+        className="relative w-full max-w-lg motion-safe:animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}

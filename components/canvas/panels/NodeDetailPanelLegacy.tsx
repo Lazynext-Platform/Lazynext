@@ -38,7 +38,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
   const options = a('options')
 
   return (
-    <div className="absolute right-0 top-0 z-20 flex h-full w-96 flex-col border-l border-slate-800 bg-slate-900 shadow-2xl animate-slide-in-right">
+    <div className="absolute right-0 top-0 z-20 flex h-full w-96 flex-col border-l border-slate-800 bg-slate-900 shadow-2xl motion-safe:animate-slide-in-right">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3">
         <div className="flex items-center gap-2">

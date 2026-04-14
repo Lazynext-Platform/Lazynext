@@ -80,7 +80,7 @@ export function NotificationCenter() {
 
       {/* Dropdown */}
       {isNotificationOpen && (
-        <div role="dialog" aria-label="Notifications" className="absolute right-0 top-10 z-50 w-96 animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+        <div role="dialog" aria-label="Notifications" className="absolute right-0 top-10 z-50 w-96 motion-safe:animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
           {/* Header */}
           <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
             <h3 id="notif-title" className="flex-1 text-sm font-semibold text-slate-200">Notifications</h3>

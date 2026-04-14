@@ -189,7 +189,7 @@ export default function CreateWorkspacePage() {
       <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-8">
         {/* STEP 1 — Workspace Setup */}
         {step === 1 && (
-          <div className="animate-fadeIn">
+          <div className="motion-safe:animate-fadeIn">
             <h1 className="text-center text-2xl font-bold text-white">
               Let&apos;s set up your workspace
             </h1>
@@ -236,7 +236,7 @@ export default function CreateWorkspacePage() {
 
         {/* STEP 2 — Setup Choice */}
         {step === 2 && (
-          <div className="animate-fadeIn">
+          <div className="motion-safe:animate-fadeIn">
             <button
               onClick={() => setStep(1)}
               className="mb-4 flex items-center gap-1 text-sm text-slate-400 transition-colors hover:text-white"
@@ -287,7 +287,7 @@ export default function CreateWorkspacePage() {
 
         {/* STEP 3 — First Decision */}
         {step === 3 && !showSuccess && (
-          <div className="animate-fadeIn">
+          <div className="motion-safe:animate-fadeIn">
             <button
               onClick={() => {
                 setStep(2)
@@ -359,7 +359,7 @@ export default function CreateWorkspacePage() {
 
         {/* STEP 3 — Success */}
         {step === 3 && showSuccess && (
-          <div className="animate-fadeIn text-center">
+          <div className="motion-safe:animate-fadeIn text-center">
             {/* Score badge */}
             <div
               className={`mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-emerald-500 transition-all duration-500 ${

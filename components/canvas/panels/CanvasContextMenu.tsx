@@ -73,7 +73,7 @@ export function CanvasContextMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 w-52 animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl"
+      className="fixed z-50 w-52 motion-safe:animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl"
       style={{ left: position.x, top: position.y }}
     >
       {/* Create Node */}
@@ -88,7 +88,7 @@ export function CanvasContextMenu({
         </button>
 
         {showCreateSub && (
-          <div className="absolute left-full top-0 ml-1 w-44 animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl">
+          <div className="absolute left-full top-0 ml-1 w-44 motion-safe:animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl">
             {createNodeItems.map((item) => {
               const colors = NODE_COLORS[item.type]
               return (
@@ -147,7 +147,7 @@ export function NodeContextMenu({
   onDelete: () => void
 }) {
   return (
-    <div className="w-52 rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl animate-scaleIn">
+    <div className="w-52 rounded-xl border border-slate-700 bg-slate-900 p-1 shadow-2xl motion-safe:animate-scaleIn">
       <button onClick={onEdit} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors">
         <Pencil className="h-4 w-4 text-slate-400" />
         <span className="flex-1 text-left">Edit</span>

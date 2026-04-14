@@ -80,7 +80,7 @@ export function CanvasToolbar() {
   return (
     <div className="absolute bottom-6 right-6 z-10">
       {isOpen && (
-        <div className="mb-3 w-72 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl animate-slide-in-up">
+        <div className="mb-3 w-72 rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl motion-safe:animate-slide-in-up">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2.5">
             <span className="text-sm font-semibold text-slate-200">Add Node</span>

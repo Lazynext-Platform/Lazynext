@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useParams, notFound } from 'next/navigation'
 import { ExternalLink, Copy, Check, Eye, Lock, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -33,13 +33,21 @@ export default function SharedCanvasPage() {
   }
   const [showShareModal, setShowShareModal] = useState(false)
   const [copied, setCopied] = useState(false)
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+    }
+  }, [])
 
   function handleCopy() {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href).catch(() => {})
     }
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
+    copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
   }
 
   function getNodePos(id: string) {

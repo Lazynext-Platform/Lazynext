@@ -128,7 +128,7 @@ export function LazyMindPanel() {
   if (!isLazyMindOpen) return null
 
   return (
-    <div className="fixed inset-y-0 right-0 z-40 flex w-96 animate-slide-in-right flex-col border-l border-slate-700 bg-slate-900 shadow-2xl">
+    <div className="fixed inset-y-0 right-0 z-40 flex w-96 motion-safe:animate-slide-in-right flex-col border-l border-slate-700 bg-slate-900 shadow-2xl">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
@@ -165,7 +165,7 @@ export function LazyMindPanel() {
             )
           }
           return (
-            <div key={msg.id} className="flex items-start gap-3 animate-fadeIn">
+            <div key={msg.id} className="flex items-start gap-3 motion-safe:animate-fadeIn">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand/20">
                 <Sparkles className="h-3.5 w-3.5 text-brand" />
               </div>

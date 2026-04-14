@@ -145,7 +145,7 @@ export default function PlatformGuidePage() {
   return (
     <div className="min-h-screen bg-slate-950">
       {/* Hero */}
-      <div className="border-b border-slate-800 bg-gradient-to-b from-brand/5 to-transparent px-4 py-12 sm:py-16">
+      <div className="border-b border-slate-800 bg-gradient-to-b from-brand/5 to-transparent px-4 py-12 sm:py-16 md:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand/20">
             <BookOpen className="h-7 w-7 text-brand" />
@@ -208,7 +208,7 @@ export default function PlatformGuidePage() {
       </div>
 
       {/* Guide sections */}
-      <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
+      <div className="mx-auto max-w-3xl px-4 py-8 md:px-8 space-y-4">
         {guideSections.map((section) => {
           const isExpanded = expandedSection === section.id
           const isComplete = completedSections.has(section.id)
@@ -249,7 +249,7 @@ export default function PlatformGuidePage() {
 
               {/* Expanded content */}
               {isExpanded && (
-                <div className="border-t border-slate-800 px-6 pb-6 pt-4 animate-fadeIn">
+                <div className="border-t border-slate-800 px-6 pb-6 pt-4 motion-safe:animate-fadeIn">
                   <div className="space-y-4">
                     {section.features.map((feature, i) => (
                       <div
@@ -302,7 +302,7 @@ export default function PlatformGuidePage() {
 
         {/* Completion CTA */}
         {allComplete && (
-          <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-8 text-center animate-fadeIn">
+          <div className="mt-8 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-8 text-center motion-safe:animate-fadeIn">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
               <Rocket className="h-6 w-6 text-emerald-400" />
             </div>

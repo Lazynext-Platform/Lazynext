@@ -180,7 +180,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
       <div
         ref={tooltipRef}
         onClick={(e) => e.stopPropagation()}
-        className="absolute z-[101] animate-fadeIn"
+        className="absolute z-[101] motion-safe:animate-fadeIn"
         style={{ top: tooltipPos.top, left: tooltipPos.left, width: tooltipWidth }}
       >
         <div className="rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">

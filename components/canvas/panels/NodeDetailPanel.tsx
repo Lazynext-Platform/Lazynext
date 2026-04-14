@@ -35,7 +35,7 @@ export function NodeDetailPanel({ nodeId }: { nodeId: string }) {
   })()
 
   return (
-    <div className="absolute right-0 top-0 z-20 flex h-full w-96 flex-col border-l border-slate-800 bg-slate-900 shadow-2xl animate-slide-in-right">
+    <div className="absolute right-0 top-0 z-20 flex h-full w-96 flex-col border-l border-slate-800 bg-slate-900 shadow-2xl motion-safe:animate-slide-in-right">
       {panelContent}
     </div>
   )

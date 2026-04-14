@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   GitBranch,
   Plus,
@@ -121,15 +121,25 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
   const [options, setOptions] = useState(['', ''])
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(false)
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    }
+  }, [])
 
   const handleSubmit = () => {
     if (!question.trim()) {
       setError(true)
-      setTimeout(() => setError(false), 1500)
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+      errorTimerRef.current = setTimeout(() => setError(false), 1500)
       return
     }
     setSubmitted(true)
-    setTimeout(() => onClose(), 2000)
+    closeTimerRef.current = setTimeout(() => onClose(), 2000)
   }
 
   const addTag = () => {

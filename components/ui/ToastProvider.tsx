@@ -44,7 +44,7 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 
   return (
     <div className={cn(
-      'relative w-96 overflow-hidden rounded-xl border bg-slate-900 shadow-2xl animate-slide-in-right',
+      'relative w-96 overflow-hidden rounded-xl border bg-slate-900 shadow-2xl motion-safe:animate-slide-in-right',
       config.borderColor
     )}>
       <div className="flex items-start gap-3 p-4">
