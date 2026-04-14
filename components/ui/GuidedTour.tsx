@@ -166,7 +166,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
       {/* Spotlight ring */}
       {spotlight && (
         <div
-          className="absolute rounded-xl border-2 border-brand shadow-lg shadow-brand/20 animate-pulse pointer-events-none"
+          className="absolute rounded-xl border-2 border-brand shadow-lg shadow-brand/20 motion-safe:animate-pulse pointer-events-none"
           style={{
             top: spotlight.top,
             left: spotlight.left,

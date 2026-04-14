@@ -176,6 +176,7 @@ export default function HeroSection() {
               <svg
                 className="pointer-events-none absolute inset-0 h-full w-full"
                 style={{ zIndex: 0 }}
+                aria-hidden="true"
               >
                 <line
                   x1="25%"

@@ -91,6 +91,7 @@ export default function SignUpPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             autoComplete="name"
+            aria-describedby={error ? 'signup-error' : undefined}
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
@@ -103,6 +104,7 @@ export default function SignUpPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
+            aria-describedby={error ? 'signup-error' : undefined}
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
@@ -115,13 +117,14 @@ export default function SignUpPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
+            aria-describedby={error ? 'signup-error' : undefined}
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             minLength={6}
             maxLength={128}
             required
           />
         </div>
-        {error && <p className="text-sm text-red-500" role="alert">{error}</p>}
+        {error && <p id="signup-error" className="text-sm text-red-500" role="alert">{error}</p>}
         <button
           type="submit"
           disabled={loading}

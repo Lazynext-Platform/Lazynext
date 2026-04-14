@@ -332,27 +332,27 @@ export function CanvasSkeleton() {
     <div className="flex h-full w-full" aria-busy="true" aria-label="Loading content">
       {/* Sidebar skeleton */}
       <div className="hidden w-40 flex-col gap-3 border-r border-slate-800 p-3 md:flex">
-        <div className="h-3 w-24 animate-pulse rounded bg-slate-800" />
-        <div className="h-8 w-full animate-pulse rounded-lg bg-slate-800" />
-        <div className="h-8 w-full animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.1s' }} />
-        <div className="h-8 w-full animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.2s' }} />
+        <div className="h-3 w-24 motion-safe:animate-pulse rounded bg-slate-800" />
+        <div className="h-8 w-full motion-safe:animate-pulse rounded-lg bg-slate-800" />
+        <div className="h-8 w-full motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.1s' }} />
+        <div className="h-8 w-full motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.2s' }} />
         <div className="h-px w-full bg-slate-800" />
-        <div className="h-3 w-16 animate-pulse rounded bg-slate-800" />
-        <div className="h-6 w-full animate-pulse rounded bg-slate-800" />
-        <div className="h-6 w-full animate-pulse rounded bg-slate-800" />
+        <div className="h-3 w-16 motion-safe:animate-pulse rounded bg-slate-800" />
+        <div className="h-6 w-full motion-safe:animate-pulse rounded bg-slate-800" />
+        <div className="h-6 w-full motion-safe:animate-pulse rounded bg-slate-800" />
       </div>  
       {/* Canvas skeleton */}
       <div className="flex-1 p-6 space-y-4">
         <div className="flex gap-3">
-          <div className="h-20 w-48 animate-pulse rounded-lg bg-slate-800" />
-          <div className="h-20 w-48 animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.1s' }} />
+          <div className="h-20 w-48 motion-safe:animate-pulse rounded-lg bg-slate-800" />
+          <div className="h-20 w-48 motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.1s' }} />
         </div>
         <div className="flex gap-3 pl-12">
-          <div className="h-20 w-48 animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.2s' }} />
-          <div className="h-20 w-48 animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.3s' }} />
+          <div className="h-20 w-48 motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.2s' }} />
+          <div className="h-20 w-48 motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.3s' }} />
         </div>
         <div className="flex gap-3 pl-24">
-          <div className="h-20 w-48 animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.4s' }} />
+          <div className="h-20 w-48 motion-safe:animate-pulse rounded-lg bg-slate-800" style={{ animationDelay: '0.4s' }} />
         </div>
       </div>
     </div>

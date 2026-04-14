@@ -25,7 +25,10 @@ export function DecisionQualityBadge({ score, size = 'sm' }: DecisionQualityBadg
   }
 
   return (
-    <span className={cn('inline-flex items-center gap-1 rounded-full border font-semibold', color, sizeStyles[size])}>
+    <span
+      className={cn('inline-flex items-center gap-1 rounded-full border font-semibold', color, sizeStyles[size])}
+      aria-label={`Quality score: ${score} out of 100, ${label}`}
+    >
       {score}
       {size !== 'sm' && <span className="font-normal opacity-70">({label})</span>}
     </span>

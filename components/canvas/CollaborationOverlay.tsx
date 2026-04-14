@@ -70,7 +70,7 @@ export default function CollaborationOverlay({ collaborators, isMobile = false }
 
             {/* Node selection ring */}
             {collab.selectedNodeId && (
-              <div className={cn('pointer-events-none absolute inset-0 rounded-xl ring-2 animate-pulse', colors.ring)}
+              <div className={cn('pointer-events-none absolute inset-0 rounded-xl ring-2 motion-safe:animate-pulse', colors.ring)}
                 data-node-id={collab.selectedNodeId} />
             )}
           </div>

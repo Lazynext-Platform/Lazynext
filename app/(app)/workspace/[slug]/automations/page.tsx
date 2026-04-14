@@ -83,7 +83,7 @@ export default function AutomationsPage() {
           {/* Automation cards */}
           <div className="mt-4 space-y-3">
             {filtered.map((auto) => (
-              <div key={auto.id} role="button" tabIndex={0} className={cn('flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-4 transition-all cursor-pointer hover:border-slate-700', !auto.active && 'opacity-70')} onClick={() => { setSelectedId(auto.id); setView('builder') }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedId(auto.id); setView('builder') } }}>
+              <div key={auto.id} role="button" tabIndex={0} aria-label={`Automation: ${auto.name}, ${auto.active ? 'active' : 'paused'}`} className={cn('flex items-center justify-between rounded-xl border border-slate-800 bg-slate-900 p-4 transition-all cursor-pointer hover:border-slate-700', !auto.active && 'opacity-70')} onClick={() => { setSelectedId(auto.id); setView('builder') }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedId(auto.id); setView('builder') } }}>
                 <div className="flex items-center gap-3">
                   <div className={cn('flex h-9 w-9 items-center justify-center rounded-lg text-lg', auto.color)}>{auto.icon}</div>
                   <div>
