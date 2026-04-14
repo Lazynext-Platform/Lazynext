@@ -70,6 +70,7 @@ export default function SignInPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
@@ -81,6 +82,7 @@ export default function SignInPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             minLength={6}
             maxLength={128}

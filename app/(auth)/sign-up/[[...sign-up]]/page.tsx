@@ -90,6 +90,7 @@ export default function SignUpPage() {
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
@@ -101,6 +102,7 @@ export default function SignUpPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             required
           />
@@ -112,6 +114,7 @@ export default function SignUpPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
             className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-brand focus:border-transparent outline-none"
             minLength={6}
             maxLength={128}

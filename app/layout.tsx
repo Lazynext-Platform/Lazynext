@@ -46,6 +46,12 @@ export default async function RootLayout({
   return (
     <html lang={locale} className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} min-h-screen bg-[#020617] font-sans antialiased`}>
+        <noscript>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8', fontFamily: 'system-ui' }}>
+            <h1 style={{ color: '#f8fafc', fontSize: '1.5rem', marginBottom: '0.5rem' }}>JavaScript Required</h1>
+            <p>Lazynext requires JavaScript to run. Please enable it in your browser settings.</p>
+          </div>
+        </noscript>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
