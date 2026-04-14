@@ -157,12 +157,13 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
           <>
             <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
               <h2 className="text-lg font-semibold text-slate-100">Log a Decision</h2>
-              <button onClick={onClose} className="rounded-lg p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
+              <button onClick={onClose} aria-label="Close dialog" className="rounded-lg p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
             </div>
             <div className="max-h-[70vh] overflow-y-auto px-6 py-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300">Question <span className="text-red-400">*</span></label>
+                <label htmlFor="decision-question" className="block text-sm font-medium text-slate-300">Question <span className="text-red-400">*</span></label>
                 <textarea
+                  id="decision-question"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   placeholder="What decision needs to be made?"
@@ -175,35 +176,35 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
                 {error && !question.trim() && <p className="mt-1 text-xs text-red-400">Question is required</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300">Resolution</label>
-                <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="What was decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                <label htmlFor="decision-resolution" className="block text-sm font-medium text-slate-300">Resolution</label>
+                <textarea id="decision-resolution" value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="What was decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300">Rationale</label>
-                <textarea value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder="Why was this decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
+                <label htmlFor="decision-rationale" className="block text-sm font-medium text-slate-300">Rationale</label>
+                <textarea id="decision-rationale" value={rationale} onChange={(e) => setRationale(e.target.value)} placeholder="Why was this decided?" rows={2} maxLength={2000} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Options Considered</label>
                 <div className="mt-1.5 space-y-2">
                   {options.map((opt, i) => (
-                    <input key={`option-${i}`} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} maxLength={200} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                    <input key={`option-${i}`} value={opt} onChange={(e) => { const n = [...options]; n[i] = e.target.value; setOptions(n) }} placeholder={`Option ${i + 1}`} aria-label={`Option ${i + 1}`} maxLength={200} className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   ))}
                   <button onClick={() => setOptions([...options, ''])} className="text-xs text-brand hover:text-brand-hover">+ Add option</button>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300">Type</label>
-                  <select value={type} onChange={(e) => setType(e.target.value as DecisionType)} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none">
+                  <label htmlFor="decision-type" className="block text-sm font-medium text-slate-300">Type</label>
+                  <select id="decision-type" value={type} onChange={(e) => setType(e.target.value as DecisionType)} className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none">
                     <option value="reversible">Reversible</option>
                     <option value="irreversible">Irreversible</option>
                     <option value="experimental">Experimental</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300">Tags</label>
+                  <label htmlFor="decision-tags" className="block text-sm font-medium text-slate-300">Tags</label>
                   <div className="mt-1.5 flex gap-1">
-                    <input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} placeholder="Add tag" className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                    <input id="decision-tags" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} placeholder="Add tag" className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none" />
                   </div>
                   {tags.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{tags.map(t => <span key={t} className="flex items-center gap-1 rounded-full bg-slate-800 px-2 py-0.5 text-2xs text-slate-400"><Tag className="h-2.5 w-2.5" />{t}<button onClick={() => setTags(tags.filter(x => x !== t))} aria-label={`Remove tag ${t}`} className="text-slate-500 hover:text-slate-300">×</button></span>)}</div>}
                 </div>
@@ -319,11 +320,12 @@ export default function DecisionsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search decisions..."
+            aria-label="Search decisions"
             className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
           />
         </div>
         <div className="flex items-center gap-2">
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'quality')} className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-300 focus:border-brand focus:outline-none">
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'date' | 'quality')} aria-label="Sort decisions" className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-300 focus:border-brand focus:outline-none">
             <option value="date">Sort by Date</option>
             <option value="quality">Sort by Quality</option>
           </select>

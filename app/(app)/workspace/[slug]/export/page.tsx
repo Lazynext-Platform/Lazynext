@@ -83,15 +83,15 @@ export default function DataExportPage() {
           <>
             <div className="mt-4 grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-slate-500">Format</label>
-                <select value={fullFormat} onChange={e => setFullFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+                <label htmlFor="export-full-format" className="text-xs text-slate-500">Format</label>
+                <select id="export-full-format" value={fullFormat} onChange={e => setFullFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                   <option value="json">JSON (Recommended)</option>
                   <option value="csv">CSV</option>
                 </select>
               </div>
               <div>
-                <label className="text-xs text-slate-500">Scope</label>
-                <select className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+                <label htmlFor="export-scope" className="text-xs text-slate-500">Scope</label>
+                <select id="export-scope" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                   <option>All workflows</option>
                   <option>Q2 Product Sprint</option>
                   <option>Client Onboarding</option>
@@ -133,16 +133,16 @@ export default function DataExportPage() {
         <p className="mt-1 text-sm text-slate-400">Export decision log with quality scores and outcomes.</p>
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-slate-500">Format</label>
-            <select value={decisionFormat} onChange={e => setDecisionFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+            <label htmlFor="decision-export-format" className="text-xs text-slate-500">Format</label>
+            <select id="decision-export-format" value={decisionFormat} onChange={e => setDecisionFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
               <option value="json">JSON</option>
               <option value="csv">CSV</option>
               <option value="pdf">PDF Report</option>
             </select>
           </div>
           <div>
-            <label className="text-xs text-slate-500">Date Range</label>
-            <select value={dateRange} onChange={e => setDateRange(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+            <label htmlFor="decision-export-range" className="text-xs text-slate-500">Date Range</label>
+            <select id="decision-export-range" value={dateRange} onChange={e => setDateRange(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
               <option value="all">All time</option>
               <option value="30d">Last 30 days</option>
               <option value="90d">Last 90 days</option>

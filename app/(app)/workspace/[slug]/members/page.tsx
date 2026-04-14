@@ -167,7 +167,7 @@ export default function MembersPage() {
           <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-100">Invite Team Members</h2>
-              <button onClick={() => setShowInviteModal(false)} className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
+              <button onClick={() => setShowInviteModal(false)} aria-label="Close dialog" className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
             </div>
             <div className="mt-4 space-y-4">
               <div>
@@ -180,14 +180,15 @@ export default function MembersPage() {
                     </span>
                   ))}
                   <input type="text" value={emailInput} onChange={e => setEmailInput(e.target.value)} onKeyDown={handleEmailKeyDown}
+                    aria-label="Email address"
                     placeholder={emailChips.length === 0 ? 'teammate@company.com (press Enter to add)' : 'Add more...'}
                     className="flex-1 min-w-[120px] bg-transparent text-sm text-slate-50 placeholder-slate-500 outline-none" />
                 </div>
                 <p className="mt-1 text-2xs text-slate-600">Separate multiple emails with Enter or comma</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300">Role</label>
-                <select className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none">
+                <label htmlFor="invite-role" className="block text-sm font-medium text-slate-300">Role</label>
+                <select id="invite-role" className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none">
                   <option value="member">Member</option>
                   <option value="admin">Admin</option>
                   <option value="guest">Guest (read-only)</option>

@@ -46,18 +46,20 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-slate-100">Workspace Info</h2>
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300">Workspace name</label>
+                <label htmlFor="workspace-name" className="block text-sm font-medium text-slate-300">Workspace name</label>
                 <input
+                  id="workspace-name"
                   type="text"
                   defaultValue="My Workspace"
                   className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300">Workspace URL</label>
+                <label htmlFor="workspace-url" className="block text-sm font-medium text-slate-300">Workspace URL</label>
                 <div className="mt-1.5 flex items-center rounded-lg border border-slate-700 bg-slate-800">
                   <span className="px-3 text-sm text-slate-500">lazynext.com/workspace/</span>
                   <input
+                    id="workspace-url"
                     type="text"
                     defaultValue="my-workspace"
                     className="flex-1 bg-transparent px-1 py-2.5 text-sm text-slate-50 focus:outline-none"

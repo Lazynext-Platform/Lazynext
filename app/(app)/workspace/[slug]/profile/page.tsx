@@ -53,21 +53,21 @@ export default function ProfilePage() {
               <div className="flex-1 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs text-slate-500">First name</label>
-                    <input defaultValue="Avas" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
+                    <label htmlFor="profile-first-name" className="block text-xs text-slate-500">First name</label>
+                    <input id="profile-first-name" defaultValue="Avas" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-xs text-slate-500">Last name</label>
-                    <input defaultValue="Patel" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
+                    <label htmlFor="profile-last-name" className="block text-xs text-slate-500">Last name</label>
+                    <input id="profile-last-name" defaultValue="Patel" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500">Email</label>
-                  <input defaultValue="avas@lazynext.com" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
+                  <label htmlFor="profile-email" className="block text-xs text-slate-500">Email</label>
+                  <input id="profile-email" defaultValue="avas@lazynext.com" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500">Role / Title</label>
-                  <input defaultValue="Founder & Developer" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
+                  <label htmlFor="profile-role" className="block text-xs text-slate-500">Role / Title</label>
+                  <input id="profile-role" defaultValue="Founder & Developer" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-50 focus:border-brand focus:outline-none" />
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div><p className="text-sm text-slate-300">Dark mode</p><p className="text-xs text-slate-500">Always use dark theme</p></div>
               <label className="relative cursor-pointer">
-                <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} className="peer sr-only" />
+                <input type="checkbox" checked={darkMode} onChange={() => setDarkMode(!darkMode)} aria-label="Toggle dark mode" className="peer sr-only" />
                 <div className="h-5 w-9 rounded-full bg-slate-700 peer-checked:bg-brand transition-colors" />
                 <div className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
               </label>
@@ -155,7 +155,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div><p className="text-sm text-slate-300">AI suggestions</p><p className="text-xs text-slate-500">Show proactive LazyMind suggestions</p></div>
               <label className="relative cursor-pointer">
-                <input type="checkbox" checked={aiSuggestions} onChange={() => setAiSuggestions(!aiSuggestions)} className="peer sr-only" />
+                <input type="checkbox" checked={aiSuggestions} onChange={() => setAiSuggestions(!aiSuggestions)} aria-label="Toggle AI suggestions" className="peer sr-only" />
                 <div className="h-5 w-9 rounded-full bg-slate-700 peer-checked:bg-brand transition-colors" />
                 <div className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
               </label>
@@ -167,7 +167,7 @@ export default function ProfilePage() {
               <div key={item} className="flex items-center justify-between py-2">
                 <span className="text-sm text-slate-300">{item}</span>
                 <label className="relative cursor-pointer">
-                  <input type="checkbox" defaultChecked className="peer sr-only" />
+                  <input type="checkbox" defaultChecked aria-label={`Toggle ${item}`} className="peer sr-only" />
                   <div className="h-5 w-9 rounded-full bg-slate-700 peer-checked:bg-brand transition-colors" />
                   <div className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white transition-transform peer-checked:translate-x-4" />
                 </label>

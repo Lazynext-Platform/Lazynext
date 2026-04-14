@@ -118,7 +118,7 @@ export default function TasksPage() {
       {view === 'list' && (
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 overflow-hidden">
           <div className="grid grid-cols-12 items-center gap-2 border-b border-slate-800 px-4 py-2.5 text-2xs font-medium uppercase tracking-wider text-slate-500">
-            <span className="col-span-1"><input type="checkbox" className="rounded border-slate-600" /></span>
+            <span className="col-span-1"><input type="checkbox" aria-label="Select all tasks" className="rounded border-slate-600" /></span>
             <span className="col-span-4">Task</span>
             <span className="col-span-2">Status</span>
             <span className="col-span-1">Priority</span>
@@ -127,7 +127,7 @@ export default function TasksPage() {
           </div>
           {tasks.map(task => (
             <div key={task.id} className={cn('grid grid-cols-12 items-center gap-2 border-b border-slate-800/50 px-4 py-3 last:border-0 hover:bg-slate-800/30 transition-colors', selected.has(task.id) && 'bg-brand/5')}>
-              <span className="col-span-1"><input type="checkbox" checked={selected.has(task.id)} onChange={() => toggleSelect(task.id)} className="rounded border-slate-600" /></span>
+              <span className="col-span-1"><input type="checkbox" checked={selected.has(task.id)} onChange={() => toggleSelect(task.id)} aria-label={`Select task ${task.title}`} className="rounded border-slate-600" /></span>
               <span className={cn('col-span-4 text-sm font-medium', task.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-100')}>{task.title}</span>
               <span className="col-span-2">
                 <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium capitalize',

@@ -142,9 +142,9 @@ export default function ActivityPage() {
           <div className="mt-3 flex items-center justify-between">
             <span className="text-xs text-slate-500">Showing 1-7 of 156 entries</span>
             <div className="flex items-center gap-1">
-              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} className="rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-400 disabled:opacity-50"><ChevronLeft className="h-3 w-3" /></button>
+              <button disabled={page <= 1} onClick={() => setPage(p => p - 1)} aria-label="Previous page" className="rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-400 disabled:opacity-50"><ChevronLeft className="h-3 w-3" /></button>
               <span className="text-xs text-slate-400 px-2">Page {page}</span>
-              <button onClick={() => setPage(p => p + 1)} className="rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-400"><ChevronRight className="h-3 w-3" /></button>
+              <button onClick={() => setPage(p => p + 1)} aria-label="Next page" className="rounded-lg border border-slate-700 bg-slate-800 p-1.5 text-slate-400"><ChevronRight className="h-3 w-3" /></button>
             </div>
           </div>
           <p className="mt-2 text-2xs text-slate-600">IP addresses are partially masked for privacy.</p>

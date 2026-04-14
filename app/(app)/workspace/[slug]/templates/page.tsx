@@ -108,7 +108,7 @@ export default function TemplatesPage() {
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-          <input type="text" placeholder="Search templates..." className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
+          <input type="text" placeholder="Search templates..." aria-label="Search templates" className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
         </div>
         <div className="flex gap-1 overflow-x-auto">
           {categories.map(cat => (
@@ -163,7 +163,7 @@ export default function TemplatesPage() {
               <>
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-slate-100">Install Template</h2>
-                  <button onClick={() => setInstallModal(null)} className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
+                  <button onClick={() => setInstallModal(null)} aria-label="Close dialog" className="rounded-md p-1 text-slate-400 hover:bg-slate-800"><X className="h-4 w-4" /></button>
                 </div>
                 <div className={cn('mt-4 h-24 rounded-xl bg-gradient-to-br flex items-center justify-center', installModal.gradient)}>
                   <h3 className="text-lg font-bold text-slate-100">{installModal.name}</h3>
@@ -181,8 +181,8 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-slate-300">Add to workflow</label>
-                  <select className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none">
+                  <label htmlFor="template-workflow" className="block text-sm font-medium text-slate-300">Add to workflow</label>
+                  <select id="template-workflow" className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none">
                     <option>Main Workflow</option>
                     <option>Create new workflow</option>
                   </select>

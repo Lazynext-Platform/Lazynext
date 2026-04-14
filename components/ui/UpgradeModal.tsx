@@ -118,7 +118,7 @@ export function TrialBanner({ daysLeft = 7 }: { daysLeft?: number }) {
       </div>
       <div className="flex items-center gap-2">
         <button className="rounded-lg bg-brand px-3 py-1 text-xs font-semibold text-white hover:bg-brand-hover">Upgrade now</button>
-        <button onClick={() => setDismissed(true)} className="text-slate-500 hover:text-slate-300"><X className="h-3.5 w-3.5" /></button>
+        <button onClick={() => setDismissed(true)} aria-label="Dismiss upgrade banner" className="text-slate-500 hover:text-slate-300"><X className="h-3.5 w-3.5" /></button>
       </div>
     </div>
   )

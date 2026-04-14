@@ -112,7 +112,7 @@ export default function AutomationsPage() {
           </button>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <input defaultValue={selected?.name || 'New Automation'} className="bg-transparent text-xl font-bold text-slate-100 border-b border-transparent focus:border-brand focus:outline-none" />
+              <input defaultValue={selected?.name || 'New Automation'} aria-label="Automation name" className="bg-transparent text-xl font-bold text-slate-100 border-b border-transparent focus:border-brand focus:outline-none" />
               <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', selected?.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{selected?.active ? 'Active' : 'Paused'}</span>
             </div>
             <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover"><Save className="inline h-3.5 w-3.5 mr-1" /> Save</button>
@@ -125,14 +125,14 @@ export default function AutomationsPage() {
               <span className="text-sm font-semibold text-slate-200">WHEN</span>
             </div>
             <div className="ml-9 mt-3 rounded-xl border border-slate-700 bg-slate-800 p-4 space-y-3">
-              <select className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+              <select aria-label="Trigger type" className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                 {triggerTypes.map(t => <option key={t}>{t}</option>)}
               </select>
               <div className="grid grid-cols-2 gap-3">
-                <select className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+                <select aria-label="Node type" className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                   {nodeTypes.map(t => <option key={t}>{t}</option>)}
                 </select>
-                <select className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+                <select aria-label="Status" className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                   {statuses.map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
@@ -156,12 +156,12 @@ export default function AutomationsPage() {
                 <div key={i} className="rounded-xl border border-slate-700 bg-slate-800 p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-2xs font-medium text-slate-500">Action {i + 1}</span>
-                    {actions.length > 1 && <button onClick={() => setActions(actions.filter((_, j) => j !== i))} className="text-red-400 hover:text-red-300"><Trash2 className="h-3 w-3" /></button>}
+                    {actions.length > 1 && <button onClick={() => setActions(actions.filter((_, j) => j !== i))} aria-label={`Remove action ${i + 1}`} className="text-red-400 hover:text-red-300"><Trash2 className="h-3 w-3" /></button>}
                   </div>
-                  <select defaultValue={action.type} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+                  <select defaultValue={action.type} aria-label={`Action ${i + 1} type`} className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                     {actionTypes.map(a => <option key={a}>{a}</option>)}
                   </select>
-                  <textarea placeholder="Message template (use {{node.title}}, {{node.assignee}}...)" rows={2} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
+                  <textarea placeholder="Message template (use {{node.title}}, {{node.assignee}}...)" aria-label={`Action ${i + 1} message template`} rows={2} className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
                 </div>
               ))}
               <button onClick={() => setActions([...actions, { type: 'Send notification', config: '' }])} className="w-full rounded-xl border border-dashed border-slate-700 py-3 text-sm text-slate-500 hover:border-slate-600 hover:text-slate-400 transition-colors">+ Add action</button>
