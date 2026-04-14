@@ -1,25 +1,35 @@
-export default function Loading() {
+import { Skeleton, SkeletonHeader, SkeletonTabs } from '@/components/ui/Skeleton'
+
+export default function SettingsLoading() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading page">
-      <div className="h-7 w-48 animate-pulse rounded bg-slate-800" />
-      <div className="mt-2 h-4 w-72 animate-pulse rounded bg-slate-800/60" />
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-36 animate-pulse rounded-xl border border-slate-800 bg-slate-900/50"
-            style={{ animationDelay: `${i * 0.1}s` }}
-          />
-        ))}
+    <div className="mx-auto max-w-3xl px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading settings">
+      <SkeletonHeader />
+      {/* Tab navigation */}
+      <div className="mt-6">
+        <SkeletonTabs count={5} />
       </div>
-      <div className="mt-6 space-y-3">
+      {/* Form fields */}
+      <div className="mt-8 space-y-6">
         {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-12 animate-pulse rounded-lg bg-slate-800/40"
-            style={{ animationDelay: `${i * 0.08}s` }}
-          />
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-10 w-full rounded-lg" />
+          </div>
         ))}
+        {/* Toggle row */}
+        <div className="flex items-center justify-between py-2">
+          <div className="space-y-1">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-48" />
+          </div>
+          <Skeleton className="h-6 w-11 rounded-full" />
+        </div>
+        {/* Danger zone */}
+        <div className="rounded-xl border border-red-900/30 p-4 space-y-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-56 sm:w-72" />
+          <Skeleton className="h-9 w-32 rounded-lg" />
+        </div>
       </div>
     </div>
   )

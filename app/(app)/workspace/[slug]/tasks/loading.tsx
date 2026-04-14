@@ -1,24 +1,32 @@
-export default function Loading() {
+import { Skeleton, SkeletonHeader, SkeletonCard } from '@/components/ui/Skeleton'
+
+export default function TasksLoading() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading page">
-      <div className="h-7 w-48 animate-pulse rounded bg-slate-800" />
-      <div className="mt-2 h-4 w-72 animate-pulse rounded bg-slate-800/60" />
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-36 animate-pulse rounded-xl border border-slate-800 bg-slate-900/50"
-            style={{ animationDelay: `${i * 0.1}s` }}
-          />
-        ))}
+    <div className="max-w-full px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading tasks">
+      {/* Header with view toggle */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <SkeletonHeader />
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-9 rounded-lg" />
+          <Skeleton className="h-9 w-9 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-lg" />
+          <Skeleton className="h-9 w-20 rounded-lg" />
+        </div>
       </div>
-      <div className="mt-6 space-y-3">
-        {[0, 1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-12 animate-pulse rounded-lg bg-slate-800/40"
-            style={{ animationDelay: `${i * 0.08}s` }}
-          />
+      {/* Kanban columns — stacked on mobile, side-by-side on desktop */}
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {['To Do', 'In Progress', 'Review', 'Done'].map((_, col) => (
+          <div key={col} className="rounded-xl border border-slate-800 bg-slate-900/30 p-3">
+            <div className="mb-3 flex items-center justify-between">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-5 w-5 rounded" />
+            </div>
+            {Array.from({ length: 3 - col % 2 }, (__, j) => (
+              <div key={j} className="mb-2">
+                <SkeletonCard lines={1} />
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </div>

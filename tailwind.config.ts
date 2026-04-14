@@ -55,8 +55,13 @@ const config: Config = {
         'confetti': 'confettiFall 2s ease-in forwards',
         'fadeIn': 'fadeInUp 350ms ease',
         'scaleIn': 'scaleIn 150ms ease-out',
+        'shimmer': 'shimmer 2s linear infinite',
       },
       keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
         slideInRight: {
           from: { transform: 'translateX(100%)', opacity: '0' },
           to: { transform: 'translateX(0)', opacity: '1' },
