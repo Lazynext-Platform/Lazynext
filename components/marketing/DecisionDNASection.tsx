@@ -79,7 +79,7 @@ export default function DecisionDNASection() {
                 <LinkIcon className="h-3.5 w-3.5" />
                 <span>3 linked nodes</span>
                 <span className="mx-1">&middot;</span>
-                <span>Mar 15, 2026</span>
+                <time dateTime="2026-03-15">Mar 15, 2026</time>
               </div>
             </div>
           </div>

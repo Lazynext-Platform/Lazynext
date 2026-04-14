@@ -2,7 +2,7 @@
 
 const entries = [
   {
-    version: 'v0.4.0', date: 'April 5, 2026', tag: 'Latest',
+    version: 'v0.4.0', date: 'April 5, 2026', dateTime: '2026-04-05', tag: 'Latest',
     items: [
       { type: 'feat', text: 'Decision Health Dashboard with quality trends and outcome analytics' },
       { type: 'feat', text: 'Automation Builder with WHEN/THEN visual rules' },
@@ -12,7 +12,7 @@ const entries = [
     ],
   },
   {
-    version: 'v0.3.0', date: 'March 22, 2026', tag: null,
+    version: 'v0.3.0', date: 'March 22, 2026', dateTime: '2026-03-22', tag: null,
     items: [
       { type: 'feat', text: 'Decision DNA — AI quality scoring for every decision' },
       { type: 'feat', text: 'Template Marketplace with 6 starter templates' },
@@ -21,7 +21,7 @@ const entries = [
     ],
   },
   {
-    version: 'v0.2.0', date: 'March 8, 2026', tag: null,
+    version: 'v0.2.0', date: 'March 8, 2026', dateTime: '2026-03-08', tag: null,
     items: [
       { type: 'feat', text: 'Workflow Canvas with 7 node primitives' },
       { type: 'feat', text: 'LazyMind AI panel with Groq integration' },
@@ -30,7 +30,7 @@ const entries = [
     ],
   },
   {
-    version: 'v0.1.0', date: 'February 20, 2026', tag: null,
+    version: 'v0.1.0', date: 'February 20, 2026', dateTime: '2026-02-20', tag: null,
     items: [
       { type: 'feat', text: 'Initial launch — Landing page, pricing, and auth' },
       { type: 'feat', text: 'Onboarding flow with workspace creation' },
@@ -63,7 +63,7 @@ export default function ChangelogPage() {
               </div>
               <div className="flex items-center gap-3 mb-3">
                 <h3 className="text-lg font-bold">{entry.version}</h3>
-                <span className="text-sm text-slate-500">{entry.date}</span>
+                <time dateTime={entry.dateTime} className="text-sm text-slate-500">{entry.date}</time>
                 {entry.tag && <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-2xs font-semibold text-indigo-700">{entry.tag}</span>}
               </div>
               <ul className="space-y-2">

@@ -27,6 +27,7 @@ export function MobileBottomNav({ workspaceSlug }: { workspaceSlug: string }) {
           <Link
             key={item.label}
             href={href}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
               'flex flex-col items-center gap-1 px-3 py-1',
               isActive ? 'text-brand' : 'text-slate-500'

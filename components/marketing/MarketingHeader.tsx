@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher'
 
@@ -15,6 +16,7 @@ const navLinks = [
 
 export default function MarketingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-lg">
@@ -32,6 +34,7 @@ export default function MarketingHeader() {
             <Link
               key={link.label}
               href={link.href}
+              aria-current={pathname === link.href ? 'page' : undefined}
               className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900"
             >
               {link.label}
@@ -78,6 +81,7 @@ export default function MarketingHeader() {
               <Link
                 key={link.label}
                 href={link.href}
+                aria-current={pathname === link.href ? 'page' : undefined}
                 className="block text-sm font-medium text-slate-600"
                 onClick={() => setMobileMenuOpen(false)}
               >

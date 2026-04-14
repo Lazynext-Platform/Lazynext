@@ -141,7 +141,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
               {qualityScore} Quality
             </span>
           )}
-          <span className="text-2xs text-slate-500">Apr 2, 2026</span>
+          <time dateTime="2026-04-02" className="text-2xs text-slate-500">Apr 2, 2026</time>
         </div>
       </div>
 

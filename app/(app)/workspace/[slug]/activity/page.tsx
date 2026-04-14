@@ -17,13 +17,13 @@ const feedItems = [
 ]
 
 const auditRows = [
-  { time: 'Apr 5, 2:14 PM', user: 'Avas Patel', action: 'created', target: 'Task: Fix auth bug', detail: 'Priority: High', ip: '103.xx.xx.42', badge: 'bg-blue-500/10 text-blue-400' },
-  { time: 'Apr 5, 11:30 AM', user: 'Priya Shah', action: 'decided', target: 'Decision: Use Supabase', detail: 'Score: 91', ip: '103.xx.xx.42', badge: 'bg-orange-500/10 text-orange-400' },
-  { time: 'Apr 5, 9:15 AM', user: 'Rahul Dev', action: 'replied', target: 'Thread: Pricing', detail: 'Comment #4', ip: '49.xx.xx.88', badge: 'bg-purple-500/10 text-purple-400' },
-  { time: 'Apr 4, 4:05 PM', user: 'Sana Malik', action: 'created', target: 'Doc: API Spec v3', detail: '12 sections', ip: '103.xx.xx.42', badge: 'bg-emerald-500/10 text-emerald-400' },
-  { time: 'Apr 4, 2:30 PM', user: 'Avas Patel', action: 'updated', target: 'Task: Ship onboarding', detail: 'Status change', ip: '103.xx.xx.42', badge: 'bg-amber-500/10 text-amber-400' },
-  { time: 'Apr 3, 11:00 AM', user: 'Avas Patel', action: 'deleted', target: 'Task: Old prototype', detail: 'Permanently removed', ip: '103.xx.xx.42', badge: 'bg-red-500/10 text-red-400' },
-  { time: 'Apr 3, 9:00 AM', user: 'Priya Shah', action: 'invited', target: 'new@team.com', detail: 'Role: Member', ip: '103.xx.xx.42', badge: 'bg-blue-500/10 text-blue-400' },
+  { time: 'Apr 5, 2:14 PM', dateTime: '2026-04-05T14:14', user: 'Avas Patel', action: 'created', target: 'Task: Fix auth bug', detail: 'Priority: High', ip: '103.xx.xx.42', badge: 'bg-blue-500/10 text-blue-400' },
+  { time: 'Apr 5, 11:30 AM', dateTime: '2026-04-05T11:30', user: 'Priya Shah', action: 'decided', target: 'Decision: Use Supabase', detail: 'Score: 91', ip: '103.xx.xx.42', badge: 'bg-orange-500/10 text-orange-400' },
+  { time: 'Apr 5, 9:15 AM', dateTime: '2026-04-05T09:15', user: 'Rahul Dev', action: 'replied', target: 'Thread: Pricing', detail: 'Comment #4', ip: '49.xx.xx.88', badge: 'bg-purple-500/10 text-purple-400' },
+  { time: 'Apr 4, 4:05 PM', dateTime: '2026-04-04T16:05', user: 'Sana Malik', action: 'created', target: 'Doc: API Spec v3', detail: '12 sections', ip: '103.xx.xx.42', badge: 'bg-emerald-500/10 text-emerald-400' },
+  { time: 'Apr 4, 2:30 PM', dateTime: '2026-04-04T14:30', user: 'Avas Patel', action: 'updated', target: 'Task: Ship onboarding', detail: 'Status change', ip: '103.xx.xx.42', badge: 'bg-amber-500/10 text-amber-400' },
+  { time: 'Apr 3, 11:00 AM', dateTime: '2026-04-03T11:00', user: 'Avas Patel', action: 'deleted', target: 'Task: Old prototype', detail: 'Permanently removed', ip: '103.xx.xx.42', badge: 'bg-red-500/10 text-red-400' },
+  { time: 'Apr 3, 9:00 AM', dateTime: '2026-04-03T09:00', user: 'Priya Shah', action: 'invited', target: 'new@team.com', detail: 'Role: Member', ip: '103.xx.xx.42', badge: 'bg-blue-500/10 text-blue-400' },
 ]
 
 export default function ActivityPage() {
@@ -128,7 +128,7 @@ export default function ActivityPage() {
               <tbody>
                 {auditRows.map((row, i) => (
                   <tr key={i} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30">
-                    <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{row.time}</td>
+                    <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap"><time dateTime={row.dateTime}>{row.time}</time></td>
                     <td className="px-4 py-3 text-slate-200 whitespace-nowrap">{row.user}</td>
                     <td className="px-4 py-3"><span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium capitalize', row.badge)}>{row.action}</span></td>
                     <td className="px-4 py-3 text-slate-300">{row.target}</td>

@@ -57,10 +57,10 @@ const plans = [
 ]
 
 const billingHistory = [
-  { date: 'Apr 1, 2026', desc: 'Starter Plan — 3 seats', amountUsd: 27, status: 'Paid' },
-  { date: 'Mar 1, 2026', desc: 'Starter Plan — 3 seats', amountUsd: 27, status: 'Paid' },
-  { date: 'Feb 1, 2026', desc: 'Starter Plan — 2 seats', amountUsd: 18, status: 'Paid' },
-  { date: 'Jan 15, 2026', desc: 'Starter Plan — Trial', amountUsd: 0, status: 'Trial' },
+  { date: 'Apr 1, 2026', dateTime: '2026-04-01', desc: 'Starter Plan — 3 seats', amountUsd: 27, status: 'Paid' },
+  { date: 'Mar 1, 2026', dateTime: '2026-03-01', desc: 'Starter Plan — 3 seats', amountUsd: 27, status: 'Paid' },
+  { date: 'Feb 1, 2026', dateTime: '2026-02-01', desc: 'Starter Plan — 2 seats', amountUsd: 18, status: 'Paid' },
+  { date: 'Jan 15, 2026', dateTime: '2026-01-15', desc: 'Starter Plan — Trial', amountUsd: 0, status: 'Trial' },
 ]
 
 const usage = [
@@ -173,7 +173,7 @@ export default function BillingPage() {
             <tbody>
               {billingHistory.map((h, i) => (
                 <tr key={i} className="border-b border-slate-800/50 last:border-0">
-                  <td className="py-3 text-slate-400">{h.date}</td>
+                  <td className="py-3 text-slate-400"><time dateTime={h.dateTime}>{h.date}</time></td>
                   <td className="py-3 text-slate-200">{h.desc}</td>
                   <td className="py-3 text-right text-slate-200">{formatPrice(h.amountUsd, currency)}</td>
                   <td className="py-3 text-center">
