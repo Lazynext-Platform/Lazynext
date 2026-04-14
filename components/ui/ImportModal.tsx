@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { X, CheckCircle2, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 type Step = 1 | 2 | 3
 type ImportStatus = 'idle' | 'importing' | 'success'
@@ -31,6 +32,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
   const [progress, setProgress] = useState({ docs: 0, tasks: 0, edges: 0 })
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const modalRef = useModalA11y()
 
   useEffect(() => {
     return () => {
@@ -61,7 +63,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="import-modal-title" onClick={onClose} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="w-full max-w-2xl mx-3 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div ref={modalRef} className="w-full max-w-2xl mx-3 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
           <h2 id="import-modal-title" className="text-lg font-semibold text-slate-100">Import Data</h2>

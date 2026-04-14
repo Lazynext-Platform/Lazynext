@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 interface Shortcut {
   keys: { label: string; colorClass?: string }[]
@@ -64,6 +65,7 @@ const shortcutGroups: ShortcutGroup[] = [
 
 export function KeyboardShortcutsModal() {
   const [isOpen, setIsOpen] = useState(false)
+  const modalRef = useModalA11y(isOpen)
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
@@ -90,7 +92,7 @@ export function KeyboardShortcutsModal() {
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-150">
+      <div ref={modalRef} className="relative z-10 w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-150">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
           <h2 className="text-base font-semibold text-slate-200">Keyboard Shortcuts</h2>

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 const quickActions = [
   { icon: CheckSquare, label: 'Create Task', desc: 'Add a new task node', shortcut: 'T', color: 'bg-blue-500' },
@@ -36,6 +37,7 @@ export function CommandPalette() {
   const { isCommandPaletteOpen, toggleCommandPalette } = useUIStore()
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const modalRef = useModalA11y(isCommandPaletteOpen)
 
   const close = useCallback(() => {
     toggleCommandPalette()
@@ -74,6 +76,7 @@ export function CommandPalette() {
 
       {/* Modal */}
       <div
+        ref={modalRef}
         className="relative w-full max-w-lg animate-scaleIn rounded-xl border border-slate-700 bg-slate-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >

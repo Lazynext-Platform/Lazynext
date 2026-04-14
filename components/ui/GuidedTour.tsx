@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { X, ChevronRight, ChevronLeft, Sparkles, SkipForward } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 export interface TourStep {
   /** CSS selector for the element to highlight. null = centered modal (intro/outro). */
@@ -60,6 +61,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
   const [current, setCurrent] = useState(0)
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null)
   const tooltipRef = useRef<HTMLDivElement>(null)
+  const tourRef = useModalA11y()
   const step = steps[current]
   const isFirst = current === 0
   const isLast = current === steps.length - 1
@@ -130,7 +132,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
     : { top: window.innerHeight / 2 - tooltipHeight / 2, left: window.innerWidth / 2 - tooltipWidth / 2 }
 
   return (
-    <div className="fixed inset-0 z-[100]" role="dialog" aria-label={t('tourLabel')}>
+    <div ref={tourRef} className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={t('tourLabel')}>
       {/* Overlay with spotlight cutout */}
       <svg className="absolute inset-0 h-full w-full" style={{ pointerEvents: 'none' }}>
         <defs>

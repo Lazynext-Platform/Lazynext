@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 interface Decision {
   id: string
@@ -28,6 +29,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
   const [learning, setLearning] = useState('')
+  const modalRef = useModalA11y()
 
   const decision = decisions[currentIndex]
   const isLast = currentIndex === decisions.length - 1
@@ -45,12 +47,12 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-[540px] rounded-2xl border border-slate-700 bg-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose} onKeyDown={(e) => e.key === 'Escape' && onClose()} role="dialog" aria-modal="true" aria-labelledby="outcome-review-title">
+      <div ref={modalRef} className="w-full max-w-[540px] rounded-2xl border border-slate-700 bg-slate-900" onClick={e => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-100">Review Outcome</h2>
+            <h2 id="outcome-review-title" className="text-lg font-semibold text-slate-100">Review Outcome</h2>
             <p className="text-xs text-slate-500">{currentIndex + 1} of {decisions.length} decisions</p>
           </div>
           <button onClick={onClose} aria-label="Close outcome review" className="rounded-md p-1 text-slate-400 hover:bg-slate-800">

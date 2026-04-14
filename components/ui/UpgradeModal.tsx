@@ -5,6 +5,7 @@ import { X, Lock, Sparkles, Check, Crown } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
+import { useModalA11y } from '@/lib/utils/useModalA11y'
 
 type ModalVariant = 'node-limit' | 'ai-limit' | 'health-gate' | 'full-upgrade'
 
@@ -17,10 +18,11 @@ const plans = [
 export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: ModalVariant; onClose: () => void }) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const currency = useUIStore((s) => s.currency)
+  const modalRef = useModalA11y()
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="upgrade-modal-title" onClick={onClose} onKeyDown={(e) => e.key === 'Escape' && onClose()}>
-      <div className="w-full max-w-2xl mx-3 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+      <div ref={modalRef} className="w-full max-w-2xl mx-3 rounded-xl border border-slate-700 bg-slate-900 shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-slate-800 px-6 py-4">
           <div className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-amber-400" />
