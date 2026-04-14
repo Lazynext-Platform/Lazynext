@@ -20,12 +20,13 @@ export function MobileBottomNav({ workspaceSlug }: { workspaceSlug: string }) {
 
   return (
     <nav aria-label="Mobile navigation" className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe md:hidden">
+      <ul className="flex w-full items-center justify-around">
       {items.map((item) => {
         const href = `${base}${item.href}`
         const isActive = pathname === href || (item.href && pathname.startsWith(href))
         return (
+          <li key={item.label}>
           <Link
-            key={item.label}
             href={href}
             aria-current={isActive ? 'page' : undefined}
             className={cn(
@@ -36,8 +37,10 @@ export function MobileBottomNav({ workspaceSlug }: { workspaceSlug: string }) {
             <item.icon className="h-5 w-5" />
             <span className="text-2xs font-medium">{item.label}</span>
           </Link>
+          </li>
         )
       })}
+      </ul>
     </nav>
   )
 }

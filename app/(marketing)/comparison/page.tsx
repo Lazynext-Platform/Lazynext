@@ -36,12 +36,12 @@ export default function ComparisonPage() {
       </section>
 
       <section className="mx-auto max-w-4xl px-6 pb-24 overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" aria-label="Feature comparison across workflow platforms">
           <thead>
             <tr className="border-b-2 border-slate-200">
-              <th className="py-3 text-left font-medium text-slate-500">Feature</th>
-              <th className="py-3 text-center font-bold text-indigo-700">Lazynext</th>
-              {tools.map(t => <th key={t} className="py-3 text-center font-medium text-slate-500">{t}</th>)}
+              <th scope="col" className="py-3 text-left font-medium text-slate-500">Feature</th>
+              <th scope="col" className="py-3 text-center font-bold text-indigo-700">Lazynext</th>
+              {tools.map(t => <th key={t} scope="col" className="py-3 text-center font-medium text-slate-500">{t}</th>)}
             </tr>
           </thead>
           <tbody>

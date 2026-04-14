@@ -160,14 +160,14 @@ export default function BillingPage() {
       <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h2 className="text-lg font-semibold text-slate-100">Billing History</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label="Billing history">
             <thead>
               <tr className="border-b border-slate-800 text-xs text-slate-500">
-                <th className="py-2 text-left font-medium">Date</th>
-                <th className="py-2 text-left font-medium">Description</th>
-                <th className="py-2 text-right font-medium">Amount</th>
-                <th className="py-2 text-center font-medium">Status</th>
-                <th className="py-2 text-right font-medium">Invoice</th>
+                <th scope="col" className="py-2 text-left font-medium">Date</th>
+                <th scope="col" className="py-2 text-left font-medium">Description</th>
+                <th scope="col" className="py-2 text-right font-medium">Amount</th>
+                <th scope="col" className="py-2 text-center font-medium">Status</th>
+                <th scope="col" className="py-2 text-right font-medium">Invoice</th>
               </tr>
             </thead>
             <tbody>

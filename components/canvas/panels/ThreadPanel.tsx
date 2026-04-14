@@ -192,11 +192,11 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
               {/* Comparison table */}
               {msg.table && (
                 <div className="mt-2 overflow-x-auto rounded-lg border border-slate-700">
-                  <table className="w-full text-2xs+">
+                  <table className="w-full text-2xs+" aria-label="Comparison data">
                     <thead>
                       <tr className="border-b border-slate-700 bg-slate-800/50">
                         {msg.table.headers.map((h) => (
-                          <th key={h} className="px-2.5 py-1.5 text-left font-semibold text-slate-400">{h}</th>
+                          <th key={h} scope="col" className="px-2.5 py-1.5 text-left font-semibold text-slate-400">{h}</th>
                         ))}
                       </tr>
                     </thead>

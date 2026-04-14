@@ -93,7 +93,7 @@ export function NotificationCenter() {
           </div>
 
           {/* Items */}
-          <div className="max-h-[420px] overflow-y-auto scrollbar-thin">
+          <div className="max-h-[420px] overflow-y-auto scrollbar-thin" aria-live="polite">
             {todayItems.length > 0 && (
               <>
                 <p className="px-4 pt-3 pb-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">Today</p>

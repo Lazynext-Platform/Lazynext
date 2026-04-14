@@ -221,13 +221,13 @@ export default function DecisionHealthPage() {
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h2 className="text-sm font-semibold text-slate-200">Top Decision Makers</h2>
         <div className="mt-4 overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-label="Top decision makers">
             <thead>
               <tr className="border-b border-slate-800 text-xs text-slate-500">
-                <th className="py-2 text-left font-medium">Member</th>
-                <th className="py-2 text-center font-medium">Decisions</th>
-                <th className="py-2 text-center font-medium">Avg Quality</th>
-                <th className="py-2 text-center font-medium">Good %</th>
+                <th scope="col" className="py-2 text-left font-medium">Member</th>
+                <th scope="col" className="py-2 text-center font-medium">Decisions</th>
+                <th scope="col" className="py-2 text-center font-medium">Avg Quality</th>
+                <th scope="col" className="py-2 text-center font-medium">Good %</th>
               </tr>
             </thead>
             <tbody>

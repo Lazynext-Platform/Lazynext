@@ -83,12 +83,12 @@ export default function TablePanel({ onClose }: TablePanelProps) {
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" aria-label="Table node data">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-800/80 text-2xs font-medium uppercase tracking-wider text-slate-500">
-              <th className="w-8 px-2 py-2"><GripVertical className="h-3 w-3 text-slate-700" /></th>
+              <th scope="col" className="w-8 px-2 py-2"><GripVertical className="h-3 w-3 text-slate-700" /></th>
               {columns.map(col => (
-                <th key={col.id} className="px-3 py-2 text-left whitespace-nowrap cursor-col-resize" style={{ minWidth: col.width }}>
+                <th key={col.id} scope="col" className="px-3 py-2 text-left whitespace-nowrap cursor-col-resize" style={{ minWidth: col.width }}>
                   {col.label}
                 </th>
               ))}

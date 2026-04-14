@@ -316,25 +316,25 @@ export default function PricingPage() {
           </h2>
 
           <div className="-mx-4 overflow-x-auto sm:mx-0">
-            <table className="w-full min-w-[640px] text-sm">
+            <table className="w-full min-w-[640px] text-sm" aria-label="Plan feature comparison">
               <thead>
                 <tr className="border-b-2 border-slate-200">
-                  <th className="w-1/5 px-4 py-4 text-left font-semibold text-slate-500">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-left font-semibold text-slate-500">
                     Feature
                   </th>
-                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Free
                   </th>
-                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-brand">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-brand">
                     Starter
                     <span className="block text-xs font-normal text-brand/70">
                       Most Popular
                     </span>
                   </th>
-                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Pro
                   </th>
-                  <th className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Business
                   </th>
                 </tr>

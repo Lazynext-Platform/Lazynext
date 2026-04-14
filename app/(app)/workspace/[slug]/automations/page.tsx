@@ -172,13 +172,13 @@ export default function AutomationsPage() {
           <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-sm font-semibold text-slate-200">Run History</h2>
             <div className="mt-4 overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm" aria-label="Automation run history">
                 <thead>
                   <tr className="border-b border-slate-800 text-xs text-slate-500">
-                    <th className="py-2 text-left font-medium">Triggered At</th>
-                    <th className="py-2 text-left font-medium">Event</th>
-                    <th className="py-2 text-center font-medium">Status</th>
-                    <th className="py-2 text-left font-medium">Details</th>
+                    <th scope="col" className="py-2 text-left font-medium">Triggered At</th>
+                    <th scope="col" className="py-2 text-left font-medium">Event</th>
+                    <th scope="col" className="py-2 text-center font-medium">Status</th>
+                    <th scope="col" className="py-2 text-left font-medium">Details</th>
                   </tr>
                 </thead>
                 <tbody>

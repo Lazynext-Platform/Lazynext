@@ -114,15 +114,15 @@ export default function ActivityPage() {
             <button className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-400"><Filter className="h-3 w-3" /> Filter</button>
           </div>
           <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm" aria-label="Audit log">
               <thead>
                 <tr className="border-b border-slate-800 text-2xs font-medium uppercase tracking-wider text-slate-500">
-                  <th className="px-4 py-3 text-left">Time</th>
-                  <th className="px-4 py-3 text-left">User</th>
-                  <th className="px-4 py-3 text-left">Action</th>
-                  <th className="px-4 py-3 text-left">Target</th>
-                  <th className="px-4 py-3 text-left">Details</th>
-                  <th className="px-4 py-3 text-left">IP</th>
+                  <th scope="col" className="px-4 py-3 text-left">Time</th>
+                  <th scope="col" className="px-4 py-3 text-left">User</th>
+                  <th scope="col" className="px-4 py-3 text-left">Action</th>
+                  <th scope="col" className="px-4 py-3 text-left">Target</th>
+                  <th scope="col" className="px-4 py-3 text-left">Details</th>
+                  <th scope="col" className="px-4 py-3 text-left">IP</th>
                 </tr>
               </thead>
               <tbody>

@@ -96,13 +96,13 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
           <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Navigation
           </p>
-          <div className="mt-2 space-y-0.5">
+          <ul className="mt-2 space-y-0.5">
             {navItems.map((item) => {
               const href = `${base}${item.href}`
               const isActive = item.href === '' ? pathname === base : pathname.startsWith(href)
               return (
+                <li key={item.label}>
                 <Link
-                  key={item.label}
                   href={href}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
@@ -115,9 +115,10 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
+                </li>
               )
             })}
-          </div>
+          </ul>
         </div>
 
         {/* Workflows section */}
@@ -176,13 +177,13 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
           <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
             Workspace
           </p>
-          <div className="mt-2 space-y-0.5">
+          <ul className="mt-2 space-y-0.5">
             {settingsItems.map((item) => {
               const href = `${base}${item.href}`
               const isActive = pathname === href || (item.href !== '' && pathname.startsWith(href))
               return (
+                <li key={item.label}>
                 <Link
-                  key={item.label}
                   href={href}
                   aria-current={isActive ? 'page' : undefined}
                   className={cn(
@@ -195,9 +196,10 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
+                </li>
               )
             })}
-          </div>
+          </ul>
         </div>
       </nav>
 
