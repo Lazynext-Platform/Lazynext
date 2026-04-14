@@ -40,6 +40,11 @@
   - **Performance**: GuidedTour keyboard useEffect dependency array + `useCallback` on `next`/`prev` handlers, `motion-safe:` prefix on all 15 remaining Tailwind animation utility usages (slide-in-right, slide-in-up, scaleIn, fadeIn).
   - **Standards**: Replaced all 14 arbitrary `max-w-[1280px]` with standard Tailwind `max-w-7xl`. Upgraded footer `text-slate-400` → `text-slate-300` for better WCAG AA contrast. Added `maxLength` to all 13 remaining inputs/textareas. Guide page padding consistency (`md:px-8`).
 
+- **Final Polish (2026-04-15)** — 2 commits (71-72) covering:
+  - **Performance**: Removed duplicate Inter font import from globals.css (was loaded both via next/font/google in layout.tsx AND via CSS @import — eliminated redundant CDN request and double font download).
+  - **Accessibility**: Added `aria-label` on SocialProofBar `<section>` for WCAG landmark naming.
+  - **Verification**: Multiple consecutive audits across focus order, link purpose, button/link semantics, referrer policy, empty interactive elements, focus-visible usage, iframe loading, preconnect crossorigin, and Lighthouse-style meta checks — all returned ALL CLEAN.
+
 - **Production Quality Pass (2026-04-13 → 2026-04-14)** — 48 cleanup commits covering:
   - **Security**: Fixed 15 IDOR vulnerabilities, hardened CSP (removed unsafe-eval, added media/object/base-uri/form-action directives), rate limiting on all 19 API routes, webhook HMAC idempotency, open redirect protection, template install access control, export UUID validation, `hasValidDatabaseUrl` guard on billing checkout, shared canvas UUID validation, `poweredByHeader: false`
   - **Accessibility**: WCAG 2.1 AA — heading hierarchy, form labels (htmlFor/id), aria-labels on OAuth/workspace/icon-only buttons, role="alert" on errors, keyboard handlers, password constraints, prefers-reduced-motion for all CSS animations
