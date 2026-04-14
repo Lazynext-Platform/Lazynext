@@ -40,7 +40,8 @@ const notifications: Notification[] = [
 ]
 
 export function NotificationCenter() {
-  const { isNotificationOpen, toggleNotification } = useUIStore()
+  const isNotificationOpen = useUIStore((s) => s.isNotificationOpen)
+  const toggleNotification = useUIStore((s) => s.toggleNotification)
   const [tab, setTab] = useState<'all' | 'unread'>('all')
   const [items, setItems] = useState(notifications)
   const ref = useRef<HTMLDivElement>(null)

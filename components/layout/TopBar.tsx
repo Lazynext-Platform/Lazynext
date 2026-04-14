@@ -14,7 +14,10 @@ const presenceAvatars = [
 ]
 
 export function TopBar() {
-  const { isSidebarOpen, toggleSidebar, toggleCommandPalette, toggleLazyMind } = useUIStore()
+  const isSidebarOpen = useUIStore((s) => s.isSidebarOpen)
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
+  const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
   const [showMenu, setShowMenu] = useState(false)
 
   const handleSignOut = async () => {

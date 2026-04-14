@@ -17,7 +17,7 @@ const KeyboardShortcutsModal = dynamic(() => import('@/components/ui/KeyboardSho
 export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
   const params = useParams()
   const slug = params.slug as string
-  const { isSidebarOpen } = useUIStore()
+  const isSidebarOpen = useUIStore((s) => s.isSidebarOpen)
 
   return (
     <ToastProvider>

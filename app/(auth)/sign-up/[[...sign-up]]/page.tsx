@@ -82,7 +82,7 @@ export default function SignUpPage() {
         <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">or</span></div>
       </div>
 
-      <form onSubmit={handleSignUp} className="space-y-4">
+      <form onSubmit={handleSignUp} noValidate className="space-y-4">
         <div>
           <label htmlFor="signup-name" className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
           <input

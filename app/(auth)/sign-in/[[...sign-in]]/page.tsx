@@ -62,7 +62,7 @@ export default function SignInPage() {
         <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">or</span></div>
       </div>
 
-      <form onSubmit={handleSignIn} className="space-y-4">
+      <form onSubmit={handleSignIn} noValidate className="space-y-4">
         <div>
           <label htmlFor="signin-email" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
           <input

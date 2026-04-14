@@ -112,20 +112,18 @@ const defaultEdges: Edge[] = [
 ]
 
 export function WorkflowCanvas() {
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    selectNode,
-    addNode,
-    hydrateCanvas,
-    selectedNodeId,
-    isNodePanelOpen,
-  } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
+  const edges = useCanvasStore((s) => s.edges)
+  const onNodesChange = useCanvasStore((s) => s.onNodesChange)
+  const onEdgesChange = useCanvasStore((s) => s.onEdgesChange)
+  const onConnect = useCanvasStore((s) => s.onConnect)
+  const selectNode = useCanvasStore((s) => s.selectNode)
+  const addNode = useCanvasStore((s) => s.addNode)
+  const hydrateCanvas = useCanvasStore((s) => s.hydrateCanvas)
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId)
+  const isNodePanelOpen = useCanvasStore((s) => s.isNodePanelOpen)
 
-  const { isMobile } = useUIStore()
+  const isMobile = useUIStore((s) => s.isMobile)
 
   useEffect(() => {
     if (nodes.length === 0) {

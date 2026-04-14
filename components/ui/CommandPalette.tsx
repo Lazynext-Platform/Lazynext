@@ -34,7 +34,8 @@ const navItems = [
 ]
 
 export function CommandPalette() {
-  const { isCommandPaletteOpen, toggleCommandPalette } = useUIStore()
+  const isCommandPaletteOpen = useUIStore((s) => s.isCommandPaletteOpen)
+  const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
   const [query, setQuery] = useState('')
   const [selectedIndex, setSelectedIndex] = useState(0)
   const modalRef = useModalA11y(isCommandPaletteOpen)

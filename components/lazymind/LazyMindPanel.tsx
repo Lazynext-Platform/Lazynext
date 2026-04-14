@@ -71,7 +71,8 @@ const quickActions = [
 ]
 
 export function LazyMindPanel() {
-  const { isLazyMindOpen, toggleLazyMind } = useUIStore()
+  const isLazyMindOpen = useUIStore((s) => s.isLazyMindOpen)
+  const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)

@@ -65,7 +65,8 @@ const primitiveItems = [
 
 export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const pathname = usePathname()
-  const { isSidebarOpen, toggleSidebar } = useUIStore()
+  const isSidebarOpen = useUIStore((s) => s.isSidebarOpen)
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const base = `/workspace/${workspaceSlug}`
 

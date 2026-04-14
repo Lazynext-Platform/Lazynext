@@ -129,7 +129,7 @@ export default function PlatformGuidePage() {
   const slug = params.slug as string
   const [expandedSection, setExpandedSection] = useState<string | null>('canvas')
   const [completedSections, setCompletedSections] = useState<Set<string>>(new Set())
-  const { setTourActive } = useUIStore()
+  const setTourActive = useUIStore((s) => s.setTourActive)
 
   const markComplete = (id: string) => {
     setCompletedSections((prev) => new Set(prev).add(id))

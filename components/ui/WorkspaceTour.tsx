@@ -65,7 +65,9 @@ const workspaceTourSteps: TourStep[] = [
 ]
 
 export function WorkspaceTour() {
-  const { isTourActive, completeTour, setTourActive } = useUIStore()
+  const isTourActive = useUIStore((s) => s.isTourActive)
+  const completeTour = useUIStore((s) => s.completeTour)
+  const setTourActive = useUIStore((s) => s.setTourActive)
 
   if (!isTourActive) return null
 
