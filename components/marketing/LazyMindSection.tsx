@@ -26,7 +26,7 @@ const aiFeatures = [
 export default function LazyMindSection() {
   return (
     <section className="py-24">
-      <div className="mx-auto max-w-[1280px] px-6">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             AI that understands your{' '}

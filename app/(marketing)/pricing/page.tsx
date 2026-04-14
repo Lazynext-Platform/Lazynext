@@ -227,7 +227,7 @@ export default function PricingPage() {
 
       {/* PRICING CARDS */}
       <section className="pb-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-5 xl:grid-cols-4">
             {tiers.map((tier) => (
               <div
@@ -310,7 +310,7 @@ export default function PricingPage() {
 
       {/* FEATURE COMPARISON TABLE */}
       <section className="pb-20">
-        <div className="mx-auto max-w-[1280px] px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <h2 className="mb-12 text-center text-3xl font-bold text-slate-900">
             Compare all features
           </h2>

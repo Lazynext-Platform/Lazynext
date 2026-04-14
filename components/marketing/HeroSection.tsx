@@ -63,7 +63,7 @@ const heroNodes = [
 export default function HeroSection() {
   return (
     <section className="gradient-hero pt-32 pb-24 md:pt-40 md:pb-32">
-      <div className="mx-auto max-w-[1280px] px-6 text-center">
+      <div className="mx-auto max-w-7xl px-6 text-center">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
           <span className="h-1.5 w-1.5 rounded-full bg-brand" />

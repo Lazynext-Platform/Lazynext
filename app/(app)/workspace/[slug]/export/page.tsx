@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Shield, Database, Check, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -27,14 +27,21 @@ export default function DataExportPage() {
   const [fullFormat, setFullFormat] = useState('json')
   const [decisionFormat, setDecisionFormat] = useState('json')
   const [dateRange, setDateRange] = useState('all')
+  const exportTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (exportTimerRef.current) clearInterval(exportTimerRef.current)
+    }
+  }, [])
 
   const handleFullExport = () => {
     setFullExportStatus('exporting')
-    let timer: ReturnType<typeof setInterval> | null = null
-    timer = setInterval(() => {
+    exportTimerRef.current = setInterval(() => {
       setFullExportProgress(prev => {
         if (prev >= 100) {
-          if (timer) clearInterval(timer)
+          if (exportTimerRef.current) clearInterval(exportTimerRef.current)
+          exportTimerRef.current = null
           setFullExportStatus('ready')
           return 100
         }

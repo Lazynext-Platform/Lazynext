@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react'
 export default function CTABanner() {
   return (
     <section className="py-24">
-      <div className="mx-auto max-w-[1280px] px-6">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="relative overflow-hidden rounded-3xl bg-brand px-8 py-16 text-center md:py-20">
           {/* Decorative blur elements */}
           <div className="absolute left-0 top-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl" />

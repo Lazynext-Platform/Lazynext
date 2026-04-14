@@ -20,7 +20,7 @@ export default function MarketingHeader() {
 
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
           className="text-xl font-bold tracking-tight text-brand"

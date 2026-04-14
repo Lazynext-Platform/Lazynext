@@ -1,7 +1,7 @@
 export default function SocialProofBar() {
   return (
     <section className="border-b border-slate-100 py-12">
-      <div className="mx-auto max-w-[1280px] px-6 text-center">
+      <div className="mx-auto max-w-7xl px-6 text-center">
         <p className="mb-8 text-sm font-medium text-slate-400">
           Trusted by 1,200+ teams across 40+ countries
         </p>

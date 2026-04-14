@@ -9,7 +9,7 @@ export default function ConsolidationMap() {
 
   return (
     <section className="bg-slate-50 py-24">
-      <div className="mx-auto max-w-[1280px] px-6 text-center">
+      <div className="mx-auto max-w-7xl px-6 text-center">
         <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           One tool.{' '}
           <span className="text-brand">One price.</span>

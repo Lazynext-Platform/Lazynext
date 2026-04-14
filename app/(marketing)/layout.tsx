@@ -44,8 +44,8 @@ export default function MarketingLayout({
       {children}
 
       {/* Marketing Footer */}
-      <footer aria-label="Site footer" className="bg-slate-900 py-16 text-slate-400">
-        <div className="mx-auto max-w-[1280px] px-6">
+      <footer aria-label="Site footer" className="bg-slate-900 py-16 text-slate-300">
+        <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-2 gap-8 md:grid-cols-5 md:gap-12">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">

@@ -22,7 +22,7 @@ export default function DecisionDNASection() {
       <div className="absolute left-0 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-orange-200/20 blur-3xl" />
       <div className="absolute bottom-0 right-0 h-96 w-96 translate-x-1/2 translate-y-1/2 rounded-full bg-blue-200/20 blur-3xl" />
 
-      <div className="relative mx-auto max-w-[1280px] px-6">
+      <div className="relative mx-auto max-w-7xl px-6">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* Decision card mockup */}
           <div className="order-2 lg:order-1">

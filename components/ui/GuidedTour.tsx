@@ -90,17 +90,17 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
     }
   }, [updateTargetRect])
 
-  const next = () => {
+  const next = useCallback(() => {
     if (isLast) {
       onComplete()
     } else {
       setCurrent((c) => c + 1)
     }
-  }
+  }, [isLast, onComplete])
 
-  const prev = () => {
+  const prev = useCallback(() => {
     if (!isFirst) setCurrent((c) => c - 1)
-  }
+  }, [isFirst])
 
   // Keyboard navigation
   useEffect(() => {
@@ -111,7 +111,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  })
+  }, [onSkip, next, prev])
 
   const tooltipWidth = 380
   const tooltipHeight = 200
