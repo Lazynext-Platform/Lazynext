@@ -34,6 +34,12 @@
 
 - **Zustand Selector Optimization & Final Motion-Safe (2026-04-15)** — Converted all Zustand store destructuring to individual selectors across all 3 stores (useCanvasStore in 8 files, useUIStore in 9 files) to prevent unnecessary re-renders. Fixed last 2 `animate-pulse` instances missing `motion-safe:` prefix (EmptyStates DecisionListSkeleton, decisions page success animation). Added `noValidate` to sign-in and sign-up forms for consistent custom validation UX.
 
+- **Deep Polish Pass (2026-04-15)** — 8 commits (63-70) covering:
+  - **Timer safety**: Fixed setTimeout leaks in shared canvas, integrations, and decisions modal (useRef + useEffect cleanup). Fixed export page setInterval leak.
+  - **Accessibility**: `aria-invalid` on auth form inputs, `role="progressbar"` with `aria-valuenow`/`aria-valuemin`/`aria-valuemax` on all 18 progress bars (14 files), `title` attributes on 4 truncated text elements, RTL `dir` attribute for Arabic locale, `enterKeyHint="search"` on 5 search inputs and `enterKeyHint="send"` on chat input.
+  - **Performance**: GuidedTour keyboard useEffect dependency array + `useCallback` on `next`/`prev` handlers, `motion-safe:` prefix on all 15 remaining Tailwind animation utility usages (slide-in-right, slide-in-up, scaleIn, fadeIn).
+  - **Standards**: Replaced all 14 arbitrary `max-w-[1280px]` with standard Tailwind `max-w-7xl`. Upgraded footer `text-slate-400` → `text-slate-300` for better WCAG AA contrast. Added `maxLength` to all 13 remaining inputs/textareas. Guide page padding consistency (`md:px-8`).
+
 - **Production Quality Pass (2026-04-13 → 2026-04-14)** — 48 cleanup commits covering:
   - **Security**: Fixed 15 IDOR vulnerabilities, hardened CSP (removed unsafe-eval, added media/object/base-uri/form-action directives), rate limiting on all 19 API routes, webhook HMAC idempotency, open redirect protection, template install access control, export UUID validation, `hasValidDatabaseUrl` guard on billing checkout, shared canvas UUID validation, `poweredByHeader: false`
   - **Accessibility**: WCAG 2.1 AA — heading hierarchy, form labels (htmlFor/id), aria-labels on OAuth/workspace/icon-only buttons, role="alert" on errors, keyboard handlers, password constraints, prefers-reduced-motion for all CSS animations
