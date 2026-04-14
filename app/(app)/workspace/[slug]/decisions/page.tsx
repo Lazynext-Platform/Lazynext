@@ -331,6 +331,7 @@ export default function DecisionsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search decisions..."
             aria-label="Search decisions"
+            enterKeyHint="search"
             className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
           />
         </div>

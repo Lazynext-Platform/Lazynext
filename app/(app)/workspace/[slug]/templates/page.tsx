@@ -108,7 +108,7 @@ export default function TemplatesPage() {
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-          <input type="text" placeholder="Search templates..." aria-label="Search templates" maxLength={100} className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
+          <input type="text" placeholder="Search templates..." aria-label="Search templates" maxLength={100} enterKeyHint="search" className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
         </div>
         <div className="flex gap-1 overflow-x-auto">
           {categories.map(cat => (

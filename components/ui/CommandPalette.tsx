@@ -90,6 +90,7 @@ export function CommandPalette() {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command or search..."
             maxLength={100}
+            enterKeyHint="search"
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
             aria-label="Search commands and recent items"
             autoFocus

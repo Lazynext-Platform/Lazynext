@@ -95,6 +95,7 @@ export default function MembersPage() {
         <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search members"
           placeholder="Search members..."
+          enterKeyHint="search"
           className="w-full rounded-lg border border-slate-700 bg-slate-800 py-2 pl-9 pr-3 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none" />
       </div>
 
