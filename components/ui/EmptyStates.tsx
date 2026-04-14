@@ -363,7 +363,7 @@ export function DecisionListSkeleton() {
   return (
     <div className="space-y-3 p-4" aria-busy="true" aria-label="Loading decisions">
       {[0, 1, 2].map((i) => (
-        <div key={i} className="flex items-center gap-3 animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
+        <div key={i} className="flex items-center gap-3 motion-safe:animate-pulse" style={{ animationDelay: `${i * 0.1}s` }}>
           <div className="h-8 w-8 rounded-full bg-slate-800" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3 w-3/4 rounded bg-slate-800" />

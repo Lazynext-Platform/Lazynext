@@ -33,7 +33,8 @@ interface Subtask {
 }
 
 export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
-  const { nodes, updateNodeData } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
+  const updateNodeData = useCanvasStore((s) => s.updateNodeData)
   const node = nodes.find((n) => n.id === nodeId)
 
   const d = (node?.data ?? {}) as Record<string, unknown>

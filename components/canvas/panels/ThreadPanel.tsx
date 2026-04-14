@@ -81,7 +81,7 @@ const mentionOptions = [
 ]
 
 export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
-  const { nodes } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
   const node = nodes.find((n) => n.id === nodeId)
   const [isResolved, setIsResolved] = useState(false)
   const [input, setInput] = useState('')

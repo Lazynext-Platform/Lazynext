@@ -147,7 +147,7 @@ function LogDecisionModal({ onClose }: { onClose: () => void }) {
       >
         {submitted ? (
           <div className="flex flex-col items-center justify-center py-16 px-6">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 animate-pulse">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 motion-safe:animate-pulse">
               <CheckCircle2 className="h-8 w-8 text-emerald-400" />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-slate-100">Decision Logged!</h3>

@@ -9,7 +9,8 @@ import TablePanel from './TablePanel'
 import { NodeDetailPanelLegacy } from './NodeDetailPanelLegacy'
 
 export function NodeDetailPanel({ nodeId }: { nodeId: string }) {
-  const { nodes, selectNode } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
+  const selectNode = useCanvasStore((s) => s.selectNode)
   const node = nodes.find((n) => n.id === nodeId)
 
   if (!node) return null

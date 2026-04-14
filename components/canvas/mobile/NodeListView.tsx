@@ -43,7 +43,8 @@ const priorityDot: Record<string, string> = {
 }
 
 export function NodeListView({ onNodeSelect }: { onNodeSelect?: (id: string) => void }) {
-  const { nodes, selectNode } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
+  const selectNode = useCanvasStore((s) => s.selectNode)
   const [activeFilter, setActiveFilter] = useState('all')
   const [sortAsc, setSortAsc] = useState(true)
 

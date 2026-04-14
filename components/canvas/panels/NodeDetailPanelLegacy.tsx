@@ -11,7 +11,9 @@ const sampleThread = [
 ]
 
 export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
-  const { nodes, selectNode, updateNodeData } = useCanvasStore()
+  const nodes = useCanvasStore((s) => s.nodes)
+  const selectNode = useCanvasStore((s) => s.selectNode)
+  const updateNodeData = useCanvasStore((s) => s.updateNodeData)
   const node = nodes.find((n) => n.id === nodeId)
 
   if (!node) return null
