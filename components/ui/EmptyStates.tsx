@@ -287,7 +287,7 @@ export function RateLimitState({ retryIn = 23 }: { retryIn?: number }) {
           <span className="text-slate-500">Retry in</span>
           <span className="font-bold text-slate-200">{retryIn} seconds</span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800" role="progressbar" aria-valuenow={60} aria-valuemin={0} aria-valuemax={100}>
           <div className="h-full rounded-full bg-amber-500 transition-all" style={{ width: '60%' }} />
         </div>
       </div>

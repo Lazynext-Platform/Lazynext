@@ -132,7 +132,7 @@ export default function WorkspaceHomePage() {
 
               {/* Progress */}
               <div className="mt-3 flex items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-800" role="progressbar" aria-valuenow={wf.progress} aria-valuemin={0} aria-valuemax={100}>
                   <div
                     className={cn(
                       'h-full rounded-full',

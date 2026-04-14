@@ -166,7 +166,7 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
                 <span className={cn('text-4xl font-bold', scoreColor)}>{qualityScore}</span>
                 <span className="text-sm text-slate-500">/100</span>
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800">
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-800" role="progressbar" aria-valuenow={qualityScore} aria-valuemin={0} aria-valuemax={100} aria-label="Quality score">
                 <div className={cn('h-full rounded-full transition-all', scoreBarColor)} style={{ width: `${qualityScore}%` }} />
               </div>
               <p className="mt-2 text-xs text-slate-500">Good options coverage. Strong rationale.</p>

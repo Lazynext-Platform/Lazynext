@@ -208,7 +208,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
           <p className="mt-2 text-sm leading-relaxed text-slate-400">{t(step.descriptionKey)}</p>
 
           {/* Progress bar */}
-          <div className="mt-4 h-1 rounded-full bg-slate-800">
+          <div className="mt-4 h-1 rounded-full bg-slate-800" role="progressbar" aria-valuenow={current + 1} aria-valuemin={0} aria-valuemax={steps.length}>
             <div
               className="h-1 rounded-full bg-brand transition-all duration-300"
               style={{ width: `${((current + 1) / steps.length) * 100}%` }}

@@ -112,7 +112,7 @@ export default function DecisionHealthPage() {
             </div>
             <p className="mt-2 text-2xl font-bold text-slate-50">{s.value}</p>
             {'progress' in s && s.progress && (
-              <div className="mt-1.5 h-1.5 w-full rounded-full bg-slate-800">
+              <div className="mt-1.5 h-1.5 w-full rounded-full bg-slate-800" role="progressbar" aria-valuenow={s.progress} aria-valuemin={0} aria-valuemax={100}>
                 <div className="h-1.5 rounded-full bg-emerald-500 transition-all duration-700" style={{ width: `${s.progress}%` }} />
               </div>
             )}
@@ -137,7 +137,7 @@ export default function DecisionHealthPage() {
                 <span className="text-xs text-slate-300">{q.range} — {q.label}</span>
                 <span className="text-xs font-semibold text-slate-300">{q.count} ({q.pct}%)</span>
               </div>
-              <div className="h-5 w-full rounded-md bg-slate-800 overflow-hidden">
+              <div className="h-5 w-full rounded-md bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={q.pct} aria-valuemin={0} aria-valuemax={100} aria-label={q.label}>
                 <div className={cn('h-full rounded-md transition-all duration-700', q.color)} style={{ width: `${q.pct}%` }} />
               </div>
               <p className="mt-0.5 text-2xs text-slate-500">{q.helper}</p>
@@ -260,7 +260,7 @@ export default function DecisionHealthPage() {
                   <span className="text-xs text-slate-300">{t.type}</span>
                   <span className="text-xs text-slate-400">{t.count} ({t.pct}%)</span>
                 </div>
-                <div className="h-4 w-full rounded bg-slate-800 overflow-hidden">
+                <div className="h-4 w-full rounded bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={t.pct} aria-valuemin={0} aria-valuemax={100} aria-label={t.type}>
                   <div className={cn('h-full rounded transition-all duration-700', t.color)} style={{ width: `${t.pct}%` }} />
                 </div>
                 <p className="mt-0.5 text-2xs text-slate-500">{t.insight}</p>

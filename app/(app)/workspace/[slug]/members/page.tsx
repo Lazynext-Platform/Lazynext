@@ -83,7 +83,7 @@ export default function MembersPage() {
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <p className="text-xs text-slate-500">Seat Usage</p>
           <p className="mt-1 text-xl font-bold text-slate-50">{totalSeats}<span className="text-sm font-normal text-slate-500">/{seatLimit}</span></p>
-          <div className="mt-2 h-1.5 rounded-full bg-slate-800">
+          <div className="mt-2 h-1.5 rounded-full bg-slate-800" role="progressbar" aria-valuenow={Math.round(seatPct)} aria-valuemin={0} aria-valuemax={100} aria-label="Seat usage">
             <div className={cn('h-full rounded-full', seatPct > 80 ? 'bg-amber-500' : 'bg-brand')} style={{ width: `${seatPct}%` }} />
           </div>
         </div>

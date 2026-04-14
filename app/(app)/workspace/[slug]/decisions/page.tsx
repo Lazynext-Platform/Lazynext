@@ -281,7 +281,7 @@ export default function DecisionsPage() {
         <div className="rounded-xl border border-slate-800 bg-slate-900 p-4">
           <p className="text-2xs uppercase tracking-wider text-slate-500">Avg Quality Score</p>
           <p className={cn('mt-1 text-2xl font-bold', avgQuality >= 70 ? 'text-emerald-400' : avgQuality >= 40 ? 'text-amber-400' : 'text-red-400')}>{avgQuality}</p>
-          <div className="mt-1 h-1.5 w-full rounded-full bg-slate-800"><div className="h-1.5 rounded-full bg-emerald-500 transition-all" style={{ width: `${avgQuality}%` }} /></div>
+          <div className="mt-1 h-1.5 w-full rounded-full bg-slate-800" role="progressbar" aria-valuenow={avgQuality} aria-valuemin={0} aria-valuemax={100} aria-label="Average quality score"><div className="h-1.5 rounded-full bg-emerald-500 transition-all" style={{ width: `${avgQuality}%` }} /></div>
         </div>
         <button onClick={() => setShowOutcomeReview(true)} className="rounded-xl border border-slate-800 bg-slate-900 p-4 text-left hover:border-slate-700 transition-colors">
           <p className="text-2xs uppercase tracking-wider text-slate-500">Outcomes Tagged</p>
@@ -311,7 +311,7 @@ export default function DecisionsPage() {
           {qualityDistribution.map((q) => (
             <div key={q.range} className="flex items-center gap-3">
               <span className="w-16 text-xs text-slate-400">{q.range}</span>
-              <div className="flex-1 h-6 rounded-md bg-slate-800 overflow-hidden">
+              <div className="flex-1 h-6 rounded-md bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={Math.round((q.count / q.total) * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={q.label}>
                 <div className={cn('h-full rounded-md transition-all duration-700', q.color)} style={{ width: `${(q.count / q.total) * 100}%` }} />
               </div>
               <span className="w-10 text-right text-xs font-semibold text-slate-300">{q.count}</span>

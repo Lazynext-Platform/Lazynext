@@ -129,7 +129,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
             className="flex items-center gap-1 rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 disabled:opacity-50">
             <ChevronLeft className="h-3.5 w-3.5" /> Previous
           </button>
-          <div className="h-1 w-24 rounded-full bg-slate-800">
+          <div className="h-1 w-24 rounded-full bg-slate-800" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}>
             <div className="h-full rounded-full bg-orange-500 transition-all" style={{ width: `${progress}%` }} />
           </div>
           <button onClick={handleNext} disabled={!selectedOutcome}

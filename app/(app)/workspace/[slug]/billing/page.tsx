@@ -197,7 +197,7 @@ export default function BillingPage() {
                 <span className="text-xs text-slate-500">{u.label}</span>
                 <span className="text-xs text-slate-400">{u.value}{u.unit ? u.unit : ''} / {u.limit}{u.unit ? u.unit : ''}</span>
               </div>
-              <div className="mt-2 h-2 w-full rounded-full bg-slate-700 overflow-hidden">
+              <div className="mt-2 h-2 w-full rounded-full bg-slate-700 overflow-hidden" role="progressbar" aria-valuenow={Math.round((u.value / u.limit) * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={u.label}>
                 <div className={cn('h-full rounded-full transition-all duration-700', u.color)} style={{ width: `${(u.value / u.limit) * 100}%` }} />
               </div>
             </div>

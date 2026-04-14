@@ -170,7 +170,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                         <span className="text-xs text-slate-400">{p.label}</span>
                         <span className="text-xs text-slate-500">{Math.round(p.pct)}%</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                      <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={Math.round(p.pct)} aria-valuemin={0} aria-valuemax={100} aria-label={p.label}>
                         <div className={cn('h-full rounded-full transition-all', p.color)} style={{ width: `${p.pct}%` }} />
                       </div>
                     </div>

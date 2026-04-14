@@ -99,7 +99,7 @@ export default function TasksPage() {
                       <p className={cn('text-sm font-medium', col.status === 'done' ? 'text-slate-400 line-through' : 'text-slate-100')}>{task.title}</p>
                       {task.desc && <p className="mt-1 text-xs text-slate-500 line-clamp-2">{task.desc}</p>}
                       {task.progress > 0 && task.progress < 100 && (
-                        <div className="mt-2 h-1 w-full rounded-full bg-slate-800 overflow-hidden">
+                        <div className="mt-2 h-1 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={task.progress} aria-valuemin={0} aria-valuemax={100}>
                           <div className="h-1 rounded-full bg-brand" style={{ width: `${task.progress}%` }} />
                         </div>
                       )}

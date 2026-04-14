@@ -123,7 +123,7 @@ export default function DataExportPage() {
                   <span className="text-xs text-slate-400">Preparing...</span>
                   <span className="text-xs text-slate-500">{Math.round(fullExportProgress)}%</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={Math.round(fullExportProgress)} aria-valuemin={0} aria-valuemax={100}>
                   <div className="h-2 rounded-full bg-brand transition-all" style={{ width: `${fullExportProgress}%` }} />
                 </div>
               </div>

@@ -192,7 +192,7 @@ export default function PlatformGuidePage() {
           <span className="text-xs font-medium text-slate-400">
             {t('progress', { completed: completedSections.size, total: guideSections.length })}
           </span>
-          <div className="flex-1 h-1.5 rounded-full bg-slate-800">
+            <div className="flex-1 h-1.5 rounded-full bg-slate-800" role="progressbar" aria-valuenow={completedSections.size} aria-valuemin={0} aria-valuemax={guideSections.length}>
             <div
               className="h-1.5 rounded-full bg-brand transition-all duration-500"
               style={{ width: `${(completedSections.size / guideSections.length) * 100}%` }}

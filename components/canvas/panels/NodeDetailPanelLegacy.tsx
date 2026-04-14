@@ -192,7 +192,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
                   Quality Score
                 </label>
                 <div className="mt-1.5 flex items-center gap-3">
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-800" role="progressbar" aria-valuenow={qualityScore} aria-valuemin={0} aria-valuemax={100} aria-label="Quality score">
                     <div
                       className={cn(
                         'h-full rounded-full transition-all',

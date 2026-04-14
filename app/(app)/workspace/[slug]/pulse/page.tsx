@@ -113,7 +113,7 @@ export default function PulsePage() {
                   </div>
                   <span className="text-xs text-slate-500">{w.tasks}/{w.capacity} tasks</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-800">
+                <div className="h-2 rounded-full bg-slate-800" role="progressbar" aria-valuenow={Math.min(Math.round(pct), 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`${w.name} workload`}>
                   <div className={cn('h-full rounded-full transition-all', overloaded ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-cyan-500')} style={{ width: `${Math.min(pct, 100)}%` }} />
                 </div>
               </div>
