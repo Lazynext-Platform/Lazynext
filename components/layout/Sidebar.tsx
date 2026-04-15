@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -78,9 +79,14 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
         !isSidebarOpen && '-translate-x-full'
       )}
     >
-      {/* Workspace selector */}
+      {/* Logo + Workspace selector */}
       <div className="flex h-12 items-center justify-between border-b border-slate-800 px-4">
-        <WorkspaceSelector />
+        <div className="flex items-center gap-2">
+          <Link href="/">
+            <Image src="/logo-dark.png" alt="Lazynext" width={24} height={24} className="h-6 w-6" />
+          </Link>
+          <WorkspaceSelector />
+        </div>
         <button
           onClick={toggleSidebar}
           className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200"

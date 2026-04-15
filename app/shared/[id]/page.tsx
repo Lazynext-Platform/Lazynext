@@ -61,7 +61,7 @@ export default function SharedCanvasPage() {
       <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 py-3">
         <div className="flex items-center gap-3">
           <Link href="/">
-            <img src="/logo.png" alt="Lazynext" className="h-7 w-auto" />
+            <img src="/logo-dark.png" alt="Lazynext" className="h-7 w-auto" />
           </Link>
           <div>
             <h1 className="text-sm font-semibold text-slate-100">Shared Canvas</h1>

@@ -178,7 +178,7 @@ export default function CreateWorkspacePage() {
       {/* Logo */}
       <div className="mb-8">
         <Link href="/">
-          <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto brightness-0 invert" priority />
+          <Image src="/logo-dark.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" priority />
         </Link>
       </div>
 

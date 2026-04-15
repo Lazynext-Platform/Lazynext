@@ -1,6 +1,8 @@
 'use client'
 
 import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus, User, LogOut } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useUIStore } from '@/stores/ui.store'
 import { NotificationCenter } from '@/components/ui/NotificationCenter'
 import { cn } from '@/lib/utils/cn'
@@ -34,13 +36,18 @@ export function TopBar() {
     <header className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm px-4">
       <div className="flex items-center gap-3">
         {!isSidebarOpen && (
-          <button
-            onClick={toggleSidebar}
-            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-            aria-label="Open sidebar"
-          >
-            <Menu className="h-4 w-4" />
-          </button>
+          <>
+            <Link href="/">
+              <Image src="/logo-dark.png" alt="Lazynext" width={24} height={24} className="h-6 w-6" />
+            </Link>
+            <button
+              onClick={toggleSidebar}
+              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+          </>
         )}
 
         {/* Breadcrumb */}

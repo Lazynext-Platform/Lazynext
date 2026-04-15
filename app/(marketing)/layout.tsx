@@ -51,7 +51,7 @@ export default function MarketingLayout({
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/" className="inline-block">
-                <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-8 w-auto brightness-0 invert" />
+                <Image src="/logo-dark.png" alt="Lazynext" width={140} height={35} className="h-8 w-auto" />
               </Link>
               <p className="mt-3 text-sm leading-relaxed">
                 The operating system for work. Tasks, docs, decisions, and AI

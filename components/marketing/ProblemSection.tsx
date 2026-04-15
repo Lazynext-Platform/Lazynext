@@ -79,7 +79,7 @@ export default function ProblemSection() {
           {/* Lazynext card */}
           <div className="card-hover max-w-xs rounded-2xl border-2 border-brand bg-brand/5 p-8 text-center shadow-lg shadow-brand/10">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center">
-              <Image src="/logo.png" alt="Lazynext" width={56} height={56} className="h-14 w-auto" />
+              <Image src="/logo-transparent.png" alt="Lazynext" width={56} height={56} className="h-14 w-auto" />
             </div>
             <p className="text-xl font-bold text-brand">Lazynext</p>
             <p className="mt-2 text-sm font-medium text-slate-600">

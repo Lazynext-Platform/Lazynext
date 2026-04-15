@@ -41,7 +41,7 @@ export default function AuthLayout({
         <div>
           {/* Logo */}
           <Link href="/" className="inline-block">
-            <Image src="/logo.png" alt="Lazynext" width={160} height={40} className="h-10 w-auto brightness-0 invert" priority />
+            <Image src="/logo-dark.png" alt="Lazynext" width={160} height={40} className="h-10 w-auto" priority />
           </Link>
 
           {/* Headline */}
@@ -81,7 +81,7 @@ export default function AuthLayout({
         {/* Mobile logo */}
         <div className="mb-8 lg:hidden">
           <Link href="/">
-            <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" priority />
+            <Image src="/logo-transparent.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" priority />
           </Link>
         </div>
 
