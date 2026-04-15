@@ -6,7 +6,6 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
-  Zap,
   Upload,
   LayoutTemplate,
   PenLine,
@@ -176,10 +175,7 @@ export default function CreateWorkspacePage() {
 
       {/* Logo */}
       <div className="mb-8 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand">
-          <Zap className="h-5 w-5 text-white" />
-        </div>
-        <span className="text-xl font-bold text-white">Lazynext</span>
+        <img src="/logo.png" alt="Lazynext" className="h-9 w-auto brightness-0 invert" />
       </div>
 
       {/* Progress */}

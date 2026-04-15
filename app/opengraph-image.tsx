@@ -40,22 +40,11 @@ export default async function Image() {
             marginBottom: '32px',
           }}
         >
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '16px',
-              backgroundColor: '#4F6EF7',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '32px',
-              fontWeight: 800,
-              color: 'white',
-            }}
-          >
-            L
-          </div>
+          <svg width="56" height="64" viewBox="0 0 120 140">
+            <path d="M10 0 L45 0 L45 85 Q45 105 65 105 L10 105 Z" fill="#FF0000" />
+            <path d="M45 105 L110 105 L110 140 L10 140 L10 105 Z" fill="#FF0000" />
+            <path d="M45 0 Q45 105 110 105 L45 105 L45 0 Z" fill="#FF0000" opacity="0.85" />
+          </svg>
           <span
             style={{
               fontSize: '48px',
@@ -64,7 +53,7 @@ export default async function Image() {
               letterSpacing: '-1px',
             }}
           >
-            Lazynext
+            LAZYNEXT
           </span>
         </div>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { CheckCircle, Users, TrendingUp, Zap } from 'lucide-react'
+import Image from 'next/image'
+import { CheckCircle, Users, TrendingUp } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Auth — Lazynext',
@@ -39,10 +40,7 @@ export default function AuthLayout({
         <div>
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-white">Lazynext</span>
+            <Image src="/logo.png" alt="Lazynext" width={160} height={40} className="h-10 w-auto brightness-0 invert" />
           </div>
 
           {/* Headline */}
@@ -80,11 +78,8 @@ export default function AuthLayout({
       {/* Right Form Panel */}
       <main id="main-content" className="flex w-full flex-col items-center justify-center bg-white p-6 sm:p-12 lg:w-1/2">
         {/* Mobile logo */}
-        <div className="mb-8 flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand">
-            <Zap className="h-4 w-4 text-white" />
-          </div>
-          <span className="text-xl font-bold text-slate-900">Lazynext</span>
+        <div className="mb-8 lg:hidden">
+          <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" />
         </div>
 
         <div className="w-full max-w-md">{children}</div>

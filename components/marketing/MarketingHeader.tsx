@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { LocaleSwitcher } from '@/components/layout/LocaleSwitcher'
@@ -23,9 +24,9 @@ export default function MarketingHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
-          className="text-xl font-bold tracking-tight text-brand"
+          className="flex items-center"
         >
-          Lazynext
+          <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-8 w-auto" />
         </Link>
 
         {/* Desktop nav */}

@@ -5,7 +5,6 @@ import {
   Table,
   ArrowRight,
   ArrowDown,
-  Layers,
 } from 'lucide-react'
 
 const competitors = [
@@ -78,8 +77,8 @@ export default function ProblemSection() {
 
           {/* Lazynext card */}
           <div className="card-hover max-w-xs rounded-2xl border-2 border-brand bg-brand/5 p-8 text-center shadow-lg shadow-brand/10">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-brand shadow-lg shadow-brand/30">
-              <Layers className="h-7 w-7 text-white" />
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center">
+              <img src="/logo.png" alt="Lazynext" className="h-14 w-auto" />
             </div>
             <p className="text-xl font-bold text-brand">Lazynext</p>
             <p className="mt-2 text-sm font-medium text-slate-600">
