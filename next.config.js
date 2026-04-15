@@ -3,6 +3,8 @@ const createNextIntlPlugin = require('next-intl/plugin')
 const withNextIntl = createNextIntlPlugin('./i18n.ts')
 
 /** @type {import('next').NextConfig} */
+const isDev = process.env.NODE_ENV !== 'production'
+
 const nextConfig = {
   poweredByHeader: false,
   images: {
@@ -24,11 +26,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co https://api.lemonsqueezy.com",
+              `connect-src 'self' https://*.supabase.co https://api.lemonsqueezy.com${isDev ? ' ws://localhost:*' : ''}`,
               "media-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",

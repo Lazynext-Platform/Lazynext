@@ -17,6 +17,7 @@ export function formatCurrency(
   return new Intl.NumberFormat(locale ?? undefined, {
     style: 'currency',
     currency,
+    currencyDisplay: 'narrowSymbol',
     maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
   }).format(amount)
 }

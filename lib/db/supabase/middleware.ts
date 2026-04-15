@@ -29,6 +29,14 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not add logic between createServerClient and supabase.auth.getUser().
   // A simple mistake could make it very hard to debug session issues.
+
+  // DEV BYPASS: Skip auth when Supabase is not configured (placeholder credentials)
+  const isDev = process.env.NODE_ENV === 'development'
+  const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://your-project.supabase.co'
+  if (isDev && isPlaceholder) {
+    return supabaseResponse
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -42,6 +50,11 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === '/about' ||
     request.nextUrl.pathname === '/changelog' ||
     request.nextUrl.pathname === '/templates' ||
+    request.nextUrl.pathname === '/privacy' ||
+    request.nextUrl.pathname === '/terms' ||
+    request.nextUrl.pathname === '/contact' ||
+    request.nextUrl.pathname === '/careers' ||
+    request.nextUrl.pathname === '/docs' ||
     request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/sign-up') ||
     request.nextUrl.pathname.startsWith('/auth/callback') ||
