@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { CheckCircle, Users, TrendingUp } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -39,9 +40,9 @@ export default function AuthLayout({
       <div className="hidden bg-gradient-to-br from-brand to-brand-hover lg:flex lg:w-1/2 lg:flex-col lg:justify-between lg:p-12">
         <div>
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Lazynext" width={160} height={40} className="h-10 w-auto brightness-0 invert" />
-          </div>
+          <Link href="/" className="inline-block">
+            <Image src="/logo.png" alt="Lazynext" width={160} height={40} className="h-10 w-auto brightness-0 invert" priority />
+          </Link>
 
           {/* Headline */}
           <h2 className="mt-12 text-4xl font-bold leading-tight text-white">
@@ -79,7 +80,9 @@ export default function AuthLayout({
       <main id="main-content" className="flex w-full flex-col items-center justify-center bg-white p-6 sm:p-12 lg:w-1/2">
         {/* Mobile logo */}
         <div className="mb-8 lg:hidden">
-          <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" />
+          <Link href="/">
+            <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto" priority />
+          </Link>
         </div>
 
         <div className="w-full max-w-md">{children}</div>

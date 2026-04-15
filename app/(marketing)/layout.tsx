@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import MarketingHeader from '@/components/marketing/MarketingHeader'
 
 export const metadata: Metadata = {
@@ -49,11 +50,8 @@ export default function MarketingLayout({
           <div className="grid grid-cols-2 gap-8 md:grid-cols-5 md:gap-12">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <Link
-                href="/"
-                className="text-xl font-bold tracking-tight text-white"
-              >
-                Lazynext
+              <Link href="/" className="inline-block">
+                <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-8 w-auto brightness-0 invert" />
               </Link>
               <p className="mt-3 text-sm leading-relaxed">
                 The operating system for work. Tasks, docs, decisions, and AI

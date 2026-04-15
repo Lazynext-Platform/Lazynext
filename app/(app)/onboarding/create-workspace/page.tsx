@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Image from 'next/image'
 import {
   ArrowRight,
   ArrowLeft,
@@ -174,8 +176,10 @@ export default function CreateWorkspacePage() {
       {showConfetti && <ConfettiEffect />}
 
       {/* Logo */}
-      <div className="mb-8 flex items-center gap-2">
-        <img src="/logo.png" alt="Lazynext" className="h-9 w-auto brightness-0 invert" />
+      <div className="mb-8">
+        <Link href="/">
+          <Image src="/logo.png" alt="Lazynext" width={140} height={35} className="h-9 w-auto brightness-0 invert" priority />
+        </Link>
       </div>
 
       {/* Progress */}
