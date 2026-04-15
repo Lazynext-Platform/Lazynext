@@ -7,7 +7,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 ```
 lazynext/
 ├── app/                      # Next.js App Router
-│   ├── (marketing)/          # Public — landing, pricing
+│   ├── (marketing)/          # Public — landing, pricing, blog, about, privacy, terms, contact, careers, docs
 │   ├── (auth)/               # Auth — Supabase sign-in/up
 │   ├── (app)/                # Protected — workspace
 │   │   ├── onboarding/       # First-time workspace setup

@@ -30,7 +30,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 
 - Node.js 18+
 - npm 9+
-- A [Supabase](https://supabase.com) project
+- A [Supabase](https://supabase.com) project (optional for exploring the UI — dev auth bypass activates with placeholder credentials)
 
 ### Setup
 
@@ -62,9 +62,9 @@ Copy `.env.example` to `.env.local` and fill in:
 
 | Variable | Required | Description |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server only) |
+| `NEXT_PUBLIC_SUPABASE_URL` | For auth | Supabase project URL (leave default to explore UI without auth) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For auth | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | For auth | Supabase service role key (server only) |
 | `GROQ_API_KEY` | For AI | Groq API key for LazyMind |
 | `TOGETHER_API_KEY` | Fallback | Together AI fallback key |
 | `LEMONSQUEEZY_API_KEY` | For billing | Lemon Squeezy API key |
@@ -77,7 +77,7 @@ Copy `.env.example` to `.env.local` and fill in:
 
 ```
 app/
-  (marketing)/     Landing, pricing, features, blog, about, comparison, changelog
+  (marketing)/     Landing, pricing, features, blog, about, comparison, changelog, privacy, terms, contact, careers, docs
   (auth)/          Sign-in and sign-up (Supabase Auth)
   (app)/           Protected workspace routes
     onboarding/    First-time setup wizard

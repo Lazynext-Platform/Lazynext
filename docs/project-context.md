@@ -1,8 +1,8 @@
 # 🎯 Project Context
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Version**: Pre-release (0.1.0-dev)
-> **Last Updated**: 2026-04-05
+> **Version**: 0.1.0.0
+> **Last Updated**: 2026-04-16
 
 ---
 
@@ -60,7 +60,7 @@ Target audience: remote-first teams, SaaS companies, agencies, indie hackers, an
 ```
 lazynext/
 ├── app/                      # Next.js App Router pages + API
-│   ├── (marketing)/          # Public routes — landing, pricing
+│   ├── (marketing)/          # Public routes — landing, pricing, blog, about, privacy, terms, contact, careers, docs
 │   ├── (auth)/               # Auth routes — Supabase sign-in/up
 │   ├── (app)/                # Protected routes — workspace
 │   │   ├── onboarding/       # First-time workspace setup
