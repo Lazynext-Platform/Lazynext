@@ -75,6 +75,8 @@ const tagColors: Record<string, string> = {
   Launch: 'bg-pink-100 text-pink-700',
 }
 
+export const dynamicParams = false
+
 export function generateStaticParams() {
   return Object.keys(posts).map(slug => ({ slug }))
 }
