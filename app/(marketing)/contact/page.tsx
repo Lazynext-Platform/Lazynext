@@ -49,7 +49,7 @@ export default function ContactPage() {
 
         <div className="mt-12 rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">
           <p className="text-sm text-slate-600">
-            Already signed up? The fastest answer is usually <Link href="/signup" className="font-semibold text-indigo-600 hover:underline">inside the product</Link> — use the in-app help panel.
+            Already signed up? The fastest answer is usually <Link href="/sign-up" className="font-semibold text-indigo-600 hover:underline">inside the product</Link> — use the in-app help panel.
           </p>
         </div>
 

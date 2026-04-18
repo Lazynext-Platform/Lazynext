@@ -90,7 +90,7 @@ export default async function PublicDecisionPage({ params }: { params: { slug: s
             <Sparkles className="h-4 w-4 text-brand" />
             Lazynext
           </Link>
-          <Link href="/signup" className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover transition-colors">
+          <Link href="/sign-up" className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover transition-colors">
             Log your team&apos;s decisions →
           </Link>
         </div>
@@ -195,7 +195,7 @@ export default async function PublicDecisionPage({ params }: { params: { slug: s
             Lazynext is the decision intelligence platform for teams that refuse to forget. AI-scored on four dimensions. Outcomes tracked forever.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href="/signup" className="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+            <Link href="/sign-up" className="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
               Start free →
             </Link>
             <Link href="/" className="inline-flex items-center rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 transition-colors">

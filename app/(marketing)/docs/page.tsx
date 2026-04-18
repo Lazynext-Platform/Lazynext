@@ -59,7 +59,7 @@ export default function DocsPage() {
             Everything else in the product — tasks, threads, canvas, automations — exists to give decisions the context they need. You&apos;ll discover those organically.
           </p>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="mt-4 inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
           >
             Start logging decisions →
