@@ -46,7 +46,6 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === '/pricing' ||
     request.nextUrl.pathname === '/features' ||
     request.nextUrl.pathname === '/comparison' ||
-    request.nextUrl.pathname === '/blog' ||
     request.nextUrl.pathname === '/about' ||
     request.nextUrl.pathname === '/changelog' ||
     request.nextUrl.pathname === '/templates' ||
@@ -55,6 +54,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === '/contact' ||
     request.nextUrl.pathname === '/careers' ||
     request.nextUrl.pathname === '/docs' ||
+    request.nextUrl.pathname.startsWith('/blog') ||
+    request.nextUrl.pathname.startsWith('/d/') ||
     request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/sign-up') ||
     request.nextUrl.pathname.startsWith('/auth/callback') ||

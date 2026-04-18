@@ -16,8 +16,8 @@ test.describe('Landing Page Interactions', () => {
   })
 
   test('hero section shows headline and CTA', async ({ page }) => {
-    await expect(page.getByText(/one platform that replaces/i)).toBeVisible()
-    const signUpLink = page.getByRole('link', { name: /start free|get started|sign up/i }).first()
+    await expect(page.getByText(/decision memory for teams that/i)).toBeVisible()
+    const signUpLink = page.getByRole('link', { name: /log your first decision|start free|get started|sign up/i }).first()
     await expect(signUpLink).toBeVisible()
   })
 
