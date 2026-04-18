@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { incrementWmsFor } from '@/lib/wms'
 
 const updateSchema = z.object({
   resolution: z.string().optional(),
@@ -81,6 +82,13 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // WMS: outcome transitions from pending to a real verdict are the moat's
+  // compounding signal. Credit the workspace.
+  if (parsed.data.outcome && parsed.data.outcome !== 'pending') {
+    await incrementWmsFor(existing.workspace_id, 'outcome_recorded').catch(() => undefined)
+  }
+
   return NextResponse.json({ data: updated, error: null })
 }
 

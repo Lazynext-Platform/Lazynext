@@ -11,25 +11,25 @@ import {
 const competitors = [
   {
     name: 'Notion',
-    subtitle: '"Docs no one reads"',
+    subtitle: 'forgets the why',
     icon: FileText,
     iconBg: 'bg-slate-900',
   },
   {
     name: 'Linear',
-    subtitle: '"Tasks that drift"',
+    subtitle: 'ships, never asks if it was right',
     icon: ListTodo,
     iconBg: 'bg-indigo-600',
   },
   {
     name: 'Slack',
-    subtitle: '"Decisions lost in threads"',
+    subtitle: 'decisions evaporate in threads',
     icon: Hash,
     iconBg: 'bg-purple-600',
   },
   {
     name: 'Airtable',
-    subtitle: '"Spreadsheets with lipstick"',
+    subtitle: 'data without decisions',
     icon: Table,
     iconBg: 'bg-teal-600',
   },
@@ -41,11 +41,12 @@ export default function ProblemSection() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            The graveyard of{' '}
-            <span className="text-brand">half-used tools</span>
+            Your company&rsquo;s decisions die in{' '}
+            <span className="text-brand">the wrong tools</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
-            Your team pays for everything and finishes nothing. Sound familiar?
+            You make 40 decisions a week and remember 4. Your tools capture
+            tasks, docs, and chats &mdash; never the reasoning behind them.
           </p>
         </div>
 
@@ -83,7 +84,7 @@ export default function ProblemSection() {
             </div>
             <p className="text-xl font-bold text-brand">Lazynext</p>
             <p className="mt-2 text-sm font-medium text-slate-600">
-              Replace them all.
+              The decision layer your stack is missing.
             </p>
           </div>
         </div>

@@ -8,6 +8,7 @@ export const EVENTS = {
   TASK_ASSIGNED: 'workspace/task.assigned',
   DECISION_LOGGED: 'workspace/decision.logged',
   DECISION_OUTCOME_TAGGED: 'workspace/decision.outcome-tagged',
+  OUTCOME_REMINDER_CRON: 'cron/outcome-reminder',
   WEEKLY_DIGEST_CRON: 'cron/weekly-digest',
   EXPORT_REQUESTED: 'workspace/export.requested',
 } as const

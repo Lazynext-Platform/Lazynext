@@ -1,9 +1,7 @@
 import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { computeDecisionQualityScore } from '@/lib/ai/decision-quality'
-import { callLazyMind } from '@/lib/ai/lazymind'
-import { DECISION_QUALITY_PROMPT } from '@/lib/ai/prompts'
+import { scoreDecision } from '@/lib/ai/decision-scorer'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
@@ -13,7 +11,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
-  if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+  if (!hasValidDatabaseUrl) {
+    return NextResponse.json(
+      { error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' },
+      { status: 503 }
+    )
+  }
 
   const { data: decision, error: fetchError } = await db
     .from('decisions')
@@ -26,38 +29,34 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const authorized = await verifyWorkspaceMember(userId, decision.workspace_id)
   if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
-  const prompt = JSON.stringify({
-    question: decision.question,
-    resolution: decision.resolution,
-    rationale: decision.rationale,
-    optionsConsidered: decision.options_considered,
-    decisionType: decision.decision_type,
-  })
-
-  let qualityScore = computeDecisionQualityScore({
+  const result = await scoreDecision({
     question: decision.question,
     resolution: decision.resolution,
     rationale: decision.rationale,
     optionsConsidered: (decision.options_considered as string[]) || [],
     decisionType: decision.decision_type,
+    riskNotes: decision.outcome_notes,
   })
-  let qualityFeedback = ''
-
-  try {
-    const aiResponse = await callLazyMind(DECISION_QUALITY_PROMPT, prompt, 200)
-    const parsed = JSON.parse(aiResponse.content)
-    if (typeof parsed.score === 'number' && typeof parsed.feedback === 'string') {
-      qualityScore = parsed.score
-      qualityFeedback = parsed.feedback
-    }
-  } catch {
-    // Fall back to local score — AI unavailable or returned invalid JSON
-  }
 
   await db
     .from('decisions')
-    .update({ quality_score: qualityScore, quality_feedback: qualityFeedback, quality_scored_at: new Date().toISOString() })
+    .update({
+      quality_score: result.overall,
+      quality_feedback: result.rationale,
+      quality_scored_at: new Date().toISOString(),
+      score_breakdown: result.breakdown,
+      score_model_version: result.modelVersion,
+      score_rationale: result.rationale,
+    })
     .eq('id', params.id)
 
-  return NextResponse.json({ data: { qualityScore, qualityFeedback }, error: null })
+  return NextResponse.json({
+    data: {
+      qualityScore: result.overall,
+      qualityFeedback: result.rationale,
+      breakdown: result.breakdown,
+      source: result.source,
+    },
+    error: null,
+  })
 }

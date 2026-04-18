@@ -112,28 +112,59 @@ export function TaskAssignmentEmail({
 }
 
 // ========================================
-// 3. Weekly Digest
+// 3. Weekly Digest — decision-intelligence edition
 // ========================================
+type DigestDecision = {
+  question: string
+  quality: number | null
+  outcome: 'good' | 'bad' | 'neutral' | 'pending'
+  type?: string | null
+  url?: string
+}
+
 export function WeeklyDigestEmail({
   weekOf = 'March 31 – April 6, 2026',
-  stats = { tasksCompleted: 18, decisionsLogged: 8, avgQuality: 74, activeMembers: 6 },
-  digestUrl = `${BASE_URL}/workspace/main/pulse`,
+  stats = { decisionsLogged: 8, outcomesRecorded: 3, avgQuality: 74, pendingReminders: 4 },
+  topDecision,
+  bottomDecision,
+  overdueOutcomes = [],
+  narrative,
+  digestUrl = `${BASE_URL}/workspace/main/decisions`,
+  outcomesUrl = `${BASE_URL}/workspace/main/decisions/outcomes`,
+}: {
+  weekOf?: string
+  stats?: { decisionsLogged: number; outcomesRecorded: number; avgQuality: number; pendingReminders: number }
+  topDecision?: DigestDecision | null
+  bottomDecision?: DigestDecision | null
+  overdueOutcomes?: DigestDecision[]
+  narrative?: string | null
+  digestUrl?: string
+  outcomesUrl?: string
 }) {
   const qualityColor = stats.avgQuality >= 70 ? '#10b981' : stats.avgQuality >= 40 ? '#f59e0b' : '#ef4444'
   return (
-    <EmailLayout preheader={`Week of ${weekOf} — ${stats.tasksCompleted} tasks done`}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f172a' }}>Weekly Digest</h1>
+    <EmailLayout preheader={`Week of ${weekOf} — ${stats.decisionsLogged} decisions logged, ${stats.outcomesRecorded} outcomes recorded`}>
+      <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#0f172a' }}>Decision Digest</h1>
       <p style={{ margin: '0 0 24px', fontSize: 13, color: '#94a3b8' }}>Week of {weekOf}</p>
 
+      {/* Narrative callout — AI-generated one-liner */}
+      {narrative && (
+        <div style={{ backgroundColor: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 8, padding: '14px 18px', marginBottom: 20 }}>
+          <p style={{ margin: '0 0 4px', fontSize: 12, fontWeight: 600, color: BRAND_COLOR }}>✨ This week in one line</p>
+          <p style={{ margin: 0, fontSize: 14, color: '#0f172a', lineHeight: '1.55' }}>{narrative}</p>
+        </div>
+      )}
+
+      {/* Stats strip */}
       <table width="100%" cellPadding={0} cellSpacing={0} style={{ marginBottom: 24 }}>
         <tr>
           <td style={{ padding: 12, textAlign: 'center', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px 0 0 8px' }}>
-            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{stats.tasksCompleted}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Tasks Done</p>
-          </td>
-          <td style={{ padding: 12, textAlign: 'center', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: 'none' }}>
             <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{stats.decisionsLogged}</p>
             <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Decisions</p>
+          </td>
+          <td style={{ padding: 12, textAlign: 'center', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: 'none' }}>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{stats.outcomesRecorded}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Outcomes</p>
           </td>
           <td style={{ padding: 12, textAlign: 'center', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: 'none' }}>
             <div style={{ display: 'inline-block', width: 44, height: 44, borderRadius: '50%', border: `3px solid ${qualityColor}`, lineHeight: '38px', fontSize: 16, fontWeight: 700, color: qualityColor, textAlign: 'center' }}>
@@ -142,21 +173,49 @@ export function WeeklyDigestEmail({
             <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Avg Quality</p>
           </td>
           <td style={{ padding: 12, textAlign: 'center', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: 'none', borderRadius: '0 8px 8px 0' }}>
-            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{stats.activeMembers}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Active</p>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#0f172a' }}>{stats.pendingReminders}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 11, color: '#64748b' }}>Need outcome</p>
           </td>
         </tr>
       </table>
 
-      {/* LazyMind callout */}
-      <div style={{ backgroundColor: '#eef2ff', border: '1px solid #c7d2fe', borderRadius: 8, padding: '12px 16px', marginBottom: 24 }}>
-        <p style={{ margin: '0 0 4px', fontSize: 12, fontWeight: 600, color: BRAND_COLOR }}>✨ LazyMind Insight</p>
-        <p style={{ margin: 0, fontSize: 13, color: '#475569', lineHeight: '1.5' }}>
-          Your team&apos;s decision quality improved by 3 points this week. Keep involving stakeholders early — it correlates with better outcomes.
-        </p>
-      </div>
+      {/* Top + Bottom decisions */}
+      {(topDecision || bottomDecision) && (
+        <div style={{ marginBottom: 20 }}>
+          <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>This week&apos;s bookends</p>
+          {topDecision && (
+            <div style={{ borderLeft: '4px solid #10b981', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '12px 16px', marginBottom: 8 }}>
+              <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: '#047857' }}>🥇 Most rigorous</p>
+              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{topDecision.question}</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Quality {topDecision.quality ?? '—'}/100</p>
+            </div>
+          )}
+          {bottomDecision && (
+            <div style={{ borderLeft: '4px solid #ef4444', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '12px 16px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: '#b91c1c' }}>🥄 Weakest reasoning</p>
+              <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 600, color: '#0f172a' }}>{bottomDecision.question}</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>Quality {bottomDecision.quality ?? '—'}/100 — worth revisiting the rationale.</p>
+            </div>
+          )}
+        </div>
+      )}
 
-      <Button href={digestUrl}>View Full Pulse</Button>
+      {/* Overdue outcomes */}
+      {overdueOutcomes.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 600, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Outcomes waiting on you ({overdueOutcomes.length})</p>
+          {overdueOutcomes.slice(0, 5).map((d, i) => (
+            <div key={i} style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: 6, padding: '8px 12px', marginBottom: 6 }}>
+              <p style={{ margin: 0, fontSize: 13, color: '#0f172a' }}>{d.question}</p>
+            </div>
+          ))}
+          <div style={{ marginTop: 10 }}>
+            <a href={outcomesUrl} style={{ color: BRAND_COLOR, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>Record outcomes →</a>
+          </div>
+        </div>
+      )}
+
+      <Button href={digestUrl}>Open workspace</Button>
     </EmailLayout>
   )
 }
@@ -204,6 +263,59 @@ export function DecisionDigestEmail({
       <div style={{ marginTop: 24 }}>
         <Button href={reviewUrl}>Review Decisions</Button>
       </div>
+    </EmailLayout>
+  )
+}
+
+// ========================================
+// 5. Outcome Reminder — "How did this decision actually go?"
+// ========================================
+export function OutcomeReminderEmail({
+  decisionTitle = 'Use Supabase for database',
+  resolution = 'Go with Supabase',
+  loggedOn = 'March 3, 2026',
+  expectedBy = 'April 18, 2026',
+  captureUrl = `${BASE_URL}/workspace/main/decisions/outcomes`,
+  workspaceName = 'Lazynext',
+}: {
+  decisionTitle?: string
+  resolution?: string | null
+  loggedOn?: string
+  expectedBy?: string | null
+  captureUrl?: string
+  workspaceName?: string
+}) {
+  return (
+    <EmailLayout preheader={`How did "${decisionTitle}" play out?`}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 700, color: '#0f172a' }}>
+        How did this decision actually play out?
+      </h1>
+      <p style={{ margin: '0 0 20px', fontSize: 15, color: '#475569', lineHeight: '1.6' }}>
+        You marked this decision in <strong>{workspaceName}</strong>
+        {expectedBy ? <> with a check-in date of <strong>{expectedBy}</strong></> : <></>}. Five minutes now keeps your decision memory honest — and trains your team&apos;s AI on real outcomes.
+      </p>
+
+      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: `4px solid ${BRAND_COLOR}`, borderRadius: 8, padding: '16px 20px', marginBottom: 24 }}>
+        <p style={{ margin: '0 0 6px', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Decision</p>
+        <h2 style={{ margin: '0 0 10px', fontSize: 16, fontWeight: 600, color: '#0f172a' }}>{decisionTitle}</h2>
+        {resolution && (
+          <>
+            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>What we chose</p>
+            <p style={{ margin: '0 0 10px', fontSize: 13, color: '#475569', lineHeight: '1.5' }}>{resolution}</p>
+          </>
+        )}
+        <p style={{ margin: 0, fontSize: 12, color: '#94a3b8' }}>Logged {loggedOn}</p>
+      </div>
+
+      <p style={{ margin: '0 0 16px', fontSize: 14, color: '#475569', lineHeight: '1.6' }}>
+        Drop a verdict (Worked / Partial / Failed), a line of what you learned, and your confidence. That&apos;s it.
+      </p>
+
+      <Button href={captureUrl}>Record outcome</Button>
+
+      <p style={{ margin: '24px 0 0', fontSize: 12, color: '#94a3b8', lineHeight: '1.5' }}>
+        Decision intelligence compounds only if the outcome loop closes. Every recorded outcome makes your workspace&apos;s future recommendations measurably sharper.
+      </p>
     </EmailLayout>
   )
 }

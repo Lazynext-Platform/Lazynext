@@ -8,6 +8,8 @@ import { MobileBottomNav } from '@/components/layout/MobileBottomNav'
 import { CommandPalette } from '@/components/ui/CommandPalette'
 import { ToastProvider } from '@/components/ui/ToastProvider'
 import { WorkspaceTour } from '@/components/ui/WorkspaceTour'
+import { GlobalLogDecisionShortcut } from '@/components/decisions/GlobalLogDecisionShortcut'
+import { WmsHydrator } from '@/components/layout/WmsHydrator'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
 
@@ -42,6 +44,8 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         <LazyMindPanel />
         <KeyboardShortcutsModal />
         <WorkspaceTour />
+        <GlobalLogDecisionShortcut workspaceSlug={slug} />
+        <WmsHydrator slug={slug} />
       </div>
     </ToastProvider>
   )

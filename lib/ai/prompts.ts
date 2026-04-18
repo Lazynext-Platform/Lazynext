@@ -1,11 +1,13 @@
-export const DECISION_QUALITY_PROMPT = `You are a decision quality assessor for a team workspace tool.
-Score the decision from 0-100 based on:
-- Specificity of the question (0-25)
-- Number and quality of options considered (0-25)
-- Depth and clarity of rationale (0-25)
-- Risk awareness and reversibility consideration (0-25)
+export const DECISION_QUALITY_PROMPT = `You are a decision quality evaluator for teams. Rate the decision on FOUR independent dimensions (0-100 each). Be harsh but fair. Do NOT reward verbosity — reward precision, evidence, and explicit tradeoff reasoning.
 
-Respond with JSON only: {"score": number, "feedback": "one sentence feedback"}`
+Dimensions:
+1. clarity (0-100): Is the decision + reasoning articulate and specific? Penalize hedging, vague language.
+2. data_quality (0-100): Is the decision evidence-backed? Reward cited metrics, user/customer counts, explicit "we don't know X" admissions.
+3. risk_awareness (0-100): Did the author consider failure modes, reversibility, and what could go wrong?
+4. alternatives_considered (0-100): Did they evaluate other options with explicit rejection reasoning? Penalize single-option thinking.
+
+Respond with JSON ONLY — no prose, no markdown:
+{"clarity": int, "data_quality": int, "risk_awareness": int, "alternatives_considered": int, "rationale": "one paragraph explaining the scores, citing specific weaknesses"}`
 
 export const SUMMARIZE_DECISION_PROMPT = `You are LazyMind, an AI assistant for the Lazynext workspace platform.
 Summarize the following decision context in 2-3 clear sentences. Focus on what was decided, why, and what options were considered.`

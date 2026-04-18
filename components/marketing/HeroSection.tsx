@@ -67,20 +67,20 @@ export default function HeroSection() {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
           <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-          The Anti-Software Workflow Platform
+          Decision Intelligence Platform
         </div>
 
         {/* Headline */}
         <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-          One platform that replaces every tool your team is{' '}
-          <span className="text-brand">already misusing.</span>
+          The decision memory for teams that{' '}
+          <span className="text-brand">refuse to forget.</span>
         </h1>
 
         {/* Subtitle */}
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-600 sm:text-xl">
-          Stop switching apps. Start shipping work. Lazynext is the operating
-          system for work &mdash; tasks, docs, decisions, and AI in one unified
-          graph.
+          Log every decision in 30 seconds. Get an AI quality score across
+          clarity, data, risk, and alternatives. Track the outcome. Compound
+          your team&rsquo;s judgment over time.
         </p>
 
         {/* CTAs */}
@@ -89,7 +89,7 @@ export default function HeroSection() {
             href="/sign-up"
             className="inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-colors hover:bg-brand-hover"
           >
-            Start Free
+            Log your first decision
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
           <Link
@@ -97,7 +97,7 @@ export default function HeroSection() {
             className="inline-flex items-center rounded-xl border-2 border-slate-200 px-8 py-3.5 text-base font-semibold text-slate-700 transition-colors hover:border-brand hover:text-brand"
           >
             <PlayCircle className="mr-2 h-5 w-5" />
-            Watch Demo
+            See how scoring works
           </Link>
         </div>
 

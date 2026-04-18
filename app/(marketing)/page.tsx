@@ -13,11 +13,11 @@ const TestimonialsSection = dynamic(() => import('@/components/marketing/Testimo
 const CTABanner = dynamic(() => import('@/components/marketing/CTABanner'))
 
 export const metadata: Metadata = {
-  title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
-  description: 'One platform that replaces every tool your team is already misusing. Tasks, docs, decisions, and AI — unified on an infinite canvas.',
+  title: 'Lazynext — The Decision Intelligence Platform for Teams',
+  description: 'Capture, score, and learn from every decision your team makes. BI told you what happened. DI tells you why you chose it, what it cost, and how to choose better.',
   openGraph: {
-    title: 'Lazynext — Stop Switching Apps. Start Shipping Work.',
-    description: 'Tasks, docs, decisions, and AI in one unified workspace. Decision DNA tracks every choice your team makes.',
+    title: 'Lazynext — The Decision Intelligence Platform for Teams',
+    description: 'Log every decision in 30 seconds. Get an AI-generated quality score, track the outcome, and compound your team\u2019s judgment over time.',
   },
 }
 
