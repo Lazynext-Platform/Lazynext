@@ -2,6 +2,21 @@
 
 All notable changes to Lazynext will be documented in this file.
 
+## [1.0.0.1] - 2026-04-18
+
+Hardening follow-up to 1.0.0.0. Closes QA-flagged gaps without changing product surface.
+
+### Added
+- **E2E test suite for `/d/[slug]`** (`tests/e2e/public-decision.spec.ts`) — 4 active tests covering 404 path, response time ceiling (ISSUE-003 regression guard), console-error cleanliness, and navigable 404 pages. 1 skipped test shows the shape to unskip once test Supabase creds are wired up in CI.
+- **Structured observability logs** on `scoreDecision` — every call emits a single-line JSON log with `source`, `provider`, `model_version`, `duration_ms`. On fallback, `fallback_cause` distinguishes `no_ai_keys` / `llm_call_failed` / `json_parse_failed` so log aggregators can alert on the exact shape of a regression (ISSUE-002 class).
+- 3 new unit tests locking in the log shape so alerting rules stay valid.
+
+### Changed
+- `scoreDecision` internals: split the monolithic `try/catch` into distinct AI-call and JSON-parse blocks. Previously both failure modes landed in the same bare `catch {}` with no way to tell them apart in prod.
+
+### Operator note
+Pipe `decision_scorer` log lines to your aggregator (Axiom / Datadog / Vercel / etc.) and graph `source:heuristic` by `fallback_cause`. A spike in `json_parse_failed` means Llama is returning unparseable output again — tune the prompt or extend `extractJson()`.
+
 ## [1.0.0.0] - 2026-04-18
 
 ### Added — Decision Intelligence Platform
