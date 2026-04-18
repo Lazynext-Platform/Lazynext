@@ -37,6 +37,9 @@ export type Workspace = {
   ls_subscription_id: string | null
   ls_customer_portal_url: string | null
   region: string | null
+  wms_score: number
+  wms_updated_at: string
+  power_user_override: boolean
   created_by: string
   created_at: string
   updated_at: string
@@ -75,6 +78,8 @@ export type Node = {
   status: typeof STATUS_VALUES[number] | null
   assigned_to: string | null
   due_at: string | null
+  decision_id: string | null
+  operational_reason: string | null
   created_by: string
   created_at: string
   updated_at: string
@@ -133,10 +138,24 @@ export type Decision = {
   quality_score: number | null
   quality_feedback: string | null
   quality_scored_at: string | null
+  score_breakdown: DecisionScoreBreakdown | null
+  score_model_version: string | null
+  score_rationale: string | null
+  expected_by: string | null
+  is_public: boolean
+  public_slug: string | null
+  outcome_reminder_sent_at: string | null
   tags: string[]
   made_by: string
   created_at: string
   updated_at: string
+}
+
+export type DecisionScoreBreakdown = {
+  clarity: number
+  data_quality: number
+  risk_awareness: number
+  alternatives_considered: number
 }
 
 export type AutomationRun = {

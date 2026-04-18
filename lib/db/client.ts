@@ -1,9 +1,25 @@
 import { createClient } from '@supabase/supabase-js'
 
+// Guard against stock placeholder env values. If someone clones the repo and
+// forgets to swap these, we want DB-touching code paths to bail out fast
+// (returning safe fallbacks / notFound) instead of hanging 7+ seconds on a
+// doomed network request to a fake Supabase URL.
+const PLACEHOLDER_PATTERNS = [
+  'placeholder',
+  'your-project',
+  'your-service-role',
+  'your-anon-key',
+  'example.supabase.co',
+]
+function looksLikePlaceholder(v: string | undefined): boolean {
+  if (!v) return true
+  const lower = v.toLowerCase()
+  return PLACEHOLDER_PATTERNS.some((p) => lower.includes(p))
+}
+
 const hasValidDatabaseUrl =
-  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder') &&
-  !!process.env.SUPABASE_SERVICE_ROLE_KEY
+  !looksLikePlaceholder(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+  !looksLikePlaceholder(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 export { hasValidDatabaseUrl }
 

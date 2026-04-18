@@ -26,19 +26,27 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useUIStore } from '@/stores/ui.store'
+import { useWorkspaceStore } from '@/stores/workspace.store'
 import { WorkspaceSelector } from './WorkspaceSelector'
 import { UpgradeModal, TrialBanner } from '@/components/ui/UpgradeModal'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { isFeatureUnlocked, type WmsLayer } from '@/lib/wms'
 
-const navItems = [
-  { href: '', icon: LayoutDashboard, label: 'Home' },
-  { href: '/canvas/default', icon: Network, label: 'Canvas' },
-  { href: '/tasks', icon: ListTodo, label: 'Tasks' },
-  { href: '/decisions', icon: GitBranch, label: 'Decisions' },
-  { href: '/pulse', icon: Activity, label: 'Pulse' },
-  { href: '/automations', icon: Zap, label: 'Automations' },
-  { href: '/templates', icon: FileText, label: 'Templates' },
-  { href: '/activity', icon: Clock, label: 'Activity' },
+type NavGate = 'always' | 'tasks' | 'threads' | 'docs' | 'tables' | 'canvas' | 'automations' | 'integrations'
+
+// Every item stays in the nav list. `gate` drives progressive exposure via the
+// Workspace Maturity Score. No item is ever removed from the product — an
+// "expand all" toggle surfaces them instantly for power users.
+const navItems: Array<{ href: string; icon: typeof LayoutDashboard; label: string; gate: NavGate }> = [
+  { href: '', icon: LayoutDashboard, label: 'Home', gate: 'always' },
+  { href: '/decisions', icon: GitBranch, label: 'Decisions', gate: 'always' },
+  { href: '/decisions/outcomes', icon: Clock, label: 'Outcomes', gate: 'always' },
+  { href: '/tasks', icon: ListTodo, label: 'Tasks', gate: 'tasks' },
+  { href: '/pulse', icon: Activity, label: 'Pulse', gate: 'tasks' },
+  { href: '/activity', icon: Clock, label: 'Activity', gate: 'tasks' },
+  { href: '/templates', icon: FileText, label: 'Templates', gate: 'docs' },
+  { href: '/canvas/default', icon: Network, label: 'Canvas', gate: 'canvas' },
+  { href: '/automations', icon: Zap, label: 'Automations', gate: 'automations' },
 ]
 
 const settingsItems = [
@@ -70,6 +78,23 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const base = `/workspace/${workspaceSlug}`
+
+  // WMS-driven progressive exposure. Before hydration we optimistically show
+  // everything so users never see a sidebar "shrink". After we know the real
+  // score we honor the gating (unless power_user_override is on).
+  const wmsScore = useWorkspaceStore((s) => s.wmsScore)
+  const powerUserOverride = useWorkspaceStore((s) => s.powerUserOverride)
+  const wmsLoaded = useWorkspaceStore((s) => s.wmsLoaded)
+  const currentLayer: WmsLayer = useWorkspaceStore((s) => s.wmsLayer)
+
+  const visibleNavItems = !wmsLoaded
+    ? navItems
+    : navItems.filter((item) => {
+        if (item.gate === 'always') return true
+        return isFeatureUnlocked(item.gate, wmsScore, powerUserOverride)
+      })
+
+  const lockedCount = navItems.length - visibleNavItems.length
 
   return (
     <aside
@@ -104,7 +129,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
             Navigation
           </p>
           <ul className="mt-2 space-y-0.5">
-            {navItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const href = `${base}${item.href}`
               const isActive = item.href === '' ? pathname === base : pathname.startsWith(href)
               return (
@@ -126,6 +151,30 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
               )
             })}
           </ul>
+          {wmsLoaded && lockedCount > 0 && (
+            <button
+              onClick={async () => {
+                // Opt in to "show everything" — persists to DB + local store so
+                // the sidebar never reverts.
+                useWorkspaceStore.setState({ powerUserOverride: true })
+                try {
+                  await fetch(`/api/v1/workspace/${workspaceSlug}/wms`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ powerUserOverride: true }),
+                  })
+                } catch {
+                  // already updated locally; server will sync next load
+                }
+              }}
+              className="mt-2 flex w-full items-center gap-2 rounded-lg border border-dashed border-slate-700 px-3 py-2 text-xs text-slate-500 hover:border-slate-600 hover:text-slate-300 transition-colors"
+              title={`${lockedCount} features unlock as your team records decisions & outcomes. Click to show all now.`}
+            >
+              <Plus className="h-3 w-3" />
+              Show all {navItems.length} sections
+              <span className="ml-auto rounded bg-slate-800 px-1.5 text-2xs font-semibold text-slate-400">L{currentLayer}</span>
+            </button>
+          )}
         </div>
 
         {/* Workflows section */}
