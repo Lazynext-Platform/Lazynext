@@ -121,3 +121,51 @@ describe('scoreDecision — weighted aggregate', () => {
     expect(result.overall).toBe(100)
   })
 })
+
+describe('scoreDecision — observability logs', () => {
+  // These tests lock in the structured log shape so prod log aggregators
+  // can reliably alert on a spike in json_parse_failed (= Llama regressed
+  // to unparseable output) vs llm_call_failed (= Groq/Together outage).
+  let infoSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    mockedCall.mockReset()
+    infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+  })
+
+  function lastLogPayload(): Record<string, unknown> {
+    const call = infoSpy.mock.calls.at(-1)
+    if (!call) throw new Error('no console.info calls captured')
+    const raw = String(call[0])
+    const jsonStart = raw.indexOf('{')
+    return JSON.parse(raw.slice(jsonStart))
+  }
+
+  it('emits source=ai on successful scoring', async () => {
+    mockedCall.mockResolvedValue({ content: VALID_JSON, provider: 'groq' })
+    await scoreDecision(SAMPLE_INPUT)
+    const payload = lastLogPayload()
+    expect(payload.source).toBe('ai')
+    expect(payload.provider).toBe('groq')
+    expect(payload.model_version).toContain('groq')
+    expect(payload.fallback_cause).toBeUndefined()
+  })
+
+  it('emits fallback_cause=llm_call_failed when the AI call throws', async () => {
+    mockedCall.mockRejectedValue(new Error('Groq 503'))
+    await scoreDecision(SAMPLE_INPUT)
+    const payload = lastLogPayload()
+    expect(payload.source).toBe('heuristic')
+    expect(payload.fallback_cause).toBe('llm_call_failed')
+    expect(payload.error_message).toContain('Groq 503')
+  })
+
+  it('emits fallback_cause=json_parse_failed when the AI returns garbage', async () => {
+    mockedCall.mockResolvedValue({ content: 'I refuse to answer.', provider: 'groq' })
+    await scoreDecision(SAMPLE_INPUT)
+    const payload = lastLogPayload()
+    expect(payload.source).toBe('heuristic')
+    expect(payload.fallback_cause).toBe('json_parse_failed')
+    expect(payload.provider).toBe('groq')
+  })
+})
