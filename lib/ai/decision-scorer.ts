@@ -39,6 +39,24 @@ function clamp(n: unknown): number {
   return Math.round(Math.max(0, Math.min(100, v)))
 }
 
+// LLMs (especially Llama via Groq) often wrap JSON responses in markdown fences
+// even when explicitly told not to. Strip fences, leading/trailing prose, and
+// anything outside the outermost { ... } block before parsing.
+function extractJson(raw: string): string {
+  let s = raw.trim()
+  // Strip ``` or ```json fences
+  if (s.startsWith('```')) {
+    s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '')
+  }
+  // Grab first { ... last } in case there's leading/trailing prose
+  const first = s.indexOf('{')
+  const last = s.lastIndexOf('}')
+  if (first !== -1 && last !== -1 && last > first) {
+    s = s.slice(first, last + 1)
+  }
+  return s.trim()
+}
+
 function heuristicBreakdown(input: ScoreInput): DecisionScoreBreakdown {
   const overall = computeDecisionQualityScore(input)
   const rationaleLen = input.rationale?.trim().length ?? 0
@@ -81,7 +99,7 @@ export async function scoreDecision(input: ScoreInput): Promise<ScoreResult> {
 
   try {
     const ai = await callLazyMind(DECISION_QUALITY_PROMPT, payload, 350)
-    const parsed = JSON.parse(ai.content) as {
+    const parsed = JSON.parse(extractJson(ai.content)) as {
       clarity?: unknown
       data_quality?: unknown
       risk_awareness?: unknown
