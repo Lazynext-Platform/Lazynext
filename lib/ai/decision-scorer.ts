@@ -75,10 +75,41 @@ function heuristicBreakdown(input: ScoreInput): DecisionScoreBreakdown {
   }
 }
 
+// Structured event log for scorer outcomes. Pipe to your log aggregator
+// (Axiom, Datadog, Vercel, etc.) and alert on a spike in source:"heuristic"
+// with fallback_cause != "no_ai_keys" — that's Llama returning garbage again.
+function logScoreEvent(evt: {
+  source: 'ai' | 'heuristic'
+  provider?: 'groq' | 'together'
+  model_version: string
+  duration_ms: number
+  fallback_cause?: 'no_ai_keys' | 'llm_call_failed' | 'json_parse_failed'
+  error_message?: string
+}) {
+  // Single-line JSON so log aggregators can parse without a formatter.
+  // Keyed with a stable prefix for easy filtering: `grep decision_scorer`.
+  try {
+    // eslint-disable-next-line no-console
+    console.info(
+      'decision_scorer ' +
+        JSON.stringify({ event: 'score_decision', ...evt, ts: new Date().toISOString() })
+    )
+  } catch {
+    // Logging should never crash the scorer.
+  }
+}
+
 export async function scoreDecision(input: ScoreInput): Promise<ScoreResult> {
   const heuristic = heuristicBreakdown(input)
+  const started = Date.now()
 
   if (!hasAIKeys) {
+    logScoreEvent({
+      source: 'heuristic',
+      model_version: 'heuristic:v1',
+      duration_ms: Date.now() - started,
+      fallback_cause: 'no_ai_keys',
+    })
     return {
       overall: aggregate(heuristic),
       breakdown: heuristic,
@@ -97,9 +128,34 @@ export async function scoreDecision(input: ScoreInput): Promise<ScoreResult> {
     risk_notes: input.riskNotes ?? null,
   })
 
+  // Split AI call and JSON parse into distinct try blocks so we can tell
+  // WHICH failed when we fall back — the signal a prod operator needs to
+  // diagnose "LLM down" vs "LLM returning garbage we can't parse".
+  let aiContent: string
+  let provider: 'groq' | 'together'
   try {
     const ai = await callLazyMind(DECISION_QUALITY_PROMPT, payload, 350)
-    const parsed = JSON.parse(extractJson(ai.content)) as {
+    aiContent = ai.content
+    provider = ai.provider
+  } catch (err) {
+    logScoreEvent({
+      source: 'heuristic',
+      model_version: 'heuristic:v1',
+      duration_ms: Date.now() - started,
+      fallback_cause: 'llm_call_failed',
+      error_message: err instanceof Error ? err.message : String(err),
+    })
+    return {
+      overall: aggregate(heuristic),
+      breakdown: heuristic,
+      rationale: 'Heuristic score — AI call failed.',
+      modelVersion: 'heuristic:v1',
+      source: 'heuristic',
+    }
+  }
+
+  try {
+    const parsed = JSON.parse(extractJson(aiContent)) as {
       clarity?: unknown
       data_quality?: unknown
       risk_awareness?: unknown
@@ -112,18 +168,33 @@ export async function scoreDecision(input: ScoreInput): Promise<ScoreResult> {
       risk_awareness: clamp(parsed.risk_awareness),
       alternatives_considered: clamp(parsed.alternatives_considered),
     }
+    const modelVersion = `${DECISION_SCORER_MODEL}:${provider}`
+    logScoreEvent({
+      source: 'ai',
+      provider,
+      model_version: modelVersion,
+      duration_ms: Date.now() - started,
+    })
     return {
       overall: aggregate(breakdown),
       breakdown,
       rationale: typeof parsed.rationale === 'string' ? parsed.rationale : '',
-      modelVersion: `${DECISION_SCORER_MODEL}:${ai.provider}`,
+      modelVersion,
       source: 'ai',
     }
-  } catch {
+  } catch (err) {
+    logScoreEvent({
+      source: 'heuristic',
+      provider,
+      model_version: 'heuristic:v1',
+      duration_ms: Date.now() - started,
+      fallback_cause: 'json_parse_failed',
+      error_message: err instanceof Error ? err.message : String(err),
+    })
     return {
       overall: aggregate(heuristic),
       breakdown: heuristic,
-      rationale: 'Heuristic score — AI call failed or returned invalid JSON.',
+      rationale: 'Heuristic score — AI returned unparseable JSON.',
       modelVersion: 'heuristic:v1',
       source: 'heuristic',
     }
