@@ -2,7 +2,17 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-15
+> **Last Updated**: 2026-04-18
+
+---
+
+## [1.0.0.1] — 2026-04-18
+
+Hardening follow-up. Structured observability on `scoreDecision` + Playwright E2E suite for `/d/[slug]`. See [CHANGELOG.md](../CHANGELOG.md#1001---2026-04-18) for full details.
+
+## [1.0.0.0] — 2026-04-18
+
+**Decision Intelligence Platform** launch. 4-dimension AI decision scorer, public `/d/[slug]` pages with OG + ISR, Workspace Maturity Score progressive exposure (L1–L4), outcome reminder Inngest loop, schema migration `00002_decision_intelligence_spine.sql`, global `Cmd+Shift+D`. Fixes ISSUE-001 (`/signup` → `/sign-up` link audit), ISSUE-002 (scorer silently fell back on fenced JSON), ISSUE-003 (placeholder env DNS hang). See [CHANGELOG.md](../CHANGELOG.md#1000---2026-04-18) and [docs/releases/v1.0.0.0.md](releases/v1.0.0.0.md).
 
 ---
 

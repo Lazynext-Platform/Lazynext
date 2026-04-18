@@ -36,7 +36,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 
 ```bash
 # Clone the repo
-git clone https://github.com/lazynext/Lazynext.git
+git clone https://github.com/Lazynext-Platform/Lazynext.git
 cd Lazynext
 
 # Install dependencies
@@ -47,8 +47,9 @@ cp .env.example .env.local
 
 # Fill in your keys in .env.local (see Environment Variables below)
 
-# Run the SQL migration in your Supabase SQL Editor
-# See lib/db/migrations/00001_supabase_init.sql
+# Run the SQL migrations in your Supabase SQL Editor, in order:
+#   lib/db/migrations/00001_supabase_init.sql
+#   lib/db/migrations/00002_decision_intelligence_spine.sql
 
 # Start the dev server
 npm run dev
@@ -115,9 +116,15 @@ npm run test:e2e     # Playwright E2E tests
 
 ## Features (38 total)
 
+### Decision Intelligence (v1.0.0.0 hero surface)
+- **4-dimension AI decision scorer** — every decision scored on clarity, data quality, risk awareness, and alternatives considered (Groq llama-3.3-70b primary, Together AI fallback, deterministic heuristic when AI is unavailable)
+- **Public decision pages** at `/d/[slug]` with OG metadata and 5-minute ISR — opt-in shareable record of any decision
+- **Workspace Maturity Score (WMS)** — progressive feature exposure across L1–L4 (decisions only → tasks → docs → canvas/automations). Power users can override.
+- **Outcome reminder loop** — Inngest job nudges the author when a decision's `expected_by` date arrives
+- **Global `Cmd+Shift+D`** to log a decision from anywhere in the app
+
 ### Core
 - Infinite workflow canvas with 7 node types (Task, Doc, Decision, Thread, Pulse, Automation, Table)
-- Decision DNA — quality scoring, outcome tracking, health dashboard
 - LazyMind AI panel — Groq-powered analysis and suggestions
 - Real-time collaboration with cursor overlays
 - Command palette (⌘K) with search, quick actions, navigation
