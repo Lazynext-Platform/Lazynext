@@ -39,3 +39,8 @@ test-results/
 
 # claude code worktrees / local agent state
 /.claude/
+
+# personal secrets scratch files — NEVER commit
+secrets.txt
+secrets/
+*.secrets
