@@ -1,12 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { ArrowRight, Clock } from 'lucide-react'
 
 const posts = [
-  { slug: 'decision-dna', title: 'Introducing Decision DNA', excerpt: 'How AI-scored decisions help teams learn from every choice.', date: 'April 2, 2026', dateTime: '2026-04-02', tag: 'Product', featured: true },
+  { slug: 'launching-lazynext', title: 'Lazynext is live, and we think we shipped the thing PM tools forgot', excerpt: 'Decisions are the highest-leverage work a team does. They\'re also the least instrumented. Here\'s what we did about it.', date: 'April 18, 2026', dateTime: '2026-04-18', tag: 'Launch', featured: true },
+  { slug: 'decision-dna', title: 'Introducing Decision DNA', excerpt: 'How AI-scored decisions help teams learn from every choice.', date: 'April 2, 2026', dateTime: '2026-04-02', tag: 'Product', featured: false },
   { slug: 'graph-native', title: 'Why Graph-Native Workflows?', excerpt: 'Tasks in a list are easy. But work is messy — it branches, loops, and connects. Here\'s how a canvas changes everything.', date: 'March 20, 2026', dateTime: '2026-03-20', tag: 'Engineering', featured: false },
   { slug: 'global-first', title: 'Why We\'re Building Global-First', excerpt: '$9/seat, transparent pricing, and global infrastructure — our thesis on building for today\'s startup ecosystem.', date: 'March 10, 2026', dateTime: '2026-03-10', tag: 'Company', featured: false },
-  { slug: 'launch', title: 'Lazynext is Live', excerpt: 'After 3 months of building, Lazynext v0.1 is here. Here\'s what we shipped and what\'s next.', date: 'February 20, 2026', dateTime: '2026-02-20', tag: 'Launch', featured: false },
 ]
 
 const tagColors: Record<string, string> = {
@@ -31,7 +32,7 @@ export default function BlogPage() {
       {/* Featured */}
       {featured && (
         <section className="mx-auto max-w-4xl px-6 pb-12">
-          <div className="group rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 to-white p-8 hover:border-indigo-200 transition-colors">
+          <Link href={`/blog/${featured.slug}`} className="group block rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 to-white p-8 hover:border-indigo-200 transition-colors">
             <div className="flex items-center gap-2 mb-3">
               <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${tagColors[featured.tag] || 'bg-slate-100 text-slate-500'}`}>{featured.tag}</span>
               <span className="flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" /><time dateTime={featured.dateTime}>{featured.date}</time></span>
@@ -41,24 +42,26 @@ export default function BlogPage() {
             <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600">
               Read more <ArrowRight className="h-3.5 w-3.5" />
             </span>
-          </div>
+          </Link>
         </section>
       )}
 
       {/* Grid */}
       <section className="mx-auto max-w-4xl px-6 pb-24 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {rest.map(post => (
-          <article key={post.slug} className="group rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 transition-colors">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold ${tagColors[post.tag] || 'bg-slate-100 text-slate-500'}`}>{post.tag}</span>
-            </div>
-            <h3 className="text-base font-bold group-hover:text-indigo-700 transition-colors">{post.title}</h3>
-            <p className="mt-1 text-sm text-slate-500 line-clamp-2">{post.excerpt}</p>
-            <div className="mt-3 flex items-center justify-between">
-              <time dateTime={post.dateTime} className="text-xs text-slate-400">{post.date}</time>
-              <span className="text-xs font-semibold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">Read →</span>
-            </div>
-          </article>
+          <Link key={post.slug} href={`/blog/${post.slug}`} className="group block">
+            <article className="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-200 transition-colors h-full">
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`rounded-full px-2 py-0.5 text-2xs font-semibold ${tagColors[post.tag] || 'bg-slate-100 text-slate-500'}`}>{post.tag}</span>
+              </div>
+              <h3 className="text-base font-bold group-hover:text-indigo-700 transition-colors">{post.title}</h3>
+              <p className="mt-1 text-sm text-slate-500 line-clamp-2">{post.excerpt}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <time dateTime={post.dateTime} className="text-xs text-slate-400">{post.date}</time>
+                <span className="text-xs font-semibold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">Read →</span>
+              </div>
+            </article>
+          </Link>
         ))}
       </section>
     </main>

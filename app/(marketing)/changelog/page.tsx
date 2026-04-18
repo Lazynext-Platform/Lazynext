@@ -2,39 +2,19 @@
 
 const entries = [
   {
-    version: 'v0.4.0', date: 'April 5, 2026', dateTime: '2026-04-05', tag: 'Latest',
+    version: 'v1.0.0.0', date: 'April 18, 2026', dateTime: '2026-04-18', tag: 'Latest',
     items: [
-      { type: 'feat', text: 'Decision Health Dashboard with quality trends and outcome analytics' },
-      { type: 'feat', text: 'Automation Builder with WHEN/THEN visual rules' },
-      { type: 'feat', text: 'Task Views — Kanban board and List table' },
-      { type: 'feat', text: 'Data Export with full workspace archive' },
-      { type: 'fix', text: 'Canvas performance improved for 100+ nodes' },
-    ],
-  },
-  {
-    version: 'v0.3.0', date: 'March 22, 2026', dateTime: '2026-03-22', tag: null,
-    items: [
-      { type: 'feat', text: 'Decision DNA — AI quality scoring for every decision' },
-      { type: 'feat', text: 'Template Marketplace with 6 starter templates' },
-      { type: 'feat', text: 'Import wizard for Notion, Linear, and Trello' },
-      { type: 'fix', text: 'Mobile canvas replaced with NodeListView below 640px' },
-    ],
-  },
-  {
-    version: 'v0.2.0', date: 'March 8, 2026', dateTime: '2026-03-08', tag: null,
-    items: [
-      { type: 'feat', text: 'Workflow Canvas with 7 node primitives' },
-      { type: 'feat', text: 'LazyMind AI panel with Groq integration' },
-      { type: 'feat', text: 'Thread discussions attached to any node' },
-      { type: 'feat', text: 'Pulse dashboard with team metrics' },
-    ],
-  },
-  {
-    version: 'v0.1.0', date: 'February 20, 2026', dateTime: '2026-02-20', tag: null,
-    items: [
-      { type: 'feat', text: 'Initial launch — Landing page, pricing, and auth' },
-      { type: 'feat', text: 'Onboarding flow with workspace creation' },
-      { type: 'feat', text: 'Supabase authentication with Google & GitHub SSO' },
+      { type: 'feat', text: 'Decision DNA — LLM-scored decisions across 4 dimensions (clarity, data quality, risk awareness, alternatives considered)' },
+      { type: 'feat', text: 'Groq Llama 3.3 70B primary scorer, Together AI fallback, deterministic heuristic safety net' },
+      { type: 'feat', text: 'Public decision pages at /d/[slug] with OG metadata and 5-minute ISR' },
+      { type: 'feat', text: 'Workspace Maturity Score — progressive feature exposure (decisions first, canvas/automations at L4)' },
+      { type: 'feat', text: 'Outcome reminder loop — daily Inngest job emails authors when expected_by lands' },
+      { type: 'feat', text: 'Weekly digest now summarizes decisions logged, outcomes recorded, WMS progression' },
+      { type: 'feat', text: 'Global Cmd+Shift+D to log a decision from anywhere' },
+      { type: 'feat', text: 'Schema migration 00002_decision_intelligence_spine.sql — score_breakdown, expected_by, is_public, wms_score' },
+      { type: 'perf', text: 'Placeholder env detection — ~7.6s first-paint hang on stock .env.local values now returns fallbacks in <250ms' },
+      { type: 'fix', text: 'Decision scorer now strips ```json fences from Llama responses (was silently falling back to heuristic)' },
+      { type: 'fix', text: '/careers, /contact, /docs, /d/[slug] signup links corrected to /sign-up' },
     ],
   },
 ]
