@@ -1,7 +1,17 @@
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions'
 
-const hasAIKeys = !!process.env.GROQ_API_KEY || !!process.env.TOGETHER_API_KEY
+// A key literally set to "placeholder" (our stock .env.local value) is worse
+// than no key at all — callLazyMind would waste a 10s timeout and then fall
+// back to heuristic anyway. Treat it as unset.
+function isRealKey(v: string | undefined): boolean {
+  if (!v) return false
+  const lower = v.toLowerCase().trim()
+  if (lower === '' || lower === 'placeholder' || lower === 'your-api-key') return false
+  return true
+}
+
+const hasAIKeys = isRealKey(process.env.GROQ_API_KEY) || isRealKey(process.env.TOGETHER_API_KEY)
 export { hasAIKeys }
 
 interface LLMResponse {
