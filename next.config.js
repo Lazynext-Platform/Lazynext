@@ -1,5 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const createNextIntlPlugin = require('next-intl/plugin')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { withSentryConfig } = require('@sentry/nextjs')
 const withNextIntl = createNextIntlPlugin('./i18n.ts')
 
 /** @type {import('next').NextConfig} */
@@ -30,7 +32,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              `connect-src 'self' https://*.supabase.co https://api.lemonsqueezy.com${isDev ? ' ws://localhost:*' : ''}`,
+              `connect-src 'self' https://*.supabase.co https://api.lemonsqueezy.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://*.ingest.us.sentry.io${isDev ? ' ws://localhost:*' : ''}`,
               "media-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",
@@ -44,4 +46,14 @@ const nextConfig = {
   },
 }
 
-module.exports = withNextIntl(nextConfig)
+module.exports = withSentryConfig(withNextIntl(nextConfig), {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  widenClientFileUpload: true,
+  tunnelRoute: '/monitoring',
+  hideSourceMaps: true,
+  disableLogger: true,
+  automaticVercelMonitors: false,
+})
