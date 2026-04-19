@@ -56,6 +56,7 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === '/docs' ||
     request.nextUrl.pathname.startsWith('/blog') ||
     request.nextUrl.pathname.startsWith('/d/') ||
+    request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.startsWith('/sign-in') ||
     request.nextUrl.pathname.startsWith('/sign-up') ||
     request.nextUrl.pathname.startsWith('/auth/callback') ||
