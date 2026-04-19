@@ -44,3 +44,7 @@ test-results/
 secrets.txt
 secrets/
 *.secrets
+
+# supabase CLI local state (linking artefacts, temp files)
+/supabase/.temp/
+/supabase/.branches/
