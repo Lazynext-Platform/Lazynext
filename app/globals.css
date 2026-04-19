@@ -25,6 +25,20 @@
   * {
     @apply border-slate-700;
   }
+
+  /* Form inputs must render dark text on light surfaces (auth, marketing,
+     settings forms) regardless of the app-wide dark body color. Without
+     this, typed characters inherit slate-50 (near-white) and become invisible
+     on the white input background. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']):not([type='color']):not([type='submit']):not([type='button']):not([type='reset']),
+  textarea,
+  select {
+    @apply text-slate-900;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-slate-400;
+  }
 }
 
 @layer utilities {
