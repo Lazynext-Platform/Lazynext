@@ -38,6 +38,9 @@ export async function POST(req: Request) {
 
   const { name, slug } = parsed.data
 
+  // Find the signed-in user's existing workspace (from handle_new_user trigger
+  // or a previous onboarding run). If none exists — e.g. they signed up before
+  // the trigger was live — we backfill a workspace + membership here.
   const { data: membership, error: membershipError } = await db
     .from('workspace_members')
     .select('workspace_id')
@@ -50,12 +53,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: membershipError.message }, { status: 500 })
   }
 
-  if (!membership?.workspace_id) {
-    return NextResponse.json({ error: 'WORKSPACE_NOT_FOUND' }, { status: 404 })
-  }
-
-  const workspaceId = membership.workspace_id
-
+  // Check if the chosen slug is taken by someone else
   const { data: slugOwner, error: slugOwnerError } = await db
     .from('workspaces')
     .select('id')
@@ -66,20 +64,44 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: slugOwnerError.message }, { status: 500 })
   }
 
-  if (slugOwner && slugOwner.id !== workspaceId) {
+  if (slugOwner && slugOwner.id !== membership?.workspace_id) {
     return NextResponse.json({ error: 'SLUG_TAKEN' }, { status: 409 })
   }
 
-  const { data: workspace, error: updateError } = await db
+  // Path A: user already has a workspace — rename + reslug it.
+  if (membership?.workspace_id) {
+    const { data: workspace, error: updateError } = await db
+      .from('workspaces')
+      .update({ name, slug })
+      .eq('id', membership.workspace_id)
+      .select('id, slug, name')
+      .single()
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ data: workspace, error: null }, { status: 200 })
+  }
+
+  // Path B: backfill — create the workspace and admin membership.
+  const { data: workspace, error: insertError } = await db
     .from('workspaces')
-    .update({ name, slug })
-    .eq('id', workspaceId)
+    .insert({ name, slug, created_by: userId })
     .select('id, slug, name')
     .single()
 
-  if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 })
+  if (insertError) {
+    return NextResponse.json({ error: insertError.message }, { status: 500 })
   }
 
-  return NextResponse.json({ data: workspace, error: null }, { status: 200 })
+  const { error: memberError } = await db
+    .from('workspace_members')
+    .insert({ workspace_id: workspace.id, user_id: userId, role: 'admin' })
+
+  if (memberError) {
+    return NextResponse.json({ error: memberError.message }, { status: 500 })
+  }
+
+  return NextResponse.json({ data: workspace, error: null }, { status: 201 })
 }
