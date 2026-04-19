@@ -83,8 +83,13 @@ jobs:
       - run: npx playwright test
         env:
           NEXT_PUBLIC_APP_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          # When org secrets are configured the seeded public-decision test
+          # runs against the test Supabase project. Otherwise it falls back
+          # to placeholder values and the seeded test auto-skips via
+          # hasSupabaseCreds gate in public-decision.spec.ts.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY || 'placeholder' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

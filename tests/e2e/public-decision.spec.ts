@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { createClient } from '@supabase/supabase-js'
 
 // E2E coverage for /d/[slug] public decision pages.
 //
@@ -9,11 +10,9 @@ import { test, expect } from '@playwright/test'
 // 3. Metadata for unknown slugs resolves cleanly (no server errors during
 //    generateMetadata)
 // 4. No console errors / page crashes regardless of DB state
-//
-// What's NOT covered and needs real Supabase creds + a test fixture:
-// - Rendering a real public decision with 4-dim breakdown bars
-// - OG tags populated from decision content
-// - See the skipped test at the bottom for the shape that closes this gap.
+// 5. A seeded real public decision renders with 4-dim breakdown + OG metadata
+//    (gated on SUPABASE_SERVICE_ROLE_KEY being available — skips locally
+//    without creds, runs in CI when secrets are wired up)
 
 test.describe('Public decision page — /d/[slug]', () => {
   test('unknown slug returns 404', async ({ page }) => {
@@ -68,35 +67,77 @@ test.describe('Public decision page — /d/[slug]', () => {
     expect(links).toBeGreaterThan(0)
   })
 
-  // SKIPPED — requires a real Supabase connection + a seeded public decision.
+  // Seeded public-decision test.
   //
-  // To close this gap in CI:
-  //   1. Add SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL as
-  //      secrets pointing at a test Supabase project
-  //   2. Seed a decision before the test:
-  //        await supabase.from('decisions').insert({
-  //          id: 'e2e-test-id',
-  //          question: 'Should we add Playwright coverage for /d/[slug]?',
-  //          resolution: 'Yes, seed a real decision and hit the page.',
-  //          is_public: true,
-  //          public_slug: 'e2e-seeded-decision',
-  //          quality_score: 85,
-  //          score_breakdown: { clarity: 90, data_quality: 80, risk_awareness: 85, alternatives_considered: 85 },
-  //          ...
-  //        })
-  //   3. Unskip the test below and assert the page renders the question,
-  //      resolution, and dimension bars.
-  test.skip('seeded public decision renders with 4-dim breakdown', async ({ page }) => {
-    await page.goto('/d/e2e-seeded-decision')
-    await expect(page.locator('h1')).toContainText('Should we add Playwright coverage')
-    await expect(page.getByText('Clarity')).toBeVisible()
-    await expect(page.getByText('Data quality')).toBeVisible()
-    await expect(page.getByText('Risk awareness')).toBeVisible()
-    await expect(page.getByText('Alternatives')).toBeVisible()
-    // Hero score
-    await expect(page.locator('text=/\\b85\\b/')).toBeVisible()
-    // OG metadata in <head>
-    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content')
-    expect(ogTitle).toBeTruthy()
+  // Runs when SUPABASE_SERVICE_ROLE_KEY + NEXT_PUBLIC_SUPABASE_URL are
+  // present (CI with test Supabase, or local dev with service role).
+  // Skips cleanly otherwise so unconfigured machines still pass.
+  //
+  // The seed + cleanup happens per-test — no shared fixtures, safe to run
+  // in parallel with other specs (unique slug, isolated workspace).
+  const hasSupabaseCreds =
+    !!process.env.SUPABASE_SERVICE_ROLE_KEY &&
+    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project.supabase.co'
+
+  test('seeded public decision renders with 4-dim breakdown', async ({ page }) => {
+    test.skip(!hasSupabaseCreds, 'Supabase service role creds not configured')
+
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    )
+
+    const slug = `e2e-seeded-${Date.now()}`
+    const question = `E2E seed: should we add Playwright coverage for /d/[slug]? (${slug})`
+
+    // Reuse the first existing workspace+user so we don't need to provision
+    // auth.users rows from a test. If the DB is empty, the test skips.
+    const { data: ws } = await supabase.from('workspaces').select('id, created_by').limit(1).maybeSingle()
+    test.skip(!ws, 'No workspace in test DB to anchor seeded decision')
+
+    const { data: seeded, error: seedError } = await supabase
+      .from('decisions')
+      .insert({
+        workspace_id: ws!.id,
+        question,
+        resolution: 'Yes — seed a real decision and hit the page.',
+        rationale: 'Needed E2E coverage for the public share surface.',
+        status: 'decided',
+        outcome: 'pending',
+        quality_score: 85,
+        score_breakdown: {
+          clarity: 90,
+          data_quality: 80,
+          risk_awareness: 85,
+          alternatives_considered: 85,
+        },
+        is_public: true,
+        public_slug: slug,
+        made_by: ws!.created_by,
+      })
+      .select()
+      .single()
+
+    expect(seedError).toBeNull()
+    expect(seeded).toBeTruthy()
+
+    try {
+      await page.goto(`/d/${slug}`)
+      await expect(page.locator('h1')).toContainText('E2E seed')
+      await expect(page.getByText('Clarity')).toBeVisible()
+      await expect(page.getByText('Data quality')).toBeVisible()
+      await expect(page.getByText('Risk awareness')).toBeVisible()
+      await expect(page.getByText('Alternatives')).toBeVisible()
+      // Hero score
+      await expect(page.locator('text=/\\b85\\b/').first()).toBeVisible()
+      // OG metadata in <head>
+      const ogTitle = await page.locator('meta[property="og:title"]').getAttribute('content')
+      expect(ogTitle).toBeTruthy()
+    } finally {
+      // Cleanup — don't leak seeded rows across runs
+      await supabase.from('decisions').delete().eq('id', seeded!.id)
+    }
   })
 })
