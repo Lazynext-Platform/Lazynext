@@ -153,17 +153,25 @@ export default function CreateWorkspacePage() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/v1/workflows', {
+      const res = await fetch('/api/v1/onboarding/workspace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), slug }),
       })
       if (!res.ok) {
         const body = await res.json().catch(() => null)
-        setError(body?.error || 'Failed to create workspace. Please try again.')
+        if (body?.error === 'SLUG_TAKEN') {
+          setError('That workspace URL is already taken. Please go back and choose another name.')
+        } else if (body?.error === 'WORKSPACE_NOT_FOUND') {
+          setError('No workspace was found for your account. Please sign in again.')
+        } else {
+          setError(body?.error || 'Failed to set up your workspace. Please try again.')
+        }
         return
       }
-      router.push(`/workspace/${slug}/guide`)
+      const body = await res.json().catch(() => null)
+      const workspaceSlug = body?.data?.slug || slug
+      router.push(`/workspace/${workspaceSlug}/guide`)
     } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
