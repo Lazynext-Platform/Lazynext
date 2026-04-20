@@ -62,7 +62,7 @@ Set in **Vercel Project → Settings → Environment Variables** (Production + P
 | `RESEND_API_KEY` | resend.com | ✅ for email |
 | `INNGEST_EVENT_KEY` | app.inngest.com | ✅ for background jobs |
 | `INNGEST_SIGNING_KEY` | app.inngest.com | ✅ for background jobs |
-| `NEXT_PUBLIC_APP_URL` | your production URL | ✅ (`https://lazynext.app`) |
+| `NEXT_PUBLIC_APP_URL` | your production URL | ✅ (`https://lazynext.com`) |
 | `NEXT_PUBLIC_POSTHOG_KEY` | posthog.com | optional |
 | `SENTRY_DSN` | sentry.io | optional |
 

@@ -19,3 +19,18 @@ Key routing rules:
 - Architecture review → invoke plan-eng-review
 - Save progress, checkpoint, resume → invoke checkpoint
 - Code quality, health check → invoke health
+
+## Deploy Configuration (configured by /setup-deploy)
+- Platform: Vercel
+- Production URL: https://lazynext.com
+- Deploy workflow: auto-deploy on push to main (Vercel GitHub integration)
+- Deploy status command: HTTP health check
+- Merge method: merge
+- Project type: web app (Next.js 14 App Router)
+- Post-deploy health check: https://lazynext.com
+
+### Custom deploy hooks
+- Pre-merge: npm run lint && npm run type-check && npm test
+- Deploy trigger: automatic on push to main (Vercel picks it up)
+- Deploy status: poll https://lazynext.com until 200
+- Health check: https://lazynext.com

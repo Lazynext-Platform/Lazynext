@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0.1] - 2026-04-20
+
+**Theme:** Deploy configuration + production domain fix.
+
+### Added
+- **Deploy Configuration block in `CLAUDE.md`** — captures platform (Vercel), production URL (`https://lazynext.com`), auto-deploy workflow (GitHub integration), merge method, pre-merge hooks, and health-check endpoint. Future `/land-and-deploy` and `/ship` runs read this instead of re-asking.
+
+### Fixed
+- **`DEPLOY.md` env var table** — `NEXT_PUBLIC_APP_URL` example corrected from `lazynext.app` to `lazynext.com` (the canonical production domain).
+
 ## [1.1.0.0] - 2026-04-20
 
 **Theme:** Gumroad billing migration + per-seat pricing + 14-day trial + end-to-end upgrade funnel.
