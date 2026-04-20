@@ -56,7 +56,7 @@
 **Key sections** (in order):
 
 **General Tab:**
-1. **Workspace Info**: Name input, slug input (with lazynext.app/ prefix), logo upload circle
+1. **Workspace Info**: Name input, slug input (with lazynext.com/ prefix), logo upload circle
 2. **Notification Preferences**: 5 rows with label/description + toggle switch, Save Preferences button
 
 **Members Tab:**
@@ -101,7 +101,7 @@
 | Element | Content Type | Example/Notes |
 |---|---|---|
 | **Workspace name** | Text input | "Acme Corp" |
-| **Workspace slug** | Text input with prefix | "lazynext.app/acme-corp" |
+| **Workspace slug** | Text input with prefix | "lazynext.com/acme-corp" |
 | **Logo** | Image upload placeholder | Dashed circle with image icon |
 | **Notification toggles** | Boolean switches | Email notifications (on), Weekly digest (on), Task assignments (on), Decision logged (off), Thread mentions (on) |
 | **Team members** | Table rows | Avas Patel (Admin/Owner), Priya Sharma (Admin), Raj Kumar (Member), Guest User (Guest) |

@@ -49,7 +49,7 @@
 **Layout**: Card (bg-slate-900, rounded-xl, border) with 2-column grid (form fields + logo)
 **Key elements**:
 - Workspace Name input: pre-filled "Acme Corp"
-- Workspace Slug input: "lazynext.app/" prefix (bg-slate-800/50 with border-r) + editable "acme-corp" + warning text about breaking links
+- Workspace Slug input: "lazynext.com/" prefix (bg-slate-800/50 with border-r) + editable "acme-corp" + warning text about breaking links
 - Logo upload: 96px dashed circle with image icon + "Upload Logo" link below
 - "Save Changes" button (primary blue, right-aligned)
 **Rationale**: Slug prefix is non-editable to prevent URL format errors; logo is optional and secondary (right column)
