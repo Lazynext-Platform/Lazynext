@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
+import { FoundingMemberBanner } from '@/components/marketing/FoundingMemberBanner'
 
 type BillingCycle = 'monthly' | 'annual'
 
@@ -229,10 +230,7 @@ export default function PricingPage() {
       {/* PRICING HERO */}
       <section className="pb-10 pt-20 sm:pb-14 sm:pt-28">
         <div className="mx-auto max-w-4xl px-6 text-center">
-          <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-semibold text-amber-800">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            Founding Member pricing — 30% off for life. Limited to the first 100 teams.
-          </div>
+          <FoundingMemberBanner />
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             Simple, transparent pricing
           </h1>

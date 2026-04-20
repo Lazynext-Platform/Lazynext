@@ -414,6 +414,46 @@ export const handleExportRequested = inngest.createFunction(
   }
 )
 
+// 8. Trial-expiry cron — daily sweep of workspaces whose 14-day Business
+//    trial has elapsed without converting. Downgrades them to free and
+//    clears the trial timestamp so we don't re-process the same row.
+//    Runs at 02:00 UTC daily.
+export const handleTrialExpiryScan = inngest.createFunction(
+  {
+    id: 'trial-expiry-scan',
+    retries: 2,
+    triggers: [{ event: EVENTS.TRIAL_EXPIRY_SCAN }, { cron: '0 2 * * *' }],
+  },
+  async () => {
+    if (!hasValidDatabaseUrl) return { skipped: true }
+
+    const nowIso = new Date().toISOString()
+
+    // Eligible rows:
+    //   - trial_ends_at is set and in the past
+    //   - workspace is still on a paid plan (meaning: trial never converted)
+    //   - no gr_subscription_id (no Gumroad sale recorded)
+    const { data: expired, error } = await db
+      .from('workspaces')
+      .select('id, name, plan, trial_ends_at, gr_subscription_id')
+      .lte('trial_ends_at', nowIso)
+      .not('trial_ends_at', 'is', null)
+      .neq('plan', 'free')
+      .is('gr_subscription_id', null)
+      .limit(200)
+
+    if (error || !expired?.length) return { scanned: 0, downgraded: 0 }
+
+    const ids = expired.map((w) => w.id)
+    const { error: updErr } = await db
+      .from('workspaces')
+      .update({ plan: 'free', trial_ends_at: null, updated_at: nowIso })
+      .in('id', ids)
+
+    return { scanned: expired.length, downgraded: updErr ? 0 : expired.length }
+  }
+)
+
 // Export all functions for Inngest serve
 export const functions = [
   handleWorkspaceInvite,
@@ -423,4 +463,5 @@ export const functions = [
   handleWeeklyDigest,
   handleOutcomeReminderScan,
   handleExportRequested,
+  handleTrialExpiryScan,
 ]

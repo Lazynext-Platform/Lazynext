@@ -11,4 +11,5 @@ export const EVENTS = {
   OUTCOME_REMINDER_CRON: 'cron/outcome-reminder',
   WEEKLY_DIGEST_CRON: 'cron/weekly-digest',
   EXPORT_REQUESTED: 'workspace/export.requested',
+  TRIAL_EXPIRY_SCAN: 'cron/trial-expiry-scan',
 } as const
