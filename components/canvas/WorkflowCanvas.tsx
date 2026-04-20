@@ -26,7 +26,12 @@ import { CanvasContextMenu } from './panels/CanvasContextMenu'
 import { WorkflowEdge } from './edges/WorkflowEdge'
 import CollaborationOverlay from './CollaborationOverlay'
 import { useUIStore } from '@/stores/ui.store'
-import type { NodeType } from '@/lib/utils/constants'
+import { useWorkspaceStore } from '@/stores/workspace.store'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { canCreateNode } from '@/lib/utils/plan-gates'
+import { PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
+
+type Plan = keyof typeof PLAN_LIMITS
 
 const nodeTypes = {
   task: TaskNode,
@@ -124,6 +129,7 @@ export function WorkflowCanvas() {
   const isNodePanelOpen = useCanvasStore((s) => s.isNodePanelOpen)
 
   const isMobile = useUIStore((s) => s.isMobile)
+  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -180,6 +186,10 @@ export function WorkflowCanvas() {
 
       <CanvasContextMenu
         onCreateNode={(type: NodeType, pos) => {
+          if (!canCreateNode(plan, nodes.length)) {
+            useUpgradeModal.getState().show('node-limit')
+            return
+          }
           const id = `node-${Date.now()}`
           addNode({
             id,
