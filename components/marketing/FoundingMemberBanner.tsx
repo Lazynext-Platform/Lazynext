@@ -39,9 +39,9 @@ export function FoundingMemberBanner() {
   return (
     <div className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1 text-xs font-semibold text-amber-800">
       <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-      Founding Member pricing — 30% off for life.{' '}
+      Founding Member — lock in today&apos;s prices for life.{' '}
       {remaining === null
-        ? 'Limited to the first 100 teams.'
+        ? 'First 100 teams only.'
         : remaining === 100
           ? 'All 100 spots open.'
           : `${remaining} of 100 spots left.`}

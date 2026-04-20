@@ -330,7 +330,7 @@ export default function DecisionHealthPage() {
       variant="health-gate"
       title="Decision Health Dashboard"
       description="Track decision quality, outcomes, and velocity across your workspace. See which decisions led to wins — and which need rework."
-      requiredTier="Business"
+      requiredTier="Team"
     >
       <DecisionHealthInner />
     </FeatureGate>

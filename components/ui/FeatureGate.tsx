@@ -39,13 +39,13 @@ interface FeatureGateProps {
  *
  * Usage:
  *   <FeatureGate
- *     feature="decision-health"
- *     variant="health-gate"
- *     title="Decision Health Dashboard"
- *     description="Deep analytics on your team's decision quality."
+ *     feature="automation"
+ *     variant="automation-gate"
+ *     title="Automation Rules"
+ *     description="Trigger tasks and digests when decisions log or outcomes land."
  *     requiredTier="Business"
  *   >
- *     <ActualDashboardPage />
+ *     <AutomationsPage />
  *   </FeatureGate>
  */
 export function FeatureGate({

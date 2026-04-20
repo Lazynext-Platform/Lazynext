@@ -5,62 +5,66 @@ import Link from 'next/link'
 import { Check, X } from 'lucide-react'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
+import { PLAN_PRICING_USD, PLAN_PRICING_USD_ANNUAL } from '@/lib/utils/constants'
 
 type BillingCycle = 'monthly' | 'annual'
 
+// Landing-page pricing preview. Source of truth is /pricing — these tiers
+// are kept consistent via PLAN_PRICING_USD constants. If you change prices,
+// do it in lib/utils/constants.ts and both surfaces update.
 const tiers = [
   {
     name: 'Free',
     monthlyPrice: 0,
     annualPrice: 0,
-    period: '/month',
-    desc: 'For individuals and small experiments.',
-    cta: 'Get Started',
+    period: '/forever',
+    desc: 'For individuals exploring Decision DNA.',
+    cta: 'Start Free',
     ctaLink: '/sign-up',
     featured: false,
     features: [
-      { name: '1 workspace', included: true },
-      { name: '3 members', included: true },
-      { name: '50 nodes', included: true },
-      { name: '10 decisions', included: true },
-      { name: 'LazyMind AI', included: false },
-      { name: 'Decision DNA search', included: false },
+      { name: '3 team members', included: true },
+      { name: '20 decisions', included: true },
+      { name: '100 nodes', included: true },
+      { name: '20 AI queries/day', included: true },
+      { name: 'Decision Health Dashboard', included: false },
+      { name: 'PULSE + Automation', included: false },
     ],
   },
   {
-    name: 'Pro',
-    monthlyPrice: 9,
-    annualPrice: 7,
+    name: 'Team',
+    monthlyPrice: PLAN_PRICING_USD.starter,
+    annualPrice: PLAN_PRICING_USD_ANNUAL.starter,
     period: '/seat/month',
-    desc: 'For growing teams that ship fast.',
-    cta: 'Start Free Trial',
+    desc: 'Small teams shipping fast. Decision Health included.',
+    cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
     featured: true,
     features: [
-      { name: 'Unlimited workspaces', included: true },
-      { name: 'Unlimited members', included: true },
-      { name: 'Unlimited nodes', included: true },
-      { name: 'Decision DNA search', included: true },
-      { name: 'LazyMind AI', included: true },
-      { name: 'Priority email support', included: true },
+      { name: 'Unlimited members & nodes', included: true },
+      { name: 'Unlimited decisions', included: true },
+      { name: 'Decision Health Dashboard', included: true },
+      { name: '100 AI queries/day/seat', included: true },
+      { name: 'Import from Notion/Linear/Trello', included: true },
+      { name: 'PULSE + Automation', included: false },
     ],
   },
   {
     name: 'Business',
-    monthlyPrice: 19,
-    annualPrice: 15,
+    monthlyPrice: PLAN_PRICING_USD.pro,
+    annualPrice: PLAN_PRICING_USD_ANNUAL.pro,
     period: '/seat/month',
-    desc: 'For orgs that need control and scale.',
-    cta: 'Contact Sales',
+    desc: 'Teams that decide on purpose. Full stack.',
+    cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
     featured: false,
     features: [
-      { name: 'Everything in Pro', included: true },
-      { name: 'Decision Health Dashboard', included: true },
-      { name: 'Advanced analytics', included: true },
+      { name: 'Everything in Team', included: true },
+      { name: 'PULSE + Automation engine', included: true },
+      { name: 'Outcome tracking & trends', included: true },
+      { name: 'Semantic search + weekly digest', included: true },
+      { name: '500 AI queries/day/seat', included: true },
       { name: 'Priority support', included: true },
-      { name: 'SSO / SAML', included: true },
-      { name: 'Custom integrations', included: true },
     ],
   },
 ]
@@ -102,7 +106,7 @@ export default function PricingSection() {
             >
               Annual{' '}
               <span className="ml-1 text-xs font-bold text-green-600">
-                Save 17%
+                Save 20%
               </span>
             </button>
           </div>

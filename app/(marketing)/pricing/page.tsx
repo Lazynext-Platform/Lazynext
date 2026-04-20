@@ -45,8 +45,8 @@ const tiers = [
     name: 'Team',
     slug: 'starter' as const,
     desc: 'For small teams shipping fast',
-    monthlyPrice: '12',
-    annualPrice: '10',
+    monthlyPrice: '15',
+    annualPrice: '12',
     priceSuffix: '/seat/month',
     cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
@@ -56,6 +56,7 @@ const tiers = [
     features: [
       'Unlimited members & workspaces',
       'Unlimited decisions',
+      'Decision Health Dashboard',
       'Decision DNA search',
       'Full LazyMind AI (100 queries/day/seat)',
       'Import from Notion / Linear / Trello',
@@ -66,8 +67,8 @@ const tiers = [
     name: 'Business',
     slug: 'pro' as const,
     desc: 'For teams that decide on purpose',
-    monthlyPrice: '24',
-    annualPrice: '20',
+    monthlyPrice: '30',
+    annualPrice: '24',
     priceSuffix: '/seat/month',
     cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
@@ -75,12 +76,12 @@ const tiers = [
     highlighted: true,
     inheritLabel: 'Everything in Team, plus:',
     features: [
-      'Decision Health Dashboard',
-      'Decision quality analytics',
       'Outcome tracking & trends',
       'PULSE dashboards',
       'Automation engine',
       '500 LazyMind AI queries/day/seat',
+      'Semantic search across decisions',
+      'Weekly digest email',
       'Priority support',
       'Custom templates',
       'Data export (JSON / CSV / PDF)',
@@ -93,6 +94,8 @@ const tiers = [
     monthlyPrice: null as string | null,
     annualPrice: null as string | null,
     priceSuffix: '',
+    // Anchor price shown under "Custom" to set expectations before a sales call.
+    anchorNote: 'From $49/seat/month · 15-seat minimum',
     cta: 'Contact Sales',
     ctaLink: '/contact',
     ctaStyle: 'outline' as const,
@@ -118,7 +121,7 @@ const comparisonFeatures = [
   { name: 'Decision DNA Search', free: null, starter: true, pro: true, business: true },
   { name: 'Quality Scores', free: 'Basic', starter: 'Basic', pro: 'Full', business: 'Full' },
   { name: 'Outcome Tracking', free: null, starter: null, pro: true, business: true },
-  { name: 'Decision Health Dashboard', free: null, starter: null, pro: true, business: true },
+  { name: 'Decision Health Dashboard', free: null, starter: true, pro: true, business: true },
   { name: 'LazyMind AI queries', free: '10/day', starter: '100/day/seat', pro: '500/day/seat', business: 'Unlimited' },
   { name: 'PULSE', free: null, starter: null, pro: true, business: true },
   { name: 'Automation', free: null, starter: null, pro: true, business: true },
@@ -134,7 +137,7 @@ const comparisonFeatures = [
 const faqItems = [
   {
     q: 'How does per-seat pricing work?',
-    a: 'You pay for each active member who can access the workspace. A 10-person team on the Business plan pays $24 × 10 = $240/month (or $200/month billed annually). Add or remove seats anytime — your bill adjusts on the next cycle.',
+    a: 'You pay for each active member who can access the workspace. A 10-person team on the Business plan pays $30 × 10 = $300/month (or $240/month billed annually — a 20% save). Add or remove seats anytime and your bill adjusts on the next cycle.',
   },
   {
     q: 'Do I need a credit card to start?',
@@ -149,8 +152,8 @@ const faqItems = [
     a: "Yes, any time. Upgrade gives you immediate access to new features. Downgrade takes effect at the end of your current billing period so you keep what you paid for.",
   },
   {
-    q: 'Is there a startup discount?',
-    a: "Yes. We are giving the first 100 teams 'Founding Member' pricing — 30% off any paid plan for life. Email hello@lazynext.com with your team details to claim a spot.",
+    q: 'Is there a Founding Member program?',
+    a: "Yes. The first 100 teams that upgrade to a paid plan become Founding Members and lock in today's prices for the lifetime of their subscription — future price increases don't apply to you. Sign up and pick a paid plan to claim your spot automatically, or email hello@lazynext.com if you want to talk first.",
   },
   {
     q: 'What payment methods do you accept?',
@@ -273,7 +276,7 @@ export default function PricingPage() {
             Annual
           </span>
           <span className="ml-1 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
-            Save 17%
+            Save 20%
           </span>
         </div>
       </section>
@@ -322,9 +325,9 @@ export default function PricingPage() {
                     </div>
                   )}
                   <p className="mt-1 text-xs text-slate-400">
-                    {tier.monthlyPrice === null && 'Tailored to your org'}
+                    {tier.monthlyPrice === null && (('anchorNote' in tier && tier.anchorNote) || 'Tailored to your org')}
                     {tier.monthlyPrice === '0' && 'Free forever'}
-                    {tier.monthlyPrice && tier.monthlyPrice !== '0' && (isAnnual ? 'billed annually — save 17%' : 'billed monthly')}
+                    {tier.monthlyPrice && tier.monthlyPrice !== '0' && (isAnnual ? 'billed annually — save 20%' : 'billed monthly')}
                   </p>
                 </div>
 

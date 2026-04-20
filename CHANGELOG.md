@@ -4,6 +4,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0.0] - 2026-04-21
+
+**Theme:** Pricing strategy correction before creating Gumroad products. Fix the structural bug where Decision Health (the hero feature) was locked behind the Business tier, bump Team/Business prices to Notion/Linear parity, reframe Founding Member around price-lock-for-life, and anchor Enterprise with a from-price.
+
+Version bump is MINOR because this changes user-visible pricing and feature availability, not the data model. No DB migration.
+
+### Changed
+- **Decision Health Dashboard unlocks at Team tier (not Business).** `lib/utils/plan-gates.ts` now lists `'decision-health': ['starter', 'pro', 'business', 'enterprise']`. Locking the hero feature behind Business starved the entry tier of the thing users sign up for. `FeatureGate` on `/workspace/[slug]/decisions/health` now shows "Upgrade to Team" instead of "Upgrade to Business". Upgrade modal's `health-gate` variant copy updated accordingly. Unit test `tests/unit/plan-gates.test.ts` extended with explicit assertions across all four paid tiers.
+- **Team pricing: $12/seat → $15/seat monthly, $10 → $12 annual.** Business: $24 → $30 monthly, $20 → $24 annual. Source of truth: `lib/utils/constants.ts` (`PLAN_PRICING_USD`, `PLAN_PRICING_USD_ANNUAL`). Matches Notion ($10) / Linear ($10) entry, charges a premium for the Decision DNA feature set. Gumroad product prices follow: Team Monthly $15, Team Yearly $144 (= $12/mo × 12), Business Monthly $30, Business Yearly $288 (= $24/mo × 12).
+- **Annual discount: 17% → 20%.** Math is clean and matches the per-seat-per-month display in the pricing page. Badges and copy updated on `/pricing`, landing `PricingSection`, and `UpgradeModal` toggle.
+- **Founding Member reframe: "30% off for life" → "Lock in today's prices for life".** Conceptually stronger: Founding Members aren't buying a discount, they're hedging against future price increases. `components/marketing/FoundingMemberBanner.tsx` + pricing page FAQ rewritten. `FOUNDING_MEMBER_DISCOUNT_PCT` constant removed (no instant percentage to apply). API route comments updated to reflect new semantics.
+- **Enterprise tier shows an anchor price.** `/pricing` now displays "From $49/seat/month · 15-seat minimum" under the Custom label. Keeps the tier sales-led but stops Enterprise from looking like a black box. Business ($30) feels cheaper by comparison without needing a price reduction.
+- **Landing page `PricingSection.tsx` synced with real tier model.** Previously stuck on the old Free/Pro $9/Business $19 preview. Now imports `PLAN_PRICING_USD` constants so both surfaces always agree.
+- **Team tier marketing copy** promotes Decision Health as a Team feature across `/pricing`, landing `PricingSection`, and `UpgradeModal`. Business tier copy re-centered on what it actually uniquely unlocks: Automation, PULSE, Outcome Tracking, Semantic Search, Weekly Digest.
+- **LazyMind demo decision updated for consistency:** the marketing-page demo answer now shows "D-134: Price point for Team tier → $15/seat" and "D-141: Annual discount percentage → 20%" to match the live pricing.
+- **Founder walkthrough (`docs/FOUNDER-SETUP-WALKTHROUGH.md`) updated** with new Gumroad product prices so the non-technical setup flow produces products at correct final prices on first attempt.
+- **Billing architecture reference (`docs/references/billing-architecture.md`)** tables rewritten: plan model prices, feature-gate matrix (Decision Health ticked at Team column), constants snippet, Gumroad setup checklist product prices.
+
+### Explicitly deferred (for a separate PR)
+- Solo tier ($8/mo, 1 seat) — expands TAM but requires DB enum migration (`ALTER TYPE plan_enum ADD VALUE 'solo'`), two new Gumroad products, checkout schema addition, and modal layout changes to fit a fourth card. Post-launch decision gated on signup data.
+- Trial-card-required — moving from no-card trial to card-required is a conversion/churn tradeoff that needs real trial-conversion data before we change it.
+
 ## [1.1.0.1] - 2026-04-20
 
 **Theme:** Deploy configuration + production domain fix.

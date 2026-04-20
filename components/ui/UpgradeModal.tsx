@@ -31,7 +31,7 @@ const planCards: PlanCard[] = [
     name: 'Team',
     priceMonthly: PLAN_PRICING_USD.starter,
     priceAnnual: PLAN_PRICING_USD_ANNUAL.starter,
-    features: ['Unlimited members', 'Unlimited nodes', '100 AI queries / seat / day', 'Core Decision DNA'],
+    features: ['Unlimited members', 'Unlimited nodes', '100 AI queries / seat / day', 'Core Decision DNA', 'Decision Health Dashboard'],
     accent: 'border-brand',
     popular: false,
   },
@@ -40,7 +40,7 @@ const planCards: PlanCard[] = [
     name: 'Business',
     priceMonthly: PLAN_PRICING_USD.pro,
     priceAnnual: PLAN_PRICING_USD_ANNUAL.pro,
-    features: ['Everything in Team', '500 AI queries / seat / day', 'Decision Health Dashboard', 'PULSE + Automation', 'Outcome Tracking'],
+    features: ['Everything in Team', '500 AI queries / seat / day', 'PULSE + Automation', 'Outcome Tracking', 'Priority support'],
     accent: 'border-emerald-500',
     popular: true,
   },
@@ -62,7 +62,7 @@ const VARIANT_COPY: Record<ModalVariant, { title: string; locked?: { feature: st
   'full-upgrade': { title: 'Upgrade your plan' },
   'health-gate': {
     title: 'Unlock Decision Health',
-    locked: { feature: 'Decision Health Dashboard', tier: 'Business', desc: 'Deep analytics on your team’s decision quality.' },
+    locked: { feature: 'Decision Health Dashboard', tier: 'Team', desc: 'Deep analytics on your team’s decision quality.' },
   },
   'automation-gate': {
     title: 'Unlock Automation',
@@ -275,7 +275,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                   billingCycle === 'yearly' ? 'bg-brand text-white' : 'text-slate-400'
                 )}
               >
-                Annual <span className="text-emerald-400">-17%</span>
+                Annual <span className="text-emerald-400">-20%</span>
               </button>
             </div>
           </div>

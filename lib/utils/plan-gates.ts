@@ -25,8 +25,12 @@ export function canUseAI(plan: Plan, currentCount: number): boolean {
 export function hasFeature(plan: Plan, feature: string): boolean {
   // Plan slugs map to the new pricing tiers:
   //   starter = Team, pro = Business, business = Enterprise
+  //
+  // Decision Health is intentionally the Team-tier unlock. It's the hero
+  // feature — gating it behind Business starves the entry tier of the thing
+  // users are here for. Business keeps automation, pulse, and AI depth.
   const featureMap: Record<string, Plan[]> = {
-    'decision-health': ['pro', 'business', 'enterprise'],
+    'decision-health': ['starter', 'pro', 'business', 'enterprise'],
     'semantic-search': ['pro', 'business', 'enterprise'],
     'weekly-digest': ['pro', 'business', 'enterprise'],
     'automation': ['pro', 'business', 'enterprise'],

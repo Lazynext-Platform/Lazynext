@@ -76,10 +76,10 @@ export default function LazyMindSection() {
                   </div>
                   <div className="space-y-1 rounded-lg bg-slate-700/50 p-2.5 text-xs">
                     <p className="font-semibold text-orange-400">
-                      D-134: Price point for Pro tier
+                      D-134: Price point for Team tier
                     </p>
                     <p className="text-slate-400">
-                      Resolved: $9/seat. Score: 78/100
+                      Resolved: $15/seat. Score: 78/100
                     </p>
                   </div>
                   <div className="space-y-1 rounded-lg bg-slate-700/50 p-2.5 text-xs">
@@ -87,7 +87,7 @@ export default function LazyMindSection() {
                       D-141: Annual discount percentage
                     </p>
                     <p className="text-slate-400">
-                      Resolved: 17%. Score: 84/100
+                      Resolved: 20%. Score: 84/100
                     </p>
                   </div>
                   <p className="mt-1 text-xs text-slate-500">

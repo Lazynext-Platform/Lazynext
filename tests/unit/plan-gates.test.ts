@@ -26,9 +26,19 @@ describe('Plan Gates', () => {
   })
 
   it('should gate features by plan', () => {
+    // Decision Health is the hero feature — available from Team tier up.
     expect(hasFeature('free', 'decision-health')).toBe(false)
+    expect(hasFeature('starter', 'decision-health')).toBe(true)
+    expect(hasFeature('pro', 'decision-health')).toBe(true)
     expect(hasFeature('business', 'decision-health')).toBe(true)
+
+    // Business-tier features start at pro.
+    expect(hasFeature('starter', 'weekly-digest')).toBe(false)
     expect(hasFeature('pro', 'weekly-digest')).toBe(true)
     expect(hasFeature('free', 'weekly-digest')).toBe(false)
+
+    // Enterprise-only features.
+    expect(hasFeature('pro', 'sso')).toBe(false)
+    expect(hasFeature('business', 'sso')).toBe(true)
   })
 })
