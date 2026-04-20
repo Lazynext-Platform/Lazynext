@@ -8,9 +8,21 @@ import { useUIStore } from '@/stores/ui.store'
 
 type BillingCycle = 'monthly' | 'annual'
 
+// Gumroad product URLs — set these as Vercel env vars once your Gumroad products are live.
+// When unset, buttons fall back to /sign-up (users join free, upgrade later).
+const GUMROAD_URLS = {
+  starterMonthly: process.env.NEXT_PUBLIC_GUMROAD_STARTER_MONTHLY_URL,
+  starterAnnual: process.env.NEXT_PUBLIC_GUMROAD_STARTER_ANNUAL_URL,
+  proMonthly: process.env.NEXT_PUBLIC_GUMROAD_PRO_MONTHLY_URL,
+  proAnnual: process.env.NEXT_PUBLIC_GUMROAD_PRO_ANNUAL_URL,
+  businessMonthly: process.env.NEXT_PUBLIC_GUMROAD_BUSINESS_MONTHLY_URL,
+  businessAnnual: process.env.NEXT_PUBLIC_GUMROAD_BUSINESS_ANNUAL_URL,
+} as const
+
 const tiers = [
   {
     name: 'Free',
+    slug: 'free' as const,
     desc: 'For individuals getting started',
     monthlyPrice: '0',
     annualPrice: '0',
@@ -31,6 +43,7 @@ const tiers = [
   },
   {
     name: 'Starter',
+    slug: 'starter' as const,
     desc: 'For small teams shipping fast',
     monthlyPrice: '9',
     annualPrice: '7',
@@ -54,6 +67,7 @@ const tiers = [
   },
   {
     name: 'Pro',
+    slug: 'pro' as const,
     desc: 'For teams that need the full picture',
     monthlyPrice: '19',
     annualPrice: '15',
@@ -78,6 +92,7 @@ const tiers = [
   },
   {
     name: 'Business',
+    slug: 'business' as const,
     desc: 'For organizations at scale',
     monthlyPrice: '49',
     annualPrice: '39',
@@ -134,7 +149,7 @@ const faqItems = [
   },
   {
     q: 'What payment methods do you accept?',
-    a: 'We process payments through Lemon Squeezy, which supports credit/debit cards (Visa, Mastercard, Amex), PayPal, and other local payment methods worldwide. All pricing is in USD with automatic tax handling.',
+    a: 'We process payments through Gumroad, which supports credit/debit cards (Visa, Mastercard, Amex), PayPal, and other local payment methods worldwide. All pricing is in USD with automatic tax handling.',
   },
   {
     q: 'Is there a discount for startups?',
@@ -164,6 +179,43 @@ function renderCellValue(val: string | boolean | null) {
   if (val === true) return <CheckIcon />
   if (val === null) return <span className="text-slate-400">&mdash;</span>
   return <span>{val}</span>
+}
+
+type PricingTier = (typeof tiers)[number]
+
+function PricingCta({ tier, isAnnual }: { tier: PricingTier; isAnnual: boolean }) {
+  // For paid tiers, prefer the Gumroad checkout URL when configured.
+  let href: string = tier.ctaLink
+  let external = false
+  if (tier.slug === 'starter') {
+    const url = isAnnual ? GUMROAD_URLS.starterAnnual : GUMROAD_URLS.starterMonthly
+    if (url) { href = url; external = true }
+  } else if (tier.slug === 'pro') {
+    const url = isAnnual ? GUMROAD_URLS.proAnnual : GUMROAD_URLS.proMonthly
+    if (url) { href = url; external = true }
+  } else if (tier.slug === 'business') {
+    const url = isAnnual ? GUMROAD_URLS.businessAnnual : GUMROAD_URLS.businessMonthly
+    if (url) { href = url; external = true }
+  }
+
+  const className = `mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
+    tier.ctaStyle === 'filled'
+      ? 'bg-brand text-white shadow-sm hover:bg-brand-hover'
+      : 'border-2 border-brand bg-white text-brand hover:bg-brand/5'
+  }`
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {tier.cta}
+      </a>
+    )
+  }
+  return (
+    <Link href={href} className={className}>
+      {tier.cta}
+    </Link>
+  )
 }
 
 export default function PricingPage() {
@@ -292,16 +344,7 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={tier.ctaLink}
-                  className={`mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
-                    tier.ctaStyle === 'filled'
-                      ? 'bg-brand text-white shadow-sm hover:bg-brand-hover'
-                      : 'border-2 border-brand bg-white text-brand hover:bg-brand/5'
-                  }`}
-                >
-                  {tier.cta}
-                </Link>
+                <PricingCta tier={tier} isAnnual={isAnnual} />
               </div>
             ))}
           </div>
