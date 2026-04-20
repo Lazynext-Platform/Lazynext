@@ -23,14 +23,16 @@ export function canUseAI(plan: Plan, currentCount: number): boolean {
 }
 
 export function hasFeature(plan: Plan, feature: string): boolean {
+  // Plan slugs map to the new pricing tiers:
+  //   starter = Team, pro = Business, business = Enterprise
   const featureMap: Record<string, Plan[]> = {
-    'decision-health': ['business', 'enterprise'],
-    'semantic-search': ['business', 'enterprise'],
+    'decision-health': ['pro', 'business', 'enterprise'],
+    'semantic-search': ['pro', 'business', 'enterprise'],
     'weekly-digest': ['pro', 'business', 'enterprise'],
     'automation': ['pro', 'business', 'enterprise'],
     'custom-fields': ['business', 'enterprise'],
     'audit-log': ['business', 'enterprise'],
-    'sso': ['enterprise'],
+    'sso': ['business', 'enterprise'],
   }
   return featureMap[feature]?.includes(plan) ?? false
 }

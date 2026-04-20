@@ -11,20 +11,36 @@ export const NODE_TYPES = {
 export type NodeType = keyof typeof NODE_TYPES
 
 export const PLAN_LIMITS = {
+  // Free: hard gates to drive upgrade (members = primary trigger).
   free: { members: 3, workflows: 5, nodes: 100, aiQueries: 20 },
-  starter: { members: 10, workflows: 25, nodes: 1000, aiQueries: 100 },
-  pro: { members: 25, workflows: 100, nodes: 10000, aiQueries: 500 },
-  business: { members: 100, workflows: -1, nodes: -1, aiQueries: -1 },
+  // Paid tiers: unlimited structure; AI queries per-seat/day is the soft cap.
+  starter: { members: -1, workflows: -1, nodes: -1, aiQueries: 100 },
+  pro: { members: -1, workflows: -1, nodes: -1, aiQueries: 500 },
+  business: { members: -1, workflows: -1, nodes: -1, aiQueries: -1 },
   enterprise: { members: -1, workflows: -1, nodes: -1, aiQueries: -1 },
 } as const
 
+// Per-seat monthly USD. Display labels: starter="Team", pro="Business",
+// business="Enterprise (contact sales)". Kept as slugs to preserve DB enum.
 export const PLAN_PRICING_USD = {
   free: 0,
-  starter: 9,
-  pro: 19,
-  business: 49,
-  enterprise: null, // custom
+  starter: 12,   // Team
+  pro: 24,       // Business
+  business: null, // Enterprise — custom / contact sales
+  enterprise: null,
 } as const
+
+export const PLAN_PRICING_USD_ANNUAL = {
+  free: 0,
+  starter: 10,   // Team, billed annually (per seat per month)
+  pro: 20,       // Business, billed annually
+  business: null,
+  enterprise: null,
+} as const
+
+export const TRIAL_DAYS = 14
+export const FOUNDING_MEMBER_CAP = 100
+export const FOUNDING_MEMBER_DISCOUNT_PCT = 30
 
 export const QUALITY_THRESHOLDS = {
   high: 70,
