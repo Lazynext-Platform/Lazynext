@@ -170,7 +170,10 @@ test.describe('Auth Redirects', () => {
   })
 
   test('onboarding redirects unauthenticated users', async ({ page }) => {
+    // /onboarding is a public route by design (added in commit 81bc69a) —
+    // first-run users land here before a workspace exists. Verify the page
+    // renders instead of redirecting.
     await page.goto(`${BASE}/onboarding`)
-    expect(page.url()).toContain('/sign-in')
+    expect(page.url()).toContain('/onboarding')
   })
 })
