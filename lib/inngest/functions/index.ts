@@ -5,6 +5,7 @@ import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { scoreDecision } from '@/lib/ai/decision-scorer'
 import { callLazyMind, hasAIKeys } from '@/lib/ai/lazymind'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 
 function getResend() {
   if (!process.env.RESEND_API_KEY) return null
@@ -449,6 +450,15 @@ export const handleTrialExpiryScan = inngest.createFunction(
       .from('workspaces')
       .update({ plan: 'free', trial_ends_at: null, updated_at: nowIso })
       .in('id', ids)
+
+    if (!updErr) {
+      for (const ws of expired) {
+        trackBillingEvent('cron.trial.expired', {
+          workspaceId: ws.id,
+          previousPlan: ws.plan,
+        })
+      }
+    }
 
     return { scanned: expired.length, downgraded: updErr ? 0 : expired.length }
   }

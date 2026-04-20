@@ -1,8 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, Shield, CreditCard, Users, Bell, Palette } from 'lucide-react'
+import { Settings, Shield, CreditCard, Users, Bell, Palette, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { useWorkspaceStore } from '@/stores/workspace.store'
+import { hasFeature } from '@/lib/utils/plan-gates'
+import type { PLAN_LIMITS } from '@/lib/utils/constants'
+
+type Plan = keyof typeof PLAN_LIMITS
 
 const tabs = [
   { id: 'general', label: 'General', icon: Settings },
@@ -14,6 +20,8 @@ const tabs = [
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
+  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+  const hasSso = hasFeature(plan, 'sso')
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-8">
@@ -167,9 +175,26 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 p-4">
               <div>
                 <p className="text-sm font-semibold text-slate-200">SSO / SAML</p>
-                <p className="text-xs text-slate-500">Enterprise single sign-on</p>
+                <p className="text-xs text-slate-500">
+                  {hasSso
+                    ? 'Map corporate identity. Contact support to complete SAML setup.'
+                    : 'Enterprise single sign-on — map corporate identity with audit log.'}
+                </p>
               </div>
-              <span className="rounded-full bg-slate-700 px-2.5 py-0.5 text-xs text-slate-400">Enterprise</span>
+              {hasSso ? (
+                <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs text-emerald-400">
+                  Enabled
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => useUpgradeModal.getState().show('sso-gate')}
+                  className="flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/5 px-2.5 py-1 text-xs font-semibold text-brand hover:bg-brand/10"
+                >
+                  <Lock className="h-3 w-3" />
+                  Unlock
+                </button>
+              )}
             </div>
           </div>
         </div>
