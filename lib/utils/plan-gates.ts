@@ -30,6 +30,7 @@ export function hasFeature(plan: Plan, feature: string): boolean {
     'semantic-search': ['pro', 'business', 'enterprise'],
     'weekly-digest': ['pro', 'business', 'enterprise'],
     'automation': ['pro', 'business', 'enterprise'],
+    'pulse': ['pro', 'business', 'enterprise'],
     'custom-fields': ['business', 'enterprise'],
     'audit-log': ['business', 'enterprise'],
     'sso': ['business', 'enterprise'],

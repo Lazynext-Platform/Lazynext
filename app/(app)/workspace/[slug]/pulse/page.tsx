@@ -44,7 +44,7 @@ const weekComparison = [
 
 type Period = '7d' | '30d' | '90d'
 
-export default function PulsePage() {
+function PulseInner() {
   const [period, setPeriod] = useState<Period>('7d')
   const chartW = 480
   const chartH = 180
@@ -199,5 +199,21 @@ export default function PulsePage() {
         </p>
       </div>
     </div>
+  )
+}
+
+import { FeatureGate } from '@/components/ui/FeatureGate'
+
+export default function PulsePage() {
+  return (
+    <FeatureGate
+      feature="pulse"
+      variant="automation-gate"
+      title="PULSE Dashboard"
+      description="Live team health — workload, velocity, blockers, and burndown. Make standups redundant."
+      requiredTier="Business"
+    >
+      <PulseInner />
+    </FeatureGate>
   )
 }
