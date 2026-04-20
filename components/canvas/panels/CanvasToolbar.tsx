@@ -17,6 +17,7 @@ import { useCanvasStore } from '@/stores/canvas.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { canCreateNode } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { NODE_COLORS, PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
 
@@ -47,6 +48,7 @@ export function CanvasToolbar() {
   const handleAddNode = useCallback(
     (type: NodeType) => {
       if (!canCreateNode(plan, nodes.length)) {
+        trackBillingEvent('paywall.gate.shown', { variant: 'node-limit', plan, nodeCount: String(nodes.length) })
         useUpgradeModal.getState().show('node-limit')
         setIsOpen(false)
         return

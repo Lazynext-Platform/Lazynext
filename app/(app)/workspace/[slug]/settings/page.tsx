@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils/cn'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { hasFeature } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -188,7 +189,10 @@ export default function SettingsPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => useUpgradeModal.getState().show('sso-gate')}
+                  onClick={() => {
+                    trackBillingEvent('paywall.gate.shown', { variant: 'sso-gate', plan })
+                    useUpgradeModal.getState().show('sso-gate')
+                  }}
                   className="flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/5 px-2.5 py-1 text-xs font-semibold text-brand hover:bg-brand/10"
                 >
                   <Lock className="h-3 w-3" />

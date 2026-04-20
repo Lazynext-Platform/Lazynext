@@ -6,6 +6,7 @@ import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { canUseAI } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
 
@@ -112,6 +113,7 @@ export function LazyMindPanel() {
   const sendMessage = useCallback((text: string) => {
     if (!text.trim()) return
     if (!canUseAI(plan, aiCount)) {
+      trackBillingEvent('paywall.gate.shown', { variant: 'ai-limit', plan, aiCount: String(aiCount) })
       useUpgradeModal.getState().show('ai-limit')
       return
     }

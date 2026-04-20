@@ -29,6 +29,7 @@ import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { canCreateNode } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -187,6 +188,7 @@ export function WorkflowCanvas() {
       <CanvasContextMenu
         onCreateNode={(type: NodeType, pos) => {
           if (!canCreateNode(plan, nodes.length)) {
+            trackBillingEvent('paywall.gate.shown', { variant: 'node-limit', plan, nodeCount: String(nodes.length), surface: 'context-menu' })
             useUpgradeModal.getState().show('node-limit')
             return
           }

@@ -5,6 +5,7 @@ import { Users, Plus, Search, MoreHorizontal, Mail, X, Crown, ShieldCheck, UserC
 import { cn } from '@/lib/utils/cn'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -45,6 +46,7 @@ export default function MembersPage() {
 
   function handleInviteClick() {
     if (atMemberLimit) {
+      trackBillingEvent('paywall.gate.shown', { variant: 'member-limit', plan, memberCount: String(currentCount) })
       useUpgradeModal.getState().show('member-limit')
       return
     }
