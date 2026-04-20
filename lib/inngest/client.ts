@@ -12,4 +12,5 @@ export const EVENTS = {
   WEEKLY_DIGEST_CRON: 'cron/weekly-digest',
   EXPORT_REQUESTED: 'workspace/export.requested',
   TRIAL_EXPIRY_SCAN: 'cron/trial-expiry-scan',
+  BILLING_WELCOME: 'billing/welcome.send',
 } as const

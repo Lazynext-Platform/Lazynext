@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { X, Lock, Sparkles, Check, Crown, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -9,6 +9,7 @@ import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useModalA11y } from '@/lib/utils/useModalA11y'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_PRICING_USD, PLAN_PRICING_USD_ANNUAL, TRIAL_DAYS } from '@/lib/utils/constants'
 
 type ModalVariant = 'node-limit' | 'ai-limit' | 'member-limit' | 'health-gate' | 'automation-gate' | 'sso-gate' | 'full-upgrade'
@@ -84,9 +85,26 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
 
   const copy = VARIANT_COPY[variant]
 
+  // Log one impression per mount.
+  useEffect(() => {
+    trackBillingEvent('paywall.modal.opened', {
+      variant,
+      workspaceId: workspace?.id ?? null,
+      currentPlan: workspace?.plan ?? 'free',
+    })
+  }, [variant, workspace?.id, workspace?.plan])
+
   async function handleChoose(slug: PlanSlug) {
+    trackBillingEvent('paywall.checkout.clicked', {
+      variant,
+      plan: slug,
+      interval: billingCycle,
+      workspaceId: workspace?.id ?? null,
+    })
+
     // Enterprise → sales-led, no Gumroad product.
     if (slug === 'business') {
+      trackBillingEvent('paywall.contact.clicked', { variant, workspaceId: workspace?.id ?? null })
       router.push('/contact?topic=enterprise')
       return
     }
@@ -113,6 +131,14 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok || !data?.url) {
+        trackBillingEvent('paywall.checkout.errored', {
+          variant,
+          plan: slug,
+          interval: billingCycle,
+          workspaceId: workspace.id,
+          status: res.status,
+          errorCode: data?.error ?? null,
+        })
         toast({
           type: 'error',
           title: 'Checkout unavailable',
@@ -122,10 +148,23 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
         setLoadingSlug(null)
         return
       }
+      trackBillingEvent('paywall.checkout.succeeded', {
+        variant,
+        plan: slug,
+        interval: billingCycle,
+        workspaceId: workspace.id,
+      })
       // Redirect to Gumroad — URL includes url_params so the ping can stamp
       // the right workspace on return.
       window.location.href = data.url
     } catch (err) {
+      trackBillingEvent('paywall.checkout.errored', {
+        variant,
+        plan: slug,
+        interval: billingCycle,
+        workspaceId: workspace.id,
+        errorCode: 'network_error',
+      })
       toast({
         type: 'error',
         title: 'Network error',

@@ -4,6 +4,8 @@ import crypto from 'crypto'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
+import { inngest, EVENTS } from '@/lib/inngest/client'
 
 type PingPayload = Record<string, string>
 
@@ -58,6 +60,7 @@ export async function POST(
   // Gumroad pings are not HMAC-signed, so shared-secret-in-URL is the
   // officially recommended strategy (pair it with HTTPS-only).
   if (!safeEqual(params.secret, expected)) {
+    trackBillingEvent('webhook.ping.unauthorized', { ip })
     return NextResponse.json({ error: 'WEBHOOK_UNAUTHORIZED' }, { status: 401 })
   }
 
@@ -75,6 +78,12 @@ export async function POST(
   const subscriptionId = payload['subscription_id']
   const eventDedupeKey = saleId || subscriptionId
 
+  trackBillingEvent('webhook.ping.received', {
+    resource,
+    subscriptionId: subscriptionId ?? null,
+    saleId: saleId ?? null,
+  })
+
   // Idempotency — skip duplicate deliveries. Gumroad retries failed pings.
   if (eventDedupeKey && hasValidDatabaseUrl) {
     const { error: insertError } = await db
@@ -85,6 +94,7 @@ export async function POST(
         processed_at: new Date().toISOString(),
       })
     if (insertError?.code === '23505') {
+      trackBillingEvent('webhook.ping.duplicate', { resource, dedupeKey: eventDedupeKey })
       return NextResponse.json({ received: true, duplicate: true })
     }
   }
@@ -106,6 +116,23 @@ export async function POST(
               plan,
             })
             .eq('id', workspaceId)
+          trackBillingEvent('webhook.sale.applied', {
+            workspaceId,
+            plan,
+            subscriptionId: subscriptionId ?? null,
+          })
+          // Fire welcome email via Inngest. Non-blocking; failure to emit
+          // won't fail the ping ack.
+          if (email) {
+            try {
+              await inngest.send({
+                name: EVENTS.BILLING_WELCOME,
+                data: { email, workspaceId, plan, subscriptionId: subscriptionId ?? null },
+              })
+            } catch {
+              /* swallow — Inngest queue is best-effort */
+            }
+          }
         }
         break
       }
@@ -123,6 +150,7 @@ export async function POST(
               updated_at: new Date().toISOString(),
             })
             .eq('gr_subscription_id', subscriptionId)
+          trackBillingEvent('webhook.subscription.updated', { subscriptionId })
         }
         break
       }
@@ -136,6 +164,7 @@ export async function POST(
             .from('workspaces')
             .update({ plan: 'free', gr_subscription_id: null })
             .eq('gr_subscription_id', subscriptionId)
+          trackBillingEvent('webhook.subscription.cancelled', { subscriptionId, resource })
         }
         break
       }
@@ -152,6 +181,7 @@ export async function POST(
               updated_at: new Date().toISOString(),
             })
             .eq('gr_subscription_id', subscriptionId)
+          trackBillingEvent('webhook.subscription.updated', { subscriptionId, restarted: true })
         }
         break
       }
@@ -164,6 +194,10 @@ export async function POST(
             .from('workspaces')
             .update({ plan: 'free', gr_subscription_id: null })
             .eq('gr_subscription_id', subscriptionId)
+          trackBillingEvent(
+            resource === 'refunded' ? 'webhook.subscription.refunded' : 'webhook.subscription.disputed',
+            { subscriptionId }
+          )
         }
         break
       }

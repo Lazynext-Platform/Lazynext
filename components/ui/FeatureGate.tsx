@@ -1,10 +1,11 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, useEffect } from 'react'
 import { Lock, Sparkles } from 'lucide-react'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { hasFeature } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -56,8 +57,16 @@ export function FeatureGate({
   children,
 }: FeatureGateProps) {
   const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+  const unlocked = hasFeature(plan, feature)
 
-  if (hasFeature(plan, feature)) {
+  // Log a paywall impression exactly once per mount when the gate blocks.
+  useEffect(() => {
+    if (!unlocked) {
+      trackBillingEvent('paywall.gate.shown', { feature, variant, plan, requiredTier })
+    }
+  }, [unlocked, feature, variant, plan, requiredTier])
+
+  if (unlocked) {
     return <>{children}</>
   }
 
