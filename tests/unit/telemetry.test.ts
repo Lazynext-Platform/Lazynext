@@ -56,4 +56,19 @@ describe('trackBillingEvent', () => {
     trackBillingEvent('webhook.ping.received', circular as Record<string, string>)
     expect(logSpy).not.toHaveBeenCalled()
   })
+
+  it('dedupes identical paywall events within the 10s window', () => {
+    // Unique variant so it doesn't collide with state from other tests.
+    trackBillingEvent('paywall.gate.shown', { variant: 'dedupe-test-1', plan: 'free' })
+    trackBillingEvent('paywall.gate.shown', { variant: 'dedupe-test-1', plan: 'free' })
+    trackBillingEvent('paywall.gate.shown', { variant: 'dedupe-test-1', plan: 'free' })
+    expect(logSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('never dedupes webhook events (every ping matters)', () => {
+    trackBillingEvent('webhook.sale.applied', { workspaceId: 'ws-x' })
+    trackBillingEvent('webhook.sale.applied', { workspaceId: 'ws-x' })
+    trackBillingEvent('webhook.sale.applied', { workspaceId: 'ws-x' })
+    expect(logSpy).toHaveBeenCalledTimes(3)
+  })
 })

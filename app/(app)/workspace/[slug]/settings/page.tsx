@@ -11,6 +11,22 @@ import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
 
+const PLAN_DISPLAY: Record<string, string> = {
+  free: 'Free Plan',
+  starter: 'Team',
+  pro: 'Business',
+  business: 'Enterprise',
+  enterprise: 'Enterprise',
+}
+
+const PLAN_SUMMARY: Record<string, string> = {
+  free: '3 members · 5 workflows · 100 nodes · 20 AI queries/day',
+  starter: 'Unlimited members, workflows, and nodes · 100 AI queries/day',
+  pro: 'Everything in Team + Decision Health, Pulse, Automations · 500 AI queries/day',
+  business: 'Everything in Business + SSO, audit log, custom fields · unlimited AI',
+  enterprise: 'Everything in Business + SSO, audit log, custom fields · unlimited AI',
+}
+
 const tabs = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'members', label: 'Members', icon: Users },
@@ -133,14 +149,50 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold text-slate-100">Current Plan</h2>
             <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 p-4">
               <div>
-                <p className="text-sm font-semibold text-slate-200">Free Plan</p>
-                <p className="text-xs text-slate-500">3 members · 5 workflows · 100 nodes</p>
+                <p className="text-sm font-semibold text-slate-200">
+                  {PLAN_DISPLAY[plan] ?? 'Free Plan'}
+                </p>
+                <p className="text-xs text-slate-500">{PLAN_SUMMARY[plan] ?? PLAN_SUMMARY.free}</p>
               </div>
-              <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
-                Upgrade
-              </button>
+              {plan === 'free' ? (
+                <button
+                  type="button"
+                  onClick={() => useUpgradeModal.getState().show('full-upgrade')}
+                  className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+                >
+                  Upgrade
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => useUpgradeModal.getState().show('full-upgrade')}
+                  className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+                >
+                  Change plan
+                </button>
+              )}
             </div>
           </div>
+
+          {plan !== 'free' && (
+            <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
+              <h2 className="text-lg font-semibold text-slate-100">Subscription</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Invoices, payment method, and cancellation are managed on Gumroad.
+              </p>
+              <a
+                href="https://app.gumroad.com/subscriptions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+              >
+                Open Gumroad subscription portal
+                <svg aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 3h7v7M10 14L21 3M21 14v7H3V3h7" />
+                </svg>
+              </a>
+            </div>
+          )}
         </div>
       )}
 

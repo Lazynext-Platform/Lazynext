@@ -38,12 +38,50 @@ export type BillingEventProps = Record<string, string | number | boolean | null 
  *
  *   grep BILLING_EVENT logs | jq 'select(.event | startswith("paywall"))'
  */
+/**
+ * In-memory dedupe window. Same (event + key) within DEDUPE_WINDOW_MS
+ * emits once. Prevents a user spamming "Add node" against a hit cap
+ * from flooding logs with hundreds of paywall.gate.shown events.
+ *
+ * Key defaults to JSON.stringify(props) when not supplied via the
+ * `_dedupeKey` prop. Purely process-local — server and each browser
+ * tab have their own windows, which is the right granularity (a reload
+ * should re-emit so you can see the user hit the gate again).
+ */
+const DEDUPE_WINDOW_MS = 10_000
+const recentEmits = new Map<string, number>()
+
+function shouldDedupe(event: BillingEvent, props: BillingEventProps): boolean {
+  // Webhook + cron events are always emitted — server-side, one per ping.
+  if (event.startsWith('webhook.') || event.startsWith('cron.')) return false
+
+  const key =
+    typeof props._dedupeKey === 'string'
+      ? props._dedupeKey
+      : `${event}:${props.variant ?? ''}:${props.plan ?? ''}`
+  const now = Date.now()
+  const last = recentEmits.get(key)
+  if (last !== undefined && now - last < DEDUPE_WINDOW_MS) return true
+
+  recentEmits.set(key, now)
+  // Bound the map so it can't grow unbounded in a long-running session.
+  if (recentEmits.size > 256) {
+    const cutoff = now - DEDUPE_WINDOW_MS
+    for (const [k, t] of recentEmits) {
+      if (t < cutoff) recentEmits.delete(k)
+    }
+  }
+  return false
+}
+
 export function trackBillingEvent(event: BillingEvent, props: BillingEventProps = {}): void {
+  if (shouldDedupe(event, props)) return
+  const { _dedupeKey: _omit, ...rest } = props
   const payload = {
     type: 'BILLING_EVENT',
     event,
     ts: new Date().toISOString(),
-    ...props,
+    ...rest,
   }
   try {
     // eslint-disable-next-line no-console
