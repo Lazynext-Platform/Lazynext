@@ -59,16 +59,19 @@ test.describe('Pricing Page Interactions', () => {
   })
 
   test('all 4 plan cards are visible', async ({ page }) => {
+    // v1.1 per-seat pricing: Free / Team / Business / Enterprise
     await expect(page.getByText('Free').first()).toBeVisible()
-    await expect(page.getByText('Starter').first()).toBeVisible()
+    await expect(page.getByText('Team').first()).toBeVisible()
     await expect(page.getByText('Business').first()).toBeVisible()
+    await expect(page.getByText('Enterprise').first()).toBeVisible()
     // Verify pricing amounts are shown
     await expect(page.getByText(/\$0/).first()).toBeVisible()
-    await expect(page.getByText(/\$9/).first()).toBeVisible()
+    await expect(page.getByText(/\$12/).first()).toBeVisible()
+    await expect(page.getByText(/\$24/).first()).toBeVisible()
   })
 
   test('FAQ accordion expands on click', async ({ page }) => {
-    const faqButton = page.getByText('Can I try before I buy?')
+    const faqButton = page.getByText('Do I need a credit card to start?')
     await faqButton.scrollIntoViewIfNeeded()
     await expect(faqButton).toBeVisible()
     await faqButton.click()
