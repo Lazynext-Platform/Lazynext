@@ -157,7 +157,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
       // Redirect to Gumroad — URL includes url_params so the ping can stamp
       // the right workspace on return.
       window.location.href = data.url
-    } catch (err) {
+    } catch {
       trackBillingEvent('paywall.checkout.errored', {
         variant,
         plan: slug,
