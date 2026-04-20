@@ -2,9 +2,9 @@
 
 **Branch:** `feature/billing-gumroad-migration` → `main`
 **Open PR:** https://github.com/Lazynext-Platform/Lazynext/pull/new/feature/billing-gumroad-migration
-**Size:** 50 files changed · ~+1,900 / −2,690 · 9 commits
+**Size:** 58 files changed · ~+2,467 / −2,042 · 14 commits
 **Version bump:** 1.0.0.1 → 1.1.0.0
-**Tests:** 133 passing (+14 since `main`) · type-check clean
+**Tests:** 139 passing (+20 since `main`) · type-check clean
 
 ---
 
@@ -75,6 +75,31 @@ This PR is a full rip-and-replace of the billing surface *and* a pricing redesig
 
 Pattern used is non-invasive — rename the original default to `*Inner`, wrap with `FeatureGate` in a new default. Zero changes to page internals.
 
+### 8. Funnel telemetry (commits `cfa3088`, `b820e5c`, `6090d0e`)
+- `lib/utils/telemetry.ts` exports `trackBillingEvent(event, props)` — structured single-line JSON logs prefixed `BILLING_EVENT`. 13 event names covering the full funnel: `paywall.gate.shown / modal.opened / checkout.clicked|succeeded|errored / contact.clicked`, `webhook.ping.received|duplicate|unauthorized`, `webhook.sale.applied`, `webhook.subscription.cancelled|refunded|disputed|updated`, `cron.trial.expired`.
+- Wired into every gate trigger (5 call sites), UpgradeModal, webhook handler, and trial-expiry cron. Consistent shape: `{ event, variant, plan, ...ctx }`.
+- 10-second dedupe window prevents click-spam from flooding logs; webhook events always emit. 6 tests lock in the JSON shape.
+- Log aggregator alert rules: filter `event='paywall.gate.shown'` + variant → per-paywall conversion funnel for free.
+
+### 9. Post-purchase welcome email (commit `cfa3088`)
+- `BillingWelcomeEmail` Resend template + `EVENTS.BILLING_WELCOME` + `handleBillingWelcome` Inngest function.
+- Webhook sale handler fires `inngest.send(BILLING_WELCOME)` after the workspace update (try/catch wrapped — queue failure never breaks the ack).
+- Email includes plan-specific subject, unlocked-features list, deep-link to the workspace, and Gumroad manage-subscription link.
+
+### 10. All 7 paywall variants live (commits `e0b6c9f`, `38f8795`)
+Every modal variant now reachable from real UI. The two that were wired last:
+
+| Variant | Trigger |
+|---|---|
+| `node-limit` | Canvas toolbar + right-click when Free hits 100 nodes |
+| `ai-limit` | LazyMind `sendMessage` when daily cap reached (live counter pill replaces hardcoded `34/100`) |
+| `member-limit` | Members page Invite button when Free hits 3 members |
+| `sso-gate` | Settings → Security SSO row (clickable "Unlock", was dead pill) |
+| `health-gate` · `automation-gate` · `full-upgrade` | FeatureGate pages + Sidebar (already live) |
+
+### 11. Real Billing settings tab (commit `6090d0e`)
+Settings → Billing was a hardcoded "Free Plan / 3 members · 5 workflows · 100 nodes" placeholder. Now shows tier-specific limits, wired to the modal, and — on paid plans — a second card with an external link to `https://app.gumroad.com/subscriptions` for invoices, payment method, and cancellation.
+
 ---
 
 ## Deployment runbook (do in this order)
@@ -138,9 +163,9 @@ If the webhook handler blows up after merge:
 ## What I chose not to do in this PR
 
 - **Proration math on plan changes** — we let Gumroad handle switches. Add custom proration only if customers complain.
-- **Hard member-limit UI block on Free** — `canAddMember()` returns false when over, but the invite UI doesn't currently surface the upgrade modal. Low priority because paid tiers are unlimited members.
-- **In-app receipt archive** — customers get emailed receipts from Gumroad. Billing page shows placeholder history.
+- **Server-backed AI counter** — LazyMind's `ai-limit` gate reads a session-local counter. Good enough for v1 stub; swap to server-backed daily count when the real AI backend wires through.
+- **In-app receipt archive** — customers get emailed receipts from Gumroad. Billing page links to the Gumroad portal for history.
 - **Usage-based add-ons / metered billing** — everything stays flat per-seat.
-- **Playwright E2E for the full checkout flow** — would require a live Supabase test project + Gumroad test mode harness. The 14 integration tests cover every webhook code path deterministically.
+- **Playwright E2E for the full checkout flow** — would require a live Supabase test project + Gumroad test-mode harness. The 14 integration tests cover every webhook code path deterministically.
 
 See `docs/references/billing-architecture.md` § 7 for the full non-goals list.

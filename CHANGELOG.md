@@ -18,6 +18,15 @@ All notable changes to Lazynext will be documented in this file.
 - **Three gated pages:** Decision Health Dashboard, Automations, and PULSE now render a paywall card for Free/Team plans. New `pulse` feature key in `plan-gates.ts`.
 - **Comprehensive webhook integration tests** (`tests/integration/gumroad-webhook.test.ts`) — 14 tests covering auth (wrong secret/length mismatch/missing env), sale-ping upgrades, all 6 lifecycle events, idempotency (23505 dedupe), and unknown-resource handling. Test count: 119 → 133.
 - **Billing architecture reference** (`docs/references/billing-architecture.md`) — 311-line single source of truth: plan model, runtime flow diagrams, webhook resource table, schema, env vars, 10-step Gumroad setup checklist, file map, v1 non-goals.
+- **Funnel telemetry** (`lib/utils/telemetry.ts`) — `trackBillingEvent(event, props)` emits structured single-line JSON logs prefixed `BILLING_EVENT`. 13 event names cover the full funnel: `paywall.gate.shown`, `paywall.modal.opened`, `paywall.checkout.clicked|succeeded|errored`, `paywall.contact.clicked`, `webhook.ping.received|duplicate|unauthorized`, `webhook.sale.applied`, `webhook.subscription.cancelled|refunded|disputed|updated`, `cron.trial.expired`. Wired into FeatureGate, UpgradeModal, all five gate triggers, Gumroad webhook, and trial-expiry cron. Dedupe window (10s) prevents click-spam from flooding logs; webhook events bypass dedupe. 6 telemetry tests lock in the JSON shape.
+- **Post-purchase welcome email** — `BillingWelcomeEmail` template + `EVENTS.BILLING_WELCOME` + `handleBillingWelcome` Inngest function. Webhook sale handler fires `inngest.send(BILLING_WELCOME)` after the workspace update; handler maps plan slug → display name, looks up workspace slug for deep link, derives Gumroad manage URL from subscription id, sends via Resend. Best-effort (returns `{skipped:true}` silently when Resend isn't configured).
+- **All seven upgrade-modal variants live** — every trigger now reachable from real UI:
+  - `node-limit` fires from `CanvasToolbar.handleAddNode` + `WorkflowCanvas` right-click when Free hits 100 nodes
+  - `ai-limit` fires from `LazyMindPanel.sendMessage` when daily cap reached; LazyMind header pill replaced the hardcoded `34/100 today` with a live session counter that turns amber at the cap
+  - `member-limit` fires from the Members-page Invite button when Free hits 3 members
+  - `sso-gate` fires from the Settings → Security SSO row (clickable "Unlock" button, replaces the dead grey pill)
+  - `health-gate` / `automation-gate` / `full-upgrade` already live via FeatureGate and Sidebar
+- **Settings → Billing tab** — real plan display (Team/Business/Enterprise) with tier-specific limits summary, "Upgrade" / "Change plan" CTAs wired to the modal, and (paid plans) an external link to `https://app.gumroad.com/subscriptions` for invoices, payment method, and cancellation.
 
 ### Changed
 - `lib/utils/plan-gates.ts` — Decision Health, Semantic Search, Weekly Digest, Automation, and Pulse now unlock at `pro` (Business tier) instead of only `business`+. SSO remains `business`+ / `enterprise`.
