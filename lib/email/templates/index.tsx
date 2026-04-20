@@ -319,3 +319,55 @@ export function OutcomeReminderEmail({
     </EmailLayout>
   )
 }
+
+// ========================================
+// 6. Billing — Welcome to the paid tier
+// ========================================
+export function BillingWelcomeEmail({
+  customerName,
+  planDisplay,
+  manageUrl,
+  workspaceUrl,
+}: {
+  customerName?: string
+  planDisplay: string
+  manageUrl: string
+  workspaceUrl: string
+}) {
+  const greeting = customerName ? `Hi ${customerName},` : 'Hi there,'
+  return (
+    <EmailLayout preheader={`Welcome to ${planDisplay} — here's how to get the most from it`}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 700, color: '#0f172a' }}>
+        Welcome to {planDisplay} 🎉
+      </h1>
+      <p style={{ margin: '0 0 16px', fontSize: 15, color: '#475569', lineHeight: '1.6' }}>
+        {greeting} thanks for upgrading. Your workspace is now on the {planDisplay} plan — every paid feature is live.
+      </p>
+
+      <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: `4px solid ${BRAND_COLOR}`, borderRadius: 8, padding: '16px 20px', marginBottom: 24 }}>
+        <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>What's newly unlocked</p>
+        <ul style={{ margin: 0, padding: '0 0 0 18px', fontSize: 14, color: '#334155', lineHeight: '1.7' }}>
+          <li>Decision Health Dashboard — quality trends, outcome donut, top decision makers</li>
+          <li>PULSE — live team health, workload, burndown</li>
+          <li>Automation workflows — triggers and cron jobs for your team</li>
+          <li>Higher AI query limits — 500 LazyMind queries per seat per day</li>
+        </ul>
+      </div>
+
+      <Button href={workspaceUrl}>Open your workspace</Button>
+
+      <p style={{ margin: '24px 0 6px', fontSize: 13, color: '#475569', lineHeight: '1.6' }}>
+        Need to update your card, change plans, or cancel?
+      </p>
+      <p style={{ margin: 0, fontSize: 13 }}>
+        <a href={manageUrl} style={{ color: BRAND_COLOR, textDecoration: 'none' }}>
+          Manage your subscription →
+        </a>
+      </p>
+
+      <p style={{ margin: '24px 0 0', fontSize: 12, color: '#94a3b8', lineHeight: '1.5' }}>
+        Questions? Just reply to this email — we read every one.
+      </p>
+    </EmailLayout>
+  )
+}

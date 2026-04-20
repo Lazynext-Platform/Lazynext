@@ -14,8 +14,14 @@ import {
   Info,
 } from 'lucide-react'
 import { useCanvasStore } from '@/stores/canvas.store'
-import { NODE_COLORS, type NodeType } from '@/lib/utils/constants'
+import { useWorkspaceStore } from '@/stores/workspace.store'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { canCreateNode } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
+import { NODE_COLORS, PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
+
+type Plan = keyof typeof PLAN_LIMITS
 
 const nodeOptions: {
   type: NodeType
@@ -37,9 +43,16 @@ export function CanvasToolbar() {
   const [isOpen, setIsOpen] = useState(false)
   const addNode = useCanvasStore((s) => s.addNode)
   const nodes = useCanvasStore((s) => s.nodes)
+  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
 
   const handleAddNode = useCallback(
     (type: NodeType) => {
+      if (!canCreateNode(plan, nodes.length)) {
+        trackBillingEvent('paywall.gate.shown', { variant: 'node-limit', plan, nodeCount: String(nodes.length) })
+        useUpgradeModal.getState().show('node-limit')
+        setIsOpen(false)
+        return
+      }
       const id = `node-${Date.now()}`
       const offset = nodes.length * 30
       addNode({
@@ -50,7 +63,7 @@ export function CanvasToolbar() {
       })
       setIsOpen(false)
     },
-    [addNode, nodes.length]
+    [addNode, nodes.length, plan]
   )
 
   // Keyboard shortcut: N to toggle menu

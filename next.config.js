@@ -32,7 +32,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              `connect-src 'self' https://*.supabase.co https://api.lemonsqueezy.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://*.ingest.us.sentry.io${isDev ? ' ws://localhost:*' : ''}`,
+              `connect-src 'self' https://*.supabase.co https://app.gumroad.com https://api.gumroad.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://*.ingest.us.sentry.io${isDev ? ' ws://localhost:*' : ''}`,
               "media-src 'self'",
               "object-src 'none'",
               "base-uri 'self'",

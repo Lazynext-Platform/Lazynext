@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
+import { FoundingMemberBanner } from '@/components/marketing/FoundingMemberBanner'
 
 type BillingCycle = 'monthly' | 'annual'
 
@@ -23,86 +24,80 @@ const tiers = [
   {
     name: 'Free',
     slug: 'free' as const,
-    desc: 'For individuals getting started',
+    desc: 'For individuals exploring Decision DNA',
     monthlyPrice: '0',
     annualPrice: '0',
-    monthlyUsd: 'Free forever',
-    annualUsd: 'Free forever',
+    priceSuffix: '/forever',
     cta: 'Start Free',
     ctaLink: '/sign-up',
     ctaStyle: 'outline' as const,
     highlighted: false,
     features: [
       '1 workspace',
-      '3 members max',
-      '50 nodes per workspace',
-      '10 decisions',
-      'Basic LazyMind (10 queries/day)',
+      '3 members',
+      'Unlimited nodes',
+      '20 decisions',
+      'Basic LazyMind (10 AI queries/day)',
       'Community support',
     ],
   },
   {
-    name: 'Starter',
+    name: 'Team',
     slug: 'starter' as const,
     desc: 'For small teams shipping fast',
-    monthlyPrice: '9',
-    annualPrice: '7',
-    monthlyUsd: null as string | null,
-    annualUsd: null as string | null,
-    cta: 'Start Free Trial',
-    ctaLink: '/sign-up',
-    ctaStyle: 'filled' as const,
-    highlighted: true,
-    inheritLabel: 'Everything in Free, plus:',
-    features: [
-      'Unlimited workspaces',
-      'Unlimited members',
-      'Unlimited nodes',
-      '100 decisions/workspace',
-      'Decision DNA search',
-      'Full LazyMind AI (100 queries/day)',
-      'Email support',
-      'Import from Notion/Linear/Trello',
-    ],
-  },
-  {
-    name: 'Pro',
-    slug: 'pro' as const,
-    desc: 'For teams that need the full picture',
-    monthlyPrice: '19',
-    annualPrice: '15',
-    monthlyUsd: null as string | null,
-    annualUsd: null as string | null,
-    cta: 'Start Free Trial',
+    monthlyPrice: '12',
+    annualPrice: '10',
+    priceSuffix: '/seat/month',
+    cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
     highlighted: false,
-    inheritLabel: 'Everything in Starter, plus:',
+    inheritLabel: 'Everything in Free, plus:',
     features: [
+      'Unlimited members & workspaces',
       'Unlimited decisions',
+      'Decision DNA search',
+      'Full LazyMind AI (100 queries/day/seat)',
+      'Import from Notion / Linear / Trello',
+      'Email support',
+    ],
+  },
+  {
+    name: 'Business',
+    slug: 'pro' as const,
+    desc: 'For teams that decide on purpose',
+    monthlyPrice: '24',
+    annualPrice: '20',
+    priceSuffix: '/seat/month',
+    cta: 'Start 14-Day Trial',
+    ctaLink: '/sign-up',
+    ctaStyle: 'filled' as const,
+    highlighted: true,
+    inheritLabel: 'Everything in Team, plus:',
+    features: [
       'Decision Health Dashboard',
       'Decision quality analytics',
       'Outcome tracking & trends',
       'PULSE dashboards',
       'Automation engine',
+      '500 LazyMind AI queries/day/seat',
       'Priority support',
       'Custom templates',
-      'Data export (JSON/CSV)',
+      'Data export (JSON / CSV / PDF)',
     ],
   },
   {
-    name: 'Business',
+    name: 'Enterprise',
     slug: 'business' as const,
     desc: 'For organizations at scale',
-    monthlyPrice: '49',
-    annualPrice: '39',
-    monthlyUsd: null as string | null,
-    annualUsd: null as string | null,
+    monthlyPrice: null as string | null,
+    annualPrice: null as string | null,
+    priceSuffix: '',
     cta: 'Contact Sales',
-    ctaLink: '/sign-up',
+    ctaLink: '/contact',
     ctaStyle: 'outline' as const,
     highlighted: false,
-    inheritLabel: 'Everything in Pro, plus:',
+    inheritLabel: 'Everything in Business, plus:',
     features: [
       'SSO / SAML',
       'Advanced admin controls',
@@ -118,46 +113,52 @@ const tiers = [
 const comparisonFeatures = [
   { name: 'Workspaces', free: '1', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
   { name: 'Members', free: '3', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
-  { name: 'Nodes', free: '50', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
-  { name: 'Decisions', free: '10', starter: '100/workspace', pro: 'Unlimited', business: 'Unlimited' },
+  { name: 'Nodes', free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
+  { name: 'Decisions', free: '20', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
   { name: 'Decision DNA Search', free: null, starter: true, pro: true, business: true },
-  { name: 'Quality Scores', free: null, starter: null, pro: true, business: true },
+  { name: 'Quality Scores', free: 'Basic', starter: 'Basic', pro: 'Full', business: 'Full' },
   { name: 'Outcome Tracking', free: null, starter: null, pro: true, business: true },
-  { name: 'Health Dashboard', free: null, starter: null, pro: true, business: true },
-  { name: 'LazyMind AI queries', free: '10/day', starter: '100/day', pro: '100/day', business: 'Unlimited' },
+  { name: 'Decision Health Dashboard', free: null, starter: null, pro: true, business: true },
+  { name: 'LazyMind AI queries', free: '10/day', starter: '100/day/seat', pro: '500/day/seat', business: 'Unlimited' },
   { name: 'PULSE', free: null, starter: null, pro: true, business: true },
   { name: 'Automation', free: null, starter: null, pro: true, business: true },
   { name: 'Import', free: null, starter: true, pro: true, business: true },
-  { name: 'Export', free: null, starter: null, pro: 'JSON/CSV', business: 'JSON/CSV' },
+  { name: 'Export', free: null, starter: null, pro: 'JSON / CSV / PDF', business: 'JSON / CSV / PDF' },
   { name: 'Templates', free: null, starter: null, pro: 'Custom', business: 'Custom' },
   { name: 'Support', free: 'Community', starter: 'Email', pro: 'Priority', business: 'Dedicated' },
-  { name: 'SSO', free: null, starter: null, pro: null, business: true },
+  { name: 'Audit log', free: null, starter: null, pro: null, business: true },
+  { name: 'SSO / SAML', free: null, starter: null, pro: null, business: true },
+  { name: 'SLA', free: null, starter: null, pro: null, business: true },
 ]
 
 const faqItems = [
   {
-    q: 'Can I try before I buy?',
-    a: 'Yes! Every paid plan comes with a free 14-day Pro trial. No credit card required to get started. Explore every feature risk-free, then pick the plan that fits your team.',
+    q: 'How does per-seat pricing work?',
+    a: 'You pay for each active member who can access the workspace. A 10-person team on the Business plan pays $24 × 10 = $240/month (or $200/month billed annually). Add or remove seats anytime — your bill adjusts on the next cycle.',
   },
   {
-    q: 'How does per-seat pricing work?',
-    a: 'Each team member who accesses Lazynext counts as one seat. You only pay for the seats you use. Add or remove seats anytime, and your bill adjusts automatically on the next cycle.',
+    q: 'Do I need a credit card to start?',
+    a: "No. Sign up for Free in 30 seconds. Every paid plan comes with a 14-day Business trial — no credit card required. At day 14 you pick a plan or drop back to Free. No auto-charge surprises.",
+  },
+  {
+    q: 'What do I get on the free plan?',
+    a: 'Enough to actually feel Decision DNA working: unlimited nodes, 20 logged decisions, 3 team members, and 10 AI queries/day. When your team grows past 3 or your decisions past 20, that is when upgrading pays for itself.',
   },
   {
     q: 'Can I switch plans?',
-    a: "Absolutely. You can upgrade or downgrade your plan at any time from your Workspace Settings. When you upgrade, you get immediate access to new features. When you downgrade, the change takes effect at the end of your current billing period.",
+    a: "Yes, any time. Upgrade gives you immediate access to new features. Downgrade takes effect at the end of your current billing period so you keep what you paid for.",
+  },
+  {
+    q: 'Is there a startup discount?',
+    a: "Yes. We are giving the first 100 teams 'Founding Member' pricing — 30% off any paid plan for life. Email hello@lazynext.com with your team details to claim a spot.",
   },
   {
     q: 'What payment methods do you accept?',
-    a: 'We process payments through Gumroad, which supports credit/debit cards (Visa, Mastercard, Amex), PayPal, and other local payment methods worldwide. All pricing is in USD with automatic tax handling.',
+    a: 'We process payments through Gumroad, which supports credit/debit cards (Visa, Mastercard, Amex), PayPal, and local payment methods worldwide. Pricing is USD; Gumroad handles tax and compliance globally.',
   },
   {
-    q: 'Is there a discount for startups?',
-    a: "Yes! We have a startup program offering discounted rates for early-stage teams. Contact us at hello@lazynext.com with your company details and we'll get you set up.",
-  },
-  {
-    q: 'What happens when I hit the free plan limit?',
-    a: "You won't lose any data. When you reach a limit, you'll see a friendly upgrade prompt with options to move to a paid plan. Your existing work stays intact and accessible — you just can't create new items beyond the limit until you upgrade.",
+    q: 'What happens when I hit a limit on Free?',
+    a: "Your existing data stays intact. You will see a friendly upgrade prompt when you try to add a 4th member or log a 21st decision. Nothing disappears, nothing locks — you just cannot add more until you upgrade.",
   },
 ]
 
@@ -184,7 +185,8 @@ function renderCellValue(val: string | boolean | null) {
 type PricingTier = (typeof tiers)[number]
 
 function PricingCta({ tier, isAnnual }: { tier: PricingTier; isAnnual: boolean }) {
-  // For paid tiers, prefer the Gumroad checkout URL when configured.
+  // Map display tiers to Gumroad products. Enterprise (slug 'business') is
+  // sales-led — no Gumroad checkout link.
   let href: string = tier.ctaLink
   let external = false
   if (tier.slug === 'starter') {
@@ -193,10 +195,8 @@ function PricingCta({ tier, isAnnual }: { tier: PricingTier; isAnnual: boolean }
   } else if (tier.slug === 'pro') {
     const url = isAnnual ? GUMROAD_URLS.proAnnual : GUMROAD_URLS.proMonthly
     if (url) { href = url; external = true }
-  } else if (tier.slug === 'business') {
-    const url = isAnnual ? GUMROAD_URLS.businessAnnual : GUMROAD_URLS.businessMonthly
-    if (url) { href = url; external = true }
   }
+  // Note: tier.slug === 'business' keeps its /contact link (Enterprise).
 
   const className = `mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
     tier.ctaStyle === 'filled'
@@ -230,11 +230,12 @@ export default function PricingPage() {
       {/* PRICING HERO */}
       <section className="pb-10 pt-20 sm:pb-14 sm:pt-28">
         <div className="mx-auto max-w-4xl px-6 text-center">
+          <FoundingMemberBanner />
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
             Simple, transparent pricing
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-500 sm:text-xl">
-            Start free. Upgrade when you&apos;re ready. No credit card required.
+            Start free. Upgrade when your team grows. 14-day Business trial on every paid plan — no credit card required.
           </p>
         </div>
       </section>
@@ -306,22 +307,24 @@ export default function PricingPage() {
                 </div>
 
                 <div className="mt-5">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-extrabold text-slate-900">
-                      {formatPrice(parseInt(isAnnual ? tier.annualPrice : tier.monthlyPrice), currency)}
-                    </span>
-                    <span className="text-sm text-slate-500">
-                      {tier.monthlyPrice === '0' ? '/month' : '/seat/month'}
-                    </span>
-                  </div>
+                  {tier.monthlyPrice === null ? (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-extrabold text-slate-900">Custom</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-extrabold text-slate-900">
+                        {formatPrice(parseInt(isAnnual ? tier.annualPrice! : tier.monthlyPrice!), currency)}
+                      </span>
+                      <span className="text-sm text-slate-500">
+                        {tier.priceSuffix}
+                      </span>
+                    </div>
+                  )}
                   <p className="mt-1 text-xs text-slate-400">
-                    {isAnnual && tier.monthlyPrice !== '0' && (
-                      <span>billed annually</span>
-                    )}
-                    {!isAnnual && tier.monthlyPrice !== '0' && (
-                      <span>billed monthly</span>
-                    )}
+                    {tier.monthlyPrice === null && 'Tailored to your org'}
                     {tier.monthlyPrice === '0' && 'Free forever'}
+                    {tier.monthlyPrice && tier.monthlyPrice !== '0' && (isAnnual ? 'billed annually — save 17%' : 'billed monthly')}
                   </p>
                 </div>
 
@@ -368,17 +371,17 @@ export default function PricingPage() {
                   <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Free
                   </th>
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
+                    Team
+                  </th>
                   <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-brand">
-                    Starter
+                    Business
                     <span className="block text-xs font-normal text-brand/70">
                       Most Popular
                     </span>
                   </th>
                   <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
-                    Pro
-                  </th>
-                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
-                    Business
+                    Enterprise
                   </th>
                 </tr>
               </thead>
@@ -391,10 +394,10 @@ export default function PricingPage() {
                     <td className="px-4 py-3.5 text-center text-slate-600">
                       {renderCellValue(row.free)}
                     </td>
-                    <td className="bg-brand/[0.03] px-4 py-3.5 text-center text-slate-600">
+                    <td className="px-4 py-3.5 text-center text-slate-600">
                       {renderCellValue(row.starter)}
                     </td>
-                    <td className="px-4 py-3.5 text-center text-slate-600">
+                    <td className="bg-brand/[0.03] px-4 py-3.5 text-center text-slate-600">
                       {renderCellValue(row.pro)}
                     </td>
                     <td className="px-4 py-3.5 text-center text-slate-600">

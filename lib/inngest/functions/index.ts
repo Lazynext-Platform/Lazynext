@@ -1,10 +1,11 @@
 import { inngest, EVENTS } from '../client'
 import { Resend } from 'resend'
-import { WorkspaceInviteEmail, TaskAssignmentEmail, WeeklyDigestEmail, OutcomeReminderEmail } from '@/lib/email/templates/index'
+import { WorkspaceInviteEmail, TaskAssignmentEmail, WeeklyDigestEmail, OutcomeReminderEmail, BillingWelcomeEmail } from '@/lib/email/templates/index'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { scoreDecision } from '@/lib/ai/decision-scorer'
 import { callLazyMind, hasAIKeys } from '@/lib/ai/lazymind'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 
 function getResend() {
   if (!process.env.RESEND_API_KEY) return null
@@ -414,6 +415,107 @@ export const handleExportRequested = inngest.createFunction(
   }
 )
 
+// 8. Trial-expiry cron — daily sweep of workspaces whose 14-day Business
+//    trial has elapsed without converting. Downgrades them to free and
+//    clears the trial timestamp so we don't re-process the same row.
+//    Runs at 02:00 UTC daily.
+export const handleTrialExpiryScan = inngest.createFunction(
+  {
+    id: 'trial-expiry-scan',
+    retries: 2,
+    triggers: [{ event: EVENTS.TRIAL_EXPIRY_SCAN }, { cron: '0 2 * * *' }],
+  },
+  async () => {
+    if (!hasValidDatabaseUrl) return { skipped: true }
+
+    const nowIso = new Date().toISOString()
+
+    // Eligible rows:
+    //   - trial_ends_at is set and in the past
+    //   - workspace is still on a paid plan (meaning: trial never converted)
+    //   - no gr_subscription_id (no Gumroad sale recorded)
+    const { data: expired, error } = await db
+      .from('workspaces')
+      .select('id, name, plan, trial_ends_at, gr_subscription_id')
+      .lte('trial_ends_at', nowIso)
+      .not('trial_ends_at', 'is', null)
+      .neq('plan', 'free')
+      .is('gr_subscription_id', null)
+      .limit(200)
+
+    if (error || !expired?.length) return { scanned: 0, downgraded: 0 }
+
+    const ids = expired.map((w) => w.id)
+    const { error: updErr } = await db
+      .from('workspaces')
+      .update({ plan: 'free', trial_ends_at: null, updated_at: nowIso })
+      .in('id', ids)
+
+    if (!updErr) {
+      for (const ws of expired) {
+        trackBillingEvent('cron.trial.expired', {
+          workspaceId: ws.id,
+          previousPlan: ws.plan,
+        })
+      }
+    }
+
+    return { scanned: expired.length, downgraded: updErr ? 0 : expired.length }
+  }
+)
+
+// 9. Post-purchase welcome email. Fires when the Gumroad webhook's
+//    `sale` handler emits EVENTS.BILLING_WELCOME. Looks up the workspace
+//    by id, maps the plan slug to its display name, and sends the
+//    BillingWelcomeEmail template. Best-effort — if Resend is not
+//    configured, we return `{ skipped: true }` silently.
+export const handleBillingWelcome = inngest.createFunction(
+  { id: 'send-billing-welcome', retries: 2, triggers: [{ event: EVENTS.BILLING_WELCOME }] },
+  async ({ event }) => {
+    const { email, workspaceId, plan, subscriptionId } = event.data as {
+      email: string
+      workspaceId: string
+      plan: 'starter' | 'pro' | 'business'
+      subscriptionId: string | null
+    }
+
+    const resend = getResend()
+    if (!resend) return { skipped: true, reason: 'resend_not_configured' }
+
+    // Plan slug → customer-facing tier name
+    const planDisplay =
+      plan === 'pro' ? 'Business' : plan === 'business' ? 'Enterprise' : 'Team'
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lazynext.com'
+
+    // Look up workspace slug so the deep-link lands in the right place.
+    let workspaceUrl = `${baseUrl}/workspace`
+    let customerName: string | undefined
+    if (hasValidDatabaseUrl) {
+      const { data: ws } = await db
+        .from('workspaces')
+        .select('slug, name')
+        .eq('id', workspaceId)
+        .single()
+      if (ws?.slug) workspaceUrl = `${baseUrl}/workspace/${ws.slug}`
+      if (ws?.name) customerName = ws.name
+    }
+
+    const manageUrl = subscriptionId
+      ? `https://app.gumroad.com/subscriptions/${encodeURIComponent(subscriptionId)}/manage`
+      : `${baseUrl}/workspace`
+
+    const result = await resend.emails.send({
+      from: 'Lazynext <billing@lazynext.com>',
+      to: email,
+      subject: `Welcome to ${planDisplay} — your workspace is upgraded`,
+      react: BillingWelcomeEmail({ customerName, planDisplay, manageUrl, workspaceUrl }),
+    })
+
+    return { sent: true, id: result.data?.id }
+  }
+)
+
 // Export all functions for Inngest serve
 export const functions = [
   handleWorkspaceInvite,
@@ -423,4 +525,6 @@ export const functions = [
   handleWeeklyDigest,
   handleOutcomeReminderScan,
   handleExportRequested,
+  handleTrialExpiryScan,
+  handleBillingWelcome,
 ]

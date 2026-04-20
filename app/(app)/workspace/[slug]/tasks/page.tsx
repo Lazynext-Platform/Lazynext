@@ -17,7 +17,7 @@ const tasks = [
   { id: '7', title: 'Deploy staging environment', status: 'todo' as TaskStatus, priority: 'high', assignee: 'RD', due: 'Apr 8', progress: 0, desc: 'Set up staging on Vercel' },
   { id: '8', title: 'Add decision quality API', status: 'review' as TaskStatus, priority: 'medium', assignee: 'AP', due: 'Apr 6', progress: 90, desc: 'POST /api/v1/decisions/score' },
   { id: '9', title: 'Finalize pricing model', status: 'done' as TaskStatus, priority: 'high', assignee: 'AP', due: 'Mar 30', progress: 100, desc: 'USD pricing approved' },
-  { id: '10', title: 'Set up Lemon Squeezy integration', status: 'in-progress' as TaskStatus, priority: 'medium', assignee: 'PS', due: 'Apr 10', progress: 30, desc: 'Global payments' },
+  { id: '10', title: 'Set up Gumroad integration', status: 'in-progress' as TaskStatus, priority: 'medium', assignee: 'PS', due: 'Apr 10', progress: 30, desc: 'Global payments' },
 ]
 
 const columns: { status: TaskStatus; label: string; dotColor: string }[] = [

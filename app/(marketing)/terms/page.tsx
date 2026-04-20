@@ -40,7 +40,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">4. Billing &amp; Subscriptions</h2>
             <p className="mt-3">
-              Paid plans are billed through Lemon Squeezy. You can upgrade, downgrade, or cancel at any time.
+              Paid plans are billed through Gumroad. You can upgrade, downgrade, or cancel at any time.
               Refunds are handled on a case-by-case basis within 30 days of purchase.
             </p>
           </section>

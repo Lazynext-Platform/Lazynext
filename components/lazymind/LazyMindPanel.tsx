@@ -3,7 +3,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Sparkles, X, Send, Command, Mail, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
+import { useWorkspaceStore } from '@/stores/workspace.store'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { canUseAI } from '@/lib/utils/plan-gates'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
+import { PLAN_LIMITS } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
+
+type Plan = keyof typeof PLAN_LIMITS
 
 interface Message {
   id: string
@@ -73,9 +80,12 @@ const quickActions = [
 export function LazyMindPanel() {
   const isLazyMindOpen = useUIStore((s) => s.isLazyMindOpen)
   const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
+  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+  const aiLimit = PLAN_LIMITS[plan].aiQueries
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [aiCount, setAiCount] = useState(0)
   const chatRef = useRef<HTMLDivElement>(null)
   const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -102,10 +112,16 @@ export function LazyMindPanel() {
 
   const sendMessage = useCallback((text: string) => {
     if (!text.trim()) return
+    if (!canUseAI(plan, aiCount)) {
+      trackBillingEvent('paywall.gate.shown', { variant: 'ai-limit', plan, aiCount: String(aiCount) })
+      useUpgradeModal.getState().show('ai-limit')
+      return
+    }
     const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: text }
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setIsTyping(true)
+    setAiCount((c) => c + 1)
 
     aiTimerRef.current = setTimeout(() => {
       setIsTyping(false)
@@ -123,7 +139,7 @@ export function LazyMindPanel() {
       }
       setMessages((prev) => [...prev, aiMsg])
     }, 1500)
-  }, [])
+  }, [plan, aiCount])
 
   if (!isLazyMindOpen) return null
 
@@ -138,7 +154,14 @@ export function LazyMindPanel() {
           <p className="text-sm font-semibold text-slate-200">LazyMind</p>
           <p className="text-2xs text-slate-500">AI Assistant · Llama 3.3 70B</p>
         </div>
-        <span className="rounded-full bg-slate-800 px-2 py-0.5 text-2xs font-medium text-slate-400">34/100 today</span>
+        <span className={cn(
+          'rounded-full px-2 py-0.5 text-2xs font-medium',
+          aiLimit !== -1 && aiCount >= aiLimit
+            ? 'bg-amber-500/10 text-amber-400'
+            : 'bg-slate-800 text-slate-400'
+        )}>
+          {aiLimit === -1 ? `${aiCount} today` : `${aiCount}/${aiLimit} today`}
+        </span>
         <button onClick={toggleLazyMind} aria-label="Close LazyMind panel" className="rounded-md p-1 text-slate-400 hover:bg-slate-800 hover:text-slate-200">
           <X className="h-4 w-4" />
         </button>

@@ -51,7 +51,7 @@ export default function DecisionDNASection() {
                   Resolution
                 </p>
                 <p className="text-sm text-slate-700">
-                  Go with Lemon Squeezy — handles global payments, tax,
+                  Go with Gumroad — handles global payments, tax,
                   and works for individual creators. Revisit if volume
                   exceeds 10K txns/month.
                 </p>

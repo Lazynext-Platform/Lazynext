@@ -20,7 +20,7 @@ Lazynext is a graph-native workflow platform that unifies tasks, docs, decisions
 | Database | Supabase PostgreSQL |
 | State | Zustand |
 | AI | Groq + Together AI |
-| Payments | Lemon Squeezy |
+| Payments | Gumroad |
 | Email | Resend |
 | Testing | Vitest + Testing Library |
 
@@ -68,9 +68,8 @@ Copy `.env.example` to `.env.local` and fill in:
 | `SUPABASE_SERVICE_ROLE_KEY` | For auth | Supabase service role key (server only) |
 | `GROQ_API_KEY` | For AI | Groq API key for LazyMind |
 | `TOGETHER_API_KEY` | Fallback | Together AI fallback key |
-| `LEMONSQUEEZY_API_KEY` | For billing | Lemon Squeezy API key |
-| `LEMONSQUEEZY_STORE_ID` | For billing | Lemon Squeezy store ID |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | For billing | Lemon Squeezy webhook signing secret |
+| `GUMROAD_WEBHOOK_SECRET` | For billing | Random long string — used as the URL path secret for the Gumroad ping webhook |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | For billing | 6 Gumroad recurring-product permalinks |
 | `RESEND_API_KEY` | For email | Resend API key |
 | `NEXT_PUBLIC_APP_URL` | Recommended | Your app URL (default: http://localhost:3000) |
 

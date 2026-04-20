@@ -2,7 +2,31 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-18
+> **Last Updated**: 2026-04-20
+
+---
+
+## [Unreleased] — Gumroad billing migration + per-seat pricing (2026-04-20)
+
+Shipped on `feature/billing-gumroad-migration` — 9 commits, 48+ files, +~1,900/−2,690.
+
+**Billing provider swap.** Full Lemon Squeezy → Gumroad rip-and-replace. New `/api/v1/webhooks/gumroad/[secret]` route with URL-secret auth (timing-safe), handles every Gumroad resource (sale, subscription_updated/_ended/_cancelled/_restarted, refunded, dispute). Schema migration `20260420000001_gumroad_migration.sql` renames `ls_* → gr_*` on `workspaces`. Portal URL derived as `app.gumroad.com/subscriptions/<id>/manage`. `@lemonsqueezy/lemonsqueezy.js` removed (−57 transitive packages). CSP updated. All marketing copy swapped.
+
+**Per-seat pricing.** New tier model with display names Team ($12/$10 per seat), Business ($24/$20 per seat), Enterprise (custom/sales-led). Paid tiers all unlimited members/nodes/workflows; AI queries soft-cap (10 → 100 → 500 → unlimited per seat/day). Slug → display mapping preserved — no enum migration required.
+
+**14-day Business trial + auto-downgrade.** `handleTrialExpiryScan` Inngest cron (02:00 UTC daily) downgrades unpaid expired trials to free.
+
+**Founding Member promotion.** First 100 paying workspaces get 30% off for life. Live counter API (`/api/v1/billing/founding-member`, 5-min cache) + `<FoundingMemberBanner />` on the pricing page showing remaining spots.
+
+**End-to-end upgrade funnel.** Rewritten `UpgradeModal` posts to `/api/v1/billing/checkout` and redirects to Gumroad. Seven variants with contextual copy. Enterprise routes to `/contact?topic=enterprise`. New global trigger store — `useUpgradeModal.getState().show('health-gate')` works from anywhere.
+
+**Paywall on gated pages.** New `<FeatureGate>` wrapper applied to Decision Health, Automations, and PULSE — renders children when plan unlocks, else a lock card with "Upgrade to <Tier>" CTA.
+
+**Test coverage.** +14 integration tests (`tests/integration/gumroad-webhook.test.ts`) covering every webhook code path. Suite 119 → 133.
+
+**Docs.** New `docs/references/billing-architecture.md` (311 lines) — single source of truth. `docs/releases/PR-gumroad-migration.md` has the merge checklist.
+
+See [CHANGELOG.md](../CHANGELOG.md#unreleased) for the full file-by-file breakdown.
 
 ---
 

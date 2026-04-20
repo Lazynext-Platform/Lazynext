@@ -34,7 +34,7 @@ const runHistory = [
   { time: 'Apr 4, 9:22 AM', event: 'TASK "Review PR #42" created', status: 'success', detail: 'Assigned to Avas Patel' },
 ]
 
-export default function AutomationsPage() {
+function AutomationsInner() {
   const [view, setView] = useState<View>('list')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [automations, setAutomations] = useState(sampleAutomations)
@@ -197,5 +197,21 @@ export default function AutomationsPage() {
         </>
       )}
     </div>
+  )
+}
+
+import { FeatureGate } from '@/components/ui/FeatureGate'
+
+export default function AutomationsPage() {
+  return (
+    <FeatureGate
+      feature="automation"
+      variant="automation-gate"
+      title="Automation Workflows"
+      description="Trigger tasks, digests, and Slack pings when decisions log or outcomes land. Stop copying the same reminders."
+      requiredTier="Business"
+    >
+      <AutomationsInner />
+    </FeatureGate>
   )
 }

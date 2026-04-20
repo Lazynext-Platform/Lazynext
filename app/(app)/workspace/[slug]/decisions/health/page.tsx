@@ -72,7 +72,7 @@ const untaggedDecisions = [
   { title: 'Add dark mode to marketing pages?', age: '22 days ago' },
 ]
 
-export default function DecisionHealthPage() {
+function DecisionHealthInner() {
   const [period, setPeriod] = useState<TimePeriod>('30d')
   const params = useParams()
   const slug = params.slug as string
@@ -318,5 +318,21 @@ export default function DecisionHealthPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+import { FeatureGate } from '@/components/ui/FeatureGate'
+
+export default function DecisionHealthPage() {
+  return (
+    <FeatureGate
+      feature="decision-health"
+      variant="health-gate"
+      title="Decision Health Dashboard"
+      description="Track decision quality, outcomes, and velocity across your workspace. See which decisions led to wins — and which need rework."
+      requiredTier="Business"
+    >
+      <DecisionHealthInner />
+    </FeatureGate>
   )
 }

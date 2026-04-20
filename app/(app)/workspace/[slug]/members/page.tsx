@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { Users, Plus, Search, MoreHorizontal, Mail, X, Crown, ShieldCheck, UserCheck, Eye } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { useWorkspaceStore } from '@/stores/workspace.store'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
+import { PLAN_LIMITS } from '@/lib/utils/constants'
+
+type Plan = keyof typeof PLAN_LIMITS
 
 const roleConfig: Record<string, { label: string; color: string; icon: typeof Crown }> = {
   owner: { label: 'Owner', color: 'bg-amber-500/10 text-amber-400 border-amber-800/30', icon: Crown },
@@ -30,6 +36,24 @@ export default function MembersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [emailChips, setEmailChips] = useState<string[]>([])
   const [emailInput, setEmailInput] = useState('')
+
+  // Plan-aware seat check. Paid tiers are unlimited (-1) — the upgrade
+  // paywall only fires on Free.
+  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+  const memberLimit = PLAN_LIMITS[plan].members
+  const currentCount = members.length + pendingInvites.length
+  const atMemberLimit = memberLimit !== -1 && currentCount >= memberLimit
+
+  function handleInviteClick() {
+    if (atMemberLimit) {
+      trackBillingEvent('paywall.gate.shown', { variant: 'member-limit', plan, memberCount: String(currentCount) })
+      useUpgradeModal.getState().show('member-limit')
+      return
+    }
+    setShowInviteModal(true)
+    setEmailChips([])
+    setEmailInput('')
+  }
 
   const filtered = members.filter(
     (m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,7 +88,7 @@ export default function MembersPage() {
             {members.length} members · {pendingInvites.length} pending
           </p>
         </div>
-        <button onClick={() => { setShowInviteModal(true); setEmailChips([]); setEmailInput('') }}
+        <button onClick={handleInviteClick}
           className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
           <Plus className="h-4 w-4" /> Invite
         </button>
