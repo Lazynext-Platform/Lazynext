@@ -345,7 +345,7 @@ export function BillingWelcomeEmail({
       </p>
 
       <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderLeft: `4px solid ${BRAND_COLOR}`, borderRadius: 8, padding: '16px 20px', marginBottom: 24 }}>
-        <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>What's newly unlocked</p>
+        <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>What&apos;s newly unlocked</p>
         <ul style={{ margin: 0, padding: '0 0 0 18px', fontSize: 14, color: '#334155', lineHeight: '1.7' }}>
           <li>Decision Health Dashboard — quality trends, outcome donut, top decision makers</li>
           <li>PULSE — live team health, workload, burndown</li>
