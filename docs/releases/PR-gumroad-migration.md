@@ -2,7 +2,8 @@
 
 **Branch:** `feature/billing-gumroad-migration` → `main`
 **Open PR:** https://github.com/Lazynext-Platform/Lazynext/pull/new/feature/billing-gumroad-migration
-**Size:** 48 files changed · +1,758 / −2,689 · 7 commits
+**Size:** 50 files changed · ~+1,900 / −2,690 · 9 commits
+**Version bump:** 1.0.0.1 → 1.1.0.0
 **Tests:** 133 passing (+14 since `main`) · type-check clean
 
 ---

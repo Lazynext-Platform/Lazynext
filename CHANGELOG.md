@@ -4,6 +4,10 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0.0] - 2026-04-20
+
+**Theme:** Gumroad billing migration + per-seat pricing + 14-day trial + end-to-end upgrade funnel.
+
 ### Added
 - **Per-seat pricing tiers** — Team ($12/$10 per seat), Business ($24/$20 per seat), Enterprise (custom/sales-led). Paid tiers are all unlimited members/nodes/workflows; AI queries remain the soft cap (100 → 500 → unlimited per seat/day). Slug→display mapping: `starter`→Team, `pro`→Business, `business`→Enterprise (DB enum unchanged — no data migration required).
 - **14-day Business trial** — `TRIAL_DAYS` constant, `handleTrialExpiryScan` Inngest cron at 02:00 UTC scans for `trial_ends_at < now AND plan != 'free' AND gr_subscription_id IS NULL` and auto-downgrades to free.
