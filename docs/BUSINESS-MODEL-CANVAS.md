@@ -85,7 +85,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Self-serve signup** | Email/password + Google/GitHub OAuth; no credit card required |
 | **14-day Pro trial** | Automatic trial on signup to demonstrate full feature set |
 | **In-app upgrade prompts** | Usage-based triggers (node limits, AI query limits, member limits) via UpgradeModal |
-| **Lemon Squeezy checkout** | Seamless payment flow via Merchant of Record |
+| **Gumroad checkout** | Seamless payment flow via Merchant of Record |
 
 ### Retention & Expansion Channels
 
@@ -152,7 +152,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Usage-based upsell triggers** | Hard limits on nodes (100→1K→10K→∞), AI queries (20→100→500→∞), members (3→10→25→100), and workflows (5→25→100→∞) create natural upgrade pressure |
 | **Feature-gated tiers** | Decision Health Dashboard, Automation Builder, Weekly Digest, Audit Log, SSO, and API access gated to higher tiers |
 | **14-day Pro trial** | Users experience full feature set, then face downgrade friction |
-| **Lemon Squeezy MoR** | Handles global payment processing, tax compliance, and billing infrastructure |
+| **Gumroad MoR** | Handles global payment processing, tax compliance, and billing infrastructure |
 
 ### Revenue Growth Levers
 
@@ -194,7 +194,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Next.js 14 App Router** | Full-stack React framework with SSR/RSC |
 | **Inngest** | Background job processing (6 functions: emails, scoring, exports) |
 | **Resend** | Transactional email delivery (4 templates) |
-| **Lemon Squeezy** | Payment processing and subscription management |
+| **Gumroad** | Payment processing and subscription management |
 | **Groq + Together AI** | LLM inference for LazyMind features |
 
 ### Human Capital
@@ -243,7 +243,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Infrastructure management** | Supabase, Vercel, and third-party service reliability |
 | **Security & compliance** | RLS policies, CSP headers, data privacy compliance |
 | **Customer support** | Email-based support across tiers |
-| **Billing & payments** | Lemon Squeezy webhook management, subscription lifecycle |
+| **Billing & payments** | Gumroad webhook management, subscription lifecycle |
 | **Background job monitoring** | Ensuring Inngest functions (emails, scoring, exports) run reliably |
 
 ---
@@ -257,7 +257,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Supabase** | Database, auth, and real-time infrastructure | Managed PostgreSQL with RLS, OAuth providers, and edge functions |
 | **Groq** | Primary AI inference provider | Fast Llama 3.3 70B inference for LazyMind features |
 | **Together AI** | Fallback AI inference provider | Redundancy for AI features when Groq is unavailable |
-| **Lemon Squeezy** | Merchant of Record | Global payment processing, tax compliance, subscription management |
+| **Gumroad** | Merchant of Record | Global payment processing, tax compliance, subscription management |
 | **Resend** | Transactional email delivery | Reliable email for invites, notifications, and digests |
 | **Inngest** | Background job orchestration | Serverless functions for async processing |
 | **Vercel** (likely) | Hosting and deployment | Edge-optimized Next.js hosting |
@@ -302,7 +302,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 |-------------|--------|-------|
 | **AI inference (Groq + Together AI)** | Per AI query (up to 500/day on Pro) | Largest variable cost; scales directly with AI usage |
 | **Supabase database** | Storage, bandwidth, and connection count | Grows with users and data volume |
-| **Lemon Squeezy fees** | % of revenue (Merchant of Record cut) | Fixed percentage of all transactions |
+| **Gumroad fees** | % of revenue (Merchant of Record cut) | Fixed percentage of all transactions |
 | **Resend email** | Per email sent (invites, digests, notifications) | Moderate; weekly digest is the largest volume |
 | **Inngest** | Per function invocation (6 background functions) | Moderate; scales with decision logging and exports |
 | **Vercel hosting** | Bandwidth, serverless function invocations | Scales with traffic |
@@ -315,7 +315,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Node limits by tier** | Free: 100, Starter: 1K, Pro: 10K — controls database growth on free/low tiers |
 | **Groq + Together AI dual-provider** | Primary/fallback pattern optimizes for cost and reliability |
 | **Inngest serverless** | Pay-per-invocation background jobs vs. always-on workers |
-| **Lemon Squeezy as MoR** | Offloads tax compliance, fraud prevention, and global payment infrastructure |
+| **Gumroad as MoR** | Offloads tax compliance, fraud prevention, and global payment infrastructure |
 | **Lean team (3 people)** | AI-assisted development (Claude agent) multiplies engineering capacity |
 
 ### Unit Economics Model
@@ -338,7 +338,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | - Supabase (DB + Auth)    | - Feature development         | "Stop Switching Apps.      |
 | - Groq (Primary AI)       |   (weekly releases)           |  Start Shipping Work."     |
 | - Together AI (Fallback)  | - AI model tuning             |                            |
-| - Lemon Squeezy (MoR)     | - PLG optimization            | - Decision DNA (unique)    |
+| - Gumroad (MoR)     | - PLG optimization            | - Decision DNA (unique)    |
 | - Resend (Email)           | - Integration development     | - Graph-native canvas      |
 | - Inngest (Background)    | - i18n expansion              | - 7 unified primitives     |
 | - Slack, Notion (Integs)  | - Content/SEO marketing       | - LazyMind AI              |
@@ -366,7 +366,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | - Weekly AI digests       | - Self-serve signup           | - Global/emerging markets  |
 | - Workspace invites       | - 14-day Pro trial            |                            |
 | - Data import/export      | - In-app upgrade prompts      | Unifying trait:            |
-| - Startup program         | - Lemon Squeezy checkout      | "Teams using 4-6 tools"    |
+| - Startup program         | - Gumroad checkout      | "Teams using 4-6 tools"    |
 +---------------------------+-------------------------------+----------------------------+
 |              COST STRUCTURE                |             REVENUE STREAMS               |
 |                                            |                                           |
@@ -377,7 +377,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 |                                            | - Business: $49/seat/mo ($39 annual)      |
 | Variable:                                  | - Enterprise: Custom pricing              |
 | - AI inference (Groq/Together) — largest   |                                           |
-| - Lemon Squeezy transaction fees           | Growth levers:                            |
+| - Gumroad transaction fees           | Growth levers:                            |
 | - Resend email volume                      | - Land & expand (Free → Enterprise)       |
 | - Inngest function invocations             | - Seat expansion (per-seat model)         |
 | - Supabase storage/bandwidth               | - Annual conversion (20% discount)        |

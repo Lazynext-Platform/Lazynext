@@ -23,7 +23,7 @@ lazynext/
 │   └── ui/                   # Shared UI primitives
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI
-│   ├── billing/              # Lemon Squeezy
+│   ├── billing/              # Gumroad
 │   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
 │   ├── inngest/              # Background jobs

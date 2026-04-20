@@ -9,6 +9,10 @@ const portalSchema = z.object({
   workspaceId: z.string().uuid(),
 })
 
+function gumroadManageUrl(subscriptionId: string): string {
+  return `https://app.gumroad.com/subscriptions/${encodeURIComponent(subscriptionId)}/manage`
+}
+
 export async function POST(req: Request) {
   const { userId } = await safeAuth()
   if (!userId) {
@@ -44,12 +48,18 @@ export async function POST(req: Request) {
       .eq('id', workspaceId)
       .single()
 
-    if (!workspace?.ls_customer_portal_url) {
-      return NextResponse.json({ error: 'NO_BILLING_CUSTOMER', message: 'Workspace has no active subscription. Subscribe first.' }, { status: 400 })
+    const url =
+      workspace?.gr_subscription_manage_url ||
+      (workspace?.gr_subscription_id ? gumroadManageUrl(workspace.gr_subscription_id) : null)
+
+    if (!url) {
+      return NextResponse.json(
+        { error: 'NO_BILLING_CUSTOMER', message: 'Workspace has no active subscription. Subscribe first.' },
+        { status: 400 }
+      )
     }
 
-    // Lemon Squeezy provides a customer portal URL directly on the subscription
-    return NextResponse.json({ url: workspace.ls_customer_portal_url })
+    return NextResponse.json({ url })
   } catch (err) {
     if (process.env.NODE_ENV === 'development') console.error('Billing portal error:', err)
     return NextResponse.json({ error: 'BILLING_ERROR', message: 'Failed to get portal URL.' }, { status: 500 })

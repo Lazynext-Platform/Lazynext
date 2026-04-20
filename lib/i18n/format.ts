@@ -100,7 +100,7 @@ export function getCurrencySymbol(currency: Currency | string, locale?: string):
  * Convert USD price to approximate local currency using static rates.
  * For production, use a live exchange rate API.
  * These are approximate rates for display purposes only — actual billing
- * is handled by Lemon Squeezy which uses live exchange rates.
+ * is handled by Gumroad which uses live exchange rates.
  */
 const APPROXIMATE_USD_RATES: Record<string, number> = {
   USD: 1, EUR: 0.92, GBP: 0.79, JPY: 149, CNY: 7.24, INR: 83.5,

@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold text-slate-900">4. Third-Party Services</h2>
             <p className="mt-3">
-              We use Supabase (authentication &amp; database), Lemon Squeezy (payments), and Resend (transactional email).
+              We use Supabase (authentication &amp; database), Gumroad (payments), and Resend (transactional email).
               Each service has its own privacy policy and processes data according to their terms.
             </p>
           </section>

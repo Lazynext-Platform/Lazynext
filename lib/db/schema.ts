@@ -33,9 +33,9 @@ export type Workspace = {
   logo: string | null
   plan: typeof PLAN_VALUES[number]
   trial_ends_at: string | null
-  ls_customer_id: string | null
-  ls_subscription_id: string | null
-  ls_customer_portal_url: string | null
+  gr_customer_email: string | null
+  gr_subscription_id: string | null
+  gr_subscription_manage_url: string | null
   region: string | null
   wms_score: number
   wms_updated_at: string

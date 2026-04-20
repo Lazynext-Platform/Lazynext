@@ -49,7 +49,7 @@ const posts: Record<string, Post> = {
         '72 polish commits after feature freeze',
         '20 new tests in this release, on top of the existing suite',
         'WCAG 2.1 AA across the entire app',
-        '40 locales, 57 currencies, global billing via Lemon Squeezy',
+        '40 locales, 57 currencies, global billing via Gumroad',
         'Rate limiting on every API route, error boundaries on every page',
       ]},
       { type: 'h2', text: 'What didn\u2019t, and why' },

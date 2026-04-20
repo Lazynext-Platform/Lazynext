@@ -36,7 +36,7 @@ const heroNodes = [
   {
     type: 'Decision',
     icon: CheckCircle,
-    title: 'Go with Lemon Squeezy',
+    title: 'Go with Gumroad',
     meta: null,
     metaColor: '',
     bg: 'bg-orange-500/20',

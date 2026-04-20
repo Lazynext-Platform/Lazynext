@@ -1,9 +1,8 @@
 import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { PLANS, type PlanId } from '@/lib/billing/plans'
+import { PLANS, buildCheckoutUrl, type PlanId } from '@/lib/billing/plans'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
-import { lemonSqueezySetup, createCheckout } from '@lemonsqueezy/lemonsqueezy.js'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 const checkoutSchema = z.object({
@@ -41,53 +40,26 @@ export async function POST(req: Request) {
   }
 
   const planConfig = PLANS[plan as Exclude<PlanId, 'free'>]
-  const variantId = planConfig[interval]
+  const productUrl = planConfig[interval]
 
-  if (!variantId) {
+  if (!productUrl) {
     return NextResponse.json(
-      { error: 'BILLING_NOT_CONFIGURED', message: 'Lemon Squeezy variant IDs are not set. Configure LEMONSQUEEZY_*_ID env vars.' },
-      { status: 503 }
-    )
-  }
-
-  if (!process.env.LEMONSQUEEZY_API_KEY || !process.env.LEMONSQUEEZY_STORE_ID) {
-    return NextResponse.json(
-      { error: 'BILLING_NOT_CONFIGURED', message: 'Set LEMONSQUEEZY_API_KEY and LEMONSQUEEZY_STORE_ID env vars.' },
+      {
+        error: 'BILLING_NOT_CONFIGURED',
+        message:
+          'Gumroad product URL is not set. Configure GUMROAD_*_URL (or NEXT_PUBLIC_GUMROAD_*_URL) env vars.',
+      },
       { status: 503 }
     )
   }
 
   try {
-    lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY })
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL
-    if (!appUrl) {
-      return NextResponse.json(
-        { error: 'APP_URL_NOT_CONFIGURED', message: 'Set NEXT_PUBLIC_APP_URL env var.' },
-        { status: 503 }
-      )
-    }
-
-    const { data, error } = await createCheckout(process.env.LEMONSQUEEZY_STORE_ID, variantId, {
-      checkoutData: {
-        custom: { workspace_id: workspaceId, user_id: userId, plan },
-      },
-      productOptions: {
-        redirectUrl: `${appUrl}/workspace/${workspaceId}/settings?billing=success`,
-      },
-    })
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'BILLING_ERROR', message: error.message },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ url: data?.data.attributes.url })
+    const url = buildCheckoutUrl(productUrl, { workspaceId, userId, plan, interval })
+    return NextResponse.json({ url })
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.error('Lemon Squeezy checkout error:', err)
+    if (process.env.NODE_ENV === 'development') console.error('Gumroad checkout URL build error:', err)
     return NextResponse.json(
-      { error: 'BILLING_ERROR', message: 'Failed to create checkout session.' },
+      { error: 'BILLING_ERROR', message: 'Failed to build checkout URL.' },
       { status: 500 }
     )
   }

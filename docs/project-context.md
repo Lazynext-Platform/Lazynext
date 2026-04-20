@@ -39,7 +39,7 @@ Target audience: remote-first teams, SaaS companies, agencies, indie hackers, an
 | **Charts** | Recharts | 3.8.x | React-based charting for dashboards |
 | **AI (Primary)** | Groq | API | Fastest inference for real-time AI panel |
 | **AI (Fallback)** | Together | API | Fallback provider |
-| **Payments** | Lemon Squeezy | API | Global MoR, handles tax/compliance |
+| **Payments** | Gumroad | API | Direct checkout links; simple ping webhooks; handles tax/compliance |
 | **Email** | Resend | API | Modern email API, React templates |
 | **Analytics** | PostHog | SaaS | Product analytics |
 | **Error Tracking** | Sentry | SaaS | Error monitoring |
@@ -82,7 +82,7 @@ lazynext/
 │   └── ui/                   # Shared UI primitives
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI integration
-│   ├── billing/              # Lemon Squeezy
+│   ├── billing/              # Gumroad
 │   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend email templates
 │   ├── inngest/              # Background job definitions
@@ -116,7 +116,7 @@ lazynext/
 | Multi-tenant isolation | Workspace-level with Supabase RLS policies | Clean tenant isolation, row-level security |
 | Decision DNA | First-class decisions with quality scoring + outcome tracking | Core differentiator — no competitor does this |
 | AI integration | Context-aware sidebar (LazyMind), not generic chatbot | AI should understand the workflow graph |
-| Payment provider | Lemon Squeezy (global MoR) | Single provider handles all markets, tax, and compliance |
+| Payment provider | Gumroad | Direct checkout links, low friction, zero-SDK integration, tax compliance |
 | Design process | Blueprint framework for UI design | Complete 7-stage design lifecycle, 38 features designed |
 | Development process | Mastery framework for feature lifecycle | Structured discuss → design → plan → build → ship → reflect |
 
@@ -149,7 +149,7 @@ npm install
 
 # 3. Set up environment
 cp .env.example .env.local
-# Fill in Supabase, Groq, Lemon Squeezy, Resend keys
+# Fill in Supabase, Groq, Gumroad, Resend keys
 
 # 4. Run Supabase migration
 # Apply lib/db/migrations/00001_supabase_init.sql via Supabase Dashboard
@@ -167,9 +167,8 @@ npm run dev
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | — | Supabase service role key (server-only) |
 | `GROQ_API_KEY` | Yes | — | Groq AI API key |
 | `TOGETHER_API_KEY` | No | — | Together AI fallback key |
-| `LEMONSQUEEZY_API_KEY` | No | — | Lemon Squeezy API key |
-| `LEMONSQUEEZY_STORE_ID` | No | — | Lemon Squeezy store ID |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | No | — | Lemon Squeezy webhook secret |
+| `GUMROAD_WEBHOOK_SECRET` | No | — | URL-path secret for Gumroad ping webhook |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | No | — | Gumroad product permalinks for each plan/interval |
 | `RESEND_API_KEY` | No | — | Resend email API key |
 | `NEXT_PUBLIC_POSTHOG_KEY` | No | — | PostHog analytics |
 | `SENTRY_DSN` | No | — | Sentry error tracking |

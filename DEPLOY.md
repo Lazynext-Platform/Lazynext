@@ -9,7 +9,7 @@ Production deploy checklist for v1.0.0.1. Target platform: **Vercel** (can swap 
 - [ ] Supabase project created (https://supabase.com/dashboard)
 - [ ] Groq API key (https://console.groq.com/keys)
 - [ ] Together AI key (fallback) (https://api.together.xyz/settings/api-keys)
-- [ ] Lemon Squeezy store + 6 variant IDs (starter/pro/business × monthly/yearly)
+- [ ] Gumroad account with 6 recurring (subscription) products: starter/pro/business × monthly/yearly
 - [ ] Resend API key + verified sending domain (https://resend.com/domains)
 - [ ] Inngest account + event key + signing key (https://app.inngest.com)
 - [ ] Domain pointed at Vercel (or platform of choice)
@@ -57,10 +57,8 @@ Set in **Vercel Project → Settings → Environment Variables** (Production + P
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API | ✅ (server-only, never expose) |
 | `GROQ_API_KEY` | console.groq.com | ✅ (or scorer falls back to heuristic) |
 | `TOGETHER_API_KEY` | api.together.xyz | ⚠️ recommended |
-| `LEMONSQUEEZY_API_KEY` | LS Dashboard → Settings → API | ✅ for billing |
-| `LEMONSQUEEZY_STORE_ID` | LS Dashboard → Store → Settings | ✅ for billing |
-| `LEMONSQUEEZY_WEBHOOK_SECRET` | LS Dashboard → Webhooks → Signing Secret | ✅ for billing |
-| `LEMONSQUEEZY_{STARTER,PRO,BUSINESS}_{MONTHLY,YEARLY}_ID` | 6 variant IDs | ✅ for billing |
+| `GUMROAD_WEBHOOK_SECRET` | Random long string you pick (used as URL path secret) | ✅ for billing |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | 6 Gumroad product permalinks | ✅ for billing |
 | `RESEND_API_KEY` | resend.com | ✅ for email |
 | `INNGEST_EVENT_KEY` | app.inngest.com | ✅ for background jobs |
 | `INNGEST_SIGNING_KEY` | app.inngest.com | ✅ for background jobs |
@@ -74,10 +72,11 @@ Set in **Vercel Project → Settings → Environment Variables** (Production + P
 
 ## 4. Webhooks
 
-### Lemon Squeezy
-- URL: `https://<your-domain>/api/v1/billing/webhook`
-- Events: `subscription_created`, `subscription_updated`, `subscription_cancelled`, `subscription_payment_success`, `subscription_payment_failed`
-- Signing secret → `LEMONSQUEEZY_WEBHOOK_SECRET`
+### Gumroad
+- Dashboard → Advanced → **Ping** URL (applies to all products) **or** per-product Resource Subscription:
+  `https://<your-domain>/api/v1/webhooks/gumroad/<GUMROAD_WEBHOOK_SECRET>`
+- The secret path segment is how we verify authenticity — Gumroad does not sign pings. Use a long, random string.
+- Resources to subscribe to: `sale`, `subscription_updated`, `subscription_ended`, `subscription_cancelled`, `subscription_restarted`, `refunded`, `dispute`.
 
 ### Inngest
 - URL: `https://<your-domain>/api/inngest`

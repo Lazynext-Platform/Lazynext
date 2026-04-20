@@ -2,7 +2,13 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-18
+> **Last Updated**: 2026-04-20
+
+---
+
+## [Unreleased] — Gumroad billing migration (2026-04-20)
+
+Replaced Lemon Squeezy with Gumroad end-to-end on `feature/billing-gumroad-migration`. New webhook route under `/api/v1/webhooks/gumroad/[secret]` (URL-secret auth), new schema migration `20260420000001_gumroad_migration.sql` renaming `ls_* → gr_*` on `workspaces`, `@lemonsqueezy/lemonsqueezy.js` dependency removed, marketing copy and all docs updated. 119 Vitest tests pass. See [CHANGELOG.md](../CHANGELOG.md#unreleased) for the full touchpoint list.
 
 ---
 

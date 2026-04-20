@@ -54,11 +54,6 @@ vi.mock('@/lib/ai/decision-quality', () => ({
   computeDecisionQualityScore: vi.fn(() => 75),
 }))
 
-vi.mock('@lemonsqueezy/lemonsqueezy.js', () => ({
-  lemonSqueezySetup: vi.fn(),
-  createCheckout: vi.fn(() => Promise.resolve({ data: { data: { attributes: { url: 'https://checkout.lemonsqueezy.com/test' } } } })),
-}))
-
 beforeEach(() => {
   vi.clearAllMocks()
 })
