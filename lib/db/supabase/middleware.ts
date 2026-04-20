@@ -1,14 +1,25 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { looksLikePlaceholder } from '@/lib/db/client'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
 
+  // Short-circuit when Supabase env vars are missing or still hold stock
+  // placeholder values (e.g. CI preview builds, fresh clones). Calling
+  // createServerClient with placeholders throws 'URL and Key are required'
+  // on every request and crashes the server before any page renders.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (looksLikePlaceholder(supabaseUrl) || looksLikePlaceholder(supabaseAnonKey)) {
+    return supabaseResponse
+  }
+
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl!,
+    supabaseAnonKey!,
     {
       cookies: {
         getAll() {
@@ -29,13 +40,6 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: Do not add logic between createServerClient and supabase.auth.getUser().
   // A simple mistake could make it very hard to debug session issues.
-
-  // DEV BYPASS: Skip auth when Supabase is not configured (placeholder credentials)
-  const isDev = process.env.NODE_ENV === 'development'
-  const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://your-project.supabase.co'
-  if (isDev && isPlaceholder) {
-    return supabaseResponse
-  }
 
   const {
     data: { user },

@@ -17,6 +17,8 @@ function looksLikePlaceholder(v: string | undefined): boolean {
   return PLACEHOLDER_PATTERNS.some((p) => lower.includes(p))
 }
 
+export { looksLikePlaceholder }
+
 const hasValidDatabaseUrl =
   !looksLikePlaceholder(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
   !looksLikePlaceholder(process.env.SUPABASE_SERVICE_ROLE_KEY)
