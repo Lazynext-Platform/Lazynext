@@ -73,8 +73,8 @@ You're creating **4** products, one for each plan × billing cycle:
 
 | # | Plan | Billing | Price |
 |---|------|---------|-------|
-| 1 | Team | Monthly | $15 |
-| 2 | Team | Yearly | $144 (per seat, per year — works out to $12/seat/month, a 20% save) |
+| 1 | Team | Monthly | $19 |
+| 2 | Team | Yearly | $180 (per seat, per year — works out to $15/seat/month, a 21% save) |
 | 3 | Business | Monthly | $30 |
 | 4 | Business | Yearly | $288 (per seat, per year — works out to $24/seat/month, a 20% save) |
 
@@ -86,7 +86,7 @@ For **each** of the 4 products:
 
 **3.** Fill in:
    - **Name:** e.g. `Lazynext Team (Monthly)` for product #1
-   - **Price:** enter the price from the table above (e.g. `15` for Team Monthly)
+   - **Price:** enter the price from the table above (e.g. `19` for Team Monthly)
    - **Recurrence:** Monthly or Yearly (match the table)
    - **Description:** one sentence, e.g. `Lazynext Team plan — unlimited members, nodes, workflows. Decision Health Dashboard included. 100 AI queries/seat/day. Billed monthly.`
    - **Thumbnail:** upload your Lazynext logo (square, at least 600x600).
@@ -101,8 +101,8 @@ For **each** of the 4 products:
 
 | Product | Save URL as |
 |---|---|
-| Team Monthly ($15) | `STARTER_MONTHLY_URL` |
-| Team Yearly ($144) | `STARTER_ANNUAL_URL` |
+| Team Monthly ($19) | `STARTER_MONTHLY_URL` |
+| Team Yearly ($180) | `STARTER_ANNUAL_URL` |
 | Business Monthly ($30) | `PRO_MONTHLY_URL` |
 | Business Yearly ($288) | `PRO_ANNUAL_URL` |
 

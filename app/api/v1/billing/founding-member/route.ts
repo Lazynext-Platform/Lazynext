@@ -11,10 +11,14 @@ export const revalidate = 300
  *
  * Logic: the first N distinct workspaces that ever had a non-free plan
  * (`gr_subscription_id` set for the first time) are the Founding Members.
- * They lock in the launch prices (Team $15 / Business $30 per seat) for
- * the lifetime of the subscription — future price increases don't apply
- * to them. When the count hits `FOUNDING_MEMBER_CAP`, the promo closes
- * and new signups pay the then-current list price.
+ * They lock in whatever list price was live when they subscribed — for
+ * the lifetime of the subscription, future price increases don't apply.
+ * (Grandfathering happens at the Gumroad subscription layer — we don't
+ * store an explicit "founding price". Any existing v1.2 subscribers are
+ * locked at $15 Team / $30 Business; new v1.3 subscribers lock at $19
+ * Team / $30 Business.) When the count hits `FOUNDING_MEMBER_CAP`, the
+ * promo closes and new signups pay the then-current list price with no
+ * lifetime lock.
  */
 export async function GET() {
   if (!hasValidDatabaseUrl) {

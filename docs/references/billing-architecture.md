@@ -13,9 +13,9 @@ This is the map of every moving piece in the billing system — what calls what,
 | Slug | Display name | Monthly | Yearly | Who it's for |
 |---|---|---|---|---|
 | `free` | Free | — | — | Self-discovery, hobby use |
-| `starter` | **Team** | $15/seat | $144/seat | Small squads that want unlimited nodes + Decision Health |
+| `starter` | **Team** | $19/seat | $180/seat | Small squads that want unlimited nodes + Decision Health |
 | `pro` | **Business** | $30/seat | $288/seat | Teams that want PULSE, Automation, and Outcome Tracking |
-| `business` | **Enterprise** | from $49/seat (15-seat min) | Custom | Sales-led, no Gumroad product |
+| `business` | **Enterprise** | Custom | Custom | Sales-led, no Gumroad product, no seat minimum |
 | `enterprise` | *(reserved)* | — | — | Future use |
 
 > **Why the slug/display mismatch?** Slugs were set before the pricing re-think. Renaming them would require a Postgres enum migration and rewriting every `plan = 'pro'` check in the codebase. The display layer (`pricing/page.tsx`, `UpgradeModal.tsx`) maps slug → human-friendly name — cheaper and reversible.
@@ -25,8 +25,8 @@ This is the map of every moving piece in the billing system — what calls what,
 [`lib/utils/constants.ts`](../../lib/utils/constants.ts) is the single source of truth:
 
 ```ts
-export const PLAN_PRICING_USD         = { free: 0, starter: 15, pro: 30, business: null, enterprise: null }
-export const PLAN_PRICING_USD_ANNUAL  = { free: 0, starter: 12, pro: 24, business: null, enterprise: null }
+export const PLAN_PRICING_USD         = { free: 0, starter: 19, pro: 30, business: null, enterprise: null }
+export const PLAN_PRICING_USD_ANNUAL  = { free: 0, starter: 15, pro: 24, business: null, enterprise: null }
 export const TRIAL_DAYS               = 14
 export const FOUNDING_MEMBER_CAP      = 100
 // Founding Members lock launch prices for life — no instant discount constant.
@@ -228,8 +228,8 @@ NEXT_PUBLIC_LEMONSQUEEZY_VARIANT_*
 
 1. **Create account** at [gumroad.com](https://gumroad.com). Verify seller identity.
 2. **Create 4 subscription products:**
-   - Lazynext — Team (Monthly) at $15/mo
-   - Lazynext — Team (Yearly) at $144/yr (= $12/seat/mo, 20% save)
+   - Lazynext — Team (Monthly) at $19/mo
+   - Lazynext — Team (Yearly) at $180/yr (= $15/seat/mo, 21% save)
    - Lazynext — Business (Monthly) at $30/mo
    - Lazynext — Business (Yearly) at $288/yr (= $24/seat/mo, 20% save)
 3. **Copy each product's short URL** (e.g., `https://youraccount.gumroad.com/l/team-monthly`).

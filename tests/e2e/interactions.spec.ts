@@ -59,15 +59,15 @@ test.describe('Pricing Page Interactions', () => {
   })
 
   test('all 4 plan cards are visible', async ({ page }) => {
-    // v1.1 per-seat pricing: Free / Team / Business / Enterprise
+    // v1.3 per-seat pricing: Free / Team ($19) / Business ($30) / Enterprise (Custom)
     await expect(page.getByText('Free').first()).toBeVisible()
     await expect(page.getByText('Team').first()).toBeVisible()
     await expect(page.getByText('Business').first()).toBeVisible()
     await expect(page.getByText('Enterprise').first()).toBeVisible()
-    // Verify pricing amounts are shown
+    // Verify monthly-default pricing amounts are shown on initial load.
     await expect(page.getByText(/\$0/).first()).toBeVisible()
-    await expect(page.getByText(/\$12/).first()).toBeVisible()
-    await expect(page.getByText(/\$24/).first()).toBeVisible()
+    await expect(page.getByText(/\$19/).first()).toBeVisible()
+    await expect(page.getByText(/\$30/).first()).toBeVisible()
   })
 
   test('FAQ accordion expands on click', async ({ page }) => {

@@ -45,8 +45,8 @@ const tiers = [
     name: 'Team',
     slug: 'starter' as const,
     desc: 'For small teams shipping fast',
-    monthlyPrice: '15',
-    annualPrice: '12',
+    monthlyPrice: '19',
+    annualPrice: '15',
     priceSuffix: '/seat/month',
     cta: 'Start 14-Day Trial',
     ctaLink: '/sign-up',
@@ -94,8 +94,10 @@ const tiers = [
     monthlyPrice: null as string | null,
     annualPrice: null as string | null,
     priceSuffix: '',
-    // Anchor price shown under "Custom" to set expectations before a sales call.
-    anchorNote: 'From $49/seat/month · 15-seat minimum',
+    // Sales-led tier. We drop the 15-seat minimum here because it was
+    // turning away 10-14 seat prospects who'd otherwise be perfect fits.
+    // "Custom pricing" keeps the anchor without hard-gating team size.
+    anchorNote: 'Custom pricing — contact sales',
     cta: 'Contact Sales',
     ctaLink: '/contact',
     ctaStyle: 'outline' as const,

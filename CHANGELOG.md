@@ -4,6 +4,40 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.0] - 2026-04-21
+
+**Theme:** Lock in the final pricing strategy. Team moves to the blueprint Section 41 sensitivity-analysis sweet spot. Enterprise drops the seat minimum. Business stays put — the data says $30 is right for both personas.
+
+Version bump is MINOR because list pricing changes user-visible but the data model is untouched. No DB migration, no new Gumroad products required on the Business side.
+
+### Why this, not $9/$19/$39 + Solo + India PPP
+
+The earlier pass recommended $19 Team / $39 Business with a Solo tier and India PPP override. Deep re-read of blueprint V9 Section 41 (pricing sensitivity) surfaced two facts that override that recommendation:
+
+1. **$39 Business loses the Founder ICP.** Section 41 calls this out explicitly. Drowning Founder WTP is $15-25/seat; $39 is too far outside it. The Founder persona then stays on Team forever and never reaches Business even when they need Automation. Holding Business at $30 keeps it inside Ops PM WTP ($30-50) AND within reach of a bigger Founder-led team that has real Automation need.
+2. **$15 and $19 produce nearly identical MRR at 500 workspaces** (Section 41 table: $18K vs $19K — 5% delta). The economic case for $19 is weak on MRR and strong on LTV. That makes Team a safe bump. It's not an earth-mover — it's a correction to the blueprint target.
+
+Solo tier and India PPP are both real unlocks, but they need infrastructure we don't want to rush:
+- Solo: DB enum migration (`ALTER TYPE plan_enum ADD VALUE 'solo'`), new Gumroad products, checkout schema, upgrade-modal layout for a 4th card
+- India PPP: per-seat INR-priced Gumroad products OR Razorpay integration (blueprint Section 51 specifies Razorpay + per-workspace INR — a substantial rework)
+
+Both get their own projects. Shipping them inside this v1.3 bump would destabilize a release whose whole point is "this is the final pricing call."
+
+### Changed
+- **Team pricing: $15/seat → $19/seat monthly, $12 → $15/seat annual.** Source: `lib/utils/constants.ts` (`PLAN_PRICING_USD.starter`, `PLAN_PRICING_USD_ANNUAL.starter`). Annual save is now 21% ($19 monthly → $15 annual per-mo = $180/yr, so 21.05% off). New Gumroad product prices: Team Monthly $19, Team Yearly $180. Existing $15/$144 Gumroad products should be deactivated after the switchover; current subscribers at $15 stay at $15 for the life of their subscription via Gumroad-level grandfathering.
+- **Business pricing unchanged at $30/seat monthly, $24/seat annual.** Deliberate hold — see reasoning above.
+- **Enterprise anchor: "From $49/seat/month · 15-seat minimum" → "Custom pricing — contact sales".** `/pricing` page Enterprise card copy updated. Blueprint has no 15-seat floor anywhere; it was a conservative add during v1.2 pricing that turned away 10-14 seat prospects who'd otherwise be perfect Enterprise fits. `components/ui/UpgradeModal.tsx` and comparison table remain unchanged — they already route Enterprise to `/contact`.
+- **Pricing-page metadata description** updated from "Plans from $0 to $49/month" to "Paid plans from $19/seat/month — Enterprise custom." `app/(marketing)/pricing/layout.tsx`.
+- **LazyMind marketing demo decision** now shows `D-134: Price point for Team tier → $19/seat · Score 82/100`. Keeps the demo consistent with live pricing (visitors who read the demo and then scroll to the pricing section see matching numbers).
+- **Founding Member API route comment** (`app/api/v1/billing/founding-member/route.ts`) clarified: grandfathering happens at the Gumroad subscription layer, not in our DB. Existing v1.2 subscribers at $15/$30 stay there; new v1.3 Founding Members lock at $19/$30. Banner copy ("lock in today's prices for life") needed no change — it works at any list price because "today's prices" = whatever the user sees right now.
+- **E2E test** `tests/e2e/interactions.spec.ts` updated to expect $19 (Team) and $30 (Business) on default monthly load, instead of $12/$24 (which were annual prices and weren't visible by default anyway — the old test was passing by coincidence).
+- **Docs synced:** `docs/FOUNDER-SETUP-WALKTHROUGH.md` Gumroad product creation table now shows Team $19/$180; `docs/references/billing-architecture.md` plan-model table, constants snippet, and Gumroad setup checklist all reflect $19/$180 for Team and "Custom, no seat minimum" for Enterprise.
+
+### Explicitly deferred (tracked for follow-up PRs)
+- **Solo tier ($9/seat/mo, 1 seat).** Needs DB enum migration, 2 new Gumroad products, checkout route update, webhook plan mapping, `UpgradeModal` layout for 4 cards. Decision gate: wait for 90-day conversion data on Free → Team to see if a sub-Team price point is actually needed.
+- **India PPP override.** Blueprint Section 51 specifies per-workspace INR pricing via Razorpay (₹499/₹999/₹2,999 tiers). That's a billing-provider integration, not a config flag. Per-seat INR products on Gumroad would work as an interim step but create a messy dual-provider ops story. Scope this as its own v2.0 project paired with the per-workspace pricing rework.
+- **Removing the old Gumroad $15/$144 Team products.** Don't delete — they need to stay live for existing $15-subscribed Founding Members. Just unlist them from the public catalog so new buyers only see the $19 version. Non-code task; goes in the Gumroad dashboard.
+
 ## [1.2.0.0] - 2026-04-21
 
 **Theme:** Pricing strategy correction before creating Gumroad products. Fix the structural bug where Decision Health (the hero feature) was locked behind the Business tier, bump Team/Business prices to Notion/Linear parity, reframe Founding Member around price-lock-for-life, and anchor Enterprise with a from-price.

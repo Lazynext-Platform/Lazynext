@@ -23,22 +23,27 @@ export const PLAN_LIMITS = {
 // Per-seat monthly USD. Display labels: starter="Team", pro="Business",
 // business="Enterprise (contact sales)". Kept as slugs to preserve DB enum.
 //
-// Pricing sits at Notion/Linear parity. Team gets Decision Health (hero
-// feature) at $15 so the entry tier isn't gutted. Business ($30) keeps
-// automation, pulse, and AI depth — the things bigger teams actually need.
+// Team sits at $19 — the blueprint Section 41 sensitivity-analysis sweet
+// spot (same MRR as $15 at 500 workspaces, better LTV, still inside
+// Drowning-Founder WTP $15-25/seat). Business stays at $30 deliberately:
+// blueprint flags $39 as losing the Founder ICP, and $30 is the overlap
+// between Founder ceiling ($25) and Ops-PM floor ($30) — one price both
+// personas can stomach. Decision Health included at Team so the entry
+// tier isn't gutted.
 export const PLAN_PRICING_USD = {
   free: 0,
-  starter: 15,   // Team
+  starter: 19,   // Team
   pro: 30,       // Business
   business: null, // Enterprise — custom / contact sales
   enterprise: null,
 } as const
 
-// Annual = 20% off monthly. $15 → $12/seat/mo ($144/yr), $30 → $24/seat/mo
-// ($288/yr). Gumroad products are priced as the annual total.
+// Annual ≈ 20% off monthly. $19 → $15/seat/mo ($180/yr, 21% save),
+// $30 → $24/seat/mo ($288/yr, 20% save). Gumroad products are priced
+// as the annual total.
 export const PLAN_PRICING_USD_ANNUAL = {
   free: 0,
-  starter: 12,   // Team, billed annually (per seat per month) — $144/yr
+  starter: 15,   // Team, billed annually (per seat per month) — $180/yr
   pro: 24,       // Business, billed annually — $288/yr
   business: null,
   enterprise: null,
