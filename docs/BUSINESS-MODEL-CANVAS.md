@@ -1,7 +1,13 @@
 # Lazynext — Business Model Canvas
 
-> **Version:** 1.0 | **Date:** April 15, 2026 | **Product:** Lazynext v0.4.0
+> **Version:** 2.0 | **Date:** April 22, 2026 | **Product:** Lazynext v1.3.0.0
 > **Tagline:** "Stop Switching Apps. Start Shipping Work."
+>
+> **Tier model as of v1.3.0.0:** 4 tiers. Display names: Free, **Team**,
+> **Business**, **Enterprise**. Internal DB slugs (unchanged since v1.1
+> to preserve the plan_enum): `free` / `starter` / `pro` / `business`.
+> The pre-v1.1 5-tier `Free/Starter/Pro/Business/Enterprise` model at
+> $0/$9/$19/$49/custom has been retired.
 
 ---
 
@@ -105,10 +111,9 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | Tier | Relationship | Touch Model |
 |------|-------------|-------------|
 | **Free** | Self-serve | Automated onboarding, in-app guides, docs |
-| **Starter** ($9/seat) | Self-serve + community | Email support, knowledge base |
-| **Pro** ($19/seat) | Assisted | Priority email support, weekly AI digests |
-| **Business** ($49/seat) | High-touch | Dedicated support, API access, custom integrations |
-| **Enterprise** (custom) | White-glove | Custom SLA, on-premise option, dedicated account manager |
+| **Team** ($19/seat) | Self-serve + community | Email support, knowledge base, Decision Health Dashboard |
+| **Business** ($30/seat) | Assisted | Priority email support, PULSE + Automation, weekly AI digests |
+| **Enterprise** (custom) | White-glove | SSO/SAML, audit log, custom SLA, dedicated account manager |
 
 ### Relationship Mechanisms
 
@@ -135,12 +140,11 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 
 ### Primary Revenue: SaaS Subscriptions (Per-Seat, Per-Month)
 
-| Plan | Monthly Price | Annual Price | Annual Savings |
-|------|--------------|-------------|----------------|
+| Plan | Monthly Price | Annual Price (per seat per mo) | Annual Savings |
+|------|--------------|--------------------------------|----------------|
 | **Free** | $0/seat/mo | $0/seat/mo | — |
-| **Starter** | $9/seat/mo | $7/seat/mo | ~22% |
-| **Pro** | $19/seat/mo | $15/seat/mo | ~21% |
-| **Business** | $49/seat/mo | $39/seat/mo | ~20% |
+| **Team** | $19/seat/mo | $15/seat/mo ($180/yr) | ~21% |
+| **Business** | $30/seat/mo | $24/seat/mo ($288/yr) | ~20% |
 | **Enterprise** | Custom | Custom | Custom |
 
 ### Revenue Mechanics
@@ -158,7 +162,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 
 | Lever | Mechanism |
 |-------|-----------|
-| **Land & expand** | Free tier → Starter → Pro → Business as teams grow |
+| **Land & expand** | Free tier → Team → Business → Enterprise as teams grow |
 | **Seat expansion** | Per-seat model means revenue grows as teams add members |
 | **Annual conversion** | Monthly-to-annual migration improves cash flow and retention |
 | **Enterprise upsell** | Large organizations move to custom pricing with higher ARPU |
@@ -168,9 +172,9 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 
 | Scenario | Teams | Avg. Seats | Avg. Plan | MRR | ARR |
 |----------|-------|-----------|-----------|-----|-----|
-| Current traction | 1,200 | ~5 | Free/Starter mix | Early stage | Early stage |
-| Growth target | 5,000 | 8 | $15 avg/seat | $600K | $7.2M |
-| Scale target | 20,000 | 10 | $20 avg/seat | $4M | $48M |
+| Current traction | 1,200 | ~5 | Free/Team mix | Early stage | Early stage |
+| Growth target | 5,000 | 8 | ~$17 avg/seat (Team annual + some Business) | $680K | $8.2M |
+| Scale target | 20,000 | 10 | ~$22 avg/seat (richer Business mix) | $4.4M | $52.8M |
 
 ---
 
@@ -311,8 +315,8 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 
 | Strategy | Mechanism |
 |----------|-----------|
-| **AI query limits by tier** | Free: 20/day, Starter: 100/day, Pro: 500/day — prevents runaway AI costs |
-| **Node limits by tier** | Free: 100, Starter: 1K, Pro: 10K — controls database growth on free/low tiers |
+| **AI query limits by tier** | Free: 20/day, Team: 100/seat/day, Business: 500/seat/day, Enterprise: unlimited — prevents runaway AI costs |
+| **Node + member limits on Free** | Free: 100 nodes, 3 members, 5 workflows — paid tiers uncap all three; AI queries remain the soft cap on paid plans |
 | **Groq + Together AI dual-provider** | Primary/fallback pattern optimizes for cost and reliability |
 | **Inngest serverless** | Pay-per-invocation background jobs vs. always-on workers |
 | **Gumroad as MoR** | Offloads tax compliance, fraud prevention, and global payment infrastructure |
@@ -372,10 +376,10 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 |                                            |                                           |
 | Fixed:                                     | Freemium SaaS (per-seat, per-month):      |
 | - Team (3 people, AI-assisted)             | - Free: $0 (3 members, 100 nodes)         |
-| - Infrastructure baseline (Supabase,       | - Starter: $9/seat/mo ($7 annual)         |
-|   Vercel)                                  | - Pro: $19/seat/mo ($15 annual)           |
-|                                            | - Business: $49/seat/mo ($39 annual)      |
-| Variable:                                  | - Enterprise: Custom pricing              |
+| - Infrastructure baseline (Supabase,       | - Team: $19/seat/mo ($15 annual)          |
+|   Vercel)                                  | - Business: $30/seat/mo ($24 annual)      |
+|                                            | - Enterprise: Custom pricing              |
+| Variable:                                  |                                           |
 | - AI inference (Groq/Together) — largest   |                                           |
 | - Gumroad transaction fees           | Growth levers:                            |
 | - Resend email volume                      | - Land & expand (Free → Enterprise)       |
@@ -425,7 +429,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Automation** | Zapier, Make | ~$20–50/seat/mo |
 | **Table** | Airtable, Sheets | ~$20–45/seat/mo |
 | **Total** | 6+ tools | **~$171/seat/mo** |
-| **Lazynext Pro** | All of the above | **$19/seat/mo** |
+| **Lazynext Team** | All of the above | **$19/seat/mo** |
 
 ---
 

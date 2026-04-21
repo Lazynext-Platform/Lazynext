@@ -2,17 +2,35 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-20
+> **Last Updated**: 2026-04-22
 
 ---
 
-## [Unreleased] — Gumroad billing migration + per-seat pricing (2026-04-20)
+## [1.3.0.0] — Pricing to blueprint sweet spot + Enterprise unblocked (2026-04-22)
+
+Team $15 → **$19/seat/mo** monthly, $12 → **$15/seat/mo** annual ($180/yr). Business holds at $30 (blueprint Section 41 flags $39 as losing the Founder ICP; $30 is the overlap where Drowning-Founder ceiling meets Ops-PM floor). Enterprise anchor changes from "From $49/seat · 15-seat minimum" to **"Custom pricing — contact sales"** — the 15-seat floor was turning away real 10-14 seat prospects. v1.2 subscribers grandfathered at $15/$30 for life at the Gumroad subscription layer.
+
+Explicitly deferred to separate ships: Solo tier (needs `plan_enum` migration + 2 Gumroad products + checkout schema), India PPP (needs Razorpay or dual-provider mess).
+
+See [CHANGELOG.md](../CHANGELOG.md#1300---2026-04-22).
+
+---
+
+## [1.2.0.0] — Decision Health to Team + parity pricing + Founding Member lock-in (2026-04-20)
+
+Moved Decision Health Dashboard (hero feature) down from Business to Team so the entry tier isn't gutted. Team pricing $12 → **$15/seat/mo** monthly, $10 → **$12** annual; Business $24 → **$30** / $20 → **$24**. Added Founding Member promotion: first 100 paying workspaces grandfather-lock whatever list price is live when they subscribe. `/api/v1/billing/founding-member` returns live remaining count; `<FoundingMemberBanner />` on the pricing page surfaces it.
+
+See [CHANGELOG.md](../CHANGELOG.md#1200---2026-04-20).
+
+---
+
+## [1.1.0.0] — Gumroad billing migration + per-seat pricing (2026-04-20)
 
 Shipped on `feature/billing-gumroad-migration` — 9 commits, 48+ files, +~1,900/−2,690.
 
 **Billing provider swap.** Full Lemon Squeezy → Gumroad rip-and-replace. New `/api/v1/webhooks/gumroad/[secret]` route with URL-secret auth (timing-safe), handles every Gumroad resource (sale, subscription_updated/_ended/_cancelled/_restarted, refunded, dispute). Schema migration `20260420000001_gumroad_migration.sql` renames `ls_* → gr_*` on `workspaces`. Portal URL derived as `app.gumroad.com/subscriptions/<id>/manage`. `@lemonsqueezy/lemonsqueezy.js` removed (−57 transitive packages). CSP updated. All marketing copy swapped.
 
-**Per-seat pricing.** New tier model with display names Team ($12/$10 per seat), Business ($24/$20 per seat), Enterprise (custom/sales-led). Paid tiers all unlimited members/nodes/workflows; AI queries soft-cap (10 → 100 → 500 → unlimited per seat/day). Slug → display mapping preserved — no enum migration required.
+**Per-seat pricing (v1.1 launch prices, since superseded).** Launched as display names Team ($12/$10 per seat), Business ($24/$20 per seat), Enterprise (custom/sales-led). Paid tiers all unlimited members/nodes/workflows; AI queries soft-cap (10 → 100 → 500 → unlimited per seat/day). Slug → display mapping preserved — no enum migration required. These prices were bumped in v1.2 and again in v1.3 — see entries above.
 
 **14-day Business trial + auto-downgrade.** `handleTrialExpiryScan` Inngest cron (02:00 UTC daily) downgrades unpaid expired trials to free.
 
