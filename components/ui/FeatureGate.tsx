@@ -91,7 +91,7 @@ export function FeatureGate({
             Upgrade to {requiredTier}
           </button>
           <p className="text-2xs text-slate-500">
-            14-day Business trial on every paid plan — no credit card required.
+            30-day Business trial on every paid plan — no credit card required.
           </p>
         </div>
       </div>

@@ -4,6 +4,43 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.1] - 2026-04-23
+
+**Theme:** Align internal 14-day Business trial with the 30-day trial offered on Gumroad-hosted checkout so users see one consistent number everywhere.
+
+Why the change: Gumroad's membership trial selector only offers `one week` or `one month` as presets — no 14-day option. Picking `one month` at the Gumroad level means Gumroad-purchased subscriptions get a 30-day grace period before first charge. The internal `TRIAL_DAYS = 14` that drove the Inngest downgrade cron was now out of sync with what customers saw on the Gumroad checkout page. Keeping two different trial durations created an obvious support-load trap ("your site says 14 days but Gumroad said 30"). Aligning to 30 everywhere is the only sane fix.
+
+Only new workspaces get the longer trial. Existing workspaces keep whatever `trial_ends_at` they were stamped with at creation time, so no retroactive extension or contraction.
+
+### Changed
+- `lib/utils/constants.ts`: `TRIAL_DAYS = 14` → `30`. Single source of truth; flows through `UpgradeModal`, `TrialBanner`, workspace-creation stamp of `trial_ends_at`, and the Inngest `handleTrialExpiryScan` cron via its shared constant import.
+- `app/(marketing)/pricing/page.tsx`: Team and Business CTA text `Start 14-Day Trial` → `Start 30-Day Trial`; FAQ "Do I need a credit card?" answer now says 30 days; pricing hero subhead now says 30 days.
+- `components/marketing/PricingSection.tsx`: both tier CTAs (`Team`, `Business`) updated to `Start 30-Day Trial`.
+- `components/ui/FeatureGate.tsx`: paywall footer "14-day Business trial on every paid plan" → "30-day Business trial on every paid plan".
+- `docs/platform-walkthrough.html`: Upgrade-Paywall preview "14-day free trial included" → "30-day free trial included".
+- `lib/inngest/functions/index.ts`: comment on `handleTrialExpiryScan` updated to say 30-day trial.
+- `tests/e2e/interactions.spec.ts`: FAQ assertion regex `/14-day.*trial/i` → `/30-day.*trial/i`.
+- `docs/references/billing-architecture.md`: constants snippet and prose reference updated.
+- `docs/FOUNDER-SETUP-WALKTHROUGH.md`: Inngest sync section now says 30-day trial expiry cron.
+- `docs/features/22-upgrade-paywall-modal/*` (design-spec.md, design-brief.md, mockups/upgrade-paywall-modal.html): all 8 mentions of "14-day" updated to "30-day" across design spec, brief, and HTML mockup.
+- `docs/features/02-pricing-page/mockups/pricing-page.html`: FAQ answer now says "30-day Business trial" (also fixed stale "Pro trial" wording to "Business trial" for v1.3 alignment).
+- `docs/BUSINESS-MODEL-CANVAS.md`: 4 mentions updated across Customer Relationships, Revenue Streams, Revenue Scenarios ASCII box, and Product-led growth engine summary. Also promoted "Pro trial" naming to "Business trial" to match v1.3 plan naming.
+- `LAZYNEXT_COMPLETE_BLUEPRINT_V9.md`: Section 71 row 48 (trial logic build task) updated to "30-day Business trial on workspace creation".
+
+### Not changed (intentional)
+- `LAZYNEXT_COMPLETE_BLUEPRINT_V9.md` lines 4461, 6757, 6764: these are about a 14-day **inactivity** timer and a 14-day **onboarding mode** window, not the trial. Different concepts, left alone.
+- `CHANGELOG.md` and `docs/project-changelog.md` historical entries for v1.1 (which shipped the original 14-day trial) and v1.2 retained as the historical record. Only forward entries reflect 30.
+- Existing workspace `trial_ends_at` timestamps. The change is forward-only; workspaces created before this ship keep their original 14-day window.
+- SQL migration files. No schema change, just a constant.
+
+### Pre-merge checks
+- `npm run lint` clean
+- `npm run type-check` clean
+- `npm test` all passing (includes updated `interactions.spec.ts` regex)
+
+### Founder action required
+When creating the Gumroad products per `docs/FOUNDER-SETUP-WALKTHROUGH.md`, pick `one month` for the **Offer a free trial** setting on every subscription product. Do NOT pick `one week` — that creates a 7-day trial that won't match the 30-day messaging on lazynext.com.
+
 ## [1.3.0.0] - 2026-04-21
 
 **Theme:** Lock in the final pricing strategy. Team moves to the blueprint Section 41 sensitivity-analysis sweet spot. Enterprise drops the seat minimum. Business stays put — the data says $30 is right for both personas.

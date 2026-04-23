@@ -27,7 +27,7 @@ This is the map of every moving piece in the billing system — what calls what,
 ```ts
 export const PLAN_PRICING_USD         = { free: 0, starter: 19, pro: 30, business: null, enterprise: null }
 export const PLAN_PRICING_USD_ANNUAL  = { free: 0, starter: 15, pro: 24, business: null, enterprise: null }
-export const TRIAL_DAYS               = 14
+export const TRIAL_DAYS               = 30
 export const FOUNDING_MEMBER_CAP      = 100
 // Founding Members lock launch prices for life — no instant discount constant.
 ```
@@ -164,7 +164,7 @@ https://app.gumroad.com/subscriptions/<subscription_id>/manage
 - **Query:** workspaces where `trial_ends_at < now` AND `plan != 'free'` AND `gr_subscription_id IS NULL`
 - **Action:** update to `plan = 'free'`, clear `trial_ends_at`
 
-This closes the loop: users who start a 14-day Business trial but never pay get auto-downgraded without any manual work.
+This closes the loop: users who start a 30-day Business trial but never pay get auto-downgraded without any manual work.
 
 ### F. Founding Member counter (live banner)
 

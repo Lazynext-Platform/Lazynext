@@ -37,7 +37,7 @@ const tiers = [
     annualPrice: PLAN_PRICING_USD_ANNUAL.starter,
     period: '/seat/month',
     desc: 'Small teams shipping fast. Decision Health included.',
-    cta: 'Start 14-Day Trial',
+    cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
     featured: true,
     features: [
@@ -55,7 +55,7 @@ const tiers = [
     annualPrice: PLAN_PRICING_USD_ANNUAL.pro,
     period: '/seat/month',
     desc: 'Teams that decide on purpose. Full stack.',
-    cta: 'Start 14-Day Trial',
+    cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
     featured: false,
     features: [

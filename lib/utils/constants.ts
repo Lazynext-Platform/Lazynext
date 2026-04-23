@@ -49,7 +49,7 @@ export const PLAN_PRICING_USD_ANNUAL = {
   enterprise: null,
 } as const
 
-export const TRIAL_DAYS = 14
+export const TRIAL_DAYS = 30
 // Founding Members lock in launch prices for life. No instant percentage
 // discount — the "discount" accrues over time as list prices rise.
 export const FOUNDING_MEMBER_CAP = 100

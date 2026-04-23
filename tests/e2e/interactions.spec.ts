@@ -75,7 +75,7 @@ test.describe('Pricing Page Interactions', () => {
     await faqButton.scrollIntoViewIfNeeded()
     await expect(faqButton).toBeVisible()
     await faqButton.click()
-    await expect(page.getByText(/14-day.*trial/i).first()).toBeVisible()
+    await expect(page.getByText(/30-day.*trial/i).first()).toBeVisible()
   })
 })
 

@@ -15,14 +15,14 @@
 ## Target Users
 
 - Free plan users hitting usage limits (50 nodes, 10 decisions searchable, 10 AI queries/day)
-- Trial users nearing or past their 14-day trial period
+- Trial users nearing or past their 30-day trial period
 - Starter/Pro users encountering Business-only features (Health Dashboard)
 - Any user evaluating plan options via the Full Upgrade Modal
 
 ## Requirements
 
 **Must Have**
-- [x] Decision Search Paywall: search bar with query visible, 3 blurred result rows, gradient fade, inline upgrade card with feature list (unlimited nodes, full Decision DNA search, 100 LazyMind queries, imports), "Upgrade to Starter" CTA with INR pricing (499/seat/mo), 14-day trial mention
+- [x] Decision Search Paywall: search bar with query visible, 3 blurred result rows, gradient fade, inline upgrade card with feature list (unlimited nodes, full Decision DNA search, 100 LazyMind queries, imports), "Upgrade to Starter" CTA with INR pricing (499/seat/mo), 30-day trial mention
 - [x] Node Limit: amber warning icon, "50 of 50" usage text, full progress bar (100%), upgrade pitch with unlimited nodes highlight, "Upgrade to Starter" CTA, "Maybe later" dismissal
 - [x] AI Query Limit: sparkle icon, "10/10 queries used today" counter, full progress bar, midnight IST reset note, tier comparison table (Free=10, Starter=100, Pro=500, Business=Unlimited), "Upgrade for More Queries" CTA
 - [x] Health Dashboard Gate: blurred dashboard preview (4-col stat cards + 2-col charts), centered overlay card with chart icon, feature description, "Business Plan" badge, "Upgrade to Business" CTA (2,999/seat/mo), "or start with Pro" fallback
@@ -102,13 +102,13 @@
 | Trial banner — active | Dynamic | "Pro trial -- 11 days remaining" |
 | Trial banner — expiring | Dynamic | "Pro trial expires in 2 days" |
 | Trial banner — expired | Static | "Your Pro trial has ended. You're now on the Free plan." |
-| Trial/billing notes | Static | "14-day free trial on all paid plans. No credit card required. Cancel anytime." |
+| Trial/billing notes | Static | "30-day free trial on all paid plans. No credit card required. Cancel anytime." |
 
 ## Constraints
 
 - Paywall copy must lead with value gained, not features lost
 - All pricing must be displayed in INR with per-seat-per-month format
-- "14-day free trial" and "Cancel anytime" must appear near every upgrade CTA
+- "30-day free trial" and "Cancel anytime" must appear near every upgrade CTA
 - Blurred content must be realistic (matching actual layouts) to demonstrate what users are missing
 - "Maybe later" must be available on soft paywalls (Node Limit) but not on hard gates (Health Dashboard)
 - Trial Banners must not be dismissible — they persist until the user upgrades or the trial state changes

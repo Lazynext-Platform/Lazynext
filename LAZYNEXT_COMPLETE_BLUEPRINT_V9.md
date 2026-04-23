@@ -7190,7 +7190,7 @@ Share your Decision DNA dashboard with a stakeholder?"
 | 45 | Upgrade flow — workspace settings → choose plan → Razorpay checkout | Payment completes in test mode |
 | 46 | Feature gating — enforce limits per plan (member count, LazyMind queries, etc.) | Free tier limits enforced |
 | 47 | Billing management — cancel, upgrade, download invoice | All billing actions work |
-| 48 | Trial logic — 14-day Pro trial on workspace creation | Trial activates, expires correctly |
+| 48 | Trial logic — 30-day Business trial on workspace creation | Trial activates, expires correctly |
 | 49 | Review + test all billing flows. | Billing complete |
 
 **GTM task this week:** Incorporate beta feedback into product. Post build-in-public update.

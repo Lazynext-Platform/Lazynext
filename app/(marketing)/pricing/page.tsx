@@ -48,7 +48,7 @@ const tiers = [
     monthlyPrice: '19',
     annualPrice: '15',
     priceSuffix: '/seat/month',
-    cta: 'Start 14-Day Trial',
+    cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
     highlighted: false,
@@ -70,7 +70,7 @@ const tiers = [
     monthlyPrice: '30',
     annualPrice: '24',
     priceSuffix: '/seat/month',
-    cta: 'Start 14-Day Trial',
+    cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
     ctaStyle: 'filled' as const,
     highlighted: true,
@@ -143,7 +143,7 @@ const faqItems = [
   },
   {
     q: 'Do I need a credit card to start?',
-    a: "No. Sign up for Free in 30 seconds. Every paid plan comes with a 14-day Business trial — no credit card required. At day 14 you pick a plan or drop back to Free. No auto-charge surprises.",
+    a: "No. Sign up for Free in 30 seconds. Every paid plan comes with a 30-day Business trial — no credit card required. At day 30 you pick a plan or drop back to Free. No auto-charge surprises.",
   },
   {
     q: 'What do I get on the free plan?',
@@ -240,7 +240,7 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-500 sm:text-xl">
-            Start free. Upgrade when your team grows. 14-day Business trial on every paid plan — no credit card required.
+            Start free. Upgrade when your team grows. 30-day Business trial on every paid plan — no credit card required.
           </p>
         </div>
       </section>

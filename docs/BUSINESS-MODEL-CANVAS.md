@@ -89,7 +89,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | Channel | Mechanism |
 |---------|-----------|
 | **Self-serve signup** | Email/password + Google/GitHub OAuth; no credit card required |
-| **14-day Pro trial** | Automatic trial on signup to demonstrate full feature set |
+| **30-day Business trial** | Automatic trial on signup to demonstrate full feature set |
 | **In-app upgrade prompts** | Usage-based triggers (node limits, AI query limits, member limits) via UpgradeModal |
 | **Gumroad checkout** | Seamless payment flow via Merchant of Record |
 
@@ -155,7 +155,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | **Annual billing incentive** | 20–22% discount on annual plans drives predictability and reduces churn |
 | **Usage-based upsell triggers** | Hard limits on nodes (100→1K→10K→∞), AI queries (20→100→500→∞), members (3→10→25→100), and workflows (5→25→100→∞) create natural upgrade pressure |
 | **Feature-gated tiers** | Decision Health Dashboard, Automation Builder, Weekly Digest, Audit Log, SSO, and API access gated to higher tiers |
-| **14-day Pro trial** | Users experience full feature set, then face downgrade friction |
+| **30-day Business trial** | Users experience full feature set, then face downgrade friction |
 | **Gumroad MoR** | Handles global payment processing, tax compliance, and billing infrastructure |
 
 ### Revenue Growth Levers
@@ -368,7 +368,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 | - 3-step onboarding       |                               | Secondary:                 |
 | - Decision quality gamif. | Conversion:                   | - Enterprise (50-500)      |
 | - Weekly AI digests       | - Self-serve signup           | - Global/emerging markets  |
-| - Workspace invites       | - 14-day Pro trial            |                            |
+| - Workspace invites       | - 30-day Business trial       |                            |
 | - Data import/export      | - In-app upgrade prompts      | Unifying trait:            |
 | - Startup program         | - Gumroad checkout      | "Teams using 4-6 tools"    |
 +---------------------------+-------------------------------+----------------------------+
@@ -399,7 +399,7 @@ Lazynext is a **graph-native workflow platform** that unifies tasks, docs, decis
 2. **Consolidation economics are compelling** — $19 vs. $171/seat/mo is a concrete, measurable ROI that sells itself.
 3. **Global-first from day one** — 40 languages and 56 currencies is rare for a pre-Series-A product; unlocks underserved markets.
 4. **Lean cost structure** — 3-person team with AI-assisted development keeps burn rate low.
-5. **Product-led growth engine** — Free tier + 14-day trial + viral sharing + usage-based upgrade triggers create a self-sustaining funnel.
+5. **Product-led growth engine** — Free tier + 30-day trial + viral sharing + usage-based upgrade triggers create a self-sustaining funnel.
 
 ### Risks & Challenges
 1. **Solo-developer velocity constraint** — Small team must prioritize ruthlessly; can't compete on feature breadth with well-funded competitors.

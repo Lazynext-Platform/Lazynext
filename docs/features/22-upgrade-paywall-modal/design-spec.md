@@ -30,7 +30,7 @@
     - Limit explanation: "Free plan searches the last 10 decisions"
     - Feature list panel (bg-slate-900/50 rounded-md p-2.5): 4 items with checkmarks — unlimited nodes, full Decision DNA search, 100 LazyMind queries/day, import tools
     - CTA: "Upgrade to Starter -- 499/seat/mo" (w-full bg-[#4F6EF7])
-    - Footer: "14-day free trial. Cancel anytime." (text-[10px] text-slate-600)
+    - Footer: "30-day free trial. Cancel anytime." (text-[10px] text-slate-600)
 - **Rationale:** Showing the actual search query and blurred results creates maximum FOMO. The upgrade card appears naturally below the results, not as a disruptive popup. Feature list contextualizes the value beyond just search.
 
 ### 2. Node Limit
@@ -82,7 +82,7 @@
     - **Starter** (border-[#4F6EF7], bg-[#4F6EF7]/5): "Most Popular" badge (absolute -top-2.5, bg-[#4F6EF7]), price 415/seat/mo annual, features: unlimited everything, Decision DNA search, LazyMind AI 100/day, import tools, email support; "Start Free Trial" primary CTA
     - **Pro** (border-slate-700): price 832/seat/mo annual, features: everything in Starter + Health Dashboard, PULSE dashboards, automation engine, priority support; "Start Free Trial" secondary CTA
     - **Business** (border-slate-700): price 2,499/seat/mo annual, features: everything in Pro + SSO/SAML, audit logs, unlimited AI, dedicated support; "Contact Sales" secondary CTA
-  - Footer (px-5 pb-4): "14-day free trial on all paid plans. No credit card required. Cancel anytime." (text-[10px] text-slate-600)
+  - Footer (px-5 pb-4): "30-day free trial on all paid plans. No credit card required. Cancel anytime." (text-[10px] text-slate-600)
 - **Rationale:** Starter gets visual emphasis (blue border, tinted bg, "Most Popular" badge) to guide majority of conversions. Annual pricing shown by default with "Save 17%" to incentivize commitment. "billed annually" note sets billing expectation.
 
 ### 6. Trial Banners
@@ -106,7 +106,7 @@
 | Health Dashboard Gate | Blurred dashboard + purple overlay card | Non-Business user visits Health Dashboard |
 | Upgrade Modal — annual | Annual prices shown, toggle right, "Save 17%" visible | Default state / toggle to annual |
 | Upgrade Modal — monthly | Monthly prices shown, toggle left, no savings badge | Toggle to monthly |
-| Trial — active | Blue banner, progress bar, days remaining | During 14-day trial, > 3 days left |
+| Trial — active | Blue banner, progress bar, days remaining | During 30-day trial, > 3 days left |
 | Trial — expiring | Amber banner, warning icon, feature loss reminder | 3 days or fewer remaining |
 | Trial — expired | Red banner, downgrade notice | Trial period ended, not upgraded |
 

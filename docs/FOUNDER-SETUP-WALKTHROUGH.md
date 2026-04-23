@@ -343,7 +343,7 @@ For **each** of the 4 products:
 
 **Goal:** Tell Inngest where your app lives so cron jobs fire.
 
-**Why:** The 14-day trial expiry cron (that downgrades unpaid trials) needs Inngest to know the URL.
+**Why:** The 30-day trial expiry cron (that downgrades unpaid trials) needs Inngest to know the URL.
 
 ## Steps
 

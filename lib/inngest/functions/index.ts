@@ -415,7 +415,7 @@ export const handleExportRequested = inngest.createFunction(
   }
 )
 
-// 8. Trial-expiry cron — daily sweep of workspaces whose 14-day Business
+// 8. Trial-expiry cron — daily sweep of workspaces whose 30-day Business
 //    trial has elapsed without converting. Downgrades them to free and
 //    clears the trial timestamp so we don't re-process the same row.
 //    Runs at 02:00 UTC daily.
