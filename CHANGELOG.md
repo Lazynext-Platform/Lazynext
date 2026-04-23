@@ -4,6 +4,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.2] - 2026-04-23
+
+**Theme:** Clean up stale setup-doc references that still told founders to create 6 Gumroad products across 3 tiers (starter/pro/business). v1.3 only shows 2 tiers on the pricing page — Team and Business — which map to the `STARTER` and `PRO` env-var keys (legacy naming from when the tiers were named that way). Deploy docs are now aligned to the 4-product reality.
+
+Why: a careful founder reading `DEPLOY.md` or `README.md` before the walkthrough would over-provision 2 extra Gumroad products (`BUSINESS_*` env vars) that the v1.3 pricing page never links to. The walkthrough itself (`docs/FOUNDER-SETUP-WALKTHROUGH.md`) was already correct. Aligning the deploy refs to match.
+
+### Changed
+- `DEPLOY.md`: prerequisites line now says `4 recurring (subscription) products: team/business × monthly/yearly` instead of 6-across-3-tiers; env var table entry shows `{STARTER,PRO}` not `{STARTER,PRO,BUSINESS}` with a note that `STARTER`=Team, `PRO`=Business (legacy naming). Removed stale `v1.0.0.1` version stamp from the doc preamble.
+- `README.md`: env var table entry for Gumroad URL permalinks now says 4, not 6.
+- `docs/project-context.md`: same correction in the project reference env-var table.
+
+### Not changed (intentional)
+- `lib/billing/plans.ts`: still defines a `business` plan entry with `NEXT_PUBLIC_GUMROAD_BUSINESS_*` fallbacks. That code path is dead in v1.3 messaging (pricing page never links Business to the `business` key — it uses `pro`). Leaving the code shape alone so a future Solo/Enterprise tier can slot in without touching billing plumbing. Dead env vars are harmless if unset.
+- `.env.example`: still lists all 6 URL placeholders. It's a template of what can be set, not what must be set.
+- `docs/FOUNDER-SETUP-WALKTHROUGH.md`: already correctly lists 4 env vars. No change needed.
+
+### Pre-merge checks
+- `npm run lint` clean
+- `npm run type-check` clean
+- `npm test` all passing
+
 ## [1.3.0.1] - 2026-04-23
 
 **Theme:** Align internal 14-day Business trial with the 30-day trial offered on Gumroad-hosted checkout so users see one consistent number everywhere.

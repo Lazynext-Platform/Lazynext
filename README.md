@@ -69,7 +69,7 @@ Copy `.env.example` to `.env.local` and fill in:
 | `GROQ_API_KEY` | For AI | Groq API key for LazyMind |
 | `TOGETHER_API_KEY` | Fallback | Together AI fallback key |
 | `GUMROAD_WEBHOOK_SECRET` | For billing | Random long string — used as the URL path secret for the Gumroad ping webhook |
-| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | For billing | 6 Gumroad recurring-product permalinks |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO}_{MONTHLY,ANNUAL}_URL` | For billing | 4 Gumroad recurring-product permalinks (`STARTER`=Team, `PRO`=Business — legacy naming) |
 | `RESEND_API_KEY` | For email | Resend API key |
 | `NEXT_PUBLIC_APP_URL` | Recommended | Your app URL (default: http://localhost:3000) |
 

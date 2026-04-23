@@ -168,7 +168,7 @@ npm run dev
 | `GROQ_API_KEY` | Yes | — | Groq AI API key |
 | `TOGETHER_API_KEY` | No | — | Together AI fallback key |
 | `GUMROAD_WEBHOOK_SECRET` | No | — | URL-path secret for Gumroad ping webhook |
-| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | No | — | Gumroad product permalinks for each plan/interval |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO}_{MONTHLY,ANNUAL}_URL` | No | — | Gumroad product permalinks (`STARTER`=Team, `PRO`=Business — legacy naming; 4 URLs total) |
 | `RESEND_API_KEY` | No | — | Resend email API key |
 | `NEXT_PUBLIC_POSTHOG_KEY` | No | — | PostHog analytics |
 | `SENTRY_DSN` | No | — | Sentry error tracking |

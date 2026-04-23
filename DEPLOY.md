@@ -1,6 +1,6 @@
 # Lazynext — Deployment Guide
 
-Production deploy checklist for v1.0.0.1. Target platform: **Vercel** (can swap for Fly/Render — only `vercel.json` is Vercel-specific).
+Production deploy checklist. Target platform: **Vercel** (can swap for Fly/Render — only `vercel.json` is Vercel-specific).
 
 ---
 
@@ -9,7 +9,7 @@ Production deploy checklist for v1.0.0.1. Target platform: **Vercel** (can swap 
 - [ ] Supabase project created (https://supabase.com/dashboard)
 - [ ] Groq API key (https://console.groq.com/keys)
 - [ ] Together AI key (fallback) (https://api.together.xyz/settings/api-keys)
-- [ ] Gumroad account with 6 recurring (subscription) products: starter/pro/business × monthly/yearly
+- [ ] Gumroad account with 4 recurring (subscription) products: team/business × monthly/yearly (env vars use legacy `STARTER`=Team, `PRO`=Business naming)
 - [ ] Resend API key + verified sending domain (https://resend.com/domains)
 - [ ] Inngest account + event key + signing key (https://app.inngest.com)
 - [ ] Domain pointed at Vercel (or platform of choice)
@@ -58,7 +58,7 @@ Set in **Vercel Project → Settings → Environment Variables** (Production + P
 | `GROQ_API_KEY` | console.groq.com | ✅ (or scorer falls back to heuristic) |
 | `TOGETHER_API_KEY` | api.together.xyz | ⚠️ recommended |
 | `GUMROAD_WEBHOOK_SECRET` | Random long string you pick (used as URL path secret) | ✅ for billing |
-| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO,BUSINESS}_{MONTHLY,ANNUAL}_URL` | 6 Gumroad product permalinks | ✅ for billing |
+| `NEXT_PUBLIC_GUMROAD_{STARTER,PRO}_{MONTHLY,ANNUAL}_URL` | 4 Gumroad product permalinks (`STARTER`=Team, `PRO`=Business — legacy naming) | ✅ for billing |
 | `RESEND_API_KEY` | resend.com | ✅ for email |
 | `INNGEST_EVENT_KEY` | app.inngest.com | ✅ for background jobs |
 | `INNGEST_SIGNING_KEY` | app.inngest.com | ✅ for background jobs |
