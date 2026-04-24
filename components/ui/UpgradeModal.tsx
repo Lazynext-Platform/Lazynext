@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { X, Lock, Sparkles, Check, Crown, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { formatPrice } from '@/lib/i18n'
@@ -79,9 +79,31 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
   const [loadingSlug, setLoadingSlug] = useState<PlanSlug | null>(null)
   const currency = useUIStore((s) => s.currency)
   const workspace = useWorkspaceStore((s) => s.workspace)
+  const setWorkspace = useWorkspaceStore((s) => s.setWorkspace)
+  const params = useParams()
+  const slugFromUrl = typeof params?.slug === 'string' ? params.slug : null
   const router = useRouter()
   const { toast } = useToast()
   const modalRef = useModalA11y()
+
+  // Self-healing workspace ID resolver. The Zustand store is populated by
+  // <WorkspaceHydrator> at layout mount, but an impatient click can beat the
+  // fetch. On a cold store, fall back to the slug from the URL and resolve
+  // the ID inline — then prime the store so subsequent clicks are instant.
+  async function resolveWorkspaceId(): Promise<{ id: string; plan: string } | null> {
+    if (workspace?.id) return { id: workspace.id, plan: workspace.plan }
+    if (!slugFromUrl) return null
+    try {
+      const res = await fetch(`/api/v1/workspace/${slugFromUrl}`, { cache: 'no-store' })
+      if (!res.ok) return null
+      const body = (await res.json()) as { data?: { id: string; name: string; slug: string; plan: string; logo: string | null } }
+      if (!body.data) return null
+      setWorkspace(body.data)
+      return { id: body.data.id, plan: body.data.plan }
+    } catch {
+      return null
+    }
+  }
 
   const copy = VARIANT_COPY[variant]
 
@@ -109,16 +131,19 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
       return
     }
 
-    if (!workspace?.id) {
+    setLoadingSlug(slug)
+    const resolved = await resolveWorkspaceId()
+    if (!resolved) {
       toast({
         type: 'error',
         title: 'No workspace selected',
         description: 'Open a workspace before upgrading.',
       })
+      setLoadingSlug(null)
       return
     }
+    const workspaceId = resolved.id
 
-    setLoadingSlug(slug)
     try {
       const res = await fetch('/api/v1/billing/checkout', {
         method: 'POST',
@@ -126,7 +151,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
         body: JSON.stringify({
           plan: slug,
           interval: billingCycle,
-          workspaceId: workspace.id,
+          workspaceId,
         }),
       })
       const data = await res.json().catch(() => ({}))
@@ -135,7 +160,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
           variant,
           plan: slug,
           interval: billingCycle,
-          workspaceId: workspace.id,
+          workspaceId,
           status: res.status,
           errorCode: data?.error ?? null,
         })
@@ -152,7 +177,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
         variant,
         plan: slug,
         interval: billingCycle,
-        workspaceId: workspace.id,
+        workspaceId,
       })
       // Redirect to Gumroad — URL includes url_params so the ping can stamp
       // the right workspace on return.
@@ -162,7 +187,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
         variant,
         plan: slug,
         interval: billingCycle,
-        workspaceId: workspace.id,
+        workspaceId,
         errorCode: 'network_error',
       })
       toast({
