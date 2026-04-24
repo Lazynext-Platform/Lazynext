@@ -12,6 +12,9 @@ const inserts: { table: string; row: Record<string, unknown> }[] = []
 // Flip this to simulate a duplicate-key violation on webhook_events insert
 // (i.e., the ping was already processed).
 let insertConflict = false
+// Pre-read result used by the sale-ping handler when detecting first sale vs
+// renewal. Default: no existing row (first sale). Tests can override.
+let workspaceBefore: Record<string, unknown> | null = null
 
 function makeBuilder(table: string) {
   return {
@@ -21,6 +24,11 @@ function makeBuilder(table: string) {
         error: insertConflict ? { code: '23505', message: 'duplicate' } : null,
       })
     },
+    select: (_cols: string) => ({
+      eq: (_column: string, _value: unknown) => ({
+        maybeSingle: () => Promise.resolve({ data: workspaceBefore, error: null }),
+      }),
+    }),
     update: (patch: Record<string, unknown>) => ({
       eq: (column: string, value: unknown) => {
         updates.push({ table, patch, where: { [column]: value } })
@@ -79,6 +87,7 @@ beforeEach(() => {
   updates.length = 0
   inserts.length = 0
   insertConflict = false
+  workspaceBefore = null
   vi.clearAllMocks()
 })
 
@@ -164,6 +173,41 @@ describe('Gumroad webhook — sale ping upgrades workspace', () => {
     })
     expect(res.status).toBe(200)
     expect(updates.filter((u) => u.table === 'workspaces')).toHaveLength(0)
+  })
+
+  it('stamps trial_ends_at on first sale (no prior subscription)', async () => {
+    workspaceBefore = { gr_subscription_id: null, trial_ends_at: null }
+    const res = await callWebhook(SECRET, {
+      sale_id: 'sale_first',
+      subscription_id: 'sub_new',
+      email: 'first@x.com',
+      'url_params[workspace_id]': 'ws-new',
+      'url_params[plan]': 'starter',
+    })
+    expect(res.status).toBe(200)
+    const wsUpdate = updates.find((u) => u.table === 'workspaces')
+    expect(wsUpdate?.patch.trial_ends_at).toBeDefined()
+    const trialEnd = new Date(wsUpdate?.patch.trial_ends_at as string).getTime()
+    const expected = Date.now() + 30 * 24 * 60 * 60 * 1000
+    // Within a minute of the expected 30-day window
+    expect(Math.abs(trialEnd - expected)).toBeLessThan(60_000)
+  })
+
+  it('does NOT re-stamp trial_ends_at on renewal (existing subscription)', async () => {
+    workspaceBefore = {
+      gr_subscription_id: 'sub_existing',
+      trial_ends_at: '2026-05-01T00:00:00.000Z',
+    }
+    const res = await callWebhook(SECRET, {
+      sale_id: 'sale_renewal',
+      subscription_id: 'sub_existing',
+      email: 'renewal@x.com',
+      'url_params[workspace_id]': 'ws-renew',
+      'url_params[plan]': 'pro',
+    })
+    expect(res.status).toBe(200)
+    const wsUpdate = updates.find((u) => u.table === 'workspaces')
+    expect(wsUpdate?.patch.trial_ends_at).toBeUndefined()
   })
 })
 

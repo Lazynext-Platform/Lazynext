@@ -6,6 +6,7 @@ import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { inngest, EVENTS } from '@/lib/inngest/client'
+import { TRIAL_DAYS } from '@/lib/utils/constants'
 
 type PingPayload = Record<string, string>
 
@@ -107,19 +108,40 @@ export async function POST(
         const plan = (getUrlParam(payload, 'plan') as 'starter' | 'pro' | 'business' | undefined) ?? 'starter'
         const email = payload['email']
         if (workspaceId && hasValidDatabaseUrl) {
+          // Detect first sale vs renewal so we only stamp trial_ends_at once.
+          // Gumroad sends a `sale` ping on trial start AND on every renewal
+          // charge. We only want to set the countdown on the first one.
+          const { data: before } = await db
+            .from('workspaces')
+            .select('gr_subscription_id, trial_ends_at')
+            .eq('id', workspaceId)
+            .maybeSingle()
+          const isFirstSale = !before?.gr_subscription_id
+
+          const update: Record<string, unknown> = {
+            gr_customer_email: email ?? null,
+            gr_subscription_id: subscriptionId ?? null,
+            gr_subscription_manage_url: deriveManageUrl(subscriptionId),
+            plan,
+          }
+          // First sale → stamp the 30-day window so the Billing page can
+          // show a real countdown ("27 days left on trial, first charge on
+          // May 25"). On renewals we leave trial_ends_at alone.
+          if (isFirstSale && !before?.trial_ends_at) {
+            const trialEnd = new Date()
+            trialEnd.setDate(trialEnd.getDate() + TRIAL_DAYS)
+            update.trial_ends_at = trialEnd.toISOString()
+          }
+
           await db
             .from('workspaces')
-            .update({
-              gr_customer_email: email ?? null,
-              gr_subscription_id: subscriptionId ?? null,
-              gr_subscription_manage_url: deriveManageUrl(subscriptionId),
-              plan,
-            })
+            .update(update)
             .eq('id', workspaceId)
           trackBillingEvent('webhook.sale.applied', {
             workspaceId,
             plan,
             subscriptionId: subscriptionId ?? null,
+            isFirstSale,
           })
           // Fire welcome email via Inngest. Non-blocking; failure to emit
           // won't fail the ping ack.

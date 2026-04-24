@@ -115,6 +115,7 @@ export default function CreateWorkspacePage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [name, setName] = useState('')
+  const [committedSlug, setCommittedSlug] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [question, setQuestion] = useState('Which database should we use?')
@@ -130,10 +131,42 @@ export default function CreateWorkspacePage() {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
 
-  function handleStep1Submit(e: React.FormEvent) {
+  // Step 1 commits the workspace name + slug to the DB. Doing this up-front
+  // — rather than at step 3 ("Go to Workspace") — means a SLUG_TAKEN error
+  // can never contradict the step-3 celebration card. If the slug is taken,
+  // we stay on step 1 with the error; if it saves, the user only reaches
+  // the celebration after we know the workspace is safely renamed.
+  async function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault()
-    if (!name.trim()) return
-    setStep(2)
+    if (!name.trim() || loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/v1/onboarding/workspace', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), slug }),
+      })
+      const body = await res.json().catch(() => null)
+      if (!res.ok) {
+        if (body?.error === 'SLUG_TAKEN') {
+          setError(
+            `"${slug}" is already taken. Try a different workspace name (the URL is built from the name).`
+          )
+        } else if (res.status === 401) {
+          setError('Your session expired. Please sign in again.')
+        } else {
+          setError(body?.error || 'Could not set up your workspace. Please try again.')
+        }
+        return
+      }
+      setCommittedSlug(body?.data?.slug || slug)
+      setStep(2)
+    } catch {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   function handleOptionSelect(id: string) {
@@ -149,34 +182,8 @@ export default function CreateWorkspacePage() {
     setTimeout(() => setShowConfetti(false), 3000)
   }
 
-  async function handleGoToWorkspace() {
-    setLoading(true)
-    setError(null)
-    try {
-      const res = await fetch('/api/v1/onboarding/workspace', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), slug }),
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => null)
-        if (body?.error === 'SLUG_TAKEN') {
-          setError('That workspace URL is already taken. Please go back and choose another name.')
-        } else if (body?.error === 'WORKSPACE_NOT_FOUND') {
-          setError('No workspace was found for your account. Please sign in again.')
-        } else {
-          setError(body?.error || 'Failed to set up your workspace. Please try again.')
-        }
-        return
-      }
-      const body = await res.json().catch(() => null)
-      const workspaceSlug = body?.data?.slug || slug
-      router.push(`/workspace/${workspaceSlug}/guide`)
-    } catch {
-      setError('Network error. Please check your connection and try again.')
-    } finally {
-      setLoading(false)
-    }
+  function handleGoToWorkspace() {
+    router.push(`/workspace/${committedSlug || slug}/guide`)
   }
 
   return (
@@ -217,7 +224,10 @@ export default function CreateWorkspacePage() {
                   id="name"
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    setName(e.target.value)
+                    if (error) setError(null)
+                  }}
                   placeholder="e.g. Acme Corp"
                   maxLength={50}
                   className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
@@ -233,11 +243,23 @@ export default function CreateWorkspacePage() {
 
               <button
                 type="submit"
-                disabled={!name.trim()}
+                disabled={!name.trim() || loading}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Continue <ArrowRight className="h-4 w-4" />
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    Continue <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
+
+              {error && (
+                <p className="text-center text-sm text-red-400" role="alert">
+                  {error}
+                </p>
+              )}
             </form>
           </div>
         )}
@@ -393,23 +415,10 @@ export default function CreateWorkspacePage() {
 
             <button
               onClick={handleGoToWorkspace}
-              disabled={loading}
               className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  Go to Workspace <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+              Go to Workspace <ArrowRight className="h-4 w-4" />
             </button>
-
-            {error && (
-              <p className="mt-3 text-center text-sm text-red-400" role="alert">
-                {error}
-              </p>
-            )}
           </div>
         )}
       </div>

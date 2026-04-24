@@ -4,6 +4,33 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.1.0] - 2026-04-25
+
+**Theme:** Real billing data end-to-end. Kill the last of the mock placeholders on the Billing page, stamp the trial window at the right moment, and stop the onboarding UI from showing success + error at the same time.
+
+Before this release, `/workspace/[slug]/billing` rendered a hardcoded "Starter Plan $9/seat" card, a fake VISA 4242 payment method, and a fabricated invoice table regardless of what the workspace had actually purchased. A founder testing the Gumroad flow could complete a real checkout, get the welcome email, and still see "upgrade to Team" because the page never read the DB. The webhook-write loop also had a quiet gap: `trial_ends_at` was only set by the Supabase `handle_new_user` trigger on signup, not by the first sale, so the Billing page could never show a real countdown. And the onboarding page could render "Your workspace is ready!" and "URL already taken" in the same frame when step 3 submission raced ahead of the create call.
+
+### Added
+- `app/api/v1/workspace/[slug]/billing/route.ts` — new authoritative billing state endpoint. Returns plan, trial_ends_at, subscription id, manage url, customer email, daysUntilTrialEnd, and live member/node/workflow counts with PLAN_LIMITS caps. One request, real data.
+- Webhook now stamps `trial_ends_at = now + 30 days` on the FIRST `sale` ping (detected via absence of prior `gr_subscription_id`). Renewals leave the existing window alone.
+- Two new integration tests: "stamps trial_ends_at on first sale" and "does NOT re-stamp trial_ends_at on renewal" in `tests/integration/gumroad-webhook.test.ts`.
+
+### Changed
+- `app/(app)/workspace/[slug]/billing/page.tsx` — full rewrite. Client component fetches from the new endpoint, shows real plan with proper PLAN_DISPLAY labels (starter→Team, pro→Business, business→Enterprise), real PLAN_PRICING_USD, real trial countdown, and real usage meters. "Manage on Gumroad" now opens the actual subscription manage URL. "Change Plan" opens UpgradeModal. Payment Method shows the customer email with a link to update on Gumroad. Billing History points to the Gumroad customer portal (no fake invoice table).
+- `app/(app)/onboarding/create-workspace/page.tsx` — moved the `POST /api/v1/workspace` call from step 3 (decision) to step 1 (workspace name). Slug conflicts are now surfaced inline under the name input, not on the step 3 celebration card. Errors clear when the user types. `SLUG_TAKEN` message now tells the user exactly which slug collided and why.
+
+### Removed
+- Hardcoded `plans`, `billingHistory`, and `usage` arrays from the billing page. Fake VISA 4242 block. Static "Starter Plan $9/seat" cards. All of it gone.
+
+### Why it matters
+Founders and paying customers need to see what they actually bought. A billing page that lies to the user is worse than no billing page. With this release, the Gumroad checkout → webhook → workspace-row → UI loop is fully visible: purchase a Team subscription on lazynext.com, the Billing page immediately shows plan "Team", a 30-day trial countdown, the customer's real email, and a working "Manage on Gumroad" button.
+
+### Pre-merge checks
+- `npm run lint` clean (2 pre-existing `<img>` warnings untouched)
+- `npm run type-check` clean
+- `npm test` — 141/141 passing (139 existing + 2 new trial-stamping tests)
+- `npm run build` succeeds, new `/api/v1/workspace/[slug]/billing` route registered
+
 ## [1.3.0.5] - 2026-04-24
 
 **Theme:** Turn the opaque "No workspace selected" toast into a specific, actionable error so we can tell what is actually blocking the Upgrade flow. v1.3.0.4's race-fix didn't resolve the production bug, which means the lookup is legitimately failing — this release tells the user (and us) why.

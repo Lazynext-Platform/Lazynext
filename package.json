@@ -1,6 +1,6 @@
 {
   "name": "lazynext",
-  "version": "1.3.0.2",
+  "version": "1.3.1.0",
   "description": "The anti-software workflow platform. Tasks, docs, decisions, and AI on an infinite canvas.",
   "private": true,
   "scripts": {
