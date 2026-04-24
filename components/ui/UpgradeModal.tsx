@@ -90,18 +90,43 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
   // <WorkspaceHydrator> at layout mount, but an impatient click can beat the
   // fetch. On a cold store, fall back to the slug from the URL and resolve
   // the ID inline — then prime the store so subsequent clicks are instant.
-  async function resolveWorkspaceId(): Promise<{ id: string; plan: string } | null> {
-    if (workspace?.id) return { id: workspace.id, plan: workspace.plan }
-    if (!slugFromUrl) return null
+  // Returns a tagged error on failure so the toast can tell the user (and
+  // us) what actually went wrong.
+  type ResolveOk = { ok: true; id: string; plan: string }
+  type ResolveErr = { ok: false; reason: 'NO_SLUG' | 'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'NETWORK' | string; status?: number }
+  async function resolveWorkspaceId(): Promise<ResolveOk | ResolveErr> {
+    if (workspace?.id) return { ok: true, id: workspace.id, plan: workspace.plan }
+    if (!slugFromUrl) return { ok: false, reason: 'NO_SLUG' }
     try {
       const res = await fetch(`/api/v1/workspace/${slugFromUrl}`, { cache: 'no-store' })
-      if (!res.ok) return null
+      if (!res.ok) {
+        const errBody = (await res.json().catch(() => ({}))) as { error?: string }
+        const reason = errBody.error || (res.status === 401 ? 'UNAUTHORIZED' : res.status === 403 ? 'FORBIDDEN' : res.status === 404 ? 'NOT_FOUND' : `HTTP_${res.status}`)
+        return { ok: false, reason, status: res.status }
+      }
       const body = (await res.json()) as { data?: { id: string; name: string; slug: string; plan: string; logo: string | null } }
-      if (!body.data) return null
+      if (!body.data) return { ok: false, reason: 'EMPTY_BODY', status: res.status }
       setWorkspace(body.data)
-      return { id: body.data.id, plan: body.data.plan }
+      return { ok: true, id: body.data.id, plan: body.data.plan }
     } catch {
-      return null
+      return { ok: false, reason: 'NETWORK' }
+    }
+  }
+
+  function describeResolveError(err: ResolveErr): { title: string; description: string } {
+    switch (err.reason) {
+      case 'NO_SLUG':
+        return { title: 'No workspace in URL', description: 'Open a workspace page first, then try again.' }
+      case 'UNAUTHORIZED':
+        return { title: 'Session expired', description: 'Refresh the page and sign in again.' }
+      case 'FORBIDDEN':
+        return { title: 'Not a workspace member', description: `You aren't listed on the "${slugFromUrl}" workspace. Ask an owner to add you, or switch workspaces.` }
+      case 'NOT_FOUND':
+        return { title: 'Workspace not found', description: `No workspace with slug "${slugFromUrl}" exists in the database.` }
+      case 'NETWORK':
+        return { title: 'Network error', description: 'Could not reach the billing service. Check your connection and retry.' }
+      default:
+        return { title: 'Could not open checkout', description: `Workspace lookup failed (${err.reason}${err.status ? ` · HTTP ${err.status}` : ''}). Please refresh and retry.` }
     }
   }
 
@@ -133,12 +158,9 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
 
     setLoadingSlug(slug)
     const resolved = await resolveWorkspaceId()
-    if (!resolved) {
-      toast({
-        type: 'error',
-        title: 'No workspace selected',
-        description: 'Open a workspace before upgrading.',
-      })
+    if (!resolved.ok) {
+      const { title, description } = describeResolveError(resolved)
+      toast({ type: 'error', title, description })
       setLoadingSlug(null)
       return
     }
