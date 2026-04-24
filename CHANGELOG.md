@@ -4,6 +4,23 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.4] - 2026-04-24
+
+**Theme:** Kill the race condition behind "No workspace selected" error toasts in the Upgrade modal. v1.3.0.3 added a layout-mount hydrator, but an impatient click could beat the fetch and still fire the toast. Make the click handler self-healing instead.
+
+Why this mattered: the founder tested v1.3.0.3 in production and still got four stacked error toasts after clicking Choose Team, because the hydrator's `fetch` hadn't resolved yet when the click fired. A layout-mount hydrator is inherently racy for sub-second clicks. The fix moves the resilience into the click handler itself.
+
+### Fixed
+- `components/ui/UpgradeModal.tsx` — `handleChoose()` no longer bails on an empty Zustand store. If `workspace?.id` is missing, it falls back to `useParams().slug` from the URL, calls `GET /api/v1/workspace/[slug]` inline to resolve the ID, and primes the store while at it so subsequent clicks are instant. Only returns the "No workspace selected" toast if BOTH the store is empty AND the inline resolve fails (e.g. user is not a member or the slug is gone).
+
+### Added
+- Inline `resolveWorkspaceId()` helper in `UpgradeModal.tsx` — store-first, URL-slug-fallback pattern. Also hydrates the store on success so the WorkspaceSelector nameplate and other consumers benefit from the fetch.
+
+### Pre-merge checks
+- `npm run lint` clean (2 pre-existing warnings untouched)
+- `npm run type-check` clean
+- `npm test` — 139/139 passing
+
 ## [1.3.0.3] - 2026-04-24
 
 **Theme:** Fix workspace store never hydrating at runtime. Unblocks the Upgrade modal checkout flow so founders (and their customers) can actually click "Choose Team" and reach Gumroad.
