@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.3] - 2026-04-24
+
+**Theme:** Fix workspace store never hydrating at runtime. Unblocks the Upgrade modal checkout flow so founders (and their customers) can actually click "Choose Team" and reach Gumroad.
+
+Why this mattered: a user clicking Choose Team in the Upgrade modal was hit with four "No workspace selected" error toasts and a dead button. The workspace Zustand store was populated by tests but never by production code, so `UpgradeModal.tsx` bailed on its `workspace?.id` guard every time. This blocked the entire billing test flow on production.
+
+### Fixed
+- `components/ui/UpgradeModal.tsx` no longer bails with "No workspace selected" on every click. The workspace store is now hydrated at the layout level on every workspace page.
+- Silent pre-existing bug where `WorkspaceSelector.tsx` rendered the string "Workspace" as a fallback instead of the actual workspace name (same root cause: empty store).
+
+### Added
+- `app/api/v1/workspace/[slug]/route.ts` — `GET` endpoint that returns `{id, name, slug, plan, logo}` after Clerk auth + `workspace_members` membership check. Dev-mode fallback returns a synthetic workspace when `DATABASE_URL` is a placeholder so local dev still renders end-to-end.
+- `components/layout/WorkspaceHydrator.tsx` — client component that fetches the endpoint once on slug change and calls `setWorkspace()` on the Zustand store. Silent fallback on error so downstream surfaces still render their empty-store UI.
+- Wired `<WorkspaceHydrator slug={slug} />` into `app/(app)/workspace/[slug]/layout.tsx` alongside the existing `<WmsHydrator>`.
+
+### Pre-merge checks
+- `npm run lint` clean (2 pre-existing warnings untouched)
+- `npm run type-check` clean
+- `npm test` — 139/139 passing
+
 ## [1.3.0.2] - 2026-04-23
 
 **Theme:** Clean up stale setup-doc references that still told founders to create 6 Gumroad products across 3 tiers (starter/pro/business). v1.3 only shows 2 tiers on the pricing page — Team and Business — which map to the `STARTER` and `PRO` env-var keys (legacy naming from when the tiers were named that way). Deploy docs are now aligned to the 4-product reality.
