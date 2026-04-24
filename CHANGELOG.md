@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.5] - 2026-04-24
+
+**Theme:** Turn the opaque "No workspace selected" toast into a specific, actionable error so we can tell what is actually blocking the Upgrade flow. v1.3.0.4's race-fix didn't resolve the production bug, which means the lookup is legitimately failing — this release tells the user (and us) why.
+
+### Changed
+- `components/ui/UpgradeModal.tsx` — `resolveWorkspaceId()` now returns a tagged result (`{ok: true, ...}` or `{ok: false, reason}`). The click handler maps each failure mode to a human-readable toast:
+  - `NO_SLUG` → "Open a workspace page first"
+  - `UNAUTHORIZED` (401) → "Session expired, refresh and sign in"
+  - `FORBIDDEN` (403) → "Not a workspace member — ask an owner to add you"
+  - `NOT_FOUND` (404) → "Workspace '{slug}' not found in the database"
+  - `NETWORK` → "Could not reach billing service"
+  - Fallback → "Workspace lookup failed (REASON · HTTP STATUS)"
+
+Why: the founder tested v1.3.0.4 in prod and still saw the old generic toast. That means the store is cold AND the inline resolve is failing. Without knowing which HTTP status, we can't tell whether the user isn't a member, the slug doesn't exist, or there's an auth issue. Exposing the real reason is the fastest path to the fix.
+
+### Pre-merge checks
+- `npm run lint` clean (2 pre-existing warnings untouched)
+- `npm run type-check` clean
+- `npm test` — 139/139 passing
+
 ## [1.3.0.4] - 2026-04-24
 
 **Theme:** Kill the race condition behind "No workspace selected" error toasts in the Upgrade modal. v1.3.0.3 added a layout-mount hydrator, but an impatient click could beat the fetch and still fire the toast. Make the click handler self-healing instead.
