@@ -10,6 +10,7 @@ import { ToastProvider } from '@/components/ui/ToastProvider'
 import { WorkspaceTour } from '@/components/ui/WorkspaceTour'
 import { GlobalLogDecisionShortcut } from '@/components/decisions/GlobalLogDecisionShortcut'
 import { WmsHydrator } from '@/components/layout/WmsHydrator'
+import { WorkspaceHydrator } from '@/components/layout/WorkspaceHydrator'
 import { UpgradeModalHost } from '@/components/ui/UpgradeModalHost'
 import { useUIStore } from '@/stores/ui.store'
 import { cn } from '@/lib/utils/cn'
@@ -46,6 +47,7 @@ export default function WorkspaceLayout({ children }: { children: React.ReactNod
         <KeyboardShortcutsModal />
         <WorkspaceTour />
         <GlobalLogDecisionShortcut workspaceSlug={slug} />
+        <WorkspaceHydrator slug={slug} />
         <WmsHydrator slug={slug} />
         <UpgradeModalHost />
       </div>
