@@ -131,14 +131,26 @@ export default function BillingPage() {
           }
           return
         }
-        if (!cancelled) setState(body.data as BillingState)
+        if (!cancelled) {
+          setLoadError(null)
+          setState(body.data as BillingState)
+        }
       } catch {
         if (!cancelled) setLoadError('Network error. Could not reach the billing service.')
       }
     }
     load()
+    // Revalidate on focus — buyers come back from the Gumroad checkout tab and
+    // expect their plan to be live. Without this they'd see "Free plan" until
+    // they hard-refresh, which makes the webhook look broken even when it's
+    // already done its job.
+    function onFocus() {
+      load()
+    }
+    window.addEventListener('focus', onFocus)
     return () => {
       cancelled = true
+      window.removeEventListener('focus', onFocus)
     }
   }, [slug])
 
@@ -177,7 +189,16 @@ export default function BillingPage() {
   const currentPrice = PLAN_PRICING_USD[state.plan as keyof typeof PLAN_PRICING_USD] ?? null
   const isPaid = state.plan !== 'free' && state.plan !== 'enterprise'
   const hasSubscription = !!state.gr_subscription_id
-  const inTrial = (state.daysUntilTrialEnd ?? 0) > 0 && isPaid
+  // Show the trial banner whenever there's a trial countdown on a paid plan,
+  // including the day-of-charge (`0 days left` reads as "ends today" in copy).
+  // Don't gate it with `> 0` — that hides the banner on the most informative
+  // day of the trial.
+  const trialDays = state.daysUntilTrialEnd
+  const inTrial = trialDays !== null && trialDays >= 0 && isPaid
+  const trialBadgeText =
+    trialDays === 0
+      ? 'Trial · ends today'
+      : `Trial · ${trialDays} ${trialDays === 1 ? 'day' : 'days'} left`
 
   return (
     <>
@@ -218,8 +239,7 @@ export default function BillingPage() {
                 {inTrial && (
                   <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-400">
                     <Sparkles className="h-3 w-3" />
-                    Trial · {state.daysUntilTrialEnd} {state.daysUntilTrialEnd === 1 ? 'day' : 'days'}{' '}
-                    left
+                    {trialBadgeText}
                   </span>
                 )}
               </div>

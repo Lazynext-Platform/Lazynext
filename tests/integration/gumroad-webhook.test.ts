@@ -5,13 +5,18 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // so we can assert on the resulting mutations.
 // -----------------------------------------------------------------------
 
-type Update = { table: string; patch: Record<string, unknown>; where: Record<string, unknown> }
+type Update = {
+  table: string
+  patch: Record<string, unknown>
+  where: Record<string, unknown>
+  guards?: Record<string, unknown>
+}
 
 const updates: Update[] = []
 const inserts: { table: string; row: Record<string, unknown> }[] = []
-// Flip this to simulate a duplicate-key violation on webhook_events insert
-// (i.e., the ping was already processed).
-let insertConflict = false
+// Flip this to simulate the idempotency lookup finding an already-processed
+// event row (i.e., this ping was already handled — Gumroad is retrying).
+let eventAlreadyExists = false
 // Pre-read result used by the sale-ping handler when detecting first sale vs
 // renewal. Default: no existing row (first sale). Tests can override.
 let workspaceBefore: Record<string, unknown> | null = null
@@ -20,21 +25,46 @@ function makeBuilder(table: string) {
   return {
     insert: (row: Record<string, unknown>) => {
       inserts.push({ table, row })
-      return Promise.resolve({
-        error: insertConflict ? { code: '23505', message: 'duplicate' } : null,
-      })
+      return Promise.resolve({ error: null })
     },
     select: (_cols: string) => ({
       eq: (_column: string, _value: unknown) => ({
-        maybeSingle: () => Promise.resolve({ data: workspaceBefore, error: null }),
+        maybeSingle: () => {
+          if (table === 'webhook_events') {
+            return Promise.resolve({
+              data: eventAlreadyExists ? { event_id: 'existing' } : null,
+              error: null,
+            })
+          }
+          return Promise.resolve({ data: workspaceBefore, error: null })
+        },
       }),
     }),
-    update: (patch: Record<string, unknown>) => ({
-      eq: (column: string, value: unknown) => {
-        updates.push({ table, patch, where: { [column]: value } })
+    update: (patch: Record<string, unknown>) => {
+      const recordUpdate = (
+        column: string,
+        value: unknown,
+        guards: Record<string, unknown> = {}
+      ) => {
+        updates.push({ table, patch, where: { [column]: value }, guards })
         return Promise.resolve({ error: null })
-      },
-    }),
+      }
+      const updateChain = (column: string, value: unknown) => {
+        const where = { [column]: value }
+        return {
+          // Allow chaining `.is('gr_subscription_id', null)` for the atomic
+          // first-sale guard — record it as part of the update.
+          is: (guardColumn: string, guardValue: unknown) =>
+            recordUpdate(column, value, { [`is:${guardColumn}`]: guardValue }),
+          // Direct await on the .eq() call (the common case).
+          then: (resolve: (val: { error: null }) => void) => {
+            recordUpdate(column, value)
+            resolve({ error: null })
+          },
+        }
+      }
+      return { eq: updateChain }
+    },
   }
 }
 
@@ -86,7 +116,7 @@ async function callWebhook(secret: string, formFields: Record<string, string>) {
 beforeEach(() => {
   updates.length = 0
   inserts.length = 0
-  insertConflict = false
+  eventAlreadyExists = false
   workspaceBefore = null
   vi.clearAllMocks()
 })
@@ -209,6 +239,59 @@ describe('Gumroad webhook — sale ping upgrades workspace', () => {
     const wsUpdate = updates.find((u) => u.table === 'workspaces')
     expect(wsUpdate?.patch.trial_ends_at).toBeUndefined()
   })
+
+  // P0 hardening: an attacker-controlled url_params[plan] must not bubble into
+  // a Postgres ENUM cast error and brick Gumroad's retry queue. We validate
+  // against the known plan set and silently fall back to 'starter'.
+  it('rejects unknown plan, falls back to starter (no 500, no enum brick)', async () => {
+    const res = await callWebhook(SECRET, {
+      sale_id: 'sale_bogus',
+      subscription_id: 'sub_bogus',
+      email: 'b@x.com',
+      'url_params[workspace_id]': 'ws-bogus',
+      'url_params[plan]': 'enterprise-galactic', // not in VALID_PLANS
+    })
+    expect(res.status).toBe(200)
+    const wsUpdate = updates.find((u) => u.table === 'workspaces')
+    expect(wsUpdate?.patch.plan).toBe('starter')
+  })
+
+  // P0 hardening: when stamping trial_ends_at as part of a first sale, the
+  // webhook must add `gr_subscription_id IS NULL` to the WHERE clause so that
+  // two concurrent first-sale pings can't double-stamp the trial window.
+  it('atomic first-sale guard records is:gr_subscription_id null constraint', async () => {
+    workspaceBefore = { gr_subscription_id: null, trial_ends_at: null }
+    const res = await callWebhook(SECRET, {
+      sale_id: 'sale_first_atomic',
+      subscription_id: 'sub_first_atomic',
+      email: 'first@x.com',
+      'url_params[workspace_id]': 'ws-first-atomic',
+      'url_params[plan]': 'pro',
+    })
+    expect(res.status).toBe(200)
+    const wsUpdate = updates.find((u) => u.table === 'workspaces')
+    expect(wsUpdate?.guards).toEqual({ 'is:gr_subscription_id': null })
+  })
+
+  // Companion: on renewal we must NOT add the IS NULL guard, otherwise the
+  // update would match 0 rows on every renewal ping and the manage URL /
+  // plan upgrade would silently no-op.
+  it('renewal update does NOT add the IS NULL guard', async () => {
+    workspaceBefore = {
+      gr_subscription_id: 'sub_existing_renew',
+      trial_ends_at: '2026-05-01T00:00:00.000Z',
+    }
+    const res = await callWebhook(SECRET, {
+      sale_id: 'sale_renew_noguard',
+      subscription_id: 'sub_existing_renew',
+      email: 'r@x.com',
+      'url_params[workspace_id]': 'ws-renew-noguard',
+      'url_params[plan]': 'pro',
+    })
+    expect(res.status).toBe(200)
+    const wsUpdate = updates.find((u) => u.table === 'workspaces')
+    expect(wsUpdate?.guards).toEqual({})
+  })
 })
 
 // -----------------------------------------------------------------------
@@ -288,8 +371,8 @@ describe('Gumroad webhook — subscription lifecycle', () => {
 // -----------------------------------------------------------------------
 
 describe('Gumroad webhook — idempotency & unknowns', () => {
-  it('duplicate delivery (23505 on webhook_events) is acknowledged without re-processing', async () => {
-    insertConflict = true
+  it('duplicate delivery (existing webhook_events row) is acknowledged without re-processing', async () => {
+    eventAlreadyExists = true
     const res = await callWebhook(SECRET, {
       sale_id: 'sale_dup',
       subscription_id: 'sub_dup',
@@ -302,6 +385,8 @@ describe('Gumroad webhook — idempotency & unknowns', () => {
     expect(json).toEqual({ received: true, duplicate: true })
     // No workspace mutation — the handler bailed before the switch
     expect(updates.filter((u) => u.table === 'workspaces')).toHaveLength(0)
+    // And no idempotency insert either (SELECT-first means we already saw it)
+    expect(inserts.filter((i) => i.table === 'webhook_events')).toHaveLength(0)
   })
 
   it('unknown resource → 200 ack with no mutations', async () => {

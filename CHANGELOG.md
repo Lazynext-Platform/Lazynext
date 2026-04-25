@@ -4,6 +4,30 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.1.1] - 2026-04-25
+
+**Theme:** Pre-merge adversarial-review hardening on top of 1.3.1.0. The billing endpoint and webhook code shipped in 1.3.1.0 passed tests and shipped the happy path, but a pre-landing review surfaced four shipstoppers that would have shown up the first time we hit real concurrency, a malformed Gumroad ping, or a buyer toggling between checkout and the Billing tab. This release closes them all.
+
+### Fixed
+- **Webhook plan validation (P0).** `app/api/v1/webhooks/gumroad/[secret]/route.ts` now validates `url_params[plan]` against a `VALID_PLANS` set before any DB write. Previously an attacker-controllable querystring (Gumroad echoes our `url_params` verbatim) could pass through an unknown plan slug, get cast straight into the Postgres ENUM column, and raise. Combined with the old eager idempotency insert this would have bricked Gumroad's retry queue for that sale. Unknown plans now silently fall back to `starter` and emit a `webhook.sale.unknown_plan` telemetry event so we see it in logs.
+- **Webhook idempotency timing (P0).** Idempotency is now SELECT-first, INSERT-after-success. Previously we inserted the dedupe row at the top of the handler, so any error in the switch (DB blip, plan cast, etc.) left a phantom "already processed" row that swallowed Gumroad's retries. Now we read first, ack on hit, and only stamp the dedupe row after the switch returns clean.
+- **Atomic first-sale guard (P0).** When stamping `trial_ends_at` on a first sale we now add `gr_subscription_id IS NULL` to the WHERE clause. Two concurrent first-sale pings (Gumroad retries while the first is mid-flight) used to be able to both pass the read-then-write check and double-stamp the trial window. The atomic guard makes the second update match zero rows and quietly no-op.
+- **Billing page revalidation (P1).** `app/(app)/workspace/[slug]/billing/page.tsx` now revalidates on window `focus`. Buyers come back from the Gumroad checkout tab and expect their plan to be live; without focus refetch they'd see "Free plan" until they hard-refreshed and assume the webhook was broken when it wasn't.
+- **"Trial ends today" copy (P1).** Trial badge now renders at `daysUntilTrialEnd === 0` ("Trial · ends today") instead of disappearing. Day-of-charge is the most informative day of the trial; hiding the banner there was a bug.
+
+### Added
+- 4 new webhook tests (19 total): unknown-plan fallback, atomic-first-sale guard records `is:gr_subscription_id null`, renewal does NOT add the IS NULL guard, duplicate delivery via SELECT-first idempotency.
+- New `webhook.sale.unknown_plan` event type in `lib/utils/telemetry.ts` so the unknown-plan path is queryable.
+
+### Pre-merge checks
+- `npm run lint` clean (2 pre-existing `<img>` warnings untouched)
+- `npm run type-check` clean
+- `npm test` — 151/151 passing (148 from 1.3.1.0 + 3 hardening tests; 1 existing test renamed for clarity)
+- `npm run build` succeeds, `/api/v1/workspace/[slug]/billing` and `/api/v1/webhooks/gumroad/[secret]` both registered
+
+### Why it matters
+1.3.1.0 would have shipped with a retry-queue brick waiting for the first malformed ping and a UI that lied to buyers for ~30 seconds after every checkout. Adversarial review caught both. The billing page now matches reality the moment the webhook lands, the webhook can't be DoS'd into a stuck dedupe row by a single bad input, and concurrent retries can't double-charge the trial countdown.
+
 ## [1.3.1.0] - 2026-04-25
 
 **Theme:** Real billing data end-to-end. Kill the last of the mock placeholders on the Billing page, stamp the trial window at the right moment, and stop the onboarding UI from showing success + error at the same time.

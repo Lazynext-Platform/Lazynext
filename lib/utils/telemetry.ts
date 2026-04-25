@@ -23,6 +23,7 @@ export type BillingEvent =
   | 'webhook.ping.duplicate'
   | 'webhook.ping.unauthorized'
   | 'webhook.sale.applied'
+  | 'webhook.sale.unknown_plan' // attacker-supplied url_params[plan] not in VALID_PLANS — defaulted to starter
   | 'webhook.subscription.cancelled'
   | 'webhook.subscription.refunded'
   | 'webhook.subscription.disputed'

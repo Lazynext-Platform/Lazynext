@@ -10,6 +10,8 @@ import { TRIAL_DAYS } from '@/lib/utils/constants'
 
 type PingPayload = Record<string, string>
 
+const VALID_PLANS = new Set(['starter', 'pro', 'business'])
+
 /**
  * Timing-safe string equality check — prevents leaking info via response time.
  * Returns false when inputs differ in length (without short-circuiting).
@@ -86,15 +88,16 @@ export async function POST(
   })
 
   // Idempotency — skip duplicate deliveries. Gumroad retries failed pings.
+  // We CHECK the row exists here, but only INSERT after successful processing
+  // (see end of try block). That way a 500 mid-processing leaves the slot open
+  // for Gumroad's retry — instead of bricking it as a phantom "duplicate".
   if (eventDedupeKey && hasValidDatabaseUrl) {
-    const { error: insertError } = await db
+    const { data: existing } = await db
       .from('webhook_events')
-      .insert({
-        event_id: `gumroad:${resource}:${eventDedupeKey}`,
-        event_name: resource,
-        processed_at: new Date().toISOString(),
-      })
-    if (insertError?.code === '23505') {
+      .select('event_id')
+      .eq('event_id', `gumroad:${resource}:${eventDedupeKey}`)
+      .maybeSingle()
+    if (existing) {
       trackBillingEvent('webhook.ping.duplicate', { resource, dedupeKey: eventDedupeKey })
       return NextResponse.json({ received: true, duplicate: true })
     }
@@ -105,7 +108,16 @@ export async function POST(
       case 'sale': {
         // New purchase (first charge of a subscription or a one-off sale).
         const workspaceId = getUrlParam(payload, 'workspace_id')
-        const plan = (getUrlParam(payload, 'plan') as 'starter' | 'pro' | 'business' | undefined) ?? 'starter'
+        // Validate plan against the known enum BEFORE any DB write. Gumroad
+        // url_params are attacker-controlled (they're echoed query string),
+        // so an unknown value would otherwise bubble into a Postgres ENUM
+        // cast error and brick retries.
+        const rawPlan = getUrlParam(payload, 'plan')
+        const plan: 'starter' | 'pro' | 'business' =
+          rawPlan && VALID_PLANS.has(rawPlan) ? (rawPlan as 'starter' | 'pro' | 'business') : 'starter'
+        if (rawPlan && !VALID_PLANS.has(rawPlan)) {
+          trackBillingEvent('webhook.sale.unknown_plan', { rawPlan, workspaceId: workspaceId ?? null })
+        }
         const email = payload['email']
         if (workspaceId && hasValidDatabaseUrl) {
           // Detect first sale vs renewal so we only stamp trial_ends_at once.
@@ -133,10 +145,15 @@ export async function POST(
             update.trial_ends_at = trialEnd.toISOString()
           }
 
-          await db
-            .from('workspaces')
-            .update(update)
-            .eq('id', workspaceId)
+          // Atomic guard: when stamping trial_ends_at as part of a first sale,
+          // require gr_subscription_id IS NULL on the row. If two first-sale
+          // pings race, the second one will match 0 rows and quietly no-op
+          // instead of double-stamping the trial window.
+          let updateQuery = db.from('workspaces').update(update).eq('id', workspaceId)
+          if (isFirstSale && !before?.trial_ends_at) {
+            updateQuery = updateQuery.is('gr_subscription_id', null)
+          }
+          await updateQuery
           trackBillingEvent('webhook.sale.applied', {
             workspaceId,
             plan,
@@ -227,6 +244,19 @@ export async function POST(
       default:
         // Unknown resource — acknowledge so Gumroad stops retrying.
         break
+    }
+
+    // Mark the event as processed only after the switch above succeeded.
+    // If the row already exists (concurrent delivery beat us to it), the
+    // unique violation is benign — we just got here a second time.
+    if (eventDedupeKey && hasValidDatabaseUrl) {
+      await db
+        .from('webhook_events')
+        .insert({
+          event_id: `gumroad:${resource}:${eventDedupeKey}`,
+          event_name: resource,
+          processed_at: new Date().toISOString(),
+        })
     }
 
     return NextResponse.json({ received: true })
