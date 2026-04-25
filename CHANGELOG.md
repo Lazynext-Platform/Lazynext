@@ -4,6 +4,22 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0.6] - 2026-04-26
+
+**Theme:** Stop the CSP from blocking Sentry session replay's blob: Web Worker on every page. Live dogfood (`/qa` → 17 routes) found the same console error fired on every public page: `Refused to create a worker from 'blob:...' because it violates the following Content Security Policy directive: script-src 'self' 'unsafe-inline'. Note that 'worker-src' was not explicitly set, so 'script-src' is used as a fallback.` Sentry replay (`replayIntegration` in `sentry.client.config.ts`) bundles its compression logic as a `blob:` Worker. With `replaysOnErrorSampleRate: 1.0`, every error session was supposed to capture a replay — none of them could.
+
+### Fixed
+- `next.config.js` CSP — added explicit `worker-src 'self' blob:` directive (was implicitly falling back to `script-src` which had no `blob:`). Also added `blob:` to `script-src` so libraries that ship code as blob URLs (some xyflow/ReactFlow worker patterns) keep working. Verified across all 17 public routes (`/`, `/pricing`, `/sign-in`, `/sign-up`, `/about`, `/features`, `/blog`, `/changelog`, `/comparison`, `/contact`, `/privacy`, `/terms`, `/docs`, `/careers`, `/sitemap.xml`, `/robots.txt`, `/d/[slug]`).
+
+### Tests
+- `tests/unit/csp.regression-001.test.ts` — 4 assertions: `worker-src` directive present, allows `'self'` + `blob:`, `script-src` still allows `blob:`, baseline (default-src/object-src/frame-ancestors/base-uri/form-action) unchanged.
+
+### Verification
+- `npm run type-check` clean
+- `npm run lint` clean
+- `npm test` — **143/143** passing (139 + 4 new regression assertions)
+- `npm run build` clean
+
 ## [1.3.0.5] - 2026-04-24
 
 **Theme:** Turn the opaque "No workspace selected" toast into a specific, actionable error so we can tell what is actually blocking the Upgrade flow. v1.3.0.4's race-fix didn't resolve the production bug, which means the lookup is legitimately failing — this release tells the user (and us) why.

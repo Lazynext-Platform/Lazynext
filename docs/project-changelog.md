@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.0.6] — CSP unblocks Sentry replay's blob: worker on every page (2026-04-26)
+
+Live `/qa` dogfood across 17 public routes (`/`, `/pricing`, `/sign-in`, `/sign-up`, `/about`, `/features`, `/blog`, `/changelog`, `/comparison`, `/contact`, `/privacy`, `/terms`, `/docs`, `/careers`, `/sitemap.xml`, `/robots.txt`, `/d/[slug]`) found the same console error firing on every page: `Refused to create a worker from 'blob:...' because it violates the following Content Security Policy directive: script-src 'self' 'unsafe-inline'. Note that 'worker-src' was not explicitly set, so 'script-src' is used as a fallback.` Sentry session replay (`replayIntegration` in `sentry.client.config.ts`, `replaysOnErrorSampleRate: 1.0`) bundles its compression as a `blob:` Web Worker. Without an explicit `worker-src`, browsers fall back to `script-src` — which had no `blob:` — and refuse to spawn the worker, so every error replay capture silently failed. Added explicit `worker-src 'self' blob:` and `blob:` to `script-src`. New regression test `tests/unit/csp.regression-001.test.ts` (4 assertions) locks in the directive. Type-check clean, build clean, **143/143** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1306---2026-04-26).
+
+---
+
 ## [1.3.0.5] — Surface real workspace-resolve failure reason (2026-04-24)
 
 v1.3.0.4 added a self-healing inline fetch but production still showed the generic “No workspace selected” toast — meaning the API was actually returning non-200 and we couldn’t tell why. `resolveWorkspaceId()` now returns `{ok, reason, status}` and `UpgradeModal`’s click handler maps each reason to a specific toast (403 → “not a member”, 404 → “workspace not found”, 401 → “session expired”). 139/139 tests passing.
