@@ -48,3 +48,6 @@ secrets/
 # supabase CLI local state (linking artefacts, temp files)
 /supabase/.temp/
 /supabase/.branches/
+
+# gstack QA artifacts (local-only screenshots, probe dumps, baselines)
+/.gstack/
