@@ -1,8 +1,8 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.1.0.1 — shipped + deployed
-> **Last Updated**: 2026-04-20
+> **Current Milestone**: v1.3.0.5 — shipped + deployed
+> **Last Updated**: 2026-04-26
 
 ---
 
@@ -160,7 +160,7 @@
 | All Phase 1 features merged | ✅ All merged to main |
 | All test plans passing | ✅ 78 E2E + 53 unit tests passing |
 | Documentation complete | ✅ |
-| Deployment ready | ✅ Live on Vercel → https://lazynext.com (v1.1.0.1) |
+| Deployment ready | ✅ Live on Vercel → https://lazynext.com (v1.3.0.5) |
 
 ### Growth / v2.0
 
@@ -173,7 +173,7 @@
 | All features on feature branch | ✅ `main` |
 | Merge to main | ✅ All merged |
 | Test coverage | ✅ 78 E2E + 53 unit |
-| Deployment | ✅ Live on Vercel → https://lazynext.com (v1.1.0.1) |
+| Deployment | ✅ Live on Vercel → https://lazynext.com (v1.3.0.5) |
 
 ---
 
@@ -196,3 +196,4 @@
 |---|---|---|
 | 2026-04-05 | Initial roadmap created from 38 Blueprint features | Mastery framework adoption — mid-project |
 | 2026-04-05 | Phasing follows Blueprint FEATURE-INDEX.md phases | Existing phase groupings are logical and dependency-ordered |
+| 2026-04-26 | Header milestone synced v1.1.0.1 → v1.3.0.5 | Roadmap had drifted behind v1.2 + v1.3 ships (pricing, billing fixes) |

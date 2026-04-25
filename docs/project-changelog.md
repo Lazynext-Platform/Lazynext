@@ -2,7 +2,47 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-22
+> **Last Updated**: 2026-04-26
+
+---
+
+## [1.3.0.5] — Surface real workspace-resolve failure reason (2026-04-24)
+
+v1.3.0.4 added a self-healing inline fetch but production still showed the generic “No workspace selected” toast — meaning the API was actually returning non-200 and we couldn’t tell why. `resolveWorkspaceId()` now returns `{ok, reason, status}` and `UpgradeModal`’s click handler maps each reason to a specific toast (403 → “not a member”, 404 → “workspace not found”, 401 → “session expired”). 139/139 tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1305---2026-04-24).
+
+---
+
+## [1.3.0.4] — Self-heal workspace ID on click (2026-04-24)
+
+Killed the race where an impatient click could beat the v1.3.0.3 layout-mount hydrator and still fire “No workspace selected.” `handleChoose()` now calls `resolveWorkspaceId()` which prefers the Zustand store but falls back to `useParams().slug` + an inline `GET /api/v1/workspace/[slug]`, then primes the store on success. Error toast only fires when both paths legitimately fail. 139/139 tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1304---2026-04-24).
+
+---
+
+## [1.3.0.3] — Hydrate workspace store at layout mount (2026-04-24)
+
+Fixed the production bug where `UpgradeModal` guarded on `workspace?.id` from an empty Zustand store — `setWorkspace` was only called in tests, never in production. Clicking *Choose Team* fired four “No workspace selected” toasts and blocked checkout entirely. Added `GET /api/v1/workspace/[slug]` (auth + membership-scoped, dev-fallback) and a `WorkspaceHydrator` client component mounted in the workspace layout alongside `WmsHydrator`. Also silently fixes `WorkspaceSelector` showing a literal “Workspace” fallback. Realigned `VERSION` (was drifting at 1.1.0.0). 139/139 tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1303---2026-04-24).
+
+---
+
+## [1.3.0.2] — Align deploy docs to v1.3’s 4-product Gumroad setup (2026-04-23)
+
+v1.3 only shows two paid tiers (Team + Business). `DEPLOY.md` and `README.md` still told founders to create six Gumroad products across three tiers, which would over-provision two dead `BUSINESS_*` URLs. Realigned both docs (`FOUNDER-SETUP-WALKTHROUGH.md` already had it right) and dropped the stale “v1.0.0.1” preamble stamp from `DEPLOY.md`. Docs + version bump only — no code changes.
+
+See [CHANGELOG.md](../CHANGELOG.md#1302---2026-04-23).
+
+---
+
+## [1.3.0.1] — Align internal trial duration 14 → 30 days (2026-04-23)
+
+Gumroad’s membership trial selector only offers “one week” or “one month” — no 14-day preset. Picking “one month” means subscribers see 30 days at checkout, which conflicted with the internal `TRIAL_DAYS = 14` driving the Inngest downgrade cron. Aligned to **30 days everywhere**: `lib/utils/constants.ts`, all customer-facing copy (pricing CTAs, FAQ, hero subhead, `FeatureGate` paywall, platform-walkthrough), test expectations, Inngest cron comments, billing-architecture doc, founder walkthrough, Feature 22 design artifacts, Feature 02 mockup FAQ (also fixed stale “Pro trial” → “Business trial”), Business Model Canvas (4 mentions), and Blueprint V9 §71. Untouched: blueprint inactivity-timer / onboarding-mode lines (different concept), historical v1.1/v1.2 changelog entries (audit trail), existing `workspace.trial_ends_at` timestamps (forward-only). Lint clean, type-check clean, 139/139 tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1301---2026-04-23).
 
 ---
 
@@ -60,9 +100,9 @@ Hardening follow-up. Structured observability on `scoreDecision` + Playwright E2
 
 ## [Unreleased]
 
-<!-- Features merged to main but not yet released/deployed -->
+<!-- Features merged to main but not yet released/deployed. All v1.0–v1.3 work has shipped; the items below are kept as the historical pre-v1.0 build log. -->
 
-### Added
+### Added (pre-v1.0 build log — archival)
 
 - **Page-Specific Skeleton Screens (2026-04-15)** — Created `components/ui/Skeleton.tsx` with 12 reusable skeleton primitives (Skeleton, SkeletonCircle, SkeletonText, SkeletonCard, SkeletonStat, SkeletonTableRow, SkeletonButton, SkeletonTabs, SkeletonHeader, SkeletonSearch, SkeletonLight, SkeletonLightCard). Added shimmer animation keyframe to tailwind.config.ts. Replaced all 22 loading.tsx files with page-specific responsive layouts matching each page's actual structure. All skeletons are mobile-first (sm/md/lg/xl breakpoints) and use `motion-safe:animate-shimmer` for prefers-reduced-motion compliance.
 
