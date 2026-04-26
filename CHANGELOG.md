@@ -4,6 +4,22 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.0] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 11 — public-marketing surfaces. Two of the three pages a prospect visits before signing up were lying to them. The Comparison page (`/comparison`) claimed Lazynext shipped four features it doesn't: **Real-time collaboration** (`CollaborationOverlay` is rendered today with a hardcoded `collaborators={[]}` — there is no presence channel, no cursor sync, no broadcast layer), **Template marketplace** (the templates page is an honest empty state, no `templates` table exists), **Automation builder** (the automations page is also an empty state), and **Global pricing** (a marketing claim, not a comparable feature). Every row showed a green check for Lazynext regardless of reality. The Marketing Changelog page (`/changelog`) was even more directly stale: a hardcoded `entries` array pinned **v1.0.0.0** with the **"Latest"** ribbon while the actual production version was **v1.3.2.9** — every prospect visiting the page saw a release from over twenty rounds ago marketed as the newest thing. Both fixed honestly.
+
+### Changed
+
+- `app/(marketing)/comparison/page.tsx` — rewrote the comparison table to reflect what actually ships in v1.3.2.9. Added a fourth cell state, `'soon'` (clock icon), distinct from `false` (X) and `'partial'` (dash). Lazynext is marked `'soon'` on Automation builder and Templates (schema/node-types exist, UI/engine ship later) and the Real-time collaboration / Template marketplace / Global pricing rows were removed entirely. Three new rows added that highlight what Lazynext actually does that competitors don't: AI quality scoring, outcome reminder loop, public decision pages (`/d/[slug]`). Each row now carries a one-line "why this matters" caption under the feature name. Footer legend explains the four cell states. Honest-startup note explains what "in development" means and links to the live changelog. Switched indigo → brand lime per `docs/design-system.md`. Converted from a `'use client'` component to a server component (no client interactivity).
+- `app/(marketing)/changelog/page.tsx` — converted from a hardcoded `entries` array to a server component that reads the repo's `CHANGELOG.md` at request time (cached for 5 minutes via `export const revalidate = 300`). Includes a small inline-markdown parser for the segments that appear in our entries (`` `code` ``, `**bold**`, `*em*`) — no full markdown library pulled in for a single page. Versions are extracted from `## [version] - date` headings, the `**Theme:**` line is shown as the entry summary, and the first 8 list items per release are shown with type-coded badges (`feat` emerald, `fix` amber, `perf` blue, `note` slate). The `Latest` ribbon now sits on whatever version is genuinely latest in the file. Caps display at the 12 most recent releases with a "view full history" link to GitHub. Switched indigo → brand lime to match the rest of the marketing site. Empty-state fallback if `CHANGELOG.md` is missing.
+
+### Verification
+
+- Type-check clean.
+- Lint clean (only pre-existing `@/global-error.tsx` `<img>` warning).
+- 143/143 tests passing.
+- Production build clean. Both pages now appear in the route map as static (changelog uses ISR via `revalidate`).
+
 ## [1.3.2.9] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 10 — Workspace Settings page wired to real backend. Three more dead UI shells caught: (1) the General tab pre-filled `defaultValue="My Workspace"` and `defaultValue="my-workspace"` regardless of the actual workspace, with a "Save changes" button that had no `onClick`; (2) a "Delete workspace" button that also had no `onClick`; (3) a Notifications tab with four toggles (Task assigned / Decision review / Weekly digest / Thread mentions) all rendered in the brand "on" state with `<button>` elements that had no handlers and no persistence layer (no `notification_preferences` table exists). Three more "looks like a real settings page, does nothing" surfaces. All wired up.
