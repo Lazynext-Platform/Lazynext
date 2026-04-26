@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.3.4] — Demo-data eradication round 15: app-shell sidebar (2026-04-26)
+
+The persistent app shell, continued. Round 14 caught the TopBar; the Sidebar had an identical pattern. A "Workflows" section with three hardcoded entries (**Q2 Product Sprint** marked active, **Client Onboarding**, **Bug Triage**) rendered in every workspace's sidebar regardless of contents — there is no "workflow" primitive in the schema. Below them, a "+ New Workflow" dead button (no `onClick`). In the bottom action stack, the "LazyMind AI" button itself had no `onClick` (the actual toggle only fired from `TopBar`'s `lg:flex` button — so on tablet widths the only LazyMind entry point in the chrome was a dead button). Finally, `WorkspaceSelector` rendered as a `<button>` with a `ChevronDown`, hinting at a multi-workspace switcher dropdown that doesn't exist anywhere in the codebase. Removed the fake workflows section + dead button, wired LazyMind to `toggleLazyMind`, and converted `WorkspaceSelector` to a display-only div. Type-check clean, **143/143** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1334---2026-04-26).
+
+---
+
 ## [1.3.3.3] — Demo-data eradication round 14: app-shell topbar (2026-04-26)
 
 The persistent app shell. Every signed-in user, regardless of which workspace they were viewing, saw a `TopBar` with hardcoded text: workspace breadcrumb pinned to **"Acme Corp"** and a workflow sub-segment pinned to **"Q2 Product Sprint"** — there is no "named workflow" primitive in the schema. To the right, three avatar circles labeled **AP / PK / JR** rendered as a "Team members online" presence cluster, identical in spirit to the fake-team fixtures caught on the landing page (round 5) and the about page (round 12) — except this one rendered constantly, on every page, in the chrome that frames the entire authenticated product. Two more shell buttons did nothing: **"New Workflow"** (no `onClick`) and **"Share"** (no `onClick`, no `ShareModal` defined anywhere — verified via grep). Anyone evaluating the product saw a fully-staffed Acme Corp workspace with a working share button — none of which existed. Fixed by reading the real workspace name from `useWorkspaceStore` (already hydrated by `WorkspaceHydrator` at the `(app)` shell layer) and removing the fake presence cluster + dead buttons entirely. Type-check clean, **143/143** tests passing, build clean.

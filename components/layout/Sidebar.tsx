@@ -57,11 +57,11 @@ const settingsItems = [
   { href: '/guide', icon: BookOpen, label: 'Platform Guide' },
 ]
 
-const workflows = [
-  { name: 'Q2 Product Sprint', active: true },
-  { name: 'Client Onboarding', active: false },
-  { name: 'Bug Triage', active: false },
-]
+// Removed fake `workflows` fixture in v1.3.3.4 — "Q2 Product Sprint" /
+// "Client Onboarding" / "Bug Triage" were hardcoded examples that rendered
+// in the sidebar of every workspace regardless of contents. There is no
+// "workflow" primitive in the schema; the section was decoration that
+// suggested a feature the product doesn't have.
 
 const primitiveItems = [
   { type: 'task', icon: CheckSquare, label: 'Task', dot: 'bg-blue-400' },
@@ -76,6 +76,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const pathname = usePathname()
   const isSidebarOpen = useUIStore((s) => s.isSidebarOpen)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
   const [showUpgrade, setShowUpgrade] = useState(false)
   const base = `/workspace/${workspaceSlug}`
 
@@ -177,37 +178,6 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
           )}
         </div>
 
-        {/* Workflows section */}
-        <div className="mt-6">
-          <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
-            Workflows
-          </p>
-          <div className="mt-2 space-y-0.5">
-            {workflows.map((wf) => (
-              <button
-                key={wf.name}
-                aria-label={`Workflow: ${wf.name}`}
-                aria-current={wf.active ? 'true' : undefined}
-                className={cn(
-                  'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
-                  wf.active
-                    ? 'bg-slate-800/70 font-medium text-white'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                )}
-              >
-                {wf.active && <span className="h-1.5 w-1.5 rounded-full bg-brand" />}
-                {wf.name}
-              </button>
-            ))}
-            <button
-              aria-label="Create new workflow"
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" /> New Workflow
-            </button>
-          </div>
-        </div>
-
         {/* Primitives section */}
         <div className="mt-6">
           <p className="px-3 text-2xs font-semibold uppercase tracking-widest text-slate-500">
@@ -263,7 +233,11 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
       <div className="border-t border-slate-800 p-2 space-y-0.5">
         <TrialBanner />
         <LocaleSwitcher />
-        <button aria-label="Open LazyMind AI assistant" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors">
+        <button
+          aria-label="Open LazyMind AI assistant"
+          onClick={toggleLazyMind}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors"
+        >
           <Sparkles className="h-4 w-4 text-brand" />
           LazyMind AI
         </button>

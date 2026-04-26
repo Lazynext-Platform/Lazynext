@@ -4,6 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.4] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 15 — the persistent app shell, continued. Round 14 caught the TopBar; the Sidebar had an identical pattern. A "Workflows" section with three hardcoded entries (**Q2 Product Sprint** marked active, **Client Onboarding**, **Bug Triage**) rendered in the sidebar of every workspace regardless of contents. There is no "workflow" primitive in the schema — these were decoration that suggested a feature the product doesn't have. Below them, a "+ New Workflow" button with no `onClick`. Then in the bottom-of-sidebar action stack, the "LazyMind AI" button itself had no `onClick` (the actual LazyMind toggle only fired from `TopBar`, which renders `lg:flex` — so on tablet widths the only LazyMind entry point in the chrome was a dead button). Finally, `WorkspaceSelector` rendered as a `<button>` with a `ChevronDown` icon, hinting at a multi-workspace switcher dropdown — there is no switcher modal in the codebase and no `/workspaces` route to navigate to.
+
+### Changed
+
+- `components/layout/Sidebar.tsx` — removed the entire `workflows` const + the "Workflows" sidebar section + the "+ New Workflow" dead button. Wired the bottom "LazyMind AI" button to `toggleLazyMind` from `useUIStore` so it actually opens the LazyMind panel. Inline comment marks the workflows removal so the next person doesn't reinstate them.
+- `components/layout/WorkspaceSelector.tsx` — converted from a `<button>` with a `ChevronDown` to a display-only `<div>`. Avatar and workspace name still render from the hydrated `useWorkspaceStore`. Until a real switcher ships, the chrome no longer lies about its interactivity. Removed the unused `ChevronDown` lucide import.
+
+### Verification
+
+- Type-check clean.
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.3.3] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 14 — the persistent app shell. Every signed-in user, regardless of which workspace they were viewing, saw a `TopBar` with hardcoded text: workspace breadcrumb pinned to **"Acme Corp"** and a workflow sub-segment pinned to **"Q2 Product Sprint"**. There is no "named workflow" primitive in the schema — the second segment was pure decoration that suggested a feature the product doesn't have. To the right of the breadcrumb, three avatar circles labeled **AP / PK / JR** rendered as a "Team members online" presence cluster, identical in spirit to the fake-team fixtures we caught on the landing page (round 5) and the about page (round 12) — except this one rendered constantly, on every page, in the chrome that frames the entire authenticated product. Two more shell buttons did nothing: **"New Workflow"** (no `onClick`, no concept of workflows) and **"Share"** (no `onClick`, no `ShareModal` defined anywhere — verified by grepping the codebase for `ShareModal`, `toggleShare`, `isShareOpen`: zero results). Anyone evaluating the product saw a fully-staffed Acme Corp workspace with a working share button — none of which existed. Fixed by reading the real workspace name from `useWorkspaceStore` (already hydrated by `WorkspaceHydrator` at the `(app)` shell layer) and removing the fake presence cluster + dead buttons entirely.
