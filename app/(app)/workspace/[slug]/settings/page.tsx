@@ -1,7 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, Shield, CreditCard, Users, Bell, Palette, Lock } from 'lucide-react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { Settings, Shield, CreditCard, Users, Bell, Palette, Lock, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
@@ -39,6 +41,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general')
   const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
   const hasSso = hasFeature(plan, 'sso')
+  const params = useParams()
+  const slug = params?.slug as string
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-8">
@@ -116,29 +120,20 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Members tab */}
+      {/* Members tab — full directory lives at /members */}
       {activeTab === 'members' && (
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-100">Team Members</h2>
-            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
-              Invite member
-            </button>
-          </div>
-          <div className="mt-4 divide-y divide-slate-800">
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-brand-foreground">
-                  AP
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-200">Avas Patel</p>
-                  <p className="text-xs text-slate-500">avas@lazynext.com</p>
-                </div>
-              </div>
-              <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">Owner</span>
-            </div>
-          </div>
+          <h2 className="text-lg font-semibold text-slate-100">Team Members</h2>
+          <p className="mt-1 text-sm text-slate-400">
+            The full member directory, role management, and invitations live on the dedicated members page.
+          </p>
+          <Link
+            href={`/workspace/${slug}/members`}
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
+          >
+            <Users className="h-4 w-4" /> Open Members
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       )}
 

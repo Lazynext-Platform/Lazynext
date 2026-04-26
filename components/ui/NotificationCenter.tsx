@@ -28,16 +28,10 @@ const typeBadge: Record<NotifType, { label: string; color: string }> = {
   pulse: { label: 'PULSE', color: 'text-cyan-400 bg-cyan-500/10' },
 }
 
-const notifications: Notification[] = [
-  { id: '1', actor: 'Priya Sharma', initials: 'PS', avatarColor: 'bg-emerald-500', action: 'assigned you to Ship onboarding v2', type: 'task', time: '10m ago', unread: true, group: 'Today' },
-  { id: '2', actor: 'Raj Kumar', initials: 'RK', avatarColor: 'bg-amber-500', action: 'logged a decision: Use Supabase for Auth + DB? · Score 84', type: 'decision', time: '1h ago', unread: true, group: 'Today' },
-  { id: '3', actor: 'Meera Joshi', initials: 'MJ', avatarColor: 'bg-pink-500', action: 'mentioned you in Database migration thread', type: 'thread', time: '2h ago', unread: true, group: 'Today' },
-  { id: '4', actor: 'LazyMind', initials: 'AI', avatarColor: 'bg-brand', action: 'detected a pattern: 3 decisions this week lack rationale', type: 'ai', time: '3h ago', unread: true, group: 'Today' },
-  { id: '5', actor: 'System', initials: 'SY', avatarColor: 'bg-emerald-600', action: 'Automation Overdue task escalation triggered', type: 'automation', time: '4h ago', unread: true, group: 'Today' },
-  { id: '6', actor: 'Raj Kumar', initials: 'RK', avatarColor: 'bg-amber-500', action: 'completed Fix auth redirect bug', type: 'task', time: '1d ago', unread: false, group: 'Yesterday' },
-  { id: '7', actor: 'Avas Patel', initials: 'AP', avatarColor: 'bg-indigo-500', action: 'tagged outcome on Choose auth provider · Good outcome', type: 'decision', time: '1d ago', unread: false, group: 'Yesterday' },
-  { id: '8', actor: 'System', initials: 'PU', avatarColor: 'bg-cyan-500', action: 'Weekly digest available — decision quality up 4%', type: 'pulse', time: '1d ago', unread: false, group: 'Yesterday' },
-]
+// No notifications table exists in the current schema. Until one ships,
+// this list is intentionally empty — better an honest "all caught up"
+// than fabricated activity attributed to people who don't exist.
+const notifications: Notification[] = []
 
 export function NotificationCenter() {
   const isNotificationOpen = useUIStore((s) => s.isNotificationOpen)
@@ -95,6 +89,15 @@ export function NotificationCenter() {
 
           {/* Items */}
           <div className="max-h-[420px] overflow-y-auto scrollbar-thin" aria-live="polite">
+            {filtered.length === 0 && (
+              <div className="px-6 py-12 text-center">
+                <CheckCheck className="mx-auto h-8 w-8 text-slate-600" />
+                <p className="mt-3 text-sm font-medium text-slate-300">You&apos;re all caught up</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Notifications will appear here when teammates assign you tasks, mention you, or log decisions.
+                </p>
+              </div>
+            )}
             {todayItems.length > 0 && (
               <>
                 <p className="px-4 pt-3 pb-1 text-2xs font-semibold uppercase tracking-widest text-slate-500">Today</p>

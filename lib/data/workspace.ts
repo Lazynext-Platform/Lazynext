@@ -501,3 +501,216 @@ export async function getPulseStats(workspaceId: string): Promise<PulseStats> {
     workload: Array.from(workloadMap, ([userId, openTasks]) => ({ userId, openTasks })),
   }
 }
+
+export type DecisionHealthPeriod = '7d' | '30d' | '90d' | 'all'
+
+export interface DecisionHealthStats {
+  totalDecisions: number
+  totalDecisionsPrev: number
+  avgQuality: number | null
+  avgQualityPrev: number | null
+  outcomeTagged: number
+  velocityPerWeek: number
+  velocityPerWeekPrev: number
+  qualityBuckets: { high: number; medium: number; low: number; unscored: number }
+  outcomeCounts: { good: number; bad: number; neutral: number; pending: number }
+  /** Weekly average quality score for the last 7 weeks (oldest -> newest). */
+  qualityTrend: { week: string; value: number | null }[]
+  topDecisionMakers: { userId: string; decisions: number; avgQuality: number; goodPct: number }[]
+  typeBreakdown: { type: 'reversible' | 'irreversible' | 'experimental' | 'unspecified'; count: number }[]
+  tagCounts: { tag: string; count: number }[]
+  untaggedStale: { id: string; title: string; createdAt: string }[]
+}
+
+function periodToDays(period: DecisionHealthPeriod): number | null {
+  if (period === 'all') return null
+  return period === '7d' ? 7 : period === '30d' ? 30 : 90
+}
+
+export async function getDecisionHealthStats(
+  workspaceId: string,
+  period: DecisionHealthPeriod = '30d',
+): Promise<DecisionHealthStats> {
+  const empty: DecisionHealthStats = {
+    totalDecisions: 0,
+    totalDecisionsPrev: 0,
+    avgQuality: null,
+    avgQualityPrev: null,
+    outcomeTagged: 0,
+    velocityPerWeek: 0,
+    velocityPerWeekPrev: 0,
+    qualityBuckets: { high: 0, medium: 0, low: 0, unscored: 0 },
+    outcomeCounts: { good: 0, bad: 0, neutral: 0, pending: 0 },
+    qualityTrend: [],
+    topDecisionMakers: [],
+    typeBreakdown: [],
+    tagCounts: [],
+    untaggedStale: [],
+  }
+  if (!hasValidDatabaseUrl) return empty
+
+  const days = periodToDays(period)
+  const now = new Date()
+  const periodStart = days === null ? null : new Date(now.getTime() - days * 86400000)
+  const prevStart = days === null ? null : new Date(now.getTime() - days * 2 * 86400000)
+  const staleCutoff = new Date(now.getTime() - 30 * 86400000)
+
+  let query = db
+    .from('decisions')
+    .select('id, title, made_by, quality_score, outcome, decision_type, tags, created_at')
+    .eq('workspace_id', workspaceId)
+  if (periodStart) query = query.gte('created_at', periodStart.toISOString())
+  const { data: rowsRaw } = await query
+
+  const rows = (rowsRaw as Array<{
+    id: string
+    title: string
+    made_by: string
+    quality_score: number | null
+    outcome: 'good' | 'bad' | 'neutral' | 'pending'
+    decision_type: 'reversible' | 'irreversible' | 'experimental' | null
+    tags: string[] | null
+    created_at: string
+  }>) ?? []
+
+  // Previous-period totals (for delta).
+  let prevCount = 0
+  let prevQualitySum = 0
+  let prevQualityN = 0
+  if (prevStart && periodStart) {
+    const { data: prevRowsRaw } = await db
+      .from('decisions')
+      .select('id, quality_score')
+      .eq('workspace_id', workspaceId)
+      .gte('created_at', prevStart.toISOString())
+      .lt('created_at', periodStart.toISOString())
+    const prev = (prevRowsRaw as Array<{ id: string; quality_score: number | null }>) ?? []
+    prevCount = prev.length
+    for (const r of prev) {
+      if (r.quality_score !== null) {
+        prevQualitySum += r.quality_score
+        prevQualityN += 1
+      }
+    }
+  }
+
+  // Stale untagged (outcome === 'pending' AND > 30 days old AND within period).
+  const untaggedStale = rows
+    .filter((r) => r.outcome === 'pending' && new Date(r.created_at) < staleCutoff)
+    .sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
+    .slice(0, 5)
+    .map((r) => ({ id: r.id, title: r.title, createdAt: r.created_at }))
+
+  // Quality buckets.
+  const qualityBuckets = { high: 0, medium: 0, low: 0, unscored: 0 }
+  for (const r of rows) {
+    if (r.quality_score === null) qualityBuckets.unscored += 1
+    else if (r.quality_score >= 70) qualityBuckets.high += 1
+    else if (r.quality_score >= 40) qualityBuckets.medium += 1
+    else qualityBuckets.low += 1
+  }
+
+  // Outcome counts.
+  const outcomeCounts = { good: 0, bad: 0, neutral: 0, pending: 0 }
+  for (const r of rows) outcomeCounts[r.outcome] += 1
+
+  // Avg quality.
+  const scored = rows.filter((r) => r.quality_score !== null)
+  const avgQuality = scored.length > 0
+    ? Math.round(scored.reduce((s, r) => s + (r.quality_score ?? 0), 0) / scored.length)
+    : null
+  const avgQualityPrev = prevQualityN > 0 ? Math.round(prevQualitySum / prevQualityN) : null
+
+  // Velocity (per week).
+  const weeks = days === null ? Math.max(1, scored.length > 0 ? Math.ceil(rows.length / 3) : 1) : Math.max(1, days / 7)
+  const velocityPerWeek = Math.round((rows.length / weeks) * 10) / 10
+  const velocityPerWeekPrev = prevCount > 0 ? Math.round((prevCount / weeks) * 10) / 10 : 0
+
+  // Quality trend — stable 7-week window regardless of `period` filter.
+  // Refetched independently because `period=7d` would otherwise truncate older weeks.
+  const qualityTrend: { week: string; value: number | null }[] = Array.from(
+    { length: 7 },
+    (_, i) => ({ week: i === 6 ? 'Now' : `W${i + 1}`, value: null }),
+  )
+  const trendStart = new Date(now.getTime() - 7 * 7 * 86400000)
+  const { data: trendRowsRaw } = await db
+    .from('decisions')
+    .select('quality_score, created_at')
+    .eq('workspace_id', workspaceId)
+    .not('quality_score', 'is', null)
+    .gte('created_at', trendStart.toISOString())
+  const trendRows = (trendRowsRaw as Array<{ quality_score: number | null; created_at: string }>) ?? []
+  const trendBuckets: { sum: number; n: number }[] = Array.from({ length: 7 }, () => ({ sum: 0, n: 0 }))
+  for (const r of trendRows) {
+    const idx = 6 - Math.min(6, Math.floor((now.getTime() - new Date(r.created_at).getTime()) / (7 * 86400000)))
+    if (idx >= 0 && idx <= 6) {
+      trendBuckets[idx].sum += r.quality_score ?? 0
+      trendBuckets[idx].n += 1
+    }
+  }
+  for (let i = 0; i < 7; i++) {
+    qualityTrend[i] = {
+      week: i === 6 ? 'Now' : `W${i + 1}`,
+      value: trendBuckets[i].n > 0 ? Math.round(trendBuckets[i].sum / trendBuckets[i].n) : null,
+    }
+  }
+
+  // Top decision makers — group by made_by.
+  const makerMap = new Map<string, { decisions: number; qSum: number; qN: number; good: number }>()
+  for (const r of rows) {
+    const m = makerMap.get(r.made_by) ?? { decisions: 0, qSum: 0, qN: 0, good: 0 }
+    m.decisions += 1
+    if (r.quality_score !== null) {
+      m.qSum += r.quality_score
+      m.qN += 1
+    }
+    if (r.outcome === 'good') m.good += 1
+    makerMap.set(r.made_by, m)
+  }
+  const topDecisionMakers = Array.from(makerMap, ([userId, v]) => ({
+    userId,
+    decisions: v.decisions,
+    avgQuality: v.qN > 0 ? Math.round(v.qSum / v.qN) : 0,
+    goodPct: v.decisions > 0 ? Math.round((v.good / v.decisions) * 100) : 0,
+  }))
+    .sort((a, b) => b.decisions - a.decisions)
+    .slice(0, 10)
+
+  // Type breakdown.
+  const typeMap: Record<string, number> = { reversible: 0, irreversible: 0, experimental: 0, unspecified: 0 }
+  for (const r of rows) {
+    const k = r.decision_type ?? 'unspecified'
+    typeMap[k] = (typeMap[k] ?? 0) + 1
+  }
+  const typeBreakdown = (['reversible', 'irreversible', 'experimental', 'unspecified'] as const)
+    .map((type) => ({ type, count: typeMap[type] ?? 0 }))
+    .filter((t) => t.count > 0)
+
+  // Tag counts.
+  const tagMap = new Map<string, number>()
+  for (const r of rows) {
+    for (const t of r.tags ?? []) {
+      tagMap.set(t, (tagMap.get(t) ?? 0) + 1)
+    }
+  }
+  const tagCounts = Array.from(tagMap, ([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 20)
+
+  return {
+    totalDecisions: rows.length,
+    totalDecisionsPrev: prevCount,
+    avgQuality,
+    avgQualityPrev,
+    outcomeTagged: rows.filter((r) => r.outcome !== 'pending').length,
+    velocityPerWeek,
+    velocityPerWeekPrev,
+    qualityBuckets,
+    outcomeCounts,
+    qualityTrend,
+    topDecisionMakers,
+    typeBreakdown,
+    tagCounts,
+    untaggedStale,
+  }
+}

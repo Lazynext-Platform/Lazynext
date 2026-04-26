@@ -17,68 +17,11 @@ interface ThreadMessage {
   reactions?: { emoji: string; count: number; active?: boolean }[]
 }
 
-const sampleMessages: ThreadMessage[] = [
-  {
-    id: '1',
-    author: 'Avas Patel',
-    initials: 'AP',
-    avatarColor: 'bg-indigo-500',
-    content: "I've done a comparison of DB providers. Here's the summary:",
-    time: '3 days ago',
-    table: {
-      headers: ['Feature', 'Supabase', 'Firebase', 'PlanetScale'],
-      rows: [
-        { cells: [{ value: 'Auth Built-in', type: 'text' }, { value: '✓', type: 'check' }, { value: '✓', type: 'check' }, { value: '✗', type: 'x' }] },
-        { cells: [{ value: 'RLS Policies', type: 'text' }, { value: '✓', type: 'check' }, { value: '✗', type: 'x' }, { value: '✗', type: 'x' }] },
-        { cells: [{ value: 'Real-time', type: 'text' }, { value: '✓', type: 'check' }, { value: '✓', type: 'check' }, { value: '✗', type: 'x' }] },
-        { cells: [{ value: 'Free Tier', type: 'text' }, { value: '0.5 GB', type: 'text' }, { value: '1 GB', type: 'text' }, { value: '5 GB', type: 'text' }] },
-        { cells: [{ value: 'SQL Flavor', type: 'text' }, { value: 'Postgres', type: 'text' }, { value: 'NoSQL', type: 'text' }, { value: 'MySQL', type: 'text' }] },
-      ],
-    },
-  },
-  {
-    id: '2',
-    author: 'Priya Sharma',
-    initials: 'PS',
-    avatarColor: 'bg-emerald-500',
-    content: "PlanetScale has a much larger free tier though. Shouldn't we consider that?",
-    time: '3 days ago',
-    reactions: [{ emoji: '👍', count: 1 }],
-  },
-  {
-    id: '3',
-    author: 'Avas Patel',
-    initials: 'AP',
-    avatarColor: 'bg-indigo-500',
-    content: "PlanetScale uses MySQL — our queries are Postgres-specific. Supabase gives us Auth + DB + RLS in one platform. Firebase is NoSQL so we'd lose relational queries.",
-    time: '2 days ago',
-  },
-  {
-    id: '4',
-    author: 'Raj Kumar',
-    initials: 'RK',
-    avatarColor: 'bg-amber-500',
-    content: 'Makes sense. I agree with Supabase. @Priya Sharma what do you think?',
-    time: '2 days ago',
-    mention: 'Priya Sharma',
-  },
-  {
-    id: '5',
-    author: 'Priya Sharma',
-    initials: 'PS',
-    avatarColor: 'bg-emerald-500',
-    content: "Alright, let's go with Supabase then 👍",
-    time: '1 day ago',
-    reactions: [{ emoji: '👍', count: 3, active: true }, { emoji: '🎉', count: 2 }],
-  },
-]
-
-const mentionOptions = [
-  { name: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', role: 'Admin' },
-  { name: 'Priya Sharma', initials: 'PS', color: 'bg-emerald-500', role: 'Admin' },
-  { name: 'Raj Kumar', initials: 'RK', color: 'bg-amber-500', role: 'Member' },
-  { name: 'Neha Kapoor', initials: 'NK', color: 'bg-pink-500', role: 'Guest' },
-]
+// Thread messages and mention list will hydrate from /api/v1/messages
+// once the per-node thread fetch hook is wired. Until then, panel
+// renders an honest empty state instead of fabricated conversation.
+const sampleMessages: ThreadMessage[] = []
+const mentionOptions: { name: string; initials: string; color: string; role: string }[] = []
 
 export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const nodes = useCanvasStore((s) => s.nodes)
@@ -141,7 +84,11 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
               {qualityScore} Quality
             </span>
           )}
-          <time dateTime="2026-04-02" className="text-2xs text-slate-500">Apr 2, 2026</time>
+          {typeof d.createdAt === 'string' && (
+            <time dateTime={d.createdAt} className="text-2xs text-slate-500">
+              {new Date(d.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            </time>
+          )}
         </div>
       </div>
 
@@ -166,6 +113,13 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
 
       {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4" role="log" aria-label="Thread messages">
+        {sampleMessages.length === 0 && (
+          <div className="py-12 text-center">
+            <MessageCircle className="mx-auto h-8 w-8 text-slate-700" />
+            <p className="mt-3 text-sm font-medium text-slate-400">No comments yet</p>
+            <p className="mt-1 text-xs text-slate-600">Be the first to add context to this decision.</p>
+          </div>
+        )}
         {sampleMessages.map((msg) => (
           <div key={msg.id} className="flex gap-2.5">
             <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', msg.avatarColor)}>
@@ -242,6 +196,9 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
         {showMentions && (
           <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
             <p className="px-3 py-1.5 text-2xs font-semibold uppercase tracking-wider text-slate-500">Mention a teammate</p>
+            {mentionOptions.length === 0 && (
+              <p className="px-3 py-3 text-xs text-slate-500">Member directory loading isn&apos;t wired in this panel yet.</p>
+            )}
             {mentionOptions.map((m) => (
               <button
                 key={m.name}

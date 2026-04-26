@@ -20,11 +20,8 @@ const priorityOptions = [
   { value: 'urgent', label: 'Urgent', color: 'border-red-500 bg-red-500/10 text-red-400' },
 ]
 
-const assigneeOptions = [
-  { name: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500' },
-  { name: 'Priya Sharma', initials: 'PS', color: 'bg-emerald-500' },
-  { name: 'Raj Kumar', initials: 'RK', color: 'bg-amber-500' },
-]
+// Assignee dropdown will hydrate from a workspace-members hook once it lands.
+const assigneeOptions: { name: string; initials: string; color: string }[] = []
 
 interface Subtask {
   id: string
@@ -41,11 +38,9 @@ export function TaskDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: 
   const [title, setTitle] = useState(String(d.title || ''))
   const [status, setStatus] = useState(String(d.status || 'todo'))
   const [priority, setPriority] = useState(String(d.priority || 'medium'))
-  const [subtasks, setSubtasks] = useState<Subtask[]>([
-    { id: '1', text: 'Wireframe review', done: true },
-    { id: '2', text: 'API integration', done: false },
-    { id: '3', text: 'QA testing', done: false },
-  ])
+  const [subtasks, setSubtasks] = useState<Subtask[]>(
+    Array.isArray(d.subtasks) ? (d.subtasks as Subtask[]) : [],
+  )
   const [newSubtask, setNewSubtask] = useState('')
 
   if (!node) return null

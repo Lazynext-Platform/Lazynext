@@ -19,10 +19,8 @@ const outcomeOptions = [
   { value: 'neutral', label: 'Neutral', color: 'text-slate-400' },
 ]
 
-const sampleThread = [
-  { id: '1', author: 'Priya Sharma', initials: 'PS', color: 'bg-emerald-500', message: "Why not PlanetScale? Their free tier is more generous.", time: '3 days ago' },
-  { id: '2', author: 'Avas Patel', initials: 'AP', color: 'bg-indigo-500', message: "PlanetScale uses MySQL. Our queries are Postgres-specific. Plus Supabase has Auth + RLS built in.", time: '2 days ago' },
-]
+// Thread will hydrate from /api/v1/messages once per-node fetch is wired.
+const sampleThread: { id: string; author: string; initials: string; color: string; message: string; time: string }[] = []
 
 export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClose: () => void }) {
   const nodes = useCanvasStore((s) => s.nodes)
@@ -190,16 +188,26 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
         </div>
 
         {/* Made by */}
-        <div>
-          <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Made by</label>
-          <div className="mt-1.5 flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">AP</span>
-            <div>
-              <p className="text-sm font-medium text-slate-200">Avas Patel</p>
-              <p className="text-2xs text-slate-500">Apr 2, 2026</p>
+        {(typeof d.madeByName === 'string' || typeof d.madeByInitials === 'string' || typeof d.createdAt === 'string') && (
+          <div>
+            <label className="text-2xs+ font-semibold uppercase tracking-wider text-slate-500">Made by</label>
+            <div className="mt-1.5 flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">
+                {typeof d.madeByInitials === 'string' ? d.madeByInitials : '?'}
+              </span>
+              <div>
+                {typeof d.madeByName === 'string' && (
+                  <p className="text-sm font-medium text-slate-200">{d.madeByName}</p>
+                )}
+                {typeof d.createdAt === 'string' && (
+                  <p className="text-2xs text-slate-500">
+                    {new Date(d.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Thread */}
         <div className="border-t border-slate-800 pt-4">
@@ -217,6 +225,9 @@ export function DecisionDetailPanel({ nodeId, onClose }: { nodeId: string; onClo
 
           {threadOpen && (
             <div className="mt-3 space-y-3">
+              {sampleThread.length === 0 && (
+                <p className="text-xs text-slate-500">No replies yet — be the first.</p>
+              )}
               {sampleThread.map((msg) => (
                 <div key={msg.id} className="flex gap-2.5">
                   <span className={cn('mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-2xs font-bold text-white', msg.color)}>

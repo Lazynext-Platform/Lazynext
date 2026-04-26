@@ -48,74 +48,11 @@ const edgeTypes = {
   workflow: WorkflowEdge,
 }
 
-const defaultNodes: Node[] = [
-  {
-    id: '1',
-    type: 'task',
-    position: { x: 100, y: 80 },
-    data: {
-      title: 'Ship onboarding v2',
-      status: 'in_progress',
-      assignee: 'AP',
-      dueDate: 'Apr 10',
-      priority: 'high',
-    },
-  },
-  {
-    id: '2',
-    type: 'task',
-    position: { x: 100, y: 280 },
-    data: {
-      title: 'Fix auth redirect bug',
-      status: 'done',
-      assignee: 'PK',
-      priority: 'urgent',
-    },
-  },
-  {
-    id: '3',
-    type: 'doc',
-    position: { x: 420, y: 80 },
-    data: {
-      title: 'Product Requirements Doc',
-      status: 'draft',
-      updatedAt: '2h ago',
-      wordCount: '1,240',
-    },
-  },
-  {
-    id: '4',
-    type: 'decision',
-    position: { x: 420, y: 280 },
-    data: {
-      title: 'Use Supabase for Auth + DB?',
-      status: 'decided',
-      qualityScore: 84,
-      resolution: 'Supabase — unified Auth + PostgreSQL, RLS policies, real-time subscriptions, generous free tier.',
-      rationale: 'Supabase provides auth, database, and storage in one platform. RLS policies give row-level security. Real-time subscriptions are built in.',
-      options: ['Supabase', 'Firebase', 'PlanetScale'],
-      decisionType: 'Irreversible',
-      outcome: 'Pending',
-    },
-  },
-  {
-    id: '5',
-    type: 'decision',
-    position: { x: 740, y: 180 },
-    data: {
-      title: 'Pricing: freemium vs trial?',
-      status: 'open',
-      qualityScore: 62,
-    },
-  },
-]
-
-const defaultEdges: Edge[] = [
-  { id: 'e1-3', source: '1', target: '3', animated: true },
-  { id: 'e3-4', source: '3', target: '4' },
-  { id: 'e4-5', source: '4', target: '5', style: { strokeDasharray: '6 6' } },
-  { id: 'e2-4', source: '2', target: '4', animated: true },
-]
+// Canvas starts empty — no demo nodes are auto-injected. Server-side
+// node persistence will live behind /api/v1/nodes; until that round-trip
+// is wired, the canvas is a per-session scratchpad. Right-click to add.
+const defaultNodes: Node[] = []
+const defaultEdges: Edge[] = []
 
 export function WorkflowCanvas() {
   const nodes = useCanvasStore((s) => s.nodes)

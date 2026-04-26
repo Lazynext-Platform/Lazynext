@@ -4,6 +4,29 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.1] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 2. v1.3.2.0 cleared the five workspace pages but a follow-up sweep found seven more surfaces with hardcoded "Avas Patel / Priya Sharma / Raj Kumar / Fix auth redirect bug" fixtures: every empty canvas auto-injected 5 demo nodes, the global notification bell rendered 8 fabricated alerts, the Decisions Health dashboard was 100% fixture-driven with fake leaderboards and fake quality trends, the workspace Settings → Members tab hardcoded "Avas Patel · avas@lazynext.com · Owner", and the canvas detail panels (thread, decision, task) shipped fake conversations, fake comparison tables, fake assignees, and fake subtasks. All gone.
+
+### Changed
+- `components/canvas/WorkflowCanvas.tsx` — removed 5 hardcoded `defaultNodes` (Ship onboarding v2, Fix auth redirect bug, Product Requirements Doc, Use Supabase for Auth + DB?, Pricing freemium vs trial?) and 4 demo edges. Empty canvas no longer fabricates work that doesn't exist. Server-side node persistence (`/api/v1/nodes` round-trip) is the follow-up.
+- `components/ui/NotificationCenter.tsx` — replaced 8 hardcoded notifications with empty array + "You're all caught up" empty state. The schema has no `notifications` table; building one is a separate feature.
+- `app/(app)/workspace/[slug]/decisions/health/page.tsx` — full rewrite as server component that calls the new `getDecisionHealthStats(workspaceId, period)` helper. The dashboard now computes from the real `decisions` table: total/avg quality/outcome-tagged/velocity stat cards with real week-over-week deltas, real quality distribution buckets (high/medium/low/unscored), real outcome donut, real 7-week quality trend (always a stable 7-week window regardless of the selected period filter), real top decision makers grouped by `made_by` with name resolution via `getWorkspaceUsers`, real type breakdown (reversible/irreversible/experimental/unspecified), real tag counts, real stale-untagged list (pending outcome + 30+ days old, links to the actual decision). LazyMind insight is now generated from real signal — surfaces low-quality %, untagged %, or strong-outcome praise based on which threshold trips.
+- `app/(app)/workspace/[slug]/settings/page.tsx` — Members tab no longer hardcodes "Avas Patel · avas@lazynext.com · Owner". Replaced with a redirect card to the dedicated `/members` page (which shipped real data in v1.3.2.0).
+- `components/canvas/panels/ThreadPanel.tsx` — gutted 5 hardcoded fake messages (including the "Supabase vs PlanetScale vs Firebase" comparison table) and 4 hardcoded mention options. Honest empty state. Made-by date no longer hardcoded "Apr 2, 2026" — only renders when the node carries a real `createdAt`.
+- `components/canvas/panels/DecisionDetailPanel.tsx` — gutted 2 hardcoded thread replies and the always-shown "Avas Patel · Apr 2, 2026" Made-by row. Made-by now reads from `node.data.madeByName / madeByInitials / createdAt` and only renders when present.
+- `components/canvas/panels/TaskDetailPanel.tsx` — gutted 3 hardcoded assignee options and 3 hardcoded subtasks (Wireframe review / API integration / QA testing). Subtasks now read from `node.data.subtasks` if present.
+
+### Added
+- `getDecisionHealthStats(workspaceId, period)` in `lib/data/workspace.ts` — period-aware aggregate over the `decisions` table returning quality buckets, outcome counts, 7-week stable trend window (refetched independently so a `period=7d` filter doesn't truncate the trend), top decision makers, type breakdown, tag counts, and stale-untagged list. Independent previous-period query produces real WoW deltas for the stat cards.
+
+### Verification
+- Type-check clean.
+- Lint clean (only the 2 pre-existing `<img>` warnings).
+- 143/143 tests passing.
+- Production build clean.
+- Manual grep: every fake fixture name (Avas Patel, Priya Sharma, Priya Shah, Raj Kumar, Rahul Dev, Sana Malik, Meera Joshi, Neha Kapoor, "Fix auth redirect bug") removed from `app/` and `components/canvas/`. The marketing About page retains its founder team listing — that is intentional product copy, not demo data.
+
 ## [1.3.2.0] - 2026-04-26
 
 **Theme:** Demo-data eradication. Five core workspace pages — Tasks, Members, Activity, Pulse, Automations — were rendering hardcoded "Avas/Priya/Rahul/Sana" fixtures regardless of who was logged in or which workspace they were viewing. New users saw a populated-looking team that didn't exist. This release rips out every fake array and wires four of the five surfaces directly to live Supabase data with proper empty states. Automations gets an honest "engine in development" placeholder rather than a fake-but-non-functional UI — the build engine itself is a multi-week project that will land in a future release.
