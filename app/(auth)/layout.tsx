@@ -33,7 +33,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-screen">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-foreground">
         Skip to main content
       </a>
       {/* Left Brand Panel — Desktop only */}
@@ -45,12 +45,12 @@ export default function AuthLayout({
           </Link>
 
           {/* Headline */}
-          <h2 className="mt-12 text-4xl font-bold leading-tight text-white">
+          <h2 className="mt-12 text-4xl font-bold leading-tight text-brand-foreground">
             The operating system
             <br />
             for work.
           </h2>
-          <p className="mt-4 max-w-md text-lg text-blue-100">
+          <p className="mt-4 max-w-md text-lg text-brand-foreground/75">
             Everything your team needs to move fast and stay aligned.
           </p>
 
@@ -58,12 +58,12 @@ export default function AuthLayout({
           <div className="mt-12 space-y-5">
             {features.map((f) => (
               <div key={f.title} className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                  <f.icon className="h-5 w-5 text-white" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-foreground/10">
+                  <f.icon className="h-5 w-5 text-brand-foreground" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">{f.title}</h3>
-                  <p className="mt-0.5 text-sm text-blue-100">{f.desc}</p>
+                  <h3 className="font-semibold text-brand-foreground">{f.title}</h3>
+                  <p className="mt-0.5 text-sm text-brand-foreground/75">{f.desc}</p>
                 </div>
               </div>
             ))}
@@ -71,7 +71,7 @@ export default function AuthLayout({
         </div>
 
         {/* Footer */}
-        <p className="text-sm text-blue-200">
+        <p className="text-sm text-brand-foreground/60">
           &copy; {new Date().getFullYear()} Lazynext. All rights reserved.
         </p>
       </div>

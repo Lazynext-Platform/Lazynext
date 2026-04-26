@@ -37,7 +37,7 @@ export default function ProfilePage() {
       {/* Tabs */}
       <div className="mt-6 flex gap-1 overflow-x-auto rounded-lg border border-slate-800 bg-slate-900 p-1">
         {tabs.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors', tab === t.id ? 'bg-brand text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200')}>
+          <button key={t.id} onClick={() => setTab(t.id)} className={cn('flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors', tab === t.id ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200')}>
             <t.icon className="h-4 w-4" /> {t.label}
           </button>
         ))}
@@ -49,7 +49,7 @@ export default function ProfilePage() {
           <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-lg font-semibold text-slate-100">Personal Info</h2>
             <div className="mt-4 flex items-start gap-6">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-brand text-2xl font-bold text-white">AP</div>
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-brand text-2xl font-bold text-brand-foreground">AP</div>
               <div className="flex-1 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -71,7 +71,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-            <button className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover">Save changes</button>
+            <button className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">Save changes</button>
           </div>
 
           {/* Workspaces */}

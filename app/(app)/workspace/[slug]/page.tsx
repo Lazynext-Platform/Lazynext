@@ -99,7 +99,7 @@ export default async function WorkspaceHomePage({ params }: { params: { slug: st
         </div>
         <Link
           href={`/workspace/${params.slug}/decisions?log=1`}
-          className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+          className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
         >
           <Plus className="h-4 w-4" /> Log Decision <kbd className="ml-1 rounded bg-white/10 px-1 text-2xs">⌘D</kbd>
         </Link>

@@ -54,7 +54,7 @@ export default function SettingsPage() {
             className={cn(
               'flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors',
               activeTab === tab.id
-                ? 'bg-brand text-white'
+                ? 'bg-brand text-brand-foreground'
                 : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
             )}
           >
@@ -98,7 +98,7 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-            <button className="mt-6 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+            <button className="mt-6 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
               Save changes
             </button>
           </div>
@@ -121,14 +121,14 @@ export default function SettingsPage() {
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-100">Team Members</h2>
-            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
               Invite member
             </button>
           </div>
           <div className="mt-4 divide-y divide-slate-800">
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-brand-foreground">
                   AP
                 </div>
                 <div>
@@ -158,7 +158,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => useUpgradeModal.getState().show('full-upgrade')}
-                  className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+                  className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
                 >
                   Upgrade
                 </button>

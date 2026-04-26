@@ -87,7 +87,7 @@ export default function HeroSection() {
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             href="/sign-up"
-            className="inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-brand/25 transition-colors hover:bg-brand-hover"
+            className="inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-base font-semibold text-brand-foreground shadow-lg shadow-brand/25 transition-colors hover:bg-brand-hover"
           >
             Log your first decision
             <ArrowRight className="ml-2 h-4 w-4" />

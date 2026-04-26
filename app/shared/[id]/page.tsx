@@ -78,7 +78,7 @@ export default function SharedCanvasPage() {
           <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700">
             <Share2 className="h-3 w-3" /> Share
           </button>
-          <Link href="/" className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover">
+          <Link href="/" className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:bg-brand-hover">
             Try Lazynext <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
@@ -127,7 +127,7 @@ export default function SharedCanvasPage() {
 
             <div className="mt-4 flex items-center gap-2">
               <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : ''} className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-300 focus:outline-none" />
-              <button onClick={handleCopy} className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">
+              <button onClick={handleCopy} className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">
                 {copied ? <><Check className="h-4 w-4" /> Copied</> : <><Copy className="h-4 w-4" /> Copy</>}
               </button>
             </div>

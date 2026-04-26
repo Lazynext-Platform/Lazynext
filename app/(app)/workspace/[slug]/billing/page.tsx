@@ -99,7 +99,7 @@ export default function BillingPage() {
           </div>
           <div className="flex gap-2">
             <button className="rounded-lg border border-slate-700 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Manage Subscription</button>
-            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover">Change Plan</button>
+            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">Change Plan</button>
           </div>
         </div>
       </div>
@@ -109,14 +109,14 @@ export default function BillingPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-100">Compare Plans</h2>
           <div className="flex gap-1 rounded-lg border border-slate-700 bg-slate-800 p-0.5">
-            <button onClick={() => setBillingCycle('monthly')} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', billingCycle === 'monthly' ? 'bg-brand text-white' : 'text-slate-400')}>Monthly</button>
-            <button onClick={() => setBillingCycle('annual')} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', billingCycle === 'annual' ? 'bg-brand text-white' : 'text-slate-400')}>Annual <span className="text-emerald-400">-20%</span></button>
+            <button onClick={() => setBillingCycle('monthly')} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', billingCycle === 'monthly' ? 'bg-brand text-brand-foreground' : 'text-slate-400')}>Monthly</button>
+            <button onClick={() => setBillingCycle('annual')} className={cn('rounded-md px-3 py-1.5 text-xs font-medium', billingCycle === 'annual' ? 'bg-brand text-brand-foreground' : 'text-slate-400')}>Annual <span className="text-emerald-400">-20%</span></button>
           </div>
         </div>
         <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => (
             <div key={plan.name} className={cn('rounded-xl border-2 bg-slate-900 p-5 transition-all relative', plan.current ? plan.accent : 'border-slate-800 hover:border-slate-600')}>
-              {plan.current && <span className="absolute -top-3 left-4 rounded-full bg-brand px-3 py-0.5 text-2xs font-bold text-white">Current Plan</span>}
+              {plan.current && <span className="absolute -top-3 left-4 rounded-full bg-brand px-3 py-0.5 text-2xs font-bold text-brand-foreground">Current Plan</span>}
               <h3 className="text-lg font-bold text-slate-100">{plan.name}</h3>
               <div className="mt-2">
                 <span className="text-3xl font-bold text-slate-50">{formatPrice(billingCycle === 'annual' && plan.price !== 0 ? Math.round(plan.price * 0.8) : plan.price, currency)}</span>
@@ -129,7 +129,7 @@ export default function BillingPage() {
                   </li>
                 ))}
               </ul>
-              <button disabled={plan.ctaDisabled} className={cn('mt-5 w-full rounded-lg py-2 text-sm font-semibold transition-colors', plan.current ? 'bg-slate-800 text-slate-400 cursor-default' : plan.ctaDisabled ? 'border border-slate-700 text-slate-500 cursor-default' : 'bg-brand text-white hover:bg-brand-hover')}>
+              <button disabled={plan.ctaDisabled} className={cn('mt-5 w-full rounded-lg py-2 text-sm font-semibold transition-colors', plan.current ? 'bg-slate-800 text-slate-400 cursor-default' : plan.ctaDisabled ? 'border border-slate-700 text-slate-500 cursor-default' : 'bg-brand text-brand-foreground hover:bg-brand-hover')}>
                 {plan.cta}
               </button>
             </div>

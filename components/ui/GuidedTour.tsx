@@ -236,7 +236,7 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
               )}
               <button
                 onClick={next}
-                className="flex items-center gap-1 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover"
+                className="flex items-center gap-1 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:bg-brand-hover"
               >
                 {isLast ? t('finishTour') : t('next')}
                 {!isLast && <ChevronRight className="h-3 w-3" />}

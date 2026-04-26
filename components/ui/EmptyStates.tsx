@@ -35,7 +35,7 @@ function IconCircle({ icon: Icon, colorClass }: { icon: React.ElementType; color
 }
 
 function PrimaryButton({ children, onClick, href }: { children: React.ReactNode; onClick?: () => void; href?: string }) {
-  const cls = 'inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition-colors'
+  const cls = 'inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors'
   if (href) return <Link href={href} className={cls}>{children}</Link>
   return <button onClick={onClick} className={cls}>{children}</button>
 }

@@ -42,7 +42,7 @@ export default function LazyMindSection() {
           <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl">
             <div className="flex items-center gap-2 border-b border-slate-700/50 px-4 py-3">
               <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-brand">
-                <Sparkles className="h-3.5 w-3.5 text-white" />
+                <Sparkles className="h-3.5 w-3.5 text-brand-foreground" />
               </div>
               <span className="text-sm font-semibold text-slate-300">
                 LazyMind

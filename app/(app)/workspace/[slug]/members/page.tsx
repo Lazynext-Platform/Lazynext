@@ -89,7 +89,7 @@ export default function MembersPage() {
           </p>
         </div>
         <button onClick={handleInviteClick}
-          className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+          className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
           <Plus className="h-4 w-4" /> Invite
         </button>
       </div>
@@ -222,7 +222,7 @@ export default function MembersPage() {
             </div>
             <div className="mt-6 flex gap-3">
               <button onClick={() => setShowInviteModal(false)} className="flex-1 rounded-lg border border-slate-700 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800">Cancel</button>
-              <button className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">
+              <button className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">
                 Send {emailChips.length > 0 ? `${emailChips.length} Invite${emailChips.length > 1 ? 's' : ''}` : 'Invite'}
               </button>
             </div>

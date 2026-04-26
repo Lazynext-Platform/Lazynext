@@ -11,7 +11,7 @@ export function WorkspaceSelector() {
       aria-label={`Switch workspace: ${workspace?.name || 'Workspace'}`}
       className="flex items-center gap-2 rounded-md px-1 py-0.5 hover:bg-slate-800 transition-colors"
     >
-      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-2xs font-bold text-white">
+      <div className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-2xs font-bold text-brand-foreground">
         {workspace?.name?.charAt(0).toUpperCase() || 'L'}
       </div>
       <span

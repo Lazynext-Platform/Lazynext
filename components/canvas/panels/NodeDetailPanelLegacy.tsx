@@ -291,7 +291,7 @@ export function NodeDetailPanelLegacy({ nodeId }: { nodeId: string }) {
               maxLength={500}
               className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
             />
-            <button className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors" aria-label="Send comment">
+            <button className="rounded-lg bg-brand px-3 py-2 text-sm font-medium text-brand-foreground hover:bg-brand-hover transition-colors" aria-label="Send comment">
               <Send className="h-4 w-4" />
             </button>
           </div>

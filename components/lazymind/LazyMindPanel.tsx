@@ -183,7 +183,7 @@ export function LazyMindPanel() {
           if (msg.role === 'user') {
             return (
               <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-white">{msg.content}</div>
+                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-brand-foreground">{msg.content}</div>
               </div>
             )
           }
@@ -281,7 +281,7 @@ export function LazyMindPanel() {
             enterKeyHint="send"
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 focus:outline-none"
           />
-          <button onClick={() => sendMessage(input)} disabled={!input.trim()} aria-label="Send message" className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-white disabled:opacity-30 hover:bg-brand-hover transition-colors">
+          <button onClick={() => sendMessage(input)} disabled={!input.trim()} aria-label="Send message" className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand text-brand-foreground disabled:opacity-30 hover:bg-brand-hover transition-colors">
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>

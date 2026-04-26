@@ -50,7 +50,7 @@ function ProgressIndicator({ step }: { step: number }) {
               step > s
                 ? 'border-emerald-500 bg-emerald-500 text-white'
                 : step === s
-                  ? 'border-brand bg-brand text-white'
+                  ? 'border-brand bg-brand text-brand-foreground'
                   : 'border-slate-700 bg-transparent text-slate-500'
             }`}
           >
@@ -234,7 +234,7 @@ export default function CreateWorkspacePage() {
               <button
                 type="submit"
                 disabled={!name.trim()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Continue <ArrowRight className="h-4 w-4" />
               </button>
@@ -357,7 +357,7 @@ export default function CreateWorkspacePage() {
               <button
                 type="submit"
                 disabled={!question.trim()}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Log Decision <ArrowRight className="h-4 w-4" />
               </button>
@@ -394,7 +394,7 @@ export default function CreateWorkspacePage() {
             <button
               onClick={handleGoToWorkspace}
               disabled={loading}
-              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+              className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-hover"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

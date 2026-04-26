@@ -161,7 +161,7 @@ function CaptureModal({
         </div>
         <div className="flex justify-end gap-2 border-t border-slate-800 px-6 py-4">
           <button onClick={onClose} disabled={saving} className="rounded-lg px-4 py-2 text-sm text-slate-400 hover:bg-slate-800">Cancel</button>
-          <button onClick={save} disabled={saving || !verdict} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors disabled:opacity-60">
+          <button onClick={save} disabled={saving || !verdict} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors disabled:opacity-60">
             {saving ? 'Saving…' : 'Record outcome'}
           </button>
         </div>

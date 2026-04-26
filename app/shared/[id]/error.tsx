@@ -24,7 +24,7 @@ export default function Error({
         <p className="mt-2 text-sm text-slate-500">This link may have expired or the workflow may no longer be shared.</p>
         <button
           onClick={reset}
-          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
         >
           <RotateCcw className="h-4 w-4" />
           Try again

@@ -97,7 +97,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-white hover:bg-brand-hover transition-colors disabled:opacity-50"
+          className="w-full rounded-lg bg-brand px-4 py-3 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors disabled:opacity-50"
         >
           {loading ? 'Signing in...' : 'Sign In'}
         </button>

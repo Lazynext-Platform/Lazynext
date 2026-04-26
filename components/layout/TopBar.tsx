@@ -102,7 +102,7 @@ export function TopBar() {
         </button>
 
         {/* LazyMind AI */}
-        <button aria-label="Open LazyMind AI assistant" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
+        <button aria-label="Open LazyMind AI assistant" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
           <Sparkles className="h-3.5 w-3.5" /> LazyMind
         </button>
 

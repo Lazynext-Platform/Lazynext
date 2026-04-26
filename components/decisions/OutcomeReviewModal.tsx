@@ -135,7 +135,7 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
             <div className="h-full rounded-full bg-orange-500 transition-all" style={{ width: `${progress}%` }} />
           </div>
           <button onClick={handleNext} disabled={!selectedOutcome}
-            className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed">
+            className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed">
             {isLast ? 'Done' : 'Next'} <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>

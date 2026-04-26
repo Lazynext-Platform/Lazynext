@@ -47,8 +47,8 @@ export default function ActivityPage() {
 
       {/* Tabs */}
       <div className="mt-6 flex gap-1 rounded-lg border border-slate-800 bg-slate-900 p-1 w-fit">
-        <button onClick={() => setTab('feed')} className={cn('rounded-md px-4 py-2 text-sm font-medium', tab === 'feed' ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}>Feed</button>
-        <button onClick={() => setTab('audit')} className={cn('rounded-md px-4 py-2 text-sm font-medium', tab === 'audit' ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}>Audit Log</button>
+        <button onClick={() => setTab('feed')} className={cn('rounded-md px-4 py-2 text-sm font-medium', tab === 'feed' ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}>Feed</button>
+        <button onClick={() => setTab('audit')} className={cn('rounded-md px-4 py-2 text-sm font-medium', tab === 'audit' ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}>Audit Log</button>
       </div>
 
       {/* Feed */}

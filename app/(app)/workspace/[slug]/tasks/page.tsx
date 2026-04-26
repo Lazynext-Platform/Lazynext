@@ -62,16 +62,16 @@ export default function TasksPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex gap-0.5 rounded-lg border border-slate-700 bg-slate-800 p-0.5">
-            <button onClick={() => setView('board')} className={cn('rounded-md px-2.5 py-1.5 transition-colors', view === 'board' ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}>
+            <button onClick={() => setView('board')} className={cn('rounded-md px-2.5 py-1.5 transition-colors', view === 'board' ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}>
               <LayoutGrid className="h-4 w-4" />
             </button>
-            <button onClick={() => setView('list')} className={cn('rounded-md px-2.5 py-1.5 transition-colors', view === 'list' ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}>
+            <button onClick={() => setView('list')} className={cn('rounded-md px-2.5 py-1.5 transition-colors', view === 'list' ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}>
               <List className="h-4 w-4" />
             </button>
           </div>
           <button className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200"><Filter className="h-3 w-3" /> Filter</button>
           <button className="flex items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200"><ArrowUpDown className="h-3 w-3" /> Sort</button>
-          <button className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover"><Plus className="h-4 w-4" /> Add Task</button>
+          <button className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"><Plus className="h-4 w-4" /> Add Task</button>
         </div>
       </div>
 

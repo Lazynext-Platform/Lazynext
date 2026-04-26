@@ -118,12 +118,12 @@ export default function PricingSection() {
               key={tier.name}
               className={`card-hover rounded-2xl p-8 ${
                 tier.featured
-                  ? 'relative bg-brand text-white shadow-xl shadow-brand/20 ring-2 ring-brand'
+                  ? 'relative bg-brand text-brand-foreground shadow-xl shadow-brand/20 ring-2 ring-brand'
                   : 'border border-slate-200 bg-white'
               }`}
             >
               {tier.featured && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#3B5AE0] px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-950 px-4 py-1 text-xs font-bold uppercase tracking-wider text-brand">
                   Most Popular
                 </div>
               )}
@@ -139,7 +139,7 @@ export default function PricingSection() {
                 </span>
                 <span
                   className={`text-sm ${
-                    tier.featured ? 'text-white/70' : 'text-slate-500'
+                    tier.featured ? 'text-brand-foreground/75' : 'text-slate-500'
                   }`}
                 >
                   {tier.period}
@@ -148,7 +148,7 @@ export default function PricingSection() {
 
               <p
                 className={`mt-2 text-sm ${
-                  tier.featured ? 'text-white/70' : 'text-slate-500'
+                  tier.featured ? 'text-brand-foreground/75' : 'text-slate-500'
                 }`}
               >
                 {tier.desc}
@@ -158,8 +158,8 @@ export default function PricingSection() {
                 href={tier.ctaLink}
                 className={`mt-6 block w-full rounded-xl py-3 text-center text-sm font-semibold transition-colors ${
                   tier.featured
-                    ? 'bg-white text-brand hover:bg-slate-50'
-                    : 'border-2 border-slate-200 text-slate-700 hover:border-brand hover:text-brand'
+                    ? 'bg-slate-950 text-brand hover:bg-slate-800'
+                    : 'border-2 border-slate-200 text-slate-700 hover:border-brand hover:text-brand-foreground hover:bg-brand/10'
                 }`}
               >
                 {tier.cta}
@@ -173,14 +173,14 @@ export default function PricingSection() {
                       !f.included && !tier.featured
                         ? 'text-slate-400'
                         : tier.featured
-                          ? 'text-white'
+                          ? 'text-brand-foreground'
                           : 'text-slate-600'
                     }`}
                   >
                     {f.included ? (
                       <Check
                         className={`h-4 w-4 flex-shrink-0 ${
-                          tier.featured ? 'text-green-300' : 'text-green-500'
+                          tier.featured ? 'text-emerald-800' : 'text-green-500'
                         }`}
                       />
                     ) : (

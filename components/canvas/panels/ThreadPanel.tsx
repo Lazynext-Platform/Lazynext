@@ -271,7 +271,7 @@ export function ThreadPanel({ nodeId, onClose }: { nodeId: string; onClose: () =
           <button className="rounded-lg p-2 text-slate-400 hover:text-slate-300" aria-label="Attach file">
             <Paperclip className="h-4 w-4" />
           </button>
-          <button className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-white hover:bg-brand-hover transition-colors" aria-label="Send message">
+          <button className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand text-brand-foreground hover:bg-brand-hover transition-colors" aria-label="Send message">
             <Send className="h-4 w-4" />
           </button>
         </div>

@@ -4,6 +4,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.1.1] - 2026-04-26
+
+**Theme:** Boomerang QA fix on the v1.3.1.0 rebrand. With the brand color flipped from cobalt to lime, every surface that paired `bg-brand` with `text-white` (which passed AA on cobalt) suddenly failed AA on lime — white on `#BEFF66` doesn't reach 4.5:1 contrast. Found ~60 component-level instances across the codebase plus the entire auth left panel and CTA banner. All swapped to `text-brand-foreground` (`#0A0A0A`, near-black, the WCAG-safe pairing baked into the logo). Two `bg-white text-brand` CTAs (lime-text on white, also fails) were upgraded to `bg-slate-950 text-brand` — black-pill-with-lime-text — mirroring the logo's exact color pair for max recognition. Final logo PNGs were also dropped in at `Lazynext_Logo.png`, `public/logo.png`, `public/logo-dark.png`, `public/logo-transparent.png`, and the sidebar/topbar 24×24 slots were switched from the (now wordmark) PNG to the mark-only `/icon.svg` so they don't render as illegible blobs at icon sizes.
+
+### Fixed
+- **WCAG AA contrast on lime surfaces** — 65 files updated. Mechanically swapped `text-white` → `text-brand-foreground` whenever it appeared in the same className as `bg-brand` or `bg-brand-hover`. Touches every primary CTA across marketing, auth, app shell, canvas panels, lazymind chat, billing, settings, profile, decisions, tasks, automations, activity, integrations, templates, members, export, import, guide, pulse, onboarding, and error pages. Functional Tailwind colors (`bg-emerald-500 text-white`, `bg-red-500 text-white`, etc.) intentionally untouched — they're not on lime.
+- `components/marketing/PricingSection.tsx` — entire featured tier card (full body bg-brand). Headline + price + period + description + feature list items + Check icon all switched to dark contrast colors. Replaced cobalt `bg-[#3B5AE0]` "Most Popular" pill with `bg-slate-950 text-brand` (black pill, lime text). Featured CTA upgraded from `bg-white text-brand` → `bg-slate-950 text-brand` for max brand pop.
+- `components/marketing/CTABanner.tsx` — entire section bg-brand. Headline, body, and CTA all switched to dark-on-lime + black-pill CTA.
+- `app/(auth)/layout.tsx` — auth left brand panel (full `bg-gradient-to-br from-brand to-brand-hover` lime gradient). Swapped headline, subheading, feature card titles + descriptions, footer, and feature icon container to dark-on-lime. Replaced legacy `text-blue-100`/`text-blue-200` (cobalt-era secondary text) with `text-brand-foreground/75` and `/60` opacity variants.
+- `app/(marketing)/pricing/page.tsx` — standalone /pricing page filled-tier CTA, "Most Popular" pill, and featured tier styling.
+
+### Logo assets
+- `Lazynext_Logo.png` (root), `public/logo.png`, `public/logo-dark.png`, `public/logo-transparent.png` — all replaced with the new black-on-lime PNG (236K each).
+- `components/layout/Sidebar.tsx`, `components/layout/TopBar.tsx` — at 24×24 px, switched the logo source from `/logo-dark.png` (full wordmark, illegible at icon size) to `/icon.svg` (mark-only — lime square + black geometric mark — designed for icon sizes).
+
+### Verification
+- `npm run type-check` clean
+- `npm run lint` clean (same 2 pre-existing `<img>` warnings in `app/global-error.tsx` and `app/shared/[id]/page.tsx`)
+- `npm test` — **143/143** passing
+- `npm run build` — clean, 60+ routes
+- 0 instances of `bg-brand text-white` remain in source
+
 ## [1.3.1.0] - 2026-04-26
 
 **Theme:** Rebrand to the new black-on-lime logo. Lime (`#BEFF66`) replaces cobalt (`#4F6EF7`) as the primary brand color across the entire platform — Tailwind tokens, CSS custom properties, marketing site, app shell, canvas selection, Decision DNA charts, email templates, PWA manifest, OG image, and apple-icon. Lime is treated as an **accent only** (CTAs, focus rings, link underlines, active states, hero logo card). Full-page lime backgrounds were rejected as unprofessional. Text on lime is always near-black `#0A0A0A` to satisfy WCAG AA contrast — same pairing as the logo mark.

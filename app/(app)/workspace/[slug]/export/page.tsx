@@ -128,7 +128,7 @@ export default function DataExportPage() {
                 </div>
               </div>
             ) : (
-              <button onClick={handleFullExport} className="mt-4 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">Export Full Workspace</button>
+              <button onClick={handleFullExport} className="mt-4 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">Export Full Workspace</button>
             )}
           </>
         )}

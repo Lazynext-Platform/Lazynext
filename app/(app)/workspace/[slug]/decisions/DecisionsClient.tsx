@@ -228,7 +228,7 @@ function LogDecisionModal({
             </div>
             <div className="flex justify-end gap-2 border-t border-slate-800 px-6 py-4">
               <button onClick={onClose} disabled={submitting} className="rounded-lg px-4 py-2 text-sm text-slate-400 hover:bg-slate-800">Cancel</button>
-              <button onClick={handleSubmit} disabled={submitting} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors disabled:opacity-60">
+              <button onClick={handleSubmit} disabled={submitting} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors disabled:opacity-60">
                 {submitting ? 'Logging…' : 'Log Decision'}
               </button>
             </div>
@@ -290,7 +290,7 @@ export default function DecisionsClient({ workspaceId, workspaceSlug: _slug, dec
             Capture, score, and learn from every decision. <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-2xs">⌘D</kbd> to log a new one.
           </p>
         </div>
-        <button onClick={() => setShowLogModal(true)} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+        <button onClick={() => setShowLogModal(true)} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
           <Plus className="h-4 w-4" /> Log Decision
         </button>
       </div>
@@ -344,7 +344,7 @@ export default function DecisionsClient({ workspaceId, workspaceSlug: _slug, dec
               <button
                 key={s}
                 onClick={() => setFilter(s)}
-                className={cn('rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors', filter === s ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}
+                className={cn('rounded-md px-3 py-1.5 text-xs font-medium capitalize transition-colors', filter === s ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}
               >
                 {s}
               </button>

@@ -26,7 +26,7 @@ export default function Error({
       )}
       <button
         onClick={reset}
-        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+        className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
       >
         <RotateCcw className="h-4 w-4" />
         Try again

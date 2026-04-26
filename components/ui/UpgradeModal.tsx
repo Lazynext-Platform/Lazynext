@@ -310,7 +310,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                 onClick={() => setBillingCycle('monthly')}
                 className={cn(
                   'rounded-md px-3 py-1.5 text-xs font-medium',
-                  billingCycle === 'monthly' ? 'bg-brand text-white' : 'text-slate-400'
+                  billingCycle === 'monthly' ? 'bg-brand text-brand-foreground' : 'text-slate-400'
                 )}
               >
                 Monthly
@@ -319,7 +319,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                 onClick={() => setBillingCycle('yearly')}
                 className={cn(
                   'rounded-md px-3 py-1.5 text-xs font-medium',
-                  billingCycle === 'yearly' ? 'bg-brand text-white' : 'text-slate-400'
+                  billingCycle === 'yearly' ? 'bg-brand text-brand-foreground' : 'text-slate-400'
                 )}
               >
                 Annual <span className="text-emerald-400">-20%</span>
@@ -374,7 +374,7 @@ export function UpgradeModal({ variant = 'full-upgrade', onClose }: { variant?: 
                     className={cn(
                       'mt-4 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed',
                       plan.popular
-                        ? 'bg-brand text-white hover:bg-brand-hover'
+                        ? 'bg-brand text-brand-foreground hover:bg-brand-hover'
                         : 'border border-slate-600 text-slate-300 hover:bg-slate-700'
                     )}
                   >
@@ -419,7 +419,7 @@ export function TrialBanner({ daysLeft = 0, onUpgrade }: { daysLeft?: number; on
       <div className="flex items-center gap-2">
         <button
           onClick={onUpgrade}
-          className="rounded-lg bg-brand px-3 py-1 text-xs font-semibold text-white hover:bg-brand-hover"
+          className="rounded-lg bg-brand px-3 py-1 text-xs font-semibold text-brand-foreground hover:bg-brand-hover"
         >
           Upgrade now
         </button>

@@ -86,7 +86,7 @@ export function FeatureGate({
           <button
             type="button"
             onClick={() => useUpgradeModal.getState().show(variant)}
-            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-brand-hover"
+            className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-brand-foreground shadow-lg hover:bg-brand-hover"
           >
             Upgrade to {requiredTier}
           </button>

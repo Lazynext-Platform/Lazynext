@@ -55,7 +55,7 @@ export default function MarketingHeader() {
           </Link>
           <Link
             href="/sign-up"
-            className="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-brand/25 transition-colors hover:bg-brand-hover"
+            className="inline-flex items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground shadow-sm shadow-brand/25 transition-colors hover:bg-brand-hover"
           >
             Start Free
           </Link>

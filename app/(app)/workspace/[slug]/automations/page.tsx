@@ -66,7 +66,7 @@ function AutomationsInner() {
               </h1>
               <p className="mt-1 text-sm text-slate-400">Active Automations ({automations.filter(a => a.active).length})</p>
             </div>
-            <button className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover">
+            <button className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">
               <Plus className="h-4 w-4" /> New Automation
             </button>
           </div>
@@ -74,7 +74,7 @@ function AutomationsInner() {
           {/* Filter pills */}
           <div className="mt-4 flex gap-1">
             {(['all', 'active', 'paused'] as const).map((f) => (
-              <button key={f} onClick={() => setFilterMode(f)} className={cn('rounded-md px-3 py-1 text-2xs font-medium capitalize transition-colors', filterMode === f ? 'bg-brand text-white' : 'bg-slate-800 text-slate-400 hover:text-slate-200')}>
+              <button key={f} onClick={() => setFilterMode(f)} className={cn('rounded-md px-3 py-1 text-2xs font-medium capitalize transition-colors', filterMode === f ? 'bg-brand text-brand-foreground' : 'bg-slate-800 text-slate-400 hover:text-slate-200')}>
                 {f}
               </button>
             ))}
@@ -115,7 +115,7 @@ function AutomationsInner() {
               <input defaultValue={selected?.name || 'New Automation'} aria-label="Automation name" className="bg-transparent text-xl font-bold text-slate-100 border-b border-transparent focus:border-brand focus:outline-none" />
               <span className={cn('rounded-full px-2 py-0.5 text-2xs font-medium', selected?.active ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-700 text-slate-400')}>{selected?.active ? 'Active' : 'Paused'}</span>
             </div>
-            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover"><Save className="inline h-3.5 w-3.5 mr-1" /> Save</button>
+            <button className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"><Save className="inline h-3.5 w-3.5 mr-1" /> Save</button>
           </div>
 
           {/* WHEN trigger */}

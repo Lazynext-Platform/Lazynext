@@ -114,7 +114,7 @@ export default function TemplatesPage() {
           {categories.map(cat => (
             <button key={cat} onClick={() => setActiveCat(cat)}
               className={cn('whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition-colors',
-                activeCat === cat ? 'bg-brand border-brand text-white' :
+                activeCat === cat ? 'bg-brand border-brand text-brand-foreground' :
                 cat !== 'All' && catColors[cat] ? cn('border', catColors[cat]) :
                 'border-slate-700 text-slate-400 hover:text-slate-200')}>
               {cat}
@@ -190,7 +190,7 @@ export default function TemplatesPage() {
 
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => setInstallModal(null)} className="flex-1 rounded-lg border border-slate-700 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800">Cancel</button>
-                  <button onClick={() => setInstalled(true)} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">Install Template</button>
+                  <button onClick={() => setInstalled(true)} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">Install Template</button>
                 </div>
               </>
             ) : (
@@ -202,7 +202,7 @@ export default function TemplatesPage() {
                 <p className="mt-1 text-sm text-slate-400">{installModal.nodes} nodes added to your workflow.</p>
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => setInstallModal(null)} className="flex-1 rounded-lg border border-slate-700 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800">Close</button>
-                  <button onClick={() => setInstallModal(null)} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-brand-hover">View Canvas</button>
+                  <button onClick={() => setInstallModal(null)} className="flex-1 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">View Canvas</button>
                 </div>
               </div>
             )}

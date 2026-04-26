@@ -80,7 +80,7 @@ export default function IntegrationsPage() {
                   <p className="text-xs text-slate-500">{int.desc}</p>
                 </div>
               </div>
-              <button className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-hover">Connect</button>
+              <button className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground hover:bg-brand-hover">Connect</button>
             </div>
           ))}
         </div>

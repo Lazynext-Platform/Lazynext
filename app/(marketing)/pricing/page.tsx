@@ -205,8 +205,8 @@ function PricingCta({ tier, isAnnual }: { tier: PricingTier; isAnnual: boolean }
 
   const className = `mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
     tier.ctaStyle === 'filled'
-      ? 'bg-brand text-white shadow-sm hover:bg-brand-hover'
-      : 'border-2 border-brand bg-white text-brand hover:bg-brand/5'
+      ? 'bg-brand text-brand-foreground shadow-sm hover:bg-brand-hover'
+      : 'border-2 border-brand bg-white text-brand-foreground hover:bg-brand/10'
   }`
 
   if (external) {
@@ -298,7 +298,7 @@ export default function PricingPage() {
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center rounded-full bg-brand px-3.5 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                    <span className="inline-flex items-center rounded-full bg-brand px-3.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-foreground">
                       Most Popular
                     </span>
                   </div>
@@ -473,7 +473,7 @@ export default function PricingPage() {
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/contact"
-              className="inline-flex items-center rounded-lg bg-brand px-6 py-3 text-base font-semibold text-white shadow-sm transition-colors hover:bg-brand-hover"
+              className="inline-flex items-center rounded-lg bg-brand px-6 py-3 text-base font-semibold text-brand-foreground shadow-sm transition-colors hover:bg-brand-hover"
             >
               Talk to Us
             </Link>

@@ -74,7 +74,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-center gap-4 border-b border-slate-800 py-3">
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2">
-              <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-2xs font-bold', step >= s ? (step > s ? 'bg-emerald-500 text-white' : 'bg-brand text-white') : 'bg-slate-700 text-slate-400')}>
+              <div className={cn('flex h-6 w-6 items-center justify-center rounded-full text-2xs font-bold', step >= s ? (step > s ? 'bg-emerald-500 text-white' : 'bg-brand text-brand-foreground') : 'bg-slate-700 text-slate-400')}>
                 {step > s ? <CheckCircle2 className="h-3.5 w-3.5" /> : s}
               </div>
               <span className={cn('text-xs hidden sm:block', step >= s ? 'text-slate-200' : 'text-slate-500')}>
@@ -134,7 +134,7 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                 <option>Q2 Product Sprint</option>
                 <option>Client Onboarding</option>
               </select>
-              <button onClick={handleImport} className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-white hover:bg-brand-hover transition-colors">
+              <button onClick={handleImport} className="w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
                 Connect & Start Import
               </button>
               <button onClick={() => setStep(1)} className="w-full text-center text-xs text-slate-500 hover:text-slate-300">Back to sources</button>

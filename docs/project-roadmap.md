@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.1.0 — shipped + deployed
+> **Current Milestone**: v1.3.1.1 — shipped + deployed
 > **Last Updated**: 2026-04-26
 
 ---
@@ -160,7 +160,7 @@
 | All Phase 1 features merged | ✅ All merged to main |
 | All test plans passing | ✅ 78 E2E + 53 unit tests passing |
 | Documentation complete | ✅ |
-| Deployment ready | ✅ Live on Vercel → https://lazynext.com (v1.3.1.0) |
+| Deployment ready | ✅ Live on Vercel → https://lazynext.com (v1.3.1.1) |
 
 ### Growth / v2.0
 
@@ -173,7 +173,7 @@
 | All features on feature branch | ✅ `main` |
 | Merge to main | ✅ All merged |
 | Test coverage | ✅ 78 E2E + 53 unit |
-| Deployment | ✅ Live on Vercel → https://lazynext.com (v1.3.1.0) |
+| Deployment | ✅ Live on Vercel → https://lazynext.com (v1.3.1.1) |
 
 ---
 

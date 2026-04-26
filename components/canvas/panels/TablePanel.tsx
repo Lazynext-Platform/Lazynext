@@ -118,7 +118,7 @@ export default function TablePanel({ onClose }: TablePanelProps) {
                     return (
                       <td key={col.id} className="px-3 py-2">
                         <div className="flex items-center gap-1.5">
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-4xs font-bold text-white">
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-4xs font-bold text-brand-foreground">
                             {val.slice(0, 2).toUpperCase()}
                           </div>
                           <span className="text-slate-300">{val}</span>

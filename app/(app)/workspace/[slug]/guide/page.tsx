@@ -170,7 +170,7 @@ export default function PlatformGuidePage() {
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <button
               onClick={startInteractiveTour}
-              className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-white hover:bg-brand-hover transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
             >
               <Play className="h-4 w-4" />
               {t('startTour')}
@@ -279,7 +279,7 @@ export default function PlatformGuidePage() {
                       'mt-5 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors',
                       isComplete
                         ? 'bg-emerald-500/10 text-emerald-400'
-                        : 'bg-brand text-white hover:bg-brand-hover'
+                        : 'bg-brand text-brand-foreground hover:bg-brand-hover'
                     )}
                   >
                     {isComplete ? (
@@ -318,7 +318,7 @@ export default function PlatformGuidePage() {
               </button>
               <Link
                 href={`/workspace/${slug}`}
-                className="flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
+                className="flex items-center gap-2 rounded-xl bg-brand px-6 py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"
               >
                 {t('goToWorkspace')}
                 <ArrowRight className="h-4 w-4" />

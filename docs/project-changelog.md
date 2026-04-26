@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.1.1] — WCAG contrast sweep + final logo drop-in (2026-04-26)
+
+Boomerang fix on the v1.3.1.0 rebrand. With brand flipped to lime `#BEFF66`, every surface that paired `bg-brand` with `text-white` (passed AA on cobalt) now failed AA on lime. Found ~60 instances and swept them with a regex transform: `text-white` → `text-brand-foreground` (`#0A0A0A` near-black) wherever it sits in the same className as `bg-brand` / `bg-brand-hover`. Two `bg-white text-brand` CTAs (lime-text on white, also fails AA) upgraded to `bg-slate-950 text-brand` — black-pill-with-lime-text, mirroring the logo's color pair for max brand recognition. Manually rebuilt the entire auth left brand panel (gradient `from-brand to-brand-hover`) replacing legacy cobalt-era `text-blue-100`/`200` with `text-brand-foreground/75` opacity variants. Pricing featured tier (entire card body bg-brand) and CTA banner (entire section bg-brand) fully recolored. Final logo PNGs dropped into `Lazynext_Logo.png` + the three `public/logo*.png` paths; sidebar/topbar 24×24 slots switched from `/logo-dark.png` (full wordmark, illegible at that size) to `/icon.svg` (mark-only). 65 files touched, type-check clean, build clean, **143/143** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1311---2026-04-26).
+
+---
+
 ## [1.3.1.0] — Rebrand to black-on-lime logo identity (2026-04-26)
 
 Cobalt `#4F6EF7` retired. Lime `#BEFF66` is now the primary brand accent across the platform — Tailwind tokens, CSS variables, marketing connectors, the central landing-page "Lazynext" card (now mirrors the logo's lime + black pairing), canvas edge selection, Decision DNA quality-trend chart, email templates, OG image card, apple-icon, favicon SVG, and PWA `theme_color`. Lime is enforced as an **accent only**; full-page lime backgrounds were rejected as unprofessional for a SaaS surface. Text on lime is always near-black `#0A0A0A` (WCAG AA pairing, matches the logo mark). Brand voice and the 7 functional node-type colors are unchanged. New `brand.foreground` Tailwind token added to lock in the contrast pair. Type-check clean, build clean, **143/143** tests passing.

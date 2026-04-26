@@ -39,7 +39,7 @@ export default function ImportPage() {
               </p>
               <button
                 onClick={() => setShowModal(true)}
-                className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-hover transition-colors"
+                className="mt-4 rounded-lg bg-brand px-4 py-2 text-sm font-medium text-brand-foreground hover:bg-brand-hover transition-colors"
               >
                 Start Import
               </button>

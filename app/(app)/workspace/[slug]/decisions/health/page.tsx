@@ -95,7 +95,7 @@ function DecisionHealthInner() {
         </div>
         <div className="flex gap-1 rounded-lg border border-slate-700 bg-slate-800 p-0.5">
           {(['7d', '30d', '90d', 'all'] as TimePeriod[]).map((p) => (
-            <button key={p} onClick={() => setPeriod(p)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', period === p ? 'bg-brand text-white' : 'text-slate-400 hover:text-slate-200')}>
+            <button key={p} onClick={() => setPeriod(p)} className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', period === p ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}>
               {p === 'all' ? 'All time' : p}
             </button>
           ))}
@@ -235,7 +235,7 @@ function DecisionHealthInner() {
                 <tr key={m.name} className="border-b border-slate-800/50 last:border-0">
                   <td className="py-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-2xs font-bold text-white">{m.initials}</div>
+                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-2xs font-bold text-brand-foreground">{m.initials}</div>
                       <span className="text-slate-200">{m.name}</span>
                     </div>
                   </td>

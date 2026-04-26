@@ -149,7 +149,7 @@ export function CanvasToolbar() {
           'flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg transition-all',
           isOpen
             ? 'bg-slate-700 text-slate-300 rotate-45'
-            : 'bg-brand text-white hover:bg-brand-hover hover:shadow-xl shadow-brand/20'
+            : 'bg-brand text-brand-foreground hover:bg-brand-hover hover:shadow-xl shadow-brand/20'
         )}
       >
         {isOpen ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
