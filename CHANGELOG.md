@@ -4,6 +4,37 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.1.0] - 2026-04-26
+
+**Theme:** Rebrand to the new black-on-lime logo. Lime (`#BEFF66`) replaces cobalt (`#4F6EF7`) as the primary brand color across the entire platform — Tailwind tokens, CSS custom properties, marketing site, app shell, canvas selection, Decision DNA charts, email templates, PWA manifest, OG image, and apple-icon. Lime is treated as an **accent only** (CTAs, focus rings, link underlines, active states, hero logo card). Full-page lime backgrounds were rejected as unprofessional. Text on lime is always near-black `#0A0A0A` to satisfy WCAG AA contrast — same pairing as the logo mark.
+
+### Changed
+- `tailwind.config.ts` `brand` palette → lime (`DEFAULT: #BEFF66`, `hover: #A6E64D`, `light: #E8FFC9`, `lighter: #F4FFE3`) + new `brand.foreground: #0A0A0A` token for text-on-lime.
+- `app/globals.css` — CSS custom props (`--color-primary`, `--color-primary-hover`, new `--color-primary-foreground`) and `.gradient-hero`/`.gradient-decision` recipes switched from blue-tinted to lime-tinted.
+- `components/marketing/HeroSection.tsx` and `components/marketing/ConsolidationMap.tsx` — connector strokes lime, central "Lazynext" card switched from cobalt-with-white-text to lime-with-near-black-text (mirrors the new logo at the most brand-recognizable spot on the landing page).
+- `components/canvas/edges/WorkflowEdge.tsx` — selected edge stroke now lime.
+- `app/(app)/onboarding/create-workspace/page.tsx` — confetti palette starts with lime.
+- `app/(app)/workspace/[slug]/decisions/health/page.tsx` — Decision DNA quality-trend gradient, line, and current-point all now lime.
+- `lib/email/templates/index.tsx` — `BRAND_COLOR` now lime, `BRAND_FOREGROUND` (`#0A0A0A`) added; header/button/footer link colors recalibrated for AA contrast on lime.
+- `public/icon.svg` and `app/apple-icon.tsx` — replaced the legacy red "L" mark with the new black geometric mark (quarter-circle + small filled square) on a lime square.
+- `app/opengraph-image.tsx` — kept the dark social-preview background but introduced a lime card holding the black mark + "Lazynext" wordmark, so the brand color pops against dark in Twitter/LinkedIn previews.
+- `public/manifest.json` `theme_color` → lime so Android Chrome's address bar and task switcher show brand color.
+- `tests/e2e/seo-a11y-api.spec.ts` — updated `theme_color` assertion to `#BEFF66`.
+
+### Documentation
+- `docs/design-system.md` — palette tables updated; added explicit "Brand lime is an ACCENT, not a background" rule and the WCAG-mandatory `'#0A0A0A` on lime' pairing rule.
+- `AGENTS.md` and `README.md` — brand summaries updated to lime + the foreground-pair rule.
+- Historical `docs/features/*/design-spec.md` design specs (50 files) intentionally left unchanged. They document v1's visual decisions for posterity per the Mastery framework convention; future re-design work would create new design briefs.
+
+### Logo asset (action item — not blocking deploy)
+- `Lazynext_Logo.png` and `public/logo*.png` are still the previous PNGs. User will drop new versions into the repo; no code change needed since the file paths are unchanged.
+
+### Verification
+- `npm run type-check` clean
+- `npm run lint` clean (same 2 pre-existing `<img>` warnings, no new)
+- `npm test` — **143/143** passing
+- `npm run build` — clean, all 60+ routes compile
+
 ## [1.3.0.6] - 2026-04-26
 
 **Theme:** Stop the CSP from blocking Sentry session replay's blob: Web Worker on every page. Live dogfood (`/qa` → 17 routes) found the same console error fired on every public page: `Refused to create a worker from 'blob:...' because it violates the following Content Security Policy directive: script-src 'self' 'unsafe-inline'. Note that 'worker-src' was not explicitly set, so 'script-src' is used as a fallback.` Sentry replay (`replayIntegration` in `sentry.client.config.ts`) bundles its compression logic as a `blob:` Worker. With `replaysOnErrorSampleRate: 1.0`, every error session was supposed to capture a replay — none of them could.

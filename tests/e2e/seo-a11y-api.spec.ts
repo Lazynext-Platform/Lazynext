@@ -33,7 +33,7 @@ test.describe('SEO & Meta', () => {
     expect(response?.status()).toBe(200)
     const body = await response!.json()
     expect(body.name).toBe('Lazynext')
-    expect(body.theme_color).toBe('#4F6EF7')
+    expect(body.theme_color).toBe('#BEFF66')
     expect(body.display).toBe('standalone')
   })
 

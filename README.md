@@ -147,7 +147,7 @@ npm run test:e2e     # Playwright E2E tests
 ## Design System
 
 - **Dark theme** app (slate-950/900), **light theme** marketing
-- **Brand**: `#4F6EF7`
+- **Brand**: `#BEFF66` lime (accent only). Pair with `#0A0A0A` near-black for WCAG-safe text on lime.
 - **Font**: Inter (400/500/600/700)
 - **7 node-type colors**: Task blue, Doc emerald, Decision orange, Thread purple, Pulse cyan, Automation amber, Table teal
 - **Responsive**: Mobile-first — Mobile (<640px), Tablet (640–1024px), Desktop (>1024px)

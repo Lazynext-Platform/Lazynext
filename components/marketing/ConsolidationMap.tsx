@@ -47,17 +47,17 @@ export default function ConsolidationMap() {
             <text x="210" y="265" textAnchor="middle" fill="#64748b" fontSize="13" fontFamily="Inter" fontWeight="600">Sheets</text>
 
             {/* Animated lines */}
-            <line x1="120" y1="40" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
-            <line x1="120" y1="95" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
-            <line x1="120" y1="150" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
-            <line x1="120" y1="205" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
-            <line x1="120" y1="260" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
-            <line x1="260" y1="260" x2="540" y2="150" stroke="#4F6EF7" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="120" y1="40" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="120" y1="95" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="120" y1="150" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="120" y1="205" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="120" y1="260" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
+            <line x1="260" y1="260" x2="540" y2="150" stroke="#BEFF66" strokeWidth="1.5" opacity="0.3" className="consolidation-line" />
 
             {/* Lazynext box */}
-            <rect x="540" y="110" width="220" height="80" rx="16" fill="#4F6EF7" stroke="#3B5AE0" strokeWidth="2" />
-            <text x="650" y="147" textAnchor="middle" fill="white" fontSize="20" fontFamily="Inter" fontWeight="800">Lazynext</text>
-            <text x="650" y="170" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="12" fontFamily="Inter" fontWeight="500">Everything. One place.</text>
+            <rect x="540" y="110" width="220" height="80" rx="16" fill="#BEFF66" stroke="#0A0A0A" strokeWidth="2" />
+            <text x="650" y="147" textAnchor="middle" fill="#0A0A0A" fontSize="20" fontFamily="Inter" fontWeight="800">Lazynext</text>
+            <text x="650" y="170" textAnchor="middle" fill="rgba(10,10,10,0.7)" fontSize="12" fontFamily="Inter" fontWeight="500">Everything. One place.</text>
           </svg>
         </div>
 

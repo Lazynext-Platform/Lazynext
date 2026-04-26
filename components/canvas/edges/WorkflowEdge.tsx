@@ -29,7 +29,7 @@ export function WorkflowEdge({
         id={id}
         path={edgePath}
         style={{
-          stroke: selected ? '#4F6EF7' : '#334155',
+          stroke: selected ? '#BEFF66' : '#334155',
           strokeWidth: selected ? 2 : 1.5,
           transition: 'stroke 0.2s, stroke-width 0.2s',
           ...style,

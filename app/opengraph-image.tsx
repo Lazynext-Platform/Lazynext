@@ -31,29 +31,31 @@ export default async function Image() {
           }}
         />
 
-        {/* Logo mark */}
+        {/* Logo mark on a lime card so the brand color pops on dark bg */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
+            gap: '20px',
             marginBottom: '32px',
+            backgroundColor: '#BEFF66',
+            padding: '20px 32px',
+            borderRadius: '20px',
           }}
         >
-          <svg width="56" height="64" viewBox="0 0 120 140">
-            <path d="M10 0 L45 0 L45 85 Q45 105 65 105 L10 105 Z" fill="#FF0000" />
-            <path d="M45 105 L110 105 L110 140 L10 140 L10 105 Z" fill="#FF0000" />
-            <path d="M45 0 Q45 105 110 105 L45 105 L45 0 Z" fill="#FF0000" opacity="0.85" />
+          <svg width="72" height="72" viewBox="0 0 32 32">
+            <path d="M6 6 L18 6 A12 12 0 0 1 18 18 L18 24 L6 24 Z" fill="#0A0A0A" />
+            <path d="M20 20 L26 20 L26 26 L20 26 Z" fill="#0A0A0A" />
           </svg>
           <span
             style={{
-              fontSize: '48px',
-              fontWeight: 700,
-              color: 'white',
-              letterSpacing: '-1px',
+              fontSize: '56px',
+              fontWeight: 800,
+              color: '#0A0A0A',
+              letterSpacing: '-2px',
             }}
           >
-            LAZYNEXT
+            Lazynext
           </span>
         </div>
 

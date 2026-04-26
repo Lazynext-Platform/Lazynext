@@ -6,8 +6,9 @@
 
 @layer base {
   :root {
-    --color-primary: #4F6EF7;
-    --color-primary-hover: #3D5BD4;
+    --color-primary: #BEFF66;
+    --color-primary-hover: #A6E64D;
+    --color-primary-foreground: #0A0A0A;
     --color-bg: #020617;
     --color-surface: #0F172A;
     --color-surface-elevated: #1E293B;
@@ -67,11 +68,13 @@ html {
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 50%, #f5f0ff 100%);
+  /* Subtle lime wash on white — hints brand without overwhelming the page */
+  background: linear-gradient(135deg, #f4ffe3 0%, #ffffff 55%, #f8fafc 100%);
 }
 
 .gradient-decision {
-  background: linear-gradient(135deg, #fdf4ff 0%, #f0f4ff 50%, #f0fdf4 100%);
+  /* Lime + emerald wash for Decision DNA surfaces */
+  background: linear-gradient(135deg, #f4ffe3 0%, #ffffff 50%, #f0fdf4 100%);
 }
 
 .card-hover {

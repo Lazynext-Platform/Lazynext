@@ -33,7 +33,8 @@
 - Dark backgrounds for the canvas/app shell. Light backgrounds for marketing pages.
 - Node cards use soft pastel backgrounds with colored borders (per primitive type).
 - Quality scores ALWAYS use the green/amber/red system. Never deviate.
-- Primary blue for CTAs and interactive elements. Never use blue for decorative purposes.
+- **Brand lime (`#BEFF66`) is an ACCENT, not a background.** Use it for primary CTAs, focus rings, link underlines, the active sidebar item, selected canvas edges, the Decision DNA quality-trend line, and the marketing logo card. Never paint full-page backgrounds lime — it kills legibility and feels unprofessional at scale.
+- **Text on lime is always near-black (`#0A0A0A`).** White-on-lime fails WCAG AA. This pairing matches the logo's black-mark-on-lime card.
 
 ### Typography Usage
 - Inter for all UI text. JetBrains Mono for code and data.
@@ -71,10 +72,11 @@
 ### Brand Colors
 | Token | Value | Usage |
 |---|---|---|
-| `--color-primary` | `#4F6EF7` | Primary buttons, links, active states |
-| `--color-primary-hover` | `#3D5BD4` | Primary hover states |
-| `--color-primary-light` | `#E0E9FF` | Primary backgrounds, selected states |
-| `--color-primary-lighter` | `#F0F4FF` | Subtle primary tints |
+| `--color-primary` | `#BEFF66` | Primary buttons, link underlines, focus rings, active states. The logo's lime. |
+| `--color-primary-hover` | `#A6E64D` | Primary hover states (10% darker) |
+| `--color-primary-foreground` | `#0A0A0A` | Text on lime backgrounds. Required pairing — white-on-lime fails AA. |
+| `--color-primary-light` | `#E8FFC9` | Subtle lime tint for selected backgrounds, table-row hover |
+| `--color-primary-lighter` | `#F4FFE3` | Very subtle lime wash for hero gradients |
 
 ### Neutral / Surface Colors
 | Token | Value | Usage |

@@ -1,9 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#ffffff"/>
-  <!-- Vertical bar with curved right edge -->
-  <path d="M8 4 L14 4 L14 18 Q14 22 18 22 L8 22 Z" fill="#FF0000"/>
-  <!-- Horizontal bar -->
-  <path d="M14 22 L24 22 L24 28 L8 28 L8 22 Z" fill="#FF0000"/>
-  <!-- Curved connector -->
-  <path d="M14 4 Q14 22 24 22 L14 22 L14 4 Z" fill="#FF0000" opacity="0.85"/>
+  <!-- Lime square background, rounded -->
+  <rect width="32" height="32" rx="7" fill="#BEFF66"/>
+  <!-- Quarter-circle: square with rounded top-right corner only.
+       Top-left, bottom-left, bottom-right are right angles; top-right is
+       a quarter-circle of radius 12 sweeping into the square. -->
+  <path d="M6 6 L18 6 A12 12 0 0 1 18 18 L18 24 L6 24 Z" fill="#0A0A0A"/>
+  <!-- Small filled quarter-square in the bottom-right gap, rounded
+       on the outer top-right corner so it visually connects with the
+       quarter-circle's curve. -->
+  <path d="M20 20 L26 20 L26 26 L20 26 Z" fill="#0A0A0A"/>
 </svg>

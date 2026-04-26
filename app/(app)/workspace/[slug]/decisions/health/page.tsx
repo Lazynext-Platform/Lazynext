@@ -193,8 +193,8 @@ function DecisionHealthInner() {
             <svg width="100%" height="100%" viewBox="0 0 300 130" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#4F6EF7" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#4F6EF7" stopOpacity="0" />
+                  <stop offset="0%" stopColor="#BEFF66" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#BEFF66" stopOpacity="0" />
                 </linearGradient>
               </defs>
               {/* Grid lines */}
@@ -204,9 +204,9 @@ function DecisionHealthInner() {
               {/* Area */}
               <path d={`M ${trendPoints.map((p, i) => `${(i / (trendPoints.length - 1)) * 300},${130 - (p.value / 100) * 130}`).join(' L ')} L 300,130 L 0,130 Z`} fill="url(#trendGrad)" />
               {/* Line */}
-              <polyline points={trendPoints.map((p, i) => `${(i / (trendPoints.length - 1)) * 300},${130 - (p.value / 100) * 130}`).join(' ')} fill="none" stroke="#4F6EF7" strokeWidth="2" />
+              <polyline points={trendPoints.map((p, i) => `${(i / (trendPoints.length - 1)) * 300},${130 - (p.value / 100) * 130}`).join(' ')} fill="none" stroke="#BEFF66" strokeWidth="2" />
               {/* Current point */}
-              <circle cx="300" cy={130 - (trendPoints[trendPoints.length - 1].value / 100) * 130} r="4" fill="#4F6EF7" />
+              <circle cx="300" cy={130 - (trendPoints[trendPoints.length - 1].value / 100) * 130} r="4" fill="#BEFF66" />
             </svg>
             <div className="absolute bottom-0 left-0 right-0 flex justify-between px-1">
               {trendPoints.map((p) => (

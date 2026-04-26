@@ -72,7 +72,7 @@ function ProgressIndicator({ step }: { step: number }) {
 
 function ConfettiEffect() {
   const colors = [
-    '#4F6EF7',
+    '#BEFF66',
     '#10B981',
     '#F59E0B',
     '#EF4444',

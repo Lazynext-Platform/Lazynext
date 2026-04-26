@@ -2,10 +2,13 @@ import * as React from 'react'
 
 // ========================================
 // Lazynext Email Templates
-// Light theme — blue header, white body, slate-50 footer
+// Light theme — lime header, white body, slate-50 footer
+// Header/button text is near-black (#0A0A0A) because lime needs dark
+// foreground for WCAG AA contrast. Matches the logo's color pair.
 // ========================================
 
-const BRAND_COLOR = '#4F6EF7'
+const BRAND_COLOR = '#BEFF66'
+const BRAND_FOREGROUND = '#0A0A0A'
 const BRAND_NAME = 'Lazynext'
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
@@ -24,7 +27,7 @@ function EmailLayout({ children, preheader }: { children: React.ReactNode; prehe
                 {/* Header */}
                 <tr>
                   <td style={{ backgroundColor: BRAND_COLOR, borderRadius: '12px 12px 0 0', padding: '24px 32px' }}>
-                    <span style={{ fontSize: 20, fontWeight: 700, color: '#ffffff', letterSpacing: '-0.5px' }}>{BRAND_NAME}</span>
+                    <span style={{ fontSize: 20, fontWeight: 700, color: BRAND_FOREGROUND, letterSpacing: '-0.5px' }}>{BRAND_NAME}</span>
                   </td>
                 </tr>
                 {/* Body */}
@@ -37,7 +40,7 @@ function EmailLayout({ children, preheader }: { children: React.ReactNode; prehe
                 <tr>
                   <td style={{ backgroundColor: '#f1f5f9', borderRadius: '0 0 12px 12px', padding: '20px 32px', textAlign: 'center', border: '1px solid #e2e8f0', borderTop: 'none' }}>
                     <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
-                      {BRAND_NAME} · Graph-native workflows · <a href={BASE_URL} style={{ color: BRAND_COLOR }}>lazynext.com</a>
+                      {BRAND_NAME} · Graph-native workflows · <a href={BASE_URL} style={{ color: '#0A0A0A', textDecoration: 'underline' }}>lazynext.com</a>
                     </p>
                     <p style={{ margin: '8px 0 0', fontSize: 11, color: '#94a3b8' }}>
                       You received this because you&apos;re part of a {BRAND_NAME} workspace. <a href={`${BASE_URL}/settings`} style={{ color: '#94a3b8' }}>Unsubscribe</a>
@@ -58,7 +61,7 @@ function Button({ href, children }: { href: string; children: React.ReactNode })
     <table cellPadding={0} cellSpacing={0}>
       <tr>
         <td style={{ backgroundColor: BRAND_COLOR, borderRadius: 8, padding: '12px 28px' }}>
-          <a href={href} style={{ color: '#ffffff', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>{children}</a>
+          <a href={href} style={{ color: BRAND_FOREGROUND, fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>{children}</a>
         </td>
       </tr>
     </table>

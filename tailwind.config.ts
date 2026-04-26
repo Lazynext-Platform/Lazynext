@@ -10,10 +10,11 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#4F6EF7',
-          hover: '#3D5BD4',
-          light: '#E0E9FF',
-          lighter: '#F0F4FF',
+          DEFAULT: '#BEFF66',
+          hover: '#A6E64D',
+          light: '#E8FFC9',
+          lighter: '#F4FFE3',
+          foreground: '#0A0A0A',
         },
         surface: {
           DEFAULT: '#0F172A',

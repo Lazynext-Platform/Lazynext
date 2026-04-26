@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.1.0] — Rebrand to black-on-lime logo identity (2026-04-26)
+
+Cobalt `#4F6EF7` retired. Lime `#BEFF66` is now the primary brand accent across the platform — Tailwind tokens, CSS variables, marketing connectors, the central landing-page "Lazynext" card (now mirrors the logo's lime + black pairing), canvas edge selection, Decision DNA quality-trend chart, email templates, OG image card, apple-icon, favicon SVG, and PWA `theme_color`. Lime is enforced as an **accent only**; full-page lime backgrounds were rejected as unprofessional for a SaaS surface. Text on lime is always near-black `#0A0A0A` (WCAG AA pairing, matches the logo mark). Brand voice and the 7 functional node-type colors are unchanged. New `brand.foreground` Tailwind token added to lock in the contrast pair. Type-check clean, build clean, **143/143** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#1310---2026-04-26).
+
+---
+
 ## [1.3.0.6] — CSP unblocks Sentry replay's blob: worker on every page (2026-04-26)
 
 Live `/qa` dogfood across 17 public routes (`/`, `/pricing`, `/sign-in`, `/sign-up`, `/about`, `/features`, `/blog`, `/changelog`, `/comparison`, `/contact`, `/privacy`, `/terms`, `/docs`, `/careers`, `/sitemap.xml`, `/robots.txt`, `/d/[slug]`) found the same console error firing on every page: `Refused to create a worker from 'blob:...' because it violates the following Content Security Policy directive: script-src 'self' 'unsafe-inline'. Note that 'worker-src' was not explicitly set, so 'script-src' is used as a fallback.` Sentry session replay (`replayIntegration` in `sentry.client.config.ts`, `replaysOnErrorSampleRate: 1.0`) bundles its compression as a `blob:` Web Worker. Without an explicit `worker-src`, browsers fall back to `script-src` — which had no `blob:` — and refuse to spawn the worker, so every error replay capture silently failed. Added explicit `worker-src 'self' blob:` and `blob:` to `script-src`. New regression test `tests/unit/csp.regression-001.test.ts` (4 assertions) locks in the directive. Type-check clean, build clean, **143/143** tests passing.

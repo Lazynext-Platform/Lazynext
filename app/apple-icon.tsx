@@ -14,18 +14,14 @@ export default async function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#ffffff',
+          backgroundColor: '#BEFF66',
           borderRadius: '40px',
         }}
       >
-        {/* Red geometric L mark matching the Lazynext logo */}
-        <svg width="120" height="140" viewBox="0 0 120 140">
-          {/* Vertical bar */}
-          <path d="M10 0 L45 0 L45 85 Q45 105 65 105 L10 105 Z" fill="#FF0000" />
-          {/* Horizontal bar */}
-          <path d="M45 105 L110 105 L110 140 L10 140 L10 105 Z" fill="#FF0000" />
-          {/* Curved connector */}
-          <path d="M45 0 Q45 105 110 105 L45 105 L45 0 Z" fill="#FF0000" opacity="0.85" />
+        {/* Lazynext mark — black quarter-circle + small black square on lime */}
+        <svg width="120" height="120" viewBox="0 0 32 32">
+          <path d="M6 6 L18 6 A12 12 0 0 1 18 18 L18 24 L6 24 Z" fill="#0A0A0A" />
+          <path d="M20 20 L26 20 L26 26 L20 26 Z" fill="#0A0A0A" />
         </svg>
       </div>
     ),

@@ -106,7 +106,8 @@ See the full Autonomy Boundaries table in `docs/mastery.md` → AI Agent Protoco
 ## Key Design System Rules
 
 - **Dark theme app** (slate-950/900), **light theme marketing** (white)
-- **Brand primary**: `#4F6EF7`
+- **Brand primary**: `#BEFF66` (lime, accent only — not background-everywhere)
+- **Brand foreground on lime**: `#0A0A0A` (black-on-lime is the required WCAG-safe pairing, matches the logo)
 - **7 node-type colors**: TASK blue, DOC emerald, DECISION orange, THREAD purple, PULSE cyan, AUTOMATION amber, TABLE teal
 - **Font**: Inter (400/500/600/700), JetBrains Mono for code
 - **Responsive**: Mobile-first — Mobile (<640px), Tablet (640-1024px), Desktop (>1024px)
