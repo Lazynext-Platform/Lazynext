@@ -1,13 +1,9 @@
-'use client'
-
 import Link from 'next/link'
 import { ArrowRight, Users, Target, Globe } from 'lucide-react'
 
-const team = [
-  { name: 'Avas Patel', role: 'Founder & CEO', initials: 'AP', color: 'bg-indigo-500' },
-  { name: 'Priya Shah', role: 'Head of Design', initials: 'PS', color: 'bg-emerald-500' },
-  { name: 'Rahul Dev', role: 'Lead Engineer', initials: 'RD', color: 'bg-amber-500' },
-]
+// Honest team page. Removed the fabricated "Priya Shah / Rahul Dev" entries
+// — Lazynext is currently a one-founder operation. We'd rather show that
+// than invent a Head of Design and Lead Engineer that don't exist.
 
 const mission = [
   { icon: Target, title: 'Decision Quality', body: 'Most tools track tasks. We track the decisions behind them — so teams learn from their choices, not just check boxes.' },
@@ -40,18 +36,21 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
-      <section className="mx-auto max-w-4xl px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold">The Team</h2>
-        <p className="mt-2 text-slate-600">A small team building something big.</p>
-        <div className="mt-8 flex justify-center gap-8">
-          {team.map(t => (
-            <div key={t.name} className="flex flex-col items-center">
-              <div className={`flex h-16 w-16 items-center justify-center rounded-full text-lg font-bold text-white ${t.color}`}>{t.initials}</div>
-              <p className="mt-3 font-semibold">{t.name}</p>
-              <p className="text-sm text-slate-500">{t.role}</p>
-            </div>
-          ))}
+      {/* Team — honest one-founder note */}
+      <section className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold">Who&rsquo;s building this</h2>
+        <p className="mt-3 leading-relaxed text-slate-600">
+          Lazynext is a one-founder operation today. No simulated org chart, no
+          stock-photo headshots. Every line of code, every design decision, every
+          email reply is the same person.
+        </p>
+        <p className="mt-3 leading-relaxed text-slate-600">
+          When the team grows, this page grows with it.
+        </p>
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
+          <span className="font-semibold text-slate-900">Avas Patel</span>
+          <span className="text-slate-400">&middot;</span>
+          <span>Founder</span>
         </div>
       </section>
 
