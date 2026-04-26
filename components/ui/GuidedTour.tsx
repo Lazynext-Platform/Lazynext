@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useLayoutEffect, useRef } from 'react'
 import { X, ChevronRight, ChevronLeft, Sparkles, SkipForward } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useModalA11y } from '@/lib/utils/useModalA11y'
@@ -27,6 +27,7 @@ function getTooltipPosition(
   tooltipHeight: number
 ) {
   const gap = 16
+  const margin = 12
   let top: number
   let left: number
 
@@ -49,9 +50,12 @@ function getTooltipPosition(
       break
   }
 
-  // Clamp within viewport
-  top = Math.max(12, Math.min(top, window.innerHeight - tooltipHeight - 12))
-  left = Math.max(12, Math.min(left, window.innerWidth - tooltipWidth - 12))
+  // Clamp within viewport using *actual* tooltip dimensions so the tooltip's
+  // far edge cannot extend past the fold (Next button no longer clips off).
+  const maxTop = Math.max(margin, window.innerHeight - tooltipHeight - margin)
+  const maxLeft = Math.max(margin, window.innerWidth - tooltipWidth - margin)
+  top = Math.max(margin, Math.min(top, maxTop))
+  left = Math.max(margin, Math.min(left, maxLeft))
 
   return { top, left }
 }
@@ -113,8 +117,33 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onSkip, next, prev])
 
-  const tooltipWidth = 380
-  const tooltipHeight = 200
+  // Initial estimates — replaced with measured values after first paint via the
+  // ResizeObserver below. These only matter for the very first render before
+  // the layout effect runs.
+  const [tooltipSize, setTooltipSize] = useState({ width: 380, height: 280 })
+  const tooltipWidth = tooltipSize.width
+  const tooltipHeight = tooltipSize.height
+
+  // Measure the tooltip after every render and on size changes (window resize,
+  // i18n string length, etc.). Without this, hardcoded 200px height caused
+  // step 8 (LazyMind FAB at bottom-right) to clip the Next button below the
+  // viewport because the real tooltip is ~300px tall.
+  useLayoutEffect(() => {
+    const el = tooltipRef.current
+    if (!el) return
+    const measure = () => {
+      const { width, height } = el.getBoundingClientRect()
+      setTooltipSize((prev) =>
+        Math.abs(prev.width - width) < 1 && Math.abs(prev.height - height) < 1
+          ? prev
+          : { width, height }
+      )
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [current])
 
   // Calculate spotlight cutout + tooltip position
   const spotlight = targetRect
@@ -129,7 +158,10 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
 
   const tooltipPos = targetRect
     ? getTooltipPosition(targetRect, step.placement || 'bottom', tooltipWidth, tooltipHeight)
-    : { top: window.innerHeight / 2 - tooltipHeight / 2, left: window.innerWidth / 2 - tooltipWidth / 2 }
+    : {
+        top: Math.max(12, window.innerHeight / 2 - tooltipHeight / 2),
+        left: Math.max(12, window.innerWidth / 2 - tooltipWidth / 2),
+      }
 
   return (
     <div ref={tourRef} className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={t('tourLabel')}>
@@ -181,7 +213,13 @@ export function GuidedTour({ steps, onComplete, onSkip }: GuidedTourProps) {
         ref={tooltipRef}
         onClick={(e) => e.stopPropagation()}
         className="absolute z-[101] motion-safe:animate-fadeIn"
-        style={{ top: tooltipPos.top, left: tooltipPos.left, width: tooltipWidth }}
+        style={{
+          top: tooltipPos.top,
+          left: tooltipPos.left,
+          width: tooltipWidth,
+          maxHeight: 'calc(100vh - 24px)',
+          overflowY: 'auto',
+        }}
       >
         <div className="rounded-2xl border border-slate-700 bg-slate-900 p-5 shadow-2xl">
           {/* Header */}
