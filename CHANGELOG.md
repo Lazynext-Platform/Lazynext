@@ -4,6 +4,25 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.9] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 10 — Workspace Settings page wired to real backend. Three more dead UI shells caught: (1) the General tab pre-filled `defaultValue="My Workspace"` and `defaultValue="my-workspace"` regardless of the actual workspace, with a "Save changes" button that had no `onClick`; (2) a "Delete workspace" button that also had no `onClick`; (3) a Notifications tab with four toggles (Task assigned / Decision review / Weekly digest / Thread mentions) all rendered in the brand "on" state with `<button>` elements that had no handlers and no persistence layer (no `notification_preferences` table exists). Three more "looks like a real settings page, does nothing" surfaces. All wired up.
+
+### Added
+- `app/api/v1/workspace/[slug]/route.ts` — added `PATCH` and `DELETE` handlers. PATCH validates `name` (1–80 chars) and `slug` (lowercase letters/digits/dashes, 1–50 chars), checks owner-or-admin role, ensures the new slug isn't taken by another workspace (returns `SLUG_TAKEN` 409 on collision), and returns the updated workspace. DELETE checks owner-only and cascades through the schema's foreign keys (workspace_members, workflows, nodes, edges, decisions). New shared `resolveWorkspaceForCaller` helper used by both handlers.
+
+### Changed
+- `app/(app)/workspace/[slug]/settings/page.tsx` — General tab: name and slug inputs now controlled, hydrated from `useWorkspaceStore` on mount, with auto-slugify on name blur (only if user hasn't customized the slug). "Save changes" button calls the new `PATCH /api/v1/workspace/[slug]`, updates the store on success, redirects to the new URL when the slug changes, surfaces the four expected error codes (`SLUG_TAKEN`, `VALIDATION_ERROR`, `FORBIDDEN`, generic) with human-readable copy, and shows a transient "Saved" confirmation. Slug input has live validation (red helper text below the field). Logo upload area replaced with an honest "Logo uploads ship with the next storage migration" hint instead of a clickable-but-non-functional dashed box. Danger zone: Delete button now opens an inline confirm step ("Yes, delete \"Acme Corp\"" / "Cancel") before calling `DELETE /api/v1/workspace/[slug]`; on success redirects to `/onboarding`. Notifications tab: removed the four fake toggle buttons, replaced with an honest explainer that per-event prefs ship once the `notification_preferences` table lands, plus a list of the four event types showing "on by default" and a `mailto` opt-out for the interim.
+
+### Removed
+- The `Palette` lucide-react import (was only used as the dead logo placeholder icon).
+
+### Verification
+- Type-check clean.
+- 143/143 tests passing.
+- Production build clean.
+- Manual verification of the new API route: schema validates name/slug, slug-taken collision returns 409, role gate returns 403 for non-owner DELETE.
+
 ## [1.3.2.8] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 9 — partial walk-back of round 6's overcorrection. Round 6 (v1.3.2.5) replaced the entire ImportModal with an honest "Import flows are in development" empty state because every connector in the wizard simulated work that wasn't real. After shipping that, a closer audit of `app/api/v1/import/route.ts` revealed that the **CSV path was actually live** — when the API receives `source: 'csv'` with an inline `data` array of `{ title, type, status?, data? }` items, it creates a `workflows` row and inserts each item as a `nodes` row in the workspace. The OAuth-based connectors (Notion API, Linear, Trello, Asana, Notion ZIP) only return a fake `jobId` with `status: 'queued'` and never run, but CSV ingestion is fully functional. Round 6 threw both away. This round restores CSV upload as a real working flow while keeping OAuth connectors honestly tagged `Soon`.

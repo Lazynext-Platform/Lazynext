@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import { Settings, Shield, CreditCard, Users, Bell, Palette, Lock, ArrowRight } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
+import { Settings, Shield, CreditCard, Users, Bell, Lock, ArrowRight, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
@@ -37,12 +37,102 @@ const tabs = [
   { id: 'security', label: 'Security', icon: Shield },
 ]
 
+function slugify(s: string) {
+  return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50)
+}
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general')
-  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
-  const hasSso = hasFeature(plan, 'sso')
+  const router = useRouter()
   const params = useParams()
   const slug = params?.slug as string
+
+  const workspace = useWorkspaceStore((s) => s.workspace)
+  const setWorkspace = useWorkspaceStore((s) => s.setWorkspace)
+  const plan = (workspace?.plan || 'free') as Plan
+  const hasSso = hasFeature(plan, 'sso')
+
+  const [activeTab, setActiveTab] = useState('general')
+
+  // General tab — controlled inputs hydrated from the store.
+  const [name, setName] = useState('')
+  const [wsSlug, setWsSlug] = useState('')
+  useEffect(() => {
+    if (workspace) {
+      setName(workspace.name)
+      setWsSlug(workspace.slug)
+    }
+  }, [workspace])
+
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [deleteStatus, setDeleteStatus] = useState<'idle' | 'confirming' | 'deleting' | 'error'>('idle')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const dirty = workspace !== null && (name.trim() !== workspace.name || wsSlug.trim() !== workspace.slug)
+  const validSlug = wsSlug === '' || /^[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?$/.test(wsSlug)
+
+  async function handleSave() {
+    if (!workspace || !dirty) return
+    setSaveStatus('saving')
+    setSaveError(null)
+    try {
+      const body: Record<string, string> = {}
+      if (name.trim() !== workspace.name) body.name = name.trim()
+      if (wsSlug.trim() !== workspace.slug) body.slug = wsSlug.trim()
+      const res = await fetch(`/api/v1/workspace/${workspace.slug}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const json = await res.json().catch(() => null)
+      if (!res.ok) {
+        const code = json?.error
+        setSaveError(
+          code === 'SLUG_TAKEN' ? 'That URL is already taken — pick another.'
+          : code === 'VALIDATION_ERROR' ? 'Slug must be lowercase letters, numbers, and dashes.'
+          : code === 'FORBIDDEN' ? 'Only owners and admins can rename a workspace.'
+          : (json?.message || code || 'Save failed.')
+        )
+        setSaveStatus('error')
+        return
+      }
+      const updated = json?.data
+      if (updated) {
+        setWorkspace(updated)
+        setSaveStatus('saved')
+        // If slug changed, redirect to the new URL.
+        if (updated.slug !== slug) {
+          router.replace(`/workspace/${updated.slug}/settings`)
+        }
+        setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2500)
+      }
+    } catch {
+      setSaveError('Network error. Try again.')
+      setSaveStatus('error')
+    }
+  }
+
+  async function handleDelete() {
+    if (!workspace) return
+    setDeleteStatus('deleting')
+    setDeleteError(null)
+    try {
+      const res = await fetch(`/api/v1/workspace/${workspace.slug}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const json = await res.json().catch(() => null)
+        setDeleteError(
+          json?.error === 'FORBIDDEN' ? (json?.message || 'Only the workspace owner can delete it.')
+          : (json?.message || json?.error || 'Delete failed.')
+        )
+        setDeleteStatus('error')
+        return
+      }
+      router.replace('/onboarding')
+    } catch {
+      setDeleteError('Network error. Try again.')
+      setDeleteStatus('error')
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 md:px-8">
@@ -79,8 +169,12 @@ export default function SettingsPage() {
                 <input
                   id="workspace-name"
                   type="text"
-                  defaultValue="My Workspace"
-                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={(e) => { if (!wsSlug || wsSlug === workspace?.slug) setWsSlug(slugify(e.target.value)) }}
+                  maxLength={80}
+                  disabled={!workspace}
+                  className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand disabled:opacity-60"
                 />
               </div>
               <div>
@@ -90,20 +184,43 @@ export default function SettingsPage() {
                   <input
                     id="workspace-url"
                     type="text"
-                    defaultValue="my-workspace"
-                    className="flex-1 bg-transparent px-1 py-2.5 text-sm text-slate-50 focus:outline-none"
+                    value={wsSlug}
+                    onChange={(e) => setWsSlug(e.target.value.toLowerCase())}
+                    maxLength={50}
+                    disabled={!workspace}
+                    className="flex-1 bg-transparent px-1 py-2.5 text-sm text-slate-50 focus:outline-none disabled:opacity-60"
                   />
                 </div>
+                {!validSlug && (
+                  <p className="mt-1 text-xs text-red-400">Use lowercase letters, numbers, and dashes only.</p>
+                )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-300">Logo</label>
-                <div className="mt-1.5 flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-slate-700 bg-slate-800 text-slate-500 cursor-pointer hover:border-slate-600 transition-colors">
-                  <Palette className="h-6 w-6" />
-                </div>
+                <p className="block text-sm font-medium text-slate-300">Logo</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Logo uploads ship with the next storage migration. Until then, the workspace name initial is used in the sidebar.
+                </p>
               </div>
             </div>
-            <button className="mt-6 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
-              Save changes
+            {saveError && (
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{saveError}</span>
+              </div>
+            )}
+            {saveStatus === 'saved' && (
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3 text-xs text-emerald-300">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>Saved.</span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={!workspace || !dirty || !validSlug || saveStatus === 'saving'}
+              className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saveStatus === 'saving' ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving…</>) : 'Save changes'}
             </button>
           </div>
 
@@ -111,11 +228,45 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
             <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Permanently delete this workspace and all its data. This cannot be undone.
+              Permanently delete this workspace and all its data. This cannot be undone. Only the owner can do this.
             </p>
-            <button className="mt-4 rounded-lg border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors">
-              Delete workspace
-            </button>
+            {deleteError && (
+              <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+            {deleteStatus === 'confirming' ? (
+              <div className="mt-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600"
+                >
+                  Yes, delete &ldquo;{workspace?.name}&rdquo;
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setDeleteStatus('idle'); setDeleteError(null) }}
+                  className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : deleteStatus === 'deleting' ? (
+              <div className="mt-4 inline-flex items-center gap-2 text-sm text-red-300">
+                <Loader2 className="h-4 w-4 animate-spin" /> Deleting workspace…
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDeleteStatus('confirming')}
+                disabled={!workspace}
+                className="mt-4 rounded-lg border border-red-500/50 px-4 py-2 text-sm font-semibold text-red-400 hover:bg-red-500/10 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Delete workspace
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -195,16 +346,20 @@ export default function SettingsPage() {
       {activeTab === 'notifications' && (
         <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
           <h2 className="text-lg font-semibold text-slate-100">Notification Preferences</h2>
-          <div className="mt-4 space-y-4">
-            {['Task assigned to you', 'Decision needs review', 'Weekly digest', 'Thread mentions'].map((item) => (
-              <div key={item} className="flex items-center justify-between">
-                <span className="text-sm text-slate-300">{item}</span>
-                <button className="relative h-6 w-11 rounded-full bg-brand transition-colors">
-                  <span className="absolute right-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition-transform" />
-                </button>
+          <p className="mt-1 text-sm text-slate-400">
+            Per-event notification toggles ship once the <code className="rounded bg-slate-800 px-1 py-0.5 font-mono text-xs text-slate-300">notification_preferences</code> table lands. Until then everything routes to your account email and the in-app notification center.
+          </p>
+          <div className="mt-4 space-y-2">
+            {['Task assigned to you', 'Decision needs review (expected_by passed)', 'Weekly digest', 'Thread mentions'].map((item) => (
+              <div key={item} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/40 px-4 py-2.5">
+                <span className="text-sm text-slate-400">{item}</span>
+                <span className="text-2xs text-slate-600">on by default</span>
               </div>
             ))}
           </div>
+          <p className="mt-4 text-2xs text-slate-600">
+            Drop us an email at <a href="mailto:hello@lazynext.com" className="underline hover:text-slate-400">hello@lazynext.com</a> to opt out of any of these in the meantime.
+          </p>
         </div>
       )}
 
