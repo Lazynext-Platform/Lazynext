@@ -117,13 +117,15 @@ export default function CreateWorkspacePage() {
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
-  const [question, setQuestion] = useState('Which database should we use?')
+  const [question, setQuestion] = useState('')
   const [resolution, setResolution] = useState('')
   const [rationale, setRationale] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [scoreVisible, setScoreVisible] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [createdWorkspaceSlug, setCreatedWorkspaceSlug] = useState<string | null>(null)
+  const [decisionScore, setDecisionScore] = useState<number | null>(null)
 
   const slug = name
     .toLowerCase()
@@ -141,25 +143,20 @@ export default function CreateWorkspacePage() {
     setTimeout(() => setStep(3), 400)
   }
 
-  function handleLogDecision(e: React.FormEvent) {
+  async function handleLogDecision(e: React.FormEvent) {
     e.preventDefault()
-    setShowSuccess(true)
-    setShowConfetti(true)
-    setTimeout(() => setScoreVisible(true), 300)
-    setTimeout(() => setShowConfetti(false), 3000)
-  }
-
-  async function handleGoToWorkspace() {
+    if (!question.trim()) return
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/v1/onboarding/workspace', {
+      // 1. Create the workspace.
+      const wsRes = await fetch('/api/v1/onboarding/workspace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: name.trim(), slug }),
       })
-      if (!res.ok) {
-        const body = await res.json().catch(() => null)
+      if (!wsRes.ok) {
+        const body = await wsRes.json().catch(() => null)
         if (body?.error === 'SLUG_TAKEN') {
           setError('That workspace URL is already taken. Please go back and choose another name.')
         } else if (body?.error === 'WORKSPACE_NOT_FOUND') {
@@ -167,15 +164,57 @@ export default function CreateWorkspacePage() {
         } else {
           setError(body?.error || 'Failed to set up your workspace. Please try again.')
         }
+        setLoading(false)
         return
       }
-      const body = await res.json().catch(() => null)
-      const workspaceSlug = body?.data?.slug || slug
-      router.push(`/workspace/${workspaceSlug}/guide`)
+      const wsBody = await wsRes.json().catch(() => null)
+      const workspaceSlug = wsBody?.data?.slug || slug
+      const workspaceId = wsBody?.data?.id
+      setCreatedWorkspaceSlug(workspaceSlug)
+
+      // 2. Log the decision against the real workspace and capture the
+      //    real quality_score the scorer returns. If this fails (e.g. AI
+      //    keys missing in dev), we skip the score badge instead of
+      //    fabricating one — the user still gets a created workspace.
+      if (workspaceId) {
+        try {
+          const dRes = await fetch('/api/v1/decisions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              workspaceId,
+              question: question.trim(),
+              resolution: resolution.trim() || undefined,
+              rationale: rationale.trim() || undefined,
+            }),
+          })
+          if (dRes.ok) {
+            const dBody = await dRes.json().catch(() => null)
+            const score = dBody?.data?.quality_score
+            if (typeof score === 'number') setDecisionScore(score)
+          }
+        } catch {
+          // Non-fatal — workspace is created; score badge just hides.
+        }
+      }
+
+      // 3. Show the success screen with the real (or absent) score.
+      setShowSuccess(true)
+      setShowConfetti(true)
+      setTimeout(() => setScoreVisible(true), 300)
+      setTimeout(() => setShowConfetti(false), 3000)
     } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  function handleGoToWorkspace() {
+    if (createdWorkspaceSlug) {
+      router.push(`/workspace/${createdWorkspaceSlug}/guide`)
+    } else {
+      router.push('/onboarding')
     }
   }
 
@@ -356,11 +395,20 @@ export default function CreateWorkspacePage() {
 
               <button
                 type="submit"
-                disabled={!question.trim()}
+                disabled={!question.trim() || loading}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Log Decision <ArrowRight className="h-4 w-4" />
+                {loading ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> Logging…</>
+                ) : (
+                  <>Log Decision <ArrowRight className="h-4 w-4" /></>
+                )}
               </button>
+              {error && (
+                <p className="mt-1 text-center text-sm text-red-400" role="alert">
+                  {error}
+                </p>
+              )}
             </form>
           </div>
         )}
@@ -368,48 +416,49 @@ export default function CreateWorkspacePage() {
         {/* STEP 3 — Success */}
         {step === 3 && showSuccess && (
           <div className="motion-safe:animate-fadeIn text-center">
-            {/* Score badge */}
-            <div
-              className={`mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-emerald-500 transition-all duration-500 ${
-                scoreVisible
-                  ? 'scale-100 opacity-100'
-                  : 'scale-75 opacity-0'
-              }`}
-            >
-              <div>
-                <span className="text-3xl font-extrabold text-emerald-400">
-                  84
-                </span>
-                <span className="text-lg text-emerald-400/60">/100</span>
+            {/* Score badge — only shown when scorer returned a real value. */}
+            {decisionScore !== null ? (
+              <div
+                className={`mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-emerald-500 transition-all duration-500 ${
+                  scoreVisible
+                    ? 'scale-100 opacity-100'
+                    : 'scale-75 opacity-0'
+                }`}
+              >
+                <div>
+                  <span className="text-3xl font-extrabold text-emerald-400">
+                    {Math.round(decisionScore)}
+                  </span>
+                  <span className="text-lg text-emerald-400/60">/100</span>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className={`mx-auto flex h-28 w-28 items-center justify-center rounded-full border-4 border-emerald-500 transition-all duration-500 ${
+                  scoreVisible
+                    ? 'scale-100 opacity-100'
+                    : 'scale-75 opacity-0'
+                }`}
+              >
+                <Check className="h-10 w-10 text-emerald-400" />
+              </div>
+            )}
 
             <h1 className="mt-6 text-2xl font-bold text-white">
               Your workspace is ready!
             </h1>
             <p className="mt-2 text-sm text-slate-400">
-              Great first decision. Your team is going to love this.
+              {decisionScore !== null
+                ? 'Decision logged and scored. Your team is going to love this.'
+                : 'Decision logged. (Quality scoring kicks in once the AI keys are configured.)'}
             </p>
 
             <button
               onClick={handleGoToWorkspace}
-              disabled={loading}
               className="mt-8 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-3 text-sm font-semibold text-brand-foreground transition-colors hover:bg-brand-hover"
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  Go to Workspace <ArrowRight className="h-4 w-4" />
-                </>
-              )}
+              Go to Workspace <ArrowRight className="h-4 w-4" />
             </button>
-
-            {error && (
-              <p className="mt-3 text-center text-sm text-red-400" role="alert">
-                {error}
-              </p>
-            )}
           </div>
         )}
       </div>

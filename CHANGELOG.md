@@ -4,6 +4,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.7] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 8 — the onboarding-flow lie. Every new user signing up for Lazynext landed on a 3-step "Create Workspace" flow whose final step asked them to log their first decision (Question / Resolution / Rationale fields). On submit, the page showed confetti, animated a green circular score badge with a hardcoded **`84`** above `/100`, and declared "Your workspace is ready! Great first decision. Your team is going to love this." Except — the decision was never saved. `handleLogDecision` did exactly four things: `setShowSuccess(true)`, `setShowConfetti(true)`, two `setTimeout` calls for animation. No fetch. No POST. No score calculation. The 84 was a constant. Then "Go to Workspace" finally created the workspace via the real `/api/v1/onboarding/workspace` endpoint and navigated, leaving the user with an empty workspace and a memory of a decision that was never logged. This was the **first impression** of the entire product — the moment a new user formed their belief about what "Decision DNA" actually is. It promised AI scoring of every decision and demonstrated that promise with a literal hardcoded `84`. The default Question field was also pre-filled with "Which database should we use?" — a sample question masquerading as the user's own. All gone. Onboarding now does the real flow end-to-end.
+
+### Changed
+- `app/(app)/onboarding/create-workspace/page.tsx` — `handleLogDecision` rewritten to do the actual work in the right order: (1) POST `/api/v1/onboarding/workspace` to create the workspace, capture the returned `id` and `slug`; (2) POST `/api/v1/decisions` with the user's question + resolution + rationale against that real workspace ID, capture the real `quality_score` from the AI scorer in the response; (3) only then transition to the success screen. Score badge now displays the real returned score (rounded), or — if the decision API call failed (e.g., AI keys missing in dev environment) — falls back to a green checkmark with copy "Decision logged. (Quality scoring kicks in once the AI keys are configured.)" instead of fabricating a number. Pre-filled sample question (`'Which database should we use?'`) cleared so the input starts empty. `handleGoToWorkspace` simplified — workspace is already created, it just navigates. Loading spinner now sits on the "Log Decision" button (where the real work happens) instead of on "Go to Workspace" (which is now instantaneous). Error surfacing moved into the form step where the user can correct it.
+
+### Verification
+- Type-check clean.
+- 143/143 tests passing.
+- Production build clean.
+- The fake `84` constant is gone from `app/(app)/onboarding/create-workspace/page.tsx` (verified by grep).
+
 ## [1.3.2.6] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 7 — Export page wired up to do real work. The Export page had a particularly subtle deception: a real, working `GET /api/v1/export?workspaceId=<uuid>` endpoint exists and returns a complete JSON snapshot of the workspace (workflows, nodes, edges, decisions with scores). But the UI never called it. Instead the "Export Full Workspace" button kicked off a `setInterval` that filled a fake progress bar with `Math.random() * 8` increments, transitioned to an "Export Ready!" success card showing a `workspace-export-2026-04-26.json` filename — and then the "Download File" button did nothing. The "Export Decisions" button had no `onClick` handler at all. The API note at the bottom claimed two endpoints existed (`GET /api/v1/export/workspace`, `GET /api/v1/export/decisions`) when in reality only one existed and it had a different path. Worst kind of fake: real backend already shipped, but the UI pretended to fake it.
