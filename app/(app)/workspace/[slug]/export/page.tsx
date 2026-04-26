@@ -1,51 +1,108 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Shield, Database, Check, ArrowLeft } from 'lucide-react'
+import { useState } from 'react'
+import { Shield, Database, Check, ArrowLeft, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useWorkspaceStore } from '@/stores/workspace.store'
 
-type ExportStatus = 'idle' | 'exporting' | 'ready'
+type ExportStatus = 'idle' | 'exporting' | 'ready' | 'error'
 
 const exportIncludes = [
-  'All nodes', 'Edge connections', 'Decision rationale', 'Quality scores',
-  'Thread comments', 'Task metadata', 'Doc content', 'Tags & labels',
-  'Timestamps', 'Member assignments', 'Outcome tags', 'Attachments metadata',
+  'All workflows', 'All nodes', 'All edges', 'All decisions (with scores & outcomes)',
+  'Workspace ID', 'Export timestamp', 'Schema version',
 ]
 
 // No exports table exists in the schema yet. History stays empty
 // until completed exports are persisted server-side.
 const exportHistory: { name: string; format: string; date: string; size: string }[] = []
 
+type ExportPayload = {
+  version: string
+  exportedAt: string
+  workspaceId: string
+  workflows: unknown[]
+  nodes: unknown[]
+  edges: unknown[]
+  decisions: Array<{ created_at?: string; [k: string]: unknown }>
+}
+
+function triggerDownload(filename: string, content: string, mime: string) {
+  const blob = new Blob([content], { type: mime })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 export default function DataExportPage() {
   const params = useParams()
   const slug = params.slug as string
+  const workspace = useWorkspaceStore(s => s.workspace)
+  const workspaceId = workspace?.id ?? null
+
   const [fullExportStatus, setFullExportStatus] = useState<ExportStatus>('idle')
-  const [fullExportProgress, setFullExportProgress] = useState(0)
-  const [fullFormat, setFullFormat] = useState('json')
-  const [decisionFormat, setDecisionFormat] = useState('json')
+  const [fullExportError, setFullExportError] = useState<string | null>(null)
+  const [fullExportFilename, setFullExportFilename] = useState<string | null>(null)
+  const [decisionStatus, setDecisionStatus] = useState<ExportStatus>('idle')
+  const [decisionError, setDecisionError] = useState<string | null>(null)
+
   const [dateRange, setDateRange] = useState('all')
-  const exportTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
-    return () => {
-      if (exportTimerRef.current) clearInterval(exportTimerRef.current)
+  async function fetchExport(): Promise<ExportPayload> {
+    if (!workspaceId) throw new Error('Workspace not loaded yet — refresh the page.')
+    const res = await fetch(`/api/v1/export?workspaceId=${encodeURIComponent(workspaceId)}`)
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      throw new Error(body?.message || body?.error || `Export failed (${res.status}).`)
     }
-  }, [])
+    return res.json()
+  }
 
-  const handleFullExport = () => {
+  const handleFullExport = async () => {
     setFullExportStatus('exporting')
-    exportTimerRef.current = setInterval(() => {
-      setFullExportProgress(prev => {
-        if (prev >= 100) {
-          if (exportTimerRef.current) clearInterval(exportTimerRef.current)
-          exportTimerRef.current = null
-          setFullExportStatus('ready')
-          return 100
-        }
-        return prev + Math.random() * 8
+    setFullExportError(null)
+    try {
+      const payload = await fetchExport()
+      const filename = `lazynext-export-${new Date().toISOString().slice(0, 10)}.json`
+      triggerDownload(filename, JSON.stringify(payload, null, 2), 'application/json')
+      setFullExportFilename(filename)
+      setFullExportStatus('ready')
+    } catch (e) {
+      setFullExportError(e instanceof Error ? e.message : 'Unknown error')
+      setFullExportStatus('error')
+    }
+  }
+
+  const handleDecisionExport = async () => {
+    setDecisionStatus('exporting')
+    setDecisionError(null)
+    try {
+      const payload = await fetchExport()
+      const cutoffMs = (() => {
+        const now = Date.now()
+        if (dateRange === '30d') return now - 30 * 86400_000
+        if (dateRange === '90d') return now - 90 * 86400_000
+        if (dateRange === 'year') return new Date(new Date().getFullYear(), 0, 1).getTime()
+        return 0
+      })()
+      const decisions = payload.decisions.filter(d => {
+        if (!cutoffMs) return true
+        const ts = d.created_at ? new Date(d.created_at).getTime() : 0
+        return ts >= cutoffMs
       })
-    }, 150)
+      const stamp = new Date().toISOString().slice(0, 10)
+      const filename = `lazynext-decisions-${stamp}.json`
+      triggerDownload(filename, JSON.stringify({ exportedAt: payload.exportedAt, workspaceId: payload.workspaceId, decisions }, null, 2), 'application/json')
+      setDecisionStatus('ready')
+    } catch (e) {
+      setDecisionError(e instanceof Error ? e.message : 'Unknown error')
+      setDecisionStatus('error')
+    }
   }
 
   return (
@@ -80,28 +137,12 @@ export default function DataExportPage() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
               <Check className="h-6 w-6 text-emerald-400" />
             </div>
-            <h3 className="mt-3 text-sm font-semibold text-slate-100">Export Ready!</h3>
-            <p className="mt-1 text-xs text-slate-500">{`workspace-export-${new Date().toISOString().slice(0, 10)}.${fullFormat}`}</p>
-            <button className="mt-3 rounded-lg bg-emerald-500 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Download File</button>
+            <h3 className="mt-3 text-sm font-semibold text-slate-100">Export downloaded</h3>
+            <p className="mt-1 text-xs text-slate-500">{fullExportFilename}</p>
+            <button onClick={handleFullExport} className="mt-3 rounded-lg border border-slate-600 bg-slate-800 px-6 py-2 text-xs font-medium text-slate-300 hover:bg-slate-700">Re-export</button>
           </div>
         ) : (
           <>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="export-full-format" className="text-xs text-slate-500">Format</label>
-                <select id="export-full-format" value={fullFormat} onChange={e => setFullFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
-                  <option value="json">JSON (Recommended)</option>
-                  <option value="csv">CSV</option>
-                </select>
-              </div>
-              <div>
-                <label htmlFor="export-scope" className="text-xs text-slate-500">Scope</label>
-                <select id="export-scope" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
-                  <option>All workflows</option>
-                </select>
-              </div>
-            </div>
-
             <div className="mt-4 rounded-md bg-slate-800/50 p-3">
               <p className="text-2xs font-medium uppercase text-slate-500 mb-2">Export includes</p>
               <div className="grid grid-cols-2 gap-1">
@@ -111,21 +152,23 @@ export default function DataExportPage() {
                   </div>
                 ))}
               </div>
+              <p className="mt-2 text-2xs text-slate-600">Format: JSON (the only format the API currently emits — CSV/PDF transforms ship later).</p>
             </div>
 
-            {fullExportStatus === 'exporting' ? (
-              <div className="mt-4">
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs text-slate-400">Preparing...</span>
-                  <span className="text-xs text-slate-500">{Math.round(fullExportProgress)}%</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuenow={Math.round(fullExportProgress)} aria-valuemin={0} aria-valuemax={100}>
-                  <div className="h-2 rounded-full bg-brand transition-all" style={{ width: `${fullExportProgress}%` }} />
-                </div>
+            {fullExportError && (
+              <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
+                <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{fullExportError}</span>
               </div>
-            ) : (
-              <button onClick={handleFullExport} className="mt-4 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">Export Full Workspace</button>
             )}
+
+            <button
+              onClick={handleFullExport}
+              disabled={fullExportStatus === 'exporting' || !workspaceId}
+              className="mt-4 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {fullExportStatus === 'exporting' ? 'Preparing export…' : !workspaceId ? 'Loading workspace…' : 'Export Full Workspace'}
+            </button>
           </>
         )}
       </div>
@@ -133,27 +176,29 @@ export default function DataExportPage() {
       {/* Decisions only export */}
       <div className="mt-4 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h2 className="text-base font-semibold text-slate-100">Decisions Only Export</h2>
-        <p className="mt-1 text-sm text-slate-400">Export decision log with quality scores and outcomes.</p>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div>
-            <label htmlFor="decision-export-format" className="text-xs text-slate-500">Format</label>
-            <select id="decision-export-format" value={decisionFormat} onChange={e => setDecisionFormat(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
-              <option value="json">JSON</option>
-              <option value="csv">CSV</option>
-              <option value="pdf">PDF Report</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="decision-export-range" className="text-xs text-slate-500">Date Range</label>
-            <select id="decision-export-range" value={dateRange} onChange={e => setDateRange(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
-              <option value="all">All time</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="year">This year</option>
-            </select>
-          </div>
+        <p className="mt-1 text-sm text-slate-400">Export the decision log (with quality scores and outcomes) filtered by date.</p>
+        <div className="mt-4">
+          <label htmlFor="decision-export-range" className="text-xs text-slate-500">Date Range</label>
+          <select id="decision-export-range" value={dateRange} onChange={e => setDateRange(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+            <option value="all">All time</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+            <option value="year">This year</option>
+          </select>
         </div>
-        <button className="mt-4 w-full rounded-lg border border-slate-600 bg-slate-800 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors">Export Decisions</button>
+        {decisionError && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-xs text-red-300">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{decisionError}</span>
+          </div>
+        )}
+        <button
+          onClick={handleDecisionExport}
+          disabled={decisionStatus === 'exporting' || !workspaceId}
+          className="mt-4 w-full rounded-lg border border-slate-600 bg-slate-800 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {decisionStatus === 'exporting' ? 'Preparing…' : decisionStatus === 'ready' ? 'Re-export Decisions' : 'Export Decisions'}
+        </button>
       </div>
 
       {/* Export history */}
@@ -192,9 +237,8 @@ export default function DataExportPage() {
           <span className="text-xs text-slate-400">API access: Programmatic export via REST API</span>
         </div>
         <div className="mt-2 space-y-0.5">
-          <p className="font-mono text-2xs text-slate-500">GET /api/v1/export/workspace</p>
-          <p className="font-mono text-2xs text-slate-500">GET /api/v1/export/decisions</p>
-          <p className="text-2xs text-slate-600">Requires Pro or Business plan.</p>
+          <p className="font-mono text-2xs text-slate-500">GET /api/v1/export?workspaceId=&lt;uuid&gt;</p>
+          <p className="text-2xs text-slate-600">Returns the same JSON payload these buttons download. A dedicated decisions-only endpoint isn&apos;t live yet — the button above filters client-side from this same response.</p>
         </div>
       </div>
     </div>
