@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Sparkles, X, Send, Command, Mail, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react'
+import { Sparkles, X, Send, Command, AlertTriangle } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
@@ -14,67 +14,33 @@ type Plan = keyof typeof PLAN_LIMITS
 
 interface Message {
   id: string
-  role: 'user' | 'ai' | 'welcome'
+  role: 'user' | 'ai' | 'welcome' | 'system'
   content: string
-  structured?: {
-    statusSummary?: { label: string; value: string; color: string }[]
-    observations?: string[]
-    actions?: string[]
-    digest?: { completed: string; inProgress: string; quality: string; actionNeeded: string }
-  }
 }
 
+// In v1.3.3.5 the staged 4-message demo was removed ("Q2 Sprint analysis" /
+// "Weekly Digest" with hardcoded counts) along with the fake `setTimeout`
+// response handler. The panel now calls `/api/v1/ai/chat`, which fronts
+// `callLazyMind` (Groq with Together fallback). When neither key is set,
+// the endpoint returns 503 AI_NOT_CONFIGURED and we render the message as
+// a system note instead of pretending the AI responded.
 const initialMessages: Message[] = [
   {
     id: 'welcome',
     role: 'welcome',
-    content: "How can I help with your workflow? I can analyze workflows, generate digests, suggest tasks, and evaluate decision quality.",
-  },
-  { id: '1', role: 'user', content: 'Analyze our Q2 sprint workflow' },
-  {
-    id: '2',
-    role: 'ai',
-    content: "Here's your Q2 Sprint analysis:",
-    structured: {
-      statusSummary: [
-        { label: 'Tasks', value: '12 total', color: 'text-blue-400' },
-        { label: 'In Progress', value: '5', color: 'text-amber-400' },
-        { label: 'Decisions', value: '4 open', color: 'text-orange-400' },
-        { label: 'Health', value: '78/100', color: 'text-emerald-400' },
-      ],
-      observations: [
-        '2 decisions are older than 5 days without resolution',
-        '3 tasks have no assignee',
-        'Decision quality trending up (+4 from last week)',
-      ],
-      actions: [
-        'Resolve "Pricing model" decision — it\'s blocking 3 tasks',
-        'Assign Ship onboarding v2 to unblock pipeline',
-        'Tag outcomes on 2 decided decisions for quality tracking',
-      ],
-    },
-  },
-  { id: '3', role: 'user', content: 'Give me the weekly digest' },
-  {
-    id: '4',
-    role: 'ai',
-    content: 'Weekly Digest — Q2 Product Sprint',
-    structured: {
-      digest: {
-        completed: '4 tasks completed, 3 decisions resolved',
-        inProgress: '5 tasks in progress, 2 in review',
-        quality: 'Decision quality: 78 → 82 (+4 trend)',
-        actionNeeded: '1 blocked task, 2 decisions need outcome tagging',
-      },
-    },
+    content:
+      'Ask LazyMind anything about workflow patterns, decision-making, or how to use Lazynext. Free-text chat — no structured analysis of your workspace yet.',
   },
 ]
 
+// Quick actions kick off real prompts. They are intentionally generic until
+// the panel can read live workspace state — promising "Analyze our Q2
+// sprint" with no data access was the original demo-data lie.
 const quickActions = [
-  { label: '📊 Analyze Workflow', query: 'Analyze our Q2 sprint workflow' },
-  { label: '📋 Weekly Digest', query: "Generate this week's digest" },
-  { label: '✅ Suggest Tasks', query: 'Suggest next priority tasks' },
-  { label: '🔍 Find Decisions', query: 'Show open decisions needing attention' },
+  { label: 'How does Decision DNA scoring work?', query: 'How does Lazynext\'s Decision DNA scoring work, and what makes a decision rigorous?' },
+  { label: 'Help me write a decision', query: 'I need to write a decision rationale. What sections should I include and why?' },
+  { label: 'When to log a decision', query: 'When should my team log a decision in Lazynext vs just chatting about it?' },
+  { label: 'Outcomes vs status', query: 'What\'s the difference between a decision\'s status and its outcome in Lazynext?' },
 ]
 
 export function LazyMindPanel() {
@@ -87,13 +53,6 @@ export function LazyMindPanel() {
   const [isTyping, setIsTyping] = useState(false)
   const [aiCount, setAiCount] = useState(0)
   const chatRef = useRef<HTMLDivElement>(null)
-  const aiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (aiTimerRef.current) clearTimeout(aiTimerRef.current)
-    }
-  }, [])
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
@@ -110,35 +69,64 @@ export function LazyMindPanel() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [toggleLazyMind])
 
-  const sendMessage = useCallback((text: string) => {
-    if (!text.trim()) return
+  const sendMessage = useCallback(async (text: string) => {
+    const trimmed = text.trim()
+    if (!trimmed) return
     if (!canUseAI(plan, aiCount)) {
       trackBillingEvent('paywall.gate.shown', { variant: 'ai-limit', plan, aiCount: String(aiCount) })
       useUpgradeModal.getState().show('ai-limit')
       return
     }
-    const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: text }
+    const userMsg: Message = { id: `u-${Date.now()}`, role: 'user', content: trimmed }
     setMessages((prev) => [...prev, userMsg])
     setInput('')
     setIsTyping(true)
-    setAiCount((c) => c + 1)
 
-    aiTimerRef.current = setTimeout(() => {
-      setIsTyping(false)
-      const aiMsg: Message = {
+    try {
+      const res = await fetch('/api/v1/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: trimmed }),
+      })
+      const body = (await res.json().catch(() => ({}))) as {
+        data?: { content: string }
+        error?: string
+        message?: string
+      }
+
+      if (res.status === 503 && body.error === 'AI_NOT_CONFIGURED') {
+        setMessages((prev) => [...prev, {
+          id: `sys-${Date.now()}`,
+          role: 'system',
+          content: body.message ?? 'LazyMind is not configured on this deployment.',
+        }])
+        return
+      }
+
+      if (!res.ok || !body.data) {
+        setMessages((prev) => [...prev, {
+          id: `sys-${Date.now()}`,
+          role: 'system',
+          content: body.message ?? 'LazyMind couldn\'t answer that one. Try again in a moment.',
+        }])
+        return
+      }
+
+      setAiCount((c) => c + 1)
+      setMessages((prev) => [...prev, {
         id: `ai-${Date.now()}`,
         role: 'ai',
-        content: "Based on the current workflow state, here are insights and recommended actions.",
-        structured: {
-          actions: [
-            'Review and close overdue decisions',
-            'Add missing assignees to unowned tasks',
-            'Schedule outcome reviews for last week\'s decisions',
-          ],
-        },
-      }
-      setMessages((prev) => [...prev, aiMsg])
-    }, 1500)
+        content: body.data!.content,
+      }])
+    } catch {
+      setMessages((prev) => [...prev, {
+        id: `sys-${Date.now()}`,
+        role: 'system',
+        content: 'Network error reaching LazyMind. Check your connection and try again.',
+      }])
+    } finally {
+      setIsTyping(false)
+    }
   }, [plan, aiCount])
 
   if (!isLazyMindOpen) return null
@@ -183,7 +171,19 @@ export function LazyMindPanel() {
           if (msg.role === 'user') {
             return (
               <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-brand-foreground">{msg.content}</div>
+                <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-brand px-4 py-2.5 text-sm text-brand-foreground whitespace-pre-wrap">{msg.content}</div>
+              </div>
+            )
+          }
+          if (msg.role === 'system') {
+            return (
+              <div key={msg.id} className="flex items-start gap-3 motion-safe:animate-fadeIn">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20">
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                </div>
+                <div className="flex-1 min-w-0 rounded-2xl rounded-tl-sm border border-amber-500/20 bg-amber-500/5 p-3">
+                  <p className="text-sm text-amber-200">{msg.content}</p>
+                </div>
               </div>
             )
           }
@@ -194,52 +194,7 @@ export function LazyMindPanel() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="rounded-2xl rounded-tl-sm border border-slate-700 bg-slate-800 p-3">
-                  <p className="text-sm text-slate-300">{msg.content}</p>
-                  {msg.structured?.statusSummary && (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      {msg.structured.statusSummary.map((s) => (
-                        <div key={s.label} className="rounded-lg bg-slate-900 p-2">
-                          <p className="text-2xs text-slate-500">{s.label}</p>
-                          <p className={cn('text-sm font-semibold', s.color)}>{s.value}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {msg.structured?.observations && (
-                    <div className="mt-3">
-                      <p className="text-2xs font-semibold uppercase tracking-wider text-amber-400 mb-1.5">⚠ Observations</p>
-                      <ul className="space-y-1">
-                        {msg.structured.observations.map((o, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-xs text-slate-400">
-                            <AlertTriangle className="h-3 w-3 shrink-0 text-amber-400 mt-0.5" />{o}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {msg.structured?.actions && (
-                    <div className="mt-3">
-                      <p className="text-2xs font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">✓ Recommended Actions</p>
-                      <ol className="space-y-1">
-                        {msg.structured.actions.map((a, i) => (
-                          <li key={i} className="flex items-start gap-1.5 text-xs text-slate-400">
-                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-3xs font-bold text-emerald-400">{i + 1}</span>{a}
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-                  {msg.structured?.digest && (
-                    <div className="mt-3 space-y-2">
-                      <div className="flex items-center gap-2 text-xs text-slate-400"><CheckCircle className="h-3 w-3 text-emerald-400" /><span>{msg.structured.digest.completed}</span></div>
-                      <div className="flex items-center gap-2 text-xs text-slate-400"><TrendingUp className="h-3 w-3 text-blue-400" /><span>{msg.structured.digest.inProgress}</span></div>
-                      <div className="flex items-center gap-2 text-xs text-slate-400"><TrendingUp className="h-3 w-3 text-emerald-400" /><span>{msg.structured.digest.quality}</span></div>
-                      <div className="flex items-center gap-2 text-xs text-slate-400"><AlertTriangle className="h-3 w-3 text-amber-400" /><span>{msg.structured.digest.actionNeeded}</span></div>
-                      <button className="mt-2 flex items-center gap-1.5 rounded-lg bg-brand/10 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/20 transition-colors">
-                        <Mail className="h-3 w-3" />Send as email digest
-                      </button>
-                    </div>
-                  )}
+                  <p className="text-sm text-slate-300 whitespace-pre-wrap">{msg.content}</p>
                 </div>
               </div>
             </div>

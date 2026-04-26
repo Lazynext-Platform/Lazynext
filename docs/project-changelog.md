@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.3.5] — Demo-data eradication round 16: LazyMind AI panel was a setTimeout mock (2026-04-26)
+
+The biggest fake yet. The LazyMind AI panel advertised "Powered by Llama 3.3 70B via Groq" and rendered a staged 4-message conversation with fabricated Q2 Sprint analysis (12 tasks, 5 in progress, 4 decisions, 78/100 health) and a fake Weekly Digest. When users typed real questions, `sendMessage` ran a 1500ms `setTimeout` and returned a hardcoded canned response — the AI was never called. The infrastructure (`lib/ai/lazymind.ts`) was already wired with real Groq+Together fallback for `/api/v1/ai/analyze` and `/api/v1/ai/generate`, but the chat panel had no endpoint to call. Built `app/api/v1/ai/chat/route.ts` (auth, rate limit, zod validation, 503 AI_NOT_CONFIGURED when keys missing), wired the panel to it, dropped the staged demo conversation and structured-response render branches, replaced the dead "Send as email digest" button, and rewrote quick actions to ask real questions about Lazynext rather than promising fake workspace analysis. AI errors now render as amber `role: 'system'` notes instead of masquerading as AI responses. Type-check clean, **143/143** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1335---2026-04-26).
+
+---
+
 ## [1.3.3.4] — Demo-data eradication round 15: app-shell sidebar (2026-04-26)
 
 The persistent app shell, continued. Round 14 caught the TopBar; the Sidebar had an identical pattern. A "Workflows" section with three hardcoded entries (**Q2 Product Sprint** marked active, **Client Onboarding**, **Bug Triage**) rendered in every workspace's sidebar regardless of contents — there is no "workflow" primitive in the schema. Below them, a "+ New Workflow" dead button (no `onClick`). In the bottom action stack, the "LazyMind AI" button itself had no `onClick` (the actual toggle only fired from `TopBar`'s `lg:flex` button — so on tablet widths the only LazyMind entry point in the chrome was a dead button). Finally, `WorkspaceSelector` rendered as a `<button>` with a `ChevronDown`, hinting at a multi-workspace switcher dropdown that doesn't exist anywhere in the codebase. Removed the fake workflows section + dead button, wired LazyMind to `toggleLazyMind`, and converted `WorkspaceSelector` to a display-only div. Type-check clean, **143/143** tests passing, build clean.

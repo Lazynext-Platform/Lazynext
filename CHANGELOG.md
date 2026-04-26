@@ -4,6 +4,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.5] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 16 — the biggest fake yet. The **LazyMind AI panel** advertised itself as "Powered by Llama 3.3 70B via Groq" in the footer and rendered a fully-staged 4-message conversation showing fabricated AI responses about a "Q2 Sprint" with hardcoded counts (12 tasks, 5 in progress, 4 decisions, 78/100 health) and a fake "Weekly Digest" with invented progress numbers. When the user actually typed a question, `sendMessage` ran a 1500ms `setTimeout` and returned a hardcoded canned response: "Based on the current workflow state, here are insights and recommended actions" with three fixed bullet points — the AI was never called. The infrastructure (`lib/ai/lazymind.ts`) was already wired with a real Groq+Together fallback and existed for `/api/v1/ai/analyze` and `/api/v1/ai/generate` (decision scoring, content generation), but the chat panel had no endpoint to call. So a hero feature heavily marketed across the site was a UI mock running on `setTimeout`. Fixed by building a real chat endpoint and wiring the panel to it. When neither AI key is configured, the endpoint returns 503 `AI_NOT_CONFIGURED` and the panel shows an honest amber system note instead of pretending the response succeeded.
+
+### Added
+
+- `app/api/v1/ai/chat/route.ts` — new POST endpoint backing the LazyMind panel. Auths via `safeAuth`, rate-limits through `RATE_LIMITS.ai`, calls `callLazyMind` with a chat-specific system prompt (instructs the model not to invent workspace stats, to keep answers concise, to suggest the user paste in specifics rather than fabricate them). Returns `{ data: { content, provider }, error: null }` on success, 503 `AI_NOT_CONFIGURED` when keys aren't set, 502 `AI_ERROR` with the upstream message on Groq/Together failure, 429 on rate-limit. Validates the body with zod (`message: string min 1 max 2000`).
+
+### Changed
+
+- `components/lazymind/LazyMindPanel.tsx` — removed the staged 4-message demo (welcome only now). Removed the `setTimeout`-based fake response handler. Removed the structured-response render branches (`statusSummary`, `observations`, `digest`) — they were only ever populated from the demo fixture; the real backend returns plain markdown text. Wired `sendMessage` to fetch `/api/v1/ai/chat` with proper error handling: 503 `AI_NOT_CONFIGURED` and other errors render as `role: 'system'` amber notes rather than masquerading as AI responses. Quick action buttons rewritten to ask generic questions about Lazynext (Decision DNA scoring, when to log, outcomes vs status) rather than promising "Analyze our Q2 sprint" with no data access. Removed the dead "Send as email digest" button. `aiCount` now only increments on successful real responses (was incrementing on every `setTimeout` fake). Removed unused `Mail`, `TrendingUp`, `CheckCircle` lucide imports and the now-unused `aiTimerRef`.
+
+### Verification
+
+- Type-check clean.
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.3.4] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 15 — the persistent app shell, continued. Round 14 caught the TopBar; the Sidebar had an identical pattern. A "Workflows" section with three hardcoded entries (**Q2 Product Sprint** marked active, **Client Onboarding**, **Bug Triage**) rendered in the sidebar of every workspace regardless of contents. There is no "workflow" primitive in the schema — these were decoration that suggested a feature the product doesn't have. Below them, a "+ New Workflow" button with no `onClick`. Then in the bottom-of-sidebar action stack, the "LazyMind AI" button itself had no `onClick` (the actual LazyMind toggle only fired from `TopBar`, which renders `lg:flex` — so on tablet widths the only LazyMind entry point in the chrome was a dead button). Finally, `WorkspaceSelector` rendered as a `<button>` with a `ChevronDown` icon, hinting at a multi-workspace switcher dropdown — there is no switcher modal in the codebase and no `/workspaces` route to navigate to.
