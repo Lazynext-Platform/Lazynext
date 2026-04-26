@@ -4,6 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.2] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 13 — in-app onboarding guide and notification center. The `/workspace/[slug]/guide` page advertised a six-section walkthrough with two sections that didn't reflect what ships: a **Collaboration** section listing real-time presence, in-context thread conversations, and @mentions — none of which work today (canvas renders `CollaborationOverlay collaborators={[]}` with no presence channel; the @mentions dropdown was a hardcoded fixture removed in round 2; the thread-node "in-context conversation" panel was replaced with an honest empty state in round 2 because the conversations were fabricated). And a **Productivity** section listing Automations alongside the (real) command palette and (real) keyboard shortcuts — the rule builder/runtime ships in a future release; the page is currently an empty state. Meanwhile the `NotificationCenter` dropdown still rendered a "View all notifications" link in its footer with no `onClick` handler and no `/notifications` route to navigate to (verified — `app/(app)/workspace/[slug]/notifications/page.tsx` does not exist), and a "Mark all read" button that was always visible even when the list was empty (the array is hardcoded `[]` until a `notifications` table ships). Fixed without touching the 40 i18n locale files — orphaned translation keys are harmless.
+
+### Changed
+
+- `app/(app)/workspace/[slug]/guide/page.tsx` — removed the entire `collaboration` section from `guideSections`. Removed the `automations` feature entry from the `productivity` section's `features` array. Removed the now-unused `Users` import. Inline comments mark both removals with the reason. The section count drops from 6 to 5 — the progress bar denominator is computed from `guideSections.length`, so progress percentages stay accurate.
+- `components/ui/NotificationCenter.tsx` — removed the dead "View all notifications" footer button. Wrapped the "Mark all read" button in `unreadCount > 0` so it doesn't render on the empty state. The bell dropdown is now the full notification surface; nothing pretends to link elsewhere.
+
+### Verification
+
+- Type-check clean (the unused `Users` import would have failed `noUnusedLocals` if left behind).
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.3.1] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 12 — three more public-marketing pages telling stories that didn't match the product. **About** rendered a fabricated three-person team ("Avas Patel · Founder & CEO", "Priya Shah · Head of Design", "Rahul Dev · Lead Engineer") with colored-circle avatars and titles, when Lazynext is currently a one-founder operation. Same fake-social-proof pattern caught on the landing page in round 5 — invented teammates render alongside the real founder so a prospect can't tell which name is real. **Features** described the Pulse Dashboard as "Real-time health metrics" with "burndown charts" (refreshes on page load, no streaming; the burndown chart was replaced with an honest empty state in round 2's pulse refactor) and described Automations with two concrete WHEN/THEN examples ("when a task completes, notify the team", "when a decision is made, log it to Slack") even though the automations page is currently an honest empty state with no rule builder and no runtime. **Pricing** sold four features that don't ship as written: the Team plan promised "Import from Notion / Linear / Trello" (only the CSV path of `/api/v1/import` is wired — the OAuth connectors return a fake `jobId` and no work happens, per the round 9 audit); the Business plan listed "Automation engine" (empty-state page), "Custom templates" (no `templates` table, empty-state page), and "Data export (JSON / CSV / PDF)" (the export endpoint only emits JSON). The comparison table at the bottom of the pricing page repeated the same lies in matrix form. All three pages corrected to match what actually ships in v1.3.3.1.

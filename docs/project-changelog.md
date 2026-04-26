@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.3.2] — Demo-data eradication round 13: in-app guide + notification center (2026-04-26)
+
+The `/workspace/[slug]/guide` page advertised a six-section walkthrough with two sections that didn't reflect what ships. **Collaboration** listed real-time presence, in-context thread conversations, and @mentions — none of which work today (canvas renders `CollaborationOverlay collaborators={[]}` with no presence channel; the @mentions dropdown was a hardcoded fixture removed in round 2; the thread-node "in-context conversation" panel was replaced with an honest empty state in round 2 because the conversations were fabricated). **Productivity** listed Automations alongside the (real) command palette and (real) keyboard shortcuts — the rule builder/runtime ships in a future release; the page is currently an empty state. Meanwhile `NotificationCenter` rendered a "View all notifications" footer link with no `onClick` and no `/notifications` route to navigate to (verified absent), and a "Mark all read" button that was always visible even when the list was empty (the array is hardcoded `[]` until a `notifications` table ships). Fixed without touching the 40 i18n locale files — orphaned translation keys are harmless. Type-check clean, **143/143** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1332---2026-04-26).
+
+---
+
 ## [1.3.3.1] — Demo-data eradication round 12: about / features / pricing honesty pass (2026-04-26)
 
 Three more public-marketing pages telling stories that didn't match the product. **About** rendered a fabricated three-person team — "Avas Patel · Founder & CEO", "Priya Shah · Head of Design", "Rahul Dev · Lead Engineer" — with colored avatars and titles, when Lazynext is currently a one-founder operation. Same fake-social-proof pattern caught on the landing page in round 5 — the invented teammates render alongside the real founder so a prospect can't tell which is real. **Features** described Pulse as "Real-time health metrics" with "burndown charts" (refreshes on page load, no streaming; the burndown chart was replaced with an honest empty state in round 2's pulse refactor) and described Automations with two concrete WHEN/THEN examples even though the page is currently an empty state with no rule builder. **Pricing** sold four features that don't ship: Team plan promised "Import from Notion / Linear / Trello" (only the CSV path is wired); Business plan listed "Automation engine" (empty-state page), "Custom templates" (no `templates` table), and "Data export (JSON / CSV / PDF)" (only JSON works). The comparison table at the bottom repeated the same lies in matrix form. All three pages corrected to match what actually ships in v1.3.3.1. Type-check clean, **143/143** tests passing, build clean.

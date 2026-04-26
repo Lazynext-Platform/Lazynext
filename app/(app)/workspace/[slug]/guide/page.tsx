@@ -12,7 +12,6 @@ import {
   Zap,
   FileText,
   Sparkles,
-  Users,
   ArrowRight,
   ChevronRight,
   Check,
@@ -85,18 +84,11 @@ const guideSections: GuideSection[] = [
       { titleKey: 'sections.lazymind.features.digest.title', descriptionKey: 'sections.lazymind.features.digest.description' },
     ],
   },
-  {
-    id: 'collaboration',
-    titleKey: 'sections.collaboration.title',
-    descriptionKey: 'sections.collaboration.description',
-    icon: Users,
-    color: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-    features: [
-      { titleKey: 'sections.collaboration.features.realtime.title', descriptionKey: 'sections.collaboration.features.realtime.description' },
-      { titleKey: 'sections.collaboration.features.threads.title', descriptionKey: 'sections.collaboration.features.threads.description' },
-      { titleKey: 'sections.collaboration.features.mentions.title', descriptionKey: 'sections.collaboration.features.mentions.description' },
-    ],
-  },
+  // Removed `collaboration` section in v1.3.3.2 — none of its three
+  // sub-features actually ship. Realtime presence is not wired (canvas
+  // renders `CollaborationOverlay collaborators={[]}`), the @mentions
+  // dropdown was a fake fixture (removed round 2), and the thread-node
+  // "in-context conversations" panel currently shows an empty state.
   {
     id: 'productivity',
     titleKey: 'sections.productivity.title',
@@ -106,7 +98,8 @@ const guideSections: GuideSection[] = [
     features: [
       { titleKey: 'sections.productivity.features.command.title', descriptionKey: 'sections.productivity.features.command.description' },
       { titleKey: 'sections.productivity.features.shortcuts.title', descriptionKey: 'sections.productivity.features.shortcuts.description' },
-      { titleKey: 'sections.productivity.features.automations.title', descriptionKey: 'sections.productivity.features.automations.description' },
+      // `automations` feature dropped — the rule builder/runtime ships
+      // in a future release; the page is currently an empty state.
     ],
   },
 ]

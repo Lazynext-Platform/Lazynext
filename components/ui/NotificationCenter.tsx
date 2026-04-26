@@ -82,9 +82,11 @@ export function NotificationCenter() {
               <button role="tab" aria-selected={tab === 'all'} onClick={() => setTab('all')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'all' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>All</button>
               <button role="tab" aria-selected={tab === 'unread'} onClick={() => setTab('unread')} className={cn('rounded-md px-2.5 py-1 text-2xs+ font-medium transition-colors', tab === 'unread' ? 'bg-slate-700 text-white' : 'text-slate-400 hover:text-slate-300')}>Unread</button>
             </div>
-            <button onClick={markAllRead} className="flex items-center gap-1 text-2xs+ text-brand hover:text-brand-hover transition-colors">
-              <CheckCheck className="h-3 w-3" />Mark all read
-            </button>
+            {unreadCount > 0 && (
+              <button onClick={markAllRead} className="flex items-center gap-1 text-2xs+ text-brand hover:text-brand-hover transition-colors">
+                <CheckCheck className="h-3 w-3" />Mark all read
+              </button>
+            )}
           </div>
 
           {/* Items */}
@@ -135,10 +137,9 @@ export function NotificationCenter() {
             )}
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-slate-800 px-4 py-2.5 text-center">
-            <button className="text-xs font-medium text-brand hover:text-brand-hover transition-colors">View all notifications</button>
-          </div>
+          {/* Footer removed in v1.3.3.2 — the "View all notifications"
+              button had no onClick handler and there is no /notifications
+              route to render. The bell dropdown is the full surface. */}
         </div>
       )}
     </div>
