@@ -4,6 +4,18 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.5] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 6 — the most directly misleading flow in the app. The Import Data modal at `/workspace/[slug]/import` opened a 3-step wizard that simulated a complete Notion import end-to-end: a fake "Connect & Start Import" button kicked off a `setInterval` that filled three fake progress bars (Docs / Tasks / Connections) with random math until they all hit 100%, then showed a green checkmark success screen claiming "12 docs, 24 tasks, and 18 connections imported" alongside a fake terminal log: `✓ Connected to Notion workspace · ✓ Importing pages as DOC nodes... · ✓ Importing databases as TASK nodes... · ⚠ Skipped 2 embedded images (not supported) · ✓ Building edge connections...` None of it was real. There is no OAuth handshake, no ingestion endpoint, no schema mapper — clicking "Go to Workflow" in the success screen just closed the modal and the workspace stayed empty. Users who tried to import their data and watched the fake terminal log scroll by were the most directly deceived audience the app had. Replaced with an honest version: the planned connectors are listed (each tagged `Soon`), an amber "Import flows are in development" notice explains the OAuth + mapper + pipeline ship together, and the CTA is now a `mailto:hello@lazynext.com?subject=Import connector priority` link instead of a fake "Connect" button. The fake Step indicator, fake progress bars, fake terminal log, and fake "12 docs, 24 tasks" success screen are all gone.
+
+### Changed
+- `components/ui/ImportModal.tsx` — full rewrite. Removed the 3-step wizard with simulated `setInterval` progress, the random-number progress math (`Math.random() * 15`), the fake terminal log with checkmarks, the fake `Q2 Product Sprint` / `Client Onboarding` workflow scope dropdown, and the `12 docs, 24 tasks, 18 connections imported` success copy. New version is a single-step honest preview: roadmap connector list with `Soon` tags + amber "in development" notice + email-us-priorities CTA. ~120 lines of fake-flow code removed.
+
+### Verification
+- Type-check clean.
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.2.4] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 5 — landing page social proof. The two highest-conversion sections of the public landing page were both fabricated. **`SocialProofBar`** (mounted directly under the hero) claimed "Trusted by 1,200+ teams across 40+ countries" with six skeleton logo bars meant to imply real customer logos that don't exist. **`TestimonialsSection`** (the "Loved by teams who ship" grid above the CTA) quoted three fictional people — Priya Raghavan (Head of Product, FlowStack), Arjun Krishnamurthy (CTO, NexaBuild), Sara Mehta (Engineering Manager, DevCraft) — with detailed quotes ("we killed 5 subscriptions in one week", "LazyMind is scary good", "Monday planning went from 45 minutes to 12 minutes — we timed it") at companies that don't exist. These weren&apos;t styled as placeholders; they rendered with 5 amber stars and looked indistinguishable from real testimonials. Both gone.
