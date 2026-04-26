@@ -108,7 +108,7 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
       <div className="flex h-12 items-center justify-between border-b border-slate-800 px-4">
         <div className="flex items-center gap-2">
           <Link href="/">
-            <Image src="/logo-dark.png" alt="Lazynext" width={24} height={24} className="h-6 w-6" />
+            <Image src="/icon.svg" alt="Lazynext" width={24} height={24} className="h-6 w-6 rounded-md" />
           </Link>
           <WorkspaceSelector />
         </div>
