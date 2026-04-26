@@ -4,6 +4,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.4] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 5 — landing page social proof. The two highest-conversion sections of the public landing page were both fabricated. **`SocialProofBar`** (mounted directly under the hero) claimed "Trusted by 1,200+ teams across 40+ countries" with six skeleton logo bars meant to imply real customer logos that don't exist. **`TestimonialsSection`** (the "Loved by teams who ship" grid above the CTA) quoted three fictional people — Priya Raghavan (Head of Product, FlowStack), Arjun Krishnamurthy (CTO, NexaBuild), Sara Mehta (Engineering Manager, DevCraft) — with detailed quotes ("we killed 5 subscriptions in one week", "LazyMind is scary good", "Monday planning went from 45 minutes to 12 minutes — we timed it") at companies that don't exist. These weren&apos;t styled as placeholders; they rendered with 5 amber stars and looked indistinguishable from real testimonials. Both gone.
+
+### Removed
+- `components/marketing/SocialProofBar.tsx` — deleted. The "1,200+ teams across 40+ countries" claim is not true and never was. When real customer logos exist, a different component (with permission and real attribution) will replace it.
+- `components/marketing/TestimonialsSection.tsx` — deleted. Lazynext is early; pretending three named strangers said specific things is the most direct kind of conversion deception. Real customer quotes go here when real customers say them.
+
+### Changed
+- `app/(marketing)/page.tsx` — removed the static `SocialProofBar` import + JSX usage and the dynamic `TestimonialsSection` import + JSX usage. Landing flow is now: Hero → Problem → Primitives → DecisionDNA → LazyMind → ConsolidationMap → Pricing → CTA. The product story stands on its own.
+
+### Verification
+- Type-check clean.
+- Lint clean.
+- 143/143 tests passing.
+- Production build clean.
+- Manual grep across `components/`, `app/`: zero remaining references to `SocialProofBar`, `TestimonialsSection`, or any of the three fictional names.
+
 ## [1.3.2.3] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 4. After three rounds clearing 17 surfaces, a fourth sweep caught **the Templates page** (a fully-fake "marketplace" with six made-up templates carrying invented popularity stats — 128 / 89 / 64 / 45 / 32 / 156 stars, 342 / 215 / 156 / 98 / 74 / 489 installs — and an "Install Template" button that flipped a state flag and showed a fake success modal without actually installing anything; there is no `templates` table, no install endpoint, no ratings system), **the public Shared Canvas page at `/shared/[id]`** (every UUID-shaped path rendered the same fake 5-node graph — "Product Roadmap → Choose Database → Implement Auth, Design Review, Build API" — with fake share-modal analytics: "24 total views / 8 unique visitors / 2m avg time"), and **the Blog listing** (linked to four posts but only `launching-lazynext` had a real body in `[slug]/page.tsx`; the other three — `decision-dna`, `graph-native`, `global-first` — 404'd when clicked). All gone.
