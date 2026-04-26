@@ -1,6 +1,6 @@
 'use client'
 
-import { Activity, CheckSquare, TrendingUp, TrendingDown, Minus, AlertTriangle, Sparkles, GitBranch } from 'lucide-react'
+import { Activity, CheckSquare, TrendingUp, TrendingDown, Minus, AlertTriangle, GitBranch } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { PulseStats, MemberUser, ActivityEvent } from '@/lib/data/workspace'
 
@@ -287,14 +287,14 @@ export function PulseClient({ stats, members, recentEvents, workspaceName }: Pro
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-cyan-800/30 bg-gradient-to-r from-cyan-900/20 to-slate-900 p-5">
+      <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-5">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-cyan-400" />
-          <h3 className="text-sm font-semibold text-cyan-300">LazyMind Weekly Summary</h3>
+          <Activity className="h-4 w-4 text-cyan-400" />
+          <h3 className="text-sm font-semibold text-slate-100">This week, in one paragraph</h3>
         </div>
         <p className="mt-2 text-sm text-slate-300">{buildSummary(stats, workload)}</p>
         <p className="mt-2 text-3xs text-slate-600">
-          Numbers above are computed live from this workspace&apos;s actual decisions, tasks, and threads. Quality delta vs last week:{' '}
+          Computed deterministically from this workspace&apos;s actual decisions, tasks, and threads — not AI-generated. Quality delta vs last week:{' '}
           {qualityDelta > 0 ? `+${qualityDelta}` : qualityDelta} · Threads delta: {threadsDelta > 0 ? `+${threadsDelta}` : threadsDelta}.
         </p>
       </div>

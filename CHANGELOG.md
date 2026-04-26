@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.6] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 17 — two leftover lies. (1) Pulse Dashboard's bottom card was titled **"LazyMind Weekly Summary"** with a `Sparkles` brand-icon, suggesting an AI-generated narrative. The text was actually produced by a deterministic `buildSummary()` helper that concatenates pre-formatted sentences from real stat numbers — useful and honest data, but the framing mislabeled it as AI output. Renamed the card to "This week, in one paragraph", swapped the `Sparkles` icon for `Activity`, dropped the cyan gradient that visually echoed the AI-feature surfaces elsewhere, and added a footnote: *"Computed deterministically from this workspace's actual decisions, tasks, and threads — not AI-generated."* (2) The post-onboarding `WorkspaceTour` had a step that targeted `[aria-label="Switch workspace"]` — an element that no longer exists since round 15 converted `WorkspaceSelector` to a display-only `<div>` with `aria-label="Current workspace: ..."`. Worse, the step copy ("Switch between workspaces or create new ones. Each workspace has its own canvas, members, and settings.") promised a multi-workspace switcher dropdown that doesn't ship. Result: new users got step 3 of 10 with no spotlight and a description for a feature they couldn't find. Removed the step.
+
+### Changed
+
+- **Pulse Dashboard:** Renamed the bottom narrative card from "LazyMind Weekly Summary" to "This week, in one paragraph". Removed the `Sparkles` icon and cyan-gradient background to drop the AI framing. Added a one-line footnote calling out that the summary is deterministically computed, not AI-generated.
+
+### Removed
+
+- **WorkspaceTour:** Dropped the broken "Switch workspace" tour step. The selector pointed at a non-existent element and the description advertised a multi-workspace switcher that doesn't ship. Tour now runs 9 steps instead of 10.
+
+### Verified
+
+- Type-check clean.
+- Test suite: **143/143** passing.
+- Production build: clean.
+
+---
+
 ## [1.3.3.5] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 16 — the biggest fake yet. The **LazyMind AI panel** advertised itself as "Powered by Llama 3.3 70B via Groq" in the footer and rendered a fully-staged 4-message conversation showing fabricated AI responses about a "Q2 Sprint" with hardcoded counts (12 tasks, 5 in progress, 4 decisions, 78/100 health) and a fake "Weekly Digest" with invented progress numbers. When the user actually typed a question, `sendMessage` ran a 1500ms `setTimeout` and returned a hardcoded canned response: "Based on the current workflow state, here are insights and recommended actions" with three fixed bullet points — the AI was never called. The infrastructure (`lib/ai/lazymind.ts`) was already wired with a real Groq+Together fallback and existed for `/api/v1/ai/analyze` and `/api/v1/ai/generate` (decision scoring, content generation), but the chat panel had no endpoint to call. So a hero feature heavily marketed across the site was a UI mock running on `setTimeout`. Fixed by building a real chat endpoint and wiring the panel to it. When neither AI key is configured, the endpoint returns 503 `AI_NOT_CONFIGURED` and the panel shows an honest amber system note instead of pretending the response succeeded.

@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.3.6] — Demo-data eradication round 17: two leftover lies (2026-04-26)
+
+Two surfaces still leaked. (1) Pulse Dashboard's bottom card was titled "LazyMind Weekly Summary" with a `Sparkles` brand-icon and cyan gradient — framing it as AI-generated. The text was actually `buildSummary()`, a deterministic helper that concatenates pre-formatted sentences from real stats. Useful, honest data; misleading framing. Renamed to "This week, in one paragraph", swapped icon to `Activity`, dropped the gradient, added a "Computed deterministically … not AI-generated" footnote. (2) `WorkspaceTour` step 3 targeted `[aria-label="Switch workspace"]` — an element that no longer exists since round 15 made `WorkspaceSelector` display-only. The step description also promised a multi-workspace switcher dropdown that doesn't ship. New users got a missing spotlight + a description for a feature they couldn't find. Removed the step. Tour is now 9 steps. Type-check clean, **143/143** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1336---2026-04-26).
+
+---
+
 ## [1.3.3.5] — Demo-data eradication round 16: LazyMind AI panel was a setTimeout mock (2026-04-26)
 
 The biggest fake yet. The LazyMind AI panel advertised "Powered by Llama 3.3 70B via Groq" and rendered a staged 4-message conversation with fabricated Q2 Sprint analysis (12 tasks, 5 in progress, 4 decisions, 78/100 health) and a fake Weekly Digest. When users typed real questions, `sendMessage` ran a 1500ms `setTimeout` and returned a hardcoded canned response — the AI was never called. The infrastructure (`lib/ai/lazymind.ts`) was already wired with real Groq+Together fallback for `/api/v1/ai/analyze` and `/api/v1/ai/generate`, but the chat panel had no endpoint to call. Built `app/api/v1/ai/chat/route.ts` (auth, rate limit, zod validation, 503 AI_NOT_CONFIGURED when keys missing), wired the panel to it, dropped the staged demo conversation and structured-response render branches, replaced the dead "Send as email digest" button, and rewrote quick actions to ask real questions about Lazynext rather than promising fake workspace analysis. AI errors now render as amber `role: 'system'` notes instead of masquerading as AI responses. Type-check clean, **143/143** tests passing, build clean.

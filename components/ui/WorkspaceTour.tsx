@@ -15,12 +15,12 @@ const workspaceTourSteps: TourStep[] = [
     descriptionKey: 'steps.sidebar.description',
     placement: 'right',
   },
-  {
-    target: '[aria-label="Switch workspace"]',
-    titleKey: 'steps.workspace.title',
-    descriptionKey: 'steps.workspace.description',
-    placement: 'bottom',
-  },
+  // Removed the "Switch workspace" step in v1.3.3.6: round 15 converted
+  // `WorkspaceSelector` to a display-only div (no `aria-label="Switch
+  // workspace"` element exists anymore), and the step description
+  // ("Switch between workspaces or create new ones") promised a
+  // multi-workspace switcher dropdown that doesn't ship. Better to drop
+  // the step than spotlight nothing while telling the user a lie.
   {
     target: 'a[href*="/canvas/"]',
     titleKey: 'steps.canvas.title',
