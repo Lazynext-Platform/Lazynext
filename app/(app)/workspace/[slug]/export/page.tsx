@@ -13,11 +13,9 @@ const exportIncludes = [
   'Timestamps', 'Member assignments', 'Outcome tags', 'Attachments metadata',
 ]
 
-const exportHistory = [
-  { name: 'Full Workspace Export', format: 'JSON', date: 'Apr 3, 2026', size: '2.4 MB' },
-  { name: 'Decisions Export', format: 'CSV', date: 'Mar 28, 2026', size: '156 KB' },
-  { name: 'Full Workspace Export', format: 'JSON', date: 'Mar 15, 2026', size: '1.8 MB' },
-]
+// No exports table exists in the schema yet. History stays empty
+// until completed exports are persisted server-side.
+const exportHistory: { name: string; format: string; date: string; size: string }[] = []
 
 export default function DataExportPage() {
   const params = useParams()
@@ -83,7 +81,7 @@ export default function DataExportPage() {
               <Check className="h-6 w-6 text-emerald-400" />
             </div>
             <h3 className="mt-3 text-sm font-semibold text-slate-100">Export Ready!</h3>
-            <p className="mt-1 text-xs text-slate-500">workspace-export-2026-04-06.json · 2.4 MB</p>
+            <p className="mt-1 text-xs text-slate-500">{`workspace-export-${new Date().toISOString().slice(0, 10)}.${fullFormat}`}</p>
             <button className="mt-3 rounded-lg bg-emerald-500 px-6 py-2 text-sm font-semibold text-white hover:bg-emerald-600">Download File</button>
           </div>
         ) : (
@@ -100,8 +98,6 @@ export default function DataExportPage() {
                 <label htmlFor="export-scope" className="text-xs text-slate-500">Scope</label>
                 <select id="export-scope" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
                   <option>All workflows</option>
-                  <option>Q2 Product Sprint</option>
-                  <option>Client Onboarding</option>
                 </select>
               </div>
             </div>
@@ -157,24 +153,36 @@ export default function DataExportPage() {
             </select>
           </div>
         </div>
-        <button className="mt-4 w-full rounded-lg border border-slate-600 bg-slate-800 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors">Export 47 Decisions</button>
+        <button className="mt-4 w-full rounded-lg border border-slate-600 bg-slate-800 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-700 transition-colors">Export Decisions</button>
       </div>
 
       {/* Export history */}
       <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h2 className="text-sm font-semibold text-slate-200">Export History</h2>
-        <div className="mt-3 space-y-2">
-          {exportHistory.map((h, i) => (
-            <div key={i} className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2">
-              <div>
-                <p className="text-sm text-slate-200">{h.name} <span className="text-xs text-slate-500">({h.format})</span></p>
-                <p className="text-2xs text-slate-500">{h.date} · {h.size}</p>
-              </div>
-              <button className="text-xs text-brand hover:text-brand-hover">Re-download</button>
+        {exportHistory.length === 0 ? (
+          <p className="mt-3 text-xs text-slate-500">
+            No previous exports. Past exports will appear here once server-side persistence is wired.
+          </p>
+        ) : (
+          <>
+            <div className="mt-3 space-y-2">
+              {exportHistory.map((h, i) => (
+                <div key={i} className="flex items-center justify-between rounded-md bg-slate-800/50 px-3 py-2">
+                  <div>
+                    <p className="text-sm text-slate-200">
+                      {h.name} <span className="text-xs text-slate-500">({h.format})</span>
+                    </p>
+                    <p className="text-2xs text-slate-500">
+                      {h.date} · {h.size}
+                    </p>
+                  </div>
+                  <button className="text-xs text-brand hover:text-brand-hover">Re-download</button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="mt-2 text-2xs text-slate-600">Exports available for 30 days.</p>
+            <p className="mt-2 text-2xs text-slate-600">Exports available for 30 days.</p>
+          </>
+        )}
       </div>
 
       {/* API note */}

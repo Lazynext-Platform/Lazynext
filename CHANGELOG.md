@@ -4,6 +4,31 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.2] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 3. v1.3.2.0 cleared the five workspace pages and v1.3.2.1 cleared the canvas, notifications, decision-health dashboard, and detail panels. A third sweep found that **the entire Account → Profile page** was hardcoded with "Avas Patel / avas@lazynext.com / Founder & Developer" as the user identity (every user saw Avas's profile regardless of who they were), with three fake browser sessions (`MacBook Air — Chrome — 104.xx.xx.42`, `iPhone 15 — Safari`, `Windows PC — Firefox — 82.xx.xx.88 — London, UK`) and a fake "Side Project" workspace in the workspace switcher. **The Billing page** invented four invoices (`Apr 1 / Mar 1 / Feb 1 / Jan 15`) and four hardcoded usage counts (342 nodes / 47 decisions / 23 LazyMind / 1.2 GB) plus a fake `•••• 4242` Visa card and a fake "Next billing: May 1, 2026" date. **The Integrations page** showed Slack and Notion as connected to every user with active "Disconnect" buttons, plus a fake masked API key (`lnx_sk_••••...`) with copy/regenerate controls behind a non-functional flow. **The Export page** invented three past exports and a hardcoded "Export 47 Decisions" button. All gone. Added `NodeDetailPanelLegacy.tsx` (orphaned dead file with a fake "Priya / Avas / PlanetScale" thread) deleted entirely; replaced with an inline `FallbackPanel` for node types without a dedicated panel.
+
+### Changed
+- `app/(app)/workspace/[slug]/profile/page.tsx` + new `app/(app)/workspace/[slug]/profile/ProfileClient.tsx` — full rewrite as a server component. Reads the real Supabase auth user via the new `safeAuthUser()` helper, deriving first/last name from `user_metadata.full_name`, avatar from `user_metadata.avatar_url`, role from `user_metadata.role`, and identity providers from `app_metadata.providers`. Email field is now read-only with "Managed by Supabase Auth" hint. Avatar pulls from real `avatar_url` when present (falls back to derived initials). Workspaces section calls the new `getUserWorkspaces(userId)` helper — clicking a workspace navigates to it. Connected Accounts derives from real Supabase identity providers. Sessions tab honestly states "Per-device session list isn't available — Supabase Auth doesn't expose this; sign out and rotate your password to invalidate every refresh token" instead of fabricating IPs.
+- `app/(app)/workspace/[slug]/billing/page.tsx` + new `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — split into server + client. Server fetches real `getBillingUsage` (live counts of nodes/decisions/members from Supabase) and the workspace's actual plan. Plan comparison cards now derive from `PLAN_LIMITS` constants instead of duplicated copy. Current Plan card shows real seat count. Removed entire "Payment Method" card with fake `•••• 4242 Visa` — replaced with a "Payment Method & Invoices" card linking to the Gumroad customer portal (which is where Lazynext billing actually lives). Removed entire "Billing History" table with four fake invoices. Usage card shows three real metrics (nodes, members, decisions) with `∞` rendered for unlimited limits.
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — `connectedIntegrations` array emptied (Slack, Notion no longer falsely shown as connected); empty state explains OAuth connectors haven't shipped. "Available" section renamed to "Coming soon" with disabled "Notify me" buttons (was non-functional "Connect" buttons that did nothing). API Access card no longer fabricates a masked key with copy/regenerate; instead an honest "API key issuance ships with the Business plan" message and disabled CTA.
+- `app/(app)/workspace/[slug]/export/page.tsx` — `exportHistory` emptied (no exports table in schema); empty state explains server-side persistence is the follow-up. Removed fake "Q2 Product Sprint" + "Client Onboarding" workflow scope options. "Export 47 Decisions" generalized to "Export Decisions". Hardcoded `workspace-export-2026-04-06.json · 2.4 MB` filename now generated dynamically from current date and selected format.
+- `components/canvas/panels/NodeDetailPanel.tsx` — removed import of deleted `NodeDetailPanelLegacy`. Inlined a minimal `FallbackPanel` component for node types without a dedicated panel (pulse, automation). Renders the real `node.data.title` instead of fake "Priya / Avas" sample threads.
+
+### Added
+- `safeAuthUser()` in `lib/utils/auth.ts` — returns the full Supabase `User` (email, `user_metadata`, `app_metadata`) instead of just the user id. Backs the new server-rendered Profile page.
+- `getUserWorkspaces(userId)` in `lib/data/workspace.ts` — joins `workspace_members` with `workspaces` and derives the `isOwner` flag from `workspace.created_by === userId`. Powers the Profile → "Your workspaces" list.
+- `getBillingUsage(workspaceId)` in `lib/data/workspace.ts` — three parallel `head:true` COUNT queries against `nodes`, `decisions`, and `workspace_members` for the Billing usage card.
+
+### Removed
+- `components/canvas/panels/NodeDetailPanelLegacy.tsx` — orphaned dead file carrying fake "Priya — Why not PlanetScale? / Avas — MySQL syntax + no RLS" sample thread. Confirmed via grep no consumers besides the now-updated `NodeDetailPanel.tsx`.
+
+### Verification
+- Type-check clean.
+- Lint clean (only pre-existing `<img>` warnings).
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.2.1] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 2. v1.3.2.0 cleared the five workspace pages but a follow-up sweep found seven more surfaces with hardcoded "Avas Patel / Priya Sharma / Raj Kumar / Fix auth redirect bug" fixtures: every empty canvas auto-injected 5 demo nodes, the global notification bell rendered 8 fabricated alerts, the Decisions Health dashboard was 100% fixture-driven with fake leaderboards and fake quality trends, the workspace Settings → Members tab hardcoded "Avas Patel · avas@lazynext.com · Owner", and the canvas detail panels (thread, decision, task) shipped fake conversations, fake comparison tables, fake assignees, and fake subtasks. All gone.

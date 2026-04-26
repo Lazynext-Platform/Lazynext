@@ -14,6 +14,44 @@ export async function getWorkspaceBySlug(slug: string): Promise<Workspace | null
   return (data as Workspace) ?? null
 }
 
+export interface UserWorkspace {
+  id: string
+  name: string
+  slug: string
+  plan: string
+  role: string
+  isOwner: boolean
+}
+
+/**
+ * Lists every workspace the user belongs to, with their role and a derived
+ * isOwner flag (true when workspace.created_by === userId). Powers the
+ * Account Settings → Profile → "Your workspaces" section.
+ */
+export async function getUserWorkspaces(userId: string): Promise<UserWorkspace[]> {
+  if (!hasValidDatabaseUrl) return []
+  const { data } = await db
+    .from('workspace_members')
+    .select('role, workspace:workspaces(id, name, slug, plan, created_by)')
+    .eq('user_id', userId)
+
+  type Row = {
+    role: string
+    workspace: { id: string; name: string; slug: string; plan: string; created_by: string | null } | null
+  }
+  const rows = (data as Row[] | null) ?? []
+  return rows
+    .filter((r) => r.workspace !== null)
+    .map((r) => ({
+      id: r.workspace!.id,
+      name: r.workspace!.name,
+      slug: r.workspace!.slug,
+      plan: r.workspace!.plan,
+      role: r.role,
+      isOwner: r.workspace!.created_by === userId,
+    }))
+}
+
 export async function getCurrentMemberWorkspace(slug: string): Promise<{
   userId: string | null
   workspace: Workspace | null
@@ -712,5 +750,29 @@ export async function getDecisionHealthStats(
     typeBreakdown,
     tagCounts,
     untaggedStale,
+  }
+}
+
+export interface BillingUsage {
+  nodes: number
+  decisions: number
+  members: number
+}
+
+/**
+ * Live counts powering the Billing page Usage card. Cheap parallel
+ * COUNT(*) queries — head:true skips the row payload.
+ */
+export async function getBillingUsage(workspaceId: string): Promise<BillingUsage> {
+  if (!hasValidDatabaseUrl) return { nodes: 0, decisions: 0, members: 0 }
+  const [nodes, decisions, members] = await Promise.all([
+    db.from('nodes').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+    db.from('decisions').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+    db.from('workspace_members').select('id', { count: 'exact', head: true }).eq('workspace_id', workspaceId),
+  ])
+  return {
+    nodes: nodes.count ?? 0,
+    decisions: decisions.count ?? 0,
+    members: members.count ?? 0,
   }
 }
