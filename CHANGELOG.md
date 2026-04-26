@@ -4,6 +4,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3.3] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 14 — the persistent app shell. Every signed-in user, regardless of which workspace they were viewing, saw a `TopBar` with hardcoded text: workspace breadcrumb pinned to **"Acme Corp"** and a workflow sub-segment pinned to **"Q2 Product Sprint"**. There is no "named workflow" primitive in the schema — the second segment was pure decoration that suggested a feature the product doesn't have. To the right of the breadcrumb, three avatar circles labeled **AP / PK / JR** rendered as a "Team members online" presence cluster, identical in spirit to the fake-team fixtures we caught on the landing page (round 5) and the about page (round 12) — except this one rendered constantly, on every page, in the chrome that frames the entire authenticated product. Two more shell buttons did nothing: **"New Workflow"** (no `onClick`, no concept of workflows) and **"Share"** (no `onClick`, no `ShareModal` defined anywhere — verified by grepping the codebase for `ShareModal`, `toggleShare`, `isShareOpen`: zero results). Anyone evaluating the product saw a fully-staffed Acme Corp workspace with a working share button — none of which existed. Fixed by reading the real workspace name from `useWorkspaceStore` (already hydrated by `WorkspaceHydrator` at the `(app)` shell layer) and removing the fake presence cluster + dead buttons entirely.
+
+### Changed
+
+- `components/layout/TopBar.tsx` — replaced the hardcoded `Acme Corp` / `Q2 Product Sprint` breadcrumb with `workspace?.name ?? 'Workspace'` from `useWorkspaceStore`. Removed the workflow sub-segment, the `ChevronDown` decorations on both segments, and the workspace-switcher click handler shell (no switcher route exists at `/workspaces` — verified absent). Removed the `presenceAvatars` const and the entire `Team members online` strip — no presence channel ships today; this matches `CollaborationOverlay collaborators={[]}` already wired into the canvas. Removed the dead `New Workflow` button and the dead `Share` button — both had no `onClick` handler. Trimmed the now-unused `Plus`, `Share2`, `ChevronDown` lucide imports and the `cn` helper. Inline header comment documents all three removals so the next person doesn't reinstate them as "design polish."
+
+### Verification
+
+- Type-check clean (the unused imports would have failed `noUnusedLocals` if left behind).
+- 143/143 tests passing.
+- Production build clean.
+
 ## [1.3.3.2] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 13 — in-app onboarding guide and notification center. The `/workspace/[slug]/guide` page advertised a six-section walkthrough with two sections that didn't reflect what ships: a **Collaboration** section listing real-time presence, in-context thread conversations, and @mentions — none of which work today (canvas renders `CollaborationOverlay collaborators={[]}` with no presence channel; the @mentions dropdown was a hardcoded fixture removed in round 2; the thread-node "in-context conversation" panel was replaced with an honest empty state in round 2 because the conversations were fabricated). And a **Productivity** section listing Automations alongside the (real) command palette and (real) keyboard shortcuts — the rule builder/runtime ships in a future release; the page is currently an empty state. Meanwhile the `NotificationCenter` dropdown still rendered a "View all notifications" link in its footer with no `onClick` handler and no `/notifications` route to navigate to (verified — `app/(app)/workspace/[slug]/notifications/page.tsx` does not exist), and a "Mark all read" button that was always visible even when the list was empty (the array is hardcoded `[]` until a `notifications` table ships). Fixed without touching the 40 i18n locale files — orphaned translation keys are harmless.

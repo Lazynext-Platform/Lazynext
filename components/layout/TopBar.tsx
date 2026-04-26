@@ -1,19 +1,24 @@
 'use client'
 
-import { Search, Menu, Command, ChevronDown, Sparkles, Share2, Plus, User, LogOut } from 'lucide-react'
+import { Search, Menu, Command, Sparkles, User, LogOut } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useUIStore } from '@/stores/ui.store'
+import { useWorkspaceStore } from '@/stores/workspace.store'
 import { NotificationCenter } from '@/components/ui/NotificationCenter'
-import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/db/supabase/client'
 import { useState } from 'react'
 
-const presenceAvatars = [
-  { initials: 'AP', color: 'bg-indigo-500' },
-  { initials: 'PK', color: 'bg-emerald-500' },
-  { initials: 'JR', color: 'bg-amber-500' },
-]
+// v1.3.3.3 — removed three pieces of fake-tenant chrome that every signed-in
+// user saw regardless of their actual workspace:
+//   1. Hardcoded "Acme Corp / Q2 Product Sprint" breadcrumb. Now reads the
+//      real workspace name from `useWorkspaceStore` (hydrated by
+//      WorkspaceHydrator at the (app) shell layer). Workflow sub-segment
+//      removed entirely — there is no "named workflow" primitive.
+//   2. Three-avatar presence cluster (AP / PK / JR). No presence channel
+//      ships today; canvas renders `CollaborationOverlay collaborators={[]}`.
+//   3. Dead "New Workflow" + "Share" buttons. Neither had an onClick;
+//      no ShareModal exists in the codebase.
 
 export function TopBar() {
   const isSidebarOpen = useUIStore((s) => s.isSidebarOpen)
@@ -21,6 +26,10 @@ export function TopBar() {
   const toggleCommandPalette = useUIStore((s) => s.toggleCommandPalette)
   const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
   const [showMenu, setShowMenu] = useState(false)
+  const workspace = useWorkspaceStore((s) => s.workspace)
+  // Fall back to a neutral label while the store is hydrating, never to
+  // a fake tenant name. The breadcrumb just won't appear for ~1 paint.
+  const workspaceName = workspace?.name ?? 'Workspace'
 
   const handleSignOut = async () => {
     try {
@@ -50,21 +59,12 @@ export function TopBar() {
           </>
         )}
 
-        {/* Breadcrumb */}
+        {/* Breadcrumb — real workspace name from the hydrated store. */}
         <nav aria-label="Breadcrumb" className="hidden items-center gap-1 text-sm sm:flex">
-          <button aria-label="Switch workspace" className="flex items-center gap-1 font-semibold text-white hover:text-slate-300">
-            Acme Corp <ChevronDown className="h-3 w-3 text-slate-500" />
-          </button>
-          <span className="text-slate-600" aria-hidden="true">/</span>
-          <button aria-label="Switch workflow" className="flex items-center gap-1 font-medium text-slate-300 hover:text-white">
-            Q2 Product Sprint <ChevronDown className="h-3 w-3 text-slate-500" />
-          </button>
+          <span className="font-semibold text-white">
+            {workspaceName}
+          </span>
         </nav>
-
-        {/* New Workflow button */}
-        <button aria-label="Create new workflow" className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-800 hover:text-slate-300 lg:flex">
-          <Plus className="h-3 w-3" /> New Workflow
-        </button>
 
         {/* Search trigger */}
         <button
@@ -80,27 +80,6 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Presence avatars */}
-        <div aria-label="Team members online" className="hidden items-center -space-x-2 lg:flex">
-          {presenceAvatars.map((a) => (
-            <div
-              key={a.initials}
-              aria-label={`${a.initials} is online`}
-              className={cn(
-                'flex h-7 w-7 items-center justify-center rounded-full border-2 border-slate-900 text-2xs font-bold text-white',
-                a.color
-              )}
-            >
-              {a.initials}
-            </div>
-          ))}
-        </div>
-
-        {/* Share */}
-        <button aria-label="Share workflow" className="hidden items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-slate-400 hover:bg-slate-800 hover:text-slate-200 lg:flex">
-          <Share2 className="h-3.5 w-3.5" /> Share
-        </button>
-
         {/* LazyMind AI */}
         <button aria-label="Open LazyMind AI assistant" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
           <Sparkles className="h-3.5 w-3.5" /> LazyMind

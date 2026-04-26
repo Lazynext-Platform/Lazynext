@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.3.3] — Demo-data eradication round 14: app-shell topbar (2026-04-26)
+
+The persistent app shell. Every signed-in user, regardless of which workspace they were viewing, saw a `TopBar` with hardcoded text: workspace breadcrumb pinned to **"Acme Corp"** and a workflow sub-segment pinned to **"Q2 Product Sprint"** — there is no "named workflow" primitive in the schema. To the right, three avatar circles labeled **AP / PK / JR** rendered as a "Team members online" presence cluster, identical in spirit to the fake-team fixtures caught on the landing page (round 5) and the about page (round 12) — except this one rendered constantly, on every page, in the chrome that frames the entire authenticated product. Two more shell buttons did nothing: **"New Workflow"** (no `onClick`) and **"Share"** (no `onClick`, no `ShareModal` defined anywhere — verified via grep). Anyone evaluating the product saw a fully-staffed Acme Corp workspace with a working share button — none of which existed. Fixed by reading the real workspace name from `useWorkspaceStore` (already hydrated by `WorkspaceHydrator` at the `(app)` shell layer) and removing the fake presence cluster + dead buttons entirely. Type-check clean, **143/143** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1333---2026-04-26).
+
+---
+
 ## [1.3.3.2] — Demo-data eradication round 13: in-app guide + notification center (2026-04-26)
 
 The `/workspace/[slug]/guide` page advertised a six-section walkthrough with two sections that didn't reflect what ships. **Collaboration** listed real-time presence, in-context thread conversations, and @mentions — none of which work today (canvas renders `CollaborationOverlay collaborators={[]}` with no presence channel; the @mentions dropdown was a hardcoded fixture removed in round 2; the thread-node "in-context conversation" panel was replaced with an honest empty state in round 2 because the conversations were fabricated). **Productivity** listed Automations alongside the (real) command palette and (real) keyboard shortcuts — the rule builder/runtime ships in a future release; the page is currently an empty state. Meanwhile `NotificationCenter` rendered a "View all notifications" footer link with no `onClick` and no `/notifications` route to navigate to (verified absent), and a "Mark all read" button that was always visible even when the list was empty (the array is hardcoded `[]` until a `notifications` table ships). Fixed without touching the 40 i18n locale files — orphaned translation keys are harmless. Type-check clean, **143/143** tests passing, build clean.
