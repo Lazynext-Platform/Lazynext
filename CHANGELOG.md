@@ -4,6 +4,22 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.2.3] - 2026-04-26
+
+**Theme:** Demo-data eradication, round 4. After three rounds clearing 17 surfaces, a fourth sweep caught **the Templates page** (a fully-fake "marketplace" with six made-up templates carrying invented popularity stats — 128 / 89 / 64 / 45 / 32 / 156 stars, 342 / 215 / 156 / 98 / 74 / 489 installs — and an "Install Template" button that flipped a state flag and showed a fake success modal without actually installing anything; there is no `templates` table, no install endpoint, no ratings system), **the public Shared Canvas page at `/shared/[id]`** (every UUID-shaped path rendered the same fake 5-node graph — "Product Roadmap → Choose Database → Implement Auth, Design Review, Build API" — with fake share-modal analytics: "24 total views / 8 unique visitors / 2m avg time"), and **the Blog listing** (linked to four posts but only `launching-lazynext` had a real body in `[slug]/page.tsx`; the other three — `decision-dna`, `graph-native`, `global-first` — 404'd when clicked). All gone.
+
+### Changed
+- `app/(app)/workspace/[slug]/templates/page.tsx` — full rewrite as honest "Templates are in development" empty state. Removed all six fake templates, fake star/install counts, fake categories grid, and the entire fake install modal that simulated a success without doing anything. Replaces the page with: a sparkles-icon explainer, a CTA back to the canvas, and a list of planned categories (Engineering / Product / Agency / Operations / Startup) with example template names so visitors understand what&apos;s coming.
+- `app/shared/[id]/page.tsx` — full rewrite. Was a client component that ran the UUID regex then unconditionally rendered five hardcoded sample nodes, five hardcoded sample edges, and a Share modal showing `24 / 8 / 2m` fake analytics. Now a server component that renders an honest "Shared canvas not found" page (or "Invalid share link" for non-UUID input) and points users to the working `/d/[slug]` public-decision route. Public *canvas* sharing isn&apos;t a shipped feature — only public decisions are.
+- `app/(marketing)/blog/page.tsx` — listing now reflects reality: only `launching-lazynext` is shown (the only post with a real body). When the featured-only branch is the only post, an honest "More posts on the way" placeholder fills the grid slot instead of an empty grid.
+
+### Verification
+- Type-check clean.
+- Lint clean (only pre-existing `<img>` warnings).
+- 143/143 tests passing.
+- Production build clean.
+- Manual grep: every fake popularity number and the `sampleNodes` / `sampleEdges` constants no longer appear anywhere in `app/`.
+
 ## [1.3.2.2] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 3. v1.3.2.0 cleared the five workspace pages and v1.3.2.1 cleared the canvas, notifications, decision-health dashboard, and detail panels. A third sweep found that **the entire Account → Profile page** was hardcoded with "Avas Patel / avas@lazynext.com / Founder & Developer" as the user identity (every user saw Avas's profile regardless of who they were), with three fake browser sessions (`MacBook Air — Chrome — 104.xx.xx.42`, `iPhone 15 — Safari`, `Windows PC — Firefox — 82.xx.xx.88 — London, UK`) and a fake "Side Project" workspace in the workspace switcher. **The Billing page** invented four invoices (`Apr 1 / Mar 1 / Feb 1 / Jan 15`) and four hardcoded usage counts (342 nodes / 47 decisions / 23 LazyMind / 1.2 GB) plus a fake `•••• 4242` Visa card and a fake "Next billing: May 1, 2026" date. **The Integrations page** showed Slack and Notion as connected to every user with active "Disconnect" buttons, plus a fake masked API key (`lnx_sk_••••...`) with copy/regenerate controls behind a non-functional flow. **The Export page** invented three past exports and a hardcoded "Export 47 Decisions" button. All gone. Added `NodeDetailPanelLegacy.tsx` (orphaned dead file with a fake "Priya / Avas / PlanetScale" thread) deleted entirely; replaced with an inline `FallbackPanel` for node types without a dedicated panel.

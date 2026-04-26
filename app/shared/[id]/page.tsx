@@ -1,152 +1,44 @@
-'use client'
-
-import { useState, useRef, useEffect } from 'react'
-import { useParams, notFound } from 'next/navigation'
-import { ExternalLink, Copy, Check, Eye, Lock, Share2 } from 'lucide-react'
-import { cn } from '@/lib/utils/cn'
 import Link from 'next/link'
+import { Lock, ExternalLink } from 'lucide-react'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-const sampleNodes = [
-  { id: '1', label: 'Product Roadmap', type: 'doc', x: 80, y: 60, color: 'bg-emerald-500' },
-  { id: '2', label: 'Choose Database', type: 'decision', x: 320, y: 40, color: 'bg-orange-500' },
-  { id: '3', label: 'Implement Auth', type: 'task', x: 560, y: 80, color: 'bg-blue-500' },
-  { id: '4', label: 'Design Review', type: 'thread', x: 200, y: 220, color: 'bg-purple-500' },
-  { id: '5', label: 'Build API', type: 'task', x: 440, y: 200, color: 'bg-blue-500' },
-]
+export const dynamic = 'force-dynamic'
 
-const sampleEdges = [
-  { from: '1', to: '2' },
-  { from: '2', to: '3' },
-  { from: '1', to: '4' },
-  { from: '4', to: '5' },
-  { from: '3', to: '5' },
-]
-
-export default function SharedCanvasPage() {
-  const params = useParams<{ id: string }>()
-  const shareId = params.id
-
-  if (!UUID_RE.test(shareId)) {
-    notFound()
-  }
-  const [showShareModal, setShowShareModal] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-    }
-  }, [])
-
-  function handleCopy() {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href).catch(() => {})
-    }
-    setCopied(true)
-    if (copyTimerRef.current) clearTimeout(copyTimerRef.current)
-    copyTimerRef.current = setTimeout(() => setCopied(false), 2000)
-  }
-
-  function getNodePos(id: string) {
-    const n = sampleNodes.find(n => n.id === id)
-    return n ? { x: n.x + 60, y: n.y + 20 } : { x: 0, y: 0 }
-  }
+/**
+ * Public shared-canvas viewer. Sharing whole canvases (vs. individual
+ * decisions at `/d/[slug]`) isn't a shipped feature yet — there is no
+ * `shared_canvases` table or link-issuance flow. Until it ships, this
+ * route renders an honest "not found" instead of fabricating a 5-node
+ * sample graph and fake "24 total views / 8 unique visitors / 2m" stats.
+ */
+export default function SharedCanvasPage({ params }: { params: { id: string } }) {
+  const validId = UUID_RE.test(params.id)
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950">
-      {/* Top bar */}
-      <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 backdrop-blur px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Link href="/">
-            <img src="/logo-dark.png" alt="Lazynext" className="h-7 w-auto" />
-          </Link>
-          <div>
-            <h1 className="text-sm font-semibold text-slate-100">Shared Canvas</h1>
-            <div className="flex items-center gap-2 text-2xs text-slate-500">
-              <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> Read-only</span>
-              <span>·</span>
-              <span className="font-mono">{shareId.slice(0, 8)}</span>
-              <span>·</span>
-              <span>5 nodes</span>
-            </div>
-          </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-6 py-16">
+      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
+          <Lock className="h-5 w-5 text-slate-400" />
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setShowShareModal(true)} className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700">
-            <Share2 className="h-3 w-3" /> Share
-          </button>
-          <Link href="/" className="flex items-center gap-1.5 rounded-lg bg-brand px-4 py-1.5 text-xs font-semibold text-brand-foreground hover:bg-brand-hover">
-            Try Lazynext <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
+        <h1 className="mt-4 text-lg font-bold text-slate-100">
+          {validId ? 'Shared canvas not found' : 'Invalid share link'}
+        </h1>
+        <p className="mt-2 text-sm text-slate-400">
+          {validId
+            ? "This canvas either doesn't exist or its share link has been revoked. Public canvas sharing is in development; until it ships, this route returns nothing."
+            : "This share link doesn't look right. Share IDs are UUIDs."}
+        </p>
+        <p className="mt-4 text-xs text-slate-500">
+          Looking for a public decision page instead? Those live at <code className="rounded bg-slate-800 px-1 py-0.5 font-mono text-slate-300">/d/[slug]</code>.
+        </p>
+        <Link
+          href="/"
+          className="mt-6 inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"
+        >
+          Back to Lazynext <ExternalLink className="h-3.5 w-3.5" />
+        </Link>
       </div>
-
-      {/* Canvas area */}
-      <div className="relative flex-1 overflow-hidden">
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, #1e293b 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-          {/* Edges */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            {sampleEdges.map((edge, i) => {
-              const from = getNodePos(edge.from)
-              const to = getNodePos(edge.to)
-              return (
-                <line key={i} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke="#334155" strokeWidth={1.5} strokeDasharray="6 4" />
-              )
-            })}
-          </svg>
-
-          {/* Nodes */}
-          {sampleNodes.map(node => (
-            <div key={node.id} className="absolute cursor-default" style={{ left: node.x, top: node.y }}>
-              <div className="rounded-lg border border-slate-700 bg-slate-800/90 px-4 py-3 shadow-lg backdrop-blur min-w-[120px]">
-                <div className="flex items-center gap-2">
-                  <div className={cn('h-2.5 w-2.5 rounded-full', node.color)} />
-                  <span className="text-2xs font-medium uppercase tracking-wider text-slate-500">{node.type}</span>
-                </div>
-                <p className="mt-1 text-sm font-medium text-slate-200">{node.label}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Watermark */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1.5 text-2xs text-slate-500 backdrop-blur">
-          <Lock className="h-3 w-3" /> Built with Lazynext · Read-only view
-        </div>
-      </div>
-
-      {/* Share Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6">
-            <h2 className="text-lg font-semibold text-slate-100">Share Canvas</h2>
-            <p className="mt-1 text-sm text-slate-400">Anyone with the link can view this canvas.</p>
-
-            <div className="mt-4 flex items-center gap-2">
-              <input type="text" readOnly value={typeof window !== 'undefined' ? window.location.href : ''} className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-300 focus:outline-none" />
-              <button onClick={handleCopy} className="flex items-center gap-1 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-foreground hover:bg-brand-hover">
-                {copied ? <><Check className="h-4 w-4" /> Copied</> : <><Copy className="h-4 w-4" /> Copy</>}
-              </button>
-            </div>
-
-            <div className="mt-4 rounded-lg border border-slate-800 bg-slate-800/50 p-3">
-              <p className="text-xs font-medium text-slate-400">Analytics</p>
-              <div className="mt-2 grid grid-cols-3 gap-3">
-                <div><p className="text-lg font-bold text-slate-100">24</p><p className="text-2xs text-slate-500">Total views</p></div>
-                <div><p className="text-lg font-bold text-slate-100">8</p><p className="text-2xs text-slate-500">Unique visitors</p></div>
-                <div><p className="text-lg font-bold text-slate-100">2m</p><p className="text-2xs text-slate-500">Avg time</p></div>
-              </div>
-            </div>
-
-            <button onClick={() => setShowShareModal(false)} className="mt-4 w-full rounded-lg border border-slate-700 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-800">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

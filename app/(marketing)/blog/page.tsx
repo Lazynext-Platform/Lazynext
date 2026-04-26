@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import { ArrowRight, Clock } from 'lucide-react'
 
+// Only `launching-lazynext` has a real article body in /blog/[slug];
+// listing previously linked to 3 more posts that 404'd. Listing now
+// matches reality — when more posts ship, add their entries here AND
+// their full body in `app/(marketing)/blog/[slug]/page.tsx`.
 const posts = [
   { slug: 'launching-lazynext', title: 'Lazynext is live, and we think we shipped the thing PM tools forgot', excerpt: 'Decisions are the highest-leverage work a team does. They\'re also the least instrumented. Here\'s what we did about it.', date: 'April 18, 2026', dateTime: '2026-04-18', tag: 'Launch', featured: true },
-  { slug: 'decision-dna', title: 'Introducing Decision DNA', excerpt: 'How AI-scored decisions help teams learn from every choice.', date: 'April 2, 2026', dateTime: '2026-04-02', tag: 'Product', featured: false },
-  { slug: 'graph-native', title: 'Why Graph-Native Workflows?', excerpt: 'Tasks in a list are easy. But work is messy — it branches, loops, and connects. Here\'s how a canvas changes everything.', date: 'March 20, 2026', dateTime: '2026-03-20', tag: 'Engineering', featured: false },
-  { slug: 'global-first', title: 'Why We\'re Building Global-First', excerpt: '$9/seat, transparent pricing, and global infrastructure — our thesis on building for today\'s startup ecosystem.', date: 'March 10, 2026', dateTime: '2026-03-10', tag: 'Company', featured: false },
 ]
 
 const tagColors: Record<string, string> = {
@@ -47,6 +48,16 @@ export default function BlogPage() {
       )}
 
       {/* Grid */}
+      {rest.length === 0 ? (
+        <section className="mx-auto max-w-4xl px-6 pb-24">
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+            <p className="text-sm font-medium text-slate-700">More posts on the way</p>
+            <p className="mt-1 text-xs text-slate-500">
+              We&apos;d rather ship one solid post than four placeholders. New writing lands here when it&apos;s actually ready.
+            </p>
+          </div>
+        </section>
+      ) : (
       <section className="mx-auto max-w-4xl px-6 pb-24 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {rest.map(post => (
           <Link key={post.slug} href={`/blog/${post.slug}`} className="group block">
@@ -64,6 +75,7 @@ export default function BlogPage() {
           </Link>
         ))}
       </section>
+      )}
     </main>
   )
 }
