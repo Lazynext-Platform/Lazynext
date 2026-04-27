@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { User, Shield, Monitor, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { UserWorkspace } from '@/lib/data/workspace'
+import { formatDeviceLabel, type ParsedUserAgent } from '@/lib/utils/user-agent'
 
 type Tab = 'profile' | 'security' | 'preferences' | 'sessions'
 
@@ -20,6 +21,7 @@ interface Props {
     initials: string
     providers: string[]
     lastSignInAt: string | null
+    currentDevice: ParsedUserAgent
   }
   workspaces: UserWorkspace[]
   currentSlug: string
@@ -343,9 +345,17 @@ export function ProfileClient({ initial, workspaces, currentSlug }: Props) {
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10">
                 <Monitor className="h-4 w-4 text-emerald-400" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-slate-200">Current session</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium text-slate-200">Current session</p>
+                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-2xs font-medium text-emerald-400">
+                    Active
+                  </span>
+                </div>
                 <p className="text-2xs text-slate-500">
+                  {formatDeviceLabel(initial.currentDevice)}
+                </p>
+                <p className="mt-0.5 text-2xs text-slate-600">
                   {initial.lastSignInAt
                     ? `Signed in ${new Date(initial.lastSignInAt).toLocaleString()}`
                     : 'Active right now'}

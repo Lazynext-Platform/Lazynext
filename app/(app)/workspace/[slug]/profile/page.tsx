@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { safeAuthUser } from '@/lib/utils/auth'
 import { getUserWorkspaces } from '@/lib/data/workspace'
+import { parseUserAgent } from '@/lib/utils/user-agent'
 import { ProfileClient } from './ProfileClient'
 
 export const dynamic = 'force-dynamic'
@@ -47,6 +49,12 @@ export default async function ProfilePage({ params }: { params: { slug: string }
 
   const workspaces = await getUserWorkspaces(user.id)
 
+  // Parse the current request's user-agent to label the active session.
+  // Supabase Auth doesn't expose a per-device session list, but we can at
+  // least describe the device the user is reading this page on.
+  const ua = headers().get('user-agent')
+  const currentDevice = parseUserAgent(ua)
+
   return (
     <ProfileClient
       initial={{
@@ -59,6 +67,7 @@ export default async function ProfilePage({ params }: { params: { slug: string }
         initials: deriveInitials(fullName, email),
         providers,
         lastSignInAt: user.last_sign_in_at ?? null,
+        currentDevice,
       }}
       workspaces={workspaces}
       currentSlug={params.slug}

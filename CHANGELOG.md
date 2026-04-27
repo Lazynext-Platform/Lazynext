@@ -4,6 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.25.0] - 2026-04-27
+
+**Theme:** Sessions tab now labels the current session honestly. The card has read "Current session — Signed in {timestamp}" since v1.0; that's it. Now it parses the request user-agent server-side to also show the browser, OS, and device class — `"Chrome on macOS · Desktop"`, `"Safari on iOS · Mobile"`, etc. — so you can at least confirm the session card describes the device you're sitting at. Per-device session list still isn't shipping (Supabase Auth doesn't expose it without the admin API), and the dashed empty-state below still says so plainly.
+
+### Added
+- `lib/utils/user-agent.ts` — small UA parser (no new deps; rejected `ua-parser-js`'s 27kB gzip for a 60-line file). Returns `{ browser, os, device }` with `'Unknown'` fallbacks per field. `formatDeviceLabel` drops `Unknown` segments rather than printing them. Edge is matched before Chrome (Edge UAs include the Chrome token); iPad is classified as Tablet even though iPadOS 13+ advertises as Mac.
+- `tests/unit/user-agent.test.ts` — 11 cases: Chrome/macOS, Safari/iPhone Mobile, iPad → Tablet, Edge-before-Chrome priority, Firefox/Linux, all-Unknown for null/empty/malformed UAs, plus four `formatDeviceLabel` shape tests.
+
+### Changed
+- `app/(app)/workspace/[slug]/profile/page.tsx` — reads `headers().get('user-agent')` on the server, parses it with `parseUserAgent`, and passes `currentDevice` through to `ProfileClient`. `force-dynamic` was already set so this doesn't break ISR.
+- `app/(app)/workspace/[slug]/profile/ProfileClient.tsx` — `Props.initial.currentDevice` added; Sessions card's right side now renders an `Active` badge plus `formatDeviceLabel(currentDevice)` above the existing `Signed in …` line. The dashed "per-device list isn't available" panel below is unchanged — that limitation still holds.
+
+### Test results
+- Type-check: clean. Vitest: **208/208 passing** across 28 files (197 → 208; 11 new in `user-agent.test.ts`). Build: clean.
+
 ## [1.3.24.0] - 2026-04-27
 
 **Theme:** Two new real blog posts close the "blog ships with one post" honest empty state. v1.3.x has shipped 24+ engineering surfaces (Decision DNA scoring, Workspace Maturity Score, AI quotas, OAuth-ready scaffolding next) but `/blog` was still a one-post listing with a "more coming" placeholder. Wrote two posts grounded in actual code that exists in the repo today:
