@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.18.1] — Sidebar active-overlap hotfix (2026-04-27)
+
+Sidebar lit up two nav items at once on `/decisions/outcomes`. Active matching used `pathname.startsWith(href)`, so both `/workspace/x/decisions` and `/workspace/x/decisions/outcomes` claimed active styling. Fix: pick the longest matching href and only it wins; require trailing slash to prevent prefix bleed (`/decisions-archive` would have falsely activated `/decisions`). **175/175** tests passing across 25 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13181---2026-04-27).
+
+---
+
 ## [1.3.18.0] — ConfirmModal + batch-positions tests (2026-04-27)
 
 Replaces the workflow-delete `window.confirm` with a reusable, branded `ConfirmModal` (Esc-close, backdrop-cancel, autofocused confirm, `variant: 'danger'` painting in rose-600). The delete fetch now lives behind the modal's confirm handler, so the spinner shows while the DELETE request is in flight. Also adds 7 unit tests for the v1.3.15.0 batch positions zod schema — single update, empty array, non-UUID, non-integer, oversized (>200), 200-entry boundary, missing field. **175/175** tests passing across 25 files (was 168/24). Type-check clean, build clean.
