@@ -46,13 +46,13 @@ const workspaceTourSteps: TourStep[] = [
     placement: 'right',
   },
   {
-    target: 'button[aria-label="Open LazyMind AI assistant"]',
+    target: '[data-tour="lazymind-button"]',
     titleKey: 'steps.lazymind.title',
     descriptionKey: 'steps.lazymind.description',
-    placement: 'left',
+    placement: 'bottom',
   },
   {
-    target: 'button[aria-label="Open command palette"]',
+    target: '[data-tour="command-palette"]',
     titleKey: 'steps.commandPalette.title',
     descriptionKey: 'steps.commandPalette.description',
     placement: 'bottom',

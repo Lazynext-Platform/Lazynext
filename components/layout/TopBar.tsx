@@ -69,6 +69,8 @@ export function TopBar() {
         {/* Search trigger */}
         <button
           onClick={toggleCommandPalette}
+          aria-label="Open command palette"
+          data-tour="command-palette"
           className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-1.5 text-sm text-slate-400 hover:border-slate-600 hover:text-slate-300 transition-colors"
         >
           <Search className="h-3.5 w-3.5" />
@@ -81,7 +83,7 @@ export function TopBar() {
 
       <div className="flex items-center gap-2">
         {/* LazyMind AI */}
-        <button aria-label="Open LazyMind AI assistant" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
+        <button aria-label="Open LazyMind AI assistant" data-tour="lazymind-button" onClick={toggleLazyMind} className="hidden items-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-brand-foreground shadow-lg shadow-brand/20 hover:bg-brand-hover lg:flex">
           <Sparkles className="h-3.5 w-3.5" /> LazyMind
         </button>
 

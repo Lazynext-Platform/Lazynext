@@ -4,6 +4,22 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.17.1] - 2026-04-27
+
+**Hotfix:** Onboarding tour step 7 was spotlighting the wrong button and overlapping the sidebar. The selector `button[aria-label="Open LazyMind AI assistant"]` matched the bottom-of-sidebar LazyMind button (the first occurrence in the DOM) instead of the prominent top-bar CTA. Spotlight landed bottom-left, then `placement: 'left'` tried to render the tooltip further left, got viewport-clamped, and ended up blanketing the sidebar. Step 8 (Command Palette) was also broken — it targeted `button[aria-label="Open command palette"]`, an aria-label nothing in the codebase actually had.
+
+### Fixed
+
+- `components/layout/TopBar.tsx` — added `data-tour="lazymind-button"` and `data-tour="command-palette"` (plus the missing `aria-label="Open command palette"`) to the two TopBar CTAs so the tour can target them unambiguously.
+- `components/ui/WorkspaceTour.tsx` — step 7 now targets `[data-tour="lazymind-button"]` with `placement: 'bottom'` (was `left`, which clamped poorly even when the right element was found). Step 8 now targets `[data-tour="command-palette"]`. Both steps now spotlight the correct top-bar element and render their tooltip below it instead of overlapping the sidebar.
+- `docs/project-roadmap.md` — header v1.3.17.0 → v1.3.17.1.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
 ## [1.3.17.0] - 2026-04-27
 
 **Theme:** Workflow rename + delete + a real modal. v1.3.16.0 shipped a picker that could create new workflows via `window.prompt` (yes, browser-native and ugly). This release replaces that with a proper modal and adds rename + delete affordances directly on each row of the picker.
