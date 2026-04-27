@@ -4,6 +4,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.35.0] - 2026-04-28
+
+**Theme:** Production migrations now apply automatically. Closes the deployment gap that was silently breaking the last three ships' write-scope keys.
+
+### Added
+- `.github/workflows/db-migrate.yml` — applies `supabase/migrations/**` on every push to main. Runs `supabase link → db push --dry-run → db push`. Concurrency-locked so two deploys can't fight over Postgres locks. Manual `workflow_dispatch` for re-running stuck migrations.
+
+### Why
+- `20260428000003_api_key_scopes.sql` shipped on 2026-04-28 but was never applied to production. `normalizeScopes()` quietly fell back to `['read']`, so freshly-minted write keys would 403 every mutation. No CI step existed to apply migrations — only manual `npm run db:migrate`.
+- Now: merge to main → CI applies migrations → Vercel redeploys against the migrated schema. The dry-run prints the SQL to the workflow log for audit.
+
+### Configuration
+- Repo secrets required: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`. Without them the job logs a warning and no-ops, so forks stay green.
+
 ## [1.3.34.1] - 2026-04-28
 
 **Hotfix.** Production smoke-test caught `/docs/api` 307'ing to `/sign-in`. The middleware's public-route whitelist exact-matched `/docs` but had no prefix match, so the new API reference was effectively gated behind login.

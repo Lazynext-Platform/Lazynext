@@ -6,6 +6,19 @@
 
 ---
 
+## [v1.3.35.0] - 2026-04-28 — Migrations auto-apply on deploy
+
+**Theme:** New `.github/workflows/db-migrate.yml` runs `supabase db push` whenever `supabase/migrations/**` changes on main. Closes the gap where `20260428000003_api_key_scopes.sql` was committed but never applied — silently breaking write-scope keys.
+
+### Added
+- `db-migrate.yml` workflow: link → dry-run (audit log) → push. Concurrency-locked to one deploy at a time. `workflow_dispatch` for manual reruns.
+- Secret check no-ops cleanly when `SUPABASE_ACCESS_TOKEN` / `SUPABASE_PROJECT_ID` / `SUPABASE_DB_PASSWORD` aren't configured (forks, preview branches).
+
+### Why
+- Bearer scopes shipped in v1.3.33.0; migration sat unapplied for an hour. Future migrations now travel with the code that needs them.
+
+---
+
 ## [v1.3.34.1] - 2026-04-28 — /docs/* public-route hotfix
 
 Production smoke-test caught `/docs/api` 307'ing to `/sign-in`. Middleware whitelisted exact `/docs` only; sub-routes were gated. Fixed with a prefix match.
