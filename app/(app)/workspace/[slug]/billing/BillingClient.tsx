@@ -176,7 +176,10 @@ export function BillingClient({ slug, workspaceId, workspacePlan, usage }: Props
             </Link>
             <button
               type="button"
-              onClick={() => useUpgradeModal.getState().show('full-upgrade')}
+              onClick={() => {
+                trackBillingEvent('paywall.gate.shown', { variant: 'full-upgrade', plan: workspacePlan, surface: 'billing-page-header' })
+                useUpgradeModal.getState().show('full-upgrade')
+              }}
               className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"
             >
               Change Plan
