@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.15.0] — Beacon flush + batched position writes (2026-04-27)
+
+v1.3.14.0's per-node PATCH-on-debounce had a known gap: closing the tab inside the 600ms debounce window dropped the last drag. This release replaces the per-node PATCH cascade with a single batch endpoint (`POST /api/v1/nodes/positions` accepting up to 200 updates with one membership auth check per workspace touched) and a beacon flush on page teardown via `navigator.sendBeacon`. Every drag survives, even the one right before you hit ⌘W. The position-persist hook now uses a single shared 600ms timer that coalesces every dirty position into one batch POST instead of N parallel timers — for a user dragging 10 nodes for 5 seconds, this collapses ~10 separate PATCHes into 1 batch POST per window. **168/168** tests passing across 24 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13150---2026-04-27).
+
+---
+
 ## [1.3.14.0] — Canvas is fully persistent (2026-04-27)
 
 v1.3.13.0 shipped read-hydration + position-drag-persist; this release closes the loop on every other canvas mutation. Creating a node from the toolbar or right-click menu, drawing an edge between two nodes, deleting either via Delete-key — all now POST/DELETE against `/api/v1/nodes` and `/api/v1/edges`. Refresh after any of those and the canvas comes back exactly as you left it. The "per-session scratchpad" comment is gone for good. Scratchpad fallback still works for dev-without-Supabase: when `currentWorkflowId` is null, mutations fabricate client ids exactly like before. New `lib/canvas/persist-helpers.ts` (`createNodeOnServer` and `createEdgeOnServer` — POST first, then push the server row into the store with the real UUID; fall back to client ids on failure so the action stays visible). New `useCanvasDeletePersist` hook diffs successive node and edge id sets; any UUID that disappears triggers a DELETE; skips client-fabricated ids so scratchpad deletes don't 404 the API; primes the diff on first hydration so the initial population doesn't fire spurious deletes. **168/168** tests passing across 24 files. Type-check clean, build clean. Remaining tiny follow-ups: flush pending position writes on beforeunload, and a per-workflow URL/picker (today's URL is permanently `/canvas/default`).

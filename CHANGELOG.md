@@ -4,6 +4,29 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.15.0] - 2026-04-27
+
+**Theme:** No more dropped position writes. v1.3.14.0's per-node PATCH-on-debounce had a known gap: closing the tab inside the 600ms debounce window dropped the last drag. This release replaces the per-node PATCH cascade with a single batch endpoint and a beacon flush on page teardown — every drag survives, even the one right before you hit ⌘W.
+
+### Added
+
+- `app/api/v1/nodes/positions/route.ts` — `POST /api/v1/nodes/positions` with body `{ updates: [{ id, positionX, positionY }, ...] }`. Validates each id is UUID-shaped, batches up to 200 nodes, runs membership auth once per workspace touched, applies updates row-by-row. Used both for normal debounced writes and for the beacon flush — beacons can only POST, so a per-node PATCH wouldn't work for the close path.
+
+### Changed
+
+- `lib/canvas/use-canvas-position-persist.ts` — replaced per-node PATCH timers with a single shared 600ms timer that coalesces every dirty position into one batch POST. Adds `pagehide` + `beforeunload` handlers that flush pending positions via `navigator.sendBeacon` so closing the tab during a debounce window no longer drops the last drag. Beacons survive page teardown where regular fetch promises get cancelled.
+- `docs/project-roadmap.md` — header v1.3.14.0 → v1.3.15.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
+### Performance note
+
+For a user dragging 10 nodes around for 5 seconds, this collapses what was previously ~10 separate PATCHes into 1 batch POST per debounce window. The hot path is now also lighter — one timer instead of one-per-node.
+
 ## [1.3.14.0] - 2026-04-27
 
 **Theme:** Canvas is fully persistent now. v1.3.13.0 shipped read-hydration + position-drag-persist; this release closes the loop on every other canvas mutation. Creating a node from the toolbar or right-click menu, drawing an edge between two nodes, deleting either via Delete-key — all now POST/DELETE against `/api/v1/nodes` and `/api/v1/edges`. Refresh the page after any of those, and the canvas comes back exactly as you left it. The "per-session scratchpad" comment is gone for good. Scratchpad fallback still works for dev-without-Supabase: when `currentWorkflowId` is null, mutations fabricate client ids exactly like before — no broken UI.
