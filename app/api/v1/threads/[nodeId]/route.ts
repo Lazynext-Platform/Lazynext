@@ -1,4 +1,4 @@
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { resolveAuth, requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -14,21 +14,22 @@ export async function GET(
   req: Request,
   { params }: { params: { nodeId: string } }
 ) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  // Authenticate FIRST so anonymous callers can't probe node existence.
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
 
   const { nodeId } = params
 
-  // Verify user has access to this node's workspace
   const { data: node } = await db.from('nodes').select('workspace_id').eq('id', nodeId).single()
   if (!node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, node.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, node.workspace_id)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   const { data: thread } = await db
     .from('threads')
@@ -55,21 +56,25 @@ export async function POST(
   req: Request,
   { params }: { params: { nodeId: string } }
 ) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
 
   const { nodeId } = params
 
-  // Verify user has access to this node's workspace
   const { data: ownerNode } = await db.from('nodes').select('workspace_id').eq('id', nodeId).single()
   if (!ownerNode) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, ownerNode.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, ownerNode.workspace_id)
+  if (!auth.ok) return auth.response
+  const scopeCheck = requireScope(auth, 'write')
+  if (scopeCheck) return scopeCheck.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
+  const userId = auth.userId
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
@@ -87,11 +92,10 @@ export async function POST(
     .single()
 
   if (!thread) {
-    const url = new URL(req.url)
-    const workspaceId = url.searchParams.get('workspaceId')
-    if (!workspaceId) {
-      return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
-    }
+    // Bearer requests carry the workspace; cookie sessions need it via query
+    // for backwards compatibility. Use the authenticated workspace either way
+    // — never trust the query string when a bearer key is present.
+    const workspaceId = ownerNode.workspace_id
     const { data: newThread, error: threadError } = await db
       .from('threads')
       .insert({ node_id: nodeId, workspace_id: workspaceId, created_by: userId })
