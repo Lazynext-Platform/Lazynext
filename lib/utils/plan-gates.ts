@@ -22,6 +22,16 @@ export function canUseAI(plan: Plan, currentCount: number): boolean {
   return limit === -1 || currentCount < limit
 }
 
+export function canCreateDecision(plan: Plan, currentCount: number): boolean {
+  const limit = PLAN_LIMITS[plan].decisions
+  return limit === -1 || currentCount < limit
+}
+
+export function canCreateWorkspace(plan: Plan, currentCount: number): boolean {
+  const limit = PLAN_LIMITS[plan].workspaces
+  return limit === -1 || currentCount < limit
+}
+
 export function hasFeature(plan: Plan, feature: string): boolean {
   // Plan slugs map to the new pricing tiers:
   //   starter = Team, pro = Business, business = Enterprise

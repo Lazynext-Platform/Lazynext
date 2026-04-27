@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.20.0] — Pricing alignment + decision-limit enforcement (2026-04-27)
+
+Audit of every pricing surface against `PLAN_LIMITS` turned up six inconsistencies — the marketing site advertised `"10 AI queries/day"` and `"Unlimited nodes"` on Free while the code enforced 20 queries and 100 nodes (product more generous than the copy claimed, but the inconsistency itself broke trust). Worse: the `decisions` cap on Free was advertised as 20 in three places but never actually enforced — you could log a thousand decisions on Free. Fixed all of it. `PLAN_LIMITS` extended with `decisions` (Free: 20) and `workspaces` (Free: 1) fields; pricing page Free tier corrected to `100 nodes` / `20 AI queries/day` / `5 workflows`; FAQ + comparison table aligned; new `canCreateDecision` and `canCreateWorkspace` gates; `POST /api/v1/decisions` now enforces the 20-decision cap with a `402 PLAN_LIMIT_REACHED` response that the Log Decision modal turns into the upgrade-modal `decision-limit` variant. **187/187** tests passing across 26 files (12 new assertions guard the limit shape + every gate's boundary). Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13200---2026-04-27).
+
+---
+
 ## [1.3.19.0] — Production crawler + auth title fix (2026-04-27)
 
 Wrote a Playwright crawler (`tests/e2e/prod-crawl.spec.ts`) that walks 14 public routes on `https://lazynext.com`, captures console errors, failed requests, broken images, missing alts, duplicate ids, and missing h1s, and writes a structured `test-results/crawl-report.json`. Result on the live site: 14/14 status 200, 0 console errors, 0 failed requests, 0 broken images, 0 duplicate ids, all pages have h1, avg load ~2.8s. The one real issue it surfaced: `/sign-in` and `/sign-up` both rendered the generic `Auth — Lazynext` title because the leaf pages are client components and can't export metadata. Fix: added per-segment server `layout.tsx` files with `title.absolute`, so `/sign-in` is now `Sign in — Lazynext` and `/sign-up` is `Create your account — Lazynext`. **175/175** tests passing across 25 files. Type-check clean, build clean.

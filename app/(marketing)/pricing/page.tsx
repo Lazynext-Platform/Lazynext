@@ -35,9 +35,10 @@ const tiers = [
     features: [
       '1 workspace',
       '3 members',
-      'Unlimited nodes',
+      '100 nodes',
+      '5 workflows',
       '20 decisions',
-      'Basic LazyMind (10 AI queries/day)',
+      '20 LazyMind AI queries/day',
       'Community support',
     ],
   },
@@ -117,13 +118,14 @@ const tiers = [
 const comparisonFeatures = [
   { name: 'Workspaces', free: '1', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
   { name: 'Members', free: '3', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
-  { name: 'Nodes', free: 'Unlimited', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
+  { name: 'Nodes', free: '100', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
+  { name: 'Workflows', free: '5', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
   { name: 'Decisions', free: '20', starter: 'Unlimited', pro: 'Unlimited', business: 'Unlimited' },
   { name: 'Decision DNA Search', free: null, starter: true, pro: true, business: true },
   { name: 'Quality Scores', free: 'Basic', starter: 'Basic', pro: 'Full', business: 'Full' },
   { name: 'Outcome Tracking', free: null, starter: null, pro: true, business: true },
   { name: 'Decision Health Dashboard', free: null, starter: true, pro: true, business: true },
-  { name: 'LazyMind AI queries', free: '10/day', starter: '100/day/seat', pro: '500/day/seat', business: 'Unlimited' },
+  { name: 'LazyMind AI queries', free: '20/day', starter: '100/day/seat', pro: '500/day/seat', business: 'Unlimited' },
   { name: 'PULSE', free: null, starter: null, pro: true, business: true },
   { name: 'Automation engine', free: null, starter: null, pro: 'Soon', business: 'Soon' },
   { name: 'Import', free: null, starter: 'CSV', pro: 'CSV', business: 'CSV' },
@@ -145,7 +147,7 @@ const faqItems = [
   },
   {
     q: 'What do I get on the free plan?',
-    a: 'Enough to actually feel Decision DNA working: unlimited nodes, 20 logged decisions, 3 team members, and 10 AI queries/day. When your team grows past 3 or your decisions past 20, that is when upgrading pays for itself.',
+    a: 'Enough to actually feel Decision DNA working: 1 workspace, 3 members, up to 100 nodes across 5 workflows, 20 logged decisions, and 20 LazyMind AI queries/day. When your team grows past 3 or your decisions past 20, that is when upgrading pays for itself.',
   },
   {
     q: 'Can I switch plans?',
