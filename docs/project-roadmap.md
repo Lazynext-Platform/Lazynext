@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.9.0 — shipped + deployed
+> **Current Milestone**: v1.3.10.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---
@@ -13,15 +13,15 @@
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 |
 | 🟢 Complete (UI shell) | 38 |
-| 🟢 Fully wired to real backend | 32 |
-| 🟡 Partial / honest empty state | 6 — see *Remaining work* below |
+| 🟢 Fully wired to real backend | 33 |
+| 🟡 Partial / honest empty state | 5 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
 
 **Design Progress**: ██████████ 100%
 **UI Build**: ██████████ 100%
-**Backend wired**: █████████░ ~84%
+**Backend wired**: █████████░ ~87%
 
 > **v1.3.3.6 Status**: Live on https://lazynext.com. All 38 feature UIs built. 17 rounds of demo-data eradication (v1.3.2.0 → v1.3.3.6) replaced every fabricated fixture (Avas/Priya/Rahul fake teammates, fake Acme Corp workspace, fake testimonials, fake 84/100 onboarding score, fake Notion import, fake LazyMind chat with `setTimeout`, fake notification dropdowns, fake billing/integrations/sessions, fake template marketplace) with real Supabase data or honest empty states. Tests: **143/143** Vitest + Playwright passing, type-check clean, build clean.
 
@@ -35,7 +35,6 @@ These features show real, truthful UI but lack the backend that would make them 
 | 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
 | 30 | Profile → Connected Accounts + Sessions | Removed pending real APIs | Supabase identity-link + session listing |
 | 32 | Marketing → Blog | Only `launching-lazynext` post is real | Add real posts (or convert to MDX-driven listing) |
-| —  | Multi-workspace switcher | `WorkspaceSelector` is display-only | Switcher dropdown + `/workspaces` index route |
 | —  | Decision DNA PDF/exec report | Roadmap backlog item | Server-side render to PDF endpoint |
 
 ---

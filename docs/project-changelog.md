@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.10.0] — Multi-workspace switcher is real (2026-04-27)
+
+The `WorkspaceSelector` in the sidebar has been display-only since v1.3.3.6 (round 15) — a static badge with no dropdown, no "create workspace" affordance, and no way to switch between workspaces a user belongs to. Users with multiple workspace memberships had to type `/workspace/{slug}` URLs by hand. This release ships the dropdown: click the workspace badge, get a lazy-loaded list of every workspace you're a member of (with role tags), click one to route to `/workspace/{slug}`, or hit "Create workspace" to drop into onboarding. Backed by a new authenticated endpoint `GET /api/v1/workspaces` that joins `workspace_members` to `workspaces` for the current user, sorted alphabetically. Outside-click + Esc dismissal, `aria-haspopup="menu"`, role per row, checkmark on the active row. Switching uses `router.push('/workspace/{slug}')` — the existing `WorkspaceHydrator` re-hydrates the Zustand store from the new slug, no extra wiring needed. Roadmap *Remaining work* 6 → 5; fully wired 32 → 33; backend-wired 84% → 87%. Type-check clean, **164/164** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13100---2026-04-27).
+
+---
+
 ## [1.3.9.0] — Public Shared Canvas is real (2026-04-27)
 
 The `/shared/[id]` route shipped with v1.0.0 and has rendered "Shared canvas not found / sharing is in development" for every URL ever since. This release ships the column, the link-issuance API, and the read-only viewer. New `workflows.share_token UUID` (nullable) with a partial unique index, plus `workflows.shared_at`. The token doubles as authorization for anonymous reads — the public route is the single chokepoint and queries via the service-role admin client filtered by token, sidestepping the need for a broad anon RLS policy. Sharing is opt-in per workflow; revoking nulls the token and instantly invalidates every existing public link; regenerating mints a fresh token (also instant). Viewer is a read-only ReactFlow canvas (`nodesDraggable=false`, `nodesConnectable=false`, `elementsSelectable=false`) reusing the existing 7 node types + `WorkflowEdge`; no member identities exposed; header shows workspace name + canvas name + description and a "Build your own canvas" CTA. New endpoints: `GET/PATCH /api/v1/workflows/[id]/share`. New importable `<ShareWorkflowDialog />` component (toolbar wiring deferred until the canvas store gains a current-workflow context). Roadmap fully wired count 31 → 32; backend-wired bar 82% → 84%. Type-check clean, **164/164** tests passing across 23 files (added 3 new in `tests/unit/shared-canvas.test.ts`), production build clean.
