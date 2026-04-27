@@ -4,6 +4,22 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.21.0] - 2026-04-27
+
+**Theme:** Real "Create workspace" + workspace-cap enforcement. The "Create workspace" link in the `WorkspaceSelector` dropdown has, since v1.3.4.5, routed users to `/onboarding`. But `/api/v1/onboarding/workspace` had two paths: Path A renamed the user's existing workspace; Path B (backfill) only ran if the user had zero memberships. So clicking "Create workspace" with an existing workspace just *renamed* it — silently destructive. There was no real way to create a second workspace from the UI. This release ships the missing path + enforces the Free `workspaces: 1` cap that was added to PLAN_LIMITS in v1.3.20.0 but not yet wired.
+
+### Added
+- `app/api/v1/workspaces/route.ts` — new `POST` handler creates an additional workspace + admin membership for the authenticated user. Plan-gated: counts the caller's admin/owner memberships joined with each workspace's plan; users who own any paid workspace bypass the cap, otherwise the Free 1-workspace limit applies. Returns `402 { error: 'PLAN_LIMIT_REACHED', variant: 'workspace-limit' }` when blocked, `409 SLUG_TAKEN` when the slug collides, `201` with the new workspace on success. Best-effort cleanup deletes the workspace row if the membership insert fails so we never orphan an admin-less workspace. Rate-limited via `RATE_LIMITS.api`.
+- `components/layout/WorkspaceSelector.tsx` — "Create workspace" link replaced with a button that opens a new inline `CreateWorkspaceDialog` modal (name + slug fields, auto-slugify from name until the user touches the slug field). On submit it POSTs to `/api/v1/workspaces`, on 402 it triggers the `workspace-limit` upgrade modal with a `paywall.gate.shown` telemetry event, on 409 it surfaces the slug-collision error inline, on 201 it invalidates the cached row list and routes the user into the new workspace. Esc + outside-click dismissal, focus-trap on the name input.
+
+### Test results
+- Type-check: clean.
+- Vitest: **189/189 passing** across 26 files (187 → 189; 2 new assertions guard the new POST's 401 + 400 paths).
+- Build: clean.
+
+### Notes
+- The pre-existing `/api/v1/onboarding/workspace` route is kept for first-time onboarding (Path A rename for the trigger-created workspace, Path B backfill for users who somehow lack a membership). Additional-workspace creation is a separate code path now.
+
 ## [1.3.20.0] - 2026-04-27
 
 **Theme:** Pricing alignment + decision-limit enforcement. Audit of every pricing surface against `PLAN_LIMITS` turned up six inconsistencies — most importantly that the marketing site advertised `"10 AI queries/day"` and `"Unlimited nodes"` on Free while the code enforced 20 queries and 100 nodes. The product was *more* generous than the marketing said, but the inconsistency itself broke trust. Also: the `decisions` cap on Free was advertised as 20 in three places but never actually enforced — you could log a thousand decisions on Free. Fixed all of it. Marketing copy now matches the code; the code now matches itself across every limit.
