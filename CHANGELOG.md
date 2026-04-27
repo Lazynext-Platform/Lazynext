@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.8] - 2026-04-27
+
+**Theme:** SEO sitemap closes the gap with reality. `app/sitemap.ts` listed only 7 routes (`/`, `/about`, `/blog`, `/changelog`, `/comparison`, `/features`, `/pricing`) but five real public marketing pages were missing: `/contact`, `/careers`, `/privacy`, `/terms`, `/docs`. The single published blog post (`/blog/launching-lazynext`) wasn't indexed individually — search engines could only find it by crawling `/blog`. Added all five static pages plus the blog post entry with its real publish date.
+
+### Changed
+- `app/sitemap.ts` — added `/contact`, `/careers`, `/privacy`, `/terms`, `/docs` to the static surface map. New `blogPosts` array (currently `launching-lazynext` published 2026-04-18) emits per-post entries with `changeFrequency: 'yearly'`. New `HIGH_PRIORITY` lookup gives the homepage priority 1, `/pricing` 0.9, `/features` 0.8, and everything else falls back to 0.7. Blog posts default to 0.6. Comments document the additive contract for future blog posts.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.7] - 2026-04-27
 
 **Theme:** Funnel coverage for Enterprise contact-clicks from BillingClient. The global `UpgradeModal` already fires `paywall.contact.clicked` before routing to `/contact?topic=enterprise`. The in-app billing page Enterprise card routed to the same URL but didn't fire the event — funnel queries undercounted Enterprise interest from the in-app surface, the same parity gap the previous three ships closed for `paywall.gate.shown` / `paywall.checkout.errored` / `paywall.checkout.succeeded`.

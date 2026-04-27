@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.8] — Sitemap covers all public routes + blog posts (2026-04-27)
+
+`app/sitemap.ts` listed 7 routes; five real public pages were missing (`/contact`, `/careers`, `/privacy`, `/terms`, `/docs`) and the single published blog post wasn't indexed individually. Added all five plus a `blogPosts` array emitting per-post entries with real publish dates. New `HIGH_PRIORITY` lookup keeps homepage at 1, `/pricing` at 0.9, `/features` at 0.8, everything else at 0.7. Comments document the additive contract for future posts. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13238---2026-04-27).
+
+---
+
 ## [1.3.23.7] — BillingClient Enterprise card emits paywall.contact.clicked (2026-04-27)
 
 The global UpgradeModal already fired `paywall.contact.clicked` before routing to `/contact?topic=enterprise`, but BillingClient's Enterprise card did not. Funnel queries undercounted Enterprise interest from the in-app surface. Now both surfaces emit the same event with `plan` + `surface: 'billing-page'`. Closes the parity gap from the last three ships (`paywall.gate.shown`, `paywall.checkout.errored`, `paywall.checkout.succeeded`). **197/197** tests passing.
