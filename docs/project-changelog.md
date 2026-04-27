@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.17.1] — Tour overlap hotfix (2026-04-27)
+
+Onboarding tour step 7 (LazyMind) was spotlighting the wrong button and overlapping the sidebar. The selector `button[aria-label="Open LazyMind AI assistant"]` matched the bottom-of-sidebar LazyMind button — the first occurrence in DOM order — instead of the prominent top-bar CTA. Spotlight landed bottom-left, then `placement: 'left'` tried to render the tooltip further left, got viewport-clamped, and blanketed the sidebar. Step 8 (Command Palette) was also broken: it targeted an aria-label nothing in the codebase had. Fix: added `data-tour="lazymind-button"` + `data-tour="command-palette"` to the TopBar CTAs and switched the tour to those selectors with `placement: 'bottom'`. **168/168** tests passing across 24 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13171---2026-04-27).
+
+---
+
 ## [1.3.17.0] — Workflow rename + delete + a real modal (2026-04-27)
 
 v1.3.16.0 shipped a picker that could create workflows via `window.prompt` (yes, browser-native and ugly). This release replaces that with a focused, autofocused, Esc-closable modal (`WorkflowFormModal`) used for both create and rename, and adds per-row rename + delete affordances directly on each picker row. Hover or focus reveals the action cluster — resting state stays a clean list. Delete asks for `window.confirm`, DELETEs via the existing endpoint, and routes back to `/canvas/default` if you nuked the active workflow (which falls through to `getOrCreateDefaultWorkflow`, so even deleting the last workflow creates a fresh one instead of crashing). Rename updates the picker's label in-place by writing to the canvas store directly. **168/168** tests passing across 24 files. Type-check clean, build clean.
