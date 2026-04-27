@@ -239,7 +239,7 @@ function LogDecisionModal({
   )
 }
 
-export default function DecisionsClient({ workspaceId, workspaceSlug: _slug, decisions }: DecisionsClientProps) {
+export default function DecisionsClient({ workspaceId, workspaceSlug, decisions }: DecisionsClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [, startTransition] = useTransition()
@@ -290,9 +290,17 @@ export default function DecisionsClient({ workspaceId, workspaceSlug: _slug, dec
             Capture, score, and learn from every decision. <kbd className="rounded bg-slate-800 px-1.5 py-0.5 text-2xs">⌘D</kbd> to log a new one.
           </p>
         </div>
-        <button onClick={() => setShowLogModal(true)} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
-          <Plus className="h-4 w-4" /> Log Decision
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/workspace/${workspaceSlug}/decisions/report`}
+            className="flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-3 py-2 text-sm font-medium text-slate-300 hover:border-slate-700 hover:text-slate-100 transition-colors"
+          >
+            Exec report
+          </a>
+          <button onClick={() => setShowLogModal(true)} className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors">
+            <Plus className="h-4 w-4" /> Log Decision
+          </button>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
