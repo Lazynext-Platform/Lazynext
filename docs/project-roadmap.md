@@ -1,8 +1,8 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.1.1 — shipped + deployed
-> **Last Updated**: 2026-04-26
+> **Current Milestone**: v1.3.3.6 — shipped + deployed
+> **Last Updated**: 2026-04-27
 
 ---
 
@@ -11,18 +11,39 @@
 | Metric | Count |
 |---|---|
 | Total Features | 38 |
-| 🟢 Complete (Design) | 38 (all features fully designed via Blueprint) |
-| 🟢 Complete (Development) | 38 |
-| 🟢 Complete | 38 (all merged to `main`) |
+| 🟢 Complete (Design) | 38 |
+| 🟢 Complete (UI shell) | 38 |
+| 🟢 Fully wired to real backend | 25 |
+| 🟡 Partial / honest empty state | 13 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
-| ✅ Cleanup/Polish Commits | 72 |
+| ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
 
 **Design Progress**: ██████████ 100%
-**Development Progress**: ██████████ 100%
-**Quality/Polish**: ██████████ 100%
+**UI Build**: ██████████ 100%
+**Backend wired**: ███████░░░ ~66%
 
-> **v1.0 Status**: Ship-ready. All 38 features built, 72 cleanup commits covering security hardening, accessibility (WCAG 2.1 AA — focus traps, aria-current, semantic time, skip-nav, ARIA landmarks, form labels, table scope/captions, nav list semantics, aria-live regions, motion-safe animations on all Tailwind + CSS animations, aria-describedby, aria-invalid, role=progressbar with values, noValidate, maxLength on all inputs/textareas, enterKeyHint, RTL dir for Arabic, title on truncated text), i18n (40 locales + native translations), SEO (og:image, page metadata), performance (Zustand selectors across all 3 stores, useCallback on tour handlers, timer leak fixes via useRef, duplicate font import removal), rate limiting, error boundaries (23 files), prefers-reduced-motion, SSR safety, platform guide/tour system, lazy loading, page-specific skeleton screens, print styles, footer contrast upgrade, Tailwind token standardization (max-w-7xl), and comprehensive testing (95 Vitest + 92 Playwright E2E — all passing). Multiple consecutive audits across accessibility, performance, SEO, semantics, security, config, focus management, and link/button semantics have returned ALL CLEAN.
+> **v1.3.3.6 Status**: Live on https://lazynext.com. All 38 feature UIs built. 17 rounds of demo-data eradication (v1.3.2.0 → v1.3.3.6) replaced every fabricated fixture (Avas/Priya/Rahul fake teammates, fake Acme Corp workspace, fake testimonials, fake 84/100 onboarding score, fake Notion import, fake LazyMind chat with `setTimeout`, fake notification dropdowns, fake billing/integrations/sessions, fake template marketplace) with real Supabase data or honest empty states. Tests: **143/143** Vitest + Playwright passing, type-check clean, build clean.
+
+### Remaining work — features that ship as honest empty states
+
+These features show real, truthful UI but lack the backend that would make them functional. Listed in priority order:
+
+| # | Feature | Gap | Path to real |
+|---|---|---|---|
+| 23 | Notification Center | No `notifications` table — UI shows "all caught up" until one ships | Migration + insert from decisions/nodes events + GET/PATCH endpoints |
+| 27 | Real-time Collaboration | `CollaborationOverlay` always renders empty `collaborators={[]}` | Supabase Realtime presence channel + cursor broadcast |
+| 17 | Automation Builder | Empty-state page — no rule builder, no executor | WHEN/THEN schema + Inngest executor + UI builder |
+| 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags | Per-source OAuth + mapper + ingestion pipeline |
+| 18 | Template Marketplace | No `templates` table, no install endpoint | `templates` table + clone-to-workspace endpoint + curation flow |
+| 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
+| 38 | Activity Feed → Audit Log | Feed is real; audit log shows Enterprise empty state | `audit_log` table + write hooks across all mutation routes |
+| 12 | Settings → Notifications tab | Empty state — no `notification_preferences` table | Table + UI toggles + filter logic in notifications insert path |
+| 30 | Profile → Connected Accounts + Sessions | Removed pending real APIs | Supabase identity-link + session listing |
+| 35 | Public Shared Canvas (`/shared/[id]`) | Removed — only `/d/[slug]` decision-share works | Per-workflow share token + read-only renderer |
+| 32 | Marketing → Blog | Only `launching-lazynext` post is real | Add real posts (or convert to MDX-driven listing) |
+| —  | Multi-workspace switcher | `WorkspaceSelector` is display-only | Switcher dropdown + `/workspaces` index route |
+| —  | Decision DNA PDF/exec report | Roadmap backlog item | Server-side render to PDF endpoint |
 
 ---
 
@@ -45,7 +66,7 @@
 | 11 | Thread Comments Panel | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — messages, @mentions, reactions, comparison tables |
 | 14 | Command Palette & Search | ✅ Complete | 🟢 Merged | #05 | `main` | Built — ⌘K palette with search, Quick Actions, Recent, Navigation |
 | 20 | Empty & Error States | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 12 states (empty/error/loading/maintenance/rate-limit) |
-| 23 | Notification Center | ✅ Complete | 🟢 Merged | #05 | `main` | Built — bell dropdown, all/unread tabs, mark-all-read, type badges |
+| 23 | Notification Center | ✅ Complete | � UI only | #05 | `main` | UI built; honest empty state until `notifications` table ships (in progress on `feature/39-notifications-real-backend`) |
 | 24 | Keyboard Shortcuts | ✅ Complete | 🟢 Merged | #05 | `main` | Built — ? key modal, 23 shortcuts in 4 categories |
 | 26 | Workspace Home | ✅ Complete | 🟢 Merged | #05 | `main` | Built — greeting, stats, workflows, activity, due soon, LazyMind |
 | 28 | Toast Notifications | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 6 variants with progress bars, action buttons |
@@ -66,20 +87,20 @@
 | 08 | Decision Health Dashboard | ✅ Complete | 🟢 Merged | #07 | `main` | Built — quality trends, outcome donut, burndown, makers table |
 | 12 | Workspace Settings | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 5-tab settings (general/members/billing/notifications/security) |
 | 13 | Billing & Subscription | ✅ Complete | 🟢 Merged | #12 | `main` | Built — plan comparison, payment method, usage metrics |
-| 15 | Import Modal | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 3-step wizard (Notion, Linear, Trello, CSV) |
+| 15 | Import Modal | ✅ Complete | � Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
 | 16 | Pulse Dashboard | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workload bars, burndown SVG, LazyMind summary |
-| 17 | Automation Builder | ✅ Complete | 🟢 Merged | #05 | `main` | Built — WHEN/THEN rules, run history |
-| 18 | Template Marketplace | ✅ Complete | 🟢 Merged | #05 | `main` | Built — featured, install modal, gradient previews, categories |
+| 17 | Automation Builder | ✅ Complete | � UI only | #05 | `main` | Empty-state page — rule builder + Inngest executor pending |
+| 18 | Template Marketplace | ✅ Complete | � UI only | #05 | `main` | Honest empty state — no `templates` table, no install endpoint |
 | 19 | Email Templates | ✅ Complete | 🟢 Merged | — | `main` | Built — invite, task assignment, weekly digest, decision digest |
 | 21 | Data Export | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workspace/decisions export, history, API access |
 | 22 | Upgrade & Paywall Modal | ✅ Complete | 🟢 Merged | #13 | `main` | Built — 4 variants (node/ai/health/full), plan cards |
-| 27 | Real-time Collaboration | ✅ Complete | 🟢 Merged | #05, #11 | `main` | Built — cursor overlays, presence, typing indicators |
+| 27 | Real-time Collaboration | ✅ Complete | � UI only | #05, #11 | `main` | `CollaborationOverlay` renders empty `collaborators={[]}` until presence channel ships |
 | 30 | Profile & Account Settings | ✅ Complete | 🟢 Merged | #03 | `main` | Built — 4 tabs (profile/security/preferences/sessions) |
-| 31 | Integrations Settings | ✅ Complete | 🟢 Merged | #12 | `main` | Built — connected/available, API key, Business gating |
+| 31 | Integrations Settings | ✅ Complete | � UI only | #12 | `main` | Honest empty state — Slack/Notion/GitHub OAuth pending |
 | 32 | Marketing Pages | ✅ Complete | 🟢 Merged | #01 | `main` | Built — About, Features, Changelog, Comparison, Blog |
 | 34 | Team Member Management | ✅ Complete | 🟢 Merged | #12 | `main` | Built — role badges, stat bar, email chip invites |
 | 37 | Task Views (Kanban + List) | ✅ Complete | 🟢 Merged | #05 | `main` | Built — Kanban board + List table with filters |
-| 38 | Activity Feed & Audit Log | ✅ Complete | 🟢 Merged | #05 | `main` | Built — Feed timeline + Audit table with pagination |
+| 38 | Activity Feed & Audit Log | ✅ Complete | � Partial | #05 | `main` | Feed is real; Audit log shows Enterprise empty state until `audit_log` table ships |
 
 **Phase 2 Total**: 18 features
 
@@ -104,7 +125,7 @@
 
 | # | Feature | Design | Dev Status | Depends On | Branch | Notes |
 |---|---|---|---|---|---|---|
-| 35 | Public Shared Canvas | ✅ Complete | 🟢 Merged | #05, #34 | `main` | Built — read-only view, share modal, watermark, analytics |
+| 35 | Public Shared Canvas | ✅ Complete | � Partial | #05, #34 | `main` | `/shared/[id]` removed in eradication round 4; only `/d/[slug]` decision-share works |
 
 **Phase 4 Total**: 1 feature
 
@@ -197,3 +218,4 @@
 | 2026-04-05 | Initial roadmap created from 38 Blueprint features | Mastery framework adoption — mid-project |
 | 2026-04-05 | Phasing follows Blueprint FEATURE-INDEX.md phases | Existing phase groupings are logical and dependency-ordered |
 | 2026-04-26 | Header milestone synced v1.1.0.1 → v1.3.0.5 | Roadmap had drifted behind v1.2 + v1.3 ships (pricing, billing fixes) |
+| 2026-04-27 | Header synced to v1.3.3.6 + added *Remaining work* section | Roadmap had drifted behind 17 demo-data eradication rounds. Replaced "38 Complete" claim with honest "25 fully wired / 13 honest empty states" split — same correction the eradication rounds made to the product. |

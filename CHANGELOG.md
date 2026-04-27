@@ -4,6 +4,32 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.4.0] - 2026-04-27
+
+**Theme:** First feature off the *Remaining work* list — the bell is now real. After 17 demo-data eradication rounds (v1.3.2.0 → v1.3.3.6) replaced fabricated fixtures with honest empty states, the Notification Center had been sitting on `const notifications: Notification[] = []` with the comment *"No notifications table exists in the current schema. Until one ships, this list is intentionally empty."* This release ships the table and the wires. New `notifications` table (Postgres enum `notification_type` covering 7 event types, RLS scoped so users can only read/update their own rows, inserts gated to the service role). New `lib/data/notifications.ts` with `createNotification`, `notifyWorkspaceMembers` (fan-out to every member except the actor), `listNotifications` (hydrates actor name/email/avatar from auth.users via the admin API), `markNotificationRead`, `markAllNotificationsRead`. New API surface: `GET /api/v1/notifications?workspaceId=…`, `PATCH /api/v1/notifications` for mark-all-read, `PATCH /api/v1/notifications/[id]` for single mark-read — all RLS-checked + rate-limited. Two real event hooks wired: `POST /api/v1/decisions` now fans out a `decision_logged` notification to every workspace member except the actor (with a deep link to the decision page); `POST /api/v1/nodes` and `PATCH /api/v1/nodes/[id]` now insert a `task_assigned` notification when a task's `assignedTo` parses as a UUID matching a workspace member (treated honestly: the column is free-form `VARCHAR(255)` and assignment-by-email/name is silently skipped instead of fabricating a recipient). `NotificationCenter` rewired: fetches real data on open, polls every 60s while a workspace is hydrated, optimistic mark-read with server reconciliation, click-through follows the stored deep link and marks read. Notification rows render real actor initials (from `full_name` or `email`), real relative timestamps (`just now` / `Nm ago` / `Nh ago` / `Nd ago` / locale date), grouped Today / Yesterday / Earlier. Self-actions are suppressed (you don't notify yourself). Notification failures never block the underlying mutation — logging a decision succeeds even if the bell-row insert fails, by design.
+
+### Added
+
+- `supabase/migrations/20260427000001_notifications.sql` — `notifications` table with `notification_type` enum (task_assigned / task_due_soon / decision_logged / decision_outcome_pending / thread_mention / thread_reply / workspace_invite), recipient + actor + workspace FKs, optional related-row columns (`related_node_id`, `related_decision_id`, `related_thread_id`), `read_at` timestamp, two indexes (`user_id, read_at, created_at desc` for the bell query, `workspace_id, user_id, created_at desc` for per-workspace listing), three RLS policies (read-own, update-own, insert-service-role).
+- `lib/data/notifications.ts` — typed helpers: `createNotification` (single, never-throws, self-notify suppressed), `notifyWorkspaceMembers` (fan-out, actor excluded), `listNotifications` (joins actor metadata via `db.auth.admin.listUsers`), `markNotificationRead`, `markAllNotificationsRead`. Public `NotificationView` type embeds the actor projection used by the UI.
+- `app/api/v1/notifications/route.ts` — GET (rate-limited, RLS-scoped, returns up to 100 rows newest-first) + PATCH `mark_all_read` action.
+- `app/api/v1/notifications/[id]/route.ts` — PATCH single mark-read with UUID validation.
+- `tests/unit/notifications.test.ts` — 4 new unit tests covering self-notify suppression, payload normalization, error swallowing, and null-actor system events.
+
+### Changed
+
+- `app/api/v1/decisions/route.ts` — POST now calls `notifyWorkspaceMembers` after a successful insert, building a deep link from the workspace slug + decision id.
+- `app/api/v1/nodes/route.ts` — POST now calls `createNotification` when the new task's `assignedTo` is a UUID matching a workspace member.
+- `app/api/v1/nodes/[id]/route.ts` — PATCH now fires the same notification on a real reassignment (assignedTo changed AND not equal to the prior value AND member exists).
+- `components/ui/NotificationCenter.tsx` — replaced the empty hardcoded array with real data: `useWorkspaceStore` provides `workspace.id`, fetch wired to the new endpoints, optimistic UI with server reconciliation, link-click marks-read and closes the dropdown, 60s background poll, three error/empty/loading states. Real relative-time formatter and Today / Yesterday / Earlier grouping.
+- `docs/project-roadmap.md` — header synced from v1.3.1.1 → v1.3.4.0, replaced "38 Complete" claim with honest "25 fully wired / 13 partial" split + a *Remaining work* table listing every feature that ships as an honest empty state. Marked features 15, 17, 18, 23, 27, 31, 35, 38 as 🟡 partial.
+
+### Verification
+
+- Type-check clean.
+- Test suite: **147/147** passing (143 existing + 4 new).
+- Production build clean.
+
 ## [1.3.3.6] - 2026-04-26
 
 **Theme:** Demo-data eradication, round 17 — two leftover lies. (1) Pulse Dashboard's bottom card was titled **"LazyMind Weekly Summary"** with a `Sparkles` brand-icon, suggesting an AI-generated narrative. The text was actually produced by a deterministic `buildSummary()` helper that concatenates pre-formatted sentences from real stat numbers — useful and honest data, but the framing mislabeled it as AI output. Renamed the card to "This week, in one paragraph", swapped the `Sparkles` icon for `Activity`, dropped the cyan gradient that visually echoed the AI-feature surfaces elsewhere, and added a footnote: *"Computed deterministically from this workspace's actual decisions, tasks, and threads — not AI-generated."* (2) The post-onboarding `WorkspaceTour` had a step that targeted `[aria-label="Switch workspace"]` — an element that no longer exists since round 15 converted `WorkspaceSelector` to a display-only `<div>` with `aria-label="Current workspace: ..."`. Worse, the step copy ("Switch between workspaces or create new ones. Each workspace has its own canvas, members, and settings.") promised a multi-workspace switcher dropdown that doesn't ship. Result: new users got step 3 of 10 with no spotlight and a description for a feature they couldn't find. Removed the step.

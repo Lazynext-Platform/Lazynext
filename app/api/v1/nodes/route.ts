@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { createNotification } from '@/lib/data/notifications'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 const createSchema = z.object({
   workflowId: z.string().uuid(),
@@ -72,5 +75,32 @@ export async function POST(req: Request) {
   }).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Notify the assignee when this is a task assigned to a workspace member.
+  // assigned_to is a free-form VARCHAR — only notify when it parses as
+  // a UUID matching a real member; otherwise skip silently (honest).
+  if (parsed.data.type === 'task' && parsed.data.assignedTo && UUID_RE.test(parsed.data.assignedTo)) {
+    const { data: member } = await db
+      .from('workspace_members')
+      .select('user_id')
+      .eq('workspace_id', parsed.data.workspaceId)
+      .eq('user_id', parsed.data.assignedTo)
+      .maybeSingle()
+    if (member) {
+      const { data: workspace } = await db.from('workspaces').select('slug').eq('id', parsed.data.workspaceId).maybeSingle()
+      const slug = (workspace as { slug?: string } | null)?.slug
+      await createNotification({
+        workspaceId: parsed.data.workspaceId,
+        userId: parsed.data.assignedTo,
+        actorId: userId,
+        type: 'task_assigned',
+        title: 'You were assigned a task',
+        body: parsed.data.title.slice(0, 280),
+        link: slug ? `/workspace/${slug}/tasks` : null,
+        relatedNodeId: node.id,
+      }).catch(() => undefined)
+    }
+  }
+
   return NextResponse.json({ data: node, error: null }, { status: 201 })
 }
