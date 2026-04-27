@@ -4,6 +4,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.34.0] - 2026-04-28
+
+**Theme:** Bearer auth lands on the rest of the decisions surface, key rotation goes live, and rate-limit buckets get per-endpoint tuning.
+
+### Added
+- `POST /api/v1/api-keys/[id]/rotate` — atomically swaps a key's hash and prefix while preserving id, name, scopes, and audit lineage. New plaintext shown once, old plaintext stops working immediately.
+- `api_key.rotate` `AuditAction`. Same `resourceId` as the create entry so audit logs naturally group create → rotate → revoke.
+- `RATE_LIMITS.export` (10/min) on `/export` and `/decisions/export-csv`. Heavy reads.
+- `RATE_LIMITS.mutation` (30/min) on `POST/PATCH/DELETE /decisions`. Tighter than reads.
+- `Rotate` button in `ApiKeysPanel` with confirm guard.
+- `rotateApiKey` data helper + 2 tests (277 → 279).
+
+### Changed
+- `GET /api/v1/decisions/[id]`, `PATCH /api/v1/decisions/[id]`, `DELETE /api/v1/decisions/[id]` are bearer-aware. PATCH and DELETE require `write` scope.
+- `/docs/api` updated with the rotate endpoint and tightened bucket numbers.
+
+### Why
+- Rotation closes the lifecycle: a workspace owner can react to a leak in seconds without losing audit lineage.
+- Per-endpoint buckets stop a leaked key from scraping the entire workspace at 100 req/min.
+- The decisions CRUD surface is now fully scriptable from a CI runner.
+
 ## [1.3.33.0] - 2026-04-28
 
 **Theme:** Bearer-auth completes its v1 surface area. Per-key scopes (read / write), the first bearer-aware mutation route (`POST /api/v1/decisions`), API key UX polish, and a public API reference at `/docs/api`. The bearer story is now end-to-end usable for an external CI runner or scripting client.

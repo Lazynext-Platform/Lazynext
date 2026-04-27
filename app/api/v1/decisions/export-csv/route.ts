@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { decisionsToCsv } from '@/lib/utils/decisions-csv'
 import type { Decision } from '@/lib/db/schema'
@@ -24,6 +25,12 @@ export async function GET(req: Request) {
 
   const auth = await requireWorkspaceAuth(req, workspaceId)
   if (!auth.ok) return auth.response
+
+  // Heavy read — full workspace dump as CSV. Same tight bucket as
+  // /export so a leaked key can't scrape the workspace via either
+  // endpoint.
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.export)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   let query = db
     .from('decisions')

@@ -166,3 +166,41 @@ export async function deleteApiKey(input: DeleteApiKeyInput): Promise<boolean> {
   if (error) return false
   return (count ?? 0) > 0
 }
+
+export interface RotateApiKeyInput {
+  workspaceId: string
+  keyId: string
+}
+
+/**
+ * Rotates a key in-place. The row keeps its id (so the audit-log
+ * resourceId continues to reference the same key lifecycle), but the
+ * `key_hash` and `key_prefix` are regenerated and `last_used_at` is
+ * cleared. The OLD plaintext stops working immediately on the next
+ * request because the hash no longer matches.
+ *
+ * Returns the new plaintext + updated row, or null if the key wasn't
+ * found in the workspace.
+ */
+export async function rotateApiKey(
+  input: RotateApiKeyInput,
+): Promise<{ row: ApiKeyRow; plaintext: string } | null> {
+  if (!hasValidDatabaseUrl) return null
+  const { plaintext, keyHash, keyPrefix } = mintApiKey()
+  const { data, error } = await db
+    .from('api_keys')
+    .update({
+      key_hash: keyHash,
+      key_prefix: keyPrefix,
+      // Reset usage stats so the operator knows whether anyone has
+      // started using the new key. Old `last_used_at` referred to the
+      // now-invalid hash and would be misleading.
+      last_used_at: null,
+    })
+    .eq('workspace_id', input.workspaceId)
+    .eq('id', input.keyId)
+    .select('id, workspace_id, user_id, name, key_prefix, scopes, last_used_at, expires_at, created_at')
+    .single()
+  if (error || !data) return null
+  return { row: mapRow(data as unknown as ApiKeyDbRow), plaintext }
+}

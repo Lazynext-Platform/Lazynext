@@ -4,6 +4,7 @@ vi.mock('@/lib/db/client', () => {
   const queryBuilder = {
     select: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
     delete: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     order: vi.fn().mockReturnThis(),
@@ -30,6 +31,7 @@ import {
   createApiKey,
   deleteApiKey,
   normalizeScopes,
+  rotateApiKey,
 } from '@/lib/data/api-keys'
 import * as dbModule from '@/lib/db/client'
 type QB = {
@@ -203,5 +205,38 @@ describe('normalizeScopes', () => {
 
   it('rejects garbage-only input by falling back to [read]', () => {
     expect(normalizeScopes(['NOPE'])).toEqual(['read'])
+  })
+})
+
+describe('rotateApiKey', () => {
+  it('returns a fresh plaintext + updated row, preserving id and scopes', async () => {
+    qb.single.mockResolvedValue({
+      data: {
+        id: 'k1',
+        workspace_id: 'w1',
+        user_id: 'u1',
+        name: 'CI runner',
+        key_prefix: 'newprefx',
+        scopes: ['read'],
+        last_used_at: null,
+        expires_at: null,
+        created_at: '2026-04-28T00:00:00Z',
+      },
+      error: null,
+    })
+    const result = await rotateApiKey({ workspaceId: 'w1', keyId: 'k1' })
+    expect(result).not.toBeNull()
+    expect(result!.plaintext.startsWith('lzx_')).toBe(true)
+    expect(result!.row.id).toBe('k1')
+    expect(result!.row.scopes).toEqual(['read'])
+    // last_used_at must reset \u2014 the rotated value must not surface
+    // a stale "last used" timestamp tied to the now-invalid hash.
+    expect(result!.row.lastUsedAt).toBeNull()
+  })
+
+  it('returns null when the key id is not in the workspace (cross-tenant safe)', async () => {
+    qb.single.mockResolvedValue({ data: null, error: { message: 'not found' } })
+    const result = await rotateApiKey({ workspaceId: 'w1', keyId: 'k-other' })
+    expect(result).toBeNull()
   })
 })

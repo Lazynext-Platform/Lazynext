@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
-import { Lock, Copy, Check, Trash2, Plus, AlertCircle, Key } from 'lucide-react'
+import { Lock, Copy, Check, Trash2, Plus, AlertCircle, Key, RotateCw } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface ApiKeySummary {
@@ -72,6 +72,7 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
   const [reveal, setReveal] = useState<{ id: string; plaintext: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [rotatingId, setRotatingId] = useState<string | null>(null)
 
   const isUnlocked = unlockedPlans.includes(plan)
 
@@ -146,6 +147,33 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
       startTransition(() => router.refresh())
     } finally {
       setDeletingId(null)
+    }
+  }
+
+  async function handleRotate(id: string) {
+    // Rotation is destructive of the old plaintext but preserves the
+    // id, name, and scopes. We confirm in-line because the user has
+    // to coordinate updating consumers — a misclick costs them an
+    // outage until they paste the new key everywhere.
+    if (!confirm('Rotate this key? The old plaintext stops working immediately. You\'ll get a new one to copy.')) return
+    setError(null)
+    setRotatingId(id)
+    try {
+      const res = await fetch(`/api/v1/api-keys/${id}/rotate?workspaceId=${workspaceId}`, {
+        method: 'POST',
+      })
+      const body = await res.json()
+      if (!res.ok) {
+        setError(body?.message ?? body?.error ?? `Rotate failed (${res.status}).`)
+        return
+      }
+      const { key, plaintext } = body.data as { key: ApiKeySummary; plaintext: string }
+      // Replace the row in-place so its position in the list doesn't
+      // jump, but show the new plaintext in the reveal banner.
+      setKeys((prev) => prev.map((k) => (k.id === key.id ? key : k)))
+      setReveal({ id: key.id, plaintext })
+    } finally {
+      setRotatingId(null)
     }
   }
 
@@ -303,8 +331,17 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
                   </p>
                 </div>
                 <button
+                  onClick={() => handleRotate(k.id)}
+                  disabled={rotatingId === k.id || deletingId === k.id}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-700 px-2 py-1 text-3xs text-slate-300 hover:bg-slate-800 disabled:opacity-60"
+                  aria-label={`Rotate ${k.name}`}
+                >
+                  <RotateCw className="h-3 w-3" />
+                  {rotatingId === k.id ? 'Rotating…' : 'Rotate'}
+                </button>
+                <button
                   onClick={() => handleDelete(k.id)}
-                  disabled={deletingId === k.id}
+                  disabled={deletingId === k.id || rotatingId === k.id}
                   className="inline-flex items-center gap-1 rounded-md border border-slate-700 px-2 py-1 text-3xs text-slate-300 hover:bg-slate-800 disabled:opacity-60"
                   aria-label={`Revoke ${k.name}`}
                 >

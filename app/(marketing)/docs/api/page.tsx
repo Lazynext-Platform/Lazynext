@@ -77,10 +77,23 @@ curl https://lazynext.com/api/v1/audit-log?workspaceId=<id> \\
 
         <Section icon={<Zap className="h-5 w-5 text-indigo-600" />} title="Rate limits">
           <p>
-            100 requests per minute per key (cookie sessions: per user). The bucket
-            is keyed by the <em>key id</em>, so a leaked key burns its own budget
-            and not the human owner&apos;s. When you exceed the bucket you get{' '}
-            <code>429</code> with a <code>Retry-After</code> header.
+            Buckets are keyed by the <em>key id</em> (cookie sessions: per user)
+            so a leaked key burns its own budget. Each endpoint family has its own limit:
+          </p>
+          <ul className="mt-3 list-disc space-y-1 pl-6 text-slate-700">
+            <li>
+              <code>read</code> endpoints — 100 / minute.
+            </li>
+            <li>
+              <code>export</code> endpoints (workspace dump, CSV) — 10 / minute.
+            </li>
+            <li>
+              <code>mutation</code> endpoints (POST/PATCH/DELETE) — 30 / minute.
+            </li>
+          </ul>
+          <p className="mt-3">
+            Exceeding the bucket returns <code>429</code> with a{' '}
+            <code>Retry-After</code> header.
           </p>
         </Section>
 
@@ -110,6 +123,20 @@ curl https://lazynext.com/api/v1/audit-log?workspaceId=<id> \\
             <code>decisionType</code>, <code>tags</code>, <code>expectedBy</code>.
             The Decision DNA scorer runs server-side and the score is in the
             response.
+          </Endpoint>
+          <Endpoint method="GET" path="/api/v1/decisions/{id}" scope="read">
+            Single decision by id. Bearer keys must target the workspace that
+            owns the decision — cross-workspace lookups return{' '}
+            <code>403 WORKSPACE_MISMATCH</code>.
+          </Endpoint>
+          <Endpoint method="PATCH" path="/api/v1/decisions/{id}" scope="write">
+            Update <code>resolution</code>, <code>rationale</code>,{' '}
+            <code>status</code>, <code>outcome</code>, <code>outcomeNotes</code>,{' '}
+            <code>outcomeConfidence</code>, or <code>tags</code>. Setting an
+            outcome (other than <code>pending</code>) bumps the workspace WMS.
+          </Endpoint>
+          <Endpoint method="DELETE" path="/api/v1/decisions/{id}" scope="write">
+            Permanently remove a decision. Cascades to all linked outcomes.
           </Endpoint>
         </Section>
 

@@ -24,8 +24,10 @@ export async function GET(req: Request) {
 
   // Rate-limit per keyId for bearer requests so a leaked key can't
   // burn a human user's budget; per userId for cookie sessions.
+  // Heavy read — full workspace dump. RATE_LIMITS.export is tighter
+  // than the default api bucket (10/min) to make scraping painful.
   const rateLimitId = apiKey ? `key:${apiKey.keyId}` : `user:${userId}`
-  const rl = rateLimit(rateLimitId, RATE_LIMITS.api)
+  const rl = rateLimit(rateLimitId, RATE_LIMITS.export)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
