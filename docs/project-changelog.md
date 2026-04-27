@@ -6,6 +6,23 @@
 
 ---
 
+## [v1.3.30.0] - 2026-04-28 — Inbound bearer-token auth
+
+**Theme:** REST API can now authenticate with `Authorization: Bearer lzx_...`. `/api/v1/export` is the first consumer.
+
+### Added
+- `lib/utils/api-key-auth.ts` — `authenticateApiKey(req)` returns `{workspaceId, userId, keyId}` or null. Bumps `last_used_at` fire-and-forget. Fails closed.
+- `tests/unit/api-key-auth.test.ts` — 10 cases (251 → 261 total).
+
+### Changed
+- `app/api/v1/export/route.ts` — first bearer-aware endpoint. Bearer requests skip the membership check (key = membership). `WORKSPACE_MISMATCH` 403 if query workspaceId disagrees with bearer.
+
+### Deferred
+- Roll bearer auth out across the rest of v1 (one route per PR).
+- Per-key scopes; audit entries on key use; per-keyId rate-limit buckets.
+
+---
+
 ## [v1.3.29.0] - 2026-04-28 — API key issuance
 
 **Theme:** Settings → Integrations → API Access ships as a real feature. Enterprise workspaces can generate, list, and revoke `lzx_`-namespaced API keys with SHA-256-hashed storage and one-shot plaintext reveal.

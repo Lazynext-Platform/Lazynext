@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.30.0] - 2026-04-28
+
+**Theme:** Inbound bearer-token authentication ships. v1.3.29.0 added the issuance UX; this release adds the consumer side — the REST API can now accept `Authorization: Bearer lzx_...` (or `X-Api-Key`) and resolve it to a workspace via the SHA-256 hash stored in `api_keys.key_hash`. The `/api/v1/export` endpoint is the first consumer; it accepts both bearer and cookie-session auth, with bearer requests skipping the membership check (the key itself is the membership grant). Other v1 endpoints can opt into bearer auth one route at a time using the same helper — nothing else has been touched in this PR to keep the blast radius small.
+
+### Added
+- `lib/utils/api-key-auth.ts` — `authenticateApiKey(req)` returns `{ workspaceId, userId, keyId }` or `null`. Accepts `Authorization: Bearer <token>` (RFC 6750) and `X-Api-Key`. Rejects Basic/Digest auth schemes. Cheap shape check (`lzx_` prefix + min length) before the SHA-256 hash so garbage tokens never reach the DB. Honours `expires_at` (rejects expired keys). Bumps `last_used_at` fire-and-forget so a stat-tracking write can never slow or fail a successful request. Fails closed on every error mode without leaking which mode tripped (would otherwise be a username-enumeration primitive).
+- `tests/unit/api-key-auth.test.ts` — 10 cases: no headers, wrong scheme, wrong prefix, hash miss, Bearer match, X-Api-Key match, expired-key reject, future-expiry accept, db-error fails-closed, lowercase `bearer` accepted.
+
+### Changed
+- `app/api/v1/export/route.ts` — first bearer-aware endpoint. Tries bearer first, falls back to cookie session. Bearer requests get their `workspaceId` from the key itself; the query param is still accepted but must match (`WORKSPACE_MISMATCH` 403 otherwise). Membership check is skipped for bearer requests because the key already represents membership.
+
+### Why this matters
+- Lazynext now has a real working REST API for machine clients. CI runners, scheduled jobs, and third-party integrations can pull workspace exports with a Bearer token instead of a browser session. The pattern is intentionally additive — every other v1 route still works exactly as before, and any new route can opt in by adding three lines.
+
+### Deferred (intentionally)
+- Mass-rolling bearer auth across the rest of v1 — each route gets its own PR so the audit trail stays clean.
+- Per-key scopes (read-only vs read-write). Today every key inherits owner access.
+- Audit-log entries on key use. The shape exists; wiring is one line per route handler.
+- Rate-limit bucket per `keyId` instead of per `userId` so a leaked key can't burn a human user's budget.
+
 ## [1.3.29.0] - 2026-04-28
 
 **Theme:** API key issuance ships. Settings → Integrations → API Access is no longer a static `coming soon` placeholder — Enterprise-plan workspaces can now generate, list, and revoke real workspace-scoped API keys end-to-end. Keys follow the standard `lzx_<base64url>` namespace pattern (greppable in logs, GitHub-secret-scanning friendly), are stored as SHA-256 hashes (never recoverable from a DB dump), and the plaintext is shown to the user exactly once at creation time. The route handlers reuse the same plan-gate, rate-limit, and workspace-membership helpers as the rest of the v1 API; revocation is composite-key safe (workspace + id) so a stale id from another workspace can never delete cross-tenant. The middleware that *consumes* keys to authenticate inbound REST traffic is intentionally a follow-up PR — this release ships the issuance UX in isolation so it can be reviewed cleanly.
