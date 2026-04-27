@@ -4,6 +4,43 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.42.4] - 2026-04-28
+
+**Theme:** Documentation accuracy — round 3 (summary prose sweep).
+
+### Fixed
+- `docs/features/13-billing-subscription/summary.md` — "Per-seat pricing in INR (₹)" replaced with the truth: USD per seat sourced from `lib/utils/constants.ts`, locale-formatted via `formatPrice`.
+- `docs/features/22-upgrade-paywall-modal/summary.md` — "INR prices from `lib/billing/plans.ts`" (file doesn't exist) replaced with the real source-of-truth pointer to `lib/utils/constants.ts`.
+
+## [1.3.42.3] - 2026-04-28
+
+**Theme:** Documentation accuracy — round 2 (roadmap + cross-cutting docs).
+
+### Fixed
+- `docs/project-roadmap.md` header — `Current Milestone` was stuck at v1.3.28.1; synced to v1.3.42.2. Replaced two broken `�` glyphs with the proper 🟡 yellow circle in the Phase 2 table.
+- `docs/features/02-pricing-page/testplan.md` — currency was wrongly described as INR. Real source of truth: `lib/utils/constants.ts` exports `PLAN_PRICING_USD` / `PLAN_PRICING_USD_ANNUAL`; the pricing page formats per-locale via `formatPrice`. Constants path corrected (had `lib/billing/plans.ts` — doesn't exist). Missing-Gumroad-env fallback corrected (real fallback is `/sign-up`, not `/contact`).
+
+## [1.3.42.2] - 2026-04-28
+
+**Theme:** Documentation accuracy audit of the v1.3.42.1 backfill — caught file-tree drift introduced during retroactive writing.
+
+### Fixed
+- `AGENTS.md` `lib/` tree — added the 7 real subdirs that had been omitted (`canvas/`, `data/`, `i18n/`, `oauth/`, `realtime/`, `sdk/`, `wms.ts`).
+- `docs/features/01-landing-page/architecture.md` — file structure updated to match `components/marketing/`. Removed three fictional components (`SocialProofBar`, `TestimonialsSection`, `MobileMenu`) and added the two real ones (`MarketingHeader`, `FoundingMemberBanner`).
+- `docs/features/03-auth-pages/architecture.md` and `testplan.md` — rewrote to match real code: inline `'use client'` pages at `app/(auth)/sign-{in,up}/[[...sign-{in,up}]]/page.tsx`, only `/auth/callback` route handler exists, email-confirm and reset-password go through Supabase-hosted screens. Removed fictional `components/auth/`, `app/auth/confirm/`, `app/auth/reset-password/` references.
+- `docs/features/05-workflow-canvas/architecture.md` — rewrote against ground truth: `WorkflowCanvas.tsx` (not `Canvas.tsx`), `WorkflowEdge.tsx` (not `DefaultEdge.tsx`), real `lib/canvas/` hook-based persisters, snapshot-based history, real `app/(app)/workspace/[slug]/canvas/[id]/` route, `nodes/positions/route.ts` for bulk position patches.
+
+## [1.3.42.1] - 2026-04-28
+
+**Theme:** Mastery-framework documentation backfill across all 38 features.
+
+### Added
+- `summary.md` for features #04 and #06–#38 (34 retroactive summaries) — what was built, key decisions (reconstructed from code/commits/design docs, not fabricated), files affected, dependencies, notes. Per Mastery's mid-project adoption rule, full lifecycle docs were **not** fabricated for already-shipped features.
+- `review.md` for shipped features #01, #02, #03, #05.
+- `architecture.md` and `testplan.md` for #03 and #05; `testplan.md` for #02.
+- `Documentation` section in `README.md` linking the doc set.
+- `docs/features/FEATURE-INDEX.md` header now explains the retroactive-summary convention.
+
 ## [1.3.42.0] - 2026-04-28
 
 **Theme:** Bearer auth on `/search`. CI runners can dedupe before opening duplicate decisions or tasks.
