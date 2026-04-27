@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.27.0] — OAuth read API + Settings → Integrations rewired (2026-04-27)
+
+v1.3.26.0 shipped the OAuth table, crypto, and registry contract; this release makes them user-visible. New `lib/data/oauth-connections.ts` returns rows with `encrypted_tokens` deliberately stripped — decryption stays in the per-adapter callsites. New `GET /api/v1/oauth/connections` returns `{ connections, providers }` (provider-config state is env-driven, independent of DB). New `DELETE /api/v1/oauth/connections/[id]` for revocation. New `GET /api/v1/oauth/[provider]/start` reserves the URL space with five distinct error shapes (404 unknown / 503 missing env vars / 501 adapter-not-registered, etc.). Settings → Integrations page rewritten as a server component — reads real connections, renders every roadmap provider with `Available` or `Not configured` badges, replaces the old "coming soon" placeholder with `Configure to enable` + a tooltip naming the exact env vars. **240/240** tests passing across 31 files (231 → 240; 9 new).
+
+See [CHANGELOG.md](../CHANGELOG.md#13270---2026-04-27).
+
+---
+
 ## [1.3.26.0] — OAuth scaffolding (DB + crypto + registry contract) (2026-04-27)
 
 The seven Settings → Integrations / Import-Modal providers (Slack, Notion, GitHub, Linear, Trello, Asana, Jira) have stayed as honest empty states since v1.0 because each requires a developer-portal app registration with credentials only the human owner can produce. This release ships the infrastructure — `oauth_connections` table with AES-256-GCM-encrypted tokens, RLS service-role-only writes, partial index on `expires_at` for the refresh worker, `lib/oauth/crypto.ts` with random-IV-per-call sealing and tamper-detection on decrypt, `lib/oauth/registry.ts` with the `OAuthProviderConfig` adapter contract + `isProviderConfigured` env-var check + `KNOWN_PROVIDER_IDS` reserving the URL space for all seven. Registry ships empty: each provider adapter is a separate per-Mastery-cycle PR landing when credentials are available. **231/231** tests passing across 30 files (208 → 231; 23 new across `oauth-crypto.test.ts` + `oauth-registry.test.ts`).
