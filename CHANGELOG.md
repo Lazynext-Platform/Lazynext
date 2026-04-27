@@ -4,6 +4,30 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.20.0] - 2026-04-27
+
+**Theme:** Pricing alignment + decision-limit enforcement. Audit of every pricing surface against `PLAN_LIMITS` turned up six inconsistencies — most importantly that the marketing site advertised `"10 AI queries/day"` and `"Unlimited nodes"` on Free while the code enforced 20 queries and 100 nodes. The product was *more* generous than the marketing said, but the inconsistency itself broke trust. Also: the `decisions` cap on Free was advertised as 20 in three places but never actually enforced — you could log a thousand decisions on Free. Fixed all of it. Marketing copy now matches the code; the code now matches itself across every limit.
+
+### Changed
+- `lib/utils/constants.ts` — `PLAN_LIMITS` extended with `decisions` and `workspaces` fields. Free = `{ members: 3, workflows: 5, nodes: 100, aiQueries: 20, decisions: 20, workspaces: 1 }`. All paid tiers (Starter/Pro/Business/Enterprise) = `-1` (unlimited) on the new fields. PLAN_LIMITS is now the single source of truth for every quantity claim on every pricing surface.
+- `app/(marketing)/pricing/page.tsx` — Free tier list now reads `'100 nodes'` (was `'Unlimited nodes'`), `'20 LazyMind AI queries/day'` (was `'Basic LazyMind (10 AI queries/day)'`), and adds `'5 workflows'` (was hidden). Comparison table `Nodes` row Free `'Unlimited' → '100'`. Comparison table `LazyMind AI queries` row Free `'10/day' → '20/day'`. New `Workflows` row added (Free `'5'`, all paid `'Unlimited'`). FAQ `'What do I get on the free plan?'` answer rewritten to match: 1 workspace, 3 members, 100 nodes across 5 workflows, 20 decisions, 20 AI queries/day.
+
+### Added
+- `lib/utils/plan-gates.ts` — `canCreateDecision(plan, currentCount)` and `canCreateWorkspace(plan, currentCount)` gate functions. Same `limit === -1 || currentCount < limit` shape as the existing gates.
+- `app/api/v1/decisions/route.ts` — POST handler now reads the workspace's plan, looks up `PLAN_LIMITS[plan].decisions`, runs a `count: 'exact', head: true` query against `decisions` for the workspace, and returns `402 { error: 'PLAN_LIMIT_REACHED', variant: 'decision-limit' }` when the cap is reached. Free workspaces are now actually capped at 20 logged decisions; paid tiers stay uncapped.
+- `app/(app)/workspace/[slug]/decisions/DecisionsClient.tsx` — Log Decision modal now intercepts the 402 response and triggers the `'decision-limit'` upgrade modal via `useUpgradeModal.show()`, with a `paywall.gate.shown` telemetry event for funnel analysis. The user gets a clear next step instead of a generic error.
+- `stores/upgrade-modal.store.ts` + `components/ui/UpgradeModal.tsx` — `'decision-limit'` and `'workspace-limit'` variants added to the `UpgradeVariant` / `ModalVariant` unions and to `VARIANT_COPY` (`'Decision log full on Free'`, `'Free is one workspace'`).
+- `tests/unit/plan-limits.test.ts` — 12 new assertions: every plan has every limit field, Free is the only capped tier on members/workspaces/decisions/nodes/workflows, AI queries scale tier-by-tier (100 → 500 → unlimited), annual pricing stays at 20% off, all six gate functions return correct booleans at each boundary.
+
+### Test results
+- Type-check: clean.
+- Vitest: **187/187 passing** across 26 files (175 → 187).
+- Build: clean.
+
+### Notes
+- `canCreateWorkspace` is defined and tested but not yet wired to an API — workspace creation through onboarding still doesn't enforce the 1-workspace cap on Free. Deferred to a follow-up so this release stays focused on the decision-cap path that ships end-to-end.
+- The PricingSection component on the landing page already showed the correct numbers (`100 nodes`, `20 AI queries/day`, `20 decisions`) — the pricing page was the surface drifting.
+
 ## [1.3.19.0] - 2026-04-27
 
 **Theme:** Production crawler + auth title fix. Wrote a Playwright crawler that walks the entire public surface of `https://lazynext.com`, captures console errors, failed network requests, broken images, missing alts, duplicate ids, and missing h1s — then fixed the one real issue it surfaced: `/sign-in` and `/sign-up` both rendered the generic `<title>Auth — Lazynext`, indistinguishable in browser tabs and search results.

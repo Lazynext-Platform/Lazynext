@@ -6,6 +6,8 @@ type UpgradeVariant =
   | 'node-limit'
   | 'ai-limit'
   | 'member-limit'
+  | 'decision-limit'
+  | 'workspace-limit'
   | 'health-gate'
   | 'automation-gate'
   | 'sso-gate'

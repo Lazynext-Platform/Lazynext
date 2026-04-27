@@ -8,6 +8,7 @@ import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limi
 import { notifyWorkspaceMembers } from '@/lib/data/notifications'
 import { recordAudit } from '@/lib/data/audit-log'
 import { runAutomations } from '@/lib/data/automations'
+import { PLAN_LIMITS } from '@/lib/utils/constants'
 
 const createSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -66,6 +67,33 @@ export async function POST(req: Request) {
 
   const authorized = await verifyWorkspaceMember(userId, parsed.data.workspaceId)
   if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  // Plan-gate the decision count. Free plan caps at 20 logged
+  // decisions per workspace — that's the marketing claim and now it's
+  // enforced. Paid tiers are uncapped (-1 in PLAN_LIMITS).
+  const { data: planRow } = await db
+    .from('workspaces')
+    .select('plan')
+    .eq('id', parsed.data.workspaceId)
+    .single()
+  const plan = ((planRow as { plan?: string } | null)?.plan ?? 'free') as keyof typeof PLAN_LIMITS
+  const decisionLimit = PLAN_LIMITS[plan]?.decisions ?? -1
+  if (decisionLimit !== -1) {
+    const { count } = await db
+      .from('decisions')
+      .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', parsed.data.workspaceId)
+    if ((count ?? 0) >= decisionLimit) {
+      return NextResponse.json(
+        {
+          error: 'PLAN_LIMIT_REACHED',
+          variant: 'decision-limit',
+          message: `Free workspaces are capped at ${decisionLimit} decisions. Upgrade to log more.`,
+        },
+        { status: 402 },
+      )
+    }
+  }
 
   const scoreResult = await scoreDecision({
     question: parsed.data.question,

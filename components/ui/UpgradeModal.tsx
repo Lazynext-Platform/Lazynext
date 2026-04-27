@@ -12,7 +12,7 @@ import { useModalA11y } from '@/lib/utils/useModalA11y'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_PRICING_USD, PLAN_PRICING_USD_ANNUAL, TRIAL_DAYS } from '@/lib/utils/constants'
 
-type ModalVariant = 'node-limit' | 'ai-limit' | 'member-limit' | 'health-gate' | 'automation-gate' | 'sso-gate' | 'full-upgrade'
+type ModalVariant = 'node-limit' | 'ai-limit' | 'member-limit' | 'decision-limit' | 'workspace-limit' | 'health-gate' | 'automation-gate' | 'sso-gate' | 'full-upgrade'
 type PlanSlug = 'starter' | 'pro' | 'business'
 
 type PlanCard = {
@@ -59,6 +59,8 @@ const VARIANT_COPY: Record<ModalVariant, { title: string; locked?: { feature: st
   'node-limit': { title: 'Node limit reached' },
   'ai-limit': { title: 'AI query limit reached' },
   'member-limit': { title: 'Member limit reached' },
+  'decision-limit': { title: 'Decision log full on Free' },
+  'workspace-limit': { title: 'Free is one workspace' },
   'full-upgrade': { title: 'Upgrade your plan' },
   'health-gate': {
     title: 'Unlock Decision Health',

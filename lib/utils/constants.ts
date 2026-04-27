@@ -11,13 +11,51 @@ export const NODE_TYPES = {
 export type NodeType = keyof typeof NODE_TYPES
 
 export const PLAN_LIMITS = {
-  // Free: hard gates to drive upgrade (members = primary trigger).
-  free: { members: 3, workflows: 5, nodes: 100, aiQueries: 20 },
-  // Paid tiers: unlimited structure; AI queries per-seat/day is the soft cap.
-  starter: { members: -1, workflows: -1, nodes: -1, aiQueries: 100 },
-  pro: { members: -1, workflows: -1, nodes: -1, aiQueries: 500 },
-  business: { members: -1, workflows: -1, nodes: -1, aiQueries: -1 },
-  enterprise: { members: -1, workflows: -1, nodes: -1, aiQueries: -1 },
+  // Free: hard gates to drive upgrade. Members + decisions are the
+  // primary triggers; nodes / workflows are softer (most teams won't
+  // hit them, but we cap to prevent abuse).
+  free: {
+    members: 3,
+    workflows: 5,
+    nodes: 100,
+    aiQueries: 20,
+    decisions: 20,
+    workspaces: 1,
+  },
+  // Paid tiers: unlimited structure; AI queries per-seat/day is the
+  // soft cap. Workspace + decision counts uncapped.
+  starter: {
+    members: -1,
+    workflows: -1,
+    nodes: -1,
+    aiQueries: 100,
+    decisions: -1,
+    workspaces: -1,
+  },
+  pro: {
+    members: -1,
+    workflows: -1,
+    nodes: -1,
+    aiQueries: 500,
+    decisions: -1,
+    workspaces: -1,
+  },
+  business: {
+    members: -1,
+    workflows: -1,
+    nodes: -1,
+    aiQueries: -1,
+    decisions: -1,
+    workspaces: -1,
+  },
+  enterprise: {
+    members: -1,
+    workflows: -1,
+    nodes: -1,
+    aiQueries: -1,
+    decisions: -1,
+    workspaces: -1,
+  },
 } as const
 
 // Per-seat monthly USD. Display labels: starter="Team", pro="Business",

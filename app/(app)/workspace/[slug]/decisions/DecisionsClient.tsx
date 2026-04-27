@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils/cn'
 import { DecisionQualityBadge } from '@/components/decisions/DecisionQualityBadge'
 import OutcomeReviewModal from '@/components/decisions/OutcomeReviewModal'
 import { EmptyDecisions } from '@/components/ui/EmptyStates'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import type { Decision, DecisionScoreBreakdown } from '@/lib/db/schema'
 
 type DecisionStatus = 'all' | 'open' | 'decided' | 'reversed'
@@ -91,6 +93,15 @@ function LogDecisionModal({
       })
       const body = await res.json()
       if (!res.ok) {
+        // Plan-gate: server returns 402 with variant when the Free
+        // workspace hits its decision cap. Surface the upgrade modal
+        // instead of a generic error so the user has a clear next step.
+        if (res.status === 402 && body?.variant === 'decision-limit') {
+          trackBillingEvent('paywall.gate.shown', { variant: 'decision-limit', surface: 'log-decision' })
+          useUpgradeModal.getState().show('decision-limit')
+          setSubmitting(false)
+          return
+        }
         setError(body?.error || 'Failed to log decision')
         setSubmitting(false)
         return
