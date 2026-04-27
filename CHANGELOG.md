@@ -4,6 +4,23 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.27.0] - 2026-04-27
+
+**Theme:** OAuth scaffolding becomes user-visible. v1.3.26.0 shipped the table + crypto + registry contract; this release wires the read API, the per-provider start route, and rebuilds the Settings → Integrations page on top of all of it. The page now reads real data: every roadmap provider renders with an `Available` badge if its env vars are set or `Not configured` if they aren't, and the disabled-button copy now points at the exact env vars to set instead of the previous "coming soon" placeholder. Connected list reflects real `oauth_connections` rows when they exist (none in production yet). Provider adapters still ship one-by-one in their own PRs — this release does NOT add a working flow for any vendor.
+
+### Added
+- `lib/data/oauth-connections.ts` — read + delete data layer. `listOAuthConnections`, `deleteOAuthConnection` (composite-key delete so a stale id from another workspace can't leak), `getProviderConnectionCounts`. **Returns `OAuthConnectionRow` shapes that explicitly omit `encrypted_tokens`** so a Settings render can never accidentally surface a sealed-but-loggable token blob. Decryption stays in the per-adapter callsite that needs to make a provider call.
+- `app/api/v1/oauth/connections/route.ts` — `GET ?workspaceId=<uuid>` returns `{ connections: OAuthConnectionRow[], providers: { id, configured }[] }`. `providers` reads from env vars and is independent of DB availability so the dev-without-Supabase path still gets honest configured/not-configured state.
+- `app/api/v1/oauth/connections/[id]/route.ts` — `DELETE ?workspaceId=<uuid>` removes the connection (404 on no-match). Validates path-id shape before hitting the DB. Provider-side revocation deferred to per-adapter callsites.
+- `app/api/v1/oauth/[provider]/start/route.ts` — reserves the URL space for every roadmap provider with five distinct error shapes: `UNKNOWN_PROVIDER` (404), `MISSING_WORKSPACE_ID` (400), `DATABASE_NOT_CONFIGURED` (503), `FORBIDDEN` (403), `PROVIDER_NOT_CONFIGURED` (503 with the exact env vars to set), `PROVIDER_ADAPTER_NOT_REGISTERED` (501 with `provider_id` for deploy probes), `PROVIDER_FLOW_NOT_IMPLEMENTED` (501). State + PKCE machinery deferred to the first adapter PR.
+- `tests/unit/oauth-connections.test.ts` — 9 cases against a Supabase query-builder mock: row mapping (snake_case → camelCase), the explicit assertion that `encrypted_tokens` / `access_token` / `refresh_token` never leak, error-paths return `[]` / `0` / `{}`, count grouping, count-null defensiveness.
+
+### Changed
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — converted from client to server component. Reads real `getWorkspaceBySlug` + `verifyWorkspaceMember` + `listOAuthConnections`. New `PROVIDER_COPY: Record<OAuthProviderId, …>` map (compile error if a `KNOWN_PROVIDER_IDS` entry is missing copy). Connected list renders one tile per provider with all its connections grouped beneath; Available list renders the seven roadmap providers with `Available` (env-configured) or `Not configured` badges. The disabled `Notify me` placeholder is gone — disabled tiles now read `Configure to enable` with a tooltip naming `LAZYNEXT_OAUTH_<PROVIDER>_CLIENT_ID` + `_CLIENT_SECRET`. Connect button on configured providers points at `/api/v1/oauth/[provider]/start` so the URL is exercised end-to-end even before any adapter ships.
+
+### Test results
+- Type-check: clean. Vitest: **240/240 passing** across 31 files (231 → 240; 9 new in `oauth-connections.test.ts`). Build: clean.
+
 ## [1.3.26.0] - 2026-04-27
 
 **Theme:** OAuth scaffolding for the seven Settings → Integrations / Import-Modal providers (Slack, Notion, GitHub, Linear, Trello, Asana, Jira). The roadmap has carried these as honest empty states since v1.0 because each requires a developer-portal app registration with credentials no AI agent can produce. This release ships the *infrastructure* — DB table, AES-256-GCM token sealing, provider registry — so each provider, when its credentials land, is a thin adapter file rather than a full feature build. Zero providers wired in this PR (intentional — see `lib/oauth/registry.ts` header). Public surfaces (Settings → Integrations, Import Modal) are unchanged in this ship; they'll start showing real "Connect" buttons in subsequent per-provider PRs.

@@ -1,0 +1,97 @@
+import { NextResponse } from 'next/server'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { hasValidDatabaseUrl } from '@/lib/db/client'
+import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import {
+  isKnownProvider,
+  isProviderConfigured,
+  getOAuthProvider,
+} from '@/lib/oauth/registry'
+
+export const dynamic = 'force-dynamic'
+
+/**
+ * GET /api/v1/oauth/[provider]/start?workspaceId=<uuid>
+ *
+ * Reserves the URL space for every roadmap provider. Behavior:
+ *
+ *   - Unknown provider id → 404
+ *   - Provider not configured (env vars missing) → 503 with a copy
+ *     that names the env vars to set. The Settings UI hides the
+ *     Connect button in this case so this branch is mostly a safety
+ *     net for direct URL hits.
+ *   - Provider configured but no adapter registered (the current
+ *     scaffolding state) → 501 with `provider_id` in the body so a
+ *     deploy probe can tell which providers still need adapter PRs.
+ *   - Both configured AND adapter registered → delegate to
+ *     `buildAuthorizeUrl` + 302 redirect. (No adapter ships in this
+ *     PR; this branch will activate per-provider.)
+ *
+ * State + PKCE storage will land with the first adapter PR — they
+ * need a server-readable cookie or a short-lived DB row, neither
+ * of which is meaningful without a real provider to redirect into.
+ */
+export async function GET(
+  req: Request,
+  { params }: { params: { provider: string } },
+) {
+  const { userId } = await safeAuth()
+  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
+
+  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
+  if (!isKnownProvider(params.provider)) {
+    return NextResponse.json({ error: 'UNKNOWN_PROVIDER' }, { status: 404 })
+  }
+
+  const url = new URL(req.url)
+  const workspaceId = url.searchParams.get('workspaceId')
+  if (!workspaceId) {
+    return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
+  }
+
+  if (!hasValidDatabaseUrl) {
+    return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
+  }
+
+  const authorized = await verifyWorkspaceMember(userId, workspaceId)
+  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  if (!isProviderConfigured(params.provider)) {
+    const upper = params.provider.toUpperCase()
+    return NextResponse.json(
+      {
+        error: 'PROVIDER_NOT_CONFIGURED',
+        message: `Set LAZYNEXT_OAUTH_${upper}_CLIENT_ID and LAZYNEXT_OAUTH_${upper}_CLIENT_SECRET to enable this provider.`,
+        provider_id: params.provider,
+      },
+      { status: 503 },
+    )
+  }
+
+  const adapter = getOAuthProvider(params.provider)
+  if (!adapter) {
+    return NextResponse.json(
+      {
+        error: 'PROVIDER_ADAPTER_NOT_REGISTERED',
+        message: `${params.provider} is configured (env vars present) but no adapter has been registered yet. Adapters land in their own per-provider PRs.`,
+        provider_id: params.provider,
+      },
+      { status: 501 },
+    )
+  }
+
+  // From here on, an adapter is registered. State + PKCE machinery
+  // lands with the first adapter PR; until then we deliberately do
+  // not call `buildAuthorizeUrl` so an under-construction adapter
+  // can't redirect users into a broken provider flow.
+  return NextResponse.json(
+    {
+      error: 'PROVIDER_FLOW_NOT_IMPLEMENTED',
+      message: 'Authorize-URL construction will land with the adapter PR for this provider.',
+      provider_id: params.provider,
+    },
+    { status: 501 },
+  )
+}
