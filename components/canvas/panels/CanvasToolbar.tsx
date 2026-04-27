@@ -22,6 +22,7 @@ import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { NODE_COLORS, PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
 import { ShareWorkflowDialog } from './ShareWorkflowDialog'
+import { createNodeOnServer } from '@/lib/canvas/persist-helpers'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -44,7 +45,6 @@ const nodeOptions: {
 export function CanvasToolbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
-  const addNode = useCanvasStore((s) => s.addNode)
   const nodes = useCanvasStore((s) => s.nodes)
   const workflowId = useCanvasStore((s) => s.currentWorkflowId)
   const workflowName = useCanvasStore((s) => s.currentWorkflowName)
@@ -58,17 +58,16 @@ export function CanvasToolbar() {
         setIsOpen(false)
         return
       }
-      const id = `node-${Date.now()}`
       const offset = nodes.length * 30
-      addNode({
-        id,
+      void createNodeOnServer({
         type,
+        title: `New ${type}`,
         position: { x: 300 + offset, y: 200 + offset },
-        data: { title: `New ${type}`, status: type === 'task' ? 'todo' : undefined },
+        status: type === 'task' ? 'todo' : undefined,
       })
       setIsOpen(false)
     },
-    [addNode, nodes.length, plan]
+    [nodes.length, plan]
   )
 
   // Keyboard shortcut: N to toggle menu

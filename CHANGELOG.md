@@ -4,6 +4,32 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.14.0] - 2026-04-27
+
+**Theme:** Canvas is fully persistent now. v1.3.13.0 shipped read-hydration + position-drag-persist; this release closes the loop on every other canvas mutation. Creating a node from the toolbar or right-click menu, drawing an edge between two nodes, deleting either via Delete-key — all now POST/DELETE against `/api/v1/nodes` and `/api/v1/edges`. Refresh the page after any of those, and the canvas comes back exactly as you left it. The "per-session scratchpad" comment is gone for good. Scratchpad fallback still works for dev-without-Supabase: when `currentWorkflowId` is null, mutations fabricate client ids exactly like before — no broken UI.
+
+### Added
+
+- `lib/canvas/persist-helpers.ts` — `createNodeOnServer({ type, title, position, data?, status? })` POSTs to `/api/v1/nodes` then adds the server-issued node to the store; `createEdgeOnServer({ source, target })` POSTs to `/api/v1/edges` then adds the row. Both fall back to client-fabricated ids on failure or when no workflow context exists, so the canvas remains usable in scratchpad mode.
+- `lib/canvas/use-canvas-delete-persist.ts` — `useCanvasDeletePersist()` hook. Diffs successive node and edge id sets; any UUID-shaped id that disappears triggers `DELETE /api/v1/nodes/[id]` or `DELETE /api/v1/edges?id=[id]`. Skips client-fabricated ids so scratchpad deletes don't 404 the API. Primes the diff on first hydration so the initial population doesn't fire spurious deletes.
+
+### Changed
+
+- `components/canvas/panels/CanvasToolbar.tsx` — `handleAddNode` now calls `createNodeOnServer` instead of `addNode` directly. Plan-gating still runs first.
+- `components/canvas/WorkflowCanvas.tsx` — context-menu `onCreateNode` calls `createNodeOnServer`. ReactFlow's `onConnect` is now a custom `handleConnect` that calls `createEdgeOnServer` (replacing the store's bare `addEdge` path that didn't persist). `useCanvasDeletePersist` mounted alongside the existing hydration + position hooks. Stale unused `addNode` and `onConnect` store selectors removed.
+- `docs/project-roadmap.md` — header v1.3.13.0 → v1.3.14.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
+### Remaining canvas follow-ups
+
+- Flush pending position writes on `beforeunload` (last 600ms could still drop on tab close — small enough to ship without).
+- Multi-workflow UI: the URL is still `/canvas/default`. A picker + per-workflow URL (`/canvas/[workflowId]`) is a future item, not blocking for any user flow today.
+
 ## [1.3.13.0] - 2026-04-27
 
 **Theme:** Canvas hydrates from the server. The biggest "honest empty state" in the app — `WorkflowCanvas` had been a per-session scratchpad since v1.0, with the `// TODO: server-side persistence` comment hand-waving the gap. This release fixes half of it: the canvas now loads its real nodes and edges from the workspace's default workflow on every mount, and node position drags are persisted via debounced PATCH so layouts survive a page refresh. **Node create/delete and edge create/delete persistence is intentionally deferred to v1.3.14.0** — those callsites currently still fabricate ids and need a coordinated refactor (POST first, then add to store with the server-issued UUID). Also unblocks the v1.3.9.0 share dialog: with a real `currentWorkflowId` in the store, `ShareWorkflowDialog` now wires into the canvas toolbar behind a Share button.
