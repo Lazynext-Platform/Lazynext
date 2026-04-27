@@ -3,6 +3,12 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Privacy Policy — Lazynext',
   description: 'How Lazynext collects, uses, and protects your data.',
+  alternates: { canonical: '/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — Lazynext',
+    description: 'How Lazynext collects, uses, and protects your data.',
+    url: '/privacy',
+  },
 }
 
 export default function PrivacyPage() {

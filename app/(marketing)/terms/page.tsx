@@ -3,6 +3,12 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Terms of Service — Lazynext',
   description: 'Terms governing your use of the Lazynext platform.',
+  alternates: { canonical: '/terms' },
+  openGraph: {
+    title: 'Terms of Service — Lazynext',
+    description: 'Terms governing your use of the Lazynext platform.',
+    url: '/terms',
+  },
 }
 
 export default function TermsPage() {
