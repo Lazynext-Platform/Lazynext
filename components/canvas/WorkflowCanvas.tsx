@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from 'react'
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
@@ -25,6 +26,7 @@ import { NodeDetailPanel } from './panels/NodeDetailPanel'
 import { CanvasContextMenu } from './panels/CanvasContextMenu'
 import { WorkflowEdge } from './edges/WorkflowEdge'
 import CollaborationOverlay from './CollaborationOverlay'
+import { useCollaboration } from '@/lib/realtime/use-collaboration'
 import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
@@ -55,6 +57,14 @@ const defaultNodes: Node[] = []
 const defaultEdges: Edge[] = []
 
 export function WorkflowCanvas() {
+  return (
+    <ReactFlowProvider>
+      <WorkflowCanvasInner />
+    </ReactFlowProvider>
+  )
+}
+
+function WorkflowCanvasInner() {
   const nodes = useCanvasStore((s) => s.nodes)
   const edges = useCanvasStore((s) => s.edges)
   const onNodesChange = useCanvasStore((s) => s.onNodesChange)
@@ -67,7 +77,14 @@ export function WorkflowCanvas() {
   const isNodePanelOpen = useCanvasStore((s) => s.isNodePanelOpen)
 
   const isMobile = useUIStore((s) => s.isMobile)
+  const workspaceId = useWorkspaceStore((s) => s.workspace?.id ?? null)
   const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+
+  const collaborators = useCollaboration({
+    workspaceId,
+    selectedNodeId,
+    enabled: !isMobile,
+  })
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -143,7 +160,7 @@ export function WorkflowCanvas() {
         <NodeDetailPanel nodeId={selectedNodeId} />
       )}
 
-      <CollaborationOverlay collaborators={[]} isMobile={false} />
+      <CollaborationOverlay collaborators={collaborators} isMobile={false} />
     </div>
   )
 }

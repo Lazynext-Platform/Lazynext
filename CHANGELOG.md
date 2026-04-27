@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.6.0] - 2026-04-27
+
+**Theme:** Real-time multiplayer cursors land on the canvas. The roadmap's marquee feature — "Real-time Collaboration" — has rendered `<CollaborationOverlay collaborators={[]} />` since v1.0.0. This release wires it to actual presence: open the canvas in two browsers signed in to the same workspace and you see each other move. New `useCollaboration` hook subscribes to a Supabase Realtime presence channel keyed on `workspaceId`, broadcasts the local user's cursor in flow coordinates (so the position survives independent pan/zoom on each client), tracks `selectedNodeId` so peer selections light up node rings, and projects incoming peer cursors back to screen coordinates via ReactFlow's `flowToScreenPosition` for direct render. Cursor broadcasts are throttled to ~30 Hz. The hook is mobile-disabled (cursors don't make sense on touch). `CollaborationOverlay` now uses `position: fixed` for cursor layers (clientX/Y is viewport-relative), keeping the existing pill + name + typing animation. `WorkflowCanvas` is now wrapped in `<ReactFlowProvider>` so the hook can call `useReactFlow()` from outside the `<ReactFlow>` tree. Color is picked deterministically from the user id hash across the existing 6-color palette.
+
+### Added
+
+- `lib/realtime/use-collaboration.ts` — typed React hook returning `PresentCollaborator[]` (every workspace peer except self). Wraps `supabase.channel('presence:workspace:{id}')`, throttles cursor broadcasts via `performance.now()`, re-tracks on selection/typing changes without resubscribing, hashes user id → color, and converts flow ↔ screen coords. Cleans up channel on unmount.
+
+### Changed
+
+- `components/canvas/WorkflowCanvas.tsx` — split into outer `WorkflowCanvas` (provides `<ReactFlowProvider>`) and inner `WorkflowCanvasInner`. The inner component reads `workspace.id` and the active selection from the existing canvas store, calls `useCollaboration`, and passes the live `collaborators` array to `<CollaborationOverlay />` instead of the empty placeholder.
+- `components/canvas/CollaborationOverlay.tsx` — peer cursor layer switched from `absolute` + `left/top` to `fixed` + `transform: translate(x, y)` to align with the viewport-relative coordinates the hook now publishes. The presence counter (top-right avatars), node selection rings, and typing dots are unchanged.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 153/153 passing across 20 files (no test changes — the hook is exercised by the live channel only; integration smoke is manual via two browser windows).
+- Production build: ✅ clean.
+- No new tables, no migration. Uses Supabase Realtime presence (no extra row writes, no extra cost).
+
 ## [1.3.5.0] - 2026-04-27
 
 **Theme:** Two more features off the *Remaining work* list — Settings → Notifications and Activity → Audit Log are real. v1.3.4.0 shipped the `notifications` table; this release adds the `notification_preferences` table that lets each user mute specific event types per workspace (the in-app delivery path now consults preferences before inserting a notification row), plus the `audit_log` table that records workspace, decision, and node mutations with actor + IP + user-agent + JSON metadata. Settings → Notifications tab is rewritten as a real client component (`NotificationsTab.tsx`) that fetches every user's 7-row preference matrix on mount and bulk-PATCHes changes — email toggles are visible but disabled until SMTP delivery ships (honest hint shown). Activity → Audit Log replaces its static "Enterprise feature" placeholder with a live `AuditPanel`: Business+ workspaces see the real cursor-paginated log (Actor / Action / Timestamp / IP / User-Agent), Free/Starter workspaces see an upgrade CTA. Audit writes are wired into `PATCH /api/v1/workspace/[slug]` (workspace.update with diff metadata), `POST /api/v1/decisions` (decision.create with question + qualityScore), `POST /api/v1/nodes` (node.create with type + title), `PATCH /api/v1/nodes/[id]` (node.update with changed-keys list), and `DELETE /api/v1/nodes/[id]` (node.delete). Workspace deletion deliberately does not write an audit row because the cascade FK would orphan it post-hoc — the absence of subsequent rows is itself the deletion signal. Plan-gating uses the existing `hasFeature(plan, 'audit-log')` helper which already returns true only for Business + Enterprise. All audit inserts are best-effort: a failed audit write never 500s the underlying mutation.
