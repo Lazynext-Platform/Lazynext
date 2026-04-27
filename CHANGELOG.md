@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.5] - 2026-04-27
+
+**Theme:** Marketing pricing page now reads from the same constants as everything else. The landing `PricingSection` already imported `PLAN_PRICING_USD` / `PLAN_PRICING_USD_ANNUAL`, and `BillingClient` was synced in v1.3.23.0, but the `/pricing` route was still hardcoding `'19'`, `'15'`, `'30'`, `'24'` strings — the exact drift pattern that bit `BillingClient` in v1.3.23.0 ($9/$19/$49 mismatch). Closed before it bit again.
+
+### Changed
+- `app/(marketing)/pricing/page.tsx` — imports `PLAN_PRICING_USD` + `PLAN_PRICING_USD_ANNUAL` and derives Team/Business `monthlyPrice` + `annualPrice` via `String(PLAN_PRICING_USD.starter)` etc. instead of hardcoded literals. Now a single edit in `lib/utils/constants.ts` propagates to every price surface (BillingClient, landing PricingSection, and the marketing `/pricing` page).
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.4] - 2026-04-27
 
 **Theme:** Funnel coverage for `full-upgrade` modal entry points. Five gated surfaces (node-limit, ai-limit, member-limit, decision-limit, workspace-limit, sso-gate) all emit `paywall.gate.shown` before opening the modal, but the three generic "Upgrade" / "Change plan" buttons that surface the `full-upgrade` variant did not — the modal-open event existed but the upstream gate event didn't, so funnel queries filtering on `paywall.gate.shown` undercounted the `full-upgrade` denominator.
