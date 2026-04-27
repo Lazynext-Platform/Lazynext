@@ -7,6 +7,7 @@ import { useCanvasStore } from '@/stores/canvas.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { cn } from '@/lib/utils/cn'
 import { WorkflowFormModal } from './WorkflowFormModal'
+import { ConfirmModal } from '@/components/ui/ConfirmModal'
 
 interface Workflow {
   id: string
@@ -18,6 +19,7 @@ type ModalState =
   | { kind: 'closed' }
   | { kind: 'create' }
   | { kind: 'rename'; id: string; name: string }
+  | { kind: 'delete'; workflow: Workflow }
 
 /**
  * Picker dropdown anchored at the top-left of the canvas. Lists every
@@ -129,12 +131,9 @@ export function WorkflowPicker() {
   }
 
   async function deleteWorkflow(w: Workflow) {
-    const ok = window.confirm(
-      `Delete "${w.name}"? Its nodes and edges will be removed. This cannot be undone.`,
-    )
-    if (!ok) return
     const res = await fetch(`/api/v1/workflows/${w.id}`, { method: 'DELETE' })
     if (!res.ok) return
+    setModal({ kind: 'closed' })
     setWorkflows((ws) => ws.filter((x) => x.id !== w.id))
     if (w.id === currentWorkflowId && slug) {
       // Falls back to the workspace's first surviving workflow (or
@@ -209,7 +208,7 @@ export function WorkflowPicker() {
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
-                        onClick={() => deleteWorkflow(w)}
+                        onClick={() => setModal({ kind: 'delete', workflow: w })}
                         aria-label={`Delete ${w.name}`}
                         title="Delete"
                         className="rounded-md p-1.5 text-slate-400 hover:bg-slate-800 hover:text-rose-400"
@@ -246,6 +245,16 @@ export function WorkflowPicker() {
           initialName={modal.name}
           onClose={() => setModal({ kind: 'closed' })}
           onSubmit={(name) => submitRename(modal.id, name)}
+        />
+      )}
+      {modal.kind === 'delete' && (
+        <ConfirmModal
+          title={`Delete "${modal.workflow.name}"?`}
+          description="Its nodes and edges will be removed. This cannot be undone."
+          confirmLabel="Delete"
+          variant="danger"
+          onCancel={() => setModal({ kind: 'closed' })}
+          onConfirm={() => deleteWorkflow(modal.workflow)}
         />
       )}
     </div>

@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.17.1 — shipped + deployed
+> **Current Milestone**: v1.3.18.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---

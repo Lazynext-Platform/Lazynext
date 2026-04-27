@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.18.0] - 2026-04-27
+
+**Theme:** Confirm in-app, not in the OS chrome. Replaces the workflow-delete `window.confirm` with a real branded confirmation modal, plus locks down the new batch-positions endpoint with regression tests.
+
+### Added
+
+- `components/ui/ConfirmModal.tsx` — reusable confirmation modal with Esc-close, backdrop-cancel, autofocused confirm button, and a `variant: 'danger'` painting (rose-600 + AlertTriangle icon) for irreversible actions. Accepts a confirm handler that may be async; shows a spinner while in-flight and disables the button to block double-submits.
+- `tests/unit/batch-positions.test.ts` — 7 new unit tests covering the v1.3.15.0 batch positions zod schema: single update, empty array rejection, non-UUID rejection, non-integer rejection, oversized batch (> 200) rejection, 200-entry boundary acceptance, missing field rejection.
+
+### Changed
+
+- `components/canvas/panels/WorkflowPicker.tsx` — delete now opens a `ConfirmModal` (danger variant) instead of `window.confirm`. The delete fetch lives behind the modal's confirm handler, so the spinner shows while the DELETE request is in flight — you no longer wonder whether the click registered.
+- `docs/project-roadmap.md` — header v1.3.17.1 → v1.3.18.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ **175/175** passing across 25 files (was 168/24).
+- Production build: ✅ clean.
+
 ## [1.3.17.1] - 2026-04-27
 
 **Hotfix:** Onboarding tour step 7 was spotlighting the wrong button and overlapping the sidebar. The selector `button[aria-label="Open LazyMind AI assistant"]` matched the bottom-of-sidebar LazyMind button (the first occurrence in the DOM) instead of the prominent top-bar CTA. Spotlight landed bottom-left, then `placement: 'left'` tried to render the tooltip further left, got viewport-clamped, and ended up blanketing the sidebar. Step 8 (Command Palette) was also broken — it targeted `button[aria-label="Open command palette"]`, an aria-label nothing in the codebase actually had.
