@@ -4,6 +4,30 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.29.0] - 2026-04-28
+
+**Theme:** API key issuance ships. Settings → Integrations → API Access is no longer a static `coming soon` placeholder — Enterprise-plan workspaces can now generate, list, and revoke real workspace-scoped API keys end-to-end. Keys follow the standard `lzx_<base64url>` namespace pattern (greppable in logs, GitHub-secret-scanning friendly), are stored as SHA-256 hashes (never recoverable from a DB dump), and the plaintext is shown to the user exactly once at creation time. The route handlers reuse the same plan-gate, rate-limit, and workspace-membership helpers as the rest of the v1 API; revocation is composite-key safe (workspace + id) so a stale id from another workspace can never delete cross-tenant. The middleware that *consumes* keys to authenticate inbound REST traffic is intentionally a follow-up PR — this release ships the issuance UX in isolation so it can be reviewed cleanly.
+
+### Added
+- `supabase/migrations/20260428000001_api_keys.sql` — `api_keys` table. Columns: `id`, `workspace_id` (FK + cascade), `user_id` (creator, FK + cascade), `name` (required label), `key_hash` (UNIQUE, the SHA-256 lookup column), `key_prefix` (8-char display affordance), `last_used_at`, `expires_at` (optional self-imposed expiry), `created_at`. RLS enabled, service-role only. Index on `(workspace_id, created_at DESC)` for the Settings list query.
+- `lib/data/api-keys.ts` — `mintApiKey` (generates plaintext + hash + prefix), `hashApiKey` (deterministic for inbound auth lookups), `listApiKeys`, `createApiKey`, `deleteApiKey` (composite-key safe). Row shape **deliberately omits `key_hash`** so a Settings render can never accidentally surface the lookup hash.
+- `app/api/v1/api-keys/route.ts` — `GET ?workspaceId=<uuid>` lists keys; `POST` mints a new key. Plan-gated to `business`/`enterprise` slugs (Enterprise tier per `lib/utils/plan-gates.ts`). The plaintext is returned in the POST response body **exactly once** — the client surfaces it to the user and discards it.
+- `app/api/v1/api-keys/[id]/route.ts` — `DELETE ?workspaceId=<uuid>` revokes a key. UUID shape validation before the DB hit, 404 on no-match.
+- `components/ui/ApiKeysPanel.tsx` — client component on the Integrations page. Three states: plan-locked (shows upgrade nudge with `Contact sales` link), unlocked-empty (shows the create form), unlocked-with-keys (form + list + per-row revoke + just-created reveal banner with one-shot `Copy` button). Reveal banner drops the plaintext after the user dismisses it; never persisted client-side.
+- `tests/unit/api-keys.test.ts` — 11 cases covering: `lzx_` namespace, 32-byte entropy, sha-256 hash format, prefix relationship, key uniqueness, hash determinism, snake_case→camelCase mapping, the explicit assertion that `key_hash` never leaks into the API response shape, db-error fallback, name trim+truncate, composite-key delete success/no-match/error.
+
+### Changed
+- `lib/utils/plan-gates.ts` — added `'api-keys': ['business', 'enterprise']` (Enterprise-tier feature, sits alongside `audit-log` and `sso` in the same trust band).
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — the static `Generate API key (coming soon)` block was replaced with `<ApiKeysPanel />`. The badge now reads `Enterprise plan` (was `Business Plan`) to match the actual plan slug requirement.
+
+### Why this matters
+- The fourth and final "coming soon" surface inside the app is gone. Settings → Integrations now ships a real, working Enterprise feature instead of a decorative placeholder. Keys are bearer tokens with industry-standard handling: namespace, SHA-256 hash, prefix display, one-shot reveal. The middleware that authenticates inbound traffic with these keys is the obvious next ship.
+
+### Deferred (intentionally)
+- Inbound API authentication middleware (validates `Authorization: Bearer lzx_...` against `key_hash`, updates `last_used_at`).
+- Per-key scopes (read-only vs read-write). Today every key has implicit owner access.
+- Audit-log entries on key creation/revocation. The hooks exist; wiring is one line per route handler.
+
 ## [1.3.28.2] - 2026-04-28
 
 **Theme:** Roadmap sync. Three back-to-back ships (v1.3.28.0, v1.3.28.1) landed without updating `docs/project-roadmap.md`. This release re-anchors the roadmap header to v1.3.28.1, updates the *Remaining work* descriptions to reflect what shipped, and adds a Change Log entry. No code changes.

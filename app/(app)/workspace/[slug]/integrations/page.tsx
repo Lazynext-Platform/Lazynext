@@ -1,5 +1,5 @@
 import { redirect, notFound } from 'next/navigation'
-import { Plug, Lock, CheckCircle2 } from 'lucide-react'
+import { Plug, CheckCircle2 } from 'lucide-react'
 import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { getWorkspaceBySlug } from '@/lib/data/workspace'
 import { listOAuthConnections } from '@/lib/data/oauth-connections'
@@ -11,6 +11,12 @@ import {
 } from '@/lib/oauth/registry'
 import { cn } from '@/lib/utils/cn'
 import { ConnectionTile } from '@/components/ui/ConnectionTile'
+import { ApiKeysPanel } from '@/components/ui/ApiKeysPanel'
+
+// Plan slugs that unlock API keys. Mirrors `lib/utils/plan-gates.ts`'s
+// `'api-keys'` entry. Kept inline so the client component never
+// has to import server-only code.
+const API_KEYS_UNLOCKED_PLANS = ['business', 'enterprise'] as const
 
 export const dynamic = 'force-dynamic'
 
@@ -160,27 +166,11 @@ export default async function IntegrationsPage({ params }: { params: { slug: str
       </div>
 
       {/* API Access */}
-      <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-slate-200">API Access</h2>
-            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-3xs font-bold text-amber-400">Business Plan</span>
-          </div>
-          <Lock className="h-4 w-4 text-slate-500" />
-        </div>
-        <p className="mt-1 text-xs text-slate-500">Use the REST API for custom integrations and data management.</p>
-        <div className="mt-4 rounded-lg border border-slate-700 bg-slate-800 p-3">
-          <p className="text-xs text-slate-400">
-            API key issuance ships with the Business plan. You don&apos;t have a key yet — once issued, it will appear here with copy and rotate controls.
-          </p>
-          <button
-            disabled
-            className="mt-3 cursor-not-allowed rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-500"
-          >
-            Generate API key (coming soon)
-          </button>
-        </div>
-      </div>
+      <ApiKeysPanel
+        workspaceId={workspace.id}
+        plan={workspace.plan}
+        unlockedPlans={API_KEYS_UNLOCKED_PLANS}
+      />
     </div>
   )
 }

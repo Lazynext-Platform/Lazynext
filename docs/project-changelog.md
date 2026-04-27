@@ -6,6 +6,28 @@
 
 ---
 
+## [v1.3.29.0] - 2026-04-28 — API key issuance
+
+**Theme:** Settings → Integrations → API Access ships as a real feature. Enterprise workspaces can generate, list, and revoke `lzx_`-namespaced API keys with SHA-256-hashed storage and one-shot plaintext reveal.
+
+### Added
+- `supabase/migrations/20260428000001_api_keys.sql` — `api_keys` table (RLS, service-role only).
+- `lib/data/api-keys.ts` — mint/hash/list/create/delete. Row shape never includes `key_hash`.
+- `app/api/v1/api-keys/{route,[id]/route}.ts` — GET/POST/DELETE. Plan-gated to Enterprise.
+- `components/ui/ApiKeysPanel.tsx` — client UI: locked / empty / list states + reveal banner.
+- `tests/unit/api-keys.test.ts` — 11 cases (240 → 251 total).
+
+### Changed
+- `lib/utils/plan-gates.ts` — added `'api-keys': ['business', 'enterprise']`.
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — static placeholder replaced with `<ApiKeysPanel />`.
+
+### Deferred
+- Inbound auth middleware (validates bearer keys against `key_hash`).
+- Per-key scopes.
+- Audit-log entries on key create/revoke.
+
+---
+
 ## [v1.3.28.2] - 2026-04-28 — Roadmap sync
 
 No code changes. `docs/project-roadmap.md` re-anchored to v1.3.28.1 with updated *Remaining work* descriptions and a Change Log entry.
