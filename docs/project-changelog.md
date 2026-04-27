@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.12.0] — CSV export for decisions everywhere (2026-04-27)
+
+The Settings → Export page has been JSON-only since v1.0, and v1.3.11.0's exec report could only save as PDF. This release adds CSV everywhere decisions are exportable: a Format dropdown on the Decisions Only Export card (JSON / CSV), plus a CSV button next to "Print / Save as PDF" on the exec report. New endpoint `GET /api/v1/decisions/export-csv?workspaceId=<uuid>&range=7|30|90|365` returns a streamed CSV with `content-disposition: attachment` so browsers download instead of rendering. New utility `lib/utils/decisions-csv.ts` is a tiny RFC 4180-ish serializer (no Papa Parse dep) — escapes commas/quotes/newlines, doubles embedded quotes, joins arrays (`tags`, `stakeholders`, `options_considered`) with `; ` so they survive a single cell, CRLF line terminators. Stable column order so spreadsheet templates against the schema don't break across exports. **168/168** tests passing across 24 files (added 4 new in `tests/unit/decisions-csv.test.ts`). Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13120---2026-04-27).
+
+---
+
 ## [1.3.11.0] — Decision DNA executive report (2026-04-27)
 
 The Decision DNA exec report had been a roadmap backlog item since v1.0 — listed as "PDF/exec report" with no implementation. Rather than add a heavy PDF render dependency for a single-page report, this release ships a server-rendered, print-optimized HTML page at `/workspace/[slug]/decisions/report` that uses the browser's native "Save as PDF". Header (workspace name, date range, generation timestamp) → 4-stat overview (total, avg quality, successful, failed with % of tagged) → status breakdown → top 5 quality decisions → failed-outcome lessons → full log → footer with provenance note. Range filter via `?range=7|30|90|365` (default: All). Print stylesheet hides the action bar and back link so the saved PDF is the report alone, page-broken cleanly with `break-inside-avoid` on each card. Linked from the Decisions page header next to "Log Decision" as an "Exec report" button. Roadmap *Remaining work* 5 → 4; fully wired 33 → 34; backend-wired 87% → 89%. Type-check clean, **164/164** tests passing, build clean.
