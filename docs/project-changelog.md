@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.18.0] — ConfirmModal + batch-positions tests (2026-04-27)
+
+Replaces the workflow-delete `window.confirm` with a reusable, branded `ConfirmModal` (Esc-close, backdrop-cancel, autofocused confirm, `variant: 'danger'` painting in rose-600). The delete fetch now lives behind the modal's confirm handler, so the spinner shows while the DELETE request is in flight. Also adds 7 unit tests for the v1.3.15.0 batch positions zod schema — single update, empty array, non-UUID, non-integer, oversized (>200), 200-entry boundary, missing field. **175/175** tests passing across 25 files (was 168/24). Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13180---2026-04-27).
+
+---
+
 ## [1.3.17.1] — Tour overlap hotfix (2026-04-27)
 
 Onboarding tour step 7 (LazyMind) was spotlighting the wrong button and overlapping the sidebar. The selector `button[aria-label="Open LazyMind AI assistant"]` matched the bottom-of-sidebar LazyMind button — the first occurrence in DOM order — instead of the prominent top-bar CTA. Spotlight landed bottom-left, then `placement: 'left'` tried to render the tooltip further left, got viewport-clamped, and blanketed the sidebar. Step 8 (Command Palette) was also broken: it targeted an aria-label nothing in the codebase had. Fix: added `data-tour="lazymind-button"` + `data-tour="command-palette"` to the TopBar CTAs and switched the tour to those selectors with `placement: 'bottom'`. **168/168** tests passing across 24 files. Type-check clean, build clean.
