@@ -132,7 +132,21 @@ export function Sidebar({ workspaceSlug }: { workspaceSlug: string }) {
           <ul className="mt-2 space-y-0.5">
             {visibleNavItems.map((item) => {
               const href = `${base}${item.href}`
-              const isActive = item.href === '' ? pathname === base : pathname.startsWith(href)
+              // Pick the *longest* matching href across the visible items
+              // and only that one wins. Without this, /decisions/outcomes
+              // lights up both "Decisions" (parent) and "Outcomes"
+              // (sibling) because both prefixes match the pathname.
+              const matchingHrefs = visibleNavItems
+                .map((i) => `${base}${i.href}`)
+                .filter((h) => pathname === h || pathname.startsWith(`${h}/`))
+              const longestMatch = matchingHrefs.reduce(
+                (best, h) => (h.length > best.length ? h : best),
+                '',
+              )
+              const isActive =
+                item.href === ''
+                  ? pathname === base
+                  : longestMatch === href
               return (
                 <li key={item.label}>
                 <Link

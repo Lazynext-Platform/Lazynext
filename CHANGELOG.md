@@ -4,6 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.18.1] - 2026-04-27
+
+**Hotfix:** Sidebar lit up two nav items at once on `/decisions/outcomes`. Active matching used `pathname.startsWith(href)`, so both `/workspace/x/decisions` *and* `/workspace/x/decisions/outcomes` claimed the active styling — "Decisions" highlighted as the parent and "Outcomes" highlighted as the leaf, simultaneously.
+
+### Fixed
+
+- `components/layout/Sidebar.tsx` — active matching now picks the *longest* matching href across the visible nav items and only that one wins. Also requires `pathname.startsWith(`${href}/`)` (with the trailing slash) so `/decisions-archive` would never falsely activate `/decisions`. The bug only surfaced once `/decisions/outcomes` was added as a sibling nav item; the parent-only navigation worked correctly.
+- `docs/project-roadmap.md` — header v1.3.18.0 → v1.3.18.1.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 175/175 passing across 25 files.
+- Production build: ✅ clean.
+
 ## [1.3.18.0] - 2026-04-27
 
 **Theme:** Confirm in-app, not in the OS chrome. Replaces the workflow-delete `window.confirm` with a real branded confirmation modal, plus locks down the new batch-positions endpoint with regression tests.
