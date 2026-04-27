@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.10.0] - 2026-04-27
+
+**Theme:** Multi-workspace switcher is real. The `WorkspaceSelector` in the sidebar has been display-only since v1.3.3.6 (round 15) — a static badge with no dropdown, no "create workspace" affordance, and no way to switch between workspaces a user belongs to. Users with multiple workspace memberships had to type `/workspace/{slug}` URLs by hand. This release ships the dropdown: click the workspace badge, get a lazy-loaded list of every workspace you're a member of (with role tags), click one to route to `/workspace/{slug}`, or hit "Create workspace" to drop into onboarding. Backed by a new authenticated endpoint, `GET /api/v1/workspaces`, that joins `workspace_members` to `workspaces` for the current user. Roadmap *Remaining work* count 6 → 5; fully wired count 32 → 33; backend-wired bar 84% → ~87%.
+
+### Added
+
+- `app/api/v1/workspaces/route.ts` — `GET` returns `Array<{ id, name, slug, plan, logo, role }>` for every workspace the authenticated user is a member of, sorted alphabetically. Used by the sidebar switcher; no caching (`cache: 'no-store'` from the client) so a freshly created workspace appears immediately on the next dropdown open.
+- `WorkspaceSelector` dropdown — `aria-haspopup="menu"`, outside-click + Esc dismissal, lazy-loads the list on first open (no upfront round-trip cost), shows role per row, marks the active workspace with a checkmark, includes a "Create workspace" link to `/onboarding`.
+
+### Changed
+
+- `components/layout/WorkspaceSelector.tsx` — replaced the static display-only badge with the real switcher described above. The button now carries `aria-label="Switch workspace (current: {name})"` so screen readers announce its function. Switching is implemented as `router.push('/workspace/{slug}')` — the existing `WorkspaceHydrator` on that route refreshes the Zustand store from the new slug, so no extra wiring is needed.
+- `docs/project-roadmap.md` — header v1.3.9.0 → v1.3.10.0; dropped multi-workspace switcher from *Remaining work*; fully-wired 32 → 33; backend-wired bar 84% → 87%.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 164/164 passing across 23 files.
+- Production build: ✅ clean.
+
 ## [1.3.9.0] - 2026-04-27
 
 **Theme:** Public Shared Canvas is real. The `/shared/[id]` route shipped with v1.0.0 and has rendered "Shared canvas not found / sharing is in development" for every URL ever since (no `share_token` column, no link-issuance flow, no read-only renderer). This release ships all three. Workflows now carry an optional `share_token` UUID that doubles as authorization for anonymous reads — no broad anon RLS policy needed; the public route is the single chokepoint and reads via the service-role admin client filtered by token. Sharing is opt-in per workflow; revoking nulls the token and instantly invalidates every existing public link; regenerating mints a fresh token (also instantly invalidating the old). Public viewer is a read-only ReactFlow canvas (`nodesDraggable=false`, `nodesConnectable=false`, `elementsSelectable=false`), no member identities exposed, no API surface beyond the read. Header shows workspace name + canvas name + description and a "Build your own canvas" CTA. Roadmap fully wired count 31 → 32; backend-wired bar 82% → 84%.
