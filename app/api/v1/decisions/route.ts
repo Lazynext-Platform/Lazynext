@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { scoreDecision } from '@/lib/ai/decision-scorer'
 import { incrementWmsFor } from '@/lib/wms'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { notifyWorkspaceMembers } from '@/lib/data/notifications'
 
 const createSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -104,6 +105,20 @@ export async function POST(req: Request) {
   if (scoreResult.overall > 0) {
     // noop; future calibration hook
   }
+// Fan out a workspace-wide notification (every member except the actor).
+  // Non-blocking: notification failures must not 500 the decision write.
+  const { data: workspace } = await db.from('workspaces').select('slug').eq('id', parsed.data.workspaceId).maybeSingle()
+  const slug = (workspace as { slug?: string } | null)?.slug
+  await notifyWorkspaceMembers({
+    workspaceId: parsed.data.workspaceId,
+    actorId: userId,
+    type: 'decision_logged',
+    title: 'New decision logged',
+    body: parsed.data.question.slice(0, 280),
+    link: slug ? `/workspace/${slug}/decisions/${decision.id}` : null,
+    relatedDecisionId: decision.id,
+  }).catch(() => undefined)
 
+  
   return NextResponse.json({ data: decision, error: null }, { status: 201 })
 }

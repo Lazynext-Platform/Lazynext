@@ -2,7 +2,15 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-26
+> **Last Updated**: 2026-04-27
+
+---
+
+## [1.3.4.0] — First feature off the *Remaining work* list: the bell is real (2026-04-27)
+
+After 17 rounds of demo-data eradication replaced fabricated fixtures with honest empty states, the *Remaining work* table in the roadmap listed 13 features still shipping as UI shells with no backend. This release ships the first one: **Notification Center**. New `notifications` table (Postgres enum, RLS, three policies). New `lib/data/notifications.ts` with `createNotification` / `notifyWorkspaceMembers` / `listNotifications` / `markNotificationRead` / `markAllNotificationsRead` — actor projection hydrated via the admin API so the bell can render real initials, names, and avatars. New API: `GET /api/v1/notifications?workspaceId=…`, `PATCH /api/v1/notifications` for mark-all-read, `PATCH /api/v1/notifications/[id]` for single mark-read. Two real event hooks wired: `POST /api/v1/decisions` fans out a `decision_logged` notification to every workspace member except the actor (with a deep link); `POST /api/v1/nodes` and `PATCH /api/v1/nodes/[id]` insert `task_assigned` when assignedTo parses as a UUID matching a workspace member (the column is free-form `VARCHAR(255)`, so assignment-by-email/name is silently skipped — honest). `NotificationCenter` rewired: fetches real data, polls every 60s, optimistic mark-read, click-through follows the stored deep link, real relative timestamps, Today / Yesterday / Earlier grouping. Self-actions suppressed (no self-notify). Notification failures never block the underlying mutation. Roadmap header synced to v1.3.4.0 with a new *Remaining work* table that drops Notification Center from the list. Type-check clean, **147/147** tests passing (143 existing + 4 new), build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1340---2026-04-27).
 
 ---
 
