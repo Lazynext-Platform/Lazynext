@@ -1,16 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { Activity, Filter, ShieldCheck, GitBranch, MessageCircle, FileText, CheckSquare, Zap, Table, BarChart3 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Activity, ShieldCheck, GitBranch, MessageCircle, FileText, CheckSquare, Zap, Table, BarChart3, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import type { ActivityEvent, MemberUser } from '@/lib/data/workspace'
+import { hasFeature } from '@/lib/utils/plan-gates'
+import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Tab = 'feed' | 'audit'
+type Plan = keyof typeof PLAN_LIMITS
 
 interface Props {
   events: ActivityEvent[]
   members: MemberUser[]
   workspaceName: string
+  workspaceId: string
+  workspacePlan: string
 }
 
 const resourceIcon: Record<ActivityEvent['resourceType'], { icon: typeof Activity; color: string }> = {
@@ -67,8 +72,9 @@ function actionVerb(e: ActivityEvent): string {
   }
 }
 
-export function ActivityClient({ events, members, workspaceName }: Props) {
+export function ActivityClient({ events, members, workspaceName, workspaceId, workspacePlan }: Props) {
   const [tab, setTab] = useState<Tab>('feed')
+  const auditEntitled = hasFeature(workspacePlan as Plan, 'audit-log')
 
   const memberById = new Map(members.map((m) => [m.userId, m]))
   const buckets = bucketByDate(events)
@@ -165,25 +171,176 @@ export function ActivityClient({ events, members, workspaceName }: Props) {
       )}
 
       {tab === 'audit' && (
-        <div className="mt-6">
-          <div className="mb-3 flex items-center gap-2">
-            <button
-              disabled
-              className="flex cursor-not-allowed items-center gap-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-500 opacity-60"
-            >
-              <Filter className="h-3 w-3" /> Filter
-            </button>
+        <AuditPanel workspaceId={workspaceId} entitled={auditEntitled} />
+      )}
+    </div>
+  )
+}
+
+// ─── Audit Log panel ────────────────────────────────────────────────
+// Plan-gated. Business+/Enterprise see the live audit_log table; lower
+// tiers see an honest upgrade prompt. Cursor-paginated by created_at.
+
+interface AuditView {
+  id: string
+  workspace_id: string
+  actor_id: string | null
+  action: string
+  resource_type: string | null
+  resource_id: string | null
+  metadata: Record<string, unknown>
+  ip: string | null
+  user_agent: string | null
+  created_at: string
+  actor: {
+    id: string | null
+    name: string | null
+    email: string | null
+    avatarUrl: string | null
+  } | null
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  'workspace.update': 'updated workspace',
+  'workspace.delete': 'deleted workspace',
+  'decision.create': 'logged decision',
+  'decision.update': 'updated decision',
+  'decision.delete': 'deleted decision',
+  'node.create': 'created node',
+  'node.update': 'updated node',
+  'node.delete': 'deleted node',
+  'member.invite': 'invited member',
+  'member.remove': 'removed member',
+  'member.role_update': 'changed member role',
+}
+
+function AuditPanel({ workspaceId, entitled }: { workspaceId: string; entitled: boolean }) {
+  const [items, setItems] = useState<AuditView[]>([])
+  const [cursor, setCursor] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState(false)
+
+  useEffect(() => {
+    if (!entitled) return
+    let cancelled = false
+    void (async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const res = await fetch(`/api/v1/audit-log?workspaceId=${workspaceId}`)
+        if (!res.ok) {
+          if (res.status === 503) setError('Audit-log backend is not configured.')
+          else setError('Failed to load audit log.')
+          return
+        }
+        const json = (await res.json()) as { data: { items: AuditView[]; nextCursor: string | null } }
+        if (!cancelled) {
+          setItems(json.data.items)
+          setCursor(json.data.nextCursor)
+          setDone(json.data.nextCursor === null)
+        }
+      } catch {
+        if (!cancelled) setError('Failed to load audit log.')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [workspaceId, entitled])
+
+  const loadMore = async () => {
+    if (!cursor) return
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/v1/audit-log?workspaceId=${workspaceId}&cursor=${encodeURIComponent(cursor)}`)
+      if (!res.ok) return
+      const json = (await res.json()) as { data: { items: AuditView[]; nextCursor: string | null } }
+      setItems((prev) => [...prev, ...json.data.items])
+      setCursor(json.data.nextCursor)
+      setDone(json.data.nextCursor === null)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!entitled) {
+    return (
+      <div className="mt-6">
+        <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-12 text-center">
+          <ShieldCheck className="mx-auto h-12 w-12 text-slate-600" />
+          <p className="mt-4 text-base font-medium text-slate-200">
+            Audit log is a Business plan feature
+          </p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+            Upgrade to Business to see a per-event audit trail with actor, IP, user-agent, and metadata.
+            The Feed tab still shows everything that happens in this workspace on every plan.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-6">
+      <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+        <div className="grid grid-cols-[auto_1fr_auto] gap-4 border-b border-slate-800 px-4 py-2 text-2xs font-semibold uppercase tracking-widest text-slate-500">
+          <span>Actor</span>
+          <span>Action</span>
+          <span className="text-right">When</span>
+        </div>
+        {loading && items.length === 0 && (
+          <div className="flex items-center justify-center gap-2 py-12 text-xs text-slate-400">
+            <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin" /> Loading…
           </div>
-          <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900 p-12 text-center">
-            <ShieldCheck className="mx-auto h-12 w-12 text-slate-600" />
-            <p className="mt-4 text-base font-medium text-slate-200">
-              Detailed audit logs are an Enterprise feature
-            </p>
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-              Per-event audit trail with IP, user agent, and actor metadata is coming soon.
-              In the meantime, the Feed tab shows everything that happens in this workspace.
+        )}
+        {error && (
+          <div className="px-6 py-12 text-center text-sm text-amber-300">{error}</div>
+        )}
+        {!loading && !error && items.length === 0 && (
+          <div className="px-6 py-12 text-center">
+            <ShieldCheck className="mx-auto h-8 w-8 text-slate-600" />
+            <p className="mt-3 text-sm font-medium text-slate-300">No audit events yet</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Actions like editing the workspace, logging a decision, or assigning a task will appear here.
             </p>
           </div>
+        )}
+        {items.map((row) => (
+          <div key={row.id} className="grid grid-cols-[auto_1fr_auto] items-start gap-4 border-t border-slate-800 px-4 py-3">
+            <div className="text-sm font-medium text-slate-200">
+              {row.actor?.name || row.actor?.email || (row.actor_id ? row.actor_id.slice(0, 8) : 'system')}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm text-slate-300">
+                {ACTION_LABELS[row.action] ?? row.action}
+                {row.resource_id ? <span className="text-slate-500"> · {row.resource_id.slice(0, 8)}</span> : null}
+              </p>
+              {row.ip || row.user_agent ? (
+                <p className="mt-0.5 truncate text-2xs text-slate-500">
+                  {row.ip ? <span>{row.ip}</span> : null}
+                  {row.ip && row.user_agent ? <span> · </span> : null}
+                  {row.user_agent ? <span title={row.user_agent}>{row.user_agent.slice(0, 80)}</span> : null}
+                </p>
+              ) : null}
+            </div>
+            <div className="text-right text-2xs text-slate-500">
+              {relativeTime(row.created_at)}
+            </div>
+          </div>
+        ))}
+      </div>
+      {!done && items.length > 0 && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs text-slate-300 hover:bg-slate-700 disabled:opacity-60"
+          >
+            {loading ? <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin" /> : null}
+            Load more
+          </button>
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.3.6 — shipped + deployed
+> **Current Milestone**: v1.3.5.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---
@@ -13,15 +13,15 @@
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 |
 | 🟢 Complete (UI shell) | 38 |
-| 🟢 Fully wired to real backend | 25 |
-| 🟡 Partial / honest empty state | 13 — see *Remaining work* below |
+| 🟢 Fully wired to real backend | 28 |
+| 🟡 Partial / honest empty state | 10 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
 
 **Design Progress**: ██████████ 100%
 **UI Build**: ██████████ 100%
-**Backend wired**: ███████░░░ ~66%
+**Backend wired**: ████████░░ ~74%
 
 > **v1.3.3.6 Status**: Live on https://lazynext.com. All 38 feature UIs built. 17 rounds of demo-data eradication (v1.3.2.0 → v1.3.3.6) replaced every fabricated fixture (Avas/Priya/Rahul fake teammates, fake Acme Corp workspace, fake testimonials, fake 84/100 onboarding score, fake Notion import, fake LazyMind chat with `setTimeout`, fake notification dropdowns, fake billing/integrations/sessions, fake template marketplace) with real Supabase data or honest empty states. Tests: **143/143** Vitest + Playwright passing, type-check clean, build clean.
 
@@ -31,14 +31,11 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 23 | Notification Center | No `notifications` table — UI shows "all caught up" until one ships | Migration + insert from decisions/nodes events + GET/PATCH endpoints |
 | 27 | Real-time Collaboration | `CollaborationOverlay` always renders empty `collaborators={[]}` | Supabase Realtime presence channel + cursor broadcast |
 | 17 | Automation Builder | Empty-state page — no rule builder, no executor | WHEN/THEN schema + Inngest executor + UI builder |
 | 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags | Per-source OAuth + mapper + ingestion pipeline |
 | 18 | Template Marketplace | No `templates` table, no install endpoint | `templates` table + clone-to-workspace endpoint + curation flow |
 | 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
-| 38 | Activity Feed → Audit Log | Feed is real; audit log shows Enterprise empty state | `audit_log` table + write hooks across all mutation routes |
-| 12 | Settings → Notifications tab | Empty state — no `notification_preferences` table | Table + UI toggles + filter logic in notifications insert path |
 | 30 | Profile → Connected Accounts + Sessions | Removed pending real APIs | Supabase identity-link + session listing |
 | 35 | Public Shared Canvas (`/shared/[id]`) | Removed — only `/d/[slug]` decision-share works | Per-workflow share token + read-only renderer |
 | 32 | Marketing → Blog | Only `launching-lazynext` post is real | Add real posts (or convert to MDX-driven listing) |
@@ -66,7 +63,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 11 | Thread Comments Panel | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — messages, @mentions, reactions, comparison tables |
 | 14 | Command Palette & Search | ✅ Complete | 🟢 Merged | #05 | `main` | Built — ⌘K palette with search, Quick Actions, Recent, Navigation |
 | 20 | Empty & Error States | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 12 states (empty/error/loading/maintenance/rate-limit) |
-| 23 | Notification Center | ✅ Complete | � UI only | #05 | `main` | UI built; honest empty state until `notifications` table ships (in progress on `feature/39-notifications-real-backend`) |
+| 23 | Notification Center | ✅ Complete | 🟢 Wired | #05 | `main` | Real `notifications` table + bell wired (v1.3.4.0); per-event preferences (v1.3.5.0) |
 | 24 | Keyboard Shortcuts | ✅ Complete | 🟢 Merged | #05 | `main` | Built — ? key modal, 23 shortcuts in 4 categories |
 | 26 | Workspace Home | ✅ Complete | 🟢 Merged | #05 | `main` | Built — greeting, stats, workflows, activity, due soon, LazyMind |
 | 28 | Toast Notifications | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 6 variants with progress bars, action buttons |
@@ -85,7 +82,7 @@ These features show real, truthful UI but lack the backend that would make them 
 |---|---|---|---|---|---|---|
 | 07 | Decision DNA View | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — Log Decision Modal, quality bars, health overview |
 | 08 | Decision Health Dashboard | ✅ Complete | 🟢 Merged | #07 | `main` | Built — quality trends, outcome donut, burndown, makers table |
-| 12 | Workspace Settings | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 5-tab settings (general/members/billing/notifications/security) |
+| 12 | Workspace Settings | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 5-tab settings; Notifications tab now wired to real `notification_preferences` (v1.3.5.0) |
 | 13 | Billing & Subscription | ✅ Complete | 🟢 Merged | #12 | `main` | Built — plan comparison, payment method, usage metrics |
 | 15 | Import Modal | ✅ Complete | � Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
 | 16 | Pulse Dashboard | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workload bars, burndown SVG, LazyMind summary |
@@ -100,7 +97,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 32 | Marketing Pages | ✅ Complete | 🟢 Merged | #01 | `main` | Built — About, Features, Changelog, Comparison, Blog |
 | 34 | Team Member Management | ✅ Complete | 🟢 Merged | #12 | `main` | Built — role badges, stat bar, email chip invites |
 | 37 | Task Views (Kanban + List) | ✅ Complete | 🟢 Merged | #05 | `main` | Built — Kanban board + List table with filters |
-| 38 | Activity Feed & Audit Log | ✅ Complete | � Partial | #05 | `main` | Feed is real; Audit log shows Enterprise empty state until `audit_log` table ships |
+| 38 | Activity Feed & Audit Log | ✅ Complete | 🟢 Wired | #05 | `main` | Feed is real; Audit log table + write hooks shipped v1.3.5.0 (Business+ plan gate) |
 
 **Phase 2 Total**: 18 features
 
@@ -218,4 +215,4 @@ These features show real, truthful UI but lack the backend that would make them 
 | 2026-04-05 | Initial roadmap created from 38 Blueprint features | Mastery framework adoption — mid-project |
 | 2026-04-05 | Phasing follows Blueprint FEATURE-INDEX.md phases | Existing phase groupings are logical and dependency-ordered |
 | 2026-04-26 | Header milestone synced v1.1.0.1 → v1.3.0.5 | Roadmap had drifted behind v1.2 + v1.3 ships (pricing, billing fixes) |
-| 2026-04-27 | Header synced to v1.3.3.6 + added *Remaining work* section | Roadmap had drifted behind 17 demo-data eradication rounds. Replaced "38 Complete" claim with honest "25 fully wired / 13 honest empty states" split — same correction the eradication rounds made to the product. |
+| 2026-04-27 | Header synced to v1.3.5.0 + dropped Notification Center, Settings→Notifications tab, and Audit Log from *Remaining work* | Three more features moved from honest empty state to fully wired |

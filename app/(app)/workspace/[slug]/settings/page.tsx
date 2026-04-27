@@ -10,6 +10,7 @@ import { useWorkspaceStore } from '@/stores/workspace.store'
 import { hasFeature } from '@/lib/utils/plan-gates'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
+import { NotificationsTab } from './NotificationsTab'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -343,25 +344,7 @@ export default function SettingsPage() {
       )}
 
       {/* Notifications tab */}
-      {activeTab === 'notifications' && (
-        <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900 p-6">
-          <h2 className="text-lg font-semibold text-slate-100">Notification Preferences</h2>
-          <p className="mt-1 text-sm text-slate-400">
-            Per-event notification toggles ship once the <code className="rounded bg-slate-800 px-1 py-0.5 font-mono text-xs text-slate-300">notification_preferences</code> table lands. Until then everything routes to your account email and the in-app notification center.
-          </p>
-          <div className="mt-4 space-y-2">
-            {['Task assigned to you', 'Decision needs review (expected_by passed)', 'Weekly digest', 'Thread mentions'].map((item) => (
-              <div key={item} className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-800/40 px-4 py-2.5">
-                <span className="text-sm text-slate-400">{item}</span>
-                <span className="text-2xs text-slate-600">on by default</span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-4 text-2xs text-slate-600">
-            Drop us an email at <a href="mailto:hello@lazynext.com" className="underline hover:text-slate-400">hello@lazynext.com</a> to opt out of any of these in the meantime.
-          </p>
-        </div>
-      )}
+      {activeTab === 'notifications' && <NotificationsTab workspaceId={workspace?.id ?? null} />}
 
       {/* Security tab */}
       {activeTab === 'security' && (

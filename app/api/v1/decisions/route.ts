@@ -6,6 +6,7 @@ import { scoreDecision } from '@/lib/ai/decision-scorer'
 import { incrementWmsFor } from '@/lib/wms'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { notifyWorkspaceMembers } from '@/lib/data/notifications'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const createSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -119,6 +120,19 @@ export async function POST(req: Request) {
     relatedDecisionId: decision.id,
   }).catch(() => undefined)
 
-  
+  await recordAudit({
+    workspaceId: parsed.data.workspaceId,
+    actorId: userId,
+    action: 'decision.create',
+    resourceType: 'decision',
+    resourceId: decision.id,
+    metadata: {
+      question: parsed.data.question.slice(0, 500),
+      decisionType: parsed.data.decisionType ?? null,
+      qualityScore: scoreResult.overall,
+    },
+    request: req,
+  }).catch(() => undefined)
+
   return NextResponse.json({ data: decision, error: null }, { status: 201 })
 }
