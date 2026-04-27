@@ -22,7 +22,10 @@ export async function GET(req: Request) {
 
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
+  // Rate-limit per keyId for bearer requests so a leaked key can't
+  // burn a human user's budget; per userId for cookie sessions.
+  const rateLimitId = apiKey ? `key:${apiKey.keyId}` : `user:${userId}`
+  const rl = rateLimit(rateLimitId, RATE_LIMITS.api)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 

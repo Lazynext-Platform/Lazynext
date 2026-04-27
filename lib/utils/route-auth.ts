@@ -33,6 +33,10 @@ export interface AuthOk {
   bearerWorkspaceId: string | null
   viaApiKey: boolean
   keyId: string | null
+  // Stable identifier for rate-limit buckets. For bearer requests this
+  // is the keyId so a leaked key can't burn a human user's budget; for
+  // cookie-session requests it falls back to the userId.
+  rateLimitId: string
 }
 
 export interface AuthFail {
@@ -55,6 +59,7 @@ export async function resolveAuth(req: Request): Promise<AuthResult> {
       bearerWorkspaceId: apiKey.workspaceId,
       viaApiKey: true,
       keyId: apiKey.keyId,
+      rateLimitId: `key:${apiKey.keyId}`,
     }
   }
   const session = await safeAuth()
@@ -70,6 +75,7 @@ export async function resolveAuth(req: Request): Promise<AuthResult> {
     bearerWorkspaceId: null,
     viaApiKey: false,
     keyId: null,
+    rateLimitId: `user:${session.userId}`,
   }
 }
 

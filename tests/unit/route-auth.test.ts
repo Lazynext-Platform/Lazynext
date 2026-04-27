@@ -59,6 +59,21 @@ describe('resolveAuth', () => {
       expect(out.response.status).toBe(401)
     }
   })
+
+  it('rate-limit id is keyed by keyId for bearer requests', async () => {
+    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    const out = await resolveAuth(req)
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.rateLimitId).toBe('key:k1')
+  })
+
+  it('rate-limit id is keyed by userId for cookie sessions', async () => {
+    mockApiKey.mockResolvedValue(null)
+    mockSafeAuth.mockResolvedValue({ userId: 'u9' })
+    const out = await resolveAuth(req)
+    expect(out.ok).toBe(true)
+    if (out.ok) expect(out.rateLimitId).toBe('user:u9')
+  })
 })
 
 describe('requireWorkspaceAuth', () => {

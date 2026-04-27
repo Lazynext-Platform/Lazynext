@@ -4,6 +4,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.32.0] - 2026-04-28
+
+**Theme:** Bearer-auth machinery hardening. Three loose ends from v1.3.31.0 close in one ship: per-keyId rate-limit buckets, audit-log entries on key issuance + revocation, and an `api_key.*` filter on the audit-log API.
+
+### Added
+- `AuthOk.rateLimitId` on `lib/utils/route-auth.ts` — `key:<keyId>` for bearer requests, `user:<userId>` for cookie sessions. A leaked API key now burns its own bucket instead of the human user's.
+- Two new `AuditAction` values: `api_key.create`, `api_key.revoke`. Both are wired into `app/api/v1/api-keys` (POST + DELETE) and accepted by the audit-log query filter.
+- Two more cases in `tests/unit/route-auth.test.ts` asserting the rate-limit identifier is keyId-derived for bearer and userId-derived for cookie sessions (10 cases total, was 8).
+
+### Changed
+- `app/api/v1/audit-log/route.ts`, `app/api/v1/decisions/route.ts` (GET), `app/api/v1/export/route.ts` — rate-limit calls now use the auth-derived identifier instead of a flat `api:${userId}` bucket.
+- `lib/data/audit-log.ts` — `AuditAction` extended with the two new strings (no migration needed; column is `VARCHAR(64)`).
+
+### Why this matters
+- Per-keyId buckets are a real security improvement: a compromised key can no longer DoS a workspace owner's cookie session.
+- Audit hooks on key lifecycle close the most-requested gap from v1.3.30.0 — admins can now see *who issued or revoked which key, when, from which IP* in the same place they read every other workspace mutation.
+
+### Deferred (intentionally)
+- Bearer auth on mutation routes (notifications mark-read, decisions PATCH) — each one rolls out in its own PR.
+- Per-key scopes (read-only vs read-write).
+- A user-facing rate-limit dashboard scoped to keyId.
+
 ## [1.3.31.0] - 2026-04-28
 
 **Theme:** Bearer auth rolls out to three more read endpoints. v1.3.30.0 wired `/api/v1/export`; this release adds the `requireWorkspaceAuth` helper so any v1 route can opt into bearer auth in two lines, and applies it to `/api/v1/audit-log`, `/api/v1/decisions` (GET), and `/api/v1/decisions/export-csv`. Behaviour is identical to before for cookie-session callers; bearer callers now succeed where they previously got 401.
