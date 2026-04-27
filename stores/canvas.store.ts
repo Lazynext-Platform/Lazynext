@@ -21,6 +21,15 @@ interface CanvasState {
   history: { nodes: Node[]; edges: Edge[] }[]
   historyIndex: number
 
+  // Server context. Set by `WorkflowCanvas` once the active workflow has
+  // been resolved from `/api/v1/workflows/default`. Until both ids are
+  // populated, the canvas is a per-session scratchpad — every callsite
+  // that wants to persist must check `currentWorkflowId` is non-null.
+  currentWorkflowId: string | null
+  currentWorkflowName: string | null
+  currentWorkspaceId: string | null
+  isHydrated: boolean
+
   setNodes: (nodes: Node[]) => void
   setEdges: (edges: Edge[]) => void
   onNodesChange: OnNodesChange
@@ -31,6 +40,12 @@ interface CanvasState {
   removeNode: (id: string) => void
   selectNode: (id: string | null) => void
   hydrateCanvas: (nodes: Node[], edges: Edge[]) => void
+  setWorkflowContext: (ctx: {
+    workflowId: string
+    workflowName: string
+    workspaceId: string
+  }) => void
+  setHydrated: (hydrated: boolean) => void
   undo: () => void
   redo: () => void
   toggleLazyMind: () => void
@@ -47,6 +62,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   isNodePanelOpen: false,
   history: [],
   historyIndex: -1,
+
+  currentWorkflowId: null,
+  currentWorkflowName: null,
+  currentWorkspaceId: null,
+  isHydrated: false,
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
@@ -95,6 +115,15 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   hydrateCanvas: (nodes, edges) => {
     set({ nodes, edges, history: [{ nodes, edges }], historyIndex: 0 })
   },
+
+  setWorkflowContext: ({ workflowId, workflowName, workspaceId }) =>
+    set({
+      currentWorkflowId: workflowId,
+      currentWorkflowName: workflowName,
+      currentWorkspaceId: workspaceId,
+    }),
+
+  setHydrated: (hydrated) => set({ isHydrated: hydrated }),
 
   undo: () => {
     const { history, historyIndex } = get()
