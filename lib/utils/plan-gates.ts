@@ -48,6 +48,10 @@ export function hasFeature(plan: Plan, feature: string): boolean {
     'custom-fields': ['business', 'enterprise'],
     'audit-log': ['business', 'enterprise'],
     'sso': ['business', 'enterprise'],
+    // API keys: machine access to the REST API. Enterprise-tier
+    // because production integrations sit alongside SSO + audit log
+    // in the same trust band.
+    'api-keys': ['business', 'enterprise'],
   }
   return featureMap[feature]?.includes(plan) ?? false
 }
