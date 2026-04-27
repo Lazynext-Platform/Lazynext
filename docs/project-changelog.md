@@ -6,6 +6,20 @@
 
 ---
 
+## [v1.3.39.0] - 2026-04-28 — Bearer auth on /nodes
+
+**Theme:** `/api/v1/nodes` and `/api/v1/nodes/{id}` are now bearer-aware. Mutations require `write` scope. The canvas-as-API surface is real for external automations.
+
+### Added
+- Bearer auth on all `/nodes` routes.
+- OpenAPI 3.1 entries for `/nodes` and `/nodes/{id}` (8 paths total).
+- `Node` schema in OpenAPI components.
+
+### Changed
+- All node routes authenticate before resource lookup — no anonymous existence-probing.
+
+---
+
 ## [v1.3.38.0] - 2026-04-28 — /whoami identity introspection
 
 **Theme:** A read-only endpoint that resolves the inbound credentials and returns the workspace, scopes, and key metadata. Closes the "is my key wired right?" loop for integrators.

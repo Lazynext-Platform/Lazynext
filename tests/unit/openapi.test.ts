@@ -27,6 +27,8 @@ describe('buildOpenApiSpec', () => {
       '/decisions/export-csv',
       '/decisions/{id}',
       '/export',
+      '/nodes',
+      '/nodes/{id}',
       '/whoami',
     ])
   })
@@ -46,11 +48,22 @@ describe('buildOpenApiSpec', () => {
     expect(spec.paths['/decisions'].post.responses['429'].description).toMatch(/mutation bucket/)
     expect(spec.paths['/decisions/{id}'].patch.responses['429'].description).toMatch(/mutation bucket/)
     expect(spec.paths['/decisions/{id}'].delete.responses['429'].description).toMatch(/mutation bucket/)
+    expect(spec.paths['/nodes'].post.responses['429'].description).toMatch(/mutation bucket/)
+    expect(spec.paths['/nodes/{id}'].patch.responses['429'].description).toMatch(/mutation bucket/)
+    expect(spec.paths['/nodes/{id}'].delete.responses['429'].description).toMatch(/mutation bucket/)
+  })
+
+  it('node mutations document INSUFFICIENT_SCOPE on 403', () => {
+    expect(spec.paths['/nodes'].post.responses['403'].description).toMatch(/INSUFFICIENT_SCOPE/)
+    expect(spec.paths['/nodes/{id}'].patch.responses['403'].description).toMatch(/INSUFFICIENT_SCOPE/)
+    expect(spec.paths['/nodes/{id}'].delete.responses['403'].description).toMatch(/INSUFFICIENT_SCOPE/)
   })
 
   it('every workspace-scoped operation requires workspaceId', () => {
     // /whoami is identity introspection — no workspace param.
-    const exempt = new Set(['/whoami'])
+    // /nodes scopes via workflowId (GET) or body (POST); /nodes/{id}
+    // resolves the workspace via the row.
+    const exempt = new Set(['/whoami', '/nodes', '/nodes/{id}'])
     for (const [path, methods] of Object.entries(spec.paths)) {
       if (exempt.has(path)) continue
       for (const [method, op] of Object.entries(methods)) {
