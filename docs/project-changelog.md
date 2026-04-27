@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.2] — Contact page is topic-aware (2026-04-27)
+
+v1.3.23.1's billing page Enterprise card routes to `/contact?topic=enterprise`, but the contact page wasn't reading `?topic`. Now it does: when `topic=enterprise`, an indigo Enterprise banner renders above the standard contact rows with a primary mailto button pre-filled with subject + body template (team size, current tools, must-haves, timeline). `TOPICS` registry is a single object — future topics (security, migration, etc.) are one-line additions. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13232---2026-04-27).
+
+---
+
 ## [1.3.23.1] — Hotfix: Billing page Upgrade buttons wired (2026-04-27)
 
 v1.3.23.0 corrected every dollar value but left the buttons broken: top-right "Change Plan" linked to a 404 (`/workspace/[slug]/upgrade`), per-card "Upgrade" buttons had no `onClick`. Both wired: "Change Plan" now triggers `useUpgradeModal.show('full-upgrade')`; per-card Starter/Pro buttons POST to `/api/v1/billing/checkout` and redirect to Gumroad; Enterprise card routes to `/contact?topic=enterprise`. Pending spinner, in-flight disable, inline amber error alert, `paywall.checkout.clicked` telemetry with `surface: 'billing-page'`. **197/197** tests passing, type-check clean, build clean.

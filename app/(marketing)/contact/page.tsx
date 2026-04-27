@@ -1,16 +1,40 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Mail, MessageCircle, Shield } from 'lucide-react'
+import { Building2, Mail, MessageCircle, Shield } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Contact — Lazynext',
   description: 'Reach the humans behind Lazynext. No ticketing system theater.',
 }
 
+// Topic taxonomy — keep tight. Anything we can deep-link from the product
+// (e.g. billing page enterprise card → /contact?topic=enterprise) lives here.
+const TOPICS = {
+  enterprise: {
+    badge: 'Enterprise inquiry',
+    headline: 'Enterprise plan — let’s talk',
+    subhead:
+      'Custom seats, SSO/SAML, dedicated support, audit log retention, and a real DPA. We reply within one business day.',
+    primaryEmail: 'hello@lazynext.com',
+    mailtoSubject: 'Enterprise plan inquiry',
+    mailtoBody:
+      'Team size:\nCurrent tools:\nMust-haves (SSO, audit, DPA, etc.):\nTimeline:\n',
+  },
+} as const
+
+type TopicKey = keyof typeof TOPICS
+
 // Honest placeholder — no invented phone numbers, no 40-field contact form,
 // no "live chat with a dedicated success manager". Just real routes to real
 // people, with clear expectations on response time.
-export default function ContactPage() {
+export default function ContactPage({
+  searchParams,
+}: {
+  searchParams?: { topic?: string }
+}) {
+  const topicKey = searchParams?.topic as TopicKey | undefined
+  const topic = topicKey && topicKey in TOPICS ? TOPICS[topicKey] : null
+
   return (
     <main id="main-content" className="bg-white text-slate-900">
       <section className="mx-auto max-w-2xl px-6 pb-20 pt-24">
@@ -25,6 +49,28 @@ export default function ContactPage() {
             Pick the channel that matches your question. All of these go to real people.
           </p>
         </div>
+
+        {topic && (
+          <div className="mt-10 rounded-2xl border border-indigo-200 bg-indigo-50/50 p-6">
+            <div className="flex items-start gap-3">
+              <Building2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-indigo-600" />
+              <div className="min-w-0 flex-1">
+                <span className="inline-flex items-center rounded-full bg-indigo-600 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white">
+                  {topic.badge}
+                </span>
+                <p className="mt-3 text-lg font-semibold text-slate-900">{topic.headline}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{topic.subhead}</p>
+                <a
+                  href={`mailto:${topic.primaryEmail}?subject=${encodeURIComponent(topic.mailtoSubject)}&body=${encodeURIComponent(topic.mailtoBody)}`}
+                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700"
+                >
+                  <Mail className="h-4 w-4" />
+                  Email {topic.primaryEmail}
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-12 space-y-4">
           <ContactRow
