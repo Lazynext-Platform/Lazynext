@@ -56,10 +56,10 @@ export default function CollaborationOverlay({ collaborators, isMobile = false }
         const colors = colorMap[collab.color] || colorMap.blue
         return (
           <div key={collab.id}>
-            {/* Cursor with name pill */}
+            {/* Cursor with name pill — clientX/Y is viewport-relative, so fixed. */}
             {collab.cursor && (
-              <div className="pointer-events-none absolute z-50 transition-all duration-75"
-                style={{ left: collab.cursor.x, top: collab.cursor.y }}>
+              <div className="pointer-events-none fixed z-50 transition-transform duration-75"
+                style={{ transform: `translate(${collab.cursor.x}px, ${collab.cursor.y}px)` }}>
                 <CursorArrow color={colors.cursor} />
                 <div className={cn('ml-3 -mt-1 flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-medium shadow-lg whitespace-nowrap', colors.bg, colors.text)}>
                   {collab.name}
