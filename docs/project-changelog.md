@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.6] — Marketing /pricing Enterprise CTA passes ?topic=enterprise (2026-04-27)
+
+v1.3.23.2 made `/contact` topic-aware. The in-app billing page Enterprise card already passed `?topic=enterprise`, but the marketing `/pricing` Enterprise card — the larger Enterprise traffic source — still routed to bare `/contact`. Now both surfaces hit the same `TOPICS.enterprise` registry entry, surfacing the tailored banner with pre-filled mailto subject + body. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13236---2026-04-27).
+
+---
+
 ## [1.3.23.5] — Marketing /pricing page reads PLAN_PRICING_USD constants (2026-04-27)
 
 The landing PricingSection already imported the constants and BillingClient was synced in v1.3.23.0, but the marketing `/pricing` route hardcoded `'19'/'15'/'30'/'24'` strings — the exact drift pattern that caused the $9/$19/$49 mismatch in v1.3.23.0. Now derives `monthlyPrice` / `annualPrice` from `PLAN_PRICING_USD` and `PLAN_PRICING_USD_ANNUAL` so a single edit in `lib/utils/constants.ts` propagates to every price surface. **197/197** tests passing.
