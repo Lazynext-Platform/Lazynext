@@ -46,13 +46,33 @@ const quickActions = [
 export function LazyMindPanel() {
   const isLazyMindOpen = useUIStore((s) => s.isLazyMindOpen)
   const toggleLazyMind = useUIStore((s) => s.toggleLazyMind)
-  const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
+  const workspace = useWorkspaceStore((s) => s.workspace)
+  const plan = (workspace?.plan || 'free') as Plan
+  const workspaceId = workspace?.id
   const aiLimit = PLAN_LIMITS[plan].aiQueries
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [aiCount, setAiCount] = useState(0)
   const chatRef = useRef<HTMLDivElement>(null)
+
+  // Hydrate the daily count from the server when the workspace + panel
+  // open. Without this the badge always reads `0/20` on every page
+  // reload, which underrepresents the user's actual remaining quota.
+  useEffect(() => {
+    if (!isLazyMindOpen || !workspaceId) return
+    let cancelled = false
+    fetch(`/api/v1/ai/usage?workspaceId=${workspaceId}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) return
+        const json = (await res.json()) as { data?: { used?: number } }
+        if (!cancelled && typeof json.data?.used === 'number') setAiCount(json.data.used)
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [isLazyMindOpen, workspaceId])
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight
@@ -86,11 +106,13 @@ export function LazyMindPanel() {
       const res = await fetch('/api/v1/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed }),
+        body: JSON.stringify({ message: trimmed, workspaceId }),
       })
       const body = (await res.json().catch(() => ({}))) as {
         data?: { content: string }
         error?: string
+        variant?: string
+        used?: number
         message?: string
       }
 
@@ -100,6 +122,18 @@ export function LazyMindPanel() {
           role: 'system',
           content: body.message ?? 'LazyMind is not configured on this deployment.',
         }])
+        return
+      }
+
+      if (res.status === 402 && body.error === 'PLAN_LIMIT_REACHED') {
+        // Server-side daily cap hit. Sync the badge to the truth and
+        // surface the upgrade modal so the user has a next step.
+        if (typeof body.used === 'number') setAiCount(body.used)
+        trackBillingEvent('paywall.gate.shown', { variant: 'ai-limit', plan, surface: 'lazymind-server' })
+        useUpgradeModal.getState().show('ai-limit')
+        // Roll back the user message so the chat doesn't show a
+        // pending question with no reply.
+        setMessages((prev) => prev.filter((m) => m.id !== userMsg.id))
         return
       }
 
@@ -127,7 +161,7 @@ export function LazyMindPanel() {
     } finally {
       setIsTyping(false)
     }
-  }, [plan, aiCount])
+  }, [plan, aiCount, workspaceId])
 
   if (!isLazyMindOpen) return null
 

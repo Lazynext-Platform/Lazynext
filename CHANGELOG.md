@@ -4,6 +4,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.22.0] - 2026-04-27
+
+**Theme:** Server-side AI daily quota — the marketing claim becomes the enforced reality. Lazynext has advertised "20 LazyMind AI queries/day" on Free, "100/day/seat" on Starter, "500/day/seat" on Pro, and "unlimited" on Business since v1.0. The actual enforcement until today: a 20-req/min burst cap (`RATE_LIMITS.ai`) plus a client-side counter in `LazyMindPanel` that reset on every page reload. So a Free user could send 20 queries, refresh, send 20 more, refresh, send 20 more — effectively ~28,800/day. The marketing was nominal; the enforcement was theatre. Fixed.
+
+### Added
+- `supabase/migrations/20260427000005_ai_usage.sql` — new `ai_usage(user_id, workspace_id, day, count, updated_at)` table with `(user_id, workspace_id, day)` composite primary key, index on the same lookup tuple, RLS enabled (service-role writes only; users never read this table directly).
+- `lib/data/ai-usage.ts` — `getDailyAiUsage`, `getWorkspacePlan`, `checkAiQuota`, `recordAiUsage`. Day boundary is UTC. `recordAiUsage` is best-effort and never throws (a failed write produces no answer-blocking error). `checkAiQuota` derives `{ allowed, plan, used, limit }` against `PLAN_LIMITS[plan].aiQueries`.
+- `app/api/v1/ai/usage/route.ts` — new `GET /api/v1/ai/usage?workspaceId=…` returns `{ plan, used, limit, remaining }` for the caller's daily count. Powers panel-header badge hydration so it survives page reloads.
+
+### Changed
+- `app/api/v1/ai/chat/route.ts` — schema accepts optional `workspaceId`. When present: verifies workspace membership; calls `checkAiQuota`; returns `402 { error: 'PLAN_LIMIT_REACHED', variant: 'ai-limit', used, limit }` when the daily cap is reached; on a successful AI response calls `recordAiUsage` (fire-and-forget) so today's count increments. Calls without `workspaceId` are unchanged — still rate-limited per minute, no per-day enforcement.
+- `components/lazymind/LazyMindPanel.tsx` — reads `workspace.id` from the store and sends it on every chat request. On open, hydrates `aiCount` from `/api/v1/ai/usage` so the badge shows the *real* remaining quota across reloads. Handles 402 by syncing the displayed count to the server's authoritative `used`, removing the optimistic user message, and triggering the `ai-limit` upgrade modal with `paywall.gate.shown` telemetry.
+
+### Test results
+- Type-check: clean.
+- Vitest: **197/197 passing** across 27 files (189 → 197; 8 new assertions in `tests/unit/ai-usage.test.ts` covering empty-row → 0, populated count, fallback plan, Free-at-cap, Free-under-cap, Business unlimited, and the upsert path).
+- Build: clean.
+
+### Notes
+- `/api/v1/ai/generate` and `/api/v1/ai/analyze` still use only the per-minute burst cap. Those endpoints back lower-volume server-side actions (decision summary, doc draft) that aren't currently surfaced in the user-facing daily quota — deferred to a follow-up so this release stays focused on the LazyMind-chat path that ships end-to-end.
+- A read-modify-write race between two simultaneous AI calls from the same user could undercount by 1 (the user uses *fewer* of their quota than recorded, never more) — acceptable given the cost of an atomic SQL increment vs. the upside of a Supabase-portable upsert.
+
 ## [1.3.21.0] - 2026-04-27
 
 **Theme:** Real "Create workspace" + workspace-cap enforcement. The "Create workspace" link in the `WorkspaceSelector` dropdown has, since v1.3.4.5, routed users to `/onboarding`. But `/api/v1/onboarding/workspace` had two paths: Path A renamed the user's existing workspace; Path B (backfill) only ran if the user had zero memberships. So clicking "Create workspace" with an existing workspace just *renamed* it — silently destructive. There was no real way to create a second workspace from the UI. This release ships the missing path + enforces the Free `workspaces: 1` cap that was added to PLAN_LIMITS in v1.3.20.0 but not yet wired.
