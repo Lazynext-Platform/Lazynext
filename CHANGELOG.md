@@ -4,6 +4,14 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.42.0] - 2026-04-28
+
+**Theme:** Bearer auth on `/search`. CI runners can dedupe before opening duplicate decisions or tasks.
+
+### Added
+- `GET /api/v1/search?workspaceId=...&q=...` is bearer-aware. Returns grouped results: nodes, decisions, workflows.
+- OpenAPI spec entry for `/search` (11 paths total).
+
 ## [1.3.41.0] - 2026-04-28
 
 **Theme:** Bearer auth on `/threads/{nodeId}`. CI runners can post comments to task nodes — e.g. "build #1234 failed: <link>" auto-posted on a related decision.

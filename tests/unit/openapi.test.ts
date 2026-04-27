@@ -30,6 +30,7 @@ describe('buildOpenApiSpec', () => {
       '/export',
       '/nodes',
       '/nodes/{id}',
+      '/search',
       '/threads/{nodeId}',
       '/whoami',
     ])

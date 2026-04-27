@@ -1,14 +1,9 @@
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 
 export async function GET(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
@@ -19,8 +14,11 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'MISSING_PARAMS' }, { status: 400 })
   }
 
-  const authorized = await verifyWorkspaceMember(userId, workspaceId)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, workspaceId)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   const [nodeRes, decisionRes, workflowRes] = await Promise.all([
     db.from('nodes').select('*').eq('workspace_id', workspaceId).ilike('title', `%${q}%`).limit(10),
