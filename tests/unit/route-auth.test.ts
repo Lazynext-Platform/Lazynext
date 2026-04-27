@@ -14,7 +14,7 @@ vi.mock('@/lib/utils/auth', () => ({
   verifyWorkspaceMember: (...args: unknown[]) => mockVerifyMember(...args),
 }))
 
-import { resolveAuth, requireWorkspaceAuth } from '@/lib/utils/route-auth'
+import { resolveAuth, requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 
 beforeEach(() => {
   mockApiKey.mockReset()
@@ -26,7 +26,7 @@ const req = new Request('http://example.test/v1/x')
 
 describe('resolveAuth', () => {
   it('returns viaApiKey=true when bearer resolves', async () => {
-    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read'] })
     const out = await resolveAuth(req)
     expect(out.ok).toBe(true)
     if (out.ok) {
@@ -34,6 +34,7 @@ describe('resolveAuth', () => {
       expect(out.userId).toBe('u1')
       expect(out.bearerWorkspaceId).toBe('w1')
       expect(out.keyId).toBe('k1')
+      expect(out.scopes).toEqual(['read'])
     }
     expect(mockSafeAuth).not.toHaveBeenCalled()
   })
@@ -47,6 +48,8 @@ describe('resolveAuth', () => {
       expect(out.viaApiKey).toBe(false)
       expect(out.userId).toBe('u9')
       expect(out.bearerWorkspaceId).toBeNull()
+      // Cookie sessions get the full scope set.
+      expect(out.scopes).toEqual(['read', 'write'])
     }
   })
 
@@ -61,7 +64,7 @@ describe('resolveAuth', () => {
   })
 
   it('rate-limit id is keyed by keyId for bearer requests', async () => {
-    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read'] })
     const out = await resolveAuth(req)
     expect(out.ok).toBe(true)
     if (out.ok) expect(out.rateLimitId).toBe('key:k1')
@@ -78,14 +81,14 @@ describe('resolveAuth', () => {
 
 describe('requireWorkspaceAuth', () => {
   it('passes when bearer key matches the requested workspace', async () => {
-    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    mockApiKey.mockResolvedValue({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read'] })
     const out = await requireWorkspaceAuth(req, 'w1')
     expect(out.ok).toBe(true)
     expect(mockVerifyMember).not.toHaveBeenCalled()
   })
 
   it('rejects with 403 WORKSPACE_MISMATCH when bearer key targets another workspace', async () => {
-    mockApiKey.mockResolvedValue({ workspaceId: 'w2', userId: 'u1', keyId: 'k1' })
+    mockApiKey.mockResolvedValue({ workspaceId: 'w2', userId: 'u1', keyId: 'k1', scopes: ['read'] })
     const out = await requireWorkspaceAuth(req, 'w1')
     expect(out.ok).toBe(false)
     if (!out.ok) {
@@ -124,6 +127,30 @@ describe('requireWorkspaceAuth', () => {
     expect(out.ok).toBe(false)
     if (!out.ok) {
       expect(out.response.status).toBe(401)
+    }
+  })
+})
+
+describe('requireScope', () => {
+  it('passes when the auth carries the required scope', () => {
+    const fail = requireScope(
+      { ok: true, userId: 'u1', bearerWorkspaceId: 'w1', viaApiKey: true, keyId: 'k1', rateLimitId: 'key:k1', scopes: ['read', 'write'] },
+      'write',
+    )
+    expect(fail).toBeNull()
+  })
+
+  it('rejects with 403 INSUFFICIENT_SCOPE when the scope is missing', async () => {
+    const fail = requireScope(
+      { ok: true, userId: 'u1', bearerWorkspaceId: 'w1', viaApiKey: true, keyId: 'k1', rateLimitId: 'key:k1', scopes: ['read'] },
+      'write',
+    )
+    expect(fail).not.toBeNull()
+    if (fail) {
+      expect(fail.response.status).toBe(403)
+      const body = await fail.response.json()
+      expect(body.error).toBe('INSUFFICIENT_SCOPE')
+      expect(body.requiredScope).toBe('write')
     }
   })
 })

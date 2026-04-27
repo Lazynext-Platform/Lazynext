@@ -4,6 +4,34 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.33.0] - 2026-04-28
+
+**Theme:** Bearer-auth completes its v1 surface area. Per-key scopes (read / write), the first bearer-aware mutation route (`POST /api/v1/decisions`), API key UX polish, and a public API reference at `/docs/api`. The bearer story is now end-to-end usable for an external CI runner or scripting client.
+
+### Added
+- **API key scopes** — keys are minted with `read`, `write`, or both. Default is `['read']` (least-privilege). New migration `20260428000003_api_key_scopes.sql` adds `scopes TEXT[] NOT NULL DEFAULT ARRAY['read']` with a CHECK constraint. `lib/data/api-keys.ts` exports `API_KEY_SCOPES` + `normalizeScopes()`.
+- **`requireScope(auth, scope)` helper** in `lib/utils/route-auth.ts` — returns null on pass, prebuilt 403 `INSUFFICIENT_SCOPE` (with a `requiredScope` field) on miss. Cookie sessions auto-pass; bearer keys are checked against their stored scopes.
+- **First bearer-aware mutation route** — `POST /api/v1/decisions` now accepts API keys with the `write` scope. Read-only keys hitting it get `403 INSUFFICIENT_SCOPE`.
+- **API reference page** at `/docs/api` — covers auth, scopes, rate-limits, all 4 read endpoints + the new write endpoint, error codes. Honest, single-page, no auto-generated fluff.
+- **API keys UX** — "Allow write" checkbox at create time, `read-only` / `read + write` badges per key in the list, `expires in Nd` / `expired` badges with red/amber/slate colour urgency.
+- **6 new tests** (277 total, was 271): `normalizeScopes` whitelisting + dedupe, `requireScope` pass + 403 fail, scopes-on-resolveAuth assertions for bearer + cookie sessions.
+
+### Changed
+- `lib/utils/api-key-auth.ts` — `ApiKeyAuthResult` now carries `scopes: ApiKeyScope[]`; the lookup query selects the new column.
+- `AuthOk` carries `scopes` end-to-end. Cookie sessions are auto-granted the full set (`['read', 'write']`).
+- `POST /api/v1/api-keys` — accepts an optional `scopes` array on create; the audit metadata records it.
+- `app/api/v1/decisions/route.ts` POST — swapped `safeAuth + verifyWorkspaceMember` for `requireWorkspaceAuth + requireScope('write')`. Rate-limit now uses `auth.rateLimitId` (per-keyId for bearer).
+
+### Why this matters
+- **Defence in depth.** A leaked CSV-export key can no longer be turned into a decision-creation key. Mutation is gated at three layers: workspace ownership, key validity, and explicit scope.
+- **External writes are now possible** — a Slack bot or CI runner can log decisions automatically by minting a key with `write` scope.
+- **Public docs close the loop** — `/docs/api` is the page a developer lands on when they ask "can I script this?".
+
+### Deferred (intentionally)
+- Per-route rate-limit overrides (mutations should probably be tighter than 100/min).
+- Bearer auth on more mutation routes (workspace.update, member.invite, decision.update). Each rolls out individually with explicit audit + scope review.
+- A `keys.update` endpoint (rotate scope on existing keys).
+
 ## [1.3.32.0] - 2026-04-28
 
 **Theme:** Bearer-auth machinery hardening. Three loose ends from v1.3.31.0 close in one ship: per-keyId rate-limit buckets, audit-log entries on key issuance + revocation, and an `api_key.*` filter on the audit-log API.

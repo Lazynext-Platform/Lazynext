@@ -74,12 +74,13 @@ describe('authenticateApiKey', () => {
         workspace_id: 'w1',
         user_id: 'u1',
         expires_at: null,
+        scopes: ['read'],
       },
       error: null,
     })
     const { plaintext } = mintApiKey()
     const out = await authenticateApiKey(reqWith({ authorization: `Bearer ${plaintext}` }))
-    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read'] })
   })
 
   it('resolves a matching key via X-Api-Key header', async () => {
@@ -89,12 +90,13 @@ describe('authenticateApiKey', () => {
         workspace_id: 'w1',
         user_id: 'u1',
         expires_at: null,
+        scopes: ['read', 'write'],
       },
       error: null,
     })
     const { plaintext } = mintApiKey()
     const out = await authenticateApiKey(reqWith({ 'x-api-key': plaintext }))
-    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read', 'write'] })
   })
 
   it('rejects an expired key', async () => {
@@ -119,12 +121,13 @@ describe('authenticateApiKey', () => {
         workspace_id: 'w1',
         user_id: 'u1',
         expires_at: new Date(Date.now() + 60_000).toISOString(),
+        scopes: ['read'],
       },
       error: null,
     })
     const { plaintext } = mintApiKey()
     const out = await authenticateApiKey(reqWith({ authorization: `Bearer ${plaintext}` }))
-    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1' })
+    expect(out).toEqual({ workspaceId: 'w1', userId: 'u1', keyId: 'k1', scopes: ['read'] })
   })
 
   it('returns null on db error (fails closed, never leaks why)', async () => {

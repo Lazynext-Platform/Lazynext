@@ -1,5 +1,5 @@
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
-import { hashApiKey } from '@/lib/data/api-keys'
+import { hashApiKey, normalizeScopes, type ApiKeyScope } from '@/lib/data/api-keys'
 
 /**
  * Inbound API-key authentication. Given an `Authorization: Bearer
@@ -25,6 +25,7 @@ export interface ApiKeyAuthResult {
   // the request itself isn't strictly that user's session.
   userId: string
   keyId: string
+  scopes: ApiKeyScope[]
 }
 
 const BEARER_RE = /^Bearer\s+(.+)$/i
@@ -72,7 +73,7 @@ export async function authenticateApiKey(
   const keyHash = hashApiKey(headerValue)
   const { data, error } = await db
     .from('api_keys')
-    .select('id, workspace_id, user_id, expires_at')
+    .select('id, workspace_id, user_id, expires_at, scopes')
     .eq('key_hash', keyHash)
     .maybeSingle()
   if (error || !data) return null
@@ -82,6 +83,7 @@ export async function authenticateApiKey(
     workspace_id: string
     user_id: string
     expires_at: string | null
+    scopes: string[] | null
   }
 
   if (row.expires_at) {
@@ -109,5 +111,6 @@ export async function authenticateApiKey(
     workspaceId: row.workspace_id,
     userId: row.user_id,
     keyId: row.id,
+    scopes: normalizeScopes(row.scopes ?? undefined),
   }
 }
