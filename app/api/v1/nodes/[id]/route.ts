@@ -4,6 +4,7 @@ import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { createNotification } from '@/lib/data/notifications'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -109,6 +110,16 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
   }
 
+  await recordAudit({
+    workspaceId: existing.workspace_id,
+    actorId: userId,
+    action: 'node.update',
+    resourceType: 'node',
+    resourceId: params.id,
+    metadata: { changes: Object.keys(parsed.data) },
+    request: req,
+  }).catch(() => undefined)
+
   return NextResponse.json({ data: updated, error: null })
 }
 
@@ -128,5 +139,14 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
 
   await db.from('nodes').delete().eq('id', params.id)
+  await recordAudit({
+    workspaceId: existing.workspace_id,
+    actorId: userId,
+    action: 'node.delete',
+    resourceType: 'node',
+    resourceId: params.id,
+    metadata: {},
+    request: req,
+  }).catch(() => undefined)
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

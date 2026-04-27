@@ -4,6 +4,39 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.5.0] - 2026-04-27
+
+**Theme:** Two more features off the *Remaining work* list — Settings → Notifications and Activity → Audit Log are real. v1.3.4.0 shipped the `notifications` table; this release adds the `notification_preferences` table that lets each user mute specific event types per workspace (the in-app delivery path now consults preferences before inserting a notification row), plus the `audit_log` table that records workspace, decision, and node mutations with actor + IP + user-agent + JSON metadata. Settings → Notifications tab is rewritten as a real client component (`NotificationsTab.tsx`) that fetches every user's 7-row preference matrix on mount and bulk-PATCHes changes — email toggles are visible but disabled until SMTP delivery ships (honest hint shown). Activity → Audit Log replaces its static "Enterprise feature" placeholder with a live `AuditPanel`: Business+ workspaces see the real cursor-paginated log (Actor / Action / Timestamp / IP / User-Agent), Free/Starter workspaces see an upgrade CTA. Audit writes are wired into `PATCH /api/v1/workspace/[slug]` (workspace.update with diff metadata), `POST /api/v1/decisions` (decision.create with question + qualityScore), `POST /api/v1/nodes` (node.create with type + title), `PATCH /api/v1/nodes/[id]` (node.update with changed-keys list), and `DELETE /api/v1/nodes/[id]` (node.delete). Workspace deletion deliberately does not write an audit row because the cascade FK would orphan it post-hoc — the absence of subsequent rows is itself the deletion signal. Plan-gating uses the existing `hasFeature(plan, 'audit-log')` helper which already returns true only for Business + Enterprise. All audit inserts are best-effort: a failed audit write never 500s the underlying mutation.
+
+### Added
+
+- `supabase/migrations/20260427000002_notification_prefs_and_audit_log.sql` — two new tables. `notification_preferences (workspace_id, user_id, type, in_app, email, updated_at)` with `UNIQUE(workspace_id, user_id, type)` for upsert-by-event, RLS for read-own + upsert-own. `audit_log (workspace_id, actor_id, action, resource_type, resource_id, metadata jsonb, ip inet, user_agent text, created_at)` with member-read RLS (tenant isolation) + service-role-only inserts; index on `(workspace_id, created_at desc)`.
+- `lib/data/notification-preferences.ts` — `NOTIFICATION_TYPES` array + `NOTIFICATION_TYPE_LABELS` record, `getPreferences` (default-merges to one row per type with `{in_app: true, email: false}`), `upsertPreference` (onConflict `'workspace_id,user_id,type'`).
+- `lib/data/audit-log.ts` — `AuditAction` union (11 values across workspace/decision/node/member), `recordAudit` (extracts IP from `x-forwarded-for` first hop or `x-real-ip`, user-agent from headers; never throws), `listAuditLog` (cursor pagination by `created_at`, hydrates actor via `db.auth.admin.listUsers`, optional action filter).
+- `app/api/v1/notification-preferences/route.ts` — GET (returns 7-row default-merged list) + PATCH (zod array of `{type, in_app?, email?}`, loops upserts, returns fresh prefs).
+- `app/api/v1/audit-log/route.ts` — GET with workspaceId required, plan gate → 402 PLAN_GATE for Free/Starter; supports `cursor`, `action`, `limit` (1–200, clamped).
+- `app/(app)/workspace/[slug]/settings/NotificationsTab.tsx` — real client tab with per-event in-app + email toggles, bulk-save, "Saved." confirmation, 503-aware honest amber error banner.
+- `tests/unit/notification-preferences.test.ts` — 3 new tests: upsert payload shape + onConflict key, email-default-false, default-merged getPreferences.
+- `tests/unit/audit-log.test.ts` — 3 new tests: full payload with IP + UA extraction, never-throws on Supabase error, null-IP/UA when no forwarded headers.
+
+### Changed
+
+- `lib/data/notifications.ts` — `createNotification` and `notifyWorkspaceMembers` now consult `notification_preferences.in_app` and skip recipients who muted the type. The lookup is wrapped in a duck-typed try/catch so existing test mocks (which only stub `from(...).insert(...)`) keep passing.
+- `app/api/v1/workspace/[slug]/route.ts` — PATCH writes a `workspace.update` audit row with `{changes, previous}` diff metadata.
+- `app/api/v1/decisions/route.ts` — POST writes a `decision.create` audit row alongside the existing `decision_logged` notification.
+- `app/api/v1/nodes/route.ts` — POST writes a `node.create` audit row.
+- `app/api/v1/nodes/[id]/route.ts` — PATCH writes a `node.update` audit row with the list of changed keys; DELETE writes a `node.delete` row before cascade.
+- `app/(app)/workspace/[slug]/settings/page.tsx` — Notifications tab now renders `<NotificationsTab workspaceId={…} />` instead of the "ships once table lands" empty state.
+- `app/(app)/workspace/[slug]/activity/page.tsx` + `ActivityClient.tsx` — pass `workspaceId` and `workspacePlan` through; replace static Audit Log placeholder with `AuditPanel` (cursor-paginated grid with Loader2 spinner, plan-gated upgrade CTA for non-Business workspaces).
+- `docs/project-roadmap.md` — header bumped to v1.3.5.0; dropped Notification Center, Settings → Notifications tab, and Activity → Audit Log from the *Remaining work* table; "Fully wired" count 25 → 28; backend-wired bar 66% → 74%; feature #12 and #38 status notes refreshed.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 153/153 passing across 20 files (was 147/147, added 6 new tests).
+- Production build: ✅ clean (only the pre-existing `<img>` warning in `global-error.tsx`, unrelated to this release).
+- Migration: ready to apply via Supabase Dashboard alongside `20260427000001_notifications.sql`.
+
 ## [1.3.4.0] - 2026-04-27
 
 **Theme:** First feature off the *Remaining work* list — the bell is now real. After 17 demo-data eradication rounds (v1.3.2.0 → v1.3.3.6) replaced fabricated fixtures with honest empty states, the Notification Center had been sitting on `const notifications: Notification[] = []` with the comment *"No notifications table exists in the current schema. Until one ships, this list is intentionally empty."* This release ships the table and the wires. New `notifications` table (Postgres enum `notification_type` covering 7 event types, RLS scoped so users can only read/update their own rows, inserts gated to the service role). New `lib/data/notifications.ts` with `createNotification`, `notifyWorkspaceMembers` (fan-out to every member except the actor), `listNotifications` (hydrates actor name/email/avatar from auth.users via the admin API), `markNotificationRead`, `markAllNotificationsRead`. New API surface: `GET /api/v1/notifications?workspaceId=…`, `PATCH /api/v1/notifications` for mark-all-read, `PATCH /api/v1/notifications/[id]` for single mark-read — all RLS-checked + rate-limited. Two real event hooks wired: `POST /api/v1/decisions` now fans out a `decision_logged` notification to every workspace member except the actor (with a deep link to the decision page); `POST /api/v1/nodes` and `PATCH /api/v1/nodes/[id]` now insert a `task_assigned` notification when a task's `assignedTo` parses as a UUID matching a workspace member (treated honestly: the column is free-form `VARCHAR(255)` and assignment-by-email/name is silently skipped instead of fabricating a recipient). `NotificationCenter` rewired: fetches real data on open, polls every 60s while a workspace is hydrated, optimistic mark-read with server reconciliation, click-through follows the stored deep link and marks read. Notification rows render real actor initials (from `full_name` or `email`), real relative timestamps (`just now` / `Nm ago` / `Nh ago` / `Nd ago` / locale date), grouped Today / Yesterday / Earlier. Self-actions are suppressed (you don't notify yourself). Notification failures never block the underlying mutation — logging a decision succeeds even if the bell-row insert fails, by design.

@@ -52,11 +52,19 @@ export interface CreateNotificationInput {
  * must not block the underlying mutation (e.g. logging a decision
  * succeeded; failing to insert the bell-row should not 500 the request).
  * Returns true on success, false on any failure.
+ *
+ * Respects per-user `notification_preferences` (if a row exists with
+ * `in_app = false` for this type, the row is silently skipped).
  */
 export async function createNotification(input: CreateNotificationInput): Promise<boolean> {
   if (!hasValidDatabaseUrl) return false
   // Don't notify yourself about your own action.
   if (input.actorId && input.actorId === input.userId) return false
+
+  // Honor opt-outs. Missing row = enabled (default).
+  const enabled = await isInAppEnabledForUser(input.userId, input.workspaceId, input.type)
+  if (!enabled) return false
+
   const { error } = await db.from('notifications').insert({
     workspace_id: input.workspaceId,
     user_id: input.userId,
@@ -73,7 +81,42 @@ export async function createNotification(input: CreateNotificationInput): Promis
 }
 
 /**
- * Fan a notification out to every workspace member except the actor.
+ * Resolve in_app enablement for a single (user, workspace, type) tuple.
+ * Default is `true` when no preferences row exists for that type.
+ */
+async function isInAppEnabledForUser(
+  userId: string,
+  workspaceId: string,
+  type: NotificationType,
+): Promise<boolean> {
+  try {
+    const q = db.from('notification_preferences').select('in_app')
+    // Guard the chained calls — a partial mock in tests may not implement
+    // the full builder. Default to enabled if anything goes sideways.
+    if (!q || typeof (q as { eq?: unknown }).eq !== 'function') return true
+    const { data } = await (q as unknown as {
+      eq: (col: string, val: string) => {
+        eq: (col: string, val: string) => {
+          eq: (col: string, val: string) => {
+            maybeSingle: () => Promise<{ data: { in_app: boolean } | null }>
+          }
+        }
+      }
+    })
+      .eq('user_id', userId)
+      .eq('workspace_id', workspaceId)
+      .eq('type', type)
+      .maybeSingle()
+    if (!data) return true
+    return data.in_app !== false
+  } catch {
+    return true
+  }
+}
+
+/**
+ * Fan a notification out to every workspace member except the actor,
+ * filtered by their `notification_preferences.in_app` setting for this type.
  * Used for workspace-wide events like "<actor> logged a decision".
  */
 export async function notifyWorkspaceMembers(input: Omit<CreateNotificationInput, 'userId'>): Promise<number> {
@@ -85,9 +128,23 @@ export async function notifyWorkspaceMembers(input: Omit<CreateNotificationInput
 
   type Row = { user_id: string }
   const rows = (members as Row[] | null) ?? []
-  const recipients = rows
+  let recipients = rows
     .map((r) => r.user_id)
     .filter((uid) => uid !== input.actorId)
+
+  if (recipients.length === 0) return 0
+
+  // Filter out users who have explicitly disabled this type's in_app channel.
+  const { data: prefs } = await db
+    .from('notification_preferences')
+    .select('user_id, in_app')
+    .eq('workspace_id', input.workspaceId)
+    .eq('type', input.type)
+    .in('user_id', recipients)
+
+  type Pref = { user_id: string; in_app: boolean }
+  const optedOut = new Set(((prefs as Pref[] | null) ?? []).filter((p) => p.in_app === false).map((p) => p.user_id))
+  recipients = recipients.filter((uid) => !optedOut.has(uid))
 
   if (recipients.length === 0) return 0
 

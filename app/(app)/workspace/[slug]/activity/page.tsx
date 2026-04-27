@@ -22,6 +22,8 @@ export default async function ActivityPage({ params }: { params: { slug: string 
       events={events}
       members={members}
       workspaceName={workspace.name}
+      workspaceId={workspace.id}
+      workspacePlan={workspace.plan}
     />
   )
 }

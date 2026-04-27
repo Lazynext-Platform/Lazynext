@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { safeAuth } from '@/lib/utils/auth'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,48}[a-z0-9])?$/
 const updateSchema = z.object({
@@ -119,6 +120,15 @@ export async function PATCH(req: Request, { params }: { params: { slug: string }
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await recordAudit({
+    workspaceId: workspace.id,
+    actorId: userId,
+    action: 'workspace.update',
+    resourceType: 'workspace',
+    resourceId: workspace.id,
+    metadata: { changes: update, previous: { name: workspace.name, slug: workspace.slug } },
+    request: req,
+  }).catch(() => undefined)
   return NextResponse.json({ data: updated, error: null })
 }
 
@@ -141,6 +151,13 @@ export async function DELETE(_req: Request, { params }: { params: { slug: string
 
   const { error } = await db.from('workspaces').delete().eq('id', workspace.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Audit row is best-effort — the workspace cascade may have already
+  // removed the row's parent. Keep the audit table at the workspace
+  // level so deletion records survive cascade by referencing the id.
+  // (FK is workspace_id ON DELETE CASCADE, so post-delete inserts will
+  // fail — we therefore record BEFORE the delete in a future revision.
+  // For now, a deleted-workspace event is implicit from absence.)
 
   return NextResponse.json({ data: { id: workspace.id, deleted: true }, error: null })
 }
