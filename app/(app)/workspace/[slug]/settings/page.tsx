@@ -304,7 +304,10 @@ export default function SettingsPage() {
               {plan === 'free' ? (
                 <button
                   type="button"
-                  onClick={() => useUpgradeModal.getState().show('full-upgrade')}
+                  onClick={() => {
+                    trackBillingEvent('paywall.gate.shown', { variant: 'full-upgrade', plan, surface: 'settings-billing' })
+                    useUpgradeModal.getState().show('full-upgrade')
+                  }}
                   className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"
                 >
                   Upgrade
@@ -312,7 +315,10 @@ export default function SettingsPage() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => useUpgradeModal.getState().show('full-upgrade')}
+                  onClick={() => {
+                    trackBillingEvent('paywall.gate.shown', { variant: 'full-upgrade', plan, surface: 'settings-billing' })
+                    useUpgradeModal.getState().show('full-upgrade')
+                  }}
                   className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
                 >
                   Change plan

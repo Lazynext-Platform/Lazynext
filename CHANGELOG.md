@@ -4,6 +4,17 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.4] - 2026-04-27
+
+**Theme:** Funnel coverage for `full-upgrade` modal entry points. Five gated surfaces (node-limit, ai-limit, member-limit, decision-limit, workspace-limit, sso-gate) all emit `paywall.gate.shown` before opening the modal, but the three generic "Upgrade" / "Change plan" buttons that surface the `full-upgrade` variant did not — the modal-open event existed but the upstream gate event didn't, so funnel queries filtering on `paywall.gate.shown` undercounted the `full-upgrade` denominator.
+
+### Changed
+- `app/(app)/workspace/[slug]/settings/page.tsx` — both billing-tab buttons (Free → Upgrade, paid → Change plan) now emit `paywall.gate.shown` with `variant: 'full-upgrade'`, `plan`, `surface: 'settings-billing'` before showing the modal.
+- `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — top-right "Change Plan" button (added in v1.3.23.1) now emits `paywall.gate.shown` with `variant: 'full-upgrade'`, `plan`, `surface: 'billing-page-header'` before showing the modal.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.3] - 2026-04-27
 
 **Theme:** Funnel parity for the billing-page checkout surface. v1.3.23.1 wired the page's Upgrade buttons but only emitted `paywall.checkout.clicked` — no `errored` or `succeeded` events. The global `UpgradeModal` has emitted all three for months, so any funnel query splitting clicks vs successful redirects vs errors silently double-counted billing-page traffic as click-only. Now both surfaces emit the same three events with `surface: 'billing-page'` so funnel tools can split them.

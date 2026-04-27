@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.4] — Funnel coverage for full-upgrade modal entry points (2026-04-27)
+
+Five gated surfaces emit `paywall.gate.shown` before opening the modal, but the three generic "Upgrade" / "Change plan" buttons surfacing the `full-upgrade` variant did not. Wired three call sites: settings billing tab Free → Upgrade button, settings billing tab paid → Change plan button, in-app billing page top-right "Change Plan" button. Each emits `paywall.gate.shown` with `variant: 'full-upgrade'`, `plan`, and a distinct `surface` label so funnel queries can split per entry point. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13234---2026-04-27).
+
+---
+
 ## [1.3.23.3] — Billing-page funnel telemetry parity (2026-04-27)
 
 v1.3.23.1 wired the in-app billing page's Upgrade buttons but only emitted `paywall.checkout.clicked`. Now `paywall.checkout.errored` (with `status` + `message`) and `paywall.checkout.succeeded` (with `plan` + `interval`) also fire — same shape as the global UpgradeModal — with `surface: 'billing-page'` so funnel queries can split clicks vs successful redirects vs errors. **197/197** tests passing.
