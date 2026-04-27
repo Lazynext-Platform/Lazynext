@@ -4,6 +4,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.41.0] - 2026-04-28
+
+**Theme:** Bearer auth on `/threads/{nodeId}`. CI runners can post comments to task nodes — e.g. "build #1234 failed: <link>" auto-posted on a related decision.
+
+### Added
+- `GET /api/v1/threads/{nodeId}` and `POST /api/v1/threads/{nodeId}` are bearer-aware.
+- POST requires `write` scope and uses the mutation rate-limit bucket (30/min).
+- OpenAPI spec entry for `/threads/{nodeId}` (10 paths total).
+
+### Changed
+- All thread routes authenticate before resource lookup — no anonymous existence-probing.
+- Thread auto-creation now uses the authenticated workspace (from the node row), never a query-string `workspaceId` — closes a hypothetical cross-workspace insert vector that bearer keys could otherwise have triggered.
+
 ## [1.3.40.0] - 2026-04-28
 
 **Theme:** Bearer auth on `/edges`. Closes the canvas-graph surface — nodes + edges are both fully programmable now.

@@ -6,6 +6,19 @@
 
 ---
 
+## [v1.3.41.0] - 2026-04-28 — Bearer auth on /threads
+
+**Theme:** `/api/v1/threads/{nodeId}` GET/POST now bearer-aware. POST requires `write` scope. Thread workspace is now derived from the node row, not a query string.
+
+### Added
+- Bearer auth on `/threads/{nodeId}`.
+- OpenAPI 3.1 entry (10 paths total).
+
+### Changed
+- Thread auto-creation uses the node's workspace_id, closing a query-string trust vector.
+
+---
+
 ## [v1.3.40.0] - 2026-04-28 — Bearer auth on /edges
 
 **Theme:** `/api/v1/edges` GET/POST/DELETE are now bearer-aware with `write` scope on mutations. Canvas graph (nodes + edges) is fully programmable.

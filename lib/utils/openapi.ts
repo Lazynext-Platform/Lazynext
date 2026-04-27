@@ -8,7 +8,7 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.40.0'
+const PACKAGE_VERSION = '1.3.41.0'
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
@@ -519,6 +519,61 @@ export function buildOpenApiSpec(): OpenApiSpec {
           ],
           responses: {
             '200': { description: 'Deleted' },
+            '403': errorResponse('INSUFFICIENT_SCOPE'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+      },
+      '/threads/{nodeId}': {
+        get: {
+          summary: 'List messages in a node\'s thread',
+          tags: ['Threads'],
+          parameters: [
+            {
+              name: 'nodeId',
+              in: 'path',
+              required: true,
+              description: 'Node UUID',
+              schema: { type: 'string', format: 'uuid' },
+            },
+          ],
+          responses: {
+            '200': { description: 'Thread + messages, or empty if none' },
+            '401': errorResponse('Missing or invalid credentials'),
+            '403': errorResponse('Bearer key does not belong to workspace'),
+            '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+        post: {
+          summary: 'Add a message to a node\'s thread',
+          description: 'Requires `write` scope. Creates the thread if absent.',
+          tags: ['Threads'],
+          parameters: [
+            {
+              name: 'nodeId',
+              in: 'path',
+              required: true,
+              description: 'Node UUID',
+              schema: { type: 'string', format: 'uuid' },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['content'],
+                  properties: {
+                    content: { type: 'string' },
+                    contentType: { type: 'string', enum: ['text', 'markdown'] },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '201': { description: 'Created' },
             '403': errorResponse('INSUFFICIENT_SCOPE'),
             '429': errorResponse('mutation bucket: 30/min'),
           },
