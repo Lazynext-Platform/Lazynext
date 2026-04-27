@@ -3,6 +3,7 @@ import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { deleteApiKey } from '@/lib/data/api-keys'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -30,6 +31,17 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (!deleted) {
     return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
   }
+
+  // Audit the revocation. Fire-and-forget; metadata records the id
+  // because the row is now gone — there's nothing to look up later.
+  void recordAudit({
+    workspaceId,
+    actorId: userId,
+    action: 'api_key.revoke',
+    resourceType: 'api_key',
+    resourceId: params.id,
+    request: req,
+  })
 
   return NextResponse.json({ data: { revoked: true }, error: null })
 }

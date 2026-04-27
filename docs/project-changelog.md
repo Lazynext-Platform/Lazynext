@@ -6,6 +6,25 @@
 
 ---
 
+## [v1.3.32.0] - 2026-04-28 — Bearer-auth machinery hardening
+
+**Theme:** Three follow-ups from v1.3.31.0 land in one ship — per-keyId rate-limit buckets, audit hooks on key issuance + revocation, and a filterable `api_key.*` action on the audit-log API.
+
+### Added
+- `AuthOk.rateLimitId` (`key:<keyId>` for bearer, `user:<userId>` for cookie). Leaked keys burn their own bucket.
+- `api_key.create` and `api_key.revoke` `AuditAction`s, emitted from `app/api/v1/api-keys` POST + DELETE.
+- Two more route-auth tests (269 → 271).
+
+### Changed
+- `app/api/v1/audit-log/route.ts`, `app/api/v1/decisions/route.ts` (GET), `app/api/v1/export/route.ts` — rate-limit identifiers swapped to the auth-derived bucket.
+- `lib/data/audit-log.ts` `AuditAction` extended (no migration; `VARCHAR(64)`).
+
+### Why
+- Per-keyId rate-limit closes a real security gap.
+- Lifecycle audit hooks make compromised-key forensics tractable.
+
+---
+
 ## [v1.3.31.0] - 2026-04-28 — Bearer auth rolls out to read endpoints
 
 **Theme:** `audit-log`, `decisions` (GET), `decisions/export-csv` now accept Bearer tokens via the new `requireWorkspaceAuth` helper.

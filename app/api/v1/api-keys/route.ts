@@ -5,6 +5,7 @@ import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { hasFeature } from '@/lib/utils/plan-gates'
 import { listApiKeys, createApiKey } from '@/lib/data/api-keys'
+import { recordAudit } from '@/lib/data/audit-log'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -82,6 +83,19 @@ export async function POST(req: Request) {
   if (!created) {
     return NextResponse.json({ error: 'CREATE_FAILED' }, { status: 500 })
   }
+
+  // Audit the issuance. Fire-and-forget — a failed audit must not
+  // fail the create. Metadata captures the prefix so an auditor can
+  // tell which key was issued without storing the plaintext.
+  void recordAudit({
+    workspaceId: parsed.data.workspaceId,
+    actorId: userId,
+    action: 'api_key.create',
+    resourceType: 'api_key',
+    resourceId: created.row.id,
+    metadata: { name: created.row.name, key_prefix: created.row.keyPrefix },
+    request: req,
+  })
 
   // The plaintext is in the response body exactly once. The client is
   // responsible for showing it to the user and discarding it after

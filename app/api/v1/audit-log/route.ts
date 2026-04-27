@@ -20,6 +20,8 @@ const VALID_ACTIONS: AuditAction[] = [
   'member.invite',
   'member.remove',
   'member.role_update',
+  'api_key.create',
+  'api_key.revoke',
 ]
 
 export async function GET(req: Request) {
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
 
   const auth = await requireWorkspaceAuth(req, workspaceId)
   if (!auth.ok) return auth.response
-  const rl = rateLimit(`api:${auth.userId}`, RATE_LIMITS.api)
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   // Plan gate. Audit log is a Business+/Enterprise feature.

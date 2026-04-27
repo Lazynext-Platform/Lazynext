@@ -20,6 +20,8 @@ export type AuditAction =
   | 'member.invite'
   | 'member.remove'
   | 'member.role_update'
+  | 'api_key.create'
+  | 'api_key.revoke'
 
 export interface AuditRow {
   id: string
