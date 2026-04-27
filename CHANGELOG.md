@@ -4,6 +4,25 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.19.0] - 2026-04-27
+
+**Theme:** Production crawler + auth title fix. Wrote a Playwright crawler that walks the entire public surface of `https://lazynext.com`, captures console errors, failed network requests, broken images, missing alts, duplicate ids, and missing h1s — then fixed the one real issue it surfaced: `/sign-in` and `/sign-up` both rendered the generic `<title>Auth — Lazynext`, indistinguishable in browser tabs and search results.
+
+### Added
+
+- `tests/e2e/prod-crawl.spec.ts` — read-only production crawler. Walks 14 public routes (landing, pricing, about, blog, changelog, comparison, contact, careers, privacy, terms, docs, features, sign-in, sign-up). Filters third-party console noise (favicon, Sentry init, fonts, Cookiebanner). Writes a structured `test-results/crawl-report.json` with status, load time, console errors, failed requests, broken images, alt-less images, duplicate ids, h1 presence, title, meta description. Run with `CRAWL_BASE=<url> npx playwright test tests/e2e/prod-crawl.spec.ts`. Defaults to `https://lazynext.com`.
+
+### Fixed
+
+- `/sign-in` now renders `<title>Sign in — Lazynext`. `/sign-up` now renders `<title>Create your account — Lazynext`. Previously both inherited the parent `(auth)/layout.tsx` metadata which set the literal `Auth — Lazynext` (the leaf pages are client components and can't export `metadata` directly). Fix: added per-segment server `layout.tsx` files under `(auth)/sign-in/` and `(auth)/sign-up/` that export `metadata` with `title.absolute` so the parent layout's new `title.template` doesn't double-suffix the brand. Parent fallback default is now `Sign in — Lazynext` (the most-visited auth page).
+
+### Verification
+
+- Crawler: 14/14 routes status 200. 0 console errors, 0 failed requests, 0 broken images, 0 duplicate ids. All pages have an h1. Average load time ~2.8s.
+- Type-check: ✅ clean.
+- Test suite: ✅ 175/175 passing across 25 files (the crawler is a dedicated e2e spec, not part of the unit count).
+- Production build: ✅ clean.
+
 ## [1.3.18.1] - 2026-04-27
 
 **Hotfix:** Sidebar lit up two nav items at once on `/decisions/outcomes`. Active matching used `pathname.startsWith(href)`, so both `/workspace/x/decisions` *and* `/workspace/x/decisions/outcomes` claimed the active styling — "Decisions" highlighted as the parent and "Outcomes" highlighted as the leaf, simultaneously.

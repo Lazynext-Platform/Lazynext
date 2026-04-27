@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.19.0] — Production crawler + auth title fix (2026-04-27)
+
+Wrote a Playwright crawler (`tests/e2e/prod-crawl.spec.ts`) that walks 14 public routes on `https://lazynext.com`, captures console errors, failed requests, broken images, missing alts, duplicate ids, and missing h1s, and writes a structured `test-results/crawl-report.json`. Result on the live site: 14/14 status 200, 0 console errors, 0 failed requests, 0 broken images, 0 duplicate ids, all pages have h1, avg load ~2.8s. The one real issue it surfaced: `/sign-in` and `/sign-up` both rendered the generic `Auth — Lazynext` title because the leaf pages are client components and can't export metadata. Fix: added per-segment server `layout.tsx` files with `title.absolute`, so `/sign-in` is now `Sign in — Lazynext` and `/sign-up` is `Create your account — Lazynext`. **175/175** tests passing across 25 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13190---2026-04-27).
+
+---
+
 ## [1.3.18.1] — Sidebar active-overlap hotfix (2026-04-27)
 
 Sidebar lit up two nav items at once on `/decisions/outcomes`. Active matching used `pathname.startsWith(href)`, so both `/workspace/x/decisions` and `/workspace/x/decisions/outcomes` claimed active styling. Fix: pick the longest matching href and only it wins; require trailing slash to prevent prefix bleed (`/decisions-archive` would have falsely activated `/decisions`). **175/175** tests passing across 25 files. Type-check clean, build clean.
