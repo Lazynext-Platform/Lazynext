@@ -1,10 +1,24 @@
 # Lazynext — Feature Index
 
 > **Total Features**: 38
-> **Total Files**: 195 (38 mockups + 38 briefs + 38 specs + 38 reviews + 38 handoffs + 5 infrastructure)
-> **Last Updated**: 2026-04-05
-> **Status**: Complete — all Blueprint lifecycle stages fulfilled for every feature.
+> **Total Files**: 195 design files + per-feature Mastery docs (lifecycle docs for #01–05, retroactive `summary.md` for #04 and #06–38)
+> **Last Updated**: 2026-04-28
+> **Status**: Complete — all Blueprint lifecycle stages fulfilled for every feature; Mastery-side documentation completed retroactively per the framework's mid-project adoption rules.
 > **Design Lifecycle**: Discover → Explore → Define → Create → Refine → Handoff → Reflect — ALL COMPLETE
+> **Development Lifecycle**: All 38 features shipped (`🟢 Merged` per `project-roadmap.md`). Features #01–05 carry full Mastery docs (`discussion`, `architecture`, `tasks`, `testplan`, `changelog`, `review`). Feature #04 and Features #06–38 carry a single retroactive [`summary.md`](#per-feature-summary-docs-retroactive) documenting what was built, why, and which files are affected — per Mastery's mid-project adoption pattern.
+
+---
+
+## Per-Feature Summary Docs (retroactive)
+
+Each feature folder for #04 and #06–38 contains a `summary.md` (Template #15 from `docs/mastery.md`) capturing:
+- What was built (2-4 sentence synopsis)
+- Key decisions made (reconstructed from code, commits, design docs, and changelog)
+- Files & components affected
+- Dependencies (upstream + downstream)
+- Notes (limitations, follow-ups, technical debt)
+
+These are deliberately not full lifecycle docs because Mastery explicitly forbids fabricating retroactive `discussion.md` / `architecture.md` / `tasks.md` files for past work.
 
 ---
 

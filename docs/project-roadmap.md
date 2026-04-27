@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.28.1 — shipped + deployed
+> **Current Milestone**: v1.3.42.2 — shipped + deployed
 > **Last Updated**: 2026-04-28
 
 ---
@@ -78,7 +78,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 08 | Decision Health Dashboard | ✅ Complete | 🟢 Merged | #07 | `main` | Built — quality trends, outcome donut, burndown, makers table |
 | 12 | Workspace Settings | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 5-tab settings; Notifications tab now wired to real `notification_preferences` (v1.3.5.0) |
 | 13 | Billing & Subscription | ✅ Complete | 🟢 Merged | #12 | `main` | Built — plan comparison, payment method, usage metrics |
-| 15 | Import Modal | ✅ Complete | � Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
+| 15 | Import Modal | ✅ Complete | 🟡 Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
 | 16 | Pulse Dashboard | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workload bars, burndown SVG, LazyMind summary |
 | 17 | Automation Builder | ✅ Complete | 🟢 Merged | #05 | `main` | Real WHEN/THEN engine (v1.3.7.0) — `decision.logged` + `task.created` triggers, `notification.send` + `webhook.post` actions, run history |
 | 18 | Template Marketplace | ✅ Complete | 🟢 Merged | #05 | `main` | 6-template curated catalog (v1.3.8.0) — install clones nodes + edges into workspace |
@@ -87,7 +87,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 22 | Upgrade & Paywall Modal | ✅ Complete | 🟢 Merged | #13 | `main` | Built — 4 variants (node/ai/health/full), plan cards |
 | 27 | Real-time Collaboration | ✅ Complete | 🟢 Merged | #05, #11 | `main` | Supabase Realtime presence wired (v1.3.6.0) — live cursors + selection rings on the canvas |
 | 30 | Profile & Account Settings | ✅ Complete | 🟢 Merged | #03 | `main` | Built — 4 tabs (profile/security/preferences/sessions) |
-| 31 | Integrations Settings | ✅ Complete | � UI only | #12 | `main` | Honest empty state — Slack/Notion/GitHub OAuth pending |
+| 31 | Integrations Settings | ✅ Complete | 🟡 UI only | #12 | `main` | Honest empty state — Slack/Notion/GitHub OAuth pending |
 | 32 | Marketing Pages | ✅ Complete | 🟢 Merged | #01 | `main` | Built — About, Features, Changelog, Comparison, Blog |
 | 34 | Team Member Management | ✅ Complete | 🟢 Merged | #12 | `main` | Built — role badges, stat bar, email chip invites |
 | 37 | Task Views (Kanban + List) | ✅ Complete | 🟢 Merged | #05 | `main` | Built — Kanban board + List table with filters |

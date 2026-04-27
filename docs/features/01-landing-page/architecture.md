@@ -3,51 +3,52 @@
 > **Feature**: 01 — Landing Page
 > **Status**: 🟢 FINALIZED
 > **Date**: 2026-04-06
+> **Last verified against code**: 2026-04-28
 
 ---
 
 ## Overview
 
-Convert the existing basic landing page (`app/(marketing)/page.tsx`) into a full 12-section marketing page matching the Blueprint mockup. The page uses a component-per-section architecture with the existing marketing layout providing header/footer.
+Convert the existing basic landing page (`app/(marketing)/page.tsx`) into a full marketing page matching the Blueprint mockup. The page uses a component-per-section architecture with the existing marketing layout providing header/footer.
 
 ## File Structure
 
 ```
 app/(marketing)/
-├── layout.tsx                    # MODIFY — Enhanced header/footer from mockup
+├── layout.tsx                    # MODIFY — mounts MarketingHeader + footer
 ├── page.tsx                      # MODIFY — Compose all landing sections
-└── pricing/                     # Existing (untouched in this feature)
+└── pricing/                      # Existing (untouched in this feature — see #02)
 
 components/marketing/
-├── HeroSection.tsx              # NEW — Hero with badge, headline, CTAs, canvas mockup
-├── SocialProofBar.tsx           # NEW — Team count + logo placeholders
-├── ProblemSection.tsx           # NEW — Tool graveyard + Lazynext card
-├── PrimitivesSection.tsx        # NEW — 7 node type cards
-├── DecisionDNASection.tsx       # NEW — Decision card mockup + feature list
-├── LazyMindSection.tsx          # NEW — AI chat mockup + feature list
-├── ConsolidationMap.tsx         # NEW — SVG convergence + price comparison
-├── PricingSection.tsx           # NEW — Toggle + 3-tier pricing (client component)
-├── TestimonialsSection.tsx      # NEW — 3 testimonial cards
-├── CTABanner.tsx                # NEW — Blue gradient CTA
-└── MobileMenu.tsx               # NEW — Mobile hamburger dropdown (client component)
+├── MarketingHeader.tsx           # NEW — Header with nav + mobile menu (client)
+├── HeroSection.tsx               # NEW — Hero with badge, headline, CTAs, canvas mockup
+├── ProblemSection.tsx            # NEW — Tool graveyard + Lazynext card
+├── PrimitivesSection.tsx         # NEW — 7 node type cards
+├── DecisionDNASection.tsx        # NEW — Decision card mockup + feature list
+├── LazyMindSection.tsx           # NEW — AI chat mockup + feature list
+├── ConsolidationMap.tsx          # NEW — SVG convergence + price comparison
+├── PricingSection.tsx            # NEW — Toggle + tiered pricing (client component)
+├── FoundingMemberBanner.tsx      # NEW — Founding-member promo banner
+└── CTABanner.tsx                 # NEW — Gradient CTA section
 ```
+
+> **Not implemented**: a separate `SocialProofBar`, `TestimonialsSection`, or `MobileMenu` component. Social-proof and testimonial copy is inlined into other sections; mobile menu logic lives inside `MarketingHeader.tsx`.
 
 ## Component Architecture
 
 ### Server Components (default)
 - `HeroSection` — Static hero with CSS animations (float-anim)
-- `SocialProofBar` — Static placeholder logos
 - `ProblemSection` — Static competitor cards + Lazynext card
 - `PrimitivesSection` — Static 7 primitive cards
 - `DecisionDNASection` — Static decision card mockup + text
 - `LazyMindSection` — Static AI chat mockup + feature list
 - `ConsolidationMap` — Static SVG diagram + price comparison
-- `TestimonialsSection` — Static testimonial cards
+- `FoundingMemberBanner` — Static promo banner
 - `CTABanner` — Static CTA section
 
 ### Client Components ('use client')
-- `PricingSection` — Needs useState for monthly/annual toggle
-- `MobileMenu` — Needs useState for menu open/close toggle
+- `MarketingHeader` — Mobile menu open/close state
+- `PricingSection` — Monthly/annual toggle state
 
 ## Data Flow
 
