@@ -44,6 +44,11 @@ export default function ApiDocsPage() {
             </Link>{' '}
             (OpenAPI 3.1)
           </p>
+          <p className="mt-2 text-sm text-slate-500">
+            Typed client lives at <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs">lib/sdk</code>{' '}
+            in the repo &mdash; copy <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-xs">client.ts</code>{' '}
+            into your project. Zero deps, ~150 lines, types map 1:1 to the OpenAPI schema.
+          </p>
         </div>
 
         <Section icon={<KeyRound className="h-5 w-5 text-indigo-600" />} title="Authentication">
