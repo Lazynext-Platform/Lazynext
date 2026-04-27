@@ -4,6 +4,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.31.0] - 2026-04-28
+
+**Theme:** Bearer auth rolls out to three more read endpoints. v1.3.30.0 wired `/api/v1/export`; this release adds the `requireWorkspaceAuth` helper so any v1 route can opt into bearer auth in two lines, and applies it to `/api/v1/audit-log`, `/api/v1/decisions` (GET), and `/api/v1/decisions/export-csv`. Behaviour is identical to before for cookie-session callers; bearer callers now succeed where they previously got 401.
+
+### Added
+- `lib/utils/route-auth.ts` — `resolveAuth(req)` and `requireWorkspaceAuth(req, workspaceId)`. Bearer first, cookie session fallback. Bearer requests with a mismatched workspaceId return 403 `WORKSPACE_MISMATCH`. Cookie callers run through `verifyWorkspaceMember` as before.
+- `tests/unit/route-auth.test.ts` — 9 cases: bearer match, bearer mismatch, cookie member, cookie non-member, both missing, fallback path, etc.
+
+### Changed
+- `app/api/v1/audit-log/route.ts` — swapped `safeAuth` + `verifyWorkspaceMember` for `requireWorkspaceAuth`. Plan gate (`audit-log` requires Business+) is unchanged.
+- `app/api/v1/decisions/route.ts` — GET handler converted; POST handler intentionally left on cookie-session auth (write paths roll out separately).
+- `app/api/v1/decisions/export-csv/route.ts` — inlined membership check replaced with `requireWorkspaceAuth`.
+
+### Why this matters
+- The four most-requested machine endpoints (workspace export, audit log, decisions list, decisions CSV) now accept API keys. A CI runner can pull a workspace's compliance audit trail or quality CSV with a Bearer token. Any other v1 route can opt in by adding a `requireWorkspaceAuth` line.
+
+### Deferred (intentionally)
+- Mutation routes (`POST/PATCH/DELETE`) — each one rolls out in its own PR with explicit rate-limit + audit-log review.
+- Per-key scopes (read-only vs read-write).
+- Per-keyId rate-limit buckets so a leaked key can't burn a human user's budget.
+
 ## [1.3.30.0] - 2026-04-28
 
 **Theme:** Inbound bearer-token authentication ships. v1.3.29.0 added the issuance UX; this release adds the consumer side — the REST API can now accept `Authorization: Bearer lzx_...` (or `X-Api-Key`) and resolve it to a workspace via the SHA-256 hash stored in `api_keys.key_hash`. The `/api/v1/export` endpoint is the first consumer; it accepts both bearer and cookie-session auth, with bearer requests skipping the membership check (the key itself is the membership grant). Other v1 endpoints can opt into bearer auth one route at a time using the same helper — nothing else has been touched in this PR to keep the blast radius small.

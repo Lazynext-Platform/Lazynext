@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { hasFeature } from '@/lib/utils/plan-gates'
@@ -23,18 +23,16 @@ const VALID_ACTIONS: AuditAction[] = [
 ]
 
 export async function GET(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
 
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
 
-  const authorized = await verifyWorkspaceMember(userId, workspaceId)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, workspaceId)
+  if (!auth.ok) return auth.response
+  const rl = rateLimit(`api:${auth.userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   // Plan gate. Audit log is a Business+/Enterprise feature.
   const { data: workspace } = await db.from('workspaces').select('plan').eq('id', workspaceId).maybeSingle()

@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server'
-import { safeAuth } from '@/lib/utils/auth'
+import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { decisionsToCsv } from '@/lib/utils/decisions-csv'
 import type { Decision } from '@/lib/db/schema'
 
 // GET /api/v1/decisions/export.csv?workspaceId=<uuid>&range=7|30|90|365
 // Returns the workspace's decision log as a streamed CSV download.
-// Caller must be a member of the workspace.
+// Caller must be a member of the workspace OR present a valid bearer
+// API key bound to that workspace.
 export async function GET(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
   if (!hasValidDatabaseUrl) {
     return NextResponse.json(
       { error: 'DATABASE_NOT_CONFIGURED' },
@@ -24,16 +22,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
   }
 
-  const { data: membership } = await db
-    .from('workspace_members')
-    .select('id')
-    .eq('workspace_id', workspaceId)
-    .eq('user_id', userId)
-    .maybeSingle()
-
-  if (!membership) {
-    return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
-  }
+  const auth = await requireWorkspaceAuth(req, workspaceId)
+  if (!auth.ok) return auth.response
 
   let query = db
     .from('decisions')
