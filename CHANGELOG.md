@@ -4,6 +4,17 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.1] - 2026-04-27
+
+**Theme:** Hotfix — Billing page Upgrade buttons actually work now. v1.3.23.0 fixed every dollar value but left the buttons broken: top-right "Change Plan" linked to `/workspace/[slug]/upgrade` (404), per-card "Upgrade" buttons had no `onClick` at all (dead pixels). Wired both: "Change Plan" now triggers the global `useUpgradeModal.show('full-upgrade')` modal, per-card buttons POST to `/api/v1/billing/checkout` (Starter / Business) or route to `/contact?topic=enterprise` (Enterprise tier, no Gumroad product). Free tier shows "Free forever" and is intentionally non-interactive.
+
+### Changed
+- `app/(app)/workspace/[slug]/billing/page.tsx` — passes `workspaceId` (not just slug) to the client so checkout can be scoped without a round-trip.
+- `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — new `handleUpgrade(plan)` helper POSTs `{ plan, interval, workspaceId }` to `/api/v1/billing/checkout` and `window.location.href = body.data.url` on success. Translates UI `'monthly'|'annual'` → server `'monthly'|'yearly'` at the boundary. Per-card button now wires through to `handleUpgrade` for Starter/Pro, `/contact` for Enterprise, no-op for Free. Pending state shows a spinner + "Opening checkout…" copy on the clicked card and disables every other plan card while in flight. Errors from the API render as an inline amber alert below the comparison grid (no toast dependency). "Change Plan" button at the top now calls `useUpgradeModal.getState().show('full-upgrade')` instead of routing to a 404. Telemetry: `paywall.checkout.clicked` fires with `surface: 'billing-page'` so we can distinguish it from the upgrade-modal funnel.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.0] - 2026-04-27
 
 **Theme:** In-app billing page synced to PLAN_LIMITS + PLAN_PRICING_USD. Audit found `app/(app)/workspace/[slug]/billing/BillingClient.tsx` had drifted hard from constants: Team card showed `$9` (real: `$19`), Business card showed `$19` (real: `$30`), Enterprise card showed `$49/seat/month` (real: contact-sales / null), Free tier copy listed only 4 limits instead of 6 (missing `1 workspace`, `20 decisions`), Decisions usage row hardcoded `limit: -1` so Free workspaces never saw their `12/20` cap. Fixed by deriving every dollar value from `PLAN_PRICING_USD` and every limit from `PLAN_LIMITS`. Single source of truth now extends to the in-app billing screen the same way it does to the marketing pricing page.

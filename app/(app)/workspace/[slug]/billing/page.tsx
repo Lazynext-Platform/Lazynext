@@ -14,5 +14,5 @@ export default async function BillingPage({ params }: { params: { slug: string }
   const usage = await getBillingUsage(workspace.id)
   const plan = (workspace.plan ?? 'free') as Plan
 
-  return <BillingClient slug={params.slug} workspacePlan={plan} usage={usage} />
+  return <BillingClient slug={params.slug} workspaceId={workspace.id} workspacePlan={plan} usage={usage} />
 }
