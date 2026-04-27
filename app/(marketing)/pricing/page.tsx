@@ -80,7 +80,7 @@ const tiers = [
     features: [
       'Outcome tracking & trends',
       'PULSE dashboards',
-      'Automation engine (coming soon)',
+      'Automation engine (WHEN/THEN triggers + webhooks)',
       '500 LazyMind AI queries/day/seat',
       'Semantic search across decisions',
       'Weekly digest email',
@@ -128,7 +128,7 @@ const comparisonFeatures = [
   { name: 'Decision Health Dashboard', free: null, starter: true, pro: true, business: true },
   { name: 'LazyMind AI queries', free: '20/day', starter: '100/day/seat', pro: '500/day/seat', business: 'Unlimited' },
   { name: 'PULSE', free: null, starter: null, pro: true, business: true },
-  { name: 'Automation engine', free: null, starter: null, pro: 'Soon', business: 'Soon' },
+  { name: 'Automation engine', free: null, starter: null, pro: true, business: true },
   { name: 'Import', free: null, starter: 'CSV', pro: 'CSV', business: 'CSV' },
   { name: 'Export', free: null, starter: null, pro: 'JSON', business: 'JSON' },
   { name: 'Support', free: 'Community', starter: 'Email', pro: 'Priority', business: 'Dedicated' },

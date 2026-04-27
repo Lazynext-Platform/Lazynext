@@ -6,6 +6,16 @@
 
 ---
 
+## [v1.3.28.1] - 2026-04-28 — Marketing accuracy patch
+
+**Theme:** Pricing + comparison pages no longer understate shipped features.
+
+### Changed
+- `app/(marketing)/pricing/page.tsx` — Automation engine listed as live (was `coming soon`).
+- `app/(marketing)/comparison/page.tsx` — Automation builder + Templates flipped from `soon` to `true` (both shipped in v1.3.7.0 / v1.3.8.0).
+
+---
+
 ## [v1.3.28.0] - 2026-04-28 — OAuth surfaces consistent + Disconnect
 
 **Theme:** Import modal and Settings → Integrations now share the same registry-driven empty state. Disconnect button ships, closing the read-only loop on Integrations.
