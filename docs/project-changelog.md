@@ -6,6 +6,16 @@
 
 ---
 
+## [v1.3.42.0] - 2026-04-28 — Bearer auth on /search
+
+**Theme:** `/api/v1/search` is bearer-aware. Read-only — the api bucket. CI dedupe before creating duplicate decisions/tasks works now.
+
+### Added
+- Bearer auth on `/search`.
+- OpenAPI 3.1 entry (11 paths total).
+
+---
+
 ## [v1.3.41.0] - 2026-04-28 — Bearer auth on /threads
 
 **Theme:** `/api/v1/threads/{nodeId}` GET/POST now bearer-aware. POST requires `write` scope. Thread workspace is now derived from the node row, not a query string.

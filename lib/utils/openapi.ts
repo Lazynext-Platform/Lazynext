@@ -8,7 +8,7 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.41.0'
+const PACKAGE_VERSION = '1.3.42.0'
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
@@ -521,6 +521,28 @@ export function buildOpenApiSpec(): OpenApiSpec {
             '200': { description: 'Deleted' },
             '403': errorResponse('INSUFFICIENT_SCOPE'),
             '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+      },
+      '/search': {
+        get: {
+          summary: 'Search nodes, decisions, and workflows in a workspace',
+          tags: ['Search'],
+          parameters: [
+            workspaceIdParam,
+            {
+              name: 'q',
+              in: 'query',
+              required: true,
+              description: 'Search term (case-insensitive substring match)',
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': { description: 'Grouped results: nodes, decisions, workflows' },
+            '401': errorResponse('Missing or invalid credentials'),
+            '403': errorResponse('Bearer key does not belong to workspace'),
+            '429': errorResponse('api bucket: 100/min'),
           },
         },
       },
