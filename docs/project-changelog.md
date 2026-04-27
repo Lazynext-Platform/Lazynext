@@ -6,6 +6,68 @@
 
 ---
 
+## [v1.3.42.4] - 2026-04-28 — Audit round 3 (summary prose sweep)
+
+**Theme:** Prose-level sweep across all 34 retroactive `summary.md` files. Found and fixed two residual currency drift issues that had propagated from the same incorrect mental model corrected in v1.3.42.3.
+
+### Fixed
+- [`docs/features/13-billing-subscription/summary.md`](features/13-billing-subscription/summary.md) — "Per-seat pricing in INR (₹)" replaced with the truth: USD per seat sourced from `lib/utils/constants.ts`, locale-formatted via `formatPrice`.
+- [`docs/features/22-upgrade-paywall-modal/summary.md`](features/22-upgrade-paywall-modal/summary.md) — "INR prices from `lib/billing/plans.ts`" (file doesn't exist) replaced with the real source-of-truth pointer to `lib/utils/constants.ts`.
+
+### Notes
+- Swept the full set with regex for known prior failure modes (`Clerk`, `action-based`, `INR`, `lib/billing/plans`, fictional component names) — only the two USD/INR slips above remained.
+- The other 32 `summary.md` files passed clean.
+
+---
+
+## [v1.3.42.3] - 2026-04-28 — Audit round 2 (roadmap + cross-cutting docs)
+
+**Theme:** Second audit pass after the file-path drift fixes. Caught 3 cross-cutting inaccuracies the file-tree audit missed.
+
+### Fixed
+- [`docs/project-roadmap.md`](project-roadmap.md) header — `Current Milestone` was stuck at `v1.3.28.1`, two versions of doc updates behind. Synced to `v1.3.42.2`.
+- [`docs/project-roadmap.md`](project-roadmap.md) — replaced two broken `�` glyphs with the proper 🟡 yellow circle in the Phase 2 table (rows for #15 Import Modal and #31 Integrations Settings).
+- [`docs/features/02-pricing-page/testplan.md`](features/02-pricing-page/testplan.md) — currency was wrongly described as INR. Real source of truth: `lib/utils/constants.ts` exports `PLAN_PRICING_USD` / `PLAN_PRICING_USD_ANNUAL`; the pricing page formats per-locale via `formatPrice` from `lib/i18n`. Also corrected the constants path (had `lib/billing/plans.ts` — doesn't exist) and the missing-Gumroad-env fallback (real fallback is `/sign-up`, not `/contact`).
+
+### Notes
+- Verified accurate (no changes): [`docs/references/billing-architecture.md`](references/billing-architecture.md) — slug/display mapping, prices, feature gates, file paths all match the code as of today.
+
+---
+
+## [v1.3.42.2] - 2026-04-28 — Documentation accuracy audit
+
+**Theme:** Audited the docs written in v1.3.42.1 against the real codebase. Found and fixed four drift issues introduced during the retroactive backfill.
+
+### Fixed
+- [`AGENTS.md`](../AGENTS.md) `lib/` tree — added the 7 real subdirs that had been omitted (`canvas/`, `data/`, `i18n/`, `oauth/`, `realtime/`, `sdk/`, `wms.ts`).
+- [`docs/features/01-landing-page/architecture.md`](features/01-landing-page/architecture.md) — file structure updated to match `components/marketing/`. Removed three fictional components (`SocialProofBar`, `TestimonialsSection`, `MobileMenu`) and added the two real ones that had been missed (`MarketingHeader`, `FoundingMemberBanner`). Mobile-menu state lives inside `MarketingHeader`.
+- [`docs/features/03-auth-pages/architecture.md`](features/03-auth-pages/architecture.md) — rewrote to match real code: inline `'use client'` pages at `app/(auth)/sign-{in,up}/[[...sign-{in,up}]]/page.tsx` (Clerk-migration catch-all kept), only `/auth/callback` route handler exists, email-confirm and reset-password go through Supabase-hosted screens. Removed fictional `components/auth/`, `app/auth/confirm/`, `app/auth/reset-password/` references.
+- [`docs/features/03-auth-pages/testplan.md`](features/03-auth-pages/testplan.md) — updated 4 sections to match the real Supabase-hosted confirm/reset flows and remove the fictional env-flag-driven OAuth toggle.
+- [`docs/features/05-workflow-canvas/architecture.md`](features/05-workflow-canvas/architecture.md) — rewrote against ground truth: `WorkflowCanvas.tsx` (not `Canvas.tsx`), `WorkflowEdge.tsx` (not `DefaultEdge.tsx`), real `lib/canvas/` hook-based persisters, snapshot-based (not action-based) history, real `app/(app)/workspace/[slug]/canvas/[id]/` route, real API surface including `nodes/positions/route.ts` for bulk position patches.
+
+### Notes
+- Verified accurate (no changes): `components/` tree, `stores/` set, top-level `app/(app)/` structure, `app/api/v1/` route surface in summaries, [`docs/features/02-pricing-page/architecture.md`](features/02-pricing-page/architecture.md) (single 489-line client component file as documented).
+
+---
+
+## [v1.3.42.1] - 2026-04-28 — Mastery documentation backfill
+
+**Theme:** Retroactive Mastery-framework documentation across all 38 features. Every feature folder now carries either the full lifecycle (`discussion → architecture → tasks → testplan → changelog → review`) or a single `summary.md` per Mastery's mid-project-adoption rule. No fabricated history.
+
+### Added
+- `summary.md` for features #04, #06–#38 (34 files) — what was built, key decisions, files affected, dependencies, and notes, all grounded in code, design briefs, the project roadmap, and prior changelog entries.
+- `review.md` for shipped features #01, #02, #03, #05 — post-ship retrospectives.
+- `architecture.md` + `testplan.md` for features #03 and #05 (filling the gaps in their original lifecycles).
+- `testplan.md` for feature #02.
+- `Documentation` section in [`README.md`](../README.md) linking the doc set.
+- Updated [`docs/features/FEATURE-INDEX.md`](features/FEATURE-INDEX.md) header explaining the retroactive-summary convention.
+
+### Notes
+- Per `docs/mastery.md` → Mid-Project Adoption Step 6, full lifecycle docs were **not** fabricated for completed features. A single `summary.md` is the correct retroactive artifact.
+- AGENTS.md, project-context.md, project-discussion.md, and project-roadmap.md were already current — no changes needed.
+
+---
+
 ## [v1.3.42.0] - 2026-04-28 — Bearer auth on /search
 
 **Theme:** `/api/v1/search` is bearer-aware. Read-only — the api bucket. CI dedupe before creating duplicate decisions/tasks works now.

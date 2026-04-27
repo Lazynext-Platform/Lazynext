@@ -153,6 +153,27 @@ npm run test:e2e     # Playwright E2E tests
 - **Responsive**: Mobile-first — Mobile (<640px), Tablet (640–1024px), Desktop (>1024px)
 - See `docs/design-system.md` for full tokens and patterns
 
+## Documentation
+
+The complete documentation set lives in [`docs/`](docs/):
+
+| Doc | Purpose |
+|---|---|
+| [`docs/project-context.md`](docs/project-context.md) | Project identity, stack, architecture, conventions |
+| [`docs/project-discussion.md`](docs/project-discussion.md) | Why the project exists; key decisions |
+| [`docs/project-roadmap.md`](docs/project-roadmap.md) | All 38 features and their status |
+| [`docs/project-changelog.md`](docs/project-changelog.md) | High-level shipped-feature log |
+| [`docs/design-system.md`](docs/design-system.md) | Design tokens, color palette, type ramp |
+| [`docs/features/FEATURE-INDEX.md`](docs/features/FEATURE-INDEX.md) | All 38 features — links to design + summary docs |
+| [`docs/mastery.md`](docs/mastery.md) | Development process framework (read-only) |
+| [`docs/mastery-compact.md`](docs/mastery-compact.md) | Compact rules for AI agent sessions |
+| [`docs/blueprint-compact.mastery.md`](docs/blueprint-compact.mastery.md) | UI design framework |
+| [`docs/references/`](docs/references/) | ADRs, billing architecture, process overrides |
+
+Per-feature documentation lives under `docs/features/XX-feature-name/`. Each folder contains the full Blueprint design lifecycle (`design-brief.md`, `design-spec.md`, `design-review.md`, `design-handoff.md`, `mockups/`) and either the Mastery development lifecycle (`discussion.md`, `architecture.md`, `tasks.md`, `testplan.md`, `changelog.md`, `review.md`) or a single retroactive `summary.md` for features built before Mastery was adopted mid-project.
+
+For AI agents, [`AGENTS.md`](AGENTS.md) at the project root is the entry point.
+
 ## License
 
 Private — All rights reserved.

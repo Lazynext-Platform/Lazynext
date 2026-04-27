@@ -24,10 +24,17 @@ lazynext/
 ├── lib/                      # Service layer
 │   ├── ai/                   # Groq/Together AI
 │   ├── billing/              # Gumroad
+│   ├── canvas/               # Canvas persist + history helpers
+│   ├── data/                 # Server data loaders
 │   ├── db/                   # Supabase client + schema types
 │   ├── email/                # Resend templates
+│   ├── i18n/                 # Locale + translation helpers
 │   ├── inngest/              # Background jobs
-│   └── utils/                # Utilities
+│   ├── oauth/                # Third-party OAuth (integrations)
+│   ├── realtime/             # Supabase Realtime channels + presence
+│   ├── sdk/                  # Public bearer-auth SDK helpers
+│   ├── utils/                # Utilities
+│   └── wms.ts                # Workspace membership / plan-limit checks
 ├── stores/                   # Zustand state stores
 ├── docs/                     # Documentation
 │   ├── mastery.md            # Development process framework (READ-ONLY)
