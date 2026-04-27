@@ -1,13 +1,15 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { callLazyMind } from '@/lib/ai/lazymind'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { checkAiQuota, recordAiUsage } from '@/lib/data/ai-usage'
 
 const generateSchema = z.object({
   prompt: z.string().min(1).max(2000),
   type: z.enum(['node_content', 'decision_rationale', 'doc_draft', 'task_breakdown']),
   context: z.record(z.string(), z.unknown()).optional(),
+  workspaceId: z.string().uuid().optional(),
 })
 
 const systemPrompts: Record<string, string> = {
@@ -31,7 +33,30 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { prompt, type, context } = parsed.data
+  const { prompt, type, context, workspaceId } = parsed.data
+
+  // Plan-gate the daily AI quota when scoped to a workspace. Same
+  // pattern as `/api/v1/ai/chat`: callers that don't pass
+  // `workspaceId` get the per-minute burst cap above and nothing else.
+  if (workspaceId) {
+    const ok = await verifyWorkspaceMember(userId, workspaceId)
+    if (!ok) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+    const quota = await checkAiQuota(userId, workspaceId)
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: 'PLAN_LIMIT_REACHED',
+          variant: 'ai-limit',
+          message: `You've used ${quota.used} of ${quota.limit} LazyMind queries for today. Upgrade for a larger daily quota.`,
+          plan: quota.plan,
+          used: quota.used,
+          limit: quota.limit,
+        },
+        { status: 402 },
+      )
+    }
+  }
+
   const systemPrompt = systemPrompts[type]
   const userMessage = context
     ? `${prompt}\n\nContext: ${JSON.stringify(context)}`
@@ -39,6 +64,7 @@ export async function POST(req: Request) {
 
   try {
     const response = await callLazyMind(systemPrompt, userMessage, 800)
+    if (workspaceId) void recordAiUsage(userId, workspaceId)
     return NextResponse.json({
       data: { content: response.content, provider: response.provider, type },
       error: null,
