@@ -6,6 +6,20 @@
 
 ---
 
+## [v1.3.37.0] - 2026-04-28 — Typed TypeScript client at lib/sdk
+
+**Theme:** `LazynextClient` with typed errors. Zero deps, ~150 lines, copy-paste integration.
+
+### Added
+- `lib/sdk/client.ts` and `lib/sdk/index.ts`.
+- `LazynextApiError` with `code` (UNAUTHORIZED, INSUFFICIENT_SCOPE, RATE_LIMITED, NOT_FOUND, BAD_REQUEST, SERVER_ERROR, UNKNOWN) and `requiredScope`.
+- 10 SDK tests (286 → 296).
+
+### Why
+- Pairs with the OpenAPI spec from v1.3.36.0. Integrators get a working client today, not after we publish to npm.
+
+---
+
 ## [v1.3.36.0] - 2026-04-28 — OpenAPI 3.1 spec at /api/v1/openapi.json
 
 **Theme:** Machine-readable counterpart to `/docs/api`. Hand-written OpenAPI 3.1, public, edge-cached 5min. Covers every bearer-aware endpoint with security schemes, scope requirements, and rate-limit bucket annotations on 429 responses.

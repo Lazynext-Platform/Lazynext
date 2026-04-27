@@ -4,6 +4,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.37.0] - 2026-04-28
+
+**Theme:** Typed TypeScript client for the public REST API. Zero dependencies, copy-pasteable, error codes are first-class.
+
+### Added
+- `lib/sdk/client.ts` — `LazynextClient` with `decisions.{list,get,create,update,delete}`. Bearer header set automatically.
+- `LazynextApiError` with stable `code` field: `UNAUTHORIZED | INSUFFICIENT_SCOPE | RATE_LIMITED | NOT_FOUND | BAD_REQUEST | SERVER_ERROR | UNKNOWN`. `requiredScope` populated for 403s. Callers branch on the code, not the prose.
+- `lib/sdk/index.ts` re-exports the public surface.
+- `tests/unit/sdk-client.test.ts` — 10 tests covering bearer header, JSON body, every error mapping (286 → 296).
+- `/docs/api` mentions the typed client.
+
+### Why
+- OpenAPI shipped in v1.3.36.0; the client is the first thing every integrator builds. Shipping it ourselves means the integration story is "copy this file" rather than "hand-roll fetch wrappers".
+
 ## [1.3.36.0] - 2026-04-28
 
 **Theme:** Machine-readable API spec at `/api/v1/openapi.json`. SDK generators, Postman, and IDE plugins can now consume Lazynext's REST surface programmatically.
