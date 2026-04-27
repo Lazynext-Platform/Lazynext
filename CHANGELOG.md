@@ -4,6 +4,17 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.28.1] - 2026-04-28
+
+**Theme:** Marketing accuracy patch. The pricing page and the competitor comparison page were both still listing **Automation engine** and **Templates** as `Soon`/`coming soon`, even though the automation engine shipped in v1.3.7.0 (real WHEN/THEN triggers + webhook actions + run history) and the template marketplace shipped in v1.3.8.0 (6-template curated catalog with one-click install). That understates the product to every prospect that visits the pricing or comparison page before signing up.
+
+### Changed
+- `app/(marketing)/pricing/page.tsx` — Business tier feature line changed from `Automation engine (coming soon)` to `Automation engine (WHEN/THEN triggers + webhooks)`. Comparison-table row for `Automation engine` flipped from `Soon`/`Soon` (Pro/Business) to `true`/`true`.
+- `app/(marketing)/comparison/page.tsx` — `Automation builder` and `Templates` rows flipped from `lazynext: 'soon'` to `lazynext: true`.
+
+### Why this matters
+- Before this patch, a prospect comparing Lazynext to Linear or Asana on the comparison page saw both products beat us on automation. After: parity. Same for templates vs Notion. The product already does these things; the page now says so.
+
 ## [1.3.28.0] - 2026-04-28
 
 **Theme:** OAuth surfaces become consistent across the app. v1.3.27.0 wired the registry into Settings → Integrations; this release ports the same honest pattern to the Import modal and adds a working Disconnect button to Settings. Both surfaces now read from the same source of truth: tiles show `Available` if env-configured, `Not configured` (with the exact env vars in tooltips) otherwise. The Import modal's `Connect` link reuses the same `/api/v1/oauth/[provider]/start` URL — once any adapter PR lands, both surfaces light up together with no extra wiring. Disconnect uses the existing `DELETE /api/v1/oauth/connections/[id]` route shipped in v1.3.27.0 and `router.refresh()` to re-render the server component.

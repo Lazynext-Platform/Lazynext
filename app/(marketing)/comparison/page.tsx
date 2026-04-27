@@ -72,12 +72,12 @@ const rows: Row[] = [
   {
     feature: 'Automation builder',
     why: 'Trigger-based rules: when X happens, do Y.',
-    lazynext: 'soon', notion: 'partial', linear: true, asana: true,
+    lazynext: true, notion: 'partial', linear: true, asana: true,
   },
   {
     feature: 'Templates',
     why: 'Start a project from a pre-built structure.',
-    lazynext: 'soon', notion: true, linear: 'partial', asana: true,
+    lazynext: true, notion: true, linear: 'partial', asana: true,
   },
   {
     feature: 'Free tier',
