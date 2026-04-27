@@ -136,3 +136,32 @@ describe('API Routes - Search', () => {
     expect(res.status).toBe(400)
   })
 })
+
+describe('API Routes - Workspaces (POST)', () => {
+  it('should reject unauthenticated requests', async () => {
+    const { safeAuth } = await import('@/lib/utils/auth')
+    vi.mocked(safeAuth).mockResolvedValueOnce({ userId: null })
+
+    const { POST } = await import('@/app/api/v1/workspaces/route')
+    const req = new Request('http://localhost:3000/api/v1/workspaces', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Acme', slug: 'acme' }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+  })
+
+  it('should validate POST body with Zod', async () => {
+    const { POST } = await import('@/app/api/v1/workspaces/route')
+    const req = new Request('http://localhost:3000/api/v1/workspaces', {
+      method: 'POST',
+      body: JSON.stringify({ name: '', slug: 'Has Spaces' }),
+      headers: { 'Content-Type': 'application/json' },
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(400)
+    const json = await res.json()
+    expect(json.error).toBe('VALIDATION_ERROR')
+  })
+})

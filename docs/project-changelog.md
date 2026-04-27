@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.21.0] — Real "Create workspace" + workspace-cap enforcement (2026-04-27)
+
+The "Create workspace" link in the `WorkspaceSelector` dropdown has, since v1.3.4.5, routed to `/onboarding` — which had two paths in `/api/v1/onboarding/workspace`: Path A *renamed* the user's existing workspace, Path B (backfill) only ran with zero memberships. So clicking "Create workspace" with an existing workspace silently renamed it. There was no real way to create a second workspace from the UI. This release ships the missing path + enforces the Free `workspaces: 1` cap added to PLAN_LIMITS in v1.3.20.0. New `POST /api/v1/workspaces` creates an additional workspace + admin membership, plan-gated by `canCreateWorkspace` against the caller's admin/owner memberships (paid-workspace owners bypass the cap). Returns `402 PLAN_LIMIT_REACHED` with `variant: 'workspace-limit'` when blocked, `409 SLUG_TAKEN` on collision. UI: new inline `CreateWorkspaceDialog` modal in `WorkspaceSelector` (auto-slugify, focus-trap, Esc dismissal); on 402 triggers the `workspace-limit` upgrade modal with a `paywall.gate.shown` telemetry event. **189/189** tests passing across 26 files (187 → 189). Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13210---2026-04-27).
+
+---
+
 ## [1.3.20.0] — Pricing alignment + decision-limit enforcement (2026-04-27)
 
 Audit of every pricing surface against `PLAN_LIMITS` turned up six inconsistencies — the marketing site advertised `"10 AI queries/day"` and `"Unlimited nodes"` on Free while the code enforced 20 queries and 100 nodes (product more generous than the copy claimed, but the inconsistency itself broke trust). Worse: the `decisions` cap on Free was advertised as 20 in three places but never actually enforced — you could log a thousand decisions on Free. Fixed all of it. `PLAN_LIMITS` extended with `decisions` (Free: 20) and `workspaces` (Free: 1) fields; pricing page Free tier corrected to `100 nodes` / `20 AI queries/day` / `5 workflows`; FAQ + comparison table aligned; new `canCreateDecision` and `canCreateWorkspace` gates; `POST /api/v1/decisions` now enforces the 20-decision cap with a `402 PLAN_LIMIT_REACHED` response that the Log Decision modal turns into the upgrade-modal `decision-limit` variant. **187/187** tests passing across 26 files (12 new assertions guard the limit shape + every gate's boundary). Type-check clean, build clean.

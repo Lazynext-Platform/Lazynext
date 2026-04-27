@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { ChevronDown, Plus, Check, Loader2 } from 'lucide-react'
 import { useWorkspaceStore } from '@/stores/workspace.store'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 
 interface WorkspaceRow {
   id: string
@@ -31,6 +32,7 @@ export function WorkspaceSelector() {
   const [rows, setRows] = useState<WorkspaceRow[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showCreate, setShowCreate] = useState(false)
   const containerRef = useRef<HTMLDivElement | null>(null)
 
   const name = workspace?.name ?? 'Workspace'
@@ -149,16 +151,190 @@ export function WorkspaceSelector() {
 
           <div className="my-1 h-px bg-slate-800" />
 
-          <Link
-            href="/onboarding"
-            onClick={() => setOpen(false)}
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-300 hover:bg-slate-800"
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              setShowCreate(true)
+            }}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-slate-300 hover:bg-slate-800"
           >
             <Plus className="h-3.5 w-3.5" />
             Create workspace
-          </Link>
+          </button>
         </div>
       )}
+
+      {showCreate && (
+        <CreateWorkspaceDialog
+          onClose={() => setShowCreate(false)}
+          onCreated={(slug) => {
+            setShowCreate(false)
+            // Invalidate the cached list so the new workspace shows up
+            // next time the dropdown opens.
+            setRows(null)
+            router.push(`/workspace/${slug}`)
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+}
+
+function CreateWorkspaceDialog({
+  onClose,
+  onCreated,
+}: {
+  onClose: () => void
+  onCreated: (slug: string) => void
+}) {
+  const [name, setName] = useState('')
+  const [slug, setSlug] = useState('')
+  const [slugTouched, setSlugTouched] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const effectiveSlug = slugTouched ? slug : slugify(name)
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!name.trim() || !effectiveSlug) {
+      setError('Name and slug are required')
+      return
+    }
+    setSubmitting(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/v1/workspaces', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim(), slug: effectiveSlug }),
+      })
+      const body = await res.json()
+      if (!res.ok) {
+        if (res.status === 402 && body?.variant === 'workspace-limit') {
+          trackBillingEvent('paywall.gate.shown', {
+            variant: 'workspace-limit',
+            surface: 'create-workspace',
+          })
+          useUpgradeModal.getState().show('workspace-limit')
+          onClose()
+          return
+        }
+        if (res.status === 409) {
+          setError('That slug is already taken — try another.')
+        } else {
+          setError(body?.error || `Failed to create workspace (HTTP ${res.status})`)
+        }
+        setSubmitting(false)
+        return
+      }
+      onCreated(body.data.slug)
+    } catch {
+      setError('Network error')
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-workspace-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
+    >
+      <form
+        onSubmit={handleSubmit}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-md rounded-xl border border-slate-800 bg-slate-950 p-6 shadow-2xl"
+      >
+        <h2 id="create-workspace-title" className="text-lg font-semibold text-slate-100">
+          Create a workspace
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          A separate canvas with its own members, decisions, and plan.
+        </p>
+
+        <div className="mt-5 space-y-3">
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-400">Name</span>
+            <input
+              ref={inputRef}
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={100}
+              required
+              className="w-full rounded-md border border-slate-800 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-brand"
+              placeholder="Acme Inc"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-slate-400">URL slug</span>
+            <div className="flex items-center gap-2 rounded-md border border-slate-800 bg-slate-900 px-3 py-2 text-sm">
+              <span className="text-slate-500">/workspace/</span>
+              <input
+                type="text"
+                value={effectiveSlug}
+                onChange={(e) => {
+                  setSlugTouched(true)
+                  setSlug(
+                    e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9-]/g, '')
+                      .slice(0, 60),
+                  )
+                }}
+                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+                required
+                className="flex-1 bg-transparent text-slate-100 outline-none"
+                placeholder="acme"
+              />
+            </div>
+          </label>
+        </div>
+
+        {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="rounded-md px-3 py-1.5 text-sm text-slate-400 hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={submitting || !name.trim()}
+            className="flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-sm font-semibold text-brand-foreground hover:bg-brand/90 disabled:opacity-50"
+          >
+            {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Create workspace
+          </button>
+        </div>
+      </form>
     </div>
   )
 }
