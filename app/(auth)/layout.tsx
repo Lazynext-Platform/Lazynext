@@ -4,7 +4,10 @@ import Link from 'next/link'
 import { CheckCircle, Users, TrendingUp } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Auth — Lazynext',
+  title: {
+    default: 'Sign in — Lazynext',
+    template: '%s — Lazynext',
+  },
   description: 'Sign in or create your Lazynext account. Tasks, docs, decisions, and AI in one place.',
 }
 
