@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.11.0] — Decision DNA executive report (2026-04-27)
+
+The Decision DNA exec report had been a roadmap backlog item since v1.0 — listed as "PDF/exec report" with no implementation. Rather than add a heavy PDF render dependency for a single-page report, this release ships a server-rendered, print-optimized HTML page at `/workspace/[slug]/decisions/report` that uses the browser's native "Save as PDF". Header (workspace name, date range, generation timestamp) → 4-stat overview (total, avg quality, successful, failed with % of tagged) → status breakdown → top 5 quality decisions → failed-outcome lessons → full log → footer with provenance note. Range filter via `?range=7|30|90|365` (default: All). Print stylesheet hides the action bar and back link so the saved PDF is the report alone, page-broken cleanly with `break-inside-avoid` on each card. Linked from the Decisions page header next to "Log Decision" as an "Exec report" button. Roadmap *Remaining work* 5 → 4; fully wired 33 → 34; backend-wired 87% → 89%. Type-check clean, **164/164** tests passing, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13110---2026-04-27).
+
+---
+
 ## [1.3.10.0] — Multi-workspace switcher is real (2026-04-27)
 
 The `WorkspaceSelector` in the sidebar has been display-only since v1.3.3.6 (round 15) — a static badge with no dropdown, no "create workspace" affordance, and no way to switch between workspaces a user belongs to. Users with multiple workspace memberships had to type `/workspace/{slug}` URLs by hand. This release ships the dropdown: click the workspace badge, get a lazy-loaded list of every workspace you're a member of (with role tags), click one to route to `/workspace/{slug}`, or hit "Create workspace" to drop into onboarding. Backed by a new authenticated endpoint `GET /api/v1/workspaces` that joins `workspace_members` to `workspaces` for the current user, sorted alphabetically. Outside-click + Esc dismissal, `aria-haspopup="menu"`, role per row, checkmark on the active row. Switching uses `router.push('/workspace/{slug}')` — the existing `WorkspaceHydrator` re-hydrates the Zustand store from the new slug, no extra wiring needed. Roadmap *Remaining work* 6 → 5; fully wired 32 → 33; backend-wired 84% → 87%. Type-check clean, **164/164** tests passing, build clean.

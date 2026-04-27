@@ -4,6 +4,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.11.0] - 2026-04-27
+
+**Theme:** Decision DNA executive report. The PDF/exec report was a roadmap backlog item since v1.0 — never built because dropping a heavy server-side PDF library for one report felt like over-engineering. This release skips the dependency entirely: a server-rendered, print-optimized HTML page at `/workspace/[slug]/decisions/report` that the browser's native "Save as PDF" flow turns into a clean, paginated document. Real data, real numbers, no fake charts.
+
+### Added
+
+- `app/(app)/workspace/[slug]/decisions/report/page.tsx` — server component. Resolves workspace via `getCurrentMemberWorkspace`, fetches up to 500 recent decisions via `getRecentDecisions`, applies an optional `?range=7|30|90|365` filter (default: all-time), then computes stats (total, avg quality across scored entries, successful/failed/mixed counts with % of tagged, status breakdown, pending outcomes), top 5 quality decisions, failed-outcome lessons (up to 10), and full log. Inline `@page { margin: 0.6in }` so the printed PDF has consistent margins. `break-inside-avoid` on each decision card so rows don't split across pages.
+- `app/(app)/workspace/[slug]/decisions/report/ReportPrintButton.tsx` — minimal client wrapper around `window.print()`. The whole report is server-rendered; this is the only client bundle the page contributes.
+
+### Changed
+
+- `app/(app)/workspace/[slug]/decisions/DecisionsClient.tsx` — header now renders an "Exec report" link next to the "Log Decision" button, routing to the new report page. Stopped underscore-aliasing `workspaceSlug` (it had been `workspaceSlug: _slug` since v1.0; now it's used).
+- `docs/project-roadmap.md` — header v1.3.10.0 → v1.3.11.0; dropped Decision DNA PDF/exec report from *Remaining work* (4 items left); fully-wired count 33 → 34; backend-wired bar 87% → 89%.
+
+### Verification
+
+- Type-check: ✅ clean (fixed initial outcome-enum mismatch — schema uses `good`/`bad`/`neutral`/`pending`, not `successful`/`failed`/`mixed`).
+- Test suite: ✅ 164/164 passing across 23 files.
+- Production build: ✅ clean.
+
 ## [1.3.10.0] - 2026-04-27
 
 **Theme:** Multi-workspace switcher is real. The `WorkspaceSelector` in the sidebar has been display-only since v1.3.3.6 (round 15) — a static badge with no dropdown, no "create workspace" affordance, and no way to switch between workspaces a user belongs to. Users with multiple workspace memberships had to type `/workspace/{slug}` URLs by hand. This release ships the dropdown: click the workspace badge, get a lazy-loaded list of every workspace you're a member of (with role tags), click one to route to `/workspace/{slug}`, or hit "Create workspace" to drop into onboarding. Backed by a new authenticated endpoint, `GET /api/v1/workspaces`, that joins `workspace_members` to `workspaces` for the current user. Roadmap *Remaining work* count 6 → 5; fully wired count 32 → 33; backend-wired bar 84% → ~87%.
