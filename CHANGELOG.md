@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.7] - 2026-04-27
+
+**Theme:** Funnel coverage for Enterprise contact-clicks from BillingClient. The global `UpgradeModal` already fires `paywall.contact.clicked` before routing to `/contact?topic=enterprise`. The in-app billing page Enterprise card routed to the same URL but didn't fire the event — funnel queries undercounted Enterprise interest from the in-app surface, the same parity gap the previous three ships closed for `paywall.gate.shown` / `paywall.checkout.errored` / `paywall.checkout.succeeded`.
+
+### Changed
+- `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — per-card click handler now fires `paywall.contact.clicked` (with `plan: 'business' | 'enterprise'`, `surface: 'billing-page'`) before `window.location.href` redirects to `/contact?topic=enterprise`. Same shape as `components/ui/UpgradeModal.tsx`.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.6] - 2026-04-27
 
 **Theme:** Marketing pricing page Enterprise CTA now passes `?topic=enterprise`. v1.3.23.2 made `/contact` topic-aware so the in-app billing page Enterprise card surfaces a tailored Enterprise banner with pre-filled mailto. The marketing `/pricing` Enterprise card was the larger source of Enterprise traffic but still routed to bare `/contact`, missing the banner + pre-filled subject/body. Same one-line fix as the in-app surface.

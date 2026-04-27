@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.7] — BillingClient Enterprise card emits paywall.contact.clicked (2026-04-27)
+
+The global UpgradeModal already fired `paywall.contact.clicked` before routing to `/contact?topic=enterprise`, but BillingClient's Enterprise card did not. Funnel queries undercounted Enterprise interest from the in-app surface. Now both surfaces emit the same event with `plan` + `surface: 'billing-page'`. Closes the parity gap from the last three ships (`paywall.gate.shown`, `paywall.checkout.errored`, `paywall.checkout.succeeded`). **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13237---2026-04-27).
+
+---
+
 ## [1.3.23.6] — Marketing /pricing Enterprise CTA passes ?topic=enterprise (2026-04-27)
 
 v1.3.23.2 made `/contact` topic-aware. The in-app billing page Enterprise card already passed `?topic=enterprise`, but the marketing `/pricing` Enterprise card — the larger Enterprise traffic source — still routed to bare `/contact`. Now both surfaces hit the same `TOPICS.enterprise` registry entry, surfacing the tailored banner with pre-filled mailto subject + body. **197/197** tests passing.
