@@ -4,6 +4,17 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.22.1] - 2026-04-27
+
+**Theme:** Hotfix — extend the daily AI quota to `/api/v1/ai/generate` and `/api/v1/ai/analyze`. v1.3.22.0 closed the loophole on the LazyMind chat path but explicitly deferred these two endpoints; left as-is they'd be a future quota-bypass surface the moment any UI code started calling them. Same shape as chat: optional `workspaceId`, when present we verify membership, plan-gate via `checkAiQuota`, return `402 PLAN_LIMIT_REACHED variant=ai-limit` on cap, and call `recordAiUsage` after success. No active UI callers today, so this is preventative — the quota is now consistent across all three AI endpoints.
+
+### Changed
+- `app/api/v1/ai/generate/route.ts` — schema accepts optional `workspaceId`; same plan-gate + post-success increment as chat.
+- `app/api/v1/ai/analyze/route.ts` — same.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** (existing 401/400 tests for these endpoints still hold; `workspaceId` is optional). Build: clean.
+
 ## [1.3.22.0] - 2026-04-27
 
 **Theme:** Server-side AI daily quota — the marketing claim becomes the enforced reality. Lazynext has advertised "20 LazyMind AI queries/day" on Free, "100/day/seat" on Starter, "500/day/seat" on Pro, and "unlimited" on Business since v1.0. The actual enforcement until today: a 20-req/min burst cap (`RATE_LIMITS.ai`) plus a client-side counter in `LazyMindPanel` that reset on every page reload. So a Free user could send 20 queries, refresh, send 20 more, refresh, send 20 more — effectively ~28,800/day. The marketing was nominal; the enforcement was theatre. Fixed.

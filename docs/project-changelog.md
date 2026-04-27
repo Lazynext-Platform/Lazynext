@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.22.1] — Hotfix: extend daily AI quota to generate + analyze (2026-04-27)
+
+v1.3.22.0 closed the daily-quota loophole on `/api/v1/ai/chat` but explicitly deferred `/api/v1/ai/generate` and `/api/v1/ai/analyze`. Left as-is they'd be a future quota-bypass surface the moment any UI started calling them. Both now follow the same shape: optional `workspaceId`, plan-gate via `checkAiQuota` when present, `402 PLAN_LIMIT_REACHED variant=ai-limit` on cap, `recordAiUsage` after success. **197/197** tests passing, type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13221---2026-04-27).
+
+---
+
 ## [1.3.22.0] — Server-side AI daily quota (2026-04-27)
 
 Lazynext has advertised "20 LazyMind AI queries/day" on Free / 100 on Starter / 500 on Pro / unlimited on Business since v1.0. Actual enforcement until today: a 20-req/minute burst cap plus a client-side counter that reset on page reload — so a Free user could send 20, refresh, send 20 more, indefinitely (≈28,800/day). New `ai_usage(user_id, workspace_id, day, count)` table with composite PK + RLS-locked service-role writes. New `lib/data/ai-usage.ts` (`getDailyAiUsage`, `getWorkspacePlan`, `checkAiQuota`, `recordAiUsage`; UTC day boundary; best-effort writes). New `GET /api/v1/ai/usage` endpoint hydrates the panel-header badge across reloads. `POST /api/v1/ai/chat` now accepts optional `workspaceId`, verifies membership, plan-gates against `PLAN_LIMITS[plan].aiQueries`, returns `402 PLAN_LIMIT_REACHED variant=ai-limit` when blocked, calls `recordAiUsage` after a successful response. `LazyMindPanel` sends `workspaceId` on every request, hydrates `aiCount` from the server, handles 402 by syncing the badge to the authoritative `used` and surfacing the `ai-limit` upgrade modal. **197/197** tests passing across 27 files (189 → 197; 8 new assertions in `tests/unit/ai-usage.test.ts`). Type-check clean, build clean.
