@@ -29,6 +29,7 @@ import {
   listApiKeys,
   createApiKey,
   deleteApiKey,
+  normalizeScopes,
 } from '@/lib/data/api-keys'
 import * as dbModule from '@/lib/db/client'
 type QB = {
@@ -78,6 +79,7 @@ describe('listApiKeys', () => {
           user_id: 'u1',
           name: 'CI runner',
           key_prefix: 'a1b2c3d4',
+          scopes: ['read'],
           last_used_at: null,
           expires_at: null,
           created_at: '2026-04-28T00:00:00Z',
@@ -94,6 +96,7 @@ describe('listApiKeys', () => {
         userId: 'u1',
         name: 'CI runner',
         keyPrefix: 'a1b2c3d4',
+        scopes: ['read'],
         lastUsedAt: null,
         expiresAt: null,
         createdAt: '2026-04-28T00:00:00Z',
@@ -180,5 +183,25 @@ describe('deleteApiKey', () => {
     qb._result = { data: null, error: { message: 'boom' }, count: 0 }
     const ok = await deleteApiKey({ workspaceId: 'w1', keyId: 'k1' })
     expect(ok).toBe(false)
+  })
+})
+
+describe('normalizeScopes', () => {
+  it('defaults empty input to least-privilege [read]', () => {
+    expect(normalizeScopes(undefined)).toEqual(['read'])
+    expect(normalizeScopes(null)).toEqual(['read'])
+    expect(normalizeScopes([])).toEqual(['read'])
+  })
+
+  it('whitelists unknown tokens out', () => {
+    expect(normalizeScopes(['read', 'admin', 'sudo'])).toEqual(['read'])
+  })
+
+  it('dedupes and stable-orders', () => {
+    expect(normalizeScopes(['write', 'read', 'write'])).toEqual(['read', 'write'])
+  })
+
+  it('rejects garbage-only input by falling back to [read]', () => {
+    expect(normalizeScopes(['NOPE'])).toEqual(['read'])
   })
 })

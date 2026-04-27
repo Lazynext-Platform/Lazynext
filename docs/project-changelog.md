@@ -6,6 +6,29 @@
 
 ---
 
+## [v1.3.33.0] - 2026-04-28 — Bearer-auth completes its v1 surface
+
+**Theme:** Per-key scopes, the first bearer-aware mutation route, API key UX polish, and `/docs/api`. Bearer story is now end-to-end usable.
+
+### Added
+- API key scopes (`read` / `write`, default `['read']`) with migration + CHECK constraint.
+- `requireScope(auth, scope)` helper — 403 `INSUFFICIENT_SCOPE` on miss.
+- `POST /api/v1/decisions` accepts API keys with `write` scope.
+- `/docs/api` public reference (auth, scopes, rate-limits, all endpoints, errors).
+- Scope checkbox + read/write/expires badges in `ApiKeysPanel`.
+- 6 new tests (271 → 277).
+
+### Changed
+- `AuthOk` carries `scopes` end-to-end. Cookie sessions get the full set.
+- `POST /api/v1/api-keys` accepts an optional `scopes` array; audit records it.
+
+### Why
+- **Defence in depth.** A leaked read-only key can't mutate. Mutation is gated at workspace + key + scope layers.
+- External writes now possible (CI runners, Slack bots).
+- Public API docs close the developer loop.
+
+---
+
 ## [v1.3.32.0] - 2026-04-28 — Bearer-auth machinery hardening
 
 **Theme:** Three follow-ups from v1.3.31.0 land in one ship — per-keyId rate-limit buckets, audit hooks on key issuance + revocation, and a filterable `api_key.*` action on the audit-log API.

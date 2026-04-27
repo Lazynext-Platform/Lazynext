@@ -8,6 +8,7 @@ interface ApiKeySummary {
   id: string
   name: string
   keyPrefix: string
+  scopes: string[]
   lastUsedAt: string | null
   expiresAt: string | null
   createdAt: string
@@ -26,6 +27,34 @@ interface Props {
   unlockedPlans: readonly string[]
 }
 
+function expiresBadge(iso: string) {
+  // Visual urgency for upcoming expiry. Negative remaining days means
+  // already expired — server-side auth rejects it but we still render
+  // a clear "expired" badge so the user knows to revoke or re-issue.
+  const ms = Date.parse(iso)
+  if (!Number.isFinite(ms)) return null
+  const days = Math.round((ms - Date.now()) / (1000 * 60 * 60 * 24))
+  if (days < 0) {
+    return (
+      <span className="rounded-full bg-red-500/10 px-2 py-0.5 text-3xs font-bold text-red-400">
+        expired
+      </span>
+    )
+  }
+  if (days <= 7) {
+    return (
+      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-3xs font-bold text-amber-400">
+        expires in {days}d
+      </span>
+    )
+  }
+  return (
+    <span className="rounded-full bg-slate-700/60 px-2 py-0.5 text-3xs font-bold text-slate-300">
+      expires in {days}d
+    </span>
+  )
+}
+
 export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
   const router = useRouter()
   const [, startTransition] = useTransition()
@@ -34,6 +63,9 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [name, setName] = useState('')
+  // Default to least-privilege — the user opts in to write access by
+  // ticking the checkbox. Matches the server-side default.
+  const [allowWrite, setAllowWrite] = useState(false)
   // The plaintext is shown exactly once after creation. We keep it in
   // state long enough for the user to copy it, then drop it on close.
   // Never persisted; never re-fetchable.
@@ -75,7 +107,11 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
       const res = await fetch('/api/v1/api-keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workspaceId, name: name.trim() }),
+        body: JSON.stringify({
+          workspaceId,
+          name: name.trim(),
+          scopes: allowWrite ? ['read', 'write'] : ['read'],
+        }),
       })
       const body = await res.json()
       if (!res.ok) {
@@ -86,6 +122,7 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
       setKeys((prev) => [key, ...prev])
       setReveal({ id: key.id, plaintext })
       setName('')
+      setAllowWrite(false)
     } finally {
       setCreating(false)
     }
@@ -200,7 +237,7 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
       )}
 
       {/* Create */}
-      <div className="mt-4 flex items-center gap-2">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -208,6 +245,15 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
           maxLength={100}
           className="flex-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:border-brand focus:outline-none"
         />
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-2xs font-semibold text-slate-300 hover:bg-slate-700">
+          <input
+            type="checkbox"
+            checked={allowWrite}
+            onChange={(e) => setAllowWrite(e.target.checked)}
+            className="h-3 w-3 accent-brand"
+          />
+          Allow write
+        </label>
         <button
           onClick={handleCreate}
           disabled={creating || !name.trim()}
@@ -217,6 +263,9 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
           {creating ? 'Generating…' : 'Generate key'}
         </button>
       </div>
+      <p className="mt-1 text-3xs text-slate-500">
+        Read-only keys can call GET endpoints (export, audit log, decisions list). Write keys can also mutate — only enable when needed.
+      </p>
 
       {/* List */}
       <div className="mt-4 border-t border-slate-800 pt-3">
@@ -229,11 +278,21 @@ export function ApiKeysPanel({ workspaceId, plan, unlockedPlans }: Props) {
             {keys.map((k) => (
               <li key={k.id} className="flex items-center justify-between gap-2 text-xs">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium text-slate-200">{k.name}</p>
                     <code className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-3xs text-slate-400">
                       lzx_{k.keyPrefix}…
                     </code>
+                    {k.scopes?.includes('write') ? (
+                      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-3xs font-bold text-amber-400">
+                        read + write
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-slate-700/60 px-2 py-0.5 text-3xs font-bold text-slate-300">
+                        read-only
+                      </span>
+                    )}
+                    {k.expiresAt && expiresBadge(k.expiresAt)}
                   </div>
                   <p className="text-3xs text-slate-500">
                     {k.lastUsedAt

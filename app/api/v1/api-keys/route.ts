@@ -4,7 +4,7 @@ import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { hasFeature } from '@/lib/utils/plan-gates'
-import { listApiKeys, createApiKey } from '@/lib/data/api-keys'
+import { listApiKeys, createApiKey, API_KEY_SCOPES } from '@/lib/data/api-keys'
 import { recordAudit } from '@/lib/data/audit-log'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
@@ -15,6 +15,7 @@ type Plan = keyof typeof PLAN_LIMITS
 const CreateBody = z.object({
   workspaceId: z.string().uuid(),
   name: z.string().min(1).max(100),
+  scopes: z.array(z.enum(API_KEY_SCOPES)).optional(),
   expiresAt: z.string().datetime().optional().nullable(),
 })
 
@@ -78,6 +79,7 @@ export async function POST(req: Request) {
     workspaceId: parsed.data.workspaceId,
     userId,
     name: parsed.data.name,
+    scopes: parsed.data.scopes,
     expiresAt: parsed.data.expiresAt ?? null,
   })
   if (!created) {
@@ -93,7 +95,11 @@ export async function POST(req: Request) {
     action: 'api_key.create',
     resourceType: 'api_key',
     resourceId: created.row.id,
-    metadata: { name: created.row.name, key_prefix: created.row.keyPrefix },
+    metadata: {
+      name: created.row.name,
+      key_prefix: created.row.keyPrefix,
+      scopes: created.row.scopes,
+    },
     request: req,
   })
 

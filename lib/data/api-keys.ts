@@ -9,12 +9,32 @@ const KEY_PREFIX_NAMESPACE = 'lzx_'
 const KEY_RANDOM_BYTES = 32
 const PREFIX_DISPLAY_LENGTH = 8
 
+export const API_KEY_SCOPES = ['read', 'write'] as const
+export type ApiKeyScope = (typeof API_KEY_SCOPES)[number]
+
+export function normalizeScopes(input: readonly string[] | undefined | null): ApiKeyScope[] {
+  // Whitelist + dedupe + stable order. Empty input falls back to
+  // least-privilege ['read'] so callers can't accidentally mint a
+  // zero-scope key (the CHECK constraint would reject it anyway).
+  const allowed = new Set<ApiKeyScope>()
+  for (const raw of input ?? []) {
+    if ((API_KEY_SCOPES as readonly string[]).includes(raw)) {
+      allowed.add(raw as ApiKeyScope)
+    }
+  }
+  if (allowed.size === 0) return ['read']
+  // Stable order matches API_KEY_SCOPES so audit metadata is
+  // deterministic across requests.
+  return API_KEY_SCOPES.filter((s) => allowed.has(s))
+}
+
 export interface ApiKeyRow {
   id: string
   workspaceId: string
   userId: string
   name: string
   keyPrefix: string // first 8 chars of the random part (no `lzx_` namespace)
+  scopes: ApiKeyScope[]
   lastUsedAt: string | null
   expiresAt: string | null
   createdAt: string
@@ -52,6 +72,7 @@ interface ApiKeyDbRow {
   user_id: string
   name: string
   key_prefix: string
+  scopes: string[] | null
   last_used_at: string | null
   expires_at: string | null
   created_at: string
@@ -64,6 +85,7 @@ function mapRow(row: ApiKeyDbRow): ApiKeyRow {
     userId: row.user_id,
     name: row.name,
     keyPrefix: row.key_prefix,
+    scopes: normalizeScopes(row.scopes ?? undefined),
     lastUsedAt: row.last_used_at,
     expiresAt: row.expires_at,
     createdAt: row.created_at,
@@ -80,7 +102,7 @@ export async function listApiKeys(workspaceId: string): Promise<ApiKeyRow[]> {
   if (!hasValidDatabaseUrl) return []
   const { data, error } = await db
     .from('api_keys')
-    .select('id, workspace_id, user_id, name, key_prefix, last_used_at, expires_at, created_at')
+    .select('id, workspace_id, user_id, name, key_prefix, scopes, last_used_at, expires_at, created_at')
     .eq('workspace_id', workspaceId)
     .order('created_at', { ascending: false })
   if (error || !data) return []
@@ -91,6 +113,7 @@ export interface CreateApiKeyInput {
   workspaceId: string
   userId: string
   name: string
+  scopes?: readonly string[]
   expiresAt?: string | null
 }
 
@@ -105,6 +128,7 @@ export async function createApiKey(
 ): Promise<{ row: ApiKeyRow; plaintext: string } | null> {
   if (!hasValidDatabaseUrl) return null
   const { plaintext, keyHash, keyPrefix } = mintApiKey()
+  const scopes = normalizeScopes(input.scopes)
   const { data, error } = await db
     .from('api_keys')
     .insert({
@@ -113,9 +137,10 @@ export async function createApiKey(
       name: input.name.trim().slice(0, 100),
       key_hash: keyHash,
       key_prefix: keyPrefix,
+      scopes,
       expires_at: input.expiresAt ?? null,
     })
-    .select('id, workspace_id, user_id, name, key_prefix, last_used_at, expires_at, created_at')
+    .select('id, workspace_id, user_id, name, key_prefix, scopes, last_used_at, expires_at, created_at')
     .single()
   if (error || !data) return null
   return { row: mapRow(data as unknown as ApiKeyDbRow), plaintext }

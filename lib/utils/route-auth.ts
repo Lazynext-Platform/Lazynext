@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { authenticateApiKey } from '@/lib/utils/api-key-auth'
+import { API_KEY_SCOPES, type ApiKeyScope } from '@/lib/data/api-keys'
 
 /**
  * Resolves a v1 request to either a session user or an API-key bearer.
@@ -37,6 +38,11 @@ export interface AuthOk {
   // is the keyId so a leaked key can't burn a human user's budget; for
   // cookie-session requests it falls back to the userId.
   rateLimitId: string
+  // Permitted operations for this caller. Bearer requests carry the
+  // key's stored scopes verbatim. Cookie-session requests get the
+  // full set — a human session through the dashboard is implicitly
+  // allowed to do anything they have UI affordances for.
+  scopes: ApiKeyScope[]
 }
 
 export interface AuthFail {
@@ -60,6 +66,7 @@ export async function resolveAuth(req: Request): Promise<AuthResult> {
       viaApiKey: true,
       keyId: apiKey.keyId,
       rateLimitId: `key:${apiKey.keyId}`,
+      scopes: apiKey.scopes,
     }
   }
   const session = await safeAuth()
@@ -76,6 +83,9 @@ export async function resolveAuth(req: Request): Promise<AuthResult> {
     viaApiKey: false,
     keyId: null,
     rateLimitId: `user:${session.userId}`,
+    // Cookie sessions get the full scope set — a human in the
+    // dashboard is implicitly allowed to do anything the UI exposes.
+    scopes: [...API_KEY_SCOPES],
   }
 }
 
@@ -112,4 +122,28 @@ export async function requireWorkspaceAuth(
     }
   }
   return auth
+}
+
+/**
+ * Asserts the caller has a specific scope. Returns null on pass; an
+ * `AuthFail` (403 INSUFFICIENT_SCOPE) on miss. Use after
+ * `requireWorkspaceAuth` on mutation routes:
+ *
+ *   const auth = await requireWorkspaceAuth(req, workspaceId)
+ *   if (!auth.ok) return auth.response
+ *   const scopeFail = requireScope(auth, 'write')
+ *   if (scopeFail) return scopeFail.response
+ *
+ * Cookie sessions always pass (they carry every scope). Bearer
+ * requests pass only if the key's stored scopes include `scope`.
+ */
+export function requireScope(auth: AuthOk, scope: ApiKeyScope): AuthFail | null {
+  if (auth.scopes.includes(scope)) return null
+  return {
+    ok: false,
+    response: NextResponse.json(
+      { error: 'INSUFFICIENT_SCOPE', requiredScope: scope },
+      { status: 403 },
+    ),
+  }
 }
