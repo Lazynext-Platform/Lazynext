@@ -5,6 +5,12 @@ import { Sparkles } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Careers — Lazynext',
   description: 'We are small and early. If that excites you, say hi.',
+  alternates: { canonical: '/careers' },
+  openGraph: {
+    title: 'Careers — Lazynext',
+    description: 'We are small and early. If that excites you, say hi.',
+    url: '/careers',
+  },
 }
 
 // Honest placeholder — no invented team pages, perks, or open roles. Lazynext

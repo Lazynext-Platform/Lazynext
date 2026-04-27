@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.9] — Canonical URLs on every public marketing page (2026-04-27)
+
+Without `alternates.canonical`, query-string variants like `/contact?topic=enterprise` split SEO authority. Added canonical URLs and `openGraph.url` to all 11 public marketing pages (`/pricing`, `/about`, `/features`, `/comparison`, `/changelog`, `/blog`, `/contact`, `/careers`, `/docs`, `/privacy`, `/terms`). Combined with the v1.3.23.8 sitemap coverage, the marketing surface is now SEO-complete. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13239---2026-04-27).
+
+---
+
 ## [1.3.23.8] — Sitemap covers all public routes + blog posts (2026-04-27)
 
 `app/sitemap.ts` listed 7 routes; five real public pages were missing (`/contact`, `/careers`, `/privacy`, `/terms`, `/docs`) and the single published blog post wasn't indexed individually. Added all five plus a `blogPosts` array emitting per-post entries with real publish dates. New `HIGH_PRIORITY` lookup keeps homepage at 1, `/pricing` at 0.9, `/features` at 0.8, everything else at 0.7. Comments document the additive contract for future posts. **197/197** tests passing.

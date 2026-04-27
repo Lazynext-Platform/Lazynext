@@ -4,6 +4,17 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.9] - 2026-04-27
+
+**Theme:** Canonical URLs on every public marketing page. Root layout sets `metadataBase` so per-page `alternates.canonical: '/path'` resolves to absolute `https://lazynext.com/path`. Without this, `/contact?topic=enterprise` (and any future tracked-link variants) split SEO authority across query-string variants. Added `alternates.canonical` plus `openGraph.url` to all 11 public marketing pages: `/pricing`, `/about`, `/features`, `/comparison`, `/changelog`, `/blog`, `/contact`, `/careers`, `/docs`, `/privacy`, `/terms`. Sitemap from v1.3.23.8 + canonicals from this ship now form a complete SEO surface.
+
+### Changed
+- `app/(marketing)/{pricing,about,features,comparison,changelog,blog}/layout.tsx` — added `alternates: { canonical: '/path' }` and `openGraph.url: '/path'` to each existing metadata block. Both fields resolve against the root `metadataBase`.
+- `app/(marketing)/{contact,careers,docs,privacy,terms}/page.tsx` — same additions on the page-level metadata exports (these are server components without a separate layout).
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.8] - 2026-04-27
 
 **Theme:** SEO sitemap closes the gap with reality. `app/sitemap.ts` listed only 7 routes (`/`, `/about`, `/blog`, `/changelog`, `/comparison`, `/features`, `/pricing`) but five real public marketing pages were missing: `/contact`, `/careers`, `/privacy`, `/terms`, `/docs`. The single published blog post (`/blog/launching-lazynext`) wasn't indexed individually — search engines could only find it by crawling `/blog`. Added all five static pages plus the blog post entry with its real publish date.

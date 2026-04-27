@@ -5,6 +5,12 @@ import { Building2, Mail, MessageCircle, Shield } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Contact — Lazynext',
   description: 'Reach the humans behind Lazynext. No ticketing system theater.',
+  alternates: { canonical: '/contact' },
+  openGraph: {
+    title: 'Contact — Lazynext',
+    description: 'Reach the humans behind Lazynext. No ticketing system theater.',
+    url: '/contact',
+  },
 }
 
 // Topic taxonomy — keep tight. Anything we can deep-link from the product

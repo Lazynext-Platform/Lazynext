@@ -5,6 +5,12 @@ import { Book, GitBranch, Clock, Target, CheckCircle2 } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Docs — Lazynext',
   description: 'A short, honest walkthrough of how Lazynext actually works.',
+  alternates: { canonical: '/docs' },
+  openGraph: {
+    title: 'Docs — Lazynext',
+    description: 'A short, honest walkthrough of how Lazynext actually works.',
+    url: '/docs',
+  },
 }
 
 // Honest placeholder — no fake Docusaurus site with 200 empty sections.
