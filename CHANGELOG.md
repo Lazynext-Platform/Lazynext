@@ -4,6 +4,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.16.0] - 2026-04-27
+
+**Theme:** Per-workflow URLs and a picker. The canvas is no longer single-workflow — `/workspace/[slug]/canvas/[id]` now hydrates the requested workflow specifically, and a new picker dropdown in the canvas top-left lets you switch between workflows or create new ones without ever leaving the page. The magic word `default` still works in the URL and resolves to the workspace's default workflow, so existing sidebar links keep their behaviour.
+
+### Added
+
+- `components/canvas/panels/WorkflowPicker.tsx` — top-left dropdown listing every workflow in the current workspace with a single-click switch, plus a "+ New workflow" action that POSTs to `/api/v1/workflows` and routes to the new workflow's URL. Lazy-loads the list on first open (no extra request for users who never switch). Click-outside + Escape close. Active workflow gets a brand-coloured check.
+- `components/canvas/WorkflowCanvas.tsx` — accepts an optional `workflowIdFromUrl` prop, threaded through to hydration.
+- `app/(app)/workspace/[slug]/canvas/[id]/page.tsx` — reads `[id]` from the URL via `useParams` and forwards it to `<WorkflowCanvas>`.
+
+### Changed
+
+- `lib/canvas/use-canvas-hydration.ts` — second optional arg `workflowId`. When `null`, `undefined`, or `'default'`, falls back to the existing `/api/v1/workflows/default` resolution. Otherwise loads that specific workflow via `GET /api/v1/workflows/[id]`. Cache key now includes the workflow id so URL changes re-hydrate correctly. Existing sidebar links to `/canvas/default` still work — the magic word is preserved.
+- `docs/project-roadmap.md` — header v1.3.15.0 → v1.3.16.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
 ## [1.3.15.0] - 2026-04-27
 
 **Theme:** No more dropped position writes. v1.3.14.0's per-node PATCH-on-debounce had a known gap: closing the tab inside the 600ms debounce window dropped the last drag. This release replaces the per-node PATCH cascade with a single batch endpoint and a beacon flush on page teardown — every drag survives, even the one right before you hit ⌘W.
