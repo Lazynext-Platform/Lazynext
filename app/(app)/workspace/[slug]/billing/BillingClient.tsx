@@ -258,7 +258,14 @@ export function BillingClient({ slug, workspaceId, workspacePlan, usage }: Props
                   onClick={() => {
                     if (isCustomPriced || p === 'business' || p === 'enterprise') {
                       // Enterprise tier routes to contact-sales — no
-                      // Gumroad product to check out against.
+                      // Gumroad product to check out against. Fire
+                      // paywall.contact.clicked so funnel queries can
+                      // attribute Enterprise inquiries to this surface,
+                      // matching the global UpgradeModal's shape.
+                      trackBillingEvent('paywall.contact.clicked', {
+                        plan: p,
+                        surface: 'billing-page',
+                      })
                       window.location.href = '/contact?topic=enterprise'
                       return
                     }
