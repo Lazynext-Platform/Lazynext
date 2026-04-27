@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.6.0 — shipped + deployed
+> **Current Milestone**: v1.3.7.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---
@@ -13,15 +13,15 @@
 | Total Features | 38 |
 | 🟢 Complete (Design) | 38 |
 | 🟢 Complete (UI shell) | 38 |
-| 🟢 Fully wired to real backend | 29 |
-| 🟡 Partial / honest empty state | 9 — see *Remaining work* below |
+| 🟢 Fully wired to real backend | 30 |
+| 🟡 Partial / honest empty state | 8 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
 
 **Design Progress**: ██████████ 100%
 **UI Build**: ██████████ 100%
-**Backend wired**: █████████░ ~76%
+**Backend wired**: █████████░ ~79%
 
 > **v1.3.3.6 Status**: Live on https://lazynext.com. All 38 feature UIs built. 17 rounds of demo-data eradication (v1.3.2.0 → v1.3.3.6) replaced every fabricated fixture (Avas/Priya/Rahul fake teammates, fake Acme Corp workspace, fake testimonials, fake 84/100 onboarding score, fake Notion import, fake LazyMind chat with `setTimeout`, fake notification dropdowns, fake billing/integrations/sessions, fake template marketplace) with real Supabase data or honest empty states. Tests: **143/143** Vitest + Playwright passing, type-check clean, build clean.
 
@@ -31,7 +31,6 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 17 | Automation Builder | Empty-state page — no rule builder, no executor | WHEN/THEN schema + Inngest executor + UI builder |
 | 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags | Per-source OAuth + mapper + ingestion pipeline |
 | 18 | Template Marketplace | No `templates` table, no install endpoint | `templates` table + clone-to-workspace endpoint + curation flow |
 | 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
@@ -85,7 +84,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 13 | Billing & Subscription | ✅ Complete | 🟢 Merged | #12 | `main` | Built — plan comparison, payment method, usage metrics |
 | 15 | Import Modal | ✅ Complete | � Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
 | 16 | Pulse Dashboard | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workload bars, burndown SVG, LazyMind summary |
-| 17 | Automation Builder | ✅ Complete | � UI only | #05 | `main` | Empty-state page — rule builder + Inngest executor pending |
+| 17 | Automation Builder | ✅ Complete | 🟢 Merged | #05 | `main` | Real WHEN/THEN engine (v1.3.7.0) — `decision.logged` + `task.created` triggers, `notification.send` + `webhook.post` actions, run history |
 | 18 | Template Marketplace | ✅ Complete | � UI only | #05 | `main` | Honest empty state — no `templates` table, no install endpoint |
 | 19 | Email Templates | ✅ Complete | 🟢 Merged | — | `main` | Built — invite, task assignment, weekly digest, decision digest |
 | 21 | Data Export | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workspace/decisions export, history, API access |

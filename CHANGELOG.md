@@ -4,6 +4,33 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.7.0] - 2026-04-27
+
+**Theme:** The Automation Builder is real. The page that shipped with v1.0.0 has rendered "The automations engine is in development" with a `disabled` button and 4 fake preview rules ever since. This release deletes that placeholder and replaces it with a working WHEN/THEN engine. Two narrow trigger types in v1 (`decision.logged`, `task.created`), two narrow action types (`notification.send` with `{{variable}}` template interpolation, `webhook.post` with HTTPS-only + 5s timeout). The engine runs synchronously after the underlying mutation succeeds, writes a row per execution to the existing `automation_runs` table (now keyed on `automation_id`; `node_id` is nullable), and never propagates failures up to the user-facing write. New `automations` table (RLS member-read, service-role-write). Real CRUD UI: list view with WHEN/THEN pills + last 8 runs as colored chips (green for success, red for failed, hover to see error message), per-row enable/disable toggle, delete with confirm, "New automation" dialog with template interpolation hint and HTTPS-only validation. Roadmap fully wired count 29 → 30; backend-wired bar 76% → 79%.
+
+### Added
+
+- `supabase/migrations/20260427000003_automations.sql` — new `automations` table (workspace_id, name, description, trigger_type, trigger_config jsonb, action_type, action_config jsonb, enabled, created_by, timestamps). Partial index on `(workspace_id, trigger_type) WHERE enabled = TRUE` so the engine's lookup is O(matches), not O(workspace). RLS read-for-members + service-role-all. `automation_runs.node_id` dropped NOT NULL and `automation_id` FK column added with cascade.
+- `lib/data/automations.ts` — typed engine. Exports `TRIGGER_TYPES` + `ACTION_TYPES` arrays for runtime validation, `AutomationEvent` discriminated union (`DecisionLoggedEvent` | `TaskCreatedEvent`), `runAutomations(event)` evaluator, plus CRUD helpers (`listAutomations`, `createAutomation`, `updateAutomation`, `deleteAutomation`, `listRecentRuns`). Action runner supports `{{variable}}` interpolation from event payload (`question`, `qualityScore`, `decisionType`, `title`, `assignedTo`, etc.). Webhook action enforces `https://` and uses `AbortSignal.timeout(5000)`.
+- `app/api/v1/automations/route.ts` — GET (list with optional `?includeRuns=true`) + POST (zod-validated create).
+- `app/api/v1/automations/[id]/route.ts` — PATCH (partial update including enable/disable) + DELETE (cascades runs).
+- `app/(app)/workspace/[slug]/automations/AutomationsClient.tsx` — full client UI (list, create dialog, recent-runs chips, optimistic toggle/delete).
+- `tests/unit/automations.test.ts` — 4 new tests: no-match no-fire, full notification fan-out with interpolation, https-only webhook rejection, error-swallowing on Supabase failure.
+
+### Changed
+
+- `app/api/v1/decisions/route.ts` — POST now calls `runAutomations({ type: 'decision.logged', … })` after the existing notification + audit hooks.
+- `app/api/v1/nodes/route.ts` — POST calls `runAutomations({ type: 'task.created', … })` whenever `type === 'task'`.
+- `app/(app)/workspace/[slug]/automations/page.tsx` — placeholder ("The automations engine is in development", 4 fake preview rules, disabled button) replaced with `<AutomationsClient />` behind the existing `automation-gate` FeatureGate (Pro+).
+- `docs/project-roadmap.md` — header v1.3.6.0 → v1.3.7.0, dropped #17 from *Remaining work*, fully-wired 29 → 30, backend-wired bar 76% → 79%.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 157/157 passing across 21 files (153 existing + 4 new in `tests/unit/automations.test.ts`).
+- Production build: ✅ clean.
+- Migration ready to apply alongside the v1.3.4.0 + v1.3.5.0 migrations via Supabase Dashboard.
+
 ## [1.3.6.0] - 2026-04-27
 
 **Theme:** Real-time multiplayer cursors land on the canvas. The roadmap's marquee feature — "Real-time Collaboration" — has rendered `<CollaborationOverlay collaborators={[]} />` since v1.0.0. This release wires it to actual presence: open the canvas in two browsers signed in to the same workspace and you see each other move. New `useCollaboration` hook subscribes to a Supabase Realtime presence channel keyed on `workspaceId`, broadcasts the local user's cursor in flow coordinates (so the position survives independent pan/zoom on each client), tracks `selectedNodeId` so peer selections light up node rings, and projects incoming peer cursors back to screen coordinates via ReactFlow's `flowToScreenPosition` for direct render. Cursor broadcasts are throttled to ~30 Hz. The hook is mobile-disabled (cursors don't make sense on touch). `CollaborationOverlay` now uses `position: fixed` for cursor layers (clientX/Y is viewport-relative), keeping the existing pill + name + typing animation. `WorkflowCanvas` is now wrapped in `<ReactFlowProvider>` so the hook can call `useReactFlow()` from outside the `<ReactFlow>` tree. Color is picked deterministically from the user id hash across the existing 6-color palette.

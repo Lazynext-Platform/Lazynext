@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.7.0] — Automation Builder is real (2026-04-27)
+
+The Automations page shipped with v1.0.0 and has rendered "The automations engine is in development" with a `disabled` button and 4 fake preview rules ever since. This release deletes that placeholder and replaces it with a working WHEN/THEN engine. Two narrow trigger types in v1: `decision.logged` (fires from POST /api/v1/decisions after the existing notification + audit hooks) and `task.created` (fires from POST /api/v1/nodes when `type === 'task'`). Two narrow action types: `notification.send` with `{{variable}}` template interpolation pulling fields from the event payload (`{{question}}`, `{{qualityScore}}`, `{{title}}`, etc.), and `webhook.post` with HTTPS-only validation and a 5s `AbortSignal.timeout` cap. New `automations` table (RLS member-read, service-role-write); the existing `automation_runs.node_id` is now nullable and a new `automation_id` FK column ties each run to its rule. Engine runs synchronously after the underlying mutation succeeds, writes a row per execution, and swallows failures so a misconfigured automation can never 500 a user-facing write. UI: list view with WHEN/THEN pills + last 8 runs as colored chips (green=success, red=failed, hover for error), per-row enable/disable toggle, delete-with-confirm, "New automation" dialog with template interpolation hint. Roadmap fully wired count 29 → 30; backend-wired bar 76% → 79%. Type-check clean, **157/157** tests passing across 21 files (added 4 new in `tests/unit/automations.test.ts`), production build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1370---2026-04-27).
+
+---
+
 ## [1.3.6.0] — Real-time multiplayer cursors land on the canvas (2026-04-27)
 
 The roadmap's marquee feature — "Real-time Collaboration" — has rendered `<CollaborationOverlay collaborators={[]} />` since v1.0.0. This release wires it to actual Supabase Realtime presence. Two browsers signed in to the same workspace now see each other's cursors move in real time, with name pills, deterministic per-user colors, and pulse rings on the nodes each peer has selected. New `lib/realtime/use-collaboration.ts` hook subscribes to a presence channel keyed on `workspace_id`, broadcasts cursor in flow coordinates (so positions survive independent pan/zoom on each client) and projects incoming peer cursors back to screen coords via `flowToScreenPosition`. Cursor broadcasts are throttled to ~30 Hz; selection and typing flags re-track without resubscribing. Mobile is intentionally disabled. `WorkflowCanvas` is now split into an outer wrapper that provides `<ReactFlowProvider>` and an inner component that calls the hook. `CollaborationOverlay` cursors switched to `position: fixed` to align with viewport-relative coordinates. No new tables, no migration, no row writes — pure presence channel. Type-check clean, **153/153** tests passing, build clean.
