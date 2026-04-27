@@ -35,6 +35,8 @@ import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 import { useCanvasHydration } from '@/lib/canvas/use-canvas-hydration'
 import { useCanvasPositionPersist } from '@/lib/canvas/use-canvas-position-persist'
+import { useCanvasDeletePersist } from '@/lib/canvas/use-canvas-delete-persist'
+import { createNodeOnServer, createEdgeOnServer } from '@/lib/canvas/persist-helpers'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -74,9 +76,7 @@ function WorkflowCanvasInner() {
   const edges = useCanvasStore((s) => s.edges)
   const onNodesChange = useCanvasStore((s) => s.onNodesChange)
   const onEdgesChange = useCanvasStore((s) => s.onEdgesChange)
-  const onConnect = useCanvasStore((s) => s.onConnect)
   const selectNode = useCanvasStore((s) => s.selectNode)
-  const addNode = useCanvasStore((s) => s.addNode)
   const hydrateCanvas = useCanvasStore((s) => s.hydrateCanvas)
   const selectedNodeId = useCanvasStore((s) => s.selectedNodeId)
   const isNodePanelOpen = useCanvasStore((s) => s.isNodePanelOpen)
@@ -93,6 +93,7 @@ function WorkflowCanvasInner() {
 
   useCanvasHydration(workspaceId)
   useCanvasPositionPersist()
+  useCanvasDeletePersist()
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -111,6 +112,18 @@ function WorkflowCanvasInner() {
     selectNode(null)
   }, [selectNode])
 
+  // Override the store's bare onConnect: we need to POST to /api/v1/edges
+  // and persist the server-issued UUID, otherwise edges drawn between
+  // hydrated nodes evaporate on refresh. The helper falls back to a
+  // client edge id when one endpoint is a scratchpad (non-UUID) node.
+  const handleConnect = useCallback(
+    (connection: { source: string | null; target: string | null }) => {
+      if (!connection.source || !connection.target) return
+      void createEdgeOnServer({ source: connection.source, target: connection.target })
+    },
+    [],
+  )
+
   if (isMobile) {
     return <NodeListView />
   }
@@ -122,7 +135,7 @@ function WorkflowCanvasInner() {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={handleConnect}
         onNodeClick={onNodeClick}
         onPaneClick={onPaneClick}
         nodeTypes={nodeTypes}
@@ -154,12 +167,11 @@ function WorkflowCanvasInner() {
             useUpgradeModal.getState().show('node-limit')
             return
           }
-          const id = `node-${Date.now()}`
-          addNode({
-            id,
+          void createNodeOnServer({
             type,
+            title: `New ${type}`,
             position: { x: pos.x - 200, y: pos.y - 100 },
-            data: { title: `New ${type}`, status: type === 'task' ? 'todo' : undefined },
+            status: type === 'task' ? 'todo' : undefined,
           })
         }}
       />
