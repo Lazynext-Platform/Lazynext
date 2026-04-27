@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { createNotification } from '@/lib/data/notifications'
 import { recordAudit } from '@/lib/data/audit-log'
+import { runAutomations } from '@/lib/data/automations'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -112,6 +113,19 @@ export async function POST(req: Request) {
     metadata: { type: parsed.data.type, title: parsed.data.title.slice(0, 200) },
     request: req,
   }).catch(() => undefined)
+
+  if (parsed.data.type === 'task') {
+    const { data: ws } = await db.from('workspaces').select('slug').eq('id', parsed.data.workspaceId).maybeSingle()
+    await runAutomations({
+      type: 'task.created',
+      workspaceId: parsed.data.workspaceId,
+      actorId: userId,
+      nodeId: node.id,
+      title: parsed.data.title,
+      assignedTo: parsed.data.assignedTo ?? null,
+      workspaceSlug: (ws as { slug?: string } | null)?.slug ?? null,
+    }).catch(() => undefined)
+  }
 
   return NextResponse.json({ data: node, error: null }, { status: 201 })
 }

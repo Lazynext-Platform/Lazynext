@@ -7,6 +7,7 @@ import { incrementWmsFor } from '@/lib/wms'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { notifyWorkspaceMembers } from '@/lib/data/notifications'
 import { recordAudit } from '@/lib/data/audit-log'
+import { runAutomations } from '@/lib/data/automations'
 
 const createSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -132,6 +133,17 @@ export async function POST(req: Request) {
       qualityScore: scoreResult.overall,
     },
     request: req,
+  }).catch(() => undefined)
+
+  await runAutomations({
+    type: 'decision.logged',
+    workspaceId: parsed.data.workspaceId,
+    actorId: userId,
+    decisionId: decision.id,
+    question: parsed.data.question,
+    decisionType: parsed.data.decisionType ?? null,
+    qualityScore: scoreResult.overall,
+    workspaceSlug: slug ?? null,
   }).catch(() => undefined)
 
   return NextResponse.json({ data: decision, error: null }, { status: 201 })
