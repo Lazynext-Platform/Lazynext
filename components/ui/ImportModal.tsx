@@ -1,16 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { X, Sparkles, Mail, Upload, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, Sparkles, Mail, Upload, AlertCircle, CheckCircle2, ArrowRight } from 'lucide-react'
 import { useModalA11y } from '@/lib/utils/useModalA11y'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 
-const oauthSources = [
-  { id: 'notion-api', name: 'Notion', desc: 'Pages & databases via OAuth', icon: '📝' },
+// Per-source icon + description. Order matches the visual grid.
+// Provider id (when present) maps to `lib/oauth/registry.ts`'s
+// `OAuthProviderId` so tiles can hot-swap between disabled, configured,
+// and connected states once an adapter ships. The notion-zip row has
+// no provider id because it's a file upload, not OAuth.
+const oauthSources: Array<{ id: string; providerId?: string; name: string; desc: string; icon: string }> = [
+  { id: 'notion-api', providerId: 'notion', name: 'Notion', desc: 'Pages & databases via OAuth', icon: '📝' },
   { id: 'notion-zip', name: 'Notion Export', desc: 'ZIP archive upload', icon: '📦' },
-  { id: 'linear', name: 'Linear', desc: 'Issues & projects', icon: '⚡' },
-  { id: 'trello', name: 'Trello', desc: 'Boards & cards', icon: '📋' },
-  { id: 'asana', name: 'Asana', desc: 'Tasks & projects', icon: '🎯' },
+  { id: 'linear', providerId: 'linear', name: 'Linear', desc: 'Issues & projects', icon: '⚡' },
+  { id: 'trello', providerId: 'trello', name: 'Trello', desc: 'Boards & cards', icon: '📋' },
+  { id: 'asana', providerId: 'asana', name: 'Asana', desc: 'Tasks & projects', icon: '🎯' },
 ]
 
 type NodeType = 'task' | 'doc' | 'decision' | 'thread' | 'pulse' | 'automation' | 'table'
@@ -99,6 +104,35 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
   const [status, setStatus] = useState<ImportStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   const [importedCount, setImportedCount] = useState<number>(0)
+
+  // Provider-configured map from the OAuth registry. Lazily loaded once
+  // when the modal opens — keeps the modal cheap to render and means
+  // dev-without-Supabase still sees honest tile state (the API returns
+  // env-driven config even when the DB is unconfigured).
+  const [providerConfig, setProviderConfig] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    if (!workspaceId) return
+    let cancelled = false
+    fetch(`/api/v1/oauth/connections?workspaceId=${workspaceId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((body) => {
+        if (cancelled || !body?.data?.providers) return
+        const map: Record<string, boolean> = {}
+        for (const p of body.data.providers as Array<{ id: string; configured: boolean }>) {
+          map[p.id] = p.configured
+        }
+        setProviderConfig(map)
+      })
+      .catch(() => {
+        // Network errors are non-fatal: tiles fall back to the
+        // disabled state, which matches reality (the connector is
+        // not available right now).
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [workspaceId])
 
   async function handleCsvFile(file: File) {
     if (!workspaceId) {
@@ -228,40 +262,72 @@ export function ImportModal({ onClose }: { onClose: () => void }) {
                 </div>
               )}
 
-              {/* Roadmap: OAuth connectors */}
+              {/* Roadmap: OAuth connectors. Each tile reflects the real
+                  registry state — configured providers show a green
+                  Available badge with a working Connect link; the rest
+                  stay disabled with copy that names the env vars. The
+                  notion-zip row has no provider id (file upload, not
+                  OAuth) and stays in the historical "Soon" state. */}
               <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
                     <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-amber-400">OAuth connectors are in development</p>
+                    <p className="text-sm font-semibold text-amber-400">OAuth connectors</p>
                     <p className="mt-1 text-xs text-slate-400">
-                      The connectors below need a real OAuth handshake + ingestion pipeline before they do anything.
-                      Email us at <a href="mailto:hello@lazynext.com" className="underline hover:text-amber-300">hello@lazynext.com</a> to vote on which one ships first.
+                      Each tile becomes a working <strong>Connect</strong> button once that provider&apos;s
+                      OAuth credentials are configured on this deployment. Until then, tiles stay disabled.
+                      Email <a href="mailto:hello@lazynext.com" className="underline hover:text-amber-300">hello@lazynext.com</a> to vote on priority.
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {oauthSources.map((src) => (
-                  <div
-                    key={src.id}
-                    className="flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-800/50 p-4 opacity-70"
-                  >
-                    <span className="text-2xl">{src.icon}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-200">{src.name}</p>
-                        <span className="rounded-full bg-slate-700 px-1.5 py-0.5 text-3xs font-medium text-slate-400">
-                          Soon
-                        </span>
+                {oauthSources.map((src) => {
+                  const isConfigured = src.providerId ? providerConfig[src.providerId] === true : false
+                  return (
+                    <div
+                      key={src.id}
+                      className={`flex items-start gap-3 rounded-xl border bg-slate-800/50 p-4 ${
+                        isConfigured ? 'border-emerald-500/30' : 'border-slate-800 opacity-70'
+                      }`}
+                    >
+                      <span className="text-2xl">{src.icon}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-slate-200">{src.name}</p>
+                          {isConfigured ? (
+                            <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-3xs font-medium text-emerald-400">
+                              Available
+                            </span>
+                          ) : (
+                            <span
+                              className="rounded-full bg-slate-700 px-1.5 py-0.5 text-3xs font-medium text-slate-400"
+                              title={
+                                src.providerId
+                                  ? `Set LAZYNEXT_OAUTH_${src.providerId.toUpperCase()}_CLIENT_ID and LAZYNEXT_OAUTH_${src.providerId.toUpperCase()}_CLIENT_SECRET to enable.`
+                                  : 'ZIP-archive ingestion ships separately.'
+                              }
+                            >
+                              {src.providerId ? 'Not configured' : 'Soon'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">{src.desc}</p>
+                        {isConfigured && src.providerId && workspaceId && (
+                          <a
+                            href={`/api/v1/oauth/${src.providerId}/start?workspaceId=${workspaceId}`}
+                            className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300"
+                          >
+                            Connect <ArrowRight className="h-3 w-3" />
+                          </a>
+                        )}
                       </div>
-                      <p className="text-xs text-slate-500">{src.desc}</p>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               <a

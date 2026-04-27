@@ -2,7 +2,23 @@
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-04-27
+> **Last Updated**: 2026-04-28
+
+---
+
+## [v1.3.28.0] - 2026-04-28 — OAuth surfaces consistent + Disconnect
+
+**Theme:** Import modal and Settings → Integrations now share the same registry-driven empty state. Disconnect button ships, closing the read-only loop on Integrations.
+
+### Added
+- `components/ui/ConnectionTile.tsx` — client component with a per-row Disconnect button (two-step confirm). Calls `DELETE /api/v1/oauth/connections/[id]` then `router.refresh()`.
+
+### Changed
+- `components/ui/ImportModal.tsx` — five OAuth tiles fetch `/api/v1/oauth/connections` on mount and render `Available` (env-configured) or `Not configured` (tooltip names env vars) instead of static `Soon` badges. Working `Connect →` link on configured providers points at the shared `/api/v1/oauth/[provider]/start` URL.
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — connected list now renders via `ConnectionTile`.
+
+### Tests
+- Existing 240/240 unit suite remains green; build remains green; type-check clean.
 
 ---
 

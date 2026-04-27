@@ -4,7 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
-## [1.3.27.0] - 2026-04-27
+## [1.3.28.0] - 2026-04-28
+
+**Theme:** OAuth surfaces become consistent across the app. v1.3.27.0 wired the registry into Settings → Integrations; this release ports the same honest pattern to the Import modal and adds a working Disconnect button to Settings. Both surfaces now read from the same source of truth: tiles show `Available` if env-configured, `Not configured` (with the exact env vars in tooltips) otherwise. The Import modal's `Connect` link reuses the same `/api/v1/oauth/[provider]/start` URL — once any adapter PR lands, both surfaces light up together with no extra wiring. Disconnect uses the existing `DELETE /api/v1/oauth/connections/[id]` route shipped in v1.3.27.0 and `router.refresh()` to re-render the server component.
+
+### Added
+- `components/ui/ConnectionTile.tsx` — small client component for the connected-providers list on the Integrations page. Per-row Disconnect button with inline two-step confirm (`Disconnect → Confirm | Cancel`) so a misclick can't drop a working integration. Surfaces API errors inline. Calls `router.refresh()` on success so the deletion re-renders without a full reload.
+
+### Changed
+- `components/ui/ImportModal.tsx` — the five OAuth-source tiles (Notion, Linear, Trello, Asana, Notion ZIP) no longer render as decorative `Soon` placeholders. Each tile that maps to an `OAuthProviderId` (notion, linear, trello, asana) now fetches `/api/v1/oauth/connections?workspaceId=<id>` on mount and reflects the real registry state: green `Available` badge + working `Connect →` link if env-configured, otherwise a `Not configured` badge with a tooltip naming `LAZYNEXT_OAUTH_<PROVIDER>_CLIENT_ID` + `_CLIENT_SECRET`. Notion ZIP keeps a `Soon` badge (file upload, not OAuth). Network errors during fetch are non-fatal — tiles fall back to the disabled state, which matches reality.
+- `app/(app)/workspace/[slug]/integrations/page.tsx` — connected providers now render via `ConnectionTile` so each row gets a Disconnect action. The page stays a server component; only the new tile is `'use client'`.
+
+### Why this matters
+- Two of the three surfaces that previously rendered fake `Soon` tags (Settings → Integrations and the Import modal) now reflect deployment reality, and the third (Profile → Connected Accounts) was already real Supabase identity-provider data. Disconnect closes the read-only loop on Integrations: a workspace owner can now delete a stale connection without a database round-trip.
+
+
 
 **Theme:** OAuth scaffolding becomes user-visible. v1.3.26.0 shipped the table + crypto + registry contract; this release wires the read API, the per-provider start route, and rebuilds the Settings → Integrations page on top of all of it. The page now reads real data: every roadmap provider renders with an `Available` badge if its env vars are set or `Not configured` if they aren't, and the disabled-button copy now points at the exact env vars to set instead of the previous "coming soon" placeholder. Connected list reflects real `oauth_connections` rows when they exist (none in production yet). Provider adapters still ship one-by-one in their own PRs — this release does NOT add a working flow for any vendor.
 
