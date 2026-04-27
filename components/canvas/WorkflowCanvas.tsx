@@ -33,6 +33,8 @@ import { useUpgradeModal } from '@/stores/upgrade-modal.store'
 import { canCreateNode } from '@/lib/utils/plan-gates'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
+import { useCanvasHydration } from '@/lib/canvas/use-canvas-hydration'
+import { useCanvasPositionPersist } from '@/lib/canvas/use-canvas-position-persist'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -50,9 +52,12 @@ const edgeTypes = {
   workflow: WorkflowEdge,
 }
 
-// Canvas starts empty — no demo nodes are auto-injected. Server-side
-// node persistence will live behind /api/v1/nodes; until that round-trip
-// is wired, the canvas is a per-session scratchpad. Right-click to add.
+// Canvas hydrates from the workspace's default workflow on mount via
+// `useCanvasHydration` — see `/api/v1/workflows/default`. Node position
+// drags are persisted via debounced PATCH; node create/delete and edge
+// create/delete still live only in-memory in this release (a follow-up
+// will wire those, see roadmap). Until hydration completes the canvas
+// renders the empty arrays below.
 const defaultNodes: Node[] = []
 const defaultEdges: Edge[] = []
 
@@ -85,6 +90,9 @@ function WorkflowCanvasInner() {
     selectedNodeId,
     enabled: !isMobile,
   })
+
+  useCanvasHydration(workspaceId)
+  useCanvasPositionPersist()
 
   useEffect(() => {
     if (nodes.length === 0) {

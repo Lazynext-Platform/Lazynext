@@ -12,6 +12,7 @@ import {
   Table,
   X,
   Info,
+  Share2,
 } from 'lucide-react'
 import { useCanvasStore } from '@/stores/canvas.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
@@ -20,6 +21,7 @@ import { canCreateNode } from '@/lib/utils/plan-gates'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { NODE_COLORS, PLAN_LIMITS, type NodeType } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
+import { ShareWorkflowDialog } from './ShareWorkflowDialog'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -41,8 +43,11 @@ const nodeOptions: {
 
 export function CanvasToolbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const addNode = useCanvasStore((s) => s.addNode)
   const nodes = useCanvasStore((s) => s.nodes)
+  const workflowId = useCanvasStore((s) => s.currentWorkflowId)
+  const workflowName = useCanvasStore((s) => s.currentWorkflowName)
   const plan = (useWorkspaceStore((s) => s.workspace?.plan) || 'free') as Plan
 
   const handleAddNode = useCallback(
@@ -142,18 +147,38 @@ export function CanvasToolbar() {
       )}
 
       {/* FAB */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label={isOpen ? 'Close node picker' : 'Add node'}
-        className={cn(
-          'flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg transition-all',
-          isOpen
-            ? 'bg-slate-700 text-slate-300 rotate-45'
-            : 'bg-brand text-brand-foreground hover:bg-brand-hover hover:shadow-xl shadow-brand/20'
+      <div className="flex flex-col items-end gap-2">
+        {workflowId && (
+          <button
+            onClick={() => setShareOpen(true)}
+            aria-label="Share canvas"
+            title="Share canvas"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-slate-300 shadow-md transition-all hover:bg-slate-700 hover:text-slate-100"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
         )}
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
-      </button>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label={isOpen ? 'Close node picker' : 'Add node'}
+          className={cn(
+            'flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg transition-all',
+            isOpen
+              ? 'bg-slate-700 text-slate-300 rotate-45'
+              : 'bg-brand text-brand-foreground hover:bg-brand-hover hover:shadow-xl shadow-brand/20'
+          )}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {shareOpen && workflowId && (
+        <ShareWorkflowDialog
+          workflowId={workflowId}
+          workflowName={workflowName ?? 'Untitled workflow'}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
     </div>
   )
 }

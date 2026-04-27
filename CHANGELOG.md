@@ -4,6 +4,36 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.13.0] - 2026-04-27
+
+**Theme:** Canvas hydrates from the server. The biggest "honest empty state" in the app — `WorkflowCanvas` had been a per-session scratchpad since v1.0, with the `// TODO: server-side persistence` comment hand-waving the gap. This release fixes half of it: the canvas now loads its real nodes and edges from the workspace's default workflow on every mount, and node position drags are persisted via debounced PATCH so layouts survive a page refresh. **Node create/delete and edge create/delete persistence is intentionally deferred to v1.3.14.0** — those callsites currently still fabricate ids and need a coordinated refactor (POST first, then add to store with the server-issued UUID). Also unblocks the v1.3.9.0 share dialog: with a real `currentWorkflowId` in the store, `ShareWorkflowDialog` now wires into the canvas toolbar behind a Share button.
+
+### Added
+
+- `app/api/v1/workflows/default/route.ts` — `GET /api/v1/workflows/default?workspaceId=<uuid>`. Member-gated. Wraps the existing `getOrCreateDefaultWorkflow` helper so the canvas page (whose URL is permanently `/canvas/default`) can resolve the workspace's first workflow id without forcing a UI-level workflow picker.
+- `lib/canvas/use-canvas-hydration.ts` — `useCanvasHydration(workspaceId)` hook. Resolves workflow id, then parallel-fetches nodes + edges, normalizes the server shape (`position_x` → `position.x`, etc.), pushes into the canvas store, and stamps `currentWorkflowId` / `currentWorkflowName` / `currentWorkspaceId`. Failures are swallowed honestly — the canvas falls back to scratchpad mode rather than crashing.
+- `lib/canvas/use-canvas-position-persist.ts` — `useCanvasPositionPersist()` hook. Watches `nodes` for any UUID-shaped node whose position has drifted, then PATCHes `/api/v1/nodes/[id]` 600ms after the last change. Skips client-fabricated ids (`node-${Date.now()}`) so scratchpad nodes don't 404 the API.
+
+### Changed
+
+- `stores/canvas.store.ts` — adds `currentWorkflowId`, `currentWorkflowName`, `currentWorkspaceId`, `isHydrated`, `setWorkflowContext`, `setHydrated`. Initial values `null` / `false`. Existing scratchpad behavior preserved when no workflow context is set.
+- `components/canvas/WorkflowCanvas.tsx` — calls `useCanvasHydration` + `useCanvasPositionPersist`. Stale "TODO: server-side persistence will live behind /api/v1/nodes" comment removed and replaced with an honest description of what does and doesn't persist.
+- `components/canvas/panels/CanvasToolbar.tsx` — adds a Share button above the FAB whenever `currentWorkflowId` is non-null. Clicking opens the existing `ShareWorkflowDialog` (importable since v1.3.9.0, finally wired). Hidden when no workflow context — no fake affordance.
+- `docs/project-roadmap.md` — header v1.3.12.0 → v1.3.13.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
+### Known follow-ups (v1.3.14.0)
+
+- Persist node create (toolbar + context menu) — currently still in-memory.
+- Persist node delete — currently still in-memory.
+- Persist edge create (`onConnect`) and edge delete — currently still in-memory.
+- Flush pending position writes on `beforeunload` to avoid losing the last 600ms of drag.
+
 ## [1.3.12.0] - 2026-04-27
 
 **Theme:** CSV export for decisions. The Settings → Export page has been JSON-only since v1.0, and v1.3.11.0's exec report could only be saved as PDF. This release adds CSV everywhere decisions are exportable: a Format dropdown on the Decisions Only Export card, plus a CSV button next to "Print / Save as PDF" on the new exec report. CSV opens cleanly in Excel/Sheets, makes spreadsheet-driven analysis trivial, and complements the human-readable PDF and the developer-facing JSON.
