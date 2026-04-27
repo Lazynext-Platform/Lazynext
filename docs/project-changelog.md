@@ -6,6 +6,16 @@
 
 ---
 
+## [v1.3.40.0] - 2026-04-28 — Bearer auth on /edges
+
+**Theme:** `/api/v1/edges` GET/POST/DELETE are now bearer-aware with `write` scope on mutations. Canvas graph (nodes + edges) is fully programmable.
+
+### Added
+- Bearer auth on all `/edges` routes.
+- OpenAPI 3.1 entry for `/edges` (9 paths total).
+
+---
+
 ## [v1.3.39.0] - 2026-04-28 — Bearer auth on /nodes
 
 **Theme:** `/api/v1/nodes` and `/api/v1/nodes/{id}` are now bearer-aware. Mutations require `write` scope. The canvas-as-API surface is real for external automations.

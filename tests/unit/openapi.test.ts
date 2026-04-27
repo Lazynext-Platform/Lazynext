@@ -26,6 +26,7 @@ describe('buildOpenApiSpec', () => {
       '/decisions',
       '/decisions/export-csv',
       '/decisions/{id}',
+      '/edges',
       '/export',
       '/nodes',
       '/nodes/{id}',
@@ -63,7 +64,7 @@ describe('buildOpenApiSpec', () => {
     // /whoami is identity introspection — no workspace param.
     // /nodes scopes via workflowId (GET) or body (POST); /nodes/{id}
     // resolves the workspace via the row.
-    const exempt = new Set(['/whoami', '/nodes', '/nodes/{id}'])
+    const exempt = new Set(['/whoami', '/nodes', '/nodes/{id}', '/edges'])
     for (const [path, methods] of Object.entries(spec.paths)) {
       if (exempt.has(path)) continue
       for (const [method, op] of Object.entries(methods)) {
