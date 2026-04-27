@@ -1,8 +1,8 @@
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 import { incrementWmsFor } from '@/lib/wms'
 
 const updateSchema = z.object({
@@ -16,14 +16,13 @@ const updateSchema = z.object({
 })
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
+  // Look up the decision first so we know which workspace to bind to.
+  // This is a tiny indexed read; cheap enough to do before auth so we
+  // can hand requireWorkspaceAuth a concrete workspaceId. The bearer
+  // path then gets a free 403 WORKSPACE_MISMATCH if the key targets a
+  // different workspace.
   const { data: decision, error } = await db
     .from('decisions')
     .select('*')
@@ -32,26 +31,28 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   if (error || !decision) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
-  const authorized = await verifyWorkspaceMember(userId, decision.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, decision.workspace_id)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   return NextResponse.json({ data: decision, error: null })
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  // Verify ownership before update
   const { data: existing } = await db.from('decisions').select('workspace_id').eq('id', params.id).single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, existing.workspace_id)
+  if (!auth.ok) return auth.response
+  const scopeFail = requireScope(auth, 'write')
+  if (scopeFail) return scopeFail.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
@@ -70,7 +71,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (parsed.data.tags !== undefined) updateData.tags = parsed.data.tags
 
   if (parsed.data.outcome && parsed.data.outcome !== 'pending') {
-    updateData.outcome_tagged_by = userId
+    updateData.outcome_tagged_by = auth.userId
     updateData.outcome_tagged_at = new Date().toISOString()
   }
 
@@ -93,19 +94,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  // Verify ownership before delete
   const { data: existing } = await db.from('decisions').select('workspace_id').eq('id', params.id).single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, existing.workspace_id)
+  if (!auth.ok) return auth.response
+  const scopeFail = requireScope(auth, 'write')
+  if (scopeFail) return scopeFail.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   await db.from('decisions').delete().eq('id', params.id)
   return NextResponse.json({ data: { deleted: true }, error: null })

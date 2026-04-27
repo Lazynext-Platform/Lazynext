@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
   const { userId } = auth
 
-  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   // Plan-gate the decision count. Free plan caps at 20 logged

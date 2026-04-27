@@ -21,6 +21,7 @@ const VALID_ACTIONS: AuditAction[] = [
   'member.remove',
   'member.role_update',
   'api_key.create',
+  'api_key.rotate',
   'api_key.revoke',
 ]
 

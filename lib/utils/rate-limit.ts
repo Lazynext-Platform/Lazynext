@@ -29,6 +29,15 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
   ai: { limit: 20, windowSec: 60 },
   auth: { limit: 10, windowSec: 60 },
   webhook: { limit: 50, windowSec: 60 },
+  // Heavy reads — full workspace dump or CSV stream. Returning the
+  // whole tenant on every call is expensive on the DB and tempting
+  // for a leaked key to abuse for exfiltration. 10/min is enough for
+  // a CI runner doing nightly snapshots; not enough for a scrape.
+  export: { limit: 10, windowSec: 60 },
+  // Mutations — tighter than read so a leaked write key can't
+  // hammer the DB with thousands of decisions. 30/min is generous
+  // for human use; abusive automation hits the wall fast.
+  mutation: { limit: 30, windowSec: 60 },
 }
 
 export function rateLimit(

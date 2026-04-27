@@ -6,6 +6,28 @@
 
 ---
 
+## [v1.3.34.0] - 2026-04-28 — Decisions surface fully bearer + key rotation
+
+**Theme:** Bearer auth lands on `decisions/[id]` GET/PATCH/DELETE, API keys can be rotated in-place, and rate-limit buckets are tuned per endpoint type.
+
+### Added
+- `POST /api/v1/api-keys/[id]/rotate` — preserves id/scopes/audit lineage, swaps hash+prefix.
+- `api_key.rotate` AuditAction.
+- `RATE_LIMITS.export` (10/min) and `.mutation` (30/min) buckets.
+- Rotate button in `ApiKeysPanel`.
+- `rotateApiKey` data helper + 2 tests (277 → 279).
+
+### Changed
+- All `/decisions/[id]` handlers bearer-aware; PATCH+DELETE gated by `write` scope.
+- `/export` and `/decisions/export-csv` use the tighter export bucket.
+- `/decisions` POST/PATCH/DELETE use the mutation bucket.
+
+### Why
+- Lifecycle closes: a workspace owner can rotate a leaked key in seconds without losing audit lineage.
+- Per-endpoint buckets stop scraping at 100 req/min.
+
+---
+
 ## [v1.3.33.0] - 2026-04-28 — Bearer-auth completes its v1 surface
 
 **Theme:** Per-key scopes, the first bearer-aware mutation route, API key UX polish, and `/docs/api`. Bearer story is now end-to-end usable.
