@@ -6,6 +6,23 @@
 
 ---
 
+## [v1.3.31.0] - 2026-04-28 — Bearer auth rolls out to read endpoints
+
+**Theme:** `audit-log`, `decisions` (GET), `decisions/export-csv` now accept Bearer tokens via the new `requireWorkspaceAuth` helper.
+
+### Added
+- `lib/utils/route-auth.ts` — `requireWorkspaceAuth(req, wsId)` plumbing helper.
+- `tests/unit/route-auth.test.ts` — 9 cases (261 → 269 total).
+
+### Changed
+- `app/api/v1/audit-log/route.ts`, `app/api/v1/decisions/route.ts` (GET only), `app/api/v1/decisions/export-csv/route.ts` — swapped to `requireWorkspaceAuth`.
+
+### Deferred
+- Mutation routes (one PR each).
+- Per-key scopes; per-keyId rate-limit buckets.
+
+---
+
 ## [v1.3.30.0] - 2026-04-28 — Inbound bearer-token auth
 
 **Theme:** REST API can now authenticate with `Authorization: Bearer lzx_...`. `/api/v1/export` is the first consumer.

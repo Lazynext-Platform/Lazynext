@@ -1,4 +1,5 @@
 import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -24,20 +25,17 @@ const createSchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workspaceId = url.searchParams.get('workspaceId')
   if (!workspaceId) return NextResponse.json({ error: 'MISSING_WORKSPACE_ID' }, { status: 400 })
 
-  const authorized = await verifyWorkspaceMember(userId, workspaceId)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, workspaceId)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(`api:${auth.userId}`, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   const { data: results, error } = await db
     .from('decisions')
