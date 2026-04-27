@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.17.0] — Workflow rename + delete + a real modal (2026-04-27)
+
+v1.3.16.0 shipped a picker that could create workflows via `window.prompt` (yes, browser-native and ugly). This release replaces that with a focused, autofocused, Esc-closable modal (`WorkflowFormModal`) used for both create and rename, and adds per-row rename + delete affordances directly on each picker row. Hover or focus reveals the action cluster — resting state stays a clean list. Delete asks for `window.confirm`, DELETEs via the existing endpoint, and routes back to `/canvas/default` if you nuked the active workflow (which falls through to `getOrCreateDefaultWorkflow`, so even deleting the last workflow creates a fresh one instead of crashing). Rename updates the picker's label in-place by writing to the canvas store directly. **168/168** tests passing across 24 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13170---2026-04-27).
+
+---
+
 ## [1.3.16.0] — Per-workflow URLs + workflow picker (2026-04-27)
 
 The canvas is no longer single-workflow. `/workspace/[slug]/canvas/[id]` now hydrates the requested workflow specifically (via `GET /api/v1/workflows/[id]`), and a new picker dropdown in the canvas top-left lets you switch between workflows or create new ones without ever leaving the page. The magic word `default` in the URL still resolves to the workspace's default workflow, so existing sidebar links keep working unchanged. The picker lazy-loads its list on first open (no extra round-trip for users who never switch), supports click-outside + Escape, and POSTs to `/api/v1/workflows` for the "+ New workflow" action before routing to the freshly-created workflow. **168/168** tests passing across 24 files. Type-check clean, build clean.

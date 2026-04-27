@@ -4,6 +4,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.17.0] - 2026-04-27
+
+**Theme:** Workflow rename + delete + a real modal. v1.3.16.0 shipped a picker that could create new workflows via `window.prompt` (yes, browser-native and ugly). This release replaces that with a proper modal and adds rename + delete affordances directly on each row of the picker.
+
+### Added
+
+- `components/canvas/panels/WorkflowFormModal.tsx` — focused, autofocused, Esc-closable modal used for both create and rename. Backdrop click closes. Submit-on-enter. Trims input. Disables when name is empty or submission is in flight.
+- Per-row rename + delete buttons in the workflow picker. Hover or focus to reveal — keeps the resting state clean. Delete asks for `window.confirm` then DELETEs via the existing `/api/v1/workflows/[id]` endpoint. Rename PATCHes the same endpoint and updates the picker's label in-place via `useCanvasStore.setState({ currentWorkflowName })` if you renamed the active workflow.
+
+### Changed
+
+- `components/canvas/panels/WorkflowPicker.tsx` — replaced `window.prompt` with the new modal for create. Picker dropdown widened from `w-72` to `w-80` to accommodate the action buttons. Each row is now a `group` with opacity-0/100 transitions on the action cluster so the resting state looks like a clean list.
+- Deleting the active workflow routes back to `/canvas/default`, which falls through to `getOrCreateDefaultWorkflow` — so even nuking the last workflow creates a fresh one instead of crashing the canvas.
+- `docs/project-roadmap.md` — header v1.3.16.0 → v1.3.17.0.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files.
+- Production build: ✅ clean.
+
 ## [1.3.16.0] - 2026-04-27
 
 **Theme:** Per-workflow URLs and a picker. The canvas is no longer single-workflow — `/workspace/[slug]/canvas/[id]` now hydrates the requested workflow specifically, and a new picker dropdown in the canvas top-left lets you switch between workflows or create new ones without ever leaving the page. The magic word `default` still works in the URL and resolves to the workspace's default workflow, so existing sidebar links keep their behaviour.
