@@ -4,6 +4,13 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.34.1] - 2026-04-28
+
+**Hotfix.** Production smoke-test caught `/docs/api` 307'ing to `/sign-in`. The middleware's public-route whitelist exact-matched `/docs` but had no prefix match, so the new API reference was effectively gated behind login.
+
+### Fixed
+- `lib/db/supabase/middleware.ts` — `/docs/*` paths are now public. Exact `/docs` continues to work; `/docs/api` (and any future sub-route) renders without auth.
+
 ## [1.3.34.0] - 2026-04-28
 
 **Theme:** Bearer auth lands on the rest of the decisions surface, key rotation goes live, and rate-limit buckets get per-endpoint tuning.

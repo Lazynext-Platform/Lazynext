@@ -6,6 +6,12 @@
 
 ---
 
+## [v1.3.34.1] - 2026-04-28 — /docs/* public-route hotfix
+
+Production smoke-test caught `/docs/api` 307'ing to `/sign-in`. Middleware whitelisted exact `/docs` only; sub-routes were gated. Fixed with a prefix match.
+
+---
+
 ## [v1.3.34.0] - 2026-04-28 — Decisions surface fully bearer + key rotation
 
 **Theme:** Bearer auth lands on `decisions/[id]` GET/PATCH/DELETE, API keys can be rotated in-place, and rate-limit buckets are tuned per endpoint type.

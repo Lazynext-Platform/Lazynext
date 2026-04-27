@@ -57,7 +57,11 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname === '/terms' ||
     request.nextUrl.pathname === '/contact' ||
     request.nextUrl.pathname === '/careers' ||
+    // /docs and any sub-path (e.g. /docs/api) are public marketing
+    // pages. Exact-matching '/docs' alone left /docs/api 307'ing to
+    // /sign-in, which broke the public API reference.
     request.nextUrl.pathname === '/docs' ||
+    request.nextUrl.pathname.startsWith('/docs/') ||
     request.nextUrl.pathname.startsWith('/blog') ||
     request.nextUrl.pathname.startsWith('/d/') ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
