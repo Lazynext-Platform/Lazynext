@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.25.0] — Sessions tab labels the current device (2026-04-27)
+
+The Profile → Sessions tab has shown nothing more than `Signed in {timestamp}` since v1.0. New `lib/utils/user-agent.ts` parses the request UA server-side (no new deps; declined the 27kB `ua-parser-js` for a 60-line implementation) into `{ browser, os, device }`, and the Sessions card now renders a label like `"Chrome on macOS · Desktop"` plus an `Active` badge. Edge is matched before Chrome (Edge UAs include the Chrome token); iPad is classified Tablet even though iPadOS 13+ advertises as Mac. 11 new tests; per-device session list still not shipping — Supabase Auth doesn't expose it without the admin API, and the dashed empty-state below the card still says so. **208/208** tests passing across 28 files (197 → 208).
+
+See [CHANGELOG.md](../CHANGELOG.md#13250---2026-04-27).
+
+---
+
 ## [1.3.24.0] — Two real blog posts close the "blog ships with one post" gap (2026-04-27)
 
 `/blog` had been a single-post listing since v1.0 with a `More posts on the way` placeholder. Wrote two posts grounded in real code that exists in the repo: `how-decision-dna-scoring-works` walks the four-dimension scoring pipeline in `lib/ai/decision-scorer.ts` — Groq → Together → heuristic fallback, the `extractJson` step for Llama-wrapping-JSON-in-fences, stamped `model_version` on every score, and the two alerts (heuristic-rate, p95 duration) we run on the call log; `workspace-maturity-score` documents `lib/wms.ts` end-to-end — the five WMS events with their real weights, the four-layer threshold map (0/15/35/60), the soft-sidebar vs hard-API gate, and the Power-user override toggle. `/blog` listing + `[slug]` route + `sitemap.ts` all updated together. **197/197** tests passing, type-check clean, build clean.
