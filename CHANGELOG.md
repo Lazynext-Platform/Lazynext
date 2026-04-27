@@ -4,6 +4,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.36.0] - 2026-04-28
+
+**Theme:** Machine-readable API spec at `/api/v1/openapi.json`. SDK generators, Postman, and IDE plugins can now consume Lazynext's REST surface programmatically.
+
+### Added
+- `GET /api/v1/openapi.json` — OpenAPI 3.1 spec covering all bearer-aware endpoints (`/decisions` list+POST, `/decisions/{id}` GET+PATCH+DELETE, `/decisions/export-csv`, `/export`, `/audit-log`). Public, edge-cached 5min.
+- `lib/utils/openapi.ts` — hand-written `buildOpenApiSpec()`. Hand-written so it documents what we actually promise, not whatever a generator decides to expose.
+- 7 unit tests asserting every endpoint requires `workspaceId`, every mutation declares INSUFFICIENT_SCOPE on 403, and export endpoints reference the export bucket (286 total).
+- Link to the spec from `/docs/api`.
+
+### Why
+- Hand-written OpenAPI is the smallest viable step toward an SDK without forcing us into a generator's idioms. Future SDK ships consume this file.
+
 ## [1.3.35.0] - 2026-04-28
 
 **Theme:** Production migrations now apply automatically. Closes the deployment gap that was silently breaking the last three ships' write-scope keys.

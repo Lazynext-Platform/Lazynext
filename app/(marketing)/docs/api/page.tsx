@@ -34,6 +34,16 @@ export default function ApiDocsPage() {
             JSON out. v1 covers the read paths your CI runner needs and one write
             path for logging decisions from external tooling.
           </p>
+          <p className="mt-4 text-sm text-slate-500">
+            Machine-readable spec:{' '}
+            <Link
+              href="/api/v1/openapi.json"
+              className="font-medium text-indigo-600 underline-offset-4 hover:underline"
+            >
+              /api/v1/openapi.json
+            </Link>{' '}
+            (OpenAPI 3.1)
+          </p>
         </div>
 
         <Section icon={<KeyRound className="h-5 w-5 text-indigo-600" />} title="Authentication">

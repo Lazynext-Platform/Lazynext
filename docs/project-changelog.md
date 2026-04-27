@@ -6,6 +6,21 @@
 
 ---
 
+## [v1.3.36.0] - 2026-04-28 — OpenAPI 3.1 spec at /api/v1/openapi.json
+
+**Theme:** Machine-readable counterpart to `/docs/api`. Hand-written OpenAPI 3.1, public, edge-cached 5min. Covers every bearer-aware endpoint with security schemes, scope requirements, and rate-limit bucket annotations on 429 responses.
+
+### Added
+- `app/api/v1/openapi.json/route.ts` — returns the spec.
+- `lib/utils/openapi.ts` — `buildOpenApiSpec()` pure builder.
+- `tests/unit/openapi.test.ts` — 7 tests (279 → 286).
+- `/docs/api` links to the spec.
+
+### Why
+- Unblocks SDK generation and third-party tooling without committing to a runtime introspection generator.
+
+---
+
 ## [v1.3.35.0] - 2026-04-28 — Migrations auto-apply on deploy
 
 **Theme:** New `.github/workflows/db-migrate.yml` runs `supabase db push` whenever `supabase/migrations/**` changes on main. Closes the gap where `20260428000003_api_key_scopes.sql` was committed but never applied — silently breaking write-scope keys.
