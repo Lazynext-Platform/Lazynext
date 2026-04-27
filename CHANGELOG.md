@@ -4,6 +4,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.40.0] - 2026-04-28
+
+**Theme:** Bearer auth on `/edges`. Closes the canvas-graph surface — nodes + edges are both fully programmable now.
+
+### Added
+- `GET /api/v1/edges`, `POST /api/v1/edges`, `DELETE /api/v1/edges` are bearer-aware.
+- POST and DELETE require `write` scope and use the mutation rate-limit bucket (30/min).
+- OpenAPI spec entry for `/edges` (9 paths total).
+
+### Changed
+- All edge routes authenticate before resource lookup — no anonymous existence-probing.
+
+### Why
+- Connecting two task nodes via an automation now works end-to-end from a CI runner.
+
 ## [1.3.39.0] - 2026-04-28
 
 **Theme:** Bearer auth lands on `/api/v1/nodes`. CI runners and external automations can now create/update/delete tasks, docs, decisions — the canvas-as-API surface.

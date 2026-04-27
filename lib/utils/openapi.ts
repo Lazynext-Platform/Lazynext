@@ -8,7 +8,7 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.39.0'
+const PACKAGE_VERSION = '1.3.40.0'
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
@@ -450,6 +450,73 @@ export function buildOpenApiSpec(): OpenApiSpec {
           description: 'Requires `write` scope.',
           tags: ['Nodes'],
           parameters: [idPathParam],
+          responses: {
+            '200': { description: 'Deleted' },
+            '403': errorResponse('INSUFFICIENT_SCOPE'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+      },
+      '/edges': {
+        get: {
+          summary: 'List edges in a workflow',
+          tags: ['Edges'],
+          parameters: [
+            {
+              name: 'workflowId',
+              in: 'query',
+              required: true,
+              description: 'UUID of the workflow.',
+              schema: { type: 'string', format: 'uuid' },
+            },
+          ],
+          responses: {
+            '200': { description: 'List of edges' },
+            '401': errorResponse('Missing or invalid credentials'),
+            '403': errorResponse('Bearer key does not belong to workspace'),
+            '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+        post: {
+          summary: 'Create an edge',
+          description: 'Requires `write` scope.',
+          tags: ['Edges'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['workflowId', 'sourceId', 'targetId'],
+                  properties: {
+                    workflowId: { type: 'string', format: 'uuid' },
+                    sourceId: { type: 'string', format: 'uuid' },
+                    targetId: { type: 'string', format: 'uuid' },
+                    condition: { type: 'object' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '201': { description: 'Created' },
+            '403': errorResponse('INSUFFICIENT_SCOPE'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+        delete: {
+          summary: 'Delete an edge',
+          description: 'Requires `write` scope.',
+          tags: ['Edges'],
+          parameters: [
+            {
+              name: 'id',
+              in: 'query',
+              required: true,
+              description: 'Edge UUID',
+              schema: { type: 'string', format: 'uuid' },
+            },
+          ],
           responses: {
             '200': { description: 'Deleted' },
             '403': errorResponse('INSUFFICIENT_SCOPE'),
