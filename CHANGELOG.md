@@ -4,6 +4,29 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.8.0] - 2026-04-27
+
+**Theme:** Template Marketplace is real. The page that shipped with v1.0.0 has rendered "Templates are in development" with a 5-card "categories planned for launch" preview ever since. This release deletes that placeholder and replaces it with a working catalog: 6 curated starter templates (Product Sprint, Architecture Decision Log, Feature Decision Log, OKR Tracker, Pre-launch Checklist, Client Project) across 4 categories, each shipping with seed nodes + edges + initial task statuses. Click "Install template" → a new `workflows` row is created in the caller's workspace, every seed node is inserted with a fresh UUID, edges are remapped from seed-id → real-uuid, an audit row is written, and the canvas opens. The catalog itself lives in `lib/data/template-catalog.ts` (not a DB seed) so templates ship with the deploy and iterate via PR review, sidestepping cross-workspace RLS. No new tables — reuses the existing `workflows` / `nodes` / `edges` tables. Roadmap fully wired count 30 → 31; backend-wired bar 79% → 82%.
+
+### Added
+
+- `lib/data/template-catalog.ts` — typed `TEMPLATE_CATALOG` array with 6 curated starter templates. Each template has a `category` (engineering/product/agency/operations/startup), `icon` (lucide name), `color`, and self-contained `nodes` + `edges` seeds. Edges reference nodes by local seed id and are remapped at install time. Exports `getTemplate(id)` and `TEMPLATE_CATEGORY_LABELS`.
+- `app/api/v1/templates/route.ts` — `GET` returns the catalog summary (id, name, description, category, icon, color, node/edge counts) plus the category list. Auth + rate-limited; touches no DB rows.
+- `app/api/v1/templates/install/route.ts` — `POST { templateId, workspaceId }` creates the workflow + nodes (one-by-one to capture UUIDs) + edges (bulk insert, remapped). Uses the service-role admin client behind `verifyWorkspaceMember`. Records a `workflow.install` audit row with template id + name + node count.
+- `tests/unit/template-catalog.test.ts` — 4 new tests: every template has nodes + valid category label, every edge points at a real seed-node id, template ids are unique, `getTemplate` round-trips correctly.
+
+### Changed
+
+- `app/(app)/workspace/[slug]/templates/page.tsx` — placeholder ("Templates are in development", 5 fake "planned categories" cards, disabled CTA) replaced with a real client UI: category filter chips with counts, 2-column responsive grid of template cards (icon + category pill + node/edge count + Install button), per-card install state (Loader2 spinner → CheckCircle2 → router push to canvas), 503-aware honest error banner, footer note about the still-pending "Export as template" backlog item.
+- `docs/project-roadmap.md` — header v1.3.7.0 → v1.3.8.0, dropped #18 from *Remaining work*, fully-wired 30 → 31, backend-wired bar 79% → 82%.
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 161/161 passing across 22 files (157 existing + 4 new in `tests/unit/template-catalog.test.ts`).
+- Production build: ✅ clean.
+- No migration required — install reuses the existing `workflows` / `nodes` / `edges` tables.
+
 ## [1.3.7.0] - 2026-04-27
 
 **Theme:** The Automation Builder is real. The page that shipped with v1.0.0 has rendered "The automations engine is in development" with a `disabled` button and 4 fake preview rules ever since. This release deletes that placeholder and replaces it with a working WHEN/THEN engine. Two narrow trigger types in v1 (`decision.logged`, `task.created`), two narrow action types (`notification.send` with `{{variable}}` template interpolation, `webhook.post` with HTTPS-only + 5s timeout). The engine runs synchronously after the underlying mutation succeeds, writes a row per execution to the existing `automation_runs` table (now keyed on `automation_id`; `node_id` is nullable), and never propagates failures up to the user-facing write. New `automations` table (RLS member-read, service-role-write). Real CRUD UI: list view with WHEN/THEN pills + last 8 runs as colored chips (green for success, red for failed, hover to see error message), per-row enable/disable toggle, delete with confirm, "New automation" dialog with template interpolation hint and HTTPS-only validation. Roadmap fully wired count 29 → 30; backend-wired bar 76% → 79%.
