@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.0] — In-app billing page synced to PLAN_LIMITS + PLAN_PRICING_USD (2026-04-27)
+
+Audit found `BillingClient.tsx` had drifted hard from the constants: Team card said `$9` (real: `$19`), Business card said `$19` (real: `$30`), Enterprise showed a fake `$49/seat/month` (real: contact-sales), Free card listed 4 of 6 limits, Decisions usage row hardcoded `limit: -1` so Free workspaces never saw their `12/20` cap progress. Fixed by deriving prices from `PLAN_PRICING_USD` and limits from `PLAN_LIMITS`; `null` (the contact-sales sentinel) renders as **Custom** and skips annual-discount math. Single source of truth now extends to the in-app billing screen the same way it does to the marketing pricing page. **197/197** tests passing, type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13230---2026-04-27).
+
+---
+
 ## [1.3.22.1] — Hotfix: extend daily AI quota to generate + analyze (2026-04-27)
 
 v1.3.22.0 closed the daily-quota loophole on `/api/v1/ai/chat` but explicitly deferred `/api/v1/ai/generate` and `/api/v1/ai/analyze`. Left as-is they'd be a future quota-bypass surface the moment any UI started calling them. Both now follow the same shape: optional `workspaceId`, plan-gate via `checkAiQuota` when present, `402 PLAN_LIMIT_REACHED variant=ai-limit` on cap, `recordAiUsage` after success. **197/197** tests passing, type-check clean, build clean.

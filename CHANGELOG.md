@@ -4,6 +4,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.0] - 2026-04-27
+
+**Theme:** In-app billing page synced to PLAN_LIMITS + PLAN_PRICING_USD. Audit found `app/(app)/workspace/[slug]/billing/BillingClient.tsx` had drifted hard from constants: Team card showed `$9` (real: `$19`), Business card showed `$19` (real: `$30`), Enterprise card showed `$49/seat/month` (real: contact-sales / null), Free tier copy listed only 4 limits instead of 6 (missing `1 workspace`, `20 decisions`), Decisions usage row hardcoded `limit: -1` so Free workspaces never saw their `12/20` cap. Fixed by deriving every dollar value from `PLAN_PRICING_USD` and every limit from `PLAN_LIMITS`. Single source of truth now extends to the in-app billing screen the same way it does to the marketing pricing page.
+
+### Changed
+- `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — `planMeta` no longer carries `price`; the card pulls `PLAN_PRICING_USD[plan]` at render time. `null` (Enterprise/Business contact-sales sentinel) renders as **Custom** with no period and skips the annual-discount math. Free card features expanded to the full 6-bullet list (`1 workspace`, `3 members`, `5 workflows`, `100 nodes`, `20 decisions`, `20 AI queries/day`). Starter card adds `Unlimited decisions` and reads `100 AI queries/day/seat`. Pro card reads `500 AI queries/day/seat`. Decisions usage row now uses `limits.decisions` so Free workspaces see real progress against the 20-decision cap. Current-plan subtitle handles the three cases (free, paid, custom) explicitly so Enterprise customers no longer see `$null/seat/month`.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
+### Notes
+- The `Change Plan` button still links to `/workspace/[slug]/upgrade`, a route that doesn't exist (404). Tracking as a follow-up; the Gumroad portal link directly above it is the working path until the in-app upgrade flow lands.
+
 ## [1.3.22.1] - 2026-04-27
 
 **Theme:** Hotfix — extend the daily AI quota to `/api/v1/ai/generate` and `/api/v1/ai/analyze`. v1.3.22.0 closed the loophole on the LazyMind chat path but explicitly deferred these two endpoints; left as-is they'd be a future quota-bypass surface the moment any UI code started calling them. Same shape as chat: optional `workspaceId`, when present we verify membership, plan-gate via `checkAiQuota`, return `402 PLAN_LIMIT_REACHED variant=ai-limit` on cap, and call `recordAiUsage` after success. No active UI callers today, so this is preventative — the quota is now consistent across all three AI endpoints.

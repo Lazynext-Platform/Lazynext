@@ -6,7 +6,7 @@ import { CreditCard, Check, ArrowLeft, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
-import { PLAN_LIMITS } from '@/lib/utils/constants'
+import { PLAN_LIMITS, PLAN_PRICING_USD } from '@/lib/utils/constants'
 import type { BillingUsage } from '@/lib/data/workspace'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -25,33 +25,32 @@ const PLAN_DISPLAY: Record<Plan, string> = {
   enterprise: 'Enterprise',
 }
 
-const planMeta: Record<Plan, { price: number; period: string; features: string[]; accent: string }> = {
+// Plan card metadata. Prices are sourced from `PLAN_PRICING_USD` so a
+// single bump there propagates everywhere; feature copy lives here
+// because each card surfaces a curated 4-5 bullets, not the full
+// feature matrix (that's the marketing pricing page's job).
+const planMeta: Record<Plan, { period: string; features: string[]; accent: string }> = {
   free: {
-    price: 0,
     period: '/forever',
-    features: ['3 members', '5 workflows', '100 nodes', '20 AI queries/day'],
+    features: ['1 workspace', '3 members', '5 workflows', '100 nodes', '20 decisions', '20 AI queries/day'],
     accent: 'border-slate-600',
   },
   starter: {
-    price: 9,
     period: '/seat/month',
-    features: ['Unlimited members', 'Unlimited workflows', 'Unlimited nodes', '100 AI queries/day', 'Email support'],
+    features: ['Unlimited members', 'Unlimited workflows', 'Unlimited nodes', 'Unlimited decisions', '100 AI queries/day/seat', 'Email support'],
     accent: 'border-brand',
   },
   pro: {
-    price: 19,
     period: '/seat/month',
-    features: ['Everything in Team', 'Decision Health dashboard', 'Pulse', 'Automations', '500 AI queries/day'],
+    features: ['Everything in Team', 'Decision Health dashboard', 'Pulse', 'Automations', '500 AI queries/day/seat'],
     accent: 'border-emerald-500',
   },
   business: {
-    price: 49,
     period: '/seat/month',
     features: ['Everything in Business', 'SSO / SAML', 'Audit log', 'Custom fields', 'Unlimited AI queries', 'Dedicated support'],
     accent: 'border-amber-500',
   },
   enterprise: {
-    price: 49,
     period: '/seat/month',
     features: ['Everything in Business', 'SSO / SAML', 'Audit log', 'Custom fields', 'Unlimited AI queries', 'Dedicated support'],
     accent: 'border-amber-500',
@@ -75,11 +74,12 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
   const currency = useUIStore((s) => s.currency)
   const limits = PLAN_LIMITS[workspacePlan]
   const currentMeta = planMeta[workspacePlan]
+  const currentPrice = PLAN_PRICING_USD[workspacePlan]
 
   const usageRows = [
     { label: 'Nodes', value: usage.nodes, limit: limits.nodes, color: 'bg-brand' },
     { label: 'Members', value: usage.members, limit: limits.members, color: 'bg-emerald-500' },
-    { label: 'Decisions logged', value: usage.decisions, limit: -1, color: 'bg-violet-500' },
+    { label: 'Decisions logged', value: usage.decisions, limit: limits.decisions, color: 'bg-violet-500' },
   ]
 
   return (
@@ -102,9 +102,11 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
               <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">Current Plan</span>
             </div>
             <p className="mt-1 text-sm text-slate-400">
-              {currentMeta.price === 0
-                ? 'Free forever · upgrade for unlimited nodes, workflows, and AI'
-                : `${formatPrice(currentMeta.price, currency)}${currentMeta.period} · ${usage.members} ${usage.members === 1 ? 'seat' : 'seats'}`}
+              {currentPrice === 0
+                ? 'Free forever · upgrade for unlimited nodes, workflows, decisions, and AI'
+                : currentPrice === null
+                  ? `Custom pricing · ${usage.members} ${usage.members === 1 ? 'seat' : 'seats'}`
+                  : `${formatPrice(currentPrice, currency)}${currentMeta.period} · ${usage.members} ${usage.members === 1 ? 'seat' : 'seats'}`}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -150,7 +152,15 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
             const meta = planMeta[p]
             const isCurrent = p === workspacePlan
             const display = PLAN_DISPLAY[p]
-            const adjustedPrice = billingCycle === 'annual' && meta.price !== 0 ? Math.round(meta.price * 0.8) : meta.price
+            const basePrice = PLAN_PRICING_USD[p]
+            // `null` is the Enterprise / Business "contact sales" sentinel.
+            // Render "Custom" for those tiers and skip the annual
+            // discount math entirely.
+            const isCustomPriced = basePrice === null
+            const adjustedPrice =
+              !isCustomPriced && billingCycle === 'annual' && basePrice !== 0
+                ? Math.round(basePrice * 0.8)
+                : basePrice
             return (
               <div
                 key={p}
@@ -166,8 +176,14 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
                 )}
                 <h3 className="text-lg font-bold text-slate-100">{display}</h3>
                 <div className="mt-2">
-                  <span className="text-3xl font-bold text-slate-50">{formatPrice(adjustedPrice, currency)}</span>
-                  <span className="text-sm text-slate-500">{meta.period}</span>
+                  {isCustomPriced ? (
+                    <span className="text-2xl font-bold text-slate-50">Custom</span>
+                  ) : (
+                    <>
+                      <span className="text-3xl font-bold text-slate-50">{formatPrice(adjustedPrice as number, currency)}</span>
+                      <span className="text-sm text-slate-500">{meta.period}</span>
+                    </>
+                  )}
                 </div>
                 <ul className="mt-4 space-y-2">
                   {meta.features.map((f) => (
