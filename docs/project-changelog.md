@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.16.0] — Per-workflow URLs + workflow picker (2026-04-27)
+
+The canvas is no longer single-workflow. `/workspace/[slug]/canvas/[id]` now hydrates the requested workflow specifically (via `GET /api/v1/workflows/[id]`), and a new picker dropdown in the canvas top-left lets you switch between workflows or create new ones without ever leaving the page. The magic word `default` in the URL still resolves to the workspace's default workflow, so existing sidebar links keep working unchanged. The picker lazy-loads its list on first open (no extra round-trip for users who never switch), supports click-outside + Escape, and POSTs to `/api/v1/workflows` for the "+ New workflow" action before routing to the freshly-created workflow. **168/168** tests passing across 24 files. Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13160---2026-04-27).
+
+---
+
 ## [1.3.15.0] — Beacon flush + batched position writes (2026-04-27)
 
 v1.3.14.0's per-node PATCH-on-debounce had a known gap: closing the tab inside the 600ms debounce window dropped the last drag. This release replaces the per-node PATCH cascade with a single batch endpoint (`POST /api/v1/nodes/positions` accepting up to 200 updates with one membership auth check per workspace touched) and a beacon flush on page teardown via `navigator.sendBeacon`. Every drag survives, even the one right before you hit ⌘W. The position-persist hook now uses a single shared 600ms timer that coalesces every dirty position into one batch POST instead of N parallel timers — for a user dragging 10 nodes for 5 seconds, this collapses ~10 separate PATCHes into 1 batch POST per window. **168/168** tests passing across 24 files. Type-check clean, build clean.

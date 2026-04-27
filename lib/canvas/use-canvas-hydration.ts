@@ -21,49 +21,76 @@ interface ServerEdge {
 }
 
 /**
- * Hydrates the canvas from the workspace's default workflow:
+ * Hydrates the canvas from a specific workflow, or from the workspace's
+ * default workflow when `workflowId` is null/undefined/`'default'`:
  *
- *   1. Resolves the workflow id via `/api/v1/workflows/default`.
+ *   1. Resolves the workflow id (either passed in, or via `/api/v1/workflows/default`).
  *   2. Loads its nodes + edges in parallel.
  *   3. Sets `currentWorkflowId` / `currentWorkspaceId` on the store so
  *      downstream code (share dialog, drag-persist) can light up.
  *
- * Failures are swallowed honestly \u2014 the canvas falls back to a
+ * Failures are swallowed honestly — the canvas falls back to a
  * scratchpad mode (no persistence) instead of crashing the page.
  */
-export function useCanvasHydration(workspaceId: string | null) {
+export function useCanvasHydration(
+  workspaceId: string | null,
+  workflowId?: string | null,
+) {
   const hydrateCanvas = useCanvasStore((s) => s.hydrateCanvas)
   const setWorkflowContext = useCanvasStore((s) => s.setWorkflowContext)
   const setHydrated = useCanvasStore((s) => s.setHydrated)
   const isHydrated = useCanvasStore((s) => s.isHydrated)
-  const lastWorkspaceId = useRef<string | null>(null)
+  const lastKey = useRef<string | null>(null)
 
   useEffect(() => {
     if (!workspaceId) return
-    if (lastWorkspaceId.current === workspaceId && isHydrated) return
-    lastWorkspaceId.current = workspaceId
+    const wantsDefault = !workflowId || workflowId === 'default'
+    const key = `${workspaceId}::${wantsDefault ? 'default' : workflowId}`
+    if (lastKey.current === key && isHydrated) return
+    lastKey.current = key
 
     let cancelled = false
 
     async function run() {
       try {
-        const wfRes = await fetch(
-          `/api/v1/workflows/default?workspaceId=${workspaceId}`,
-          { cache: 'no-store' },
-        )
-        if (!wfRes.ok) {
-          if (!cancelled) setHydrated(true)
-          return
+        let resolvedId: string
+        let resolvedName: string
+
+        if (wantsDefault) {
+          const wfRes = await fetch(
+            `/api/v1/workflows/default?workspaceId=${workspaceId}`,
+            { cache: 'no-store' },
+          )
+          if (!wfRes.ok) {
+            if (!cancelled) setHydrated(true)
+            return
+          }
+          const wfJson = (await wfRes.json()) as {
+            data: { id: string; name: string }
+          }
+          if (cancelled) return
+          resolvedId = wfJson.data.id
+          resolvedName = wfJson.data.name
+        } else {
+          const wfRes = await fetch(`/api/v1/workflows/${workflowId}`, {
+            cache: 'no-store',
+          })
+          if (!wfRes.ok) {
+            if (!cancelled) setHydrated(true)
+            return
+          }
+          const wfJson = (await wfRes.json()) as {
+            data: { id: string; name: string }
+          }
+          if (cancelled) return
+          resolvedId = wfJson.data.id
+          resolvedName = wfJson.data.name
         }
-        const wfJson = (await wfRes.json()) as {
-          data: { id: string; name: string }
-        }
-        if (cancelled) return
 
         // Pull nodes + edges in parallel.
         const [nodesRes, edgesRes] = await Promise.all([
-          fetch(`/api/v1/nodes?workflowId=${wfJson.data.id}`, { cache: 'no-store' }),
-          fetch(`/api/v1/edges?workflowId=${wfJson.data.id}`, { cache: 'no-store' }),
+          fetch(`/api/v1/nodes?workflowId=${resolvedId}`, { cache: 'no-store' }),
+          fetch(`/api/v1/edges?workflowId=${resolvedId}`, { cache: 'no-store' }),
         ])
         if (cancelled) return
 
@@ -94,8 +121,8 @@ export function useCanvasHydration(workspaceId: string | null) {
         }))
 
         setWorkflowContext({
-          workflowId: wfJson.data.id,
-          workflowName: wfJson.data.name,
+          workflowId: resolvedId,
+          workflowName: resolvedName,
           workspaceId: workspaceId!,
         })
         hydrateCanvas(nodes, edges)
@@ -109,5 +136,5 @@ export function useCanvasHydration(workspaceId: string | null) {
     return () => {
       cancelled = true
     }
-  }, [workspaceId, hydrateCanvas, setWorkflowContext, setHydrated, isHydrated])
+  }, [workspaceId, workflowId, hydrateCanvas, setWorkflowContext, setHydrated, isHydrated])
 }

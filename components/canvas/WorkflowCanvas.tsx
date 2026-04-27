@@ -22,6 +22,7 @@ import { PulseNode } from './nodes/PulseNode'
 import { AutomationNode } from './nodes/AutomationNode'
 import { TableNode } from './nodes/TableNode'
 import { CanvasToolbar } from './panels/CanvasToolbar'
+import { WorkflowPicker } from './panels/WorkflowPicker'
 import { NodeDetailPanel } from './panels/NodeDetailPanel'
 import { CanvasContextMenu } from './panels/CanvasContextMenu'
 import { WorkflowEdge } from './edges/WorkflowEdge'
@@ -63,15 +64,23 @@ const edgeTypes = {
 const defaultNodes: Node[] = []
 const defaultEdges: Edge[] = []
 
-export function WorkflowCanvas() {
+export function WorkflowCanvas({
+  workflowIdFromUrl = null,
+}: {
+  workflowIdFromUrl?: string | null
+} = {}) {
   return (
     <ReactFlowProvider>
-      <WorkflowCanvasInner />
+      <WorkflowCanvasInner workflowIdFromUrl={workflowIdFromUrl} />
     </ReactFlowProvider>
   )
 }
 
-function WorkflowCanvasInner() {
+function WorkflowCanvasInner({
+  workflowIdFromUrl,
+}: {
+  workflowIdFromUrl: string | null
+}) {
   const nodes = useCanvasStore((s) => s.nodes)
   const edges = useCanvasStore((s) => s.edges)
   const onNodesChange = useCanvasStore((s) => s.onNodesChange)
@@ -91,7 +100,7 @@ function WorkflowCanvasInner() {
     enabled: !isMobile,
   })
 
-  useCanvasHydration(workspaceId)
+  useCanvasHydration(workspaceId, workflowIdFromUrl)
   useCanvasPositionPersist()
   useCanvasDeletePersist()
 
@@ -159,6 +168,8 @@ function WorkflowCanvasInner() {
       </ReactFlow>
 
       <CanvasToolbar />
+
+      <WorkflowPicker />
 
       <CanvasContextMenu
         onCreateNode={(type: NodeType, pos) => {

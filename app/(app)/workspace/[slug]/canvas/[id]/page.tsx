@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useParams } from 'next/navigation'
 
 const WorkflowCanvas = dynamic(
   () => import('@/components/canvas/WorkflowCanvas').then((m) => m.WorkflowCanvas),
@@ -8,5 +9,6 @@ const WorkflowCanvas = dynamic(
 )
 
 export default function CanvasPage() {
-  return <WorkflowCanvas />
+  const params = useParams<{ id: string }>()
+  return <WorkflowCanvas workflowIdFromUrl={params?.id ?? null} />
 }
