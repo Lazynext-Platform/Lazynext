@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.6] - 2026-04-27
+
+**Theme:** Marketing pricing page Enterprise CTA now passes `?topic=enterprise`. v1.3.23.2 made `/contact` topic-aware so the in-app billing page Enterprise card surfaces a tailored Enterprise banner with pre-filled mailto. The marketing `/pricing` Enterprise card was the larger source of Enterprise traffic but still routed to bare `/contact`, missing the banner + pre-filled subject/body. Same one-line fix as the in-app surface.
+
+### Changed
+- `app/(marketing)/pricing/page.tsx` — Enterprise tier `ctaLink` changed from `/contact` to `/contact?topic=enterprise` so visitors clicking the marketing Enterprise card land on the same tailored banner the in-app billing page already shows. Routes to the same `TOPICS.enterprise` registry entry from v1.3.23.2.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.5] - 2026-04-27
 
 **Theme:** Marketing pricing page now reads from the same constants as everything else. The landing `PricingSection` already imported `PLAN_PRICING_USD` / `PLAN_PRICING_USD_ANNUAL`, and `BillingClient` was synced in v1.3.23.0, but the `/pricing` route was still hardcoding `'19'`, `'15'`, `'30'`, `'24'` strings — the exact drift pattern that bit `BillingClient` in v1.3.23.0 ($9/$19/$49 mismatch). Closed before it bit again.

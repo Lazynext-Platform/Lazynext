@@ -100,7 +100,7 @@ const tiers = [
     // "Custom pricing" keeps the anchor without hard-gating team size.
     anchorNote: 'Custom pricing — contact sales',
     cta: 'Contact Sales',
-    ctaLink: '/contact',
+    ctaLink: '/contact?topic=enterprise',
     ctaStyle: 'outline' as const,
     highlighted: false,
     inheritLabel: 'Everything in Business, plus:',
