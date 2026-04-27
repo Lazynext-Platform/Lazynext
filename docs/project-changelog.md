@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.26.0] — OAuth scaffolding (DB + crypto + registry contract) (2026-04-27)
+
+The seven Settings → Integrations / Import-Modal providers (Slack, Notion, GitHub, Linear, Trello, Asana, Jira) have stayed as honest empty states since v1.0 because each requires a developer-portal app registration with credentials only the human owner can produce. This release ships the infrastructure — `oauth_connections` table with AES-256-GCM-encrypted tokens, RLS service-role-only writes, partial index on `expires_at` for the refresh worker, `lib/oauth/crypto.ts` with random-IV-per-call sealing and tamper-detection on decrypt, `lib/oauth/registry.ts` with the `OAuthProviderConfig` adapter contract + `isProviderConfigured` env-var check + `KNOWN_PROVIDER_IDS` reserving the URL space for all seven. Registry ships empty: each provider adapter is a separate per-Mastery-cycle PR landing when credentials are available. **231/231** tests passing across 30 files (208 → 231; 23 new across `oauth-crypto.test.ts` + `oauth-registry.test.ts`).
+
+See [CHANGELOG.md](../CHANGELOG.md#13260---2026-04-27).
+
+---
+
 ## [1.3.25.0] — Sessions tab labels the current device (2026-04-27)
 
 The Profile → Sessions tab has shown nothing more than `Signed in {timestamp}` since v1.0. New `lib/utils/user-agent.ts` parses the request UA server-side (no new deps; declined the 27kB `ua-parser-js` for a 60-line implementation) into `{ browser, os, device }`, and the Sessions card now renders a label like `"Chrome on macOS · Desktop"` plus an `Active` badge. Edge is matched before Chrome (Edge UAs include the Chrome token); iPad is classified Tablet even though iPadOS 13+ advertises as Mac. 11 new tests; per-device session list still not shipping — Supabase Auth doesn't expose it without the admin API, and the dashed empty-state below the card still says so. **208/208** tests passing across 28 files (197 → 208).
