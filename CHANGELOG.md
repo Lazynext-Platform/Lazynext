@@ -4,6 +4,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.26.0] - 2026-04-27
+
+**Theme:** OAuth scaffolding for the seven Settings → Integrations / Import-Modal providers (Slack, Notion, GitHub, Linear, Trello, Asana, Jira). The roadmap has carried these as honest empty states since v1.0 because each requires a developer-portal app registration with credentials no AI agent can produce. This release ships the *infrastructure* — DB table, AES-256-GCM token sealing, provider registry — so each provider, when its credentials land, is a thin adapter file rather than a full feature build. Zero providers wired in this PR (intentional — see `lib/oauth/registry.ts` header). Public surfaces (Settings → Integrations, Import Modal) are unchanged in this ship; they'll start showing real "Connect" buttons in subsequent per-provider PRs.
+
+### Added
+- `supabase/migrations/20260427000006_oauth_connections.sql` — `oauth_connections` table: `(workspace_id, user_id, provider, external_id, encrypted_tokens, scopes, expires_at, …)` with `UNIQUE (workspace_id, provider, external_id)` so re-installing the same Slack workspace updates rather than duplicates. Two indexes: workspace+provider lookup (Settings UI), partial index on `expires_at` (refresh worker). RLS enabled, service-role writes only — defense in depth on top of the encryption.
+- `lib/oauth/crypto.ts` — AES-256-GCM token sealing. `sealTokenEnvelope({ access_token, refresh_token?, expires_at? })` → `iv:authTag:ciphertext` triple, all base64url. `openTokenEnvelope` is the inverse and validates shape (rejects payloads missing `access_token`). Key resolved from `OAUTH_TOKEN_ENCRYPTION_KEY` env var (32-byte hex; misconfiguration throws at boot, not at the provider callback). Random IV per call so identical plaintext yields distinct ciphertext.
+- `lib/oauth/registry.ts` — `OAuthProviderConfig` adapter contract (`buildAuthorizeUrl`, `exchangeCode`, scopes per `read|write|admin` mode, PKCE flag). `KNOWN_PROVIDER_IDS` allow-list reserves the URL space for all seven providers — unknown ids 404 even before any adapter lands. `isProviderConfigured(id)` checks `LAZYNEXT_OAUTH_<PROVIDER>_CLIENT_ID` + `_CLIENT_SECRET` so the eventual UI can show "Connect" vs "Configure to enable" without lying. Registry ships empty: each provider adapter lands in its own Mastery cycle when credentials are available.
+- `tests/unit/oauth-crypto.test.ts` — 14 cases: round-trip, random-IV, base64url segment shape, wrong-key rejection, tampered-ciphertext rejection, malformed-payload rejection, envelope round-trip, minimal-envelope round-trip, `access_token`-missing rejection, key-resolution paths (valid hex, missing env, non-hex, wrong length).
+- `tests/unit/oauth-registry.test.ts` — 9 cases: known-id list shape, `isKnownProvider` allow-list, registry-empty assertions for every roadmap id, `isProviderConfigured` truth table (neither set, one set, both set, empty strings).
+
+### Test results
+- Type-check: clean. Vitest: **231/231 passing** across 30 files (208 → 231; 23 new across `oauth-crypto.test.ts` + `oauth-registry.test.ts`). Build: clean.
+
 ## [1.3.25.0] - 2026-04-27
 
 **Theme:** Sessions tab now labels the current session honestly. The card has read "Current session — Signed in {timestamp}" since v1.0; that's it. Now it parses the request user-agent server-side to also show the browser, OS, and device class — `"Chrome on macOS · Desktop"`, `"Safari on iOS · Mobile"`, etc. — so you can at least confirm the session card describes the device you're sitting at. Per-device session list still isn't shipping (Supabase Auth doesn't expose it without the admin API), and the dashed empty-state below still says so plainly.

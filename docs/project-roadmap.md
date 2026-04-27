@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.25.0 — shipped + deployed
+> **Current Milestone**: v1.3.26.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---
@@ -31,9 +31,9 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags | Per-source OAuth + mapper + ingestion pipeline |
-| 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
-| 30 | Profile → Connected Accounts + Sessions | Removed pending real APIs | Supabase identity-link + session listing |
+| 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags. **OAuth scaffolding (DB + crypto + registry) shipped v1.3.26.0** — each provider is now a thin adapter PR pending credentials. | Per-provider OAuth app registration + adapter |
+| 31 | Integrations Settings | Empty state — "Notify me" disabled buttons. **OAuth scaffolding shipped v1.3.26.0** — adapters pending credentials. | Slack/Notion/GitHub OAuth app registration + adapter |
+| 30 | Profile → Connected Accounts + Sessions | Connected Accounts reads real Supabase identity providers; Sessions tab labels current device (v1.3.25.0). Per-device session list still requires Supabase admin API. | Supabase identity-link flows + service-role session listing |
 | 32 | Marketing → Blog | 3 real posts (Launch, Engineering, Product) — backlog still grows organically | Add real posts (or convert to MDX-driven listing) |
 
 ---
