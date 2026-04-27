@@ -4,5 +4,6 @@ export type {
   Decision,
   CreateDecisionInput,
   UpdateDecisionInput,
+  WhoamiResponse,
   LazynextErrorCode,
 } from './client'

@@ -50,6 +50,16 @@ export interface UpdateDecisionInput {
   status?: Decision['status']
 }
 
+export interface WhoamiResponse {
+  authType: 'session' | 'apiKey'
+  userId: string
+  workspaceId: string | null
+  keyId?: string | null
+  keyPrefix?: string | null
+  keyName?: string | null
+  scopes: Array<'read' | 'write'>
+}
+
 export type LazynextErrorCode =
   | 'UNAUTHORIZED'
   | 'INSUFFICIENT_SCOPE'
@@ -88,6 +98,11 @@ export class LazynextClient {
     this.workspaceId = opts.workspaceId
     this.baseUrl = opts.baseUrl ?? DEFAULT_BASE_URL
     this.fetchImpl = opts.fetch ?? globalThis.fetch.bind(globalThis)
+  }
+
+  async whoami(): Promise<WhoamiResponse> {
+    const res = await this.request('GET', '/whoami')
+    return (await res.json()) as WhoamiResponse
   }
 
   readonly decisions = {

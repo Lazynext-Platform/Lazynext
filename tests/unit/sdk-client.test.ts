@@ -108,4 +108,28 @@ describe('LazynextClient', () => {
     const [, init] = fetchMock.mock.calls[0]
     expect((init as RequestInit).method).toBe('DELETE')
   })
+
+  it('whoami returns the resolved identity', async () => {
+    const fetchMock = mockFetch([
+      {
+        ok: true,
+        jsonBody: {
+          authType: 'apiKey',
+          userId: 'u-1',
+          workspaceId: 'ws-1',
+          keyId: 'k-1',
+          keyPrefix: 'lzx_abcd1234',
+          keyName: 'CI runner',
+          scopes: ['read', 'write'],
+        },
+      },
+    ])
+    const lzx = new LazynextClient({ ...opts, fetch: fetchMock as unknown as typeof fetch })
+    const me = await lzx.whoami()
+    expect(me.authType).toBe('apiKey')
+    expect(me.workspaceId).toBe('ws-1')
+    expect(me.scopes).toEqual(['read', 'write'])
+    const [url] = fetchMock.mock.calls[0]
+    expect(url).toBe('https://example.test/api/v1/whoami')
+  })
 })
