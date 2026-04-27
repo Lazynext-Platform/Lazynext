@@ -4,6 +4,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.39.0] - 2026-04-28
+
+**Theme:** Bearer auth lands on `/api/v1/nodes`. CI runners and external automations can now create/update/delete tasks, docs, decisions — the canvas-as-API surface.
+
+### Added
+- `GET /api/v1/nodes`, `POST /api/v1/nodes`, `GET /api/v1/nodes/{id}`, `PATCH /api/v1/nodes/{id}`, `DELETE /api/v1/nodes/{id}` are bearer-aware.
+- Mutations (POST/PATCH/DELETE) require `write` scope and use the mutation rate-limit bucket (30/min).
+- Reads use the api bucket (100/min).
+- OpenAPI spec entry for `/nodes` and `/nodes/{id}` with full schema.
+- `Node` schema in `components.schemas`.
+
+### Changed
+- All node routes authenticate BEFORE looking up the row — anonymous callers can't probe node/workflow existence by ID.
+- Audit log entries on node mutations now record `viaApiKey: true` when the call came from a bearer key.
+
+### Why
+- The bearer story extends to the canvas surface that 80% of integrations actually want — "open a task from my CI run when a build fails". The OpenAPI spec now documents 8 paths instead of 6.
+
 ## [1.3.38.0] - 2026-04-28
 
 **Theme:** Identity introspection. SDK consumers can now verify their bearer key resolves to the right workspace and scopes BEFORE running a real call.

@@ -8,7 +8,7 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.38.0'
+const PACKAGE_VERSION = '1.3.39.0'
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
@@ -106,6 +106,30 @@ export function buildOpenApiSpec(): OpenApiSpec {
     },
   }
 
+  const nodeSchema: OpenApiSchema = {
+    type: 'object',
+    properties: {
+      id: { type: 'string', format: 'uuid' },
+      workspace_id: { type: 'string', format: 'uuid' },
+      workflow_id: { type: 'string', format: 'uuid' },
+      type: {
+        type: 'string',
+        enum: ['task', 'doc', 'table', 'thread', 'decision', 'automation', 'pulse'],
+      },
+      title: { type: 'string' },
+      data: { type: 'object' },
+      position_x: { type: 'integer' },
+      position_y: { type: 'integer' },
+      status: {
+        type: 'string',
+        enum: ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'],
+      },
+      assigned_to: { type: 'string' },
+      created_at: { type: 'string', format: 'date-time' },
+      updated_at: { type: 'string', format: 'date-time' },
+    },
+  }
+
   const workspaceIdParam: OpenApiParameter = {
     name: 'workspaceId',
     in: 'query',
@@ -151,6 +175,7 @@ export function buildOpenApiSpec(): OpenApiSpec {
       schemas: {
         Error: errorSchema,
         Decision: decisionSchema,
+        Node: nodeSchema,
       },
     },
     paths: {
@@ -297,6 +322,138 @@ export function buildOpenApiSpec(): OpenApiSpec {
           responses: {
             '200': { description: 'Audit log entries' },
             '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+      },
+      '/nodes': {
+        get: {
+          summary: 'List nodes in a workflow',
+          tags: ['Nodes'],
+          parameters: [
+            {
+              name: 'workflowId',
+              in: 'query',
+              required: true,
+              description: 'UUID of the workflow. The workflow\'s workspace must match the bearer key\'s workspace.',
+              schema: { type: 'string', format: 'uuid' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'List of nodes',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      data: { type: 'array', items: { $ref: '#/components/schemas/Node' } },
+                    },
+                  },
+                },
+              },
+            },
+            '401': errorResponse('Missing or invalid credentials'),
+            '403': errorResponse('Bearer key does not belong to workspace'),
+            '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+        post: {
+          summary: 'Create a node',
+          description: 'Requires `write` scope.',
+          tags: ['Nodes'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['workflowId', 'workspaceId', 'type', 'title', 'positionX', 'positionY'],
+                  properties: {
+                    workflowId: { type: 'string', format: 'uuid' },
+                    workspaceId: { type: 'string', format: 'uuid' },
+                    type: {
+                      type: 'string',
+                      enum: ['task', 'doc', 'table', 'thread', 'decision', 'automation', 'pulse'],
+                    },
+                    title: { type: 'string' },
+                    positionX: { type: 'integer' },
+                    positionY: { type: 'integer' },
+                    status: {
+                      type: 'string',
+                      enum: ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'],
+                    },
+                    assignedTo: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Created',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Node' } } },
+            },
+            '403': errorResponse('INSUFFICIENT_SCOPE — key lacks `write`'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+      },
+      '/nodes/{id}': {
+        get: {
+          summary: 'Get a node',
+          tags: ['Nodes'],
+          parameters: [idPathParam],
+          responses: {
+            '200': {
+              description: 'The node',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Node' } } },
+            },
+            '404': errorResponse('Not found'),
+          },
+        },
+        patch: {
+          summary: 'Update a node',
+          description: 'Requires `write` scope.',
+          tags: ['Nodes'],
+          parameters: [idPathParam],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string' },
+                    positionX: { type: 'integer' },
+                    positionY: { type: 'integer' },
+                    status: {
+                      type: 'string',
+                      enum: ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'cancelled'],
+                    },
+                    assignedTo: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Updated',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/Node' } } },
+            },
+            '403': errorResponse('INSUFFICIENT_SCOPE'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
+        delete: {
+          summary: 'Delete a node',
+          description: 'Requires `write` scope.',
+          tags: ['Nodes'],
+          parameters: [idPathParam],
+          responses: {
+            '200': { description: 'Deleted' },
+            '403': errorResponse('INSUFFICIENT_SCOPE'),
+            '429': errorResponse('mutation bucket: 30/min'),
           },
         },
       },

@@ -1,4 +1,4 @@
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { resolveAuth, requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -18,13 +18,11 @@ const updateSchema = z.object({
 })
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  // Authenticate FIRST so anonymous callers can't probe node existence.
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
 
   const { data: node, error } = await db
     .from('nodes')
@@ -34,26 +32,34 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
   if (error || !node) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
-  const authorized = await verifyWorkspaceMember(userId, node.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, node.workspace_id)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   return NextResponse.json({ data: node, error: null })
 }
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
 
   // Verify ownership before update
   const { data: existing } = await db.from('nodes').select('workspace_id, type, assigned_to, title').eq('id', params.id).single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, existing.workspace_id)
+  if (!auth.ok) return auth.response
+  const scopeCheck = requireScope(auth, 'write')
+  if (scopeCheck) return scopeCheck.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
+  const userId = auth.userId
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
@@ -116,7 +122,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     action: 'node.update',
     resourceType: 'node',
     resourceId: params.id,
-    metadata: { changes: Object.keys(parsed.data) },
+    metadata: { changes: Object.keys(parsed.data), viaApiKey: auth.viaApiKey },
     request: req,
   }).catch(() => undefined)
 
@@ -124,28 +130,31 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
+
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
 
   // Verify ownership before delete
   const { data: existing } = await db.from('nodes').select('workspace_id').eq('id', params.id).single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, existing.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, existing.workspace_id)
+  if (!auth.ok) return auth.response
+  const scopeCheck = requireScope(auth, 'write')
+  if (scopeCheck) return scopeCheck.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   await db.from('nodes').delete().eq('id', params.id)
   await recordAudit({
     workspaceId: existing.workspace_id,
-    actorId: userId,
+    actorId: auth.userId,
     action: 'node.delete',
     resourceType: 'node',
     resourceId: params.id,
-    metadata: {},
+    metadata: { viaApiKey: auth.viaApiKey },
     request: req,
   }).catch(() => undefined)
   return NextResponse.json({ data: { deleted: true }, error: null })

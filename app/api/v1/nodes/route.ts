@@ -1,4 +1,4 @@
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { resolveAuth, requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
@@ -22,22 +22,26 @@ const createSchema = z.object({
 })
 
 export async function GET(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)
   const workflowId = url.searchParams.get('workflowId')
   if (!workflowId) return NextResponse.json({ error: 'MISSING_WORKFLOW_ID' }, { status: 400 })
 
+  // Authenticate FIRST so anonymous callers can't probe workflow existence.
+  // The follow-up `requireWorkspaceAuth` call after the workflow lookup
+  // is what actually enforces the workspace match.
+  const preAuth = await resolveAuth(req)
+  if (!preAuth.ok) return preAuth.response
+
   const { data: workflow } = await db.from('workflows').select('workspace_id').eq('id', workflowId).single()
   if (!workflow) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
-  const authorized = await verifyWorkspaceMember(userId, workflow.workspace_id)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+
+  const auth = await requireWorkspaceAuth(req, workflow.workspace_id)
+  if (!auth.ok) return auth.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
 
   const { data: results, error } = await db.from('nodes').select('*').eq('workflow_id', workflowId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -45,12 +49,6 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await safeAuth()
-  if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
-
-  const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
-
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   let body: unknown
@@ -60,8 +58,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const authorized = await verifyWorkspaceMember(userId, parsed.data.workspaceId)
-  if (!authorized) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+  const auth = await requireWorkspaceAuth(req, parsed.data.workspaceId)
+  if (!auth.ok) return auth.response
+  const scopeCheck = requireScope(auth, 'write')
+  if (scopeCheck) return scopeCheck.response
+
+  const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
+  if (!rl.success) return rateLimitResponse(rl.resetAt)
+
+  const userId = auth.userId
 
   const { data: node, error } = await db.from('nodes').insert({
     workflow_id: parsed.data.workflowId,
@@ -110,7 +115,7 @@ export async function POST(req: Request) {
     action: 'node.create',
     resourceType: 'node',
     resourceId: node.id,
-    metadata: { type: parsed.data.type, title: parsed.data.title.slice(0, 200) },
+    metadata: { type: parsed.data.type, title: parsed.data.title.slice(0, 200), viaApiKey: auth.viaApiKey },
     request: req,
   }).catch(() => undefined)
 
