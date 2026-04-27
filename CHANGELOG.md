@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.3] - 2026-04-27
+
+**Theme:** Funnel parity for the billing-page checkout surface. v1.3.23.1 wired the page's Upgrade buttons but only emitted `paywall.checkout.clicked` — no `errored` or `succeeded` events. The global `UpgradeModal` has emitted all three for months, so any funnel query splitting clicks vs successful redirects vs errors silently double-counted billing-page traffic as click-only. Now both surfaces emit the same three events with `surface: 'billing-page'` so funnel tools can split them.
+
+### Changed
+- `app/(app)/workspace/[slug]/billing/BillingClient.tsx` — `handleUpgrade` now emits `paywall.checkout.errored` (with `status` + `message`) on non-200 / missing-URL responses and on network errors, and `paywall.checkout.succeeded` (with `plan` + `interval`) immediately before `window.location.href` redirect. Mirrors `components/ui/UpgradeModal.tsx`'s telemetry shape so funnel queries don't have to special-case the surface.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.2] - 2026-04-27
 
 **Theme:** Closes the second half of v1.3.23.1 — the Enterprise card on the in-app billing page now routes to `/contact?topic=enterprise`, but the contact page didn't read `?topic`, so users landed on the generic page with no signal that we'd registered their interest. Now the contact page is topic-aware: when `?topic=enterprise` is present, it surfaces an Enterprise banner up top with badge, headline, subhead, and a primary `mailto:hello@lazynext.com` button pre-filled with subject `Enterprise plan inquiry` and a body template asking for team size, current tools, must-haves, and timeline.

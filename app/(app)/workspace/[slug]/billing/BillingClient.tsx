@@ -103,12 +103,30 @@ export function BillingClient({ slug, workspaceId, workspacePlan, usage }: Props
       })
       const body = (await res.json().catch(() => ({}))) as { data?: { url?: string }; error?: string; message?: string }
       if (!res.ok || !body.data?.url) {
-        setCheckoutError(body.message || body.error || 'Checkout temporarily unavailable. Try again in a moment.')
+        const errorMessage = body.message || body.error || 'Checkout temporarily unavailable. Try again in a moment.'
+        trackBillingEvent('paywall.checkout.errored', {
+          plan: targetPlan,
+          surface: 'billing-page',
+          status: res.status,
+          message: errorMessage,
+        })
+        setCheckoutError(errorMessage)
         setPendingPlan(null)
         return
       }
+      trackBillingEvent('paywall.checkout.succeeded', {
+        plan: targetPlan,
+        surface: 'billing-page',
+        interval: billingCycle === 'annual' ? 'yearly' : 'monthly',
+      })
       window.location.href = body.data.url
     } catch {
+      trackBillingEvent('paywall.checkout.errored', {
+        plan: targetPlan,
+        surface: 'billing-page',
+        status: 0,
+        message: 'network-error',
+      })
       setCheckoutError('Network error. Check your connection and try again.')
       setPendingPlan(null)
     }

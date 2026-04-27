@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.3] — Billing-page funnel telemetry parity (2026-04-27)
+
+v1.3.23.1 wired the in-app billing page's Upgrade buttons but only emitted `paywall.checkout.clicked`. Now `paywall.checkout.errored` (with `status` + `message`) and `paywall.checkout.succeeded` (with `plan` + `interval`) also fire — same shape as the global UpgradeModal — with `surface: 'billing-page'` so funnel queries can split clicks vs successful redirects vs errors. **197/197** tests passing.
+
+See [CHANGELOG.md](../CHANGELOG.md#13233---2026-04-27).
+
+---
+
 ## [1.3.23.2] — Contact page is topic-aware (2026-04-27)
 
 v1.3.23.1's billing page Enterprise card routes to `/contact?topic=enterprise`, but the contact page wasn't reading `?topic`. Now it does: when `topic=enterprise`, an indigo Enterprise banner renders above the standard contact rows with a primary mailto button pre-filled with subject + body template (team size, current tools, must-haves, timeline). `TOPICS` registry is a single object — future topics (security, migration, etc.) are one-line additions. **197/197** tests passing.
