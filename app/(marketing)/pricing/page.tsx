@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
 import { FoundingMemberBanner } from '@/components/marketing/FoundingMemberBanner'
+import { PLAN_PRICING_USD, PLAN_PRICING_USD_ANNUAL } from '@/lib/utils/constants'
 
 type BillingCycle = 'monthly' | 'annual'
 
@@ -46,8 +47,8 @@ const tiers = [
     name: 'Team',
     slug: 'starter' as const,
     desc: 'For small teams shipping fast',
-    monthlyPrice: '19',
-    annualPrice: '15',
+    monthlyPrice: String(PLAN_PRICING_USD.starter),
+    annualPrice: String(PLAN_PRICING_USD_ANNUAL.starter),
     priceSuffix: '/seat/month',
     cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
@@ -68,8 +69,8 @@ const tiers = [
     name: 'Business',
     slug: 'pro' as const,
     desc: 'For teams that decide on purpose',
-    monthlyPrice: '30',
-    annualPrice: '24',
+    monthlyPrice: String(PLAN_PRICING_USD.pro),
+    annualPrice: String(PLAN_PRICING_USD_ANNUAL.pro),
     priceSuffix: '/seat/month',
     cta: 'Start 30-Day Trial',
     ctaLink: '/sign-up',
