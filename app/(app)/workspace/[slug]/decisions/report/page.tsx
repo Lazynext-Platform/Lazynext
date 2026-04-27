@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Printer, ChevronLeft } from 'lucide-react'
+import { Printer, ChevronLeft, FileSpreadsheet } from 'lucide-react'
 import { getCurrentMemberWorkspace, getRecentDecisions } from '@/lib/data/workspace'
 import type { Decision } from '@/lib/db/schema'
 import { ReportPrintButton } from './ReportPrintButton'
@@ -47,6 +47,17 @@ export default async function DecisionReportPage({
           </Link>
           <div className="flex items-center gap-2">
             <RangePicker slug={params.slug} active={days} />
+            <a
+              href={
+                days
+                  ? `/api/v1/decisions/export-csv?workspaceId=${workspace.id}&range=${days}`
+                  : `/api/v1/decisions/export-csv?workspaceId=${workspace.id}`
+              }
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              CSV
+            </a>
             <ReportPrintButton>
               <Printer className="h-4 w-4" />
               Print / Save as PDF

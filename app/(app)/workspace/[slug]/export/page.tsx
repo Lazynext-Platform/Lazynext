@@ -5,8 +5,11 @@ import { Shield, Database, Check, ArrowLeft, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useWorkspaceStore } from '@/stores/workspace.store'
+import { decisionsToCsv } from '@/lib/utils/decisions-csv'
+import type { Decision } from '@/lib/db/schema'
 
 type ExportStatus = 'idle' | 'exporting' | 'ready' | 'error'
+type DecisionFormat = 'json' | 'csv'
 
 const exportIncludes = [
   'All workflows', 'All nodes', 'All edges', 'All decisions (with scores & outcomes)',
@@ -52,6 +55,7 @@ export default function DataExportPage() {
   const [decisionError, setDecisionError] = useState<string | null>(null)
 
   const [dateRange, setDateRange] = useState('all')
+  const [decisionFormat, setDecisionFormat] = useState<DecisionFormat>('json')
 
   async function fetchExport(): Promise<ExportPayload> {
     if (!workspaceId) throw new Error('Workspace not loaded yet — refresh the page.')
@@ -96,8 +100,13 @@ export default function DataExportPage() {
         return ts >= cutoffMs
       })
       const stamp = new Date().toISOString().slice(0, 10)
-      const filename = `lazynext-decisions-${stamp}.json`
-      triggerDownload(filename, JSON.stringify({ exportedAt: payload.exportedAt, workspaceId: payload.workspaceId, decisions }, null, 2), 'application/json')
+      if (decisionFormat === 'csv') {
+        const filename = `lazynext-decisions-${stamp}.csv`
+        triggerDownload(filename, decisionsToCsv(decisions as Decision[]), 'text/csv;charset=utf-8')
+      } else {
+        const filename = `lazynext-decisions-${stamp}.json`
+        triggerDownload(filename, JSON.stringify({ exportedAt: payload.exportedAt, workspaceId: payload.workspaceId, decisions }, null, 2), 'application/json')
+      }
       setDecisionStatus('ready')
     } catch (e) {
       setDecisionError(e instanceof Error ? e.message : 'Unknown error')
@@ -184,6 +193,13 @@ export default function DataExportPage() {
             <option value="30d">Last 30 days</option>
             <option value="90d">Last 90 days</option>
             <option value="year">This year</option>
+          </select>
+        </div>
+        <div className="mt-3">
+          <label htmlFor="decision-export-format" className="text-xs text-slate-500">Format</label>
+          <select id="decision-export-format" value={decisionFormat} onChange={e => setDecisionFormat(e.target.value as DecisionFormat)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-slate-200 focus:border-brand focus:outline-none">
+            <option value="json">JSON — full payload</option>
+            <option value="csv">CSV — spreadsheet-friendly</option>
           </select>
         </div>
         {decisionError && (

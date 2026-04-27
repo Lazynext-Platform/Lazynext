@@ -4,6 +4,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.12.0] - 2026-04-27
+
+**Theme:** CSV export for decisions. The Settings → Export page has been JSON-only since v1.0, and v1.3.11.0's exec report could only be saved as PDF. This release adds CSV everywhere decisions are exportable: a Format dropdown on the Decisions Only Export card, plus a CSV button next to "Print / Save as PDF" on the new exec report. CSV opens cleanly in Excel/Sheets, makes spreadsheet-driven analysis trivial, and complements the human-readable PDF and the developer-facing JSON.
+
+### Added
+
+- `lib/utils/decisions-csv.ts` — RFC 4180-ish serializer. Escapes commas, double-quotes (doubled), and newlines per spec. Arrays (`tags`, `stakeholders`, `options_considered`) join with `; ` so they survive a single cell. CRLF line terminators. Stable column order: `id, created_at, made_by, question, resolution, rationale, decision_type, status, outcome, outcome_notes, outcome_tagged_at, quality_score, options_considered, stakeholders, tags, expected_by, is_public`.
+- `app/api/v1/decisions/export-csv/route.ts` — `GET /api/v1/decisions/export-csv?workspaceId=<uuid>&range=7|30|90|365`. Member-only. Streams CSV with `content-type: text/csv` + `content-disposition: attachment` so browsers download instead of rendering. Range filter mirrors the exec report.
+- `tests/unit/decisions-csv.test.ts` — 4 new tests: empty list emits header only, basic row passes through unescaped, RFC 4180 escaping for commas/quotes/newlines, array-field joining.
+
+### Changed
+
+- `app/(app)/workspace/[slug]/export/page.tsx` — Decisions Only Export now has a Format dropdown (JSON / CSV). CSV path uses `decisionsToCsv` client-side off the existing `/api/v1/export` payload (no extra round-trip).
+- `app/(app)/workspace/[slug]/decisions/report/page.tsx` — header gains a CSV download link next to "Print / Save as PDF". Honors the active range filter on the report.
+- `docs/project-roadmap.md` — header v1.3.11.0 → v1.3.12.0. (Remaining work table unchanged — all 4 items still OAuth/content blocked.)
+
+### Verification
+
+- Type-check: ✅ clean.
+- Test suite: ✅ 168/168 passing across 24 files (164 existing + 4 new).
+- Production build: ✅ clean.
+
 ## [1.3.11.0] - 2026-04-27
 
 **Theme:** Decision DNA executive report. The PDF/exec report was a roadmap backlog item since v1.0 — never built because dropping a heavy server-side PDF library for one report felt like over-engineering. This release skips the dependency entirely: a server-rendered, print-optimized HTML page at `/workspace/[slug]/decisions/report` that the browser's native "Save as PDF" flow turns into a clean, paginated document. Real data, real numbers, no fake charts.
