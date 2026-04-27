@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.22.0] — Server-side AI daily quota (2026-04-27)
+
+Lazynext has advertised "20 LazyMind AI queries/day" on Free / 100 on Starter / 500 on Pro / unlimited on Business since v1.0. Actual enforcement until today: a 20-req/minute burst cap plus a client-side counter that reset on page reload — so a Free user could send 20, refresh, send 20 more, indefinitely (≈28,800/day). New `ai_usage(user_id, workspace_id, day, count)` table with composite PK + RLS-locked service-role writes. New `lib/data/ai-usage.ts` (`getDailyAiUsage`, `getWorkspacePlan`, `checkAiQuota`, `recordAiUsage`; UTC day boundary; best-effort writes). New `GET /api/v1/ai/usage` endpoint hydrates the panel-header badge across reloads. `POST /api/v1/ai/chat` now accepts optional `workspaceId`, verifies membership, plan-gates against `PLAN_LIMITS[plan].aiQueries`, returns `402 PLAN_LIMIT_REACHED variant=ai-limit` when blocked, calls `recordAiUsage` after a successful response. `LazyMindPanel` sends `workspaceId` on every request, hydrates `aiCount` from the server, handles 402 by syncing the badge to the authoritative `used` and surfacing the `ai-limit` upgrade modal. **197/197** tests passing across 27 files (189 → 197; 8 new assertions in `tests/unit/ai-usage.test.ts`). Type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13220---2026-04-27).
+
+---
+
 ## [1.3.21.0] — Real "Create workspace" + workspace-cap enforcement (2026-04-27)
 
 The "Create workspace" link in the `WorkspaceSelector` dropdown has, since v1.3.4.5, routed to `/onboarding` — which had two paths in `/api/v1/onboarding/workspace`: Path A *renamed* the user's existing workspace, Path B (backfill) only ran with zero memberships. So clicking "Create workspace" with an existing workspace silently renamed it. There was no real way to create a second workspace from the UI. This release ships the missing path + enforces the Free `workspaces: 1` cap added to PLAN_LIMITS in v1.3.20.0. New `POST /api/v1/workspaces` creates an additional workspace + admin membership, plan-gated by `canCreateWorkspace` against the caller's admin/owner memberships (paid-workspace owners bypass the cap). Returns `402 PLAN_LIMIT_REACHED` with `variant: 'workspace-limit'` when blocked, `409 SLUG_TAKEN` on collision. UI: new inline `CreateWorkspaceDialog` modal in `WorkspaceSelector` (auto-slugify, focus-trap, Esc dismissal); on 402 triggers the `workspace-limit` upgrade modal with a `paywall.gate.shown` telemetry event. **189/189** tests passing across 26 files (187 → 189). Type-check clean, build clean.

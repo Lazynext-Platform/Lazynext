@@ -1,8 +1,9 @@
-import { safeAuth } from '@/lib/utils/auth'
+import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { callLazyMind, hasAIKeys } from '@/lib/ai/lazymind'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { checkAiQuota, recordAiUsage } from '@/lib/data/ai-usage'
 
 // LazyMind free-text chat endpoint. Backs the in-app `LazyMindPanel`.
 // Prior to v1.3.3.5 the panel was a UI-only mock — it ran a 1500ms
@@ -13,6 +14,7 @@ import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limi
 
 const chatSchema = z.object({
   message: z.string().min(1).max(2000),
+  workspaceId: z.string().uuid().optional(),
 })
 
 const SYSTEM_PROMPT = `You are LazyMind, the AI assistant inside Lazynext — a graph-native workflow platform that unifies tasks, docs, decisions, threads, and outcomes on an infinite canvas. Lazynext's hero feature is Decision DNA, which scores decision quality on four dimensions (clarity, data quality, risk awareness, alternatives considered) and tracks outcomes over time so teams learn from their choices.
@@ -28,13 +30,6 @@ export async function POST(req: Request) {
   const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
   if (!rl.success) return rateLimitResponse(rl.resetAt)
 
-  if (!hasAIKeys) {
-    return NextResponse.json(
-      { error: 'AI_NOT_CONFIGURED', message: 'LazyMind is not configured on this deployment. Set GROQ_API_KEY or TOGETHER_API_KEY in .env.local to enable.' },
-      { status: 503 },
-    )
-  }
-
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }
   const parsed = chatSchema.safeParse(body)
@@ -42,8 +37,42 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'VALIDATION_ERROR', details: parsed.error.flatten() }, { status: 400 })
   }
 
+  // Plan-gate the daily AI quota when the caller scoped this request
+  // to a specific workspace. The panel always passes workspaceId; the
+  // legacy callers that don't are exempt (they get the per-minute
+  // burst cap above and nothing else, same as before).
+  if (parsed.data.workspaceId) {
+    const ok = await verifyWorkspaceMember(userId, parsed.data.workspaceId)
+    if (!ok) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 })
+    const quota = await checkAiQuota(userId, parsed.data.workspaceId)
+    if (!quota.allowed) {
+      return NextResponse.json(
+        {
+          error: 'PLAN_LIMIT_REACHED',
+          variant: 'ai-limit',
+          message: `You've used ${quota.used} of ${quota.limit} LazyMind queries for today. Upgrade for a larger daily quota.`,
+          plan: quota.plan,
+          used: quota.used,
+          limit: quota.limit,
+        },
+        { status: 402 },
+      )
+    }
+  }
+
+  if (!hasAIKeys) {
+    return NextResponse.json(
+      { error: 'AI_NOT_CONFIGURED', message: 'LazyMind is not configured on this deployment. Set GROQ_API_KEY or TOGETHER_API_KEY in .env.local to enable.' },
+      { status: 503 },
+    )
+  }
+
   try {
     const response = await callLazyMind(SYSTEM_PROMPT, parsed.data.message, 600)
+    if (parsed.data.workspaceId) {
+      // Best-effort, never blocks the response.
+      void recordAiUsage(userId, parsed.data.workspaceId)
+    }
     return NextResponse.json({ data: { content: response.content, provider: response.provider }, error: null })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'AI request failed'
