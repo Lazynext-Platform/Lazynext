@@ -4,6 +4,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.38.0] - 2026-04-28
+
+**Theme:** Identity introspection. SDK consumers can now verify their bearer key resolves to the right workspace and scopes BEFORE running a real call.
+
+### Added
+- `GET /api/v1/whoami` — returns `{ authType, userId, workspaceId, keyId, keyPrefix, keyName, scopes }` for bearer requests; `{ authType: 'session', userId, scopes }` for cookie sessions. Read-only — no scope requirement so `read`-only keys can verify themselves. Rate-limited on the api bucket.
+- `LazynextClient.whoami()` returning `WhoamiResponse`.
+- OpenAPI 3.1 spec entry for `/whoami` (six paths now documented).
+- 1 SDK test covering the happy path (296 → 297).
+
+### Why
+- Top integrator question is "is my key wired right?". Without `/whoami` they had to call `/decisions` and read the workspace_id back — a mutation budget burned on a misconfiguration check.
+
 ## [1.3.37.0] - 2026-04-28
 
 **Theme:** Typed TypeScript client for the public REST API. Zero dependencies, copy-pasteable, error codes are first-class.

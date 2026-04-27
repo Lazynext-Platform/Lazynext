@@ -8,7 +8,7 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.36.0'
+const PACKAGE_VERSION = '1.3.38.0'
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
@@ -296,6 +296,37 @@ export function buildOpenApiSpec(): OpenApiSpec {
           parameters: [workspaceIdParam],
           responses: {
             '200': { description: 'Audit log entries' },
+            '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+      },
+      '/whoami': {
+        get: {
+          summary: 'Identity introspection',
+          description:
+            'Returns the resolved identity for the inbound credentials. No scope required — read-only keys can call this to verify themselves.',
+          tags: ['Auth'],
+          responses: {
+            '200': {
+              description: 'Resolved identity',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      authType: { type: 'string', enum: ['session', 'apiKey'] },
+                      userId: { type: 'string', format: 'uuid' },
+                      workspaceId: { type: 'string', format: 'uuid' },
+                      keyId: { type: 'string', format: 'uuid' },
+                      keyPrefix: { type: 'string' },
+                      keyName: { type: 'string' },
+                      scopes: { type: 'array', items: { type: 'string', enum: ['read', 'write'] } },
+                    },
+                  },
+                },
+              },
+            },
+            '401': errorResponse('Missing or invalid credentials'),
             '429': errorResponse('api bucket: 100/min'),
           },
         },

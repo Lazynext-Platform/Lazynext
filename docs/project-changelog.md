@@ -6,6 +6,18 @@
 
 ---
 
+## [v1.3.38.0] - 2026-04-28 — /whoami identity introspection
+
+**Theme:** A read-only endpoint that resolves the inbound credentials and returns the workspace, scopes, and key metadata. Closes the "is my key wired right?" loop for integrators.
+
+### Added
+- `app/api/v1/whoami/route.ts`.
+- `LazynextClient.whoami()` and `WhoamiResponse` type in the SDK.
+- OpenAPI entry; six paths now documented.
+- 1 new SDK test (296 → 297).
+
+---
+
 ## [v1.3.37.0] - 2026-04-28 — Typed TypeScript client at lib/sdk
 
 **Theme:** `LazynextClient` with typed errors. Zero deps, ~150 lines, copy-paste integration.

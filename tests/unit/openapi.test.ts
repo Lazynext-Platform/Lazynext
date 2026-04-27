@@ -27,6 +27,7 @@ describe('buildOpenApiSpec', () => {
       '/decisions/export-csv',
       '/decisions/{id}',
       '/export',
+      '/whoami',
     ])
   })
 
@@ -47,8 +48,11 @@ describe('buildOpenApiSpec', () => {
     expect(spec.paths['/decisions/{id}'].delete.responses['429'].description).toMatch(/mutation bucket/)
   })
 
-  it('every operation requires workspaceId or has it as path scope', () => {
+  it('every workspace-scoped operation requires workspaceId', () => {
+    // /whoami is identity introspection — no workspace param.
+    const exempt = new Set(['/whoami'])
     for (const [path, methods] of Object.entries(spec.paths)) {
+      if (exempt.has(path)) continue
       for (const [method, op] of Object.entries(methods)) {
         const hasWorkspace = (op.parameters ?? []).some(
           (p) => p.name === 'workspaceId' && p.in === 'query'
