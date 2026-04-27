@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.23.1] — Hotfix: Billing page Upgrade buttons wired (2026-04-27)
+
+v1.3.23.0 corrected every dollar value but left the buttons broken: top-right "Change Plan" linked to a 404 (`/workspace/[slug]/upgrade`), per-card "Upgrade" buttons had no `onClick`. Both wired: "Change Plan" now triggers `useUpgradeModal.show('full-upgrade')`; per-card Starter/Pro buttons POST to `/api/v1/billing/checkout` and redirect to Gumroad; Enterprise card routes to `/contact?topic=enterprise`. Pending spinner, in-flight disable, inline amber error alert, `paywall.checkout.clicked` telemetry with `surface: 'billing-page'`. **197/197** tests passing, type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13231---2026-04-27).
+
+---
+
 ## [1.3.23.0] — In-app billing page synced to PLAN_LIMITS + PLAN_PRICING_USD (2026-04-27)
 
 Audit found `BillingClient.tsx` had drifted hard from the constants: Team card said `$9` (real: `$19`), Business card said `$19` (real: `$30`), Enterprise showed a fake `$49/seat/month` (real: contact-sales), Free card listed 4 of 6 limits, Decisions usage row hardcoded `limit: -1` so Free workspaces never saw their `12/20` cap progress. Fixed by deriving prices from `PLAN_PRICING_USD` and limits from `PLAN_LIMITS`; `null` (the contact-sales sentinel) renders as **Custom** and skips annual-discount math. Single source of truth now extends to the in-app billing screen the same way it does to the marketing pricing page. **197/197** tests passing, type-check clean, build clean.

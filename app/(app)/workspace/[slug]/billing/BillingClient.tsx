@@ -2,10 +2,12 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { CreditCard, Check, ArrowLeft, FileText } from 'lucide-react'
+import { CreditCard, Check, ArrowLeft, FileText, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { formatPrice } from '@/lib/i18n'
 import { useUIStore } from '@/stores/ui.store'
+import { useUpgradeModal } from '@/stores/upgrade-modal.store'
+import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS, PLAN_PRICING_USD } from '@/lib/utils/constants'
 import type { BillingUsage } from '@/lib/data/workspace'
 
@@ -13,6 +15,7 @@ type Plan = keyof typeof PLAN_LIMITS
 
 interface Props {
   slug: string
+  workspaceId: string
   workspacePlan: Plan
   usage: BillingUsage
 }
@@ -69,12 +72,47 @@ function formatLimit(limit: number): string {
   return limit < 0 ? '∞' : String(limit)
 }
 
-export function BillingClient({ slug, workspacePlan, usage }: Props) {
+export function BillingClient({ slug, workspaceId, workspacePlan, usage }: Props) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const [pendingPlan, setPendingPlan] = useState<Plan | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const currency = useUIStore((s) => s.currency)
   const limits = PLAN_LIMITS[workspacePlan]
   const currentMeta = planMeta[workspacePlan]
   const currentPrice = PLAN_PRICING_USD[workspacePlan]
+
+  // POST to /api/v1/billing/checkout, then redirect to the returned
+  // Gumroad URL. Same shape as the global UpgradeModal so we get the
+  // same telemetry events + error mapping.
+  async function handleUpgrade(targetPlan: Exclude<Plan, 'free' | 'business' | 'enterprise'>) {
+    setCheckoutError(null)
+    setPendingPlan(targetPlan)
+    trackBillingEvent('paywall.checkout.clicked', { plan: targetPlan, surface: 'billing-page' })
+    try {
+      const res = await fetch('/api/v1/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: targetPlan,
+          // Server schema accepts 'monthly' | 'yearly'; we expose
+          // 'monthly' / 'annual' in the UI for consistency with the
+          // marketing pricing page — translate at the boundary.
+          interval: billingCycle === 'annual' ? 'yearly' : 'monthly',
+          workspaceId,
+        }),
+      })
+      const body = (await res.json().catch(() => ({}))) as { data?: { url?: string }; error?: string; message?: string }
+      if (!res.ok || !body.data?.url) {
+        setCheckoutError(body.message || body.error || 'Checkout temporarily unavailable. Try again in a moment.')
+        setPendingPlan(null)
+        return
+      }
+      window.location.href = body.data.url
+    } catch {
+      setCheckoutError('Network error. Check your connection and try again.')
+      setPendingPlan(null)
+    }
+  }
 
   const usageRows = [
     { label: 'Nodes', value: usage.nodes, limit: limits.nodes, color: 'bg-brand' },
@@ -118,12 +156,13 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
             >
               Manage on Gumroad
             </Link>
-            <Link
-              href={`/workspace/${slug}/upgrade`}
+            <button
+              type="button"
+              onClick={() => useUpgradeModal.getState().show('full-upgrade')}
               className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground hover:bg-brand-hover"
             >
               Change Plan
-            </Link>
+            </button>
           </div>
         </div>
       </div>
@@ -193,20 +232,49 @@ export function BillingClient({ slug, workspacePlan, usage }: Props) {
                   ))}
                 </ul>
                 <button
-                  disabled={isCurrent}
+                  type="button"
+                  disabled={isCurrent || pendingPlan !== null || isCustomPriced || p === 'free'}
+                  onClick={() => {
+                    if (isCustomPriced || p === 'business' || p === 'enterprise') {
+                      // Enterprise tier routes to contact-sales — no
+                      // Gumroad product to check out against.
+                      window.location.href = '/contact?topic=enterprise'
+                      return
+                    }
+                    if (p === 'starter' || p === 'pro') {
+                      void handleUpgrade(p)
+                    }
+                  }}
                   className={cn(
-                    'mt-5 w-full rounded-lg py-2 text-sm font-semibold transition-colors',
-                    isCurrent
+                    'mt-5 flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-semibold transition-colors',
+                    isCurrent || p === 'free'
                       ? 'cursor-default bg-slate-800 text-slate-400'
-                      : 'bg-brand text-brand-foreground hover:bg-brand-hover',
+                      : 'bg-brand text-brand-foreground hover:bg-brand-hover disabled:opacity-50',
                   )}
                 >
-                  {isCurrent ? 'Current Plan' : 'Upgrade'}
+                  {pendingPlan === p && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  {isCurrent
+                    ? 'Current Plan'
+                    : p === 'free'
+                      ? 'Free forever'
+                      : isCustomPriced
+                        ? 'Contact sales'
+                        : pendingPlan === p
+                          ? 'Opening checkout…'
+                          : 'Upgrade'}
                 </button>
               </div>
             )
           })}
         </div>
+        {checkoutError && (
+          <p
+            role="alert"
+            className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-300"
+          >
+            {checkoutError}
+          </p>
+        )}
       </div>
 
       {/* Payment & invoices — handled by Gumroad, not stored locally. */}
