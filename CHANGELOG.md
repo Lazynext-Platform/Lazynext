@@ -4,6 +4,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.24.0] - 2026-04-27
+
+**Theme:** Two new real blog posts close the "blog ships with one post" honest empty state. v1.3.x has shipped 24+ engineering surfaces (Decision DNA scoring, Workspace Maturity Score, AI quotas, OAuth-ready scaffolding next) but `/blog` was still a one-post listing with a "more coming" placeholder. Wrote two posts grounded in actual code that exists in the repo today:
+- `how-decision-dna-scoring-works` — Engineering deep-dive on `lib/ai/decision-scorer.ts`: four orthogonal dimensions, Groq → Together → heuristic provider chain, the `extractJson` step that survives Llama-wrapping-JSON-in-fences, every score stamped with `model_version`, structured `decision_scorer` log events, and the two alerts we run on the call rate.
+- `workspace-maturity-score` — Product piece on `lib/wms.ts`: the five WMS events with their real weights (decision_created +2, outcome_recorded +3, teammate_invited +5, decision_public_shared +2, integration_connected +4), the four-layer threshold map (0/15/35/60), the soft sidebar gate vs the hard API-side gate via `isFeatureUnlocked`, and the Power-user override toggle for prospects who want everything immediately.
+
+### Changed
+- `app/(marketing)/blog/page.tsx` — `posts` array gains two non-featured entries (Engineering + Product tags). Comment updated: adding a post is a three-step edit (listing + `[slug]/page.tsx` body + `sitemap.ts`).
+- `app/(marketing)/blog/[slug]/page.tsx` — added two new `Post` records under their slugs in the `posts` map. Each is full body content (h2 sections, lists, prose, plus a real TypeScript code block on the engineering post). `generateStaticParams` picks them up automatically since it iterates `Object.keys(posts)`.
+- `app/sitemap.ts` — `blogPosts` array now lists all three real posts with their actual publish dates so each gets an indexed entry with the right `lastModified`.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.9] - 2026-04-27
 
 **Theme:** Canonical URLs on every public marketing page. Root layout sets `metadataBase` so per-page `alternates.canonical: '/path'` resolves to absolute `https://lazynext.com/path`. Without this, `/contact?topic=enterprise` (and any future tracked-link variants) split SEO authority across query-string variants. Added `alternates.canonical` plus `openGraph.url` to all 11 public marketing pages: `/pricing`, `/about`, `/features`, `/comparison`, `/changelog`, `/blog`, `/contact`, `/careers`, `/docs`, `/privacy`, `/terms`. Sitemap from v1.3.23.8 + canonicals from this ship now form a complete SEO surface.
