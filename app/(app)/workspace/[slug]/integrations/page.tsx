@@ -10,6 +10,7 @@ import {
   type OAuthProviderId,
 } from '@/lib/oauth/registry'
 import { cn } from '@/lib/utils/cn'
+import { ConnectionTile } from '@/components/ui/ConnectionTile'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,34 +86,22 @@ export default async function IntegrationsPage({ params }: { params: { slug: str
         ) : (
           <div className="space-y-3">
             {connectedRows.map((row) => (
-              <div key={row.id} className="rounded-xl border border-slate-800 bg-slate-900 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg text-xl', row.copy.color)}>{row.copy.icon}</div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-slate-200">{row.copy.name}</p>
-                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-3xs font-medium text-emerald-400">
-                          {row.connections.length === 1 ? 'Connected' : `${row.connections.length} connected`}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500">{row.copy.desc}</p>
-                    </div>
-                  </div>
-                </div>
-                <ul className="mt-3 space-y-1 border-t border-slate-800 pt-3">
-                  {row.connections.map((c) => (
-                    <li key={c.id} className="flex items-center justify-between text-xs">
-                      <span className="text-slate-300">{c.displayName ?? c.externalId}</span>
-                      <span className="text-3xs text-slate-500">
-                        {c.scopes ? `${c.scopes.split(/\s+/).length} scope(s)` : 'no scopes recorded'}
-                        {' \u00b7 '}
-                        added {new Date(c.createdAt).toLocaleDateString()}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <ConnectionTile
+                key={row.id}
+                workspaceId={workspace.id}
+                providerId={row.id}
+                providerName={row.copy.name}
+                providerDesc={row.copy.desc}
+                providerIcon={row.copy.icon}
+                providerColor={row.copy.color}
+                connections={row.connections.map((c) => ({
+                  id: c.id,
+                  displayName: c.displayName,
+                  externalId: c.externalId,
+                  scopes: c.scopes,
+                  createdAt: c.createdAt,
+                }))}
+              />
             ))}
           </div>
         )}
