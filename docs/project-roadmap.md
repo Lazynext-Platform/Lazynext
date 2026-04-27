@@ -1,8 +1,8 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.27.0 — shipped + deployed
-> **Last Updated**: 2026-04-27
+> **Current Milestone**: v1.3.28.1 — shipped + deployed
+> **Last Updated**: 2026-04-28
 
 ---
 
@@ -31,8 +31,8 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags. **OAuth scaffolding (DB + crypto + registry) shipped v1.3.26.0** — each provider is now a thin adapter PR pending credentials. | Per-provider OAuth app registration + adapter |
-| 31 | Integrations Settings | Page rewired to registry (v1.3.27.0): every provider renders `Available` or `Not configured` based on env vars; Connect routes through `/api/v1/oauth/[provider]/start`. Per-provider adapters pending credentials. | Per-provider adapter PR (auth-URL build + token exchange) |
+| 15 | Import Modal | CSV path works; OAuth tiles now wired to the registry (v1.3.28.0) and render `Available` or `Not configured` per env vars. Each provider remains a thin adapter PR pending credentials. | Per-provider OAuth app registration + adapter |
+| 31 | Integrations Settings | Page rewired to registry (v1.3.27.0); per-row Disconnect button shipped (v1.3.28.0). Per-provider adapters pending credentials. | Per-provider adapter PR (auth-URL build + token exchange) |
 | 30 | Profile → Connected Accounts + Sessions | Connected Accounts reads real Supabase identity providers; Sessions tab labels current device (v1.3.25.0). Per-device session list still requires Supabase admin API. | Supabase identity-link flows + service-role session listing |
 | 32 | Marketing → Blog | 3 real posts (Launch, Engineering, Product) — backlog still grows organically | Add real posts (or convert to MDX-driven listing) |
 
@@ -210,3 +210,4 @@ These features show real, truthful UI but lack the backend that would make them 
 | 2026-04-05 | Phasing follows Blueprint FEATURE-INDEX.md phases | Existing phase groupings are logical and dependency-ordered |
 | 2026-04-26 | Header milestone synced v1.1.0.1 → v1.3.0.5 | Roadmap had drifted behind v1.2 + v1.3 ships (pricing, billing fixes) |
 | 2026-04-27 | Header synced to v1.3.5.0 + dropped Notification Center, Settings→Notifications tab, and Audit Log from *Remaining work* | Three more features moved from honest empty state to fully wired |
+| 2026-04-28 | Header synced to v1.3.28.1; Import modal + Integrations Disconnect noted as shipped; pricing/comparison pages corrected to list Automation engine + Templates as live | Three ships landed back-to-back without doc updates |

@@ -4,6 +4,13 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.28.2] - 2026-04-28
+
+**Theme:** Roadmap sync. Three back-to-back ships (v1.3.28.0, v1.3.28.1) landed without updating `docs/project-roadmap.md`. This release re-anchors the roadmap header to v1.3.28.1, updates the *Remaining work* descriptions to reflect what shipped, and adds a Change Log entry. No code changes.
+
+### Changed
+- `docs/project-roadmap.md` — milestone bumped to v1.3.28.1; Import Modal + Integrations Settings rows note v1.3.28.0 as their latest; Change Log row added.
+
 ## [1.3.28.1] - 2026-04-28
 
 **Theme:** Marketing accuracy patch. The pricing page and the competitor comparison page were both still listing **Automation engine** and **Templates** as `Soon`/`coming soon`, even though the automation engine shipped in v1.3.7.0 (real WHEN/THEN triggers + webhook actions + run history) and the template marketplace shipped in v1.3.8.0 (6-template curated catalog with one-click install). That understates the product to every prospect that visits the pricing or comparison page before signing up.

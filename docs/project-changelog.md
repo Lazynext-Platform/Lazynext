@@ -6,6 +6,12 @@
 
 ---
 
+## [v1.3.28.2] - 2026-04-28 — Roadmap sync
+
+No code changes. `docs/project-roadmap.md` re-anchored to v1.3.28.1 with updated *Remaining work* descriptions and a Change Log entry.
+
+---
+
 ## [v1.3.28.1] - 2026-04-28 — Marketing accuracy patch
 
 **Theme:** Pricing + comparison pages no longer understate shipped features.
