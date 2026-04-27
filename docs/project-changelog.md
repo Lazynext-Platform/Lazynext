@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.9.0] — Public Shared Canvas is real (2026-04-27)
+
+The `/shared/[id]` route shipped with v1.0.0 and has rendered "Shared canvas not found / sharing is in development" for every URL ever since. This release ships the column, the link-issuance API, and the read-only viewer. New `workflows.share_token UUID` (nullable) with a partial unique index, plus `workflows.shared_at`. The token doubles as authorization for anonymous reads — the public route is the single chokepoint and queries via the service-role admin client filtered by token, sidestepping the need for a broad anon RLS policy. Sharing is opt-in per workflow; revoking nulls the token and instantly invalidates every existing public link; regenerating mints a fresh token (also instant). Viewer is a read-only ReactFlow canvas (`nodesDraggable=false`, `nodesConnectable=false`, `elementsSelectable=false`) reusing the existing 7 node types + `WorkflowEdge`; no member identities exposed; header shows workspace name + canvas name + description and a "Build your own canvas" CTA. New endpoints: `GET/PATCH /api/v1/workflows/[id]/share`. New importable `<ShareWorkflowDialog />` component (toolbar wiring deferred until the canvas store gains a current-workflow context). Roadmap fully wired count 31 → 32; backend-wired bar 82% → 84%. Type-check clean, **164/164** tests passing across 23 files (added 3 new in `tests/unit/shared-canvas.test.ts`), production build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#1390---2026-04-27).
+
+---
+
 ## [1.3.8.0] — Template Marketplace is real (2026-04-27)
 
 The Templates page shipped with v1.0.0 and has rendered "Templates are in development" with a 5-card "categories planned for launch" preview ever since. This release deletes the placeholder and replaces it with a working catalog: 6 curated starter templates (Product Sprint, Architecture Decision Log, Feature Decision Log, OKR Tracker, Pre-launch Checklist, Client Project) across 4 categories, each shipping with seed nodes + edges + initial task statuses. Click "Install template" → a new `workflows` row is created in the caller's workspace, every seed node is inserted with a fresh UUID, edges are remapped from seed-id → real-uuid, an audit row is written, and the canvas opens. The catalog lives in `lib/data/template-catalog.ts` (not a DB seed) so templates ship with the deploy and iterate via PR review — no cross-workspace RLS gymnastics, no public templates table. No migration needed; reuses the existing `workflows` / `nodes` / `edges` tables. New `GET /api/v1/templates` (catalog summary, no DB read) and `POST /api/v1/templates/install` (zod-validated, service-role insert under `verifyWorkspaceMember`). Roadmap fully wired count 30 → 31; backend-wired bar 79% → 82%. Type-check clean, **161/161** tests passing across 22 files (added 4 new in `tests/unit/template-catalog.test.ts`), production build clean.
