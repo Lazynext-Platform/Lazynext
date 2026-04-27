@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import { ArrowRight, Clock } from 'lucide-react'
 
-// Only `launching-lazynext` has a real article body in /blog/[slug];
-// listing previously linked to 3 more posts that 404'd. Listing now
-// matches reality — when more posts ship, add their entries here AND
-// their full body in `app/(marketing)/blog/[slug]/page.tsx`.
+// Each entry here MUST have a corresponding article body in
+// `app/(marketing)/blog/[slug]/page.tsx`. Adding a post is a two-step
+// edit (listing + body) plus an entry in `app/sitemap.ts`'s `blogPosts`.
 const posts = [
   { slug: 'launching-lazynext', title: 'Lazynext is live, and we think we shipped the thing PM tools forgot', excerpt: 'Decisions are the highest-leverage work a team does. They\'re also the least instrumented. Here\'s what we did about it.', date: 'April 18, 2026', dateTime: '2026-04-18', tag: 'Launch', featured: true },
+  { slug: 'how-decision-dna-scoring-works', title: 'How Decision DNA actually scores a decision', excerpt: 'Four dimensions, two LLM providers, one deterministic fallback, and a stamped model version on every score. The complete pipeline, including what fails.', date: 'April 22, 2026', dateTime: '2026-04-22', tag: 'Engineering' },
+  { slug: 'workspace-maturity-score', title: 'Workspace Maturity Score: why we hide most of the product on day one', excerpt: 'Most workflow tools dump 20 features on you and hope. We unlock features as you actually decide things. Here\'s the math, the events, and why the default bias is "earn the complexity."', date: 'April 25, 2026', dateTime: '2026-04-25', tag: 'Product' },
 ]
 
 const tagColors: Record<string, string> = {

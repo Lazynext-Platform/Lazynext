@@ -24,6 +24,8 @@ const staticPages = [
 // dependency-free and the published surface explicit.
 const blogPosts = [
   { slug: 'launching-lazynext', publishedAt: new Date('2026-04-18') },
+  { slug: 'how-decision-dna-scoring-works', publishedAt: new Date('2026-04-22') },
+  { slug: 'workspace-maturity-score', publishedAt: new Date('2026-04-25') },
 ] as const
 
 // High-priority routes get a higher number so search engines crawl them

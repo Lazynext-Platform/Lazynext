@@ -6,6 +6,14 @@
 
 ---
 
+## [1.3.24.0] — Two real blog posts close the "blog ships with one post" gap (2026-04-27)
+
+`/blog` had been a single-post listing since v1.0 with a `More posts on the way` placeholder. Wrote two posts grounded in real code that exists in the repo: `how-decision-dna-scoring-works` walks the four-dimension scoring pipeline in `lib/ai/decision-scorer.ts` — Groq → Together → heuristic fallback, the `extractJson` step for Llama-wrapping-JSON-in-fences, stamped `model_version` on every score, and the two alerts (heuristic-rate, p95 duration) we run on the call log; `workspace-maturity-score` documents `lib/wms.ts` end-to-end — the five WMS events with their real weights, the four-layer threshold map (0/15/35/60), the soft-sidebar vs hard-API gate, and the Power-user override toggle. `/blog` listing + `[slug]` route + `sitemap.ts` all updated together. **197/197** tests passing, type-check clean, build clean.
+
+See [CHANGELOG.md](../CHANGELOG.md#13240---2026-04-27).
+
+---
+
 ## [1.3.23.9] — Canonical URLs on every public marketing page (2026-04-27)
 
 Without `alternates.canonical`, query-string variants like `/contact?topic=enterprise` split SEO authority. Added canonical URLs and `openGraph.url` to all 11 public marketing pages (`/pricing`, `/about`, `/features`, `/comparison`, `/changelog`, `/blog`, `/contact`, `/careers`, `/docs`, `/privacy`, `/terms`). Combined with the v1.3.23.8 sitemap coverage, the marketing surface is now SEO-complete. **197/197** tests passing.

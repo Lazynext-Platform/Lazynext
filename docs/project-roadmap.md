@@ -1,7 +1,7 @@
 # 🗺️ Project Roadmap
 
 > **Project**: Lazynext — The Anti-Software Workflow Platform
-> **Current Milestone**: v1.3.23.9 — shipped + deployed
+> **Current Milestone**: v1.3.24.0 — shipped + deployed
 > **Last Updated**: 2026-04-27
 
 ---
@@ -34,7 +34,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 15 | Import Modal | CSV path works; OAuth connectors (Notion/Linear/Trello/Asana/Jira) show `Soon` tags | Per-source OAuth + mapper + ingestion pipeline |
 | 31 | Integrations Settings | Empty state — "Notify me" disabled buttons | Slack/Notion/GitHub OAuth + outbound delivery |
 | 30 | Profile → Connected Accounts + Sessions | Removed pending real APIs | Supabase identity-link + session listing |
-| 32 | Marketing → Blog | Only `launching-lazynext` post is real | Add real posts (or convert to MDX-driven listing) |
+| 32 | Marketing → Blog | 3 real posts (Launch, Engineering, Product) — backlog still grows organically | Add real posts (or convert to MDX-driven listing) |
 
 ---
 
