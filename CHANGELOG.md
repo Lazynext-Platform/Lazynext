@@ -4,6 +4,16 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.23.2] - 2026-04-27
+
+**Theme:** Closes the second half of v1.3.23.1 — the Enterprise card on the in-app billing page now routes to `/contact?topic=enterprise`, but the contact page didn't read `?topic`, so users landed on the generic page with no signal that we'd registered their interest. Now the contact page is topic-aware: when `?topic=enterprise` is present, it surfaces an Enterprise banner up top with badge, headline, subhead, and a primary `mailto:hello@lazynext.com` button pre-filled with subject `Enterprise plan inquiry` and a body template asking for team size, current tools, must-haves, and timeline.
+
+### Changed
+- `app/(marketing)/contact/page.tsx` — reads `searchParams.topic`, looks up a `TOPICS` registry (currently `{ enterprise }`), renders an indigo banner above the standard contact rows when the topic matches. Unknown / missing topic falls through to the existing generic layout (zero behavior change for users not coming from the billing page). Topic registry is a single object so adding `?topic=security`, `?topic=migration`, etc. is a one-line addition.
+
+### Test results
+- Type-check: clean. Vitest: **197/197 passing** across 27 files. Build: clean.
+
 ## [1.3.23.1] - 2026-04-27
 
 **Theme:** Hotfix — Billing page Upgrade buttons actually work now. v1.3.23.0 fixed every dollar value but left the buttons broken: top-right "Change Plan" linked to `/workspace/[slug]/upgrade` (404), per-card "Upgrade" buttons had no `onClick` at all (dead pixels). Wired both: "Change Plan" now triggers the global `useUpgradeModal.show('full-upgrade')` modal, per-card buttons POST to `/api/v1/billing/checkout` (Starter / Business) or route to `/contact?topic=enterprise` (Enterprise tier, no Gumroad product). Free tier shows "Free forever" and is intentionally non-interactive.
