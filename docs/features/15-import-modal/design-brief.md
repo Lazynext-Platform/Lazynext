@@ -28,17 +28,19 @@
 
 ## Requirements
 
+> **Shipping reality (2026-04-28)**: Only the **CSV path is wired end-to-end** in the live app. The OAuth-based connectors (Notion API, Linear, Trello, Asana, Notion ZIP) below are **roadmap** — the registry in `lib/oauth/registry.ts` exposes them as `Available` / `Not configured` tiles, but no provider adapter has shipped yet. Each `[x]` below describes the *designed* state; items marked **🟡 Roadmap** are not yet built. See [`docs/features/15-import-modal/summary.md`](./summary.md) and [`docs/project-roadmap.md`](../../project-roadmap.md) for the current honest state.
+
 ### Must Have
-- [x] 3-step wizard with visual step indicator (numbered circles + labels connected by lines)
+- [x] 3-step wizard with visual step indicator (numbered circles + labels connected by lines) — 🟡 Roadmap (CSV ships as a single-step modal today)
 - [x] Step 1 — Source selection: 6 source cards in a 2-column grid (Notion API, Notion ZIP, Linear, Trello, Asana, CSV)
 - [x] Each source card shows logo/icon, name, description, and optional "Recommended" badge
-- [x] Step 2 — Connection: source-specific configuration (OAuth connect for API sources, file upload for ZIP/CSV)
-- [x] Import preview showing what entities map to which Lazynext primitives (Pages to DOC, DB rows to TASK, etc.)
+- [x] Step 2 — Connection: source-specific configuration (OAuth connect for API sources, file upload for ZIP/CSV) — 🟡 Roadmap for OAuth sources; CSV upload is live
+- [x] Import preview showing what entities map to which Lazynext primitives (Pages to DOC, DB rows to TASK, etc.) — 🟡 Roadmap
 - [x] Workflow selector dropdown for target workflow
-- [x] Step 3 — Progress: animated spinner, progress bars per entity type (Docs, Tasks, Edges), live log with success/warning/info entries
+- [x] Step 3 — Progress: animated spinner, progress bars per entity type (Docs, Tasks, Edges), live log with success/warning/info entries — 🟡 Roadmap (CSV shows a simpler `parsing → uploading → success` status)
 - [x] Success state with completion summary and "Go to Workflow" / "Import More" CTAs
 - [x] Close button (X) in modal header
-- [x] Back navigation from Step 2 to Step 1
+- [x] Back navigation from Step 2 to Step 1 — 🟡 Roadmap (single-step modal today)
 
 ### Nice to Have
 - [x] "Recommended" badge on Notion API source
