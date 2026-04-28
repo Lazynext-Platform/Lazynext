@@ -3,8 +3,20 @@
 import { createClient } from '@/lib/db/supabase/client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+
+// Only allow internal redirects — never honour an absolute URL or
+// protocol-relative URL from the query string.
+function safeNext(raw: string | null): string {
+  if (!raw) return '/onboarding/create-workspace'
+  if (!raw.startsWith('/') || raw.startsWith('//')) return '/onboarding/create-workspace'
+  return raw
+}
 
 export default function SignInPage() {
+  const searchParams = useSearchParams()
+  const next = safeNext(searchParams.get('next'))
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -24,14 +36,16 @@ export default function SignInPage() {
       return
     }
 
-    window.location.href = '/onboarding/create-workspace'
+    window.location.href = next
   }
 
   const handleOAuth = async (provider: 'google' | 'github') => {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      },
     })
   }
 

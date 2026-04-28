@@ -64,6 +64,11 @@ export async function updateSession(request: NextRequest) {
   if (!user && requiresAuth) {
     const url = request.nextUrl.clone()
     url.pathname = '/sign-in'
+    // Preserve where the user was trying to go so sign-in can return them.
+    const next = `${request.nextUrl.pathname}${request.nextUrl.search}`
+    if (next && next !== '/sign-in') {
+      url.searchParams.set('next', next)
+    }
     return NextResponse.redirect(url)
   }
 

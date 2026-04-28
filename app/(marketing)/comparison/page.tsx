@@ -119,13 +119,13 @@ export default function ComparisonPage() {
       </section>
 
       <section className="mx-auto max-w-4xl px-6 pb-12 overflow-x-auto">
-        <table className="w-full text-sm" aria-label="Feature comparison across workflow platforms">
+        <table className="w-full min-w-[640px] text-sm" aria-label="Feature comparison across workflow platforms">
           <thead>
             <tr className="border-b-2 border-slate-200">
-              <th scope="col" className="py-3 text-left font-medium text-slate-500">Feature</th>
-              <th scope="col" className="py-3 text-center font-bold text-lime-700">Lazynext</th>
+              <th scope="col" className="py-3 pr-4 text-left font-medium text-slate-500">Feature</th>
+              <th scope="col" className="px-3 py-3 text-center font-bold text-lime-700">Lazynext</th>
               {competitors.map(t => (
-                <th key={t} scope="col" className="py-3 text-center font-medium text-slate-500">{t}</th>
+                <th key={t} scope="col" className="px-3 py-3 text-center font-medium text-slate-500">{t}</th>
               ))}
             </tr>
           </thead>

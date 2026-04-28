@@ -221,7 +221,7 @@ export function NotFoundState() {
         This page doesn&apos;t exist or may have been moved.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-3">
-        <PrimaryButton href="/">Go to Dashboard</PrimaryButton>
+        <PrimaryButton href="/">Go Home</PrimaryButton>
         <SecondaryButton onClick={() => window.history.back()}>Go Back</SecondaryButton>
       </div>
     </StateContainer>
