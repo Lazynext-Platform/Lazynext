@@ -9,6 +9,14 @@
 
 ## Session Notes
 
+### Session Note — 2026-04-29 (continued)
+- **Who**: AI Agent (GitHub Copilot, Claude Opus 4.7)
+- **Worked On**: Phase C.1 via middleware shortcut.
+  - `middleware.ts`: stamps `X-Request-Id` + `X-API-Version: v1` on every `/api/v1/*` response. Honours client-supplied `X-Request-Id` for log correlation. Non-clobbering — routes already setting these via `buildResponseHeaders` win.
+- **Stopped At**: 339/339 tests still passing, type-check clean.
+- **Blockers**: C.2 (integration test) deferred — would need a Playwright pass against `npm run dev`; cheaper to verify after the Phase C sweep is reviewed.
+- **Next Steps**: Human reviews canary + middleware contract.
+
 ### Session Note — 2026-04-29
 - **Who**: AI Agent (GitHub Copilot, Claude Opus 4.7)
 - **Duration**: async

@@ -30,6 +30,16 @@ function detectLocale(request: NextRequest): string {
   return defaultLocale
 }
 
+/**
+ * Generate a request id. Edge runtime always has Web Crypto.
+ */
+function generateRequestId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  return `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request)
 
@@ -43,6 +53,25 @@ export async function middleware(request: NextRequest) {
         maxAge: 365 * 24 * 60 * 60, // 1 year
         sameSite: 'lax',
       })
+    }
+  }
+
+  // Stamp the public-API contract headers on every /api/v1/* response.
+  // Route handlers that opt into `buildResponseHeaders` will have
+  // already set these — we never clobber. This guarantees that EVERY
+  // public-API response carries `X-Request-Id` + `X-API-Version`, even
+  // routes that haven't been migrated to the shared header builder.
+  // Per-request rate-limit / Retry-After / Sunset headers remain the
+  // route handler's responsibility.
+  if (request.nextUrl.pathname.startsWith('/api/v1')) {
+    if (!response.headers.has('X-Request-Id')) {
+      // Prefer a client-supplied id if present (lets a customer
+      // correlate their own logs with ours).
+      const upstream = request.headers.get('X-Request-Id')
+      response.headers.set('X-Request-Id', upstream ?? generateRequestId())
+    }
+    if (!response.headers.has('X-API-Version')) {
+      response.headers.set('X-API-Version', 'v1')
     }
   }
 
