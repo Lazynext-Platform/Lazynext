@@ -6,6 +6,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.1.1] - 2026-04-29
+
+**Theme:** SEO + security fixes after a deep audit pass.
+
+### Fixed
+- **Social-card breakage** — `app/layout.tsx` openGraph and Twitter image fields were hardcoded to `/og-image.png`, a path that doesn't exist in `/public`. Every shared link on Twitter / Slack / LinkedIn / Discord rendered a broken image. Removed the override so Next's file-convention auto-merge of `app/opengraph-image.tsx` (Edge runtime, generated 1200×630 PNG) takes over for both card types.
+- **Stale OpenAPI `info.version`** — `lib/utils/openapi.ts` had `PACKAGE_VERSION` hardcoded to `'1.3.42.0'`, five releases behind production. Every consumer of `/api/v1/openapi.json` (SDK code-gen, doc portals, version-tracking clients) was getting outdated version metadata. Now imported from `package.json` so it stays in sync with the standard release flow.
+- **DB error message leak** (info disclosure, OWASP A09) — 8 sites across 5 API routes were echoing `PostgrestError.message` directly into HTTP 500 responses, leaking schema details (table names, column names, RLS policy names, constraint descriptions). All sites now return `{ error: 'DATABASE_ERROR' }` with the raw error funneled through dev-only `console.error`. Sentry still captures full traces server-side.
+  - Routes patched: `app/api/v1/onboarding/workspace/route.ts` (5 sites), `app/api/v1/workspaces/route.ts` (2), `app/api/v1/threads/[nodeId]/route.ts` (2), `app/api/v1/import/route.ts` (2), `app/api/v1/templates/[id]/install/route.ts` (1).
+
+### Added
+- **JSON-LD structured data on marketing pages** — `app/(marketing)/layout.tsx` emits a single `application/ld+json` script with an `@graph` of `Organization` + `SoftwareApplication` (with free-tier `Offer`). Inherited by all 19 public routes. Zero LCP/CLS impact.
+
+### Validation
+- 350/350 Vitest tests pass
+- Type-check + lint clean
+- Build warning-free except the intentional `<img>` in `global-error.tsx`
+
 ## [1.4.1.0] - 2026-04-29
 
 **Theme:** Performance + security tightening on top of the v1.4.0.1 polish.
