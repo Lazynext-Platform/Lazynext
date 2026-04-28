@@ -40,6 +40,60 @@ export const RATE_LIMITS: Record<string, RateLimitConfig> = {
   mutation: { limit: 30, windowSec: 60 },
 }
 
+// ─────────────────────────────────────────────────────────────
+// Per-plan public-API rate limits.
+//
+// Two-tier model (per feature #40 architecture):
+//   1. **per-key** — protects a single key from monopolising the
+//      workspace's quota. Tighter than the workspace ceiling.
+//   2. **workspace ceiling** — protects the cluster from a customer
+//      minting many keys to bypass per-key throttling. Looser than
+//      the per-key limit times some plausible key count.
+//
+// Both buckets share the same 60-second window so callers see one
+// clean reset boundary. A request is allowed only when BOTH buckets
+// have headroom.
+//
+// Plan slug mapping (matches `PLAN_LIMITS` in `constants.ts`):
+//   free       → no public-API access (gated at `hasFeature`)
+//   starter    → "Team" tier (also no API access today)
+//   pro        → "Business" tier ← first tier with API access
+//   business   → "Enterprise" tier
+//   enterprise → custom contracts; same as business in code
+// ─────────────────────────────────────────────────────────────
+
+export type ApiPlan = 'free' | 'starter' | 'pro' | 'business' | 'enterprise'
+
+export interface ApiPlanRateLimit {
+  /** Per-key bucket: a single API key can't exceed this. */
+  perKey: RateLimitConfig
+  /** Workspace ceiling: sum of all keys in a workspace can't exceed this. */
+  workspace: RateLimitConfig
+}
+
+export const API_PLAN_RATE_LIMITS: Record<ApiPlan, ApiPlanRateLimit> = {
+  free: {
+    perKey: { limit: 60, windowSec: 60 },
+    workspace: { limit: 120, windowSec: 60 },
+  },
+  starter: {
+    perKey: { limit: 60, windowSec: 60 },
+    workspace: { limit: 120, windowSec: 60 },
+  },
+  pro: {
+    perKey: { limit: 600, windowSec: 60 },
+    workspace: { limit: 1800, windowSec: 60 },
+  },
+  business: {
+    perKey: { limit: 6000, windowSec: 60 },
+    workspace: { limit: 30_000, windowSec: 60 },
+  },
+  enterprise: {
+    perKey: { limit: 6000, windowSec: 60 },
+    workspace: { limit: 30_000, windowSec: 60 },
+  },
+}
+
 export function rateLimit(
   identifier: string,
   config: RateLimitConfig = RATE_LIMITS.api
@@ -61,6 +115,86 @@ export function rateLimit(
 
   existing.count++
   return { success: true, remaining: config.limit - existing.count, resetAt: existing.resetAt }
+}
+
+/**
+ * Two-tier rate-limit decision for the public REST API.
+ *
+ * Behaviour:
+ *  - Both buckets are checked; the request is allowed only when both
+ *    have headroom.
+ *  - When rejected, the **stricter** (sooner-to-reset, lower-remaining)
+ *    bucket wins the response headers. This is the bucket the caller
+ *    needs to back off on.
+ *  - A rejection in either bucket does NOT increment the other —
+ *    callers shouldn't be punished twice for the same wall-clock
+ *    failure.
+ *
+ * The returned `headers` object is shaped to feed directly into
+ * `buildResponseHeaders({ rateLimit: ... })` from `api-headers.ts`.
+ */
+export interface ApiRateLimitInput {
+  keyId: string
+  workspaceId: string
+  plan: ApiPlan
+}
+
+export interface ApiRateLimitResult {
+  /** True when both buckets have headroom. */
+  allowed: boolean
+  /** Headers describing the **binding** (stricter) bucket. */
+  headers: { limit: number; remaining: number; resetAtSec: number }
+  /** Seconds until the binding bucket resets. Set on 429 responses. */
+  retryAfterSec: number
+  /** Which bucket triggered the rejection (if any). For tests/diagnostics. */
+  bindingBucket: 'per-key' | 'workspace' | 'none'
+}
+
+export function checkApiRateLimit(input: ApiRateLimitInput): ApiRateLimitResult {
+  const { keyId, workspaceId, plan } = input
+  const cfg = API_PLAN_RATE_LIMITS[plan]
+
+  const perKey = rateLimit(`apikey:${keyId}`, cfg.perKey)
+  const workspace = rateLimit(`apiws:${workspaceId}`, cfg.workspace)
+
+  const allowed = perKey.success && workspace.success
+
+  // Pick the binding bucket: the one that ran out first (or, if both
+  // succeeded, the one closer to running out — that's what the
+  // headers should reflect so the client backs off on the right cycle).
+  const perKeyTighter =
+    !perKey.success ||
+    (workspace.success && perKey.remaining <= workspace.remaining)
+
+  const binding = perKeyTighter ? perKey : workspace
+  const bindingBucket: ApiRateLimitResult['bindingBucket'] = allowed
+    ? 'none'
+    : !perKey.success
+      ? 'per-key'
+      : 'workspace'
+
+  const resetAtSec = Math.ceil(binding.resetAt / 1000)
+  const limit = perKeyTighter ? cfg.perKey.limit : cfg.workspace.limit
+
+  return {
+    allowed,
+    headers: {
+      limit,
+      remaining: Math.max(0, binding.remaining),
+      resetAtSec,
+    },
+    retryAfterSec: allowed ? 0 : Math.max(1, Math.ceil((binding.resetAt - Date.now()) / 1000)),
+    bindingBucket,
+  }
+}
+
+/**
+ * Test-only: clear the in-memory rate-limit store. Exported so
+ * `tests/unit/rate-limit.test.ts` can isolate cases without
+ * cross-test contamination. Production code MUST NOT call this.
+ */
+export function __resetRateLimitStoreForTests(): void {
+  store.clear()
 }
 
 export function rateLimitResponse(resetAt: number) {

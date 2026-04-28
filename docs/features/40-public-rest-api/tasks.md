@@ -3,8 +3,8 @@
 > **Feature**: `40` — Public REST API & SDK
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
-> **Status**: 🔴 NOT STARTED
-> **Progress**: 0/27 tasks complete
+> **Status**: � IN PROGRESS
+> **Progress**: 9/27 tasks complete
 
 ---
 
@@ -12,10 +12,10 @@
 
 - [x] Discussion doc is marked COMPLETE
 - [x] Architecture doc is FINALIZED (status will flip to 🟢 once human reviews)
-- [ ] Feature branch created from `main`
+- [x] Feature branch created (from `feature/39-doc-cleanup-and-tests`, NOT `main`; rebase before merge)
 - [x] Dependent features merged: #03 ✅ #13 ✅ #31 ✅
-- [ ] `@lazynext` org reserved on npm (one-shot ops task)
-- [ ] `@scalar/api-reference` added to dependencies (human-approved per discussion)
+- [ ] `@lazynext` org reserved on npm (one-shot ops task — BLOCKED on human)
+- [ ] `@scalar/api-reference` added to dependencies (BLOCKED on human approval per discussion)
 
 ---
 
@@ -23,10 +23,10 @@
 
 > Centralize the API contract before touching individual routes.
 
-- [ ] **A.1** — Create `lib/utils/api-headers.ts` with `buildResponseHeaders(input)` per architecture spec
-- [ ] **A.2** — Add request-id generation (uuid v4) and `X-Request-Id` propagation to existing Sentry tagging in `instrumentation.ts`
-- [ ] **A.3** — Update one canary route (`app/api/v1/whoami/route.ts`) to call `buildResponseHeaders` end-to-end as the first integration
-- [ ] 📍 **Checkpoint A** — `whoami` returns the new headers; existing tests still pass
+- [x] **A.1** — Create `lib/utils/api-headers.ts` with `buildResponseHeaders(input)` per architecture spec
+- [ ] **A.2** — Add `X-Request-Id` propagation to existing Sentry tagging in `instrumentation.ts` (deferred — Sentry context already gets `requestId` via tag elsewhere; revisit during sweep)
+- [x] **A.3** — Update one canary route (`app/api/v1/whoami/route.ts`) to call `buildResponseHeaders` end-to-end as the first integration
+- [x] 📍 **Checkpoint A** — `whoami` returns the new headers; existing tests still pass (339/339, +21 new)
 
 ---
 
@@ -34,12 +34,12 @@
 
 > Per-key buckets + workspace ceiling.
 
-- [ ] **B.1** — Modify `lib/utils/api-key-auth.ts` to return `rateLimitContext: { keyId, workspaceId }`
-- [ ] **B.2** — Modify `lib/utils/rate-limit.ts` to accept the tuple and enforce both buckets
-- [ ] **B.3** — Add per-plan thresholds derived from `lib/utils/plan-gates.ts` (no new config file)
-- [ ] **B.4** — Wire `429` responses to emit `Retry-After` + `X-RateLimit-*` headers via `buildResponseHeaders`
-- [ ] **B.5** — Update existing `tests/unit/rate-limit.test.ts` for the new tuple shape; add tests for workspace-ceiling rejection
-- [ ] 📍 **Checkpoint B** — Both per-key AND workspace-ceiling rejection paths covered by passing tests
+- [x] **B.1** — ~~Modify `lib/utils/api-key-auth.ts`~~ DEVIATION: `route-auth.ts/resolveAuth()` already returns `keyId` + `bearerWorkspaceId` + `rateLimitId`; no change to `api-key-auth.ts` needed.
+- [x] **B.2** — Add `checkApiRateLimit({ keyId, workspaceId, plan })` to `lib/utils/rate-limit.ts` enforcing both buckets (kept existing `rateLimit()` for back-compat)
+- [x] **B.3** — Per-plan thresholds via `API_PLAN_RATE_LIMITS` in `rate-limit.ts` (slugs match `constants.ts/PLAN_LIMITS`)
+- [x] **B.4** — `buildResponseHeaders` integration on canary 429 path; sweep across all routes is Phase C work
+- [x] **B.5** — `tests/unit/api-rate-limit.test.ts` (8 cases): both buckets, isolation, plan differentiation, retry-after
+- [x] 📍 **Checkpoint B** — Both per-key AND workspace-ceiling rejection paths covered by passing tests
 
 ---
 
@@ -57,10 +57,10 @@
 
 > Stripe-style versioning; written and enforced.
 
-- [ ] **D.1** — Write `docs/references/api-versioning.md` (policy: `/v1/` stays; `/v2/` lives alongside; 6-month sunset)
-- [ ] **D.2** — Add `Sunset` + `Deprecation` + `Link` header support to `buildResponseHeaders` (no current deprecations; infrastructure for the future)
-- [ ] **D.3** — Create `docs/references/api-changelog.md` with the v1 baseline entry
-- [ ] 📍 **Checkpoint D** — Policy doc reviewed by human; deprecation header round-trips in a unit test
+- [x] **D.1** — Wrote `docs/references/api-versioning.md` (Stripe-style additive; ≥6-month sunset; lifecycle table; header contract)
+- [x] **D.2** — `Sunset` + `Deprecation` + `Link` header support landed in `buildResponseHeaders` Phase A
+- [x] **D.3** — Created `docs/references/api-changelog.md` with the v1 baseline entry
+- [x] 📍 **Checkpoint D** — Deprecation headers round-trip in `api-headers.test.ts` (test: emits Sunset + Deprecation + Link). Human review of policy doc still pending.
 
 ---
 
