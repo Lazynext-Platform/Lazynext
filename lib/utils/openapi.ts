@@ -8,7 +8,9 @@
  * Kept as a pure builder so unit tests can call it without a request.
  */
 
-const PACKAGE_VERSION = '1.3.42.0'
+import packageJson from '../../package.json'
+
+const PACKAGE_VERSION: string = packageJson.version
 
 export interface OpenApiSpec {
   openapi: '3.1.0'
