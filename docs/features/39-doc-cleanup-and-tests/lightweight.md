@@ -33,8 +33,8 @@ This feature is **lightweight-eligible** per [`docs/mastery.md`](../../mastery.m
 ### Out of scope (deferred — needs human sign-off per autonomy boundaries)
 
 - Roadmap reclassification of features (none required after re-verification — #30 status is correct, summary text was the real issue).
-- Backfilling missing version entries (`v1.3.6.0`, `v1.3.7.0`, `v1.3.8.0`, `v1.3.25.0`, `v1.3.27.0`) into [`docs/project-changelog.md`](../../project-changelog.md) — needs git archaeology + human confirmation of theme accuracy.
-- Promoting backlog items (REST API, AI workflow gen, PDF export, etc.) into numbered roadmap features.
+- Backfilling missing version entries (`v1.3.6.0`, `v1.3.7.0`, `v1.3.8.0`, `v1.3.25.0`, `v1.3.27.0`) into [`docs/project-changelog.md`](../../project-changelog.md) — **resolved**: re-verification on 2026-04-28 confirmed all five entries are already present (lines 330, 346, 578, 586, 594). Audit produced a false positive; no work needed.
+- Promoting backlog items (REST API, AI workflow gen, PDF export, etc.) into numbered roadmap features — **partially resolved**: drafted [`docs/features/40-public-rest-api/discussion.md`](../40-public-rest-api/discussion.md) as a 🟡 IN PROGRESS draft. Roadmap **not yet updated** — promotion to numbered feature pending human approval.
 
 ## Tasks
 
@@ -72,6 +72,8 @@ This feature is **lightweight-eligible** per [`docs/mastery.md`](../../mastery.m
 | 2026-04-28 | Corrected `docs/features/30-profile-account-settings/summary.md` — 2FA is "Managed externally", not in-app TOTP. Removed false `qrcode` package claim. |
 | 2026-04-28 | Added cross-reference header in `CHANGELOG.md` pointing at `docs/project-changelog.md` for full version history. |
 | 2026-04-28 | type-check ✅ — vitest 318/318 ✅ — lint ✅ |
+| 2026-04-28 | **Audit follow-up**: re-verified the alleged "missing changelog versions" (v1.3.6.0/7.0/8.0/25.0/27.0). All five entries are in fact present in [`docs/project-changelog.md`](../../project-changelog.md) (lines 330, 346, 578, 586, 594). The original audit grep'd a partial range and produced a false positive. No backfill needed. |
+| 2026-04-28 | Drafted [`docs/features/40-public-rest-api/discussion.md`](../40-public-rest-api/discussion.md) (🟡 IN PROGRESS) for the Public REST API & SDK formalization. Roadmap promotion pending human approval. |
 
 ## Reflection
 
