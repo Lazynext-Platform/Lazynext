@@ -6,6 +6,38 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0.1] - 2026-04-28
+
+**Theme:** Post-release polish — eight live-QA passes after the v1.4.0.0 Public REST API ship found no functional regressions but a long tail of small UX, a11y, deprecation, and dead-code papercuts. All fixed in one rolling sweep.
+
+### Fixed
+- `app/(marketing)/docs/api/layout.tsx` — sticky sub-nav was hidden behind the fixed marketing header (`top-0 z-30` rendered behind `top-0 z-50 h-16`). Wrapper got `pt-16`; bar moved to `top-16 z-40`. Active page now gets a pill, others get muted hover. `aria-current="page"` for SR.
+- `lib/db/supabase/middleware.ts` — auth gate inverted from "isPublicRoute allowlist" to a `PROTECTED_PREFIXES` denylist (`/workspace`, `/onboarding`). Unknown URLs now hit the real 404 page instead of being 307'd to `/sign-in`. When unauthed users hit a protected route the middleware now appends `?next=<original-path>` so sign-in can return them after auth.
+- `app/(auth)/sign-in/[[...sign-in]]/page.tsx` — reads `?next=` via `useSearchParams`, validates with `safeNext()` (relative-only, rejects absolute and protocol-relative), and uses it for both password and OAuth flows. The auth callback already supported `?next=` — no changes needed there.
+- `app/(app)/onboarding/page.tsx` — created; redirects to `/onboarding/create-workspace` so the bare `/onboarding` URL no longer 404s.
+- `app/(auth)/sign-up/[[...sign-up]]/page.tsx` — added the standard "By creating an account you agree to our Terms and Privacy Policy" disclosure under the submit button.
+- `app/robots.ts` — added explicit `Allow: /api/v1/openapi.json`. The blanket `Disallow: /api/` was inadvertently blocking the OpenAPI spec from search.
+- `app/(marketing)/comparison/page.tsx` — table headers crammed at narrow viewports. Added `min-w-[640px]` so the existing `overflow-x-auto` wrapper handles horizontal scroll cleanly; added per-column padding so labels breathe.
+- `components/ui/EmptyStates.tsx` — `NotFoundState` button labeled "Go to Dashboard" but `href="/"` lands on the marketing home. Relabeled to "Go Home" so label matches behaviour.
+- `components/decisions/OutcomeReviewModal.tsx` — Notes and Key Learning textareas had visible `<label>` tags but no `htmlFor`/`id` link. Screen readers announced them as nameless "edit text". Added `outcome-notes` / `outcome-learning` id pairs.
+
+### Changed
+- `next.config.js` — migrated two deprecated Sentry top-level config keys (`disableLogger`, `automaticVercelMonitors`) to their new `webpack.*` nested locations. Same behaviour, build is now warning-free except the intentional `<img>` in `global-error.tsx`.
+- Renamed `sentry.client.config.ts` → `instrumentation-client.ts` per Next 15/Sentry's new file convention. Required for Turbopack compatibility.
+
+### Removed
+- `components/decisions/DecisionCard.tsx` — orphan component, no callers anywhere. The decisions page renders inline cards via `DecisionsClient.tsx`; the public `/d/[shareId]` page renders its own shared view.
+
+### Docs
+- `docs/project-roadmap.md`, `docs/features/40-public-rest-api/{tasks,discussion}.md` — replaced 3 stray `U+FFFD` replacement glyphs left over from the #40 release with the intended 🟢 status emoji.
+
+### Validation
+- 350/350 Vitest tests pass (40 files)
+- Type-check clean
+- Lint warning-free (one pre-existing `<img>` in `global-error.tsx` only — intentional, runs before the `next/image` runtime is guaranteed)
+- All 4 fixes from QA round 2 (`1fd530e`) verified live by browser QA in round 4
+- All 3 fixes from QA round 3 (`60a1189`) verified live: redirect preserves `?next=`, 404 returns HTTP 404, comparison renders cleanly
+
 ## [1.3.42.4] - 2026-04-28
 
 **Theme:** Documentation accuracy — round 3 (summary prose sweep).
