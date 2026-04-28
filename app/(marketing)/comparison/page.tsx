@@ -168,7 +168,7 @@ export default function ComparisonPage() {
 
       <section className="bg-slate-900 py-16 text-center text-slate-50">
         <h2 className="text-2xl font-bold">Try the decision-quality engine</h2>
-        <p className="mt-2 text-sm text-slate-400">Free tier — no card required.</p>
+        <p className="mt-2 text-sm text-slate-600">Free tier — no card required.</p>
         <Link
           href="/sign-up"
           className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground hover:bg-brand-hover transition-colors"

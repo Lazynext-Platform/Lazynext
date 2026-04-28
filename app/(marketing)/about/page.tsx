@@ -49,7 +49,7 @@ export default function AboutPage() {
         </p>
         <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-600">
           <span className="font-semibold text-slate-900">Avas Patel</span>
-          <span className="text-slate-400">&middot;</span>
+          <span className="text-slate-500">&middot;</span>
           <span>Founder</span>
         </div>
       </section>
@@ -57,7 +57,7 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="bg-indigo-600 py-16 text-center text-white">
         <h2 className="text-2xl font-bold">Ready to make better decisions?</h2>
-        <p className="mt-2 text-indigo-200">Start free. No credit card required.</p>
+        <p className="mt-2 text-indigo-100">Start free. No credit card required.</p>
         <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 hover:bg-indigo-50">
           Get Started <ArrowRight className="h-4 w-4" />
         </Link>
