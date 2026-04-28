@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test'
 
 const BASE = 'http://localhost:3000'
 
+// API auth tests need a real Supabase backend to verify the auth path —
+// against placeholder creds the routes 503 before reaching the auth check.
+// Pattern matches public-decision.spec.ts.
+const hasRealSupabase =
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co' &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://your-project.supabase.co'
+
 // ─── SEO Infrastructure ─────────────────────────────────────
 
 test.describe('SEO & Meta', () => {
@@ -61,6 +69,7 @@ test.describe('SEO & Meta', () => {
 
 test.describe('API Route Health', () => {
   test('unauthenticated API requests return 401', async ({ request }) => {
+    test.skip(!hasRealSupabase, 'Real Supabase creds not configured — auth path cannot reach 401 against placeholder backend')
     const routes = [
       '/api/v1/nodes',
       '/api/v1/edges',
@@ -79,6 +88,7 @@ test.describe('API Route Health', () => {
   })
 
   test('unauthenticated POST requests return 401', async ({ request }) => {
+    test.skip(!hasRealSupabase, 'Real Supabase creds not configured — auth path cannot reach 401 against placeholder backend')
     const routes = [
       '/api/v1/nodes',
       '/api/v1/edges',
@@ -170,10 +180,12 @@ test.describe('Auth Redirects', () => {
   })
 
   test('onboarding redirects unauthenticated users', async ({ page }) => {
-    // /onboarding is a public route by design (added in commit 81bc69a) —
-    // first-run users land here before a workspace exists. Verify the page
-    // renders instead of redirecting.
+    // /onboarding became a protected prefix in the middleware (see
+    // lib/db/supabase/middleware.ts PROTECTED_PREFIXES). Unauthenticated
+    // users should be sent to /sign-in with a `next=/onboarding/...` param
+    // so we return them after auth. The previous behavior (pre-middleware
+    // refactor) treated /onboarding as public; that is no longer the case.
     await page.goto(`${BASE}/onboarding`)
-    expect(page.url()).toContain('/onboarding')
+    expect(page.url()).toContain('/sign-in')
   })
 })

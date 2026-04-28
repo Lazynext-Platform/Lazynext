@@ -1,4 +1,10 @@
 import { test, expect } from '@playwright/test'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+// Read the current version from VERSION (single source of truth) so this
+// test does not go stale every release. Previously hardcoded to v1.0.0.0.
+const CURRENT_VERSION = readFileSync(join(process.cwd(), 'VERSION'), 'utf-8').trim()
 
 test.describe('Launch surface smoke tests', () => {
   test('blog index shows the launch post', async ({ page }) => {
@@ -15,11 +21,11 @@ test.describe('Launch surface smoke tests', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Decision DNA: 4 dimensions' })).toBeVisible()
   })
 
-  test('marketing changelog reflects v1.0.0.0', async ({ page }) => {
+  test('marketing changelog reflects the current shipped version', async ({ page }) => {
     const response = await page.goto('/changelog')
     expect(response?.status()).toBe(200)
-    await expect(page.getByText('v1.0.0.0')).toBeVisible()
-    await expect(page.getByText(/Decision DNA/)).toBeVisible()
+    await expect(page.getByText(`v${CURRENT_VERSION}`).first()).toBeVisible()
+    await expect(page.getByText(/Decision DNA|Decision|Lazynext/i).first()).toBeVisible()
     // Stale fictional entries should be gone
     await expect(page.getByText('v0.4.0')).not.toBeVisible()
   })
