@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Lock, Eye } from 'lucide-react'
 import { getSharedCanvas } from '@/lib/data/shared-canvas'
-import { SharedCanvasViewer } from './SharedCanvasViewer'
+import { SharedCanvasMount } from './SharedCanvasMount'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,7 +66,7 @@ export default async function SharedCanvasPage({ params }: { params: { id: strin
           <p className="text-sm text-slate-500">This canvas is empty.</p>
         </div>
       ) : (
-        <SharedCanvasViewer nodes={canvas.nodes} edges={canvas.edges} />
+        <SharedCanvasMount nodes={canvas.nodes} edges={canvas.edges} />
       )}
 
       <footer className="border-t border-slate-800 px-6 py-2 text-2xs text-slate-600">
