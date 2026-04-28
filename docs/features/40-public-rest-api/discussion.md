@@ -1,7 +1,7 @@
 # 💬 Discussion: Public REST API & SDK (formalization)
 
 > **Feature**: `40` — Public REST API & SDK
-> **Status**: � COMPLETE
+> **Status**: 🟢 COMPLETE
 > **Branch**: not yet created (architecture stage starts on a fresh `feature/40-public-rest-api` branch)
 > **Depends On**: #03 Auth Pages (for API key issuance UX), #13 Billing (plan-gated rate limits), #31 Integrations Settings (hosts the API Keys panel)
 > **Date Started**: 2026-04-28

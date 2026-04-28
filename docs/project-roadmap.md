@@ -105,7 +105,7 @@ These features show real, truthful UI but lack the backend that would make them 
 |---|---|---|---|---|---|---|
 | 25 | Table Primitive | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — TablePanel with toolbar, inline editing, summary footer |
 | 36 | Decision Outcome Review | ✅ Complete | 🟢 Merged | #07, #08 | `main` | Built — emoji outcomes, queue navigation, LazyMind suggestions |
-| 40 | Public REST API & SDK (formalization) | ✅ Discuss/Design/Plan | � Merged | #03, #13, #31 | `main` (PR #11, 2026-04-28) | Header contract on every `/api/v1/*` response (X-Request-Id, X-API-Version, X-RateLimit triplet, Retry-After). Plan-aware two-tier rate limiting. 6 customer docs pages at `/docs/api/*`. SDK packaged at `packages/sdk/` (`@lazynext/sdk@0.1.0`, `private: true` until npm org reserved). Reference docs at [`docs/references/api-versioning.md`](references/api-versioning.md) + [`docs/references/api-changelog.md`](references/api-changelog.md). 350/350 tests pass. |
+| 40 | Public REST API & SDK (formalization) | ✅ Discuss/Design/Plan | 🟢 Merged | #03, #13, #31 | `main` (PR #11, 2026-04-28) | Header contract on every `/api/v1/*` response (X-Request-Id, X-API-Version, X-RateLimit triplet, Retry-After). Plan-aware two-tier rate limiting. 6 customer docs pages at `/docs/api/*`. SDK packaged at `packages/sdk/` (`@lazynext/sdk@0.1.0`, `private: true` until npm org reserved). Reference docs at [`docs/references/api-versioning.md`](references/api-versioning.md) + [`docs/references/api-changelog.md`](references/api-changelog.md). 350/350 tests pass. |
 
 **Phase 3 Total**: 3 features
 

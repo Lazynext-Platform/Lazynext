@@ -3,7 +3,7 @@
 > **Feature**: `40` — Public REST API & SDK
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
-> **Status**: � IN PROGRESS
+> **Status**: 🟢 COMPLETE
 > **Progress**: 25/27 tasks complete
 
 ---
