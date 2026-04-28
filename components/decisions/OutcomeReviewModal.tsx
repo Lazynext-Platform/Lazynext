@@ -96,8 +96,8 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
 
           {/* Notes */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-slate-300">Notes (optional)</label>
-            <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+            <label htmlFor="outcome-notes" className="block text-sm font-medium text-slate-300">Notes (optional)</label>
+            <textarea id="outcome-notes" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
               maxLength={1000}
               placeholder="What happened? Any unexpected outcomes?"
               className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none resize-none" />
@@ -105,8 +105,8 @@ export default function OutcomeReviewModal({ decisions, onClose }: OutcomeReview
 
           {/* Learning */}
           <div className="mt-3">
-            <label className="block text-sm font-medium text-slate-300">Key learning</label>
-            <textarea value={learning} onChange={e => setLearning(e.target.value)} rows={2}
+            <label htmlFor="outcome-learning" className="block text-sm font-medium text-slate-300">Key learning</label>
+            <textarea id="outcome-learning" value={learning} onChange={e => setLearning(e.target.value)} rows={2}
               maxLength={1000}
               placeholder="What would you do differently next time?"
               className="mt-1.5 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-50 placeholder-slate-500 focus:border-brand focus:outline-none resize-none" />
