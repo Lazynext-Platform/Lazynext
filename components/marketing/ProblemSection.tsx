@@ -42,7 +42,7 @@ export default function ProblemSection() {
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             Your company&rsquo;s decisions die in{' '}
-            <span className="text-brand">the wrong tools</span>
+            <span className="rounded-md bg-brand/40 px-2 py-0.5 text-slate-900">the wrong tools</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
             You make 40 decisions a week and remember 4. Your tools capture
@@ -82,7 +82,7 @@ export default function ProblemSection() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center">
               <Image src="/logo-transparent.png" alt="Lazynext" width={56} height={56} className="h-14 w-auto" />
             </div>
-            <p className="text-xl font-bold text-brand">Lazynext</p>
+            <p className="text-xl font-bold text-slate-900">Lazynext</p>
             <p className="mt-2 text-sm font-medium text-slate-600">
               The decision layer your stack is missing.
             </p>

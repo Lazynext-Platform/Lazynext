@@ -46,7 +46,7 @@ export default function CareersPage() {
               See what we&apos;re building
             </Link>
           </div>
-          <p className="mt-10 text-xs text-slate-400">
+          <p className="mt-10 text-xs text-slate-600">
             This page will grow into a real careers page once we&apos;re hiring at volume. Right now, an email gets you further than a form.
           </p>
         </div>
