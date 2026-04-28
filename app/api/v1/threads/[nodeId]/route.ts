@@ -101,7 +101,10 @@ export async function POST(
       .insert({ node_id: nodeId, workspace_id: workspaceId, created_by: userId })
       .select()
       .single()
-    if (threadError) return NextResponse.json({ error: threadError.message }, { status: 500 })
+    if (threadError) {
+      if (process.env.NODE_ENV === 'development') console.error('threads thread create:', threadError)
+      return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
+    }
     thread = newThread
   }
 
@@ -116,6 +119,9 @@ export async function POST(
     .select()
     .single()
 
-  if (msgError) return NextResponse.json({ error: msgError.message }, { status: 500 })
+  if (msgError) {
+    if (process.env.NODE_ENV === 'development') console.error('threads message insert:', msgError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
+  }
   return NextResponse.json({ data: message, error: null }, { status: 201 })
 }

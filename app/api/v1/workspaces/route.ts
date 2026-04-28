@@ -145,7 +145,8 @@ export async function POST(req: Request) {
     .single()
 
   if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('workspaces insert:', insertError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   const { error: memberError } = await db
@@ -156,7 +157,8 @@ export async function POST(req: Request) {
     // Best-effort cleanup of the just-created workspace so we don't
     // leave an orphan with no admin membership.
     await db.from('workspaces').delete().eq('id', workspace.id)
-    return NextResponse.json({ error: memberError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('workspaces member insert:', memberError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   return NextResponse.json({ data: workspace, error: null }, { status: 201 })

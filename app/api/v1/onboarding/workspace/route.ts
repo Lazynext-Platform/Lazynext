@@ -50,7 +50,8 @@ export async function POST(req: Request) {
     .maybeSingle()
 
   if (membershipError) {
-    return NextResponse.json({ error: membershipError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('onboarding/workspace membership lookup:', membershipError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   // Check if the chosen slug is taken by someone else
@@ -61,7 +62,8 @@ export async function POST(req: Request) {
     .maybeSingle()
 
   if (slugOwnerError) {
-    return NextResponse.json({ error: slugOwnerError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('onboarding/workspace slug lookup:', slugOwnerError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   if (slugOwner && slugOwner.id !== membership?.workspace_id) {
@@ -78,7 +80,8 @@ export async function POST(req: Request) {
       .single()
 
     if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 })
+      if (process.env.NODE_ENV === 'development') console.error('onboarding/workspace update:', updateError)
+      return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
     }
 
     return NextResponse.json({ data: workspace, error: null }, { status: 200 })
@@ -92,7 +95,8 @@ export async function POST(req: Request) {
     .single()
 
   if (insertError) {
-    return NextResponse.json({ error: insertError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('onboarding/workspace insert:', insertError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   const { error: memberError } = await db
@@ -100,7 +104,8 @@ export async function POST(req: Request) {
     .insert({ workspace_id: workspace.id, user_id: userId, role: 'admin' })
 
   if (memberError) {
-    return NextResponse.json({ error: memberError.message }, { status: 500 })
+    if (process.env.NODE_ENV === 'development') console.error('onboarding/workspace member insert:', memberError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
   }
 
   return NextResponse.json({ data: workspace, error: null }, { status: 201 })

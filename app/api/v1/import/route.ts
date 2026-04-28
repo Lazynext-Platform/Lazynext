@@ -51,7 +51,10 @@ export async function POST(req: Request) {
         .insert({ workspace_id: workspaceId, name: `Import from ${source}`, created_by: userId })
         .select()
         .single()
-      if (wfError) return NextResponse.json({ error: wfError.message }, { status: 500 })
+      if (wfError) {
+        if (process.env.NODE_ENV === 'development') console.error('import workflow create:', wfError)
+        return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
+      }
       targetWorkflowId = wf.id
     }
 
@@ -71,7 +74,10 @@ export async function POST(req: Request) {
       )
       .select()
 
-    if (nodeError) return NextResponse.json({ error: nodeError.message }, { status: 500 })
+    if (nodeError) {
+      if (process.env.NODE_ENV === 'development') console.error('import node insert:', nodeError)
+      return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
+    }
 
     return NextResponse.json({
       data: {

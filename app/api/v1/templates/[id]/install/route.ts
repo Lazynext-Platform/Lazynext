@@ -48,7 +48,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     .select()
     .single()
 
-  if (wfError) return NextResponse.json({ error: wfError.message }, { status: 500 })
+  if (wfError) {
+    if (process.env.NODE_ENV === 'development') console.error('templates install workflow:', wfError)
+    return NextResponse.json({ error: 'DATABASE_ERROR' }, { status: 500 })
+  }
 
   // Copy nodes with new IDs
   const nodeIdMap = new Map<string, string>()
