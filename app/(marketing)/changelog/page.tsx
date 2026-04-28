@@ -183,7 +183,7 @@ export default async function ChangelogPage() {
                       </li>
                     ))}
                     {entry.items.length > 8 && (
-                      <li className="text-2xs text-slate-600 pl-1">
+                      <li className="text-2xs text-slate-400 pl-1">
                         + {entry.items.length - 8} more — see the full <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/CHANGELOG.md" className="underline hover:text-slate-600" target="_blank" rel="noreferrer">CHANGELOG.md</a>
                       </li>
                     )}

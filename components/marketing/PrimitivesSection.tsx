@@ -74,7 +74,7 @@ export default function PrimitivesSection() {
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             Built from seven{' '}
-            <span className="rounded-md bg-brand/40 px-2 py-0.5 text-slate-900">powerful primitives</span>
+            <span className="text-brand">powerful primitives</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
             Everything in Lazynext is a node. Combine them infinitely.
@@ -103,7 +103,7 @@ export default function PrimitivesSection() {
               </div>
               <h3 className="text-base font-bold text-slate-900">{p.name}</h3>
               <p className="mt-1 text-sm text-slate-500">{p.desc}</p>
-              <p className="mt-3 text-xs font-medium text-slate-600">
+              <p className="mt-3 text-xs font-medium text-slate-400">
                 {p.replaces}
               </p>
             </div>

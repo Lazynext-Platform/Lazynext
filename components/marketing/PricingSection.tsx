@@ -105,7 +105,7 @@ export default function PricingSection() {
               }`}
             >
               Annual{' '}
-              <span className="ml-1 text-xs font-bold text-green-800">
+              <span className="ml-1 text-xs font-bold text-green-600">
                 Save 20%
               </span>
             </button>
@@ -171,7 +171,7 @@ export default function PricingSection() {
                     key={f.name}
                     className={`flex items-center gap-2 text-sm ${
                       !f.included && !tier.featured
-                        ? 'text-slate-500 line-through'
+                        ? 'text-slate-400'
                         : tier.featured
                           ? 'text-brand-foreground'
                           : 'text-slate-600'

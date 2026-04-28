@@ -105,7 +105,7 @@ export default function ContactPage({
           </p>
         </div>
 
-        <p className="mt-10 text-center text-xs text-slate-600">
+        <p className="mt-10 text-center text-xs text-slate-400">
           We do not run a chatbot that pretends to be a person. If you&apos;re emailing us, a person reads it.
         </p>
       </section>

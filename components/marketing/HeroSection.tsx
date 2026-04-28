@@ -65,7 +65,7 @@ export default function HeroSection() {
     <section className="gradient-hero pt-32 pb-24 md:pt-40 md:pb-32">
       <div className="mx-auto max-w-7xl px-6 text-center">
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
+        <div className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand">
           <span className="h-1.5 w-1.5 rounded-full bg-brand" />
           Decision Intelligence Platform
         </div>
@@ -73,7 +73,7 @@ export default function HeroSection() {
         {/* Headline */}
         <h1 className="mx-auto mt-6 max-w-4xl text-4xl font-extrabold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
           The decision memory for teams that{' '}
-          <span className="rounded-md bg-brand/40 px-2 py-0.5 text-slate-900">refuse to forget.</span>
+          <span className="text-brand">refuse to forget.</span>
         </h1>
 
         {/* Subtitle */}
