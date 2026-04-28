@@ -197,16 +197,41 @@ export function __resetRateLimitStoreForTests(): void {
   store.clear()
 }
 
-export function rateLimitResponse(resetAt: number) {
+/**
+ * Build a 429 response. Backwards compatible: callers may pass just the
+ * `resetAt` epoch-ms (legacy signature) or an options object that
+ * additionally carries the bucket's `limit` so the response can emit
+ * the full `X-RateLimit-Limit` + `X-RateLimit-Remaining` triplet.
+ *
+ * Signed by feature #40 — the public REST API contract requires these
+ * headers on every 429.
+ */
+export function rateLimitResponse(
+  resetAtOrOpts:
+    | number
+    | { resetAt: number; limit?: number; remaining?: number }
+) {
+  const opts =
+    typeof resetAtOrOpts === 'number' ? { resetAt: resetAtOrOpts } : resetAtOrOpts
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Retry-After': String(Math.max(1, Math.ceil((opts.resetAt - Date.now()) / 1000))),
+    'X-RateLimit-Reset': String(Math.ceil(opts.resetAt / 1000)),
+  }
+  if (typeof opts.limit === 'number') headers['X-RateLimit-Limit'] = String(opts.limit)
+  if (typeof opts.remaining === 'number') {
+    headers['X-RateLimit-Remaining'] = String(Math.max(0, opts.remaining))
+  } else if (typeof opts.limit === 'number') {
+    // If we know the limit but not remaining, the caller is in the 429
+    // path — there are zero requests left.
+    headers['X-RateLimit-Remaining'] = '0'
+  }
+
   return new Response(
-    JSON.stringify({ error: 'RATE_LIMITED', message: 'Too many requests. Please try again later.' }),
-    {
-      status: 429,
-      headers: {
-        'Content-Type': 'application/json',
-        'Retry-After': String(Math.ceil((resetAt - Date.now()) / 1000)),
-        'X-RateLimit-Reset': String(Math.ceil(resetAt / 1000)),
-      },
-    }
+    JSON.stringify({
+      error: 'RATE_LIMITED',
+      message: 'Too many requests. Please try again later.',
+    }),
+    { status: 429, headers }
   )
 }
