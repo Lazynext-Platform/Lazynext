@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
 > **Status**: � IN PROGRESS
-> **Progress**: 11/27 tasks complete
+> **Progress**: 18/27 tasks complete
 
 ---
 
@@ -49,7 +49,7 @@
 
 - [x] **C.1** — DEVIATION: rather than rewriting all 23 routes, `middleware.ts` now stamps `X-Request-Id` (preferring client-supplied id) + `X-API-Version: v1` on every `/api/v1/*` response. Routes opt into the full builder (rate-limit headers etc.) at their own pace. Non-clobbering — routes that already use `buildResponseHeaders` are untouched.
 - [x] **C.1b** — Bulk-upgraded all 50 `rateLimitResponse(rl.resetAt)` call sites to `rateLimitResponse({ resetAt, limit, remaining })`. `rateLimit()` return type extended with `limit` (back-compat additive). Every 429 now carries the full `X-RateLimit-Limit/Remaining/Reset` + `Retry-After` triplet.
-- [ ] **C.2** — Add an integration test (`tests/integration/api-headers.test.ts`) that hits every public route and asserts the contract headers are present
+- [x] **C.2** — `tests/integration/api-headers.test.ts` invokes `middleware()` directly with mock `NextRequest`s, asserts contract headers on 8 representative paths + 1 marketing route negative-case + uniqueness + client-supplied id passthrough
 - [ ] 📍 **Checkpoint C** — Integration test green; no route returns without `X-Request-Id` + `X-API-Version`
 
 ---
@@ -85,12 +85,12 @@
 
 > Scalar-rendered reference + supporting pages.
 
-- [ ] **F.1** — Install `@scalar/api-reference` (with human approval logged in changelog)
-- [ ] **F.2** — Create `app/(marketing)/docs/api/layout.tsx` with marketing chrome
-- [ ] **F.3** — Create `app/(marketing)/docs/api/page.tsx` rendering Scalar against `/api/v1/openapi.json`
-- [ ] **F.4** — Create supporting MDX/TSX pages: `quickstart`, `authentication`, `rate-limits`, `webhooks`, `versioning`, `changelog`
-- [ ] **F.5** — Add `/docs/api` and child routes to `app/sitemap.ts`
-- [ ] **F.6** — Webhook page: include the Node verification snippet using `crypto.timingSafeEqual`
+- [ ] **F.1** — Install `@scalar/api-reference` (BLOCKED on human approval; supporting pages shipped without Scalar)
+- [ ] **F.2** — Create `app/(marketing)/docs/api/layout.tsx` with marketing chrome (deferred — root marketing layout already wraps these pages)
+- [ ] **F.3** — Render Scalar against `/api/v1/openapi.json` (BLOCKED; existing `/docs/api` page links to the raw OpenAPI JSON until Scalar is approved)
+- [x] **F.4** — Created `quickstart`, `authentication`, `rate-limits`, `webhooks`, `versioning`, `changelog` pages under `app/(marketing)/docs/api/`. All zero-dep, marketing-styled, internally cross-linked.
+- [x] **F.5** — Added all 6 routes to `app/sitemap.ts`
+- [x] **F.6** — Webhook page includes the full Node `crypto.timingSafeEqual` verification snippet with replay-protection comment
 - [ ] 📍 **Checkpoint F** — `/docs/api` renders the live OpenAPI spec; all 6 supporting pages load; sitemap includes them
 
 ---
