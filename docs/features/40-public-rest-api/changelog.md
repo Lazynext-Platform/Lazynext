@@ -1,11 +1,24 @@
 # 📝 Changelog: Public REST API & SDK
 
 > **Feature**: `40` — Public REST API & SDK
-> **Branch**: `feature/40-public-rest-api` (not yet created)
+> **Branch**: `feature/40-public-rest-api`
 > **Started**: 2026-04-28
-> **Completed**: —
+> **Completed**: 2026-04-28 (PR #11 merged)
 
 ---
+
+## Session Notes
+
+### Session Note — 2026-04-28 (merge + post-ship)
+- **Who**: AI Agent (GitHub Copilot, Claude Opus 4.7)
+- **Worked On**: Z.3, Z.4 (merge-time tasks).
+  - PR #11 merged into `main` by human reviewer.
+  - Bumped `VERSION` and `package.json` to `1.4.0.0`.
+  - Wrote `[v1.4.0.0]` entry in [`docs/project-changelog.md`](../../project-changelog.md).
+  - Flipped #40 to 🟢 Merged in [`docs/project-roadmap.md`](../../project-roadmap.md). Roadmap stats now show 40 features, 0 not-started.
+- **Stopped At**: Feature done. Outstanding items are all external decisions (npm org, Scalar dep, openapi-typescript dep) that don't block this feature's "done" state.
+- **Blockers**: None for #40 itself.
+- **Next Steps**: When `@lazynext` is reserved on npm, flip `private: false` in `packages/sdk/package.json` and `npm publish`.
 
 ## Session Notes
 

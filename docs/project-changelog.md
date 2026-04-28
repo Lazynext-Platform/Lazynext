@@ -6,6 +6,38 @@
 
 ---
 
+## [v1.4.0.0] - 2026-04-28 — Public REST API v1 (#40 merged via PR #11)
+
+**Theme:** Feature #40 ships. The `/api/v1/*` surface is now a real, documented, versioned product: response-header contract, plan-aware rate limits, customer docs site, publish-ready typed SDK.
+
+### Added
+- **Header contract on every `/api/v1/*` response** — middleware stamps `X-Request-Id` (preserves upstream value if present, else freshly minted via `crypto.randomUUID()`) and `X-API-Version: v1`. Routes set `X-RateLimit-Limit`/`Remaining`/`Reset` via [`lib/utils/api-headers.ts → buildResponseHeaders()`](../lib/utils/api-headers.ts). 429s now always emit the full triplet plus `Retry-After` (clamped ≥ 1s).
+- **Plan-aware two-tier rate limiting** — [`lib/utils/rate-limit.ts → checkApiRateLimit()`](../lib/utils/rate-limit.ts). Per-key + per-workspace ceilings differ by plan: free/starter 60/120 rpm, pro 600/1 800, business/enterprise 6 000/30 000. All 50 existing `rateLimitResponse(rl.resetAt)` call sites swept to the new options-object signature.
+- **Six customer docs pages** under [`app/(marketing)/docs/api/`](../app/(marketing)/docs/api): `/docs/api/{quickstart,authentication,rate-limits,webhooks,versioning,changelog}` plus a shared `layout.tsx` with sticky sub-nav. Sitemap and README updated.
+- **SDK packaged at [`packages/sdk/`](../packages/sdk/)** — `@lazynext/sdk@0.1.0`, MIT, hand-typed client (~150 LOC), README, LICENSE, tsconfig. `private: true` until the npm org is reserved. `lib/sdk/{client,index}.ts` are re-export shims so internal imports keep working unchanged.
+- **Reference docs** — [`docs/references/api-versioning.md`](references/api-versioning.md) (Stripe-style additive policy, ≥ 6-month sunset, full header-contract table) + [`docs/references/api-changelog.md`](references/api-changelog.md) (internal API change log with v1 baseline).
+- **32 new tests** (350/350 in 40 files): `tests/integration/api-headers.test.ts` (7 cases), `tests/unit/api-headers.test.ts` (13), `tests/unit/api-rate-limit.test.ts` (8), and 4 added to `tests/unit/rate-limit.test.ts`.
+
+### Changed
+- `rateLimitResponse(resetAt)` is back-compat; new options-object `rateLimitResponse({ resetAt, limit?, remaining? })` is preferred.
+- `rateLimit()` return type now includes `limit` (additive, non-breaking).
+- [`docs/releases/v1.0.0.0.md`](releases/v1.0.0.0.md) — corrected the "Try it" clone URL to `Lazynext-Platform/Lazynext`.
+
+### Deferred (with documented reasons in [`docs/features/40-public-rest-api/changelog.md`](features/40-public-rest-api/changelog.md))
+- **A.2** Sentry on `/api/v1` — Sentry is no-op in this repo today.
+- **E.1** npm workspaces — would change Vercel build behaviour; standalone publishable directory works for v0.1.0.
+- **E.3** physical test file move — vitest globs `tests/**`, moving would break discovery.
+- **E.5/E.6** auto-gen SDK types — needs `openapi-typescript` dep approval.
+- **E.8** `npm publish` — package is `private: true`; flip after `@lazynext` is reserved on npm.
+- **F.1/F.3** Scalar OpenAPI viewer — needs `@scalar/api-reference` dep approval.
+
+### Stats
+- **10 commits** on `feature/40-public-rest-api`, merged as PR #11.
+- **25/27 Build-stage tasks complete.**
+- **Validation**: type-check clean, lint clean (only pre-existing `global-error.tsx <img>` warning), 350/350 tests pass.
+
+---
+
 ## [v1.3.42.4] - 2026-04-28 — Audit round 3 (summary prose sweep)
 
 **Theme:** Prose-level sweep across all 34 retroactive `summary.md` files. Found and fixed two residual currency drift issues that had propagated from the same incorrect mental model corrected in v1.3.42.3.
