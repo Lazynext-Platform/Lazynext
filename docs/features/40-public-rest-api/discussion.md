@@ -1,11 +1,11 @@
 # 💬 Discussion: Public REST API & SDK (formalization)
 
 > **Feature**: `40` — Public REST API & SDK
-> **Status**: 🟡 IN PROGRESS — DRAFT
-> **Branch**: not yet created (awaiting human approval to promote from backlog)
-> **Depends On**: #03 Auth Pages (for API key issuance UX), #13 Billing (plan-gated rate limits)
+> **Status**: � COMPLETE
+> **Branch**: not yet created (architecture stage starts on a fresh `feature/40-public-rest-api` branch)
+> **Depends On**: #03 Auth Pages (for API key issuance UX), #13 Billing (plan-gated rate limits), #31 Integrations Settings (hosts the API Keys panel)
 > **Date Started**: 2026-04-28
-> **Date Completed**: —
+> **Date Completed**: 2026-04-28
 
 ---
 
@@ -73,9 +73,9 @@ The implementation budget is small *because* the engine already exists. Most of 
 | Feature #03 — Auth Pages | Feature | ✅ Done |
 | Feature #13 — Billing & Subscription | Feature | ✅ Done — needed for plan-gated rate limits |
 | Feature #31 — Integrations Settings | Feature | ✅ Done — already hosts API Keys panel |
-| `redoc-cli` or `@scalar/api-reference` | External | 🔴 Needs human approval — new dependency |
-| npm publish access for `@lazynext` org | Infrastructure | 🔴 Needs human setup |
-| `@lazynext/sdk` package name | External | 🔴 Needs reserve on npm |
+| `@scalar/api-reference` | External | 🟡 Approved (Decisions log 2026-04-28). To be installed during architecture stage. |
+| npm publish access for `@lazynext` org | Infrastructure | 🟡 Approved — reserve `@lazynext` org on npm. To be done during architecture stage as a one-shot ops task. |
+| `@lazynext/sdk` package name | External | 🟡 Approved — reserved alongside the org. |
 
 ## Research & Prior Art
 
@@ -106,10 +106,12 @@ The implementation budget is small *because* the engine already exists. Most of 
 
 ## Open Questions
 
-- [ ] Are we okay reserving `@lazynext` on npm now even if SDK release is later?
-- [ ] Does the docs page belong under the marketing route group (`(marketing)/docs/api/`) or the app shell? (Marketing — public docs shouldn't require auth.)
-- [ ] Webhooks: do we ship the consumer-facing signature verification snippet in 4 languages (Node/Python/Ruby/Go) or only Node?
-- [ ] Rate limits: enforce per-key or per-workspace? (Probably per-key, with a workspace ceiling.)
+_All resolved 2026-04-28 — see Decisions log below._
+
+- [x] ~~Are we okay reserving `@lazynext` on npm now even if SDK release is later?~~ → **Yes. Reserve now (defensive).** Squatting risk is real; reservation is free.
+- [x] ~~Does the docs page belong under the marketing route group or the app shell?~~ → **Marketing route group** (`app/(marketing)/docs/api/`). Public docs must not require auth.
+- [x] ~~Do we ship the consumer-facing signature verification snippet in 4 languages or only Node?~~ → **Node only at v1.** Add Python/Ruby/Go in a follow-up feature if customer demand surfaces. Avoid maintaining 4 untested examples.
+- [x] ~~Rate limits: enforce per-key or per-workspace?~~ → **Per-key, with a workspace ceiling.** Per-key gives us granular throttling without nuking the whole workspace; the workspace ceiling protects the cluster from a misbehaving plan-tier customer minting many keys.
 
 ## Decisions Made
 
@@ -118,10 +120,17 @@ The implementation budget is small *because* the engine already exists. Most of 
 | 2026-04-28 | Promote backlog item to numbered feature `#40` | Strategic enabler for OAuth adapters (#15/#31), AI workflow gen, and PDF export — formalizing first multiplies leverage. |
 | 2026-04-28 | Scope is *packaging*, not new endpoints | All 24 route folders already exist + are tested; pretending this is a "build" would inflate it artificially. |
 | 2026-04-28 | Version pinning at `/v1/` stays | Already shipped; no good reason to rewrite. |
-| 2026-04-28 | Scalar over Redoc for the docs page | Bundle size + theme support; tentative — confirm during architecture stage. |
+| 2026-04-28 | **Scalar** for the docs renderer | Smaller bundle than Redoc; supports the marketing site's dark/light theme switcher; faster initial render. Add `@scalar/api-reference` as a marketing-route dependency only (lazy-loaded; not on the app bundle). |
+| 2026-04-28 | Reserve `@lazynext` npm org **now** | Defensive against squatting; free; release timing decoupled. |
+| 2026-04-28 | Docs page lives at `app/(marketing)/docs/api/` | Public docs must not require auth; marketing group already serves the light theme. |
+| 2026-04-28 | Webhook examples: **Node only at v1** | Avoid maintaining 4 untested language snippets; expand on customer demand. |
+| 2026-04-28 | Rate limits: **per-key with a workspace ceiling** | Granular throttling + cluster-protection from a customer minting many keys. Headers: `X-RateLimit-{Limit,Remaining,Reset}` + `Retry-After`. |
+| 2026-04-28 | API versioning policy: **Stripe-style** | `/v1/` prefix stays; breaking changes → `/v2/` lives alongside; 6-month sunset window via `Sunset` + `Deprecation` headers (RFC 8594 / IETF deprecation header). |
 
 ## Discussion Complete ✅
 
-_To be marked complete by a human after open questions are resolved and the npm/dependency approvals come in._
+**Summary**: Lazynext's REST API engine is fully built (`app/api/v1/*` + bearer auth + OpenAPI spec + typed SDK at `lib/sdk/`); this feature *packages* it as a public product. Four layers: (1) Scalar-rendered docs page at `app/(marketing)/docs/api/`, (2) Stripe-style versioning policy with `Sunset`/`Deprecation` headers, (3) per-key rate limits with workspace ceiling and standard rate-limit headers, (4) `@lazynext/sdk` published to npm.
 
-**Next** (when complete): Create [architecture.md](architecture.md) → break out per-layer file structure (docs page, versioning headers, SDK packaging, rate-limit response shape).
+**Completed**: 2026-04-28
+
+**Next**: Create [`architecture.md`](architecture.md) — break out per-layer file structure (docs page, versioning headers, SDK packaging, rate-limit response shape).

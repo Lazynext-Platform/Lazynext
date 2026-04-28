@@ -10,12 +10,12 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 38 |
+| Total Features | 39 |
 | 🟢 Complete (Design) | 38 |
 | 🟢 Complete (UI shell) | 38 |
 | 🟢 Fully wired to real backend | 34 |
 | 🟡 Partial / honest empty state | 4 — see *Remaining work* below |
-| 🔴 Not Started | 0 |
+| 🔴 Not Started | 1 — #40 Public REST API (discussion drafted 2026-04-28) |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
 
@@ -105,8 +105,9 @@ These features show real, truthful UI but lack the backend that would make them 
 |---|---|---|---|---|---|---|
 | 25 | Table Primitive | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — TablePanel with toolbar, inline editing, summary footer |
 | 36 | Decision Outcome Review | ✅ Complete | 🟢 Merged | #07, #08 | `main` | Built — emoji outcomes, queue navigation, LazyMind suggestions |
+| 40 | Public REST API & SDK (formalization) | 🔴 Discussion 🟡 | 🔴 Not Started | #03, #13, #31 | — | Promoted from backlog (2026-04-28). Discussion drafted at [`docs/features/40-public-rest-api/discussion.md`](features/40-public-rest-api/discussion.md). Engineering already exists (`app/api/v1/*` + `lib/sdk/`); this feature is product packaging — public docs page, versioning policy, rate-limit transparency, npm SDK release. |
 
-**Phase 3 Total**: 2 features
+**Phase 3 Total**: 3 features
 
 ---
 
@@ -193,7 +194,7 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | Feature Idea | Priority | Notes |
 |---|---|---|
-| API for external integrations | Medium | Enable third-party tools to connect |
+| ~~API for external integrations~~ | ~~Medium~~ | **Promoted to feature #40 on 2026-04-28** |
 | Mobile native app (React Native) | Low | Future consideration |
 | AI workflow generation from prompt | Medium | "Create a hiring workflow" → auto-generate canvas |
 | Decision DNA reporting / PDF export | Medium | Executive-friendly decision reports |
@@ -211,3 +212,4 @@ These features show real, truthful UI but lack the backend that would make them 
 | 2026-04-26 | Header milestone synced v1.1.0.1 → v1.3.0.5 | Roadmap had drifted behind v1.2 + v1.3 ships (pricing, billing fixes) |
 | 2026-04-27 | Header synced to v1.3.5.0 + dropped Notification Center, Settings→Notifications tab, and Audit Log from *Remaining work* | Three more features moved from honest empty state to fully wired |
 | 2026-04-28 | Header synced to v1.3.28.1; Import modal + Integrations Disconnect noted as shipped; pricing/comparison pages corrected to list Automation engine + Templates as live | Three ships landed back-to-back without doc updates |
+| 2026-04-28 | Promoted backlog item **Public REST API for external integrations** to numbered feature **#40 — Public REST API & SDK (formalization)** in Phase 3 | Strategic enabler for OAuth adapters (#15/#31), AI workflow generation, and PDF export. Engineering already exists; work is product packaging. Discussion doc drafted at `docs/features/40-public-rest-api/discussion.md`. |
