@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
 > **Status**: � IN PROGRESS
-> **Progress**: 24/27 tasks complete
+> **Progress**: 25/27 tasks complete
 
 ---
 
@@ -86,7 +86,7 @@
 > Scalar-rendered reference + supporting pages.
 
 - [ ] **F.1** — Install `@scalar/api-reference` (BLOCKED on human approval; supporting pages shipped without Scalar)
-- [ ] **F.2** — Create `app/(marketing)/docs/api/layout.tsx` with marketing chrome (deferred — root marketing layout already wraps these pages)
+- [x] **F.2** — Created `app/(marketing)/docs/api/layout.tsx` with sticky sub-nav (Reference / Quickstart / Authentication / Rate Limits / Webhooks / Versioning / Changelog) so readers can jump laterally without bouncing through the index
 - [ ] **F.3** — Render Scalar against `/api/v1/openapi.json` (BLOCKED; existing `/docs/api` page links to the raw OpenAPI JSON until Scalar is approved)
 - [x] **F.4** — Created `quickstart`, `authentication`, `rate-limits`, `webhooks`, `versioning`, `changelog` pages under `app/(marketing)/docs/api/`. All zero-dep, marketing-styled, internally cross-linked.
 - [x] **F.5** — Added all 6 routes to `app/sitemap.ts`
