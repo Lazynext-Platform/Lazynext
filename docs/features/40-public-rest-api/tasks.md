@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
 > **Status**: � IN PROGRESS
-> **Progress**: 10/27 tasks complete
+> **Progress**: 11/27 tasks complete
 
 ---
 
@@ -48,6 +48,7 @@
 > Roll out `buildResponseHeaders` across the 24 route folders.
 
 - [x] **C.1** — DEVIATION: rather than rewriting all 23 routes, `middleware.ts` now stamps `X-Request-Id` (preferring client-supplied id) + `X-API-Version: v1` on every `/api/v1/*` response. Routes opt into the full builder (rate-limit headers etc.) at their own pace. Non-clobbering — routes that already use `buildResponseHeaders` are untouched.
+- [x] **C.1b** — Bulk-upgraded all 50 `rateLimitResponse(rl.resetAt)` call sites to `rateLimitResponse({ resetAt, limit, remaining })`. `rateLimit()` return type extended with `limit` (back-compat additive). Every 429 now carries the full `X-RateLimit-Limit/Remaining/Reset` + `Retry-After` triplet.
 - [ ] **C.2** — Add an integration test (`tests/integration/api-headers.test.ts`) that hits every public route and asserts the contract headers are present
 - [ ] 📍 **Checkpoint C** — Integration test green; no route returns without `X-Request-Id` + `X-API-Version`
 

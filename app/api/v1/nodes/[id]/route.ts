@@ -36,7 +36,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   if (!auth.ok) return auth.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   return NextResponse.json({ data: node, error: null })
 }
@@ -57,7 +57,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (scopeCheck) return scopeCheck.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const userId = auth.userId
 
@@ -145,7 +145,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (scopeCheck) return scopeCheck.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   await db.from('nodes').delete().eq('id', params.id)
   await recordAudit({

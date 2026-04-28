@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`ai:${userId}`, RATE_LIMITS.ai)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!hasValidDatabaseUrl) {
     return NextResponse.json(

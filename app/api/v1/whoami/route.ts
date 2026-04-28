@@ -83,7 +83,7 @@ export async function GET(req: Request) {
   // Session path — single bucket.
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
   if (!rl.success) {
-    const baseResp = rateLimitResponse(rl.resetAt)
+    const baseResp = rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
     baseResp.headers.set('X-Request-Id', requestId)
     baseResp.headers.set('X-API-Version', 'v1')
     return baseResp

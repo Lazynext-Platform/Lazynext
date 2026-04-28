@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
@@ -37,7 +37,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
@@ -70,7 +70,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 

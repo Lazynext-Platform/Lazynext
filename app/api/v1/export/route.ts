@@ -28,7 +28,7 @@ export async function GET(req: Request) {
   // than the default api bucket (10/min) to make scraping painful.
   const rateLimitId = apiKey ? `key:${apiKey.keyId}` : `user:${userId}`
   const rl = rateLimit(rateLimitId, RATE_LIMITS.export)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
   const url = new URL(req.url)

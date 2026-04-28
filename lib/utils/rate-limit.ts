@@ -97,7 +97,7 @@ export const API_PLAN_RATE_LIMITS: Record<ApiPlan, ApiPlanRateLimit> = {
 export function rateLimit(
   identifier: string,
   config: RateLimitConfig = RATE_LIMITS.api
-): { success: boolean; remaining: number; resetAt: number } {
+): { success: boolean; limit: number; remaining: number; resetAt: number } {
   const now = Date.now()
   const key = identifier
 
@@ -106,15 +106,20 @@ export function rateLimit(
   if (!existing || existing.resetAt < now) {
     const resetAt = now + config.windowSec * 1000
     store.set(key, { count: 1, resetAt })
-    return { success: true, remaining: config.limit - 1, resetAt }
+    return { success: true, limit: config.limit, remaining: config.limit - 1, resetAt }
   }
 
   if (existing.count >= config.limit) {
-    return { success: false, remaining: 0, resetAt: existing.resetAt }
+    return { success: false, limit: config.limit, remaining: 0, resetAt: existing.resetAt }
   }
 
   existing.count++
-  return { success: true, remaining: config.limit - existing.count, resetAt: existing.resetAt }
+  return {
+    success: true,
+    limit: config.limit,
+    remaining: config.limit - existing.count,
+    resetAt: existing.resetAt,
+  }
 }
 
 /**

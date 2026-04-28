@@ -39,7 +39,7 @@ export async function GET(
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!isKnownProvider(params.provider)) {
     return NextResponse.json({ error: 'UNKNOWN_PROVIDER' }, { status: 404 })
