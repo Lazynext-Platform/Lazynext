@@ -12,7 +12,7 @@ export default function ConsolidationMap() {
       <div className="mx-auto max-w-7xl px-6 text-center">
         <h2 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
           One tool.{' '}
-          <span className="text-brand">One price.</span>
+          <span className="rounded-md bg-brand/40 px-2 py-0.5 text-slate-900">One price.</span>
         </h2>
         <p className="mx-auto mb-16 max-w-xl text-lg text-slate-500">
           Stop paying six subscriptions for six half-solutions.
@@ -64,10 +64,10 @@ export default function ConsolidationMap() {
         {/* Price comparison */}
         <div className="mt-12 flex flex-col items-center justify-center gap-8 sm:flex-row">
           <div className="text-center">
-            <p className="text-4xl font-extrabold text-slate-300 line-through">
+            <p className="text-4xl font-extrabold text-slate-500 line-through">
               {formatPrice(171, currency)}
             </p>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-600">
               /seat/month (6 tools)
             </p>
           </div>
@@ -76,8 +76,8 @@ export default function ConsolidationMap() {
             <ArrowDown className="h-8 w-8 text-brand sm:hidden" />
           </div>
           <div className="text-center">
-            <p className="text-5xl font-extrabold text-brand">{formatPrice(19, currency)}</p>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="inline-block rounded-lg bg-brand px-3 py-1 text-5xl font-extrabold text-brand-foreground">{formatPrice(19, currency)}</p>
+            <p className="mt-2 text-sm text-slate-600">
               /seat/month (1 tool)
             </p>
           </div>
