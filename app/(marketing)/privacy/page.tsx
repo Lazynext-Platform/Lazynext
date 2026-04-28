@@ -16,7 +16,7 @@ export default function PrivacyPage() {
     <main id="main-content" className="bg-white text-slate-900">
       <article className="mx-auto max-w-3xl px-6 pb-20 pt-24">
         <h1 className="text-4xl font-bold tracking-tight">Privacy Policy</h1>
-        <p className="mt-2 text-sm text-slate-600">Last updated: April 15, 2026</p>
+        <p className="mt-2 text-sm text-slate-400">Last updated: April 15, 2026</p>
 
         <div className="mt-10 space-y-8 text-base leading-relaxed text-slate-600">
           <section>
@@ -57,7 +57,7 @@ export default function PrivacyPage() {
             <p className="mt-3">
               You can access, update, or delete your data at any time from your workspace settings. For account
               deletion requests or data export, contact us at{' '}
-              <a href="mailto:security@lazynext.com" className="font-semibold text-slate-900 underline decoration-brand decoration-2 underline-offset-2 hover:bg-brand/20">
+              <a href="mailto:security@lazynext.com" className="font-medium text-brand hover:underline">
                 security@lazynext.com
               </a>.
             </p>
@@ -67,7 +67,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-slate-900">6. Contact</h2>
             <p className="mt-3">
               Questions about this policy? Reach us at{' '}
-              <a href="mailto:security@lazynext.com" className="font-semibold text-slate-900 underline decoration-brand decoration-2 underline-offset-2 hover:bg-brand/20">
+              <a href="mailto:security@lazynext.com" className="font-medium text-brand hover:underline">
                 security@lazynext.com
               </a>.
             </p>

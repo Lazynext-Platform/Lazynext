@@ -89,7 +89,7 @@ export default function DocsPage() {
           </div>
         </Link>
 
-        <p className="mt-10 text-xs text-slate-600">
+        <p className="mt-10 text-xs text-slate-400">
           A deeper technical reference is on the roadmap. Need something specific right now? Email <a href="mailto:hello@lazynext.com" className="underline hover:text-slate-600">hello@lazynext.com</a> — we answer fast.
         </p>
       </section>
@@ -102,7 +102,7 @@ function Concept({ num, icon, title, body }: { num: string; icon: React.ReactNod
     <div className="flex gap-4 rounded-xl border border-slate-200 bg-white p-6 transition-colors hover:border-indigo-200">
       <div className="flex flex-shrink-0 flex-col items-center">
         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-50">{icon}</div>
-        <div className="mt-2 font-mono text-xs font-semibold text-slate-600">0{num}</div>
+        <div className="mt-2 font-mono text-xs font-semibold text-slate-400">0{num}</div>
       </div>
       <div className="min-w-0 flex-1">
         <h3 className="text-lg font-semibold text-slate-900">{title}</h3>

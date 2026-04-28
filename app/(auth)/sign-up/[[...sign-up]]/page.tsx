@@ -50,7 +50,7 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm text-center">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Check your email</h1>
         <p className="text-slate-500 mb-4">We sent a confirmation link to <strong>{email}</strong></p>
-        <Link href="/sign-in" className="font-semibold text-slate-900 underline decoration-brand decoration-2 underline-offset-2 hover:bg-brand/20">← Back to sign in</Link>
+        <Link href="/sign-in" className="text-brand hover:text-brand-hover">← Back to sign in</Link>
       </div>
     )
   }
@@ -79,7 +79,7 @@ export default function SignUpPage() {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-        <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-600">or</span></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">or</span></div>
       </div>
 
       <form onSubmit={handleSignUp} noValidate className="space-y-4">
@@ -151,7 +151,7 @@ export default function SignUpPage() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Already have an account?{' '}
-        <Link href="/sign-in" className="font-semibold text-slate-900 underline decoration-brand decoration-2 underline-offset-2 hover:bg-brand/20">Sign in</Link>
+        <Link href="/sign-in" className="text-brand hover:text-brand-hover">Sign in</Link>
       </p>
     </div>
   )

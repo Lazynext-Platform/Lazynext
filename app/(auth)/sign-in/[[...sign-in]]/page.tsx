@@ -73,7 +73,7 @@ export default function SignInPage() {
 
       <div className="relative mb-6">
         <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-        <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-600">or</span></div>
+        <div className="relative flex justify-center text-xs"><span className="bg-white px-2 text-slate-400">or</span></div>
       </div>
 
       <form onSubmit={handleSignIn} noValidate className="space-y-4">
@@ -119,7 +119,7 @@ export default function SignInPage() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         Don&apos;t have an account?{' '}
-        <Link href="/sign-up" className="font-semibold text-slate-900 underline decoration-brand decoration-2 underline-offset-2 hover:bg-brand/20">Sign up</Link>
+        <Link href="/sign-up" className="text-brand hover:text-brand-hover">Sign up</Link>
       </p>
     </div>
   )

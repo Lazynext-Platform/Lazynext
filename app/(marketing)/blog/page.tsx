@@ -37,7 +37,7 @@ export default function BlogPage() {
           <Link href={`/blog/${featured.slug}`} className="group block rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 to-white p-8 hover:border-indigo-200 transition-colors">
             <div className="flex items-center gap-2 mb-3">
               <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${tagColors[featured.tag] || 'bg-slate-100 text-slate-500'}`}>{featured.tag}</span>
-              <span className="flex items-center gap-1 text-xs text-slate-600"><Clock className="h-3 w-3" /><time dateTime={featured.dateTime}>{featured.date}</time></span>
+              <span className="flex items-center gap-1 text-xs text-slate-400"><Clock className="h-3 w-3" /><time dateTime={featured.dateTime}>{featured.date}</time></span>
             </div>
             <h2 className="text-2xl font-bold group-hover:text-indigo-700 transition-colors">{featured.title}</h2>
             <p className="mt-2 text-slate-600 leading-relaxed">{featured.excerpt}</p>
@@ -69,7 +69,7 @@ export default function BlogPage() {
               <h3 className="text-base font-bold group-hover:text-indigo-700 transition-colors">{post.title}</h3>
               <p className="mt-1 text-sm text-slate-500 line-clamp-2">{post.excerpt}</p>
               <div className="mt-3 flex items-center justify-between">
-                <time dateTime={post.dateTime} className="text-xs text-slate-600">{post.date}</time>
+                <time dateTime={post.dateTime} className="text-xs text-slate-400">{post.date}</time>
                 <span className="text-xs font-semibold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">Read →</span>
               </div>
             </article>

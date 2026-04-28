@@ -32,10 +32,10 @@ export default function DecisionDNASection() {
                   <CheckCircle className="h-4 w-4 text-white" />
                 </div>
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-700">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-500">
                     Decision
                   </span>
-                  <span className="ml-2 text-xs text-slate-600">D-127</span>
+                  <span className="ml-2 text-xs text-slate-400">D-127</span>
                 </div>
                 <div className="ml-auto rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700">
                   Resolved
@@ -72,7 +72,7 @@ export default function DecisionDNASection() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-600">
+              <div className="flex items-center gap-2 text-xs text-slate-400">
                 <Users className="h-3.5 w-3.5" />
                 <span>5 participants</span>
                 <span className="mx-1">&middot;</span>
@@ -86,12 +86,12 @@ export default function DecisionDNASection() {
 
           {/* Text content */}
           <div className="order-1 lg:order-2">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-800">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-orange-600">
               Hero Feature
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
               Decision DNA &mdash; Your team&apos;s{' '}
-              <span className="text-orange-700">institutional memory</span>
+              <span className="text-orange-500">institutional memory</span>
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-slate-600">
               Every decision your team makes is logged as a first-class node.
