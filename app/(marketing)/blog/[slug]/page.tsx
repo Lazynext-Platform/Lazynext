@@ -182,7 +182,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
         <header className="mt-6">
           <div className="flex items-center gap-3">
             <span className={`rounded-full px-2.5 py-0.5 text-2xs font-semibold ${tagColors[post.tag] || 'bg-slate-100 text-slate-500'}`}>{post.tag}</span>
-            <span className="flex items-center gap-1 text-xs text-slate-400">
+            <span className="flex items-center gap-1 text-xs text-slate-600">
               <Clock className="h-3 w-3" />
               <time dateTime={post.dateTime}>{post.date}</time>
             </span>

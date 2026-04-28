@@ -171,7 +171,7 @@ const faqItems = [
 function CheckIcon({ className }: { className?: string }) {
   return (
     <svg
-      className={className || 'mx-auto h-5 w-5 text-brand'}
+      className={className || 'mx-auto h-5 w-5 text-emerald-600'}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -184,7 +184,7 @@ function CheckIcon({ className }: { className?: string }) {
 
 function renderCellValue(val: string | boolean | null) {
   if (val === true) return <CheckIcon />
-  if (val === null) return <span className="text-slate-400">&mdash;</span>
+  if (val === null) return <span className="text-slate-500" aria-label="Not included">&mdash;</span>
   return <span>{val}</span>
 }
 
@@ -207,7 +207,7 @@ function PricingCta({ tier, isAnnual }: { tier: PricingTier; isAnnual: boolean }
   const className = `mt-8 block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors ${
     tier.ctaStyle === 'filled'
       ? 'bg-brand text-brand-foreground shadow-sm hover:bg-brand-hover'
-      : 'border-2 border-brand bg-white text-brand-foreground hover:bg-brand/10'
+      : 'border-2 border-brand bg-white text-slate-900 hover:bg-brand/10'
   }`
 
   if (external) {
@@ -327,7 +327,7 @@ export default function PricingPage() {
                       </span>
                     </div>
                   )}
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs text-slate-600">
                     {tier.monthlyPrice === null && (('anchorNote' in tier && tier.anchorNote) || 'Tailored to your org')}
                     {tier.monthlyPrice === '0' && 'Free forever'}
                     {tier.monthlyPrice && tier.monthlyPrice !== '0' && (isAnnual ? 'billed annually — save 20%' : 'billed monthly')}
@@ -337,7 +337,7 @@ export default function PricingPage() {
                 <ul className="mt-7 flex-1 space-y-3">
                   {tier.inheritLabel && (
                     <li className="flex items-start gap-2.5">
-                      <span className="mt-0.5 shrink-0 text-sm font-semibold text-brand">
+                      <span className="mt-0.5 shrink-0 text-sm font-bold text-emerald-600">
                         +
                       </span>
                       <span className="text-sm font-medium text-slate-600">
@@ -347,7 +347,7 @@ export default function PricingPage() {
                   )}
                   {tier.features.map((f) => (
                     <li key={f} className="flex items-start gap-2.5">
-                      <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+                      <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                       <span className="text-sm text-slate-600">{f}</span>
                     </li>
                   ))}
@@ -380,9 +380,9 @@ export default function PricingPage() {
                   <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Team
                   </th>
-                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-brand">
+                  <th scope="col" className="w-1/5 px-4 py-4 text-center font-semibold text-slate-900">
                     Business
-                    <span className="block text-xs font-normal text-brand/70">
+                    <span className="ml-1 inline-block rounded-full bg-brand px-2 py-0.5 text-2xs font-bold uppercase tracking-wide text-brand-foreground">
                       Most Popular
                     </span>
                   </th>
@@ -479,7 +479,7 @@ export default function PricingPage() {
               Talk to Us
             </Link>
           </div>
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-4 text-sm text-slate-600">
             Or start free &mdash; no credit card required.
           </p>
         </div>

@@ -30,7 +30,7 @@ export default function LazyMindSection() {
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
             AI that understands your{' '}
-            <span className="text-brand">entire workflow</span>
+            <span className="rounded-md bg-brand/40 px-2 py-0.5 text-slate-900">entire workflow</span>
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-slate-500">
             LazyMind isn&apos;t a chatbot bolted on. It sees your graph.
