@@ -6,6 +6,27 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.1.0] - 2026-04-29
+
+**Theme:** Performance + security tightening on top of the v1.4.0.1 polish.
+
+### Performance
+- `app/shared/[id]/SharedCanvasMount.tsx` (new) + `app/shared/[id]/page.tsx` — the public shared-canvas viewer now lazy-loads `@xyflow/react` and the seven node-type components via `next/dynamic` with `ssr: false`. The existing `/workspace/.../canvas/[id]` route already used this pattern; bringing `/shared/[id]` in line:
+  - First Load JS: **274 kB → 208 kB** (-66 kB, -24%)
+  - Page chunk: **59.5 kB → 2.1 kB** (-96%)
+  - SEO: unaffected — the canvas is SVG/Canvas after hydration regardless, page title and OG tags still ship server-rendered.
+- `next.config.js` — added `experimental.optimizePackageImports` for `lucide-react` and `@xyflow/react`. Next 14 already tree-shakes lucide's modular paths well, so no measured delta on current call sites, but it hardens against future namespace-style imports.
+
+### Security
+- `next.config.js` — two new global response headers:
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (2 years, preload-ready; submission to hstspreload.org is a separate one-shot human task).
+  - `X-DNS-Prefetch-Control: on` — explicit opt-in for cross-origin DNS prefetch (Supabase, Gumroad, Sentry).
+
+### Validation
+- 350/350 Vitest tests pass
+- Type-check + lint clean
+- Build warning-free except the intentional `<img>` in `global-error.tsx`
+
 ## [1.4.0.1] - 2026-04-28
 
 **Theme:** Post-release polish — eight live-QA passes after the v1.4.0.0 Public REST API ship found no functional regressions but a long tail of small UX, a11y, deprecation, and dead-code papercuts. All fixed in one rolling sweep.
