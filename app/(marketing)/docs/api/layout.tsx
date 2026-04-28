@@ -21,10 +21,10 @@ const SUB_NAV: Array<{ href: string; label: string }> = [
 
 export default function ApiDocsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-white text-slate-900">
+    <div className="bg-white pt-16 text-slate-900">
       <nav
         aria-label="API documentation"
-        className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur"
+        className="sticky top-16 z-40 border-b border-slate-200 bg-white/90 backdrop-blur"
       >
         <div className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-6 py-3 text-sm">
           {SUB_NAV.map((item) => (
