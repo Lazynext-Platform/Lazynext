@@ -45,33 +45,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isPublicRoute =
-    request.nextUrl.pathname === '/' ||
-    request.nextUrl.pathname === '/pricing' ||
-    request.nextUrl.pathname === '/features' ||
-    request.nextUrl.pathname === '/comparison' ||
-    request.nextUrl.pathname === '/about' ||
-    request.nextUrl.pathname === '/changelog' ||
-    request.nextUrl.pathname === '/templates' ||
-    request.nextUrl.pathname === '/privacy' ||
-    request.nextUrl.pathname === '/terms' ||
-    request.nextUrl.pathname === '/contact' ||
-    request.nextUrl.pathname === '/careers' ||
-    // /docs and any sub-path (e.g. /docs/api) are public marketing
-    // pages. Exact-matching '/docs' alone left /docs/api 307'ing to
-    // /sign-in, which broke the public API reference.
-    request.nextUrl.pathname === '/docs' ||
-    request.nextUrl.pathname.startsWith('/docs/') ||
-    request.nextUrl.pathname.startsWith('/blog') ||
-    request.nextUrl.pathname.startsWith('/d/') ||
-    request.nextUrl.pathname.startsWith('/onboarding') ||
-    request.nextUrl.pathname.startsWith('/sign-in') ||
-    request.nextUrl.pathname.startsWith('/sign-up') ||
-    request.nextUrl.pathname.startsWith('/auth/callback') ||
-    request.nextUrl.pathname.startsWith('/shared/') ||
-    request.nextUrl.pathname.startsWith('/api/')
+  // Auth gate uses a SHORT protected-route prefix list rather than an
+  // ever-growing public allowlist. The old allowlist approach 307'd every
+  // unknown path (typos, fake URLs, deprecated routes) to /sign-in, which
+  // hurt SEO and confused users — Next.js's not-found.tsx never got a
+  // chance to render. We flip it: middleware only intervenes on routes
+  // that genuinely require a session. Everything else flows through to
+  // Next.js routing, which renders the page if it exists or 404s if not.
+  const PROTECTED_PREFIXES = [
+    '/workspace',
+    '/onboarding',
+  ]
+  const requiresAuth = PROTECTED_PREFIXES.some((prefix) =>
+    request.nextUrl.pathname === prefix ||
+    request.nextUrl.pathname.startsWith(`${prefix}/`)
+  )
 
-  if (!user && !isPublicRoute) {
+  if (!user && requiresAuth) {
     const url = request.nextUrl.clone()
     url.pathname = '/sign-in'
     return NextResponse.redirect(url)

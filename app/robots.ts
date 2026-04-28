@@ -7,7 +7,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        // The `allow` rules win over `disallow` for more-specific paths,
+        // so the public OpenAPI spec under /api/ is crawlable while the
+        // rest of /api/ stays blocked.
+        allow: ['/', '/api/v1/openapi.json'],
         disallow: ['/workspace/', '/onboarding/', '/api/', '/auth/', '/shared/'],
       },
     ],
