@@ -35,8 +35,47 @@ export default function MarketingLayout({
 }: {
   children: React.ReactNode
 }) {
+  // JSON-LD structured data: tells search engines what Lazynext is. Renders
+  // once in the marketing layout so all public pages inherit the org and
+  // software-application metadata. Only crawlers read this — no DOM impact.
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://www.lazynext.com/#organization',
+        name: 'Lazynext',
+        url: 'https://www.lazynext.com',
+        logo: 'https://www.lazynext.com/logo-dark.png',
+        sameAs: ['https://github.com/Lazynext-Platform'],
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': 'https://www.lazynext.com/#software',
+        name: 'Lazynext',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: 'https://www.lazynext.com',
+        description:
+          'The operating system for work. Tasks, docs, decisions, and AI — unified in one graph. Decision DNA scores every choice and tracks outcomes.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+          description: 'Free tier: single workspace, no card required.',
+        },
+        publisher: { '@id': 'https://www.lazynext.com/#organization' },
+      },
+    ],
+  }
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
+      {/* eslint-disable-next-line react/no-danger */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-brand-foreground">
         Skip to main content
       </a>
