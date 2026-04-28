@@ -57,8 +57,8 @@ export default function PrivacyPage() {
             <p className="mt-3">
               You can access, update, or delete your data at any time from your workspace settings. For account
               deletion requests or data export, contact us at{' '}
-              <a href="mailto:privacy@lazynext.com" className="font-medium text-brand hover:underline">
-                privacy@lazynext.com
+              <a href="mailto:security@lazynext.com" className="font-medium text-brand hover:underline">
+                security@lazynext.com
               </a>.
             </p>
           </section>
@@ -67,8 +67,8 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-slate-900">6. Contact</h2>
             <p className="mt-3">
               Questions about this policy? Reach us at{' '}
-              <a href="mailto:privacy@lazynext.com" className="font-medium text-brand hover:underline">
-                privacy@lazynext.com
+              <a href="mailto:security@lazynext.com" className="font-medium text-brand hover:underline">
+                security@lazynext.com
               </a>.
             </p>
           </section>

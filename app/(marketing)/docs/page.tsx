@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Book, GitBranch, Clock, Target, CheckCircle2 } from 'lucide-react'
+import { Book, GitBranch, Clock, Target, CheckCircle2, Code } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Docs — Lazynext',
@@ -71,6 +71,23 @@ export default function DocsPage() {
             Start logging decisions →
           </Link>
         </div>
+
+        <Link
+          href="/docs/api"
+          className="mt-6 flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-6 transition-colors hover:border-indigo-200"
+        >
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-indigo-50">
+            <Code className="h-5 w-5 text-indigo-600" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-semibold text-slate-900">
+              Building an integration? →
+            </h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-600">
+              REST API reference, bearer-token auth, rate limits, webhooks, and a typed SDK. Read paths your CI runner needs and one write path for logging decisions from external tooling.
+            </p>
+          </div>
+        </Link>
 
         <p className="mt-10 text-xs text-slate-400">
           A deeper technical reference is on the roadmap. Need something specific right now? Email <a href="mailto:hello@lazynext.com" className="underline hover:text-slate-600">hello@lazynext.com</a> — we answer fast.
