@@ -2,6 +2,8 @@
 
 All notable changes to Lazynext will be documented in this file.
 
+> **Full version history** lives in [`docs/project-changelog.md`](docs/project-changelog.md). This file carries the most recent versions only — when in doubt, the docs version is the source of truth for entries older than the latest few releases.
+
 ## [Unreleased]
 
 ## [1.3.42.4] - 2026-04-28
