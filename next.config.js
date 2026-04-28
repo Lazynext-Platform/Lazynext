@@ -9,6 +9,9 @@ const isDev = process.env.NODE_ENV !== 'production'
 
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@xyflow/react'],
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
