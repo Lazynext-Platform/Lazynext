@@ -9,6 +9,26 @@
 
 ## Session Notes
 
+### Session Note — 2026-04-28 (Phase E + polish)
+- **Who**: AI Agent (GitHub Copilot, Claude Opus 4.7)
+- **Worked On**:
+  - **Phase E (partial — safe-only)**: extracted SDK source to `packages/sdk/` as standalone publishable directory. `package.json` set to `name: @lazynext/sdk`, `version: 0.1.0`, `private: true` (cannot accidentally publish until `@lazynext` org is reserved on npm and the flag is flipped). Wrote `README.md` (quickstart + endpoint table + versioning), `LICENSE` (MIT), `tsconfig.json`. `lib/sdk/{client,index}.ts` are now re-export shims so internal imports work unchanged.
+  - **Phase E.8 verified locally**: ran `npm pack --dry-run` from `packages/sdk/` — 11 files, 6 kB packed (LICENSE, README, package.json, dist/{client,index}.{js,d.ts,*.map}). Tarball contents verified without publishing.
+  - **Polish**: added `prepublishOnly: npm run build` so build runs automatically before publish. `.gitignore` now ignores `/packages/*/dist` and `/packages/*/*.tgz` so build artifacts never get committed.
+  - **Z.1**: README.md gained the Public REST API section linking to `/docs/api/{quickstart,authentication,rate-limits,webhooks,versioning,changelog}` + `/api/v1/openapi.json`.
+  - **Z.2**: AGENTS.md project-structure tree now lists `packages/sdk/` and notes `lib/sdk/` as a re-export shim with canonical source elsewhere.
+  - **Z.5**: this entry.
+- **Deviations from plan**:
+  - **E.1 (npm workspaces) deferred**. Adding `workspaces: ["packages/*"]` to root `package.json` changes Vercel build behaviour (lockfile resolution, hoisting). Standalone publishable directory works for v0.1.0 and can be promoted to a workspace later if needed.
+  - **E.3 (move test file) deferred**. `tests/unit/sdk-client.test.ts` still passes against the shim path. Moving it adds churn without test value.
+  - **E.5/E.6 (openapi-typescript auto-gen) deferred**. Hand-written client is stable and tracks the small surface area. Auto-gen needs a new dependency that crosses the autonomy boundary.
+  - **F.1/F.3 (Scalar) blocked**. Needs `@scalar/api-reference` dep approval. Static `/docs/api` page already links to raw `/api/v1/openapi.json`.
+  - **F.2 (shared docs/api/layout.tsx) deferred**. All six sub-pages already share visual identity (white bg, max-w-3xl, slate-900 prose, "← API Reference" backlink). A pass-through layout adds no value.
+  - **A.2 (Sentry on /api/v1) deferred**. Sentry is no-op in this repo; would need real DSN + middleware wiring to be meaningful.
+  - **PR for #39 blocked**: gh CLI 404 from SAML on tokens. Manual click required.
+- **Stopped At**: 24/27 tasks done, 6 commits pushed, 350/350 tests passing, type-check clean, lint clean (only pre-existing global-error.tsx warning), tarball verified.
+- **Next Steps**: Human reviews + opens PR. At merge time, do Z.3 (project-changelog) and Z.4 (roadmap → 🟢 Merged). After `@lazynext` reserved on npm: flip `private: false` and run `npm publish`.
+
 ### Session Note — 2026-04-29 (continued)
 - **Who**: AI Agent (GitHub Copilot, Claude Opus 4.7)
 - **Worked On**: Phase C.1 via middleware shortcut.

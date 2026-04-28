@@ -41,7 +41,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "publish:dry": "npm publish --dry-run"
+    "prepublishOnly": "npm run build",
+    "publish:dry": "npm run build && npm pack --dry-run"
   },
   "devDependencies": {
     "typescript": "^5.9.0",
