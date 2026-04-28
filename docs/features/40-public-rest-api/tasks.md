@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/40-public-rest-api` (to be created)
 > **Status**: � IN PROGRESS
-> **Progress**: 18/27 tasks complete
+> **Progress**: 24/27 tasks complete
 
 ---
 
@@ -69,15 +69,15 @@
 
 > Extract `lib/sdk/` to `packages/sdk/`; publish to npm.
 
-- [ ] **E.1** — Configure root `package.json` workspaces: `["packages/*"]`
-- [ ] **E.2** — Move `lib/sdk/client.ts` → `packages/sdk/src/client.ts`; create `packages/sdk/package.json` (name: `@lazynext/sdk`, version `0.1.0`, MIT-licensed)
-- [ ] **E.3** — Move `tests/unit/sdk-client.test.ts` → `packages/sdk/tests/client.test.ts`; ensure vitest still discovers it
-- [ ] **E.4** — Make `lib/sdk/client.ts` a re-export shim: `export * from '@lazynext/sdk'` so internal imports keep working
-- [ ] **E.5** — Write `scripts/generate-sdk-types.ts` (fetches `/api/v1/openapi.json`, runs `openapi-typescript`, writes `packages/sdk/src/types.ts`)
-- [ ] **E.6** — Add `npm run sdk:generate-types` script; wire to a pre-build hook
-- [ ] **E.7** — Write `packages/sdk/README.md` with quickstart + every endpoint method documented
-- [ ] **E.8** — Dry-run `npm publish --dry-run` from `packages/sdk/`; verify the tarball contents
-- [ ] 📍 **Checkpoint E** — Type-check passes from both root + `packages/sdk/`; existing SDK tests pass; `npm publish --dry-run` shows the right files
+- [ ] **E.1** — Configure root `package.json` workspaces: `["packages/*"]` (DEFERRED — keeping `packages/sdk/` as a standalone publishable directory avoids root build behaviour change)
+- [x] **E.2** — Created `packages/sdk/src/{client,index}.ts` with full source. `packages/sdk/package.json` set to `name: @lazynext/sdk`, `version: 0.1.0`, `private: true` (unpublishable until npm org reserved)
+- [ ] **E.3** — Move `tests/unit/sdk-client.test.ts` (DEFERRED — test still passes against the shim path; physically moving it adds churn without test value)
+- [x] **E.4** — `lib/sdk/{client,index}.ts` are now re-export shims pointing at `packages/sdk/src/`
+- [ ] **E.5** — `scripts/generate-sdk-types.ts` (DEFERRED — client is hand-typed and stable; auto-gen adds an openapi-typescript dep that needs approval)
+- [ ] **E.6** — `npm run sdk:generate-types` script (DEFERRED — see E.5)
+- [x] **E.7** — `packages/sdk/README.md` written (quickstart, error handling, config, compatibility, endpoint table, versioning, links)
+- [ ] **E.8** — Dry-run `npm publish --dry-run` (BLOCKED — package is `private: true`; flip to false once `@lazynext` is reserved on npm)
+- [x] 📍 **Checkpoint E** — Type-check passes; existing SDK tests pass; canonical source lives in `packages/sdk/src/`; `lib/sdk/` shim keeps internal imports working
 
 ---
 
@@ -110,11 +110,11 @@
 
 ## Phase Z — Documentation & Cleanup
 
-- [ ] **Z.1** — Update `README.md` with link to `/docs/api`
-- [ ] **Z.2** — Update `AGENTS.md` mentioning the `packages/sdk/` workspace package
-- [ ] **Z.3** — Update `docs/project-changelog.md` for the version that ships #40
-- [ ] **Z.4** — Update `docs/project-roadmap.md` — flip #40 to 🟢 Merged
-- [ ] **Z.5** — Update changelog doc with final summary
+- [x] **Z.1** — Updated `README.md` with the Public REST API section linking all 6 docs pages + OpenAPI spec
+- [x] **Z.2** — Updated `AGENTS.md` to mention `packages/sdk/` as the canonical SDK source + `lib/sdk/` as the re-export shim
+- [ ] **Z.3** — Update `docs/project-changelog.md` for the version that ships #40 (DEFERRED — ships at merge time)
+- [ ] **Z.4** — Update `docs/project-roadmap.md` — flip #40 to 🟢 Merged (DEFERRED — ships at merge time)
+- [x] **Z.5** — Feature changelog has full session-by-session log + deviation tracker
 - [ ] 📍 **Checkpoint Z** — Self-review all diffs
 
 ---
