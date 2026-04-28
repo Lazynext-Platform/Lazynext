@@ -24,7 +24,7 @@ export async function POST(req: Request) {
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   let body: unknown
   try { body = await req.json() } catch { return NextResponse.json({ error: 'INVALID_JSON' }, { status: 400 }) }

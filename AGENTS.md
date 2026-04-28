@@ -32,7 +32,7 @@ lazynext/
 │   ├── inngest/              # Background jobs
 │   ├── oauth/                # Third-party OAuth (integrations)
 │   ├── realtime/             # Supabase Realtime channels + presence
-│   ├── sdk/                  # Public bearer-auth SDK helpers
+│   ├── sdk/                  # Public bearer-auth SDK helpers (re-export shim — canonical source in `packages/sdk/`)
 │   ├── utils/                # Utilities
 │   └── wms.ts                # Workspace membership / plan-limit checks
 ├── stores/                   # Zustand state stores
@@ -42,6 +42,8 @@ lazynext/
 │   ├── design-system.md      # Design tokens and patterns
 │   ├── features/             # 38 feature folders
 │   └── references/           # ADRs, process overrides, guides
+├── packages/                 # Publishable workspace packages
+│   └── sdk/                  # @lazynext/sdk — public REST client
 └── public/                   # Static assets
 ```
 

@@ -27,7 +27,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
 
   let body: unknown
@@ -49,7 +49,7 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
   const { userId } = await safeAuth()
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })
 
   const ws = await loadOwning(params.id, userId)

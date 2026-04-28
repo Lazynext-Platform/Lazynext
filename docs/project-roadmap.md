@@ -105,7 +105,7 @@ These features show real, truthful UI but lack the backend that would make them 
 |---|---|---|---|---|---|---|
 | 25 | Table Primitive | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — TablePanel with toolbar, inline editing, summary footer |
 | 36 | Decision Outcome Review | ✅ Complete | 🟢 Merged | #07, #08 | `main` | Built — emoji outcomes, queue navigation, LazyMind suggestions |
-| 40 | Public REST API & SDK (formalization) | 🔴 Discussion 🟡 | 🔴 Not Started | #03, #13, #31 | — | Promoted from backlog (2026-04-28). Discussion drafted at [`docs/features/40-public-rest-api/discussion.md`](features/40-public-rest-api/discussion.md). Engineering already exists (`app/api/v1/*` + `lib/sdk/`); this feature is product packaging — public docs page, versioning policy, rate-limit transparency, npm SDK release. |
+| 40 | Public REST API & SDK (formalization) | ✅ Discuss/Design/Plan | 🟡 Build complete — awaiting PR | #03, #13, #31 | `feature/40-public-rest-api` | Promoted from backlog (2026-04-28). 9 commits on branch, 25/27 Build tasks done, 350/350 tests pass. Header contract + plan-aware rate limits + 6 docs pages + `packages/sdk/` (`@lazynext/sdk@0.1.0`, `private: true`). PR body at [`docs/features/40-public-rest-api/PR-BODY.md`](features/40-public-rest-api/PR-BODY.md). Deferred items need external decisions (npm org reservation, `@scalar/api-reference` dep approval). |
 
 **Phase 3 Total**: 3 features
 

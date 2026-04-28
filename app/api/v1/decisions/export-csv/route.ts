@@ -30,7 +30,7 @@ export async function GET(req: Request) {
   // /export so a leaked key can't scrape the workspace via either
   // endpoint.
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.export)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   let query = db
     .from('decisions')

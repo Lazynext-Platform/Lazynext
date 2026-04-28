@@ -33,7 +33,7 @@ export async function DELETE(
   if (!userId) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 })
 
   const rl = rateLimit(`api:${userId}`, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   if (!hasValidDatabaseUrl) {
     return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED' }, { status: 503 })

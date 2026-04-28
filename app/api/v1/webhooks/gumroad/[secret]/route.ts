@@ -49,7 +49,7 @@ export async function POST(
 ) {
   const ip = headers().get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
   const rl = rateLimit(`webhook:${ip}`, RATE_LIMITS.webhook)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const expected = process.env.GUMROAD_WEBHOOK_SECRET
   if (!expected) {

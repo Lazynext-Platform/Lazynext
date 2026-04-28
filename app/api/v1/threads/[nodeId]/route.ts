@@ -29,7 +29,7 @@ export async function GET(
   if (!auth.ok) return auth.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const { data: thread } = await db
     .from('threads')
@@ -72,7 +72,7 @@ export async function POST(
   if (scopeCheck) return scopeCheck.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const userId = auth.userId
 

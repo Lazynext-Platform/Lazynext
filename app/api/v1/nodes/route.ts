@@ -41,7 +41,7 @@ export async function GET(req: Request) {
   if (!auth.ok) return auth.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const { data: results, error } = await db.from('nodes').select('*').eq('workflow_id', workflowId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
   if (scopeCheck) return scopeCheck.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.mutation)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const userId = auth.userId
 

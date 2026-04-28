@@ -35,7 +35,7 @@ export async function GET(req: Request) {
   const auth = await requireWorkspaceAuth(req, workspaceId)
   if (!auth.ok) return auth.response
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   // Plan gate. Audit log is a Business+/Enterprise feature.
   const { data: workspace } = await db.from('workspaces').select('plan').eq('id', workspaceId).maybeSingle()

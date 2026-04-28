@@ -13,6 +13,10 @@
 # production
 /build
 
+# packages/sdk build output
+/packages/*/dist
+/packages/*/*.tgz
+
 # misc
 .DS_Store
 *.pem

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   if (!auth.ok) return auth.response
 
   const rl = rateLimit(auth.rateLimitId, RATE_LIMITS.api)
-  if (!rl.success) return rateLimitResponse(rl.resetAt)
+  if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   const [nodeRes, decisionRes, workflowRes] = await Promise.all([
     db.from('nodes').select('*').eq('workspace_id', workspaceId).ilike('title', `%${q}%`).limit(10),

@@ -1,9 +1,4 @@
-export { LazynextClient, LazynextApiError } from './client'
-export type {
-  LazynextClientOptions,
-  Decision,
-  CreateDecisionInput,
-  UpdateDecisionInput,
-  WhoamiResponse,
-  LazynextErrorCode,
-} from './client'
+/**
+ * Re-export shim. Canonical source: packages/sdk/src/index.ts
+ */
+export * from '../../packages/sdk/src/index'

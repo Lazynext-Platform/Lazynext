@@ -174,6 +174,19 @@ Per-feature documentation lives under `docs/features/XX-feature-name/`. Each fol
 
 For AI agents, [`AGENTS.md`](AGENTS.md) at the project root is the entry point.
 
+### Public REST API
+
+The product surfaces a public REST API at `/api/v1/*` for Business and Enterprise plans. Customer-facing docs live under [`/docs/api`](https://lazynext.com/docs/api):
+
+- [Quickstart](https://lazynext.com/docs/api/quickstart) — first call in 5 minutes
+- [Authentication](https://lazynext.com/docs/api/authentication) — bearer keys, scopes, rotation
+- [Rate limits](https://lazynext.com/docs/api/rate-limits) — per-key + workspace ceiling
+- [Webhooks](https://lazynext.com/docs/api/webhooks) — signing, retry policy, verification
+- [Versioning](https://lazynext.com/docs/api/versioning) — Stripe-style additive, ≥6-month sunset
+- [Changelog](https://lazynext.com/docs/api/changelog) — what changed and when
+
+OpenAPI 3.1 spec at [`/api/v1/openapi.json`](https://lazynext.com/api/v1/openapi.json). Internal versioning policy at [`docs/references/api-versioning.md`](docs/references/api-versioning.md).
+
 ## License
 
 Private — All rights reserved.
