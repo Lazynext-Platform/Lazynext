@@ -16,6 +16,7 @@ import type { ReactNode } from 'react'
 
 const SUB_NAV: Array<{ href: string; label: string }> = [
   { href: '/docs/api', label: 'Reference' },
+  { href: '/docs/api/reference', label: 'Explorer' },
   { href: '/docs/api/quickstart', label: 'Quickstart' },
   { href: '/docs/api/authentication', label: 'Authentication' },
   { href: '/docs/api/rate-limits', label: 'Rate Limits' },
