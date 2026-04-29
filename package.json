@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "sdk:generate-types": "tsx scripts/generate-sdk-types.ts"
   },
   "keywords": [],
   "author": "Lazynext Contributors",
@@ -58,7 +59,9 @@
     "eslint-config-next": "^14.2.35",
     "happy-dom": "^20.8.9",
     "knip": "^6.4.1",
+    "openapi-typescript": "^7.13.0",
     "supabase": "^2.23.4",
+    "tsx": "^4.21.0",
     "vitest": "^4.1.2"
   }
 }
