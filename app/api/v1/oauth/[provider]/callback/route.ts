@@ -8,10 +8,12 @@ import {
   getOAuthProvider,
 } from '@/lib/oauth/registry'
 import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
+import { ensureNotionAdapterRegistered } from '@/lib/oauth/notion'
 import { sealTokenEnvelope } from '@/lib/oauth/crypto'
 import { reportApiError } from '@/lib/utils/api-sentry'
 
 ensureGithubAdapterRegistered()
+ensureNotionAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 

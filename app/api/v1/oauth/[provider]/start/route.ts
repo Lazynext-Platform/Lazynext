@@ -8,12 +8,14 @@ import {
   getOAuthProvider,
 } from '@/lib/oauth/registry'
 import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
+import { ensureNotionAdapterRegistered } from '@/lib/oauth/notion'
 import { reportApiError } from '@/lib/utils/api-sentry'
 import { randomBytes } from 'node:crypto'
 
 // Adapter registration. Each adapter is idempotent — calling
 // the ensure* helper more than once is a no-op.
 ensureGithubAdapterRegistered()
+ensureNotionAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 
