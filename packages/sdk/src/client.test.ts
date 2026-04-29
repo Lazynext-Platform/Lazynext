@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { LazynextClient, LazynextApiError } from '@/lib/sdk/client'
+import { LazynextClient, LazynextApiError } from './client'
 
 function mockFetch(responses: Array<Partial<Response> & { jsonBody?: unknown }>) {
   let i = 0

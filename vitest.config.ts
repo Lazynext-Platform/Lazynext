@@ -9,7 +9,13 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/**/*.test.{ts,tsx}'],
+    // Tests live in tests/ for app-level code, and colocated next to
+    // their source under packages/*/src for publishable workspace
+    // packages (canonical pattern for the SDK monorepo path).
+    include: [
+      'tests/**/*.test.{ts,tsx}',
+      'packages/*/src/**/*.test.{ts,tsx}',
+    ],
   },
   resolve: {
     alias: {
