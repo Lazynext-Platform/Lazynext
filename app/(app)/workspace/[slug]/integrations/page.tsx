@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils/cn'
 import { ConnectionTile } from '@/components/ui/ConnectionTile'
 import { ApiKeysPanel } from '@/components/ui/ApiKeysPanel'
+import { OAuthStatusBanner } from '@/components/ui/OAuthStatusBanner'
 
 // Plan slugs that unlock API keys. Mirrors `lib/utils/plan-gates.ts`'s
 // `'api-keys'` entry. Kept inline so the client component never
@@ -77,6 +78,13 @@ export default async function IntegrationsPage({ params }: { params: { slug: str
         Integrations
       </h1>
       <p className="mt-1 text-sm text-slate-400">Connect your favorite tools to Lazynext.</p>
+
+      {/* Renders only when the OAuth callback redirected back here
+          with ?oauth_connected=<provider> or ?oauth_error=<code>.
+          Self-clears the query string after first paint. */}
+      <div className="mt-6">
+        <OAuthStatusBanner />
+      </div>
 
       {/* Connected — populated when an OAuth callback successfully writes a row */}
       <div className="mt-6">
