@@ -7,6 +7,13 @@ import {
   isProviderConfigured,
   getOAuthProvider,
 } from '@/lib/oauth/registry'
+import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
+import { reportApiError } from '@/lib/utils/api-sentry'
+import { randomBytes } from 'node:crypto'
+
+// Adapter registration. Each adapter is idempotent — calling
+// the ensure* helper more than once is a no-op.
+ensureGithubAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 
@@ -82,16 +89,58 @@ export async function GET(
     )
   }
 
-  // From here on, an adapter is registered. State + PKCE machinery
-  // lands with the first adapter PR; until then we deliberately do
-  // not call `buildAuthorizeUrl` so an under-construction adapter
-  // can't redirect users into a broken provider flow.
-  return NextResponse.json(
-    {
-      error: 'PROVIDER_FLOW_NOT_IMPLEMENTED',
-      message: 'Authorize-URL construction will land with the adapter PR for this provider.',
-      provider_id: params.provider,
-    },
-    { status: 501 },
-  )
+  // From here on, an adapter is registered. Mint a CSRF state
+  // token, stamp it into a short-lived signed cookie, and redirect
+  // to the provider's authorize URL.
+  const state = randomBytes(24).toString('base64url')
+
+  // Origin from the request URL so dev / preview / prod all build
+  // the right absolute redirect URI without an extra env var.
+  const origin = url.origin
+  const redirectUri = `${origin}/api/v1/oauth/${params.provider}/callback`
+
+  // Default to read-mode for now; the UI doesn't yet expose a
+  // mode selector. Per-adapter flows that need write access call
+  // this endpoint with `?mode=write` in a future PR.
+  const modeParam = url.searchParams.get('mode')
+  const mode: 'read' | 'write' | 'admin' =
+    modeParam === 'write' || modeParam === 'admin' ? modeParam : 'read'
+
+  let authorizeUrl: string
+  try {
+    authorizeUrl = adapter.buildAuthorizeUrl({
+      state,
+      redirectUri,
+      mode,
+    })
+  } catch (err) {
+    reportApiError(err, {
+      route: '/api/v1/oauth/[provider]/start',
+      method: 'GET',
+      userId,
+      workspaceId,
+      extra: { provider: params.provider },
+    })
+    return NextResponse.json(
+      { error: 'PROVIDER_AUTHORIZE_FAILED', provider_id: params.provider },
+      { status: 500 },
+    )
+  }
+
+  // Cookie carries: state + workspaceId + mode. Signed via
+  // SameSite=Lax + Secure + HttpOnly + 10-minute expiry. We don't
+  // also DB-persist this — a transient cookie is the right home for
+  // a 10-minute CSRF token.
+  const cookieValue = JSON.stringify({ state, workspaceId, mode })
+  const cookieName = `lzx_oauth_${params.provider}`
+
+  const response = NextResponse.redirect(authorizeUrl, { status: 302 })
+  response.cookies.set(cookieName, cookieValue, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 10, // 10 minutes
+  })
+  return response
 }
