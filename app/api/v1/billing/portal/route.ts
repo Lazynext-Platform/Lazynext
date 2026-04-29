@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { reportApiError } from '@/lib/utils/api-sentry'
 
 const portalSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -61,7 +62,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ url })
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.error('Billing portal error:', err)
+    reportApiError(err, {
+      route: '/api/v1/billing/portal',
+      method: 'POST',
+      userId,
+      workspaceId,
+    })
     return NextResponse.json({ error: 'BILLING_ERROR', message: 'Failed to get portal URL.' }, { status: 500 })
   }
 }

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { callLazyMind, hasAIKeys } from '@/lib/ai/lazymind'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { checkAiQuota, recordAiUsage } from '@/lib/data/ai-usage'
+import { reportApiError } from '@/lib/utils/api-sentry'
 
 // LazyMind free-text chat endpoint. Backs the in-app `LazyMindPanel`.
 // Prior to v1.3.3.5 the panel was a UI-only mock — it ran a 1500ms
@@ -75,6 +76,12 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ data: { content: response.content, provider: response.provider }, error: null })
   } catch (err) {
+    reportApiError(err, {
+      route: '/api/v1/ai/chat',
+      method: 'POST',
+      userId,
+      workspaceId: parsed.data.workspaceId ?? null,
+    })
     const message = err instanceof Error ? err.message : 'AI request failed'
     return NextResponse.json({ error: 'AI_ERROR', message }, { status: 502 })
   }
