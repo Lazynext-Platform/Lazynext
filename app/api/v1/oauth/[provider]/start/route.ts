@@ -10,6 +10,7 @@ import {
 import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
 import { ensureNotionAdapterRegistered } from '@/lib/oauth/notion'
 import { ensureLinearAdapterRegistered } from '@/lib/oauth/linear'
+import { ensureSlackAdapterRegistered } from '@/lib/oauth/slack'
 import { reportApiError } from '@/lib/utils/api-sentry'
 import { randomBytes } from 'node:crypto'
 
@@ -18,6 +19,7 @@ import { randomBytes } from 'node:crypto'
 ensureGithubAdapterRegistered()
 ensureNotionAdapterRegistered()
 ensureLinearAdapterRegistered()
+ensureSlackAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 
