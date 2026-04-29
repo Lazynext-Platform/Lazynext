@@ -10,6 +10,7 @@ const posts = [
   { slug: 'launching-lazynext', title: 'Lazynext is live, and we think we shipped the thing PM tools forgot', excerpt: 'Decisions are the highest-leverage work a team does. They\'re also the least instrumented. Here\'s what we did about it.', date: 'April 18, 2026', dateTime: '2026-04-18', tag: 'Launch', featured: true },
   { slug: 'how-decision-dna-scoring-works', title: 'How Decision DNA actually scores a decision', excerpt: 'Four dimensions, two LLM providers, one deterministic fallback, and a stamped model version on every score. The complete pipeline, including what fails.', date: 'April 22, 2026', dateTime: '2026-04-22', tag: 'Engineering' },
   { slug: 'workspace-maturity-score', title: 'Workspace Maturity Score: why we hide most of the product on day one', excerpt: 'Most workflow tools dump 20 features on you and hope. We unlock features as you actually decide things. Here\'s the math, the events, and why the default bias is "earn the complexity."', date: 'April 25, 2026', dateTime: '2026-04-25', tag: 'Product' },
+  { slug: 'instrumenting-the-api', title: 'The week we instrumented the API and stopped guessing', excerpt: 'Sentry on every v1 route, per-device session list backed by SECURITY DEFINER RPCs, auto-generated SDK types, a Scalar OpenAPI explorer, and the first OAuth adapter — all in one push. Notes from the release.', date: 'April 28, 2026', dateTime: '2026-04-28', tag: 'Engineering' },
 ]
 
 const tagColors: Record<string, string> = {

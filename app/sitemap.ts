@@ -33,6 +33,7 @@ const blogPosts = [
   { slug: 'launching-lazynext', publishedAt: new Date('2026-04-18') },
   { slug: 'how-decision-dna-scoring-works', publishedAt: new Date('2026-04-22') },
   { slug: 'workspace-maturity-score', publishedAt: new Date('2026-04-25') },
+  { slug: 'instrumenting-the-api', publishedAt: new Date('2026-04-28') },
 ] as const
 
 // High-priority routes get a higher number so search engines crawl them
