@@ -6,6 +6,7 @@ import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { inngest, EVENTS } from '@/lib/inngest/client'
+import { reportApiError } from '@/lib/utils/api-sentry'
 
 type PingPayload = Record<string, string>
 
@@ -209,7 +210,10 @@ export async function POST(
 
     return NextResponse.json({ received: true })
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.error('Gumroad webhook processing error:', err)
+    reportApiError(err, {
+      route: '/api/v1/webhooks/gumroad/[secret]',
+      method: 'POST',
+    })
     return NextResponse.json({ error: 'WEBHOOK_PROCESSING_ERROR' }, { status: 500 })
   }
 }

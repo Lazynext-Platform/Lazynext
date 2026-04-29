@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { PLANS, buildCheckoutUrl, type PlanId } from '@/lib/billing/plans'
 import { hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { reportApiError } from '@/lib/utils/api-sentry'
 
 const checkoutSchema = z.object({
   plan: z.enum(['starter', 'pro', 'business']),
@@ -57,7 +58,13 @@ export async function POST(req: Request) {
     const url = buildCheckoutUrl(productUrl, { workspaceId, userId, plan, interval })
     return NextResponse.json({ url })
   } catch (err) {
-    if (process.env.NODE_ENV === 'development') console.error('Gumroad checkout URL build error:', err)
+    reportApiError(err, {
+      route: '/api/v1/billing/checkout',
+      method: 'POST',
+      userId,
+      workspaceId,
+      extra: { plan, interval },
+    })
     return NextResponse.json(
       { error: 'BILLING_ERROR', message: 'Failed to build checkout URL.' },
       { status: 500 }
