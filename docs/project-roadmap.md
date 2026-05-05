@@ -14,7 +14,7 @@
 | 🟢 Complete (Design) | 39 |
 | 🟢 Complete (UI shell) | 39 |
 | 🟢 Fully wired to real backend | 35 |
-| 🟡 Partial / honest empty state | 2 — see *Remaining work* below |
+| 🟡 Partial / honest empty state | 1 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
@@ -31,7 +31,6 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 30 | Profile → Connected Accounts + Sessions | Connected Accounts reads real Supabase identity providers; Sessions tab labels current device (v1.3.25.0). Per-device session list still requires Supabase admin API. | Supabase identity-link flows + service-role session listing |
 | 32 | Marketing → Blog | 4 real posts (Launch, Engineering, Product, Maturity); registry refactor on `feature/80-…` | Convert to MDX-driven listing or grow backlog organically |
 
 ---
