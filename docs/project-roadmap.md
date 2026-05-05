@@ -14,7 +14,7 @@
 | 🟢 Complete (Design) | 39 |
 | 🟢 Complete (UI shell) | 39 |
 | 🟢 Fully wired to real backend | 35 |
-| 🟡 Partial / honest empty state | 4 — see *Remaining work* below |
+| 🟡 Partial / honest empty state | 2 — see *Remaining work* below |
 | 🔴 Not Started | 0 |
 | ⏸️ On Hold | 0 |
 | ✅ Cleanup/Polish + Demo-data eradication rounds | 89 commits |
@@ -31,10 +31,8 @@ These features show real, truthful UI but lack the backend that would make them 
 
 | # | Feature | Gap | Path to real |
 |---|---|---|---|
-| 15 | Import Modal | CSV path works; OAuth tiles now wired to the registry (v1.3.28.0) and render `Available` or `Not configured` per env vars. Each provider remains a thin adapter PR pending credentials. | Per-provider OAuth app registration + adapter |
-| 31 | Integrations Settings | Page rewired to registry (v1.3.27.0); per-row Disconnect button shipped (v1.3.28.0). Per-provider adapters pending credentials. | Per-provider adapter PR (auth-URL build + token exchange) |
 | 30 | Profile → Connected Accounts + Sessions | Connected Accounts reads real Supabase identity providers; Sessions tab labels current device (v1.3.25.0). Per-device session list still requires Supabase admin API. | Supabase identity-link flows + service-role session listing |
-| 32 | Marketing → Blog | 3 real posts (Launch, Engineering, Product) — backlog still grows organically | Add real posts (or convert to MDX-driven listing) |
+| 32 | Marketing → Blog | 4 real posts (Launch, Engineering, Product, Maturity); registry refactor on `feature/80-…` | Convert to MDX-driven listing or grow backlog organically |
 
 ---
 
@@ -78,7 +76,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 08 | Decision Health Dashboard | ✅ Complete | 🟢 Merged | #07 | `main` | Built — quality trends, outcome donut, burndown, makers table |
 | 12 | Workspace Settings | ✅ Complete | 🟢 Merged | #05 | `main` | Built — 5-tab settings; Notifications tab now wired to real `notification_preferences` (v1.3.5.0) |
 | 13 | Billing & Subscription | ✅ Complete | 🟢 Merged | #12 | `main` | Built — plan comparison, payment method, usage metrics |
-| 15 | Import Modal | ✅ Complete | 🟡 Partial | #05 | `main` | CSV import is real; OAuth connectors (Notion/Linear/Trello/Asana/Jira) tagged `Soon` |
+| 15 | Import Modal | ✅ Complete | � Code complete | #05 | `feature/80-oauth-adapters-sessions-blog` | CSV import + all OAuth adapters shipped (GitHub, Notion, Linear, Slack on `main`; Asana, Jira, Trello on branch). Production activation blocked only on provider OAuth app registrations + env-var rollout. |
 | 16 | Pulse Dashboard | ✅ Complete | 🟢 Merged | #05 | `main` | Built — workload bars, burndown SVG, LazyMind summary |
 | 17 | Automation Builder | ✅ Complete | 🟢 Merged | #05 | `main` | Real WHEN/THEN engine (v1.3.7.0) — `decision.logged` + `task.created` triggers, `notification.send` + `webhook.post` actions, run history |
 | 18 | Template Marketplace | ✅ Complete | 🟢 Merged | #05 | `main` | 6-template curated catalog (v1.3.8.0) — install clones nodes + edges into workspace |
@@ -87,7 +85,7 @@ These features show real, truthful UI but lack the backend that would make them 
 | 22 | Upgrade & Paywall Modal | ✅ Complete | 🟢 Merged | #13 | `main` | Built — 4 variants (node/ai/health/full), plan cards |
 | 27 | Real-time Collaboration | ✅ Complete | 🟢 Merged | #05, #11 | `main` | Supabase Realtime presence wired (v1.3.6.0) — live cursors + selection rings on the canvas |
 | 30 | Profile & Account Settings | ✅ Complete | 🟢 Merged | #03 | `main` | Built — 4 tabs (profile/security/preferences/sessions) |
-| 31 | Integrations Settings | ✅ Complete | 🟡 UI only | #12 | `main` | Honest empty state — Slack/Notion/GitHub OAuth pending |
+| 31 | Integrations Settings | ✅ Complete | � Code complete | #12 | `feature/80-oauth-adapters-sessions-blog` | All 7 OAuth adapters (GitHub/Notion/Linear/Slack/Asana/Jira/Trello) implemented; UI + status banner live. Provider OAuth app registration + env vars are the only remaining ops step. |
 | 32 | Marketing Pages | ✅ Complete | 🟢 Merged | #01 | `main` | Built — About, Features, Changelog, Comparison, Blog |
 | 34 | Team Member Management | ✅ Complete | 🟢 Merged | #12 | `main` | Built — role badges, stat bar, email chip invites |
 | 37 | Task Views (Kanban + List) | ✅ Complete | 🟢 Merged | #05 | `main` | Built — Kanban board + List table with filters |

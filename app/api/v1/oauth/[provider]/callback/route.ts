@@ -11,6 +11,8 @@ import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
 import { ensureNotionAdapterRegistered } from '@/lib/oauth/notion'
 import { ensureLinearAdapterRegistered } from '@/lib/oauth/linear'
 import { ensureSlackAdapterRegistered } from '@/lib/oauth/slack'
+import { ensureAsanaAdapterRegistered } from '@/lib/oauth/asana'
+import { ensureJiraAdapterRegistered } from '@/lib/oauth/jira'
 import { sealTokenEnvelope } from '@/lib/oauth/crypto'
 import { reportApiError } from '@/lib/utils/api-sentry'
 
@@ -18,6 +20,8 @@ ensureGithubAdapterRegistered()
 ensureNotionAdapterRegistered()
 ensureLinearAdapterRegistered()
 ensureSlackAdapterRegistered()
+ensureAsanaAdapterRegistered()
+ensureJiraAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 

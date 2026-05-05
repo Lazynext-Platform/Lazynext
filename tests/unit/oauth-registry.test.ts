@@ -89,3 +89,41 @@ describe('isProviderConfigured', () => {
     expect(isProviderConfigured('slack')).toBe(false)
   })
 })
+
+describe('isProviderConfigured — Trello (API key only)', () => {
+  // Trello is the lone exception to the CLIENT_ID/CLIENT_SECRET
+  // convention — its legacy "Authorize" flow uses an API key only.
+  const KEY = 'LAZYNEXT_OAUTH_TRELLO_API_KEY'
+  let original: string | undefined
+
+  beforeEach(() => {
+    original = process.env[KEY]
+    delete process.env[KEY]
+  })
+
+  afterEach(() => {
+    if (original === undefined) delete process.env[KEY]
+    else process.env[KEY] = original
+  })
+
+  it('returns false when the API key is absent', () => {
+    expect(isProviderConfigured('trello')).toBe(false)
+  })
+
+  it('returns false on an empty-string API key', () => {
+    process.env[KEY] = ''
+    expect(isProviderConfigured('trello')).toBe(false)
+  })
+
+  it('returns true when the API key is set', () => {
+    process.env[KEY] = 'trello-key-123'
+    expect(isProviderConfigured('trello')).toBe(true)
+  })
+
+  it('does NOT require CLIENT_ID/CLIENT_SECRET for Trello', () => {
+    process.env[KEY] = 'k'
+    delete process.env.LAZYNEXT_OAUTH_TRELLO_CLIENT_ID
+    delete process.env.LAZYNEXT_OAUTH_TRELLO_CLIENT_SECRET
+    expect(isProviderConfigured('trello')).toBe(true)
+  })
+})

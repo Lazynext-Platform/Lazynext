@@ -1,8 +1,10 @@
 import type { MetadataRoute } from 'next'
+import { posts as blogPostList } from './(marketing)/blog/_posts'
 
 // Static surface map. Order is reading-order on the marketing nav so it's
-// easy to see at a glance what's covered. /blog/[slug] entries are added
-// below the static list because they have their own publish dates.
+// easy to see at a glance what's covered. /blog/[slug] entries are derived
+// from the same `_posts` registry the blog pages render from, so adding a
+// post in one place updates the sitemap automatically.
 const staticPages = [
   '',
   '/pricing',
@@ -25,16 +27,12 @@ const staticPages = [
   '/terms',
 ] as const
 
-// Real, published blog posts. When a new post lands in
-// `app/(marketing)/blog/[slug]/page.tsx`, add a line here so it gets
-// indexed. We deliberately avoid a glob/manifest scan to keep this file
-// dependency-free and the published surface explicit.
-const blogPosts = [
-  { slug: 'launching-lazynext', publishedAt: new Date('2026-04-18') },
-  { slug: 'how-decision-dna-scoring-works', publishedAt: new Date('2026-04-22') },
-  { slug: 'workspace-maturity-score', publishedAt: new Date('2026-04-25') },
-  { slug: 'instrumenting-the-api', publishedAt: new Date('2026-04-28') },
-] as const
+// Real, published blog posts. The single source of truth is the
+// `_posts/` registry; we just project slug + publish date here.
+const blogPosts = blogPostList.map((p) => ({
+  slug: p.slug,
+  publishedAt: new Date(p.dateTime),
+}))
 
 // High-priority routes get a higher number so search engines crawl them
 // first when they have a budget; everything else lands at 0.7.
