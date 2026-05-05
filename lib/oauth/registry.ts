@@ -36,11 +36,36 @@ export type OAuthProviderId =
 
 export type OAuthScopeMode = 'read' | 'write' | 'admin'
 
+/**
+ * OAuth flow shape. Most providers use the standard authorization-
+ * code flow (`'code'`): redirect to provider → user consents →
+ * provider redirects back with `?code=...` → server exchanges code
+ * for tokens.
+ *
+ * Trello is the lone exception in our roster — it uses the legacy
+ * "Authorize" flow (`'fragment'`) which returns the access token
+ * directly in the URL fragment (`#token=...`) of the return URL.
+ * The server callback can't read fragments; a tiny client-side
+ * bridge page extracts the token and POSTs it to a dedicated finish
+ * endpoint instead. See `app/(marketing)/oauth/trello/bridge/page.tsx`.
+ *
+ * For fragment-flow adapters, `exchangeCode` is called with `code`
+ * carrying the access token directly (not an auth code). The
+ * adapter performs the identity lookup and returns the same
+ * envelope shape as a code-flow adapter.
+ */
+export type OAuthFlowType = 'code' | 'fragment'
+
 export interface OAuthProviderConfig {
   /** Provider id used in DB rows + URL paths (`/api/v1/oauth/[provider]/...`). */
   id: OAuthProviderId
   /** Human-readable display name for the UI. */
   displayName: string
+  /**
+   * Auth flow shape. Defaults to `'code'`. See `OAuthFlowType`
+   * for what `'fragment'` means and which adapter uses it.
+   */
+  flowType?: OAuthFlowType
   /** Whether this provider supports PKCE (RFC 7636). Slack does not; most modern providers do. */
   pkce: boolean
   /** Scope strings for each access mode. Provider-specific. */
@@ -119,8 +144,16 @@ export function isKnownProvider(id: string): id is OAuthProviderId {
  * `LAZYNEXT_OAUTH_<PROVIDER>_CLIENT_SECRET`. Each provider adapter
  * will check for additional vars (signing secrets, app IDs) when
  * those exist; this is the floor.
+ *
+ * Trello is the exception: its legacy "Authorize" flow uses an API
+ * key only (no client secret). For Trello we look at
+ * `LAZYNEXT_OAUTH_TRELLO_API_KEY` instead.
  */
 export function isProviderConfigured(id: OAuthProviderId): boolean {
+  if (id === 'trello') {
+    const key = process.env.LAZYNEXT_OAUTH_TRELLO_API_KEY
+    return typeof key === 'string' && key.length > 0
+  }
   const upper = id.toUpperCase()
   const cid = process.env[`LAZYNEXT_OAUTH_${upper}_CLIENT_ID`]
   const sec = process.env[`LAZYNEXT_OAUTH_${upper}_CLIENT_SECRET`]

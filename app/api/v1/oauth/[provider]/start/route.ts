@@ -13,21 +13,21 @@ import { ensureLinearAdapterRegistered } from '@/lib/oauth/linear'
 import { ensureSlackAdapterRegistered } from '@/lib/oauth/slack'
 import { ensureAsanaAdapterRegistered } from '@/lib/oauth/asana'
 import { ensureJiraAdapterRegistered } from '@/lib/oauth/jira'
+import { ensureTrelloAdapterRegistered } from '@/lib/oauth/trello'
 import { reportApiError } from '@/lib/utils/api-sentry'
 import { randomBytes } from 'node:crypto'
 
 // Adapter registration. Each adapter is idempotent — calling
-// the ensure* helper more than once is a no-op. Trello is
-// intentionally NOT registered: Trello's auth flow returns the
-// token in a URL fragment, which the server-side callback
-// cannot read. Wiring Trello requires a separate fragment-
-// handling client route — tracked as a follow-up.
+// the ensure* helper more than once is a no-op. Trello uses a
+// fragment-flow rather than the standard authorization-code
+// flow; the start route handles both shapes via `flowType`.
 ensureGithubAdapterRegistered()
 ensureNotionAdapterRegistered()
 ensureLinearAdapterRegistered()
 ensureSlackAdapterRegistered()
 ensureAsanaAdapterRegistered()
 ensureJiraAdapterRegistered()
+ensureTrelloAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 
@@ -111,7 +111,15 @@ export async function GET(
   // Origin from the request URL so dev / preview / prod all build
   // the right absolute redirect URI without an extra env var.
   const origin = url.origin
-  const redirectUri = `${origin}/api/v1/oauth/${params.provider}/callback`
+  // Fragment-flow providers (Trello) can't return to the standard
+  // /callback route — fragments aren't readable server-side. They
+  // return to a tiny client-side bridge page that extracts the
+  // token from `window.location.hash` and POSTs it to a dedicated
+  // /finish endpoint.
+  const redirectUri =
+    adapter.flowType === 'fragment'
+      ? `${origin}/oauth/${params.provider}/bridge`
+      : `${origin}/api/v1/oauth/${params.provider}/callback`
 
   // Default to read-mode for now; the UI doesn't yet expose a
   // mode selector. Per-adapter flows that need write access call
