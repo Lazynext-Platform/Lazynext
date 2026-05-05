@@ -11,15 +11,23 @@ import { ensureGithubAdapterRegistered } from '@/lib/oauth/github'
 import { ensureNotionAdapterRegistered } from '@/lib/oauth/notion'
 import { ensureLinearAdapterRegistered } from '@/lib/oauth/linear'
 import { ensureSlackAdapterRegistered } from '@/lib/oauth/slack'
+import { ensureAsanaAdapterRegistered } from '@/lib/oauth/asana'
+import { ensureJiraAdapterRegistered } from '@/lib/oauth/jira'
 import { reportApiError } from '@/lib/utils/api-sentry'
 import { randomBytes } from 'node:crypto'
 
 // Adapter registration. Each adapter is idempotent — calling
-// the ensure* helper more than once is a no-op.
+// the ensure* helper more than once is a no-op. Trello is
+// intentionally NOT registered: Trello's auth flow returns the
+// token in a URL fragment, which the server-side callback
+// cannot read. Wiring Trello requires a separate fragment-
+// handling client route — tracked as a follow-up.
 ensureGithubAdapterRegistered()
 ensureNotionAdapterRegistered()
 ensureLinearAdapterRegistered()
 ensureSlackAdapterRegistered()
+ensureAsanaAdapterRegistered()
+ensureJiraAdapterRegistered()
 
 export const dynamic = 'force-dynamic'
 

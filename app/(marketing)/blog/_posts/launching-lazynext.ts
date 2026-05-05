@@ -1,0 +1,57 @@
+import type { Post } from './types'
+
+const post: Post = {
+  slug: 'launching-lazynext',
+  title: 'Lazynext is live, and we think we shipped the thing PM tools forgot',
+  excerpt: 'Every decision your team makes is now a scored, tracked, reviewed object. Here\u2019s why that matters more than another Kanban board.',
+  date: 'April 18, 2026',
+  dateTime: '2026-04-18',
+  tag: 'Launch',
+  featured: true,
+  content: [
+    { type: 'p', text: 'Here\u2019s the uncomfortable thing about running a team.' },
+    { type: 'p', text: 'You don\u2019t get paid for the tasks you complete. You get paid for the decisions you make. The hire. The architecture choice. The feature cut. Every one of those decisions costs or compounds for months.' },
+    { type: 'p', text: 'And yet your decisions live in Slack threads that age out in three weeks, in meeting notes nobody reads, in the head of whoever was in the room. The outcome lands six months later and nobody goes back to ask "did we reason about this well, or did we get lucky?"' },
+    { type: 'p', text: 'We built Lazynext because we were tired of this.' },
+    { type: 'h2', text: 'The thesis' },
+    { type: 'p', text: 'A team\u2019s ability to make good decisions is its most valuable compounding asset. And almost nobody measures it. So we made decisions a first-class object, and we made an LLM grade them.' },
+    { type: 'h2', text: 'Decision DNA: 4 dimensions' },
+    { type: 'p', text: 'Every decision in Lazynext gets scored on four equally weighted dimensions, 0 to 100 each:' },
+    { type: 'ul', items: [
+      'Clarity \u2014 is the question sharp, or a vague vibe?',
+      'Data quality \u2014 is the rationale grounded in evidence or in guesses?',
+      'Risk awareness \u2014 does it name the downside, the reversibility, the stakes?',
+      'Alternatives considered \u2014 what did you seriously weigh, and what did you reject?',
+    ]},
+    { type: 'p', text: 'Primary model is Groq\u2019s Llama 3.3 70B. Together AI is the fallback. If both fail, a deterministic heuristic takes over so scoring never blocks a decision from being logged. Every score is stamped with the model version. Look back in a year and you\u2019ll know which model judged what.' },
+    { type: 'h2', text: 'The outcome loop is the point' },
+    { type: 'p', text: 'A scored decision without a tracked outcome is a prettier diary. So every decision has an expected_by field. A daily Inngest job finds decisions past their date and emails the author. "Hey, you said you\u2019d know in 30 days. It\u2019s been 30 days. What happened?" You tag the outcome. The decision gets a retrospective. Over time you see which categories your team wins at, which ones you fumble, and who has calibrated judgment versus who is guessing.' },
+    { type: 'h2', text: 'Public decision pages' },
+    { type: 'p', text: 'Any decision can be shared at /d/[slug] with full OG metadata. Post it in the RFC channel. The quarterly review. Twitter. The scoring makes the reasoning legible even to people who weren\u2019t in the room. This is the thing every eng org has been faking with Google Docs for a decade.' },
+    { type: 'h2', text: 'Workspace Maturity Score' },
+    { type: 'p', text: 'Most workflow tools give you 20 features on day one and hope you figure it out. We do the opposite. New workspaces get decisions and outcomes only. As you actually decide things, a score grows in the background and unlocks more: tasks and threads at 15 points, docs and tables at 35, the full canvas and automations at 60. Power user who wants everything immediately? One toggle. Default bias: earn the complexity.' },
+    { type: 'h2', text: 'What shipped' },
+    { type: 'ul', items: [
+      '38 features, all designed and built',
+      '72 polish commits after feature freeze',
+      '20 new tests in this release, on top of the existing suite',
+      'WCAG 2.1 AA across the entire app',
+      '40 locales, 57 currencies, global billing via Gumroad',
+      'Rate limiting on every API route, error boundaries on every page',
+    ]},
+    { type: 'h2', text: 'What didn\u2019t, and why' },
+    { type: 'ul', items: [
+      'Real-time collaboration cursors are plumbed but not battle-tested. Q3.',
+      'Native mobile isn\u2019t a product question, it\u2019s a distribution question. Not yet.',
+      'Self-hosted exists in the code but the support model doesn\u2019t. Email us.',
+    ]},
+    { type: 'h2', text: 'Try it' },
+    { type: 'p', text: 'We built a dev auth bypass so you can walk the entire UI without a database.' },
+    { type: 'code', lang: 'bash', text: 'git clone https://github.com/Lazynext-Platform/Lazynext.git\ncd Lazynext\nnpm install --legacy-peer-deps\nnpm run dev' },
+    { type: 'p', text: 'Set GROQ_API_KEY to see the AI scorer. Without it, the heuristic path still runs, still useful, just not AI.' },
+    { type: 'p', text: 'If your team makes a lot of decisions and has no way to know if it\u2019s getting better at them, we want to talk to you. hello@lazynext.com.' },
+    { type: 'p', text: 'Go decide something good. Then come back and see if you did.' },
+  ],
+}
+
+export default post
