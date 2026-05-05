@@ -6,6 +6,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.2.0] - 2026-05-05
+
+**Theme:** OAuth adapter roster complete. Asana + Jira + Trello shipped — closes the last #15 OAuth gap.
+
+### Added
+- **Asana OAuth adapter** (`lib/oauth/asana.ts`) — OAuth 2.0 code flow with refresh tokens (1h expiry); identity returned inline on the token response. 10 unit tests.
+- **Jira / Atlassian 3LO adapter** (`lib/oauth/jira.ts`) — audience-scoped flow (`audience=api.atlassian.com`); identity built from parallel `/me` + `/oauth/token/accessible-resources` calls; `external_id` is `${cloudid}:${account_id}` so multi-site tenants work. 11 unit tests.
+- **Trello fragment-flow adapter** (`lib/oauth/trello.ts` + `app/oauth/trello/bridge/page.tsx` + `app/api/v1/oauth/trello/finish/route.ts`) — Trello returns the access token in the URL fragment, which the server can't read. New `OAuthFlowType = 'code' | 'fragment'` discriminator on `OAuthProviderConfig`; for fragment providers, the start route redirects to a tiny client bridge page that JS-extracts the token from `window.location.hash`, scrubs it via `history.replaceState`, then POSTs `{token, state}` to a dedicated finish endpoint that performs the same CSRF state + workspace-membership + envelope-encrypt + upsert as the standard callback. `isProviderConfigured('trello')` is special-cased to require only `LAZYNEXT_OAUTH_TRELLO_API_KEY` (Trello has no client secret — the API key is the only credential needed before the user authorizes). 8 unit tests + 4 registry tests.
+- **Blog post registry refactor** — `app/(marketing)/blog/_posts/{types,index,...}.ts`. Each post is now a typed module; listing page, slug page, and `app/sitemap.ts` derive from the same registry. New post: *Workspace Maturity Score: how it's computed*.
+
+### Validation
+- **445/445** Vitest tests pass (+12 over v1.4.1.1)
+- Type-check + lint clean
+- SDK types regenerated (no diff — finish endpoint is internal)
+
 ## [1.4.1.1] - 2026-04-29
 
 **Theme:** SEO + security fixes after a deep audit pass.
