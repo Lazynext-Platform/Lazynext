@@ -6,6 +6,23 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.11.0] - 2026-05-06
+
+**Theme:** Cleanup sweep — closes the deferred technical debt left at v1.4.0.0.
+
+### Added
+- **A.2 — Sentry request-id correlation** — `instrumentation.ts` now exports a custom `onRequestError` that wraps Sentry's stock `captureRequestError` and tags every event with `request_id` from the incoming `X-Request-Id` header. Customers can now grep their own logs and find the matching Sentry issue. Tag enrichment is wrapped in a try/catch so it can never fail an error capture.
+- **E.5 / E.6 — SDK type generation drift check** — `npm run sdk:check-types` (CI-friendly) re-runs `openapi-typescript` against the current `buildOpenApiSpec()` and exits non-zero if `packages/sdk/src/types.ts` would drift. Wire this into pre-merge CI to make the OpenAPI spec the single source of truth: change the spec → run `sdk:generate-types` → commit. Re-ran `sdk:generate-types` to catch the spec up to v1.5.10.0 (47585 chars).
+
+### Fixed
+- **`package.json` version sync** — was stuck at `1.4.1.1` while `VERSION` had been advancing through 1.5.x. Both now point at `1.5.11.0` and will be bumped together going forward.
+
+### Documentation
+- `docs/features/40-public-rest-api/tasks.md` — A.2, E.5, E.6 flipped from deferred to done. Remaining v1.4.0.0 deferreds are all genuinely ops-gated: E.1 (npm workspaces — changes Vercel build), E.3 (test-file relocation — churn without test value), E.8 (`npm publish` — needs `@lazynext` org reservation).
+
+### Why
+Closing the v1.4.0.0 sweep so the changelog stops carrying a tail. The three items left after this ship are all human/ops decisions, not autonomous coding work.
+
 ## [1.5.10.0] - 2026-05-06
 
 **Theme:** Edges enter the audit log; the audit page learns to scope to a single resource.

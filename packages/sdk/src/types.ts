@@ -339,6 +339,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/decisions/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Render the workspace Decision DNA report (HTML)
+         * @description Returns a print-optimised HTML document of every logged decision. Cookie-session callers receive an inline auto-print script that opens the browser save-as-PDF dialog; bearer-key callers (the SDK, downstream automations) receive the same HTML without the script and can pipe it through their own renderer (puppeteer, headless-chrome, weasyprint) to materialise a PDF. Plan-gated to Team+ via the workspace plan, NOT the caller.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description UUID of the workspace. Bearer keys are workspace-scoped — the key must belong to this workspace. */
+                    workspaceId: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description HTML document */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/html": string;
+                    };
+                };
+                /** @description PLAN_LIMIT_REACHED — workspace plan does not include pdf-export */
+                402: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description export bucket: 10/min */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/export": {
         parameters: {
             query?: never;
@@ -392,12 +452,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Read workspace audit log */
+        /**
+         * Read workspace audit log
+         * @description Plan-gated to Business+. Cursor-paginated via `before` (the `created_at` of the last row from the previous page). Optional `action` filter and `range` window.
+         */
         get: {
             parameters: {
                 query: {
                     /** @description UUID of the workspace. Bearer keys are workspace-scoped — the key must belong to this workspace. */
                     workspaceId: string;
+                    /** @description ISO timestamp — return rows older than this. Use the last row's `created_at` from the previous page. */
+                    before?: string;
+                    /** @description Filter to a single audit action. */
+                    action?: "workspace.update" | "workspace.delete" | "decision.create" | "decision.update" | "decision.delete" | "node.create" | "node.update" | "node.delete" | "member.invite" | "member.remove" | "member.role_update" | "api_key.create" | "api_key.rotate" | "api_key.revoke" | "edge.create" | "edge.delete" | "ai.workflow.generated" | "ai.workflow.accepted" | "ai.workflow.refined";
+                    /** @description Restrict to entries within the last N days. `all` (default) returns the full window. */
+                    range?: "7" | "30" | "90" | "365" | "all";
+                    /** @description Resource timeline filter (#52). Must be set together with `resourceId`. Allowlisted to `node | decision | workspace | api_key | member`. */
+                    resourceType?: "node" | "decision" | "workspace" | "api_key" | "member";
+                    /** @description Resource timeline filter (#52). Ignored unless `resourceType` is also set. */
+                    resourceId?: string;
                 };
                 header?: never;
                 path?: never;
@@ -412,7 +485,156 @@ export interface paths {
                     };
                     content?: never;
                 };
+                /** @description Plan does not include audit-log access */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
                 /** @description api bucket: 100/min */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Record a client-emitted audit entry
+         * @description Lets a client (browser session or bearer key) record one of a tight allowlist of audit actions. Only `ai.workflow.accepted` and `ai.workflow.refined` are permitted — every other action is server-recorded as the matching mutation happens, so allowing a client to spoof e.g. `decision.delete` would corrupt the log. NOT plan-gated (writes happen regardless of plan; reads are gated).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        workspaceId: string;
+                        /** @enum {string} */
+                        action: "ai.workflow.accepted" | "ai.workflow.refined";
+                        /** @description Bounded subset only: prompt (≤500 chars), nodeCount, edgeCount, refineCount. Other fields ignored. */
+                        metadata?: Record<string, never>;
+                        resourceType?: string;
+                        resourceId?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Recorded */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            data?: {
+                                recorded?: boolean;
+                            };
+                        };
+                    };
+                };
+                /** @description VALIDATION_ERROR | MISSING_WORKSPACE_ID | ACTION_NOT_ALLOWED | INVALID_JSON */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Missing or invalid credentials */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description Bearer key does not belong to workspace */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description mutation bucket: 30/min */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/audit-log/export-csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Export workspace audit log as CSV
+         * @description Plan-gated to Business+. Capped at 5000 rows. Filename embeds the active `range` so SOC-2 evidence packs are self-describing.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /** @description UUID of the workspace. Bearer keys are workspace-scoped — the key must belong to this workspace. */
+                    workspaceId: string;
+                    /** @description Filter to a single audit action (same enum as `/audit-log`). */
+                    action?: string;
+                    /** @description Restrict to the last N days. `all` (default) exports up to the 5000-row cap. */
+                    range?: "7" | "30" | "90" | "365" | "all";
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description CSV file */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
+                    };
+                };
+                /** @description Plan does not include audit-log access */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                /** @description export bucket: 10/min */
                 429: {
                     headers: {
                         [name: string]: unknown;

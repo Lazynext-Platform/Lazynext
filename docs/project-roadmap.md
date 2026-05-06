@@ -115,10 +115,11 @@ These features show real, truthful UI but lack the backend that would make them 
 | 50 | Audit Log Diff Viewer | ✅ Complete | � Merged | #43, #47 | `main` | Producer (`node.update`) emits `previous` + `next` snapshots of changed fields. Reader (`summarizeAuditMetadata`) renders `title: "Old" → "New"` per field, with `(+N more)` overflow, 40-char truncation, em-dash for nulls, placeholders for non-primitives. Backwards compatible. v1.5.8.0. 556/556 tests. |
 | 51 | Decision audit producers | ✅ Complete | � Merged | #50 | `main` | Decision PATCH and DELETE now emit audit rows. PATCH snapshots `previous` + `next` for resolution/rationale/status/outcome/outcomeNotes/outcomeConfidence/tags. DELETE snapshots `question`. Reader for `*.delete` learns to read the snapshotted question/title. v1.5.9.0. 561/561 tests. |
 | 52 | Resource-scoped audit timeline | ✅ Complete | 🟢 Merged | #43 | `main` | `?resourceType=&resourceId=` parameter pair on GET `/audit-log` scopes the response to a single resource's history. Both keys required (either alone is dropped). resourceType allowlisted to node/decision/workspace/api_key/member. OpenAPI documents the pair. v1.5.9.0. 561/561 tests. |
-| 53 | Resource filter UI | ✅ Complete | 🟡 In review | #52 | `feature/53-54-edge-audits-and-resource-filter-ui` | Audit-log page surfaces the resource filter as a pill with Clear button; row resource ids are click-to-filter. Composes with action + range + load-more. `edge` added to allowlist. v1.5.10.0. 562/562 tests. |
-| 54 | Edge audit producers | ✅ Complete | 🟡 In review | #43 | `feature/53-54-edge-audits-and-resource-filter-ui` | `POST/DELETE /api/v1/edges` now emit `edge.create` and `edge.delete` audit rows snapshotting workflow/source/target ids. New `AuditAction` members threaded through formatter, OpenAPI, page allowlist, and client dropdown. v1.5.10.0. 562/562 tests. |
+| 53 | Resource filter UI | ✅ Complete | 🟢 Merged | #52 | `main` | Audit-log page surfaces the resource filter as a pill with Clear button; row resource ids are click-to-filter. Composes with action + range + load-more. `edge` added to allowlist. v1.5.10.0. 562/562 tests. |
+| 54 | Edge audit producers | ✅ Complete | 🟢 Merged | #43 | `main` | `POST/DELETE /api/v1/edges` emit `edge.create`/`edge.delete` audit rows snapshotting workflow/source/target ids. New `AuditAction` members threaded through formatter, OpenAPI, page allowlist, and client dropdown. v1.5.10.0. 562/562 tests. |
+| 55 | v1.4.0.0 deferred sweep | ✅ Complete | 🟡 In review | #40 | `feature/55-deferred-cleanup` | A.2 Sentry request-id tag in `onRequestError`. E.5/E.6 SDK codegen + CI drift check (`sdk:check-types`). package.json version sync. v1.5.11.0. 562/562 tests. |
 
-**Phase 3 Total**: 17 features
+**Phase 3 Total**: 18 features
 
 ---
 
