@@ -72,6 +72,24 @@ describe('summarizeAuditMetadata', () => {
     )
   })
 
+  it('decision.delete renders the snapshotted question (#51)', () => {
+    expect(
+      summarizeAuditMetadata('decision.delete', { question: 'Should we adopt RSC?' }),
+    ).toBe('"Should we adopt RSC?"')
+    expect(
+      summarizeAuditMetadata('decision.delete', {
+        question: 'Should we ship?',
+        viaApiKey: true,
+      }),
+    ).toBe('"Should we ship?" · via API key')
+  })
+
+  it('node.delete renders the snapshotted title when present', () => {
+    expect(
+      summarizeAuditMetadata('node.delete', { title: 'Ship it' }),
+    ).toBe('"Ship it"')
+  })
+
   it('summarises api_key.* with name + prefix when present', () => {
     expect(
       summarizeAuditMetadata('api_key.create', { name: 'CI Bot', prefix: 'lzx_abc' }),

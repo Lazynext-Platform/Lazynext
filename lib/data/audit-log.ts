@@ -110,6 +110,16 @@ export async function listAuditLog(opts: {
    * apply on the same query.
    */
   sinceIso?: string | null
+  /**
+   * Restrict to audit rows touching a specific resource (e.g. a
+   * single node or decision). Both keys must be set; `resourceType`
+   * alone or `resourceId` alone is rejected so the route layer can't
+   * accidentally fan out to every node in a workspace. Used by the
+   * #52 resource timeline endpoint to stitch the audit history of a
+   * single resource into a timeline.
+   */
+  resourceType?: string | null
+  resourceId?: string | null
 }): Promise<{ items: AuditView[]; nextCursor: string | null }> {
   if (!hasValidDatabaseUrl) return { items: [], nextCursor: null }
   const limit = Math.min(Math.max(opts.limit ?? 50, 1), 200)
@@ -124,6 +134,9 @@ export async function listAuditLog(opts: {
   if (opts.cursor) q = q.lt('created_at', opts.cursor)
   if (opts.action) q = q.eq('action', opts.action)
   if (opts.sinceIso) q = q.gte('created_at', opts.sinceIso)
+  if (opts.resourceType && opts.resourceId) {
+    q = q.eq('resource_type', opts.resourceType).eq('resource_id', opts.resourceId)
+  }
 
   const { data } = await q
   const rows = (data as AuditRow[] | null) ?? []
