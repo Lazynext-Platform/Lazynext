@@ -6,6 +6,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.6.0] - 2026-05-06
+
+**Theme:** Audit log learns to read its own writing. Metadata blobs render as a one-line summary instead of a JSON pile.
+
+### Added
+- **Audit Log Metadata Summary (#47)** — `summarizeAuditMetadata(action, metadata)` in `lib/utils/audit-format.ts` produces a one-line human summary keyed off the action shape: `node.update` / `decision.update` show `Edited: title, status`; `workspace.update` shows `Renamed "Old" → "New"`; `node.create` shows `Created task: "…"`; `decision.create` shows `"…" · score 82`; `api_key.*` shows `Name (lzx_abc…)`; `member.*` shows `email · role`; `ai.workflow.*` shows `"prompt" · N nodes`. `viaApiKey: true` appends ` · via API key` for clarity in compliance pulls. Unknown shapes fall through to the existing JSON `<details>` block — nothing is hidden, only better-presented.
+- **AuditLogClient** now renders the summary inline as a one-liner above the (renamed) `raw metadata` collapsible. When there's nothing to summarise the JSON-only fallback retains the original `metadata` label.
+
+### Tests
+- **`tests/unit/audit-metadata-summary.test.ts`** — 13 cases covering every action branch: null/empty, changes-array, viaApiKey suffix, workspace rename, workspace fallback, truncation at 60 chars, API-key flagging on deletes, api_key name+prefix, member email+role, ai.workflow prompt+nodeCount pluralisation. **536 tests passing** (523 → 536, +13).
+
+### Why
+The audit page is the SOC-2-friendly receipt for every workspace mutation, but the metadata column was a JSON dump that auditors had to parse mentally. The producer side already encodes the right structure (`changes: ['title','status']`, `{ name, slug }` rename pairs, `prompt` + `nodeCount` for AI runs); we just needed a reader. Pure function, deterministic, no schema migration, no producer changes.
+
 ## [1.5.5.0] - 2026-05-06
 
 **Theme:** OpenAPI spec catches up. The new bearer-aware audit-log filters and CSV export are now first-class citizens of the public contract.

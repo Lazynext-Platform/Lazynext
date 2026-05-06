@@ -11,6 +11,7 @@ import {
   formatRelativeTime,
   formatActor,
   formatAuditRange,
+  summarizeAuditMetadata,
   type AuditRange,
 } from '@/lib/utils/audit-format'
 
@@ -250,16 +251,27 @@ export function AuditLogClient({
                       ) : (
                         <span className="text-slate-600">—</span>
                       )}
-                      {Object.keys(row.metadata ?? {}).length > 0 ? (
-                        <details className="mt-1">
-                          <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300">
-                            metadata
-                          </summary>
-                          <pre className="mt-1 max-w-md overflow-x-auto rounded bg-slate-950 p-2 text-[10px] text-slate-400">
-                            {JSON.stringify(row.metadata, null, 2)}
-                          </pre>
-                        </details>
-                      ) : null}
+                      {(() => {
+                        const summary = summarizeAuditMetadata(row.action, row.metadata)
+                        const hasJson = Object.keys(row.metadata ?? {}).length > 0
+                        return (
+                          <>
+                            {summary ? (
+                              <div className="mt-1 text-xs text-slate-300">{summary}</div>
+                            ) : null}
+                            {hasJson ? (
+                              <details className="mt-1">
+                                <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300">
+                                  {summary ? 'raw metadata' : 'metadata'}
+                                </summary>
+                                <pre className="mt-1 max-w-md overflow-x-auto rounded bg-slate-950 p-2 text-[10px] text-slate-400">
+                                  {JSON.stringify(row.metadata, null, 2)}
+                                </pre>
+                              </details>
+                            ) : null}
+                          </>
+                        )
+                      })()}
                     </td>
                     <td className="px-4 py-3 align-top font-mono text-xs text-slate-500">
                       {row.ip ?? '—'}
