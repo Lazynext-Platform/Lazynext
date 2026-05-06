@@ -117,9 +117,10 @@ These features show real, truthful UI but lack the backend that would make them 
 | 52 | Resource-scoped audit timeline | ✅ Complete | 🟢 Merged | #43 | `main` | `?resourceType=&resourceId=` parameter pair on GET `/audit-log` scopes the response to a single resource's history. Both keys required (either alone is dropped). resourceType allowlisted to node/decision/workspace/api_key/member. OpenAPI documents the pair. v1.5.9.0. 561/561 tests. |
 | 53 | Resource filter UI | ✅ Complete | 🟢 Merged | #52 | `main` | Audit-log page surfaces the resource filter as a pill with Clear button; row resource ids are click-to-filter. Composes with action + range + load-more. `edge` added to allowlist. v1.5.10.0. 562/562 tests. |
 | 54 | Edge audit producers | ✅ Complete | 🟢 Merged | #43 | `main` | `POST/DELETE /api/v1/edges` emit `edge.create`/`edge.delete` audit rows snapshotting workflow/source/target ids. New `AuditAction` members threaded through formatter, OpenAPI, page allowlist, and client dropdown. v1.5.10.0. 562/562 tests. |
-| 55 | v1.4.0.0 deferred sweep | ✅ Complete | 🟡 In review | #40 | `feature/55-deferred-cleanup` | A.2 Sentry request-id tag in `onRequestError`. E.5/E.6 SDK codegen + CI drift check (`sdk:check-types`). package.json version sync. v1.5.11.0. 562/562 tests. |
+| 55 | v1.4.0.0 deferred sweep | ✅ Complete | � Merged | #40 | `main` | A.2 Sentry request-id tag in `onRequestError`. E.5/E.6 SDK codegen + CI drift check (`sdk:check-types`). package.json version sync. v1.5.11.0. 562/562 tests. |
+| 56 | Audit producer test coverage | ✅ Complete | 🟡 In review | #51, #54 | `feature/56-producer-tests` | Route-layer tests for decision PATCH/DELETE and edge POST/DELETE audit producers (11 new cases). v1.5.12.0. 573/573 tests. |
 
-**Phase 3 Total**: 18 features
+**Phase 3 Total**: 19 features
 
 ---
 

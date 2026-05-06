@@ -6,6 +6,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.12.0] - 2026-05-06
+
+**Theme:** Test coverage for the audit producers shipped in #51 and #54.
+
+### Tests
+- **`tests/unit/decisions-update-route.test.ts`** (7 cases) — covers PATCH and DELETE on `/api/v1/decisions/[id]`. Asserts `decision.update` fires with `previous` + `next` snapshots scoped to changed fields, that `outcomeNotes` and `outcomeConfidence` map to their snake_case DB columns in the `previous` snapshot, that `viaApiKey` propagates from auth, and that 404s never record audit. DELETE asserts the snapshotted question, 200-char truncation, and the 404 short-circuit.
+- **`tests/unit/edges-route.test.ts`** (4 cases) — covers POST and DELETE on `/api/v1/edges`. Asserts `edge.create` fires with `workflowId/sourceId/targetId` and the new edge id, `edge.delete` reads the snapshotted edge before deletion, and validation/missing-id errors short-circuit before audit.
+
+**573 tests passing** (562 → 573, +11).
+
+### Why
+The producers shipped without route-level tests; the metadata contract is the API the audit reader depends on, so it deserves explicit coverage. Closes the test-debt called out in #51 and #54 discussion docs.
+
 ## [1.5.11.0] - 2026-05-06
 
 **Theme:** Cleanup sweep — closes the deferred technical debt left at v1.4.0.0.
