@@ -319,11 +319,91 @@ export function buildOpenApiSpec(): OpenApiSpec {
       '/audit-log': {
         get: {
           summary: 'Read workspace audit log',
+          description:
+            'Plan-gated to Business+. Cursor-paginated via `before` (the `created_at` of the last row from the previous page). Optional `action` filter and `range` window.',
           tags: ['Audit'],
-          parameters: [workspaceIdParam],
+          parameters: [
+            workspaceIdParam,
+            {
+              name: 'before',
+              in: 'query',
+              required: false,
+              description: 'ISO timestamp — return rows older than this. Use the last row\'s `created_at` from the previous page.',
+              schema: { type: 'string', format: 'date-time' },
+            },
+            {
+              name: 'action',
+              in: 'query',
+              required: false,
+              description: 'Filter to a single audit action.',
+              schema: {
+                type: 'string',
+                enum: [
+                  'workspace.update',
+                  'workspace.delete',
+                  'decision.create',
+                  'decision.update',
+                  'decision.delete',
+                  'node.create',
+                  'node.update',
+                  'node.delete',
+                  'member.invite',
+                  'member.remove',
+                  'member.role_update',
+                  'api_key.create',
+                  'api_key.rotate',
+                  'api_key.revoke',
+                  'ai.workflow.generated',
+                  'ai.workflow.accepted',
+                  'ai.workflow.refined',
+                ],
+              },
+            },
+            {
+              name: 'range',
+              in: 'query',
+              required: false,
+              description: 'Restrict to entries within the last N days. `all` (default) returns the full window.',
+              schema: { type: 'string', enum: ['7', '30', '90', '365', 'all'] },
+            },
+          ],
           responses: {
             '200': { description: 'Audit log entries' },
+            '403': errorResponse('Plan does not include audit-log access'),
             '429': errorResponse('api bucket: 100/min'),
+          },
+        },
+      },
+      '/audit-log/export-csv': {
+        get: {
+          summary: 'Export workspace audit log as CSV',
+          description:
+            'Plan-gated to Business+. Capped at 5000 rows. Filename embeds the active `range` so SOC-2 evidence packs are self-describing.',
+          tags: ['Audit', 'Export'],
+          parameters: [
+            workspaceIdParam,
+            {
+              name: 'action',
+              in: 'query',
+              required: false,
+              description: 'Filter to a single audit action (same enum as `/audit-log`).',
+              schema: { type: 'string' },
+            },
+            {
+              name: 'range',
+              in: 'query',
+              required: false,
+              description: 'Restrict to the last N days. `all` (default) exports up to the 5000-row cap.',
+              schema: { type: 'string', enum: ['7', '30', '90', '365', 'all'] },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'CSV file',
+              content: { 'text/csv': { schema: { type: 'string' } } },
+            },
+            '403': errorResponse('Plan does not include audit-log access'),
+            '429': errorResponse('export bucket: 10/min'),
           },
         },
       },

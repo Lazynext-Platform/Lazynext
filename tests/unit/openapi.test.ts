@@ -23,6 +23,7 @@ describe('buildOpenApiSpec', () => {
   it('lists every bearer-aware endpoint', () => {
     expect(Object.keys(spec.paths).sort()).toEqual([
       '/audit-log',
+      '/audit-log/export-csv',
       '/decisions',
       '/decisions/export-csv',
       '/decisions/{id}',
@@ -45,6 +46,18 @@ describe('buildOpenApiSpec', () => {
   it('export endpoints document the export bucket', () => {
     expect(spec.paths['/decisions/export-csv'].get.responses['429'].description).toMatch(/export bucket/)
     expect(spec.paths['/export'].get.responses['429'].description).toMatch(/export bucket/)
+    expect(spec.paths['/audit-log/export-csv'].get.responses['429'].description).toMatch(/export bucket/)
+  })
+
+  it('audit-log endpoints expose action + range filters', () => {
+    const auditList = spec.paths['/audit-log'].get
+    const auditCsv = spec.paths['/audit-log/export-csv'].get
+    const listParamNames = (auditList.parameters ?? []).map((p) => p.name)
+    const csvParamNames = (auditCsv.parameters ?? []).map((p) => p.name)
+    expect(listParamNames).toEqual(expect.arrayContaining(['workspaceId', 'action', 'range', 'before']))
+    expect(csvParamNames).toEqual(expect.arrayContaining(['workspaceId', 'action', 'range']))
+    const rangeParam = (auditList.parameters ?? []).find((p) => p.name === 'range')!
+    expect((rangeParam.schema as { enum?: string[] }).enum).toEqual(['7', '30', '90', '365', 'all'])
   })
 
   it('mutation endpoints document the mutation bucket', () => {

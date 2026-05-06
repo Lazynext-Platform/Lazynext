@@ -6,6 +6,19 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.5.0] - 2026-05-06
+
+**Theme:** OpenAPI spec catches up. The new bearer-aware audit-log filters and CSV export are now first-class citizens of the public contract.
+
+### Added
+- **OpenAPI Spec Sync (#46)** — `lib/utils/openapi.ts` now documents `/audit-log/export-csv` (a bearer-aware endpoint that's been live since v1.5.3.0 but missing from the public spec) and the `?action` + `?range` query parameters on `/audit-log` (live since v1.5.4.0). Both audit endpoints document the Business+ plan gate via 403 responses and the correct rate-limit bucket (export bucket for CSV, api bucket for the JSON list). The `action` enum is the exhaustive seventeen-value `AuditAction` list, kept by hand in lockstep with `lib/data/audit-log.ts`. The `range` enum mirrors the `AuditRange` literal — `7 | 30 | 90 | 365 | all`.
+
+### Tests
+- New `audit-log endpoints expose action + range filters` test in `tests/unit/openapi.test.ts` asserts both audit endpoints declare the expected query parameters and that the `range` enum stays in sync with the runtime parser. The existing `lists every bearer-aware endpoint` snapshot test was updated to include `/audit-log/export-csv`. The export-bucket regression test now also covers the new CSV endpoint. **523 tests passing** (515 → 522 was #45; 522 → 523 is #46's net add).
+
+### Why
+The OpenAPI spec is the public contract: SDK generation, third-party integrations, and the docs site all consume it. v1.5.3.0 and v1.5.4.0 added new bearer-aware surface area without updating the spec, so external clients had no way to discover the new filters or the audit CSV endpoint. This catches the spec back up to the runtime in a single commit, and the new structural test prevents the gap from reopening — any future audit-log query parameter has to be declared in the spec or the suite goes red.
+
 ## [1.5.4.0] - 2026-05-06
 
 **Theme:** Audit log learns to forget. Date-range filter retires the "all time" payload bloat for compliance pulls.
