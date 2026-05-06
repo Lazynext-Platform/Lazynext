@@ -70,7 +70,32 @@ export async function GET(req: Request) {
   const range = parseAuditRange(url.searchParams.get('range'))
   const sinceIso = rangeCutoffIso(range)
 
-  const result = await listAuditLog({ workspaceId, limit, cursor, action, sinceIso })
+  // Resource timeline (#52). Both keys must be set; we never let a
+  // caller filter by resource_type alone (that would dump every node
+  // event in the workspace). resourceType is restricted to a small
+  // allowlist so a client can't probe arbitrary table names.
+  const resourceTypeParam = url.searchParams.get('resourceType')
+  const resourceIdParam = url.searchParams.get('resourceId')
+  const RESOURCE_TYPES: ReadonlySet<string> = new Set([
+    'node',
+    'decision',
+    'workspace',
+    'api_key',
+    'member',
+  ])
+  const resourceType =
+    resourceTypeParam && RESOURCE_TYPES.has(resourceTypeParam) ? resourceTypeParam : null
+  const resourceId = resourceType && resourceIdParam ? resourceIdParam : null
+
+  const result = await listAuditLog({
+    workspaceId,
+    limit,
+    cursor,
+    action,
+    sinceIso,
+    resourceType,
+    resourceId,
+  })
   return NextResponse.json({ data: result, error: null })
 }
 

@@ -245,8 +245,14 @@ export function summarizeAuditMetadata(
       return null
     }
     case 'node.delete':
-    case 'decision.delete':
+    case 'decision.delete': {
+      // Producer (#51) snapshots the question/title before delete.
+      const q = typeof m.question === 'string' ? m.question : null
+      const t = typeof m.title === 'string' ? m.title : null
+      if (q) return `"${truncate(q, 80)}"${viaApi}`
+      if (t) return `"${truncate(t, 80)}"${viaApi}`
       return viaApi ? `Deleted${viaApi}` : null
+    }
     case 'api_key.create':
     case 'api_key.rotate':
     case 'api_key.revoke': {

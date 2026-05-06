@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { requireWorkspaceAuth, requireScope } from '@/lib/utils/route-auth'
 import { incrementWmsFor } from '@/lib/wms'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const updateSchema = z.object({
   resolution: z.string().optional(),
@@ -43,7 +44,15 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  const { data: existing } = await db.from('decisions').select('workspace_id').eq('id', params.id).single()
+  // Pull every field we might diff against into the audit row's
+  // `previous` snapshot. Same pattern as nodes/[id] (#50). All these
+  // columns are compact (no unbounded blob like `data` on nodes) so
+  // the entire set is safe to snapshot.
+  const { data: existing } = await db
+    .from('decisions')
+    .select('workspace_id, resolution, rationale, status, outcome, outcome_notes, outcome_confidence, tags')
+    .eq('id', params.id)
+    .single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
   const auth = await requireWorkspaceAuth(req, existing.workspace_id)
@@ -90,13 +99,48 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     await incrementWmsFor(existing.workspace_id, 'outcome_recorded').catch(() => undefined)
   }
 
+  // Audit (#51). Diff-shape compatible with the #50 reader: snapshot
+  // each changed field's previous + next value. Camel-case snapshot
+  // keys match the API surface, not the DB columns, so the audit
+  // viewer summary reads naturally.
+  void recordAudit({
+    workspaceId: existing.workspace_id,
+    actorId: auth.userId,
+    action: 'decision.update',
+    resourceType: 'decision',
+    resourceId: params.id,
+    metadata: (() => {
+      const changes = Object.keys(parsed.data)
+      const previous: Record<string, unknown> = {}
+      const next: Record<string, unknown> = {}
+      for (const k of changes) {
+        const dbKey =
+          k === 'outcomeNotes'
+            ? 'outcome_notes'
+            : k === 'outcomeConfidence'
+              ? 'outcome_confidence'
+              : k
+        previous[k] = (existing as Record<string, unknown>)[dbKey] ?? null
+        next[k] = (parsed.data as Record<string, unknown>)[k] ?? null
+      }
+      return { changes, previous, next, viaApiKey: auth.viaApiKey }
+    })(),
+    request: req,
+  })
+
   return NextResponse.json({ data: updated, error: null })
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   if (!hasValidDatabaseUrl) return NextResponse.json({ error: 'DATABASE_NOT_CONFIGURED', message: 'Set Supabase env vars in .env.local.' }, { status: 503 })
 
-  const { data: existing } = await db.from('decisions').select('workspace_id').eq('id', params.id).single()
+  // Snapshot the question for the audit summary so 'Deleted decision
+  // "Should we adopt RSC?"' renders without a follow-up DB read.
+  const { data: existing } = await db
+    .from('decisions')
+    .select('workspace_id, question')
+    .eq('id', params.id)
+    .single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
   const auth = await requireWorkspaceAuth(req, existing.workspace_id)
@@ -108,5 +152,21 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   if (!rl.success) return rateLimitResponse({ resetAt: rl.resetAt, limit: rl.limit, remaining: rl.remaining })
 
   await db.from('decisions').delete().eq('id', params.id)
+
+  void recordAudit({
+    workspaceId: existing.workspace_id,
+    actorId: auth.userId,
+    action: 'decision.delete',
+    resourceType: 'decision',
+    resourceId: params.id,
+    metadata: {
+      question: typeof (existing as { question?: string }).question === 'string'
+        ? String((existing as { question: string }).question).slice(0, 200)
+        : null,
+      viaApiKey: auth.viaApiKey,
+    },
+    request: req,
+  })
+
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

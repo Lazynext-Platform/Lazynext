@@ -6,6 +6,23 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.9.0] - 2026-05-06
+
+**Theme:** Decision audits catch up with node audits, and the audit log learns to scope to a single resource.
+
+### Added
+- **Decision audit producers (#51)** — `app/api/v1/decisions/[id]/route.ts` PATCH and DELETE now emit `decision.update` and `decision.delete` audit rows. The PATCH producer follows the #50 diff shape: `previous` + `next` snapshots of every changed field (resolution, rationale, status, outcome, outcomeNotes, outcomeConfidence, tags). All these columns are compact — no unbounded blob like nodes' `data` — so the entire set is safe to snapshot. The DELETE producer snapshots the `question` so the audit summary renders `"Should we adopt RSC?"` instead of a bare `Deleted`.
+  - Reader extension: `summarizeAuditMetadata` for `node.delete` / `decision.delete` now reads the snapshotted `question` / `title` and renders it inline. Previous behaviour (null-when-empty / `Deleted · via API key` when bearer-driven) preserved as a fallback.
+- **Resource-scoped audit timeline (#52)** — `GET /api/v1/audit-log` accepts `?resourceType=&resourceId=` to scope the response to a single resource's history. Both keys must be set; either alone is silently dropped so a caller can't accidentally fan out to every node in the workspace. `resourceType` is allowlisted to `node | decision | workspace | api_key | member` so a client can't probe arbitrary `resource_type` values. `listAuditLog` gains the matching parameter pair, applied as two `eq()` clauses on the existing query so it composes cleanly with `cursor`, `action`, and `range`.
+  - **OpenAPI** declares both new parameters with explicit cross-references to the pair requirement.
+
+### Tests
+- **`tests/unit/audit-log-resource-filter.test.ts`** (3 cases) verifies the loader applies both `eq()` clauses when the pair is set and drops the filter when either key is missing. Builds a tiny query-recorder mock so we can assert the exact Supabase calls.
+- **`tests/unit/audit-metadata-summary.test.ts`** gains 2 cases: `decision.delete` renders the snapshotted question, `node.delete` renders the snapshotted title. **561 tests passing** (556 → 561, +5).
+
+### Why
+#50 closed the loop on node mutations but left decisions only half-audited — `decision.create` was recorded, `decision.update` and `decision.delete` were silently missing. That made compliance pulls inconsistent across resource types: nodes had a full lifecycle trail, decisions only had birthdays. #52 then makes the resulting timeline navigable: the audit page (and any future per-resource view) can now ask for just one node's or one decision's history without paging through every workspace event.
+
 ## [1.5.8.0] - 2026-05-06
 
 **Theme:** Two deferred follow-ups close the same week. The decision report opens to the SDK; the audit log learns to render before/after diffs.

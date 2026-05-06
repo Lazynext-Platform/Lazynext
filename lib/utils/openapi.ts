@@ -383,6 +383,20 @@ export function buildOpenApiSpec(): OpenApiSpec {
               description: 'Restrict to entries within the last N days. `all` (default) returns the full window.',
               schema: { type: 'string', enum: ['7', '30', '90', '365', 'all'] },
             },
+            {
+              name: 'resourceType',
+              in: 'query',
+              required: false,
+              description: 'Resource timeline filter (#52). Must be set together with `resourceId`. Allowlisted to `node | decision | workspace | api_key | member`.',
+              schema: { type: 'string', enum: ['node', 'decision', 'workspace', 'api_key', 'member'] },
+            },
+            {
+              name: 'resourceId',
+              in: 'query',
+              required: false,
+              description: 'Resource timeline filter (#52). Ignored unless `resourceType` is also set.',
+              schema: { type: 'string' },
+            },
           ],
           responses: {
             '200': { description: 'Audit log entries' },
