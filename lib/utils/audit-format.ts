@@ -35,6 +35,10 @@ export function formatAuditAction(action: AuditAction): string {
       return 'API key rotated'
     case 'api_key.revoke':
       return 'API key revoked'
+    case 'edge.create':
+      return 'Edge created'
+    case 'edge.delete':
+      return 'Edge deleted'
     case 'ai.workflow.generated':
       return 'AI workflow generated'
     case 'ai.workflow.accepted':
@@ -283,5 +287,13 @@ export function summarizeAuditMetadata(
     }
     case 'workspace.delete':
       return null
+    case 'edge.create':
+    case 'edge.delete': {
+      // Edges have no human-readable name; the workflow id is the
+      // most useful breadcrumb to render.
+      const wf = typeof m.workflowId === 'string' ? m.workflowId : null
+      if (wf) return `Workflow ${wf.slice(0, 8)}${viaApi}`
+      return viaApi ? `Edge${viaApi}` : null
+    }
   }
 }

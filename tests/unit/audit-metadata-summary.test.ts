@@ -90,6 +90,24 @@ describe('summarizeAuditMetadata', () => {
     ).toBe('"Ship it"')
   })
 
+  it('edge.create renders the workflow breadcrumb (#54)', () => {
+    expect(
+      summarizeAuditMetadata('edge.create', {
+        workflowId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+      }),
+    ).toBe('Workflow aaaaaaaa')
+    expect(
+      summarizeAuditMetadata('edge.delete', {
+        workflowId: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+        viaApiKey: true,
+      }),
+    ).toBe('Workflow aaaaaaaa · via API key')
+    expect(summarizeAuditMetadata('edge.create', { viaApiKey: true })).toBe(
+      'Edge · via API key',
+    )
+    expect(summarizeAuditMetadata('edge.create', {})).toBeNull()
+  })
+
   it('summarises api_key.* with name + prefix when present', () => {
     expect(
       summarizeAuditMetadata('api_key.create', { name: 'CI Bot', prefix: 'lzx_abc' }),

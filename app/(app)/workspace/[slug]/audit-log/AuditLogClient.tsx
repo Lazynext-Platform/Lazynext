@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ScrollText, Loader2, AlertTriangle, Download } from 'lucide-react'
+import { ArrowLeft, ScrollText, Loader2, AlertTriangle, Download, Filter, X } from 'lucide-react'
 import type { AuditAction, AuditView } from '@/lib/data/audit-log'
 import {
   formatAuditAction,
@@ -31,6 +31,8 @@ const ACTION_OPTIONS: { value: '' | AuditAction; label: string }[] = [
   { value: 'api_key.create', label: 'API key created' },
   { value: 'api_key.rotate', label: 'API key rotated' },
   { value: 'api_key.revoke', label: 'API key revoked' },
+  { value: 'edge.create', label: 'Edge created' },
+  { value: 'edge.delete', label: 'Edge deleted' },
   { value: 'ai.workflow.generated', label: 'AI workflow generated' },
   { value: 'ai.workflow.accepted', label: 'AI workflow accepted' },
   { value: 'ai.workflow.refined', label: 'AI workflow refined' },
@@ -51,6 +53,8 @@ interface Props {
   initialCursor: string | null
   initialAction: AuditAction | null
   initialRange: AuditRange
+  initialResourceType: string | null
+  initialResourceId: string | null
 }
 
 const RANGE_OPTIONS: AuditRange[] = ['7', '30', '90', '365', 'all']
@@ -62,6 +66,8 @@ export function AuditLogClient({
   initialCursor,
   initialAction,
   initialRange,
+  initialResourceType,
+  initialResourceId,
 }: Props) {
   const router = useRouter()
   const sp = useSearchParams()
@@ -90,6 +96,26 @@ export function AuditLogClient({
     )
   }
 
+  /**
+   * Resource timeline filter (#53). Sets both keys at once so we
+   * never end up in an invalid half-set state. Passing nulls clears
+   * both. Range + action filters are preserved — you can stack "this
+   * node, in the last 7 days, only `node.update`".
+   */
+  function setResourceFilter(resourceType: string | null, resourceId: string | null) {
+    const params = new URLSearchParams(sp?.toString())
+    if (resourceType && resourceId) {
+      params.set('resourceType', resourceType)
+      params.set('resourceId', resourceId)
+    } else {
+      params.delete('resourceType')
+      params.delete('resourceId')
+    }
+    startTransition(() =>
+      router.replace(`/workspace/${slug}/audit-log${params.toString() ? '?' + params.toString() : ''}`),
+    )
+  }
+
   async function loadMore() {
     if (!cursor || loadingMore) return
     setLoadingMore(true)
@@ -101,6 +127,10 @@ export function AuditLogClient({
       url.searchParams.set('limit', '50')
       if (initialAction) url.searchParams.set('action', initialAction)
       if (initialRange !== 'all') url.searchParams.set('range', initialRange)
+      if (initialResourceType && initialResourceId) {
+        url.searchParams.set('resourceType', initialResourceType)
+        url.searchParams.set('resourceId', initialResourceId)
+      }
 
       const res = await fetch(url.toString(), {
         method: 'GET',
@@ -196,6 +226,28 @@ export function AuditLogClient({
         </div>
       </div>
 
+      {initialResourceType && initialResourceId ? (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs">
+          <Filter className="h-3.5 w-3.5 text-amber-300" aria-hidden />
+          <span className="text-slate-300">Showing only events for</span>
+          <span className="rounded bg-slate-950 px-1.5 py-0.5 font-mono text-slate-200">
+            {initialResourceType}
+          </span>
+          <span className="rounded bg-slate-950 px-1.5 py-0.5 font-mono text-slate-400">
+            {initialResourceId.slice(0, 8)}…
+          </span>
+          <button
+            type="button"
+            onClick={() => setResourceFilter(null, null)}
+            disabled={isPending}
+            className="ml-auto inline-flex items-center gap-1 rounded border border-slate-700 px-2 py-0.5 text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+            title="Clear resource filter"
+          >
+            <X className="h-3 w-3" /> Clear
+          </button>
+        </div>
+      ) : null}
+
       {items.length === 0 ? (
         <div className="mt-12 rounded-xl border border-slate-800 bg-slate-900 p-12 text-center">
           <ScrollText className="mx-auto h-10 w-10 text-slate-600" />
@@ -239,13 +291,23 @@ export function AuditLogClient({
                     </td>
                     <td className="px-4 py-3 align-top">
                       {row.resource_type ? (
-                        <div className="font-mono text-xs text-slate-400">
-                          {row.resource_type}
+                        <div className="flex items-center gap-1 font-mono text-xs text-slate-400">
+                          <span>{row.resource_type}</span>
                           {row.resource_id ? (
-                            <span className="text-slate-600">
-                              {' · '}
-                              {row.resource_id.slice(0, 8)}
-                            </span>
+                            <>
+                              <span className="text-slate-600">·</span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setResourceFilter(row.resource_type, row.resource_id)
+                                }
+                                disabled={isPending}
+                                className="rounded px-1 text-slate-500 hover:bg-slate-800 hover:text-slate-200 disabled:opacity-50"
+                                title="Show only this resource's events"
+                              >
+                                {row.resource_id.slice(0, 8)}
+                              </button>
+                            </>
                           ) : null}
                         </div>
                       ) : (

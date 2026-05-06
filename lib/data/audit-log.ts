@@ -23,6 +23,10 @@ export type AuditAction =
   | 'api_key.create'
   | 'api_key.rotate'
   | 'api_key.revoke'
+  // Edge mutations on the canvas (#54). Edges have no PATCH route
+  // (you delete and re-create), so only `.create` and `.delete`.
+  | 'edge.create'
+  | 'edge.delete'
   // AI workflow generation (#41). `generated` is server-side; `accepted`
   // and `refined` are client-emitted when the user clicks the matching
   // button on the preview modal.
