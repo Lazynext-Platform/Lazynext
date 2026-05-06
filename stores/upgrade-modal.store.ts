@@ -11,6 +11,7 @@ type UpgradeVariant =
   | 'health-gate'
   | 'automation-gate'
   | 'sso-gate'
+  | 'pdf-export-gate'
   | 'full-upgrade'
 
 interface UpgradeModalState {

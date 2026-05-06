@@ -39,7 +39,14 @@ export default async function DecisionHealthPage({
       description="Track decision quality, outcomes, and velocity across your workspace. See which decisions led to wins — and which need rework."
       requiredTier="Team"
     >
-      <DecisionHealthClient stats={stats} members={members} period={period} slug={params.slug} />
+      <DecisionHealthClient
+        stats={stats}
+        members={members}
+        period={period}
+        slug={params.slug}
+        workspaceId={workspace.id}
+        plan={workspace.plan as 'free' | 'starter' | 'pro' | 'business' | 'enterprise'}
+      />
     </FeatureGate>
   )
 }

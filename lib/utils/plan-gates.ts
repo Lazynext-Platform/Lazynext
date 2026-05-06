@@ -52,6 +52,10 @@ export function hasFeature(plan: Plan, feature: string): boolean {
     // because production integrations sit alongside SSO + audit log
     // in the same trust band.
     'api-keys': ['business', 'enterprise'],
+    // PDF export of the Decision DNA report (#42). Team-tier and up.
+    // Aligns with `decision-health` (the data source) and the typical
+    // "shareable artifact for non-users" workflow.
+    'pdf-export': ['starter', 'pro', 'business', 'enterprise'],
   }
   return featureMap[feature]?.includes(plan) ?? false
 }
