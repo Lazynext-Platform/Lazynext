@@ -4,6 +4,7 @@ import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limi
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { hasFeature } from '@/lib/utils/plan-gates'
 import { AUDIT_CSV_CAP, auditLogToCsv } from '@/lib/utils/audit-log-csv'
+import { parseAuditRange, rangeCutoffIso } from '@/lib/utils/audit-format'
 import type { AuditAction, AuditRow } from '@/lib/data/audit-log'
 import type { PLAN_LIMITS } from '@/lib/utils/constants'
 
@@ -79,6 +80,9 @@ export async function GET(req: Request) {
       ? (actionParam as AuditAction)
       : null
 
+  const range = parseAuditRange(url.searchParams.get('range'))
+  const sinceIso = rangeCutoffIso(range)
+
   let query = db
     .from('audit_log')
     .select('*')
@@ -86,6 +90,7 @@ export async function GET(req: Request) {
     .order('created_at', { ascending: false })
     .limit(AUDIT_CSV_CAP)
   if (action) query = query.eq('action', action)
+  if (sinceIso) query = query.gte('created_at', sinceIso)
 
   const { data, error } = await query
   if (error) {
@@ -99,6 +104,7 @@ export async function GET(req: Request) {
   const stamp = new Date().toISOString().slice(0, 10)
   const filenameBits = ['lazynext-audit-log']
   if (action) filenameBits.push(action.replace(/\./g, '-'))
+  if (range !== 'all') filenameBits.push(`${range}d`)
   filenameBits.push(stamp)
   return new NextResponse(csv, {
     status: 200,

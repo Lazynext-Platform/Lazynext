@@ -92,3 +92,52 @@ export function formatActor(actor: AuditView['actor']): string {
   if (!actor) return 'System'
   return actor.name ?? actor.email ?? 'Unknown user'
 }
+
+// ─────────────────────────────────────────────────────────────
+// Date-range filter (#45). Shared parser used by the loader, the
+// JSON list endpoint, the CSV endpoint, and the page UI so that
+// validation never drifts between layers.
+// ─────────────────────────────────────────────────────────────
+
+export type AuditRange = '7' | '30' | '90' | '365' | 'all'
+
+const VALID_RANGES = new Set<AuditRange>(['7', '30', '90', '365', 'all'])
+
+/**
+ * Coerce a query-string value into an `AuditRange`. Anything we don't
+ * recognise (including undefined / null / 'now' / '1y' / negative
+ * numbers) collapses to the default 'all' so URLs never 400 because a
+ * user mangled the param.
+ */
+export function parseAuditRange(input: string | null | undefined): AuditRange {
+  if (!input) return 'all'
+  return VALID_RANGES.has(input as AuditRange) ? (input as AuditRange) : 'all'
+}
+
+/**
+ * ISO timestamp `range` days before `now`, or `null` for 'all'.
+ * Pure & deterministic for tests.
+ */
+export function rangeCutoffIso(range: AuditRange, now: Date = new Date()): string | null {
+  if (range === 'all') return null
+  const days = Number(range)
+  return new Date(now.getTime() - days * 86_400_000).toISOString()
+}
+
+/**
+ * Human label for the dropdown / tooltips.
+ */
+export function formatAuditRange(range: AuditRange): string {
+  switch (range) {
+    case '7':
+      return 'Last 7 days'
+    case '30':
+      return 'Last 30 days'
+    case '90':
+      return 'Last 90 days'
+    case '365':
+      return 'Last year'
+    case 'all':
+      return 'All time'
+  }
+}

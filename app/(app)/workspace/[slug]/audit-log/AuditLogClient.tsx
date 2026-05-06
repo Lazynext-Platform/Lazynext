@@ -10,6 +10,8 @@ import {
   actionTone,
   formatRelativeTime,
   formatActor,
+  formatAuditRange,
+  type AuditRange,
 } from '@/lib/utils/audit-format'
 
 const ACTION_OPTIONS: { value: '' | AuditAction; label: string }[] = [
@@ -47,7 +49,10 @@ interface Props {
   initialItems: AuditView[]
   initialCursor: string | null
   initialAction: AuditAction | null
+  initialRange: AuditRange
 }
+
+const RANGE_OPTIONS: AuditRange[] = ['7', '30', '90', '365', 'all']
 
 export function AuditLogClient({
   workspaceId,
@@ -55,6 +60,7 @@ export function AuditLogClient({
   initialItems,
   initialCursor,
   initialAction,
+  initialRange,
 }: Props) {
   const router = useRouter()
   const sp = useSearchParams()
@@ -74,6 +80,15 @@ export function AuditLogClient({
     )
   }
 
+  function setRange(range: AuditRange) {
+    const params = new URLSearchParams(sp?.toString())
+    if (range === 'all') params.delete('range')
+    else params.set('range', range)
+    startTransition(() =>
+      router.replace(`/workspace/${slug}/audit-log${params.toString() ? '?' + params.toString() : ''}`),
+    )
+  }
+
   async function loadMore() {
     if (!cursor || loadingMore) return
     setLoadingMore(true)
@@ -84,6 +99,7 @@ export function AuditLogClient({
       url.searchParams.set('cursor', cursor)
       url.searchParams.set('limit', '50')
       if (initialAction) url.searchParams.set('action', initialAction)
+      if (initialRange !== 'all') url.searchParams.set('range', initialRange)
 
       const res = await fetch(url.toString(), {
         method: 'GET',
@@ -130,19 +146,34 @@ export function AuditLogClient({
           <a
             href={
               `/api/v1/audit-log/export-csv?workspaceId=${encodeURIComponent(workspaceId)}` +
-              (initialAction ? `&action=${encodeURIComponent(initialAction)}` : '')
+              (initialAction ? `&action=${encodeURIComponent(initialAction)}` : '') +
+              (initialRange !== 'all' ? `&range=${initialRange}` : '')
             }
             download
             className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-offset-2 focus:ring-offset-slate-950"
-            title={
-              initialAction
-                ? `Download CSV (filtered to ${initialAction})`
-                : 'Download up to 5,000 audit rows as CSV'
-            }
+            title={`Download CSV (${formatAuditRange(initialRange)}${initialAction ? `, ${initialAction}` : ''})`}
           >
             <Download className="h-4 w-4" aria-hidden />
             Download CSV
           </a>
+          <div>
+            <label className="block text-xs font-medium text-slate-500" htmlFor="range-filter">
+              Date range
+            </label>
+            <select
+              id="range-filter"
+              value={initialRange}
+              onChange={(e) => setRange(e.target.value as AuditRange)}
+              disabled={isPending}
+              className="mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            >
+              {RANGE_OPTIONS.map((r) => (
+                <option key={r} value={r}>
+                  {formatAuditRange(r)}
+                </option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block text-xs font-medium text-slate-500" htmlFor="action-filter">
               Filter by action

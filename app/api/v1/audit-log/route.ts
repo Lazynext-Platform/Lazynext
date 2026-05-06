@@ -4,6 +4,7 @@ import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
 import { hasFeature } from '@/lib/utils/plan-gates'
 import { listAuditLog, type AuditAction } from '@/lib/data/audit-log'
+import { parseAuditRange, rangeCutoffIso } from '@/lib/utils/audit-format'
 import { PLAN_LIMITS } from '@/lib/utils/constants'
 
 type Plan = keyof typeof PLAN_LIMITS
@@ -51,6 +52,9 @@ export async function GET(req: Request) {
     ? (actionParam as AuditAction)
     : null
 
-  const result = await listAuditLog({ workspaceId, limit, cursor, action })
+  const range = parseAuditRange(url.searchParams.get('range'))
+  const sinceIso = rangeCutoffIso(range)
+
+  const result = await listAuditLog({ workspaceId, limit, cursor, action, sinceIso })
   return NextResponse.json({ data: result, error: null })
 }

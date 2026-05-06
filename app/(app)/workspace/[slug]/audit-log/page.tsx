@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { FeatureGate } from '@/components/ui/FeatureGate'
 import { getCurrentMemberWorkspace } from '@/lib/data/workspace'
 import { listAuditLog, type AuditAction } from '@/lib/data/audit-log'
+import { parseAuditRange, rangeCutoffIso } from '@/lib/utils/audit-format'
 import { AuditLogClient } from './AuditLogClient'
 
 export const dynamic = 'force-dynamic'
@@ -32,7 +33,7 @@ export default async function AuditLogPage({
   searchParams,
 }: {
   params: { slug: string }
-  searchParams?: { action?: string }
+  searchParams?: { action?: string; range?: string }
 }) {
   const { workspace, isMember } = await getCurrentMemberWorkspace(params.slug)
   if (!workspace || !isMember) notFound()
@@ -46,11 +47,14 @@ export default async function AuditLogPage({
       ? (searchParams.action as AuditAction)
       : null
 
+  const initialRange = parseAuditRange(searchParams?.range)
+
   const initial = await listAuditLog({
     workspaceId: workspace.id,
     limit: 50,
     cursor: null,
     action: initialAction,
+    sinceIso: rangeCutoffIso(initialRange),
   })
 
   return (
@@ -67,6 +71,7 @@ export default async function AuditLogPage({
         initialItems={initial.items}
         initialCursor={initial.nextCursor}
         initialAction={initialAction}
+        initialRange={initialRange}
       />
     </FeatureGate>
   )
