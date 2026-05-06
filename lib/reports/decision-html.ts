@@ -285,7 +285,11 @@ function summaryCards(report: DecisionReport): string {
 // Public renderer
 // ─────────────────────────────────────────────────────────────
 
-export function renderDecisionReportHtml(report: DecisionReport): string {
+export function renderDecisionReportHtml(
+  report: DecisionReport,
+  options: { autoPrint?: boolean } = {},
+): string {
+  const autoPrint = options.autoPrint ?? true
   const wsName = escapeHtml(report.workspace.name)
   const generated = escapeHtml(fmtDate(report.generatedAt))
 
@@ -334,7 +338,7 @@ export function renderDecisionReportHtml(report: DecisionReport): string {
     `<span>${wsName}</span>`,
     '<span>lazynext.com</span>',
     '</footer>',
-    `<script>${AUTO_PRINT_SCRIPT}</script>`,
+    autoPrint ? `<script>${AUTO_PRINT_SCRIPT}</script>` : '',
     '</body>',
     '</html>',
   ].join('')

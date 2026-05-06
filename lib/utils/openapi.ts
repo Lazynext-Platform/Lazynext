@@ -305,6 +305,23 @@ export function buildOpenApiSpec(): OpenApiSpec {
           },
         },
       },
+      '/decisions/report': {
+        get: {
+          summary: 'Render the workspace Decision DNA report (HTML)',
+          description:
+            'Returns a print-optimised HTML document of every logged decision. Cookie-session callers receive an inline auto-print script that opens the browser save-as-PDF dialog; bearer-key callers (the SDK, downstream automations) receive the same HTML without the script and can pipe it through their own renderer (puppeteer, headless-chrome, weasyprint) to materialise a PDF. Plan-gated to Team+ via the workspace plan, NOT the caller.',
+          tags: ['Decisions', 'Export'],
+          parameters: [workspaceIdParam],
+          responses: {
+            '200': {
+              description: 'HTML document',
+              content: { 'text/html': { schema: { type: 'string' } } },
+            },
+            '402': errorResponse('PLAN_LIMIT_REACHED — workspace plan does not include pdf-export'),
+            '429': errorResponse('export bucket: 10/min'),
+          },
+        },
+      },
       '/export': {
         get: {
           summary: 'Export full workspace as JSON',
