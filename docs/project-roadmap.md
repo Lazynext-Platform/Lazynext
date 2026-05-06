@@ -106,9 +106,10 @@ These features show real, truthful UI but lack the backend that would make them 
 | 41 | AI Workflow Generation from Prompt | ✅ Complete | 🟢 Merged | #05, #10, #18 | `main` | LazyMind drafts a typed node graph from a freeform prompt. Strict-JSON LLM output, zod-parsed, retried once. 12-node / 20-edge cap. Hand-rolled top-down auto-layout. Preview-then-commit modal. Reuses `/api/v1/ai/generate` plan-gate + quota + rate-limit scaffolding. v1.5.0.0. 470/470 tests. |
 | 42 | Decision DNA PDF Export | ✅ Complete | � Merged | #07, #08 | `main` | Print-ready HTML report of every logged decision (cover, summary cards, TOC, score bars). Auto-fires `window.print()` so user lands in save-as-PDF dialog. Zero new dependencies — server-rendered HTML + `@page` print stylesheet. Cookie-only `GET /api/v1/decisions/report`, plan-gated to Team+. 500-decision cap with truncation banner. v1.5.1.0. 488/488 tests. |
 | 43 | Audit Log Viewer | ✅ Complete | � Merged | #38 | `main` | Read-only paginated viewer at `/workspace/[slug]/audit-log` for the audit-log table that's been writing since v1.3.5.0. Server-rendered first page, client load-more cursor pagination, single-dropdown action filter, color-coded action chips, collapsible `metadata` JSON. Plan-gated to Business+ with new `audit-log-gate` upgrade variant. v1.5.2.0. 507/507 tests. |
-| 44 | Audit Log CSV Export | ✅ Complete | 🟡 In review | #43 | `feature/44-audit-log-csv-export` | `GET /api/v1/audit-log/export-csv` + Download CSV button on the audit log page. RFC 4180 escaping mirrors `decisions-csv.ts`. 5000-row cap, action filter respected. Cookie + bearer auth, plan-gated to Business+, shares the `export` rate-limit bucket. v1.5.3.0. 515/515 tests. |
+| 44 | Audit Log CSV Export | ✅ Complete | � Merged | #43 | `main` | `GET /api/v1/audit-log/export-csv` + Download CSV button on the audit log page. RFC 4180 escaping mirrors `decisions-csv.ts`. 5000-row cap, action filter respected. Cookie + bearer auth, plan-gated to Business+, shares the `export` rate-limit bucket. v1.5.3.0. 515/515 tests. |
+| 45 | Audit Log Date-Range Filter | ✅ Complete | 🟡 In review | #43, #44 | `feature/45-audit-log-date-range` | Shared `parseAuditRange` + `rangeCutoffIso` plumbed through loader, JSON list, CSV endpoint, and page UI. Buckets: 7 / 30 / 90 / 365 / all. Default `'all'` preserves prior behaviour. CSV filename includes range so SOC-2 evidence packs are self-describing. v1.5.4.0. 522/522 tests. |
 
-**Phase 3 Total**: 7 features
+**Phase 3 Total**: 8 features
 
 ---
 

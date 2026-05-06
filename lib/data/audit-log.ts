@@ -103,6 +103,13 @@ export async function listAuditLog(opts: {
   limit?: number
   cursor?: string | null
   action?: AuditAction | null
+  /**
+   * Filter to rows newer than this ISO timestamp. The route layer
+   * derives this from the `range` query-string param via
+   * `rangeCutoffIso`. Independent of `cursor` — both clauses can
+   * apply on the same query.
+   */
+  sinceIso?: string | null
 }): Promise<{ items: AuditView[]; nextCursor: string | null }> {
   if (!hasValidDatabaseUrl) return { items: [], nextCursor: null }
   const limit = Math.min(Math.max(opts.limit ?? 50, 1), 200)
@@ -116,6 +123,7 @@ export async function listAuditLog(opts: {
 
   if (opts.cursor) q = q.lt('created_at', opts.cursor)
   if (opts.action) q = q.eq('action', opts.action)
+  if (opts.sinceIso) q = q.gte('created_at', opts.sinceIso)
 
   const { data } = await q
   const rows = (data as AuditRow[] | null) ?? []

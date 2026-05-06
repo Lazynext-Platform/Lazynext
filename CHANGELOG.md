@@ -6,6 +6,25 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.4.0] - 2026-05-06
+
+**Theme:** Audit log learns to forget. Date-range filter retires the "all time" payload bloat for compliance pulls.
+
+### Added
+- **Audit Log Date-Range Filter (#45)** — closes the deferred item from both #43 and #44 in one ship. New `?range=7|30|90|365|all` parameter plumbed through the loader, the JSON list endpoint, the CSV endpoint, and the page UI. Default `'all'` preserves the existing zero-filter behaviour for any user with a bookmarked URL; explicit selection narrows.
+  - **Shared parser** — `lib/utils/audit-format.ts` exports `parseAuditRange(input)` (collapses missing / garbage / unknown buckets to `'all'` so URLs never 400 because of a mangled query param), `rangeCutoffIso(range, now)` (deterministic `Date` arithmetic, returns `null` for `'all'`), and `formatAuditRange(range)` (human label for the dropdown). Pure & deterministic so `now` can be injected in tests.
+  - **Loader** — `lib/data/audit-log.ts` `listAuditLog(opts)` accepts a `sinceIso` clause that maps to `audit_log.created_at >= cutoff`. Independent of `cursor` so cursor pagination keeps working with a date filter applied — both clauses can be on the same query without cross-talk.
+  - **JSON endpoint** — `app/api/v1/audit-log/route.ts` reads `?range=`, derives `sinceIso` via the shared parser, passes it to `listAuditLog`. Bearer-aware callers get the same filter.
+  - **CSV endpoint** — `app/api/v1/audit-log/export-csv/route.ts` adds the same range filter and bakes it into the attachment filename: `lazynext-audit-log-90d-2026-05-06.csv` when filtered, unchanged when `'all'`. Auditors evaluate filenames before opening files; this keeps SOC-2 evidence packs self-describing.
+  - **UI** — `AuditLogClient.tsx` adds a "Date range" dropdown next to the existing "Filter by action" dropdown. Selecting a range writes through `router.replace` for back-button correctness and shareable URLs. The "Download CSV" link picks up the active range so the file matches the table.
+
+### Tests
+- `tests/unit/audit-range.test.ts` (7 cases): `parseAuditRange` covers all five valid buckets, missing input, garbage strings (`'1y'`, `'-1'`, `'14'`, `'forever'`, `'All'`), `rangeCutoffIso` covers `'all'` → null and the four day-arithmetic buckets with deterministic `now`, ISO 8601 format regression, and `formatAuditRange` label sentinels for every bucket.
+- 522 / 522 tests passing (515 + 7 new).
+
+### Why
+Compliance pulls scope to a quarter or a year; "everything since dawn" is both a UX problem (oldest rows last after many "Load older" clicks) and a payload problem (CSV exports were 5,000 rows of mostly-stale events). Both #43 and #44 explicitly deferred this. One small ship retires it.
+
 ## [1.5.3.0] - 2026-05-06
 
 **Theme:** Audit log finishes the loop — CSV download for SOC-2 evidence pulls.
