@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { db, hasValidDatabaseUrl } from '@/lib/db/client'
 import { z } from 'zod'
 import { rateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/utils/rate-limit'
+import { recordAudit } from '@/lib/data/audit-log'
 
 const createSchema = z.object({
   workflowId: z.string().uuid(),
@@ -68,6 +69,22 @@ export async function POST(req: Request) {
   }).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  void recordAudit({
+    workspaceId: wf.workspace_id,
+    actorId: auth.userId,
+    action: 'edge.create',
+    resourceType: 'edge',
+    resourceId: edge.id,
+    metadata: {
+      workflowId: parsed.data.workflowId,
+      sourceId: parsed.data.sourceId,
+      targetId: parsed.data.targetId,
+      viaApiKey: auth.viaApiKey,
+    },
+    request: req,
+  })
+
   return NextResponse.json({ data: edge, error: null }, { status: 201 })
 }
 
@@ -81,7 +98,7 @@ export async function DELETE(req: Request) {
   const preAuth = await resolveAuth(req)
   if (!preAuth.ok) return preAuth.response
 
-  const { data: existing } = await db.from('edges').select('workflow_id').eq('id', id).single()
+  const { data: existing } = await db.from('edges').select('workflow_id, source_id, target_id').eq('id', id).single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
   const { data: workflow } = await db.from('workflows').select('workspace_id').eq('id', existing.workflow_id).single()
   if (!workflow) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
@@ -96,5 +113,21 @@ export async function DELETE(req: Request) {
 
   const { error } = await db.from('edges').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  void recordAudit({
+    workspaceId: workflow.workspace_id,
+    actorId: auth.userId,
+    action: 'edge.delete',
+    resourceType: 'edge',
+    resourceId: id,
+    metadata: {
+      workflowId: existing.workflow_id,
+      sourceId: existing.source_id,
+      targetId: existing.target_id,
+      viaApiKey: auth.viaApiKey,
+    },
+    request: req,
+  })
+
   return NextResponse.json({ data: { deleted: true }, error: null })
 }

@@ -6,6 +6,20 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.10.0] - 2026-05-06
+
+**Theme:** Edges enter the audit log; the audit page learns to scope to a single resource.
+
+### Added
+- **Edge audit producers (#54)** — `POST` and `DELETE` on `/api/v1/edges` now emit `edge.create` and `edge.delete` audit rows. Metadata snapshots `workflowId`, `sourceId`, `targetId` so the audit row is self-contained even after the edge is gone. Two new `AuditAction` union members. Exhaustive switches across `formatAuditAction`, `actionTone`, `summarizeAuditMetadata` (renders `Workflow {prefix}` breadcrumb), the `/audit-log` GET `VALID_ACTIONS`, the audit page allowlist, the AuditLogClient action dropdown, and the OpenAPI enum on `GET /audit-log`.
+- **Resource filter UI (#53)** — The audit-log page reads `?resourceType=&resourceId=` and surfaces the filter as an active-filter pill at the top of the table ("Showing only events for `node` `12345678…`" with a Clear button). Each row's resource id becomes a click target that adds the same filter — one click stitches a single resource's full timeline. Filter is composable with action + range + load-more (the cursor-paged fetch passes the pair through). `resourceType` allowlist mirrors the API: `node | decision | workspace | api_key | member | edge`.
+
+### Tests
+- New cases in `tests/unit/audit-metadata-summary.test.ts` cover the `edge.*` summary branch (workflow prefix breadcrumb, `viaApiKey` suffix, fallback for empty metadata). **562 tests passing** (561 → 562).
+
+### Why
+#52 added the API; #53 makes it usable from the audit page — a click-to-filter affordance that's the natural next step from the diff viewer in #50. #54 gives canvas wiring the same audit coverage decisions and nodes already had: deleting an edge no longer leaves the audit trail with a hole.
+
 ## [1.5.9.0] - 2026-05-06
 
 **Theme:** Decision audits catch up with node audits, and the audit log learns to scope to a single resource.

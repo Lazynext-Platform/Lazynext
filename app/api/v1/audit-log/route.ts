@@ -24,6 +24,8 @@ const VALID_ACTIONS: AuditAction[] = [
   'api_key.create',
   'api_key.rotate',
   'api_key.revoke',
+  'edge.create',
+  'edge.delete',
   'ai.workflow.generated',
   'ai.workflow.accepted',
   'ai.workflow.refined',
