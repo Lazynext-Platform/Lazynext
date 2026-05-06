@@ -6,6 +6,21 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.3.0] - 2026-05-06
+
+**Theme:** Audit log finishes the loop — CSV download for SOC-2 evidence pulls.
+
+### Added
+- **Audit Log CSV Export (#44)** — closes the explicit "out-of-scope" item from #43's discussion. Auditors expect CSV; v1.5.2.0 only had a JSON list endpoint and an HTML viewer.
+  - **Endpoint** — `GET /api/v1/audit-log/export-csv?workspaceId=&action=`. Returns up to `AUDIT_CSV_CAP = 5000` rows in `created_at DESC` as `text/csv` with `content-disposition: attachment` and a date-stamped filename (`lazynext-audit-log-2026-05-06.csv` or `lazynext-audit-log-decision-create-2026-05-06.csv` when filtered). Cookie session **or** bearer-key authenticated via `requireWorkspaceAuth` — same shape as `/api/v1/decisions/export-csv`. Plan-gated to Business+ via `hasFeature(plan, 'audit-log')`. Rate-limited under the existing `export` bucket so a leaked key can't scrape via three CSV/JSON routes in parallel.
+  - **Serializer** — `lib/utils/audit-log-csv.ts`. Mirrors `lib/utils/decisions-csv.ts` exactly: RFC 4180-ish escaping (doubled inner quotes, comma/newline cells wrapped, JSON objects collapsed to JSON-string cell), CRLF line terminators, header-only emission on empty input. Stable column order: `id, created_at, workspace_id, actor_id, action, resource_type, resource_id, metadata, ip, user_agent`. Exports `AUDIT_CSV_HEADERS` and `AUDIT_CSV_CAP` so the route handler and the test suite share one source of truth.
+  - **CSV omits actor name/email by design** — `actor_id` (UUID) is the stable join key. `listAuditLog`'s actor lookup is bounded to `perPage: 200` users, which is unsafe at the 5000-row cap; rather than ship sparse/wrong mappings, the CSV emits `actor_id` only and consumers join externally. Documented in the file header so the next person doesn't "fix" it.
+  - **UI** — `app/(app)/workspace/[slug]/audit-log/AuditLogClient.tsx` now renders a "Download CSV" `<a download>` button next to the action-filter dropdown. The link respects the active filter (filename and rows both reflect what the user is currently viewing) and the `download` attribute kicks the response straight into the browser's downloads instead of navigating away. Tooltip updates between filtered/unfiltered to set the row-count expectation.
+
+### Tests
+- `tests/unit/audit-log-csv.test.ts` (8 cases): header-only on empty input, CRLF line terminator between header and rows, simple-value passthrough, RFC 4180 escaping for commas / quotes / newlines, JSON-stringified metadata cell with nested escaping, null collapsing for `actor_id` / `resource_id` / `ip` / `user_agent`, header column order regression sentinel, `AUDIT_CSV_CAP === 5000`.
+- 515 / 515 tests passing (507 + 8 new).
+
 ## [1.5.2.0] - 2026-05-06
 
 **Theme:** Audit log finally has eyes. Business+ admins can read what `recordAudit` has been writing for months without curl.

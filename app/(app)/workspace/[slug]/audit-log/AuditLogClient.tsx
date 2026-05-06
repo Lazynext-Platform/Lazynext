@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, ScrollText, Loader2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, ScrollText, Loader2, AlertTriangle, Download } from 'lucide-react'
 import type { AuditAction, AuditView } from '@/lib/data/audit-log'
 import {
   formatAuditAction,
@@ -126,23 +126,41 @@ export function AuditLogClient({
             Every workspace mutation, ordered newest first.
           </p>
         </div>
-        <div>
-          <label className="block text-xs font-medium text-slate-500" htmlFor="action-filter">
-            Filter by action
-          </label>
-          <select
-            id="action-filter"
-            value={initialAction ?? ''}
-            onChange={(e) => setActionFilter(e.target.value as '' | AuditAction)}
-            disabled={isPending}
-            className="mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-lime-400"
+        <div className="flex flex-wrap items-end gap-3">
+          <a
+            href={
+              `/api/v1/audit-log/export-csv?workspaceId=${encodeURIComponent(workspaceId)}` +
+              (initialAction ? `&action=${encodeURIComponent(initialAction)}` : '')
+            }
+            download
+            className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm font-medium text-slate-100 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-offset-2 focus:ring-offset-slate-950"
+            title={
+              initialAction
+                ? `Download CSV (filtered to ${initialAction})`
+                : 'Download up to 5,000 audit rows as CSV'
+            }
           >
-            {ACTION_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            <Download className="h-4 w-4" aria-hidden />
+            Download CSV
+          </a>
+          <div>
+            <label className="block text-xs font-medium text-slate-500" htmlFor="action-filter">
+              Filter by action
+            </label>
+            <select
+              id="action-filter"
+              value={initialAction ?? ''}
+              onChange={(e) => setActionFilter(e.target.value as '' | AuditAction)}
+              disabled={isPending}
+              className="mt-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-lime-400"
+            >
+              {ACTION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
