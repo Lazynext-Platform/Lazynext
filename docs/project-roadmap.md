@@ -109,9 +109,10 @@ These features show real, truthful UI but lack the backend that would make them 
 | 44 | Audit Log CSV Export | ✅ Complete | � Merged | #43 | `main` | `GET /api/v1/audit-log/export-csv` + Download CSV button on the audit log page. RFC 4180 escaping mirrors `decisions-csv.ts`. 5000-row cap, action filter respected. Cookie + bearer auth, plan-gated to Business+, shares the `export` rate-limit bucket. v1.5.3.0. 515/515 tests. |
 | 45 | Audit Log Date-Range Filter | ✅ Complete | � Merged | #43, #44 | `main` | Shared `parseAuditRange` + `rangeCutoffIso` plumbed through loader, JSON list, CSV endpoint, and page UI. Buckets: 7 / 30 / 90 / 365 / all. Default `'all'` preserves prior behaviour. CSV filename includes range so SOC-2 evidence packs are self-describing. v1.5.4.0. 522/522 tests. |
 | 46 | OpenAPI Spec Sync | ✅ Complete | � Merged | #43, #44, #45 | `main` | `lib/utils/openapi.ts` now lists `/audit-log/export-csv` and documents `?action` + `?range` on `/audit-log`. The `action` enum mirrors `AuditAction` (17 values); the `range` enum mirrors `AuditRange`. New structural test prevents the spec from drifting again. v1.5.5.0. 523/523 tests. |
-| 47 | Audit Log Metadata Summary | ✅ Complete | 🟡 In review | #43 | `feature/47-audit-metadata-summary` | `summarizeAuditMetadata` reads each action's known metadata shape and emits a one-line summary (rename pairs, edited fields, ai.workflow prompt+nodeCount, etc.). Renders inline above a renamed `raw metadata` collapsible; unknown shapes fall through to the JSON view unchanged. v1.5.6.0. 536/536 tests. |
+| 47 | Audit Log Metadata Summary | ✅ Complete | � Merged | #43 | `main` | `summarizeAuditMetadata` reads each action's known metadata shape and emits a one-line summary (rename pairs, edited fields, ai.workflow prompt+nodeCount, etc.). Renders inline above a renamed `raw metadata` collapsible; unknown shapes fall through to the JSON view unchanged. v1.5.6.0. 536/536 tests. |
+| 48 | Audit Log POST endpoint | ✅ Complete | 🟡 In review | #41, #43 | `feature/48-audit-log-post-endpoint` | New `POST /api/v1/audit-log` with a tight client-writable allowlist (`ai.workflow.accepted` + `ai.workflow.refined` only). Sanitised metadata (prompt 500-char cap, integer counts), `viaApiKey` server-derived. `WorkflowGeneratorModal` now fires both events fire-and-forget. GET-side action allowlist aligned with export-csv. v1.5.7.0. 548/548 tests. |
 
-**Phase 3 Total**: 10 features
+**Phase 3 Total**: 11 features
 
 ---
 

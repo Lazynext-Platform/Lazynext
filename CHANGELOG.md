@@ -6,6 +6,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.7.0] - 2026-05-06
+
+**Theme:** Audit log closes the AI workflow funnel. Client clicks (accept / refine) now leave a trail — server-only actions stay server-only.
+
+### Added
+- **Audit Log POST endpoint (#48)** — closes the deferred follow-up from #41. New `POST /api/v1/audit-log` accepts a tight allowlist of two client-writable actions: `ai.workflow.accepted` and `ai.workflow.refined`. Every other audit action returns `400 ACTION_NOT_ALLOWED` so the client can never spoof a `decision.delete` or `member.remove` and corrupt the log.
+  - **Sanitised metadata.** The route reads only four fields from the request body (`prompt` capped at 500 chars, `nodeCount` / `edgeCount` / `refineCount` floored to non-negative integers). Everything else is dropped on the floor. `viaApiKey` is server-derived from the auth result.
+  - **`WorkflowGeneratorModal`** fires `ai.workflow.accepted` after a successful commit and `ai.workflow.refined` when the user clicks Refine. Both calls are fire-and-forget (`.catch(() => undefined)`); a failure here never blocks the UI. The previous TODO comment in the modal is gone.
+  - **OpenAPI** — `POST /audit-log` is now declared with the two-value `action` enum and the bounded `metadata` shape. Mutation rate-limit bucket documented. The structural "every workspace-scoped operation requires workspaceId" test now also accepts a request body with `workspaceId` in `required[]`, since the POST takes its scope from the body rather than the query.
+  - **GET allowlist fix.** `app/api/v1/audit-log/route.ts` was silently dropping `?action=ai.workflow.*` filters because the `VALID_ACTIONS` array predated the AI workflow audit additions. The page-level dropdown surfaced those filters but the API rejected them, so users got no narrowing. Aligned with the export-csv allowlist.
+
+### Tests
+- **`tests/unit/audit-log-post-route.test.ts`** — 11 cases covering the route's full control flow: INVALID_JSON, MISSING_WORKSPACE_ID, ACTION_NOT_ALLOWED for `decision.delete` / `ai.workflow.generated` / unknown actions, auth-failure passthrough, 429 on rate-limit, sanitised happy path (asserting `actor_id` and `rogue` keys are dropped), prompt truncation, count flooring, `viaApiKey: true` on bearer auth, and 500 AUDIT_WRITE_FAILED on insert failure.
+- **OpenAPI test** gains a regression assertion that `POST /audit-log` declares only the two client-writable actions in its `action` enum and that the 429 response mentions the mutation bucket. **548 tests passing** (536 → 548, +12).
+
+### Why
+Without this endpoint, the audit log only saw `ai.workflow.generated` (server-emitted at generation time) but had no record of whether the user actually committed the result to the canvas. The Decision DNA team uses this funnel — generated/refined/accepted — to measure how often LazyMind output is good enough to ship. Compliance reviews wanted the same visibility for SOC-2 packs. The tight allowlist is non-negotiable: the audit log is the system-of-record for who-did-what, and once a client can write arbitrary actions the table stops being trustworthy.
+
 ## [1.5.6.0] - 2026-05-06
 
 **Theme:** Audit log learns to read its own writing. Metadata blobs render as a one-line summary instead of a JSON pile.

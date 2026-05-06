@@ -373,6 +373,58 @@ export function buildOpenApiSpec(): OpenApiSpec {
             '429': errorResponse('api bucket: 100/min'),
           },
         },
+        post: {
+          summary: 'Record a client-emitted audit entry',
+          description:
+            'Lets a client (browser session or bearer key) record one of a tight allowlist of audit actions. Only `ai.workflow.accepted` and `ai.workflow.refined` are permitted — every other action is server-recorded as the matching mutation happens, so allowing a client to spoof e.g. `decision.delete` would corrupt the log. NOT plan-gated (writes happen regardless of plan; reads are gated).',
+          tags: ['Audit'],
+          requestBody: {
+            required: true,
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['workspaceId', 'action'],
+                  properties: {
+                    workspaceId: { type: 'string', format: 'uuid' },
+                    action: {
+                      type: 'string',
+                      enum: ['ai.workflow.accepted', 'ai.workflow.refined'],
+                    },
+                    metadata: {
+                      type: 'object',
+                      description: 'Bounded subset only: prompt (≤500 chars), nodeCount, edgeCount, refineCount. Other fields ignored.',
+                    },
+                    resourceType: { type: 'string' },
+                    resourceId: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Recorded',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      data: {
+                        type: 'object',
+                        properties: { recorded: { type: 'boolean' } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            '400': errorResponse('VALIDATION_ERROR | MISSING_WORKSPACE_ID | ACTION_NOT_ALLOWED | INVALID_JSON'),
+            '401': errorResponse('Missing or invalid credentials'),
+            '403': errorResponse('Bearer key does not belong to workspace'),
+            '429': errorResponse('mutation bucket: 30/min'),
+          },
+        },
       },
       '/audit-log/export-csv': {
         get: {

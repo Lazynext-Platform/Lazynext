@@ -46,7 +46,7 @@ export function WorkflowGeneratorModal({ isOpen, onClose, workspaceId, onGenerat
   const [loading, setLoading] = useState(false)
   const [committing, setCommitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [, setRefineCount] = useState(0)
+  const [refineCount, setRefineCount] = useState(0)
 
   const reset = useCallback(() => {
     setPrompt('')
@@ -110,9 +110,28 @@ export function WorkflowGeneratorModal({ isOpen, onClose, workspaceId, onGenerat
     setPrompt(
       `${prompt.trim()}\n\nPrevious graph:\n${titles}\n\nRefine: `,
     )
+    // Best-effort client audit (#48). Fire-and-forget — never blocks
+    // the UI, and the server allowlist rejects anything else.
+    if (workspaceId) {
+      void fetch('/api/v1/audit-log', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+          workspaceId,
+          action: 'ai.workflow.refined',
+          metadata: {
+            prompt: prompt.trim().slice(0, 500),
+            nodeCount: graph.nodes.length,
+            edgeCount: graph.edges.length,
+            refineCount: refineCount + 1,
+          },
+        }),
+      }).catch(() => undefined)
+    }
     setGraph(null)
     setRefineCount((c) => c + 1)
-  }, [graph, prompt])
+  }, [graph, prompt, workspaceId, refineCount])
 
   const accept = useCallback(async () => {
     if (!graph) return
@@ -122,16 +141,33 @@ export function WorkflowGeneratorModal({ isOpen, onClose, workspaceId, onGenerat
       // (A future PR can read the live ReactFlow viewport via `useReactFlow`.)
       const center = { x: 600, y: 300 }
       await commitGeneratedWorkflow(graph, center)
-      // Note: client-side `ai.workflow.accepted` audit logging is a
-      // follow-up — needs a POST /api/v1/audit-log endpoint that
-      // doesn't exist yet. The server already logs `ai.workflow.generated`
-      // in /api/v1/ai/workflow which is enough to measure top-funnel.
+      // Best-effort client audit (#48). The server already logs
+      // `ai.workflow.generated` in /api/v1/ai/workflow; this closes
+      // the funnel so compliance can see which generations were
+      // actually committed to the canvas.
+      if (workspaceId) {
+        void fetch('/api/v1/audit-log', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({
+            workspaceId,
+            action: 'ai.workflow.accepted',
+            metadata: {
+              prompt: prompt.trim().slice(0, 500),
+              nodeCount: graph.nodes.length,
+              edgeCount: graph.edges.length,
+              refineCount,
+            },
+          }),
+        }).catch(() => undefined)
+      }
       reset()
       onClose()
     } finally {
       setCommitting(false)
     }
-  }, [graph, onClose, reset])
+  }, [graph, onClose, reset, workspaceId, prompt, refineCount])
 
   // Pre-compute a layered view so the preview lays out the same way the
   // commit will land on the canvas. Pure: no DOM, no state.
