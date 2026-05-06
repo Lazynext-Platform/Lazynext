@@ -60,6 +60,19 @@ describe('buildOpenApiSpec', () => {
     expect((rangeParam.schema as { enum?: string[] }).enum).toEqual(['7', '30', '90', '365', 'all'])
   })
 
+  it('POST /audit-log is restricted to client-writable AI workflow actions', () => {
+    const post = spec.paths['/audit-log'].post
+    expect(post).toBeDefined()
+    const schema = post.requestBody?.content?.['application/json']?.schema as
+      | { properties?: { action?: { enum?: string[] } } }
+      | undefined
+    expect(schema?.properties?.action?.enum).toEqual([
+      'ai.workflow.accepted',
+      'ai.workflow.refined',
+    ])
+    expect(post.responses['429'].description).toMatch(/mutation bucket/)
+  })
+
   it('mutation endpoints document the mutation bucket', () => {
     expect(spec.paths['/decisions'].post.responses['429'].description).toMatch(/mutation bucket/)
     expect(spec.paths['/decisions/{id}'].patch.responses['429'].description).toMatch(/mutation bucket/)
@@ -83,10 +96,20 @@ describe('buildOpenApiSpec', () => {
     for (const [path, methods] of Object.entries(spec.paths)) {
       if (exempt.has(path)) continue
       for (const [method, op] of Object.entries(methods)) {
-        const hasWorkspace = (op.parameters ?? []).some(
+        const hasWorkspaceParam = (op.parameters ?? []).some(
           (p) => p.name === 'workspaceId' && p.in === 'query'
         )
-        expect(hasWorkspace, `${method.toUpperCase()} ${path}`).toBe(true)
+        // POST /audit-log declares workspaceId in the request body.
+        const bodySchema = op.requestBody?.content?.['application/json']?.schema as
+          | { required?: string[]; properties?: Record<string, unknown> }
+          | undefined
+        const hasWorkspaceBody =
+          !!bodySchema?.required?.includes('workspaceId') &&
+          !!bodySchema?.properties?.workspaceId
+        expect(
+          hasWorkspaceParam || hasWorkspaceBody,
+          `${method.toUpperCase()} ${path}`,
+        ).toBe(true)
       }
     }
   })
