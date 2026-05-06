@@ -6,6 +6,28 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0.0] - 2026-05-06
+
+**Theme:** AI workflow generation — LazyMind drafts a node graph from a freeform prompt.
+
+### Added
+- **AI Workflow Generation (#41)** — new `Generate a workflow…` quick action in the LazyMind side panel opens a modal where the user describes work in plain English; the LLM returns a directed graph of typed nodes (task / doc / decision / thread / pulse / automation / table) and edges, the user previews the layered layout, then accepts to commit it onto the canvas.
+  - **Generator** — `lib/ai/workflow-generator.ts`. Strict-JSON output via `groq:llama-3.3-70b-versatile` (matches the decision-scorer pattern), zod-parsed, retried once on schema failure. Hard caps at 12 nodes / 20 edges / 80-char titles — truncation drops orphan edges so the graph stays valid.
+  - **API** — `POST /api/v1/ai/workflow`. Cookie-session only (matches `/ai/generate`). Reuses the existing `checkAiQuota` daily-quota gate (1 unit per call regardless of graph size) and the `RATE_LIMITS.ai` per-minute bucket. Errors map to standard codes: 401 / 403 / 402 / 429 / 400 / 502 (`WORKFLOW_GENERATION_FAILED`) / 503 (`AI_UNAVAILABLE`).
+  - **Auto-layout** — `lib/canvas/auto-layout.ts`. Hand-rolled top-down BFS layered layout (no new dep). Cycle-safe via iteration cap. Pure function; the modal preview and the on-canvas commit use the same positions so what you see is what you get.
+  - **Commit path** — `lib/canvas/apply-generated-workflow.ts`. Sequential `createNodeOnServer` + `createEdgeOnServer` calls; tempIds resolved to server UUIDs in-flight. Partial-failure honest: orphan edges are skipped, not synthesized.
+  - **Telemetry** — server emits `audit_log` action `ai.workflow.generated` with `{prompt_length, node_count, edge_count, provider, model, duration_ms}`. Two new audit actions reserved (`ai.workflow.accepted`, `ai.workflow.refined`) for a follow-up client emitter once `POST /api/v1/audit-log` lands.
+- **15 new tests** — 8 generator, 9 route, 5 auto-layout (one bonus origin-translation case). Brings the suite to 470 (up from 445).
+
+### Validation
+- **470/470** Vitest tests pass
+- Type-check + lint clean (only the intentional `global-error <img>` warning)
+- No new runtime dependency (zod was already in use)
+- No DB migration; no env-var change
+
+### Documentation
+- `docs/features/41-ai-workflow-generation/{discussion,architecture,tasks}.md` — full Mastery cycle of design + plan docs.
+
 ## [1.4.2.0] - 2026-05-05
 
 **Theme:** OAuth adapter roster complete. Asana + Jira + Trello shipped — closes the last #15 OAuth gap.

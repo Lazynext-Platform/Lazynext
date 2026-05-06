@@ -103,8 +103,9 @@ These features show real, truthful UI but lack the backend that would make them 
 | 25 | Table Primitive | ✅ Complete | 🟢 Merged | #05, #09 | `main` | Built — TablePanel with toolbar, inline editing, summary footer |
 | 36 | Decision Outcome Review | ✅ Complete | 🟢 Merged | #07, #08 | `main` | Built — emoji outcomes, queue navigation, LazyMind suggestions |
 | 40 | Public REST API & SDK (formalization) | ✅ Discuss/Design/Plan | 🟢 Merged | #03, #13, #31 | `main` (PR #11, 2026-04-28) | Header contract on every `/api/v1/*` response (X-Request-Id, X-API-Version, X-RateLimit triplet, Retry-After). Plan-aware two-tier rate limiting. 6 customer docs pages at `/docs/api/*`. SDK packaged at `packages/sdk/` (`@lazynext/sdk@0.1.0`, `private: true` until npm org reserved). Reference docs at [`docs/references/api-versioning.md`](references/api-versioning.md) + [`docs/references/api-changelog.md`](references/api-changelog.md). 350/350 tests pass. |
+| 41 | AI Workflow Generation from Prompt | ✅ Complete | 🟢 Code complete | #05, #10, #18 | `feature/41-ai-workflow-generation` | LazyMind drafts a typed node graph from a freeform prompt. Strict-JSON LLM output, zod-parsed, retried once. 12-node / 20-edge cap. Hand-rolled top-down auto-layout. Preview-then-commit modal. Reuses `/api/v1/ai/generate` plan-gate + quota + rate-limit scaffolding. v1.5.0.0. 470/470 tests. |
 
-**Phase 3 Total**: 3 features
+**Phase 3 Total**: 4 features
 
 ---
 
