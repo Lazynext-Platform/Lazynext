@@ -12,7 +12,7 @@ import { useModalA11y } from '@/lib/utils/useModalA11y'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_PRICING_USD, PLAN_PRICING_USD_ANNUAL, TRIAL_DAYS } from '@/lib/utils/constants'
 
-type ModalVariant = 'node-limit' | 'ai-limit' | 'member-limit' | 'decision-limit' | 'workspace-limit' | 'health-gate' | 'automation-gate' | 'sso-gate' | 'pdf-export-gate' | 'full-upgrade'
+type ModalVariant = 'node-limit' | 'ai-limit' | 'member-limit' | 'decision-limit' | 'workspace-limit' | 'health-gate' | 'automation-gate' | 'sso-gate' | 'pdf-export-gate' | 'audit-log-gate' | 'full-upgrade'
 type PlanSlug = 'starter' | 'pro' | 'business'
 
 type PlanCard = {
@@ -77,6 +77,10 @@ const VARIANT_COPY: Record<ModalVariant, { title: string; locked?: { feature: st
   'pdf-export-gate': {
     title: 'Unlock PDF export',
     locked: { feature: 'Decision DNA PDF report', tier: 'Team', desc: 'Print-ready summary of every logged decision — share with stakeholders or archive for audits.' },
+  },
+  'audit-log-gate': {
+    title: 'Unlock the audit log',
+    locked: { feature: 'Workspace audit log', tier: 'Business', desc: 'Every workspace mutation — actor, action, target, IP, timestamp — in one searchable view. Required for SOC-2 evidence.' },
   },
 }
 

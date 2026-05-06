@@ -391,6 +391,28 @@ export default function SettingsPage() {
                 </button>
               )}
             </div>
+            {/* #43 — Audit log entry point. The page itself FeatureGate's
+             * to Business+ so we render the link unconditionally and let
+             * the gate handle paywall messaging. Link is the same shape
+             * regardless of plan so the "Unlock" badge stays informative
+             * rather than the only clickable element. */}
+            <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 p-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-200">Audit log</p>
+                <p className="text-xs text-slate-500">
+                  {hasFeature(plan, 'audit-log')
+                    ? 'Every workspace mutation — actor, action, target, IP, timestamp.'
+                    : 'Business plan — searchable trail of every workspace mutation. Required for SOC-2 evidence.'}
+                </p>
+              </div>
+              <Link
+                href={`/workspace/${slug}/audit-log`}
+                className="flex items-center gap-1.5 rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs font-medium text-slate-200 hover:bg-slate-800"
+              >
+                Open audit log
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
         </div>
       )}
