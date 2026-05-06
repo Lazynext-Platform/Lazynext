@@ -141,3 +141,106 @@ export function formatAuditRange(range: AuditRange): string {
       return 'All time'
   }
 }
+
+// ─────────────────────────────────────────────────────────────
+// Metadata summary (#47). Turn the audit row's `metadata` blob
+// into a one-line human-readable summary based on the action
+// shape. Returns `null` when there's nothing useful to surface,
+// in which case the UI falls back to the raw JSON details.
+// ─────────────────────────────────────────────────────────────
+
+function truncate(s: string, max: number): string {
+  if (s.length <= max) return s
+  return s.slice(0, max - 1).trimEnd() + '…'
+}
+
+/**
+ * Produce a one-line summary for an audit row's metadata. The mapping
+ * is keyed off the action so we never invent a meaning that doesn't
+ * match the producer in `app/api/v1/**`. Unknown shapes return `null`
+ * — the caller renders the JSON details block in that case.
+ */
+export function summarizeAuditMetadata(
+  action: AuditAction,
+  metadata: Record<string, unknown> | null | undefined,
+): string | null {
+  if (!metadata || typeof metadata !== 'object') return null
+  const m = metadata as Record<string, unknown>
+  const viaApi = m.viaApiKey === true ? ' · via API key' : ''
+
+  switch (action) {
+    case 'node.update':
+    case 'decision.update': {
+      const changes = Array.isArray(m.changes)
+        ? m.changes.filter((x): x is string => typeof x === 'string')
+        : null
+      if (changes && changes.length > 0) return `Edited: ${changes.join(', ')}${viaApi}`
+      return null
+    }
+    case 'workspace.update': {
+      const changes = (m.changes && typeof m.changes === 'object'
+        ? (m.changes as Record<string, unknown>)
+        : {}) as Record<string, unknown>
+      const previous = (m.previous && typeof m.previous === 'object'
+        ? (m.previous as Record<string, unknown>)
+        : {}) as Record<string, unknown>
+      const parts: string[] = []
+      if (typeof changes.name === 'string' && typeof previous.name === 'string') {
+        parts.push(`Renamed "${previous.name}" → "${changes.name}"`)
+      }
+      if (typeof changes.slug === 'string' && typeof previous.slug === 'string') {
+        parts.push(`Slug "${previous.slug}" → "${changes.slug}"`)
+      }
+      if (parts.length > 0) return parts.join(' · ') + viaApi
+      const keys = Object.keys(changes)
+      if (keys.length > 0) return `Edited: ${keys.join(', ')}${viaApi}`
+      return null
+    }
+    case 'node.create': {
+      const type = typeof m.type === 'string' ? m.type : null
+      const title = typeof m.title === 'string' ? m.title : null
+      if (type && title) return `Created ${type}: "${truncate(title, 60)}"${viaApi}`
+      if (type) return `Created ${type}${viaApi}`
+      return null
+    }
+    case 'decision.create': {
+      const q = typeof m.question === 'string' ? m.question : null
+      const score = typeof m.qualityScore === 'number' ? m.qualityScore : null
+      if (q) return `"${truncate(q, 80)}"${score != null ? ` · score ${score}` : ''}${viaApi}`
+      return null
+    }
+    case 'node.delete':
+    case 'decision.delete':
+      return viaApi ? `Deleted${viaApi}` : null
+    case 'api_key.create':
+    case 'api_key.rotate':
+    case 'api_key.revoke': {
+      const name = typeof m.name === 'string' ? m.name : null
+      const prefix = typeof m.prefix === 'string' ? m.prefix : null
+      if (name && prefix) return `${name} (${prefix}…)`
+      return name ?? prefix ?? null
+    }
+    case 'member.invite':
+    case 'member.remove':
+    case 'member.role_update': {
+      const email = typeof m.email === 'string' ? m.email : null
+      const role = typeof m.role === 'string' ? m.role : null
+      if (email && role) return `${email} · ${role}`
+      if (email) return email
+      if (role) return `Role: ${role}`
+      return null
+    }
+    case 'ai.workflow.generated':
+    case 'ai.workflow.accepted':
+    case 'ai.workflow.refined': {
+      const prompt = typeof m.prompt === 'string' ? m.prompt : null
+      const nodeCount = typeof m.nodeCount === 'number' ? m.nodeCount : null
+      const parts: string[] = []
+      if (prompt) parts.push(`"${truncate(prompt, 80)}"`)
+      if (nodeCount != null) parts.push(`${nodeCount} node${nodeCount === 1 ? '' : 's'}`)
+      return parts.length > 0 ? parts.join(' · ') : null
+    }
+    case 'workspace.delete':
+      return null
+  }
+}

@@ -108,9 +108,10 @@ These features show real, truthful UI but lack the backend that would make them 
 | 43 | Audit Log Viewer | ✅ Complete | � Merged | #38 | `main` | Read-only paginated viewer at `/workspace/[slug]/audit-log` for the audit-log table that's been writing since v1.3.5.0. Server-rendered first page, client load-more cursor pagination, single-dropdown action filter, color-coded action chips, collapsible `metadata` JSON. Plan-gated to Business+ with new `audit-log-gate` upgrade variant. v1.5.2.0. 507/507 tests. |
 | 44 | Audit Log CSV Export | ✅ Complete | � Merged | #43 | `main` | `GET /api/v1/audit-log/export-csv` + Download CSV button on the audit log page. RFC 4180 escaping mirrors `decisions-csv.ts`. 5000-row cap, action filter respected. Cookie + bearer auth, plan-gated to Business+, shares the `export` rate-limit bucket. v1.5.3.0. 515/515 tests. |
 | 45 | Audit Log Date-Range Filter | ✅ Complete | � Merged | #43, #44 | `main` | Shared `parseAuditRange` + `rangeCutoffIso` plumbed through loader, JSON list, CSV endpoint, and page UI. Buckets: 7 / 30 / 90 / 365 / all. Default `'all'` preserves prior behaviour. CSV filename includes range so SOC-2 evidence packs are self-describing. v1.5.4.0. 522/522 tests. |
-| 46 | OpenAPI Spec Sync | ✅ Complete | 🟡 In review | #43, #44, #45 | `feature/46-openapi-spec-sync` | `lib/utils/openapi.ts` now lists `/audit-log/export-csv` and documents `?action` + `?range` on `/audit-log`. The `action` enum mirrors `AuditAction` (17 values); the `range` enum mirrors `AuditRange`. New structural test prevents the spec from drifting again. v1.5.5.0. 523/523 tests. |
+| 46 | OpenAPI Spec Sync | ✅ Complete | � Merged | #43, #44, #45 | `main` | `lib/utils/openapi.ts` now lists `/audit-log/export-csv` and documents `?action` + `?range` on `/audit-log`. The `action` enum mirrors `AuditAction` (17 values); the `range` enum mirrors `AuditRange`. New structural test prevents the spec from drifting again. v1.5.5.0. 523/523 tests. |
+| 47 | Audit Log Metadata Summary | ✅ Complete | 🟡 In review | #43 | `feature/47-audit-metadata-summary` | `summarizeAuditMetadata` reads each action's known metadata shape and emits a one-line summary (rename pairs, edited fields, ai.workflow prompt+nodeCount, etc.). Renders inline above a renamed `raw metadata` collapsible; unknown shapes fall through to the JSON view unchanged. v1.5.6.0. 536/536 tests. |
 
-**Phase 3 Total**: 9 features
+**Phase 3 Total**: 10 features
 
 ---
 
