@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { BarChart3, TrendingUp, Target, Tag, Sparkles, AlertTriangle, ArrowLeft, Users } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { ExportPdfButton } from '@/components/decisions/ExportPdfButton'
 import type { DecisionHealthStats, DecisionHealthPeriod, MemberUser } from '@/lib/data/workspace'
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
   members: MemberUser[]
   period: DecisionHealthPeriod
   slug: string
+  workspaceId: string
+  plan: 'free' | 'starter' | 'pro' | 'business' | 'enterprise'
 }
 
 const OUTCOME_COLORS: Record<string, string> = {
@@ -51,7 +54,7 @@ function relativeAge(iso: string): string {
   return `${months} ${months === 1 ? 'month' : 'months'} ago`
 }
 
-export function DecisionHealthClient({ stats, members, period, slug }: Props) {
+export function DecisionHealthClient({ stats, members, period, slug, workspaceId, plan }: Props) {
   const router = useRouter()
   const sp = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -95,17 +98,20 @@ export function DecisionHealthClient({ stats, members, period, slug }: Props) {
             Decision Health Dashboard
           </h1>
         </div>
-        <div className={cn('flex gap-1 rounded-lg border border-slate-700 bg-slate-800 p-0.5', isPending && 'opacity-60')}>
-          {(['7d', '30d', '90d', 'all'] as DecisionHealthPeriod[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              disabled={isPending}
-              className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', period === p ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}
-            >
-              {p === 'all' ? 'All time' : p}
-            </button>
-          ))}
+        <div className={cn('flex items-center gap-2', isPending && 'opacity-60')}>
+          <ExportPdfButton workspaceId={workspaceId} plan={plan} />
+          <div className="flex gap-1 rounded-lg border border-slate-700 bg-slate-800 p-0.5">
+            {(['7d', '30d', '90d', 'all'] as DecisionHealthPeriod[]).map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                disabled={isPending}
+                className={cn('rounded-md px-3 py-1.5 text-xs font-medium transition-colors', period === p ? 'bg-brand text-brand-foreground' : 'text-slate-400 hover:text-slate-200')}
+              >
+                {p === 'all' ? 'All time' : p}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

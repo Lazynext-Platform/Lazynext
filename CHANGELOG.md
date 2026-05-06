@@ -6,6 +6,24 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.1.0] - 2026-05-06
+
+**Theme:** Decision DNA → PDF. Print-ready audit reports for every workspace's decision log.
+
+### Added
+- **Decision DNA PDF export (#42)** — new `Export PDF` button on the Decision Health Dashboard opens a print-optimized HTML view of every logged decision (cover page, summary cards, table of contents, per-decision score breakdown) and auto-fires `window.print()` so the user lands directly in the system save-as-PDF dialog. Zero new dependencies — the report is server-rendered HTML with an inline `@page` print stylesheet, which means no headless Chrome footprint, no `pdf-lib` runtime, and pixel-perfect output through whichever browser the user already has open.
+  - **Loader** — `lib/data/decision-report.ts`. `loadDecisionReport(workspaceId)` fetches the workspace, headcount, and up to `DECISION_REPORT_CAP = 500` decisions in `created_at DESC` order, maps the snake_case rows to a typed `DecisionReport` (camelCase) with a pre-computed summary block (`avgQuality` with `-1` sentinel for "no scored decisions yet", `byOutcome`, `byType`). The 500 cap is hard — the architecture doc trades multi-page report churn for predictable render cost and tags `truncated: true` so the renderer can show a banner.
+  - **Renderer** — `lib/reports/decision-html.ts`. Pure-string HTML builder, no DOM, no React. Every interpolation flows through `escapeHtml` (XSS hardening tested with `<script>`, `<img>`, quotes, `&`). Inline `<style>` carries both screen styling (slate background, lime accent borders) and a `@media print` block with `@page { size: letter; margin: 0.75in }`, `page-break-after` on cover/TOC, `page-break-inside: avoid` on each decision card so cards never split across pages. Score bars are simple `<div>`-bar pairs (no SVG) so the HTML stays under ~30 KB even at the 500-decision cap.
+  - **Route** — `app/api/v1/decisions/report/route.ts`. Cookie-only `GET`, validates `workspaceId` UUID, runs the same `verifyWorkspaceMember` check as every other v1 surface, shares the existing `export` rate-limit bucket so this endpoint can't be turned into a scrape primitive, then plan-gates on `hasFeature(plan, 'pdf-export')` returning `402 PLAN_LIMIT_REACHED { variant: 'pdf-export' }` for free-tier callers. Successful response is `Content-Type: text/html; charset=utf-8`, `Cache-Control: no-store`, plus `X-Frame-Options: DENY` / `X-Content-Type-Options: nosniff` defense-in-depth on a doc that contains an inline `<script>`.
+  - **Plan gate** — new `'pdf-export'` flag in `lib/utils/plan-gates.ts`, scoped to `starter+` (Team / Business / Enterprise). Aligns with `'decision-health'` (the data source) so a workspace that can see the dashboard can also export it.
+  - **Button** — `components/decisions/ExportPdfButton.tsx`. Free tier → opens `useUpgradeModal.show('pdf-export-gate')` with new variant copy ("Unlock PDF export · Decision DNA PDF report · Team"). Paid tier → `window.open` with `noopener,noreferrer` so the export tab can't `window.opener` back into the workspace.
+  - **Wiring** — `app/(app)/workspace/[slug]/decisions/health/page.tsx` threads `workspace.id` and `workspace.plan` into `DecisionHealthClient`, which renders the button next to the period selector in the dashboard topbar.
+
+### Tests
+- `tests/unit/decision-report-renderer.test.ts` (10 cases) — `escapeHtml` covers all five entity vectors; `renderDecisionReportHtml` asserts the doc structure (title, cover, TOC, per-decision article count), banner visibility under both `truncated` states, score-block omission when `scoreBreakdown` is null, the `-1` `avgQuality` sentinel rendering as `—` (not `-1/100`), the empty-state copy, and the auto-print script presence.
+- `tests/unit/decision-report-route.test.ts` (8 cases) — the full status-code matrix: 401 no session, 400 missing/malformed `workspaceId`, 403 non-member, 404 workspace gone, 402 free-tier plan gate, 429 rate-limit exceeded, 200 with `text/html; charset=utf-8`, `cache-control: no-store`, and the workspace name in the body.
+- 488 / 488 tests passing (470 + 18 new).
+
 ## [1.5.0.0] - 2026-05-06
 
 **Theme:** AI workflow generation — LazyMind drafts a node graph from a freeform prompt.
