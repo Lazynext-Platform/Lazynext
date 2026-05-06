@@ -24,7 +24,7 @@
 > Centralize the API contract before touching individual routes.
 
 - [x] **A.1** — Create `lib/utils/api-headers.ts` with `buildResponseHeaders(input)` per architecture spec
-- [ ] **A.2** — Add `X-Request-Id` propagation to existing Sentry tagging in `instrumentation.ts` (deferred — Sentry context already gets `requestId` via tag elsewhere; revisit during sweep)
+- [x] **A.2** — Custom `onRequestError` in `instrumentation.ts` enriches every Sentry capture with the `X-Request-Id` tag (v1.5.11.0 — closes the v1.4.0.0 deferred sweep)
 - [x] **A.3** — Update one canary route (`app/api/v1/whoami/route.ts`) to call `buildResponseHeaders` end-to-end as the first integration
 - [x] 📍 **Checkpoint A** — `whoami` returns the new headers; existing tests still pass (339/339, +21 new)
 
@@ -73,8 +73,8 @@
 - [x] **E.2** — Created `packages/sdk/src/{client,index}.ts` with full source. `packages/sdk/package.json` set to `name: @lazynext/sdk`, `version: 0.1.0`, `private: true` (unpublishable until npm org reserved)
 - [ ] **E.3** — Move `tests/unit/sdk-client.test.ts` (DEFERRED — test still passes against the shim path; physically moving it adds churn without test value)
 - [x] **E.4** — `lib/sdk/{client,index}.ts` are now re-export shims pointing at `packages/sdk/src/`
-- [ ] **E.5** — `scripts/generate-sdk-types.ts` (DEFERRED — client is hand-typed and stable; auto-gen adds an openapi-typescript dep that needs approval)
-- [ ] **E.6** — `npm run sdk:generate-types` script (DEFERRED — see E.5)
+- [x] **E.5** — `scripts/generate-sdk-types.ts` shipped; pipes `buildOpenApiSpec()` through `openapi-typescript` to `packages/sdk/src/types.ts`
+- [x] **E.6** — `npm run sdk:generate-types` script wired in `package.json`
 - [x] **E.7** — `packages/sdk/README.md` written (quickstart, error handling, config, compatibility, endpoint table, versioning, links)
 - [ ] **E.8** — Dry-run `npm publish --dry-run` (BLOCKED — package is `private: true`; flip to false once `@lazynext` is reserved on npm)
 - [x] 📍 **Checkpoint E** — Type-check passes; existing SDK tests pass; canonical source lives in `packages/sdk/src/`; `lib/sdk/` shim keeps internal imports working
