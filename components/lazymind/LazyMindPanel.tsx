@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Sparkles, X, Send, Command, AlertTriangle } from 'lucide-react'
+import { Sparkles, X, Send, Command, AlertTriangle, Wand2 } from 'lucide-react'
 import { useUIStore } from '@/stores/ui.store'
 import { useWorkspaceStore } from '@/stores/workspace.store'
 import { useUpgradeModal } from '@/stores/upgrade-modal.store'
@@ -9,6 +9,7 @@ import { canUseAI } from '@/lib/utils/plan-gates'
 import { trackBillingEvent } from '@/lib/utils/telemetry'
 import { PLAN_LIMITS } from '@/lib/utils/constants'
 import { cn } from '@/lib/utils/cn'
+import { WorkflowGeneratorModal } from './WorkflowGeneratorModal'
 
 type Plan = keyof typeof PLAN_LIMITS
 
@@ -54,6 +55,7 @@ export function LazyMindPanel() {
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [aiCount, setAiCount] = useState(0)
+  const [isGenOpen, setIsGenOpen] = useState(false)
   const chatRef = useRef<HTMLDivElement>(null)
 
   // Hydrate the daily count from the server when the workspace + panel
@@ -250,6 +252,13 @@ export function LazyMindPanel() {
 
       {/* Quick actions */}
       <div className="flex gap-2 overflow-x-auto px-4 py-2 scrollbar-thin">
+        <button
+          onClick={() => setIsGenOpen(true)}
+          className="shrink-0 inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-brand-foreground hover:bg-brand-hover transition-colors"
+        >
+          <Wand2 className="h-3 w-3" />
+          Generate a workflow…
+        </button>
         {quickActions.map((qa) => (
           <button key={qa.label} onClick={() => sendMessage(qa.query)} className="shrink-0 rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors">
             {qa.label}
@@ -279,6 +288,16 @@ export function LazyMindPanel() {
           <span className="flex items-center gap-0.5 text-3xs text-slate-600"><Command className="h-2.5 w-2.5" />L to toggle</span>
         </div>
       </div>
+
+      {/* AI workflow generator (#41). Self-contained modal; renders only
+          when isGenOpen flips so it's invisible on the side panel until
+          the user clicks the quick-action pill. */}
+      <WorkflowGeneratorModal
+        isOpen={isGenOpen}
+        onClose={() => setIsGenOpen(false)}
+        workspaceId={workspaceId}
+        onGenerated={() => setAiCount((c) => c + 1)}
+      />
     </div>
   )
 }
