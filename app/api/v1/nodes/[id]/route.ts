@@ -47,8 +47,15 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const preAuth = await resolveAuth(req)
   if (!preAuth.ok) return preAuth.response
 
-  // Verify ownership before update
-  const { data: existing } = await db.from('nodes').select('workspace_id, type, assigned_to, title').eq('id', params.id).single()
+  // Verify ownership before update. Pull every field we might diff
+  // against in the audit row so the metadata can carry a `previous`
+  // snapshot for #50's reader-side diff viewer. The columns are
+  // already on the row; selecting more is free.
+  const { data: existing } = await db
+    .from('nodes')
+    .select('workspace_id, type, assigned_to, title, status, position_x, position_y, data')
+    .eq('id', params.id)
+    .single()
   if (!existing) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
   const auth = await requireWorkspaceAuth(req, existing.workspace_id)
@@ -122,7 +129,34 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     action: 'node.update',
     resourceType: 'node',
     resourceId: params.id,
-    metadata: { changes: Object.keys(parsed.data), viaApiKey: auth.viaApiKey },
+    metadata: (() => {
+      const changes = Object.keys(parsed.data)
+      const fieldsToDiff = changes.filter((k) => k !== 'data')
+      const previous: Record<string, unknown> = {}
+      const next: Record<string, unknown> = {}
+      for (const k of fieldsToDiff) {
+        const dbKey =
+          k === 'positionX'
+            ? 'position_x'
+            : k === 'positionY'
+              ? 'position_y'
+              : k === 'assignedTo'
+                ? 'assigned_to'
+                : k
+        previous[k] = (existing as Record<string, unknown>)[dbKey] ?? null
+        next[k] = (parsed.data as Record<string, unknown>)[k] ?? null
+      }
+      return {
+        changes,
+        // before/after snapshots for the audit log diff viewer (#50).
+        // `data` is excluded because it can be arbitrarily large; the
+        // diff viewer falls through to the generic 'Edited: data' line
+        // for that case.
+        previous,
+        next,
+        viaApiKey: auth.viaApiKey,
+      }
+    })(),
     request: req,
   }).catch(() => undefined)
 

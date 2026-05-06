@@ -26,6 +26,7 @@ describe('buildOpenApiSpec', () => {
       '/audit-log/export-csv',
       '/decisions',
       '/decisions/export-csv',
+      '/decisions/report',
       '/decisions/{id}',
       '/edges',
       '/export',

@@ -101,4 +101,70 @@ describe('summarizeAuditMetadata', () => {
   it('returns null for workspace.delete (terminal action, no useful detail)', () => {
     expect(summarizeAuditMetadata('workspace.delete', { reason: 'whatever' })).toBeNull()
   })
+
+  // ─────────────────────────────────────────────────────────────
+  // #50: diff viewer for node.update / decision.update
+  // ─────────────────────────────────────────────────────────────
+
+  it('node.update with previous + next renders per-field arrows', () => {
+    expect(
+      summarizeAuditMetadata('node.update', {
+        changes: ['title', 'status'],
+        previous: { title: 'Old', status: 'todo' },
+        next: { title: 'New', status: 'done' },
+      }),
+    ).toBe('title: "Old" → "New" · status: "todo" → "done"')
+  })
+
+  it('node.update arrows truncate long string values to 40 chars', () => {
+    const long = 'x'.repeat(80)
+    const result = summarizeAuditMetadata('node.update', {
+      previous: { title: 'Old' },
+      next: { title: long },
+    }) ?? ''
+    expect(result).toContain('"Old" → "')
+    expect(result).toContain('…"')
+  })
+
+  it('node.update collapses to "+N more" when more than 3 fields changed', () => {
+    const result = summarizeAuditMetadata('node.update', {
+      previous: { a: 1, b: 1, c: 1, d: 1, e: 1 },
+      next: { a: 2, b: 2, c: 2, d: 2, e: 2 },
+    })
+    expect(result).toContain('(+2 more)')
+  })
+
+  it('node.update renders null/undefined as em-dash', () => {
+    expect(
+      summarizeAuditMetadata('node.update', {
+        previous: { assignedTo: null },
+        next: { assignedTo: 'user-uuid' },
+      }),
+    ).toBe('assignedTo: — → "user-uuid"')
+  })
+
+  it('node.update appends "via API key" on bearer-driven edits', () => {
+    expect(
+      summarizeAuditMetadata('node.update', {
+        previous: { title: 'a' },
+        next: { title: 'b' },
+        viaApiKey: true,
+      }),
+    ).toBe('title: "a" → "b" · via API key')
+  })
+
+  it('node.update falls back to legacy "Edited: …" when no diff snapshot', () => {
+    expect(
+      summarizeAuditMetadata('node.update', { changes: ['data'] }),
+    ).toBe('Edited: data')
+  })
+
+  it('node.update collapses non-string/number/bool values to placeholders', () => {
+    expect(
+      summarizeAuditMetadata('node.update', {
+        previous: { tags: ['old'] },
+        next: { tags: ['a', 'b', 'c'] },
+      }),
+    ).toBe('tags: [1] → [3]')
+  })
 })

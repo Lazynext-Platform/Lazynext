@@ -6,6 +6,26 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.8.0] - 2026-05-06
+
+**Theme:** Two deferred follow-ups close the same week. The decision report opens to the SDK; the audit log learns to render before/after diffs.
+
+### Added
+- **Decision Report bearer auth (#49)** — `GET /api/v1/decisions/report` switched from cookie-only `safeAuth` + `verifyWorkspaceMember` to `requireWorkspaceAuth`, so bearer-key callers (the SDK, downstream automations) can fetch the same Decision DNA HTML and pipe it through their own renderer (puppeteer, headless-chrome, weasyprint, …) to materialise a PDF. Cookie sessions still get the inline auto-print `<script>` that opens the browser save-as dialog — bearer responses omit it because there's no human in a tab to consume it.
+  - **Plan gating stays workspace-scoped**, not caller-scoped: bearer keys still need the workspace plan to include `pdf-export`. Same `export` rate-limit bucket; bucket key now includes `auth.rateLimitId` so a leaked key can't burn a human user's budget.
+  - **OpenAPI** declares the route under Decisions/Export with `/decisions/report` listed alongside `/decisions/export-csv`. The path-list snapshot test catches future drift.
+- **Audit Log Diff Viewer (#50)** — producer-side: `node.update` now emits `previous` and `next` snapshots of the changed fields (excluding the unbounded `data` blob) inside the audit metadata. Reader-side: `summarizeAuditMetadata` for `node.update` / `decision.update` renders per-field arrows like `title: "Old" → "New" · status: "todo" → "done"`. More than three fields collapse to `(+N more)`. Long string values truncate to 40 chars. Null values render as em-dash. Non-primitive values (arrays, objects) collapse to `[N]` / `{…}` placeholders.
+  - **Backwards compatible.** Older audit rows without the snapshot keys fall through to the legacy `Edited: title, status` summary. The `data` field, which can be arbitrarily large, is excluded from the snapshot and falls through too.
+  - **Decision PATCH route does not currently emit `decision.update` audits**; once that producer is wired up the reader will pick up the same diff format automatically. Out of scope for this ship.
+
+### Tests
+- **`tests/unit/decisions-report-route.test.ts`** (new) — 9 cases: validation (missing/malformed UUID), auth passthrough, cookie session renders with `autoPrint: true`, bearer auth with `autoPrint: false`, rate-limit bucket scopes by `rateLimitId` (key vs user), 429, 402 PLAN_LIMIT_REACHED, 404. Replaces the older `tests/unit/decision-report-route.test.ts` whose direct mocks of `safeAuth` / `verifyWorkspaceMember` no longer match the route's auth path.
+- **`tests/unit/audit-metadata-summary.test.ts`** gains 7 cases covering the diff viewer: per-field arrows, 40-char truncation, +N more collapse, em-dash null, viaApiKey suffix, legacy fallback, array/object placeholders.
+- **OpenAPI test** path-list now expects `/decisions/report`. **556 tests passing** (548 → 556, +8 net).
+
+### Why
+#42 shipped the report cookie-only because the bearer scope question wasn't settled. It's settled now: SDK consumers want a programmatic Decision DNA dump, and the workspace plan gate already protects revenue. The audit-log diff viewer closes a follow-up #47 explicitly listed as out-of-scope: compliance reviews wanted to see what changed, not just which fields were touched.
+
 ## [1.5.7.0] - 2026-05-06
 
 **Theme:** Audit log closes the AI workflow funnel. Client clicks (accept / refine) now leave a trail — server-only actions stay server-only.

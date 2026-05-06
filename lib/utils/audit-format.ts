@@ -155,6 +155,20 @@ function truncate(s: string, max: number): string {
 }
 
 /**
+ * Render a value for inline diff display. Strings get quoted +
+ * truncated; primitives stringify directly; null/undefined render as
+ * an em-dash; objects/arrays collapse to a placeholder rather than
+ * dumping JSON into a single-line summary.
+ */
+function formatDiffValue(v: unknown): string {
+  if (v === null || v === undefined) return '—'
+  if (typeof v === 'string') return `"${truncate(v, 40)}"`
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v)
+  if (Array.isArray(v)) return `[${v.length}]`
+  return '{…}'
+}
+
+/**
  * Produce a one-line summary for an audit row's metadata. The mapping
  * is keyed off the action so we never invent a meaning that doesn't
  * match the producer in `app/api/v1/**`. Unknown shapes return `null`
@@ -171,6 +185,27 @@ export function summarizeAuditMetadata(
   switch (action) {
     case 'node.update':
     case 'decision.update': {
+      const previous = m.previous && typeof m.previous === 'object'
+        ? (m.previous as Record<string, unknown>)
+        : null
+      const next = m.next && typeof m.next === 'object'
+        ? (m.next as Record<string, unknown>)
+        : null
+      // Diff viewer (#50): when both before and after snapshots are
+      // present we render `title: "Old" → "New"` per changed field.
+      // Falls back to the legacy `Edited: title, status` summary when
+      // either side is missing (older audit rows or fields excluded
+      // from the snapshot like `data`).
+      if (previous && next) {
+        const keys = Object.keys(next).filter((k) => k in previous)
+        if (keys.length > 0) {
+          const parts = keys
+            .slice(0, 3)
+            .map((k) => `${k}: ${formatDiffValue(previous[k])} → ${formatDiffValue(next[k])}`)
+          const more = keys.length > 3 ? ` (+${keys.length - 3} more)` : ''
+          return parts.join(' · ') + more + viaApi
+        }
+      }
       const changes = Array.isArray(m.changes)
         ? m.changes.filter((x): x is string => typeof x === 'string')
         : null

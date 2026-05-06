@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { safeAuth, verifyWorkspaceMember } from '@/lib/utils/auth'
+import { requireWorkspaceAuth } from '@/lib/utils/route-auth'
 import {
   rateLimit,
   rateLimitResponse,
@@ -26,28 +26,38 @@ type Plan = 'free' | 'starter' | 'pro' | 'business' | 'enterprise'
  * GET /api/v1/decisions/report?workspaceId={uuid}
  *
  * Returns a print-optimized HTML document of the workspace's Decision
- * DNA. Cookie-only at v1 (no bearer scope yet — see
- * docs/features/42-decision-dna-pdf-export/architecture.md).
+ * DNA. Bearer-aware as of #49 — cookie sessions get the auto-print
+ * dialog, bearer-key consumers (the SDK, downstream automations) get
+ * the same HTML and can pipe it through their own renderer
+ * (puppeteer, headless-chrome, weasyprint, etc.) to materialise a
+ * PDF.
  *
- * The browser is responsible for "save as PDF" via the print dialog;
- * the response embeds an auto-print script as a UX accelerator.
+ * Bearer keys still need the workspace's plan to include `pdf-export`
+ * (Team+); plan gating is by workspace, not by caller.
  */
 export async function GET(req: Request) {
   const requestId = newRequestId()
   const baseHeaders = headersToObject(buildResponseHeaders({ requestId }))
 
-  const { userId } = await safeAuth()
-  if (!userId) {
+  const url = new URL(req.url)
+  const workspaceId = url.searchParams.get('workspaceId')
+  if (!workspaceId || !UUID_RE.test(workspaceId)) {
     return NextResponse.json(
-      { error: 'UNAUTHORIZED' },
-      { status: 401, headers: baseHeaders },
+      { error: 'INVALID_WORKSPACE_ID' },
+      { status: 400, headers: baseHeaders },
     )
   }
 
-  // Same `export` rate-limit bucket as /api/v1/export. Both are read-
-  // heavy workspace dumps; sharing the bucket limits exposure to
-  // scraping campaigns regardless of which endpoint is hit.
-  const rl = rateLimit(`export:${userId}`, RATE_LIMITS.export)
+  const auth = await requireWorkspaceAuth(req, workspaceId)
+  if (!auth.ok) {
+    for (const [k, v] of Object.entries(baseHeaders)) auth.response.headers.set(k, v)
+    return auth.response
+  }
+
+  // Same `export` rate-limit bucket as /api/v1/export. Bearer requests
+  // bucket by keyId (set in resolveAuth) so a leaked key can't burn a
+  // human user's budget.
+  const rl = rateLimit(`export:${auth.rateLimitId}`, RATE_LIMITS.export)
   if (!rl.success) {
     const r = rateLimitResponse({
       resetAt: rl.resetAt,
@@ -65,23 +75,6 @@ export async function GET(req: Request) {
         message: 'Set Supabase env vars in .env.local.',
       },
       { status: 503, headers: baseHeaders },
-    )
-  }
-
-  const url = new URL(req.url)
-  const workspaceId = url.searchParams.get('workspaceId')
-  if (!workspaceId || !UUID_RE.test(workspaceId)) {
-    return NextResponse.json(
-      { error: 'INVALID_WORKSPACE_ID' },
-      { status: 400, headers: baseHeaders },
-    )
-  }
-
-  const isMember = await verifyWorkspaceMember(userId, workspaceId)
-  if (!isMember) {
-    return NextResponse.json(
-      { error: 'FORBIDDEN' },
-      { status: 403, headers: baseHeaders },
     )
   }
 
@@ -107,16 +100,16 @@ export async function GET(req: Request) {
       )
     }
 
-    const html = renderDecisionReportHtml(report)
+    // Bearer requests get a non-auto-print HTML — the auto-print
+    // <script> only makes sense for a human in a browser tab. Pass the
+    // viaApiKey flag through so the renderer can omit it.
+    const html = renderDecisionReportHtml(report, { autoPrint: !auth.viaApiKey })
     return new NextResponse(html, {
       status: 200,
       headers: {
         ...baseHeaders,
         'Content-Type': 'text/html; charset=utf-8',
-        // Decision data is workspace-private; never cache.
         'Cache-Control': 'no-store',
-        // Defense-in-depth: the file contains an inline <script> for
-        // auto-print but no third-party JS. Lock the doc down.
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
       },
@@ -126,7 +119,7 @@ export async function GET(req: Request) {
       route: '/api/v1/decisions/report',
       method: 'GET',
       requestId,
-      userId,
+      userId: auth.userId,
       workspaceId,
     })
     return NextResponse.json(
