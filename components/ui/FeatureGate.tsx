@@ -17,6 +17,8 @@ type UpgradeVariant =
   | 'health-gate'
   | 'automation-gate'
   | 'sso-gate'
+  | 'pdf-export-gate'
+  | 'audit-log-gate'
   | 'full-upgrade'
 
 interface FeatureGateProps {

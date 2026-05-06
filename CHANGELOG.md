@@ -6,6 +6,25 @@ All notable changes to Lazynext will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.2.0] - 2026-05-06
+
+**Theme:** Audit log finally has eyes. Business+ admins can read what `recordAudit` has been writing for months without curl.
+
+### Added
+- **Audit Log Viewer (#43)** — new page at `/workspace/[slug]/audit-log`. Server-renders the first 50 rows so there's no empty-flash, then a client component takes over for filter changes (single dropdown over all 17 `AuditAction` values) and "Load older entries" cursor pagination. Each row shows action (color-coded chip — red for deletes, emerald for creates, sky for AI workflow, amber for config edits, slate otherwise), actor (name → email → "System" fallback), target (`resource_type · 8-char id`), IP, and a relative timestamp ("3m ago", "2d ago", absolute date past 30 days). `metadata` payloads collapse into `<details>` so the table stays scannable but the full JSON is one click away. Plan-gated to Business+ via `FeatureGate` with the new `'audit-log-gate'` upgrade-modal variant.
+  - **Page** — `app/(app)/workspace/[slug]/audit-log/page.tsx`. Calls `getCurrentMemberWorkspace` + `notFound()` on non-membership, then `listAuditLog` for the initial server render. Reads `?action=` from the URL so the filter is shareable.
+  - **Client** — `app/(app)/workspace/[slug]/audit-log/AuditLogClient.tsx`. Filter dropdown writes through `router.replace` (server re-renders with the new initial page) for stable URLs and back-button correctness. Load-more `fetch`'es `/api/v1/audit-log` with `credentials: 'same-origin'` and surfaces 402/429/5xx as one inline amber banner — the page itself is gated, so a mid-session 402 means the workspace plan dropped, not a bug.
+  - **Helpers** — `lib/utils/audit-format.ts`. Pure functions: `formatAuditAction(action)` (exhaustive `switch` so adding an `AuditAction` is a TypeScript error if the label is forgotten), `actionTone(action)` returning a 5-tone palette key, `formatRelativeTime(iso, now)` deterministic against an injected `now` for testability, `formatActor(actor)` with the name → email → "Unknown user" / "System" fallback chain.
+  - **Settings entry point** — `app/(app)/workspace/[slug]/settings/page.tsx` Security tab now has an "Open audit log" link card. Always-clickable so Business+ admins find it; the gated copy explains the upsell for free/team callers (the page itself handles the paywall).
+  - **Modal variant** — `'audit-log-gate'` added to `stores/upgrade-modal.store.ts`, `components/ui/UpgradeModal.tsx` (`VARIANT_COPY` with "Required for SOC-2 evidence" pitch), and `components/ui/FeatureGate.tsx` (its `UpgradeVariant` union was lagging behind the store, also picked up `'pdf-export-gate'` from v1.5.1.0 in the same edit).
+
+### Tests
+- `tests/unit/audit-format.test.ts` (19 cases): every `AuditAction` returns a non-empty label with no leftover `.` (regression for the dotted-machine-name escaping into the UI), specific label sentinels, every tone branch (red/emerald/sky/amber/slate), every relative-time bucket (seconds/minutes/hours/days/weeks/absolute), future-timestamp safety, garbage-input dash, and the actor fallback chain.
+- 507 / 507 tests passing (488 + 19 new).
+
+### Why
+The `audit_log` table has been writing rows since v1.3.5.0 — every workspace mutation calls `recordAudit` — but the only way an admin could read it was via `GET /api/v1/audit-log`. SOC-2 evidence pulls require clickable proof; "who deleted that workspace?" was an engineering ticket. This ship closes that loop without touching the data layer.
+
 ## [1.5.1.0] - 2026-05-06
 
 **Theme:** Decision DNA → PDF. Print-ready audit reports for every workspace's decision log.
