@@ -11,14 +11,14 @@ export const EXTERNAL_TOOLS: ExternalTool[] = [
 	{
 		name: "Marble",
 		description:
-			"Modern headless CMS for content management and the blog for OpenCut",
-		url: "https://marblecms.com?utm_source=opencut",
+			"Modern headless CMS for content management and the blog for Lazynext",
+		url: "https://marblecms.com?utm_source=lazynext",
 		icon: OcMarbleIcon,
 	},
 	{
 		name: "Databuddy",
-		description: "GDPR compliant analytics and user insights for OpenCut",
-		url: "https://databuddy.cc?utm_source=opencut",
+		description: "GDPR compliant analytics and user insights for Lazynext",
+		url: "https://databuddy.cc?utm_source=lazynext",
 		icon: OcDataBuddyIcon,
 	},
 ];

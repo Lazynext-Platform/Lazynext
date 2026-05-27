@@ -57,7 +57,7 @@ export function Header() {
 							<Link href="/" className="flex items-center gap-3">
 								<Image
 									src={DEFAULT_LOGO_URL}
-									alt="OpenCut Logo"
+									alt="Lazynext Logo"
 									className="invert dark:invert-0"
 									width={32}
 									height={32}
@@ -67,24 +67,22 @@ export function Header() {
 						<ContextMenuContent>
 							<ContextMenuItem
 								onClick={async () => {
-									const res = await fetch(DEFAULT_LOGO_URL);
-									const svg = await res.text();
-									await navigator.clipboard.writeText(svg);
+									await navigator.clipboard.writeText(new URL(DEFAULT_LOGO_URL, window.location.origin).toString());
 								}}
 							>
 								<HugeiconsIcon icon={Copy01Icon} />
-								Copy SVG
+								Copy Logo URL
 							</ContextMenuItem>
 							<ContextMenuItem
 								onClick={() => {
 									const a = document.createElement("a");
 									a.href = DEFAULT_LOGO_URL;
-									a.download = "opencut-logo.svg";
+									a.download = "lazynext-logo.png";
 									a.click();
 								}}
 							>
 								<HugeiconsIcon icon={Download01Icon} />
-								Download SVG
+								Download Logo
 							</ContextMenuItem>
 							<Link href="/brand">
 								<ContextMenuItem>

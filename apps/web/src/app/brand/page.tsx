@@ -48,18 +48,18 @@ const ASSET_SECTIONS: AssetSection[] = [
 	{
 		title: "Symbol",
 		description:
-			"Use the symbol on its own when the OpenCut name is already present nearby or space is limited.",
+			"Use the symbol on its own when the Lazynext name is already present nearby or space is limited.",
 		cols: "2",
 		assets: [
 			{
-				src: "/logos/opencut/symbol.svg",
+				src: "/logos/lazynext/symbol.svg",
 				theme: "dark",
 				label: "Symbol",
 				width: 400,
 				height: 400,
 			},
 			{
-				src: "/logos/opencut/symbol-light.svg",
+				src: "/logos/lazynext/symbol-light.svg",
 				theme: "light",
 				label: "Symbol",
 				width: 400,
@@ -74,28 +74,28 @@ const ASSET_SECTIONS: AssetSection[] = [
 		cols: "2",
 		assets: [
 			{
-				src: "/logos/opencut/logo.svg",
+				src: "/logos/lazynext/logo.svg",
 				theme: "dark",
 				label: "Logo",
 				width: 1809,
 				height: 400,
 			},
 			{
-				src: "/logos/opencut/logo-light.svg",
+				src: "/logos/lazynext/logo-light.svg",
 				theme: "light",
 				label: "Logo",
 				width: 1809,
 				height: 400,
 			},
 			{
-				src: "/logos/opencut/text.svg",
+				src: "/logos/lazynext/text.svg",
 				theme: "dark",
 				label: "Text",
 				width: 1760,
 				height: 400,
 			},
 			{
-				src: "/logos/opencut/text-light.svg",
+				src: "/logos/lazynext/text-light.svg",
 				theme: "light",
 				label: "Text",
 				width: 1760,
@@ -112,7 +112,7 @@ export default function BrandPage() {
 			title="Brand"
 			description={
 				<>
-					Download OpenCut brand assets for use in your projects.{" "}
+					Download Lazynext brand assets for use in your projects.{" "}
 					<Link
 						href="#guidelines"
 						className="underline underline-offset-4"
@@ -173,17 +173,17 @@ export default function BrandPage() {
 				<div className="flex flex-col gap-3">
 					<h2 className="font-semibold text-lg">Usage</h2>
 					<p className="text-muted-foreground text-base leading-relaxed">
-						OpenCut is open source — the code is free to use under its license.
+						Lazynext is open source — the code is free to use under its license.
 						That license does not cover the name or logo. You can say you use
-						OpenCut, that your project integrates with OpenCut, or that it was
-						built on top of OpenCut. You cannot name your product OpenCut, imply
+						Lazynext, that your project integrates with Lazynext, or that it was
+						built on top of Lazynext. You cannot name your product Lazynext, imply
 						we made or endorse your product, or use the marks commercially
 						without asking first. For anything unclear, reach out at{" "}
 						<Link
-							href="mailto:brand@opencut.app"
+							href="mailto:brand@lazynext.com"
 							className="underline underline-offset-4"
 						>
-							brand@opencut.app
+							brand@lazynext.com
 						</Link>
 						.
 					</p>
@@ -193,8 +193,8 @@ export default function BrandPage() {
 					<h2 className="font-semibold text-lg">What&apos;s not allowed</h2>
 					<ul className="text-muted-foreground text-base flex flex-col gap-2 leading-relaxed">
 						{[
-							"Using OpenCut in the name of your product, service, or domain.",
-							"Implying that OpenCut made, sponsors, or endorses your work.",
+							"Using Lazynext in the name of your product, service, or domain.",
+							"Implying that Lazynext made, sponsors, or endorses your work.",
 							"Using the logo or name on merchandise or commercial marketing.",
 							"Modifying the marks.",
 						].map((item) => (

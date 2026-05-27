@@ -1,10 +1,10 @@
 [package]
-name = "opencut-desktop"
+name = "lazynext-desktop"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "opencut"
+name = "lazynext"
 path = "src/main.rs"
 
 [dependencies]
