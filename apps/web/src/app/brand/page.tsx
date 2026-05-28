@@ -49,18 +49,11 @@ const ASSET_SECTIONS: AssetSection[] = [
 		title: "Symbol",
 		description:
 			"Use the symbol on its own when the Lazynext name is already present nearby or space is limited.",
-		cols: "2",
+		cols: "1",
 		assets: [
 			{
-				src: "/logos/lazynext/symbol.svg",
+				src: "/logos/lazynext/symbol.png",
 				theme: "dark",
-				label: "Symbol",
-				width: 400,
-				height: 400,
-			},
-			{
-				src: "/logos/lazynext/symbol-light.svg",
-				theme: "light",
 				label: "Symbol",
 				width: 400,
 				height: 400,
@@ -71,34 +64,13 @@ const ASSET_SECTIONS: AssetSection[] = [
 		title: "Lockup",
 		description:
 			"The full lockup combines the symbol and wordmark. Prefer this in most contexts where you have enough horizontal space.",
-		cols: "2",
+		cols: "1",
 		assets: [
 			{
-				src: "/logos/lazynext/logo.svg",
+				src: "/logos/lazynext/logo.png",
 				theme: "dark",
 				label: "Logo",
 				width: 1809,
-				height: 400,
-			},
-			{
-				src: "/logos/lazynext/logo-light.svg",
-				theme: "light",
-				label: "Logo",
-				width: 1809,
-				height: 400,
-			},
-			{
-				src: "/logos/lazynext/text.svg",
-				theme: "dark",
-				label: "Text",
-				width: 1760,
-				height: 400,
-			},
-			{
-				src: "/logos/lazynext/text-light.svg",
-				theme: "light",
-				label: "Text",
-				width: 1760,
 				height: 400,
 			},
 		],

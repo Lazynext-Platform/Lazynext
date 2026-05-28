@@ -41,10 +41,9 @@ export function Footer() {
 						<div className="mb-4 flex items-center justify-start gap-2">
 							<Image
 								src={DEFAULT_LOGO_URL}
-								alt="Lazynext"
+								alt="Lazynext Logo"
 								width={24}
 								height={24}
-								className="invert dark:invert-0"
 							/>
 							<span className="text-lg font-bold">Lazynext</span>
 						</div>
