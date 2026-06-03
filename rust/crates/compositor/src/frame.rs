@@ -38,6 +38,42 @@ pub struct LayerDescriptor {
     #[serde(default)]
     pub effect_pass_groups: Vec<Vec<EffectPassDescriptor>>,
     pub mask: Option<LayerMaskDescriptor>,
+    pub color_grading: Option<ColorGradingDescriptor>,
+    pub crop: Option<CropDescriptor>,
+    pub border_radius: Option<f32>,
+    pub shadow: Option<ShadowDescriptor>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CropDescriptor {
+    pub left: f32,
+    pub top: f32,
+    pub right: f32,
+    pub bottom: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShadowDescriptor {
+    pub color: [f32; 4],
+    pub distance: f32,
+    pub angle: f32,
+    pub blur: f32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ColorGradingDescriptor {
+    pub brightness: f32,
+    pub contrast: f32,
+    pub saturation: f32,
+    pub grayscale: Option<f32>,
+    pub sepia: Option<f32>,
+    pub invert: Option<f32>,
+    pub hue_rotate: Option<f32>,
+    pub pixelate: Option<f32>,
+    pub edge_detect: Option<f32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

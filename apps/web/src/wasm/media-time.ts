@@ -3,7 +3,6 @@ import {
 	parseTimecode as _parseTimecode,
 	roundToFrame as _roundToFrame,
 	snappedSeekTime as _snappedSeekTime,
-	TICKS_PER_SECOND as _TICKS_PER_SECOND,
 	mediaTimeFromSeconds as _mediaTimeFromSeconds,
 	mediaTimeToSeconds as _mediaTimeToSeconds,
 	type FrameRate,
@@ -24,7 +23,7 @@ import {
  */
 export type MediaTime = number & { readonly __mediaTime: unique symbol };
 
-export const TICKS_PER_SECOND = _TICKS_PER_SECOND();
+export const TICKS_PER_SECOND = 120_000; // Mirrors rust/crates/time/src/media_time.rs
 
 function isMediaTime(value: number): value is MediaTime {
 	return Number.isInteger(value);

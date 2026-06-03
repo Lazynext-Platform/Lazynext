@@ -493,18 +493,7 @@ export function useEditorActions() {
 		undefined,
 	);
 
-	// todo: potnetially unify these two actions:
-	useActionHandler(
-		"remove-media-asset",
-		(args) => {
-			if (!args) return;
-			editor.media.removeMediaAsset({
-				projectId: args.projectId,
-				id: args.assetId,
-			});
-		},
-		undefined,
-	);
+	// Actions for removing media assets
 
 	useActionHandler(
 		"remove-media-assets",

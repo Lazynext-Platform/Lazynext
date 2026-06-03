@@ -1,0 +1,115 @@
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::io::{self, BufRead, Write};
+
+#[derive(Deserialize, Debug)]
+struct RpcRequest {
+    jsonrpc: String,
+    id: Value,
+    method: String,
+    params: Option<Value>,
+}
+
+#[derive(Serialize)]
+struct RpcResponse {
+    jsonrpc: String,
+    id: Value,
+    result: Option<Value>,
+    error: Option<RpcError>,
+}
+
+#[derive(Serialize)]
+struct RpcError {
+    code: i32,
+    message: String,
+}
+
+fn handle_request(req: RpcRequest) -> RpcResponse {
+    let mut response = RpcResponse {
+        jsonrpc: "2.0".to_string(),
+        id: req.id.clone(),
+        result: None,
+        error: None,
+    };
+
+    match req.method.as_str() {
+        "tools/list" => {
+            response.result = Some(serde_json::json!({
+                "tools": [
+                    {
+                        "name": "create_timeline",
+                        "description": "Initialize a new video timeline using the Lazynext core time crate",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "fps": { "type": "number", "description": "Frames per second" }
+                            },
+                            "required": ["fps"]
+                        }
+                    }
+                ]
+            }));
+        }
+        "tools/call" => {
+            // Handle tool execution
+            let params = req.params.unwrap_or_default();
+            let name = params.get("name").and_then(|v| v.as_str()).unwrap_or("");
+            if name == "create_timeline" {
+                // Here we would call into the `time` and `compositor` crates!
+                response.result = Some(serde_json::json!({
+                    "content": [
+                        { "type": "text", "text": "Successfully initialized 60 FPS timeline!" }
+                    ]
+                }));
+            } else {
+                response.error = Some(RpcError {
+                    code: -32601,
+                    message: "Method not found".to_string(),
+                });
+            }
+        }
+        _ => {
+            response.error = Some(RpcError {
+                code: -32601,
+                message: "Method not found".to_string(),
+            });
+        }
+    }
+    response
+}
+
+fn main() -> Result<()> {
+    let stdin = io::stdin();
+    let stdout = io::stdout();
+    let mut handle = stdout.lock();
+
+    for line in stdin.lock().lines() {
+        let line = line?;
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        match serde_json::from_str::<RpcRequest>(&line) {
+            Ok(req) => {
+                let res = handle_request(req);
+                let res_json = serde_json::to_string(&res)?;
+                writeln!(handle, "{}", res_json)?;
+                handle.flush()?;
+            }
+            Err(e) => {
+                let err_res = serde_json::json!({
+                    "jsonrpc": "2.0",
+                    "id": null,
+                    "error": {
+                        "code": -32700,
+                        "message": format!("Parse error: {}", e)
+                    }
+                });
+                writeln!(handle, "{}", err_res)?;
+                handle.flush()?;
+            }
+        }
+    }
+    Ok(())
+}

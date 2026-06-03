@@ -1,12 +1,11 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, real, jsonb } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
 	id: text("id").primaryKey(),
 
-	// todo: implement fully anonymous sign-in for privacy
-	// we don't have any auth flows currently so this is fine for now
-	name: text("name").notNull(),
-	email: text("email").notNull().unique(),
+	// anonymous sign-in support
+	name: text("name"),
+	email: text("email").unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
 	image: text("image"),
 	createdAt: timestamp("created_at")
@@ -68,3 +67,39 @@ export const verifications = pgTable("verifications", {
 		() => /* @__PURE__ */ new Date(),
 	),
 }).enableRLS();
+
+export const projects = pgTable("projects", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+	createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
+	updatedAt: timestamp("updated_at").$defaultFn(() => new Date()).notNull(),
+}).enableRLS();
+
+export const timelines = pgTable("timelines", {
+	id: text("id").primaryKey(),
+	projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+	width: integer("width").notNull().default(1920),
+	height: integer("height").notNull().default(1080),
+	framerate: real("framerate").notNull().default(30.0),
+	createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
+	updatedAt: timestamp("updated_at").$defaultFn(() => new Date()).notNull(),
+}).enableRLS();
+
+export const tracks = pgTable("tracks", {
+	id: text("id").primaryKey(),
+	timelineId: text("timeline_id").notNull().references(() => timelines.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	zIndex: integer("z_index").notNull(),
+}).enableRLS();
+
+export const clips = pgTable("clips", {
+	id: text("id").primaryKey(),
+	trackId: text("track_id").notNull().references(() => tracks.id, { onDelete: "cascade" }),
+	type: text("type").notNull(), // 'video', 'audio', 'image', 'text'
+	sourceUrl: text("source_url"),
+	startTime: real("start_time").notNull(), // timeline position in seconds
+	duration: real("duration").notNull(), // duration in seconds
+	properties: jsonb("properties"), // custom properties like colors, text content, etc.
+}).enableRLS();
+

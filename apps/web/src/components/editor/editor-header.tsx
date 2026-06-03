@@ -14,7 +14,7 @@ import { RenameProjectDialog } from "@/project/components/rename-project-dialog"
 import { DeleteProjectDialog } from "@/project/components/delete-project-dialog";
 import { useRouter } from "next/navigation";
 import { FaDiscord } from "react-icons/fa6";
-import { ExportButton } from "./export-button";
+import ExportButton from "./export-button";
 import { FeedbackPopover } from "@/feedback/components/feedback-popover";
 import { ThemeToggle } from "../theme-toggle";
 import { DEFAULT_LOGO_URL } from "@/site/brand";
@@ -28,6 +28,8 @@ import Image from "next/image";
 import { cn } from "@/utils/ui";
 
 export function EditorHeader() {
+	const activeProject = useEditor((e) => e.project.getActive());
+
 	return (
 		<header className="bg-background flex h-[3.4rem] items-center justify-between px-3 pt-0.5">
 			<div className="flex items-center gap-1">
@@ -36,7 +38,7 @@ export function EditorHeader() {
 			</div>
 			<nav className="flex items-center gap-2">
 				<FeedbackPopover />
-				<ExportButton />
+				<ExportButton projectId={activeProject?.metadata.id || ""} />
 				<ThemeToggle />
 			</nav>
 		</header>

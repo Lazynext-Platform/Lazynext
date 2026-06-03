@@ -57,7 +57,22 @@ struct LayerUniformBuffer {
     opacity: f32,
     flip_x: f32,
     flip_y: f32,
-    _padding: [f32; 2], // WebGL requires uniform buffer sizes to be multiples of 16 bytes (40 → 48)
+    brightness: f32,
+    contrast: f32,
+    saturation: f32,
+    grayscale: f32,
+    pixelate: f32,
+    edge_detect: f32,
+    crop: [f32; 4],
+    border_radius: f32,
+    sepia: f32,
+    invert: f32,
+    hue_rotate: f32,
+    shadow_color: [f32; 4],
+    shadow_distance: f32,
+    shadow_angle: f32,
+    shadow_blur: f32,
+    shadow_padding: f32,
 }
 
 #[repr(C)]
@@ -286,6 +301,10 @@ impl Compositor {
 
     pub fn release_texture(&mut self, id: &str) {
         self.textures.remove(id);
+    }
+
+    pub fn has_texture(&self, id: &str) -> bool {
+        self.textures.get(id).is_some()
     }
 
     /// Composites all frame items into a texture and returns it.
@@ -602,7 +621,27 @@ impl Compositor {
                         opacity: layer.opacity,
                         flip_x: if layer.transform.flip_x { 1.0 } else { 0.0 },
                         flip_y: if layer.transform.flip_y { 1.0 } else { 0.0 },
-                        _padding: [0.0; 2],
+                        brightness: layer.color_grading.as_ref().map(|cg| cg.brightness).unwrap_or(1.0),
+                        contrast: layer.color_grading.as_ref().map(|cg| cg.contrast).unwrap_or(1.0),
+                        saturation: layer.color_grading.as_ref().map(|cg| cg.saturation).unwrap_or(1.0),
+                        grayscale: layer.color_grading.as_ref().map(|cg| cg.grayscale.unwrap_or(0.0)).unwrap_or(0.0),
+                        pixelate: layer.color_grading.as_ref().map(|cg| cg.pixelate.unwrap_or(0.0)).unwrap_or(0.0),
+                        edge_detect: layer.color_grading.as_ref().map(|cg| cg.edge_detect.unwrap_or(0.0)).unwrap_or(0.0),
+                        crop: [
+                            layer.crop.as_ref().map(|c| c.left).unwrap_or(0.0),
+                            layer.crop.as_ref().map(|c| c.top).unwrap_or(0.0),
+                            layer.crop.as_ref().map(|c| c.right).unwrap_or(0.0),
+                            layer.crop.as_ref().map(|c| c.bottom).unwrap_or(0.0),
+                        ],
+                        border_radius: layer.border_radius.unwrap_or(0.0),
+                        sepia: layer.color_grading.as_ref().map(|cg| cg.sepia.unwrap_or(0.0)).unwrap_or(0.0),
+                        invert: layer.color_grading.as_ref().map(|cg| cg.invert.unwrap_or(0.0)).unwrap_or(0.0),
+                        hue_rotate: layer.color_grading.as_ref().map(|cg| cg.hue_rotate.unwrap_or(0.0)).unwrap_or(0.0),
+                        shadow_color: layer.shadow.as_ref().map(|s| s.color).unwrap_or([0.0, 0.0, 0.0, 0.0]),
+                        shadow_distance: layer.shadow.as_ref().map(|s| s.distance).unwrap_or(0.0),
+                        shadow_angle: layer.shadow.as_ref().map(|s| s.angle).unwrap_or(0.0),
+                        shadow_blur: layer.shadow.as_ref().map(|s| s.blur).unwrap_or(0.0),
+                        shadow_padding: 0.0,
                     }),
                     usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
                 });

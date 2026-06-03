@@ -21,7 +21,7 @@ import type {
 	TProjectSortKey,
 	TProjectSortOption,
 } from "@/project/types";
-import { formatTimecode, mediaTimeToSeconds } from "lazynext-wasm";
+
 import { formatDate } from "@/utils/date";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -76,9 +76,16 @@ const formatProjectDuration = ({
 		return null;
 	}
 
-	const durationSeconds = mediaTimeToSeconds({ time: duration });
-	const format = durationSeconds >= 3600 ? "HH:MM:SS" : "MM:SS";
-	return formatTimecode({ time: duration, format }) ?? "";
+	const durationSeconds = duration / 120000;
+	const pad = (n: number) => n.toString().padStart(2, "0");
+	const h = Math.floor(durationSeconds / 3600);
+	const m = Math.floor((durationSeconds % 3600) / 60);
+	const s = Math.floor(durationSeconds % 60);
+	
+	if (durationSeconds >= 3600) {
+		return `${pad(h)}:${pad(m)}:${pad(s)}`;
+	}
+	return `${pad(m)}:${pad(s)}`;
 };
 
 const VIEW_MODE_OPTIONS = [

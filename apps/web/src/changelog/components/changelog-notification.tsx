@@ -31,10 +31,17 @@ export function ChangelogNotification() {
 				numeric: true,
 			}) < 0;
 
-		// TODO(v0.4): revert to the standard "null = first-time visitor, record silently"
-		// path. The null case intentionally shows the card for this release so existing
-		// users who never had the key get the 0.3.0 announcement.
 		if (!isOutdated) return;
+
+		// Reverting to the standard "null = first-time visitor, record silently" path.
+		if (storedVersion === null) {
+			try {
+				localStorage.setItem(STORAGE_KEY, latest.version);
+			} catch {
+				// ignore
+			}
+			return; // Do not show the popup for first-time visitors
+		}
 
 		try {
 			localStorage.setItem(STORAGE_KEY, latest.version);

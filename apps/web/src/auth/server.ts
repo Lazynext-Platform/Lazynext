@@ -1,4 +1,5 @@
 import { betterAuth, type RateLimit } from "better-auth";
+import { anonymous } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { Redis } from "@upstash/redis";
 import { db } from "@/db";
@@ -15,6 +16,9 @@ export const auth = betterAuth({
 		usePlural: true,
 	}),
 	secret: webEnv.BETTER_AUTH_SECRET,
+	plugins: [
+		anonymous(), // Enables anonymous sign-in support
+	],
 	user: {
 		deleteUser: {
 			enabled: true,

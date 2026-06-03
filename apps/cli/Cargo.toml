@@ -1,0 +1,12 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+compositor = { path = "../../rust/crates/compositor" }
+time = { path = "../../rust/crates/time" }
+gpu = { path = "../../rust/crates/gpu" }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

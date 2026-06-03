@@ -8,7 +8,6 @@ export type TActionArgsMap = {
 	"seek-backward": { seconds: number } | undefined;
 	"jump-forward": { seconds: number } | undefined;
 	"jump-backward": { seconds: number } | undefined;
-	"remove-media-asset": { projectId: string; assetId: string };
 	"remove-media-assets": { projectId: string; assetIds: string[] };
 };
 

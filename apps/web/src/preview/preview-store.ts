@@ -13,14 +13,18 @@ interface PersistedPreviewState {
 	};
 	overlays?: PreviewOverlaysState;
 	gridConfig?: GridConfig;
+	customLines?: Array<{ axis: "x" | "y"; percent: number }>;
 }
 
 interface PreviewState {
 	activeGuide: GuideId | null;
 	overlays: PreviewOverlaysState;
 	gridConfig: GridConfig;
+	customLines: Array<{ axis: "x" | "y"; percent: number }>;
 	toggleGuide: (guideId: GuideId) => void;
 	setGridConfig: (config: Partial<GridConfig>) => void;
+	addCustomLine: (axis: "x" | "y", percent: number) => void;
+	clearCustomLines: () => void;
 	setOverlayVisibility: ({
 		overlayId,
 		isVisible,
@@ -52,6 +56,7 @@ export const usePreviewStore = create<PreviewState>()(
 			activeGuide: null,
 			overlays: DEFAULT_PREVIEW_OVERLAYS,
 			gridConfig: DEFAULT_GRID_CONFIG,
+			customLines: [],
 			toggleGuide: (guideId) => {
 				set((state) => ({
 					activeGuide: state.activeGuide === guideId ? null : guideId,
@@ -61,6 +66,14 @@ export const usePreviewStore = create<PreviewState>()(
 				set((state) => ({
 					gridConfig: { ...state.gridConfig, ...config },
 				}));
+			},
+			addCustomLine: (axis, percent) => {
+				set((state) => ({
+					customLines: [...state.customLines, { axis, percent }],
+				}));
+			},
+			clearCustomLines: () => {
+				set(() => ({ customLines: [] }));
 			},
 			setOverlayVisibility: ({ overlayId, isVisible }) => {
 				set((state) => ({
@@ -92,12 +105,14 @@ export const usePreviewStore = create<PreviewState>()(
 						rows: state?.gridConfig?.rows ?? DEFAULT_GRID_CONFIG.rows,
 						cols: state?.gridConfig?.cols ?? DEFAULT_GRID_CONFIG.cols,
 					},
+					customLines: state?.customLines ?? [],
 				};
 			},
 			partialize: (state) => ({
 				activeGuide: state.activeGuide,
 				overlays: state.overlays,
 				gridConfig: state.gridConfig,
+				customLines: state.customLines,
 			}),
 		},
 	),

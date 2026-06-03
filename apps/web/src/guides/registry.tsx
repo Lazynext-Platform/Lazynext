@@ -1,6 +1,6 @@
 import type { GuideDefinition } from "@/guides/types";
 import { gridGuide } from "./definitions/grid";
-// import { customGuide } from "./definitions/custom";
+import { customGuide } from "./definitions/custom";
 import {
 	tiktokGuide,
 	igReelsGuide,
@@ -16,9 +16,7 @@ export const GUIDE_REGISTRY = [
 	igReelsGuide,
 	ytShortsGuide,
 	spotlightGuide,
-
-	// todo: wire up custom guide fully, then uncomment this:
-	// customGuide,
+	customGuide,
 ] as const satisfies readonly GuideDefinition[];
 
 export type GuideId = (typeof GUIDE_REGISTRY)[number]["id"];

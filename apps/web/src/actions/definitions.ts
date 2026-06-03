@@ -138,11 +138,6 @@ export const ACTIONS = {
 		description: "Redo",
 		category: "history",
 	},
-	"remove-media-asset": {
-		description: "Remove media asset",
-		category: "assets",
-		args: { projectId: "string", assetId: "string" },
-	},
 	"remove-media-assets": {
 		description: "Remove media assets",
 		category: "assets",

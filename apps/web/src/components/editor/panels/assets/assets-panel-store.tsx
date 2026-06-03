@@ -15,19 +15,35 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
-export const TAB_KEYS = [
-	"media",
-	"sounds",
-	"text",
-	"stickers",
-	"effects",
-	"transitions",
-	"captions",
-	"adjustment",
-	"settings",
-] as const;
+export type Tab =
+	| "media"
+	| "sounds"
+	| "text"
+	| "stickers"
+	| "effects"
+	| "transitions"
+	| "captions"
+	| "adjustment"
+	| "settings"
+	| "scripting";
 
-export type Tab = (typeof TAB_KEYS)[number];
+export const ALL_TABS: {
+	id: Tab;
+	label: string;
+	shortcut?: string;
+	disabled?: boolean;
+}[] = [
+	{ id: "media", label: "Media" },
+	{ id: "sounds", label: "Sounds" },
+	{ id: "text", label: "Text", shortcut: "T" },
+	{ id: "stickers", label: "Stickers", disabled: true },
+	{ id: "effects", label: "Effects", disabled: false },
+	{ id: "transitions", label: "Transitions", disabled: true },
+	{ id: "captions", label: "Captions", disabled: false },
+	{ id: "adjustment", label: "Adjustment", disabled: true },
+	{ id: "scripting", label: "Scripting", disabled: false },
+	{ id: "settings", label: "Settings" },
+];
 
 const createHugeiconsIcon =
 	({ icon }: { icon: IconSvgElement }) =>
@@ -71,6 +87,10 @@ export const tabs = {
 	settings: {
 		icon: createHugeiconsIcon({ icon: Settings01Icon }),
 		label: "Settings",
+	},
+	scripting: {
+		icon: createHugeiconsIcon({ icon: Settings01Icon }),
+		label: "Scripting",
 	},
 } satisfies Record<
 	Tab,

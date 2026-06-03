@@ -1,0 +1,24 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "fps": 60.0,
+  "duration_frames": 120,
+  "bg_color": [0.09, 0.09, 0.11, 1.0],
+  "tracks": [
+    {
+      "id": "t1",
+      "name": "V1",
+      "clips": [
+        { "id": "c1", "name": "Ocean.mp4", "start_frame": 0, "duration_frames": 60 },
+        { "id": "c2", "name": "Mountain.mp4", "start_frame": 60, "duration_frames": 60 }
+      ]
+    },
+    {
+      "id": "t2",
+      "name": "A1",
+      "clips": [
+        { "id": "c3", "name": "Wind.wav", "start_frame": 0, "duration_frames": 120 }
+      ]
+    }
+  ]
+}
