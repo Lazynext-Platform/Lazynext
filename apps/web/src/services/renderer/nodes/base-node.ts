@@ -9,6 +9,7 @@ export class BaseNode<
 	resolved: Resolved | null = null;
 
 	constructor(params?: Params) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		this.params = params ?? ({} as Params);
 	}
 

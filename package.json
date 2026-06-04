@@ -21,7 +21,8 @@
     "preview:web": "turbo run preview --filter=@lazynext/web",
     "publish:wasm": "bun run build:wasm && npm publish rust/wasm/pkg --access public",
     "start:tools": "turbo run start --filter=@lazynext/tools",
-    "test": "bun test"
+    "test": "bun test",
+    "e2e": "turbo run e2e --filter=@lazynext/web"
   },
   "dependencies": {
     "@types/react": "^19.2.10",

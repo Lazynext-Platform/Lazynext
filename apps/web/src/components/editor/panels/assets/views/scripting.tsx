@@ -15,6 +15,7 @@ export function ScriptingView() {
             const plugin = new wasm.WasmPluginRuntime();
             const result = plugin.execute_script(script);
             setOutput(result);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (e: any) {
             setOutput(e.toString());
         }

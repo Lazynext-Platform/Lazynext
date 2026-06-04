@@ -555,6 +555,7 @@ export class ProjectManager {
 			project.name.toLowerCase().includes(searchQuery.toLowerCase()),
 		);
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const [key, order] = sortOption.split("-") as [
 			TProjectSortKey,
 			"asc" | "desc",

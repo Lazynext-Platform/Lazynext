@@ -27,6 +27,7 @@ export class IndexedDBAdapter<T> implements StorageAdapter<T> {
 			request.onsuccess = () => resolve(request.result);
 
 			request.onupgradeneeded = (event) => {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				const db = (event.target as IDBOpenDBRequest).result;
 				if (!db.objectStoreNames.contains(this.storeName)) {
 					db.createObjectStore(this.storeName, { keyPath: "id" });
@@ -85,6 +86,7 @@ export class IndexedDBAdapter<T> implements StorageAdapter<T> {
 		return new Promise((resolve, reject) => {
 			const request = store.getAllKeys();
 			request.onerror = () => reject(request.error);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			request.onsuccess = () => resolve(request.result as string[]);
 		});
 	}

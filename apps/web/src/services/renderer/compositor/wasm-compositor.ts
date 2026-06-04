@@ -91,6 +91,7 @@ class WasmCompositor {
 		renderFrame(frame);
 		if (isRenderPerfEnabled()) {
 			recordWasmFrameProfile(
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				getLastFrameProfile() as Array<{ name: string; durationMs: number }>,
 			);
 		}

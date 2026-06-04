@@ -58,3 +58,36 @@ fn parse_apply_mask_feather_options(value: JsValue) -> Result<ApplyMaskFeatherOp
         feather: read_f32_property(&object, "feather")?,
     })
 }
+
+struct ApplyPolygonMaskOptions {
+    mask: wgpu::web_sys::OffscreenCanvas,
+    width: u32,
+    height: u32,
+    points_x: Vec<f32>,
+    points_y: Vec<f32>,
+}
+
+#[wasm_bindgen(js_name = applyPolygonMask)]
+pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
+    // Scaffold for Polygon Masking
+    let _apply_polygon_mask_options = parse_apply_polygon_mask_options(options)?;
+    
+    // In a full implementation, we would pass these vertices to a WebGPU stencil buffer
+    // For now, we return a blank canvas to satisfy the WebAssembly signature
+    let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();
+    Ok(canvas)
+}
+
+fn parse_apply_polygon_mask_options(value: JsValue) -> Result<ApplyPolygonMaskOptions, JsValue> {
+    let object: Object = value
+        .dyn_into()
+        .map_err(|_| JsValue::from_str("applyPolygonMask expects an options object"))?;
+
+    Ok(ApplyPolygonMaskOptions {
+        mask: read_offscreen_canvas_property(&object, "mask")?,
+        width: read_u32_property(&object, "width")?,
+        height: read_u32_property(&object, "height")?,
+        points_x: vec![], // Scaffold
+        points_y: vec![], // Scaffold
+    })
+}

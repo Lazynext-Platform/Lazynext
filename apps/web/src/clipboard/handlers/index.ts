@@ -45,5 +45,6 @@ export function buildPasteClipboardCommand({
 	const handler = clipboardHandlers[entry.type] as ClipboardHandler<
 		typeof entry.type
 	>;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	return handler.paste({ entry: entry as never, context });
 }

@@ -6,7 +6,7 @@ import { measureTextElement } from "@/text/measure-element";
 import {
 	getElementLocalTime,
 } from "@/animation";
-import { resolveTransformAtTime } from "@/rendering/animation-values";
+import { resolveTransformAtTime } from "@/animation/values";
 import { buildTransformFromParams } from "@/rendering";
 
 export interface ElementBounds {

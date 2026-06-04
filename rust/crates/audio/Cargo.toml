@@ -1,0 +1,11 @@
+[package]
+name = "audio"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+time = { path = "../time" }
+anyhow = "1.0"
+
+# MOCK dependencies for VST3 hosting
+# In a real environment, we would use `vst3-sys` or `cpal` for DSP

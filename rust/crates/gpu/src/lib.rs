@@ -19,3 +19,4 @@ pub enum GpuError {
     #[error("The output surface does not support the required texture format")]
     UnsupportedSurfaceFormat,
 }
+pub mod scopes;

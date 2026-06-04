@@ -18,7 +18,7 @@ import {
 	measureTextElement,
 } from "@/text/measure-element";
 import { resolveColorAtTime, resolveOpacityAtTime } from "@/animation/values";
-import { resolveTransformAtTime } from "@/rendering/animation-values";
+import { resolveTransformAtTime } from "@/animation/values";
 import { videoCache } from "@/services/video-cache/service";
 import type { CanvasRenderer } from "./canvas-renderer";
 import type { AnyBaseNode } from "./nodes/base-node";

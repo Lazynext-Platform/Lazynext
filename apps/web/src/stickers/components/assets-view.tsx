@@ -74,6 +74,7 @@ export function StickersView() {
 			<Tabs
 				value={selectedCategory}
 				onValueChange={(value) => {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					setSelectedCategory({ category: value as StickerCategory });
 				}}
 				variant="underline"
@@ -298,6 +299,7 @@ function StickerSection({
 								size="sm"
 								className="h-auto gap-1 p-0 text-xs text-primary"
 								onClick={() => {
+									// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 									onSeeAll(section.action?.category as StickerCategory);
 								}}
 							>
@@ -338,6 +340,7 @@ function StickerItem({
 			return;
 		}
 
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setHasImageError(false);
 	}, [item.id]);
 

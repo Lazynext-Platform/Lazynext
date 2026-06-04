@@ -12,11 +12,7 @@ import { EffectLayerNode } from "./nodes/effect-layer-node";
 import type { AnyBaseNode } from "./nodes/base-node";
 import type { TBackground, TCanvasSize } from "@/project/types";
 import { DEFAULT_BACKGROUND_BLUR_INTENSITY } from "@/background/blur";
-import {
-	buildTransformFromParams,
-	readBlendModeFromParams,
-	readOpacityFromParams,
-} from "@/rendering";
+import { buildTransformFromParams, readBlendModeFromParams, readOpacityFromParams } from "@/rendering";
 
 const PREVIEW_MAX_IMAGE_SIZE = 2048;
 

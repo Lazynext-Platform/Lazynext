@@ -4,6 +4,7 @@ import type {
 	ElementAnimations,
 } from "./types";
 import { resolveAnimationPathValueAtTime } from "./resolve";
+import type { Transform } from "@/primitives/transform";
 
 export function resolveOpacityAtTime({
 	baseOpacity,
@@ -58,4 +59,50 @@ export function resolveColorAtTime({
 		localTime: Math.max(0, localTime),
 		fallbackValue: baseColor,
 	});
+}
+
+export function resolveTransformAtTime({
+	baseTransform,
+	animations,
+	localTime,
+}: {
+	baseTransform: Transform;
+	animations: ElementAnimations | undefined;
+	localTime: number;
+}): Transform {
+	const safeLocalTime = Math.max(0, localTime);
+	return {
+		position: {
+			x: resolveAnimationPathValueAtTime({
+				animations,
+				propertyPath: "transform.positionX",
+				localTime: safeLocalTime,
+				fallbackValue: baseTransform.position.x,
+			}),
+			y: resolveAnimationPathValueAtTime({
+				animations,
+				propertyPath: "transform.positionY",
+				localTime: safeLocalTime,
+				fallbackValue: baseTransform.position.y,
+			}),
+		},
+		scaleX: resolveAnimationPathValueAtTime({
+			animations,
+			propertyPath: "transform.scaleX",
+			localTime: safeLocalTime,
+			fallbackValue: baseTransform.scaleX,
+		}),
+		scaleY: resolveAnimationPathValueAtTime({
+			animations,
+			propertyPath: "transform.scaleY",
+			localTime: safeLocalTime,
+			fallbackValue: baseTransform.scaleY,
+		}),
+		rotate: resolveAnimationPathValueAtTime({
+			animations,
+			propertyPath: "transform.rotate",
+			localTime: safeLocalTime,
+			fallbackValue: baseTransform.rotate,
+		}),
+	};
 }

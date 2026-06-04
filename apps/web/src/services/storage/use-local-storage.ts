@@ -20,8 +20,10 @@ export function useLocalStorage<T>({
 		try {
 			const storedValue = localStorage.getItem(key);
 			if (storedValue !== null) {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				const parsedValue = JSON.parse(storedValue) as T;
 				valueRef.current = parsedValue;
+				// eslint-disable-next-line react-hooks/set-state-in-effect
 				setValue(parsedValue);
 			}
 		} catch {
@@ -45,6 +47,7 @@ export function useLocalStorage<T>({
 		({ value: nextValue }: { value: T | ((previousValue: T) => T) }) => {
 			const resolvedValue =
 				typeof nextValue === "function"
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					? (nextValue as (previousValue: T) => T)(valueRef.current)
 					: nextValue;
 

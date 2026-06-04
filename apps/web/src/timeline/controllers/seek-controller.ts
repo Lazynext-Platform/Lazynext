@@ -159,6 +159,7 @@ export class SeekController {
 		if (!isClickGesture({ event, session: this.session })) return false;
 		if (this.config.isSelecting) return false;
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const target = event.target as HTMLElement;
 		if (this.config.getPlayheadEl()?.contains(target)) return false;
 

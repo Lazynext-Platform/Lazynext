@@ -67,6 +67,7 @@ export class UpdateClipEffectParamsCommand extends Command {
 			elementPredicate: isVisualElement,
 			update: (element) => {
 				return updateEffectParamsOnElement({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					element: element as VisualElement,
 					effectId: this.effectId,
 					params: this.params,

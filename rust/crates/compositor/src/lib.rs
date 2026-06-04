@@ -10,3 +10,6 @@ pub use frame::{
     CanvasClearDescriptor, CanvasTextureDescriptor, EffectPassDescriptor, EffectUniformValueDescriptor, FrameDescriptor,
     FrameItemDescriptor, LayerDescriptor, LayerMaskDescriptor, QuadTransformDescriptor, ColorGradingDescriptor, CropDescriptor, ShadowDescriptor
 };
+pub mod transforms3d;
+pub mod aces;
+pub mod stereoscopic;

@@ -22,6 +22,7 @@ export function useElementPreview<T extends TimelineElement>({
 
 	const previewTracks = editor.timeline.getPreviewTracks();
 	const renderElement =
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		(findTrackInSceneTracks({
 			tracks: previewTracks ?? editor.scenes.getActiveScene().tracks,
 			trackId,

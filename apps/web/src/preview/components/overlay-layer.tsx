@@ -154,6 +154,7 @@ export function PreviewOverlayLayer({
 				}
 			})}
 			{(
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				Object.entries(hudInstancesByAnchor) as Array<
 					[PreviewOverlayHudAnchor, PreviewOverlayInstance[]]
 				>

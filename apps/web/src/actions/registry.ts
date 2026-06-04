@@ -17,6 +17,7 @@ export function bindAction<A extends TAction>(
 	handler: TActionFunc<A>,
 ) {
 	const handlers = boundActions[action];
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const typedHandler = handler as ActionHandler;
 	if (handlers) {
 		handlers.push(typedHandler);
@@ -33,6 +34,7 @@ export function unbindAction<A extends TAction>(
 	const handlers = boundActions[action];
 	if (!handlers) return;
 
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const typedHandler = handler as ActionHandler;
 	boundActions[action] = handlers.filter((h) => h !== typedHandler);
 

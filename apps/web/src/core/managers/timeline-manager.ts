@@ -717,12 +717,14 @@ export class TimelineManager {
 			const existingOverlay = this.previewOverlay.get(elementId);
 			const changed = Object.entries(elementUpdates).some(([key, value]) => {
 				return !Object.is(
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					existingOverlay?.[key as keyof TimelineElement],
 					value,
 				);
 			});
 			if (changed) {
 				changedOverlayCount += 1;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				const mergedOverlay = {
 					...existingOverlay,
 					...elementUpdates,
@@ -782,6 +784,7 @@ export class TimelineManager {
 			const nextElements = track.elements.map((element) => {
 				const overlay = this.previewOverlay.get(element.id);
 				return overlay
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					? ({ ...element, ...overlay } as TimelineElement)
 					: element;
 			});

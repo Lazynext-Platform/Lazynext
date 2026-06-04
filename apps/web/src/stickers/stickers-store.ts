@@ -211,6 +211,7 @@ export const useStickersStore = create<StickersStore>()(
 					persistedState !== null &&
 					"selectedCategory" in persistedState
 				) {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					const typedState = persistedState as {
 						selectedCategory?: string;
 						recentStickers?: string[];
@@ -220,6 +221,7 @@ export const useStickersStore = create<StickersStore>()(
 						...typedState,
 						selectedCategory:
 							category in STICKER_CATEGORIES
+								// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 								? (category as StickerCategory)
 								: "all",
 						recentStickers: sanitizeRecentStickers({

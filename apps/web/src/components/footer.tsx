@@ -78,7 +78,10 @@ export function Footer() {
 						</div>
 					</div>
 
+					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<div className="flex items-start justify-start gap-12 py-2">
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 						{(Object.keys(links) as Category[]).map((category) => (
 							<div key={category} className="flex flex-col gap-2">
 								<h3 className="text-foreground font-semibold">

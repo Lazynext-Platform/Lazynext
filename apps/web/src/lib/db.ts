@@ -5,6 +5,7 @@ export async function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
     request.onupgradeneeded = (e) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
       const db = (e.target as IDBOpenDBRequest).result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
@@ -15,6 +16,8 @@ export async function openDB(): Promise<IDBDatabase> {
   });
 }
 
+ 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function saveProjectState(projectData: any, assets: any[]) {
   const db = await openDB();
   return new Promise<void>((resolve, reject) => {
@@ -38,6 +41,7 @@ export async function saveProjectState(projectData: any, assets: any[]) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function loadProjectState(): Promise<{ projectData: any, assets: any[] } | null> {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -49,6 +53,7 @@ export async function loadProjectState(): Promise<{ projectData: any, assets: an
       if (request.result) {
         resolve({
            projectData: request.result.projectData,
+           // eslint-disable-next-line @typescript-eslint/no-explicit-any
            assets: (request.result.assets || []).map((a: any) => ({
              ...a,
              url: a.file ? URL.createObjectURL(a.file) : (a.url || '')

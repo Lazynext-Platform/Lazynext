@@ -31,6 +31,7 @@ function normalizeBookmarks({ raw }: { raw: unknown }): Bookmark[] {
 			if (typeof item === "number") {
 				return { time: roundMediaTime({ time: item }) };
 			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			const obj = item as Record<string, unknown>;
 			if (
 				typeof obj !== "object" ||
@@ -267,6 +268,7 @@ class StorageService {
 					time:
 						serializedProject.metadata.duration ??
 						getProjectDurationFromScenes({
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 							scenes: (serializedProject.scenes ?? []) as unknown as TScene[],
 						}),
 				}),

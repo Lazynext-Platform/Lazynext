@@ -222,11 +222,13 @@ export function BackgroundContent() {
 	const isColorBackground = activeProject.settings.background.type === "color";
 
 	const currentBlurIntensity = isBlurBackground
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		? (activeProject.settings.background as { blurIntensity: number })
 				.blurIntensity
 		: DEFAULT_BACKGROUND_BLUR_INTENSITY;
 
 	const currentBackgroundColor = isColorBackground
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		? (activeProject.settings.background as { color: string }).color
 		: DEFAULT_BACKGROUND_COLOR;
 

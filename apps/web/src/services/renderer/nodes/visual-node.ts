@@ -1,7 +1,8 @@
 import { BaseNode } from "./base-node";
 import type { Effect, EffectPass } from "@/effects/types";
 import type { Mask } from "@/masks/types";
-import type { BlendMode, Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
+import type { BlendMode } from "@/primitives/blend-mode";
 import type { RetimeConfig, VisualElement } from "@/timeline";
 
 export interface VisualNodeParams {

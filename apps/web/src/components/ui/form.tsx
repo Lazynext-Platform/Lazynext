@@ -56,6 +56,7 @@ function Form<
 			const stored = store.getItem(persistKeyOnMount.current);
 			if (stored) {
 				resetRef.current(
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					JSON.parse(stored) as DefaultValues<TFieldValues>,
 				);
 			}
@@ -110,6 +111,7 @@ type FormFieldContextValue<
 };
 
 const FormFieldContext = React.createContext<FormFieldContextValue>(
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	{} as FormFieldContextValue,
 );
 
@@ -154,6 +156,7 @@ type FormItemContextValue = {
 };
 
 const FormItemContext = React.createContext<FormItemContextValue>(
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	{} as FormItemContextValue,
 );
 

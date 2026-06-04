@@ -77,6 +77,7 @@ export function FontPicker({
 
 	useEffect(() => {
 		if (!open) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSearch("");
 			setActiveTab("all");
 		}

@@ -277,6 +277,7 @@ export class ZoomController {
 		const preventZoom = (event: WheelEvent) => {
 			const isZoomKeyPressed = event.ctrlKey || event.metaKey;
 			const container = this.config.getContainerEl();
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			const isInContainer = container?.contains(event.target as Node) ?? false;
 			if (isZoomKeyPressed && isInContainer) {
 				event.preventDefault();

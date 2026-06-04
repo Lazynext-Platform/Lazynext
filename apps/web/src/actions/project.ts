@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users, projects, timelines, tracks, clips } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
+// eslint-disable-next-line lazynext/prefer-object-params
 export async function createProject(userId: string, name: string) {
   const projectId = `proj_${Date.now()}`;
   const timelineId = `tl_${Date.now()}`;

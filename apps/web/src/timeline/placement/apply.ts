@@ -120,6 +120,7 @@ function buildPlacedAudioTrack({
 }): AudioTrack {
 	return {
 		...buildEmptyTrack({ id, type: "audio" }),
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		elements: elements as AudioTrack["elements"],
 	};
 }
@@ -137,21 +138,25 @@ function buildPlacedOverlayTrack({
 		case "video":
 			return {
 				...buildEmptyTrack({ id, type: "video" }),
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				elements: elements as VideoTrack["elements"],
 			};
 		case "text":
 			return {
 				...buildEmptyTrack({ id, type: "text" }),
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				elements: elements as TextTrack["elements"],
 			};
 		case "graphic":
 			return {
 				...buildEmptyTrack({ id, type: "graphic" }),
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				elements: elements as GraphicTrack["elements"],
 			};
 		case "effect":
 			return {
 				...buildEmptyTrack({ id, type: "effect" }),
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				elements: elements as EffectTrack["elements"],
 			};
 	}

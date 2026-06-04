@@ -209,6 +209,7 @@ export function SelectableSurface({
 	);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setSelectionState((state) =>
 			pruneSelection({
 				state,
@@ -226,6 +227,7 @@ export function SelectableSurface({
 			return;
 		}
 
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setHighlightedId(revealId);
 		getItemElement(revealId)?.scrollIntoView({ block: "center" });
 

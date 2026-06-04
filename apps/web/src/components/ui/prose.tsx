@@ -89,6 +89,7 @@ function renderHastNode({
 }
 
 function renderHtmlNodes({ html }: { html: string }): React.ReactNode {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const rootNode = unified().use(rehypeParse, { fragment: true }).parse(html) as HastRootNode;
 	return (rootNode.children ?? []).map((childNode, index) =>
 		renderHastNode({ node: childNode, key: `prose-node-${index}` }),

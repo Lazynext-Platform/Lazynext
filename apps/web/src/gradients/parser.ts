@@ -328,6 +328,7 @@ const matchImplicitEllipse = (): Shape | undefined => {
 };
 
 const matchCircle = (): Shape | undefined => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const circle = match({
 		type: "shape",
 		pattern: /^(circle)/i,
@@ -344,6 +345,7 @@ const matchCircle = (): Shape | undefined => {
 };
 
 const matchEllipse = (): Shape | undefined => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const ellipse = match({
 		type: "shape",
 		pattern: /^(ellipse)/i,

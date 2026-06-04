@@ -19,7 +19,8 @@ import {
 } from "@/preview/preview-snap";
 import type { TCanvasSize } from "@/project/types";
 import type { ParamValues } from "@/params";
-import { buildTransformFromParams, type Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
+import { buildTransformFromParams } from "@/rendering";
 import { isVisualElement } from "@/timeline/element-utils";
 import type {
 	ElementRef,
@@ -354,6 +355,7 @@ export class PreviewInteractionController {
 			kind: "pending",
 			origin: startPos,
 			pointerId,
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			captureTarget: currentTarget as HTMLElement,
 			topmostHit: hits[0] ?? null,
 			selectedHit: resolvePreferredHit({

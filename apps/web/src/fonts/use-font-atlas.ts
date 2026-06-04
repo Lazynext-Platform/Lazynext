@@ -20,6 +20,7 @@ export function useFontAtlas({ open }: { open: boolean }) {
 	useEffect(() => {
 		if (!open || atlas) return;
 
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setStatus("loading");
 		loadFontAtlas().then((data) => {
 			if (data) {

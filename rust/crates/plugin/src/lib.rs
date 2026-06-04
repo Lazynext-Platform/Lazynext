@@ -25,7 +25,7 @@ pub struct PluginRuntime {
 
 impl PluginRuntime {
     pub fn new() -> Self {
-        let mut context = Context::default();
+        let context = Context::default();
         let api = Rc::new(RefCell::new(EditorAPI::new()));
         
         // Expose a native `setTime` function to JS

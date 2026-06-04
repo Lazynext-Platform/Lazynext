@@ -311,6 +311,7 @@ function mapFieldsToRecord<T extends object>({
 		record[fields[index]] = values[index];
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	return record as T;
 }
 

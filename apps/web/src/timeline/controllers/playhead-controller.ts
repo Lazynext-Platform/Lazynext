@@ -142,6 +142,7 @@ export class PlayheadController {
 
 	onRulerMouseDown(event: ReactMouseEvent): void {
 		if (event.button !== 0) return;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		if (this.config.getPlayheadEl()?.contains(event.target as Node)) return;
 
 		event.preventDefault();

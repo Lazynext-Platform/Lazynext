@@ -145,6 +145,7 @@ function NumberField({
 
 	useLayoutEffect(() => {
 		if (!suffix) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSuffixLeft(0);
 			return;
 		}

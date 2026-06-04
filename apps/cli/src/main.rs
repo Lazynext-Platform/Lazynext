@@ -187,6 +187,10 @@ async fn main() {
                         blend_mode: BlendMode::Normal,
                         effect_pass_groups: vec![],
                         mask: None,
+                        color_grading: None,
+                        crop: None,
+                        border_radius: None,
+                        shadow: None,
                     }));
                 }
             }

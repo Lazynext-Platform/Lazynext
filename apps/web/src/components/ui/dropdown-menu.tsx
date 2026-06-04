@@ -142,9 +142,11 @@ const DropdownMenuItem = React.forwardRef<
 		const renderedChildren =
 			asChild && React.isValidElement(children) ? (
 				React.cloneElement(
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					children as React.ReactElement<{ children?: React.ReactNode }>,
 					{},
 					iconSlot,
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					(children as React.ReactElement<{ children?: React.ReactNode }>).props
 						.children,
 				)

@@ -57,6 +57,7 @@ async function handleInit({ modelId }: { modelId: string }) {
 	fileBytes.clear();
 
 	try {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		transcriber = (await pipeline("automatic-speech-recognition", modelId, {
 			dtype: "q4",
 			device: "auto",

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
 import type { SceneTracks, VideoElement } from "@/timeline";
 import { applyElementUpdate } from "@/timeline/update-pipeline";
 import { mediaTime, ZERO_MEDIA_TIME } from "@/wasm";
@@ -66,6 +66,8 @@ describe("applyElementUpdate", () => {
 			},
 		});
 
+		 
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		expect(updatedElement.duration).toBe(7 as any);
 		expect(Number.isInteger(updatedElement.duration)).toBe(true);
 	});

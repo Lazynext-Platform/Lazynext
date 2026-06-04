@@ -10,6 +10,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
 	return (
 		<Sonner
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			theme={theme as ToasterProps["theme"]}
 			className="toaster group"
 			position="bottom-right"

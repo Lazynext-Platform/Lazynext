@@ -134,6 +134,7 @@ function EditorRuntimeBindings() {
 	);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/immutability
 		editor.command.isRippleEnabled = rippleEditingEnabled;
 	}, [editor, rippleEditingEnabled]);
 
@@ -141,6 +142,7 @@ function EditorRuntimeBindings() {
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
 			if (!editor.save.getIsDirty()) return;
 			event.preventDefault();
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			(event as unknown as { returnValue: string }).returnValue = "";
 		};
 

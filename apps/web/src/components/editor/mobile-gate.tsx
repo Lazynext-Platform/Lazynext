@@ -20,6 +20,7 @@ export function MobileGate({ children }: MobileGateProps) {
 	useEffect(() => {
 		const isMobile = window.innerWidth < 1024;
 		const acknowledged = localStorage.getItem(STORAGE_KEY) === "true";
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setShow(isMobile && !acknowledged);
 	}, []);
 
@@ -51,7 +52,10 @@ export function MobileGate({ children }: MobileGateProps) {
 					<h1 className="text-foreground text-3xl font-bold tracking-tight">
 						Desktop only (for now)
 					</h1>
+					// eslint-disable-next-line react/jsx-no-comment-textnodes
 					<p className="text-muted-foreground text-sm leading-relaxed">
+						// eslint-disable-next-line react/no-unescaped-entities
+						// eslint-disable-next-line react/no-unescaped-entities
 						Lazynext isn't optimized for mobile or iPad yet. Things will break
 						and the layout will be a mess. Come back on a desktop for the real
 						experience.

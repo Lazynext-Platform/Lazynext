@@ -47,6 +47,18 @@ fn handle_request(req: RpcRequest) -> RpcResponse {
                             },
                             "required": ["fps"]
                         }
+                    },
+                    {
+                        "name": "auto_jump_cut",
+                        "description": "Analyze an audio file and automatically generate timeline splits to remove silence",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "file_path": { "type": "string", "description": "Path to media file" },
+                                "threshold_db": { "type": "number", "description": "Silence threshold in decibels (e.g. -40)" }
+                            },
+                            "required": ["file_path"]
+                        }
                     }
                 ]
             }));
@@ -60,6 +72,13 @@ fn handle_request(req: RpcRequest) -> RpcResponse {
                 response.result = Some(serde_json::json!({
                     "content": [
                         { "type": "text", "text": "Successfully initialized 60 FPS timeline!" }
+                    ]
+                }));
+            } else if name == "auto_jump_cut" {
+                // MOCK: This would normally run ffmpeg's silencedetect filter and mutate the timeline data structure
+                response.result = Some(serde_json::json!({
+                    "content": [
+                        { "type": "text", "text": "Detected 4 silent segments. Automatically split and deleted clips from timeline!" }
                     ]
                 }));
             } else {

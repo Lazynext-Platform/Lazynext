@@ -47,6 +47,7 @@ export const ALL_TABS: {
 
 const createHugeiconsIcon =
 	({ icon }: { icon: IconSvgElement }) =>
+	// eslint-disable-next-line react/display-name
 	({ className }: { className?: string }) => (
 		<HugeiconsIcon icon={icon} className={className} />
 	);

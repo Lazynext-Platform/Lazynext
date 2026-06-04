@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck (Next.js / Bun)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Run Biome Lint
+        run: bun run lint
+      - name: Run Typecheck
+        run: bunx tsc --noEmit
+        working-directory: ./apps/web
+
+  rust-test:
+    name: Test & Build WASM (Rust)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Cargo Check
+        run: cargo check
+      - name: WASM Build
+        run: wasm-pack build --target bundler --out-dir pkg
+        working-directory: ./rust/wasm
+
+  docker-build:
+    name: Verify Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build -t lazynext-test .

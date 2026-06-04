@@ -12,7 +12,7 @@ import type {
 	VideoElement,
 	VideoTrack,
 } from "@/timeline";
-import type { Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
 import { resolveTrackPlacement } from "@/timeline/placement";
 import { mediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
@@ -648,6 +648,8 @@ describe("resolveTrackPlacement", () => {
 			trackId: "video-main",
 			trackIndex: 0,
 			trackType: "video",
+			 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			adjustedStartTime: 0 as any,
 		});
 	});

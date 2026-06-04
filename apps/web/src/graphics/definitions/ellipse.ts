@@ -47,6 +47,7 @@ export const ellipseGraphicDefinition: GraphicDefinition = {
 		const fill = String(params.fill ?? "#ffffff");
 		const stroke = String(params.stroke ?? "#000000");
 		const strokeWidth = Math.max(0, Number(params.strokeWidth ?? 0));
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const strokeAlign = (params.strokeAlign ?? "center") as GraphicStrokeAlign;
 		const inset = strokeAlign === "center" ? strokeWidth / 2 : 0;
 		const centerX = width / 2;

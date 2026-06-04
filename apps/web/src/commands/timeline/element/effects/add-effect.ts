@@ -49,6 +49,7 @@ export class AddClipEffectCommand extends Command {
 			elementPredicate: isVisualElement,
 		update: (element) => {
 			const updated = addEffectToElement({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				element: element as VisualElement,
 				effectType: this.effectType,
 			});

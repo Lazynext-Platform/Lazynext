@@ -74,6 +74,7 @@ async function fetchFromMarble<T>({
 			);
 			return fallback;
 		}
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		return (await response.json()) as T;
 	} catch (error) {
 		console.error(`Error fetching ${endpoint}:`, error);

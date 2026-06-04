@@ -1,7 +1,8 @@
 import { BaseNode } from "./base-node";
 import type { TextElement } from "@/timeline";
 import type { EffectPass } from "@/effects/types";
-import type { BlendMode, Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
+import type { BlendMode } from "@/primitives/blend-mode";
 import { drawMeasuredTextLayout } from "@/text/primitives";
 import type { MeasuredTextElement } from "@/text/measure-element";
 

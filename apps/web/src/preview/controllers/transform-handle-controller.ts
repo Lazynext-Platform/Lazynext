@@ -24,8 +24,9 @@ import {
 } from "@/animation";
 import type { ElementAnimations } from "@/animation/types";
 import type { ParamValues } from "@/params";
-import { buildTransformFromParams, type Transform } from "@/rendering";
-import { resolveTransformAtTime } from "@/rendering/animation-values";
+import type { Transform } from "@/primitives/transform";
+import { buildTransformFromParams } from "@/rendering";
+import { resolveTransformAtTime } from "@/animation/values";
 import type {
 	ElementRef,
 	SceneTracks,
@@ -386,6 +387,7 @@ export class TransformHandleController {
 			animationsWithoutScale,
 			pointerId: event.pointerId,
 			captureTarget: this.capturePointer({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				target: event.currentTarget as HTMLElement,
 				pointerId: event.pointerId,
 			}),
@@ -421,6 +423,7 @@ export class TransformHandleController {
 			initialBoundsCy: context.bounds.cy,
 			pointerId: event.pointerId,
 			captureTarget: this.capturePointer({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				target: event.currentTarget as HTMLElement,
 				pointerId: event.pointerId,
 			}),
@@ -463,6 +466,7 @@ export class TransformHandleController {
 			animationsWithoutScale,
 			pointerId: event.pointerId,
 			captureTarget: this.capturePointer({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				target: event.currentTarget as HTMLElement,
 				pointerId: event.pointerId,
 			}),

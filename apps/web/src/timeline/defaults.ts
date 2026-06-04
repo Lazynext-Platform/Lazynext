@@ -1,6 +1,7 @@
 import { DEFAULT_NEW_ELEMENT_DURATION } from "@/timeline/creation";
 import type { TTimelineViewState } from "@/project/types";
-import type { BlendMode, Transform } from "@/rendering";
+import type { Transform } from "@/primitives/transform";
+import type { BlendMode } from "@/primitives/blend-mode";
 import { ZERO_MEDIA_TIME } from "@/wasm";
 import type { TextElement } from "./types";
 

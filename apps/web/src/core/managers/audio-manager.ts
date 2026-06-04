@@ -470,6 +470,7 @@ export class AudioManager {
 	}
 
 	private hasCurveRetime({ clip }: { clip: AudioClipSource }): boolean {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const mode = (clip.retime as { mode?: unknown } | undefined)?.mode;
 		return mode === "curve";
 	}

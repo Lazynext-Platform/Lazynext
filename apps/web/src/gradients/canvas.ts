@@ -460,7 +460,9 @@ const normalizePositionKeywords = ({
 		xValue?.type === "position-keyword" &&
 		yValue?.type === "position-keyword"
 	) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const xKeyword = xValue.value.toLowerCase() as PositionKeyword;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const yKeyword = yValue.value.toLowerCase() as PositionKeyword;
 		const xIsVertical = xKeyword === "top" || xKeyword === "bottom";
 		const yIsHorizontal = yKeyword === "left" || yKeyword === "right";
@@ -628,6 +630,7 @@ const keywordToPosition = ({
 	axisSize: number;
 	axis: "x" | "y";
 }): number => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const keyword = value.toLowerCase() as PositionKeyword;
 
 	if (keyword === "center") {

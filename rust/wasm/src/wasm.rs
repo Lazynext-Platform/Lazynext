@@ -21,7 +21,12 @@ pub use gpu::*;
 #[cfg(target_arch = "wasm32")]
 pub use masks::*;
 #[cfg(target_arch = "wasm32")]
+#[cfg(target_arch = "wasm32")]
 pub use perf::*;
 #[cfg(target_arch = "wasm32")]
 pub use plugin::*;
+#[cfg(target_arch = "wasm32")]
+pub mod proxy;
+#[cfg(target_arch = "wasm32")]
+pub use proxy::*;
 pub use time::*;

@@ -78,6 +78,7 @@ function ColorPickerContent({
 	const displayHue = s === 0 || isSameHueWrapped ? internalHue : h;
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setInputValue(formatColorValue({ hex: value, format: colorFormat }));
 	}, [value, colorFormat]);
 
@@ -373,6 +374,7 @@ function ColorPickerContent({
 					<Select
 						value={colorFormat}
 						onValueChange={(selectedFormat) =>
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 							setColorFormat(selectedFormat as ColorFormat)
 						}
 					>
@@ -432,6 +434,7 @@ const ColorPicker = forwardRef<HTMLDivElement, ColorPickerProps>(
 		const [inputValue, setInputValue] = useState(value);
 
 		useEffect(() => {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setInputValue(value);
 		}, [value]);
 

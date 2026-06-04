@@ -20,6 +20,7 @@ export class OPFSAdapter implements StorageAdapter<File> {
 			const fileHandle = await directory.getFileHandle(key);
 			return await fileHandle.getFile();
 		} catch (error) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			if ((error as Error).name === "NotFoundError") {
 				return null;
 			}
@@ -47,6 +48,7 @@ export class OPFSAdapter implements StorageAdapter<File> {
 			const directory = await this.getDirectory();
 			await directory.removeEntry(key);
 		} catch (error) {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			if ((error as Error).name !== "NotFoundError") {
 				throw error;
 			}

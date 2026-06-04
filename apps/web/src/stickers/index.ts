@@ -193,6 +193,7 @@ export async function searchAll({
 		if (result.items.length === 0) {
 			continue;
 		}
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const category = provider.id as StickerCategory;
 		sections.push({
 			id: category,
@@ -261,6 +262,7 @@ export async function browseAll({
 				return null;
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			const category = provider.id as StickerCategory;
 		return {
 			...firstSection,

@@ -282,6 +282,27 @@
   }
 }
 
+/* Focus-visible ring for keyboard accessibility */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+/* Editor-specific design tokens */
+.dark .editor {
+  --editor-bg: hsl(0 0% 7%);
+  --editor-surface: hsl(0 0% 10%);
+  --editor-surface-hover: hsl(0 0% 14%);
+  --editor-border: hsl(0 0% 16%);
+  --editor-text: hsl(0 0% 87%);
+  --editor-text-muted: hsl(0 0% 55%);
+  --editor-accent: hsl(230 80% 65%);
+  --editor-accent-hover: hsl(230 80% 58%);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

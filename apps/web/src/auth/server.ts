@@ -32,6 +32,7 @@ export const auth = betterAuth({
 		customStorage: {
 			get: async (key) => {
 				const value = await redis.get(key);
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				return value as RateLimit | undefined;
 			},
 			set: async (key, value) => {

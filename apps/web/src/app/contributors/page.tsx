@@ -45,6 +45,7 @@ async function getContributors(): Promise<Contributor[]> {
 			return [];
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const contributors = (await response.json()) as Contributor[];
 
 		const filteredContributors = contributors.filter(

@@ -67,6 +67,7 @@ export const usePreviewStore = create<PreviewState>()(
 					gridConfig: { ...state.gridConfig, ...config },
 				}));
 			},
+			// eslint-disable-next-line lazynext/prefer-object-params
 			addCustomLine: (axis, percent) => {
 				set((state) => ({
 					customLines: [...state.customLines, { axis, percent }],
@@ -96,6 +97,7 @@ export const usePreviewStore = create<PreviewState>()(
 			name: "preview-settings",
 			version: 6,
 			migrate: (persistedState) => {
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				const state = persistedState as PersistedPreviewState | undefined;
 
 				return {

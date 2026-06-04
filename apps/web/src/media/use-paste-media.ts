@@ -40,6 +40,7 @@ export function usePasteMedia() {
 
 	useEffect(() => {
 		const handlePaste = async (event: ClipboardEvent) => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			const activeElement = document.activeElement as HTMLElement;
 
 			if (activeElement && isTypableDOMElement({ element: activeElement })) {

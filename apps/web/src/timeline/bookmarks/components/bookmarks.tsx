@@ -96,10 +96,12 @@ export function TimelineBookmarksRow({
 				type="button"
 				onWheel={handleWheel}
 				onClick={(event) => {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					if (!event.currentTarget.contains(event.target as Node)) return;
 					handleTimelineContentClick(event);
 				}}
 				onMouseDown={(event) => {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 					if (!event.currentTarget.contains(event.target as Node)) return;
 					handleRulerMouseDown(event);
 					handleRulerTrackingMouseDown(event);
@@ -305,6 +307,7 @@ function BookmarkPopoverContent({
 	);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setDraftColorHex(
 			(bookmark.color ?? DEFAULT_TIMELINE_BOOKMARK_COLOR)
 				.replace("#", "")

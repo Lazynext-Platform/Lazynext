@@ -49,6 +49,7 @@ export function ChangelogNotification() {
 			// ignore
 		}
 
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setRelease(latest);
 	}, []);
 

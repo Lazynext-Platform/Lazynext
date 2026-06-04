@@ -141,6 +141,7 @@ export function applyElementUpdate({
 	patch: Partial<TimelineElement>;
 	context: ElementUpdateContext;
 }): TimelineElement {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	let nextElement = {
 		...element,
 		...patch,

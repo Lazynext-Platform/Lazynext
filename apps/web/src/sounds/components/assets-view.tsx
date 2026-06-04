@@ -191,6 +191,7 @@ function SoundEffectsView() {
 	}: React.UIEvent<HTMLDivElement>) => {
 		const { scrollTop } = currentTarget;
 		setScrollPosition({ position: scrollTop });
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		handleScroll({ currentTarget } as React.UIEvent<HTMLDivElement>);
 	};
 

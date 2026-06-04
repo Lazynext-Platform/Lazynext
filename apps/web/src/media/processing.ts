@@ -196,6 +196,7 @@ export async function processMediaAssets({
 
 const getMediaDuration = ({ file }: { file: File }): Promise<number> => {
 	return new Promise((resolve, reject) => {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		const element = document.createElement(
 			file.type.startsWith("video/") ? "video" : "audio",
 		) as HTMLVideoElement;

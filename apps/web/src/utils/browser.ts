@@ -37,10 +37,12 @@ export function isTypableDOMElement({
 	if (element.isContentEditable) return true;
 
 	if (element.tagName === "INPUT") {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		return !(element as HTMLInputElement).disabled;
 	}
 
 	if (element.tagName === "TEXTAREA") {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		return !(element as HTMLTextAreaElement).disabled;
 	}
 

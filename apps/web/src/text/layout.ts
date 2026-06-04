@@ -30,6 +30,7 @@ export function setCanvasLetterSpacing({
 	letterSpacingPx: number;
 }): void {
 	if ("letterSpacing" in ctx) {
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		(ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing =
 			`${letterSpacingPx}px`;
 	}

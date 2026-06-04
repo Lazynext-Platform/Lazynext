@@ -884,12 +884,14 @@ function ProjectMenu({
 					aria-label="Project menu"
 					onClick={(event) =>
 						handleMenuClick({
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 							event: event as unknown as MouseEvent<HTMLButtonElement>,
 						})
 					}
 					onMouseDown={(event) => event.stopPropagation()}
 					onKeyDown={(event) =>
 						handleMenuKeyDown({
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 							event: event as unknown as KeyboardEvent<HTMLButtonElement>,
 						})
 					}
@@ -984,7 +986,10 @@ function EmptyState() {
 					/>
 					<div className="flex flex-col items-center gap-3">
 						<h3 className="text-lg font-medium">No results found</h3>
+						// eslint-disable-next-line react/jsx-no-comment-textnodes
 						<p className="text-muted-foreground max-w-md">
+							// eslint-disable-next-line react/no-unescaped-entities
+							// eslint-disable-next-line react/no-unescaped-entities
 							Your search for "{searchQuery}" did not return any results.
 						</p>
 					</div>

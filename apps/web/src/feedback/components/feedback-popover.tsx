@@ -32,6 +32,7 @@ interface FeedbackFormValues {
 function readHistory(): FeedbackEntry[] {
 	try {
 		const stored = localStorage.getItem(HISTORY_KEY);
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 		return stored ? (JSON.parse(stored) as FeedbackEntry[]) : [];
 	} catch {
 		return [];
