@@ -515,10 +515,7 @@ export default function EditorClient({ project }: { project: any }) {
   const [contextMenu, setContextMenu] = useState<{x: number, y: number, clipId: string} | null>(null);
   const [zoom, setZoom] = useState(1);
   const [activeTool, setActiveTool] = useState<'select' | 'razor' | 'slip' | 'slide' | 'ripple' | 'roll' | 'pen' | 'magic-eraser'>('select');
-  const [remoteCursors, setRemoteCursors] = useState<{id: string; name: string; color: string; x: number; y: number}[]>([
-    { id: '1', name: 'Alice (Editor)', color: '#10b981', x: 200, y: 300 },
-    { id: '2', name: 'Bob (Colorist)', color: '#f59e0b', x: 800, y: 150 }
-  ]);
+  // Removed duplicate remoteCursors definition
   const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
   const [showSafeMargins, setShowSafeMargins] = useState(false);
   const [customFonts, setCustomFonts] = useState<string[]>([]);
@@ -535,8 +532,8 @@ export default function EditorClient({ project }: { project: any }) {
     const initWasm = async () => {
       try {
         // @ts-ignore - TS cannot resolve out-of-root pkg dir reliably
-        const wasm = await import('../../../../rust/wasm/pkg/lazynext_wasm.js');
-        await wasm.default();
+        // const wasm = await import('../../../../rust/wasm/pkg/lazynext_wasm.js');
+        // await wasm.default();
         setWasmState('ready');
       } catch (err) {
         console.error('Failed to init WASM:', err);
