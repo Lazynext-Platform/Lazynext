@@ -1,6 +1,0 @@
-2026/06/04 18:15:03 Authorizing with OAuth2 token
-2026/06/04 18:15:03 [vertexaiopencode:us-central1:lazynext-db] Listening on 127.0.0.1:5441
-2026/06/04 18:15:03 The proxy has started successfully and is ready for new connections!
-2026/06/04 18:15:08 [vertexaiopencode:us-central1:lazynext-db] Accepted connection from 127.0.0.1:53523
-2026/06/04 18:15:18 [vertexaiopencode:us-central1:lazynext-db] client closed the connection
-2026/06/04 18:15:18 SIGTERM signal received. Shutting down...
