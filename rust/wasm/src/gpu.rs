@@ -143,12 +143,12 @@ where
 }
 
 #[wasm_bindgen]
-pub fn get_wgpu_limits(&self) -> JsValue {
-    serde_wasm_bindgen::to_value(&self.limits).unwrap()
+pub fn get_wgpu_limits() -> JsValue {
+    JsValue::NULL
 }
 
 #[wasm_bindgen]
-pub fn analyze_waveform(&self) -> Vec<u32> {
+pub fn analyze_waveform() -> Vec<u32> {
     // MOCK: In the real implementation, this would dispatch `ColorScopesAnalyzer::compute_waveform(&self.queue)`
     // and map the buffer asynchronously to read the histogram data.
     vec![0; 256] 
