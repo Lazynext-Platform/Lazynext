@@ -7,8 +7,6 @@ import { EditorCore } from "@/core";
 import { useEditor } from "@/editor/use-editor";
 import { useKeybindingsListener } from "@/actions/use-keybindings";
 import { useKeybindingsStore } from "@/actions/keybindings-store";
-import { useTimelineStore } from "@/timeline/timeline-store";
-import { useEditorActions } from "@/actions/use-editor-actions";
 import { loadFontAtlas } from "@/fonts/google-fonts";
 import {
 	initializeGpuRenderer,
@@ -129,14 +127,9 @@ export function EditorProvider({ projectId, children }: EditorProviderProps) {
 
 function EditorRuntimeBindings() {
 	const editor = useEditor();
-	const rippleEditingEnabled = useTimelineStore(
-		(state) => state.rippleEditingEnabled,
-	);
-
 	useEffect(() => {
-		// eslint-disable-next-line react-hooks/immutability
-		editor.command.isRippleEnabled = rippleEditingEnabled;
-	}, [editor, rippleEditingEnabled]);
+		// timeline removed, no ripple editing
+	}, [editor]);
 
 	useEffect(() => {
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -150,7 +143,6 @@ function EditorRuntimeBindings() {
 		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
 	}, [editor]);
 
-	useEditorActions();
 	useKeybindingsListener();
 	return null;
 }
