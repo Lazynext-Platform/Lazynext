@@ -57,6 +57,14 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     
     if args.len() < 3 {
+        println!(r#"
+  _                                     _   ___   ___ _____  ___  
+ | |   __ _ _____   _ _ __   _____  __ | | |__ \ / _ \__ / |/ _ \ 
+ | |  / _` |_  / | | | '_ \ / _ \ \/ / | |    ) | | | |_ \ | | | |
+ | |___ (_| |/ /| |_| | | | |  __/>  <  | |   / /| |_| |__) | |_| |
+ |_____\__,_/___|\__, |_| |_|\___/_/\_\ |_|  / /  \___/____/ \___/ 
+                 |___/                                             
+        "#);
         eprintln!("Usage: lazynext-cli <render|export|prompt> <project_file> [output_file_or_prompt_text]");
         std::process::exit(1);
     }
