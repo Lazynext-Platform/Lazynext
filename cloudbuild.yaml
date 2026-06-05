@@ -13,6 +13,8 @@ steps:
   - 'us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web:latest'
   - '--region'
   - 'us-central1'
+  - '--add-cloudsql-instances'
+  - 'vertexaiopencode:us-central1:lazynext-db'
 images:
 - 'us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web'
 timeout: '1800s'
