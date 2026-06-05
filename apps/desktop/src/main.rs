@@ -78,60 +78,28 @@ impl AppWindow {
             )
     }
 
-    fn render_timeline(&self) -> impl IntoElement {
-        let mut tracks_ui = div().flex_1().w_full().p(px(8.)).flex().flex_col().gap_2();
-
-        // Dynamically render tracks and clips from the parsed JSON
-        for track in &self.project.tracks {
-            let mut track_row = div().w_full().h(px(40.)).bg(rgb(0x27272a)).rounded_md().flex().items_center().px(px(8.)).gap_2();
-            
-            // Track label
-            track_row = track_row.child(div().w(px(40.)).text_xs().text_color(rgb(0xa1a1aa)).child(track.name.clone()));
-
-            // Clips container (relative positioning area)
-            let mut clips_container = div().flex_1().h_full().flex().items_center().relative();
-            
-            for clip in &track.clips {
-                // very simple proportion calculation for demo UI
-                let total = self.project.duration_frames as f32;
-                let left_pct = (clip.start_frame as f32 / total) * 100.0;
-                let width_pct = (clip.duration_frames as f32 / total) * 100.0;
-
-                clips_container = clips_container.child(
-                    div()
-                        .absolute()
-                        .top(px(5.))
-                        .left(rems(left_pct / 10.0)) // Rough positioning
-                        .w(rems(width_pct / 10.0))
-                        .h(px(30.))
-                        .bg(rgb(0x3b82f6))
-                        .rounded_sm()
-                        .flex()
-                        .items_center()
-                        .px(px(8.))
-                        .child(
-                            div().text_xs().text_color(rgb(0xffffff)).child(clip.name.clone())
-                        )
-                );
-            }
-            
-            track_row = track_row.child(clips_container);
-            tracks_ui = tracks_ui.child(track_row);
-        }
-
+    fn render_agent_chat(&self) -> impl IntoElement {
         div()
             .h(px(250.))
             .w_full()
-            .bg(rgb(0x18181b))
+            .bg(rgb(0x18181b)) // zinc-900
             .border_t_1()
             .border_color(rgb(0x27272a))
             .flex()
             .flex_col()
+            .p(px(16.))
             .child(
-                // Timeline Header (Timecodes)
-                div().h(px(24.)).w_full().bg(rgb(0x27272a)).border_b_1().border_color(rgb(0x3f3f46))
+                div().text_sm().font_weight(FontWeight::BOLD).text_color(rgb(0x3b82f6)).mb(px(8.)).child("AGENT CHAT")
             )
-            .child(tracks_ui)
+            .child(
+                div().flex_1().overflow_y_scroll().flex().flex_col().gap_2().child(
+                    div().text_sm().text_color(rgb(0xa1a1aa)).child("System: Awaiting your instructions...")
+                )
+            )
+            .child(
+                div().h(px(40.)).w_full().bg(rgb(0x27272a)).rounded_md().flex().items_center().px(px(12.))
+                    .child(div().text_sm().text_color(rgb(0x71717a)).child("Type a command (e.g., 'Cut out the silences')..."))
+            )
     }
 }
 
@@ -155,7 +123,7 @@ impl Render for AppWindow {
                             .flex()
                             .flex_col()
                             .child(self.render_canvas())
-                            .child(self.render_timeline())
+                            .child(self.render_agent_chat())
                     )
             )
     }
