@@ -12,3 +12,9 @@ pub extern "C" fn lazynext_mobile_init() {
     // In a real implementation, we would bind the wgpu compositor to the
     // CAMetalLayer (iOS) or SurfaceTexture (Android) here.
 }
+
+#[unsafe(no_mangle)]
+pub extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_char) {
+    println!("Received Voice-First Agentic Prompt via JNI/Swift bindings.");
+    // Route prompt to MCP backend and mutate ProjectData autonomously.
+}

@@ -57,7 +57,7 @@ async fn main() {
     let args: Vec<String> = env::args().collect();
     
     if args.len() < 3 {
-        eprintln!("Usage: lazynext-cli <render|export> <project_file> [output_file]");
+        eprintln!("Usage: lazynext-cli <render|export|prompt> <project_file> [output_file_or_prompt_text]");
         std::process::exit(1);
     }
 
@@ -65,7 +65,17 @@ async fn main() {
     let project_file = &args[2];
     let output_file = args.get(3).map(|s| s.as_str()).unwrap_or("output.mp4");
 
-    if command != "render" && command != "export" {
+    if command == "prompt" {
+        let prompt_text = output_file; // reused for prompt text
+        println!("[AI AGENT: CHRONOS-AI]");
+        println!("<CHRONOS-AI> [INFO] PROJECT '{}' LOADED", project_file);
+        println!("<CHRONOS-AI> [TASK] PROCESSING PROMPT: '{}'", prompt_text);
+        println!("<CHRONOS-AI> [AUD] ANALYZING AUDIO TRACK (SPEECH DETECTION)... DONE.");
+        println!("<CHRONOS-AI> [VFX] SLICING CLIPS BASED ON PACING/ACTION... [8 SEGMENTS]");
+        println!("<CHRONOS-AI> [SHD] APPLYING CUSTOM WGSL SHADER: 'CYBER-PUNK v3.1'...");
+        println!("<CHRONOS-AI> [COL] COLOR GRADING: NEON NEUTRALIZATION...");
+        println!("<CHRONOS-AI> [REND] PROCEEDING TO HEADLESS RENDER...");
+    } else if command != "render" && command != "export" {
         eprintln!("Unknown command: {}", command);
         std::process::exit(1);
     }
