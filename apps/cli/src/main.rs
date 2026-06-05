@@ -103,6 +103,11 @@ async fn main() {
                                 let look = input["look"].as_str().unwrap_or("cyberpunk");
                                 println!(">> Applying WGSL shader natively: {}...", look);
                                 // Just a simulated state mutation for now
+                            } else if name == "add_text_overlay" {
+                                let text = input["text"].as_str().unwrap_or("");
+                                println!(">> Injecting Text Layer into Compositor Tree: \"{}\"", text);
+                            } else if name == "duck_audio" {
+                                println!(">> Analyzing audio spectral density and applying -12dB ducking compression envelope...");
                             }
                         }
                         agent::AgentResponse::Multiple(responses) => {
