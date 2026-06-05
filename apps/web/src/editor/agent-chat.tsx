@@ -6,14 +6,33 @@ export function AgentChat() {
   ]);
   const [input, setInput] = useState('');
 
-  const handleSend = () => {
-    if (!input.trim()) return;
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
-    // TODO: Wire this directly to the apps/mcp protocol
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: 'system', content: `Agent: Received command. Modifying Rust state via MCP...` }]);
-    }, 500);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
+    const currentInput = input;
     setInput('');
+    setIsLoading(true);
+    setMessages(prev => [...prev, { role: 'user', content: currentInput }]);
+    
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: currentInput })
+      });
+      
+      const data = await res.json();
+      if (data.error) {
+        setMessages(prev => [...prev, { role: 'system', content: `Error: ${data.error}` }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'system', content: data.response }]);
+      }
+    } catch (e: any) {
+      setMessages(prev => [...prev, { role: 'system', content: `Network Error: ${e.message}` }]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -22,7 +41,7 @@ export function AgentChat() {
       
       <div className="flex-1 overflow-y-auto flex flex-col gap-2 mb-4">
         {messages.map((msg, idx) => (
-          <div key={idx} className={`text-sm ${msg.role === 'user' ? 'text-zinc-100 text-right' : 'text-zinc-400 text-left'}`}>
+          <div key={idx} className={`text-sm whitespace-pre-wrap ${msg.role === 'user' ? 'text-zinc-100 text-right' : 'text-zinc-400 text-left'}`}>
             {msg.content}
           </div>
         ))}
@@ -39,9 +58,10 @@ export function AgentChat() {
         />
         <button 
           onClick={handleSend}
-          className="h-10 px-4 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-md transition-colors"
+          disabled={isLoading}
+          className="h-10 px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-zinc-400 text-white text-sm font-medium rounded-md transition-colors"
         >
-          Send
+          {isLoading ? '...' : 'Send'}
         </button>
       </div>
     </div>
