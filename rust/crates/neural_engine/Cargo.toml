@@ -1,0 +1,10 @@
+[package]
+name = "neural_engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# tract = "0.21.0" # Mocked out for demonstration purposes
+ndarray = "0.15.6"
+serde = { version = "1.0", features = ["derive"] }
+image = "0.24.7"
