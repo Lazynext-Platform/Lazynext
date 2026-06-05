@@ -84,6 +84,7 @@ async fn main() {
         let api_key = match provider.as_str() {
             "openai" | "gpt" => std::env::var("OPENAI_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
             "gemini" | "google" => std::env::var("GEMINI_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
+            "ollama" | "local" => std::env::var("OLLAMA_ENDPOINT").unwrap_or_else(|_| "http://localhost:11434".to_string()),
             _ => std::env::var("ANTHROPIC_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
         };
         

@@ -273,6 +273,100 @@ impl AgentProvider for GeminiAgent {
 }
 
 // -----------------------------------------------------------------------------
+// Ollama Implementation (Local Models)
+// -----------------------------------------------------------------------------
+
+pub struct OllamaAgent {
+    client: Client,
+    model: String,
+    endpoint: String,
+}
+
+impl OllamaAgent {
+    pub fn new(model: String, endpoint: String) -> Self {
+        let ep = if endpoint.is_empty() { "http://localhost:11434".to_string() } else { endpoint };
+        Self {
+            client: Client::new(),
+            model,
+            endpoint: ep,
+        }
+    }
+
+    fn convert_to_ollama_tools(anthropic_tools: Vec<tools::Tool>) -> serde_json::Value {
+        // Ollama uses OpenAI's exact function calling schema!
+        let mut oai_tools = vec![];
+        for t in anthropic_tools {
+            oai_tools.push(json!({
+                "type": "function",
+                "function": {
+                    "name": t.name,
+                    "description": t.description,
+                    "parameters": t.input_schema
+                }
+            }));
+        }
+        json!(oai_tools)
+    }
+}
+
+#[async_trait]
+impl AgentProvider for OllamaAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let tools = Self::convert_to_ollama_tools(tools::get_available_tools());
+        
+        let payload = json!({
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are Lazynext Agent, an autonomous video editor. You have direct control over a Rust-based NLE. When the user asks you to edit their video, use your available tools to perform the edit."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            "tools": tools,
+            "stream": false
+        });
+
+        let url = format!("{}/api/chat", self.endpoint);
+        let res = self.client.post(&url)
+            .header("content-type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .context("Failed to send request to Ollama")?;
+
+        let body: serde_json::Value = res.json().await.context("Failed to parse response JSON")?;
+        
+        if let Some(message) = body.get("message") {
+            let mut responses = vec![];
+            
+            if let Some(text) = message["content"].as_str() {
+                if !text.is_empty() {
+                    responses.push(AgentResponse::Text(text.to_string()));
+                }
+            }
+            
+            if let Some(tool_calls) = message["tool_calls"].as_array() {
+                for tc in tool_calls {
+                    if let Some(func) = tc.get("function") {
+                        let name = func["name"].as_str().unwrap_or("unknown").to_string();
+                        let input = func["arguments"].clone();
+                        responses.push(AgentResponse::ToolCall { name, input });
+                    }
+                }
+            }
+            
+            return Ok(AgentResponse::Multiple(responses));
+        }
+        
+        Ok(AgentResponse::Text(format!("Error: Unexpected Ollama response format: {}", body)))
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Factory
 // -----------------------------------------------------------------------------
 
@@ -293,7 +387,12 @@ impl AgentFactory {
                 let m = if model.is_empty() { "gemini-1.5-pro" } else { model };
                 Ok(Box::new(GeminiAgent::new(api_key.to_string(), m.to_string())))
             }
-            _ => Err(anyhow!("Unsupported provider: {}. Try 'anthropic', 'openai', or 'gemini'.", provider)),
+            "ollama" | "local" => {
+                let m = if model.is_empty() { "llama3" } else { model };
+                // Use api_key parameter as the endpoint for Ollama since it doesn't need an API key
+                Ok(Box::new(OllamaAgent::new(m.to_string(), api_key.to_string())))
+            }
+            _ => Err(anyhow!("Unsupported provider: {}. Try 'anthropic', 'openai', 'gemini', or 'ollama'.", provider)),
         }
     }
 }
