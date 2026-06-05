@@ -70,6 +70,58 @@ pub fn build_ffmpeg_command(name: &str, args: &Value, input_file: &str, output_f
     Ok(cmd)
 }
 
+/// Constructs a complex FFMPEG filtergraph given a list of tool operations.
+pub fn build_complex_ffmpeg_command(tools: &[(String, Value)], input_files: &[String], output_file: &str) -> Result<Vec<String>> {
+    let mut cmd = vec!["-y".to_string()];
+    
+    for input in input_files {
+        cmd.push("-i".to_string());
+        cmd.push(input.to_string());
+    }
+
+    let mut filter_complex = String::new();
+    let mut current_video_stream = "[0:v]".to_string();
+    
+    for (i, (name, args)) in tools.iter().enumerate() {
+        let out_stream = format!("[v{}]", i + 1);
+        match name.as_str() {
+            "add_text_overlay" => {
+                let text = args.get("text").and_then(|v| v.as_str()).unwrap_or("Text");
+                let filter = format!(
+                    "{current_video_stream}drawtext=text='{}':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2{out_stream}",
+                    text.replace("'", "\\'")
+                );
+                filter_complex.push_str(&filter);
+                filter_complex.push(';');
+                current_video_stream = out_stream;
+            }
+            "color_grade" => {
+                let filter = format!("{current_video_stream}colorbalance=rs=.2:bs=-.2{out_stream}");
+                filter_complex.push_str(&filter);
+                filter_complex.push(';');
+                current_video_stream = out_stream;
+            }
+            // Other tools would map to other complex filters (e.g. overlaying an image [1:v] over [0:v])
+            _ => {}
+        }
+    }
+    
+    // Remove trailing semicolon
+    if filter_complex.ends_with(';') {
+        filter_complex.pop();
+    }
+    
+    if !filter_complex.is_empty() {
+        cmd.push("-filter_complex".to_string());
+        cmd.push(filter_complex);
+        cmd.push("-map".to_string());
+        cmd.push(current_video_stream);
+    }
+    
+    cmd.push(output_file.to_string());
+    Ok(cmd)
+}
+
 /// Executes the tool by dynamically constructing the FFMPEG command and running it.
 pub async fn execute_tool(name: &str, args: Value, input_file: &str, output_file: &str) -> Result<String> {
     let cmd_args = build_ffmpeg_command(name, &args, input_file, output_file)?;
@@ -117,5 +169,15 @@ mod tests {
         });
         let cmd = build_ffmpeg_command("add_text_overlay", &args, "in.mp4", "out.mp4").unwrap();
         assert_eq!(cmd.join(" "), "-y -i in.mp4 -vf drawtext=text='Hello World':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,2.5,7.5)' out.mp4");
+    }
+
+    #[test]
+    fn test_complex_ffmpeg_command() {
+        let tools = vec![
+            ("color_grade".to_string(), json!({})),
+            ("add_text_overlay".to_string(), json!({"text": "Epic"}))
+        ];
+        let cmd = build_complex_ffmpeg_command(&tools, &["in.mp4".to_string()], "out.mp4").unwrap();
+        assert_eq!(cmd.join(" "), "-y -i in.mp4 -filter_complex [0:v]colorbalance=rs=.2:bs=-.2[v1];[v1]drawtext=text='Epic':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2[v2] -map [v2] out.mp4");
     }
 }
