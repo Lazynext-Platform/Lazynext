@@ -185,6 +185,94 @@ impl AgentProvider for OpenAIAgent {
 }
 
 // -----------------------------------------------------------------------------
+// Gemini Implementation
+// -----------------------------------------------------------------------------
+
+pub struct GeminiAgent {
+    client: Client,
+    api_key: String,
+    model: String,
+}
+
+impl GeminiAgent {
+    pub fn new(api_key: String, model: String) -> Self {
+        Self {
+            client: Client::new(),
+            api_key,
+            model,
+        }
+    }
+
+    fn convert_to_gemini_tools(anthropic_tools: Vec<tools::Tool>) -> serde_json::Value {
+        let mut declarations = vec![];
+        for t in anthropic_tools {
+            declarations.push(json!({
+                "name": t.name,
+                "description": t.description,
+                "parameters": t.input_schema
+            }));
+        }
+        json!([{ "functionDeclarations": declarations }])
+    }
+}
+
+#[async_trait]
+impl AgentProvider for GeminiAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let tools = Self::convert_to_gemini_tools(tools::get_available_tools());
+        
+        let payload = json!({
+            "systemInstruction": {
+                "parts": [{ "text": "You are Lazynext Agent, an autonomous video editor. You have direct control over a Rust-based NLE. When the user asks you to edit their video, use your available tools to perform the edit." }]
+            },
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [{ "text": prompt }]
+                }
+            ],
+            "tools": tools
+        });
+
+        let url = format!("https://generativelanguage.googleapis.com/v1beta/models/{}:generateContent?key={}", self.model, self.api_key);
+        let res = self.client.post(&url)
+            .header("content-type", "application/json")
+            .json(&payload)
+            .send()
+            .await
+            .context("Failed to send request to Gemini")?;
+
+        let body: serde_json::Value = res.json().await.context("Failed to parse response JSON")?;
+        
+        if let Some(candidates) = body["candidates"].as_array() {
+            if let Some(content) = candidates.get(0).and_then(|c| c.get("content")) {
+                if let Some(parts) = content["parts"].as_array() {
+                    let mut responses = vec![];
+                    
+                    for part in parts {
+                        if let Some(text) = part.get("text").and_then(|t| t.as_str()) {
+                            if !text.is_empty() {
+                                responses.push(AgentResponse::Text(text.to_string()));
+                            }
+                        }
+                        
+                        if let Some(func_call) = part.get("functionCall") {
+                            let name = func_call["name"].as_str().unwrap_or("unknown").to_string();
+                            let input = func_call["args"].clone();
+                            responses.push(AgentResponse::ToolCall { name, input });
+                        }
+                    }
+                    
+                    return Ok(AgentResponse::Multiple(responses));
+                }
+            }
+        }
+        
+        Ok(AgentResponse::Text(format!("Error: Unexpected Gemini response format: {}", body)))
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Factory
 // -----------------------------------------------------------------------------
 
@@ -201,7 +289,11 @@ impl AgentFactory {
                 let m = if model.is_empty() { "gpt-4o" } else { model };
                 Ok(Box::new(OpenAIAgent::new(api_key.to_string(), m.to_string())))
             }
-            _ => Err(anyhow!("Unsupported provider: {}. Try 'anthropic' or 'openai'.", provider)),
+            "gemini" | "google" => {
+                let m = if model.is_empty() { "gemini-1.5-pro" } else { model };
+                Ok(Box::new(GeminiAgent::new(api_key.to_string(), m.to_string())))
+            }
+            _ => Err(anyhow!("Unsupported provider: {}. Try 'anthropic', 'openai', or 'gemini'.", provider)),
         }
     }
 }

@@ -83,6 +83,7 @@ async fn main() {
         let model = std::env::var("LAZYNEXT_AI_MODEL").unwrap_or_else(|_| "".to_string());
         let api_key = match provider.as_str() {
             "openai" | "gpt" => std::env::var("OPENAI_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
+            "gemini" | "google" => std::env::var("GEMINI_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
             _ => std::env::var("ANTHROPIC_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
         };
         
