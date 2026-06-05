@@ -11,3 +11,4 @@ anyhow = "1.0"
 time = { path = "../../rust/crates/time" }
 compositor = { path = "../../rust/crates/compositor" }
 state = { path = "../../rust/crates/state" }
+agent = { version = "0.1.0", path = "../../rust/crates/agent" }

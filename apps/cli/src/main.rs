@@ -66,15 +66,24 @@ async fn main() {
     let output_file = args.get(3).map(|s| s.as_str()).unwrap_or("output.mp4");
 
     if command == "prompt" {
-        let prompt_text = output_file; // reused for prompt text
-        println!("[AI AGENT: CHRONOS-AI]");
-        println!("<CHRONOS-AI> [INFO] PROJECT '{}' LOADED", project_file);
-        println!("<CHRONOS-AI> [TASK] PROCESSING PROMPT: '{}'", prompt_text);
-        println!("<CHRONOS-AI> [AUD] ANALYZING AUDIO TRACK (SPEECH DETECTION)... DONE.");
-        println!("<CHRONOS-AI> [VFX] SLICING CLIPS BASED ON PACING/ACTION... [8 SEGMENTS]");
-        println!("<CHRONOS-AI> [SHD] APPLYING CUSTOM WGSL SHADER: 'CYBER-PUNK v3.1'...");
-        println!("<CHRONOS-AI> [COL] COLOR GRADING: NEON NEUTRALIZATION...");
-        println!("<CHRONOS-AI> [REND] PROCEEDING TO HEADLESS RENDER...");
+        let prompt_text = output_file;
+        println!("[AI AGENT: CLAUDE 3.5 SONNET]");
+        println!("> Sending prompt to Anthropic API: '{}'", prompt_text);
+        
+        let api_key = std::env::var("ANTHROPIC_API_KEY").unwrap_or_else(|_| "mock_key_for_testing".to_string());
+        let agent = agent::ClaudeAgent::new(api_key);
+        
+        // Let's actually execute the prompt asynchronously
+        match agent.send_prompt(prompt_text).await {
+            Ok(response) => {
+                println!("> Received Response from LLM Engine:");
+                println!("{}", response);
+                println!("\n> State Mutated. Proceeding to headless render...");
+            }
+            Err(e) => {
+                eprintln!("> Failed to contact LLM API: {}", e);
+            }
+        }
     } else if command != "render" && command != "export" {
         eprintln!("Unknown command: {}", command);
         std::process::exit(1);

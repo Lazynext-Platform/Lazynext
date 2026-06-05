@@ -11,3 +11,4 @@ state = { path = "../../rust/crates/state" }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+agent = { version = "0.1.0", path = "../../rust/crates/agent" }
