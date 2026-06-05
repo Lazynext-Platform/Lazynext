@@ -16,7 +16,7 @@ import { MulticamGrid } from './panels/multicam-grid';
 import { SpeedRamping } from './panels/speed-ramping';
 import { ExportDelivery } from './panels/export-delivery';
 import WasmPlayer from "./wasm-player";
-import AgentChat from "../../editor/agent-chat";
+import { AgentChat } from "../../editor/agent-chat";
 import { CollaborationSync } from '@/lib/crdt';
 
 function VideoScopes({ isPlaying, frame }: { isPlaying: boolean; frame: number }) {
