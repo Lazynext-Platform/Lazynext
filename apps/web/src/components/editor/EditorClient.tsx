@@ -16,7 +16,7 @@ import { MulticamGrid } from './panels/multicam-grid';
 import { SpeedRamping } from './panels/speed-ramping';
 import { ExportDelivery } from './panels/export-delivery';
 import WasmPlayer from "./wasm-player";
-import Timeline from "./timeline";
+import AgentChat from "../../editor/agent-chat";
 import { CollaborationSync } from '@/lib/crdt';
 
 function VideoScopes({ isPlaying, frame }: { isPlaying: boolean; frame: number }) {
@@ -7652,69 +7652,7 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="h-full w-[25%] bg-gradient-to-r from-pink-500/80 via-red-600/90 to-red-500/0" />
               </div>
             )}
-            <Timeline 
-              project={projectData} 
-              frame={frame} 
-              isQuantumSuperposition={isQuantumSuperposition}
-              onChangeFrame={setFrame}
-              onProjectUpdate={setProjectData} 
-              onCommitUpdate={commitState}
-              selectedClipId={selectedClipId}
-              selectedClipIds={selectedClipIds}
-              cloudComments={cloudComments}
-              onSelectClip={(id) => {
-                setSelectedClipId(id);
-                if (id) {
-                  if (!selectedClipIds.includes(id)) {
-                    setSelectedClipIds([id]);
-                  }
-                } else {
-                  setSelectedClipIds([]);
-                }
-              }}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              onToggleSelectClip={(id: any) => {
-                if (selectedClipIds.includes(id)) {
-                  setSelectedClipIds(prev => prev.filter(x => x !== id));
-                  if (selectedClipId === id) setSelectedClipId(null);
-                } else {
-                  setSelectedClipIds(prev => [...prev, id]);
-                  setSelectedClipId(id);
-                }
-              }}
-              pxPerFrame={zoomLevel}
-              onToggleTrackHide={(idx) => toggleTrackProperty(idx, 'isHidden')}
-              onToggleTrackLock={(idx) => toggleTrackProperty(idx, 'isLocked')}
-              onToggleTrackMute={(idx) => toggleTrackProperty(idx, 'isMuted')}
-              onToggleTrackSolo={(idx) => toggleTrackProperty(idx, 'isSoloed')}
-              isSnappingEnabled={isSnappingEnabled}
-              onMoveTrack={handleMoveTrack}
-              isPlaying={isPlaying}
-              trackHeight={trackHeightSize}
-              markers={projectData.markers || []}
-              onRenameTrack={handleRenameTrack}
-               
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              activeTool={activeTool as any}
-              // eslint-disable-next-line lazynext/prefer-object-params
-              onContextMenuTrack={(e, trackIdx) => {
-                 setTrackContextMenu({ x: e.clientX, y: e.clientY, trackIdx });
-              }}
-              // eslint-disable-next-line lazynext/prefer-object-params
-              onClickClip={(e, clipId, frameAtClick) => {
-                if (activeTool === 'razor' && frameAtClick !== undefined) {
-                  handleSplitClip(clipId, frameAtClick);
-                } else {
-                  setSelectedClipId(clipId);
-                }
-              }}
-              // eslint-disable-next-line lazynext/prefer-object-params
-              onContextMenuClip={(e, clipId) => {
-                e.preventDefault();
-                setSelectedClipId(clipId);
-                setContextMenu({ x: e.clientX, y: e.clientY, clipId });
-              }}
-            />
+            <AgentChat />
           </div>
             </>
           )}
