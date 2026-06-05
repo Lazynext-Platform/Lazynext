@@ -38,3 +38,9 @@ params: 6c58aa81-3dc3-48b5-8589-0499098655f3,1
   }
 }
  GET /editor/6c58aa81-3dc3-48b5-8589-0499098655f3 500 in 755ms (compile: 432ms, render: 323ms)
+✓ Compiled in 351ms
+Persisting failed: Failed to compact database
+
+Caused by:
+    0: Failed to deserialize used key hashes AMQF from 00000035.meta
+    1: incompatible version

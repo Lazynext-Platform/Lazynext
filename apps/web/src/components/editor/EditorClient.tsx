@@ -172,7 +172,6 @@ const solveCubicBezier = (p: number, p1x: number, p1y: number, p2x: number, p2y:
 export default function EditorClient({ project }: { project: any }) {
   const lastSavedProject = useRef<string>('');
   const [frame, setFrame] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [inspectorWidth, setInspectorWidth] = useState(320);
   const [timelineHeight, setTimelineHeight] = useState(320);
