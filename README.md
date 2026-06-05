@@ -1,49 +1,77 @@
-<table width="100%">
-  <tr>
-    <td align="left" width="120">
-      <img src="https://assets.lazynext.com/branding/symbol.svg" alt="Lazynext Logo" width="100" />
-    </td>
-    <td align="right">
-      <h1>Lazynext 2030</h1>
-      <h3 style="margin-top: -10px;">The World's First Fully Autonomous, Agentic, Prompt-to-Video Editing Platform.</h3>
-    </td>
-  </tr>
-</table>
+# Lazynext 2030: Fully Autonomous Agentic NLE
 
-[![Discord](https://img.shields.io/discord/1386309140057690133?label=Discord&logo=discord&logoColor=fff&color=5865F2&style=flat)](https://discord.gg/zmR9N35cjK)
-[![X](https://img.shields.io/badge/follow-%40lazynextapp-000?logo=x&logoColor=fff&style=flat)](https://x.com/lazynextapp)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE)
+Lazynext 2030 represents a fundamental paradigm shift in video editing. Instead of dragging and dropping clips onto a static timeline, Lazynext is a **Multi-Model AI Agent Platform**. 
 
-## The Paradigm Shift
+You simply give instructions via voice or text ("Cut out the silences and apply a cyberpunk grade"), and our blazing-fast Rust core natively mutates the timeline using deterministic tool schemas.
 
-**The traditional timeline is dead. 🚀**
+## Multi-Model Architecture
 
-We have completely ripped out the complex tracks, the razor blade tools, and the overwhelming legacy UI. Lazynext has successfully pivoted to a **100% Agentic Architecture**. You do not edit the video yourself anymore; you simply chat with a built-in AI (powered natively by Anthropic's Claude 3.5 Sonnet), and the AI directly mutates the video project state on your behalf.
+Lazynext supports native LLM abstractions out of the box, ensuring you are never locked into a single ecosystem. You can dynamically swap the underlying AI engine using environment variables.
 
-## How It Works
+### 1. OpenAI (GPT-4o)
+```bash
+export LAZYNEXT_AI_PROVIDER="openai"
+export LAZYNEXT_AI_MODEL="gpt-4o"
+export OPENAI_API_KEY="sk-..."
+```
 
-Because we separated all the business logic into a single, memory-safe, blazing-fast Rust core (`rust/crates/state` and `rust/crates/agent`), Lazynext is able to run the exact same LLM-driven video editing brain seamlessly across **five** unique interfaces:
+### 2. Anthropic (Claude 3.5 Sonnet)
+```bash
+export LAZYNEXT_AI_PROVIDER="anthropic"
+export LAZYNEXT_AI_MODEL="claude-3-5-sonnet-20240620"
+export ANTHROPIC_API_KEY="sk-ant-..."
+```
 
-1. **Web Agent:** A React-based floating Chat UI running Next.js.
-2. **Desktop Agent:** A native macOS/Windows GPUI Chat interface running natively next to the massive video canvas.
-3. **CLI Agent:** A hacker-style TUI (`lazynext-cli prompt "cut the video"`) that runs entirely headless.
-4. **Mobile Voice Agent:** Native iOS & Android bindings providing a voice-first agentic interface on the go.
-5. **MCP Server:** An open JSON-RPC agent protocol allowing *any* external AI to connect and edit videos in Lazynext!
+### 3. Google (Gemini 1.5 Pro)
+```bash
+export LAZYNEXT_AI_PROVIDER="gemini"
+export LAZYNEXT_AI_MODEL="gemini-1.5-pro"
+export GEMINI_API_KEY="AIzaSy..."
+```
 
-Under the hood, the AI issues structured `ToolCall` JSON commands (like `cut_silences` or `color_grade`), and the Rust backend mathematically slices the clips and applies WGSL shaders natively via `wgpu`. 
+### 4. Local / Offline (Ollama)
+Run Lazynext completely offline and free on your local GPU.
+```bash
+export LAZYNEXT_AI_PROVIDER="ollama"
+export LAZYNEXT_AI_MODEL="llama3"
+export OLLAMA_ENDPOINT="http://localhost:11434"
+```
 
-## Sponsors
+## The 5 Agentic Interfaces
 
-Lazynext is supported by companies that believe in open source creator tools.
+Lazynext is built in Rust to be infinitely portable. The same AI Video Engine runs seamlessly across five different formats:
 
-- [**fal.ai**](https://fal.ai?utm_source=github-lazynext&utm_campaign=oss): Generative image, video, and audio models all in one place.
+1. **Next.js Web Interface (`apps/web`)**: A beautiful, responsive web dashboard with a live agent chat interface.
+2. **GPUI Desktop Engine (`apps/desktop`)**: A native Rust-based desktop application boasting sub-millisecond render times via wgpu.
+3. **Headless CLI (`apps/cli`)**: Perfect for CI/CD batch rendering. Type `lazynext-cli prompt "duck the audio"`.
+4. **MCP Server (`apps/mcp`)**: Exposes our video editing tools directly to external models via the Model Context Protocol (e.g. Claude Desktop).
+5. **Mobile C-API (`apps/mobile`)**: A lightweight compiled library ready to be embedded into iOS (Swift) and Android (Kotlin) for voice-first editing.
 
-Want your logo here? Reach out at [sponsor@lazynext.com](mailto:sponsor@lazynext.com).
+## Development
 
-## Contributing
+Lazynext is built using `cargo`. To compile the workspace:
+```bash
+cargo build --release
+```
 
-The architectural foundation of the agentic era is complete and rock solid. We are now actively accepting outside contributions! If you want to help us expand the Lazynext 2030 autonomous roadmap, [join the Discord](https://discord.gg/zmR9N35cjK) or [open an issue](https://github.com/lazynext-corporation/lazynext/issues).
+To run the Next.js Web App:
+```bash
+cd apps/web
+npm install
+npm run dev
+```
 
-## License
+To run the full suite of Agentic Core unit tests:
+```bash
+cargo test -p agent
+```
 
-[MIT](LICENSE)
+## Capabilities
+The underlying Agent Schema natively supports:
+- `cut_silences`
+- `duck_audio`
+- `color_grade`
+- `add_text_overlay`
+- `add_transition`
+- `crop_and_pan`
+- `generate_subtitles`

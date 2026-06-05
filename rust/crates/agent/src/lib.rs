@@ -367,6 +367,48 @@ impl AgentProvider for OllamaAgent {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_agent_factory_openai() {
+        let agent = AgentFactory::create("openai", "gpt-4o", "mock_key");
+        assert!(agent.is_ok());
+    }
+
+    #[test]
+    fn test_agent_factory_anthropic() {
+        let agent = AgentFactory::create("anthropic", "claude-3", "mock_key");
+        assert!(agent.is_ok());
+    }
+
+    #[test]
+    fn test_agent_factory_gemini() {
+        let agent = AgentFactory::create("gemini", "gemini-1.5-pro", "mock_key");
+        assert!(agent.is_ok());
+    }
+
+    #[test]
+    fn test_agent_factory_ollama() {
+        let agent = AgentFactory::create("ollama", "llama3", "http://localhost:11434");
+        assert!(agent.is_ok());
+    }
+
+    #[test]
+    fn test_agent_factory_invalid() {
+        let agent = AgentFactory::create("invalid_provider", "model", "mock_key");
+        assert!(agent.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_agent_response_debug() {
+        let res = AgentResponse::Text("Success".into());
+        let dbg = format!("{:?}", res);
+        assert_eq!(dbg, "Text(\"Success\")");
+    }
+}
+
 // -----------------------------------------------------------------------------
 // Factory
 // -----------------------------------------------------------------------------
