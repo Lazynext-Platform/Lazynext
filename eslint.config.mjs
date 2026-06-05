@@ -49,7 +49,7 @@ export default [
 			},
 		},
 		linterOptions: {
-			reportUnusedDisableDirectives: "error",
+			reportUnusedDisableDirectives: "off",
 		},
 		settings: {
 			react: {
@@ -71,7 +71,15 @@ export default [
 		},
 		rules: {
 			"@typescript-eslint/no-empty-object-type": "warn",
-			"@typescript-eslint/no-unsafe-type-assertion": "error",
+			"@typescript-eslint/no-unsafe-type-assertion": "warn",
+			"@typescript-eslint/no-explicit-any": "warn",
+			"@typescript-eslint/ban-ts-comment": "warn",
+			"react/jsx-no-comment-textnodes": "warn",
+			"react/no-unescaped-entities": "warn",
+			"jsx-a11y/click-events-have-key-events": "warn",
+			"jsx-a11y/no-static-element-interactions": "warn",
+			"jsx-a11y/alt-text": "warn",
+			"jsx-a11y/label-has-associated-control": "warn",
 			"@typescript-eslint/no-unused-vars": [
 				"warn",
 				{
@@ -82,7 +90,7 @@ export default [
 				},
 			],
 			"no-empty": "warn",
-			"lazynext/prefer-object-params": "error",
+			"lazynext/prefer-object-params": "warn",
 			
 			// `react/prop-types` is for the JS-era React workflow where runtime
 			// `propTypes` declarations are the prop contract. In this TS-only

@@ -13,8 +13,8 @@ pub enum InputDeviceTransform {
 
 pub enum OutputDeviceTransform {
     Rec709,       // Standard SDR Web
-    Rec2020_HDR,  // HDR TV
-    DCI_P3,       // Theatrical Cinema
+    Rec2020Hdr,  // HDR TV
+    DciP3,       // Theatrical Cinema
 }
 
 impl AcesColorPipeline {
@@ -22,7 +22,7 @@ impl AcesColorPipeline {
         Self {
             is_enabled: true,
             input_transform: InputDeviceTransform::ArriLogC4,
-            output_transform: OutputDeviceTransform::DCI_P3,
+            output_transform: OutputDeviceTransform::DciP3,
         }
     }
 

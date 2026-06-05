@@ -46,6 +46,7 @@
     "eventemitter3": "^5.0.4",
     "feed": "^5.2.1",
     "input-otp": "^1.4.2",
+    "kysely": "0.27.2",
     "lazynext-wasm": "file:../../rust/wasm/pkg",
     "lucide-react": "^0.562.0",
     "mediabunny": "^1.46.0",
@@ -101,5 +102,8 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.98.0"
+  },
+  "resolutions": {
+    "kysely": "0.27.2"
   }
 }

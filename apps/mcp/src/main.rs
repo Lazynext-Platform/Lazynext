@@ -2,8 +2,11 @@ use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::io::{self, BufRead, Write};
+use state::ProjectData;
+use std::sync::{Arc, Mutex};
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 struct RpcRequest {
     jsonrpc: String,
     id: Value,
@@ -25,7 +28,7 @@ struct RpcError {
     message: String,
 }
 
-fn handle_request(req: RpcRequest) -> RpcResponse {
+fn handle_request(req: RpcRequest, _shared_project: Arc<Mutex<Option<ProjectData>>>) -> RpcResponse {
     let mut response = RpcResponse {
         jsonrpc: "2.0".to_string(),
         id: req.id.clone(),
@@ -68,10 +71,13 @@ fn handle_request(req: RpcRequest) -> RpcResponse {
             let params = req.params.unwrap_or_default();
             let name = params.get("name").and_then(|v| v.as_str()).unwrap_or("");
             if name == "create_timeline" {
-                // Here we would call into the `time` and `compositor` crates!
+                let mut project = ProjectData::new("mcp_proj".into(), "Lazynext MCP".into(), 60.0, 1280, 720);
+                if let Ok(mut lock) = _shared_project.lock() {
+                    *lock = Some(project);
+                }
                 response.result = Some(serde_json::json!({
                     "content": [
-                        { "type": "text", "text": "Successfully initialized 60 FPS timeline!" }
+                        { "type": "text", "text": "Successfully initialized 60 FPS timeline natively using state crate!" }
                     ]
                 }));
             } else if name == "auto_jump_cut" {
@@ -99,6 +105,7 @@ fn handle_request(req: RpcRequest) -> RpcResponse {
 }
 
 fn main() -> Result<()> {
+    let shared_project: Arc<Mutex<Option<ProjectData>>> = Arc::new(Mutex::new(None));
     let stdin = io::stdin();
     let stdout = io::stdout();
     let mut handle = stdout.lock();
@@ -111,7 +118,7 @@ fn main() -> Result<()> {
 
         match serde_json::from_str::<RpcRequest>(&line) {
             Ok(req) => {
-                let res = handle_request(req);
+                let res = handle_request(req, Arc::clone(&shared_project));
                 let res_json = serde_json::to_string(&res)?;
                 writeln!(handle, "{}", res_json)?;
                 handle.flush()?;

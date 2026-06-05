@@ -1,37 +1,14 @@
 use gpui::*;
+#[allow(unused_imports)]
 use compositor::{Compositor, FrameDescriptor, CanvasClearDescriptor};
+#[allow(unused_imports)]
 use gpu::GpuContext;
+use state::{ProjectData, Track, Clip};
 use serde::Deserialize;
 use std::fs;
 
-#[derive(Deserialize, Debug, Clone)]
-struct ClipConfig {
-    id: String,
-    name: String,
-    start_frame: u32,
-    duration_frames: u32,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct TrackConfig {
-    id: String,
-    name: String,
-    clips: Vec<ClipConfig>,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct ProjectConfig {
-    width: u32,
-    height: u32,
-    fps: f32,
-    duration_frames: u32,
-    bg_color: [f32; 4],
-    #[serde(default)]
-    tracks: Vec<TrackConfig>,
-}
-
 struct AppWindow {
-    project: ProjectConfig,
+    project: ProjectData,
 }
 
 impl AppWindow {
@@ -96,7 +73,7 @@ impl AppWindow {
                     .items_center()
                     .justify_center()
                     .child(
-                        div().text_sm().text_color(rgb(0x52525b)).child(format!("wgpu Canvas {}x{}", self.project.width, self.project.height))
+                        div().text_sm().text_color(rgb(0x52525b)).child(format!("wgpu Canvas 1280x720"))
                     )
             )
     }
@@ -185,19 +162,29 @@ impl Render for AppWindow {
 }
 
 fn main() {
-    let project_path = "../cli/project.json";
-    let project_json = fs::read_to_string(project_path).unwrap_or_else(|_| {
-        r#"{
-            "width": 1280,
-            "height": 720,
-            "fps": 30.0,
-            "duration_frames": 120,
-            "bg_color": [0.0, 0.0, 0.0, 1.0],
-            "tracks": []
-        }"#.to_string()
+    let mut project = ProjectData::new("proj_desktop".into(), "Lazynext Desktop Engine".into(), 60.0, 1280, 720);
+    project.duration_frames = 1000;
+    
+    // Add a test track and clip to prove the engine works natively
+    let mut track = Track {
+        id: "t1".into(),
+        name: "V1".into(),
+        track_type: "video".into(),
+        clips: vec![],
+    };
+    track.clips.push(Clip {
+        id: "c1".into(),
+        name: "Native Test Clip".into(),
+        start_frame: 100,
+        duration_frames: 300,
+        media_id: "media_1".into(),
+        is_disabled: false,
     });
-
-    let project: ProjectConfig = serde_json::from_str(&project_json).expect("Failed to parse project.json");
+    project.add_track(track);
+    
+    // Validate engine mutator works natively
+    project.update_clip("c1", Some(50), None);
+    
 
     Application::new().run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(1280.), px(800.)), cx);

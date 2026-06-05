@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 	productionBrowserSourceMaps: true,
 	output: "standalone",
+	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,

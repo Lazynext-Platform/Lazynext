@@ -30,3 +30,8 @@ pub mod proxy;
 #[cfg(target_arch = "wasm32")]
 pub use proxy::*;
 pub use time::*;
+
+#[cfg(target_arch = "wasm32")]
+mod state;
+#[cfg(target_arch = "wasm32")]
+pub use state::*;

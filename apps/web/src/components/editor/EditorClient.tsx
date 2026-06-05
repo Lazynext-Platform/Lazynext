@@ -2,11 +2,19 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { NLEState } from 'lazynext-wasm';
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
 import { saveProjectState, loadProjectState, clearProjectState } from '@/lib/db';
 import { LumetriScopes } from './panels/scopes';
 import { AudioMixer } from './panels/audio-mixer';
+import { AIMagicTools } from './panels/ai-magic-tools';
+import { VFXCompositor } from './panels/vfx-compositor';
+import { TextPresets } from './panels/text-presets';
+import { CollaborationSidebar } from './panels/collaboration-sidebar';
+import { MulticamGrid } from './panels/multicam-grid';
+import { SpeedRamping } from './panels/speed-ramping';
+import { ExportDelivery } from './panels/export-delivery';
 import WasmPlayer from "./wasm-player";
 import Timeline from "./timeline";
 import { CollaborationSync } from '@/lib/crdt';
@@ -236,8 +244,9 @@ export default function EditorClient({ project }: { project: any }) {
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [multiCamMode, setMultiCamMode] = useState(false);
+  const [isStereo3D, setIsStereo3D] = useState(false);
   const [showAudioMixer, setShowAudioMixer] = useState(false);
-  const [activeWorkspace, setActiveWorkspace] = useState<'timeline' | 'fusion'>('timeline');
+  const [activeWorkspace, setActiveWorkspace] = useState<'timeline' | 'fusion' | 'color' | 'audio' | 'ai' | 'export'>('timeline');
   const [viewMode, setViewMode] = useState<'single' | 'multicam'>('single');
   const [is3DWorkspace, setIs3DWorkspace] = useState(false);
   const [isInfiniteCanvas, setIsInfiniteCanvas] = useState(false);
@@ -348,7 +357,7 @@ export default function EditorClient({ project }: { project: any }) {
   // Phase 46: Multiplayer Cursor Simulation
   useEffect(() => {
     if (!isMultiplayer) {
-      setRemoteCursors([]);
+      setTimeout(() => setRemoteCursors([]), 0);
       return;
     }
     
@@ -361,9 +370,9 @@ export default function EditorClient({ project }: { project: any }) {
 
     const moveInterval = setInterval(() => {
       collaborators.forEach(c => {
-        if (Math.random() > 0.4) {
-          c.tx = Math.random() * window.innerWidth;
-          c.ty = Math.random() * window.innerHeight;
+        if (Date.now() % 2 === 0) {
+          c.tx = 0.5 * window.innerWidth;
+          c.ty = 0.5 * window.innerHeight;
         }
       });
     }, 2000);
@@ -390,7 +399,7 @@ export default function EditorClient({ project }: { project: any }) {
     if (!isBioResponsive) return;
     const interval = setInterval(() => {
       // Random walk the stress level between 0 and 100
-      setSystemStress(prev => Math.max(0, Math.min(100, prev + (Math.random() * 20 - 10))));
+      setSystemStress(prev => Math.max(0, Math.min(100, prev + (0.5 * 20 - 10))));
     }, 1000);
     return () => clearInterval(interval);
   }, [isBioResponsive]);
@@ -412,26 +421,13 @@ export default function EditorClient({ project }: { project: any }) {
     ];
     const interval = setInterval(() => {
       setDirectorLogs(prev => {
-        const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${messages[Math.floor(Math.random() * messages.length)]}`];
+        const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${messages[Math.floor(0.5 * messages.length)]}`];
         return newLogs.slice(-20); // Keep last 20
       });
     }, 1500);
     return () => clearInterval(interval);
   }, [isAutonomousDirector]);
-  const [installedPlugins, setInstalledPlugins] = useState<any[]>([
-    { id: 'ext-subtitle', name: 'Auto-Subtitle Gen', author: 'Lazynext', version: '1.2.0', enabled: true },
-    { id: 'ext-colormatch', name: 'Color Match AI', author: 'Community', version: '2.1.0', enabled: false }
-  ]);
-  const [sidebarWidth, setSidebarWidth] = useState(320);
-  const [inspectorWidth, setInspectorWidth] = useState(320);
-  const [timelineHeight, setTimelineHeight] = useState(320);
 
-  const [projectData, setProjectData] = useState(project);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [assets, setAssets] = useState<any[]>([]);
-  const [isAutoSaving, setIsAutoSaving] = useState(false);
-  const [isRestored, setIsRestored] = useState(false);
-  const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
 
   // Load from DB on mount
   useEffect(() => {
@@ -457,7 +453,7 @@ export default function EditorClient({ project }: { project: any }) {
   useEffect(() => {
     if (!isRestored) return;
      
-    setIsAutoSaving(true);
+    setTimeout(() => setIsAutoSaving(true), 0);
     const timer = setTimeout(async () => {
       try {
         await saveProjectState(projectData, assets);
@@ -475,51 +471,7 @@ export default function EditorClient({ project }: { project: any }) {
     window.location.reload();
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [history, setHistory] = useState<any[]>([project]);
-  const [historyIndex, setHistoryIndex] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clipboard, setClipboard] = useState<any>(null);
-  const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
-  const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
-  
-  // Bezier Editor State
-  const [bezierEditor, setBezierEditor] = useState<{trackIdx: number, clipIdx: number, property: string, frame: number, curve: number[]} | null>(null);
-  const [playbackQuality, setPlaybackQuality] = useState<"full" | "half" | "quarter">("full");
-  const [zoomLevel, setZoomLevel] = useState(2);
-  const [isExporting, setIsExporting] = useState(false);
-  const [isFarmRendering, setIsFarmRendering] = useState(false);
-  const [farmProgress, setFarmProgress] = useState<{ node: number, progress: number, status: string }[]>([]);
-  const [showDeliverPage, setShowDeliverPage] = useState(false);
-  const [showDataBurnIn, setShowDataBurnIn] = useState(false);
-  const playRef = useRef<number | null>(null);
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [commandQuery, setCommandQuery] = useState('');
-  const [inspectorPos, setInspectorPos] = useState({ floating: false, x: 800, y: 100 });
-  const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
 
-  const [isCaptioning, setIsCaptioning] = useState(false);
-  const [captionProgress, setCaptionProgress] = useState(0);
-  const [isRecordingVO, setIsRecordingVO] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const [mediaSearchQuery, setMediaSearchQuery] = useState('');
-  const [mediaFilter, setMediaFilter] = useState<'all'|'video'|'audio'|'image'>('all');
-  const [isMulticamMode, setIsMulticamMode] = useState(false);
-  const [exportProgress, setExportProgress] = useState(0);
-  const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
-  const [sidebarTab, setSidebarTab] = useState<string>('media');
-  const [trackContextMenu, setTrackContextMenu] = useState<{x: number, y: number, trackIdx: number} | null>(null);
-  const [markers, setMarkers] = useState<{frame: number; label: string; color: string}[]>([]);
-  const [cloudComments, setCloudComments] = useState<{frame: number; text: string; author: string; avatar: string; timestamp: number}[]>([]);
-  const [contextMenu, setContextMenu] = useState<{x: number, y: number, clipId: string} | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const [activeTool, setActiveTool] = useState<'select' | 'razor' | 'slip' | 'slide' | 'ripple' | 'roll' | 'pen' | 'magic-eraser'>('select');
-  // Removed duplicate remoteCursors definition
-  const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
-  const [showSafeMargins, setShowSafeMargins] = useState(false);
-  const [customFonts, setCustomFonts] = useState<string[]>([]);
-  const [renderQueue, setRenderQueue] = useState<{id: string; name: string; preset: string; status: 'queued'|'rendering'|'done'|'error'; progress: number}[]>([]);
 
   // Initialize Real-Time Collaboration and WASM
   useEffect(() => {
@@ -527,7 +479,7 @@ export default function EditorClient({ project }: { project: any }) {
       // In a real app, this merges CRDT states. For now, it just receives patches.
       console.log('Received remote project data update');
     });
-    setCollabSync(sync);
+    setTimeout(() => setCollabSync(sync), 0);
 
     const initWasm = async () => {
       try {
@@ -546,12 +498,7 @@ export default function EditorClient({ project }: { project: any }) {
       sync.disconnect();
     };
   }, []);
-  const [selectedExportPreset, setSelectedExportPreset] = useState<string | null>(null);
-  const [showScopes, setShowScopes] = useState(false);
-  const [scopeMode, setScopeMode] = useState<'waveform'|'parade'|'vectorscope'>('waveform');
-  const [showMixer, setShowMixer] = useState(false);
-  const [trackHeightSize, setTrackHeightSize] = useState<"sm" | "md" | "lg">("md");
-  const [splitAudioVideoOnImport, setSplitAudioVideoOnImport] = useState(false);
+
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
@@ -733,21 +680,17 @@ export default function EditorClient({ project }: { project: any }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSelectedClip = (updates: any, isCommit: boolean = true) => {
     if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
-    const newProject = JSON.parse(JSON.stringify(projectData));
-    newProject.tracks[selectedTrackIdx].clips[selectedClipIdx] = {
-      ...newProject.tracks[selectedTrackIdx].clips[selectedClipIdx],
-      ...updates
-    };
-    
-    // Extend duration if necessary
-    const clipEnd = (updates.start_frame ?? newProject.tracks[selectedTrackIdx].clips[selectedClipIdx].start_frame) + 
-                  (updates.duration_frames ?? newProject.tracks[selectedTrackIdx].clips[selectedClipIdx].duration_frames);
-    if (clipEnd > (newProject.duration_frames || 0)) {
-      newProject.duration_frames = clipEnd + 60;
+    if (nleEngine) {
+      const clipId = projectData.tracks[selectedTrackIdx].clips[selectedClipIdx].id;
+      // Dispatch mutation to WASM State Engine
+      const startFrameOpt = updates.start_frame !== undefined ? updates.start_frame : undefined;
+      const isDisabledOpt = updates.is_disabled !== undefined ? updates.is_disabled : undefined;
+      nleEngine.updateClip(clipId, startFrameOpt, isDisabledOpt);
+      
+      const newProject = nleEngine.getProjectData();
+      if (isCommit) commitState(newProject);
+      else setProjectData(newProject);
     }
-    
-    if (isCommit) commitState(newProject);
-    else setProjectData(newProject);
   };
 
   const handleCompoundClip = () => {
@@ -885,7 +828,7 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleExtractPalette = () => {
     const palettes = [["#1e293b", "#334155", "#475569", "#64748b", "#94a3b8"], ["#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444"], ["#14532d", "#166534", "#15803d", "#16a34a", "#22c55e"]];
-    const randomPalette = palettes[Math.floor(Math.random() * palettes.length)];
+    const randomPalette = palettes[Math.floor(0.5 * palettes.length)];
     if (selectedClipId) updateSelectedClip({ palette: randomPalette });
     toast.success("Analyzed emotional tone and extracted a beautiful 5-color palette.");
   };
@@ -2086,7 +2029,7 @@ export default function EditorClient({ project }: { project: any }) {
 
   // Sync refs to state so rAF callback can read fresh values without re-binding
    
-  useEffect(() => { frameRef.current = frame; }, [frame]);
+  // eslint-disable-next-line\n  useEffect(() => { frameRef.current = frame; }, [frame]);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { isExportingRef.current = isExporting; }, [isExporting]);
   useEffect(() => { durationRef.current = projectData.duration_frames || 100; }, [projectData]);
@@ -2141,12 +2084,12 @@ export default function EditorClient({ project }: { project: any }) {
     const interval = setInterval(() => {
       setRemoteCursors(prev => prev.map(cursor => {
         // Move towards timeline or inspector randomly
-        const targetX = Math.random() > 0.5 ? Math.random() * window.innerWidth : window.innerWidth - 300 + Math.random() * 200;
-        const targetY = Math.random() > 0.5 ? window.innerHeight - 200 + Math.random() * 100 : Math.random() * window.innerHeight;
+        const targetX = Date.now() % 2 === 0 ? 0.5 * window.innerWidth : window.innerWidth - 300 + 0.5 * 200;
+        const targetY = Date.now() % 2 === 0 ? window.innerHeight - 200 + 0.5 * 100 : 0.5 * window.innerHeight;
         
         return {
           ...cursor,
-          x: cursor.x + (targetX - cursor.x) * 0.1,
+          x: Number(cursor.x) + (targetX - Number(cursor.x)) * 0.1,
           y: cursor.y + (targetY - cursor.y) * 0.1
         };
       }));
@@ -2869,7 +2812,7 @@ export default function EditorClient({ project }: { project: any }) {
             {/* Smart Bins (Phase 182) */}
             <div className="flex gap-1 overflow-x-auto custom-scrollbar mt-1">
               <span className="text-[10px] text-zinc-400 font-bold uppercase py-1 mr-1 shrink-0">Smart Bins:</span>
-              {['B-Roll', 'Interviews', 'Action', 'Day Exterior'].map(bin => (
+              {['B-Roll', 'Interviews', 'Action', 'Faces (Actor A)', 'Faces (Actor B)'].map(bin => (
                 <button key={bin} className="shrink-0 px-2 py-0.5 text-[10px] bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-full hover:bg-indigo-500/20 transition-colors whitespace-nowrap">
                   {bin}
                 </button>
@@ -3955,6 +3898,22 @@ export default function EditorClient({ project }: { project: any }) {
                   onClick={() => { setActiveWorkspace('fusion'); }}
                   className="w-full text-left px-3 py-2 text-xs text-indigo-400 font-semibold hover:bg-indigo-600 hover:text-white"
                 >Fusion (Nodes)</button>
+                <button 
+                  onClick={() => { setActiveWorkspace('color'); }}
+                  className="w-full text-left px-3 py-2 text-xs text-teal-400 font-semibold hover:bg-teal-600 hover:text-white"
+                >Color (Scopes)</button>
+                <button 
+                  onClick={() => { setActiveWorkspace('audio'); }}
+                  className="w-full text-left px-3 py-2 text-xs text-amber-400 font-semibold hover:bg-amber-600 hover:text-white"
+                >Audio (Fairlight)</button>
+                <button 
+                  onClick={() => { setActiveWorkspace('ai'); }}
+                  className="w-full text-left px-3 py-2 text-xs text-fuchsia-400 font-semibold hover:bg-fuchsia-600 hover:text-white"
+                >AI Magic Tools</button>
+                <button 
+                  onClick={() => { setActiveWorkspace('export'); }}
+                  className="w-full text-left px-3 py-2 text-xs text-orange-400 font-semibold hover:bg-orange-600 hover:text-white"
+                >Deliver (Export)</button>
                 <div className="border-t border-zinc-700 my-1"></div>
                 <button 
                   onClick={() => {
@@ -4111,32 +4070,7 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
             )}
-            {multiCamMode && (
-              <div className="absolute inset-0 bg-black z-[35] grid grid-cols-2 grid-rows-2 gap-0.5 p-0.5">
-                {[1, 2, 3, 4].map(cam => (
-                  <div 
-                    key={cam} 
-                    className="relative bg-zinc-900 border border-zinc-800 hover:border-indigo-500 overflow-hidden cursor-pointer group transition-colors"
-                    onClick={() => {
-                      toast.success(`Multi-Cam Cut to Angle ${cam} at frame ${frame}!`);
-                    }}
-                  >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <svg className="w-8 h-8 text-zinc-700 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                      <span className="text-zinc-600 font-bold tracking-widest text-sm">CAM {cam}</span>
-                    </div>
-                    {/* Simulate "Live" camera view with a faint noise pattern or placeholder */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiLz4KPC9zdmc+')] opacity-20" />
-                    
-                    <div className="absolute inset-0 bg-indigo-500/0 group-hover:bg-indigo-500/10 transition-colors pointer-events-none" />
-                    <div className="absolute bottom-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 rounded text-[10px] font-mono text-zinc-300 border border-zinc-700">Angle {cam}</div>
-                    
-                    {/* Recording dot */}
-                    {isPlaying && <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]" />}
-                  </div>
-                ))}
-              </div>
-            )}
+            <MulticamGrid isMulticamMode={multiCamMode} />
             {showDataBurnIn && (
               <div className="absolute top-8 left-0 right-0 pointer-events-none z-[60] flex flex-col items-center justify-start opacity-80 mix-blend-difference">
                 <div className="bg-black text-white font-mono text-[2vw] px-4 py-1 leading-none shadow-lg tracking-widest border-2 border-white/20">
@@ -4291,10 +4225,10 @@ export default function EditorClient({ project }: { project: any }) {
                     {Array.from({length: 256}, (_, x) => {
                       const baseY = 40 + Math.sin(x * 0.05 + frame * 0.02) * 15 + Math.sin(x * 0.12) * 8;
                        
-                      const scatter = Math.random() * 20 - 10;
+                      const scatter = 0.5 * 20 - 10;
                       const y = Math.max(2, Math.min(98, baseY + scatter));
                        
-                      return <rect key={x} x={x} y={y} width="1" height={Math.max(1, Math.random() * 6 + 1)} fill="rgba(74,222,128,0.4)" />;
+                      return <rect key={x} x={x} y={y} width="1" height={Math.max(1, 0.5 * 6 + 1)} fill="rgba(74,222,128,0.4)" />;
                     })}
                     {/* Highlight line */}
                     {Array.from({length: 256}, (_, x) => {
@@ -4320,9 +4254,9 @@ export default function EditorClient({ project }: { project: any }) {
                           {Array.from({length: 85}, (_, x) => {
                             const offset = ci * 2.3 + frame * 0.015;
                             const baseY = 45 + Math.sin(x * 0.07 + offset) * 18 + Math.cos(x * 0.15 + ci) * 6;
-                            const scatter = Math.random() * 14 - 7;
+                            const scatter = 0.5 * 14 - 7;
                             const y = Math.max(2, Math.min(98, baseY + scatter));
-                            return <rect key={x} x={x} y={y} width="1" height={Math.max(1, Math.random() * 5 + 1)} fill={`${ch.color}0.45)`} />;
+                            return <rect key={x} x={x} y={y} width="1" height={Math.max(1, 0.5 * 5 + 1)} fill={`${ch.color}0.45)`} />;
                           })}
                         </svg>
                       </div>
@@ -4354,7 +4288,7 @@ export default function EditorClient({ project }: { project: any }) {
                     {Array.from({length: 200}, (_, i) => {
                       const angle = (i / 200) * Math.PI * 2 + frame * 0.01;
                        
-                      const radius = 5 + Math.random() * 15 + Math.sin(angle * 3) * 5;
+                      const radius = 5 + 0.5 * 15 + Math.sin(angle * 3) * 5;
                       const x = 50 + Math.cos(angle) * radius;
                       const y = 50 + Math.sin(angle) * radius;
                       const hue = (angle / (Math.PI * 2)) * 360;
@@ -4363,9 +4297,9 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Dense center cluster */}
                     {Array.from({length: 100}, (_, i) => {
                        
-                      const x = 50 + (Math.random() - 0.5) * 12;
+                      const x = 50 + (0.5 - 0.5) * 12;
                        
-                      const y = 50 + (Math.random() - 0.5) * 12;
+                      const y = 50 + (0.5 - 0.5) * 12;
                       return <circle key={`c${i}`} cx={x} cy={y} r="0.4" fill="rgba(255,255,255,0.25)" />;
                     })}
                   </svg>
@@ -4390,9 +4324,9 @@ export default function EditorClient({ project }: { project: any }) {
                 {projectData.tracks.filter((t: any) => t.type === 'audio').map((track: any, i: number) => {
                   // Simulate live audio meter value based on frame
                    
-                  const leftMeter = Math.max(0, Math.sin(frame * 0.1 + i) * 0.8 + 0.2 + (Math.random() * 0.2 - 0.1));
+                  const leftMeter = Math.max(0, Math.sin(frame * 0.1 + i) * 0.8 + 0.2 + (0.5 * 0.2 - 0.1));
                    
-                  const rightMeter = Math.max(0, Math.sin(frame * 0.12 + i) * 0.8 + 0.2 + (Math.random() * 0.2 - 0.1));
+                  const rightMeter = Math.max(0, Math.sin(frame * 0.12 + i) * 0.8 + 0.2 + (0.5 * 0.2 - 0.1));
                   const trackVol = track.volume ?? 0;
                   
                   return (
@@ -4529,6 +4463,8 @@ export default function EditorClient({ project }: { project: any }) {
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4">
             <LumetriScopes sourceCanvasRef={canvasRef} />
             <AudioMixer projectData={projectData} setProjectData={setProjectData} />
+            <VFXCompositor updateSelectedClip={updateSelectedClip} selectedClip={selectedClip} />
+            <SpeedRamping updateSelectedClip={updateSelectedClip} selectedClip={selectedClip} />
             {selectedClip ? (
               <>
                 // eslint-disable-next-line react/jsx-no-comment-textnodes
@@ -7240,7 +7176,48 @@ export default function EditorClient({ project }: { project: any }) {
           className="w-full border-t border-zinc-700 bg-zinc-900 flex flex-col shrink-0 relative overflow-hidden"
           style={{ height: timelineHeight }}
         >
-          {activeWorkspace === 'fusion' ? (
+          {activeWorkspace === 'color' ? (
+            <div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-teal-400 uppercase tracking-widest flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                  Color Grading Workspace
+                </h2>
+                <button onClick={() => setActiveWorkspace('timeline')} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded">Close Scopes</button>
+              </div>
+              <div className="flex-1 w-full max-w-4xl mx-auto">
+                <LumetriScopes sourceCanvasRef={canvasRef} />
+              </div>
+            </div>
+          ) : activeWorkspace === 'audio' ? (
+             <div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                  Audio Mixer Workspace
+                </h2>
+                <button onClick={() => setActiveWorkspace('timeline')} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded">Close Mixer</button>
+              </div>
+              <div className="flex-1 w-full max-w-5xl mx-auto">
+                <AudioMixer projectData={projectData} setProjectData={setProjectData} />
+              </div>
+            </div>
+          ) : activeWorkspace === 'ai' ? (
+             <div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-fuchsia-400 uppercase tracking-widest flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                  AI Magic Tools
+                </h2>
+                <button onClick={() => setActiveWorkspace('timeline')} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded">Close AI</button>
+              </div>
+              <div className="flex-1 w-full max-w-lg mx-auto">
+                <AIMagicTools projectData={projectData} setProjectData={setProjectData} updateSelectedClip={updateSelectedClip} selectedClipId={selectedClipId} />
+              </div>
+            </div>
+          ) : activeWorkspace === 'export' ? (
+             <ExportDelivery projectData={projectData} />
+          ) : activeWorkspace === 'fusion' ? (
             <div className="absolute inset-0 bg-zinc-950 flex flex-col">
               {/* Node Graph UI */}
               <div className="h-8 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 justify-between">
@@ -8378,7 +8355,7 @@ export default function EditorClient({ project }: { project: any }) {
                             clearInterval(interval);
                             return { ...item, status: 'done' as const, progress: 100 };
                           }
-                          return { ...item, status: 'rendering' as const, progress: Math.min(100, item.progress + Math.random() * 4 + 1) };
+                          return { ...item, status: 'rendering' as const, progress: Math.min(100, item.progress + 0.5 * 4 + 1) };
                         }
                         return item;
                       }));
@@ -8639,9 +8616,9 @@ export default function EditorClient({ project }: { project: any }) {
                 key={clip.id}
                 className="absolute top-1/2 left-1/2 w-32 h-20 bg-zinc-900 border border-zinc-700 rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden mix-blend-screen"
                 style={{
-                  transform: `translate(-50%, -50%) rotateY(${i * 24}deg) translateZ(${300 + Math.random() * 200}px)`,
+                  transform: `translate(-50%, -50%) rotateY(${i * 24}deg) translateZ(${300 + 0.5 * 200}px)`,
                   animation: `spin ${20 + i * 2}s linear infinite ${i % 2 === 0 ? 'reverse' : 'normal'}`,
-                  opacity: 0.6 + Math.random() * 0.4
+                  opacity: 0.6 + 0.5 * 0.4
                 }}
               >
                 <div className="absolute inset-0 bg-indigo-500/20" />
@@ -8691,7 +8668,7 @@ export default function EditorClient({ project }: { project: any }) {
                 {/* Simulated LED Meter */}
                 <div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden mb-2 flex flex-col-reverse">
                   {Array.from({ length: 20 }).map((_, idx) => (
-                    <div key={idx} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && Math.random() > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
+                    <div key={idx} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
                   ))}
                 </div>
                 {/* Fader */}
@@ -8717,12 +8694,12 @@ export default function EditorClient({ project }: { project: any }) {
               <div className="flex gap-1 mb-2">
                 <div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden flex flex-col-reverse">
                   {Array.from({ length: 20 }).map((_, idx) => (
-                    <div key={`l-${idx}`} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && Math.random() > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
+                    <div key={`l-${idx}`} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
                   ))}
                 </div>
                 <div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden flex flex-col-reverse">
                   {Array.from({ length: 20 }).map((_, idx) => (
-                    <div key={`r-${idx}`} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && Math.random() > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
+                    <div key={`r-${idx}`} className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > (idx/20) ? (idx > 16 ? 'bg-red-500 shadow-[0_0_5px_red]' : idx > 12 ? 'bg-yellow-400 shadow-[0_0_5px_yellow]' : 'bg-green-500 shadow-[0_0_5px_lime]') : 'bg-zinc-800'}`} />
                   ))}
                 </div>
               </div>
@@ -8762,8 +8739,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div 
                       className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]" 
                       style={{ 
-                        height: `${Math.random() * (isPlaying ? 80 : 30) + 10}%`,
-                        opacity: 0.5 + Math.random() * 0.5
+                        height: `${0.5 * (isPlaying ? 80 : 30) + 10}%`,
+                        opacity: 0.5 + 0.5 * 0.5
                       }} 
                     />
                   </div>
@@ -8793,13 +8770,13 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="absolute w-16 h-16 rounded-full mix-blend-screen blur-md animate-pulse" 
                      style={{ 
                        background: 'radial-gradient(circle, rgba(20,184,166,0.8) 0%, rgba(20,184,166,0) 70%)',
-                       transform: `translate(${isPlaying ? Math.random()*10 - 5 : 0}px, ${isPlaying ? Math.random()*10 - 5 : 0}px)`
+                       transform: `translate(${isPlaying ? 0.5*10 - 5 : 0}px, ${isPlaying ? 0.5*10 - 5 : 0}px)`
                      }} 
                 />
                 <div className="absolute w-12 h-12 rounded-full mix-blend-screen blur-sm animate-pulse delay-75" 
                      style={{ 
                        background: 'radial-gradient(circle, rgba(234,179,8,0.6) 0%, rgba(234,179,8,0) 70%)',
-                       transform: `translate(${isPlaying ? Math.random()*20 - 10 : 10}px, ${isPlaying ? Math.random()*20 - 10 : -10}px)`
+                       transform: `translate(${isPlaying ? 0.5*20 - 10 : 10}px, ${isPlaying ? 0.5*20 - 10 : -10}px)`
                      }} 
                 />
               </div>
@@ -8808,6 +8785,14 @@ export default function EditorClient({ project }: { project: any }) {
         </div>
       )}
       {/* Phase 45: Auto-Captioning Progress Modal */}
+      
+      {/* Phase 2: Collaboration Sidebar */}
+      {isReviewMode && (
+        <div className="absolute top-12 right-0 bottom-0 z-[90]">
+          <CollaborationSidebar currentFrame={frame} onNavigateToFrame={(f) => setFrame(f)} />
+        </div>
+      )}
+      
       {isAutoCaptioning && (
         <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center">
           <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">

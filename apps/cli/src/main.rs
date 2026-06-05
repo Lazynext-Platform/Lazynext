@@ -4,33 +4,7 @@ use gpu::{GpuContext, wgpu};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
-use serde::Deserialize;
-
-#[derive(Deserialize, Debug, Clone)]
-struct ClipConfig {
-    id: String,
-    name: String,
-    start_frame: u32,
-    duration_frames: u32,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct TrackConfig {
-    id: String,
-    name: String,
-    clips: Vec<ClipConfig>,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct ProjectConfig {
-    width: u32,
-    height: u32,
-    fps: f32,
-    duration_frames: u32,
-    bg_color: [f32; 4],
-    #[serde(default)]
-    tracks: Vec<TrackConfig>,
-}
+use state::{ProjectData, Track, Clip};
 
 // Generate a pseudo-random RGBA color based on the clip name
 fn get_color_for_name(name: &str) -> [u8; 4] {
@@ -104,9 +78,18 @@ async fn main() {
         std::process::exit(1);
     });
     
-    let project: ProjectConfig = serde_json::from_str(&project_json).unwrap_or_else(|e| {
+    let project: ProjectData = serde_json::from_str(&project_json).unwrap_or_else(|e| {
         eprintln!("Failed to parse project JSON: {}", e);
         std::process::exit(1);
+    });
+    
+    // Wire up the satellite uplink!
+    let shared_project = std::sync::Arc::new(std::sync::Mutex::new(Some(project.clone())));
+    
+    // Spawn the daemon
+    let daemon_project_ref = std::sync::Arc::clone(&shared_project);
+    tokio::spawn(async move {
+        satellite_uplink::start_satellite_listener(daemon_project_ref).await;
     });
     
     // 1. Initialize GPU
@@ -139,6 +122,8 @@ async fn main() {
     });
     
     println!("Starting render pipeline for {} at {}x{} ({} fps)...", output_file, project.width, project.height, project.fps);
+    // Grab latest project from daemon
+    let project = shared_project.lock().unwrap().clone().unwrap();
     
     let total_frames = project.duration_frames;
     

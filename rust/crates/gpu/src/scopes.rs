@@ -1,5 +1,6 @@
 use wgpu::{Device, Queue, ComputePipeline, Buffer};
 
+#[allow(dead_code)]
 pub struct ColorScopesAnalyzer {
     pipeline: ComputePipeline,
     buffer: Buffer,
