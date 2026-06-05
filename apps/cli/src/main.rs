@@ -4,7 +4,7 @@ use gpu::{GpuContext, wgpu};
 use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
 
-use state::{ProjectData, Track, Clip};
+use state::ProjectData;
 
 // Generate a pseudo-random RGBA color based on the clip name
 fn get_color_for_name(name: &str) -> [u8; 4] {
@@ -64,6 +64,18 @@ async fn main() {
     let command = &args[1];
     let project_file = &args[2];
     let output_file = args.get(3).map(|s| s.as_str()).unwrap_or("output.mp4");
+
+    let project_json = std::fs::read_to_string(project_file).unwrap_or_else(|_| {
+        eprintln!("Failed to read {}", project_file);
+        std::process::exit(1);
+    });
+    
+    let project: ProjectData = serde_json::from_str(&project_json).unwrap_or_else(|e| {
+        eprintln!("Failed to parse project JSON: {}", e);
+        std::process::exit(1);
+    });
+    
+    let shared_project = std::sync::Arc::new(std::sync::Mutex::new(Some(project.clone())));
 
     if command == "prompt" {
         let prompt_text = output_file;
@@ -139,24 +151,12 @@ async fn main() {
     println!("Initializing Lazynext Headless Engine...");
     println!("Loading project: {}", project_file);
     
-    let project_json = std::fs::read_to_string(project_file).unwrap_or_else(|_| {
-        eprintln!("Failed to read {}", project_file);
-        std::process::exit(1);
-    });
-    
-    let project: ProjectData = serde_json::from_str(&project_json).unwrap_or_else(|e| {
-        eprintln!("Failed to parse project JSON: {}", e);
-        std::process::exit(1);
-    });
-    
     // Wire up the satellite uplink!
-    let shared_project = std::sync::Arc::new(std::sync::Mutex::new(Some(project.clone())));
-    
     // Spawn the daemon
-    let daemon_project_ref = std::sync::Arc::clone(&shared_project);
-    tokio::spawn(async move {
-        satellite_uplink::start_satellite_listener(daemon_project_ref).await;
-    });
+    // let daemon_project_ref = std::sync::Arc::clone(&shared_project);
+    // tokio::spawn(async move {
+    //     // satellite_uplink::start_satellite_listener(daemon_project_ref).await;
+    // });
     
     // 1. Initialize GPU
     let gpu = GpuContext::new().await.expect("Failed to initialize GPU context");

@@ -92,7 +92,7 @@ impl AppWindow {
                 div().text_sm().font_weight(FontWeight::BOLD).text_color(rgb(0x3b82f6)).mb(px(8.)).child("AGENT CHAT")
             )
             .child(
-                div().flex_1().overflow_y_scroll().flex().flex_col().gap_2().child(
+                div().flex_1().overflow_hidden().flex().flex_col().gap_2().child(
                     div().text_sm().text_color(rgb(0xa1a1aa)).child("System: Awaiting your instructions...")
                 )
             )
