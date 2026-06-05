@@ -79,11 +79,15 @@ async fn main() {
 
     if command == "prompt" {
         let prompt_text = output_file;
-        println!("[AI AGENT: CLAUDE 3.5 SONNET]");
-        println!("> Sending prompt to Anthropic API: '{}'", prompt_text);
+        let provider = std::env::var("LAZYNEXT_AI_PROVIDER").unwrap_or_else(|_| "anthropic".to_string());
+        let model = std::env::var("LAZYNEXT_AI_MODEL").unwrap_or_else(|_| "".to_string());
+        let api_key = match provider.as_str() {
+            "openai" | "gpt" => std::env::var("OPENAI_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
+            _ => std::env::var("ANTHROPIC_API_KEY").unwrap_or_else(|_| "mock_key".to_string()),
+        };
         
-        let api_key = std::env::var("ANTHROPIC_API_KEY").unwrap_or_else(|_| "mock_key_for_testing".to_string());
-        let agent = agent::ClaudeAgent::new(api_key);
+        let agent = agent::AgentFactory::create(&provider, &model, &api_key)
+            .expect("Failed to initialize AgentProvider");
         
         // Let's actually execute the prompt asynchronously
         match agent.send_prompt(prompt_text).await {
