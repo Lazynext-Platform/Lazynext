@@ -87,6 +87,17 @@ pub fn get_available_tools() -> Vec<Tool> {
                 },
                 "required": ["style"]
             }),
+        },
+        Tool {
+            name: "transcribe_video".to_string(),
+            description: "Transcribes the spoken words in the video using an AI Whisper model.".to_string(),
+            input_schema: serde_json::json!({
+                "type": "object",
+                "properties": {
+                    "language": { "type": "string", "description": "The language code, e.g. 'en', or 'auto'" }
+                },
+                "required": []
+            }),
         }
     ]
 }
