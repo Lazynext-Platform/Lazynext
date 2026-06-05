@@ -5,6 +5,7 @@ use reqwest::Client;
 use serde_json::json;
 use async_trait::async_trait;
 
+#[derive(Debug)]
 pub enum AgentResponse {
     Text(String),
     ToolCall { name: String, input: serde_json::Value },

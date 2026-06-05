@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 state = { path = "../../rust/crates/state" }
 compositor = { path = "../../rust/crates/compositor" }
+agent = { path = "../../rust/crates/agent" }
+tokio = { version = "1.0", features = ["full"] }

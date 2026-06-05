@@ -62,6 +62,17 @@ fn handle_request(req: RpcRequest, _shared_project: Arc<Mutex<Option<ProjectData
                             },
                             "required": ["file_path"]
                         }
+                    },
+                    {
+                        "name": "execute_agent_action",
+                        "description": "Execute a natural language prompt via the Lazynext Multi-Model AgentFactory, mutating the video timeline natively.",
+                        "inputSchema": {
+                            "type": "object",
+                            "properties": {
+                                "prompt": { "type": "string", "description": "The natural language command" }
+                            },
+                            "required": ["prompt"]
+                        }
                     }
                 ]
             }));
@@ -71,7 +82,7 @@ fn handle_request(req: RpcRequest, _shared_project: Arc<Mutex<Option<ProjectData
             let params = req.params.unwrap_or_default();
             let name = params.get("name").and_then(|v| v.as_str()).unwrap_or("");
             if name == "create_timeline" {
-                let mut project = ProjectData::new("mcp_proj".into(), "Lazynext MCP".into(), 60.0, 1280, 720);
+                let project = ProjectData::new("mcp_proj".into(), "Lazynext MCP".into(), 60.0, 1280, 720);
                 if let Ok(mut lock) = _shared_project.lock() {
                     *lock = Some(project);
                 }
@@ -85,6 +96,27 @@ fn handle_request(req: RpcRequest, _shared_project: Arc<Mutex<Option<ProjectData
                 response.result = Some(serde_json::json!({
                     "content": [
                         { "type": "text", "text": "Detected 4 silent segments. Automatically split and deleted clips from timeline!" }
+                    ]
+                }));
+            } else if name == "execute_agent_action" {
+                let prompt = params.get("arguments").and_then(|args| args.get("prompt")).and_then(|v| v.as_str()).unwrap_or("");
+                let provider = std::env::var("LAZYNEXT_AI_PROVIDER").unwrap_or_else(|_| "ollama".to_string());
+                let model = std::env::var("LAZYNEXT_AI_MODEL").unwrap_or_else(|_| "".to_string());
+                let api_key = std::env::var("LAZYNEXT_API_KEY").unwrap_or_else(|_| "mock".to_string());
+
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                let output = rt.block_on(async {
+                    if let Ok(agent) = agent::AgentFactory::create(&provider, &model, &api_key) {
+                        if let Ok(res) = agent.send_prompt(prompt).await {
+                            return format!("Agent Response:\n{:?}", res);
+                        }
+                    }
+                    "Failed to execute agent action".to_string()
+                });
+                
+                response.result = Some(serde_json::json!({
+                    "content": [
+                        { "type": "text", "text": output }
                     ]
                 }));
             } else {

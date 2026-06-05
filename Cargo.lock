@@ -4074,8 +4074,10 @@ dependencies = [
 name = "mobile"
 version = "0.1.0"
 dependencies = [
+ "agent",
  "compositor",
  "state",
+ "tokio",
 ]
 
 [[package]]
