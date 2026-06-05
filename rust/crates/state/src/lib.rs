@@ -65,3 +65,46 @@ impl ProjectData {
         false
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_project_creation() {
+        let proj = ProjectData::new("test_id".into(), "Test Project".into(), 60.0, 1920, 1080);
+        assert_eq!(proj.id, "test_id");
+        assert_eq!(proj.name, "Test Project");
+        assert_eq!(proj.fps, 60.0);
+        assert_eq!(proj.width, 1920);
+        assert_eq!(proj.height, 1080);
+        assert!(proj.tracks.is_empty());
+    }
+
+    #[test]
+    fn test_add_track_and_clip() {
+        let mut proj = ProjectData::new("proj1".into(), "Proj 1".into(), 24.0, 1920, 1080);
+        let mut track = Track {
+            id: "track1".into(),
+            name: "V1".into(),
+            track_type: "video".into(),
+            clips: Vec::new(),
+        };
+        let clip = Clip {
+            id: "clip1".into(),
+            name: "My Video".into(),
+            start_frame: 0,
+            duration_frames: 240, // 10 seconds at 24fps
+            media_id: "my_video.mp4".into(),
+            is_disabled: false,
+        };
+        
+        track.clips.push(clip);
+        proj.add_track(track);
+
+        assert_eq!(proj.tracks.len(), 1);
+        assert_eq!(proj.tracks[0].clips.len(), 1);
+        assert_eq!(proj.tracks[0].clips[0].media_id, "my_video.mp4");
+        assert_eq!(proj.tracks[0].clips[0].duration_frames, 240);
+    }
+}

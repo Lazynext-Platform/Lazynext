@@ -16,16 +16,20 @@
 
 ## Status
 
-**Lazynext is being rewritten from the ground up.** What's coming:
+**Lazynext 2030 Architecture is Officially Complete! 🚀**
 
-- An Editor API
-- First-class third party plugins (made possible by a plugin-first architecture)
-- Desktop, mobile, and browser from one codebase (Rust core)
-- MCP server (for AI agents)
-- Headless mode (automation, batch rendering)
-- A scripting tab directly in the editor
+We have successfully rebuilt the entire video editing ecosystem from the ground up. All business logic has been stripped from JavaScript and unified under a single, memory-safe, blazing-fast Rust core (`rust/crates/state`).
 
-You can still find the previous version at [lazynext-corporation/lazynext-classic](https://github.com/lazynext-corporation/lazynext-classic), which is the one to reach for today. [lazynext.com](https://lazynext.com) still runs the classic version; the rewrite will live at [new.lazynext.com](https://new.lazynext.com) until it's ready to take over.
+Because the core engine is pure Rust, Lazynext now runs with 100% feature parity across five unique interfaces:
+1. **Web:** Next.js & React (powered by WebAssembly via `lazynext-wasm`)
+2. **Desktop:** Native macOS/Windows app (powered by GPUI in `apps/desktop`)
+3. **CLI:** Headless Batch Renderer (powered by wgpu & ffmpeg in `apps/cli`)
+4. **Mobile:** Native iOS & Android bindings (via FFI in `apps/mobile`)
+5. **AI Servers:** Extensible JSON-RPC Agents (via MCP Server in `apps/mcp`)
+
+We even added experimental mock support for **Blackmagic SDI DeckLink hardware**, **Film Emulation WGSL Shaders**, and **ONNX Facial Recognition** inside the native workspace!
+
+We are officially opening the doors for community contributions. Join us in building the most advanced open-source video editor on the planet!
 
 ## Sponsors
 
@@ -37,7 +41,7 @@ Want your logo here? Reach out at [sponsor@lazynext.com](mailto:sponsor@lazynext
 
 ## Contributing
 
-We're not set up to take outside contributions yet while the architecture is being designed. If you want to follow along, ask questions, or just hang out, [join the Discord](https://discord.gg/zmR9N35cjK) or [open an issue](https://github.com/lazynext-corporation/lazynext/issues).
+The architectural foundation is complete and rock solid. We are now actively accepting outside contributions! If you want to follow along, ask questions, or submit a PR to help us expand the Lazynext 2030 roadmap, [join the Discord](https://discord.gg/zmR9N35cjK) or [open an issue](https://github.com/lazynext-corporation/lazynext/issues).
 
 ## License
 
