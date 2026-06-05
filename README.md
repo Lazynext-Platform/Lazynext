@@ -4,8 +4,8 @@
       <img src="https://assets.lazynext.com/branding/symbol.svg" alt="Lazynext Logo" width="100" />
     </td>
     <td align="right">
-      <h1>Lazynext</h1>
-      <h3 style="margin-top: -10px;">A free and open source video editor for web, desktop, and mobile.</h3>
+      <h1>Lazynext 2030</h1>
+      <h3 style="margin-top: -10px;">The World's First Fully Autonomous, Agentic, Prompt-to-Video Editing Platform.</h3>
     </td>
   </tr>
 </table>
@@ -14,22 +14,23 @@
 [![X](https://img.shields.io/badge/follow-%40lazynextapp-000?logo=x&logoColor=fff&style=flat)](https://x.com/lazynextapp)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat)](LICENSE)
 
-## Status
+## The Paradigm Shift
 
-**Lazynext 2030 Architecture is Officially Complete! 🚀**
+**The traditional timeline is dead. 🚀**
 
-We have successfully rebuilt the entire video editing ecosystem from the ground up. All business logic has been stripped from JavaScript and unified under a single, memory-safe, blazing-fast Rust core (`rust/crates/state`).
+We have completely ripped out the complex tracks, the razor blade tools, and the overwhelming legacy UI. Lazynext has successfully pivoted to a **100% Agentic Architecture**. You do not edit the video yourself anymore; you simply chat with a built-in AI (powered natively by Anthropic's Claude 3.5 Sonnet), and the AI directly mutates the video project state on your behalf.
 
-Because the core engine is pure Rust, Lazynext now runs with 100% feature parity across five unique interfaces:
-1. **Web:** Next.js & React (powered by WebAssembly via `lazynext-wasm`)
-2. **Desktop:** Native macOS/Windows app (powered by GPUI in `apps/desktop`)
-3. **CLI:** Headless Batch Renderer (powered by wgpu & ffmpeg in `apps/cli`)
-4. **Mobile:** Native iOS & Android bindings (via FFI in `apps/mobile`)
-5. **AI Servers:** Extensible JSON-RPC Agents (via MCP Server in `apps/mcp`)
+## How It Works
 
-We even added experimental mock support for **Blackmagic SDI DeckLink hardware**, **Film Emulation WGSL Shaders**, and **ONNX Facial Recognition** inside the native workspace!
+Because we separated all the business logic into a single, memory-safe, blazing-fast Rust core (`rust/crates/state` and `rust/crates/agent`), Lazynext is able to run the exact same LLM-driven video editing brain seamlessly across **five** unique interfaces:
 
-We are officially opening the doors for community contributions. Join us in building the most advanced open-source video editor on the planet!
+1. **Web Agent:** A React-based floating Chat UI running Next.js.
+2. **Desktop Agent:** A native macOS/Windows GPUI Chat interface running natively next to the massive video canvas.
+3. **CLI Agent:** A hacker-style TUI (`lazynext-cli prompt "cut the video"`) that runs entirely headless.
+4. **Mobile Voice Agent:** Native iOS & Android bindings providing a voice-first agentic interface on the go.
+5. **MCP Server:** An open JSON-RPC agent protocol allowing *any* external AI to connect and edit videos in Lazynext!
+
+Under the hood, the AI issues structured `ToolCall` JSON commands (like `cut_silences` or `color_grade`), and the Rust backend mathematically slices the clips and applies WGSL shaders natively via `wgpu`. 
 
 ## Sponsors
 
@@ -41,7 +42,7 @@ Want your logo here? Reach out at [sponsor@lazynext.com](mailto:sponsor@lazynext
 
 ## Contributing
 
-The architectural foundation is complete and rock solid. We are now actively accepting outside contributions! If you want to follow along, ask questions, or submit a PR to help us expand the Lazynext 2030 roadmap, [join the Discord](https://discord.gg/zmR9N35cjK) or [open an issue](https://github.com/lazynext-corporation/lazynext/issues).
+The architectural foundation of the agentic era is complete and rock solid. We are now actively accepting outside contributions! If you want to help us expand the Lazynext 2030 autonomous roadmap, [join the Discord](https://discord.gg/zmR9N35cjK) or [open an issue](https://github.com/lazynext-corporation/lazynext/issues).
 
 ## License
 
