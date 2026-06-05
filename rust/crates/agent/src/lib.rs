@@ -4,6 +4,12 @@ use anyhow::{Result, Context};
 use reqwest::Client;
 use serde_json::json;
 
+pub enum AgentResponse {
+    Text(String),
+    ToolCall { name: String, input: serde_json::Value },
+    Multiple(Vec<AgentResponse>),
+}
+
 pub struct ClaudeAgent {
     client: Client,
     api_key: String,
@@ -17,7 +23,7 @@ impl ClaudeAgent {
         }
     }
 
-    pub async fn send_prompt(&self, prompt: &str) -> Result<String> {
+    pub async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
         let tools = tools::get_available_tools();
         
         let payload = json!({
@@ -44,23 +50,23 @@ impl ClaudeAgent {
 
         let body: serde_json::Value = res.json().await.context("Failed to parse response JSON")?;
         
-        // Extract the text response or tool calls
         if let Some(content) = body["content"].as_array() {
-            let mut output = String::new();
+            let mut responses = vec![];
             for block in content {
                 if block["type"] == "tool_use" {
-                    let tool_name = block["name"].as_str().unwrap_or("unknown");
-                    let tool_input = &block["input"];
-                    output.push_str(&format!("\n[AGENT TRIGGERED TOOL: {} with input: {}]", tool_name, tool_input));
+                    responses.push(AgentResponse::ToolCall {
+                        name: block["name"].as_str().unwrap_or("unknown").to_string(),
+                        input: block["input"].clone()
+                    });
                 } else if block["type"] == "text" {
                     if let Some(text) = block["text"].as_str() {
-                        output.push_str(&format!("\n[AGENT MESSAGE: {}]", text));
+                        responses.push(AgentResponse::Text(text.to_string()));
                     }
                 }
             }
-            Ok(output)
+            Ok(AgentResponse::Multiple(responses))
         } else {
-            Ok(format!("Error: Unexpected response format: {}", body))
+            Ok(AgentResponse::Text(format!("Error: Unexpected response format: {}", body)))
         }
     }
 }

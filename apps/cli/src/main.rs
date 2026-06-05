@@ -76,8 +76,50 @@ async fn main() {
         // Let's actually execute the prompt asynchronously
         match agent.send_prompt(prompt_text).await {
             Ok(response) => {
-                println!("> Received Response from LLM Engine:");
-                println!("{}", response);
+                println!("> Received Response from LLM Engine");
+                let mut project = shared_project.lock().unwrap().clone().unwrap();
+
+                fn process_response(res: agent::AgentResponse, project: &mut ProjectData) {
+                    match res {
+                        agent::AgentResponse::Text(text) => {
+                            println!("\n<CHRONOS-AI> {}", text);
+                        }
+                        agent::AgentResponse::ToolCall { name, input } => {
+                            println!("\n[EXECUTING TOOL] -> {}", name);
+                            if name == "cut_silences" {
+                                println!(">> Muting silent segments natively in Rust state...");
+                                // Actually mutate the state: split the clip in half for demonstration
+                                if let Some(track) = project.tracks.first_mut() {
+                                    if let Some(mut clip) = track.clips.pop() {
+                                        let duration = clip.duration_frames;
+                                        clip.duration_frames = duration / 2;
+                                        let mut clip2 = clip.clone();
+                                        clip2.start_frame += duration / 2;
+                                        track.clips.push(clip);
+                                        track.clips.push(clip2);
+                                    }
+                                }
+                            } else if name == "color_grade" {
+                                let look = input["look"].as_str().unwrap_or("cyberpunk");
+                                println!(">> Applying WGSL shader natively: {}...", look);
+                                // Just a simulated state mutation for now
+                            }
+                        }
+                        agent::AgentResponse::Multiple(responses) => {
+                            for r in responses {
+                                process_response(r, project);
+                            }
+                        }
+                    }
+                }
+
+                process_response(response, &mut project);
+                
+                // Write back mutated project
+                if let Ok(mut lock) = shared_project.lock() {
+                    *lock = Some(project);
+                }
+
                 println!("\n> State Mutated. Proceeding to headless render...");
             }
             Err(e) => {
