@@ -65,7 +65,18 @@ export function MediaPoolSidebar({
     setSplitAudioVideoOnImport,
     sidebarTab,
     sidebarWidth,
-    splitAudioVideoOnImport
+    splitAudioVideoOnImport,
+    setIsEmotionHeatmapMode,
+    isEmotionHeatmapMode,
+    handleSyncAudioVideo,
+    handleSceneCutDetection,
+    handleDubVoiceTrack,
+    handleMorphLips,
+    handleTranscribeAudio,
+    handleVisualDebugger,
+    handleAddNodeToGraph,
+    setAssets,
+    setInstalledPlugins
 }: MediaPoolSidebarProps) {
   return (
 <aside
