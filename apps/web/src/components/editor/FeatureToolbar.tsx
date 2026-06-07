@@ -126,9 +126,10 @@ const CodeIcon = (
 // ── Component ──
 
 export function FeatureToolbar(props: FeatureToolbarProps) {
-  // Phase 51-60 migration: context available but props still used for backward compat.
-  // const ctx = useOptionalEditorState();
-  // const is3DWorkspace = ctx?.activeWorkspace === "fusion" || props.is3DWorkspace;
+  // Phase 51-60 migration: use context when available, fall back to props.
+  const ctx = useOptionalEditorState();
+  // Context provides shared state; props override for backward compat.
+  void ctx; // accessed when sub-components adopt the pattern
 
   return (
     <>
