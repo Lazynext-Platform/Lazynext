@@ -9,6 +9,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { NLEState } from 'lazynext-wasm';
+import type { Project } from "@/types/editor";
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
 import { saveProjectState, loadProjectState, clearProjectState } from '@/lib/db';
@@ -32,7 +33,7 @@ import { ExperimentalPanels } from "./ExperimentalPanels";
 
 import { INITIAL_ASSETS } from "./editor-defaults";
 
-export default function EditorClient({ project }: { project: any }) {
+export default function EditorClient({ project }: { project: Project }) {
   const lastSavedProject = useRef<string>('');
   const mediaRecorderRef = useRef<any>(null);
   const audioChunksRef = useRef<any[]>([]);
