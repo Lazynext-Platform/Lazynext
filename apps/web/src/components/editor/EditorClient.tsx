@@ -9,7 +9,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { NLEState } from 'lazynext-wasm';
-import type { Project } from "@/types/editor";
+import type { Project, Asset, TimelineMarker } from "@/types/editor";
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
 import { saveProjectState, loadProjectState, clearProjectState } from '@/lib/db';
@@ -40,8 +40,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [frame, setFrame] = useState(0);
 
   const [projectData, setProjectData] = useState(project);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [assets, setAssets] = useState<any[]>([]);
+  const [assets, setAssets] = useState<Asset[]>([]);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
   const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
@@ -56,8 +55,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cloudComments, setCloudComments] = useState<any[]>([]);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [markers, setMarkers] = useState<any[]>([]);
+  const [markers, setMarkers] = useState<TimelineMarker[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contextMenu, setContextMenu] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
