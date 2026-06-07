@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { evaluateMathExpression } from "../math";
+import { evaluateMathExpression, solveCubicBezier } from "../math";
 
 describe("evaluateMathExpression", () => {
 	describe("basic arithmetic", () => {
@@ -116,5 +116,38 @@ describe("evaluateMathExpression", () => {
 			expect(evaluateMathExpression({ input: "[].constructor" })).toBeNull();
 			expect(evaluateMathExpression({ input: "({}).constructor" })).toBeNull();
 		});
+	});
+});
+
+describe("solveCubicBezier", () => {
+	it("linear bezier (0,0,1,1) returns identity", () => {
+		expect(solveCubicBezier({ p: 0, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBe(0);
+		expect(solveCubicBezier({ p: 0.5, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBeCloseTo(0.5);
+		expect(solveCubicBezier({ p: 1, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBe(1);
+	});
+
+	it("ease-in-out (0.42,0,0.58,1) returns expected midpoint", () => {
+		const val = solveCubicBezier({ p: 0.5, p1x: 0.42, p1y: 0, p2x: 0.58, p2y: 1 });
+		expect(val).toBe(0.5); // ease-in-out midpoint is exactly 0.5
+	});
+
+	it("ease-in (0.42,0,1,1) starts slow", () => {
+		expect(solveCubicBezier({ p: 0, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(0);
+		expect(solveCubicBezier({ p: 0.25, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBeLessThan(0.25);
+		expect(solveCubicBezier({ p: 1, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(1);
+	});
+
+	it("ease-out (0,0,0.58,1) ends slow", () => {
+		expect(solveCubicBezier({ p: 0.75, p1x: 0, p1y: 0, p2x: 0.58, p2y: 1 })).toBeGreaterThan(0.75);
+	});
+
+	it("returns monotonic results", () => {
+		let prev = -Infinity;
+		for (let i = 0; i <= 10; i++) {
+			const p = i / 10;
+			const val = solveCubicBezier({ p, p1x: 0.42, p1y: 0, p2x: 0.58, p2y: 1 });
+			expect(val).toBeGreaterThanOrEqual(prev);
+			prev = val;
+		}
 	});
 });
