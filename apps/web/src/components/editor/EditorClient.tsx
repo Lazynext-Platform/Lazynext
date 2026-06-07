@@ -4,6 +4,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NLEState } from 'lazynext-wasm';
 import { useEditorState } from './useEditorState';
+import { RenderFarmModal } from './RenderFarmModal';
+import { BezierEditorModal } from './BezierEditorModal';
 import type { Project, Asset, TimelineMarker } from "@/types/editor";
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
@@ -6290,47 +6292,7 @@ export default function EditorClient({ project }: { project: Project }) {
       )}
 
       {/* Phase 25: Render Farm Dashboard Modal */}
-      {isFarmRendering && (
-        <div className="absolute inset-0 z-[60] bg-black/90 backdrop-blur-xl flex items-center justify-center transition-opacity duration-300">
-          <div className="bg-zinc-900 border border-zinc-700/50 p-8 rounded-xl shadow-2xl w-[600px] flex flex-col relative overflow-hidden">
-            <h3 className="text-white text-2xl font-bold mb-6 flex items-center gap-3">
-              <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-              Distributed Render Farm
-            </h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              {farmProgress.map((node: { node: string; status: string; progress: number }) => (
-                <div key={node.node} className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 relative overflow-hidden">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-zinc-300">Node {node.node}</span>
-                    <span className={`text-xs font-bold ${node.status === 'Complete' ? 'text-emerald-400' : 'text-blue-400'}`}>{node.status}</span>
-                  </div>
-                  <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden mb-1">
-                    <div
-                      className={`h-full transition-all duration-300 ${node.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
-                      style={{ width: `${node.progress}%` }}
-                    />
-                  </div>
-                  <div className="text-right text-[10px] text-zinc-500 font-mono">{Math.round(node.progress)}%</div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex justify-center">
-              {farmProgress.every((n: { progress: number }) => n.progress === 100) ? (
-                <div className="px-6 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/50">
-                  Render Complete
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-zinc-400 text-sm">
-                  <svg className="w-4 h-4 animate-spin text-blue-500" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  Processing across 4 Cloud Nodes...
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <RenderFarmModal isOpen={isFarmRendering} farmProgress={farmProgress} />
 
         {/* Modals & Popovers */}
 
@@ -6493,92 +6455,7 @@ export default function EditorClient({ project }: { project: Project }) {
       ))}
 
       {/* Bezier Graph Editor Modal */}
-      {bezierEditor && (
-        <div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl p-6 w-[400px] flex flex-col relative overflow-hidden">
-            <div className="flex justify-between items-center mb-4 border-b border-zinc-800 pb-3">
-              <h3 className="text-zinc-200 font-medium text-sm flex items-center gap-2">
-                <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
-                Graph Editor: {bezierEditor.property}
-              </h3>
-              <button onClick={() => setBezierEditor(null)} className="text-zinc-500 hover:text-white transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-              </button>
-            </div>
-
-            <div className="relative w-full aspect-square bg-zinc-950 border border-zinc-800 rounded-lg mb-6 group overflow-hidden">
-              <svg className="w-full h-full absolute inset-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {/* Grid */}
-                <line x1="0" y1="25" x2="100" y2="25" stroke="#27272a" strokeWidth="1" />
-                <line x1="0" y1="50" x2="100" y2="50" stroke="#27272a" strokeWidth="1" />
-                <line x1="0" y1="75" x2="100" y2="75" stroke="#27272a" strokeWidth="1" />
-                <line x1="25" y1="0" x2="25" y2="100" stroke="#27272a" strokeWidth="1" />
-                <line x1="50" y1="0" x2="50" y2="100" stroke="#27272a" strokeWidth="1" />
-                <line x1="75" y1="0" x2="75" y2="100" stroke="#27272a" strokeWidth="1" />
-
-                {/* The Bezier Curve */}
-                <path
-                  d={`M0 100 C ${bezierEditor.curve[0]*100} ${100 - bezierEditor.curve[1]*100}, ${bezierEditor.curve[2]*100} ${100 - bezierEditor.curve[3]*100}, 100 0`}
-                  fill="none" stroke="#6366f1" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]"
-                />
-
-                {/* Handles */}
-                <line x1="0" y1="100" x2={bezierEditor.curve[0]*100} y2={100 - bezierEditor.curve[1]*100} stroke="#a1a1aa" strokeWidth="1" strokeDasharray="4 2" />
-                <line x1="100" y1="0" x2={bezierEditor.curve[2]*100} y2={100 - bezierEditor.curve[3]*100} stroke="#a1a1aa" strokeWidth="1" strokeDasharray="4 2" />
-                <circle cx={bezierEditor.curve[0]*100} cy={100 - bezierEditor.curve[1]*100} r="3" fill="#6366f1" />
-                <circle cx={bezierEditor.curve[2]*100} cy={100 - bezierEditor.curve[3]*100} r="3" fill="#ec4899" />
-              </svg>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
-                <span className="text-xs text-indigo-400 font-semibold mb-1">Point 1</span>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-500 w-4">X</span>
-                  <input type="range" min="0" max="1" step="0.01" value={bezierEditor.curve[0]} onChange={(e) => setBezierEditor(prev => prev ? {...prev, curve: [parseFloat(e.target.value), prev.curve[1], prev.curve[2], prev.curve[3]]} : null)} className="flex-1 accent-indigo-500 mx-2 h-1" />
-                  <span className="text-[10px] text-zinc-300 w-6">{bezierEditor.curve[0].toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-500 w-4">Y</span>
-                  <input type="range" min="-0.5" max="1.5" step="0.01" value={bezierEditor.curve[1]} onChange={(e) => setBezierEditor(prev => prev ? {...prev, curve: [prev.curve[0], parseFloat(e.target.value), prev.curve[2], prev.curve[3]]} : null)} className="flex-1 accent-indigo-500 mx-2 h-1" />
-                  <span className="text-[10px] text-zinc-300 w-6">{bezierEditor.curve[1].toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
-                <span className="text-xs text-pink-400 font-semibold mb-1">Point 2</span>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-500 w-4">X</span>
-                  <input type="range" min="0" max="1" step="0.01" value={bezierEditor.curve[2]} onChange={(e) => setBezierEditor(prev => prev ? {...prev, curve: [prev.curve[0], prev.curve[1], parseFloat(e.target.value), prev.curve[3]]} : null)} className="flex-1 accent-pink-500 mx-2 h-1" />
-                  <span className="text-[10px] text-zinc-300 w-6">{bezierEditor.curve[2].toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-500 w-4">Y</span>
-                  <input type="range" min="-0.5" max="1.5" step="0.01" value={bezierEditor.curve[3]} onChange={(e) => setBezierEditor(prev => prev ? {...prev, curve: [prev.curve[0], prev.curve[1], prev.curve[2], parseFloat(e.target.value)]} : null)} className="flex-1 accent-pink-500 mx-2 h-1" />
-                  <span className="text-[10px] text-zinc-300 w-6">{bezierEditor.curve[3].toFixed(2)}</span>
-                </div>
-              </div>
-            </div>
-
-            <button
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition-colors"
-              onClick={() => {
-                const newProject = JSON.parse(JSON.stringify(projectData));
-                const clip = newProject.tracks[bezierEditor!.trackIdx!]?.clips?.[bezierEditor!.clipIdx!];
-
-                const kf = clip.keyframes?.find((k: any) => k.property === bezierEditor.property && Math.abs(k.frame - bezierEditor!.frame!) < 0.5);
-                if (kf) {
-                  kf.bezierCurve = bezierEditor.curve;
-                  commitState(newProject);
-                }
-                setBezierEditor(null);
-              }}
-            >
-              Save Curve
-            </button>
-          </div>
-        </div>
-      )}
+      <BezierEditorModal bezierEditor={bezierEditor} setBezierEditor={setBezierEditor} projectData={projectData} commitState={commitState} />
 
       {/* Deliver Page Overlay */}
       {showDeliverPage && (
