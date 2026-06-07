@@ -9,11 +9,11 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 	productionBrowserSourceMaps: true,
 	output: "standalone",
-	// tsc --noEmit: 0 errors. Build failing on Turbopack template variable issue (pre-existing), not type errors.
+	
 	
 	
 	typescript: {
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
 	webpack(config) {
