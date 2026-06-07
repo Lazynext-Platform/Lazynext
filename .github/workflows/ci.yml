@@ -56,10 +56,9 @@ jobs:
       - name: Run Tests
         run: bun test
 
-      # TODO: Re-enable once 265 TS errors are resolved
-      # - name: Type Check
-      #   run: bun run tsc --noEmit
+      - name: Type Check
+        run: bun run typecheck
 
-      # TODO: Re-enable once remaining eslint issues are resolved
+      # TODO: Re-enable once remaining eslint issues are resolved (4 errors, 578 warnings pre-existing)
       # - name: Lint
       #   run: bun run lint

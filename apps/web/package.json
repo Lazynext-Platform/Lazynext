@@ -12,6 +12,7 @@
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
     "format": "prettier src --write",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
