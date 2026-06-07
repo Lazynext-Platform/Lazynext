@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { NLEState } from 'lazynext-wasm';
+import { useEditorState } from './useEditorState';
 import type { Project, Asset, TimelineMarker } from "@/types/editor";
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
@@ -34,8 +35,13 @@ export default function EditorClient({ project }: { project: Project }) {
   const audioChunksRef = useRef<any[]>([]);
   const [frame, setFrame] = useState(0);
 
+  // Migrated to EditorStateProvider context (Phase 60)
+  const ctx = useEditorState();
+  const { assets, setAssets, isPlaying, setIsPlaying, selectedClipId, setSelectedClipId,
+    selectedClipIds, setSelectedClipIds, zoomLevel, setZoomLevel, isSnappingEnabled,
+    setIsSnappingEnabled, activeWorkspace, setActiveWorkspace, markers, setMarkers } = ctx;
+
   const [projectData, setProjectData] = useState(project);
-  const [assets, setAssets] = useState<Asset[]>([]);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
   const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
@@ -43,12 +49,9 @@ export default function EditorClient({ project }: { project: Project }) {
   const [history, setHistory] = useState<Project[]>([project]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const [clipboard, setClipboard] = useState<Project | null>(null);
-  const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
-  const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cloudComments, setCloudComments] = useState<{ id?: string; frame: number; text: string; author?: string; avatar?: string; timestamp?: number }[]>([]);
-  const [markers, setMarkers] = useState<TimelineMarker[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; trackIdx?: number; clipIdx?: number; type?: string } | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,9 +60,6 @@ export default function EditorClient({ project }: { project: Project }) {
   const [nleEngine, setNleEngine] = useState<NLEState | null>(null);
 
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [activeTool, setActiveTool] = useState<string>('select');
   const [isExporting, setIsExporting] = useState(false);
@@ -67,7 +67,6 @@ export default function EditorClient({ project }: { project: Project }) {
   const [multiCamMode, setMultiCamMode] = useState(false);
   const [isStereo3D, setIsStereo3D] = useState(false);
   const [showAudioMixer, setShowAudioMixer] = useState(false);
-  const [activeWorkspace, setActiveWorkspace] = useState<'timeline' | 'fusion' | 'color' | 'audio' | 'ai' | 'export'>('timeline');
   const [viewMode, setViewMode] = useState<'single' | 'multicam'>('single');
   const [is3DWorkspace, setIs3DWorkspace] = useState(false);
   const [isInfiniteCanvas, setIsInfiniteCanvas] = useState(false);

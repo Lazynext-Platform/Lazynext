@@ -9,11 +9,11 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 	productionBrowserSourceMaps: true,
 	output: "standalone",
-	// tsc --noEmit passes with 0 errors, but Next.js internal type
-	// checker is stricter with dynamic data shapes. Remove once
-	// all inline object literals have explicit type annotations.
+	// All TypeScript errors resolved (June 2026).
+	
+	
 	typescript: {
-		ignoreBuildErrors: true,
+		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
 	webpack(config) {

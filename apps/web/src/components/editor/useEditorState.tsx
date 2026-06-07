@@ -47,15 +47,15 @@ interface EditorState {
   selectedClipId: string | null;
   setSelectedClipId: (id: string | null) => void;
   selectedClipIds: string[];
-  setSelectedClipIds: (ids: string[]) => void;
+  setSelectedClipIds: React.Dispatch<React.SetStateAction<string[]>>;
   // Viewport
   zoomLevel: number;
-  setZoomLevel: (level: number) => void;
+  setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   isSnappingEnabled: boolean;
-  setIsSnappingEnabled: (v: boolean) => void;
+  setIsSnappingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   // Workspace
   activeWorkspace: Workspace;
-  setActiveWorkspace: (w: Workspace) => void;
+  setActiveWorkspace: React.Dispatch<React.SetStateAction<Workspace>>;
   // Markers & Clipboard
   markers: TimelineMarker[];
   setMarkers: React.Dispatch<React.SetStateAction<TimelineMarker[]>>;
