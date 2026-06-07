@@ -99,9 +99,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 	const editor = useEditor();
 	const sortOption: TProjectSortOption = `${sortKey}-${sortOrder}`;
 
-	const isLoading = useEditor((e) => e.project.getIsLoading());
-	const isInitialized = useEditor((e) => e.project.getIsInitialized());
-	const projectsToDisplay = useEditor((e) =>
+	const isLoading = useEditor((e: any) => e.project.getIsLoading());
+	const isInitialized = useEditor((e: any) => e.project.getIsInitialized());
+	const projectsToDisplay = useEditor((e: any) =>
 		e.project.getFilteredAndSortedProjects({ searchQuery, sortOption }),
 	);
 
@@ -132,7 +132,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 				<StoragePersistenceDialog />
 				<ChangelogNotification />
 				<ProjectsHeader />
-				<ProjectsToolbar projectIds={projectsToDisplay.map((p) => p.id)} />
+				<ProjectsToolbar projectIds={projectsToDisplay.map((p: { id: string }) => p.id)} />
 				<main className="mx-auto px-4 pt-6 pb-12 flex flex-col gap-6 max-w-[1400px]">
 					{isLoading || !isInitialized ? (
 						<ProjectsSkeleton />
@@ -146,11 +146,11 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 									: "flex flex-col gap-3"
 							}
 						>
-							{projectsToDisplay.map((project) => (
+							{projectsToDisplay.map((project: any) => (
 								<ProjectItem
 									key={project.id}
 									project={project}
-									allProjectIds={projectsToDisplay.map((p) => p.id)}
+									allProjectIds={projectsToDisplay.map((p: { id: string }) => p.id)}
 								/>
 							))}
 						</div>

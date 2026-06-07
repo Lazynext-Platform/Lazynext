@@ -295,7 +295,7 @@ function getTargetKeyMetadata({
 		channel != null ? normalizeChannel({ channel }) : undefined;
 	const keys = normalizedChannel?.keys ?? [];
 	if (keyframeId) {
-		const keyById = keys.find((key) => key.id === keyframeId);
+		const keyById = keys.find((key: ScalarAnimationKey | DiscreteAnimationKey) => key.id === keyframeId);
 		if (keyById) {
 			return {
 				id: keyById.id,
@@ -304,7 +304,7 @@ function getTargetKeyMetadata({
 		}
 	}
 
-	const keyAtTime = keys.find((key) =>
+	const keyAtTime = keys.find((key: ScalarAnimationKey | DiscreteAnimationKey) =>
 		isNearlySameTime({ leftTime: key.time, rightTime: time }),
 	);
 	if (keyAtTime) {
@@ -628,7 +628,7 @@ export function removeKeyframe({
 	}
 
 	if (isScalarChannel(channel)) {
-		const nextKeys = channel.keys.filter((keyframe) => keyframe.id !== keyframeId);
+		const nextKeys = channel.keys.filter((keyframe: ScalarAnimationKey | DiscreteAnimationKey) => keyframe.id !== keyframeId);
 		if (nextKeys.length === 0) {
 			return undefined;
 		}
@@ -641,7 +641,7 @@ export function removeKeyframe({
 		});
 	}
 
-	const nextKeys = channel.keys.filter((keyframe) => keyframe.id !== keyframeId);
+	const nextKeys = channel.keys.filter((keyframe: ScalarAnimationKey | DiscreteAnimationKey) => keyframe.id !== keyframeId);
 	if (nextKeys.length === 0) {
 		return undefined;
 	}
@@ -773,7 +773,7 @@ export function updateScalarKeyframeCurve({
 		return animations;
 	}
 
-	const keyframeIndex = channel.keys.findIndex((keyframe) => keyframe.id === keyframeId);
+	const keyframeIndex = channel.keys.findIndex((keyframe: ScalarAnimationKey | DiscreteAnimationKey) => keyframe.id === keyframeId);
 	if (keyframeIndex < 0) {
 		return animations;
 	}
@@ -938,19 +938,19 @@ function splitDiscreteChannelAtTime({
 	}
 
 	const normalizedChannel = normalizeChannel({ channel });
-	let leftKeys = normalizedChannel.keys.filter((key) => key.time <= splitTime);
+	let leftKeys = normalizedChannel.keys.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time <= splitTime);
 	let rightKeys = normalizedChannel.keys
-		.filter((key) => key.time >= splitTime)
+		.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time >= splitTime)
 		.map((key) => ({
 			...key,
 			time: subMediaTime({ a: key.time, b: splitTime }),
 		}));
 
 	if (shouldIncludeSplitBoundary) {
-		const hasBoundaryOnLeft = leftKeys.some((key) =>
+		const hasBoundaryOnLeft = leftKeys.some((key: ScalarAnimationKey | DiscreteAnimationKey) =>
 			isNearlySameTime({ leftTime: key.time, rightTime: splitTime }),
 		);
-		const hasBoundaryOnRight = rightKeys.some((key) =>
+		const hasBoundaryOnRight = rightKeys.some((key: ScalarAnimationKey | DiscreteAnimationKey) =>
 			isNearlySameTime({ leftTime: key.time, rightTime: 0 }),
 		);
 		const boundaryValue = getChannelValueAtTime({
@@ -1011,18 +1011,18 @@ function splitScalarChannelAtTime({
 	}
 
 	const normalizedChannel = normalizeChannel({ channel });
-	let leftKeys = normalizedChannel.keys.filter((key) => key.time <= splitTime);
+	let leftKeys = normalizedChannel.keys.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time <= splitTime);
 	let rightKeys = normalizedChannel.keys
-		.filter((key) => key.time >= splitTime)
+		.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time >= splitTime)
 		.map((key) => ({
 			...key,
 			time: subMediaTime({ a: key.time, b: splitTime }),
 		}));
 
-	const hasBoundaryOnLeft = leftKeys.some((key) =>
+	const hasBoundaryOnLeft = leftKeys.some((key: ScalarAnimationKey | DiscreteAnimationKey) =>
 		isNearlySameTime({ leftTime: key.time, rightTime: splitTime }),
 	);
-	const hasBoundaryOnRight = rightKeys.some((key) =>
+	const hasBoundaryOnRight = rightKeys.some((key: ScalarAnimationKey | DiscreteAnimationKey) =>
 		isNearlySameTime({ leftTime: key.time, rightTime: 0 }),
 	);
 	if (!shouldIncludeSplitBoundary || (hasBoundaryOnLeft && hasBoundaryOnRight)) {
@@ -1091,7 +1091,7 @@ function splitScalarChannelAtTime({
 			const r1 = lerpPoint({ left: q1, right: q2, progress });
 			const splitPoint = lerpPoint({ left: r0, right: r1, progress });
 			leftKeys = [
-				...normalizedChannel.keys.filter((key) => key.time < splitTime),
+				...normalizedChannel.keys.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time < splitTime),
 				{
 					...leftKey,
 					rightHandle: {
@@ -1132,7 +1132,7 @@ function splitScalarChannelAtTime({
 					},
 				},
 				...normalizedChannel.keys
-					.filter((key) => key.time > rightKey.time)
+					.filter((key: ScalarAnimationKey | DiscreteAnimationKey) => key.time > rightKey.time)
 					.map((key) => ({
 						...key,
 						time: subMediaTime({ a: key.time, b: splitTime }),

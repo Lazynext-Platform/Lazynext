@@ -120,7 +120,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number; preset?: string }[]>([]);
   const [commandQuery, setCommandQuery] = useState('');
   const [isFarmRendering, setIsFarmRendering] = useState(false);
-  const [farmProgress, setFarmProgress] = useState(0);
+  const [farmProgress, setFarmProgress] = useState<{ node: string; status: string; progress: number }[]>([]);
   const [assetForgeMaterial, setAssetForgeMaterial] = useState("glassmorphism");
   const [isSentientColorOpen, setIsSentientColorOpen] = useState(false);
   const [isSingularity, setIsSingularity] = useState(false);
@@ -1657,6 +1657,7 @@ export default function EditorClient({ project }: { project: Project }) {
         {active && keyframe.easing === 'custom' && (
           <button
             onClick={() => setBezierEditor({
+              isOpen: true,
               trackIdx: selectedTrackIdx,
               clipIdx: selectedClipIdx,
               property,
@@ -2258,10 +2259,6 @@ export default function EditorClient({ project }: { project: Project }) {
               setMediaFilter={setMediaFilter}
               assets={assets}
               projectData={projectData}
-              selectedClip={selectedClip}
-              selectedClipId={selectedClipId}
-              selectedClipIds={selectedClipIds}
-              isPlaying={isPlaying}
               frame={frame}
               splitAudioVideoOnImport={splitAudioVideoOnImport}
               setSplitAudioVideoOnImport={setSplitAudioVideoOnImport}
@@ -2725,7 +2722,7 @@ export default function EditorClient({ project }: { project: Project }) {
               assets={assets}
               canvasRef={canvasRef}
               showSafeMargins={showSafeMargins}
-              renderQuality={playbackQuality}
+              renderQuality={playbackQuality as "full" | "half" | "quarter"}
             />
             {/* Phase 27: Cinematic Multiverse Prototyping */}
             {isMultiverseMode && (
@@ -3773,14 +3770,8 @@ export default function EditorClient({ project }: { project: Project }) {
                     <div className="mt-4 pt-4 border-t border-zinc-800">
                       <button
                         onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2000)),
-                            {
-                              loading: 'Analyzing tracks for voice/dialog...',
-                              success: 'Auto-Ducking Applied!',
-                              error: 'Failed to apply auto-ducking.'
-                            }
-                          ).then(() => {
+                          const duckPromise = new Promise(resolve => setTimeout(resolve, 2000));
+                          duckPromise.then(() => {
                             // Simulated ducking keyframes
                             const newKfs = [...(selectedClip.keyframes || [])];
                             // Duck volume down to 30% halfway through, then back up
@@ -3792,6 +3783,14 @@ export default function EditorClient({ project }: { project: Project }) {
                             updateSelectedClip({ keyframes: newKfs });
                             commitState(projectData);
                           });
+                          toast.promise(
+                            duckPromise,
+                            {
+                              loading: 'Analyzing tracks for voice/dialog...',
+                              success: 'Auto-Ducking Applied!',
+                              error: 'Failed to apply auto-ducking.'
+                            }
+                          );
                         }}
                         className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium py-2 rounded border border-zinc-700 transition-colors flex items-center justify-center gap-2"
                       >
@@ -3856,16 +3855,18 @@ export default function EditorClient({ project }: { project: Project }) {
                       {/* Phase 23: 3D Camera Tracker */}
                       <button
                         onClick={() => {
+                          const trackPromise = new Promise<void>(resolve => setTimeout(resolve, 4000));
+                          trackPromise.then(() => {
+                            setIs3DWorkspace(true);
+                          });
                           toast.promise(
-                            new Promise<void>(resolve => setTimeout(resolve, 4000)),
+                            trackPromise,
                             {
                               loading: 'Analyzing scene in 3D... generating point cloud...',
                               success: '3D Camera Track successful! Null object and 3D Camera added to scene.',
                               error: 'Tracking failed.'
                             }
-                          ).then(() => {
-                            setIs3DWorkspace(true);
-                          });
+                          );
                         }}
                         className="w-full bg-teal-600/80 hover:bg-teal-500 text-white text-xs font-medium py-2 rounded border border-teal-500 transition-colors flex items-center justify-center gap-2 mt-2"
                       >
@@ -4827,17 +4828,19 @@ export default function EditorClient({ project }: { project: Project }) {
                     <button
                       className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 rounded transition-colors shadow-lg flex items-center justify-center gap-2"
                       onClick={() => {
+                        const erasePromise = new Promise(resolve => setTimeout(resolve, 2000));
+                        erasePromise.then(() => {
+                          updateSelectedClip({ magicEraseApplied: true });
+                          commitState(projectData);
+                        });
                         toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 2000)),
+                          erasePromise,
                           {
                             loading: 'Analyzing pixels via Content-Aware Fill...',
                             success: 'Object magically erased!',
                             error: 'Failed to erase object.'
                           }
-                        ).then(() => {
-                          updateSelectedClip({ magicEraseApplied: true });
-                          commitState(projectData);
-                        });
+                        );
                       }}
                     >
                       ✨ Process Object Removal
@@ -6410,7 +6413,7 @@ export default function EditorClient({ project }: { project: Project }) {
             </h3>
 
             <div className="grid grid-cols-2 gap-4">
-              {farmProgress.map(node => (
+              {farmProgress.map((node: { node: string; status: string; progress: number }) => (
                 <div key={node.node} className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 relative overflow-hidden">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium text-zinc-300">Node {node.node}</span>
@@ -6428,7 +6431,7 @@ export default function EditorClient({ project }: { project: Project }) {
             </div>
 
             <div className="mt-8 flex justify-center">
-              {farmProgress.every(n => n.progress === 100) ? (
+              {farmProgress.every((n: { progress: number }) => n.progress === 100) ? (
                 <div className="px-6 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/50">
                   Render Complete
                 </div>

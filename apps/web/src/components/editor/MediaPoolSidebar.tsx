@@ -4,6 +4,7 @@ import React from "react";
 import { toast } from "sonner";
 
 interface MediaPoolSidebarProps {
+  [extra: string]: any;
   assets: any;
   frame: any;
   handleAiVoiceover: any;
@@ -307,14 +308,8 @@ export function MediaPoolSidebar({
                     toast.error('Need at least 2 video clips to create a Multi-Cam sequence.');
                     return;
                   }
-                  toast.promise(
-                    new Promise<void>(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Syncing angles via Audio Waveforms...',
-                      success: 'Multi-Cam Clip Created!',
-                      error: 'Sync failed.'
-                    }
-                  ).then(() => {
+                  const multiCamPromise = new Promise<void>(resolve => setTimeout(resolve, 2000));
+                  multiCamPromise.then(() => {
                     const newAsset = {
                       id: `multicam-${Date.now()}`,
                       type: 'multicam',
@@ -324,6 +319,14 @@ export function MediaPoolSidebar({
                     };
                     setAssets((prev: any[]) => [newAsset, ...prev]);
                   });
+                  toast.promise(
+                    multiCamPromise,
+                    {
+                      loading: 'Syncing angles via Audio Waveforms...',
+                      success: 'Multi-Cam Clip Created!',
+                      error: 'Sync failed.'
+                    }
+                  );
                 }}
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
@@ -648,14 +651,8 @@ export function MediaPoolSidebar({
               <button
                 className="w-full bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/50 text-indigo-300 text-xs font-bold py-2 rounded mb-4 transition-colors flex items-center justify-center gap-2"
                 onClick={() => {
-                  toast.promise(
-                    new Promise<void>(resolve => setTimeout(resolve, 2000)),
-                    {
-                      loading: 'Installing plugin from local script...',
-                      success: 'Script loaded and registered new extension API endpoints!',
-                      error: 'Failed to install plugin.'
-                    }
-                  ).then(() => {
+                  const pluginPromise = new Promise<void>(resolve => setTimeout(resolve, 2000));
+                  pluginPromise.then(() => {
                     setInstalledPlugins([...installedPlugins, {
                       id: `ext-${Date.now()}`,
                       name: 'Custom User Script',
@@ -664,6 +661,14 @@ export function MediaPoolSidebar({
                       enabled: true
                     }]);
                   });
+                  toast.promise(
+                    pluginPromise,
+                    {
+                      loading: 'Installing plugin from local script...',
+                      success: 'Script loaded and registered new extension API endpoints!',
+                      error: 'Failed to install plugin.'
+                    }
+                  );
                 }}
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>

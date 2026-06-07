@@ -82,7 +82,7 @@ export class RemoveMediaAssetCommand extends Command {
 
 		storageService
 			.deleteMediaAsset({ projectId: this.projectId, id: this.assetId })
-			.catch((error) => {
+			.catch((error: Error) => {
 				console.error("Failed to delete media item:", error);
 			});
 	}
@@ -107,7 +107,7 @@ export class RemoveMediaAssetCommand extends Command {
 					projectId: this.projectId,
 					mediaAsset: restoredAsset,
 				})
-				.catch((error) => {
+				.catch((error: Error) => {
 					console.error("Failed to restore media item on undo:", error);
 				});
 		}

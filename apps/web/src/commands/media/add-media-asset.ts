@@ -54,7 +54,7 @@ export class AddMediaAssetCommand extends Command {
 				projectId: this.projectId,
 				mediaAsset: this.createdAsset,
 			})
-			.catch((error) => {
+			.catch((error: Error) => {
 				console.error("Failed to save media item:", error);
 
 				const currentAssets = editor.media.getAssets();
@@ -105,7 +105,7 @@ export class AddMediaAssetCommand extends Command {
 			if (this.createdAsset) {
 				storageService
 					.deleteMediaAsset({ projectId: this.projectId, id: this.assetId })
-					.catch((error) => {
+					.catch((error: Error) => {
 						console.error("Failed to delete media item on undo:", error);
 					});
 			}
