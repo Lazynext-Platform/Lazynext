@@ -22,6 +22,7 @@ import { CollaborationSync } from '@/lib/crdt';
 import { solveCubicBezier } from "@/utils/math";
 import { getKeyframedValue, hasKeyframe } from "./keyframe-utils";
 import { VideoScopes } from "./VideoScopes";
+import { FeatureToolbar } from "./FeatureToolbar";
 
 import { INITIAL_ASSETS } from "./editor-defaults";
 
@@ -3492,193 +3493,51 @@ export default function EditorClient({ project }: { project: any }) {
           )}
 
           <div className="flex items-center gap-4 absolute top-4 right-4 z-10">
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${multiCamMode ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setMultiCamMode(!multiCamMode)}
-              title="Toggle Multi-Camera Viewer (Shift+0)"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-              Multi-Cam
-            </button>
-            {/* Phase 23: 3D Workspace Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${is3DWorkspace ? 'bg-teal-600 border-teal-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIs3DWorkspace(!is3DWorkspace)}
-              title="Toggle 3D Compositing Workspace"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
-              3D Mode
-            </button>
-            {/* Phase 29: Holographic Volumetric Editor Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSpatialEditorMode ? 'bg-fuchsia-600 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsSpatialEditorMode(!isSpatialEditorMode)}
-              title="Toggle Holographic Volumetric Spatial Editor"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-              Spatial Editor
-            </button>
-            {/* Phase 30: Sentient Autonomous Studio Toggle */}
-            <button
-              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isAutonomousDirector ? 'bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsAutonomousDirector(!isAutonomousDirector)}
-              title="Toggle Sentient Autonomous Director AI"
-            >
-              🤖 Autonomous Director
-            </button>
-            {/* Phase 31: Bio-Responsive UI Themes */}
-            <button
-              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isBioResponsive ? 'bg-orange-600 border-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.8)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsBioResponsive(!isBioResponsive)}
-              title={`Toggle Bio-Responsive UI Theme (Current Stress: ${systemStress.toFixed(1)}%)`}
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-              Bio-Sync
-            </button>
-            {/* Phase 32: Omnipresent Voice Orb Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isOmniOrbActive ? 'bg-cyan-600 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsOmniOrbActive(!isOmniOrbActive)}
-              title="Toggle AI Voice Command Orb"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-              Omni Orb
-            </button>
-            {/* Phase 33: Multi-Agent Swarm Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSwarmActive ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsSwarmActive(!isSwarmActive)}
-              title="Toggle Multi-Agent Rendering Swarm"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-              Agent Swarm
-            </button>
-            {/* Phase 34: Neuro-Symbolic Generative Synthesis Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isGenerativeDreamingActive ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.7)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsGenerativeDreamingActive(!isGenerativeDreamingActive)}
-              title="Toggle Neuro-Symbolic Scene Synthesis"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-              Dream Clip
-            </button>
-            {/* Phase 35: God Mode Toggle */}
-            <button
-              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mr-2 ${isGodMode ? 'bg-gradient-to-r from-yellow-500 via-red-500 to-fuchsia-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105' : 'bg-zinc-900/80 border-zinc-600/50 hover:bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]'}`}
-              onClick={activateGodMode}
-              title="Activate God Mode — Enable All AI Modes Simultaneously"
-            >
-              ⚡ GOD MODE
-            </button>
-            {/* Phase 40: The Singularity ∞ Toggle */}
-            <button
-              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 mr-2 ${isSingularity ? 'bg-white text-black border-white shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110' : 'bg-black text-white border-zinc-700 hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]'}`}
-              onClick={() => setIsSingularity(!isSingularity)}
-              title="Activate The Singularity: Infinite Canvas Mode"
-            >
-              ∞ SINGULARITY
-            </button>
-            {/* Phase 36: Quantum Timeline Superposition Toggle */}
-            <div className="flex items-center">
-              {isQuantumSuperposition && (
-                <button
-                  onClick={() => setIsQuantumSuperposition(false)}
-                  className="text-[10px] font-black bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded-l animate-pulse shadow-[0_0_15px_rgba(79,70,229,0.8)]"
-                >
-                  👁️ OBSERVE
-                </button>
-              )}
-              <button
-                className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isQuantumSuperposition ? 'bg-indigo-900/80 border-indigo-500 text-indigo-300 rounded-r shadow-[0_0_10px_rgba(79,70,229,0.4)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-                onClick={() => setIsQuantumSuperposition(!isQuantumSuperposition)}
-                title="Toggle Quantum Superposition Timeline"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
-                Quantum
-              </button>
-            </div>
-            {/* Phase 37: Neural Cinematography AI Toggle */}
-            <button
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isCinematographyAI ? 'bg-cyan-600/80 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsCinematographyAI(!isCinematographyAI)}
-              title="Toggle Neural Cinematography Analysis"
-            >
-              🎥 Neural Cinema
-            </button>
-            {/* Phase 38: Holographic Asset Forge Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAssetForgeOpen ? 'bg-fuchsia-600/80 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsAssetForgeOpen(!isAssetForgeOpen)}
-              title="Open Holographic Asset Forge"
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-              Asset Forge
-            </button>
-            {/* Phase 39: Sentient Color Intelligence Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSentientColorOpen ? 'bg-rose-600/80 border-rose-500 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsSentientColorOpen(!isSentientColorOpen)}
-              title="Open Sentient Color Intelligence"
-            >
-              🎨 Sentient Color
-            </button>
-            {/* Phase 43: Professional Audio Mixer Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAudioMixerOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsAudioMixerOpen(!isAudioMixerOpen)}
-              title="Open Professional Audio Mixer"
-            >
-              🎛️ Mixer
-            </button>
-            {/* Phase 44: DaVinci-Style Color Scopes Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isColorScopesOpen ? 'bg-teal-600/80 border-teal-500 text-white shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsColorScopesOpen(!isColorScopesOpen)}
-              title="Open Color Scopes (Waveform / Vectorscope)"
-            >
-              📊 Scopes
-            </button>
-            {/* Phase 45: CapCut-Style Tools */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAutoCaptioning ? 'bg-orange-600/80 border-orange-500 text-white animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => { setIsAutoCaptioning(true); setAutoCaptionProgress(0); }}
-              title="Auto-Generate Captions (Speech-to-Text)"
-            >
-              💬 Auto-Captions
-            </button>
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${hasBeatSync ? 'bg-pink-600/80 border-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setHasBeatSync(!hasBeatSync)}
-              title="Auto Beat Sync Markers"
-            >
-              🥁 Beat Sync
-            </button>
-            {/* Phase 46: Multiplayer Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isMultiplayer ? 'bg-blue-600/80 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsMultiplayer(!isMultiplayer)}
-              title="Toggle Live Multiplayer Mode"
-            >
-              👥 Co-op
-            </button>
-            {/* Phase 48: Chat Toggle */}
-            <button
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isChatOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              title="Open Session Chat"
-            >
-              💬 Chat
-            </button>
-            <button className="text-[10px] bg-zinc-900/80 backdrop-blur border border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2" onClick={handleOpenDevConsole}>
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-              Dev Console
-            </button>
-
-            <div className="flex items-center gap-1 bg-zinc-900/80 backdrop-blur border border-zinc-700/50 rounded-lg p-1 mr-4">
-              <button className="p-1.5 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors" title="Draw Annotation (Arrow)" onClick={handleCanvasAnnotation}>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-              </button>
-              <div className="w-3 h-3 rounded-full bg-red-500 cursor-pointer border border-zinc-300 ml-1"></div>
+            <FeatureToolbar
+              is3DWorkspace={is3DWorkspace}
+              setIs3DWorkspace={setIs3DWorkspace}
+              isSpatialEditorMode={isSpatialEditorMode}
+              setIsSpatialEditorMode={setIsSpatialEditorMode}
+              isAutonomousDirector={isAutonomousDirector}
+              setIsAutonomousDirector={setIsAutonomousDirector}
+              isBioResponsive={isBioResponsive}
+              setIsBioResponsive={setIsBioResponsive}
+              systemStress={systemStress}
+              isOmniOrbActive={isOmniOrbActive}
+              setIsOmniOrbActive={setIsOmniOrbActive}
+              isSwarmActive={isSwarmActive}
+              setIsSwarmActive={setIsSwarmActive}
+              isGenerativeDreamingActive={isGenerativeDreamingActive}
+              setIsGenerativeDreamingActive={setIsGenerativeDreamingActive}
+              isGodMode={isGodMode}
+              setIsGodMode={setIsGodMode}
+              isSingularity={isSingularity}
+              setIsSingularity={setIsSingularity}
+              isQuantumSuperposition={isQuantumSuperposition}
+              setIsQuantumSuperposition={setIsQuantumSuperposition}
+              isCinematographyAI={isCinematographyAI}
+              setIsCinematographyAI={setIsCinematographyAI}
+              isAssetForgeOpen={isAssetForgeOpen}
+              setIsAssetForgeOpen={setIsAssetForgeOpen}
+              isSentientColorOpen={isSentientColorOpen}
+              setIsSentientColorOpen={setIsSentientColorOpen}
+              isAudioMixerOpen={isAudioMixerOpen}
+              setIsAudioMixerOpen={setIsAudioMixerOpen}
+              isColorScopesOpen={isColorScopesOpen}
+              setIsColorScopesOpen={setIsColorScopesOpen}
+              isAutoCaptioning={isAutoCaptioning}
+              setIsAutoCaptioning={setIsAutoCaptioning}
+              setAutoCaptionProgress={setAutoCaptionProgress}
+              hasBeatSync={hasBeatSync}
+              setHasBeatSync={setHasBeatSync}
+              isMultiplayer={isMultiplayer}
+              setIsMultiplayer={setIsMultiplayer}
+              isChatOpen={isChatOpen}
+              setIsChatOpen={setIsChatOpen}
+              activateGodMode={activateGodMode}
+              handleOpenDevConsole={handleOpenDevConsole}
+              handleCanvasAnnotation={handleCanvasAnnotation}
+            />
             </div>
 
             <div className="text-xs text-zinc-400 font-medium px-2">
@@ -8571,7 +8430,6 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
         </div>
       )}
-    </div>
     </div>
   );
 }
