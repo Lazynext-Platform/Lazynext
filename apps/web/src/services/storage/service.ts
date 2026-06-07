@@ -23,6 +23,7 @@ import {
 } from "@/services/storage/migrations";
 import type { Bookmark, SceneTracks, TScene } from "@/timeline";
 import { roundMediaTime } from "@/wasm";
+import { saveProject as syncProjectToBackend } from "@/actions/project";
 
 function normalizeBookmarks({ raw }: { raw: unknown }): Bookmark[] {
 	if (!Array.isArray(raw)) return [];
@@ -166,6 +167,13 @@ class StorageService {
 			key: project.metadata.id,
 			value: serializedProject,
 		});
+
+		// Sync with backend database
+		try {
+			await syncProjectToBackend(project.metadata.id, serializedProject);
+		} catch (err) {
+			console.error("Failed to sync project to backend:", err);
+		}
 	}
 
 	async loadProject({

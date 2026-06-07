@@ -274,3 +274,40 @@ function tokenize(input: string): Token[] {
 
 	return tokens;
 }
+
+/**
+ * Cubic Bezier interpolation (CSS-like easing curve solver).
+ * Approximates y at parameter p given control points (p1x, p1y) and (p2x, p2y).
+ */
+export function solveCubicBezier({
+	p,
+	p1x,
+	p1y,
+	p2x,
+	p2y,
+}: {
+	p: number;
+	p1x: number;
+	p1y: number;
+	p2x: number;
+	p2y: number;
+}): number {
+	let u = p;
+	for (let i = 0; i < 5; i++) {
+		const x =
+			3 * Math.pow(1 - u, 2) * u * p1x +
+			3 * (1 - u) * Math.pow(u, 2) * p2x +
+			Math.pow(u, 3);
+		const dx =
+			3 * Math.pow(1 - u, 2) * p1x +
+			6 * (1 - u) * u * (p2x - p1x) +
+			3 * Math.pow(u, 2) * (1 - p2x);
+		if (Math.abs(x - p) < 1e-6 || Math.abs(dx) < 1e-6) break;
+		u = u - (x - p) / dx;
+	}
+	return (
+		3 * Math.pow(1 - u, 2) * u * p1y +
+		3 * (1 - u) * Math.pow(u, 2) * p2y +
+		Math.pow(u, 3)
+	);
+}

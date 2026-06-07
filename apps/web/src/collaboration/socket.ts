@@ -1,6 +1,3 @@
-// @ts-nocheck
-// import { useWasm } from "@/hooks/use-wasm";
-
 export class CollaborationSocket {
     private ws: WebSocket | null = null;
     private roomId: string;

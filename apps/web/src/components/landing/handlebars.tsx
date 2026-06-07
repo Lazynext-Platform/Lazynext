@@ -131,8 +131,8 @@ export function Handlebars({ children }: HandlebarsProps) {
 		? `linear-gradient(90deg,
             rgba(255, 255, 255, 0) 0%, 
             rgba(255, 255, 255, 0) ${leftGradientPercent}%, 
-            rgba(0, 0, 0) ${leftGradientPercent}%, 
-            rgba(0, 0, 0) ${rightGradientPercent}%, 
+            rgb(0, 0, 0) ${leftGradientPercent}%, 
+            rgb(0, 0, 0) ${rightGradientPercent}%, 
             rgba(255, 255, 255, 0) ${rightGradientPercent}%, 
             rgba(255, 255, 255, 0) 100%)`
 		: undefined;

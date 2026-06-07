@@ -1,7 +1,10 @@
 import EditorClient from "@/components/editor/EditorClient";
 import ExportButton from "@/components/editor/export-button";
+import { EditorErrorBoundary } from "@/components/editor/EditorErrorBoundary";
 import { getProject } from "@/actions/project";
 import { notFound } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function EditorPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -19,24 +22,32 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
     fps: project.timeline?.framerate || 60,
     duration_frames: 120, // TODO: derive from clips
     bg_color: [0.09, 0.09, 0.11, 1.0],
-    tracks: project.timeline?.tracks || []
+    tracks: project.timeline?.tracks || [],
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-white">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-white selection:bg-violet-500/30">
       {/* Header */}
-      <header className="flex h-12 w-full items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4">
-        <div className="flex items-center gap-4">
-          <span className="font-bold">Lazynext</span>
-          <span className="text-sm text-zinc-400">{project.name}</span>
+      <header className="flex h-14 w-full items-center justify-between border-b border-white/5 bg-zinc-950/80 backdrop-blur-md px-6 shadow-sm z-50">
+        <div className="flex items-center gap-6">
+          <span className="font-extrabold tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+            Lazynext
+          </span>
+          <div className="h-4 w-px bg-white/10" />
+          <span className="text-sm font-medium text-zinc-300">{project.name}</span>
         </div>
         <ExportButton projectId={project.id} />
       </header>
 
-      {/* Main Body */}
-      <div className="flex flex-1 overflow-hidden relative">
-        <EditorClient project={projectJson} />
-      </div>
+      {/* Main Body — wrapped in error boundary so a crash doesn't lose the header */}
+      <EditorErrorBoundary section="Editor">
+        <div className="flex flex-1 overflow-hidden relative">
+          <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
+          <div className="relative z-10 flex flex-1 w-full h-full">
+            <EditorClient project={projectJson} />
+          </div>
+        </div>
+      </EditorErrorBoundary>
     </div>
   );
 }

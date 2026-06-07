@@ -1,6 +1,3 @@
-// @ts-nocheck
-// import { useWasm } from "@/hooks/use-wasm";
-
 export class HardwareConsoleManager {
     private midiAccess: WebMidi.MIDIAccess | null = null;
     

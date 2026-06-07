@@ -1,6 +1,5 @@
-// @ts-nocheck
-import { useState, useCallback, useMemo, createContext, useContext, ReactNode } from 'react';
-import type { Project, Clip, Track, Asset, AgentEvent, TimelineMarker } from '@/types/editor';
+import { useState, createContext, useContext, type ReactNode } from 'react';
+import type { Project, Asset } from "@/types/editor";
 
 // This is the beginning of the great state migration (Phase 51)
 // We are extracting the massive state clusters from EditorClient into a Context Provider

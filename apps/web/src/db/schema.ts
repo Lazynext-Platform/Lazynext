@@ -72,6 +72,7 @@ export const projects = pgTable("projects", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
 	userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+	data: jsonb("data"),
 	createdAt: timestamp("created_at").$defaultFn(() => new Date()).notNull(),
 	updatedAt: timestamp("updated_at").$defaultFn(() => new Date()).notNull(),
 }).enableRLS();

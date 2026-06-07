@@ -1,4 +1,5 @@
 // @ts-nocheck
+/* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -18,239 +19,52 @@ import { ExportDelivery } from './panels/export-delivery';
 import WasmPlayer from "./wasm-player";
 import { AgentChat } from "../../editor/agent-chat";
 import { CollaborationSync } from '@/lib/crdt';
+import { solveCubicBezier } from "@/utils/math";
+import { getKeyframedValue, hasKeyframe } from "./keyframe-utils";
+import { VideoScopes } from "./VideoScopes";
 
-function VideoScopes({ isPlaying, frame }: { isPlaying: boolean; frame: number }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [scopeType, setScopeType] = useState<'parade' | 'vectorscope' | 'waveform'>('parade');
-
-  useEffect(() => {
-    let animationFrame: number;
-    const drawScope = () => {
-      const scopeCanvas = canvasRef.current;
-      if (!scopeCanvas) return;
-      const ctx = scopeCanvas.getContext('2d');
-      if (!ctx) return;
-      
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-      const sourceCanvas = document.getElementById('lazynext-canvas') as HTMLCanvasElement;
-      if (sourceCanvas && sourceCanvas.width > 0 && sourceCanvas.height > 0) {
-        const sampleWidth = 120;
-        const sampleHeight = 120;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = sampleWidth;
-        tempCanvas.height = sampleHeight;
-        const tempCtx = tempCanvas.getContext('2d');
-        if (tempCtx) {
-          tempCtx.drawImage(sourceCanvas, 0, 0, sampleWidth, sampleHeight);
-          const imageData = tempCtx.getImageData(0, 0, sampleWidth, sampleHeight);
-          const data = imageData.data;
-          
-          ctx.fillStyle = '#09090b'; 
-          ctx.fillRect(0, 0, scopeCanvas.width, scopeCanvas.height);
-          
-          ctx.globalAlpha = 0.4;
-
-          if (scopeType === 'parade') {
-            const sectionWidth = scopeCanvas.width / 3;
-            for (let x = 0; x < sampleWidth; x++) {
-              for (let y = 0; y < sampleHeight; y++) {
-                const idx = (y * sampleWidth + x) * 4;
-                const r = data[idx];
-                const g = data[idx+1];
-                const b = data[idx+2];
-                
-                const targetX_R = (x / sampleWidth) * sectionWidth;
-                const targetX_G = sectionWidth + (x / sampleWidth) * sectionWidth;
-                const targetX_B = sectionWidth * 2 + (x / sampleWidth) * sectionWidth;
-                
-                ctx.fillStyle = '#ef4444'; // red
-                ctx.fillRect(targetX_R, scopeCanvas.height - (r/255)*scopeCanvas.height, 1, 1);
-                
-                ctx.fillStyle = '#22c55e'; // green
-                ctx.fillRect(targetX_G, scopeCanvas.height - (g/255)*scopeCanvas.height, 1, 1);
-                
-                ctx.fillStyle = '#3b82f6'; // blue
-                ctx.fillRect(targetX_B, scopeCanvas.height - (b/255)*scopeCanvas.height, 1, 1);
-              }
-            }
-          } else if (scopeType === 'waveform') {
-             for (let x = 0; x < sampleWidth; x++) {
-              for (let y = 0; y < sampleHeight; y++) {
-                const idx = (y * sampleWidth + x) * 4;
-                const r = data[idx];
-                const g = data[idx+1];
-                const b = data[idx+2];
-                const luma = 0.299*r + 0.587*g + 0.114*b;
-                
-                const targetX = (x / sampleWidth) * scopeCanvas.width;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(targetX, scopeCanvas.height - (luma/255)*scopeCanvas.height, 1, 1);
-              }
-            }
-          } else if (scopeType === 'vectorscope') {
-            // Draw crosshairs
-            ctx.strokeStyle = '#333';
-            ctx.beginPath();
-            ctx.moveTo(scopeCanvas.width/2, 0); ctx.lineTo(scopeCanvas.width/2, scopeCanvas.height);
-            ctx.moveTo(0, scopeCanvas.height/2); ctx.lineTo(scopeCanvas.width, scopeCanvas.height/2);
-            ctx.stroke();
-
-            for (let i = 0; i < data.length; i += 16) {
-              const r = data[i]; const g = data[i+1]; const b = data[i+2];
-              const cb = -0.168736*r - 0.331264*g + 0.5*b;
-              const cr = 0.5*r - 0.418688*g - 0.081312*b;
-              const cx = scopeCanvas.width/2 + (cb / 128) * (scopeCanvas.width/2);
-              const cy = scopeCanvas.height/2 - (cr / 128) * (scopeCanvas.height/2);
-              ctx.fillStyle = `rgb(${r},${g},${b})`;
-              ctx.fillRect(cx, cy, 1, 1);
-            }
-          }
-          
-          ctx.globalAlpha = 1.0;
-        }
-      }
-      
-      if (isPlaying) {
-        animationFrame = requestAnimationFrame(drawScope);
-      }
-    };
-    
-    drawScope();
-    
-    return () => {
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-    };
-  }, [isPlaying, frame, scopeType]);
-
-  return (
-    <div className="w-full bg-zinc-950 border border-zinc-700 rounded relative">
-      <div className="absolute top-1 left-2 z-20">
-        <select 
-          value={scopeType}
-           
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={(e) => setScopeType(e.target.value as any)}
-          className="bg-transparent text-[10px] text-zinc-400 uppercase font-bold outline-none cursor-pointer hover:text-white"
-        >
-          <option value="parade">RGB Parade</option>
-          <option value="waveform">Waveform</option>
-          <option value="vectorscope">Vectorscope</option>
-        </select>
-      </div>
-      {scopeType === 'parade' && (
-        <>
-          <div className="absolute top-1 left-2 mt-4 text-[8px] text-red-500 font-bold z-10">R</div>
-          <div className="absolute top-1 left-1/3 ml-2 text-[8px] text-green-500 font-bold z-10">G</div>
-          <div className="absolute top-1 left-2/3 ml-2 text-[8px] text-blue-500 font-bold z-10">B</div>
-          <div className="absolute top-0 bottom-0 left-1/3 w-px bg-zinc-800 z-10 pointer-events-none" />
-          <div className="absolute top-0 bottom-0 left-2/3 w-px bg-zinc-800 z-10 pointer-events-none" />
-        </>
-      )}
-      <canvas ref={canvasRef} width={240} height={120} className="w-full h-[120px] relative z-0" />
-    </div>
-  );
-}
-
-const INITIAL_ASSETS = [
-  { id: "asset-1", type: "video", name: "Video_Clip_01.mp4", duration_frames: 120, color: "bg-indigo-600/80 border-indigo-400 hover:bg-indigo-500" },
-  { id: "asset-2", type: "video", name: "Video_Clip_02.mp4", duration_frames: 60, color: "bg-emerald-600/80 border-emerald-400 hover:bg-emerald-500" },
-  { id: "asset-3", type: "audio", name: "Audio_Track.wav", duration_frames: 300, color: "bg-amber-600/80 border-amber-400 hover:bg-amber-500" }
-];
-
-// Cubic Bezier interpolation (CSS-like)
-const solveCubicBezier = (p: number, p1x: number, p1y: number, p2x: number, p2y: number) => {
-  let u = p;
-  for (let i = 0; i < 5; i++) {
-    const x = 3 * Math.pow(1 - u, 2) * u * p1x + 3 * (1 - u) * Math.pow(u, 2) * p2x + Math.pow(u, 3);
-    const dx = 3 * Math.pow(1 - u, 2) * p1x + 6 * (1 - u) * u * (p2x - p1x) + 3 * Math.pow(u, 2) * (1 - p2x);
-    if (Math.abs(x - p) < 1e-6 || Math.abs(dx) < 1e-6) break;
-    u = u - (x - p) / dx;
-  }
-  return 3 * Math.pow(1 - u, 2) * u * p1y + 3 * (1 - u) * Math.pow(u, 2) * p2y + Math.pow(u, 3);
-};
+import { INITIAL_ASSETS } from "./editor-defaults";
 
 export default function EditorClient({ project }: { project: any }) {
   const lastSavedProject = useRef<string>('');
+  const mediaRecorderRef = useRef<any>(null);
+  const audioChunksRef = useRef<any[]>([]);
   const [frame, setFrame] = useState(0);
-  const [sidebarWidth, setSidebarWidth] = useState(320);
-  const [inspectorWidth, setInspectorWidth] = useState(320);
-  const [timelineHeight, setTimelineHeight] = useState(320);
+
   const [projectData, setProjectData] = useState(project);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [assets, setAssets] = useState<any[]>([]);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
   const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
-
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getKeyframedValue = (clip: any, property: string, defaultValue: number) => {
-    let baseValue = defaultValue;
-    if (clip?.keyframes) {
-      const kfs = clip.keyframes.filter((k: any) => k.property === property);
-      if (kfs.length > 0) {
-        kfs.sort((a: any, b: any) => a.frame - b.frame);
-        const relativeFrame = frame - clip.start_frame;
-        if (relativeFrame <= kfs[0].frame) {
-          baseValue = kfs[0].value;
-        } else if (relativeFrame >= kfs[kfs.length - 1].frame) {
-          baseValue = kfs[kfs.length - 1].value;
-        } else {
-          for (let i = 0; i < kfs.length - 1; i++) {
-            const k1 = kfs[i];
-            const k2 = kfs[i + 1];
-            if (relativeFrame >= k1.frame && relativeFrame < k2.frame) {
-              if (k1.easing === 'step') {
-                baseValue = k1.value;
-                break;
-              }
-              let progress = (relativeFrame - k1.frame) / (k2.frame - k1.frame);
-              
-              let bz = [0, 0, 1, 1]; // linear
-              if (k1.easing === 'ease-in') bz = [0.42, 0, 1, 1];
-              else if (k1.easing === 'ease-out') bz = [0, 0, 0.58, 1];
-              else if (k1.easing === 'ease-in-out') bz = [0.42, 0, 0.58, 1];
-              else if (k1.easing === 'custom' && k1.bezierCurve?.length === 4) bz = k1.bezierCurve;
-              
-              if (k1.easing && k1.easing !== 'linear' && k1.easing !== 'step') {
-                progress = solveCubicBezier(progress, bz[0], bz[1], bz[2], bz[3]);
-              }
-              
-              baseValue = k1.value + (k2.value - k1.value) * progress;
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    if (clip?.expressions?.[property]) {
-      try {
-        const time = (frame - clip.start_frame) / 60; // Assuming 60fps
-        const value = baseValue;
-         
-        const fn = new Function('time', 'value', 'Math', `return ${clip.expressions[property]};`);
-        return fn(time, value, Math);
-      } catch (e) {
-        console.error("Expression error on property", property, e);
-      }
-    }
-    
-    return baseValue;
-  };
-
-
-
+  const [history, setHistory] = useState<any[]>([project]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [clipboard, setClipboard] = useState<any>(null);
+  const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
+  const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [cloudComments, setCloudComments] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [markers, setMarkers] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [contextMenu, setContextMenu] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [collabSync, setCollabSync] = useState<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [nleEngine, setNleEngine] = useState<any>(null);
 
    
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hasKeyframe = (clip: any, property: string) => {
-    if (!clip) return false;
-    const relativeFrame = frame - clip.start_frame;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return clip?.keyframes?.some((k: any) => k.property === property && Math.abs(k.frame - relativeFrame) < 0.5) || false;
-  };
-
   const [isPlaying, setIsPlaying] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [activeTool, setActiveTool] = useState<string>('select');
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
   const [multiCamMode, setMultiCamMode] = useState(false);
   const [isStereo3D, setIsStereo3D] = useState(false);
   const [showAudioMixer, setShowAudioMixer] = useState(false);
@@ -278,6 +92,36 @@ export default function EditorClient({ project }: { project: any }) {
   const [isQuantumSuperposition, setIsQuantumSuperposition] = useState(false);
   const [isCinematographyAI, setIsCinematographyAI] = useState(false);
   const [isAssetForgeOpen, setIsAssetForgeOpen] = useState(false);
+  const [isRecordingVO, setIsRecordingVO] = useState(false);
+  const [isCaptioning, setIsCaptioning] = useState(false);
+  const [captionProgress, setCaptionProgress] = useState(0);
+  const [bezierEditor, setBezierEditor] = useState<any>(null);
+  const [showDeliverPage, setShowDeliverPage] = useState(false);
+  const [customFonts, setCustomFonts] = useState<any[]>([]);
+  const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
+  const [splitAudioVideoOnImport, setSplitAudioVideoOnImport] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState('media');
+  const [mediaSearchQuery, setMediaSearchQuery] = useState('');
+  const [mediaFilter, setMediaFilter] = useState('all');
+  const [installedPlugins, setInstalledPlugins] = useState<any[]>([]);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [inspectorPos, setInspectorPos] = useState({ floating: false, x: 800, y: 100 });
+  const [timelineHeight, setTimelineHeight] = useState(400);
+  const [isMulticamMode, setIsMulticamMode] = useState(false);
+  const [playbackQuality, setPlaybackQuality] = useState('high');
+  const [showSafeMargins, setShowSafeMargins] = useState(false);
+  const [showScopes, setShowScopes] = useState(false);
+  const [showMixer, setShowMixer] = useState(false);
+  const [scopeMode, setScopeMode] = useState('parade');
+  const [inspectorWidth, setInspectorWidth] = useState(300);
+  const [showDataBurnIn, setShowDataBurnIn] = useState(false);
+  const [trackHeightSize, setTrackHeightSize] = useState('medium');
+  const [trackContextMenu, setTrackContextMenu] = useState<any>(null);
+  const [selectedExportPreset, setSelectedExportPreset] = useState('youtube');
+  const [renderQueue, setRenderQueue] = useState<any[]>([]);
+  const [commandQuery, setCommandQuery] = useState('');
+  const [isFarmRendering, setIsFarmRendering] = useState(false);
+  const [farmProgress, setFarmProgress] = useState(0);
   const [assetForgeMaterial, setAssetForgeMaterial] = useState("glassmorphism");
   const [isSentientColorOpen, setIsSentientColorOpen] = useState(false);
   const [isSingularity, setIsSingularity] = useState(false);
@@ -436,7 +280,6 @@ export default function EditorClient({ project }: { project: any }) {
     return () => clearInterval(interval);
   }, [isAutonomousDirector]);
 
-
   // Load from DB on mount
   useEffect(() => {
     async function load() {
@@ -479,8 +322,6 @@ export default function EditorClient({ project }: { project: any }) {
     window.location.reload();
   };
 
-
-
   // Initialize Real-Time Collaboration and WASM
   useEffect(() => {
     const sync = new CollaborationSync('room_123', (remoteData) => {
@@ -506,7 +347,6 @@ export default function EditorClient({ project }: { project: any }) {
       sync.disconnect();
     };
   }, []);
-
 
   useEffect(() => {
     const handleClick = () => setContextMenu(null);
@@ -2042,8 +1882,6 @@ export default function EditorClient({ project }: { project: any }) {
   useEffect(() => { isExportingRef.current = isExporting; }, [isExporting]);
   useEffect(() => { durationRef.current = projectData.duration_frames || 100; }, [projectData]);
 
-
-
   useEffect(() => {
     let rafId: number;
 
@@ -2421,7 +2259,6 @@ export default function EditorClient({ project }: { project: any }) {
       }
     }
 
-
     setAssets(prev => [...prev, newAsset]);
   };
 
@@ -2784,7 +2621,6 @@ export default function EditorClient({ project }: { project: any }) {
         </div>
         {/* ... (sidebar content) */}
 
-
         {sidebarTab === 'media' && (
           <div className="px-4 pt-4 pb-2 flex flex-col gap-3 shrink-0">
             <div className="relative">
@@ -2802,7 +2638,7 @@ export default function EditorClient({ project }: { project: any }) {
                 <button 
                   key={f}
                    
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   onClick={() => setMediaFilter(f as any)}
                   className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${mediaFilter === f ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                 >
@@ -2964,7 +2800,7 @@ export default function EditorClient({ project }: { project: any }) {
                   ) : asset.type === 'image' ? (
                     <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                   ) : (
-                    // eslint-disable-next-line jsx-a11y/media-has-caption
+
                     <video src={asset.url} preload="metadata" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" onLoadedMetadata={(e) => { e.currentTarget.currentTime = Math.min(1.0, e.currentTarget.duration / 2); }} />
                   )}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
@@ -3193,18 +3029,16 @@ export default function EditorClient({ project }: { project: any }) {
               <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
                 <p className="text-xs text-zinc-400 leading-loose">
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">So</span> 
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">today</span> 
-                  // eslint-disable-next-line react/no-unescaped-entities
-                  // eslint-disable-next-line react/no-unescaped-entities
+
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">we're</span> 
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">going</span> 
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">to</span> 
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">talk</span> 
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">about</span> 
-                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-                  // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
                   <span className="bg-red-500/20 text-red-300 line-through cursor-pointer rounded px-1 transition-colors" title="Ripple Deleted" onClick={handleRestoreRippleWord}>um</span> 
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">the</span> 
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">new</span> 
@@ -3319,16 +3153,15 @@ export default function EditorClient({ project }: { project: any }) {
                   <svg className="w-3 h-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
                   Edit Index
                 </span>
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <span className="text-[10px] text-zinc-400 font-mono">
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   {markers.length + (projectData.tracks?.reduce((acc: number, t: any) => acc + (t.clips?.reduce((cAcc: number, c: any) => cAcc + (c.notes?.length || 0), 0) || 0), 0) || 0)} Events
                 </span>
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-1.5">
                 {(() => {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   const events: any[] = [];
                   markers.forEach(m => events.push({
                     type: 'marker',
@@ -3338,11 +3171,11 @@ export default function EditorClient({ project }: { project: any }) {
                     icon: '📍',
                     id: `g-${m.frame}-${m.label}`
                   }));
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   projectData.tracks?.forEach((t: any) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                     t.clips?.forEach((c: any) => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                       c.notes?.forEach((n: any) => events.push({
                         type: 'note',
                         frame: c.start_frame + n.frame,
@@ -3352,7 +3185,7 @@ export default function EditorClient({ project }: { project: any }) {
                         id: n.id,
                         clipName: c.name || c.id
                       }));
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                       c.markers?.forEach((m: any) => events.push({
                          type: 'clip_marker',
                          frame: c.start_frame + m.frameOffset,
@@ -3375,7 +3208,7 @@ export default function EditorClient({ project }: { project: any }) {
                   }
                   return events.map((ev, i) => (
                      
-                    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
                     <div 
                       key={`${ev.id}-${i}`}
                       className="group flex flex-col p-2 bg-zinc-900/50 border border-zinc-700/80 hover:bg-zinc-800 hover:border-zinc-700 rounded cursor-pointer transition-colors"
@@ -3466,7 +3299,7 @@ export default function EditorClient({ project }: { project: any }) {
 
       {/* Left Splitter */}
       {!mediaPoolPos.floating && (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div
           className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
           onMouseDown={(e: React.MouseEvent) => {
@@ -3484,10 +3317,9 @@ export default function EditorClient({ project }: { project: any }) {
       <div className="flex flex-1 flex-col overflow-hidden h-full">
         {/* Top Half: Preview & Inspector */}
         <div className="flex flex-1 overflow-hidden min-h-0 relative w-full">
-          // eslint-disable-next-line react/jsx-no-comment-textnodes
+
           {/* Preview Area */}
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
           <div 
             className="flex-1 flex flex-col items-center justify-center bg-black relative"
             onClick={(e) => {
@@ -3560,7 +3392,7 @@ export default function EditorClient({ project }: { project: any }) {
           )}
           
           {/* Phase 47: Frame-Accurate Annotations Overlay */}
-          {isReviewMode && annotations.filter(a => Math.abs(a.frame - currentFrame) < 5).map(annotation => (
+          {isReviewMode && annotations.filter(a => Math.abs(a.frame - frame) < 5).map(annotation => (
             <div 
               key={annotation.id}
               className="absolute z-40 transform -translate-x-1/2 -translate-y-full pb-2 animate-in fade-in slide-in-from-bottom-2 pointer-events-auto"
@@ -3985,10 +3817,9 @@ export default function EditorClient({ project }: { project: any }) {
                >
                  Export
                </button>
-          // eslint-disable-next-line react/jsx-no-comment-textnodes
+
           </div>
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
           <div 
             className="text-zinc-300 absolute top-4 left-4 z-10 text-sm font-mono bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-zinc-700 cursor-pointer hover:border-indigo-500/50 transition-colors group"
             title="Click to jump to a specific frame"
@@ -4016,10 +3847,9 @@ export default function EditorClient({ project }: { project: any }) {
             <span className="text-zinc-400 text-[10px] ml-2">f{frame}</span>
           </div>
           <div className="w-full max-w-4xl max-h-full aspect-video border border-zinc-700 bg-zinc-950 relative overflow-hidden shadow-2xl">
-            // eslint-disable-next-line react/jsx-no-comment-textnodes
+
             {/* Sentient AGI Co-Editor (Phase 218) */}
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
             <div 
               className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)] animate-pulse cursor-pointer flex items-center justify-center border-2 border-white/50 hover:scale-110 transition-transform"
               onClick={() => handleAGICoEditor()}
@@ -4031,10 +3861,10 @@ export default function EditorClient({ project }: { project: any }) {
             <WasmPlayer 
               project={{
                 ...projectData,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 tracks: projectData.tracks?.map((t: any) => ({
                   ...t,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   clips: t.clips?.filter((c: any) => !c.isDisabled)
                 })) || []
               }} 
@@ -4121,7 +3951,7 @@ export default function EditorClient({ project }: { project: any }) {
               <div className="absolute inset-0 z-40 grid grid-cols-2 grid-rows-2 bg-black">
                  {[1, 2, 3, 4].map((camIndex) => (
                     
-                   // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
                    <div 
                      key={camIndex}
                      className="relative border border-zinc-700 bg-zinc-900 overflow-hidden cursor-pointer group hover:border-indigo-500 transition-colors"
@@ -4158,7 +3988,7 @@ export default function EditorClient({ project }: { project: any }) {
             <select
               value={playbackQuality}
                
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
               onChange={(e) => setPlaybackQuality(e.target.value as any)}
               className="bg-zinc-800/80 text-zinc-300 text-xs px-2 py-1.5 rounded border border-zinc-700 outline-none hover:bg-zinc-700"
             >
@@ -4325,10 +4155,9 @@ export default function EditorClient({ project }: { project: any }) {
                   Audio Track Mixer
                 </span>
               </div>
-              // eslint-disable-next-line react/jsx-no-comment-textnodes
+
               <div className="flex-1 p-3 flex gap-2 overflow-x-auto custom-scrollbar items-start">
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 {projectData.tracks.filter((t: any) => t.type === 'audio').map((track: any, i: number) => {
                   // Simulate live audio meter value based on frame
                    
@@ -4418,7 +4247,7 @@ export default function EditorClient({ project }: { project: any }) {
 
       {/* Right Splitter */}
       {!inspectorPos.floating && (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div
           className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
           onMouseDown={(e: React.MouseEvent) => {
@@ -4440,7 +4269,7 @@ export default function EditorClient({ project }: { project: any }) {
       >
           {/* Floating Header */}
           {inspectorPos.floating && (
-             // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
              <div 
                className="h-8 bg-zinc-800 flex items-center justify-between px-3 cursor-move border-b border-zinc-700 select-none"
                onMouseDown={(e: React.MouseEvent) => {
@@ -4475,10 +4304,9 @@ export default function EditorClient({ project }: { project: any }) {
             <SpeedRamping updateSelectedClip={updateSelectedClip} selectedClip={selectedClip} />
             {selectedClip ? (
               <>
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div>
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Name</label>
                   <input 
                     type="text" 
@@ -4488,10 +4316,9 @@ export default function EditorClient({ project }: { project: any }) {
                   />
                 </div>
                 <div className="flex gap-2">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Start Frame</label>
                     <input 
                       type="number" 
@@ -4500,10 +4327,9 @@ export default function EditorClient({ project }: { project: any }) {
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
                     />
                   </div>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Duration</label>
                     <input 
                       type="number" 
@@ -4516,10 +4342,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Text Settings */}
                 {selectedClip.type === "text" && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Text Settings</label>
                     <div className="flex flex-col gap-3">
                       <div>
@@ -4767,10 +4592,9 @@ export default function EditorClient({ project }: { project: any }) {
                 )}
                 {/* AI Auto-Caption */}
                 {(selectedClip.type === 'video' || selectedClip.type === 'audio') && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">AI Services</label>
                     <button
                       onClick={startAutoCaption}
@@ -4801,10 +4625,9 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Playback Speed (Video & Audio) */}
                 {(selectedClip.type === 'video' || selectedClip.type === 'audio') && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Playback Speed</label>
                     <div className="flex items-center justify-between mb-2">
                       {renderKeyframeBtn("playback_rate", selectedClip.playback_rate ?? 1.0)}
@@ -4816,7 +4639,7 @@ export default function EditorClient({ project }: { project: any }) {
                       onChange={(e) => {
                         const val = parseFloat(e.target.value);
                         updateSelectedClip({ playback_rate: val }, false);
-                        if (hasKeyframe(selectedClip, 'playback_rate')) toggleKeyframe('playback_rate', val);
+                        if (hasKeyframe({ clip: selectedClip, property: "playback_rate", frame })) toggleKeyframe('playback_rate', val);
                       }}
                       onMouseUp={() => commitState(projectData)}
                       className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4824,10 +4647,9 @@ export default function EditorClient({ project }: { project: any }) {
                     
                     {/* Speed Ramp / Time Remap */}
                     <div className="mt-4 pt-3 border-t border-zinc-700/60">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex items-center justify-between mb-3">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Speed Ramp</label>
                         <button
                           onClick={() => {
@@ -4873,7 +4695,7 @@ export default function EditorClient({ project }: { project: any }) {
                               { position: 1.0, speed: 1.0 }
                             ];
                             const toY = (speed: number) => 55 - Math.min(speed, 4) * 12.5;
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                             const pathData = points.map((p: any, i: number) => {
                               const x = p.position * 200;
                               const y = toY(p.speed);
@@ -4886,10 +4708,9 @@ export default function EditorClient({ project }: { project: any }) {
                             return (
                               <>
                                 <path d={fillPath} fill="url(#speedGrad)" opacity="0.3" />
-                                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                                 <path d={pathData} fill="none" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round" />
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                 {points.map((p: any, i: number) => (
                                   <circle 
                                     key={i}
@@ -4958,10 +4779,9 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Retiming Process (for video clips) */}
                 {(selectedClip.type === "video") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Retiming & Scaling Process</label>
                     
                     {/* Auto-Reframe (Phase 195) */}
@@ -5018,10 +4838,9 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Audio Mix (for audio/video clips) */}
                 {(selectedClip.type === "audio" || selectedClip.type === "video") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Audio Mix</label>
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex-1 flex flex-col items-center gap-1">
@@ -5045,18 +4864,18 @@ export default function EditorClient({ project }: { project: any }) {
                       <span className="text-xs text-zinc-400 w-16">Volume</span>
                       <button 
                         onClick={() => toggleKeyframe("volume", selectedClip.volume ?? 1.0)}
-                        className={`text-xs mr-2 transition-colors ${hasKeyframe(selectedClip, "volume") ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
+                        className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "volume", frame }) ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
                         title="Toggle Volume Keyframe"
                       >
                         ♦
                       </button>
                       <input 
                         type="range" min="0" max="2" step="0.01" 
-                        value={getKeyframedValue(selectedClip, "volume", selectedClip.volume ?? 1.0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "volume", defaultValue: selectedClip.volume ?? 1.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, "volume")) {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          if (hasKeyframe({ clip: selectedClip, property: "volume", frame })) {
+
                             const newKfs = (selectedClip.keyframes || []).filter((k: any) => !(k.property === "volume" && Math.abs(k.frame - (frame - selectedClip.start_frame)) < 0.5));
                             newKfs.push({ frame: frame - selectedClip.start_frame, property: "volume", value: val });
                             updateSelectedClip({ volume: val, keyframes: newKfs });
@@ -5066,25 +4885,25 @@ export default function EditorClient({ project }: { project: any }) {
                         }}
                         className="w-full accent-amber-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "volume", selectedClip.volume ?? 1.0).toFixed(2)}x</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "volume", defaultValue: selectedClip.volume ?? 1.0, frame }).toFixed(2)}x</span>
                     </div>
 
                     <div className="flex items-center justify-between mt-3">
                       <span className="text-xs text-zinc-400 w-16">Pan (L/R)</span>
                       <button 
                         onClick={() => toggleKeyframe("pan", selectedClip.pan ?? 0.0)}
-                        className={`text-xs mr-2 transition-colors ${hasKeyframe(selectedClip, "pan") ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
+                        className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "pan", frame }) ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
                         title="Toggle Pan Keyframe"
                       >
                         ♦
                       </button>
                       <input 
                         type="range" min="-1" max="1" step="0.05" 
-                        value={getKeyframedValue(selectedClip, "pan", selectedClip.pan ?? 0.0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "pan", defaultValue: selectedClip.pan ?? 0.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, "pan")) {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          if (hasKeyframe({ clip: selectedClip, property: "pan", frame })) {
+
                             const newKfs = (selectedClip.keyframes || []).filter((k: any) => !(k.property === "pan" && Math.abs(k.frame - (frame - selectedClip.start_frame)) < 0.5));
                             newKfs.push({ frame: frame - selectedClip.start_frame, property: "pan", value: val });
                             updateSelectedClip({ pan: val, keyframes: newKfs });
@@ -5094,7 +4913,7 @@ export default function EditorClient({ project }: { project: any }) {
                         }}
                         className="w-full accent-amber-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "pan", selectedClip.pan ?? 0.0).toFixed(2)}</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "pan", defaultValue: selectedClip.pan ?? 0.0, frame }).toFixed(2)}</span>
                     </div>
 
                     {/* Essential Sound Auto-Ducking (Phase 14) */}
@@ -5246,13 +5065,11 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
 
                     <div className="mt-4 pt-3 border-t border-zinc-700/50">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex items-center justify-between mb-2">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-xs font-medium text-zinc-400 block">Voice Isolation (AI)</label>
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox" 
@@ -5328,10 +5145,9 @@ export default function EditorClient({ project }: { project: any }) {
                 {selectedClip.type === "audio" && (
                   <div className="pt-2 border-t border-zinc-700 mt-3 mb-3">
                     <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/20 p-2 rounded">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <span className="text-[10px] font-semibold text-indigo-300 flex items-center gap-1">✨ AI Voice Isolation</span>
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" className="sr-only peer" defaultChecked />
                         <div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
@@ -5342,10 +5158,9 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Audio Track Routing (Phase 186) */}
                 {selectedClip.type === "audio" && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2 mb-4">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">Output Routing</label>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-zinc-400 w-16">Bus Send</span>
@@ -5361,10 +5176,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Audio EQ Graphic (Phase 162) */}
                 {selectedClip.type === "audio" && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-4 mb-4">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">Parametric EQ</label>
                     <div className="relative w-full h-24 bg-zinc-950 border border-zinc-700 rounded mb-3 overflow-hidden shadow-inner group">
                       <div className="absolute inset-0 pointer-events-none grid grid-cols-4 grid-rows-3 opacity-20">
@@ -5387,10 +5201,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Spatial Audio / Ambisonics (Phase 183) */}
                 {selectedClip.type === "audio" && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-4 mb-4">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">Spatial 360 Panner</label>
                     <div className="w-full flex items-center justify-center p-4">
                       <div className="relative w-24 h-24 rounded-full border-2 border-zinc-700 bg-zinc-950 flex items-center justify-center cursor-move group hover:border-sky-500/50 transition-colors">
@@ -5406,10 +5219,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Voice FX & Pitch Shifter */}
                 {(selectedClip.type === "audio" || selectedClip.type === "video") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-3 border-t border-zinc-700 mt-3">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-indigo-400 block mb-2 uppercase tracking-wider">Voice FX & Pitch</label>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] text-zinc-400">Preset</span>
@@ -5451,10 +5263,9 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
 
                     {/* Audio Clean-up */}
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-zinc-700/50">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-[10px] font-bold text-indigo-400 block uppercase tracking-wider mb-1">Audio Clean-up</label>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-zinc-400 w-16 text-left leading-tight">Noise<br/>Reduction</span>
@@ -5487,10 +5298,9 @@ export default function EditorClient({ project }: { project: any }) {
                 )}
 
                 {/* Visuals */}
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div className="pt-2 border-t border-zinc-700 mt-2">
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Color Overlay (WASM)</label>
                   <div className="flex items-center gap-2 mb-3">
                     <input 
@@ -5500,11 +5310,10 @@ export default function EditorClient({ project }: { project: any }) {
                       className="w-8 h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
                     />
                     <span className="text-xs text-zinc-400 uppercase">{rgbaToHex(selectedClip.layer?.color)}</span>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   </div>
                   
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Blend Mode</label>
                   <select 
                     value={selectedClip.blend_mode || "normal"}
@@ -5530,10 +5339,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </select>
 
                   {/* Blend If */}
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="mt-3 pt-3 border-t border-zinc-700/50">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Blend If (Luma)</label>
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
@@ -5566,10 +5374,9 @@ export default function EditorClient({ project }: { project: any }) {
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-4 border-t border-zinc-700 mt-4 mb-4">
                     <div className="flex items-center justify-between mb-4">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex items-center gap-2">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-xs font-medium text-zinc-400 block">Color Wheels (Lift/Gamma/Gain)</label>
                         {/* Custom LUT Creator (Phase 192) */}
                         <button className="text-[10px] bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white px-2 py-0.5 rounded border border-zinc-700 transition-colors flex items-center gap-1" onClick={() => handleExportLUT()}>
@@ -5600,16 +5407,15 @@ export default function EditorClient({ project }: { project: any }) {
                         const val = selectedClip.filters?.[wheel.id] || { h: 0, s: 0, v: 0 };
                         return (
                           <div key={wheel.id} className="flex flex-col items-center gap-2">
-                            // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                             <span className="text-[10px] text-zinc-400 uppercase font-medium">{wheel.label}</span>
-                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
                             <div 
                               className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-zinc-700 hover:border-zinc-500 transition-colors" 
                               style={{ background: 'radial-gradient(circle at center, #71717a, transparent), conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}
                               onMouseDown={(e: React.MouseEvent) => {
                                 const rect = e.currentTarget.getBoundingClientRect();
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                 const updateVal = (ev: any) => {
                                   const x = ev.clientX - rect.left - rect.width / 2;
                                   const y = ev.clientY - rect.top - rect.height / 2;
@@ -5650,10 +5456,9 @@ export default function EditorClient({ project }: { project: any }) {
                       })}
                     </div>
                     {/* Custom RGB Curves */}
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="mt-5 pt-4 border-t border-zinc-700">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-[10px] font-bold text-amber-500 block mb-3 uppercase tracking-wider">Custom Curves</label>
                       <div className="relative w-full aspect-square bg-zinc-950 border border-zinc-700 rounded mb-3 overflow-hidden cursor-crosshair group shadow-inner">
                         {/* Grid */}
@@ -5701,10 +5506,9 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                     
                     {/* 3D LUT Support */}
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="mt-5 pt-4 border-t border-zinc-700">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-[10px] font-bold text-indigo-400 block mb-3 uppercase tracking-wider">3D LUT</label>
                       <div className="flex items-center gap-2">
                          <select
@@ -5737,16 +5541,14 @@ export default function EditorClient({ project }: { project: any }) {
 
                       {/* Face Refinement AI (Phase 165) */}
                       <div className="mt-5 pt-4 border-t border-zinc-700">
-                        // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                         <div className="flex items-center justify-between">
-                          // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                          // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                           <label className="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1">
                             ✨ Face Refinement (AI)
-                          // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                           </label>
-                          // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                          // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input 
                               type="checkbox" 
@@ -5798,10 +5600,9 @@ export default function EditorClient({ project }: { project: any }) {
                 {/* Retiming & Speed Ramp (for video clips) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex items-center justify-between mb-3">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-xs font-medium text-zinc-400 block">Retiming & Speed</label>
                       <button 
                         className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded border border-zinc-700 transition-colors"
@@ -5811,11 +5612,11 @@ export default function EditorClient({ project }: { project: any }) {
                       </button>
                       {/* Grayscale */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("grayscale", selectedClip.filters?.grayscale ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "grayscale") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("grayscale", selectedClip.filters?.grayscale ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "grayscale", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Grayscale</span>
                         <input 
                           type="range" min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "grayscale", selectedClip.filters?.grayscale ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "grayscale", defaultValue: selectedClip.filters?.grayscale ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), grayscale: val } }, false);
@@ -5823,15 +5624,15 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "grayscale", selectedClip.filters?.grayscale ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "grayscale", defaultValue: selectedClip.filters?.grayscale ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                       {/* Sepia */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("sepia", selectedClip.filters?.sepia ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "sepia") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("sepia", selectedClip.filters?.sepia ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "sepia", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Sepia</span>
                         <input 
                           type="range" min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "sepia", selectedClip.filters?.sepia ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "sepia", defaultValue: selectedClip.filters?.sepia ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), sepia: val } }, false);
@@ -5839,15 +5640,15 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "sepia", selectedClip.filters?.sepia ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "sepia", defaultValue: selectedClip.filters?.sepia ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                       {/* Invert */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("invert", selectedClip.filters?.invert ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "invert") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("invert", selectedClip.filters?.invert ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "invert", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Invert</span>
                         <input 
                           type="range" min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "invert", selectedClip.filters?.invert ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "invert", defaultValue: selectedClip.filters?.invert ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), invert: val } }, false);
@@ -5855,15 +5656,15 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "invert", selectedClip.filters?.invert ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "invert", defaultValue: selectedClip.filters?.invert ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                       {/* Hue Rotate */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("hue_rotate", selectedClip.filters?.hue_rotate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "hue_rotate") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("hue_rotate", selectedClip.filters?.hue_rotate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "hue_rotate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Hue Rotate</span>
                         <input 
                           type="range" min="0" max="6.283" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "hue_rotate", selectedClip.filters?.hue_rotate ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "hue_rotate", defaultValue: selectedClip.filters?.hue_rotate ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), hue_rotate: val } }, false);
@@ -5871,7 +5672,7 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "hue_rotate", selectedClip.filters?.hue_rotate ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "hue_rotate", defaultValue: selectedClip.filters?.hue_rotate ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
@@ -5879,19 +5680,18 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Image Effects */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Image Effects</label>
                     <div className="flex flex-col gap-3">
                       {/* Pixelate */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("pixelate", selectedClip.filters?.pixelate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "pixelate") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("pixelate", selectedClip.filters?.pixelate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "pixelate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Pixelate</span>
                         <input 
                           type="range" min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "pixelate", selectedClip.filters?.pixelate ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "pixelate", defaultValue: selectedClip.filters?.pixelate ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), pixelate: val } }, false);
@@ -5899,16 +5699,16 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "pixelate", selectedClip.filters?.pixelate ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "pixelate", defaultValue: selectedClip.filters?.pixelate ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                       
                       {/* Edge Detect */}
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe("edge_detect", selectedClip.filters?.edge_detect ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, "edge_detect") ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe("edge_detect", selectedClip.filters?.edge_detect ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "edge_detect", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Edge Detect</span>
                         <input 
                           type="range" min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, "edge_detect", selectedClip.filters?.edge_detect ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: "edge_detect", defaultValue: selectedClip.filters?.edge_detect ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ filters: { ...(selectedClip.filters || {}), edge_detect: val } }, false);
@@ -5916,13 +5716,12 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "edge_detect", selectedClip.filters?.edge_detect ?? 0.0).toFixed(2)}</span>
+                        <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "edge_detect", defaultValue: selectedClip.filters?.edge_detect ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
                       {/* Stabilization (Warp Stabilizer) */}
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="pt-3 mt-3 border-t border-zinc-700">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Warp Stabilizer</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400">Method</span>
@@ -5955,10 +5754,9 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
 
                       {/* Lens Correction / Optics */}
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="pt-3 mt-3 border-t border-zinc-700">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Lens / Optics</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400 w-16">Distortion</span>
@@ -5989,10 +5787,9 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
 
                       {/* Glow / Bloom */}
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="pt-3 mt-3 border-t border-zinc-700">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Glow / Bloom</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400 w-16">Intensity</span>
@@ -6027,20 +5824,19 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Crop */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 mb-2 block">Crop</label>
                     <div className="flex flex-col gap-2">
                       {["left", "right", "top", "bottom"].map((edge) => (
                         <div key={edge} className="flex items-center justify-between">
-                          <button onClick={() => toggleKeyframe(`crop_${edge}`, selectedClip.crop?.[edge] ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, `crop_${edge}`) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                          <button onClick={() => toggleKeyframe(`crop_${edge}`, selectedClip.crop?.[edge] ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `crop_${edge}`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                           <span className="text-[10px] text-zinc-400 w-8 capitalize">{edge}</span>
                           <input 
                             type="range" 
                             min="0" max="1" step="0.01" 
-                            value={getKeyframedValue(selectedClip, `crop_${edge}`, selectedClip.crop?.[edge] ?? 0.0)}
+                            value={getKeyframedValue({ clip: selectedClip, property: `crop_${edge}`, defaultValue: selectedClip.crop?.[edge] ?? 0.0, frame })}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
                               updateSelectedClip({ crop: { ...(selectedClip.crop || {left:0, right:0, top:0, bottom:0}), [edge]: val } }, false);
@@ -6048,7 +5844,7 @@ export default function EditorClient({ project }: { project: any }) {
                             onMouseUp={commitCurrentState}
                             className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
                           />
-                          <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue(selectedClip, `crop_${edge}`, selectedClip.crop?.[edge] ?? 0.0) * 100).toFixed(0)}%</span>
+                          <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue({ clip: selectedClip, property: `crop_${edge}`, defaultValue: selectedClip.crop?.[edge] ?? 0.0, frame }) * 100).toFixed(0)}%</span>
                         </div>
                       ))}
                     </div>
@@ -6249,19 +6045,18 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Border Radius */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 mb-2 block">Border Radius</label>
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe(`border_radius`, selectedClip.border_radius ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, `border_radius`) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe(`border_radius`, selectedClip.border_radius ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `border_radius`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Radius</span>
                         <input 
                           type="range" 
                           min="0" max="1" step="0.01" 
-                          value={getKeyframedValue(selectedClip, `border_radius`, selectedClip.border_radius ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: `border_radius`, defaultValue: selectedClip.border_radius ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ border_radius: val }, false);
@@ -6269,7 +6064,7 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
                         />
-                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue(selectedClip, `border_radius`, selectedClip.border_radius ?? 0.0) * 100).toFixed(0)}%</span>
+                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue({ clip: selectedClip, property: `border_radius`, defaultValue: selectedClip.border_radius ?? 0.0, frame }) * 100).toFixed(0)}%</span>
                       </div>
                     </div>
                   </div>
@@ -6277,17 +6072,16 @@ export default function EditorClient({ project }: { project: any }) {
                 
                 {/* Drop Shadow */}
                 {(selectedClip.type === "video" || selectedClip.type === "image" || selectedClip.type === "text") && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 mb-2 block">Drop Shadow</label>
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] text-zinc-400 w-12">Color</span>
                         <input 
                           type="color" 
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                           value={selectedClip.shadow?.color?.startsWith("#") ? selectedClip.shadow.color.substring(0, 7) : (selectedClip.shadow?.color?.startsWith("rgba") ? "#" + selectedClip.shadow.color.match(/\d+/g)?.slice(0,3).map((x: any) => parseInt(x).toString(16).padStart(2, '0')).join('') : "#000000")}
                           onChange={(e) => {
                             const hex = e.target.value;
@@ -6300,12 +6094,12 @@ export default function EditorClient({ project }: { project: any }) {
                         />
                       </div>
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe(`shadow_distance`, selectedClip.shadow?.distance ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, `shadow_distance`) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe(`shadow_distance`, selectedClip.shadow?.distance ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_distance`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Distance</span>
                         <input 
                           type="range" 
                           min="0" max="0.5" step="0.01" 
-                          value={getKeyframedValue(selectedClip, `shadow_distance`, selectedClip.shadow?.distance ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: `shadow_distance`, defaultValue: selectedClip.shadow?.distance ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ shadow: { ...(selectedClip.shadow || {}), distance: val } }, false);
@@ -6313,15 +6107,15 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
                         />
-                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue(selectedClip, `shadow_distance`, selectedClip.shadow?.distance ?? 0.0) * 100).toFixed(0)}</span>
+                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue({ clip: selectedClip, property: `shadow_distance`, defaultValue: selectedClip.shadow?.distance ?? 0.0, frame }) * 100).toFixed(0)}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe(`shadow_angle`, selectedClip.shadow?.angle ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, `shadow_angle`) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe(`shadow_angle`, selectedClip.shadow?.angle ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_angle`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Angle</span>
                         <input 
                           type="range" 
                           min="-3.14" max="3.14" step="0.01" 
-                          value={getKeyframedValue(selectedClip, `shadow_angle`, selectedClip.shadow?.angle ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: `shadow_angle`, defaultValue: selectedClip.shadow?.angle ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ shadow: { ...(selectedClip.shadow || {}), angle: val } }, false);
@@ -6329,15 +6123,15 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
                         />
-                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue(selectedClip, `shadow_angle`, selectedClip.shadow?.angle ?? 0.0) * (180/Math.PI)).toFixed(0)}°</span>
+                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue({ clip: selectedClip, property: `shadow_angle`, defaultValue: selectedClip.shadow?.angle ?? 0.0, frame }) * (180/Math.PI)).toFixed(0)}°</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <button onClick={() => toggleKeyframe(`shadow_blur`, selectedClip.shadow?.blur ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe(selectedClip, `shadow_blur`) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
+                        <button onClick={() => toggleKeyframe(`shadow_blur`, selectedClip.shadow?.blur ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_blur`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Blur</span>
                         <input 
                           type="range" 
                           min="0" max="0.5" step="0.01" 
-                          value={getKeyframedValue(selectedClip, `shadow_blur`, selectedClip.shadow?.blur ?? 0.0)}
+                          value={getKeyframedValue({ clip: selectedClip, property: `shadow_blur`, defaultValue: selectedClip.shadow?.blur ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
                             updateSelectedClip({ shadow: { ...(selectedClip.shadow || {}), blur: val } }, false);
@@ -6345,7 +6139,7 @@ export default function EditorClient({ project }: { project: any }) {
                           onMouseUp={commitCurrentState}
                           className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
                         />
-                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue(selectedClip, `shadow_blur`, selectedClip.shadow?.blur ?? 0.0) * 100).toFixed(0)}</span>
+                        <span className="text-xs text-zinc-300 w-8 text-right">{(getKeyframedValue({ clip: selectedClip, property: `shadow_blur`, defaultValue: selectedClip.shadow?.blur ?? 0.0, frame }) * 100).toFixed(0)}</span>
                       </div>
                     </div>
                   </div>
@@ -6354,14 +6148,13 @@ export default function EditorClient({ project }: { project: any }) {
                 {/* Effects (GPU Shaders) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex items-center justify-between mb-3">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-xs font-medium text-zinc-400">Effects (GPU Shaders)</label>
                       <button 
                         onClick={() => {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                           const hasChroma = selectedClip.effects?.some((e: any) => e.type === "chroma_key");
                           if (!hasChroma) {
                             const newEffects = [...(selectedClip.effects || []), { id: `effect_${Date.now()}`, type: "chroma_key", properties: { similarity: 0.4, smoothness: 0.1 }, color: [0.0, 1.0, 0.0, 1.0] }];
@@ -6373,10 +6166,9 @@ export default function EditorClient({ project }: { project: any }) {
                         + Chroma Key
                       </button>
                     </div>
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex flex-col gap-3">
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                       {selectedClip.effects?.map((effect: any, idx: number) => {
                         if (effect.type === "chroma_key") {
                           return (
@@ -6385,7 +6177,7 @@ export default function EditorClient({ project }: { project: any }) {
                                 <span className="text-xs text-indigo-400 font-medium">Chroma Key</span>
                                 <button 
                                   onClick={() => {
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                     const newEffects = selectedClip.effects!.filter((e: any) => e.id !== effect.id);
                                     updateSelectedClip({ effects: newEffects });
                                   }}
@@ -6453,10 +6245,9 @@ export default function EditorClient({ project }: { project: any }) {
                 )}
                 
                 {/* Transitions */}
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div className="pt-2 border-t border-zinc-700 mt-2">
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-3">Transitions</label>
                   <div className="flex flex-col gap-3">
                     {/* Fade In */}
@@ -6494,10 +6285,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Clip Notes & Annotations */}
                 <div className="pt-2 border-t border-zinc-700 mt-2">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex items-center justify-between mb-3">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
                       <svg className="w-3 h-3 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
                       Clip Notes
@@ -6524,7 +6314,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <button
                           key={noteType.type}
                           onClick={() => {
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+
                             const inputEl = document.getElementById(`clip-note-input-${selectedClip.id}`) as HTMLTextAreaElement;
                             if (!inputEl || !inputEl.value.trim()) return;
                             const newNote = {
@@ -6549,10 +6339,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                   {/* Notes list */}
                   {(selectedClip.notes || []).length > 0 && (
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto custom-scrollbar">
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                       {(selectedClip.notes || []).slice().reverse().map((note: any) => (
                         <div 
                           key={note.id} 
@@ -6567,7 +6356,7 @@ export default function EditorClient({ project }: { project: any }) {
                             <p className="text-[10px] text-zinc-300 leading-relaxed flex-1">{note.text}</p>
                             <button
                               onClick={() => {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                 updateSelectedClip({ notes: (selectedClip.notes || []).filter((n: any) => n.id !== note.id) });
                                 commitState(projectData);
                               }}
@@ -6595,10 +6384,9 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
 
                 {/* Transform */}
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div className="pt-2 border-t border-zinc-700 mt-2">
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-3">Transform</label>
                   <div className="flex flex-col gap-3">
                     {/* Pos X */}
@@ -6607,16 +6395,16 @@ export default function EditorClient({ project }: { project: any }) {
                       <span className="text-[10px] text-zinc-400 w-14">Pos X</span>
                       <input 
                         type="range" min="-1920" max="1920" step="1" 
-                        value={getKeyframedValue(selectedClip, "transform.x", selectedClip.transform?.x ?? 0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "transform.x", defaultValue: selectedClip.transform?.x ?? 0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, 'transform.x')) toggleKeyframe('transform.x', val);
+                          if (hasKeyframe({ clip: selectedClip, property: "transform.x", frame })) toggleKeyframe('transform.x', val);
                           updateSelectedClip({ transform: { ...(selectedClip.transform || {y:0, scale:1, rotation:0, opacity:1}), x: val } }, false);
                         }}
                         onMouseUp={commitCurrentState}
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "transform.x", selectedClip.transform?.x ?? 0).toFixed(0)}</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "transform.x", defaultValue: selectedClip.transform?.x ?? 0, frame }).toFixed(0)}</span>
                     </div>
                     {/* Pos Y */}
                     <div className="flex items-center justify-between">
@@ -6624,16 +6412,16 @@ export default function EditorClient({ project }: { project: any }) {
                       <span className="text-[10px] text-zinc-400 w-14">Pos Y</span>
                       <input 
                         type="range" min="-1080" max="1080" step="1" 
-                        value={getKeyframedValue(selectedClip, "transform.y", selectedClip.transform?.y ?? 0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "transform.y", defaultValue: selectedClip.transform?.y ?? 0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, 'transform.y')) toggleKeyframe('transform.y', val);
+                          if (hasKeyframe({ clip: selectedClip, property: "transform.y", frame })) toggleKeyframe('transform.y', val);
                           updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, scale:1, rotation:0, opacity:1}), y: val } }, false);
                         }}
                         onMouseUp={commitCurrentState}
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "transform.y", selectedClip.transform?.y ?? 0).toFixed(0)}</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "transform.y", defaultValue: selectedClip.transform?.y ?? 0, frame }).toFixed(0)}</span>
                     </div>
                     {/* Scale */}
                     <div className="flex items-center justify-between">
@@ -6641,16 +6429,16 @@ export default function EditorClient({ project }: { project: any }) {
                       <span className="text-[10px] text-zinc-400 w-14">Scale</span>
                       <input 
                         type="range" min="0" max="3" step="0.01" 
-                        value={getKeyframedValue(selectedClip, "transform.scale", selectedClip.transform?.scale ?? 1.0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "transform.scale", defaultValue: selectedClip.transform?.scale ?? 1.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, 'transform.scale')) toggleKeyframe('transform.scale', val);
+                          if (hasKeyframe({ clip: selectedClip, property: "transform.scale", frame })) toggleKeyframe('transform.scale', val);
                           updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, rotation:0, opacity:1}), scale: val } }, false);
                         }}
                         onMouseUp={commitCurrentState}
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue(selectedClip, "transform.scale", selectedClip.transform?.scale ?? 1.0).toFixed(2)}</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "transform.scale", defaultValue: selectedClip.transform?.scale ?? 1.0, frame }).toFixed(2)}</span>
                     </div>
                     {/* Rotation */}
                     <div className="flex items-center justify-between">
@@ -6659,10 +6447,10 @@ export default function EditorClient({ project }: { project: any }) {
                       <input 
                         type="range" min="-360" max="360" step="1" 
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
-                        value={getKeyframedValue(selectedClip, "rotation", selectedClip.transform?.rotation ?? 0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "rotation", defaultValue: selectedClip.transform?.rotation ?? 0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, "rotation")) toggleKeyframe("rotation", val);
+                          if (hasKeyframe({ clip: selectedClip, property: "rotation", frame })) toggleKeyframe("rotation", val);
                           updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, scale:1, opacity:1}), rotation: val } }, false);
                         }}
                         onMouseUp={commitCurrentState}
@@ -6672,15 +6460,15 @@ export default function EditorClient({ project }: { project: any }) {
                       <input 
                         type="range" min="0" max="1" step="0.01" 
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
-                        value={getKeyframedValue(selectedClip, "opacity", selectedClip.transform?.opacity ?? 1.0)}
+                        value={getKeyframedValue({ clip: selectedClip, property: "opacity", defaultValue: selectedClip.transform?.opacity ?? 1.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
-                          if (hasKeyframe(selectedClip, "opacity")) toggleKeyframe("opacity", val);
+                          if (hasKeyframe({ clip: selectedClip, property: "opacity", frame })) toggleKeyframe("opacity", val);
                           updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, scale:1, rotation:0}), opacity: val } }, false);
                         }}
                         onMouseUp={commitCurrentState}
                       />
-                      <span className="text-xs text-zinc-300 w-10 text-right">{Math.round(getKeyframedValue(selectedClip, "opacity", selectedClip.transform?.opacity ?? 1.0) * 100)}%</span>
+                      <span className="text-xs text-zinc-300 w-10 text-right">{Math.round(getKeyframedValue({ clip: selectedClip, property: "opacity", defaultValue: selectedClip.transform?.opacity ?? 1.0, frame }) * 100)}%</span>
                     </div>
                     {/* Keyframe Easing Presets */}
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-700/50">
@@ -6730,16 +6518,14 @@ export default function EditorClient({ project }: { project: any }) {
 
                     {/* Dynamic Zoom (Phase 168) */}
                     <div className="pt-2 border-t border-zinc-700 mt-2">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex items-center justify-between mb-2">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
                           Dynamic Zoom (Ken Burns)
-                        // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                         </label>
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input 
                             type="checkbox" 
@@ -6811,24 +6597,23 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Animation Curves */}
                 {selectedClip.keyframes && selectedClip.keyframes.length > 0 && (
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="pt-4 border-t border-zinc-700 mt-4 mb-4">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Animation Curves</label>
                     <div className="flex flex-col gap-4">
                       {Object.entries(
-                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                          selectedClip.keyframes.reduce((acc: any, k: any) => {
                            if (!acc[k.property]) acc[k.property] = [];
                            acc[k.property].push(k);
                            return acc;
                          }, {})
-                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                        ).map(([prop, kfs]: [string, any]) => {
-                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                          const sorted = [...kfs].sort((a: any, b: any) => a.frame - b.frame);
-                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                          const values = sorted.map((k: any) => k.value);
                          const minVal = Math.min(...values);
                          const maxVal = Math.max(...values);
@@ -6842,7 +6627,7 @@ export default function EditorClient({ project }: { project: any }) {
                              <div className="h-20 bg-zinc-900 rounded border border-zinc-700 relative overflow-hidden">
                                <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox={`0 0 ${duration} 100`}>
                                  <path 
-                                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                    d={sorted.map((k: any, i: number) => {
                                      const x = k.frame;
                                      const y = 100 - (((k.value - minVal) / range) * 80 + 10);
@@ -6869,10 +6654,9 @@ export default function EditorClient({ project }: { project: any }) {
                                      return `L ${x} ${y}`;
                                    }).join(' ') + ` L ${duration} ${100 - (((sorted[sorted.length - 1].value - minVal) / range) * 80 + 10)}`}
                                    fill="none" stroke="#818cf8" strokeWidth="2" vectorEffect="non-scaling-stroke"
-                                 // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                                  />
-                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                                  {sorted.map((k: any, i: number) => {
                                    const x = k.frame;
                                    const y = 100 - (((k.value - minVal) / range) * 80 + 10);
@@ -6897,10 +6681,9 @@ export default function EditorClient({ project }: { project: any }) {
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-wider">VR 360° Workspace</span>
                     <span className="text-[10px] text-fuchsia-500/80">Enable equirectangular panning viewer</span>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   </div>
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" />
                     <div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
@@ -6922,10 +6705,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* WebGPU Hardware Engine (Phase 199) */}
                 <div className="mb-4 p-3 bg-zinc-950 border border-zinc-700 rounded flex flex-col gap-2">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex items-center justify-between">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Rendering Engine</label>
                     <span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded">Experimental</span>
                   </div>
@@ -6936,10 +6718,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </select>
                 </div>
                 
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div>
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Project Name</label>
                   <input 
                     type="text" 
@@ -6951,10 +6732,9 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {/* Hardware Control Surface (Phase 184) */}
                 <div className="mt-2 p-3 bg-zinc-950 border border-zinc-700 rounded flex flex-col gap-2">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex items-center justify-between">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
                       Control Surface
@@ -6970,10 +6750,9 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
 
                 <div className="flex gap-2">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Width</label>
                     <input 
                       type="number" 
@@ -6982,10 +6761,9 @@ export default function EditorClient({ project }: { project: any }) {
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
                     />
                   </div>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Height</label>
                     <input 
                       type="number" 
@@ -6996,10 +6774,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
                 
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div>
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Aspect Ratio Presets</label>
                   <div className="flex gap-2">
                     <button 
@@ -7023,10 +6800,8 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
 
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
                 <div>
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-2">Background Color</label>
                   <div className="flex items-center gap-2">
                     <input 
@@ -7048,7 +6823,6 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
 
-
                 <div className="mt-4 pt-4 border-t border-zinc-700">
                   <div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">Timecode Burn-In Overlay</div>
                   <label className="flex items-center gap-2 cursor-pointer mb-2" title="Burn-In the timeline timecode directly into the exported video">
@@ -7062,10 +6836,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </label>
                   {projectData.burnInEnabled && (
                     <div className="flex gap-2">
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex-1">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-medium text-zinc-400 block mb-1">Position</label>
                         <select 
                           value={projectData.burnInPosition || 'bottom-right'}
@@ -7079,10 +6852,9 @@ export default function EditorClient({ project }: { project: any }) {
                           <option value="center">Center</option>
                         </select>
                       </div>
-                      // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                       <div className="flex-1">
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                        // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                         <label className="text-[10px] font-medium text-zinc-400 block mb-1">Size</label>
                         <select 
                           value={projectData.burnInSize || 'medium'}
@@ -7120,10 +6892,9 @@ export default function EditorClient({ project }: { project: any }) {
                     <span className="text-xs text-zinc-300">Smart Render Cache</span>
                   </label>
                   
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-2 mb-3">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] font-medium text-zinc-400">Project FPS</label>
                     <select 
                       value={projectData.fps || 60}
@@ -7139,10 +6910,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
 
                   <div>
-                    // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                     <div className="flex justify-between items-center mb-1">
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                      // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                       <label className="text-[10px] font-medium text-zinc-400">Auto-Save Frequency</label>
                       <span className="text-[10px] text-zinc-400">{projectData.autoSaveInterval || 5} mins</span>
                     </div>
@@ -7162,10 +6932,8 @@ export default function EditorClient({ project }: { project: any }) {
         </aside>
         </div> {/* End Top Half */}
 
-        // eslint-disable-next-line react/jsx-no-comment-textnodes
         {/* Horizontal Splitter */}
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div
           className="h-1 cursor-row-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
           onMouseDown={(e) => {
@@ -7274,10 +7042,9 @@ export default function EditorClient({ project }: { project: any }) {
             </div>
           ) : (
             <>
-          // eslint-disable-next-line react/jsx-no-comment-textnodes
+
           {/* Timeline Minimap */}
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
           <div className="h-10 bg-zinc-950 border-b border-zinc-700 relative w-full overflow-hidden cursor-crosshair group flex-shrink-0"
                onMouseDown={(e) => {
                  const rect = e.currentTarget.getBoundingClientRect();
@@ -7300,15 +7067,13 @@ export default function EditorClient({ project }: { project: any }) {
                }}>
             
             {/* Draw Tracks and Clips */}
-            // eslint-disable-next-line react/jsx-no-comment-textnodes
+
             <div className="absolute inset-0 flex flex-col-reverse py-1 gap-[1px]">
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
               {projectData.tracks?.map((track: any) => (
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div key={track.id} className="flex-1 relative w-full">
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                   {track.clips?.map((clip: any) => (
                     <div key={clip.id} 
                          className={`absolute inset-y-0 rounded-sm opacity-50 ${clip.type === 'video' || clip.type === 'image' ? 'bg-indigo-500' : clip.type === 'audio' ? 'bg-emerald-500' : 'bg-pink-500'}`}
@@ -7670,7 +7435,7 @@ export default function EditorClient({ project }: { project: any }) {
       {/* Context Menu */}
       {contextMenu && (
          
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div 
           className="fixed z-[100] bg-zinc-800 border border-zinc-700 shadow-2xl rounded py-1 flex flex-col w-48 text-sm"
           style={{ top: contextMenu.y, left: contextMenu.x }}
@@ -7695,7 +7460,7 @@ export default function EditorClient({ project }: { project: any }) {
               let targetClip = null;
               for (let t = 0; t < projectData.tracks.length; t++) {
                 if (t === selectedTrackIdx) continue;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 const overlapping = projectData.tracks[t].clips.find((c: any) => 
                   c.start_frame < clip.start_frame + clip.duration_frames && 
                   c.start_frame + c.duration_frames > clip.start_frame
@@ -7828,10 +7593,9 @@ export default function EditorClient({ project }: { project: any }) {
         {/* Modals & Popovers */}
       
       {trackContextMenu && (
-        // eslint-disable-next-line react/jsx-no-comment-textnodes
+
         <>
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
           <div className="fixed inset-0 z-40" onClick={() => setTrackContextMenu(null)} onContextMenu={(e: any) => { e.preventDefault(); setTrackContextMenu(null); }} />
           <div 
             className="fixed z-50 bg-zinc-900 border border-zinc-700 rounded shadow-xl py-1 w-48"
@@ -7846,7 +7610,7 @@ export default function EditorClient({ project }: { project: any }) {
                    style={{ backgroundColor: color === 'transparent' ? '#18181b' : color }}
                    title={color === 'transparent' ? 'No Color' : color}
                    onClick={() => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                       setProjectData((prev: any) => {
                          const np = JSON.parse(JSON.stringify(prev));
                          if (np.tracks[trackContextMenu.trackIdx]) {
@@ -7863,10 +7627,10 @@ export default function EditorClient({ project }: { project: any }) {
             <button 
               className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-zinc-800"
               onClick={() => {
-                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                  setProjectData((prev: any) => {
                     const np = JSON.parse(JSON.stringify(prev));
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                     np.tracks = np.tracks.filter((_: any, i: number) => i !== trackContextMenu.trackIdx);
                     return np;
                  });
@@ -8059,7 +7823,7 @@ export default function EditorClient({ project }: { project: any }) {
               onClick={() => {
                 const newProject = JSON.parse(JSON.stringify(projectData));
                 const clip = newProject.tracks[bezierEditor.trackIdx].clips[bezierEditor.clipIdx];
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
                 const kf = clip.keyframes?.find((k: any) => k.property === bezierEditor.property && Math.abs(k.frame - bezierEditor.frame) < 0.5);
                 if (kf) {
                   kf.bezierCurve = bezierEditor.curve;
@@ -8141,18 +7905,16 @@ export default function EditorClient({ project }: { project: any }) {
                     💾 Save Preset
                   </button>
                 </div>
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div className="flex flex-col gap-1">
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">File Name</label>
                   <input type="text" defaultValue="lazynext-export" className="bg-zinc-950 border border-zinc-700/50 rounded text-sm text-white px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Format</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="mp4">MP4 (H.264)</option>
@@ -8161,10 +7923,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <option value="gif">GIF</option>
                     </select>
                   </div>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Resolution</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="3840x2160">3840×2160 (4K)</option>
@@ -8176,10 +7937,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Frame Rate</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="24">23.976</option>
@@ -8189,10 +7949,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <option value="60">59.94</option>
                     </select>
                   </div>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Quality</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="best">Best (Highest)</option>
@@ -8203,10 +7962,9 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Audio Codec</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="aac">AAC (256kbps)</option>
@@ -8214,10 +7972,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <option value="none">No Audio</option>
                     </select>
                   </div>
-                  // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                   <div className="flex flex-col gap-1">
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                    // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">Color Space</label>
                     <select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
                       <option value="rec709">Rec. 709</option>
@@ -8234,10 +7991,9 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
 
                 {/* Direct Cloud Export (Phase 185) */}
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 <div className="mt-4 pt-4 border-t border-zinc-700">
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                  // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                   <label className="text-xs font-medium text-zinc-400 block mb-2">Publish To</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button className="flex items-center justify-center gap-2 p-2 bg-[#ff0000]/10 border border-[#ff0000]/20 hover:bg-[#ff0000]/20 rounded transition-colors" onClick={() => handleYouTubeAuth()}>
@@ -8271,10 +8027,9 @@ export default function EditorClient({ project }: { project: any }) {
                 <span className="text-[10px] font-semibold text-emerald-300 flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                   Distributed Render Farm (P2P Cloud)
-                // eslint-disable-next-line react/jsx-no-comment-textnodes
+
                 </span>
-                // eslint-disable-next-line jsx-a11y/label-has-associated-control
-                // eslint-disable-next-line jsx-a11y/label-has-associated-control
+
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" className="sr-only peer" />
                   <div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
@@ -8469,14 +8224,13 @@ export default function EditorClient({ project }: { project: any }) {
       {/* Command Palette Overlay */}
       {showCommandPalette && (
          
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
         <div 
           className="absolute inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
           onClick={() => setShowCommandPalette(false)}
-        // eslint-disable-next-line react/jsx-no-comment-textnodes
+
         >
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-          // eslint-disable-next-line jsx-a11y/click-events-have-key-events
+
           <div 
             className="w-full max-w-2xl bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
             onClick={e => e.stopPropagation()}
@@ -8487,7 +8241,7 @@ export default function EditorClient({ project }: { project: any }) {
                 type="text" 
                 className="flex-1 bg-transparent border-none text-white text-lg focus:outline-none focus-ring placeholder-zinc-500" 
                 placeholder="Search commands... (e.g. 'Add Text')" 
-                // eslint-disable-next-line jsx-a11y/no-autofocus
+
                 autoFocus
                 value={commandQuery}
                 onChange={e => setCommandQuery(e.target.value)}
@@ -8503,7 +8257,7 @@ export default function EditorClient({ project }: { project: any }) {
                 { name: 'Project Settings', desc: 'Open project configuration', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }
               ].filter(cmd => cmd.name.toLowerCase().includes(commandQuery.toLowerCase()) || cmd.desc.toLowerCase().includes(commandQuery.toLowerCase())).map((cmd, idx) => (
                  
-                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+
                 <div key={idx} className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-zinc-700/50 group" onClick={() => setShowCommandPalette(false)}>
                   <svg className="w-5 h-5 text-zinc-400 mr-4 group-hover:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={cmd.icon} /></svg>
                   <div>
