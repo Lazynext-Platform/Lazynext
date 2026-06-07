@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { toast } from "sonner";
 
 interface MediaPoolSidebarProps {
   assets: any;
@@ -12,6 +13,17 @@ interface MediaPoolSidebarProps {
   handleRestoreRippleWord: any;
   handleDiffusionPrompt: any;
   handleTelepathicLink: any;
+  setInstalledPlugins: any;
+  setAssets: any;
+  handleAddNodeToGraph: any;
+  handleVisualDebugger: any;
+  handleTranscribeAudio: any;
+  handleMorphLips: any;
+  handleDubVoiceTrack: any;
+  handleSceneCutDetection: any;
+  handleSyncAudioVideo: any;
+  isEmotionHeatmapMode: any;
+  setIsEmotionHeatmapMode: any;
   markers: any;
   setFrame: (f: number) => void;
   installedPlugins: any;

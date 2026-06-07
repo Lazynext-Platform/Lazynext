@@ -2279,6 +2279,17 @@ export default function EditorClient({ project }: { project: Project }) {
               handleTelepathicLink={handleTelepathicLink}
               markers={markers}
               setFrame={setFrame}
+              setIsEmotionHeatmapMode={setIsEmotionHeatmapMode}
+              isEmotionHeatmapMode={isEmotionHeatmapMode}
+              handleSyncAudioVideo={handleSyncAudioVideo}
+              handleSceneCutDetection={handleSceneCutDetection}
+              handleDubVoiceTrack={handleDubVoiceTrack}
+              handleMorphLips={handleMorphLips}
+              handleTranscribeAudio={handleTranscribeAudio}
+              handleVisualDebugger={handleVisualDebugger}
+              handleAddNodeToGraph={handleAddNodeToGraph}
+              setAssets={setAssets}
+              setInstalledPlugins={setInstalledPlugins}
             />
 {/* Left Splitter */}
       {!mediaPoolPos.floating && (
@@ -7334,10 +7345,7 @@ export default function EditorClient({ project }: { project: Project }) {
         </div>
       )}
 
-                  <AutoCaptionModal
-              isOpen={isAutoCaptioning}
-              progress={autoCaptionProgress}
-            />{/* Phase 46: Remote Multiplayer Cursors */}
+{/* Phase 46: Remote Multiplayer Cursors */}
       {isMultiplayer && remoteCursors.map(cursor => (
         <div
           key={cursor.id}
