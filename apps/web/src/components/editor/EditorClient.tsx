@@ -496,16 +496,6 @@ export default function EditorClient({ project }: { project: any }) {
     }
   };
 
-  const handleRenameTrack = (trackIdx: number) => {
-    const track = projectData.tracks?.[trackIdx];
-    if (!track) return;
-    const name = prompt("Rename track:", track.name);
-    if (name === null || name.trim() === "") return;
-    const newProject = JSON.parse(JSON.stringify(projectData));
-    newProject.tracks[trackIdx].name = name.trim();
-    commitState(newProject);
-  };
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let selectedClip: any = null;
   let selectedTrackIdx = -1;
@@ -717,16 +707,6 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleCustomPresetSave = () => {
     toast.success('Saved current settings as Custom Preset!');
-  };
-
-  const handleUniverseSimulation = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 5000)),
-      {
-        loading: 'Creating a self-contained physical universe simulation based on timeline data...',
-        success: 'Export successful. Universe ID: U-84729 has been born.'
-      }
-    );
   };
 
   const handleDubVoiceTrack = () => {
@@ -1497,69 +1477,6 @@ export default function EditorClient({ project }: { project: any }) {
     }
   };
 
-  const handleToggleVoiceover = async () => {
-    if (isRecordingVO) {
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-      }
-      setIsRecordingVO(false);
-      setIsPlaying(false);
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-
-      const startFrameRecord = frame;
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const durationFrames = frame - startFrameRecord;
-
-        // Add to project
-        const newProject = JSON.parse(JSON.stringify(projectData));
-        // Find or create an audio track
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let audioTrack = newProject.tracks.find((t: any) => t.type === 'audio');
-        if (!audioTrack) {
-          audioTrack = { id: `track_${Date.now()}`, name: 'A1 (Voiceover)', type: 'audio', clips: [] };
-          newProject.tracks.push(audioTrack);
-        }
-
-        audioTrack.clips.push({
-          id: `vo_${Date.now()}`,
-          type: 'audio',
-          name: 'Voiceover Recording',
-          start_frame: startFrameRecord,
-          duration_frames: durationFrames > 0 ? durationFrames : 60,
-          start_offset: 0,
-          src: audioUrl,
-          volume: 1.0
-        });
-
-        commitState(newProject);
-
-        // Stop stream tracks
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorderRef.current = mediaRecorder;
-      mediaRecorder.start();
-      setIsRecordingVO(true);
-      setIsPlaying(true); // Start playback while recording VO
-    } catch (err) {
-      console.error('Failed to start voiceover:', err);
-      toast.success('Microphone access denied or unavailable.');
-    }
-  };
-
   const handleDetectBeats = () => {
     if (!selectedClip || (selectedClip.type !== 'audio' && selectedClip.type !== 'video')) return;
 
@@ -1653,18 +1570,6 @@ export default function EditorClient({ project }: { project: any }) {
   };
 
   // eslint-disable-next-line lazynext/prefer-object-params
-  const handleMoveTrack = (fromIdx: number, toIdx: number) => {
-    const newProject = JSON.parse(JSON.stringify(projectData));
-    if (!newProject.tracks) return;
-
-    // Remove track from original position
-    const [movedTrack] = newProject.tracks.splice(fromIdx, 1);
-
-    // Insert at new position
-    newProject.tracks.splice(toIdx, 0, movedTrack);
-
-    commitState(newProject);
-  };
 
   // eslint-disable-next-line lazynext/prefer-object-params
   const toggleKeyframe = (property: string, currentValue: number) => {
