@@ -6,6 +6,8 @@ import { NLEState } from 'lazynext-wasm';
 import { useEditorState } from './useEditorState';
 import { RenderFarmModal } from './RenderFarmModal';
 import { BezierEditorModal } from './BezierEditorModal';
+import { NeuralCinemaOverlay } from './NeuralCinemaOverlay';
+import { SentientColorOverlay } from './SentientColorOverlay';
 import type { Project, Asset, TimelineMarker } from "@/types/editor";
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
@@ -2401,87 +2403,10 @@ export default function EditorClient({ project }: { project: Project }) {
           ))}
 
           {/* Phase 37: Neural Cinematography AI Dashboard & Rule of Thirds */}
-          {isCinematographyAI && (
-            <>
-              <div className="absolute top-4 left-4 z-50 bg-black/80 backdrop-blur-md border border-cyan-500/50 rounded-lg p-3 w-64 shadow-[0_0_20px_rgba(6,182,212,0.3)] pointer-events-none">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">Neural Cinema AI</span>
-                  <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Shot Type</span>
-                    <span className="text-white font-medium">Medium Close-Up</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Subject Focus</span>
-                    <span className="text-white font-medium text-emerald-400">Locked (Center)</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-zinc-400">Cinematic Score</span>
-                    <span className="text-white font-medium text-yellow-400">8.9 / 10</span>
-                  </div>
-                  <div className="w-full h-1 bg-zinc-800 rounded overflow-hidden mt-1">
-                    <div className="h-full bg-gradient-to-r from-yellow-500 to-emerald-500 w-[89%]" />
-                  </div>
-                </div>
-              </div>
-              <div className="absolute inset-0 pointer-events-none z-[35] flex items-center justify-center mix-blend-screen opacity-50">
-                <div className="w-full h-full border border-cyan-500/30 grid grid-cols-3 grid-rows-3 relative">
-                  <div className="border-r border-cyan-500/30 h-full" />
-                  <div className="border-r border-cyan-500/30 h-full" />
-                  <div />
-                  <div className="absolute top-1/3 left-0 w-full border-b border-cyan-500/30" />
-                  <div className="absolute top-2/3 left-0 w-full border-b border-cyan-500/30" />
-                  {/* Intersection points */}
-                  <div className="absolute top-1/3 left-1/3 w-2 h-2 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(34,211,238,1)]" />
-                  <div className="absolute top-1/3 left-2/3 w-2 h-2 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(34,211,238,1)]" />
-                  <div className="absolute top-2/3 left-1/3 w-2 h-2 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(34,211,238,1)]" />
-                  <div className="absolute top-2/3 left-2/3 w-2 h-2 rounded-full bg-cyan-400 -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(34,211,238,1)]" />
-                </div>
-              </div>
-            </>
-          )}
+          <NeuralCinemaOverlay isActive={isCinematographyAI} />
 
           {/* Phase 39: Sentient Color Intelligence Dashboard */}
-          {isSentientColorOpen && (
-            <div className="absolute top-20 right-4 z-50 bg-black/80 backdrop-blur-md border border-rose-500/50 rounded-lg p-3 w-56 shadow-[0_0_20px_rgba(225,29,72,0.3)] pointer-events-none">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Sentient Color</span>
-                <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse delay-75" />
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse delay-150" />
-                </div>
-              </div>
-              <div className="flex items-center justify-center mb-4 relative">
-                <div className="w-24 h-24 rounded-full border-4 border-zinc-800 relative overflow-hidden" style={{ background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}>
-                  {/* Dynamic Color Pointers */}
-                  <div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left -rotate-45 shadow-[0_0_5px_white]" />
-                  <div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left rotate-135 shadow-[0_0_5px_white]" />
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 rounded-full bg-zinc-900 shadow-inner" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex gap-1 h-6 rounded overflow-hidden">
-                  <div className="flex-1 bg-rose-500" />
-                  <div className="flex-1 bg-orange-400" />
-                  <div className="flex-1 bg-sky-500" />
-                  <div className="flex-1 bg-indigo-600" />
-                </div>
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-zinc-400">Harmony Profile</span>
-                  <span className="text-white font-medium">Split-Complementary</span>
-                </div>
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-zinc-400">Emotional Resonance</span>
-                  <span className="text-rose-400 font-medium">Energetic</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <SentientColorOverlay isActive={isSentientColorOpen} />
 
           <div className="flex items-center gap-4 absolute top-4 right-4 z-10">
             <FeatureToolbar
