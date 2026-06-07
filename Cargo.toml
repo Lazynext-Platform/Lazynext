@@ -7,5 +7,5 @@ members = [
     "rust/crates/effects",
     "rust/crates/gpu",
     "rust/crates/masks",
-    "rust/wasm", "rust/crates/compositor", "apps/mcp", "rust/crates/plugin", "apps/cli", "apps/mobile", "rust/crates/satellite_uplink", "rust/crates/neural_engine", "rust/crates/decklink", "rust/crates/agent",
+    "rust/wasm", "rust/crates/compositor", "apps/mcp", "rust/crates/plugin", "apps/cli", "apps/mobile", "rust/crates/satellite_uplink", "rust/crates/neural_engine", "rust/crates/decklink", "rust/crates/agent", "rust/crates/ffmpeg_filter",
 ]
