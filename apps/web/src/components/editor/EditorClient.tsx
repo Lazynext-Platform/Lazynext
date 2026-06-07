@@ -2275,6 +2275,10 @@ export default function EditorClient({ project }: { project: Project }) {
               handleAutoSubtitleTrack={handleAutoSubtitleTrack}
               handleAiVoiceover={handleAiVoiceover}
               handleRestoreRippleWord={handleRestoreRippleWord}
+              handleDiffusionPrompt={handleDiffusionPrompt}
+              handleTelepathicLink={handleTelepathicLink}
+              markers={markers}
+              setFrame={setFrame}
             />
 {/* Left Splitter */}
       {!mediaPoolPos.floating && (

@@ -1,6 +1,7 @@
 import type { ParamValues } from "@/params";
 import type { Transform } from "@/primitives/transform";
 import { type BlendMode, isBlendMode } from "@/primitives/blend-mode";
+export type { BlendMode };
 
 export function buildTransformFromParams({
 	params,

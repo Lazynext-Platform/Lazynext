@@ -10,6 +10,10 @@ interface MediaPoolSidebarProps {
   handleCreateMulticam: any;
   handleFileUpload: any;
   handleRestoreRippleWord: any;
+  handleDiffusionPrompt: any;
+  handleTelepathicLink: any;
+  markers: any;
+  setFrame: (f: number) => void;
   installedPlugins: any;
   mediaFilter: any;
   mediaPoolPos: any;
@@ -33,6 +37,10 @@ export function MediaPoolSidebar({
     handleCreateMulticam,
     handleFileUpload,
     handleRestoreRippleWord,
+    handleDiffusionPrompt,
+    handleTelepathicLink,
+    markers,
+    setFrame,
     installedPlugins,
     mediaFilter,
     mediaPoolPos,

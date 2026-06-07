@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useContext, type ReactNode } from "react";
+import React, { useState, createContext, useContext, type ReactNode } from "react";
 import type { Project, Asset, Clip, TimelineMarker } from "@/types/editor";
 
 /**
