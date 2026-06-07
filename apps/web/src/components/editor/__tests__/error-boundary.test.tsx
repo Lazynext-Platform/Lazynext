@@ -14,12 +14,12 @@ describe("EditorErrorBoundary", () => {
   });
 });
 
-describe("EditorProvider", () => {
-  it("exports EditorProvider and useEditorState", async () => {
+describe("EditorStateProvider", () => {
+  it("exports EditorStateProvider and useEditorState", async () => {
     const mod = await import("../useEditorState");
-    expect(mod.EditorProvider).toBeDefined();
+    expect(mod.EditorStateProvider).toBeDefined();
     expect(mod.useEditorState).toBeDefined();
-    expect(typeof mod.EditorProvider).toBe("function");
+    expect(typeof mod.EditorStateProvider).toBe("function");
     expect(typeof mod.useEditorState).toBe("function");
   });
 });

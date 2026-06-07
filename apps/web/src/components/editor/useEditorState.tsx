@@ -66,7 +66,7 @@ interface EditorState {
 
 const EditorContext = createContext<EditorState | null>(null);
 
-export function EditorProvider({ children }: { children: ReactNode }) {
+export function EditorStateProvider({ children }: { children: ReactNode }) {
   // Core
   const [projectData, setProjectData] = useState<Project | null>(null);
   const [assets, setAssets] = useState<Asset[]>([]);
