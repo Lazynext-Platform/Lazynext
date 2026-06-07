@@ -1,6 +1,5 @@
 use anyhow::{Result, anyhow};
 use serde_json::Value;
-use std::process::Command;
 
 /// Constructs an FFMPEG command array based on the given tool name and JSON schema arguments.
 pub fn build_ffmpeg_command(name: &str, args: &Value, input_file: &str, output_file: &str) -> Result<Vec<String>> {
