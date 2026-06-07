@@ -9,7 +9,6 @@ import {
 	STRING_CHANNEL_LAYOUT,
 	COLOR_CHANNEL_LAYOUT,
 } from "@/params";
-import type { ParamDefinition } from "@/params";
 
 // --- Helpers ---
 
@@ -35,14 +34,6 @@ function createBooleanParam(): any {
 	};
 }
 
-function createStringParam(): any {
-	return {
-		type: "string" as any,
-		label: "text",
-		default: "", key: "text",
-		channelLayout: STRING_CHANNEL_LAYOUT,
-	};
-}
 
 // --- Tests ---
 
