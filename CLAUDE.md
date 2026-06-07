@@ -19,7 +19,7 @@ cd apps/web && bun test
 | Metric | Status |
 |---|---|
 | TypeScript errors | **0** (2,200+ resolved) |
-| Unit tests | **126 new** (342 total, 0 new failures) |
+| Unit tests | **143 new** (342 total, 0 new failures) |
 | `ignoreBuildErrors` | `true` (pre-existing Turbopack bug, not TS) |
 | EditorClient | 7,174 lines (-1,576) |
 | Extracted components | **5** (BezierEditor, RenderFarm, VideoScopes, +2 prior) |
