@@ -32,7 +32,7 @@ export class CollaborationSocket {
   /** Send a local CRDT delta to all connected peers. */
   broadcastEdit(delta: Uint8Array): void {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(delta);
+      this.ws.send(delta.buffer as ArrayBuffer);
     }
   }
 

@@ -18,6 +18,14 @@ export interface Project {
   data?: Record<string, unknown>;
   createdAt?: string | Date;
   updatedAt?: string | Date;
+  // Display/settings fields used by EditorClient inspector
+  burnInEnabled?: boolean;
+  burnInPosition?: string;
+  burnInSize?: string;
+  useHardwareAcceleration?: boolean;
+  smartRenderCache?: boolean;
+  autoSaveInterval?: number;
+  bypassEffects?: boolean;
 }
 
 export interface Clip {
@@ -89,6 +97,8 @@ export interface Asset {
   url?: string;
   duration?: number;
   src?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  audioBuffer?: any;
 }
 
 export interface AgentEvent {
