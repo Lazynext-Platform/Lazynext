@@ -143,8 +143,17 @@ export function useEditorState() {
   const context = useContext(EditorContext);
   if (!context) {
     throw new Error(
-      "useEditorState must be used within an EditorProvider",
+      "useEditorState must be used within an EditorStateProvider",
     );
   }
   return context;
+}
+
+/**
+ * Like useEditorState(), but returns null instead of throwing when
+ * used outside an EditorStateProvider. Use this for gradual migration
+ * from prop-based to context-based state.
+ */
+export function useOptionalEditorState(): EditorState | null {
+  return useContext(EditorContext);
 }
