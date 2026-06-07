@@ -333,7 +333,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
     const initWasm = async () => {
       try {
-        // @ts-ignore - TS cannot resolve out-of-root pkg dir reliably
+        // TODO: Uncomment when Rust WASM package is built
         // const wasm = await import('../../../../rust/wasm/pkg/lazynext_wasm.js');
         // await wasm.default();
         setWasmState('ready');
