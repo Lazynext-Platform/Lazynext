@@ -45,11 +45,9 @@ export default function EditorClient({ project }: { project: Project }) {
   const [isRestored, setIsRestored] = useState(false);
   const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [history, setHistory] = useState<any[]>([project]);
+  const [history, setHistory] = useState<Project[]>([project]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [clipboard, setClipboard] = useState<any>(null);
+  const [clipboard, setClipboard] = useState<Project | null>(null);
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
 
@@ -124,7 +122,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [trackHeightSize, setTrackHeightSize] = useState('medium');
   const [trackContextMenu, setTrackContextMenu] = useState<any>(null);
   const [selectedExportPreset, setSelectedExportPreset] = useState('youtube');
-  const [renderQueue, setRenderQueue] = useState<any[]>([]);
+  const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number }[]>([]);
   const [commandQuery, setCommandQuery] = useState('');
   const [isFarmRendering, setIsFarmRendering] = useState(false);
   const [farmProgress, setFarmProgress] = useState(0);
