@@ -126,6 +126,10 @@ const CodeIcon = (
 // ── Component ──
 
 export function FeatureToolbar(props: FeatureToolbarProps) {
+  // Phase 51-60 migration: context available but props still used for backward compat.
+  // const ctx = useOptionalEditorState();
+  // const is3DWorkspace = ctx?.activeWorkspace === "fusion" || props.is3DWorkspace;
+
   return (
     <>
       {/* Phase 23: 3D Workspace Toggle */}
