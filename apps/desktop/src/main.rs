@@ -71,7 +71,7 @@ impl AppWindow {
                     .items_center()
                     .justify_center()
                     .child(
-                        div().text_sm().text_color(rgb(0x52525b)).child(format!("wgpu Canvas 1280x720"))
+                        div().text_sm().text_color(rgb(0x52525b)).child("wgpu Canvas 1280x720".to_string())
                     )
             )
     }

@@ -34,10 +34,10 @@ pub extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_ch
             let model = std::env::var("LAZYNEXT_AI_MODEL").unwrap_or_else(|_| "".to_string());
             let api_key = std::env::var("LAZYNEXT_API_KEY").unwrap_or_else(|_| "mock".to_string());
             
-            if let Ok(agent) = agent::AgentFactory::create(&provider, &model, &api_key) {
-                if let Ok(res) = agent.send_prompt(&prompt).await {
-                    println!("Mobile Agent Output:\n{:?}", res);
-                }
+            if let Ok(agent) = agent::AgentFactory::create(&provider, &model, &api_key)
+                && let Ok(res) = agent.send_prompt(&prompt).await
+            {
+                println!("Mobile Agent Output:\n{:?}", res);
             }
         });
     });
