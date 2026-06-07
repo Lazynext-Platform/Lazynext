@@ -111,7 +111,6 @@ export default function EditorClient({ project }: { project: Project }) {
   const [showSafeMargins, setShowSafeMargins] = useState(false);
   const [showScopes, setShowScopes] = useState(false);
   const [showMixer, setShowMixer] = useState(false);
-  const [scopeMode, setScopeMode] = useState('parade');
   const [inspectorWidth, setInspectorWidth] = useState(300);
   const [showDataBurnIn, setShowDataBurnIn] = useState(false);
   const [trackHeightSize, setTrackHeightSize] = useState('medium');
@@ -2879,120 +2878,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
           {/* Video Scopes Panel */}
           {showScopes && (
-            <div className="absolute bottom-0 left-0 right-0 h-48 z-40 bg-black/90 backdrop-blur-sm border-t border-zinc-700 flex flex-col">
-              {/* Scope Mode Tabs */}
-              <div className="h-7 flex items-center gap-0 border-b border-zinc-700/50 px-2 shrink-0">
-                {(['waveform', 'parade', 'vectorscope'] as const).map(mode => (
-                  <button
-                    key={mode}
-                    onClick={() => setScopeMode(mode)}
-                    className={`px-3 py-1 text-[10px] uppercase tracking-wider font-semibold transition-colors ${
-                      scopeMode === mode ? 'text-emerald-400 border-b border-emerald-400' : 'text-zinc-400 hover:text-zinc-300'
-                    }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-                <div className="flex-1" />
-                <span className="text-[8px] text-zinc-400 font-mono">LIVE</span>
-              </div>
-
-              {/* Scope Display */}
-              <div className="flex-1 p-2 overflow-hidden">
-                {scopeMode === 'waveform' && (
-                  <svg viewBox="0 0 256 100" className="w-full h-full" preserveAspectRatio="none">
-                    {/* Background grid */}
-                    {[0, 25, 50, 75, 100].map(y => (
-                      <line key={y} x1="0" y1={y} x2="256" y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="0.3" />
-                    ))}
-                    {/* IRE labels */}
-                    <text x="1" y="5" fill="rgba(255,255,255,0.2)" fontSize="4" fontFamily="monospace">100</text>
-                    <text x="1" y="53" fill="rgba(255,255,255,0.2)" fontSize="4" fontFamily="monospace">50</text>
-                    <text x="1" y="99" fill="rgba(255,255,255,0.2)" fontSize="4" fontFamily="monospace">0</text>
-                    {/* Simulated waveform data */}
-                    {Array.from({length: 256}, (_, x) => {
-                      const baseY = 40 + Math.sin(x * 0.05 + frame * 0.02) * 15 + Math.sin(x * 0.12) * 8;
-
-                      const scatter = 0.5 * 20 - 10;
-                      const y = Math.max(2, Math.min(98, baseY + scatter));
-
-                      return <rect key={x} x={x} y={y} width="1" height={Math.max(1, 0.5 * 6 + 1)} fill="rgba(74,222,128,0.4)" />;
-                    })}
-                    {/* Highlight line */}
-                    {Array.from({length: 256}, (_, x) => {
-                      const y = 40 + Math.sin(x * 0.05 + frame * 0.02) * 15 + Math.sin(x * 0.12) * 8;
-                      return <rect key={`h${x}`} x={x} y={Math.max(2, y)} width="1" height="1" fill="rgba(74,222,128,0.8)" />;
-                    })}
-                  </svg>
-                )}
-
-                {scopeMode === 'parade' && (
-                  <div className="flex h-full gap-1">
-                    {[
-                      { color: 'rgba(239,68,68,', label: 'R' },
-                      { color: 'rgba(74,222,128,', label: 'G' },
-                      { color: 'rgba(96,165,250,', label: 'B' },
-                    ].map((ch, ci) => (
-                      <div key={ci} className="flex-1 relative">
-                        <svg viewBox="0 0 85 100" className="w-full h-full" preserveAspectRatio="none">
-                          {[0, 50, 100].map(y => (
-                            <line key={y} x1="0" y1={y} x2="85" y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="0.3" />
-                          ))}
-                          <text x="1" y="6" fill={`${ch.color}0.5)`} fontSize="5" fontFamily="monospace">{ch.label}</text>
-                          {Array.from({length: 85}, (_, x) => {
-                            const offset = ci * 2.3 + frame * 0.015;
-                            const baseY = 45 + Math.sin(x * 0.07 + offset) * 18 + Math.cos(x * 0.15 + ci) * 6;
-                            const scatter = 0.5 * 14 - 7;
-                            const y = Math.max(2, Math.min(98, baseY + scatter));
-                            return <rect key={x} x={x} y={y} width="1" height={Math.max(1, 0.5 * 5 + 1)} fill={`${ch.color}0.45)`} />;
-                          })}
-                        </svg>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {scopeMode === 'vectorscope' && (
-                  <svg viewBox="0 0 100 100" className="w-full h-full max-w-[160px] mx-auto">
-                    {/* Outer circle */}
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.3" />
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.3" />
-                    <circle cx="50" cy="50" r="15" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.3" />
-                    {/* Crosshair */}
-                    <line x1="50" y1="3" x2="50" y2="97" stroke="rgba(255,255,255,0.06)" strokeWidth="0.3" />
-                    <line x1="3" y1="50" x2="97" y2="50" stroke="rgba(255,255,255,0.06)" strokeWidth="0.3" />
-                    {/* Color targets */}
-                    {[
-                      { label: 'R', x: 70, y: 18 }, { label: 'YL', x: 82, y: 40 },
-                      { label: 'G', x: 30, y: 18 }, { label: 'CY', x: 18, y: 40 },
-                      { label: 'B', x: 30, y: 82 }, { label: 'MG', x: 70, y: 82 },
-                    ].map((t, i) => (
-                      <g key={i}>
-                        <rect x={t.x - 2} y={t.y - 2} width="4" height="4" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.3" />
-                        <text x={t.x} y={t.y - 4} textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="3" fontFamily="monospace">{t.label}</text>
-                      </g>
-                    ))}
-                    {/* Simulated chrominance data points */}
-                    {Array.from({length: 200}, (_, i) => {
-                      const angle = (i / 200) * Math.PI * 2 + frame * 0.01;
-
-                      const radius = 5 + 0.5 * 15 + Math.sin(angle * 3) * 5;
-                      const x = 50 + Math.cos(angle) * radius;
-                      const y = 50 + Math.sin(angle) * radius;
-                      const hue = (angle / (Math.PI * 2)) * 360;
-                      return <circle key={i} cx={x} cy={y} r="0.6" fill={`hsla(${hue}, 80%, 60%, 0.5)`} />;
-                    })}
-                    {/* Dense center cluster */}
-                    {Array.from({length: 100}, (_, i) => {
-
-                      const x = 50 + (0.5 - 0.5) * 12;
-
-                      const y = 50 + (0.5 - 0.5) * 12;
-                      return <circle key={`c${i}`} cx={x} cy={y} r="0.4" fill="rgba(255,255,255,0.25)" />;
-                    })}
-                  </svg>
-                )}
-              </div>
+            <div className="absolute bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-sm border-t border-zinc-700">
+              <VideoScopes isPlaying={isPlaying} frame={frame} />
             </div>
           )}
 
