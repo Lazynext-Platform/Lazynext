@@ -1,9 +1,3 @@
-// @ts-nocheck
-// TODO: Remove @ts-nocheck. Blockers:
-//   1. project/timeline/clip data uses 'any' throughout — need proper types from @/types/editor
-//   2. WASM state (NLEState) is typed as 'any' — needs lazynext-wasm type exports
-//   3. ~50 remaining eslint no-explicit-any suppressions for callback params
-//   Migration path: adopt EditorStateProvider context → replace inline useState → add types
 /* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 
@@ -56,7 +50,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [cloudComments, setCloudComments] = useState<{ id: string; frame: number; text: string; author?: string }[]>([]);
   const [markers, setMarkers] = useState<TimelineMarker[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [contextMenu, setContextMenu] = useState<any>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,7 +94,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [isRecordingVO, setIsRecordingVO] = useState(false);
   const [isCaptioning, setIsCaptioning] = useState(false);
   const [captionProgress, setCaptionProgress] = useState(0);
-  const [bezierEditor, setBezierEditor] = useState<any>(null);
+  const [bezierEditor, setBezierEditor] = useState<{ isOpen: boolean } | null>(null);
   const [showDeliverPage, setShowDeliverPage] = useState(false);
   const [customFonts, setCustomFonts] = useState<string[]>([]);
   const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
@@ -108,7 +102,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [sidebarTab, setSidebarTab] = useState('media');
   const [mediaSearchQuery, setMediaSearchQuery] = useState('');
   const [mediaFilter, setMediaFilter] = useState('all');
-  const [installedPlugins, setInstalledPlugins] = useState<any[]>([]);
+  const [installedPlugins, setInstalledPlugins] = useState<{ id: string; name: string }[]>([]);
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const [inspectorPos, setInspectorPos] = useState({ floating: false, x: 800, y: 100 });
   const [timelineHeight, setTimelineHeight] = useState(400);
@@ -121,7 +115,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [inspectorWidth, setInspectorWidth] = useState(300);
   const [showDataBurnIn, setShowDataBurnIn] = useState(false);
   const [trackHeightSize, setTrackHeightSize] = useState('medium');
-  const [trackContextMenu, setTrackContextMenu] = useState<any>(null);
+  const [trackContextMenu, setTrackContextMenu] = useState<{ x: number; y: number; trackId: string } | null>(null);
   const [selectedExportPreset, setSelectedExportPreset] = useState('youtube');
   const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number }[]>([]);
   const [commandQuery, setCommandQuery] = useState('');
