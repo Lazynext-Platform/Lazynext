@@ -1,47 +1,44 @@
-# Desktop
+# Lazynext Desktop
 
-The native desktop app, built with [GPUI](https://gpui.rs).
+Native desktop NLE application built with GPUI + wgpu. Cross-platform.
 
-## Getting started
+## Platform Support
 
-**1. Install Rust:**
+| OS | GPU Backend | Status |
+|---|---|---|
+| **macOS** | Metal (native) | ✅ Primary |
+| **Windows** | Vulkan / DX12 | ✅ Supported |
+| **Linux** | Vulkan | ✅ Supported |
 
+## Setup
+
+### macOS
 ```bash
-# Linux / macOS / WSL
 ./script/setup-rust
-```
-
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File .\script\setup-rust.ps1
-```
-
-Both scripts skip installation if Rust is already present. On Linux/macOS/WSL only: after a fresh install, reload your shell with `source "$HOME/.cargo/env"`
-
-**2. Install native dependencies:**
-
-```bash
-# Linux / macOS / WSL
-./apps/desktop/script/setup
-```
-
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File .\apps\desktop\script\setup.ps1
-```
-
-**3. Run:**
-
-```bash
 cargo run -p lazynext-desktop
 ```
 
-## Platform notes
+### Windows
+```powershell
+powershell -ExecutionPolicy Bypass -File .\script\setup-windows.ps1
+cargo run -p lazynext-desktop
+```
 
-**Linux:** supports apt (Debian/Ubuntu/Mint), dnf (Fedora/RHEL), and pacman (Arch).
+### Linux
+```bash
+chmod +x script/setup-linux.sh
+./script/setup-linux.sh
+cargo run -p lazynext-desktop
+```
 
-**macOS:** installs Xcode Command Line Tools if missing.
+## Architecture
+- **UI Framework**: GPUI 0.2.2
+- **GPU**: wgpu — Metal (macOS), Vulkan (Win/Linux), DX12 (Win)
+- **Video**: Custom Rust compositor with WGSL shaders
+- **AI**: 20+ model providers
 
-**Windows:** the setup script checks for Visual Studio Build Tools. If missing, it prints the install link.
-
-**WSL:** runs the same scripts as Linux. Window rendering works via WSLg on Windows 11 and Windows 10 22H2+. If you're on an older build, test on the host instead.
+## GPU Backend
+Auto-selects best backend. Override with:
+```bash
+WGPU_BACKEND=vulkan cargo run -p lazynext-desktop
+```

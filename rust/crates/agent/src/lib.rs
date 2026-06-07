@@ -407,29 +407,201 @@ mod tests {
 // Factory
 // -----------------------------------------------------------------------------
 
-pub struct AgentFactory;
 
+// -----------------------------------------------------------------------------
+// OpenAI-Compatible Generic Agent (Mistral, Groq, DeepSeek, Together, etc.)
+// -----------------------------------------------------------------------------
+
+pub struct OpenAICompatibleAgent {
+    client: Client,
+    api_key: String,
+    model: String,
+    base_url: String,
+}
+
+impl OpenAICompatibleAgent {
+    pub fn new(api_key: String, model: String, base_url: String) -> Self {
+        Self { client: Client::new(), api_key, model, base_url }
+    }
+}
+
+#[async_trait]
+impl AgentProvider for OpenAICompatibleAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let tools = OpenAIAgent::convert_to_openai_tools(tools::get_available_tools());
+        let payload = json!({
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": "You are Lazynext Agent, an autonomous video editor."},
+                {"role": "user", "content": prompt}
+            ],
+            "tools": tools, "tool_choice": "auto"
+        });
+        let res = self.client.post(&self.base_url).bearer_auth(&self.api_key)
+            .header("content-type", "application/json").json(&payload).send().await
+            .context("OpenAI-compatible request failed")?;
+        let body: serde_json::Value = res.json().await?;
+        if let Some(choices) = body["choices"].as_array()
+            && let Some(msg) = choices.first().and_then(|c| c.get("message")) {
+                let mut responses = vec![];
+                if let Some(t) = msg["content"].as_str() { if !t.is_empty() { responses.push(AgentResponse::Text(t.into())); } }
+                if let Some(tcs) = msg["tool_calls"].as_array() {
+                    for tc in tcs {
+                        if let Some(f) = tc.get("function") {
+                            responses.push(AgentResponse::ToolCall {
+                                name: f["name"].as_str().unwrap_or("unknown").into(),
+                                input: serde_json::from_str(f["arguments"].as_str().unwrap_or("{}")).unwrap_or(json!({})),
+                            });
+                        }
+                    }
+                }
+                return Ok(AgentResponse::Multiple(responses));
+            }
+        Ok(AgentResponse::Text(format!("{}", body)))
+    }
+}
+
+macro_rules! openai_compat_agent {
+    ($name:ident, $url:expr) => {
+        pub struct $name(OpenAICompatibleAgent);
+        impl $name { pub fn new(api_key: String, model: String) -> Self { Self(OpenAICompatibleAgent::new(api_key, model, $url.into())) } }
+        #[async_trait] impl AgentProvider for $name { async fn send_prompt(&self, p: &str) -> Result<AgentResponse> { self.0.send_prompt(p).await } }
+    };
+}
+
+openai_compat_agent!(MistralAgent, "https://api.mistral.ai/v1/chat/completions");
+openai_compat_agent!(GroqAgent, "https://api.groq.com/openai/v1/chat/completions");
+openai_compat_agent!(DeepSeekAgent, "https://api.deepseek.com/v1/chat/completions");
+openai_compat_agent!(XAIAgent, "https://api.x.ai/v1/chat/completions");
+openai_compat_agent!(TogetherAgent, "https://api.together.xyz/v1/chat/completions");
+openai_compat_agent!(PerplexityAgent, "https://api.perplexity.ai/chat/completions");
+openai_compat_agent!(FireworksAgent, "https://api.fireworks.ai/inference/v1/chat/completions");
+openai_compat_agent!(AnyScaleAgent, "https://api.endpoints.anyscale.com/v1/chat/completions");
+
+// -----------------------------------------------------------------------------
+// Cohere (native API)
+// -----------------------------------------------------------------------------
+pub struct CohereAgent { client: Client, api_key: String, model: String }
+impl CohereAgent { pub fn new(api_key: String, model: String) -> Self { Self { client: Client::new(), api_key, model } } }
+#[async_trait]
+impl AgentProvider for CohereAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let tools = tools::get_available_tools();
+        let ct: Vec<serde_json::Value> = tools.iter().map(|t| json!({"name":t.name,"description":t.description,"parameter_definitions":t.input_schema.get("properties")})).collect();
+        let res = self.client.post("https://api.cohere.com/v2/chat").bearer_auth(&self.api_key)
+            .json(&json!({"model":self.model,"message":prompt,"preamble":"You are Lazynext Agent.","tools":ct})).send().await?;
+        let body: serde_json::Value = res.json().await?;
+        if let Some(t) = body["text"].as_str() { return Ok(AgentResponse::Text(t.into())); }
+        Ok(AgentResponse::Text(format!("Cohere: {}", body)))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Replicate
+// -----------------------------------------------------------------------------
+pub struct ReplicateAgent { client: Client, api_key: String, model: String }
+impl ReplicateAgent { pub fn new(api_key: String, model: String) -> Self { Self { client: Client::new(), api_key, model: models::resolve_replicate(&model) } } }
+#[async_trait]
+impl AgentProvider for ReplicateAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let res = self.client.post("https://api.replicate.com/v1/predictions").bearer_auth(&self.api_key)
+            .json(&json!({"version":self.model,"input":{"prompt":prompt,"max_tokens":1024}})).send().await?;
+        let body: serde_json::Value = res.json().await?;
+        if let Some(o) = body["output"].as_str() { return Ok(AgentResponse::Text(o.into())); }
+        Ok(AgentResponse::Text("Prediction queued".into()))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Hugging Face
+// -----------------------------------------------------------------------------
+pub struct HuggingFaceAgent { client: Client, api_key: String, model: String }
+impl HuggingFaceAgent { pub fn new(api_key: String, model: String) -> Self { Self { client: Client::new(), api_key, model } } }
+#[async_trait]
+impl AgentProvider for HuggingFaceAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let url = format!("https://api-inference.huggingface.co/models/{}", self.model);
+        let res = self.client.post(&url).bearer_auth(&self.api_key)
+            .json(&json!({"inputs":prompt,"parameters":{"max_new_tokens":1024}})).send().await?;
+        let body: serde_json::Value = res.json().await?;
+        if let Some(arr) = body.as_array().and_then(|a| a.first()) {
+            if let Some(t) = arr["generated_text"].as_str() { return Ok(AgentResponse::Text(t.into())); }
+        }
+        Ok(AgentResponse::Text(format!("HF: {}", body)))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Cloudflare Workers AI
+// -----------------------------------------------------------------------------
+pub struct CloudflareAgent { client: Client, api_key: String, account_id: String, model: String }
+impl CloudflareAgent { pub fn new(api_key: String, account_id: String, model: String) -> Self { Self { client: Client::new(), api_key, account_id, model } } }
+#[async_trait]
+impl AgentProvider for CloudflareAgent {
+    async fn send_prompt(&self, prompt: &str) -> Result<AgentResponse> {
+        let url = format!("https://api.cloudflare.com/client/v4/accounts/{}/ai/run/{}", self.account_id, self.model);
+        let res = self.client.post(&url).bearer_auth(&self.api_key)
+            .json(&json!({"messages":[{"role":"user","content":prompt}],"max_tokens":1024})).send().await?;
+        let body: serde_json::Value = res.json().await?;
+        if let Some(r) = body["result"]["response"].as_str() { return Ok(AgentResponse::Text(r.into())); }
+        Ok(AgentResponse::Text(format!("CF: {}", body)))
+    }
+}
+
+// -----------------------------------------------------------------------------
+// Model Defaults
+// -----------------------------------------------------------------------------
+pub mod models {
+    pub fn default_model(provider: &str) -> &str {
+        match provider {
+            "anthropic"|"claude" => "claude-sonnet-4-20250514",
+            "openai"|"gpt" => "gpt-4o",
+            "gemini"|"google" => "gemini-2.0-flash",
+            "ollama"|"local" => "llama3.2",
+            "mistral" => "mistral-large-latest",
+            "groq" => "llama-3.3-70b-versatile",
+            "deepseek" => "deepseek-chat",
+            "xai"|"grok" => "grok-2-1212",
+            "together" => "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+            "perplexity" => "llama-3.1-sonar-large-128k-online",
+            "fireworks" => "accounts/fireworks/models/llama-v3p3-70b-instruct",
+            "anyscale" => "meta-llama/Llama-3.3-70B-Instruct",
+            "cohere" => "command-r-plus",
+            "replicate" => "meta/meta-llama-3-70b-instruct",
+            "huggingface"|"hf" => "mistralai/Mistral-7B-Instruct-v0.3",
+            "cloudflare"|"cf" => "@cf/meta/llama-3.3-70b-instruct",
+            _ => "llama3.2",
+        }
+    }
+    pub fn resolve_replicate(m: &str) -> String { if m.contains('/') { m.into() } else { "meta/meta-llama-3-70b-instruct".into() } }
+}
+
+// -----------------------------------------------------------------------------
+// Factory — 18+ Providers
+// -----------------------------------------------------------------------------
+pub struct AgentFactory;
 impl AgentFactory {
     pub fn create(provider: &str, model: &str, api_key: &str) -> Result<Box<dyn AgentProvider>> {
+        let m = if model.is_empty() { models::default_model(provider) } else { model };
+        let k = api_key.to_string();
         match provider.to_lowercase().as_str() {
-            "anthropic" | "claude" => {
-                let m = if model.is_empty() { "claude-3-5-sonnet-20241022" } else { model };
-                Ok(Box::new(ClaudeAgent::new(api_key.to_string(), m.to_string())))
-            }
-            "openai" | "gpt" => {
-                let m = if model.is_empty() { "gpt-4o" } else { model };
-                Ok(Box::new(OpenAIAgent::new(api_key.to_string(), m.to_string())))
-            }
-            "gemini" | "google" => {
-                let m = if model.is_empty() { "gemini-1.5-pro" } else { model };
-                Ok(Box::new(GeminiAgent::new(api_key.to_string(), m.to_string())))
-            }
-            "ollama" | "local" => {
-                let m = if model.is_empty() { "llama3" } else { model };
-                // Use api_key parameter as the endpoint for Ollama since it doesn't need an API key
-                Ok(Box::new(OllamaAgent::new(m.to_string(), api_key.to_string())))
-            }
-            _ => Err(anyhow!("Unsupported provider: {}. Try 'anthropic', 'openai', 'gemini', or 'ollama'.", provider)),
+            "anthropic"|"claude" => Ok(Box::new(ClaudeAgent::new(k, m.into()))),
+            "openai"|"gpt" => Ok(Box::new(OpenAIAgent::new(k, m.into()))),
+            "gemini"|"google" => Ok(Box::new(GeminiAgent::new(k, m.into()))),
+            "ollama"|"local" => Ok(Box::new(OllamaAgent::new(m.into(), k))),
+            "mistral" => Ok(Box::new(MistralAgent::new(k, m.into()))),
+            "groq" => Ok(Box::new(GroqAgent::new(k, m.into()))),
+            "deepseek" => Ok(Box::new(DeepSeekAgent::new(k, m.into()))),
+            "xai"|"grok" => Ok(Box::new(XAIAgent::new(k, m.into()))),
+            "together" => Ok(Box::new(TogetherAgent::new(k, m.into()))),
+            "perplexity" => Ok(Box::new(PerplexityAgent::new(k, m.into()))),
+            "fireworks" => Ok(Box::new(FireworksAgent::new(k, m.into()))),
+            "anyscale" => Ok(Box::new(AnyScaleAgent::new(k, m.into()))),
+            "cohere" => Ok(Box::new(CohereAgent::new(k, m.into()))),
+            "replicate" => Ok(Box::new(ReplicateAgent::new(k, m.into()))),
+            "huggingface"|"hf" => Ok(Box::new(HuggingFaceAgent::new(k, m.into()))),
+            "cloudflare"|"cf" => Ok(Box::new(CloudflareAgent::new(k, "lazynext".into(), m.into()))),
+            _ => Err(anyhow!("Unsupported: '{}'. Available (18): anthropic, openai, gemini, ollama, mistral, groq, deepseek, xai, together, perplexity, fireworks, anyscale, cohere, replicate, huggingface, cloudflare", provider)),
         }
     }
 }
