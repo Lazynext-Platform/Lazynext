@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { evaluateMathExpression, solveCubicBezier } from "../math";
+import { evaluateMathExpression, solveCubicBezier, clamp, clampRound, snapToStep, isNearlyEqual, formatNumberForDisplay } from "../math";
 
 describe("evaluateMathExpression", () => {
 	describe("basic arithmetic", () => {
@@ -149,5 +149,44 @@ describe("solveCubicBezier", () => {
 			expect(val).toBeGreaterThanOrEqual(prev);
 			prev = val;
 		}
+	});
+});
+
+describe("clamp", () => {
+	it("returns value within range", () => {
+		expect(clamp({ value: 5, min: 0, max: 10 })).toBe(5);
+	});
+	it("clamps to minimum", () => {
+		expect(clamp({ value: -5, min: 0, max: 10 })).toBe(0);
+	});
+	it("clamps to maximum", () => {
+		expect(clamp({ value: 15, min: 0, max: 10 })).toBe(10);
+	});
+});
+
+describe("clampRound", () => {
+	it("rounds and clamps value", () => {
+		expect(clampRound({ value: 5.5, min: 0, max: 10 })).toBe(6);
+	});
+});
+
+describe("isNearlyEqual", () => {
+	it("returns true for equal values", () => {
+		expect(isNearlyEqual({ leftValue: 1, rightValue: 1 })).toBe(true);
+	});
+	it("returns false for different values", () => {
+		expect(isNearlyEqual({ leftValue: 1, rightValue: 2 })).toBe(false);
+	});
+});
+
+describe("snapToStep", () => {
+	it("snaps to nearest step", () => {
+		expect(snapToStep({ value: 1.23, step: 0.1 })).toBe(1.2);
+	});
+});
+
+describe("formatNumberForDisplay", () => {
+	it("formats simple numbers", () => {
+		expect(formatNumberForDisplay({ value: 1.5 })).toBe("1.5");
 	});
 });
