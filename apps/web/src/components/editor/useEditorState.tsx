@@ -19,7 +19,7 @@ import type { Project, Asset, Clip, TimelineMarker } from "@/types/editor";
  * - Phase 57-60: WASM core ✅
  */
 
-export type ActiveTool = "select" | "blade" | "razor" | "slip" | "pen" | "hand";
+export type ActiveTool = "select" | "blade" | "razor" | "slip" | "pen" | "hand" | "ripple" | "slide" | "magic-eraser" | "roll";
 
 export type Workspace =
   | "timeline"
