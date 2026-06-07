@@ -21,7 +21,7 @@ export class ProxyFarmDispatcher {
      * This logic would run on the client side inside React/Rust
      * to seamlessly swap the high-res file with the proxy file during playback.
      */
-    public swapMediaSource(useProxy: bool, originalUrl: string, proxyUrl: string) {
+    public swapMediaSource(useProxy: boolean, originalUrl: string, proxyUrl: string) {
         const activeSource = useProxy ? proxyUrl : originalUrl;
         console.log(`[Playback Engine] Seamlessly switching active source to: ${activeSource}`);
         // wasm_engine.update_clip_source(activeSource);
