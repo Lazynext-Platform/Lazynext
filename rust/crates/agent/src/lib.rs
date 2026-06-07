@@ -75,11 +75,10 @@ impl AgentProvider for ClaudeAgent {
                         name: block["name"].as_str().unwrap_or("unknown").to_string(),
                         input: block["input"].clone()
                     });
-                } else if block["type"] == "text" {
-                    if let Some(text) = block["text"].as_str() {
+                } else if block["type"] == "text"
+                    && let Some(text) = block["text"].as_str() {
                         responses.push(AgentResponse::Text(text.to_string()));
                     }
-                }
             }
             Ok(AgentResponse::Multiple(responses))
         } else {
@@ -154,15 +153,14 @@ impl AgentProvider for OpenAIAgent {
 
         let body: serde_json::Value = res.json().await.context("Failed to parse response JSON")?;
         
-        if let Some(choices) = body["choices"].as_array() {
-            if let Some(message) = choices.get(0).and_then(|c| c.get("message")) {
+        if let Some(choices) = body["choices"].as_array()
+            && let Some(message) = choices.first().and_then(|c| c.get("message")) {
                 let mut responses = vec![];
                 
-                if let Some(text) = message["content"].as_str() {
-                    if !text.is_empty() {
+                if let Some(text) = message["content"].as_str()
+                    && !text.is_empty() {
                         responses.push(AgentResponse::Text(text.to_string()));
                     }
-                }
                 
                 if let Some(tool_calls) = message["tool_calls"].as_array() {
                     for tc in tool_calls {
@@ -180,7 +178,6 @@ impl AgentProvider for OpenAIAgent {
                 
                 return Ok(AgentResponse::Multiple(responses));
             }
-        }
         
         Ok(AgentResponse::Text(format!("Error: Unexpected OpenAI response format: {}", body)))
     }
@@ -246,17 +243,16 @@ impl AgentProvider for GeminiAgent {
 
         let body: serde_json::Value = res.json().await.context("Failed to parse response JSON")?;
         
-        if let Some(candidates) = body["candidates"].as_array() {
-            if let Some(content) = candidates.get(0).and_then(|c| c.get("content")) {
-                if let Some(parts) = content["parts"].as_array() {
+        if let Some(candidates) = body["candidates"].as_array()
+            && let Some(content) = candidates.first().and_then(|c| c.get("content"))
+                && let Some(parts) = content["parts"].as_array() {
                     let mut responses = vec![];
                     
                     for part in parts {
-                        if let Some(text) = part.get("text").and_then(|t| t.as_str()) {
-                            if !text.is_empty() {
+                        if let Some(text) = part.get("text").and_then(|t| t.as_str())
+                            && !text.is_empty() {
                                 responses.push(AgentResponse::Text(text.to_string()));
                             }
-                        }
                         
                         if let Some(func_call) = part.get("functionCall") {
                             let name = func_call["name"].as_str().unwrap_or("unknown").to_string();
@@ -267,8 +263,6 @@ impl AgentProvider for GeminiAgent {
                     
                     return Ok(AgentResponse::Multiple(responses));
                 }
-            }
-        }
         
         Ok(AgentResponse::Text(format!("Error: Unexpected Gemini response format: {}", body)))
     }
@@ -345,11 +339,10 @@ impl AgentProvider for OllamaAgent {
         if let Some(message) = body.get("message") {
             let mut responses = vec![];
             
-            if let Some(text) = message["content"].as_str() {
-                if !text.is_empty() {
+            if let Some(text) = message["content"].as_str()
+                && !text.is_empty() {
                     responses.push(AgentResponse::Text(text.to_string()));
                 }
-            }
             
             if let Some(tool_calls) = message["tool_calls"].as_array() {
                 for tc in tool_calls {

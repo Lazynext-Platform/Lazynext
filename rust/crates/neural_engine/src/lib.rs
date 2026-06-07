@@ -21,6 +21,12 @@ pub struct FacialRecognitionModel {
     pub is_loaded: bool,
 }
 
+impl Default for FacialRecognitionModel {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FacialRecognitionModel {
     pub fn new() -> Self {
         // MOCK: Load ONNX model weights

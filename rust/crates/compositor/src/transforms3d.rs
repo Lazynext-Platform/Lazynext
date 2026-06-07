@@ -10,6 +10,12 @@ pub struct Transform3D {
     pub scale: Vector3,
 }
 
+impl Default for Transform3D {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Transform3D {
     pub fn new() -> Self {
         Self {

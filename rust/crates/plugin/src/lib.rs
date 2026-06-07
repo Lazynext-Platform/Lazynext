@@ -9,6 +9,12 @@ pub struct EditorAPI {
     pub current_time: f64,
 }
 
+impl Default for EditorAPI {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl EditorAPI {
     pub fn new() -> Self {
         Self {
@@ -21,6 +27,12 @@ impl EditorAPI {
 pub struct PluginRuntime {
     api: Rc<RefCell<EditorAPI>>,
     context: Context,
+}
+
+impl Default for PluginRuntime {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl PluginRuntime {

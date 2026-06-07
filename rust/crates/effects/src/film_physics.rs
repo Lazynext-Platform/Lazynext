@@ -12,6 +12,12 @@ pub struct FilmPhysicsEngine {
     pub current_time: f32,
 }
 
+impl Default for FilmPhysicsEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FilmPhysicsEngine {
     pub fn new() -> Self {
         Self { current_time: 0.0 }

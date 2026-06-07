@@ -9,16 +9,17 @@ pub extern "C" fn lazynext_mobile_init() {
     println!("Lazynext Mobile Engine Initialized!");
     let _project = ProjectData::new("proj_mobile".into(), "Lazynext Mobile Engine".into(), 60.0, 1080, 1920);
     println!("Mobile Engine successfully linked to core NLE state!");
-    // In a real implementation, we would bind the wgpu compositor to the
-    // CAMetalLayer (iOS) or SurfaceTexture (Android) here.
 }
 
+/// # Safety
+/// The caller must ensure `prompt_ptr` is a valid, non-null pointer to a
+/// null-terminated C string with UTF-8 content.
 #[unsafe(no_mangle)]
-pub extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_char) {
+pub unsafe extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_char) { unsafe {
     if prompt_ptr.is_null() {
         return;
     }
-    let c_str = unsafe { std::ffi::CStr::from_ptr(prompt_ptr) };
+    let c_str = std::ffi::CStr::from_ptr(prompt_ptr);
     let prompt = match c_str.to_str() {
         Ok(s) => s.to_string(),
         Err(_) => return,
@@ -26,7 +27,6 @@ pub extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_ch
     
     println!("Received Voice-First Agentic Prompt via JNI/Swift bindings: {}", prompt);
     
-    // Spawn a lightweight one-shot Tokio runtime to execute the LLM call natively
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(async {
@@ -41,4 +41,4 @@ pub extern "C" fn lazynext_mobile_voice_prompt(prompt_ptr: *const std::ffi::c_ch
             }
         });
     });
-}
+}}

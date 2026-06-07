@@ -115,8 +115,8 @@ async fn main() {
                             if name == "cut_silences" {
                                 println!(">> Muting silent segments natively in Rust state...");
                                 // Actually mutate the state: split the clip in half for demonstration
-                                if let Some(track) = project.tracks.first_mut() {
-                                    if let Some(mut clip) = track.clips.pop() {
+                                if let Some(track) = project.tracks.first_mut()
+                                    && let Some(mut clip) = track.clips.pop() {
                                         let duration = clip.duration_frames;
                                         clip.duration_frames = duration / 2;
                                         let mut clip2 = clip.clone();
@@ -124,7 +124,6 @@ async fn main() {
                                         track.clips.push(clip);
                                         track.clips.push(clip2);
                                     }
-                                }
                             } else if name == "color_grade" {
                                 let look = input["look"].as_str().unwrap_or("cyberpunk");
                                 println!(">> Applying WGSL shader natively: {}...", look);
@@ -209,7 +208,7 @@ async fn main() {
     
     // Spawn ffmpeg child process
     let mut ffmpeg = std::process::Command::new("ffmpeg")
-        .args(&[
+        .args([
             "-y", // Overwrite output
             "-f", "rawvideo",
             "-pix_fmt", "bgra", // wgpu output is bgra

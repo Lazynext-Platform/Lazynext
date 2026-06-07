@@ -14,6 +14,12 @@ pub struct DecklinkEngine {
     device: cxx::UniquePtr<ffi::DeckLinkDevice>,
 }
 
+impl Default for DecklinkEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DecklinkEngine {
     pub fn new() -> Self {
         println!("Initializing Blackmagic Desktop Video SDK via C++ FFI...");

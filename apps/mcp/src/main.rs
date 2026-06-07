@@ -106,11 +106,10 @@ fn handle_request(req: RpcRequest, _shared_project: Arc<Mutex<Option<ProjectData
 
                 let rt = tokio::runtime::Runtime::new().unwrap();
                 let output = rt.block_on(async {
-                    if let Ok(agent) = agent::AgentFactory::create(&provider, &model, &api_key) {
-                        if let Ok(res) = agent.send_prompt(prompt).await {
+                    if let Ok(agent) = agent::AgentFactory::create(&provider, &model, &api_key)
+                        && let Ok(res) = agent.send_prompt(prompt).await {
                             return format!("Agent Response:\n{:?}", res);
                         }
-                    }
                     "Failed to execute agent action".to_string()
                 });
                 

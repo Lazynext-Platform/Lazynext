@@ -17,6 +17,12 @@ pub enum OutputDeviceTransform {
     DciP3,       // Theatrical Cinema
 }
 
+impl Default for AcesColorPipeline {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AcesColorPipeline {
     pub fn new() -> Self {
         Self {
