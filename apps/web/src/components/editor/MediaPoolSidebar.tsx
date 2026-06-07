@@ -711,7 +711,7 @@ export function MediaPoolSidebar({
                 {(() => {
 
                   const events: any[] = [];
-                  markers.forEach(m => events.push({
+                  markers.forEach((m: any) => events.push({
                     type: 'marker',
                     frame: m.frame,
                     label: m.label,
