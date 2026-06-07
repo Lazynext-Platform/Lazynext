@@ -112,7 +112,7 @@ If you're unsure whether your idea falls into the preview category, feel free to
 
    ```bash
    # Database (matches docker-compose.yaml)
-   DATABASE_URL="postgresql://lazynext:lazynext@localhost:5432/lazynext"
+   DATABASE_URL="postgresql://lazynext:lazynext@localhost:5433/lazynext"
 
    # Generate a secure secret for Better Auth
    BETTER_AUTH_SECRET="your-generated-secret-here"
