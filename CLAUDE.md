@@ -20,7 +20,7 @@ cd apps/web && bun test
 |---|---|
 | TypeScript errors | **0** (2,200+ resolved) |
 | Unit tests | **171 new** (401 total, 6 pre-existing failures) |
-| `ignoreBuildErrors` | `true` (pre-existing Turbopack bug, not TS) |
+| `ignoreBuildErrors` | `true` (Turbopack: pages 500, API routes + static work) |
 | EditorClient | 7,099 lines (-1,651) |
 | Extracted components | **7** (BezierEditor, RenderFarm, NeuralCinema, SentientColor, VideoScopes, +2 prior) |
 | Database | PostgreSQL 18, 9 Drizzle tables |
