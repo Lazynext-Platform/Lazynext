@@ -302,7 +302,7 @@ export function MediaPoolSidebar({
               <button
                 className="w-full mb-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors"
                 onClick={() => {
-                  const vids = assets.filter(a => a.type === 'video');
+                  const vids = assets.filter((a: any) => a.type === 'video');
                   if (vids.length < 2) {
                     toast.error('Need at least 2 video clips to create a Multi-Cam sequence.');
                     return;
