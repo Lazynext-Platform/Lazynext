@@ -117,7 +117,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [trackHeightSize, setTrackHeightSize] = useState('medium');
   const [trackContextMenu, setTrackContextMenu] = useState<{ x: number; y: number; trackId?: string; trackIdx?: number } | null>(null);
   const [selectedExportPreset, setSelectedExportPreset] = useState('youtube');
-  const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number }[]>([]);
+  const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number; preset?: string }[]>([]);
   const [commandQuery, setCommandQuery] = useState('');
   const [isFarmRendering, setIsFarmRendering] = useState(false);
   const [farmProgress, setFarmProgress] = useState(0);

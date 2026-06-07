@@ -61,6 +61,12 @@ interface ExperimentalPanelsProps {
   directorPos: Position;
   setDirectorPos: (p: Position) => void;
   directorLogs: string[];
+  // Color Scopes & Auto Caption
+  isColorScopesOpen: boolean;
+  setIsColorScopesOpen: (v: boolean) => void;
+  isPlaying: boolean;
+  isAutoCaptioning: boolean;
+  autoCaptionProgress: number;
 }
 
 // ── Panel: Holographic Spatial Editor ──
