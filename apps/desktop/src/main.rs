@@ -4,10 +4,8 @@ use compositor::{Compositor, FrameDescriptor, CanvasClearDescriptor};
 #[allow(unused_imports)]
 use gpu::GpuContext;
 use state::{ProjectData, Track, Clip};
-use serde::Deserialize;
-use std::fs;
-
 struct AppWindow {
+    #[allow(dead_code)]
     project: ProjectData,
 }
 
@@ -24,7 +22,7 @@ impl AppWindow {
             .justify_between()
             .px(px(16.))
             .child(
-                div().text_sm().font_weight(FontWeight::BOLD).text_color(rgb(0xffffff)).child("Lazynext")
+                div().text_sm().font_weight(FontWeight::BOLD).text_color(rgb(0xffffff)).child(format!("Lazynext — {}", self.project.name))
             )
             .child(
                 div().flex().gap_2().child(
