@@ -49,21 +49,39 @@ Lazynext is built in Rust to be infinitely portable. The same AI Video Engine ru
 
 ## Development
 
-Lazynext is built using `cargo`. To compile the workspace:
+### Prerequisites
+- Rust (stable toolchain)
+- Bun (latest)
+- PostgreSQL (port 5433)
+
+### Setup
 ```bash
+# Install dependencies
+cd apps/web && bun install
+
+# Start PostgreSQL (Homebrew)
+brew services start postgresql@18
+
+# Push database schema
+bun run db:push:local
+```
+
+### Running
+```bash
+# Rust workspace
 cargo build --release
-```
 
-To run the Next.js Web App:
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+# Web app (Next.js + Turbopack)
+cd apps/web && bun run dev
 
-To run the full suite of Agentic Core unit tests:
-```bash
-cargo test -p agent
+# Full test suite
+bun test                  # 389 tests (383 pass)
+cargo test --workspace    # Rust tests
+bun run typecheck         # TypeScript check (0 errors)
+
+# Lint
+cargo clippy --workspace  # Rust (5 warnings remaining)
+bun run lint              # TypeScript (4 pre-existing errors)
 ```
 
 ## Capabilities
