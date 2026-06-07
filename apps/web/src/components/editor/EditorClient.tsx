@@ -94,7 +94,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [isRecordingVO, setIsRecordingVO] = useState(false);
   const [isCaptioning, setIsCaptioning] = useState(false);
   const [captionProgress, setCaptionProgress] = useState(0);
-  const [bezierEditor, setBezierEditor] = useState<{ isOpen: boolean; trackIdx?: number; clipIdx?: number; property?: string; frame?: number; curve: number[]; frame?: number; property?: string } | null>(null);
+  const [bezierEditor, setBezierEditor] = useState<{ isOpen: boolean; trackIdx?: number; clipIdx?: number; property?: string; frame?: number; curve: number[] } | null>(null);
   const [showDeliverPage, setShowDeliverPage] = useState(false);
   const [customFonts, setCustomFonts] = useState<string[]>([]);
   const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
