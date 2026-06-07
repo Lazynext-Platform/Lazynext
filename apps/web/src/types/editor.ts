@@ -32,6 +32,7 @@ export interface Clip {
   id: string;
   name?: string;
   start_frame: number;
+  media_offset_frames?: number;
   duration_frames: number;
   type: string;
   sourceUrl?: string;
