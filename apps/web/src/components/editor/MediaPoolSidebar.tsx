@@ -91,7 +91,7 @@ export function MediaPoolSidebar({
              onMouseDown={(e: React.MouseEvent) => {
                 const startX = e.clientX - mediaPoolPos.x;
                 const startY = e.clientY - mediaPoolPos.y;
-                const onMove = (ev: MouseEvent) => setMediaPoolPos(p => ({ ...p, x: ev.clientX - startX, y: ev.clientY - startY }));
+                const onMove = (ev: MouseEvent) => setMediaPoolPos((p: { floating: boolean; x: number; y: number }) => ({ ...p, x: ev.clientX - startX, y: ev.clientY - startY }));
                 const onUp = () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
                 window.addEventListener('mousemove', onMove);
                 window.addEventListener('mouseup', onUp);
@@ -251,7 +251,7 @@ export function MediaPoolSidebar({
                           url: 'simulated_ai_broll.mp4',
                           duration_frames: 120
                         };
-                        setAssets(prev => [newAsset, ...prev]);
+                        setAssets((prev: any[]) => [newAsset, ...prev]);
                       });
                     }
                   }}
@@ -281,7 +281,7 @@ export function MediaPoolSidebar({
                         url: 'simulated_ai_broll.mp4',
                         duration_frames: 120
                       };
-                      setAssets(prev => [newAsset, ...prev]);
+                      setAssets((prev: any[]) => [newAsset, ...prev]);
                     });
                   }}
                 >
@@ -319,7 +319,7 @@ export function MediaPoolSidebar({
                       angles: vids.map(v => v.id),
                       duration_frames: vids[0]?.duration_frames || 200
                     };
-                    setAssets(prev => [newAsset, ...prev]);
+                    setAssets((prev: any[]) => [newAsset, ...prev]);
                   });
                 }}
               >
@@ -668,7 +668,7 @@ export function MediaPoolSidebar({
               </button>
 
               <div className="flex flex-col gap-2">
-                {installedPlugins.map(plugin => (
+                {installedPlugins.map((plugin: any) => (
                   <div key={plugin.id} className="bg-zinc-900 border border-zinc-800 rounded p-3 flex flex-col gap-2">
                     <div className="flex items-start justify-between">
                       <div>
@@ -678,7 +678,7 @@ export function MediaPoolSidebar({
                       <label className="flex items-center cursor-pointer">
                         <div className="relative">
                           <input type="checkbox" className="sr-only" checked={plugin.enabled} onChange={(e) => {
-                            setInstalledPlugins(installedPlugins.map(p => p.id === plugin.id ? { ...p, enabled: e.target.checked } : p));
+                            setInstalledPlugins(installedPlugins.map((p: any) => p.id === plugin.id ? { ...p, enabled: e.target.checked } : p));
                           }} />
                           <div className={`block w-8 h-5 rounded-full transition-colors ${plugin.enabled ? 'bg-indigo-500' : 'bg-zinc-700'}`}></div>
                           <div className={`dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${plugin.enabled ? 'transform translate-x-3' : ''}`}></div>
