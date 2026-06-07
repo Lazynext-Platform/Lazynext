@@ -14,6 +14,8 @@ interface MediaPoolSidebarProps {
   handleDiffusionPrompt: any;
   handleTelepathicLink: any;
   setInstalledPlugins: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handleDragStart: (e: React.DragEvent, asset: any) => void;
   setAssets: any;
   handleAddNodeToGraph: any;
   handleVisualDebugger: any;
@@ -76,7 +78,8 @@ export function MediaPoolSidebar({
     handleVisualDebugger,
     handleAddNodeToGraph,
     setAssets,
-    setInstalledPlugins
+    setInstalledPlugins,
+    handleDragStart
 }: MediaPoolSidebarProps) {
   return (
 <aside

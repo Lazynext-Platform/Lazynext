@@ -2290,6 +2290,7 @@ export default function EditorClient({ project }: { project: Project }) {
               handleAddNodeToGraph={handleAddNodeToGraph}
               setAssets={setAssets}
               setInstalledPlugins={setInstalledPlugins}
+              handleDragStart={handleDragStart}
             />
 {/* Left Splitter */}
       {!mediaPoolPos.floating && (
