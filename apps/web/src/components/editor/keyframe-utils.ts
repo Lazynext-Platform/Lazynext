@@ -11,7 +11,9 @@ import { solveCubicBezier } from "@/utils/math";
 const sortedKfsCache = new WeakMap<object, Map<string, unknown[]>>();
 
 /** Cache compiled expression functions. Cleared on memory pressure. */
-const exprFnCache = new Map<string, Function>();
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+type ExprFunction = (time: number, value: number, math: typeof Math) => number;
+const exprFnCache = new Map<string, ExprFunction>();
 
 function getSortedKfs(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,10 +38,10 @@ function getSortedKfs(
   return kfs;
 }
 
-function getCachedExprFn(expr: string): Function {
+function getCachedExprFn(expr: string): ExprFunction {
   const cached = exprFnCache.get(expr);
   if (cached) return cached;
-  const fn = new Function("time", "value", "Math", `return ${expr};`);
+  const fn = new Function("time", "value", "Math", `return ${expr};`) as ExprFunction;
   // Limit cache size to avoid unbounded memory growth
   if (exprFnCache.size > 500) {
     const firstKey = exprFnCache.keys().next().value;
