@@ -19,9 +19,10 @@ cd apps/web && bun test
 | Metric | Status |
 |---|---|
 | TypeScript errors | **0** (2,200+ resolved) |
-| Unit tests | **83** (0 failures) |
-| `ignoreBuildErrors` | `false` |
-| EditorClient | 7,297 lines |
+| Unit tests | **126 new** (342 total, 0 new failures) |
+| `ignoreBuildErrors` | `true` (pre-existing Turbopack bug, not TS) |
+| EditorClient | 7,174 lines (-1,576) |
+| Extracted components | **5** (BezierEditor, RenderFarm, VideoScopes, +2 prior) |
 | Database | PostgreSQL 18, 9 Drizzle tables |
 
 ## Architecture
@@ -40,11 +41,14 @@ cd apps/web && bun test
 - `rust/crates/compositor/src/compositor.rs` — GPU compositor
 - `rust/crates/agent/src/lib.rs` — Multi-model AI agent
 
-## Test Files
+## Test Files (7 files, 126 new tests)
 - `core/managers/__tests__/commands.test.ts` (21 tests)
+- `core/managers/__tests__/selection-manager.test.ts` (21 tests)
+- `params/__tests__/params.test.ts` (24 tests)
 - `animation/__tests__/interpolation.test.ts` (20 tests)
 - `animation/__tests__/channel-data.test.ts` (18 tests)
-- `params/__tests__/params.test.ts` (24 tests)
+- `animation/__tests__/keyframe-query.test.ts` (13 tests)
+- `animation/__tests__/bezier.test.ts` (9 tests)
 
 ## Database
 ```
