@@ -10,7 +10,7 @@ describe("hexToHsv", () => {
 	});
 
 	it("converts black to HSV", () => {
-		const [h, s, v] = hexToHsv({ hex: "000000" });
+		const [_h, _s, v] = hexToHsv({ hex: "000000" });
 		expect(v).toBe(0);
 	});
 
