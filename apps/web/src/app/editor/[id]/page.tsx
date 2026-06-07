@@ -50,7 +50,7 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
       </header>
 
       {/* Main Body — wrapped in state provider + error boundary */}
-      <EditorStateProvider>
+      <EditorStateProvider initialProject={projectJson}>
         <EditorErrorBoundary section="Editor">
           <div className="flex flex-1 overflow-hidden relative">
             <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />

@@ -68,9 +68,9 @@ interface EditorState {
 
 const EditorContext = createContext<EditorState | null>(null);
 
-export function EditorStateProvider({ children }: { children: ReactNode }) {
+export function EditorStateProvider({ children, initialProject }: { children: ReactNode; initialProject?: Project | null }) {
   // Core
-  const [projectData, setProjectData] = useState<Project | null>(null);
+  const [projectData, setProjectData] = useState<Project | null>(initialProject ?? null);
   const [assets, setAssets] = useState<Asset[]>([]);
   // Playback
   const [currentTime, setCurrentTime] = useState(0);
