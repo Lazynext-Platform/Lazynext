@@ -37,7 +37,7 @@ export default function EditorClient({ project }: { project: any }) {
   const [isAutoSaving, setIsAutoSaving] = useState(false);
   const [isRestored, setIsRestored] = useState(false);
   const [wasmState, setWasmState] = useState<'idle' | 'ready' | 'error'>('idle');
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [history, setHistory] = useState<any[]>([project]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
@@ -45,7 +45,7 @@ export default function EditorClient({ project }: { project: any }) {
   const [clipboard, setClipboard] = useState<any>(null);
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
   const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cloudComments, setCloudComments] = useState<any[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,7 +57,7 @@ export default function EditorClient({ project }: { project: any }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [nleEngine, setNleEngine] = useState<any>(null);
 
-   
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
@@ -80,7 +80,7 @@ export default function EditorClient({ project }: { project: any }) {
   const [isAutonomousDirector, setIsAutonomousDirector] = useState(false);
   const [directorLogs, setDirectorLogs] = useState<string[]>([]);
   const [directorPos, setDirectorPos] = useState({ x: 800, y: 300 });
-  
+
   const [isBioResponsive, setIsBioResponsive] = useState(false);
   const [systemStress, setSystemStress] = useState(0);
   const [isOmniOrbActive, setIsOmniOrbActive] = useState(false);
@@ -127,7 +127,7 @@ export default function EditorClient({ project }: { project: any }) {
   const [isSingularity, setIsSingularity] = useState(false);
   const [isAudioMixerOpen, setIsAudioMixerOpen] = useState(false);
   const [isColorScopesOpen, setIsColorScopesOpen] = useState(false);
-  
+
   // Phase 45: Auto Captions & Beat Sync
   const [isAutoCaptioning, setIsAutoCaptioning] = useState(false);
   const [autoCaptionProgress, setAutoCaptionProgress] = useState(0);
@@ -212,7 +212,7 @@ export default function EditorClient({ project }: { project: any }) {
       setTimeout(() => setRemoteCursors([]), 0);
       return;
     }
-    
+
     // Initialize fake collaborators
     const collaborators = [
       { id: 'u1', name: 'Alice', role: 'Colorist', color: '#ef4444', x: window.innerWidth * 0.7, y: window.innerHeight * 0.3, tx: window.innerWidth * 0.7, ty: window.innerHeight * 0.3 },
@@ -303,7 +303,7 @@ export default function EditorClient({ project }: { project: any }) {
   // Save to DB on change (debounced)
   useEffect(() => {
     if (!isRestored) return;
-     
+
     setTimeout(() => setIsAutoSaving(true), 0);
     const timer = setTimeout(async () => {
       try {
@@ -342,7 +342,7 @@ export default function EditorClient({ project }: { project: any }) {
       }
     };
     initWasm();
-    
+
     return () => {
       sync.disconnect();
     };
@@ -353,7 +353,7 @@ export default function EditorClient({ project }: { project: any }) {
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
   }, []);
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const commitState = (newProject: any) => {
     setProjectData(newProject);
@@ -363,7 +363,7 @@ export default function EditorClient({ project }: { project: any }) {
     setHistory(nextHistory);
     setHistoryIndex(nextHistory.length - 1);
   };
-  
+
   const commitCurrentState = () => {
     const nextHistory = history.slice(0, historyIndex + 1);
     nextHistory.push(projectData);
@@ -398,18 +398,18 @@ export default function EditorClient({ project }: { project: any }) {
     if (!clipboard) return;
     const newProject = JSON.parse(JSON.stringify(projectData));
     const targetTrackIdx = selectedTrackIdx !== -1 ? selectedTrackIdx : 0;
-    
+
     if (!newProject.tracks[targetTrackIdx] || newProject.tracks[targetTrackIdx].isLocked) return;
-    
+
     const pastedClip = JSON.parse(JSON.stringify(clipboard));
     pastedClip.id = `clip-${Date.now()}`;
     pastedClip.start_frame = frameRef.current;
-    
+
     const clipEnd = pastedClip.start_frame + pastedClip.duration_frames;
     if (clipEnd > (newProject.duration_frames || 0)) {
       newProject.duration_frames = clipEnd + 60;
     }
-    
+
     newProject.tracks[targetTrackIdx].clips.push(pastedClip);
     commitState(newProject);
     setSelectedClipId(pastedClip.id);
@@ -420,17 +420,17 @@ export default function EditorClient({ project }: { project: any }) {
     const newProject = JSON.parse(JSON.stringify(projectData));
     const track = newProject.tracks[selectedTrackIdx];
     if (track.isLocked) return;
-    
+
     const original = track.clips[selectedClipIdx];
     const duplicate = JSON.parse(JSON.stringify(original));
     duplicate.id = `clip-${Date.now()}`;
     duplicate.start_frame = original.start_frame + original.duration_frames;
-    
+
     const clipEnd = duplicate.start_frame + duplicate.duration_frames;
     if (clipEnd > (newProject.duration_frames || 0)) {
       newProject.duration_frames = clipEnd + 60;
     }
-    
+
     track.clips.push(duplicate);
     commitState(newProject);
     setSelectedClipId(duplicate.id);
@@ -468,7 +468,7 @@ export default function EditorClient({ project }: { project: any }) {
     const label = prompt("Marker label:", `Marker ${markers.length + 1}`);
     if (label === null) return;
     const colors = ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#a855f7", "#ec4899"];
-    
+
     if (latestStateRef.current.selectedClipId) {
        // Add clip marker
        // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -508,7 +508,7 @@ export default function EditorClient({ project }: { project: any }) {
   let selectedClip: any = null;
   let selectedTrackIdx = -1;
   let selectedClipIdx = -1;
-  
+
   if (selectedClipId) {
     for (let t = 0; t < (projectData.tracks || []).length; t++) {
       const track = projectData.tracks[t];
@@ -524,7 +524,7 @@ export default function EditorClient({ project }: { project: any }) {
     }
   }
 
-   
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSelectedClip = (updates: any, isCommit: boolean = true) => {
     if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
@@ -534,7 +534,7 @@ export default function EditorClient({ project }: { project: any }) {
       const startFrameOpt = updates.start_frame !== undefined ? updates.start_frame : undefined;
       const isDisabledOpt = updates.is_disabled !== undefined ? updates.is_disabled : undefined;
       nleEngine.updateClip(clipId, startFrameOpt, isDisabledOpt);
-      
+
       const newProject = nleEngine.getProjectData();
       if (isCommit) commitState(newProject);
       else setProjectData(newProject);
@@ -544,16 +544,16 @@ export default function EditorClient({ project }: { project: any }) {
   const handleCompoundClip = () => {
     // If we have selectedClipIds, try to compound all of them
     const idsToCompound = selectedClipIds.length > 0 ? selectedClipIds : (latestStateRef.current.selectedClipId ? [latestStateRef.current.selectedClipId] : []);
-    
+
     if (idsToCompound.length === 0) {
       toast.error("Please select one or more clips to create a compound clip.");
       return;
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setProjectData((prev: any) => {
       const newProject = JSON.parse(JSON.stringify(prev));
-      
+
       // Step 1: Find all clips that match the selected IDs
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clipsToCompound: any[] = [];
@@ -567,9 +567,9 @@ export default function EditorClient({ project }: { project: any }) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         track.clips = track.clips.filter((c: any) => !idsToCompound.includes(c.id));
       }
-      
+
       if (clipsToCompound.length === 0) return newProject;
-      
+
       // Step 2: Calculate bounding box of time
       let minStart = Infinity;
       let maxEnd = 0;
@@ -577,7 +577,7 @@ export default function EditorClient({ project }: { project: any }) {
          if (c.start_frame < minStart) minStart = c.start_frame;
          if (c.start_frame + c.duration_frames > maxEnd) maxEnd = c.start_frame + c.duration_frames;
       }
-      
+
       // Step 3: Create the compound clip
       const compoundClip = {
         id: crypto.randomUUID(),
@@ -588,22 +588,22 @@ export default function EditorClient({ project }: { project: any }) {
         color: "#1e1b4b", // Deep indigo to signify compound
         isCompound: true
       };
-      
+
       // Insert into the first available track
       if (newProject.tracks.length > 0) {
         newProject.tracks[0].clips.push(compoundClip);
       }
-      
+
       return newProject;
     });
-    
+
     setSelectedClipId(null);
     setSelectedClipIds([]);
     toast.success("Created Compound Clip successfully.");
   };
 
-  
-  
+
+
   const handleAutoRotoscoping = () => {
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 2500)),
@@ -611,11 +611,11 @@ export default function EditorClient({ project }: { project: any }) {
         loading: 'Running SAM (Segment Anything Model) inference...',
         success: () => {
            if (selectedClipId) {
-             updateSelectedClip({ 
-               filters: { 
-                 ...(selectedClip?.filters || {}), 
-                 mask: { type: 'rotoscope', status: 'completed' } 
-               } 
+             updateSelectedClip({
+               filters: {
+                 ...(selectedClip?.filters || {}),
+                 mask: { type: 'rotoscope', status: 'completed' }
+               }
              });
            }
            return "Subject isolated from background successfully!";
@@ -626,7 +626,7 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleSpeedRamp = () => {
     if (selectedClipId) {
-      updateSelectedClip({ 
+      updateSelectedClip({
         speedCurve: [
           { time: 0, speed: 1.0 },
           { time: 0.25, speed: 2.0 },
@@ -639,7 +639,7 @@ export default function EditorClient({ project }: { project: any }) {
       toast.error("Select a clip to apply speed ramping.");
     }
   };
-  
+
   const handleAnalyzeAspectRatio = () => {
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 2000)),
@@ -647,9 +647,9 @@ export default function EditorClient({ project }: { project: any }) {
         loading: 'Analyzing clip and generating pan/crop keyframes for 9:16 aspect ratio...',
         success: () => {
           if (selectedClipId) {
-            updateSelectedClip({ 
+            updateSelectedClip({
               transform: { scale: 1.5, x: 0, y: 0, rotation: 0 },
-              isVertical: true 
+              isVertical: true
             });
           }
           return "Clip successfully converted to vertical 9:16 format!";
@@ -766,16 +766,16 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleAutoSubtitleTrack = async () => {
     const toastId = toast.loading("Uploading audio to AI for transcription...");
-    
+
     try {
       const response = await fetch('/api/ai/subtitles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId: "current_project_123" })
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'Transcription failed');
       }
@@ -789,15 +789,15 @@ export default function EditorClient({ project }: { project: any }) {
           clips: data.subtitles
         };
         newProject.tracks.unshift(subtitleTrack);
-        
+
         // Ensure duration handles it
         if ((newProject.duration_frames || 0) < 300) {
           newProject.duration_frames = 300;
         }
-        
+
         return newProject;
       });
-      
+
       toast.dismiss(toastId);
       toast.success(data.message || "Auto-Subtitles generated!");
     } catch (err) {
@@ -810,18 +810,18 @@ export default function EditorClient({ project }: { project: any }) {
   const handleAiVoiceover = async () => {
     const text = prompt("Enter text for AI Voiceover:");
     if (!text) return;
-    
+
     const toastId = toast.loading("Generating AI voiceover...");
-    
+
     try {
       const response = await fetch('/api/ai/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, voice: 'echo' })
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || 'TTS failed');
       }
@@ -841,10 +841,10 @@ export default function EditorClient({ project }: { project: any }) {
           }]
         };
         newProject.tracks.push(voiceTrack);
-        
+
         return newProject;
       });
-      
+
       toast.dismiss(toastId);
       toast.success("AI Voiceover generated!");
     } catch (err) {
@@ -871,16 +871,16 @@ export default function EditorClient({ project }: { project: any }) {
     const isVertical = projectData.width === 1080 && projectData.height === 1920;
     const newWidth = isVertical ? 1920 : 1080;
     const newHeight = isVertical ? 1080 : 1920;
-    
+
     // The scale factor required to fill the new height (assuming old height was filled)
     // Going to vertical: height increases from 1080 to 1920, so scale by ~1.77
     const scaleFactor = isVertical ? (1080/1920) : (1920/1080);
-    
+
     setProjectData((prev: any) => {
       const newProject = JSON.parse(JSON.stringify(prev));
       newProject.width = newWidth;
       newProject.height = newHeight;
-      
+
       // Auto-scale all video and image clips so they fill the new frame
       newProject.tracks.forEach((track: any) => {
         if (track.type === 'video') {
@@ -889,7 +889,7 @@ export default function EditorClient({ project }: { project: any }) {
               clip.transform = { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 };
             }
             clip.transform.scale = (clip.transform.scale || 1) * scaleFactor;
-            
+
             // Add smart tracking panning keyframes if converting to vertical
             if (!isVertical) {
               clip.keyframes = clip.keyframes || [];
@@ -904,10 +904,10 @@ export default function EditorClient({ project }: { project: any }) {
           });
         }
       });
-      
+
       return newProject;
     });
-    
+
     toast.success(`Auto-Reframed for ${isVertical ? 'YouTube' : 'TikTok/Reels'} (${newWidth}x${newHeight})`);
   };
 
@@ -915,7 +915,7 @@ export default function EditorClient({ project }: { project: any }) {
     // Basic Beat Sync: Find the first audio clip with peaks and add markers at regular intervals representing beats
     const newProject = JSON.parse(JSON.stringify(projectData));
     let beatFound = false;
-    
+
     newProject.tracks.forEach((track: any) => {
       if (track.type === 'audio' || track.clips.some((c: any) => c.type === 'audio' || c.peaks)) {
         track.clips.forEach((clip: any) => {
@@ -923,7 +923,7 @@ export default function EditorClient({ project }: { project: any }) {
             beatFound = true;
             const bpm = 120; // Simulated BPM detection
             const framesPerBeat = Math.round((60 / bpm) * 60); // 60fps
-            
+
             // Generate markers for the duration of the clip
             clip.markers = clip.markers || [];
             for (let f = 0; f < clip.duration_frames; f += framesPerBeat) {
@@ -938,7 +938,7 @@ export default function EditorClient({ project }: { project: any }) {
         });
       }
     });
-    
+
     if (beatFound) {
       setProjectData(newProject);
       toast.success('Beat Sync complete: Markers added to audio clips!');
@@ -960,11 +960,11 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handlePlanarTrack = () => {
     if (!selectedClipId) return;
-    
+
     setProjectData((prev: any) => {
       const newProject = JSON.parse(JSON.stringify(prev));
       let foundClip = null;
-      
+
       for (const track of newProject.tracks) {
         for (const clip of track.clips) {
           if (clip.id === selectedClipId) {
@@ -974,27 +974,27 @@ export default function EditorClient({ project }: { project: any }) {
         }
         if (foundClip) break;
       }
-      
+
       if (foundClip) {
         // Simulate planar tracking by generating a sine-wave motion path of keyframes
         foundClip.keyframes = foundClip.keyframes || [];
         // Remove old transform keyframes
         foundClip.keyframes = foundClip.keyframes.filter((k: any) => k.property !== 'transform.x' && k.property !== 'transform.y');
-        
+
         const duration = foundClip.duration_frames || 100;
         for (let i = 0; i <= duration; i += 15) {
           const progress = i / duration;
           const xPos = Math.sin(progress * Math.PI * 4) * 200;
           const yPos = Math.cos(progress * Math.PI * 4) * 100;
-          
+
           foundClip.keyframes.push({ frame: i, property: 'transform.x', value: xPos });
           foundClip.keyframes.push({ frame: i, property: 'transform.y', value: yPos });
         }
       }
-      
+
       return newProject;
     });
-    
+
     toast.success('Planar Tracking complete! Object motion path generated.');
   };
 
@@ -1059,7 +1059,7 @@ export default function EditorClient({ project }: { project: any }) {
     }
     const targetClipId = selectedClipId;
     const targetClip = selectedClip;
-    
+
     toast.promise(
       new Promise(resolve => setTimeout(resolve, 2000)),
       {
@@ -1076,21 +1076,21 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleMulticamSync = () => {
     const idsToSync = selectedClipIds.length > 0 ? selectedClipIds : (latestStateRef.current.selectedClipId ? [latestStateRef.current.selectedClipId] : []);
-    
+
     if (idsToSync.length < 2) {
       toast.error("Please select at least 2 clips (Shift+Click) to sync.");
       return;
     }
-    
+
     const toastId = toast.loading("Scanning audio waveforms...");
-    
+
     setTimeout(() => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setProjectData((prev: any) => {
         const newProject = JSON.parse(JSON.stringify(prev));
-        
+
         let earliestStartFrame = Infinity;
-        
+
         // Find the earliest start frame among selected clips
         for (const track of newProject.tracks) {
           for (const clip of track.clips) {
@@ -1099,7 +1099,7 @@ export default function EditorClient({ project }: { project: any }) {
              }
           }
         }
-        
+
         // Align all selected clips to the earliest start frame
         for (const track of newProject.tracks) {
           for (const clip of track.clips) {
@@ -1108,10 +1108,10 @@ export default function EditorClient({ project }: { project: any }) {
              }
           }
         }
-        
+
         return newProject;
       });
-      
+
       toast.dismiss(toastId);
       toast.success("Successfully synced camera angles based on audio!");
     }, 1500);
@@ -1169,9 +1169,9 @@ export default function EditorClient({ project }: { project: any }) {
   const handleSplitClip = (targetClipId?: string, targetFrame?: number) => {
     const idToSplit = targetClipId || selectedClipId;
     const splitAt = targetFrame !== undefined ? targetFrame : frame;
-    
+
     if (!idToSplit) return;
-    
+
     const newProject = JSON.parse(JSON.stringify(projectData));
     let found = false;
     let newClipId = null;
@@ -1187,15 +1187,15 @@ export default function EditorClient({ project }: { project: any }) {
         if (splitAt > originalClip.start_frame && splitAt < originalClip.start_frame + originalClip.duration_frames) {
           const splitPoint = splitAt - originalClip.start_frame;
           const origDuration = originalClip.duration_frames;
-          
+
           originalClip.duration_frames = splitPoint;
-          
+
           const secondHalf = JSON.parse(JSON.stringify(originalClip));
           secondHalf.id = `clip-${Date.now()}`;
           secondHalf.start_frame = splitAt;
           secondHalf.duration_frames = origDuration - splitPoint;
           secondHalf.media_offset_frames = (originalClip.media_offset_frames || 0) + splitPoint;
-          
+
           track.clips.splice(cIdx + 1, 0, secondHalf);
           found = true;
           newClipId = secondHalf.id;
@@ -1213,14 +1213,14 @@ export default function EditorClient({ project }: { project: any }) {
   const handleDeleteClip = () => {
     const idsToDelete = new Set(selectedClipIds.length > 0 ? selectedClipIds : (selectedClipId ? [selectedClipId] : []));
     if (idsToDelete.size === 0) return;
-    
+
     const newProject = JSON.parse(JSON.stringify(projectData));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     newProject.tracks.forEach((track: any) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       track.clips = track.clips.filter((clip: any) => !idsToDelete.has(clip.id));
     });
-    
+
     commitState(newProject);
     setSelectedClipId(null);
     setSelectedClipIds([]);
@@ -1232,7 +1232,7 @@ export default function EditorClient({ project }: { project: any }) {
     const track = newProject.tracks[selectedTrackIdx];
     const clipToDelete = track.clips[selectedClipIdx];
     const shiftAmount = clipToDelete.duration_frames;
-    
+
     track.clips.splice(selectedClipIdx, 1);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     track.clips.forEach((clip: any) => {
@@ -1247,7 +1247,7 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleAddText = () => {
     const newProject = JSON.parse(JSON.stringify(projectData));
-    
+
     // Create text track if it doesn't exist
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let textTrack = newProject.tracks.find((t: any) => t.name === "Text Track");
@@ -1255,7 +1255,7 @@ export default function EditorClient({ project }: { project: any }) {
         textTrack = { id: `track-${Date.now()}`, name: "Text Track", clips: [] };
         newProject.tracks.unshift(textTrack); // Add to top
     }
-    
+
     textTrack.clips.push({
         id: `text-${Date.now()}`,
         name: "New Text",
@@ -1268,13 +1268,13 @@ export default function EditorClient({ project }: { project: any }) {
         transform: { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 },
         layer: { type: "solid", color: [1, 1, 1, 1] }
     });
-    
+
     commitState(newProject);
   };
 
   const handleAddAdjustmentLayer = () => {
     const newProject = JSON.parse(JSON.stringify(projectData));
-    
+
     // Create adjustment track if it doesn't exist
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let adjTrack = newProject.tracks.find((t: any) => t.name === "Adjustment Layers");
@@ -1282,7 +1282,7 @@ export default function EditorClient({ project }: { project: any }) {
         adjTrack = { id: `track-${Date.now()}`, name: "Adjustment Layers", clips: [] };
         newProject.tracks.unshift(adjTrack); // Add to top
     }
-    
+
     adjTrack.clips.push({
         id: `adj-${Date.now()}`,
         name: "Adjustment Layer",
@@ -1291,22 +1291,22 @@ export default function EditorClient({ project }: { project: any }) {
         duration_frames: 300, // 5 seconds default
         filters: {}
     });
-    
+
     commitState(newProject);
   };
 
   const handleAutoCaption = async () => {
     const toastId = toast.loading("Analyzing audio and generating AI Captions (Whisper)...");
-    
+
     try {
       const response = await fetch('/api/ai/subtitles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId: projectData.id || 'current-project' })
       });
-      
+
       const data = await response.json();
-      
+
       if (!data.success || !data.subtitles) {
         throw new Error(data.error || "Failed to generate subtitles");
       }
@@ -1318,7 +1318,7 @@ export default function EditorClient({ project }: { project: any }) {
           textTrack = { id: `track-${Date.now()}`, name: "Captions", clips: [] };
           newProject.tracks.unshift(textTrack); // Add to top
       }
-      
+
       data.subtitles.forEach((sub: any) => {
           textTrack.clips.push({
               id: `caption-${Date.now()}-${sub.id}`,
@@ -1334,7 +1334,7 @@ export default function EditorClient({ project }: { project: any }) {
               layer: { type: "solid", color: [1, 1, 1, 1] }
           });
       });
-      
+
       commitState(newProject);
       toast.success("AI Auto-Captioning complete. Subtitles added to timeline.", { id: toastId });
     } catch (err: any) {
@@ -1352,7 +1352,7 @@ export default function EditorClient({ project }: { project: any }) {
           audioTrack = { id: `track-${Date.now()}`, name: "Voiceover", clips: [] };
           newProject.tracks.push(audioTrack); // Add to bottom
       }
-      
+
       audioTrack.clips.push({
           id: `vo-${Date.now()}`,
           name: `Voiceover Take ${audioTrack.clips.length + 1}`,
@@ -1363,7 +1363,7 @@ export default function EditorClient({ project }: { project: any }) {
           volume: 1.0,
           pan: 0.0
       });
-      
+
       commitState(newProject);
     }, 1000);
   };
@@ -1373,7 +1373,7 @@ export default function EditorClient({ project }: { project: any }) {
     const newProject = JSON.parse(JSON.stringify(projectData));
     const videoTrack = newProject.tracks[selectedTrackIdx];
     const videoClip = videoTrack.clips[selectedClipIdx];
-    
+
     if (videoClip.type !== "video") return;
 
     // 1. Mute original video
@@ -1385,7 +1385,7 @@ export default function EditorClient({ project }: { project: any }) {
       newProject.tracks.splice(audioTrackIdx, 0, { id: `track-${Date.now()}`, name: "Detached Audio", clips: [] });
     }
     const audioTrack = newProject.tracks[audioTrackIdx];
-    
+
     // 3. Create audio clip pointing to same asset
     const audioClip = JSON.parse(JSON.stringify(videoClip));
     audioClip.id = `audio-${Date.now()}`;
@@ -1396,9 +1396,9 @@ export default function EditorClient({ project }: { project: any }) {
     delete audioClip.crop;
     delete audioClip.filters;
     delete audioClip.layer;
-    
+
     audioTrack.clips.push(audioClip);
-    
+
     commitState(newProject);
     setSelectedClipId(audioClip.id);
   };
@@ -1509,7 +1509,7 @@ export default function EditorClient({ project }: { project: any }) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       audioChunksRef.current = [];
-      
+
       const startFrameRecord = frame;
 
       mediaRecorder.ondataavailable = (e) => {
@@ -1520,7 +1520,7 @@ export default function EditorClient({ project }: { project: any }) {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const audioUrl = URL.createObjectURL(audioBlob);
         const durationFrames = frame - startFrameRecord;
-        
+
         // Add to project
         const newProject = JSON.parse(JSON.stringify(projectData));
         // Find or create an audio track
@@ -1530,7 +1530,7 @@ export default function EditorClient({ project }: { project: any }) {
           audioTrack = { id: `track_${Date.now()}`, name: 'A1 (Voiceover)', type: 'audio', clips: [] };
           newProject.tracks.push(audioTrack);
         }
-        
+
         audioTrack.clips.push({
           id: `vo_${Date.now()}`,
           type: 'audio',
@@ -1541,9 +1541,9 @@ export default function EditorClient({ project }: { project: any }) {
           src: audioUrl,
           volume: 1.0
         });
-        
+
         commitState(newProject);
-        
+
         // Stop stream tracks
         stream.getTracks().forEach(track => track.stop());
       };
@@ -1560,13 +1560,13 @@ export default function EditorClient({ project }: { project: any }) {
 
   const handleDetectBeats = () => {
     if (!selectedClip || (selectedClip.type !== 'audio' && selectedClip.type !== 'video')) return;
-    
+
     // Simulate finding beats (or use actual peaks if present)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newMarkers: any[] = [];
     const clipStart = selectedClip.start_frame || 0;
     const clipDuration = selectedClip.duration_frames || 100;
-    
+
     if (selectedClip.peaks && selectedClip.peaks.length > 0) {
       let lastBeatTime = -999;
       for (let i = 0; i < selectedClip.peaks.length; i++) {
@@ -1592,7 +1592,7 @@ export default function EditorClient({ project }: { project: any }) {
         });
       }
     }
-    
+
     if (newMarkers.length > 0) {
       setMarkers(prev => {
         // filter out exact duplicates
@@ -1610,7 +1610,7 @@ export default function EditorClient({ project }: { project: any }) {
     if (!selectedClip || isCaptioning) return;
     setIsCaptioning(true);
     setCaptionProgress(0);
-    
+
     let progress = 0;
     const interval = setInterval(() => {
       progress += 5;
@@ -1654,13 +1654,13 @@ export default function EditorClient({ project }: { project: any }) {
   const handleMoveTrack = (fromIdx: number, toIdx: number) => {
     const newProject = JSON.parse(JSON.stringify(projectData));
     if (!newProject.tracks) return;
-    
+
     // Remove track from original position
     const [movedTrack] = newProject.tracks.splice(fromIdx, 1);
-    
+
     // Insert at new position
     newProject.tracks.splice(toIdx, 0, movedTrack);
-    
+
     commitState(newProject);
   };
 
@@ -1669,13 +1669,13 @@ export default function EditorClient({ project }: { project: any }) {
     if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
     const newProject = JSON.parse(JSON.stringify(projectData));
     const clip = newProject.tracks[selectedTrackIdx].clips[selectedClipIdx];
-    
+
     if (!clip.keyframes) clip.keyframes = [];
-    
+
     const relativeFrame = frame - clip.start_frame;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const existingIdx = clip.keyframes.findIndex((k: any) => k.property === property && Math.abs(k.frame - relativeFrame) < 0.5);
-    
+
     if (existingIdx !== -1) {
       clip.keyframes.splice(existingIdx, 1);
     } else {
@@ -1683,7 +1683,7 @@ export default function EditorClient({ project }: { project: any }) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       clip.keyframes.sort((a: any, b: any) => a.frame - b.frame);
     }
-    
+
     commitState(newProject);
   };
 
@@ -1708,11 +1708,11 @@ export default function EditorClient({ project }: { project: any }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const keyframe = selectedClip.keyframes?.find((k: any) => k.property === property && Math.abs(k.frame - relativeFrame) < 0.5);
     const active = !!keyframe;
-    
+
     return (
       <div className="flex items-center gap-1">
         {/* Expression Button (Phase 20) */}
-        <button 
+        <button
           onClick={() => {
             const code = prompt(`Enter JS expression for ${property} (use 'time', 'value'):`, `Math.sin(time * 5) * 100 + value`);
             if (code) {
@@ -1728,7 +1728,7 @@ export default function EditorClient({ project }: { project: any }) {
         >
           ƒx
         </button>
-        <button 
+        <button
           onClick={() => toggleKeyframe(property, value)}
           className={`mr-1 text-[10px] ${active ? 'text-indigo-400' : 'text-zinc-400'}`}
           title="Toggle Keyframe"
@@ -1751,13 +1751,13 @@ export default function EditorClient({ project }: { project: any }) {
           </select>
         )}
         {active && keyframe.easing === 'custom' && (
-          <button 
-            onClick={() => setBezierEditor({ 
-              trackIdx: selectedTrackIdx, 
-              clipIdx: selectedClipIdx, 
-              property, 
-              frame: keyframe.frame, 
-              curve: keyframe.bezierCurve || [0.25, 0.1, 0.25, 1] 
+          <button
+            onClick={() => setBezierEditor({
+              trackIdx: selectedTrackIdx,
+              clipIdx: selectedClipIdx,
+              property,
+              frame: keyframe.frame,
+              curve: keyframe.bezierCurve || [0.25, 0.1, 0.25, 1]
             })}
             className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-1 transition-colors flex items-center gap-1"
             title="Open Graph Editor"
@@ -1777,17 +1777,17 @@ export default function EditorClient({ project }: { project: any }) {
   const startExport = (exportOptions: any) => {
     setShowDeliverPage(false);
     if (!canvasRef.current) return;
-    
+
     // Initialize audio context and destination if they don't exist
     if (!audioCtxRef.current) {
-       
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
     }
     if (!audioDestRef.current) {
       audioDestRef.current = audioCtxRef.current.createMediaStreamDestination();
     }
-    
+
     if (audioCtxRef.current.state === 'suspended') {
       audioCtxRef.current.resume();
     }
@@ -1840,7 +1840,7 @@ export default function EditorClient({ project }: { project: any }) {
     };
 
     mediaRecorder.start();
-    
+
     // Defer play to allow recorder to spin up
     setTimeout(() => {
       setIsPlaying(true);
@@ -1876,7 +1876,7 @@ export default function EditorClient({ project }: { project: any }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Sync refs to state so rAF callback can read fresh values without re-binding
-   
+
   // eslint-disable-next-line\n  useEffect(() => { frameRef.current = frame; }, [frame]);
   useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
   useEffect(() => { isExportingRef.current = isExporting; }, [isExporting]);
@@ -1892,7 +1892,7 @@ export default function EditorClient({ project }: { project: any }) {
       if (isPlayingRef.current) {
         // Assume 60fps, 1000ms / 60 = 16.66ms per frame
         const framesToAdvance = Math.floor(dt / (1000 / 60));
-        
+
         if (framesToAdvance > 0) {
           let nextFrame = frameRef.current + framesToAdvance;
           if (nextFrame >= durationRef.current) {
@@ -1904,12 +1904,12 @@ export default function EditorClient({ project }: { project: any }) {
               // Stop playing when export finishes
               // This requires a state update outside rAF to be safe, but since we rely on refs, we can just do:
               // Actually we can set nextFrame to durationRef.current so it renders the last frame.
-              nextFrame = durationRef.current; 
+              nextFrame = durationRef.current;
             }
           }
           setFrame(nextFrame);
           lastTimeRef.current = time;
-          
+
           if (isExportingRef.current) {
             setExportProgress(Math.floor((nextFrame / durationRef.current) * 100));
           }
@@ -1917,7 +1917,7 @@ export default function EditorClient({ project }: { project: any }) {
       } else {
         lastTimeRef.current = time;
       }
-      
+
       rafId = requestAnimationFrame(tick);
     };
 
@@ -1932,7 +1932,7 @@ export default function EditorClient({ project }: { project: any }) {
         // Move towards timeline or inspector randomly
         const targetX = Date.now() % 2 === 0 ? 0.5 * window.innerWidth : window.innerWidth - 300 + 0.5 * 200;
         const targetY = Date.now() % 2 === 0 ? window.innerHeight - 200 + 0.5 * 100 : 0.5 * window.innerHeight;
-        
+
         return {
           ...cursor,
           x: Number(cursor.x) + (targetX - Number(cursor.x)) * 0.1,
@@ -1947,16 +1947,16 @@ export default function EditorClient({ project }: { project: any }) {
   useEffect(() => {
     if (isPlaying) {
       if (!audioCtxRef.current) {
-         
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
-      
+
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') ctx.resume();
 
       const fps = projectData.fps || 60;
-      
+
       // Find all audio/video clips in project
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const anyTrackSoloed = (projectData.tracks || []).some((t: any) => t.isSoloed);
@@ -1964,7 +1964,7 @@ export default function EditorClient({ project }: { project: any }) {
       (projectData.tracks || []).forEach((track: any) => {
         if (track.isHidden || track.isMuted) return; // Skip audio for hidden or muted tracks
         if (anyTrackSoloed && !track.isSoloed) return; // Skip non-soloed tracks if any track is soloed
-        
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (track.clips || []).forEach((clip: any) => {
           if (clip.isDisabled) return;
@@ -1974,9 +1974,9 @@ export default function EditorClient({ project }: { project: any }) {
             if (asset && asset.audioBuffer) {
               const source = ctx.createBufferSource();
               source.buffer = asset.audioBuffer;
-              
+
               const gainNode = ctx.createGain();
-              
+
               const currentLocalFrame = frameRef.current - clip.start_frame;
               const clipStartInSeconds = clip.start_frame / fps;
               const currentSeconds = frameRef.current / fps;
@@ -1985,8 +1985,8 @@ export default function EditorClient({ project }: { project: any }) {
               let initialMediaFrame = clip.media_offset_frames || 0;
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const hasSpeedKeyframes = clip.keyframes && clip.keyframes.some((k: any) => k.property === "playback_rate");
-              
-               
+
+
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const getEasingT = (kfs: any[], i: number, f: number) => {
                 let t = (f - kfs[i].frame) / (kfs[i+1].frame - kfs[i].frame);
@@ -2023,13 +2023,13 @@ export default function EditorClient({ project }: { project: any }) {
               } else {
                 initialMediaFrame += currentLocalFrame * (clip.playback_rate || 1.0);
               }
-              
+
               const sourceOffset = initialMediaFrame / fps;
-              
+
               // Apply playbackRate
               const initialPlaybackRate = getInterpolatedProperty("playback_rate", currentLocalFrame > 0 ? currentLocalFrame : 0, clip.playback_rate ?? 1.0);
               source.playbackRate.setValueAtTime(initialPlaybackRate, ctx.currentTime);
-              
+
               if (hasSpeedKeyframes) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const kfs = clip.keyframes.filter((k: any) => k.property === "playback_rate").sort((a: any, b: any) => a.frame - b.frame);
@@ -2042,13 +2042,13 @@ export default function EditorClient({ project }: { project: any }) {
                 });
               }
 
-              
+
               // Local time inside the clip relative to 0
-              
+
               // Apply Volume
               const initialVolume = getInterpolatedProperty("volume", currentLocalFrame > 0 ? currentLocalFrame : 0, clip.volume ?? 1.0);
               gainNode.gain.setValueAtTime(initialVolume, ctx.currentTime);
-              
+
               if (clip.keyframes) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const kfs = clip.keyframes.filter((k: any) => k.property === "volume");
@@ -2103,7 +2103,7 @@ export default function EditorClient({ project }: { project: any }) {
                   }
                 });
               }
-              
+
               // Audio FX (EQ)
               const bassNode = ctx.createBiquadFilter();
               bassNode.type = 'lowshelf';
@@ -2126,18 +2126,18 @@ export default function EditorClient({ project }: { project: any }) {
               midNode.connect(trebleNode);
               trebleNode.connect(pannerNode);
               pannerNode.connect(gainNode);
-              
+
               gainNode.connect(ctx.destination);
               if (audioDestRef.current) {
                 gainNode.connect(audioDestRef.current);
               }
-              
+
               const startDelay = clipStartInSeconds > currentSeconds ? clipStartInSeconds - currentSeconds : 0;
               const offsetIntoClip = clipStartInSeconds > currentSeconds ? 0 : currentSeconds - clipStartInSeconds;
-              
-              
+
+
               const mediaOffset = ((clip.media_offset_frames || 0) / fps) + (offsetIntoClip * initialPlaybackRate);
-              
+
               if (currentSeconds >= clipStartInSeconds && currentSeconds < clipStartInSeconds + (clip.duration_frames / fps)) {
                 source.start(ctx.currentTime, mediaOffset);
                 activeSourcesRef.current.push(source);
@@ -2159,7 +2159,7 @@ export default function EditorClient({ project }: { project: any }) {
     }
   }, [isPlaying, projectData.tracks, assets]);
 
-   
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDragStart = (e: React.DragEvent, asset: any) => {
     e.dataTransfer.setData("application/json", JSON.stringify({
@@ -2181,7 +2181,7 @@ export default function EditorClient({ project }: { project: any }) {
 
     const isAudio = file.type.startsWith("audio/");
     const isVideo = file.type.startsWith("video/");
-    
+
     if (!isAudio && !isVideo) return;
 
     const objectUrl = URL.createObjectURL(file);
@@ -2199,17 +2199,17 @@ export default function EditorClient({ project }: { project: any }) {
     if (isAudio || isVideo) {
       try {
         const arrayBuffer = await file.arrayBuffer();
-         
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-        
+
         if (isAudio || isVideo) {
           const channelData = audioBuffer.getChannelData(0);
           const peaks = [];
           const numPeaks = 200;
           const step = Math.floor(channelData.length / numPeaks);
-          
+
           for (let i = 0; i < numPeaks; i++) {
             let max = 0;
             for (let j = 0; j < step; j++) {
@@ -2219,11 +2219,11 @@ export default function EditorClient({ project }: { project: any }) {
             peaks.push(max);
           }
           newAsset.peaks = peaks;
-          // Only override duration for pure audio, video gets duration from video metadata later if we implement it, 
+          // Only override duration for pure audio, video gets duration from video metadata later if we implement it,
           // actually let's use audio duration for video too if it's longer.
           newAsset.duration_frames = Math.ceil(audioBuffer.duration * 60);
         }
-        
+
         newAsset.audioBuffer = audioBuffer;
       } catch (err) {
         console.warn("Could not decode audio track (may not exist):", err);
@@ -2239,13 +2239,13 @@ export default function EditorClient({ project }: { project: any }) {
         await new Promise((resolve) => {
           video.onloadeddata = () => resolve(true);
         });
-        
+
         // Seek to 1 second or half duration
         video.currentTime = Math.min(1, video.duration / 2 || 0);
         await new Promise((resolve) => {
           video.onseeked = () => resolve(true);
         });
-        
+
         const canvas = document.createElement("canvas");
         canvas.width = 160;
         canvas.height = 90;
@@ -2286,11 +2286,11 @@ export default function EditorClient({ project }: { project: any }) {
   };
 
   return (
-    <div 
+    <div
       className={`relative h-full w-full overflow-hidden transition-colors duration-1000 ${isInfiniteCanvas ? 'bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)] bg-zinc-950' : ''}`}
       style={{
-        backgroundColor: isBioResponsive 
-          ? `rgb(${Math.floor(20 + systemStress * 0.4)}, ${Math.floor(20 - systemStress * 0.2)}, ${Math.floor(20 - systemStress * 0.2)})` 
+        backgroundColor: isBioResponsive
+          ? `rgb(${Math.floor(20 + systemStress * 0.4)}, ${Math.floor(20 - systemStress * 0.2)}, ${Math.floor(20 - systemStress * 0.2)})`
           : undefined
       }}
       onWheel={isInfiniteCanvas ? (e) => {
@@ -2309,19 +2309,19 @@ export default function EditorClient({ project }: { project: any }) {
           {Array.from({length: 1600}).map((_, i) => <div key={i} className="border-r border-b border-zinc-500"></div>)}
         </div>
       )}
-      <div 
+      <div
         className={`flex h-full w-full transition-transform duration-100 ease-out origin-center ${isInfiniteCanvas ? 'absolute' : ''}`}
         style={isInfiniteCanvas ? { transform: `translate(${infinitePanZoom.x}px, ${infinitePanZoom.y}px) scale(${infinitePanZoom.scale})`, width: '150%', height: '150%', left: '-25%', top: '-25%' } : {}}
       >
       {/* Sidebar */}
       {/* Phase 29: Holographic Spatial Editor Panel */}
       {isSpatialEditorMode && (
-        <div 
+        <div
           className="fixed z-[100] w-72 bg-zinc-900/95 backdrop-blur-xl border border-fuchsia-500/50 rounded-lg shadow-[0_0_20px_rgba(217,70,239,0.3)] overflow-hidden flex flex-col"
           style={{ left: spatialEditorPos.x, top: spatialEditorPos.y }}
         >
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-          <div 
+          <div
             className="h-8 bg-zinc-800/80 border-b border-fuchsia-500/30 flex items-center justify-between px-3 cursor-move select-none"
             onMouseDown={(e: React.MouseEvent) => {
               const startX = e.clientX - spatialEditorPos.x;
@@ -2336,7 +2336,7 @@ export default function EditorClient({ project }: { project: any }) {
               <svg className="w-4 h-4 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
               <span className="text-xs font-bold text-fuchsia-100 tracking-wider">HOLOGRAPHIC EDITOR</span>
             </div>
-            <button 
+            <button
               className={`px-3 py-1 text-xs rounded border transition-colors ${isReviewMode ? 'bg-orange-600 border-orange-500 text-white shadow-[0_0_10px_rgba(234,88,12,0.4)]' : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsReviewMode(!isReviewMode)}
             >
@@ -2362,7 +2362,7 @@ export default function EditorClient({ project }: { project: any }) {
               </div>
               <input type="range" min="0" max="10" defaultValue="1" className="w-full accent-fuchsia-500" />
             </div>
-            
+
             <div className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest border-b border-zinc-800 pb-1 mt-2">Holographic Material</div>
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center">
@@ -2421,11 +2421,11 @@ export default function EditorClient({ project }: { project: any }) {
             {/* Stream 1 */}
             <path d="M 100,500 C 300,500 500,200 800,200" stroke="url(#streamGrad1)" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDuration: '1s' }} />
             <circle cx="800" cy="200" r="4" fill="#d946ef" className="animate-ping" />
-            
+
             {/* Stream 2 */}
             <path d="M 1200,600 C 900,600 700,800 400,800" stroke="url(#streamGrad1)" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDuration: '1.2s' }} />
             <circle cx="400" cy="800" r="4" fill="#06b6d4" className="animate-ping" />
-            
+
             {/* Stream 3 */}
             <path d="M 300,100 C 600,150 900,600 1300,700" stroke="url(#streamGrad1)" strokeWidth="2" fill="none" className="animate-pulse" style={{ animationDuration: '1.5s' }} />
             <circle cx="1300" cy="700" r="4" fill="#d946ef" className="animate-ping" />
@@ -2449,15 +2449,15 @@ export default function EditorClient({ project }: { project: any }) {
                 </h3>
                 <button onClick={() => setIsGenerativeDreamingActive(false)} className="text-zinc-500 hover:text-white"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
               </div>
-              
+
               <div className="relative">
-                <textarea 
+                <textarea
                   value={generativePrompt}
                   onChange={e => setGenerativePrompt(e.target.value)}
                   className="w-full h-32 bg-zinc-950/50 border border-zinc-700 rounded-xl p-4 text-zinc-300 focus:outline-none focus:border-blue-500 transition-colors resize-none placeholder-zinc-600"
                   placeholder="Describe the footage you want to hallucinate (e.g., 'Cinematic extreme close up of a neon-lit cyberpunk market at midnight, anamorphic flare, unreal engine 5 render...')"
                 />
-                
+
                 {isDreaming && (
                   <div className="absolute inset-0 bg-black/80 rounded-xl flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -2469,15 +2469,15 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex justify-end gap-2">
-                <button 
-                  onClick={() => setIsGenerativeDreamingActive(false)} 
+                <button
+                  onClick={() => setIsGenerativeDreamingActive(false)}
                   className="px-4 py-2 text-xs text-zinc-400 hover:text-white transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     setIsDreaming(true);
                     setTimeout(() => {
@@ -2499,12 +2499,12 @@ export default function EditorClient({ project }: { project: any }) {
 
       {/* Phase 30: Sentient Autonomous Director Terminal */}
       {isAutonomousDirector && (
-        <div 
+        <div
           className="fixed z-[105] w-96 bg-black/95 backdrop-blur-3xl border-2 border-red-500/50 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] overflow-hidden flex flex-col font-mono"
           style={{ left: directorPos.x, top: directorPos.y }}
         >
           {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-          <div 
+          <div
             className="h-8 bg-red-900/30 border-b border-red-500/50 flex items-center justify-between px-3 cursor-move select-none"
             onMouseDown={(e: React.MouseEvent) => {
               const startX = e.clientX - directorPos.x;
@@ -2534,14 +2534,14 @@ export default function EditorClient({ project }: { project: any }) {
         </div>
       )}
 
-      <aside 
+      <aside
         className={`${mediaPoolPos.floating ? 'fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-zinc-700 bg-zinc-900/95 backdrop-blur overflow-hidden flex flex-col' : 'border-r border-zinc-700 bg-zinc-900 flex flex-col h-full shrink-0'} transition-shadow`}
         style={mediaPoolPos.floating ? { left: mediaPoolPos.x, top: mediaPoolPos.y, width: 300, height: 600 } : { width: sidebarWidth }}
       >
         {/* Floating Header */}
         {mediaPoolPos.floating && (
            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-           <div 
+           <div
              className="h-8 bg-zinc-800 flex items-center justify-between px-3 cursor-move border-b border-zinc-700 select-none"
              onMouseDown={(e: React.MouseEvent) => {
                 const startX = e.clientX - mediaPoolPos.x;
@@ -2555,8 +2555,8 @@ export default function EditorClient({ project }: { project: any }) {
              <div className="flex items-center gap-2">
                 <span className="text-[10px] text-zinc-400 font-medium tracking-wide">MEDIA POOL</span>
                 <label className="flex items-center gap-1.5 cursor-pointer ml-4" title="Split Audio/Video on Import">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={splitAudioVideoOnImport}
                     onChange={(e) => setSplitAudioVideoOnImport(e.target.checked)}
                     className="w-3 h-3 bg-zinc-800 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
@@ -2571,49 +2571,49 @@ export default function EditorClient({ project }: { project: any }) {
         )}
 
         <div className="flex border-b border-zinc-700 items-center">
-          <button 
+          <button
             className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === 'media' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('media')}
           >MEDIA</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === 'titles' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('titles')}
           >TITLES</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'effects' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('effects')}
           >FX</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'transitions' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('transitions')}
           >TRANS</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'history' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('history')}
             title="Undo History"
           >HIST</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'transcript' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('transcript')}
             title="AI Transcript"
           >TEXT</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'index' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('index')}
           >INDEX</button>
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'fusion' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('fusion')}
             title="Node Compositing"
           >FUSION</button>
           {/* Cloud Asset Library (Phase 196) */}
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'stock' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('stock')}
             title="Cloud Asset Library"
           >STOCK</button>
           {/* Phase 24: Extension API / Plugins */}
-          <button 
+          <button
             className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === 'plugins' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-300'}`}
             onClick={() => setSidebarTab('plugins')}
             title="Extension API & Plugins"
@@ -2625,9 +2625,9 @@ export default function EditorClient({ project }: { project: any }) {
           <div className="px-4 pt-4 pb-2 flex flex-col gap-3 shrink-0">
             <div className="relative">
               <svg className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input 
-                type="text" 
-                placeholder="Search Media..." 
+              <input
+                type="text"
+                placeholder="Search Media..."
                 value={mediaSearchQuery}
                 onChange={e => setMediaSearchQuery(e.target.value)}
                 className="w-full bg-zinc-950 border border-zinc-700 rounded pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus-ring focus:border-indigo-500 transition-colors"
@@ -2635,9 +2635,9 @@ export default function EditorClient({ project }: { project: any }) {
             </div>
             <div className="flex gap-1 bg-zinc-950 p-1 rounded border border-zinc-700 overflow-x-auto custom-scrollbar">
               {['all', 'video', 'audio', 'image'].map(f => (
-                <button 
+                <button
                   key={f}
-                   
+
 
                   onClick={() => setMediaFilter(f as any)}
                   className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${mediaFilter === f ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
@@ -2645,14 +2645,14 @@ export default function EditorClient({ project }: { project: any }) {
                   {f}
                 </button>
               ))}
-              <button 
+              <button
                   onClick={() => setIsEmotionHeatmapMode(!isEmotionHeatmapMode)}
                   className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${isEmotionHeatmapMode ? 'bg-purple-600 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                 >
                   HEATMAP
                 </button>
             </div>
-            
+
             {/* Smart Bins (Phase 182) */}
             <div className="flex gap-1 overflow-x-auto custom-scrollbar mt-1">
               <span className="text-[10px] text-zinc-400 font-bold uppercase py-1 mr-1 shrink-0">Smart Bins:</span>
@@ -2662,16 +2662,16 @@ export default function EditorClient({ project }: { project: any }) {
                 </button>
               ))}
             </div>
-            
-            <button 
+
+            <button
               className="mt-1 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-300 bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 p-1.5 rounded uppercase tracking-wider transition-colors"
               onClick={handleCreateMulticam}
               title="Create a Multicam Sequence from selected clips"
             >
               🎥 Create Multicam Sequence
             </button>
-            
-            <button 
+
+            <button
               className="mt-2 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-300 bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 p-1.5 rounded uppercase tracking-wider transition-colors"
               onClick={handleSyncAudioVideo}
               title="Automatically sync audio and video clips based on waveform analysis"
@@ -2682,7 +2682,7 @@ export default function EditorClient({ project }: { project: any }) {
             <div className="mt-4 pt-3 border-t border-zinc-700/50">
               <label className="text-[10px] text-zinc-400 font-bold uppercase block mb-1">🤖 Generative AI B-Roll (Sora/Runway)</label>
               <div className="flex flex-col gap-2">
-                <textarea 
+                <textarea
                   placeholder="E.g., Cinematic drone shot of a cyberpunk city at night, neon lights reflecting on wet streets..."
                   className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 min-h-[60px] resize-none"
                   onKeyDown={(e) => {
@@ -2697,7 +2697,7 @@ export default function EditorClient({ project }: { project: any }) {
                         success: 'AI Video added to Media Pool!',
                         error: 'Failed to generate video.'
                       });
-                      
+
                       genPromise.then(() => {
                         const newAsset = {
                           id: `ai-gen-${Date.now()}`,
@@ -2711,7 +2711,7 @@ export default function EditorClient({ project }: { project: any }) {
                     }
                   }}
                 />
-                <button 
+                <button
                   className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition-all shadow-md"
                   onClick={(e) => {
                     const textarea = e.currentTarget.previousElementSibling as HTMLTextAreaElement;
@@ -2727,7 +2727,7 @@ export default function EditorClient({ project }: { project: any }) {
                       success: 'AI Video added to Media Pool!',
                       error: 'Failed to generate video.'
                     });
-                    
+
                     genPromise.then(() => {
                       const newAsset = {
                         id: `ai-gen-${Date.now()}`,
@@ -2781,13 +2781,13 @@ export default function EditorClient({ project }: { project: any }) {
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 CREATE MULTI-CAM (SYNC AUDIO)
               </button>
-              
+
               {assets.filter(a => {
                 if (mediaFilter !== 'all' && a.type !== mediaFilter) return false;
                 if (mediaSearchQuery && !a.name.toLowerCase().includes(mediaSearchQuery.toLowerCase())) return false;
                 return true;
           }).map(asset => (
-            <div 
+            <div
               key={asset.id}
               draggable
               onDragStart={(e) => handleDragStart(e, asset)}
@@ -2829,11 +2829,11 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
               ) : null}
-              
+
               <div className="flex items-center justify-between w-full px-1">
                 <span className="truncate text-xs font-medium text-zinc-300 group-hover:text-white transition-colors flex-1 pr-2" title={asset.name}>{asset.name}</span>
                 {asset.type === 'video' && (
-                  <button 
+                  <button
                     onClick={() => handleSceneCutDetection()}
                     className="opacity-0 group-hover:opacity-100 mr-1 text-[10px] bg-zinc-700 hover:bg-indigo-600 px-1 rounded transition-all"
                     title="Scene Cut Detection"
@@ -2848,13 +2848,13 @@ export default function EditorClient({ project }: { project: any }) {
 
           {sidebarTab === 'titles' && (
             <div className="col-span-full mb-2 flex gap-2">
-              <button 
+              <button
                 onClick={handleAutoSubtitleTrack}
                 className="flex-1 bg-amber-600/80 hover:bg-amber-500 text-white text-xs font-medium py-2 rounded border border-amber-500 transition-colors flex items-center justify-center gap-2"
               >
                 🎙️ Auto-Generate Subtitles (AI)
               </button>
-              <button 
+              <button
                 className="flex-1 items-center justify-center gap-1.5 px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 rounded transition-colors text-xs font-medium border border-indigo-500/30 flex"
                 onClick={handleAiVoiceover}
                 title="Generate AI Voiceover"
@@ -2870,7 +2870,7 @@ export default function EditorClient({ project }: { project: any }) {
             { name: "Impact Heading", type: "text", text_content: "IMPACT", font_family: "Impact", color: "#ffea00", font_size: 72, drop_shadow_distance: 10, drop_shadow_color: "#000000" },
             { name: "Cinematic", type: "text", text_content: "CINEMATIC", font_family: "Georgia", color: "#ffffff", font_size: 36, letter_spacing: 10 }
           ].map((preset, i) => (
-            <div 
+            <div
               key={i}
               draggable
               onDragStart={(e) => {
@@ -2894,7 +2894,7 @@ export default function EditorClient({ project }: { project: any }) {
             { name: "Advanced 3D Keyer", effectType: "3d_keyer", icon: "🟩" },
             { name: "AI Depth of Field (Bokeh)", effectType: "ai_bokeh", icon: "📷" },
           ].map((preset, i) => (
-            <div 
+            <div
               key={i}
               draggable
               onDragStart={(e) => {
@@ -2911,7 +2911,7 @@ export default function EditorClient({ project }: { project: any }) {
           {sidebarTab === 'transitions' && (
             <>
               {[
-                { 
+                {
                   category: 'Dissolves',
                   items: [
                     { name: 'Cross Dissolve', effectType: 'cross_dissolve', duration: 30, gradient: 'from-white/20 to-transparent' },
@@ -2971,10 +2971,10 @@ export default function EditorClient({ project }: { project: any }) {
                         key={ii}
                         draggable
                         onDragStart={(e) => {
-                          e.dataTransfer.setData("application/json", JSON.stringify({ 
-                            type: "preset", 
-                            preset: { ...item, isTransition: true }, 
-                            isEffect: true 
+                          e.dataTransfer.setData("application/json", JSON.stringify({
+                            type: "preset",
+                            preset: { ...item, isTransition: true },
+                            isEffect: true
                           }));
                           e.dataTransfer.effectAllowed = "copy";
                         }}
@@ -3028,20 +3028,20 @@ export default function EditorClient({ project }: { project: any }) {
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
                 <p className="text-xs text-zinc-400 leading-loose">
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">So</span> 
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">So</span>
 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">today</span> 
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">today</span>
 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">we're</span> 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">going</span> 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">to</span> 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">talk</span> 
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">we're</span>
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">going</span>
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">to</span>
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">talk</span>
 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">about</span> 
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">about</span>
 
-                  <span className="bg-red-500/20 text-red-300 line-through cursor-pointer rounded px-1 transition-colors" title="Ripple Deleted" onClick={handleRestoreRippleWord}>um</span> 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">the</span> 
-                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">new</span> 
+                  <span className="bg-red-500/20 text-red-300 line-through cursor-pointer rounded px-1 transition-colors" title="Ripple Deleted" onClick={handleRestoreRippleWord}>um</span>
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">the</span>
+                  <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">new</span>
                   <span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">features.</span>
                 </p>
                 <div className="mt-4 p-2 bg-zinc-900 border border-zinc-700 rounded flex flex-col gap-1">
@@ -3096,8 +3096,8 @@ export default function EditorClient({ project }: { project: any }) {
                 Plugin Manager
               </h3>
               <p className="text-xs text-zinc-500 mb-4">Manage 3rd-party extensions and dockable panel scripts (CEP Parity).</p>
-              
-              <button 
+
+              <button
                 className="w-full bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/50 text-indigo-300 text-xs font-bold py-2 rounded mb-4 transition-colors flex items-center justify-center gap-2"
                 onClick={() => {
                   toast.promise(
@@ -3207,9 +3207,9 @@ export default function EditorClient({ project }: { project: any }) {
                      );
                   }
                   return events.map((ev, i) => (
-                     
 
-                    <div 
+
+                    <div
                       key={`${ev.id}-${i}`}
                       className="group flex flex-col p-2 bg-zinc-900/50 border border-zinc-700/80 hover:bg-zinc-800 hover:border-zinc-700 rounded cursor-pointer transition-colors"
                       onClick={() => setFrame(ev.frame)}
@@ -3261,18 +3261,18 @@ export default function EditorClient({ project }: { project: any }) {
         {sidebarTab === 'media' && (
           <div className="flex flex-col border-t border-zinc-700 mt-auto">
              <div className="px-4 py-2 flex flex-col gap-2">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="w-full bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1.5 text-xs text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500 placeholder-zinc-600 transition-colors"
-                  placeholder="Search Media..." 
+                  placeholder="Search Media..."
                 />
-                
+
                 {/* Text-to-Video Generation (Phase 206) */}
                 <div className="flex gap-2">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="flex-1 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-3 py-1 text-[10px] text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500 placeholder-indigo-400/50 transition-colors"
-                    placeholder="Type to generate AI video..." 
+                    placeholder="Type to generate AI video..."
                   />
                   <button className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-3 py-1 rounded-full transition-colors flex items-center gap-1" onClick={handleDiffusionPrompt}>
                     ✨ Generate
@@ -3281,14 +3281,14 @@ export default function EditorClient({ project }: { project: any }) {
               </div>
             <label className="block w-full text-center text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded py-2 cursor-pointer transition-colors shadow-sm">
               Upload Media
-              <input 
-                type="file" 
-                className="hidden" 
-                accept="audio/*,video/*" 
-                onChange={handleFileUpload} 
+              <input
+                type="file"
+                className="hidden"
+                accept="audio/*,video/*"
+                onChange={handleFileUpload}
               />
             </label>
-            
+
             {/* Telepathic Asset Retrieval (Phase 217) */}
             <button className="mt-2 block w-full text-center text-[10px] font-bold text-sky-300 bg-sky-900/30 hover:bg-sky-800/50 border border-sky-500/50 rounded py-1.5 cursor-pointer transition-colors shadow-sm" onClick={() => handleTelepathicLink()}>
               🧠 Telepathic Import
@@ -3320,7 +3320,7 @@ export default function EditorClient({ project }: { project: any }) {
 
           {/* Preview Area */}
 
-          <div 
+          <div
             className="flex-1 flex flex-col items-center justify-center bg-black relative"
             onClick={(e) => {
               if (activeTool === 'pen' && selectedClipId) {
@@ -3369,11 +3369,11 @@ export default function EditorClient({ project }: { project: any }) {
           {/* Pen Tool Polygon Drawer Overlay */}
           {activeTool === 'pen' && selectedClipId && selectedClip?.polygonMask && (
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-[36]">
-              <polygon 
-                points={selectedClip.polygonMask.map((p: any) => `${p.x * 100}%,${p.y * 100}%`).join(' ')} 
-                fill="rgba(99, 102, 241, 0.2)" 
-                stroke="#6366f1" 
-                strokeWidth="2" 
+              <polygon
+                points={selectedClip.polygonMask.map((p: any) => `${p.x * 100}%,${p.y * 100}%`).join(' ')}
+                fill="rgba(99, 102, 241, 0.2)"
+                stroke="#6366f1"
+                strokeWidth="2"
                 strokeDasharray="4 2"
               />
               {selectedClip.polygonMask.map((p: any, i: number) => (
@@ -3390,10 +3390,10 @@ export default function EditorClient({ project }: { project: any }) {
               ))}
             </svg>
           )}
-          
+
           {/* Phase 47: Frame-Accurate Annotations Overlay */}
           {isReviewMode && annotations.filter(a => Math.abs(a.frame - frame) < 5).map(annotation => (
-            <div 
+            <div
               key={annotation.id}
               className="absolute z-40 transform -translate-x-1/2 -translate-y-full pb-2 animate-in fade-in slide-in-from-bottom-2 pointer-events-auto"
               style={{ left: `${annotation.x}%`, top: `${annotation.y}%` }}
@@ -3492,8 +3492,8 @@ export default function EditorClient({ project }: { project: any }) {
           )}
 
           <div className="flex items-center gap-4 absolute top-4 right-4 z-10">
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${multiCamMode ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${multiCamMode ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setMultiCamMode(!multiCamMode)}
               title="Toggle Multi-Camera Viewer (Shift+0)"
             >
@@ -3501,8 +3501,8 @@ export default function EditorClient({ project }: { project: any }) {
               Multi-Cam
             </button>
             {/* Phase 23: 3D Workspace Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${is3DWorkspace ? 'bg-teal-600 border-teal-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${is3DWorkspace ? 'bg-teal-600 border-teal-500 text-white' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIs3DWorkspace(!is3DWorkspace)}
               title="Toggle 3D Compositing Workspace"
             >
@@ -3510,8 +3510,8 @@ export default function EditorClient({ project }: { project: any }) {
               3D Mode
             </button>
             {/* Phase 29: Holographic Volumetric Editor Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSpatialEditorMode ? 'bg-fuchsia-600 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSpatialEditorMode ? 'bg-fuchsia-600 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsSpatialEditorMode(!isSpatialEditorMode)}
               title="Toggle Holographic Volumetric Spatial Editor"
             >
@@ -3519,16 +3519,16 @@ export default function EditorClient({ project }: { project: any }) {
               Spatial Editor
             </button>
             {/* Phase 30: Sentient Autonomous Studio Toggle */}
-            <button 
-              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isAutonomousDirector ? 'bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isAutonomousDirector ? 'bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsAutonomousDirector(!isAutonomousDirector)}
               title="Toggle Sentient Autonomous Director AI"
             >
               🤖 Autonomous Director
             </button>
             {/* Phase 31: Bio-Responsive UI Themes */}
-            <button 
-              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isBioResponsive ? 'bg-orange-600 border-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.8)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${isBioResponsive ? 'bg-orange-600 border-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.8)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsBioResponsive(!isBioResponsive)}
               title={`Toggle Bio-Responsive UI Theme (Current Stress: ${systemStress.toFixed(1)}%)`}
             >
@@ -3536,8 +3536,8 @@ export default function EditorClient({ project }: { project: any }) {
               Bio-Sync
             </button>
             {/* Phase 32: Omnipresent Voice Orb Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isOmniOrbActive ? 'bg-cyan-600 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isOmniOrbActive ? 'bg-cyan-600 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsOmniOrbActive(!isOmniOrbActive)}
               title="Toggle AI Voice Command Orb"
             >
@@ -3545,8 +3545,8 @@ export default function EditorClient({ project }: { project: any }) {
               Omni Orb
             </button>
             {/* Phase 33: Multi-Agent Swarm Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSwarmActive ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSwarmActive ? 'bg-indigo-600 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsSwarmActive(!isSwarmActive)}
               title="Toggle Multi-Agent Rendering Swarm"
             >
@@ -3554,8 +3554,8 @@ export default function EditorClient({ project }: { project: any }) {
               Agent Swarm
             </button>
             {/* Phase 34: Neuro-Symbolic Generative Synthesis Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isGenerativeDreamingActive ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.7)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isGenerativeDreamingActive ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.7)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsGenerativeDreamingActive(!isGenerativeDreamingActive)}
               title="Toggle Neuro-Symbolic Scene Synthesis"
             >
@@ -3563,16 +3563,16 @@ export default function EditorClient({ project }: { project: any }) {
               Dream Clip
             </button>
             {/* Phase 35: God Mode Toggle */}
-            <button 
-              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mr-2 ${isGodMode ? 'bg-gradient-to-r from-yellow-500 via-red-500 to-fuchsia-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105' : 'bg-zinc-900/80 border-zinc-600/50 hover:bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]'}`} 
+            <button
+              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mr-2 ${isGodMode ? 'bg-gradient-to-r from-yellow-500 via-red-500 to-fuchsia-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105' : 'bg-zinc-900/80 border-zinc-600/50 hover:bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]'}`}
               onClick={activateGodMode}
               title="Activate God Mode — Enable All AI Modes Simultaneously"
             >
               ⚡ GOD MODE
             </button>
             {/* Phase 40: The Singularity ∞ Toggle */}
-            <button 
-              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 mr-2 ${isSingularity ? 'bg-white text-black border-white shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110' : 'bg-black text-white border-zinc-700 hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]'}`} 
+            <button
+              className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 mr-2 ${isSingularity ? 'bg-white text-black border-white shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110' : 'bg-black text-white border-zinc-700 hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]'}`}
               onClick={() => setIsSingularity(!isSingularity)}
               title="Activate The Singularity: Infinite Canvas Mode"
             >
@@ -3581,15 +3581,15 @@ export default function EditorClient({ project }: { project: any }) {
             {/* Phase 36: Quantum Timeline Superposition Toggle */}
             <div className="flex items-center">
               {isQuantumSuperposition && (
-                <button 
+                <button
                   onClick={() => setIsQuantumSuperposition(false)}
                   className="text-[10px] font-black bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded-l animate-pulse shadow-[0_0_15px_rgba(79,70,229,0.8)]"
                 >
                   👁️ OBSERVE
                 </button>
               )}
-              <button 
-                className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isQuantumSuperposition ? 'bg-indigo-900/80 border-indigo-500 text-indigo-300 rounded-r shadow-[0_0_10px_rgba(79,70,229,0.4)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+              <button
+                className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isQuantumSuperposition ? 'bg-indigo-900/80 border-indigo-500 text-indigo-300 rounded-r shadow-[0_0_10px_rgba(79,70,229,0.4)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
                 onClick={() => setIsQuantumSuperposition(!isQuantumSuperposition)}
                 title="Toggle Quantum Superposition Timeline"
               >
@@ -3598,16 +3598,16 @@ export default function EditorClient({ project }: { project: any }) {
               </button>
             </div>
             {/* Phase 37: Neural Cinematography AI Toggle */}
-            <button 
-              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isCinematographyAI ? 'bg-cyan-600/80 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isCinematographyAI ? 'bg-cyan-600/80 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsCinematographyAI(!isCinematographyAI)}
               title="Toggle Neural Cinematography Analysis"
             >
               🎥 Neural Cinema
             </button>
             {/* Phase 38: Holographic Asset Forge Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAssetForgeOpen ? 'bg-fuchsia-600/80 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAssetForgeOpen ? 'bg-fuchsia-600/80 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsAssetForgeOpen(!isAssetForgeOpen)}
               title="Open Holographic Asset Forge"
             >
@@ -3615,55 +3615,55 @@ export default function EditorClient({ project }: { project: any }) {
               Asset Forge
             </button>
             {/* Phase 39: Sentient Color Intelligence Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSentientColorOpen ? 'bg-rose-600/80 border-rose-500 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isSentientColorOpen ? 'bg-rose-600/80 border-rose-500 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsSentientColorOpen(!isSentientColorOpen)}
               title="Open Sentient Color Intelligence"
             >
               🎨 Sentient Color
             </button>
             {/* Phase 43: Professional Audio Mixer Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAudioMixerOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAudioMixerOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsAudioMixerOpen(!isAudioMixerOpen)}
               title="Open Professional Audio Mixer"
             >
               🎛️ Mixer
             </button>
             {/* Phase 44: DaVinci-Style Color Scopes Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isColorScopesOpen ? 'bg-teal-600/80 border-teal-500 text-white shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isColorScopesOpen ? 'bg-teal-600/80 border-teal-500 text-white shadow-[0_0_10px_rgba(20,184,166,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsColorScopesOpen(!isColorScopesOpen)}
               title="Open Color Scopes (Waveform / Vectorscope)"
             >
               📊 Scopes
             </button>
             {/* Phase 45: CapCut-Style Tools */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAutoCaptioning ? 'bg-orange-600/80 border-orange-500 text-white animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isAutoCaptioning ? 'bg-orange-600/80 border-orange-500 text-white animate-pulse' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => { setIsAutoCaptioning(true); setAutoCaptionProgress(0); }}
               title="Auto-Generate Captions (Speech-to-Text)"
             >
               💬 Auto-Captions
             </button>
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${hasBeatSync ? 'bg-pink-600/80 border-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${hasBeatSync ? 'bg-pink-600/80 border-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setHasBeatSync(!hasBeatSync)}
               title="Auto Beat Sync Markers"
             >
               🥁 Beat Sync
             </button>
             {/* Phase 46: Multiplayer Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isMultiplayer ? 'bg-blue-600/80 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isMultiplayer ? 'bg-blue-600/80 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsMultiplayer(!isMultiplayer)}
               title="Toggle Live Multiplayer Mode"
             >
               👥 Co-op
             </button>
             {/* Phase 48: Chat Toggle */}
-            <button 
-              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isChatOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`} 
+            <button
+              className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${isChatOpen ? 'bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]' : 'bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white'}`}
               onClick={() => setIsChatOpen(!isChatOpen)}
               title="Open Session Chat"
             >
@@ -3684,27 +3684,27 @@ export default function EditorClient({ project }: { project: any }) {
             <div className="text-xs text-zinc-400 font-medium px-2">
               {isAutoSaving ? "Saving..." : "Saved"}
             </div>
-            
+
             <div className="flex -space-x-2 mr-2 cursor-pointer" title="Multiplayer Session (2 Active Editors)">
               <div className="w-6 h-6 rounded-full bg-indigo-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-white z-20">You</div>
               <div className="w-6 h-6 rounded-full bg-pink-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-white z-10">AL</div>
             </div>
-            
-            <button 
+
+            <button
               onClick={handleAutoReframe}
               className="text-xs bg-amber-600/80 hover:bg-amber-500 text-white px-3 py-1.5 rounded font-medium border border-amber-500 transition-colors flex items-center gap-1.5 mr-2"
               title="Auto-Reframe to 9:16 Vertical"
             >
               📱 Reframe
             </button>
-            <button 
+            <button
               onClick={handleBeatSync}
               className="text-xs bg-pink-600/80 hover:bg-pink-500 text-white px-3 py-1.5 rounded font-medium border border-pink-500 transition-colors flex items-center gap-1.5 mr-2"
               title="Auto Beat Sync Markers"
             >
               🥁 Beat Sync
             </button>
-            <button 
+            <button
               onClick={handleGenerateProxies}
               className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5 mr-2"
               title="Generate 720p Proxies"
@@ -3718,44 +3718,44 @@ export default function EditorClient({ project }: { project: any }) {
                 Workspace
               </button>
               <div className="absolute top-full right-0 mt-1 w-32 bg-zinc-800 border border-zinc-700 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50 overflow-hidden">
-                <button 
+                <button
                   onClick={() => { setInspectorPos({ floating: false, x: 800, y: 100 }); setMediaPoolPos({ floating: false, x: 50, y: 100 }); }}
                   className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
                 >Default</button>
-                <button 
+                <button
                   onClick={() => { setInspectorPos({ floating: true, x: window.innerWidth - 320, y: 50 }); setMediaPoolPos({ floating: false, x: 50, y: 100 }); setSelectedClipId(null); }}
                   className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
                 >Color Grading</button>
-                <button 
+                <button
                   onClick={() => { setMediaPoolPos({ floating: true, x: 50, y: 50 }); setInspectorPos({ floating: true, x: window.innerWidth - 320, y: 50 }); }}
                   className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
                 >Dual Screen</button>
-                <button 
+                <button
                   onClick={() => { setMediaPoolPos({ floating: false, x: 50, y: 100 }); setInspectorPos({ floating: false, x: 800, y: 100 }); setSidebarTab('media'); setTimelineHeight(400); setActiveWorkspace('timeline'); setShowAudioMixer(true); }}
                   className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
                 >Audio Workspace</button>
-                <button 
+                <button
                   onClick={() => { setActiveWorkspace('fusion'); }}
                   className="w-full text-left px-3 py-2 text-xs text-indigo-400 font-semibold hover:bg-indigo-600 hover:text-white"
                 >Fusion (Nodes)</button>
-                <button 
+                <button
                   onClick={() => { setActiveWorkspace('color'); }}
                   className="w-full text-left px-3 py-2 text-xs text-teal-400 font-semibold hover:bg-teal-600 hover:text-white"
                 >Color (Scopes)</button>
-                <button 
+                <button
                   onClick={() => { setActiveWorkspace('audio'); }}
                   className="w-full text-left px-3 py-2 text-xs text-amber-400 font-semibold hover:bg-amber-600 hover:text-white"
                 >Audio (Fairlight)</button>
-                <button 
+                <button
                   onClick={() => { setActiveWorkspace('ai'); }}
                   className="w-full text-left px-3 py-2 text-xs text-fuchsia-400 font-semibold hover:bg-fuchsia-600 hover:text-white"
                 >AI Magic Tools</button>
-                <button 
+                <button
                   onClick={() => { setActiveWorkspace('export'); }}
                   className="w-full text-left px-3 py-2 text-xs text-orange-400 font-semibold hover:bg-orange-600 hover:text-white"
                 >Deliver (Export)</button>
                 <div className="border-t border-zinc-700 my-1"></div>
-                <button 
+                <button
                   onClick={() => {
                     setIsInfiniteCanvas(!isInfiniteCanvas);
                     if (!isInfiniteCanvas) {
@@ -3774,7 +3774,7 @@ export default function EditorClient({ project }: { project: any }) {
                 </button>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setShowCommandPalette(true)}
               className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-3 py-1.5 rounded font-medium border border-zinc-700 transition-colors flex items-center gap-1.5"
               title="Keyboard Shortcuts (⌘K)"
@@ -3783,14 +3783,14 @@ export default function EditorClient({ project }: { project: any }) {
               Shortcuts
             </button>
             {/* Brain-Computer Interface Controls (Phase 215) */}
-            <button 
+            <button
               onClick={handleEEGHeadband}
               className="text-xs bg-indigo-600/80 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-medium border border-indigo-500 transition-colors flex items-center gap-1.5 mr-2"
               title="BCI Neural Mapping"
             >
               🧠 Neural Input
             </button>
-            <button 
+            <button
               onClick={handleProjectInfoDump}
               className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-3 py-1.5 rounded font-medium border border-zinc-700 transition-colors flex items-center gap-1.5"
               title="Project Info"
@@ -3798,20 +3798,20 @@ export default function EditorClient({ project }: { project: any }) {
               ℹ️ Info
             </button>
             {/* Zero-Latency CRDT Sync (Phase 214) */}
-            <button 
+            <button
               onClick={handleCRDTSync}
               className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5"
               title="Share CRDT Collaboration Link"
             >
               🤝 100-Player Sync
             </button>
-            <button 
+            <button
               onClick={handleNewProject}
               className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-4 py-1.5 rounded font-medium border border-zinc-700 transition-colors"
             >
               New Project
             </button>
-            <button 
+            <button
                  onClick={handleExport}
                  className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded font-medium transition-colors"
                >
@@ -3820,7 +3820,7 @@ export default function EditorClient({ project }: { project: any }) {
 
           </div>
 
-          <div 
+          <div
             className="text-zinc-300 absolute top-4 left-4 z-10 text-sm font-mono bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-zinc-700 cursor-pointer hover:border-indigo-500/50 transition-colors group"
             title="Click to jump to a specific frame"
             onClick={() => {
@@ -3850,15 +3850,15 @@ export default function EditorClient({ project }: { project: any }) {
 
             {/* Sentient AGI Co-Editor (Phase 218) */}
 
-            <div 
+            <div
               className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)] animate-pulse cursor-pointer flex items-center justify-center border-2 border-white/50 hover:scale-110 transition-transform"
               onClick={() => handleAGICoEditor()}
               title="Sentient AGI Co-Editor"
             >
               <div className="w-2 h-2 bg-white rounded-full"></div>
             </div>
-            
-            <WasmPlayer 
+
+            <WasmPlayer
               project={{
                 ...projectData,
 
@@ -3867,10 +3867,10 @@ export default function EditorClient({ project }: { project: any }) {
 
                   clips: t.clips?.filter((c: any) => !c.isDisabled)
                 })) || []
-              }} 
-              frame={frame} 
-              assets={assets} 
-              canvasRef={canvasRef} 
+              }}
+              frame={frame}
+              assets={assets}
+              canvasRef={canvasRef}
               showSafeMargins={showSafeMargins}
               renderQuality={playbackQuality}
             />
@@ -3879,11 +3879,11 @@ export default function EditorClient({ project }: { project: any }) {
               <div className="absolute inset-0 bg-black z-[36] flex">
                 <div className="flex-1 relative border-r-2 border-fuchsia-500/50 flex flex-col items-center justify-center overflow-hidden">
                   <div className="absolute top-2 left-2 bg-fuchsia-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">Universe A (Master)</div>
-                  <WasmPlayer 
-                    project={{ ...projectData, tracks: projectData.tracks?.map((t: any) => ({...t, clips: t.clips?.filter((c: any) => !c.isDisabled)})) || [] }} 
-                    frame={frame} 
-                    assets={assets} 
-                    canvasRef={null as any} 
+                  <WasmPlayer
+                    project={{ ...projectData, tracks: projectData.tracks?.map((t: any) => ({...t, clips: t.clips?.filter((c: any) => !c.isDisabled)})) || [] }}
+                    frame={frame}
+                    assets={assets}
+                    canvasRef={null as any}
                     showSafeMargins={false}
                     renderQuality="half"
                   />
@@ -3891,11 +3891,11 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="flex-1 relative border-l-2 border-indigo-500/50 flex flex-col items-center justify-center overflow-hidden">
                   <div className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">Universe B (Alternate Pacing)</div>
                   {/* Simulated alternate timeline with slight time offset */}
-                  <WasmPlayer 
-                    project={{ ...projectData, tracks: projectData.tracks?.map((t: any) => ({...t, clips: t.clips?.filter((c: any) => !c.isDisabled)})) || [] }} 
-                    frame={Math.max(0, frame - 15)} 
-                    assets={assets} 
-                    canvasRef={null as any} 
+                  <WasmPlayer
+                    project={{ ...projectData, tracks: projectData.tracks?.map((t: any) => ({...t, clips: t.clips?.filter((c: any) => !c.isDisabled)})) || [] }}
+                    frame={Math.max(0, frame - 15)}
+                    assets={assets}
+                    canvasRef={null as any}
                     showSafeMargins={false}
                     renderQuality="half"
                   />
@@ -3945,14 +3945,14 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="absolute w-px h-full bg-white/20" />
               </div>
             )}
-            
+
             {/* Multicam Grid Overlay */}
             {isMulticamMode && (
               <div className="absolute inset-0 z-40 grid grid-cols-2 grid-rows-2 bg-black">
                  {[1, 2, 3, 4].map((camIndex) => (
-                    
 
-                   <div 
+
+                   <div
                      key={camIndex}
                      className="relative border border-zinc-700 bg-zinc-900 overflow-hidden cursor-pointer group hover:border-indigo-500 transition-colors"
                      onClick={() => {
@@ -3976,18 +3976,18 @@ export default function EditorClient({ project }: { project: any }) {
               </div>
             )}
           </div>
-          
+
           <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
-            <button 
-              onClick={() => setIsMulticamMode(!isMulticamMode)} 
-              className={`p-2 rounded transition-colors flex items-center gap-1.5 ${isMulticamMode ? 'text-indigo-400 bg-indigo-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`} 
+            <button
+              onClick={() => setIsMulticamMode(!isMulticamMode)}
+              className={`p-2 rounded transition-colors flex items-center gap-1.5 ${isMulticamMode ? 'text-indigo-400 bg-indigo-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`}
               title="Toggle Multicam Mode"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
             </button>
             <select
               value={playbackQuality}
-               
+
 
               onChange={(e) => setPlaybackQuality(e.target.value as any)}
               className="bg-zinc-800/80 text-zinc-300 text-xs px-2 py-1.5 rounded border border-zinc-700 outline-none hover:bg-zinc-700"
@@ -3999,22 +3999,22 @@ export default function EditorClient({ project }: { project: any }) {
             <button onClick={() => setShowSafeMargins(!showSafeMargins)} className={`p-2 rounded transition-colors ${showSafeMargins ? 'text-indigo-400 bg-indigo-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`} title="Toggle Safe Margins">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
             </button>
-            <button 
-              onClick={() => { setShowScopes(!showScopes); if (!showScopes) setShowMixer(false); }} 
-              className={`p-2 rounded transition-colors ${showScopes ? 'text-emerald-400 bg-emerald-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`} 
+            <button
+              onClick={() => { setShowScopes(!showScopes); if (!showScopes) setShowMixer(false); }}
+              className={`p-2 rounded transition-colors ${showScopes ? 'text-emerald-400 bg-emerald-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`}
               title="Toggle Video Scopes"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
             </button>
-            <button 
-              onClick={() => { setShowMixer(!showMixer); if (!showMixer) setShowScopes(false); }} 
-              className={`p-2 rounded transition-colors ${showMixer ? 'text-amber-400 bg-amber-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`} 
+            <button
+              onClick={() => { setShowMixer(!showMixer); if (!showMixer) setShowScopes(false); }}
+              className={`p-2 rounded transition-colors ${showMixer ? 'text-amber-400 bg-amber-500/20' : 'text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700'}`}
               title="Toggle Audio Mixer"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
             </button>
             {/* Holographic Display Rendering (Phase 211) */}
-            <button 
+            <button
               className="px-2 py-1.5 rounded hover:bg-zinc-700 transition-colors flex items-center gap-1 bg-zinc-800/80 border border-fuchsia-500/30 text-fuchsia-300"
               title="Spatial Stereoscopic Output"
               onClick={handleStereoscopicAppleVision}
@@ -4062,10 +4062,10 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Simulated waveform data */}
                     {Array.from({length: 256}, (_, x) => {
                       const baseY = 40 + Math.sin(x * 0.05 + frame * 0.02) * 15 + Math.sin(x * 0.12) * 8;
-                       
+
                       const scatter = 0.5 * 20 - 10;
                       const y = Math.max(2, Math.min(98, baseY + scatter));
-                       
+
                       return <rect key={x} x={x} y={y} width="1" height={Math.max(1, 0.5 * 6 + 1)} fill="rgba(74,222,128,0.4)" />;
                     })}
                     {/* Highlight line */}
@@ -4125,7 +4125,7 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Simulated chrominance data points */}
                     {Array.from({length: 200}, (_, i) => {
                       const angle = (i / 200) * Math.PI * 2 + frame * 0.01;
-                       
+
                       const radius = 5 + 0.5 * 15 + Math.sin(angle * 3) * 5;
                       const x = 50 + Math.cos(angle) * radius;
                       const y = 50 + Math.sin(angle) * radius;
@@ -4134,9 +4134,9 @@ export default function EditorClient({ project }: { project: any }) {
                     })}
                     {/* Dense center cluster */}
                     {Array.from({length: 100}, (_, i) => {
-                       
+
                       const x = 50 + (0.5 - 0.5) * 12;
-                       
+
                       const y = 50 + (0.5 - 0.5) * 12;
                       return <circle key={`c${i}`} cx={x} cy={y} r="0.4" fill="rgba(255,255,255,0.25)" />;
                     })}
@@ -4160,12 +4160,12 @@ export default function EditorClient({ project }: { project: any }) {
 
                 {projectData.tracks.filter((t: any) => t.type === 'audio').map((track: any, i: number) => {
                   // Simulate live audio meter value based on frame
-                   
+
                   const leftMeter = Math.max(0, Math.sin(frame * 0.1 + i) * 0.8 + 0.2 + (0.5 * 0.2 - 0.1));
-                   
+
                   const rightMeter = Math.max(0, Math.sin(frame * 0.12 + i) * 0.8 + 0.2 + (0.5 * 0.2 - 0.1));
                   const trackVol = track.volume ?? 0;
-                  
+
                   return (
                     <div key={track.id} className="w-20 shrink-0 flex flex-col items-center bg-zinc-900/50 border border-zinc-700/80 rounded py-2 shadow-inner">
                       {/* Pan Knob */}
@@ -4175,7 +4175,7 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <span className="text-[8px] text-zinc-400 font-mono mt-1 group-hover:text-amber-400 transition-colors">{(track.pan ?? 0).toFixed(2)}</span>
                       </div>
-                      
+
                       {/* Fader & Meters */}
                       <div className="flex-1 flex gap-2 h-24 relative">
                         {/* Left/Right Meters */}
@@ -4192,14 +4192,14 @@ export default function EditorClient({ project }: { project: any }) {
                            <div className="w-3 h-1 bg-zinc-600 rounded-full mt-4" />
                         </div>
                         {/* Fader Cap */}
-                        <div 
+                        <div
                           className="absolute right-[-24px] w-5 h-8 bg-zinc-700 border-y-4 border-zinc-900 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-zinc-600 transition-colors z-10 flex items-center justify-center"
                           style={{ bottom: `${(trackVol + 60) / 72 * 100}%`, transform: 'translateY(50%)' }}
                         >
                           <div className="w-full h-0.5 bg-amber-400/50" />
                         </div>
                       </div>
-                      
+
                       {/* Track Label */}
                       <div className="mt-3 w-full border-t border-zinc-700/80 pt-1 text-center">
                         <span className="text-[10px] font-bold text-zinc-300">{track.name}</span>
@@ -4229,7 +4229,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
                         <div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
                      </div>
-                     <div 
+                     <div
                        className="absolute right-[-30px] w-7 h-8 bg-zinc-200 border-y-4 border-zinc-400 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-white transition-colors z-10 flex items-center justify-center"
                        style={{ bottom: '80%', transform: 'translateY(50%)' }}
                      >
@@ -4263,14 +4263,14 @@ export default function EditorClient({ project }: { project: any }) {
       )}
 
       {/* Inspector Sidebar */}
-      <aside 
+      <aside
         className={`${inspectorPos.floating ? 'fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-zinc-700 bg-zinc-950/95 backdrop-blur overflow-hidden flex flex-col' : 'border-l border-zinc-700 bg-zinc-950 flex flex-col shrink-0'} transition-shadow`}
         style={inspectorPos.floating ? { left: inspectorPos.x, top: inspectorPos.y, width: 300, height: 600 } : { width: inspectorWidth }}
       >
           {/* Floating Header */}
           {inspectorPos.floating && (
 
-             <div 
+             <div
                className="h-8 bg-zinc-800 flex items-center justify-between px-3 cursor-move border-b border-zinc-700 select-none"
                onMouseDown={(e: React.MouseEvent) => {
                   const startX = e.clientX - inspectorPos.x;
@@ -4296,7 +4296,7 @@ export default function EditorClient({ project }: { project: any }) {
               </button>
             )}
           </div>
-          
+
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 flex flex-col gap-4">
             <LumetriScopes sourceCanvasRef={canvasRef} />
             <AudioMixer projectData={projectData} setProjectData={setProjectData} />
@@ -4308,8 +4308,8 @@ export default function EditorClient({ project }: { project: any }) {
                 <div>
 
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={selectedClip.name}
                     onChange={(e) => updateSelectedClip({ name: e.target.value })}
                     className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -4320,8 +4320,8 @@ export default function EditorClient({ project }: { project: any }) {
                   <div className="flex-1">
 
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Start Frame</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={selectedClip.start_frame}
                       onChange={(e) => updateSelectedClip({ start_frame: parseInt(e.target.value) || 0 })}
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -4331,8 +4331,8 @@ export default function EditorClient({ project }: { project: any }) {
                   <div className="flex-1">
 
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Duration</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={selectedClip.duration_frames}
                       onChange={(e) => updateSelectedClip({ duration_frames: parseInt(e.target.value) || 1 })}
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -4349,7 +4349,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex flex-col gap-3">
                       <div>
                         <span className="text-xs text-zinc-400 block mb-1">Content</span>
-                        <textarea 
+                        <textarea
                           value={selectedClip.text_content || ""}
                           onChange={(e) => updateSelectedClip({ text_content: e.target.value })}
                           className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500 h-20"
@@ -4387,33 +4387,33 @@ export default function EditorClient({ project }: { project: any }) {
                           {customFonts.map(f => <option key={f} value={f}>{f} (Custom)</option>)}
                         </select>
                       </div>
-                      
+
                       <label className="block w-full mt-2 text-center text-[10px] font-medium text-zinc-400 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded py-1.5 cursor-pointer transition-colors">
                         + Upload Custom Font (.ttf, .otf)
-                        <input 
-                          type="file" 
-                          className="hidden" 
-                          accept=".ttf,.otf,.woff,.woff2" 
-                          onChange={handleFontUpload} 
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".ttf,.otf,.woff,.woff2"
+                          onChange={handleFontUpload}
                         />
                       </label>
-                      
+
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-xs text-zinc-400 w-16">Font Size</span>
-                        <input 
-                          type="range" min="10" max="400" step="1" 
+                        <input
+                          type="range" min="10" max="400" step="1"
                           value={selectedClip.font_size ?? 100}
                           onChange={(e) => updateSelectedClip({ font_size: parseInt(e.target.value) })}
                           className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         />
                         <span className="text-xs text-zinc-300 w-10 text-right">{selectedClip.font_size ?? 100}</span>
                       </div>
-                      
+
                       <div className="flex gap-4">
                         <div className="flex flex-col gap-1 w-1/3">
                           <span className="text-[10px] text-zinc-400 text-center">Fill</span>
-                          <input 
-                            type="color" 
+                          <input
+                            type="color"
                             value={selectedClip.color ?? "#ffffff"}
                             onChange={(e) => updateSelectedClip({ color: e.target.value })}
                             className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
@@ -4421,8 +4421,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex flex-col gap-1 w-1/3">
                           <span className="text-[10px] text-zinc-400 text-center">Stroke</span>
-                          <input 
-                            type="color" 
+                          <input
+                            type="color"
                             value={selectedClip.text_stroke_color ?? "#000000"}
                             onChange={(e) => updateSelectedClip({ text_stroke_color: e.target.value })}
                             className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
@@ -4439,8 +4439,8 @@ export default function EditorClient({ project }: { project: any }) {
                             />
                           </div>
                           {selectedClip.bg_color && (
-                            <input 
-                              type="color" 
+                            <input
+                              type="color"
                               value={selectedClip.bg_color.slice(0, 7) || "#000000"}
                               onChange={(e) => updateSelectedClip({ bg_color: e.target.value + "80" })}
                               className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
@@ -4452,8 +4452,8 @@ export default function EditorClient({ project }: { project: any }) {
                       {selectedClip.bg_color && (
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs text-zinc-400 w-20">Bg Padding</span>
-                          <input 
-                            type="range" min="0" max="100" step="1" 
+                          <input
+                            type="range" min="0" max="100" step="1"
                             value={selectedClip.bg_padding ?? 20}
                             onChange={(e) => updateSelectedClip({ bg_padding: parseInt(e.target.value) })}
                             className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4463,8 +4463,8 @@ export default function EditorClient({ project }: { project: any }) {
                       )}
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-zinc-400 w-20">Stroke Size</span>
-                        <input 
-                          type="range" min="0" max="20" step="1" 
+                        <input
+                          type="range" min="0" max="20" step="1"
                           value={selectedClip.text_stroke_width ?? 0}
                           onChange={(e) => updateSelectedClip({ text_stroke_width: parseInt(e.target.value) })}
                           className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4474,8 +4474,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-zinc-400 w-20">Letter Spacing</span>
-                        <input 
-                          type="range" min="-10" max="50" step="1" 
+                        <input
+                          type="range" min="-10" max="50" step="1"
                           value={selectedClip.letter_spacing ?? 0}
                           onChange={(e) => updateSelectedClip({ letter_spacing: parseInt(e.target.value) })}
                           className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4498,8 +4498,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                       <div className="flex items-center justify-between mt-2">
                         <span className="text-xs text-zinc-400 w-20">Shadow Blur</span>
-                        <input 
-                          type="range" min="0" max="50" step="1" 
+                        <input
+                          type="range" min="0" max="50" step="1"
                           value={selectedClip.shadow_blur ?? 10}
                           onChange={(e) => updateSelectedClip({ shadow_blur: parseInt(e.target.value) })}
                           className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4509,8 +4509,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-zinc-400 w-20">Shadow Dist</span>
-                        <input 
-                          type="range" min="-50" max="50" step="1" 
+                        <input
+                          type="range" min="-50" max="50" step="1"
                           value={selectedClip.shadow_offset ?? 4}
                           onChange={(e) => updateSelectedClip({ shadow_offset: parseInt(e.target.value) })}
                           className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4520,11 +4520,11 @@ export default function EditorClient({ project }: { project: any }) {
 
                       <div className="pt-2 border-t border-zinc-700 mt-2">
                         <label className="text-xs font-bold text-zinc-400 block mb-3 text-indigo-400">3D Fusion Controls</label>
-                        
+
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-zinc-400 w-24">Extrusion Depth</span>
-                          <input 
-                            type="range" min="0" max="100" step="1" 
+                          <input
+                            type="range" min="0" max="100" step="1"
                             value={selectedClip.extrusion_depth ?? 0}
                             onChange={(e) => updateSelectedClip({ extrusion_depth: parseInt(e.target.value) })}
                             className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4533,8 +4533,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-zinc-400 w-24">Rotate X</span>
-                          <input 
-                            type="range" min="-180" max="180" step="1" 
+                          <input
+                            type="range" min="-180" max="180" step="1"
                             value={selectedClip.rotate_x ?? 0}
                             onChange={(e) => updateSelectedClip({ rotate_x: parseInt(e.target.value) })}
                             className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4543,8 +4543,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-zinc-400 w-24">Rotate Y</span>
-                          <input 
-                            type="range" min="-180" max="180" step="1" 
+                          <input
+                            type="range" min="-180" max="180" step="1"
                             value={selectedClip.rotate_y ?? 0}
                             onChange={(e) => updateSelectedClip({ rotate_y: parseInt(e.target.value) })}
                             className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4553,8 +4553,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-zinc-400 w-24">Rotate Z</span>
-                          <input 
-                            type="range" min="-180" max="180" step="1" 
+                          <input
+                            type="range" min="-180" max="180" step="1"
                             value={selectedClip.rotate_z ?? 0}
                             onChange={(e) => updateSelectedClip({ rotate_z: parseInt(e.target.value) })}
                             className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
@@ -4562,8 +4562,8 @@ export default function EditorClient({ project }: { project: any }) {
                           <span className="text-xs text-zinc-300 w-8 text-right">{selectedClip.rotate_z ?? 0}°</span>
                         </div>
                       </div>
-                      
-                      <button 
+
+                      <button
                         onClick={() => {
                           const newProject = JSON.parse(JSON.stringify(projectData));
                           const newAudioClip = {
@@ -4622,7 +4622,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </button>
                   </div>
                 )}
-                
+
                 {/* Playback Speed (Video & Audio) */}
                 {(selectedClip.type === 'video' || selectedClip.type === 'audio') && (
 
@@ -4633,7 +4633,7 @@ export default function EditorClient({ project }: { project: any }) {
                       {renderKeyframeBtn("playback_rate", selectedClip.playback_rate ?? 1.0)}
                       <span className="text-xs text-zinc-300 w-10 text-left">{(selectedClip.playback_rate ?? 1.0).toFixed(2)}x</span>
                     </div>
-                    <input 
+                    <input
                       type="range" min="0.1" max="4.0" step="0.1"
                       value={selectedClip.playback_rate ?? 1.0}
                       onChange={(e) => {
@@ -4644,7 +4644,7 @@ export default function EditorClient({ project }: { project: any }) {
                       onMouseUp={() => commitState(projectData)}
                       className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                     />
-                    
+
                     {/* Speed Ramp / Time Remap */}
                     <div className="mt-4 pt-3 border-t border-zinc-700/60">
 
@@ -4667,15 +4667,15 @@ export default function EditorClient({ project }: { project: any }) {
                             commitState(projectData);
                           }}
                           className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
-                            selectedClip.speed_ramp_enabled 
-                              ? 'text-indigo-400 border-indigo-500/50 bg-indigo-500/10' 
+                            selectedClip.speed_ramp_enabled
+                              ? 'text-indigo-400 border-indigo-500/50 bg-indigo-500/10'
                               : 'text-zinc-400 border-zinc-700 hover:text-zinc-300'
                           }`}
                         >
                           {selectedClip.speed_ramp_enabled ? 'Enabled' : 'Enable'}
                         </button>
                       </div>
-                      
+
                       {/* Speed Ramp Curve Visualization */}
                       <div className="bg-zinc-950 rounded-lg border border-zinc-700 p-2 mb-3">
                         <svg viewBox="0 0 200 60" className="w-full h-14" preserveAspectRatio="none">
@@ -4687,7 +4687,7 @@ export default function EditorClient({ project }: { project: any }) {
                           <text x="2" y="18" fill="rgba(255,255,255,0.15)" fontSize="6" fontFamily="monospace">2x</text>
                           <text x="2" y="33" fill="rgba(255,255,255,0.15)" fontSize="6" fontFamily="monospace">1x</text>
                           <text x="2" y="48" fill="rgba(255,255,255,0.15)" fontSize="6" fontFamily="monospace">0x</text>
-                          
+
                           {/* Ramp curve */}
                           {(() => {
                             const points = selectedClip.speed_ramp_points || [
@@ -4701,10 +4701,10 @@ export default function EditorClient({ project }: { project: any }) {
                               const y = toY(p.speed);
                               return `${i === 0 ? 'M' : 'L'}${x},${y}`;
                             }).join(' ');
-                            
+
                             // Fill area under curve
                             const fillPath = pathData + ` L200,55 L0,55 Z`;
-                            
+
                             return (
                               <>
                                 <path d={fillPath} fill="url(#speedGrad)" opacity="0.3" />
@@ -4712,13 +4712,13 @@ export default function EditorClient({ project }: { project: any }) {
                                 <path d={pathData} fill="none" stroke="#818cf8" strokeWidth="1.5" strokeLinejoin="round" />
 
                                 {points.map((p: any, i: number) => (
-                                  <circle 
+                                  <circle
                                     key={i}
-                                    cx={p.position * 200} 
-                                    cy={toY(p.speed)} 
-                                    r="3" 
-                                    fill="#818cf8" 
-                                    stroke="#1e1b4b" 
+                                    cx={p.position * 200}
+                                    cy={toY(p.speed)}
+                                    r="3"
+                                    fill="#818cf8"
+                                    stroke="#1e1b4b"
                                     strokeWidth="1"
                                     className="cursor-pointer hover:r-4"
                                   />
@@ -4732,7 +4732,7 @@ export default function EditorClient({ project }: { project: any }) {
                               </>
                             );
                           })()}
-                          
+
                           {/* Playhead position indicator */}
                           {(() => {
                             const clipStart = selectedClip.start_frame || 0;
@@ -4742,7 +4742,7 @@ export default function EditorClient({ project }: { project: any }) {
                           })()}
                         </svg>
                       </div>
-                      
+
                       {/* Speed Ramp Presets */}
                       <div className="grid grid-cols-2 gap-1.5">
                         {[
@@ -4763,7 +4763,7 @@ export default function EditorClient({ project }: { project: any }) {
                           </button>
                         ))}
                       </div>
-                      
+
                       <button
                         onClick={() => {
                           updateSelectedClip({ speed_ramp_points: [{position: 0, speed: 1.0}, {position: 1.0, speed: 1.0}], speed_ramp_enabled: false });
@@ -4776,14 +4776,14 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Retiming Process (for video clips) */}
                 {(selectedClip.type === "video") && (
 
                   <div className="pt-2 border-t border-zinc-700 mt-2">
 
                     <label className="text-xs font-medium text-zinc-400 block mb-3">Retiming & Scaling Process</label>
-                    
+
                     {/* Auto-Reframe (Phase 195) */}
                     <div className="flex items-center justify-between mb-3 bg-indigo-500/10 border border-indigo-500/20 p-2 rounded">
                       <span className="text-[10px] font-semibold text-indigo-300 flex items-center gap-1">📱 AI Auto-Reframe</span>
@@ -4802,7 +4802,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs text-zinc-400 w-24">Process</span>
-                      <select 
+                      <select
                         className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
                         value={selectedClip.retiming_process || 'nearest'}
                         onChange={(e) => {
@@ -4815,11 +4815,11 @@ export default function EditorClient({ project }: { project: any }) {
                         <option value="optical_flow">Optical Flow</option>
                       </select>
                     </div>
-                    
+
                     {selectedClip.retiming_process === 'optical_flow' && (
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-zinc-400 w-24">Motion Est.</span>
-                        <select 
+                        <select
                           className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
                           value={selectedClip.motion_estimation || 'standard'}
                           onChange={(e) => {
@@ -4835,7 +4835,7 @@ export default function EditorClient({ project }: { project: any }) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Audio Mix (for audio/video clips) */}
                 {(selectedClip.type === "audio" || selectedClip.type === "video") && (
 
@@ -4852,7 +4852,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <span className="text-[10px] text-zinc-400 font-mono tracking-widest">LUFS: -14.2</span>
                       </div>
                     </div>
-                    
+
                     {/* Generative Audio Extension (Phase 207) */}
                     <div className="flex items-center justify-between bg-amber-500/10 border border-amber-500/20 p-2 rounded mb-3">
                       <span className="text-[10px] font-semibold text-amber-300 flex items-center gap-1">🎵 AI Music Extender</span>
@@ -4862,15 +4862,15 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-zinc-400 w-16">Volume</span>
-                      <button 
+                      <button
                         onClick={() => toggleKeyframe("volume", selectedClip.volume ?? 1.0)}
                         className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "volume", frame }) ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
                         title="Toggle Volume Keyframe"
                       >
                         ♦
                       </button>
-                      <input 
-                        type="range" min="0" max="2" step="0.01" 
+                      <input
+                        type="range" min="0" max="2" step="0.01"
                         value={getKeyframedValue({ clip: selectedClip, property: "volume", defaultValue: selectedClip.volume ?? 1.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
@@ -4890,15 +4890,15 @@ export default function EditorClient({ project }: { project: any }) {
 
                     <div className="flex items-center justify-between mt-3">
                       <span className="text-xs text-zinc-400 w-16">Pan (L/R)</span>
-                      <button 
+                      <button
                         onClick={() => toggleKeyframe("pan", selectedClip.pan ?? 0.0)}
                         className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "pan", frame }) ? 'text-amber-500' : 'text-zinc-400 hover:text-zinc-400'}`}
                         title="Toggle Pan Keyframe"
                       >
                         ♦
                       </button>
-                      <input 
-                        type="range" min="-1" max="1" step="0.05" 
+                      <input
+                        type="range" min="-1" max="1" step="0.05"
                         value={getKeyframedValue({ clip: selectedClip, property: "pan", defaultValue: selectedClip.pan ?? 0.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
@@ -4918,7 +4918,7 @@ export default function EditorClient({ project }: { project: any }) {
 
                     {/* Essential Sound Auto-Ducking (Phase 14) */}
                     <div className="mt-4 pt-4 border-t border-zinc-800">
-                      <button 
+                      <button
                         onClick={() => {
                           toast.promise(
                             new Promise(resolve => setTimeout(resolve, 2000)),
@@ -4952,7 +4952,7 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Phase 22: AI Voice Cloning & Dubbing */}
                     <div className="mt-4 pt-4 border-t border-zinc-800">
                       <label className="text-xs font-medium text-zinc-400 block mb-3">AI Voice / Dubbing (ElevenLabs Parity)</label>
-                      <button 
+                      <button
                         onClick={() => {
                           toast.promise(
                             new Promise<void>(resolve => setTimeout(resolve, 3000)),
@@ -4967,8 +4967,8 @@ export default function EditorClient({ project }: { project: any }) {
                       >
                         🎙️ Clone Speaker Voice
                       </button>
-                      
-                      <button 
+
+                      <button
                         onClick={() => {
                           const txt = prompt("Enter text for TTS Dubbing using cloned voice:");
                           if (txt) {
@@ -4993,15 +4993,15 @@ export default function EditorClient({ project }: { project: any }) {
 
                     {/* Planar Tracker & 3D Tracker */}
                     <div className="mt-4 pt-4 border-t border-zinc-800">
-                      <button 
+                      <button
                         onClick={handlePlanarTrack}
                         className="w-full bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-medium py-2 rounded border border-indigo-500 transition-colors flex items-center justify-center gap-2"
                       >
                         🎯 Track Object (Planar)
                       </button>
-                      
+
                       {/* Phase 23: 3D Camera Tracker */}
-                      <button 
+                      <button
                         onClick={() => {
                           toast.promise(
                             new Promise<void>(resolve => setTimeout(resolve, 4000)),
@@ -5021,9 +5021,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <p className="text-[10px] text-zinc-500 mt-1.5 text-center leading-tight">
                         Extracts a 3D camera solve and point cloud from 2D footage for compositing.
                       </p>
-                      
+
                       {/* Auto-Reframe (Phase 18) */}
-                      <button 
+                      <button
                         onClick={handleAutoReframe}
                         className="w-full bg-fuchsia-600/80 hover:bg-fuchsia-500 text-white text-xs font-medium py-2 rounded border border-fuchsia-500 transition-colors flex items-center justify-center gap-2 mt-4"
                       >
@@ -5033,14 +5033,14 @@ export default function EditorClient({ project }: { project: any }) {
                         Uses AI to keep the subject in frame while converting to vertical video.
                       </p>
                     </div>
-                    
+
                     {/* Compositing (Mask & LUTs) */}
                     <div className="mt-4 pt-4 border-t border-zinc-800">
                       <label className="text-xs font-medium text-zinc-400 block mb-3">Compositing</label>
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-xs text-zinc-300">Polygon Mask</span>
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             className={`p-1 hover:bg-zinc-700 rounded transition-colors ${selectedClip.mask ? 'text-indigo-400' : 'text-zinc-500'}`}
                             onClick={() => updateSelectedClip({ mask: !selectedClip.mask })}
                             title="Toggle Mask"
@@ -5051,7 +5051,7 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-zinc-300">3D LUT</span>
-                        <select 
+                        <select
                           className="bg-zinc-900 border border-zinc-700 rounded text-[10px] text-zinc-300 px-2 py-1 outline-none"
                           value={selectedClip.lut || 'none'}
                           onChange={(e) => updateSelectedClip({ lut: e.target.value })}
@@ -5071,8 +5071,8 @@ export default function EditorClient({ project }: { project: any }) {
                         <label className="text-xs font-medium text-zinc-400 block">Voice Isolation (AI)</label>
 
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={selectedClip.voiceIsolation ?? false}
                             onChange={(e) => updateSelectedClip({ voiceIsolation: e.target.checked })}
                             className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
@@ -5081,8 +5081,8 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-zinc-400 w-16">Amount</span>
-                        <input 
-                          type="range" min="0" max="100" step="1" 
+                        <input
+                          type="range" min="0" max="100" step="1"
                           value={selectedClip.voiceIsolationAmount ?? 100}
                           onChange={(e) => updateSelectedClip({ voiceIsolationAmount: parseInt(e.target.value) }, false)}
                           disabled={!selectedClip.voiceIsolation}
@@ -5095,8 +5095,8 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Auto-Ducking */}
                     <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-zinc-700/50">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedClip.audio_fx?.autoDuck ?? false}
                           onChange={(e) => {
                              updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), autoDuck: e.target.checked } });
@@ -5106,13 +5106,13 @@ export default function EditorClient({ project }: { project: any }) {
                         />
                         <span className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase">Auto-Duck against Voiceover</span>
                       </label>
-                      
+
                       {selectedClip.audio_fx?.autoDuck && (
                         <>
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] text-zinc-400 w-16">Sensitivity</span>
-                            <input 
-                              type="range" min="0" max="1" step="0.05" 
+                            <input
+                              type="range" min="0" max="1" step="0.05"
                               value={selectedClip.audio_fx?.duckSensitivity ?? 0.5}
                               onChange={(e) => {
                                 updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), duckSensitivity: parseFloat(e.target.value) } }, false);
@@ -5124,8 +5124,8 @@ export default function EditorClient({ project }: { project: any }) {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] text-zinc-400 w-16">Duck Amount</span>
-                            <input 
-                              type="range" min="-40" max="0" step="1" 
+                            <input
+                              type="range" min="-40" max="0" step="1"
                               value={selectedClip.audio_fx?.duckAmount ?? -18}
                               onChange={(e) => {
                                 updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), duckAmount: parseFloat(e.target.value) } }, false);
@@ -5155,7 +5155,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Audio Track Routing (Phase 186) */}
                 {selectedClip.type === "audio" && (
 
@@ -5225,7 +5225,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <label className="text-[10px] font-bold text-indigo-400 block mb-2 uppercase tracking-wider">Voice FX & Pitch</label>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] text-zinc-400">Preset</span>
-                      <select 
+                      <select
                         className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-[10px] rounded px-1.5 py-1 outline-none focus:border-indigo-500"
                         value={selectedClip.audio_fx?.voicePreset || 'none'}
                         onChange={(e) => {
@@ -5248,8 +5248,8 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-zinc-400 w-16">Pitch Offset</span>
-                      <input 
-                        type="range" min="-24" max="24" step="1" 
+                      <input
+                        type="range" min="-24" max="24" step="1"
                         value={selectedClip.audio_fx?.pitch ?? 0}
                         onChange={(e) => {
                           updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), pitch: parseInt(e.target.value), voicePreset: 'custom' } }, false);
@@ -5269,8 +5269,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <label className="text-[10px] font-bold text-indigo-400 block uppercase tracking-wider mb-1">Audio Clean-up</label>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-zinc-400 w-16 text-left leading-tight">Noise<br/>Reduction</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.05" 
+                        <input
+                          type="range" min="0" max="1" step="0.05"
                           value={selectedClip.audio_fx?.noiseReduction ?? 0}
                           onChange={(e) => {
                             updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), noiseReduction: parseFloat(e.target.value) } }, false);
@@ -5282,8 +5282,8 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-zinc-400 w-16">De-Reverb</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.05" 
+                        <input
+                          type="range" min="0" max="1" step="0.05"
                           value={selectedClip.audio_fx?.deReverb ?? 0}
                           onChange={(e) => {
                             updateSelectedClip({ audio_fx: { ...(selectedClip.audio_fx || {}), deReverb: parseFloat(e.target.value) } }, false);
@@ -5303,8 +5303,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Color Overlay (WASM)</label>
                   <div className="flex items-center gap-2 mb-3">
-                    <input 
-                      type="color" 
+                    <input
+                      type="color"
                       value={rgbaToHex(selectedClip.layer?.color)}
                       onChange={(e) => updateSelectedClip({ layer: { type: "solid", color: hexToRgba(e.target.value) } })}
                       className="w-8 h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
@@ -5312,10 +5312,10 @@ export default function EditorClient({ project }: { project: any }) {
                     <span className="text-xs text-zinc-400 uppercase">{rgbaToHex(selectedClip.layer?.color)}</span>
 
                   </div>
-                  
+
 
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Blend Mode</label>
-                  <select 
+                  <select
                     value={selectedClip.blend_mode || "normal"}
                     onChange={(e) => updateSelectedClip({ blend_mode: e.target.value })}
                     className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500 cursor-pointer"
@@ -5346,8 +5346,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-zinc-400 w-16 leading-tight text-left">This<br/>Layer</span>
-                        <input 
-                          type="range" min="0" max="255" step="1" 
+                        <input
+                          type="range" min="0" max="255" step="1"
                           value={selectedClip.blendIf?.thisLayer ?? 255}
                           onChange={(e) => updateSelectedClip({ blendIf: { ...(selectedClip.blendIf || {}), thisLayer: parseInt(e.target.value) } }, false)}
                           onMouseUp={commitCurrentState}
@@ -5357,8 +5357,8 @@ export default function EditorClient({ project }: { project: any }) {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] text-zinc-400 w-16 leading-tight text-left">Underlying<br/>Layer</span>
-                        <input 
-                          type="range" min="0" max="255" step="1" 
+                        <input
+                          type="range" min="0" max="255" step="1"
                           value={selectedClip.blendIf?.underlyingLayer ?? 0}
                           onChange={(e) => updateSelectedClip({ blendIf: { ...(selectedClip.blendIf || {}), underlyingLayer: parseInt(e.target.value) } }, false)}
                           onMouseUp={commitCurrentState}
@@ -5369,7 +5369,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Color Grading (3-Way Wheels) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-4 border-t border-zinc-700 mt-4 mb-4">
@@ -5410,8 +5410,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                             <span className="text-[10px] text-zinc-400 uppercase font-medium">{wheel.label}</span>
 
-                            <div 
-                              className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-zinc-700 hover:border-zinc-500 transition-colors" 
+                            <div
+                              className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-zinc-700 hover:border-zinc-500 transition-colors"
                               style={{ background: 'radial-gradient(circle at center, #71717a, transparent), conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}
                               onMouseDown={(e: React.MouseEvent) => {
                                 const rect = e.currentTarget.getBoundingClientRect();
@@ -5437,18 +5437,18 @@ export default function EditorClient({ project }: { project: any }) {
                                 window.addEventListener('mouseup', upHandler);
                               }}
                             >
-                              <div className="absolute w-2.5 h-2.5 bg-zinc-900 border-2 border-white rounded-full shadow-md pointer-events-none" style={{ 
+                              <div className="absolute w-2.5 h-2.5 bg-zinc-900 border-2 border-white rounded-full shadow-md pointer-events-none" style={{
                                  left: `${50 + (val.s * Math.cos(val.h * Math.PI / 180)) * 50}%`,
                                  top: `${50 + (val.s * Math.sin(val.h * Math.PI / 180)) * 50}%`,
                                  transform: 'translate(-50%, -50%)'
                               }} />
                             </div>
-                            <input 
-                              type="range" min="-1" max="1" step="0.01" 
-                              value={val.v} 
+                            <input
+                              type="range" min="-1" max="1" step="0.01"
+                              value={val.v}
                               onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), [wheel.id]: { ...val, v: parseFloat(e.target.value) } } }, false)}
                               onMouseUp={commitCurrentState}
-                              className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mt-1" 
+                              className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mt-1"
                             />
                             <span className="text-[10px] text-zinc-400 font-mono">{val.v > 0 ? '+' : ''}{val.v.toFixed(2)}</span>
                           </div>
@@ -5475,7 +5475,7 @@ export default function EditorClient({ project }: { project: any }) {
                           <path d="M 0 100 Q 50 50 100 0" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
                           {/* Simulated Custom Curve */}
                           <path d={`M 0 100 C 30 ${100 - (selectedClip.filters?.curveShadows ?? 25)}, 70 ${100 - (selectedClip.filters?.curveHighlights ?? 75)}, 100 0`} fill="none" stroke="#e4e4e7" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-                          
+
                           {/* Control Points */}
                           <circle cx="30%" cy={`${100 - (selectedClip.filters?.curveShadows ?? 25)}%`} r="4" fill="#a1a1aa" className="pointer-events-auto cursor-ns-resize hover:fill-amber-400 hover:r-5 transition-all" />
                           <circle cx="70%" cy={`${100 - (selectedClip.filters?.curveHighlights ?? 75)}%`} r="4" fill="#a1a1aa" className="pointer-events-auto cursor-ns-resize hover:fill-amber-400 hover:r-5 transition-all" />
@@ -5484,27 +5484,27 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex gap-4">
                         <div className="flex-1 group">
                           <span className="text-[10px] text-zinc-400 block mb-1 font-semibold group-hover:text-zinc-300 transition-colors">Shadows Point</span>
-                          <input 
-                            type="range" min="0" max="100" 
-                            value={selectedClip.filters?.curveShadows ?? 25} 
-                            onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), curveShadows: parseInt(e.target.value) } }, false)} 
-                            onMouseUp={commitCurrentState} 
-                            className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer" 
+                          <input
+                            type="range" min="0" max="100"
+                            value={selectedClip.filters?.curveShadows ?? 25}
+                            onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), curveShadows: parseInt(e.target.value) } }, false)}
+                            onMouseUp={commitCurrentState}
+                            className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer"
                           />
                         </div>
                         <div className="flex-1 group">
                           <span className="text-[10px] text-zinc-400 block mb-1 font-semibold group-hover:text-zinc-300 transition-colors">Highlights Point</span>
-                          <input 
-                            type="range" min="0" max="100" 
-                            value={selectedClip.filters?.curveHighlights ?? 75} 
-                            onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), curveHighlights: parseInt(e.target.value) } }, false)} 
-                            onMouseUp={commitCurrentState} 
-                            className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer" 
+                          <input
+                            type="range" min="0" max="100"
+                            value={selectedClip.filters?.curveHighlights ?? 75}
+                            onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), curveHighlights: parseInt(e.target.value) } }, false)}
+                            onMouseUp={commitCurrentState}
+                            className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer"
                           />
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* 3D LUT Support */}
 
                     <div className="mt-5 pt-4 border-t border-zinc-700">
@@ -5531,7 +5531,7 @@ export default function EditorClient({ project }: { project: any }) {
                              <option value="slog3_to_rec709">Sony S-Log3 to Rec.709</option>
                            </optgroup>
                          </select>
-                         <button 
+                         <button
                            className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1.5 rounded text-xs transition-colors border border-zinc-700"
                            title="Import Custom LUT (.cube)"
                          >
@@ -5550,9 +5550,9 @@ export default function EditorClient({ project }: { project: any }) {
                           </label>
 
                           <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              className="sr-only" 
+                            <input
+                              type="checkbox"
+                              className="sr-only"
                               checked={selectedClip.filters?.faceRefinement || false}
                               onChange={(e) => updateSelectedClip({ filters: { ...(selectedClip.filters || {}), faceRefinement: e.target.checked } })}
                             />
@@ -5580,8 +5580,8 @@ export default function EditorClient({ project }: { project: any }) {
                       {selectedClip.filters?.lut && selectedClip.filters.lut !== 'none' && (
                         <div className="flex items-center justify-between mt-3">
                           <span className="text-[10px] text-zinc-400 w-16">Intensity</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.filters?.lutIntensity ?? 1.0}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
@@ -5596,7 +5596,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Retiming & Speed Ramp (for video clips) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
@@ -5604,7 +5604,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between mb-3">
 
                       <label className="text-xs font-medium text-zinc-400 block">Retiming & Speed</label>
-                      <button 
+                      <button
                         className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded border border-zinc-700 transition-colors"
                         onClick={() => handleSpeedRamp()}
                       >
@@ -5614,8 +5614,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("grayscale", selectedClip.filters?.grayscale ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "grayscale", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Grayscale</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.01" 
+                        <input
+                          type="range" min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "grayscale", defaultValue: selectedClip.filters?.grayscale ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5630,8 +5630,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("sepia", selectedClip.filters?.sepia ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "sepia", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Sepia</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.01" 
+                        <input
+                          type="range" min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "sepia", defaultValue: selectedClip.filters?.sepia ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5646,8 +5646,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("invert", selectedClip.filters?.invert ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "invert", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Invert</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.01" 
+                        <input
+                          type="range" min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "invert", defaultValue: selectedClip.filters?.invert ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5662,8 +5662,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("hue_rotate", selectedClip.filters?.hue_rotate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "hue_rotate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Hue Rotate</span>
-                        <input 
-                          type="range" min="0" max="6.283" step="0.01" 
+                        <input
+                          type="range" min="0" max="6.283" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "hue_rotate", defaultValue: selectedClip.filters?.hue_rotate ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5677,7 +5677,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Image Effects */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
 
@@ -5689,8 +5689,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("pixelate", selectedClip.filters?.pixelate ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "pixelate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Pixelate</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.01" 
+                        <input
+                          type="range" min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "pixelate", defaultValue: selectedClip.filters?.pixelate ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5701,13 +5701,13 @@ export default function EditorClient({ project }: { project: any }) {
                         />
                         <span className="text-xs text-zinc-300 w-10 text-right">{getKeyframedValue({ clip: selectedClip, property: "pixelate", defaultValue: selectedClip.filters?.pixelate ?? 0.0, frame }).toFixed(2)}</span>
                       </div>
-                      
+
                       {/* Edge Detect */}
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe("edge_detect", selectedClip.filters?.edge_detect ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "edge_detect", frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-14">Edge Detect</span>
-                        <input 
-                          type="range" min="0" max="1" step="0.01" 
+                        <input
+                          type="range" min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: "edge_detect", defaultValue: selectedClip.filters?.edge_detect ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -5725,7 +5725,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Warp Stabilizer</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400">Method</span>
-                          <select 
+                          <select
                             className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-[10px] rounded px-1.5 py-1 outline-none"
                             value={selectedClip.filters?.stabilizationMethod || 'subspace'}
                             onChange={(e) => {
@@ -5740,8 +5740,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-zinc-400 w-16">Smoothness</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.filters?.stabilizationSmoothness ?? 0.5}
                             onChange={(e) => {
                               updateSelectedClip({ filters: { ...(selectedClip.filters || {}), stabilizationSmoothness: parseFloat(e.target.value) } }, false);
@@ -5760,8 +5760,8 @@ export default function EditorClient({ project }: { project: any }) {
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Lens / Optics</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400 w-16">Distortion</span>
-                          <input 
-                            type="range" min="-1" max="1" step="0.05" 
+                          <input
+                            type="range" min="-1" max="1" step="0.05"
                             value={selectedClip.filters?.lensDistortion ?? 0}
                             onChange={(e) => {
                               updateSelectedClip({ filters: { ...(selectedClip.filters || {}), lensDistortion: parseFloat(e.target.value) } }, false);
@@ -5773,8 +5773,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-zinc-400 w-16 text-left leading-tight">Chromatic<br/>Aberration</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.filters?.chromaticAberration ?? 0}
                             onChange={(e) => {
                               updateSelectedClip({ filters: { ...(selectedClip.filters || {}), chromaticAberration: parseFloat(e.target.value) } }, false);
@@ -5793,8 +5793,8 @@ export default function EditorClient({ project }: { project: any }) {
                         <label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">Glow / Bloom</label>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-[10px] text-zinc-400 w-16">Intensity</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.filters?.glowIntensity ?? 0}
                             onChange={(e) => {
                               updateSelectedClip({ filters: { ...(selectedClip.filters || {}), glowIntensity: parseFloat(e.target.value) } }, false);
@@ -5806,8 +5806,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-zinc-400 w-16">Radius</span>
-                          <input 
-                            type="range" min="0" max="100" step="1" 
+                          <input
+                            type="range" min="0" max="100" step="1"
                             value={selectedClip.filters?.glowRadius ?? 20}
                             onChange={(e) => {
                               updateSelectedClip({ filters: { ...(selectedClip.filters || {}), glowRadius: parseFloat(e.target.value) } }, false);
@@ -5833,9 +5833,9 @@ export default function EditorClient({ project }: { project: any }) {
                         <div key={edge} className="flex items-center justify-between">
                           <button onClick={() => toggleKeyframe(`crop_${edge}`, selectedClip.crop?.[edge] ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `crop_${edge}`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                           <span className="text-[10px] text-zinc-400 w-8 capitalize">{edge}</span>
-                          <input 
-                            type="range" 
-                            min="0" max="1" step="0.01" 
+                          <input
+                            type="range"
+                            min="0" max="1" step="0.01"
                             value={getKeyframedValue({ clip: selectedClip, property: `crop_${edge}`, defaultValue: selectedClip.crop?.[edge] ?? 0.0, frame })}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
@@ -5857,8 +5857,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <label className="text-xs font-medium text-zinc-400 mb-2 block flex items-center justify-between">
                       Power Window / Mask
                       <label className="flex items-center gap-1 cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedClip.mask?.enabled ?? false}
                           onChange={(e) => {
                              updateSelectedClip({ mask: { ...(selectedClip.mask || {shape: 'rectangle', feather: 0.1, invert: false, opacity: 1.0}), enabled: e.target.checked } });
@@ -5869,7 +5869,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <span className="text-[10px] text-zinc-400">Enable</span>
                       </label>
                     </label>
-                    
+
                     {selectedClip.mask?.enabled && (
                       <div className="flex flex-col gap-3 mt-3">
                         {/* AI Mask Tracking (Phase 170) */}
@@ -5880,7 +5880,7 @@ export default function EditorClient({ project }: { project: any }) {
                             <button className="bg-zinc-800 hover:bg-indigo-600 text-white text-[10px] px-2 py-1 rounded transition-colors" onClick={handleTrackMaskForward} title="Track Forward">Track ▶</button>
                           </div>
                         </div>
-                        
+
                         {/* 3D Camera Tracker (Phase 202) */}
                         <div className="flex items-center justify-between bg-sky-500/10 border border-sky-500/20 p-2 rounded">
                           <span className="text-[10px] font-semibold text-sky-300 flex items-center gap-1">🎥 3D Point Cloud Tracker</span>
@@ -5888,7 +5888,7 @@ export default function EditorClient({ project }: { project: any }) {
                             Extract 3D
                           </button>
                         </div>
-                        
+
                         {/* Real-time NeRF Generation (Phase 212) */}
                         <div className="flex items-center justify-between bg-teal-500/10 border border-teal-500/20 p-2 rounded">
                           <span className="text-[10px] font-semibold text-teal-300 flex items-center gap-1">🌌 Neural Radiance Field</span>
@@ -5896,7 +5896,7 @@ export default function EditorClient({ project }: { project: any }) {
                             Convert to NeRF
                           </button>
                         </div>
-                        
+
                         <div className="flex gap-1 bg-zinc-950 p-1 rounded border border-zinc-700">
                           {[
                             { id: 'rectangle', icon: 'M4 4h16v16H4z' },
@@ -5919,8 +5919,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-zinc-400 w-16">Feather</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.mask?.feather ?? 0.1}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
@@ -5934,8 +5934,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-zinc-400 w-16">Opacity</span>
-                          <input 
-                            type="range" min="0" max="1" step="0.05" 
+                          <input
+                            type="range" min="0" max="1" step="0.05"
                             value={selectedClip.mask?.opacity ?? 1.0}
                             onChange={(e) => {
                               const val = parseFloat(e.target.value);
@@ -5948,8 +5948,8 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
 
                         <label className="flex items-center gap-2 cursor-pointer mt-1">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             checked={selectedClip.mask?.invert ?? false}
                             onChange={(e) => {
                                updateSelectedClip({ mask: { ...selectedClip.mask, invert: e.target.checked } });
@@ -5963,7 +5963,7 @@ export default function EditorClient({ project }: { project: any }) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Magic Eraser (AI Object Removal) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && selectedClip.magicEraseMask && selectedClip.magicEraseMask.length > 0 && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
@@ -5971,7 +5971,7 @@ export default function EditorClient({ project }: { project: any }) {
                       🪄 AI Magic Eraser
                     </label>
                     <p className="text-[10px] text-zinc-400 mb-2">Mask contains {selectedClip.magicEraseMask.length} brush strokes.</p>
-                    <button 
+                    <button
                       className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 rounded transition-colors shadow-lg flex items-center justify-center gap-2"
                       onClick={() => {
                         toast.promise(
@@ -5990,7 +5990,7 @@ export default function EditorClient({ project }: { project: any }) {
                       ✨ Process Object Removal
                     </button>
                     {selectedClip.magicEraseApplied && (
-                       <button 
+                       <button
                          className="w-full mt-2 bg-red-900/50 hover:bg-red-900/80 text-red-200 text-[10px] py-1 rounded transition-colors"
                          onClick={() => {
                            updateSelectedClip({ magicEraseMask: null, magicEraseApplied: false });
@@ -6002,15 +6002,15 @@ export default function EditorClient({ project }: { project: any }) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Chroma Key / Ultra Key */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
                     <label className="text-xs font-medium text-zinc-400 mb-2 flex items-center justify-between">
                       Chroma Key (Ultra Key)
                       <label className="flex items-center gap-1 cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedClip.chromaKey?.enabled ?? false}
                           onChange={(e) => {
                              updateSelectedClip({ chromaKey: { ...(selectedClip.chromaKey || {color: '#00ff00', similarity: 0.4, smoothness: 0.1}), enabled: e.target.checked } });
@@ -6021,7 +6021,7 @@ export default function EditorClient({ project }: { project: any }) {
                         <span className="text-[10px] text-zinc-400">Enable</span>
                       </label>
                     </label>
-                    
+
                     {selectedClip.chromaKey?.enabled && (
                       <div className="flex flex-col gap-3 mt-3">
                         <div className="flex items-center justify-between">
@@ -6042,7 +6042,7 @@ export default function EditorClient({ project }: { project: any }) {
                     )}
                   </div>
                 )}
-                
+
                 {/* Border Radius */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
 
@@ -6053,9 +6053,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe(`border_radius`, selectedClip.border_radius ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `border_radius`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Radius</span>
-                        <input 
-                          type="range" 
-                          min="0" max="1" step="0.01" 
+                        <input
+                          type="range"
+                          min="0" max="1" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: `border_radius`, defaultValue: selectedClip.border_radius ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -6069,7 +6069,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Drop Shadow */}
                 {(selectedClip.type === "video" || selectedClip.type === "image" || selectedClip.type === "text") && (
 
@@ -6079,8 +6079,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] text-zinc-400 w-12">Color</span>
-                        <input 
-                          type="color" 
+                        <input
+                          type="color"
 
                           value={selectedClip.shadow?.color?.startsWith("#") ? selectedClip.shadow.color.substring(0, 7) : (selectedClip.shadow?.color?.startsWith("rgba") ? "#" + selectedClip.shadow.color.match(/\d+/g)?.slice(0,3).map((x: any) => parseInt(x).toString(16).padStart(2, '0')).join('') : "#000000")}
                           onChange={(e) => {
@@ -6096,9 +6096,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe(`shadow_distance`, selectedClip.shadow?.distance ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_distance`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Distance</span>
-                        <input 
-                          type="range" 
-                          min="0" max="0.5" step="0.01" 
+                        <input
+                          type="range"
+                          min="0" max="0.5" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: `shadow_distance`, defaultValue: selectedClip.shadow?.distance ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -6112,9 +6112,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe(`shadow_angle`, selectedClip.shadow?.angle ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_angle`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Angle</span>
-                        <input 
-                          type="range" 
-                          min="-3.14" max="3.14" step="0.01" 
+                        <input
+                          type="range"
+                          min="-3.14" max="3.14" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: `shadow_angle`, defaultValue: selectedClip.shadow?.angle ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -6128,9 +6128,9 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex items-center justify-between">
                         <button onClick={() => toggleKeyframe(`shadow_blur`, selectedClip.shadow?.blur ?? 0.0)} className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_blur`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}>♦</button>
                         <span className="text-[10px] text-zinc-400 w-12">Blur</span>
-                        <input 
-                          type="range" 
-                          min="0" max="0.5" step="0.01" 
+                        <input
+                          type="range"
+                          min="0" max="0.5" step="0.01"
                           value={getKeyframedValue({ clip: selectedClip, property: `shadow_blur`, defaultValue: selectedClip.shadow?.blur ?? 0.0, frame })}
                           onChange={(e) => {
                             const val = parseFloat(e.target.value);
@@ -6144,7 +6144,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Effects (GPU Shaders) */}
                 {(selectedClip.type === "video" || selectedClip.type === "image") && (
                   <div className="pt-2 border-t border-zinc-700 mt-2">
@@ -6152,7 +6152,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between mb-3">
 
                       <label className="text-xs font-medium text-zinc-400">Effects (GPU Shaders)</label>
-                      <button 
+                      <button
                         onClick={() => {
 
                           const hasChroma = selectedClip.effects?.some((e: any) => e.type === "chroma_key");
@@ -6175,7 +6175,7 @@ export default function EditorClient({ project }: { project: any }) {
                             <div key={effect.id} className="bg-zinc-900 border border-zinc-700 rounded p-2 flex flex-col gap-2">
                               <div className="flex items-center justify-between border-b border-zinc-700 pb-1 mb-1">
                                 <span className="text-xs text-indigo-400 font-medium">Chroma Key</span>
-                                <button 
+                                <button
                                   onClick={() => {
 
                                     const newEffects = selectedClip.effects!.filter((e: any) => e.id !== effect.id);
@@ -6189,8 +6189,8 @@ export default function EditorClient({ project }: { project: any }) {
                               {/* Target Color */}
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] text-zinc-400 w-16">Target Color</span>
-                                <input 
-                                  type="color" 
+                                <input
+                                  type="color"
                                   value={effect.color ? rgbaToHex(effect.color) : "#00ff00"}
                                   onChange={(e) => {
                                     const c = hexToRgba(e.target.value);
@@ -6204,8 +6204,8 @@ export default function EditorClient({ project }: { project: any }) {
                               {/* Similarity */}
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] text-zinc-400 w-16">Similarity</span>
-                                <input 
-                                  type="range" min="0" max="1" step="0.01" 
+                                <input
+                                  type="range" min="0" max="1" step="0.01"
                                   value={effect.properties.similarity ?? 0.4}
                                   onChange={(e) => {
                                     const val = parseFloat(e.target.value);
@@ -6221,8 +6221,8 @@ export default function EditorClient({ project }: { project: any }) {
                               {/* Smoothness */}
                               <div className="flex items-center justify-between">
                                 <span className="text-[10px] text-zinc-400 w-16">Smoothness</span>
-                                <input 
-                                  type="range" min="0" max="1" step="0.01" 
+                                <input
+                                  type="range" min="0" max="1" step="0.01"
                                   value={effect.properties.smoothness ?? 0.1}
                                   onChange={(e) => {
                                     const val = parseFloat(e.target.value);
@@ -6243,7 +6243,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Transitions */}
 
                 <div className="pt-2 border-t border-zinc-700 mt-2">
@@ -6253,8 +6253,8 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Fade In */}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-zinc-400 w-16">Fade In (f)</span>
-                      <input 
-                        type="range" min="0" max="120" step="1" 
+                      <input
+                        type="range" min="0" max="120" step="1"
                         value={selectedClip.transitions?.in?.duration_frames || 0}
                         onChange={(e) => {
                           const val = parseInt(e.target.value);
@@ -6268,8 +6268,8 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Fade Out */}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-zinc-400 w-16">Fade Out (f)</span>
-                      <input 
-                        type="range" min="0" max="120" step="1" 
+                      <input
+                        type="range" min="0" max="120" step="1"
                         value={selectedClip.transitions?.out?.duration_frames || 0}
                         onChange={(e) => {
                           const val = parseInt(e.target.value);
@@ -6296,7 +6296,7 @@ export default function EditorClient({ project }: { project: any }) {
                       {(selectedClip.notes || []).length}
                     </span>
                   </div>
-                  
+
                   {/* Add note form */}
                   <div className="flex flex-col gap-2 mb-3">
                     <textarea
@@ -6343,8 +6343,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto custom-scrollbar">
 
                       {(selectedClip.notes || []).slice().reverse().map((note: any) => (
-                        <div 
-                          key={note.id} 
+                        <div
+                          key={note.id}
                           className={`rounded border p-2 transition-colors group/note ${
                             note.type === 'bug' ? 'bg-red-950/30 border-red-900/40' :
                             note.type === 'todo' ? 'bg-amber-950/30 border-amber-900/40' :
@@ -6366,7 +6366,7 @@ export default function EditorClient({ project }: { project: any }) {
                             </button>
                           </div>
                           <div className="flex items-center gap-2 mt-1.5">
-                            <button 
+                            <button
                               onClick={() => setFrame(note.frame)}
                               className="text-[8px] text-indigo-400 hover:text-indigo-300 font-mono bg-indigo-500/10 px-1 py-0.5 rounded transition-colors"
                             >
@@ -6393,8 +6393,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between">
                       {renderKeyframeBtn("transform.x", selectedClip.transform?.x ?? 0)}
                       <span className="text-[10px] text-zinc-400 w-14">Pos X</span>
-                      <input 
-                        type="range" min="-1920" max="1920" step="1" 
+                      <input
+                        type="range" min="-1920" max="1920" step="1"
                         value={getKeyframedValue({ clip: selectedClip, property: "transform.x", defaultValue: selectedClip.transform?.x ?? 0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
@@ -6410,8 +6410,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between">
                       {renderKeyframeBtn("transform.y", selectedClip.transform?.y ?? 0)}
                       <span className="text-[10px] text-zinc-400 w-14">Pos Y</span>
-                      <input 
-                        type="range" min="-1080" max="1080" step="1" 
+                      <input
+                        type="range" min="-1080" max="1080" step="1"
                         value={getKeyframedValue({ clip: selectedClip, property: "transform.y", defaultValue: selectedClip.transform?.y ?? 0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
@@ -6427,8 +6427,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between">
                       {renderKeyframeBtn("transform.scale", selectedClip.transform?.scale ?? 1.0)}
                       <span className="text-[10px] text-zinc-400 w-14">Scale</span>
-                      <input 
-                        type="range" min="0" max="3" step="0.01" 
+                      <input
+                        type="range" min="0" max="3" step="0.01"
                         value={getKeyframedValue({ clip: selectedClip, property: "transform.scale", defaultValue: selectedClip.transform?.scale ?? 1.0, frame })}
                         onChange={(e) => {
                           const val = parseFloat(e.target.value);
@@ -6444,8 +6444,8 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="flex items-center justify-between">
                       {renderKeyframeBtn("rotation", selectedClip.transform?.rotation ?? 0)}
                       <span className="text-[10px] text-zinc-400 w-14">Rotation</span>
-                      <input 
-                        type="range" min="-360" max="360" step="1" 
+                      <input
+                        type="range" min="-360" max="360" step="1"
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         value={getKeyframedValue({ clip: selectedClip, property: "rotation", defaultValue: selectedClip.transform?.rotation ?? 0, frame })}
                         onChange={(e) => {
@@ -6457,8 +6457,8 @@ export default function EditorClient({ project }: { project: any }) {
                       />
                       {renderKeyframeBtn("opacity", selectedClip.transform?.opacity ?? 1.0)}
                       <span className="text-[10px] text-zinc-400 w-14">Opacity</span>
-                      <input 
-                        type="range" min="0" max="1" step="0.01" 
+                      <input
+                        type="range" min="0" max="1" step="0.01"
                         className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                         value={getKeyframedValue({ clip: selectedClip, property: "opacity", defaultValue: selectedClip.transform?.opacity ?? 1.0, frame })}
                         onChange={(e) => {
@@ -6475,7 +6475,7 @@ export default function EditorClient({ project }: { project: any }) {
                       <span className="text-[10px] text-zinc-400 w-14">Easing</span>
                       <div className="flex gap-1 flex-1 bg-zinc-950 p-1 rounded border border-zinc-700">
                         {['Linear', 'Ease In', 'Ease Out', 'Bezier'].map(ease => (
-                          <button 
+                          <button
                             key={ease}
                             className="flex-1 text-[10px] py-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
                           >
@@ -6488,8 +6488,8 @@ export default function EditorClient({ project }: { project: any }) {
                     {/* Motion Blur */}
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-700/50">
                       <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
+                        <input
+                          type="checkbox"
                           checked={selectedClip.transform?.motionBlur ?? false}
                           onChange={(e) => {
                              updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, scale:1, rotation:0, opacity:1}), motionBlur: e.target.checked } });
@@ -6501,8 +6501,8 @@ export default function EditorClient({ project }: { project: any }) {
                       </label>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-zinc-400">Angle</span>
-                        <input 
-                          type="range" min="0" max="360" step="1" 
+                        <input
+                          type="range" min="0" max="360" step="1"
                           value={selectedClip.transform?.shutterAngle ?? 180}
                           onChange={(e) => {
                             updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, scale:1, rotation:0, opacity:1}), shutterAngle: parseInt(e.target.value) } }, false);
@@ -6527,9 +6527,9 @@ export default function EditorClient({ project }: { project: any }) {
                         </label>
 
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="sr-only" 
+                          <input
+                            type="checkbox"
+                            className="sr-only"
                             checked={selectedClip.transform?.dynamicZoom ?? false}
                             onChange={(e) => updateSelectedClip({ transform: { ...(selectedClip.transform || {x:0, y:0, scale:1, rotation:0, opacity:1}), dynamicZoom: e.target.checked } })}
                           />
@@ -6545,15 +6545,15 @@ export default function EditorClient({ project }: { project: any }) {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Lens Distortion (Phase 171) */}
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] text-zinc-400 w-24 leading-tight">Lens Distortion (Correction)</span>
-                      <input 
-                        type="range" min="-100" max="100" 
+                      <input
+                        type="range" min="-100" max="100"
                         value={selectedClip.lens_distortion || 0}
                         onChange={(e) => updateSelectedClip({ lens_distortion: parseInt(e.target.value) })}
-                        className="flex-1 h-1 bg-zinc-800 accent-indigo-500 rounded-lg appearance-none cursor-pointer" 
+                        className="flex-1 h-1 bg-zinc-800 accent-indigo-500 rounded-lg appearance-none cursor-pointer"
                       />
                       <span className="text-[10px] text-zinc-300 w-6 text-right font-mono">{selectedClip.lens_distortion || 0}</span>
                     </div>
@@ -6620,24 +6620,24 @@ export default function EditorClient({ project }: { project: any }) {
                          const range = maxVal - minVal || 1;
                          const duration = selectedClip.duration_frames;
                          const localFrame = frame - selectedClip.start_frame;
-                         
+
                          return (
                            <div key={prop} className="flex flex-col gap-1">
                              <div className="text-[10px] text-zinc-400 uppercase">{prop.replace('.', ' ')}</div>
                              <div className="h-20 bg-zinc-900 rounded border border-zinc-700 relative overflow-hidden">
                                <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox={`0 0 ${duration} 100`}>
-                                 <path 
+                                 <path
 
                                    d={sorted.map((k: any, i: number) => {
                                      const x = k.frame;
                                      const y = 100 - (((k.value - minVal) / range) * 80 + 10);
-                                     
+
                                      if (i === 0) return `M 0 ${y} L ${x} ${y}`;
-                                     
+
                                      const prev = sorted[i - 1];
                                      const prevX = prev.frame;
                                      const prevY = 100 - (((prev.value - minVal) / range) * 80 + 10);
-                                     
+
                                      if (prev.easing === 'step') {
                                         return `L ${x} ${prevY} L ${x} ${y}`;
                                      } else if (prev.easing === 'ease-in-out') {
@@ -6675,7 +6675,7 @@ export default function EditorClient({ project }: { project: any }) {
             ) : (
               <div className="flex flex-col gap-4">
                 <div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">Project Settings</div>
-                
+
                 {/* VR 360° Video Editing (Phase 209) */}
                 <div className="mb-4 flex items-center justify-between p-3 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded">
                   <div className="flex flex-col">
@@ -6689,7 +6689,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
                   </label>
                 </div>
-                
+
                 {/* Quantum Video Processing (Phase 213) */}
                 <div className="mb-4 p-3 bg-indigo-950/40 border border-indigo-900 rounded flex flex-col gap-2 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
                   <div className="flex items-center justify-between">
@@ -6717,13 +6717,13 @@ export default function EditorClient({ project }: { project: any }) {
                     <option>Software (CPU)</option>
                   </select>
                 </div>
-                
+
 
                 <div>
 
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Project Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={projectData.name || "Untitled Project"}
                     onChange={(e) => commitState({ ...projectData, name: e.target.value })}
                     className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -6754,8 +6754,8 @@ export default function EditorClient({ project }: { project: any }) {
                   <div className="flex-1">
 
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Width</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={projectData.width || 1920}
                       onChange={(e) => commitState({ ...projectData, width: parseInt(e.target.value) || 1920 })}
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -6765,33 +6765,33 @@ export default function EditorClient({ project }: { project: any }) {
                   <div className="flex-1">
 
                     <label className="text-xs font-medium text-zinc-400 block mb-1">Height</label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={projectData.height || 1080}
                       onChange={(e) => commitState({ ...projectData, height: parseInt(e.target.value) || 1080 })}
                       className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
                     />
                   </div>
                 </div>
-                
+
 
                 <div>
 
                   <label className="text-xs font-medium text-zinc-400 block mb-1">Aspect Ratio Presets</label>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => commitState({ ...projectData, width: 1920, height: 1080 })}
                       className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
                     >
                       16:9 (1080p)
                     </button>
-                    <button 
+                    <button
                       onClick={() => commitState({ ...projectData, width: 1080, height: 1920 })}
                       className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
                     >
                       9:16 (Shorts)
                     </button>
-                    <button 
+                    <button
                       onClick={() => commitState({ ...projectData, width: 1080, height: 1080 })}
                       className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
                     >
@@ -6804,8 +6804,8 @@ export default function EditorClient({ project }: { project: any }) {
 
                   <label className="text-xs font-medium text-zinc-400 block mb-2">Background Color</label>
                   <div className="flex items-center gap-2">
-                    <input 
-                      type="color" 
+                    <input
+                      type="color"
                       value={(() => {
                         const bg = projectData.bg_color || [0.09, 0.09, 0.11, 1.0];
                         const toHex = (c: number) => Math.round(c * 255).toString(16).padStart(2, '0');
@@ -6826,8 +6826,8 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="mt-4 pt-4 border-t border-zinc-700">
                   <div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">Timecode Burn-In Overlay</div>
                   <label className="flex items-center gap-2 cursor-pointer mb-2" title="Burn-In the timeline timecode directly into the exported video">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={projectData.burnInEnabled || false}
                       onChange={(e) => commitState({ ...projectData, burnInEnabled: e.target.checked })}
                       className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
@@ -6840,7 +6840,7 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex-1">
 
                         <label className="text-[10px] font-medium text-zinc-400 block mb-1">Position</label>
-                        <select 
+                        <select
                           value={projectData.burnInPosition || 'bottom-right'}
                           onChange={(e) => commitState({ ...projectData, burnInPosition: e.target.value })}
                           className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -6856,7 +6856,7 @@ export default function EditorClient({ project }: { project: any }) {
                       <div className="flex-1">
 
                         <label className="text-[10px] font-medium text-zinc-400 block mb-1">Size</label>
-                        <select 
+                        <select
                           value={projectData.burnInSize || 'medium'}
                           onChange={(e) => commitState({ ...projectData, burnInSize: e.target.value })}
                           className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -6873,30 +6873,30 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="mt-4 pt-4 border-t border-zinc-700">
                   <div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">Performance & Saving</div>
                   <label className="flex items-center gap-2 cursor-pointer mb-3" title="Enable WebGPU/WebGL rendering acceleration">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={projectData.useHardwareAcceleration ?? true}
                       onChange={(e) => commitState({ ...projectData, useHardwareAcceleration: e.target.checked })}
                       className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
                     />
                     <span className="text-xs text-zinc-300">Use Hardware Acceleration (GPU)</span>
                   </label>
-                  
+
                   <label className="flex items-center gap-2 cursor-pointer mb-3" title="Cache computationally heavy FX in the background for smoother playback">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={projectData.smartRenderCache ?? false}
                       onChange={(e) => commitState({ ...projectData, smartRenderCache: e.target.checked })}
                       className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
                     />
                     <span className="text-xs text-zinc-300">Smart Render Cache</span>
                   </label>
-                  
+
 
                   <div className="flex flex-col gap-2 mb-3">
 
                     <label className="text-[10px] font-medium text-zinc-400">Project FPS</label>
-                    <select 
+                    <select
                       value={projectData.fps || 60}
                       onChange={(e) => commitState({ ...projectData, fps: parseInt(e.target.value) })}
                       className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
@@ -6916,8 +6916,8 @@ export default function EditorClient({ project }: { project: any }) {
                       <label className="text-[10px] font-medium text-zinc-400">Auto-Save Frequency</label>
                       <span className="text-[10px] text-zinc-400">{projectData.autoSaveInterval || 5} mins</span>
                     </div>
-                    <input 
-                      type="range" 
+                    <input
+                      type="range"
                       min="1" max="30" step="1"
                       value={projectData.autoSaveInterval || 5}
                       onChange={(e) => commitState({ ...projectData, autoSaveInterval: parseInt(e.target.value) })}
@@ -6948,7 +6948,7 @@ export default function EditorClient({ project }: { project: any }) {
         />
 
         {/* Timeline or Node Graph */}
-        <section 
+        <section
           className="w-full border-t border-zinc-700 bg-zinc-900 flex flex-col shrink-0 relative overflow-hidden"
           style={{ height: timelineHeight }}
         >
@@ -7000,14 +7000,14 @@ export default function EditorClient({ project }: { project: any }) {
                 <span className="text-xs text-zinc-300 font-medium tracking-wide">FUSION GRAPH</span>
                 <button onClick={() => setActiveWorkspace('timeline')} className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded">Close Nodes</button>
               </div>
-              
+
               <div className="flex-1 relative overflow-hidden bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiMzZjNmNDYiLz48L3N2Zz4=')]">
                 {/* Simulated Nodes Canvas */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   <path d="M 150 150 C 250 150, 250 150, 350 150" stroke="#6366f1" strokeWidth="2" fill="none" />
                   <path d="M 450 150 C 550 150, 550 150, 650 150" stroke="#6366f1" strokeWidth="2" fill="none" />
                 </svg>
-                
+
                 {/* MediaIn Node */}
                 <div className="absolute top-[120px] left-[50px] w-[100px] bg-zinc-800 border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
                   <div className="h-6 bg-zinc-700 border-b border-zinc-600 flex items-center px-2">
@@ -7017,7 +7017,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <div className="w-3 h-3 bg-indigo-500 rounded-full border border-indigo-300 translate-x-3.5 shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
                   </div>
                 </div>
-                
+
                 {/* Effect Node */}
                 <div className="absolute top-[120px] left-[350px] w-[100px] bg-zinc-800 border border-emerald-500 rounded-md shadow-xl flex flex-col overflow-hidden ring-2 ring-emerald-500/50">
                   <div className="h-6 bg-emerald-600/20 border-b border-emerald-500/50 flex items-center px-2">
@@ -7051,7 +7051,7 @@ export default function EditorClient({ project }: { project: any }) {
                  const x = e.clientX - rect.left;
                  const targetFrame = Math.max(0, Math.floor((x / rect.width) * (projectData.duration_frames || 100)));
                  setFrame(targetFrame);
-                 
+
                  // Handle dragging
                  const handleMouseMove = (moveEvent: MouseEvent) => {
                    const newX = moveEvent.clientX - rect.left;
@@ -7065,7 +7065,7 @@ export default function EditorClient({ project }: { project: any }) {
                  window.addEventListener('mousemove', handleMouseMove);
                  window.addEventListener('mouseup', handleMouseUp);
                }}>
-            
+
             {/* Draw Tracks and Clips */}
 
             <div className="absolute inset-0 flex flex-col-reverse py-1 gap-[1px]">
@@ -7075,12 +7075,12 @@ export default function EditorClient({ project }: { project: any }) {
                 <div key={track.id} className="flex-1 relative w-full">
 
                   {track.clips?.map((clip: any) => (
-                    <div key={clip.id} 
+                    <div key={clip.id}
                          className={`absolute inset-y-0 rounded-sm opacity-50 ${clip.type === 'video' || clip.type === 'image' ? 'bg-indigo-500' : clip.type === 'audio' ? 'bg-emerald-500' : 'bg-pink-500'}`}
-                         style={{ 
-                           left: `${(clip.start_frame / (projectData.duration_frames || 100)) * 100}%`, 
-                           width: `${(clip.duration_frames / (projectData.duration_frames || 100)) * 100}%` 
-                         }} 
+                         style={{
+                           left: `${(clip.start_frame / (projectData.duration_frames || 100)) * 100}%`,
+                           width: `${(clip.duration_frames / (projectData.duration_frames || 100)) * 100}%`
+                         }}
                     />
                   ))}
                 </div>
@@ -7091,7 +7091,7 @@ export default function EditorClient({ project }: { project: any }) {
             <div className="absolute top-0 bottom-0 w-px bg-red-500 z-10 pointer-events-none" style={{ left: `${(frame / (projectData.duration_frames || 100)) * 100}%` }}>
               <div className="absolute top-0 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-red-500" />
             </div>
-            
+
             {/* Hover overlay hint */}
             <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center">
               <span className="text-[10px] uppercase tracking-widest text-white/50 font-semibold bg-black/50 px-2 py-0.5 rounded backdrop-blur">Timeline Minimap Navigator</span>
@@ -7099,7 +7099,7 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
           {/* Timeline Header Toolbar */}
           <div className="h-8 w-full border-b border-zinc-700 bg-zinc-950 flex items-center px-4 gap-2">
-             <button 
+             <button
                className="text-xs font-medium text-white bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 active:bg-zinc-600 transition-colors"
                onClick={() => {
                  setFrame(0);
@@ -7109,24 +7109,24 @@ export default function EditorClient({ project }: { project: any }) {
              >
                Start
              </button>
-             <button 
+             <button
                className={`text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm ${
-                 isPlaying 
-                   ? "bg-rose-600 border-rose-500 hover:bg-rose-500 active:bg-rose-700" 
+                 isPlaying
+                   ? "bg-rose-600 border-rose-500 hover:bg-rose-500 active:bg-rose-700"
                    : "bg-indigo-600 border-indigo-500 hover:bg-indigo-500 active:bg-indigo-700"
                }`}
                onClick={() => setIsPlaying(!isPlaying)}
              >
                {isPlaying ? "Pause" : "Play"}
              </button>
-             <button 
+             <button
                className={`text-xs font-medium border px-3 py-1 rounded transition-colors shadow-sm ${projectData.bypassEffects ? 'bg-amber-600 text-white border-amber-500 hover:bg-amber-500' : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'}`}
                onClick={() => commitState({ ...projectData, bypassEffects: !projectData.bypassEffects })}
                title="Bypass All Color Grading and FX"
              >
                🪄 Bypass FX
              </button>
-             <button 
+             <button
                className={`text-xs font-medium border px-4 py-1 rounded transition-colors shadow-sm ${showDataBurnIn ? 'bg-amber-600 text-white border-amber-500 hover:bg-amber-500' : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'}`}
                onClick={() => setShowDataBurnIn(!showDataBurnIn)}
                title="Toggle Data Burn-In Overlay"
@@ -7134,7 +7134,7 @@ export default function EditorClient({ project }: { project: any }) {
                ⏱️ Burn-In
              </button>
               {/* Phase 28: BCI Emotion Mapping */}
-              <button 
+              <button
                 className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isEmotionHeatmapMode ? 'bg-orange-600 text-white border-orange-500' : 'bg-zinc-800 text-orange-400 border-zinc-700 hover:bg-zinc-700'}`}
                 onClick={() => setIsEmotionHeatmapMode(!isEmotionHeatmapMode)}
                 title="BCI Emotion Heatmap (Arousal/Valence Pacing Analysis)"
@@ -7142,14 +7142,14 @@ export default function EditorClient({ project }: { project: any }) {
                 🧠 Emotion Heatmap
               </button>
               {/* Phase 27: Cinematic Multiverse */}
-              <button 
+              <button
                 className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isMultiverseMode ? 'bg-fuchsia-600 text-white border-fuchsia-500' : 'bg-zinc-800 text-fuchsia-400 border-zinc-700 hover:bg-zinc-700'}`}
                 onClick={() => setIsMultiverseMode(!isMultiverseMode)}
                 title="Branch Timeline (A/B Multiverse Prototyping)"
               >
                 🌌 Branch A/B
               </button>
-             <button 
+             <button
                className="text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
                onClick={handleUndo}
                disabled={historyIndex <= 0}
@@ -7158,14 +7158,14 @@ export default function EditorClient({ project }: { project: any }) {
                ↩️ Undo
              </button>
              {/* Time-Travel Causality Undo (Phase 219) */}
-             <button 
+             <button
                className="text-[10px] font-bold text-cyan-300 border px-2 py-1 rounded transition-colors shadow-[0_0_8px_rgba(34,211,238,0.4)] bg-cyan-900/30 border-cyan-500/50 hover:bg-cyan-800/50"
                onClick={handleClosedTimelikeCurve}
                title="Causality Reversal (Undo Reality)"
              >
                ⏳ Undo Reality
              </button>
-             <button 
+             <button
                className="text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
                onClick={handleRedo}
                disabled={historyIndex >= history.length - 1}
@@ -7173,20 +7173,20 @@ export default function EditorClient({ project }: { project: any }) {
              >
                Redo ↪️
              </button>
-             <input 
-               type="range" 
+             <input
+               type="range"
                className="flex-1 ml-4 accent-indigo-500"
-               min="0" 
-               max={Math.max(1, (projectData.duration_frames || 100) - 1)} 
+               min="0"
+               max={Math.max(1, (projectData.duration_frames || 100) - 1)}
                value={frame}
                onChange={(e) => {
                  setFrame(parseInt(e.target.value));
                  setIsPlaying(false);
                }}
              />
-             
+
              {/* Interdimensional 5D Timeline (Phase 216) */}
-             <button 
+             <button
                className="text-[10px] font-bold text-fuchsia-300 border px-2 py-1 ml-2 rounded transition-colors shadow-[0_0_8px_rgba(217,70,239,0.4)] bg-fuchsia-900/30 border-fuchsia-500/50 hover:bg-fuchsia-800/50"
                onClick={() => handle5thDimension()}
                title="Expand into 5th Dimension"
@@ -7195,25 +7195,25 @@ export default function EditorClient({ project }: { project: any }) {
              </button>
              <div className="flex items-center gap-2 ml-auto pl-4 border-l border-zinc-700">
                <span className="text-zinc-400 text-[10px] font-medium tracking-wider">ZOOM</span>
-               <input 
-                 type="range" 
-                 min="0.5" 
-                 max="10" 
+               <input
+                 type="range"
+                 min="0.5"
+                 max="10"
                  step="0.5"
-                 value={zoomLevel} 
+                 value={zoomLevel}
                  onChange={(e) => setZoomLevel(parseFloat(e.target.value))}
                  className="w-24 accent-zinc-500"
                />
              </div>
              <div className="ml-2 pl-4 border-l border-zinc-700 flex items-center gap-2">
-               <button 
+               <button
                  className="text-xs font-medium text-white bg-emerald-600 border border-emerald-500 px-3 py-1 rounded hover:bg-emerald-500 active:bg-emerald-700 transition-colors shadow-sm"
                  onClick={handleExport}
                >
                  Export
                </button>
                {/* Phase 25: Distributed Render Farm */}
-               <button 
+               <button
                  className="text-xs font-medium text-white bg-blue-600 border border-blue-500 px-3 py-1 rounded hover:bg-blue-500 active:bg-blue-700 transition-colors shadow-sm flex items-center gap-1"
                  onClick={() => alert("Render Farm feature coming in Phase 25")}
                  title="Send to Cloud Render Farm"
@@ -7223,49 +7223,49 @@ export default function EditorClient({ project }: { project: any }) {
                </button>
              </div>
              <div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2 items-center">
-                <button 
+                <button
                   className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${isSnappingEnabled ? "bg-indigo-600 border border-indigo-500 hover:bg-indigo-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                   onClick={() => setIsSnappingEnabled(!isSnappingEnabled)}
                   title={`Toggle Snapping (S) - ${isSnappingEnabled ? 'ON' : 'OFF'}`}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                 </button>
-                
+
                 {/* Neural Auto-Rotoscoping (Phase 201) */}
-                <button 
+                <button
                   className="text-xs font-medium bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
                   onClick={() => handleAutoRotoscoping()}
                   title="Neural Auto-Rotoscoping Magic Wand"
                 >
                   🪄 Roto
                 </button>
-                
+
                 {/* Multi-Camera Angle Auto-Sync (Phase 205) */}
-                <button 
+                <button
                   className="text-xs font-medium bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
                   onClick={() => handleMulticamSync()}
                   title="Auto-Sync Multi-Cam via Audio"
                 >
                   🎧 Sync Audio
                 </button>
-                
+
                 <div className="h-4 w-px bg-zinc-700 mx-1"></div>
 
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-zinc-400 uppercase font-semibold">Track Height</span>
                   <div className="flex gap-1 bg-zinc-900 p-0.5 rounded border border-zinc-700">
-                    <button 
-                      onClick={() => setTrackHeightSize('sm')} 
+                    <button
+                      onClick={() => setTrackHeightSize('sm')}
                       className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === 'sm' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                       title="Small Track Height"
                     >S</button>
-                    <button 
-                      onClick={() => setTrackHeightSize('md')} 
+                    <button
+                      onClick={() => setTrackHeightSize('md')}
                       className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === 'md' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                       title="Medium Track Height"
                     >M</button>
-                    <button 
-                      onClick={() => setTrackHeightSize('lg')} 
+                    <button
+                      onClick={() => setTrackHeightSize('lg')}
                       className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === 'lg' ? 'bg-zinc-700 text-white' : 'text-zinc-400 hover:text-zinc-300'}`}
                       title="Large Track Height"
                     >L</button>
@@ -7273,57 +7273,57 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
               <div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2">
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'select' ? "bg-zinc-700 border border-zinc-600" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('select')}
                    title="Selection Tool (V)"
                  >
                    👆 Select
                  </button>
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'pen' ? "bg-indigo-600 border border-indigo-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('pen')}
                    title="Pen Tool - Draw Vector Masks (P)"
                  >
                    🖋️ Pen
                  </button>
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'magic-eraser' ? "bg-emerald-600 border border-emerald-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('magic-eraser')}
                    title="Magic Eraser Tool - Object Removal"
                  >
                    🪄 Eraser
                  </button>
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'razor' ? "bg-red-600 border border-red-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('razor')}
                    title="Razor Tool (C)"
                  >
                    ✂️ Razor
                  </button>
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'slip' ? "bg-amber-600 border border-amber-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('slip')}
                    title="Slip Tool (Y)"
                  >
                    🔄 Slip
                  </button>
-                 <button 
+                 <button
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'ripple' ? "bg-purple-600 border border-purple-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    onClick={() => setActiveTool('ripple')}
                    title="Ripple Tool (B)"
                  >
                    🌊 Ripple
                  </button>
-                 <button 
-                   onClick={() => setActiveTool("slide")} 
+                 <button
+                   onClick={() => setActiveTool("slide")}
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'slide' ? "bg-cyan-600 border border-cyan-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    title="Slide Edit Tool (Move clip without changing duration or timeline length)"
                  >
                    Slide
                  </button>
-                 <button 
-                   onClick={() => setActiveTool("roll")} 
+                 <button
+                   onClick={() => setActiveTool("roll")}
                    className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === 'roll' ? "bg-pink-600 border border-pink-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
                    title="Roll Edit Tool (Trim adjoining clips simultaneously)"
                  >
@@ -7331,7 +7331,7 @@ export default function EditorClient({ project }: { project: any }) {
                  </button>
               </div>
               <div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2">
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 disabled:opacity-50 transition-colors shadow-sm"
                  onClick={() => handleSplitClip()}
                  disabled={!selectedClip || frame <= selectedClip.start_frame || frame >= selectedClip.start_frame + selectedClip.duration_frames}
@@ -7339,7 +7339,7 @@ export default function EditorClient({ project }: { project: any }) {
                >
                  ✂️ Split
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-amber-200 bg-amber-900/30 border border-amber-700/50 px-3 py-1 rounded hover:bg-amber-900/50 disabled:opacity-50 transition-colors shadow-sm"
                  onClick={() => handleSceneCutDetection()}
                  disabled={!selectedClip}
@@ -7347,14 +7347,14 @@ export default function EditorClient({ project }: { project: any }) {
                >
                  🪄 AI Scene Detect
                </button>
-               <button 
+               <button
                   className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                   onClick={handleCompoundClip}
                   title="Create Compound Clip (Opt+C)"
                 >
                   📦 Compound Clip
                 </button>
-                <button 
+                <button
                   className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                   onClick={handleAddMarker}
                   title="Add Marker at Playhead (M)"
@@ -7362,41 +7362,41 @@ export default function EditorClient({ project }: { project: any }) {
                   🏁 Marker
                 </button>
                 {/* Cloud Comment (Phase 17) */}
-                <button 
+                <button
                   className="text-xs font-medium text-sky-200 bg-sky-900/30 border border-sky-700/50 px-3 py-1 rounded hover:bg-sky-900/50 transition-colors shadow-sm"
                   onClick={handleAddCloudComment}
                   title="Add Cloud Comment (Frame.io Parity)"
                 >
                   💬 Comment
                 </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                  onClick={handleAddText}
                >
                  + Add Text
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                  onClick={handleAddAdjustmentLayer}
                  title="Add an Adjustment Layer to apply effects to all clips below it"
                >
                  ✨ Adj. Layer
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                  onClick={handleAutoCaption}
                  title="Generate Auto-Captions from Audio"
                >
                  ✨ Auto-Caption
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-red-900/50 hover:text-red-400 hover:border-red-900/50 transition-colors shadow-sm"
                  onClick={handleRecordVoiceover}
                  title="Record Voiceover at Playhead"
                >
                  🎤 Record Voiceover
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 disabled:opacity-50 transition-colors shadow-sm"
                  onClick={handleDuplicateClip}
                  disabled={!selectedClip}
@@ -7404,7 +7404,7 @@ export default function EditorClient({ project }: { project: any }) {
                >
                  📋 Duplicate
                </button>
-               <button 
+               <button
                  className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
                  onClick={handleAddMarker}
                  title="Add Marker at Playhead (M)"
@@ -7434,9 +7434,9 @@ export default function EditorClient({ project }: { project: any }) {
 
       {/* Context Menu */}
       {contextMenu && (
-         
 
-        <div 
+
+        <div
           className="fixed z-[100] bg-zinc-800 border border-zinc-700 shadow-2xl rounded py-1 flex flex-col w-48 text-sm"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={(e) => e.stopPropagation()}
@@ -7454,15 +7454,15 @@ export default function EditorClient({ project }: { project: any }) {
             </button>
           )}
           {(selectedClip?.type === 'video' || selectedClip?.type === 'audio') && (
-            <button className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full" onClick={() => { 
+            <button className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full" onClick={() => {
               if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
               const clip = projectData.tracks[selectedTrackIdx].clips[selectedClipIdx];
               let targetClip = null;
               for (let t = 0; t < projectData.tracks.length; t++) {
                 if (t === selectedTrackIdx) continue;
 
-                const overlapping = projectData.tracks[t].clips.find((c: any) => 
-                  c.start_frame < clip.start_frame + clip.duration_frames && 
+                const overlapping = projectData.tracks[t].clips.find((c: any) =>
+                  c.start_frame < clip.start_frame + clip.duration_frames &&
                   c.start_frame + c.duration_frames > clip.start_frame
                 );
                 if (overlapping) {
@@ -7476,13 +7476,13 @@ export default function EditorClient({ project }: { project: any }) {
                 const newStartFrame = targetClip.start_frame - (targetClip.media_offset_frames || 0) + (clip.media_offset_frames || 0);
                 updateSelectedClip({ start_frame: newStartFrame });
               }
-              setContextMenu(null); 
+              setContextMenu(null);
             }}>
               Auto-Sync Audio
             </button>
           )}
           <div className="h-px bg-zinc-700 my-1"></div>
-          
+
           <div className="px-4 py-1.5 flex gap-1 justify-between">
             <button className="w-4 h-4 rounded-full bg-indigo-600 border border-indigo-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-indigo-600/80 border-indigo-400 hover:bg-indigo-500" }); setContextMenu(null); }} title="Default" />
             <button className="w-4 h-4 rounded-full bg-red-600 border border-red-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-red-600/80 border-red-400 hover:bg-red-500" }); setContextMenu(null); }} title="Red" />
@@ -7493,8 +7493,8 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
 
           <div className="h-px bg-zinc-700 my-1"></div>
-          
-          <button className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full" onClick={() => { 
+
+          <button className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full" onClick={() => {
             if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
             const clip = projectData.tracks[selectedTrackIdx].clips[selectedClipIdx];
             const relativeFrame = frameRef.current - clip.start_frame;
@@ -7504,9 +7504,9 @@ export default function EditorClient({ project }: { project: any }) {
             } else {
                toast.error("Playhead must be over the clip to add a marker.");
             }
-            setContextMenu(null); 
+            setContextMenu(null);
           }}>Add Marker at Playhead</button>
-          
+
           <div className="h-px bg-zinc-700 my-1"></div>
           <button className="text-left px-4 py-1.5 hover:bg-red-500/20 text-red-400 w-full" onClick={() => { handleDeleteClip(); setContextMenu(null); }}>Delete</button>
           <button className="text-left px-4 py-1.5 hover:bg-red-500/20 text-red-400 w-full" onClick={() => { handleRippleDeleteClip(); setContextMenu(null); }}>Ripple Delete</button>
@@ -7519,26 +7519,26 @@ export default function EditorClient({ project }: { project: any }) {
           <div className="bg-zinc-900/90 border border-zinc-700/50 p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] w-[400px] flex flex-col items-center relative overflow-hidden">
             {/* Animated background glow */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse"></div>
-            
+
             <div className="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(99,102,241,0.2)]">
               <svg className="w-8 h-8 text-indigo-400 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
             </div>
-            
+
             <h3 className="text-white text-xl font-medium mb-2 tracking-tight">Exporting Master</h3>
             <p className="text-zinc-400 text-sm mb-8 text-center px-4">Your video is being processed using WebCodecs hardware acceleration.</p>
-            
+
             <div className="w-full bg-zinc-800/80 rounded-full h-3 overflow-hidden mb-3 border border-zinc-700/50 relative">
-              <div 
+              <div
                 className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-300 ease-out"
                 style={{ width: `${exportProgress}%` }}
               >
                 <div className="absolute top-0 right-0 bottom-0 w-20 bg-gradient-to-r from-transparent to-white/20 animate-[shimmer_2s_infinite]"></div>
               </div>
             </div>
-            
+
             <div className="flex justify-between w-full text-xs font-medium">
               <span className="text-zinc-400">Processing...</span>
               <span className="text-indigo-400">{Math.round(exportProgress)}%</span>
@@ -7555,7 +7555,7 @@ export default function EditorClient({ project }: { project: any }) {
               <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
               Distributed Render Farm
             </h3>
-            
+
             <div className="grid grid-cols-2 gap-4">
               {farmProgress.map(node => (
                 <div key={node.node} className="bg-zinc-950 border border-zinc-800 rounded-lg p-4 relative overflow-hidden">
@@ -7564,7 +7564,7 @@ export default function EditorClient({ project }: { project: any }) {
                     <span className={`text-xs font-bold ${node.status === 'Complete' ? 'text-emerald-400' : 'text-blue-400'}`}>{node.status}</span>
                   </div>
                   <div className="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden mb-1">
-                    <div 
+                    <div
                       className={`h-full transition-all duration-300 ${node.progress === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
                       style={{ width: `${node.progress}%` }}
                     />
@@ -7573,7 +7573,7 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-8 flex justify-center">
               {farmProgress.every(n => n.progress === 100) ? (
                 <div className="px-6 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold border border-emerald-500/50">
@@ -7591,20 +7591,20 @@ export default function EditorClient({ project }: { project: any }) {
       )}
 
         {/* Modals & Popovers */}
-      
+
       {trackContextMenu && (
 
         <>
 
           <div className="fixed inset-0 z-40" onClick={() => setTrackContextMenu(null)} onContextMenu={(e: any) => { e.preventDefault(); setTrackContextMenu(null); }} />
-          <div 
+          <div
             className="fixed z-50 bg-zinc-900 border border-zinc-700 rounded shadow-xl py-1 w-48"
             style={{ left: trackContextMenu.x, top: trackContextMenu.y }}
           >
             <div className="px-3 py-1 text-xs text-zinc-400 font-medium">Track Color</div>
             <div className="flex flex-wrap gap-1.5 px-3 py-2">
               {['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', 'transparent'].map(color => (
-                <button 
+                <button
                    key={color}
                    className="w-5 h-5 rounded-full border border-zinc-700 hover:scale-110 transition-transform"
                    style={{ backgroundColor: color === 'transparent' ? '#18181b' : color }}
@@ -7624,7 +7624,7 @@ export default function EditorClient({ project }: { project: any }) {
               ))}
             </div>
             <hr className="border-zinc-700 my-1"/>
-            <button 
+            <button
               className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-zinc-800"
               onClick={() => {
 
@@ -7655,23 +7655,23 @@ export default function EditorClient({ project }: { project: any }) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          
+
           <div className="flex-1 flex p-2 gap-2 overflow-x-auto bg-zinc-950/50 hide-scrollbar">
             {/* Render audio tracks */}
             {projectData.tracks?.filter((t: any) => t.type === 'audio').map((track: any, i: number) => (
               <div key={track.id} className="w-20 bg-zinc-800 border border-zinc-700 rounded flex flex-col items-center py-2 shrink-0">
                 <span className="text-[10px] font-semibold text-zinc-400 mb-2 truncate w-full text-center px-1">A{i+1}</span>
-                
+
                 {/* Pan knob */}
                 <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-600 mb-2 relative">
                   <div className="absolute top-1 left-1/2 w-0.5 h-3 bg-zinc-400 origin-bottom transform rotate-0"></div>
                 </div>
                 <span className="text-[8px] text-zinc-500 mb-4">PAN</span>
-                
+
                 {/* VST / Effects Rack (Phase 19) */}
                 <div className="w-full px-1 mb-3 flex flex-col gap-1">
-                  <div 
-                    className="w-full h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-500 flex items-center justify-center cursor-pointer hover:bg-zinc-700 hover:text-white transition-colors" 
+                  <div
+                    className="w-full h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-500 flex items-center justify-center cursor-pointer hover:bg-zinc-700 hover:text-white transition-colors"
                     title="Add VST Plugin"
                     onClick={() => toast.success("VST Plugin browser opened. Support for VST3/AU coming in Phase 19.b")}
                   >
@@ -7681,7 +7681,7 @@ export default function EditorClient({ project }: { project: any }) {
                     empty
                   </div>
                 </div>
-                
+
                 {/* Fader Track */}
                 <div className="flex-1 w-full flex justify-center relative px-2">
                   <div className="w-1.5 h-full bg-black rounded-full border border-zinc-900 relative">
@@ -7696,21 +7696,21 @@ export default function EditorClient({ project }: { project: any }) {
                     {isPlaying && <div className="absolute top-[20%] w-full h-0.5 bg-red-500"></div>}
                   </div>
                 </div>
-                
+
                 <span className="text-[10px] text-emerald-400 mt-2 font-mono">0.0 dB</span>
               </div>
             ))}
-            
+
             {/* Master Bus */}
             <div className="w-24 bg-zinc-800 border-2 border-zinc-600 rounded flex flex-col items-center py-2 shrink-0 ml-auto shadow-lg relative overflow-hidden">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
               <span className="text-[11px] font-bold text-white mb-2 truncate w-full text-center px-1">MAIN</span>
-              
+
               <div className="flex gap-1 mb-4">
                 <button className="w-6 h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-400 hover:text-white">EQ</button>
                 <button className="w-6 h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-400 hover:text-white">DYN</button>
               </div>
-              
+
               <div className="flex-1 w-full flex justify-center relative px-2">
                 <div className="w-2 h-full bg-black rounded-full border border-zinc-900 relative">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-300 border-b-4 border-zinc-500 rounded cursor-ns-resize hover:bg-white shadow-lg flex items-center justify-center">
@@ -7727,7 +7727,7 @@ export default function EditorClient({ project }: { project: any }) {
                   </div>
                 </div>
               </div>
-              
+
               <span className="text-[10px] text-white mt-2 font-mono">-3.2 dB</span>
             </div>
           </div>
@@ -7736,8 +7736,8 @@ export default function EditorClient({ project }: { project: any }) {
 
       {/* Multiplayer Cursors Overlay */}
       {remoteCursors.map(cursor => (
-        <div 
-          key={cursor.id} 
+        <div
+          key={cursor.id}
           className="fixed pointer-events-none z-[9999] transition-all duration-1000 ease-linear"
           style={{ left: cursor.x, top: cursor.y }}
         >
@@ -7763,7 +7763,7 @@ export default function EditorClient({ project }: { project: any }) {
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            
+
             <div className="relative w-full aspect-square bg-zinc-950 border border-zinc-800 rounded-lg mb-6 group overflow-hidden">
               <svg className="w-full h-full absolute inset-0 pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                 {/* Grid */}
@@ -7773,13 +7773,13 @@ export default function EditorClient({ project }: { project: any }) {
                 <line x1="25" y1="0" x2="25" y2="100" stroke="#27272a" strokeWidth="1" />
                 <line x1="50" y1="0" x2="50" y2="100" stroke="#27272a" strokeWidth="1" />
                 <line x1="75" y1="0" x2="75" y2="100" stroke="#27272a" strokeWidth="1" />
-                
+
                 {/* The Bezier Curve */}
-                <path 
-                  d={`M0 100 C ${bezierEditor.curve[0]*100} ${100 - bezierEditor.curve[1]*100}, ${bezierEditor.curve[2]*100} ${100 - bezierEditor.curve[3]*100}, 100 0`} 
+                <path
+                  d={`M0 100 C ${bezierEditor.curve[0]*100} ${100 - bezierEditor.curve[1]*100}, ${bezierEditor.curve[2]*100} ${100 - bezierEditor.curve[3]*100}, 100 0`}
                   fill="none" stroke="#6366f1" strokeWidth="3" className="drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]"
                 />
-                
+
                 {/* Handles */}
                 <line x1="0" y1="100" x2={bezierEditor.curve[0]*100} y2={100 - bezierEditor.curve[1]*100} stroke="#a1a1aa" strokeWidth="1" strokeDasharray="4 2" />
                 <line x1="100" y1="0" x2={bezierEditor.curve[2]*100} y2={100 - bezierEditor.curve[3]*100} stroke="#a1a1aa" strokeWidth="1" strokeDasharray="4 2" />
@@ -7787,7 +7787,7 @@ export default function EditorClient({ project }: { project: any }) {
                 <circle cx={bezierEditor.curve[2]*100} cy={100 - bezierEditor.curve[3]*100} r="3" fill="#ec4899" />
               </svg>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
                 <span className="text-xs text-indigo-400 font-semibold mb-1">Point 1</span>
@@ -7802,7 +7802,7 @@ export default function EditorClient({ project }: { project: any }) {
                   <span className="text-[10px] text-zinc-300 w-6">{bezierEditor.curve[1].toFixed(2)}</span>
                 </div>
               </div>
-              
+
               <div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
                 <span className="text-xs text-pink-400 font-semibold mb-1">Point 2</span>
                 <div className="flex items-center justify-between">
@@ -7817,8 +7817,8 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
             </div>
-            
-            <button 
+
+            <button
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition-colors"
               onClick={() => {
                 const newProject = JSON.parse(JSON.stringify(projectData));
@@ -7875,8 +7875,8 @@ export default function EditorClient({ project }: { project: any }) {
                       key={preset.id}
                       onClick={() => setSelectedExportPreset(preset.id)}
                       className={`relative p-3 rounded-lg border text-left transition-all duration-200 bg-gradient-to-br ${preset.color} ${
-                        selectedExportPreset === preset.id 
-                          ? 'ring-2 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.25)] scale-[1.02]' 
+                        selectedExportPreset === preset.id
+                          ? 'ring-2 ring-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.25)] scale-[1.02]'
                           : 'hover:scale-[1.01] hover:brightness-110'
                       }`}
                     >
@@ -7983,7 +7983,7 @@ export default function EditorClient({ project }: { project: any }) {
                     </select>
                   </div>
                 </div>
-                
+
                 {/* Export Chapter Markers (Phase 173) */}
                 <div className="mt-4 flex items-center gap-2">
                   <input type="checkbox" id="chapterMarkers" className="w-3 h-3 accent-indigo-500 cursor-pointer" defaultChecked />
@@ -8038,7 +8038,7 @@ export default function EditorClient({ project }: { project: any }) {
 
               {/* Add to Queue Button */}
               <div className="p-5 mt-auto border-t border-zinc-700">
-                <button 
+                <button
                   onClick={() => {
                     const presetName = selectedExportPreset || 'custom';
                     const newItem = {
@@ -8075,7 +8075,7 @@ export default function EditorClient({ project }: { project: any }) {
                 </button>
               </div>
             </div>
-            
+
             {/* Right Side: Preview + Render Queue */}
             <div className="flex-1 flex flex-col bg-zinc-950">
               {/* Preview */}
@@ -8114,8 +8114,8 @@ export default function EditorClient({ project }: { project: any }) {
                       {renderQueue.map((item) => (
                         <div key={item.id} className="flex items-center gap-4 px-5 py-3 border-b border-zinc-700/50 hover:bg-zinc-800/30 transition-colors">
                           <div className={`w-2 h-2 rounded-full shrink-0 ${
-                            item.status === 'done' ? 'bg-emerald-500' : 
-                            item.status === 'rendering' ? 'bg-amber-500 animate-pulse' : 
+                            item.status === 'done' ? 'bg-emerald-500' :
+                            item.status === 'rendering' ? 'bg-amber-500 animate-pulse' :
                             item.status === 'error' ? 'bg-red-500' : 'bg-zinc-600'
                           }`} />
                           <div className="flex-1 min-w-0">
@@ -8158,7 +8158,7 @@ export default function EditorClient({ project }: { project: any }) {
       {/* Phase 38: Holographic Asset Forge Modal */}
       {isAssetForgeOpen && (
         <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-8" onClick={() => setIsAssetForgeOpen(false)}>
-          <div 
+          <div
             className="w-full max-w-4xl h-[70vh] rounded-2xl shadow-2xl flex overflow-hidden relative"
             style={{
               background: 'linear-gradient(135deg, rgba(24,24,27,0.95) 0%, rgba(9,9,11,0.98) 100%)',
@@ -8169,17 +8169,17 @@ export default function EditorClient({ project }: { project: any }) {
           >
             {/* Background Holographic Grid */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGgyMHYyMEgyMHoiIGZpbGw9IiNkOTQ2ZWYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-30 mix-blend-screen pointer-events-none" />
-            
+
             <div className="w-64 border-r border-fuchsia-500/20 bg-black/40 p-4 flex flex-col z-10">
               <h3 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <svg className="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
                 Asset Forge
               </h3>
-              
+
               <div className="space-y-4 flex-1">
                 <div>
                   <label className="text-[10px] text-zinc-400 uppercase font-semibold mb-2 block">Material Type</label>
-                  <select 
+                  <select
                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs text-white"
                     value={assetForgeMaterial}
                     onChange={(e) => setAssetForgeMaterial(e.target.value)}
@@ -8191,21 +8191,21 @@ export default function EditorClient({ project }: { project: any }) {
                     <option value="cyber-crystal">Cyber Crystal</option>
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="text-[10px] text-zinc-400 uppercase font-semibold mb-2 block">Generation Prompt</label>
-                  <textarea 
+                  <textarea
                     className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white resize-none h-24 focus:border-fuchsia-500 focus:outline-none"
                     placeholder="Describe the 3D asset to forge... (e.g. 'A floating cyberpunk city element with glowing pink accents')"
                   />
                 </div>
-                
+
                 <button className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold py-2 rounded text-xs shadow-[0_0_15px_rgba(217,70,239,0.4)] transition-all active:scale-95">
                   Forge Asset
                 </button>
               </div>
             </div>
-            
+
             <div className="flex-1 flex flex-col relative z-10 p-6">
               <div className="flex-1 border-2 border-dashed border-fuchsia-500/20 rounded-xl bg-black/20 flex items-center justify-center relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-fuchsia-500/10 pointer-events-none" />
@@ -8223,24 +8223,24 @@ export default function EditorClient({ project }: { project: any }) {
       )}
       {/* Command Palette Overlay */}
       {showCommandPalette && (
-         
 
-        <div 
+
+        <div
           className="absolute inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
           onClick={() => setShowCommandPalette(false)}
 
         >
 
-          <div 
+          <div
             className="w-full max-w-2xl bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center px-4 py-3 border-b border-zinc-700">
               <svg className="w-5 h-5 text-zinc-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-              <input 
-                type="text" 
-                className="flex-1 bg-transparent border-none text-white text-lg focus:outline-none focus-ring placeholder-zinc-500" 
-                placeholder="Search commands... (e.g. 'Add Text')" 
+              <input
+                type="text"
+                className="flex-1 bg-transparent border-none text-white text-lg focus:outline-none focus-ring placeholder-zinc-500"
+                placeholder="Search commands... (e.g. 'Add Text')"
 
                 autoFocus
                 value={commandQuery}
@@ -8256,7 +8256,7 @@ export default function EditorClient({ project }: { project: any }) {
                 { name: 'Toggle Proxies', desc: 'Switch to 1/2 resolution proxy mode', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' },
                 { name: 'Project Settings', desc: 'Open project configuration', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }
               ].filter(cmd => cmd.name.toLowerCase().includes(commandQuery.toLowerCase()) || cmd.desc.toLowerCase().includes(commandQuery.toLowerCase())).map((cmd, idx) => (
-                 
+
 
                 <div key={idx} className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-zinc-700/50 group" onClick={() => setShowCommandPalette(false)}>
                   <svg className="w-5 h-5 text-zinc-400 mr-4 group-hover:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={cmd.icon} /></svg>
@@ -8296,12 +8296,12 @@ export default function EditorClient({ project }: { project: any }) {
       {isSingularity && (
         <div className="fixed inset-0 z-[1000] bg-black text-white overflow-hidden flex flex-col items-center justify-center animate-in fade-in duration-1000">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/40 via-black to-black" />
-          
+
           {/* Orbital rings */}
           <div className="absolute w-[800px] h-[800px] border border-white/5 rounded-full animate-spin-slow pointer-events-none" style={{ animationDuration: '60s' }} />
           <div className="absolute w-[600px] h-[600px] border border-white/10 rounded-full animate-spin-slow pointer-events-none" style={{ animationDuration: '40s', animationDirection: 'reverse' }} />
           <div className="absolute w-[400px] h-[400px] border border-white/20 rounded-full animate-spin-slow pointer-events-none" style={{ animationDuration: '20s' }} />
-          
+
           <h1 className="text-6xl font-black tracking-tighter mix-blend-difference z-10 mb-8 blur-[1px] animate-pulse">
             THE SINGULARITY
           </h1>
@@ -8312,7 +8312,7 @@ export default function EditorClient({ project }: { project: any }) {
           {/* Floating 'clips' in orbit */}
           <div className="absolute inset-0 pointer-events-none perspective-[1000px]">
             {projectData.tracks?.flatMap((t: any) => t.clips)?.slice(0, 15).map((clip: any, i: number) => (
-              <div 
+              <div
                 key={clip.id}
                 className="absolute top-1/2 left-1/2 w-32 h-20 bg-zinc-900 border border-zinc-700 rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden mix-blend-screen"
                 style={{
@@ -8328,7 +8328,7 @@ export default function EditorClient({ project }: { project: any }) {
             ))}
           </div>
 
-          <button 
+          <button
             className="absolute bottom-12 z-50 px-8 py-3 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform hover:shadow-[0_0_30px_rgba(255,255,255,0.8)]"
             onClick={() => setIsSingularity(false)}
           >
@@ -8349,7 +8349,7 @@ export default function EditorClient({ project }: { project: any }) {
               <div className="absolute top-1 right-2 w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
             </button>
           </div>
-          
+
           <div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2 pt-2">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
@@ -8359,7 +8359,7 @@ export default function EditorClient({ project }: { project: any }) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          
+
           <div className="flex gap-4">
             {/* Audio Tracks */}
             {projectData.tracks?.filter((t: any) => t.type === 'audio').map((track: any, i: number) => (
@@ -8372,9 +8372,9 @@ export default function EditorClient({ project }: { project: any }) {
                   ))}
                 </div>
                 {/* Fader */}
-                <input 
-                  type="range" 
-                  min="-60" max="12" defaultValue="0" 
+                <input
+                  type="range"
+                  min="-60" max="12" defaultValue="0"
                   className="w-24 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer -rotate-90 my-12"
                 />
                 <div className="text-[9px] font-mono text-zinc-500 mt-2">0 dB</div>
@@ -8384,9 +8384,9 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
             ))}
-            
+
             <div className="w-px bg-zinc-800 mx-2" />
-            
+
             {/* Master Track */}
             <div className="flex flex-col items-center bg-zinc-900/80 p-2 rounded-lg border border-indigo-900/50 w-24 shadow-[0_0_20px_rgba(79,70,229,0.1)]">
               <span className="text-[10px] text-indigo-400 font-bold mb-2">MASTER</span>
@@ -8404,9 +8404,9 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
               {/* Fader */}
-              <input 
-                type="range" 
-                min="-60" max="12" defaultValue="0" 
+              <input
+                type="range"
+                min="-60" max="12" defaultValue="0"
                 className="w-24 h-1 bg-indigo-900 rounded-lg appearance-none cursor-pointer -rotate-90 my-12"
               />
               <div className="text-[9px] font-mono text-zinc-300 mt-2">0.0 dB</div>
@@ -8427,7 +8427,7 @@ export default function EditorClient({ project }: { project: any }) {
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
-          
+
           <div className="flex gap-4">
             {/* Waveform Monitor */}
             <div className="flex flex-col items-center">
@@ -8436,12 +8436,12 @@ export default function EditorClient({ project }: { project: any }) {
                 {/* Simulated Waveform Data */}
                 {Array.from({ length: 48 }).map((_, idx) => (
                   <div key={idx} className="flex-1 flex flex-col justify-end h-full">
-                    <div 
-                      className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]" 
-                      style={{ 
+                    <div
+                      className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]"
+                      style={{
                         height: `${0.5 * (isPlaying ? 80 : 30) + 10}%`,
                         opacity: 0.5 + 0.5 * 0.5
-                      }} 
+                      }}
                     />
                   </div>
                 ))}
@@ -8453,7 +8453,7 @@ export default function EditorClient({ project }: { project: any }) {
                 </div>
               </div>
             </div>
-            
+
             {/* Vectorscope */}
             <div className="flex flex-col items-center">
               <span className="text-[10px] text-zinc-400 font-bold mb-1">VECTORSCOPE</span>
@@ -8462,22 +8462,22 @@ export default function EditorClient({ project }: { project: any }) {
                 <div className="absolute inset-0 border border-zinc-800/50 rounded-full m-2" />
                 <div className="absolute w-full h-px bg-zinc-800/80" />
                 <div className="absolute h-full w-px bg-zinc-800/80" />
-                
+
                 {/* Skin Tone Indicator Line */}
                 <div className="absolute w-1/2 h-px bg-orange-900/50 origin-left rotate-[-15deg] translate-x-1/2" />
-                
+
                 {/* Simulated Chroma Data Cloud */}
-                <div className="absolute w-16 h-16 rounded-full mix-blend-screen blur-md animate-pulse" 
-                     style={{ 
+                <div className="absolute w-16 h-16 rounded-full mix-blend-screen blur-md animate-pulse"
+                     style={{
                        background: 'radial-gradient(circle, rgba(20,184,166,0.8) 0%, rgba(20,184,166,0) 70%)',
                        transform: `translate(${isPlaying ? 0.5*10 - 5 : 0}px, ${isPlaying ? 0.5*10 - 5 : 0}px)`
-                     }} 
+                     }}
                 />
-                <div className="absolute w-12 h-12 rounded-full mix-blend-screen blur-sm animate-pulse delay-75" 
-                     style={{ 
+                <div className="absolute w-12 h-12 rounded-full mix-blend-screen blur-sm animate-pulse delay-75"
+                     style={{
                        background: 'radial-gradient(circle, rgba(234,179,8,0.6) 0%, rgba(234,179,8,0) 70%)',
                        transform: `translate(${isPlaying ? 0.5*20 - 10 : 10}px, ${isPlaying ? 0.5*20 - 10 : -10}px)`
-                     }} 
+                     }}
                 />
               </div>
             </div>
@@ -8485,14 +8485,14 @@ export default function EditorClient({ project }: { project: any }) {
         </div>
       )}
       {/* Phase 45: Auto-Captioning Progress Modal */}
-      
+
       {/* Phase 2: Collaboration Sidebar */}
       {isReviewMode && (
         <div className="absolute top-12 right-0 bottom-0 z-[90]">
           <CollaborationSidebar currentFrame={frame} onNavigateToFrame={(f) => setFrame(f)} />
         </div>
       )}
-      
+
       {isAutoCaptioning && (
         <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center">
           <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">
@@ -8504,8 +8504,8 @@ export default function EditorClient({ project }: { project: any }) {
             <h3 className="text-xl font-black text-white mb-2">Transcribing Audio...</h3>
             <p className="text-sm text-zinc-400 mb-6">Lazynext AI is analyzing speech to text.</p>
             <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-orange-600 to-yellow-500 transition-all duration-100 ease-out" 
+              <div
+                className="h-full bg-gradient-to-r from-orange-600 to-yellow-500 transition-all duration-100 ease-out"
                 style={{ width: `${autoCaptionProgress}%` }}
               />
             </div>
@@ -8513,11 +8513,11 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
         </div>
       )}
-      
+
       {/* Phase 46: Remote Multiplayer Cursors */}
       {isMultiplayer && remoteCursors.map(cursor => (
-        <div 
-          key={cursor.id} 
+        <div
+          key={cursor.id}
           className="fixed pointer-events-none z-[9999]"
           style={{ left: cursor.x, top: cursor.y, transition: 'none' }}
         >
@@ -8531,7 +8531,7 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
         </div>
       ))}
-      
+
       {/* Phase 48: Live Session Terminal (Chat) */}
       {isChatOpen && (
         <div className="absolute top-20 right-4 z-50 w-80 bg-zinc-950/95 backdrop-blur-xl border border-indigo-500/30 rounded-xl shadow-[0_0_40px_rgba(79,70,229,0.15)] flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-right-4">
@@ -8559,9 +8559,9 @@ export default function EditorClient({ project }: { project: any }) {
           </div>
           <div className="p-2 border-t border-zinc-800 bg-zinc-900/30">
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Message team... (@ to mention, /time for frame)" 
+              <input
+                type="text"
+                placeholder="Message team... (@ to mention, /time for frame)"
                 className="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-2 pl-3 pr-10 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors"
               />
               <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-indigo-400 hover:text-indigo-300">
