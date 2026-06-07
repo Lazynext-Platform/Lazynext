@@ -5,6 +5,7 @@
 
 pub mod filter;
 pub mod graph;
+pub mod presets;
 pub mod types;
 
 pub use filter::Filter;
