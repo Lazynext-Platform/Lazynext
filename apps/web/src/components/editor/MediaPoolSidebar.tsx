@@ -112,7 +112,7 @@ export function MediaPoolSidebar({
                   <span className="text-[10px] text-zinc-400 uppercase">Split A/V</span>
                 </label>
               </div>
-              <button onClick={() => setMediaPoolPos(p => ({...p, floating: false}))} className="text-zinc-400 hover:text-white p-0.5 rounded hover:bg-zinc-700">
+              <button onClick={() => setMediaPoolPos((p: any) => ({...p, floating: false}))} className="text-zinc-400 hover:text-white p-0.5 rounded hover:bg-zinc-700">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
            </div>
@@ -319,7 +319,7 @@ export function MediaPoolSidebar({
                       id: `multicam-${Date.now()}`,
                       type: 'multicam',
                       name: `Multi-Cam Sync (${vids.length} Angles)`,
-                      angles: vids.map(v => v.id),
+                      angles: vids.map((v: any) => v.id),
                       duration_frames: vids[0]?.duration_frames || 200
                     };
                     setAssets((prev: any[]) => [newAsset, ...prev]);
@@ -330,11 +330,11 @@ export function MediaPoolSidebar({
                 CREATE MULTI-CAM (SYNC AUDIO)
               </button>
 
-              {assets.filter(a => {
+              {assets.filter((a: any) => {
                 if (mediaFilter !== 'all' && a.type !== mediaFilter) return false;
                 if (mediaSearchQuery && !a.name.toLowerCase().includes(mediaSearchQuery.toLowerCase())) return false;
                 return true;
-          }).map(asset => (
+          }).map((asset: any) => (
             <div
               key={asset.id}
               draggable

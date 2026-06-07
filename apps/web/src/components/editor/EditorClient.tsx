@@ -6466,7 +6466,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
                       setProjectData((prev: any) => {
                          const np = JSON.parse(JSON.stringify(prev));
-                         if (np.tracks[trackContextMenu.trackIdx]) {
+                         if (trackContextMenu?.trackIdx != null && np.tracks[trackContextMenu.trackIdx]) {
                            np.tracks[trackContextMenu.trackIdx].color = color === 'transparent' ? undefined : color;
                          }
                          return np;
@@ -6675,9 +6675,9 @@ export default function EditorClient({ project }: { project: Project }) {
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition-colors"
               onClick={() => {
                 const newProject = JSON.parse(JSON.stringify(projectData));
-                const clip = newProject.tracks[bezierEditor.trackIdx].clips[bezierEditor.clipIdx];
+                const clip = newProject.tracks[bezierEditor!.trackIdx!]?.clips?.[bezierEditor!.clipIdx!];
 
-                const kf = clip.keyframes?.find((k: any) => k.property === bezierEditor.property && Math.abs(k.frame - bezierEditor.frame) < 0.5);
+                const kf = clip.keyframes?.find((k: any) => k.property === bezierEditor.property && Math.abs(k.frame - bezierEditor!.frame!) < 0.5);
                 if (kf) {
                   kf.bezierCurve = bezierEditor.curve;
                   commitState(newProject);
