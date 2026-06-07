@@ -47,10 +47,10 @@ export default function EditorClient({ project }: { project: Project }) {
   const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [cloudComments, setCloudComments] = useState<{ id: string; frame: number; text: string; author?: string }[]>([]);
+  const [cloudComments, setCloudComments] = useState<{ id?: string; frame: number; text: string; author?: string; avatar?: string; timestamp?: number }[]>([]);
   const [markers, setMarkers] = useState<TimelineMarker[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; trackIdx?: number; clipIdx?: number; type?: string } | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,7 +94,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [isRecordingVO, setIsRecordingVO] = useState(false);
   const [isCaptioning, setIsCaptioning] = useState(false);
   const [captionProgress, setCaptionProgress] = useState(0);
-  const [bezierEditor, setBezierEditor] = useState<{ isOpen: boolean } | null>(null);
+  const [bezierEditor, setBezierEditor] = useState<{ isOpen: boolean; trackIdx?: number; clipIdx?: number; property?: string; frame?: number } | null>(null);
   const [showDeliverPage, setShowDeliverPage] = useState(false);
   const [customFonts, setCustomFonts] = useState<string[]>([]);
   const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
@@ -102,7 +102,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [sidebarTab, setSidebarTab] = useState('media');
   const [mediaSearchQuery, setMediaSearchQuery] = useState('');
   const [mediaFilter, setMediaFilter] = useState('all');
-  const [installedPlugins, setInstalledPlugins] = useState<{ id: string; name: string }[]>([]);
+  const [installedPlugins, setInstalledPlugins] = useState<{ id?: string; name?: string; version?: string; enabled?: boolean }[]>([]);
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const [inspectorPos, setInspectorPos] = useState({ floating: false, x: 800, y: 100 });
   const [timelineHeight, setTimelineHeight] = useState(400);
@@ -115,7 +115,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [inspectorWidth, setInspectorWidth] = useState(300);
   const [showDataBurnIn, setShowDataBurnIn] = useState(false);
   const [trackHeightSize, setTrackHeightSize] = useState('medium');
-  const [trackContextMenu, setTrackContextMenu] = useState<{ x: number; y: number; trackId: string } | null>(null);
+  const [trackContextMenu, setTrackContextMenu] = useState<{ x: number; y: number; trackId?: string; trackIdx?: number } | null>(null);
   const [selectedExportPreset, setSelectedExportPreset] = useState('youtube');
   const [renderQueue, setRenderQueue] = useState<{ id: string; name: string; status: string; progress: number }[]>([]);
   const [commandQuery, setCommandQuery] = useState('');

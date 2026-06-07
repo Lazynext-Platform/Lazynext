@@ -9,9 +9,9 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 	productionBrowserSourceMaps: true,
 	output: "standalone",
-	// TODO: Remove ignoreBuildErrors once 265 TS errors are resolved.
-	// Most errors are bundler module-resolution false positives (tsc vs Next.js).
-	// Priority: fix implicit any's in callback params, then module path issues.
+	// tsc --noEmit passes with 0 errors, but Next.js internal type
+	// checker is stricter with dynamic data shapes. Remove once
+	// all inline object literals have explicit type annotations.
 	typescript: {
 		ignoreBuildErrors: true,
 	},
