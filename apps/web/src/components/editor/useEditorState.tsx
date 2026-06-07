@@ -53,6 +53,9 @@ interface EditorState {
   setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
   isSnappingEnabled: boolean;
   setIsSnappingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  // Command Palette
+  showCommandPalette: boolean;
+  setShowCommandPalette: React.Dispatch<React.SetStateAction<boolean>>;
   // Workspace
   activeWorkspace: Workspace;
   setActiveWorkspace: React.Dispatch<React.SetStateAction<Workspace>>;
@@ -83,6 +86,8 @@ export function EditorStateProvider({ children, initialProject }: { children: Re
   // Viewport
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
+  // Command Palette
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   // Workspace
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace>("timeline");
   // Markers & Clipboard
@@ -125,6 +130,8 @@ export function EditorStateProvider({ children, initialProject }: { children: Re
     setZoomLevel,
     isSnappingEnabled,
     setIsSnappingEnabled,
+    showCommandPalette,
+    setShowCommandPalette,
     activeWorkspace,
     setActiveWorkspace,
     markers,

@@ -43,7 +43,8 @@ export default function EditorClient({ project }: { project: Project }) {
   const ctx = useEditorState();
   const { assets, setAssets, isPlaying, setIsPlaying, selectedClipId, setSelectedClipId,
     selectedClipIds, setSelectedClipIds, zoomLevel, setZoomLevel, isSnappingEnabled,
-    setIsSnappingEnabled, activeWorkspace, setActiveWorkspace, markers, setMarkers } = ctx;
+    setIsSnappingEnabled, showCommandPalette, setShowCommandPalette,
+    activeWorkspace, setActiveWorkspace, markers, setMarkers } = ctx;
 
   const [projectData, setProjectData] = useState(project);
   const [isAutoSaving, setIsAutoSaving] = useState(false);
@@ -64,7 +65,6 @@ export default function EditorClient({ project }: { project: Project }) {
   const [nleEngine, setNleEngine] = useState<NLEState | null>(null);
 
 
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [activeTool, setActiveTool] = useState<string>('select');
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
