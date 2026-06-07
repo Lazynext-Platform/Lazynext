@@ -15,14 +15,23 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
   }
 
   // Ensure JSON payload has correct defaults
+  const tracks = project.timeline?.tracks || [];
+  const maxClipEnd = tracks.reduce((max: number, track: { clips?: Array<{ start_frame?: number; duration_frames?: number }> }) => {
+    for (const clip of track.clips || []) {
+      const end = (clip.start_frame || 0) + (clip.duration_frames || 0);
+      if (end > max) max = end;
+    }
+    return max;
+  }, 0);
+
   const projectJson = {
     ...project,
     width: project.timeline?.width || 1920,
     height: project.timeline?.height || 1080,
     fps: project.timeline?.framerate || 60,
-    duration_frames: 120, // TODO: derive from clips
+    duration_frames: maxClipEnd || 120,
     bg_color: [0.09, 0.09, 0.11, 1.0],
-    tracks: project.timeline?.tracks || [],
+    tracks,
   };
 
   return (
