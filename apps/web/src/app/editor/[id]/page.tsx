@@ -1,6 +1,7 @@
 import EditorClient from "@/components/editor/EditorClient";
 import ExportButton from "@/components/editor/export-button";
 import { EditorErrorBoundary } from "@/components/editor/EditorErrorBoundary";
+import { EditorStateProvider } from "@/components/editor/useEditorState";
 import { getProject } from "@/actions/project";
 import { notFound } from "next/navigation";
 
@@ -48,15 +49,17 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
         <ExportButton projectId={project.id} />
       </header>
 
-      {/* Main Body — wrapped in error boundary so a crash doesn't lose the header */}
-      <EditorErrorBoundary section="Editor">
-        <div className="flex flex-1 overflow-hidden relative">
-          <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
-          <div className="relative z-10 flex flex-1 w-full h-full">
-            <EditorClient project={projectJson} />
+      {/* Main Body — wrapped in state provider + error boundary */}
+      <EditorStateProvider>
+        <EditorErrorBoundary section="Editor">
+          <div className="flex flex-1 overflow-hidden relative">
+            <div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
+            <div className="relative z-10 flex flex-1 w-full h-full">
+              <EditorClient project={projectJson} />
+            </div>
           </div>
-        </div>
-      </EditorErrorBoundary>
+        </EditorErrorBoundary>
+      </EditorStateProvider>
     </div>
   );
 }
