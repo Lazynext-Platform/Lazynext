@@ -1,4 +1,9 @@
 // @ts-nocheck
+// TODO: Remove @ts-nocheck. Blockers:
+//   1. project/timeline/clip data uses 'any' throughout — need proper types from @/types/editor
+//   2. WASM state (NLEState) is typed as 'any' — needs lazynext-wasm type exports
+//   3. ~50 remaining eslint no-explicit-any suppressions for callback params
+//   Migration path: adopt EditorStateProvider context → replace inline useState → add types
 /* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 
