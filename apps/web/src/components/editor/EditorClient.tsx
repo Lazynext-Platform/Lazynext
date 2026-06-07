@@ -52,7 +52,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [selectedClipIds, setSelectedClipIds] = useState<string[]>([]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [cloudComments, setCloudComments] = useState<any[]>([]);
+  const [cloudComments, setCloudComments] = useState<{ id: string; frame: number; text: string; author?: string }[]>([]);
   const [markers, setMarkers] = useState<TimelineMarker[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contextMenu, setContextMenu] = useState<any>(null);
@@ -101,7 +101,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const [captionProgress, setCaptionProgress] = useState(0);
   const [bezierEditor, setBezierEditor] = useState<any>(null);
   const [showDeliverPage, setShowDeliverPage] = useState(false);
-  const [customFonts, setCustomFonts] = useState<any[]>([]);
+  const [customFonts, setCustomFonts] = useState<string[]>([]);
   const [mediaPoolPos, setMediaPoolPos] = useState({ floating: false, x: 50, y: 100 });
   const [splitAudioVideoOnImport, setSplitAudioVideoOnImport] = useState(false);
   const [sidebarTab, setSidebarTab] = useState('media');
