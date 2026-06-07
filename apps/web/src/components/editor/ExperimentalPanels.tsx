@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useOptionalEditorState } from "./useEditorState";
 
 // ── Shared drag-to-move hook ──
 
@@ -299,6 +300,11 @@ function DirectorPanel({
 // ── Public Component ──
 
 export function ExperimentalPanels(props: ExperimentalPanelsProps) {
+  // Phase 51-60 migration: context is available for gradual adoption.
+  // Sub-panels can use useOptionalEditorState() to read shared state.
+  // const ctx = useOptionalEditorState();
+  // const isPlaying = ctx?.isPlaying ?? props.isPlaying;
+
   return (
     <>
       {props.isSpatialEditorMode && (
