@@ -57,9 +57,9 @@ export default function EditorClient({ project }: { project: Project }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [contextMenu, setContextMenu] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [collabSync, setCollabSync] = useState<any>(null);
+  const [collabSync, setCollabSync] = useState<CollaborationSync | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [nleEngine, setNleEngine] = useState<any>(null);
+  const [nleEngine, setNleEngine] = useState<NLEState | null>(null);
 
 
   const [isPlaying, setIsPlaying] = useState(false);
