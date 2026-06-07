@@ -348,6 +348,105 @@ export function ExperimentalPanels(props: ExperimentalPanelsProps) {
           onClose={() => props.setIsAutonomousDirector(false)}
         />
       )}
+
+      {props.isColorScopesOpen && (
+        <ColorScopesPanel
+          isOpen={props.isColorScopesOpen}
+          onClose={() => props.setIsColorScopesOpen(false)}
+          isPlaying={props.isPlaying}
+        />
+      )}
+
+      {props.isAutoCaptioning && (
+        <AutoCaptionModal
+          isOpen={props.isAutoCaptioning}
+          progress={props.autoCaptionProgress}
+        />
+      )}
     </>
+  );
+}
+
+// ── Panel: DaVinci-Style Color Scopes ──
+
+function ColorScopesPanel({
+  isOpen,
+  onClose,
+  isPlaying,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  isPlaying: boolean;
+}) {
+  if (!isOpen) return null;
+  return (
+    <div className="absolute top-20 left-4 z-50 bg-zinc-950/90 backdrop-blur-xl border border-teal-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(20,184,166,0.2)] flex flex-col pointer-events-auto">
+      <div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2">
+        <span className="text-xs font-bold text-teal-400 uppercase tracking-widest flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          Color Scopes
+        </span>
+        <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div className="flex gap-4">
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] text-zinc-400 font-bold mb-1">WAVEFORM</span>
+          <div className="w-48 h-32 bg-black border border-zinc-800 rounded relative overflow-hidden flex items-end">
+            {Array.from({ length: 48 }).map((_, idx) => (
+              <div key={idx} className="flex-1 flex flex-col justify-end h-full">
+                <div className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]" style={{ height: `${Math.random() * (isPlaying ? 80 : 30) + 10}%`, opacity: 0.5 + Math.random() * 0.5 }} />
+              </div>
+            ))}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="w-full h-[25%] border-b border-zinc-800/50" />
+              <div className="w-full h-[25%] border-b border-zinc-800/50" />
+              <div className="w-full h-[25%] border-b border-zinc-800/50" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] text-zinc-400 font-bold mb-1">VECTORSCOPE</span>
+          <div className="w-32 h-32 bg-black border border-zinc-800 rounded-full relative overflow-hidden flex items-center justify-center">
+            <div className="absolute inset-0 border border-zinc-800/50 rounded-full m-2" />
+            <div className="absolute w-full h-px bg-zinc-800/80" />
+            <div className="absolute h-full w-px bg-zinc-800/80" />
+            <div className="absolute w-1/2 h-px bg-orange-900/50 origin-left rotate-[-15deg] translate-x-1/2" />
+            <div className="absolute w-16 h-16 rounded-full mix-blend-screen blur-md animate-pulse" style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.8) 0%, rgba(20,184,166,0) 70%)', transform: `translate(${isPlaying ? -5 : 0}px, ${isPlaying ? -5 : 0}px)` }} />
+            <div className="absolute w-12 h-12 rounded-full mix-blend-screen blur-sm animate-pulse" style={{ background: 'radial-gradient(circle, rgba(234,179,8,0.6) 0%, rgba(234,179,8,0) 70%)', transform: `translate(${isPlaying ? 10 : 10}px, ${isPlaying ? -10 : -10}px)` }} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Panel: Auto-Captioning Progress Modal ──
+
+function AutoCaptionModal({
+  isOpen,
+  progress,
+}: {
+  isOpen: boolean;
+  progress: number;
+}) {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center">
+      <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">
+        <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
+          <svg className="w-8 h-8 text-orange-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-black text-white mb-2">Transcribing Audio...</h3>
+        <p className="text-sm text-zinc-400 mb-6">Lazynext AI is analyzing speech to text.</p>
+        <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-orange-600 to-yellow-500 transition-all duration-100 ease-out" style={{ width: `${progress}%` }} />
+        </div>
+        <div className="text-xs font-mono text-orange-400 mt-2">{progress}% Complete</div>
+      </div>
+    </div>
   );
 }

@@ -2240,6 +2240,11 @@ export default function EditorClient({ project }: { project: Project }) {
               directorPos={directorPos}
               setDirectorPos={setDirectorPos}
               directorLogs={directorLogs}
+              isColorScopesOpen={isColorScopesOpen}
+              setIsColorScopesOpen={setIsColorScopesOpen}
+              isPlaying={isPlaying}
+              isAutoCaptioning={isAutoCaptioning}
+              autoCaptionProgress={autoCaptionProgress}
             />
             <MediaPoolSidebar
               mediaPoolPos={mediaPoolPos}
@@ -7325,28 +7330,10 @@ export default function EditorClient({ project }: { project: Project }) {
         </div>
       )}
 
-      {isAutoCaptioning && (
-        <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center">
-          <div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-orange-400 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-black text-white mb-2">Transcribing Audio...</h3>
-            <p className="text-sm text-zinc-400 mb-6">Lazynext AI is analyzing speech to text.</p>
-            <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-orange-600 to-yellow-500 transition-all duration-100 ease-out"
-                style={{ width: `${autoCaptionProgress}%` }}
-              />
-            </div>
-            <div className="text-xs font-mono text-orange-400 mt-2">{autoCaptionProgress}% Complete</div>
-          </div>
-        </div>
-      )}
-
-      {/* Phase 46: Remote Multiplayer Cursors */}
+                  <AutoCaptionModal
+              isOpen={isAutoCaptioning}
+              progress={autoCaptionProgress}
+            />{/* Phase 46: Remote Multiplayer Cursors */}
       {isMultiplayer && remoteCursors.map(cursor => (
         <div
           key={cursor.id}
