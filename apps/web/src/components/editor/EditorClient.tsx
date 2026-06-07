@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NLEState } from 'lazynext-wasm';
 import { toast } from 'sonner';
 import { Layers, Volume2, Video, Type, ZoomIn, ZoomOut, Play, Pause, SkipBack, Scissors, MousePointer2, Spline, ArrowLeft, MoreHorizontal, Settings2, Download, MonitorPlay, Square, Plus, Settings, Maximize2, Trash2, Undo, Redo } from 'lucide-react';
