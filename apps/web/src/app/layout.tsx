@@ -66,3 +66,4 @@ export default function RootLayout({
 		</html>
 	);
 }
+// SEO metadata managed in ./metadata.ts
