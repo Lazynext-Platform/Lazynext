@@ -7,14 +7,9 @@ let _db: ReturnType<typeof drizzle> | null = null;
 
 function getDb() {
 	if (!_db) {
-		const client = postgres(webEnv.DATABASE_URL, {
-			...(process.env.NODE_ENV === "production" ? {
-				host: "/cloudsql/vertexaiopencode:us-central1:lazynext-db"
-			} : {})
-		});
+		const client = postgres(webEnv.DATABASE_URL);
 		_db = drizzle(client, { schema });
 	}
-
 	return _db;
 }
 
