@@ -1,16 +1,23 @@
 import { auth } from "@/auth/server";
 
-async function safeAuth(req: Request): Promise<Response> {
-  try {
-    return await auth.handler(req);
-  } catch (e) {
-    return new Response(JSON.stringify({ 
-      error: "Handler exception", 
-      detail: String(e),
-      stack: (e as Error).stack?.substring(0, 500)
-    }), { status: 500, headers: { "Content-Type": "application/json" } });
+export async function POST(req: Request) {
+  const res = await auth.handler(req);
+  if (res.status >= 400) {
+    const body = await res.clone().text();
+    return new Response(JSON.stringify({ status: res.status, body }), { 
+      status: res.status, headers: { "Content-Type": "application/json" } 
+    });
   }
+  return res;
 }
 
-export const POST = safeAuth;
-export const GET = safeAuth;
+export async function GET(req: Request) {
+  const res = await auth.handler(req);
+  if (res.status >= 400) {
+    const body = await res.clone().text();
+    return new Response(JSON.stringify({ status: res.status, body }), { 
+      status: res.status, headers: { "Content-Type": "application/json" } 
+    });
+  }
+  return res;
+}
