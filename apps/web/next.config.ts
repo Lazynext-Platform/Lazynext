@@ -10,6 +10,12 @@ const nextConfig: NextConfig = {
 	productionBrowserSourceMaps: true,
 	output: "standalone",
 
+		// Prevent CDN from caching error responses for 1 year
+		experimental: {
+			staleTimes: { dynamic: 0, static: 60 },
+		},
+
+
 		async headers() {
 			return [{
 				source: "/(.*)",
