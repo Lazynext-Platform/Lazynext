@@ -1,23 +1,24 @@
 import { auth } from "@/auth/server";
 
-async function handle(method: string, req: Request) {
-  try {
-    const res = await auth.handler(req);
-    // Log non-200 responses
-    if (res.status >= 400) {
-      const body = await res.clone().text();
-      console.error(`[Auth ${method}] ${res.status}: ${body.substring(0, 500)}`);
-    }
-    return res;
-  } catch (e) {
-    console.error(`[Auth ${method}] Exception:`, e);
+export async function POST(req: Request) {
+  const res = await auth.handler(req);
+  // If error, return the body so we can debug
+  if (res.status >= 400) {
+    const body = await res.text();
     return new Response(JSON.stringify({ 
-      error: "Auth exception", 
-      detail: e instanceof Error ? e.message : String(e),
-      stack: e instanceof Error ? e.stack?.substring(0, 500) : undefined
-    }), { status: 500, headers: { "Content-Type": "application/json" } });
+      status: res.status, 
+      body: body.substring(0, 1000),
+      headers: Object.fromEntries(res.headers.entries())
+    }), { status: res.status, headers: { "Content-Type": "application/json" } });
   }
+  return res;
 }
 
-export async function POST(req: Request) { return handle("POST", req); }
-export async function GET(req: Request) { return handle("GET", req); }
+export async function GET(req: Request) {
+  const res = await auth.handler(req);
+  if (res.status >= 400) {
+    const body = await res.text();
+    return new Response(JSON.stringify({ status: res.status, body: body.substring(0, 500) }), { status: res.status, headers: { "Content-Type": "application/json" } });
+  }
+  return res;
+}
