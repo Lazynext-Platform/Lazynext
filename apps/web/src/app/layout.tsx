@@ -5,7 +5,6 @@ import { Toaster } from "../components/ui/sonner";
 import { ChangelogNotification } from "@/changelog/components/changelog-notification";
 import { TooltipProvider } from "../components/ui/tooltip";
 import { BotIdClient } from "botid/client";
-import { webEnv } from "@/env/web";
 import { Inter } from "next/font/google";
 import { OrganizationLD, SoftwareAppLD, WebSiteLD } from "@/seo/SchemaOrg";
 import { generateMetadata } from "@/seo/metadata";
@@ -46,7 +45,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 						<Toaster />
 						<Script src="https://cdn.databuddy.cc/databuddy.js" strategy="afterInteractive" async
 							data-client-id="UP-Wcoy5arxFeK7oyjMMZ"
-							data-disabled={webEnv.NODE_ENV === "development"}
+							data-disabled={process.env.NODE_ENV === "development"}
 							data-track-attributes={false} data-track-errors={true}
 							data-track-outgoing-links={false} data-track-web-vitals={false}
 							data-track-sessions={false} />
