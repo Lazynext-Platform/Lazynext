@@ -1,0 +1,7 @@
+Contact: mailto:security@lazynext.com
+Expires: 2027-12-31T23:59:59.000Z
+Encryption: https://lazynext.com/pgp-key.txt
+Acknowledgments: https://lazynext.com/security/hall-of-fame
+Policy: https://lazynext.com/security
+Preferred-Languages: en
+Canonical: https://lazynext.com/.well-known/security.txt

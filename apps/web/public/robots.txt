@@ -1,0 +1,49 @@
+# Lazynext — Robots.txt
+# Allow all search engines to crawl public pages
+# Block API routes, editor workspace, and Next.js internals
+
+User-agent: *
+Allow: /
+Allow: /sign-in
+Allow: /sign-up
+Allow: /dashboard
+Allow: /billing
+Allow: /docs
+Allow: /blog
+Allow: /changelog
+Allow: /privacy
+Allow: /terms
+Allow: /sponsors
+Allow: /contributors
+Allow: /roadmap
+Allow: /brand
+Allow: /settings
+Disallow: /api/
+Disallow: /editor/
+Disallow: /_next/
+Disallow: /*.json$
+Disallow: /*.xml$
+
+# Crawl delay (polite crawling)
+Crawl-delay: 10
+
+# Sitemaps
+Sitemap: https://lazynext.com/sitemap.xml
+Sitemap: https://lazynext.com/rss.xml
+
+# Specific crawlers
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 5
+
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 10
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 10
