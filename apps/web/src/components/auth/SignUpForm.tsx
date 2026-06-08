@@ -32,8 +32,8 @@ export function SignUpForm() {
 				toast.success("Account created! Redirecting...");
 				router.push("/projects");
 			}
-		} catch {
-			toast.error("An unexpected error occurred");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Signup failed — server may be unreachable");
 		} finally {
 			setLoading(false);
 		}

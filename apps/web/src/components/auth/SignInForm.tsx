@@ -27,7 +27,7 @@ export function SignInForm() {
 				router.push("/projects");
 			}
 		} catch (err) {
-			toast.error("An unexpected error occurred");
+			toast.error(err instanceof Error ? err.message : "Sign in failed — server may be unreachable");
 		} finally {
 			setLoading(false);
 		}
