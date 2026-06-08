@@ -1,6 +1,8 @@
 import { createAuthClient } from "better-auth/react";
-import { webEnv } from "@/env/web";
 
-export const { signIn, signUp, useSession } = createAuthClient({
-	baseURL: webEnv.NEXT_PUBLIC_SITE_URL,
-});
+// Use process.env directly — Next.js inlines NEXT_PUBLIC_* at build time.
+// Importing webEnv from @/env/web fails client-side because zod validation
+// accesses process.env vars that are undefined in the browser.
+const baseURL = process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com";
+
+export const { signIn, signUp, useSession } = createAuthClient({ baseURL });
