@@ -33,7 +33,7 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Build-time env stubs to pass validation
-ENV DATABASE_URL="postgresql://lazynext:lazynext@localhost:5432/lazynext"
+ENV DATABASE_URL="postgresql://lazynext:lazynext@34.123.147.221:5432/lazynext"
 ENV BETTER_AUTH_SECRET="build-time-secret"
 ENV UPSTASH_REDIS_REST_URL="http://localhost:8079"
 ENV UPSTASH_REDIS_REST_TOKEN="example_token"
