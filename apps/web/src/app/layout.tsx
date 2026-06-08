@@ -7,8 +7,9 @@ import { TooltipProvider } from "../components/ui/tooltip";
 import { BotIdClient } from "botid/client";
 import { webEnv } from "@/env/web";
 import { Inter } from "next/font/google";
-import { OrganizationSchema, SoftwareAppSchema } from "@/seo/StructuredData";
+import { OrganizationLD, SoftwareAppLD, WebSiteLD } from "@/seo/SchemaOrg";
 import { generateMetadata } from "@/seo/metadata";
+import { SEOHeadTags, PreloadHeroImage } from "@/seo/HeadMeta";
 import { CookieConsent } from "@/components/analytics/CookieConsent";
 import { WebVitals } from "@/components/analytics/WebVitals";
 
@@ -23,10 +24,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<BotIdClient protect={protectedRoutes} />
-				<OrganizationSchema />
-				<SoftwareAppSchema />
+				<OrganizationLD />
+				<SoftwareAppLD />
+				<WebSiteLD />
+				<SEOHeadTags />
+				<PreloadHeroImage />
 				<link rel="icon" type="image/x-icon" href="/favicon.ico" />
 				<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+				<link rel="manifest" href="/manifest.json" />
 				<meta name="theme-color" content="#7c3aed" />
 				<meta name="color-scheme" content="dark" />
 				{process.env.NODE_ENV === "development" && (
