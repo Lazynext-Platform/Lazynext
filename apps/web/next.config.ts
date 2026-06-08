@@ -3,6 +3,10 @@ import { withBotId } from "botid/next/config";
 import { withContentCollections } from "@content-collections/next";
 
 const nextConfig: NextConfig = {
+		env: {
+			NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com",
+		},
+
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
 	},
