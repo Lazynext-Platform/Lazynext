@@ -1,14 +1,8 @@
-import { betterAuth, type RateLimit } from "better-auth";
+import { betterAuth } from "better-auth";
 import { anonymous } from "better-auth/plugins";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { Redis } from "@upstash/redis";
 import { db } from "@/db";
 import { webEnv } from "@/env/web";
-
-const redis = new Redis({
-	url: webEnv.UPSTASH_REDIS_REST_URL,
-	token: webEnv.UPSTASH_REDIS_REST_TOKEN,
-});
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
@@ -17,7 +11,7 @@ export const auth = betterAuth({
 	}),
 	secret: webEnv.BETTER_AUTH_SECRET,
 	plugins: [
-		anonymous(), // Enables anonymous sign-in support
+		anonymous(),
 	],
 	user: {
 		deleteUser: {
@@ -27,18 +21,10 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
+	// Use database-backed rate limiting — avoids Redis dependency
+	// that fails when Redis is not running in Cloud Run
 	rateLimit: {
-		storage: "secondary-storage",
-		customStorage: {
-			get: async (key) => {
-				const value = await redis.get(key);
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-				return value as RateLimit | undefined;
-			},
-			set: async (key, value) => {
-				await redis.set(key, value);
-			},
-		},
+		storage: "database",
 	},
 	baseURL: webEnv.NEXT_PUBLIC_SITE_URL,
 	appName: "Lazynext",
