@@ -15,7 +15,7 @@ export function SettingsPageClient() {
 
 	if (isPending) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-zinc-950">
+			<div className="flex min-h-screen items-center justify-center bg-background">
 				<div className="text-zinc-400">Loading...</div>
 			</div>
 		);
@@ -48,7 +48,7 @@ export function SettingsPageClient() {
 	};
 
 	return (
-		<div className="min-h-screen bg-zinc-950 text-zinc-100">
+		<div className="min-h-screen bg-background text-foreground">
 			<div className="mx-auto max-w-2xl px-4 py-16">
 				<Link
 					href="/projects"

@@ -38,7 +38,7 @@ export function BillingPageClient() {
 
 	if (isPending) {
 		return (
-			<div className="flex min-h-screen items-center justify-center bg-zinc-950">
+			<div className="flex min-h-screen items-center justify-center bg-background">
 				<div className="text-zinc-400">Loading...</div>
 			</div>
 		);
@@ -50,7 +50,7 @@ export function BillingPageClient() {
 	}
 
 	return (
-		<div className="min-h-screen bg-zinc-950 text-zinc-100">
+		<div className="min-h-screen bg-background text-foreground">
 			<div className="mx-auto max-w-5xl px-4 py-16">
 				<Link
 					href="/projects"
@@ -116,7 +116,7 @@ export function BillingPageClient() {
 				{/* Payment History */}
 				<section className="mt-12 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6">
 					<h2 className="text-lg font-semibold text-white">Payment History</h2>
-					<div className="mt-4 rounded-lg border border-zinc-800 bg-zinc-950/50 p-8 text-center">
+					<div className="mt-4 rounded-lg border border-zinc-800 bg-background/50 p-8 text-center">
 						<p className="text-sm text-zinc-500">No payments yet. Upgrade to a paid plan to see your history here.</p>
 					</div>
 				</section>

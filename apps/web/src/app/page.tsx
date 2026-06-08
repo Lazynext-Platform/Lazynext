@@ -21,7 +21,7 @@ const FAQ_ITEMS = [
 
 export default function Home() {
 	return (
-		<div className="bg-zinc-950">
+		<div className="bg-background">
 			<Header />
 			<HeroSection />
 			<FeaturesGrid />

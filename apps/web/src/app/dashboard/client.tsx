@@ -25,11 +25,11 @@ export function DashboardClient() {
 	const { data: session, isPending } = useSession();
 	const router = useRouter();
 
-	if (isPending) return <div className="flex min-h-screen items-center justify-center bg-zinc-950"><div className="text-zinc-400">Loading...</div></div>;
+	if (isPending) return <div className="flex min-h-screen items-center justify-center bg-background"><div className="text-zinc-400">Loading...</div></div>;
 	if (!session) { router.push("/sign-in"); return null; }
 
 	return (
-		<div className="min-h-screen bg-zinc-950 text-zinc-100">
+		<div className="min-h-screen bg-background text-foreground">
 			<div className="mx-auto max-w-5xl px-4 py-12">
 				<div className="mb-10">
 					<h1 className="text-3xl font-bold text-white">Welcome back{session.user?.name ? `, ${session.user.name}` : ""}</h1>
