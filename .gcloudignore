@@ -11,3 +11,5 @@ rust/target/
 rust/wasm/target/
 *.log
 .DS_Store
+.env.local
+.env
