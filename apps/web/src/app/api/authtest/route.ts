@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth/server";
 
 export async function GET() {
-  try {
-    return NextResponse.json({ 
-      type: typeof auth, 
-      keys: Object.keys(auth).slice(0, 10),
-      hasHandler: "handler" in auth,
-    });
-  } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
-  }
+  const url = process.env.DATABASE_URL || "NOT SET";
+  // Safe: show prefix and length, not full URL
+  return NextResponse.json({
+    url_prefix: url.substring(0, 30),
+    url_length: url.length,
+    has_at: url.includes("@"),
+    has_slash: url.includes("/"),
+    starts_postgres: url.startsWith("postgresql://") || url.startsWith("postgres://"),
+  });
 }
