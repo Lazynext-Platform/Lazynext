@@ -1,32 +1,21 @@
 import { auth } from "@/auth/server";
 import { toNextJsHandler } from "better-auth/next-js";
 
-// Error-wrapped handler to surface Better Auth errors
-const handler = (() => {
-  try {
-    const h = toNextJsHandler(auth);
-    console.log("[Auth] Handler initialized OK");
-    return h;
-  } catch (e) {
-    console.error("[Auth] Init failed:", e);
-    throw e;
-  }
-})();
+console.log("[Auth Route] auth type:", typeof auth);
+console.log("[Auth Route] auth keys:", auth ? Object.keys(auth) : "null/undefined");
 
-export async function POST(req: Request) {
-  try {
-    return await handler.POST(req);
-  } catch (e) {
-    console.error("[Auth POST]", e);
-    return new Response(JSON.stringify({ error: "Auth error", detail: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } });
-  }
+let handler: ReturnType<typeof toNextJsHandler>;
+try {
+  handler = toNextJsHandler(auth);
+  console.log("[Auth Route] Handler created. POST:", typeof handler.POST, "GET:", typeof handler.GET);
+} catch (e) {
+  console.error("[Auth Route] toNextJsHandler failed:", e);
+  // Return a basic handler that shows the error
+  handler = {
+    POST: async () => new Response(JSON.stringify({ error: "toNextJsHandler failed", detail: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } }),
+    GET: async () => new Response(JSON.stringify({ error: "toNextJsHandler failed", detail: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } }),
+  };
 }
 
-export async function GET(req: Request) {
-  try {
-    return await handler.GET(req);
-  } catch (e) {
-    console.error("[Auth GET]", e);
-    return new Response(JSON.stringify({ error: "Auth error", detail: String(e) }), { status: 500, headers: { "Content-Type": "application/json" } });
-  }
-}
+export const POST = handler.POST;
+export const GET = handler.GET;
