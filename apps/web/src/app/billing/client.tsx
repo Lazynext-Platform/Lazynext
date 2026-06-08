@@ -71,12 +71,12 @@ export function BillingPageClient() {
 							key={plan.name}
 							className={`relative rounded-2xl border p-6 ${
 								plan.highlight
-									? "border-violet-500/50 bg-violet-500/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]"
+									? "border-blue-500/50 bg-blue-500/5 shadow-[0_0_30px_rgba(139,92,246,0.15)]"
 									: "border-zinc-800 bg-zinc-900/50"
 							}`}
 						>
 							{plan.highlight && (
-								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-600 px-3 py-0.5 text-xs font-semibold text-white">
+								<div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-semibold text-white">
 									Most Popular
 								</div>
 							)}
@@ -103,7 +103,7 @@ export function BillingPageClient() {
 									plan.current
 										? "border border-zinc-700 bg-zinc-800 text-zinc-500 cursor-default"
 										: plan.highlight
-											? "bg-violet-600 text-white hover:bg-violet-500"
+											? "bg-blue-600 text-white hover:bg-blue-500"
 											: "border border-zinc-700 bg-zinc-800 text-white hover:bg-zinc-700"
 								}`}
 							>

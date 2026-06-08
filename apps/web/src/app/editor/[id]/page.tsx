@@ -36,11 +36,11 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
   };
 
   return (
-    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-white selection:bg-violet-500/30">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-zinc-950 text-white selection:bg-blue-500/30">
       {/* Header */}
       <header className="flex h-14 w-full items-center justify-between border-b border-white/5 bg-zinc-950/80 backdrop-blur-md px-6 shadow-sm z-50">
         <div className="flex items-center gap-6">
-          <span className="font-extrabold tracking-tight bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+          <span className="font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
             Lazynext
           </span>
           <div className="h-4 w-px bg-white/10" />

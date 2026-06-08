@@ -61,7 +61,7 @@ export function UniversalSocialMeta({
 
 			{/* ── Microsoft / LinkedIn ── */}
 			<meta name="msapplication-TileImage" content="/apple-touch-icon.png" />
-			<meta name="msapplication-TileColor" content="#7c3aed" />
+			<meta name="msapplication-TileColor" content="#269bf9" />
 
 			{/* ── Apple / iOS ── */}
 			<meta name="apple-mobile-web-app-title" content="Lazynext" />
@@ -72,7 +72,7 @@ export function UniversalSocialMeta({
 
 			{/* ── Android / Chrome ── */}
 			<meta name="mobile-web-app-capable" content="yes" />
-			<meta name="theme-color" content="#7c3aed" />
+			<meta name="theme-color" content="#269bf9" />
 			<meta name="application-name" content="Lazynext" />
 			<link rel="manifest" href="/manifest.json" />
 		</>

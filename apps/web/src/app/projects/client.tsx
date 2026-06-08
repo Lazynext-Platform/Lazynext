@@ -122,7 +122,7 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 	}, [editor.project, initialProjects]);
 
 	return (
-		<div className="bg-zinc-950 min-h-screen text-zinc-100 selection:bg-violet-500/30 relative">
+		<div className="bg-zinc-950 min-h-screen text-zinc-100 selection:bg-blue-500/30 relative">
 			{/* Ambient Background */}
 			<div className="fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-zinc-950 to-zinc-950 pointer-events-none" />
 			<div className="fixed inset-0 z-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay pointer-events-none" />
@@ -614,7 +614,7 @@ function ProjectItem({
 						/>
 					) : (
 						<div className="flex size-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
-							<OcVideoIcon className="text-zinc-600 size-12 shrink-0 group-hover:text-violet-400/50 transition-colors" />
+							<OcVideoIcon className="text-zinc-600 size-12 shrink-0 group-hover:text-blue-400/50 transition-colors" />
 						</div>
 					)}
 					{/* Glassmorphism overlay on hover */}
@@ -629,7 +629,7 @@ function ProjectItem({
 			</div>
 
 			<CardContent className="flex flex-col gap-2 p-5">
-				<h3 className="text-zinc-100 group-hover:text-violet-300 line-clamp-2 text-base leading-snug font-semibold transition-colors">
+				<h3 className="text-zinc-100 group-hover:text-blue-300 line-clamp-2 text-base leading-snug font-semibold transition-colors">
 					{project.name}
 				</h3>
 				<div className="text-zinc-400 flex items-center gap-2 text-xs font-medium">
@@ -674,7 +674,7 @@ function ProjectItem({
 	const listContent = (
 		<div
 			className={`flex items-center gap-4 py-3 px-5 rounded-xl border border-white/5 transition-all duration-200 group ${
-				isSelected ? "bg-violet-500/10 border-violet-500/20 shadow-[0_0_20px_-5px_rgba(139,92,246,0.1)]" : "bg-zinc-900/40 hover:bg-zinc-800/60 backdrop-blur-sm hover:border-white/10"
+				isSelected ? "bg-blue-500/10 border-blue-500/20 shadow-[0_0_20px_-5px_rgba(139,92,246,0.1)]" : "bg-zinc-900/40 hover:bg-zinc-800/60 backdrop-blur-sm hover:border-white/10"
 			}`}
 		>
 			<Checkbox

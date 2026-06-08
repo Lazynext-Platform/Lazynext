@@ -10,7 +10,7 @@ export function Hero() {
 	return (
 		<div className="relative flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-between px-4 text-center overflow-hidden bg-zinc-950">
 			{/* Stunning Ambient Background Gradients */}
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-violet-600/30 via-fuchsia-600/10 to-transparent blur-[120px] -z-40 rounded-full animate-pulse duration-10000" />
+			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/30 via-fuchsia-600/10 to-transparent blur-[120px] -z-40 rounded-full animate-pulse duration-10000" />
 			<div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-blue-500/20 to-transparent blur-[100px] -z-40 rounded-full" />
 			<div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-rose-500/20 to-transparent blur-[100px] -z-40 rounded-full" />
 
@@ -19,9 +19,9 @@ export function Hero() {
 
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center items-center z-10">
 				{/* Premium Glass Badge */}
-				<div className="mb-8 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-zinc-200 backdrop-blur-xl shadow-2xl shadow-violet-500/20 transition-transform hover:scale-105 cursor-default animate-in fade-in slide-in-from-bottom-4 duration-700">
-					<Sparkles className="mr-2 h-4 w-4 text-violet-400 animate-pulse" />
-					<span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+				<div className="mb-8 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-zinc-200 backdrop-blur-xl shadow-2xl shadow-blue-500/20 transition-transform hover:scale-105 cursor-default animate-in fade-in slide-in-from-bottom-4 duration-700">
+					<Sparkles className="mr-2 h-4 w-4 text-blue-400 animate-pulse" />
+					<span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
 						Now powered by AI Auto-Subtitles
 					</span>
 				</div>

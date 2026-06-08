@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
 		return (
 			<AuthCard title="Check your email" subtitle="We sent a password reset link if that account exists.">
 				<div className="text-center">
-					<Link href="/sign-in" className="text-sm text-violet-400 hover:text-violet-300">Back to Sign In</Link>
+					<Link href="/sign-in" className="text-sm text-blue-400 hover:text-blue-300">Back to Sign In</Link>
 				</div>
 			</AuthCard>
 		);
@@ -50,14 +50,14 @@ export default function ForgotPasswordPage() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-violet-500"
+					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500"
 					placeholder="you@example.com"
 				/>
-				<button type="submit" disabled={loading} className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-50">
+				<button type="submit" disabled={loading} className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50">
 					{loading ? "Sending..." : "Send Reset Link"}
 				</button>
 				<p className="text-center text-xs text-zinc-500">
-					<Link href="/sign-in" className="text-violet-400 hover:text-violet-300">Back to Sign In</Link>
+					<Link href="/sign-in" className="text-blue-400 hover:text-blue-300">Back to Sign In</Link>
 				</p>
 			</form>
 		</AuthCard>

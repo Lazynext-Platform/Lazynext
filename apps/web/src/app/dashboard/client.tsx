@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const QUICK_ACTIONS = [
-	{ label: "New Project", href: "/projects?new=1", icon: "🎬", color: "bg-violet-600 hover:bg-violet-500" },
+	{ label: "New Project", href: "/projects?new=1", icon: "🎬", color: "bg-blue-600 hover:bg-blue-500" },
 	{ label: "My Projects", href: "/projects", icon: "📁", color: "bg-blue-600 hover:bg-blue-500" },
 	{ label: "AI Tools", href: "/editor/new", icon: "🤖", color: "bg-emerald-600 hover:bg-emerald-500" },
 	{ label: "Billing", href: "/billing", icon: "💳", color: "bg-amber-600 hover:bg-amber-500" },
@@ -64,7 +64,7 @@ export function DashboardClient() {
 					<div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
 						<p className="text-sm text-zinc-500">No recent projects. Create your first one!</p>
 						<Link href="/projects?new=1"
-							className="mt-4 inline-block rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-colors">
+							className="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors">
 							Create Project
 						</Link>
 					</div>

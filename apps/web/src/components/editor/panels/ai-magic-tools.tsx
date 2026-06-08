@@ -87,8 +87,8 @@ export function AIMagicTools({ projectData, setProjectData, updateSelectedClip, 
   return (
     <div className="flex flex-col bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden h-full shadow-xl">
       <div className="flex items-center px-4 h-10 border-b border-zinc-800 bg-zinc-950/50">
-        <Sparkles className="w-4 h-4 text-fuchsia-400 mr-2" />
-        <span className="text-xs font-bold text-fuchsia-400 tracking-wider uppercase">AI Magic Tools</span>
+        <Sparkles className="w-4 h-4 text-cyan-400 mr-2" />
+        <span className="text-xs font-bold text-cyan-400 tracking-wider uppercase">AI Magic Tools</span>
       </div>
       
       <div className="flex-1 p-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
@@ -96,7 +96,7 @@ export function AIMagicTools({ projectData, setProjectData, updateSelectedClip, 
         <div className="bg-zinc-950 p-4 rounded-lg border border-fuchsia-500/20 shadow-[0_0_15px_rgba(217,70,239,0.05)] relative overflow-hidden">
           <div className="absolute top-0 right-0 p-1.5 bg-fuchsia-500 text-[9px] font-bold text-white rounded-bl-lg">BETA</div>
           <div className="flex items-center gap-2 mb-2">
-            <UserSquare2 className="w-4 h-4 text-fuchsia-400" />
+            <UserSquare2 className="w-4 h-4 text-cyan-400" />
             <h3 className="text-sm font-semibold text-zinc-200">AI Talking Avatars</h3>
           </div>
           <p className="text-xs text-zinc-500 mb-4">Generate a photorealistic presenter from a text script.</p>

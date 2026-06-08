@@ -32,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 				<link rel="icon" type="image/x-icon" href="/favicon.ico" />
 				<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 				<link rel="manifest" href="/manifest.json" />
-				<meta name="theme-color" content="#7c3aed" />
+				<meta name="theme-color" content="#269bf9" />
 				<meta name="color-scheme" content="dark" />
 				{process.env.NODE_ENV === "development" && (
 					<Script src="//unpkg.com/react-scan/dist/auto.global.js" crossOrigin="anonymous" strategy="beforeInteractive" />

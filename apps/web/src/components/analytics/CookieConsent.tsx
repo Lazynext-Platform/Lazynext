@@ -29,7 +29,7 @@ export function CookieConsent() {
 				<div className="flex-1">
 					<p className="text-sm text-zinc-300">
 						We use cookies to enhance your experience, analyze site usage, and improve our services.{" "}
-						<Link href="/privacy" className="text-violet-400 underline hover:text-violet-300">
+						<Link href="/privacy" className="text-blue-400 underline hover:text-blue-300">
 							Privacy Policy
 						</Link>
 					</p>
@@ -45,7 +45,7 @@ export function CookieConsent() {
 					<button
 						type="button"
 						onClick={acceptAll}
-						className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-500 transition-colors"
+						className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
 					>
 						Accept All
 					</button>

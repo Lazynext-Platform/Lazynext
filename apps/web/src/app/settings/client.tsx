@@ -72,7 +72,7 @@ export function SettingsPageClient() {
 									type="text"
 									value={name}
 									onChange={(e) => setName(e.target.value)}
-									className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-violet-500"
+									className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
 									placeholder="Your display name"
 								/>
 							</div>
@@ -89,7 +89,7 @@ export function SettingsPageClient() {
 							<button
 								type="submit"
 								disabled={saving}
-								className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
+								className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
 							>
 								{saving ? "Saving..." : "Save Changes"}
 							</button>
@@ -106,14 +106,14 @@ export function SettingsPageClient() {
 									<span className="text-sm font-medium text-white">Autosave</span>
 									<p className="text-xs text-zinc-400">Save projects automatically every 30 seconds</p>
 								</div>
-								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-violet-500" />
+								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-blue-500" />
 							</label>
 							<label className="flex items-center justify-between rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-3">
 								<div>
 									<span className="text-sm font-medium text-white">Snap to Grid</span>
 									<p className="text-xs text-zinc-400">Snap timeline elements to the nearest frame</p>
 								</div>
-								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-violet-500" />
+								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-blue-500" />
 							</label>
 						</div>
 					</section>

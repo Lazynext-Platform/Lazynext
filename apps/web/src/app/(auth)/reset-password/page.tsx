@@ -40,10 +40,10 @@ export default function ResetPasswordPage() {
 			) : (
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
-						className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-violet-500"
+						className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500"
 						placeholder="New password (min 8 chars)" />
 					<button type="submit" disabled={loading}
-						className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-50">
+						className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50">
 						{loading ? "Resetting..." : "Reset Password"}
 					</button>
 				</form>

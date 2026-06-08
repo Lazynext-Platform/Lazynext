@@ -214,7 +214,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
       <button
         className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mr-2 ${
           props.isGodMode
-            ? "bg-gradient-to-r from-yellow-500 via-red-500 to-fuchsia-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105"
+            ? "bg-gradient-to-r from-yellow-500 via-red-500 to-cyan-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105"
             : "bg-zinc-900/80 border-zinc-600/50 hover:bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]"
         }`}
         onClick={props.activateGodMode}

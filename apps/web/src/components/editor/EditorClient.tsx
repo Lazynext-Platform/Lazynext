@@ -2523,7 +2523,7 @@ export default function EditorClient({ project }: { project: Project }) {
                 >Audio (Fairlight)</button>
                 <button
                   onClick={() => { setActiveWorkspace('ai'); }}
-                  className="w-full text-left px-3 py-2 text-xs text-fuchsia-400 font-semibold hover:bg-fuchsia-600 hover:text-white"
+                  className="w-full text-left px-3 py-2 text-xs text-cyan-400 font-semibold hover:bg-fuchsia-600 hover:text-white"
                 >AI Magic Tools</button>
                 <button
                   onClick={() => { setActiveWorkspace('export'); }}
@@ -5348,7 +5348,7 @@ export default function EditorClient({ project }: { project: Project }) {
                 {/* VR 360° Video Editing (Phase 209) */}
                 <div className="mb-4 flex items-center justify-between p-3 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded">
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-wider">VR 360° Workspace</span>
+                    <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">VR 360° Workspace</span>
                     <span className="text-[10px] text-fuchsia-500/80">Enable equirectangular panning viewer</span>
 
                   </div>
@@ -5650,7 +5650,7 @@ export default function EditorClient({ project }: { project: Project }) {
           ) : activeWorkspace === 'ai' ? (
              <div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-fuchsia-400 uppercase tracking-widest flex items-center gap-2">
+                <h2 className="text-sm font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
                   AI Magic Tools
                 </h2>
@@ -5812,7 +5812,7 @@ export default function EditorClient({ project }: { project: Project }) {
               </button>
               {/* Phase 27: Cinematic Multiverse */}
               <button
-                className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isMultiverseMode ? 'bg-fuchsia-600 text-white border-fuchsia-500' : 'bg-zinc-800 text-fuchsia-400 border-zinc-700 hover:bg-zinc-700'}`}
+                className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isMultiverseMode ? 'bg-fuchsia-600 text-white border-fuchsia-500' : 'bg-zinc-800 text-cyan-400 border-zinc-700 hover:bg-zinc-700'}`}
                 onClick={() => setIsMultiverseMode(!isMultiverseMode)}
                 title="Branch Timeline (A/B Multiverse Prototyping)"
               >
@@ -6158,7 +6158,7 @@ export default function EditorClient({ project }: { project: Project }) {
             <button className="w-4 h-4 rounded-full bg-emerald-600 border border-emerald-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-emerald-600/80 border-emerald-400 hover:bg-emerald-500" }); setContextMenu(null); }} title="Green" />
             <button className="w-4 h-4 rounded-full bg-amber-500 border border-amber-300 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-amber-500/80 border-amber-300 hover:bg-amber-400" }); setContextMenu(null); }} title="Yellow" />
             <button className="w-4 h-4 rounded-full bg-cyan-600 border border-cyan-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-cyan-600/80 border-cyan-400 hover:bg-cyan-500" }); setContextMenu(null); }} title="Cyan" />
-            <button className="w-4 h-4 rounded-full bg-fuchsia-600 border border-fuchsia-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-fuchsia-600/80 border-fuchsia-400 hover:bg-fuchsia-500" }); setContextMenu(null); }} title="Magenta" />
+            <button className="w-4 h-4 rounded-full bg-fuchsia-600 border border-cyan-400 hover:scale-110 transition-transform" onClick={() => { updateSelectedClip({ color: "bg-fuchsia-600/80 border-cyan-400 hover:bg-fuchsia-500" }); setContextMenu(null); }} title="Magenta" />
           </div>
 
           <div className="h-px bg-zinc-700 my-1"></div>
@@ -6413,7 +6413,7 @@ export default function EditorClient({ project }: { project: Project }) {
                     { id: 'twitter', name: 'X/Twitter', icon: '𝕏', format: 'MP4 H.264', res: '1920×1080', fps: '30', bitrate: '12 Mbps', color: 'from-blue-600/20 to-blue-900/10 border-blue-800/40' },
                     { id: 'prores_master', name: 'ProRes Master', icon: '🎬', format: 'MOV ProRes 422', res: '1920×1080', fps: '24', bitrate: '147 Mbps', color: 'from-amber-600/20 to-amber-900/10 border-amber-800/40' },
                     { id: 'webm_web', name: 'Web (VP9)', icon: '🌐', format: 'WebM VP9', res: '1920×1080', fps: '30', bitrate: '8 Mbps', color: 'from-emerald-600/20 to-emerald-900/10 border-emerald-800/40' },
-                    { id: 'gif', name: 'GIF', icon: '🖼️', format: 'GIF', res: '480×270', fps: '15', bitrate: 'N/A', color: 'from-violet-600/20 to-violet-900/10 border-violet-800/40' },
+                    { id: 'gif', name: 'GIF', icon: '🖼️', format: 'GIF', res: '480×270', fps: '15', bitrate: 'N/A', color: 'from-blue-600/20 to-blue-900/10 border-blue-800/40' },
                   ].map(preset => (
                     <button
                       key={preset.id}
@@ -6715,8 +6715,8 @@ export default function EditorClient({ project }: { project: Project }) {
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGgyMHYyMEgyMHoiIGZpbGw9IiNkOTQ2ZWYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-30 mix-blend-screen pointer-events-none" />
 
             <div className="w-64 border-r border-fuchsia-500/20 bg-black/40 p-4 flex flex-col z-10">
-              <h3 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-400 to-purple-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <svg className="w-5 h-5 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
+              <h3 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <svg className="w-5 h-5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
                 Asset Forge
               </h3>
 
@@ -6752,10 +6752,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
             <div className="flex-1 flex flex-col relative z-10 p-6">
               <div className="flex-1 border-2 border-dashed border-fuchsia-500/20 rounded-xl bg-black/20 flex items-center justify-center relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-fuchsia-500/10 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/10 pointer-events-none" />
                 <div className="text-center">
                   <div className="w-24 h-24 mx-auto border-4 border-fuchsia-500/30 rounded-full flex items-center justify-center animate-spin-slow mb-4 shadow-[0_0_30px_rgba(217,70,239,0.2)]">
-                    <svg className="w-10 h-10 text-fuchsia-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
+                    <svg className="w-10 h-10 text-cyan-400 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>
                   </div>
                   <p className="text-zinc-500 text-sm">Holographic projection area</p>
                   <p className="text-zinc-600 text-xs mt-1">Ready to synthesize {assetForgeMaterial}</p>
@@ -6831,7 +6831,7 @@ export default function EditorClient({ project }: { project: Project }) {
           {/* God Mode Badge */}
           <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[210] pointer-events-none">
             <div className="bg-black/70 backdrop-blur-xl border border-yellow-500/60 px-6 py-1.5 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.5)]">
-              <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-400 to-fuchsia-400 tracking-[0.3em] uppercase animate-pulse">⚡ GOD MODE ACTIVE ⚡</span>
+              <span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-400 to-cyan-400 tracking-[0.3em] uppercase animate-pulse">⚡ GOD MODE ACTIVE ⚡</span>
             </div>
           </div>
         </>
