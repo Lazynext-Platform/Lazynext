@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const results: Record<string, unknown> = {};
+  
+  // Test 1: DB connection
   try {
-    const mod = await import("@/auth/server");
-    const a = mod.auth;
-    return NextResponse.json({ type: typeof a, keys: Object.keys(a).slice(0, 10), hasHandler: "handler" in a });
+    const { db } = await import("@/db");
+    results.db = typeof db;
+  } catch (e) { results.db = "FAIL: " + String(e); }
+  
+  // Test 2: Auth import
+  try {
+    const { auth } = await import("@/auth/server");
+    results.auth = { type: typeof auth, keys: Object.keys(auth).slice(0, 10) };
   } catch (e) {
-    return NextResponse.json({ error: String(e), stack: (e as Error).stack?.substring(0, 300) }, { status: 500 });
+    results.auth = "FAIL: " + String(e);
+    const err = e as Error;
+    if (err.stack) results.stack = err.stack.substring(0, 500);
   }
+  
+  return NextResponse.json(results);
 }
