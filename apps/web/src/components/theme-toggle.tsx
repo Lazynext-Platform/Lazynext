@@ -3,7 +3,8 @@
 import { Button } from "./ui/button";
 import { useTheme } from "next-themes";
 import { cn } from "@/utils/ui";
-import { Sun03Icon } from "@hugeicons/core-free-icons";
+import { useEffect, useState } from "react";
+import { Sun03Icon, Moon02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 interface ThemeToggleProps {
@@ -17,7 +18,13 @@ export function ThemeToggle({
 	iconClassName,
 	onToggle,
 }: ThemeToggleProps) {
-	const { theme, setTheme } = useTheme();
+	const { theme, resolvedTheme, setTheme } = useTheme();
+	const [mounted, setMounted] = useState(false);
+	useEffect(() => setMounted(true), []);
+
+	if (!mounted) return <div className="size-8" />;
+
+	const isDark = resolvedTheme === "dark";
 
 	return (
 		<Button
@@ -25,15 +32,16 @@ export function ThemeToggle({
 			variant="ghost"
 			className={cn("size-8", className)}
 			onClick={(e) => {
-				setTheme(theme === "dark" ? "light" : "dark");
+				setTheme(isDark ? "light" : "dark");
 				onToggle?.(e);
 			}}
+			title={isDark ? "Switch to light mode" : "Switch to dark mode"}
 		>
 			<HugeiconsIcon
-				icon={Sun03Icon}
+				icon={isDark ? Sun03Icon : Moon02Icon}
 				className={cn("!size-[1.1rem]", iconClassName)}
 			/>
-			<span className="sr-only">{theme === "dark" ? "Light" : "Dark"}</span>
+			<span className="sr-only">{isDark ? "Light mode" : "Dark mode"}</span>
 		</Button>
 	);
 }

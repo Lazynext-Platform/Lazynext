@@ -12,6 +12,7 @@ import { generateMetadata } from "@/seo/metadata";
 import { SEOHeadTags, PreloadHeroImage } from "@/seo/HeadMeta";
 import { CookieConsent } from "@/components/analytics/CookieConsent";
 import { WebVitals } from "@/components/analytics/WebVitals";
+import { ThemeScript } from "@/components/ui/theme-script";
 
 const siteFont = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
+				<ThemeScript />
 				<BotIdClient protect={protectedRoutes} />
 				<OrganizationLD />
 				<SoftwareAppLD />
