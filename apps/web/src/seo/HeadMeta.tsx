@@ -37,7 +37,6 @@ export function SEOHeadTags() {
 			<link rel="dns-prefetch" href="https://cdn.lazynext.com" />
 
 			{/* Cache control hint */}
-			<meta httpEquiv="Cache-Control" content="public, max-age=31536000, immutable" />
 
 			{/* Geo tags */}
 			<meta name="geo.region" content="US" />
