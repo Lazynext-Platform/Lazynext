@@ -3,7 +3,7 @@ export const SITE_URL = "https://lazynext.com";
 export const SITE_INFO = {
 	title: "Lazynext",
 	description:
-		"A simple but powerful video editor that gets the job done. In your browser.",
+		"AI-powered video editing platform. Describe your edit in natural language — our multi-model AI agent executes it using a Rust compositor. 6 platform formats, 18 AI providers.",
 	url: SITE_URL,
 	openGraphImage: "/open-graph/default.jpg",
 	twitterImage: "/open-graph/default.jpg",

@@ -24,7 +24,7 @@ const roadmapItems: RoadmapItem[] = [
 	{
 		title: "Start",
 		description:
-			"This is where it all started. Repository created, initial project structure, and the vision for a free, open-source video editor. [Check out the first tweet](https://x.com/mazeincoding/status/1936706642512388188) to see where it started.",
+			"This is where it all started. Repository created, initial project structure, and the vision for a free, open-source video editor. The vision: an AI-powered video editor where you describe edits in natural language and a multi-model AI agent executes them. 6 platform formats, Rust compositor, 18 AI providers.",
 		status: {
 			text: "Completed",
 			type: "complete",
