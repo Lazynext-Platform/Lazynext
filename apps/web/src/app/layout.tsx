@@ -9,6 +9,8 @@ import { webEnv } from "@/env/web";
 import { Inter } from "next/font/google";
 import { OrganizationSchema, SoftwareAppSchema } from "@/seo/StructuredData";
 import { generateMetadata } from "@/seo/metadata";
+import { CookieConsent } from "@/components/analytics/CookieConsent";
+import { WebVitals } from "@/components/analytics/WebVitals";
 
 const siteFont = Inter({ subsets: ["latin"] });
 
@@ -42,6 +44,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 							data-track-outgoing-links={false} data-track-web-vitals={false}
 							data-track-sessions={false} />
 						{children}
+						<CookieConsent />
+						<WebVitals />
 					</TooltipProvider>
 				</ThemeProvider>
 			</body>
