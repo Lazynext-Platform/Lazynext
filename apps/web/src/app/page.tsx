@@ -1,3 +1,6 @@
+// Revalidate every 60 seconds — prevents ISR caching stale error pages
+export const revalidate = 60;
+
 import { HeroSection } from "@/components/landing/HeroSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { CTASection } from "@/components/landing/CTASection";
