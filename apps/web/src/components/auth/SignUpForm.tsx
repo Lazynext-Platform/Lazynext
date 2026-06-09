@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signUp } from "@/auth/client";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -21,16 +20,17 @@ export function SignUpForm() {
 		}
 		setLoading(true);
 		try {
-			const result = await signUp.email({
-				name,
-				email,
-				password,
+			const res = await fetch("/api/signup", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name, email, password }),
 			});
-			if (result.error) {
-				toast.error(result.error.message ?? "Sign up failed");
+			const data = await res.json();
+			if (res.ok) {
+				toast.success("Account created! Please sign in.");
+				router.push("/sign-in");
 			} else {
-				toast.success("Account created! Redirecting...");
-				router.push("/projects");
+				toast.error(data.error ?? "Sign up failed");
 			}
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Signup failed — server may be unreachable");
