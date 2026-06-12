@@ -1,0 +1,16 @@
+# Dockerfile.migrate
+FROM oven/bun:1 AS runner
+
+WORKDIR /app
+
+# Copy the entire workspace configuration and source to ensure imports and monorepo dependencies are resolvable
+COPY . .
+
+# Install all dependencies (including devDependencies like drizzle-kit)
+RUN bun install
+
+# Ensure database URL is provided at runtime, but allow the build to pass
+ENV NODE_ENV=production
+
+WORKDIR /app/apps/web
+CMD ["bun", "run", "db:push:prod"]

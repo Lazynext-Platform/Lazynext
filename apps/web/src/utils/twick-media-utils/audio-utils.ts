@@ -474,7 +474,7 @@ const interleave = (buffer: AudioBuffer, numChannels: number, numFrames: number)
 const floatTo16BitPCM = (view: DataView, offset: number, input: Float32Array): void => {
   let pos = offset;
   for (let i = 0; i < input.length; i++, pos += 2) {
-    let s = Math.max(-1, Math.min(1, input[i]));
+    const s = Math.max(-1, Math.min(1, input[i]));
     view.setInt16(pos, s < 0 ? s * 0x8000 : s * 0x7fff, true);
   }
 };

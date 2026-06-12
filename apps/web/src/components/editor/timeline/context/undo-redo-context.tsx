@@ -101,7 +101,7 @@ export const UndoRedoProvider: React.FC<UndoRedoProviderProps> = ({
   // When user makes a new change
   const setPresent = (data: ProjectJSON) => {
     setState((prevState) => {
-      let newPast = [...prevState.past];
+      const newPast = [...prevState.past];
       if (prevState.present) {
         newPast.push(deepClone(prevState.present));
       }

@@ -10,11 +10,13 @@ echo "Starting Lazynext 2025 Platform..."
 
 # 1. Start Rust WASM auto-builder (in background)
 echo "Starting Rust WASM builder..."
-bun run dev:wasm &
+cd rust/wasm && wasm-pack build --target web --out-dir pkg &
+cd ../..
 
 # 2. Start Next.js Frontend (in background)
 echo "Starting Next.js Frontend..."
-bun run dev:web &
+cd apps/web && bun run dev &
+cd ../..
 
 # 3. Start Remotion Render Service
 echo "Starting Render Service..."

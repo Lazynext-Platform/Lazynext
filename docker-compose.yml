@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # Next.js UI Shell
@@ -14,6 +13,11 @@ services:
       - NEXT_PUBLIC_RENDER_URL=http://localhost:8003
       - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
       - BETTER_AUTH_SECRET=super_secret_docker_key_123
+      - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
+      - UPSTASH_REDIS_REST_TOKEN=docker_local_mock_token
+      - MARBLE_WORKSPACE_KEY=mock_marble_key
+      - FREESOUND_CLIENT_ID=mock_freesound_client
+      - FREESOUND_API_KEY=mock_freesound_key
     depends_on:
       postgres-db:
         condition: service_started
@@ -73,6 +77,37 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  # Local Standard Redis
+  redis-db:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Upstash REST API Proxy for local Redis
+  redis-proxy:
+    image: hiett/serverless-redis-http:latest
+    environment:
+      - SRH_MODE=env
+      - SRH_TOKEN=docker_local_mock_token
+      - SRH_CONNECTION_STRING=redis://redis-db:6379
+    ports:
+      - "8079:80"
+    depends_on:
+      - redis-db
+    restart: unless-stopped
+
+  # Run Database Migrations
+  db-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
+    depends_on:
+      postgres-db:
+        condition: service_started
 
 volumes:
   postgres_data:

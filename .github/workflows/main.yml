@@ -50,7 +50,7 @@ jobs:
       - name: Lint
         run: bun run lint
       - name: Type Check
-        run: bun run typecheck
+        run: cd apps/web && bun run typecheck
       # In a real workflow, we would copy the built WASM from the previous job artifact here
       # - name: Build Next.js
       #   run: bun run build

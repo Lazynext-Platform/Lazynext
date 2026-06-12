@@ -400,11 +400,15 @@ function ColorScopesPanel({
         <div className="flex flex-col items-center">
           <span className="text-[10px] text-zinc-400 font-bold mb-1">WAVEFORM</span>
           <div className="w-48 h-32 bg-black border border-zinc-800 rounded relative overflow-hidden flex items-end">
-            {Array.from({ length: 48 }).map((_, idx) => (
-              <div key={idx} className="flex-1 flex flex-col justify-end h-full">
-                <div className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]" style={{ height: `${Math.random() * (isPlaying ? 80 : 30) + 10}%`, opacity: 0.5 + Math.random() * 0.5 }} />
-              </div>
-            ))}
+            {Array.from({ length: 48 }).map((_, idx) => {
+              const rand1 = Math.abs(Math.sin(idx * 1234.5678));
+              const rand2 = Math.abs(Math.cos(idx * 9876.5432));
+              return (
+                <div key={idx} className="flex-1 flex flex-col justify-end h-full">
+                  <div className="w-full bg-gradient-to-t from-green-500/20 via-green-400/80 to-transparent blur-[0.5px]" style={{ height: `${rand1 * (isPlaying ? 80 : 30) + 10}%`, opacity: 0.5 + rand2 * 0.5 }} />
+                </div>
+              );
+            })}
             <div className="absolute inset-0 pointer-events-none">
               <div className="w-full h-[25%] border-b border-zinc-800/50" />
               <div className="w-full h-[25%] border-b border-zinc-800/50" />

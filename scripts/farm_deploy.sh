@@ -7,7 +7,7 @@ echo "🚀 Provisioning Lazynext 2025 Headless Render Node..."
 # 1. Compile the CLI binary in release mode
 cd "$(dirname "$0")/.."
 echo "🔨 Compiling Rust CLI Daemon..."
-cargo build --manifest-path apps/cli/Cargo.toml --release
+cargo build --manifest-path rust/cli/Cargo.toml --release
 
 # 2. Emulate distributing the binary to 5 separate render nodes
 echo "🌐 Distributing daemon to render nodes..."

@@ -37,7 +37,7 @@ jobs:
       - name: Build Web App
         run: bun run build
       - name: Run Web Tests
-        run: bun run test || echo "Tests passed or not configured properly"
+        run: bun run test
 
   docker-build:
     name: Docker Sanity Check

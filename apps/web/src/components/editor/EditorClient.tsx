@@ -50,7 +50,7 @@ export default function EditorClient({ project }: { project: Project }) {
   const { activeWorkspace, setActiveWorkspace } = ctx;
 
   // We use a mock clientId for now unless the user context provides one
-  const clientId = useRef(`user_${Math.random().toString(36).substring(7)}`).current;
+  const [clientId] = useState(() => `user_${Math.random().toString(36).substring(7)}`);
 
   const handleDeltaReceived = useCallback((delta: any) => {
     // Pass delta to Rust WASM engine
@@ -2454,7 +2454,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
   const handleAgentExecuteTool = (toolName: string, args: Record<string, any>) => {
     console.log(`Agent executing: ${toolName}`, args);
-    let newProject = { ...projectData };
+    const newProject = { ...projectData };
 
     if (!nleEngine) {
       toast.error("WASM engine not ready.");

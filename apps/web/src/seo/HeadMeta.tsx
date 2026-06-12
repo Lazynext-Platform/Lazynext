@@ -28,7 +28,7 @@ export function SEOHeadTags() {
 			<meta name="DC.format" content="text/html" />
 			<meta name="DC.language" content="en" />
 			<meta name="DC.coverage" content="Global" />
-			<meta name="DC.rights" content="Copyright Lazynext-Corporation. All Rights Reserved.
+			<meta name="DC.rights" content="Copyright Lazynext-Corporation. All Rights Reserved." />
 
 			{/* Performance: Preconnect to critical origins */}
 			<link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />

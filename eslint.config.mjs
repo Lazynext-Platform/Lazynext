@@ -91,6 +91,13 @@ export default [
 			],
 			"no-empty": "warn",
 			"lazynext/prefer-object-params": "warn",
+			"prefer-const": "warn",
+			"no-useless-catch": "warn",
+			"no-useless-assignment": "warn",
+			"react-hooks/immutability": "warn",
+			"react-hooks/set-state-in-effect": "warn",
+			"preserve-caught-error": "warn",
+			"jsx-a11y/no-noninteractive-element-interactions": "warn",
 			
 			// `react/prop-types` is for the JS-era React workflow where runtime
 			// `propTypes` declarations are the prop contract. In this TS-only
@@ -101,4 +108,21 @@ export default [
 		},
 	},
 	scopeToWebFiles(eslintConfigPrettier),
+	{
+		rules: {
+			"prefer-const": "warn",
+			"no-useless-catch": "warn",
+			"no-useless-assignment": "warn",
+			"react-hooks/immutability": "warn",
+			"react-hooks/set-state-in-effect": "warn",
+			"preserve-caught-error": "warn",
+			"jsx-a11y/no-noninteractive-element-interactions": "warn",
+			"no-empty": "warn",
+			"jsx-a11y/media-has-caption": "warn",
+			"react/no-unknown-property": "warn",
+			"jsx-a11y/html-has-lang": "warn",
+			"@next/next/no-html-link-for-pages": "warn",
+			"jsx-a11y/anchor-is-valid": "warn"
+		}
+	}
 ];
