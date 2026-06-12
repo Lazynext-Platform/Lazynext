@@ -13,8 +13,30 @@ services:
       - NEXT_PUBLIC_SYNC_URL=ws://localhost:8002
       - NEXT_PUBLIC_RENDER_URL=http://localhost:8003
       - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
+      - BETTER_AUTH_SECRET=super_secret_docker_key_123
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_started
+      lazynext-api:
+        condition: service_started
+    restart: unless-stopped
+
+  # Agentic REST API Gateway
+  lazynext-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8005:8005"
+    restart: unless-stopped
+
+  # MCP Server (Agent Interface)
+  lazynext-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    stdin_open: true
+    tty: true
     restart: unless-stopped
 
   # WebRTC / CRDT Signaling Server
@@ -47,7 +69,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: lazynext
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

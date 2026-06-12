@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { VideoPlayer } from '@/components/feed/VideoPlayer';
 import Link from 'next/link';
-import { ArrowLeft, Compass, Video as VideoIcon } from 'lucide-react';
+import { ArrowLeft, Compass, Video as VideoIcon, Sparkles } from 'lucide-react';
 
 // Mock database of published videos
 const FEED_DATA = [
@@ -47,7 +47,6 @@ export default function FeedPage() {
       const scrollPosition = containerRef.current.scrollTop;
       const windowHeight = containerRef.current.clientHeight;
       
-      // Calculate which video is most prominent in view
       const newActiveIndex = Math.round(scrollPosition / windowHeight);
       
       if (newActiveIndex !== activeIndex && newActiveIndex >= 0 && newActiveIndex < FEED_DATA.length) {
@@ -68,26 +67,43 @@ export default function FeedPage() {
   }, [activeIndex]);
 
   return (
-    <div className="w-full h-screen bg-black flex overflow-hidden">
+    <div className="w-full h-[calc(100vh-73px)] flex overflow-hidden bg-transparent pt-10">
       
+      {/* Desktop Sidebar Navigation */}
+      <div className="hidden lg:flex flex-col gap-8 w-[250px] ml-6 h-[calc(100%-40px)] glass-panel p-6 shadow-2xl relative z-10">
+        <h1 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">LAZYNEXT<span className="text-cyan-500">.</span></h1>
+        
+        <nav className="flex flex-col gap-4">
+          <Link href="/feed" className="flex items-center gap-4 text-cyan-400 font-bold text-lg p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_15px_rgba(0,212,223,0.1)]">
+            <Compass className="w-6 h-6" /> Explore
+          </Link>
+          <Link href="/editor" className="flex items-center gap-4 text-white/50 hover:text-white font-bold text-lg p-3 rounded-xl hover:bg-white/5 transition-colors">
+            <VideoIcon className="w-6 h-6" /> Create
+          </Link>
+          <Link href="/dashboard" className="flex items-center gap-4 text-white/50 hover:text-white font-bold text-lg p-3 rounded-xl hover:bg-white/5 transition-colors">
+             <Sparkles className="w-6 h-6" /> Dashboard
+          </Link>
+        </nav>
+      </div>
+
       {/* Mobile-Style Feed Container */}
       <div 
         ref={containerRef}
-        className="relative w-full max-w-[500px] h-full mx-auto snap-y snap-mandatory overflow-y-scroll overflow-x-hidden hide-scrollbar"
+        className="relative w-full max-w-[500px] h-full mx-auto snap-y snap-mandatory overflow-y-scroll overflow-x-hidden hide-scrollbar shadow-2xl rounded-3xl border border-white/10 bg-black/40 backdrop-blur-3xl"
         style={{ scrollBehavior: 'smooth' }}
       >
         {/* Navigation Overlay */}
         <div className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
           <Link href="/" className="pointer-events-auto">
-            <div className="p-3 bg-black/40 backdrop-blur-md rounded-full text-white hover:bg-black/60 transition-colors">
+            <div className="p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
               <ArrowLeft className="w-5 h-5" />
             </div>
           </Link>
-          <div className="flex gap-4">
-            <div className="pointer-events-auto px-4 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-white font-semibold text-sm hover:bg-black/60 transition-colors cursor-pointer">
+          <div className="flex gap-4 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pointer-events-auto shadow-2xl">
+            <div className="px-5 py-2 text-white/60 font-semibold text-sm hover:text-white transition-colors cursor-pointer rounded-full">
               Following
             </div>
-            <div className="pointer-events-auto px-4 py-1.5 bg-white text-black font-bold text-sm rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <div className="px-5 py-2 bg-gradient-to-tr from-cyan-400 to-blue-500 text-black font-bold text-sm rounded-full shadow-[0_0_20px_rgba(0,212,223,0.4)]">
               For You
             </div>
           </div>
@@ -103,20 +119,7 @@ export default function FeedPage() {
         ))}
       </div>
 
-      {/* Desktop Sidebar Navigation (Optional for widescreen) */}
-      <div className="hidden lg:flex fixed left-0 top-0 h-full w-[250px] border-r border-neutral-900 bg-black/95 p-6 flex-col gap-8">
-        <h1 className="text-2xl font-black text-white tracking-tighter">LAZYNEXT<span className="text-cyan-500">.</span></h1>
-        
-        <nav className="flex flex-col gap-4">
-          <Link href="/feed" className="flex items-center gap-4 text-white font-bold text-lg">
-            <Compass className="w-6 h-6" /> Explore
-          </Link>
-          <Link href="/editor" className="flex items-center gap-4 text-neutral-500 hover:text-white font-bold text-lg transition-colors">
-            <VideoIcon className="w-6 h-6" /> Create
-          </Link>
-        </nav>
-      </div>
-
+      {/* @ts-expect-error styled-jsx type mismatch */}
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -124,14 +127,6 @@ export default function FeedPage() {
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
-        }
-        @keyframes marquee {
-          0% { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-          display: inline-block;
-          animation: marquee 8s linear infinite;
         }
       `}</style>
     </div>

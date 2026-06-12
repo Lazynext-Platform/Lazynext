@@ -1,21 +1,55 @@
 use lazynext_core::nle_state::NLEState;
+use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use std::io::{self, BufRead};
+use serde_json::{json, Value};
 
 #[tokio::main]
 async fn main() {
-    // Initialize the core engine
-    let engine_state = NLEState::new("mcp_session_1".to_string(), "AI Editor".to_string(), 24);
+    let editor = AutonomousEditor::new();
     
-    // In a real MCP server, this would communicate via JSON-RPC over stdio
     eprintln!("Lazynext MCP Server started.");
-    eprintln!("AI assistants can now access the timeline with {} tracks.", engine_state.get_project_data().tracks.len());
+    eprintln!("Exposing tool: autonomous_edit");
     
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
-        let req = line.unwrap_or_default();
-        if req.is_empty() { continue; }
+        let req_str = line.unwrap_or_default();
+        if req_str.is_empty() { continue; }
         
-        // Simple echo for now, to be replaced by full MCP protocol parser
-        println!("{{\"jsonrpc\": \"2.0\", \"result\": \"Acknowledged command by AI\"}}");
+        // Basic JSON-RPC handling
+        if let Ok(req) = serde_json::from_str::<Value>(&req_str) {
+            let id = req["id"].clone();
+            let method = req["method"].as_str().unwrap_or("");
+            
+            if method == "call_tool" {
+                if req["params"]["name"] == "autonomous_edit" {
+                    let prompt = req["params"]["arguments"]["prompt"].as_str().unwrap_or("").to_string();
+                    let intent = VideoIntent {
+                        prompt,
+                        require_plan_approval: true,
+                        source_files: vec![],
+                    };
+                    
+                    let job_id = editor.process_intent(intent).await.unwrap_or_else(|e| e);
+                    
+                    let response = json!({
+                        "jsonrpc": "2.0",
+                        "id": id,
+                        "result": {
+                            "job_id": job_id,
+                            "status": "awaiting_approval"
+                        }
+                    });
+                    println!("{}", response);
+                    continue;
+                }
+            }
+            
+            let response = json!({
+                "jsonrpc": "2.0",
+                "id": id,
+                "result": "Acknowledged"
+            });
+            println!("{}", response);
+        }
     }
 }

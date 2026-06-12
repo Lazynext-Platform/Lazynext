@@ -4,9 +4,13 @@ use lazynext_core::NLEState;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The ID of the CRDT project to render
+    /// Natural language prompt for editing
     #[arg(short, long)]
-    project: String,
+    prompt: Option<String>,
+
+    /// The ID of the CRDT project to render
+    #[arg(short='r', long)]
+    render_project: Option<String>,
 
     /// Output format (e.g., mp4, mov)
     #[arg(short, long, default_value = "mp4")]
@@ -25,35 +29,55 @@ struct Args {
 async fn main() {
     let args = Args::parse();
 
-    println!("🚀 Starting Lazynext 2025 Headless Render Daemon...");
-    println!("Loading Project: {}", args.project);
+    println!("🚀 Starting Lazynext 2025 Headless CLI...");
 
-    // Initialize the EXACT SAME core logic used in Web, Desktop, and Mobile!
-    let mut engine = NLEState::new(
-        args.project.clone(),
-        format!("Headless Job: {}", args.project),
-        60
-    );
-
-    // Mock loading CRDT state from disk/network
-    engine.add_track("V1".to_string(), "video".to_string());
-    engine.add_clip_to_track(
-        0, 
-        "clip_1".to_string(), 
-        "video".to_string(), 
-        "Network_Footage.mp4".to_string(), 
-        0, 
-        300
-    );
-
-    println!("✅ CRDT State Loaded. {} tracks active.", engine.get_project_data().tracks.len());
-    println!("🎬 Beginning Headless Render Pipeline ({}x{}, {})", args.width, args.height, args.format);
-
-    // Mocking the render progress for demonstration
-    for i in 1..=5 {
-        tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-        println!("⏳ Render Progress: {}%", i * 20);
+    if let Some(prompt) = args.prompt {
+        println!("🤖 Received AI Editing Intent: {}", prompt);
+        let editor = lazynext_core::autonomous::AutonomousEditor::new();
+        let intent = lazynext_core::autonomous::VideoIntent {
+            prompt,
+            require_plan_approval: true,
+            source_files: vec![],
+        };
+        let job_id = editor.process_intent(intent).await.unwrap_or_else(|e| e);
+        println!("✅ Job queued. ID: {}", job_id);
+        println!("⏳ Awaiting plan approval from user...");
+        // In real CLI, you'd wait and poll here.
+        return;
     }
 
-    println!("🎉 Render Complete! Output saved to: ./out/{}.{}", args.project, args.format);
+    if let Some(project) = args.render_project {
+        println!("Loading Project: {}", project);
+
+        // Initialize the EXACT SAME core logic used in Web, Desktop, and Mobile!
+        let mut engine = NLEState::new(
+            project.clone(),
+            format!("Headless Job: {}", project),
+            60
+        );
+
+        // Mock loading CRDT state from disk/network
+        engine.add_track("V1".to_string(), "video".to_string());
+        engine.add_clip_to_track(
+            0, 
+            "clip_1".to_string(), 
+            "video".to_string(), 
+            "Network_Footage.mp4".to_string(), 
+            0, 
+            300
+        );
+
+        println!("✅ CRDT State Loaded. {} tracks active.", engine.get_project_data().tracks.len());
+        println!("🎬 Beginning Headless Render Pipeline ({}x{}, {})", args.width, args.height, args.format);
+
+        // Mocking the render progress for demonstration
+        for i in 1..=5 {
+            tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+            println!("⏳ Render Progress: {}%", i * 20);
+        }
+
+        println!("🎉 Render Complete! Output saved to: ./out/{}.{}", project, args.format);
+    } else {
+        println!("Please specify either --prompt for autonomous editing or --render-project for rendering.");
+    }
 }

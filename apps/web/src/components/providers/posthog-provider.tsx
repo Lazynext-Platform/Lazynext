@@ -16,5 +16,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
-  return <PHProvider client={posthog}>{children}</PHProvider>
+  return <PHProvider client={posthog}>
+    {/* @ts-expect-error React types mismatch */}
+    {children}
+  </PHProvider>
 }

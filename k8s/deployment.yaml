@@ -3,6 +3,62 @@ kind: Namespace
 metadata:
   name: lazynext
 ---
+# Database
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-db
+  namespace: lazynext
+spec:
+  serviceName: "postgres-db-service"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "password"
+        - name: POSTGRES_DB
+          value: "lazynext"
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-db
+  namespace: lazynext
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres-db
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+# Web Frontend
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,21 +76,26 @@ spec:
     spec:
       containers:
       - name: lazynext-web
-        image: lazynext/web:latest
+        image: lazynext_2025-lazynext-web:latest
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
-        resources:
-          requests:
-            cpu: "500m"
-            memory: "512Mi"
-          limits:
-            cpu: "1"
-            memory: "1Gi"
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: NEXT_PUBLIC_SYNC_URL
+          value: "ws://lazynext-sync:8002"
+        - name: NEXT_PUBLIC_RENDER_URL
+          value: "http://lazynext-render:8003"
+        - name: DATABASE_URL
+          value: "postgres://postgres:password@postgres-db:5432/lazynext"
+        - name: BETTER_AUTH_SECRET
+          value: "super_secret_kubernetes_key_123"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: lazynext-web-service
+  name: lazynext-web
   namespace: lazynext
 spec:
   type: LoadBalancer
@@ -45,46 +106,142 @@ spec:
     port: 80
     targetPort: 3000
 ---
+# API Gateway
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lazynext-gpu-worker
+  name: lazynext-api
+  namespace: lazynext
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lazynext-api
+  template:
+    metadata:
+      labels:
+        app: lazynext-api
+    spec:
+      containers:
+      - name: lazynext-api
+        image: lazynext_2025-lazynext-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8005
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-api
+  namespace: lazynext
+spec:
+  type: LoadBalancer
+  selector:
+    app: lazynext-api
+  ports:
+  - protocol: TCP
+    port: 8005
+    targetPort: 8005
+---
+# Sync Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-sync
+  namespace: lazynext
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lazynext-sync
+  template:
+    metadata:
+      labels:
+        app: lazynext-sync
+    spec:
+      containers:
+      - name: lazynext-sync
+        image: lazynext_2025-lazynext-sync:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8002
+        env:
+        - name: NODE_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-sync
+  namespace: lazynext
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-sync
+  ports:
+  - protocol: TCP
+    port: 8002
+    targetPort: 8002
+---
+# Render Farm
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-render
+  namespace: lazynext
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lazynext-render
+  template:
+    metadata:
+      labels:
+        app: lazynext-render
+    spec:
+      containers:
+      - name: lazynext-render
+        image: lazynext_2025-lazynext-render:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8003
+        env:
+        - name: NODE_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-render
+  namespace: lazynext
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-render
+  ports:
+  - protocol: TCP
+    port: 8003
+    targetPort: 8003
+---
+# MCP Agent
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-mcp
   namespace: lazynext
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: lazynext-gpu-worker
+      app: lazynext-mcp
   template:
     metadata:
       labels:
-        app: lazynext-gpu-worker
+        app: lazynext-mcp
     spec:
-      tolerations:
-      - key: "nvidia.com/gpu"
-        operator: "Exists"
-        effect: "NoSchedule"
       containers:
-      - name: lazynext-gpu-worker
-        image: lazynext/generative-studio:latest
-        ports:
-        - containerPort: 8081
-        resources:
-          requests:
-            nvidia.com/gpu: 1
-          limits:
-            nvidia.com/gpu: 1
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: lazynext-gpu-service
-  namespace: lazynext
-spec:
-  type: ClusterIP
-  selector:
-    app: lazynext-gpu-worker
-  ports:
-  - protocol: TCP
-    port: 8081
-    targetPort: 8081
+      - name: lazynext-mcp
+        image: lazynext_2025-lazynext-mcp:latest
+        imagePullPolicy: IfNotPresent
+        stdin: true
+        tty: true

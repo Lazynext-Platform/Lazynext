@@ -40,7 +40,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 					<Script src="//unpkg.com/react-scan/dist/auto.global.js" crossOrigin="anonymous" strategy="beforeInteractive" />
 				)}
 			</head>
-			<body className={`${siteFont.className} font-sans antialiased`}>
+			<body className={`${siteFont.className} font-sans antialiased min-h-screen selection:bg-cyan-500/30 selection:text-cyan-200`}>
+				{/* Background Mesh */}
+				<div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-background to-background" />
+				<div className="fixed top-0 left-0 w-full h-full -z-20 bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center opacity-10 dark:opacity-5 mix-blend-overlay" />
+				
 				<PostHogProvider>
 					<ThemeProvider attribute="class" defaultTheme="system" disableTransitionOnChange={true}>
 						<TooltipProvider>
@@ -51,7 +55,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 								data-track-attributes={false} data-track-errors={true}
 								data-track-outgoing-links={false} data-track-web-vitals={false}
 								data-track-sessions={false} />
-							{children}
+							
+							<div className="relative flex min-h-screen flex-col">
+								{children}
+							</div>
+							
 							<CookieConsent />
 							<WebVitals />
 						</TooltipProvider>

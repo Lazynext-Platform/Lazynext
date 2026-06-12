@@ -1,5 +1,5 @@
 # Dockerfile.render
-FROM node:20-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
@@ -8,11 +8,11 @@ RUN apk add --no-cache ffmpeg
 
 # Copy the service files
 COPY services/render-service/package*.json ./
-RUN npm install
+RUN bun install
 
 COPY services/render-service/ ./
 
 # Expose Render Farm REST Port
 EXPOSE 8003
 
-CMD ["npm", "start"]
+CMD ["bun", "run", "start"]

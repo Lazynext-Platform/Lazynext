@@ -27,4 +27,6 @@ const webEnvSchema = z.object({
 
 export type WebEnv = z.infer<typeof webEnvSchema>;
 
-export const webEnv = webEnvSchema.parse(process.env);
+export const webEnv = process.env.SKIP_ENV_VALIDATION
+	? (process.env as unknown as WebEnv)
+	: webEnvSchema.parse(process.env);

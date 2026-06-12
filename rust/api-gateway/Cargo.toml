@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-lazynext_core = { path = "../../rust/core" }
+lazynext_core = { path = "../core" }
 tokio = { version = "1.0", features = ["full"] }
 axum = "0.6"
 serde = { version = "1.0", features = ["derive"] }

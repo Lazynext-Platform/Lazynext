@@ -52,9 +52,14 @@ async fn main() {
         }
     });
 
-    // Mock an HTTP route allowing external systems to query state
+    // Initialize AutonomousEditor
+    let editor = Arc::new(lazynext_core::autonomous::AutonomousEditor::new());
+
+    // Build our application with a route
     let app: Router = Router::new()
-        .route("/health", post(|| async { "Gateway is active and connected to CRDT engine." }));
+        .route("/health", post(|| async { "Gateway is active and connected to CRDT engine." }))
+        .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
+        .with_state(editor);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 8005));
     println!("📡 Listening for external API requests on http://{}", addr);
@@ -69,8 +74,20 @@ async fn main() {
         });
     }
 
-    // axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
-    // Blocking sleep for demonstration
-    tokio::time::sleep(tokio::time::Duration::from_secs(4)).await;
-    println!("🛑 Gateway Shutting Down.");
+    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+}
+
+use axum::extract::{State, Json};
+use lazynext_core::autonomous::VideoIntent;
+use serde_json::{json, Value};
+
+async fn handle_autonomous_edit(
+    State(editor): State<Arc<lazynext_core::autonomous::AutonomousEditor>>,
+    Json(payload): Json<VideoIntent>,
+) -> Json<Value> {
+    let job_id = editor.process_intent(payload).await.unwrap_or_else(|e| e);
+    Json(json!({
+        "job_id": job_id,
+        "status": "awaiting_approval"
+    }))
 }

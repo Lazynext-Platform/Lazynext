@@ -22,11 +22,11 @@ export default function Home() {
             </div>
             
             <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8">
-              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Autonomous</span> NLE <br className="hidden md:block" /> of the Future.
+              The <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Autonomous</span> Video Editor.
             </h1>
             
             <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto mb-12">
-              Edit video at the speed of thought. Powered by an imperceptible Rust WebAssembly engine, CRDT multiplayer sync, and a fleet of AI Directors.
+              Say goodbye to Premiere, DaVinci, CapCut, and Descript. No more manual timelines or keyframes. Just type or speak in simple language, and our Agentic AI will completely edit the video for you.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -34,7 +34,7 @@ export default function Home() {
                 href="/editor"
                 className="w-full sm:w-auto px-8 py-4 bg-white text-black font-semibold rounded-2xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]"
               >
-                Start Editing Free
+                Start Editing with AI
               </Link>
               <Link 
                 href="/billing"
@@ -57,9 +57,9 @@ export default function Home() {
                 <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">Rust & WebAssembly</h3>
+                <h3 className="text-xl font-bold mb-3">Text & Voice Commands</h3>
                 <p className="text-neutral-400">
-                  We stripped out the heavy Electron wrappers. The timeline is powered by bare-metal Rust compiled to WebAssembly, delivering 120fps rendering right in your browser.
+                  Just type or speak. No need to learn complicated manual editing tools. Our Agentic engine understands plain language and executes complex video edits instantly.
                 </p>
               </div>
 
