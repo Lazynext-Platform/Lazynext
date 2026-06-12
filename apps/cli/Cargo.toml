@@ -1,14 +1,9 @@
 [package]
-name = "cli"
+name = "lazynext_cli"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
-compositor = { path = "../../rust/crates/compositor" }
-time = { path = "../../rust/crates/time" }
-gpu = { path = "../../rust/crates/gpu" }
-state = { path = "../../rust/crates/state" }
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-agent = { version = "0.1.0", path = "../../rust/crates/agent" }
+clap = { version = "4.4", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+lazynext_core = { path = "../../rust/core" }

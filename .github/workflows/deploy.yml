@@ -1,0 +1,115 @@
+name: Lazynext 2025 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test-rust-core:
+    name: Test Rust WASM Core
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          rust/target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    - name: Run Cargo Tests
+      working-directory: ./rust
+      run: cargo test --workspace --verbose
+
+  test-frontend:
+    name: Test React UI & E2E
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run Jest Unit Tests
+      run: npm run test
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright E2E Tests
+      run: npx playwright test
+
+  build-docker-images:
+    name: Build & Push Docker Images
+    needs: [test-rust-core, test-frontend]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Web Shell
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: lazynext/web-shell:latest
+
+    - name: Build and push Pre-Processing
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/pre-processing
+        push: true
+        tags: lazynext/pre-processing:latest
+
+    - name: Build and push Generative Studio
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/generative-studio
+        push: true
+        tags: lazynext/generative-studio:latest
+
+    - name: Build and push AI Agents
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/ai-agents
+        push: true
+        tags: lazynext/ai-agents:latest
+
+    - name: Build and push Render Service
+      uses: docker/build-push-action@v5
+      with:
+        context: ./services/render-service
+        push: true
+        tags: lazynext/render-service:latest

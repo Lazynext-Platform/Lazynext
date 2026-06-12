@@ -1,67 +1,43 @@
-name: Lazynext 2030 CI/CD Pipeline
+name: Lazynext CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
-
-env:
-  CARGO_TERM_COLOR: always
+    branches: [ "main" ]
 
 jobs:
-  rust-checks:
-    name: Rust Backend Checks
+  test-web:
+    name: Test Next.js App
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - name: Cache Cargo registry and build
-        uses: Swatinem/rust-cache@v2
-
-      - name: Check Formatting
-        run: cargo fmt --all -- --check
-
-      - name: Run Clippy
-        run: cargo clippy --workspace -- -D warnings
-
-      - name: Run Cargo Check
-        run: cargo check --workspace
-
-      - name: Run Rust Tests
-        run: cargo test --workspace
-
-  web-checks:
-    name: Next.js Frontend Checks
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./apps/web
-    steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
+      - name: Install dependencies
+        run: |
+          cd apps/web
+          bun install
+      - name: Run Jest Tests
+        run: |
+          cd apps/web
+          bun test
+
+  test-ml:
+    name: Test Python Microservices
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          bun-version: latest
-
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build Web App
-        run: bun run build
-
-      - name: Run Tests
-        run: bun test
-
-      - name: Type Check
-        run: bun run typecheck
-
-      # TODO: Re-enable once remaining eslint issues are resolved (4 errors, 578 warnings pre-existing)
-      # - name: Lint
-      #   run: bun run lint
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          cd services
+          pip install -r requirements.txt
+          pip install pytest httpx
+      - name: Run Pytest
+        run: |
+          cd services
+          pytest

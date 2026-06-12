@@ -1,46 +1,51 @@
-use anyhow::Result;
-// use uuid::Uuid;
+use std::fs::File;
+use std::io::Write;
+use anyhow::{Result, Context};
+use state::ProjectData;
+use uuid::Uuid;
+use chrono::Utc;
 
-pub struct DcpEncoder {
-    pub timeline_id: String,
-    pub frame_rate: u32,
-    pub resolution: (u32, u32), // e.g. 4096 x 2160 (4K DCI)
-}
+pub struct DCPGenerator;
 
-impl DcpEncoder {
-    pub fn new(timeline_id: &str, is_4k: bool) -> Self {
-        Self {
-            timeline_id: timeline_id.to_string(),
-            frame_rate: 24, // Cinema standard
-            resolution: if is_4k { (4096, 2160) } else { (2048, 1080) },
-        }
+impl DCPGenerator {
+    pub fn new() -> Self {
+        Self
     }
 
-    /// Mocks the generation of the massive JPEG2000 sequence
-    pub fn dispatch_j2k_render(&self) -> Result<()> {
-        println!("Dispatching {} timeline to Cloud Proxy Farm for JPEG2000 encoding...", self.timeline_id);
-        println!("Resolution: {}x{} @ {}fps", self.resolution.0, self.resolution.1, self.frame_rate);
-        Ok(())
-    }
-
-    /// Generates the required CPL (Composition Playlist) XML metadata
-    pub fn generate_cpl_xml(&self) -> Result<String> {
-        // let uuid = Uuid::new_v4().to_string();
-        let uuid = "mock-uuid-1234-5678";
+    /// Generates a Digital Cinema Package (DCP) Composition Playlist (CPL)
+    pub fn generate_cpl(&self, project: &ProjectData, output_path: &str) -> Result<()> {
+        let uuid = Uuid::new_v4().urn().to_string();
+        let issue_date = Utc::now().to_rfc3339();
         
-        let xml = format!(
+        let cpl_content = format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
 <CompositionPlaylist xmlns="http://www.smpte-ra.org/schemas/429-7/2006/CPL">
-  <Id>urn:uuid:{}</Id>
-  <AnnotationText>Lazynext Theatrical Export</AnnotationText>
-  <IssueDate>2026-06-04T12:00:00-00:00</IssueDate>
-  <Issuer>Lazynext 2028 Cinematic Engine</Issuer>
-  <Creator>Lazynext Rust WebAssembly Core</Creator>
-  <ContentTitleText>Lazynext_Masterpiece_4K_DCI</ContentTitleText>
-  <ContentKind>feature</ContentKind>
-</CompositionPlaylist>"#, 
-            uuid
+    <Id>{}</Id>
+    <AnnotationText>{}</AnnotationText>
+    <IssueDate>{}</IssueDate>
+    <Issuer>Lazynext 2025</Issuer>
+    <Creator>Lazynext DCP Engine</Creator>
+    <ContentTitleText>{}</ContentTitleText>
+    <ContentKind>feature</ContentKind>
+    <ReelList>
+        <Reel>
+            <Id>{}</Id>
+            <AssetList>
+                <MainPicture>
+                    <Id>{}</Id>
+                    <EditRate>24 1</EditRate>
+                    <IntrinsicDuration>{}</IntrinsicDuration>
+                    <ScreenAspectRatio>1.85</ScreenAspectRatio>
+                </MainPicture>
+            </AssetList>
+        </Reel>
+    </ReelList>
+</CompositionPlaylist>"#,
+            uuid, project.name, issue_date, project.name, Uuid::new_v4().urn().to_string(), Uuid::new_v4().urn().to_string(), project.duration_frames
         );
-        Ok(xml)
+
+        let mut file = File::create(output_path).context("Failed to create CPL file")?;
+        file.write_all(cpl_content.as_bytes()).context("Failed to write CPL content")?;
+        Ok(())
     }
 }

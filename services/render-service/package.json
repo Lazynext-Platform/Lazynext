@@ -1,0 +1,15 @@
+{
+  "name": "render-service",
+  "version": "1.0.0",
+  "description": "Headless backend renderer dispatching to Remotion/FFmpeg",
+  "scripts": {
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "typescript": "^5.0.0"
+  }
+}

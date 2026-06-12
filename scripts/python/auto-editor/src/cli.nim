@@ -1,0 +1,387 @@
+import std/[macros, strformat, strutils]
+
+type CmdDef* = object
+  name*: string
+  help*: string
+
+const commands*: seq[CmdDef] = @[
+  CmdDef(name: "cache", help: ""),
+  CmdDef(name: "desc", help: "Display a media file's description metadata"),
+  CmdDef(name: "info", help: "Retrieve information and properties about media files\nUsage: <file> [options] | -encoders <ext> | -decoders <ext>"),
+  CmdDef(name: "levels", help: "Display loudness over time"),
+  CmdDef(name: "subdump", help: "Dump text-based subtitles to stdout with formatting stripped out"),
+  CmdDef(name: "waveform", help: "Draw waveforms for GUI. Unstable interface"),
+  CmdDef(name: "whisper", help: "Transcribe audio with ggml models\nUsage: <file> <model> [options]"),
+] & (
+  when defined(emscripten): @[] else: @[CmdDef(name: "completion", help: "Generate completions for shells")]
+)
+
+type Categories* = enum
+  cNone cEdit cTl cUrl cDis cCon cVid cAud cMis
+
+func categoryName*(c: Categories): string =
+  case c
+  of cNone: ""
+  of cEdit: "Editing Options"
+  of cTl: "Timeline Options"
+  of cUrl: "URL Download Options"
+  of cDis: "Display Options"
+  of cCon: "Container Settings"
+  of cVid: "Video Rendering"
+  of cAud: "Audio Rendering"
+  of cMis: "Miscellaneous"
+
+type Link = object
+  href*: string
+  a*: string
+
+func `$`(link: Link): string =
+  when defined(nimscript): &"<a href=\"{link.href}\">{link.a}</a>"
+  else: &"\e]8;;{link.href}\e\\{link.a}\e]8;;\e\\"
+
+const fragmented = Link(href: "https://ffmpeg.org/ffmpeg-formats.html#Fragmentation", a: "fragmented")
+const ytDlp = Link(href: "https://github.com/yt-dlp/yt-dlp", a: "yt-dlp")
+const actionsRef = Link(href: "https://auto-editor.com/ref/actions", a: "actions reference")
+
+type OptKind* = enum
+  Regular # expecting = $datum
+  Flag    # $datum = true
+  Special # args.`export` = "$datum"
+
+type OptDef* = object
+  names*: string
+  kind*: OptKind = Regular
+  c*: Categories = cNone
+  datum*: string
+  metavar*: string # Shouldn't be set for flags.
+  help*: string
+
+const whisperOptions*: seq[OptDef] = @[
+  OptDef(names: "--debug", kind: Flag, datum: "isDebug", help: ""),
+  OptDef(names: "-sw, --split-word, --split-words", kind: Flag, datum: "splitWords", help: ""),
+  OptDef(names: "-l, --language", datum: "language", metavar: "LANG",
+    help: "Set the language instead of using \"auto\". Examples: en, ja"),
+  OptDef(names: "-f, --format", datum: "format", metavar: "FORMAT",
+    help: "Output in a specific format {text|srt|json} (default text)"),
+  OptDef(names: "-o, --output", datum: "output", metavar: "FILE",
+    help: "Choose where to output (defaults to stdout)"),
+  OptDef(names: "-tr, --translate", kind: Flag, datum: "translate",
+    help: "Translate from source language to english"),
+  OptDef(names: "--queue", datum: "queue", metavar: "SECS",
+    help: "The maximum size in seconds that will be queued into before processing. (default 30)"),
+  OptDef(names: "--vad-model", datum: "vad-model", metavar: "VAD-MODEL",
+    help: "Set Voice activity detection (VAD) model"),
+  OptDef(names: "--threads", datum: "threads", metavar: "N",
+    help: "Number of CPU threads for whisper processing (default 4)"),
+]
+
+const mainOptions*: seq[OptDef] = @[
+  OptDef(names: "-e, --edit", c: cEdit, datum: "edit", metavar: "METHOD",
+      help: """
+Set an expression which determines how to make auto edits. (default is "audio")"""),
+  OptDef(names: "-w:1, --when-active, --when-normal", c: cEdit, datum: "when-normal", metavar: "ACTION",
+    help: "When a segment is active (defined by --edit) do an action. The default action being 'nil'"),
+  OptDef(names: "-w:0, --when-inactive, --when-silent", c: cEdit, datum: "when-silent", metavar: "ACTION",
+      help: &"""
+When a segment is inactive (defined by --edit) do an action. The default action being 'cut'. See the {actionsRef} for all available actions."""),
+  OptDef(names: "-m, --margin", c: cEdit, datum: "margin", metavar: "LENGTH[,LENGTH?]",
+      help: """
+Set sections near "loud" as "loud" too if section is less than LENGTH away. (default is "0.2s")"""),
+  OptDef(names: "--smooth", c: cEdit, datum: "smooth", metavar: "MINCUT[,MINCLIP?]",
+      help: """
+Make sections 'smoother' by applying minimum cut and minimum clip rules. (default is 0.2s,0.1s)
+Examples:
+  --smooth 0.2s,0.1s  # Set mincut to 0.2 seconds, minclip to 0.1 seconds.
+  --smooth 0  # Turn off smoothing"""),
+  # TODO: Add `-s` for smoothing next major release.
+  OptDef(names: "-o, --output", c: cEdit, datum: "output",
+    metavar: "FILE", help: "Set the name/path of the new output file"),
+  OptDef(names: "--cut-out, --cut", c: cEdit, datum: "cut-out",
+    metavar: "[START,STOP ...]", help: "Set segment(s) that will be cut/removed"),
+  OptDef(names: "--add-in, --keep", c: cEdit, datum: "add-in",
+    metavar: "[START,STOP ...]", help: "Set segment(s) that are leaved \"as is\", overriding other actions"),
+  OptDef(names: "--set-speed, --set-speed-for-range", c: cEdit, datum: "set-speed",
+    metavar: "[SPEED,START,STOP ...]", help: "Set segment(s) to a SPEED, overriding other actions"),
+  OptDef(names: "--set-action", c: cEdit, datum: "set-action", metavar: "ACTION,start,end",
+    help: """Set a time segment to an ACTION, overriding other actions
+Examples:
+  --set-action nil,0,5sec
+  --set-action speed:1.5,varispeed:1.5,30sec,end"""),
+  OptDef(names: "--silent-speed", c: cEdit, datum: "silent-speed", metavar: "NUM",
+    help: "[Deprecated] Set speed of inactive segments to NUM. (default is 99999)"),
+  OptDef(names: "--video-speed", c: cEdit, datum: "video-speed", metavar: "NUM",
+    help: "[Deprecated] Set speed of active segments to NUM. (default is 1)"),
+
+  OptDef(names: "-exp, --export-to-premiere", kind: Special, datum: "premiere"),
+  OptDef(names: "-exr, --export-to-resolve", kind: Special, datum: "resolve"),
+  OptDef(names: "-exf, --export-to-final-cut-pro", kind: Special, datum: "final-cut-pro"),
+  OptDef(names: "-exs, --export-to-shotcut", kind: Special, datum: "shotcut"),
+  OptDef(names: "-exk, --export-to-kdenlive", kind: Special, datum: "kdenlive"),
+
+  OptDef(names: "-ex, --export", c: cTl, datum: "export",
+    metavar: "EXPORT:ATTRS?", help: "Choose the export mode"),
+  OptDef(names: "-tb, --time-base, -r, -fps, --frame-rate", c: cTl, datum: "frame-rate",
+    metavar: "NUM", help: "Set timeline frame rate"),
+  OptDef(names: "-ar, --sample-rate", c: cTl, datum: "sample-rate", metavar: "NAT",
+    help: "Set timeline sample rate"),
+  OptDef(names: "-res, --resolution", c: cTl, datum: "resolution",
+    metavar: "WIDTH,HEIGHT", help: "Set timeline width and height"),
+  OptDef(names: "-b, -bg, --background", c: cTl, datum: "background", metavar: "COLOR",
+    help: "Set the background as a solid RGB color"),
+
+  OptDef(names: "--yt-dlp-location", c: cUrl, datum: "yt-dlp-location", metavar: "PATH",
+    help: &"Set a custom path to {ytDlp}"),
+  OptDef(names: "--output-format", c: cUrl, datum: "output-format", metavar: "TEMPLATE",
+    help: "Set the yt-dlp output file template (--output, -o)"),
+  OptDef(names: "--yt-dlp-extras", c: cUrl, datum: "yt-dlp-extras", metavar: "CMD",
+    help: "Add extra options for yt-dlp. Must be in quotes"),
+
+  OptDef(names: "--progress", c: cDis, datum: "progress", metavar: "PROGRESS",
+    help: "Set what type of progress bar to use"),
+  OptDef(names: "--debug", c: cDis, kind: Flag, datum: "isDebug",
+    help: "Show debugging messages and values"),
+  OptDef(names: "-q, --quiet", c: cDis, kind: Flag, datum: "quiet",
+    help: "Display less output"),
+  OptDef(names: "--preview, --stats", c: cDis, kind: Flag, datum: "args.preview",
+    help: "Show stats on how the input will be cut and halt"),
+
+  OptDef(names: "-vn", c: cCon, kind: Flag, datum: "args.vn",
+    help: "Disable the inclusion of video streams"),
+  OptDef(names: "-an", c: cCon, kind: Flag, datum: "args.an",
+    help: "Disable the inclusion of audio streams"),
+  OptDef(names: "-sn", c: cCon, kind: Flag, datum: "args.sn",
+    help: "Disable the inclusion of subtitle streams"),
+  OptDef(names: "-dn", c: cCon, kind: Flag, datum: "args.dn",
+    help: "Disable the inclusion of data streams"),
+  OptDef(names: "--faststart", c: cCon, kind: Flag, datum: "args.faststart",
+    help: "Enable movflags +faststart, recommended for web (default)"),
+  OptDef(names: "--no-faststart", c: cCon, kind: Flag, datum: "args.noFaststart",
+    help: "Disable movflags +faststart, will be faster for large files"),
+  OptDef(names: "--fragmented", c: cCon, kind: Flag, datum: "args.fragmented",
+    help: &"Use {fragmented} mp4/mov to allow playback before video is complete."),
+  OptDef(names: "--no-fragmented", c: cCon, kind: Flag, datum: "args.noFragmented",
+    help: "Do not use fragmented mp4/mov for better compatibility (default)"),
+
+  OptDef(names: "-c:v, -vcodec, --video-codec", c: cVid, datum: "vcodec",
+    metavar: "ENCODER", help: "Set video codec for output media"),
+  OptDef(names: "-b:v, --video-bitrate", c: cVid, datum: "video-bitrate",
+    metavar: "BITRATE", help: "Set the number of bits per second for video"),
+  OptDef(names: "-crf", c: cVid, datum: "crf", metavar: "NUM",
+    help: "Set the Constant Rate Factor for quality-based encoding. Lower = better quality. [0-63]"),
+  OptDef(names: "-profile:v, -vprofile", c: cVid, datum: "vprofile",
+    metavar: "PROFILE", help: "Set the video profile. For h264: high, main, or baseline"),
+  OptDef(names: "-preset, --preset", c: cVid, datum: "preset", metavar: "PRESET",
+    help: "Set the video encoder's preset (e.g. ultrafast, medium, slow)"),
+  OptDef(names: "--scale", c: cVid, datum: "scale", metavar: "NUM",
+    help: "Scale the output video's resolution by NUM factor"),
+  OptDef(names: "--no-seek", c: cVid, kind: Flag, datum: "args.noSeek",
+    help: "Disable file seeking when rendering video. Helpful for debugging desync issues"),
+
+  OptDef(names: "-c:a, -acodec, --audio-codec", c: cAud, datum: "acodec",
+    metavar: "ENCODER", help: "Set audio codec for output media"),
+  OptDef(names: "-layout, --audio-layout", c: cAud, datum: "layout",
+    metavar: "LAYOUT", help: "Set the audio layout for the output media/timeline"),
+  OptDef(names: "-b:a, --audio-bitrate", c: cAud, datum: "audio-bitrate",
+    metavar: "BITRATE", help: "Set the number of bits per second for audio"),
+  OptDef(names: "--mix-audio-streams", c: cAud, kind: Flag, datum: "args.mixAudioStreams",
+    help: "Mix all audio streams together into one"),
+  OptDef(names: "-anorm, --audio-normalize", c: cAud, datum: "audio-normalize",
+    metavar: "NORM-TYPE", help: """
+Apply audio normalizing (either ebu or peak). Applied right before rendering the output file"""),
+
+  OptDef(names: "--no-cache", c: cMis, kind: Flag, datum: "noCache",
+    help: "Disable reading and writing cache files"),
+  OptDef(names: "--open", c: cMis, kind: Flag, datum: "args.open",
+    help: "Open the output file after editing is done"),
+  OptDef(names: "--no-open", c: cMis, kind: Flag, datum: "args.noOpen",
+    help: "Do not open the output file after editing is done (default)"),
+  OptDef(names: "-k, --license-key", c: cMis, datum: "key",
+    help: "Provide a license key, which activates certain features"),
+  OptDef(names: "--temp-dir", c: cMis, datum: "tempdir",
+    metavar: "PATH", help: "Set where the temporary directory is located"),
+  OptDef(names: "-V, -v, --version", c: cMis, kind: Flag, datum: "showVersion",
+    help: "Show info about this program or option"),
+]
+
+proc zshcomplete*() =
+  echo "#compdef auto-editor"
+  echo ""
+  echo "_auto-editor() {"
+  echo "  local -a subcommands options"
+  echo "  subcommands=("
+  for cmd in commands:
+    if cmd.help != "":
+      echo "    '" & cmd.name & ":" & cmd.help.replace("'", "'\\''") & "'"
+    else:
+      echo "    '" & cmd.name & "'"
+  echo "  )"
+  echo "  options=("
+  for opt in mainOptions:
+    if opt.kind == Special:
+      continue
+    # Get first line of help for description
+    let desc = if opt.help != "": opt.help.split('\n')[0].replace("'", "'\\''").replace(":", "\\:") else: ""
+    for name in opt.names.split(", "):
+      let n = name.strip().replace(":", "\\:")
+      if desc != "":
+        echo "    '" & n & ":" & desc & "'"
+      else:
+        echo "    '" & n & "'"
+  echo "  )"
+  echo """
+  if (( CURRENT == 2 )); then
+    _describe 'command' subcommands
+    _describe 'option' options
+    _files
+  else
+    case "$words[2]" in
+      cache)
+        # No file completion for cache command
+        ;;
+      *)
+        _describe 'option' options
+        _files
+        ;;
+    esac
+  fi
+}
+
+_auto-editor "$@"
+"""
+
+macro genCmdCases*(keyIdent: untyped): untyped =
+  ## Generates a case statement that dispatches to command handlers.
+  ## Returns true if a command was matched and handled, false otherwise.
+  result = newNimNode(nnkCaseStmt)
+  result.add(keyIdent)
+
+  for cmd in commands:
+    var branch = newNimNode(nnkOfBranch)
+    branch.add(newStrLitNode(cmd.name))
+
+    # Build: commandLineParams()[1..^1]
+    let sliceExpr = newNimNode(nnkInfix).add(
+      ident(".."),
+      newIntLitNode(1),
+      newNimNode(nnkPrefix).add(ident("^"), newIntLitNode(1))
+    )
+    let argsExpr = newNimNode(nnkBracketExpr).add(
+      newCall(ident("commandLineParams")),
+      sliceExpr
+    )
+    let handlerCall = newCall(
+      newDotExpr(ident(cmd.name), ident("main")),
+      argsExpr
+    )
+
+    var stmtList = newStmtList()
+    if cmd.help != "":
+      # if paramCount() < 2: echo help else: handler(args)
+      stmtList.add(newNimNode(nnkIfStmt).add(
+        newNimNode(nnkElifBranch).add(
+          newNimNode(nnkInfix).add(ident("<"), newCall(ident("paramCount")), newIntLitNode(2)),
+          newStmtList(newCall(ident("echo"), newStrLitNode(cmd.help)))
+        ),
+        newNimNode(nnkElse).add(newStmtList(handlerCall))
+      ))
+    else:
+      stmtList.add(handlerCall)
+    stmtList.add(newCall(ident("quit"), newIntLitNode(0)))
+
+    branch.add(stmtList)
+    result.add(branch)
+
+  # else branch - do nothing (no match)
+  var elseBranch = newNimNode(nnkElse)
+  elseBranch.add(newStmtList(newNimNode(nnkDiscardStmt).add(newEmptyNode())))
+  result.add(elseBranch)
+
+
+func argsFlags(): seq[string] {.compileTime.} =
+  for opt in mainOptions:
+    if opt.kind == Flag and opt.datum.startsWith("args."):
+      result.add(opt.datum[5..^1])
+
+macro genFlagInterface*(argsType: untyped): untyped =
+  ## Generates getter/setter procs for each args.* flag using bitpacking on flags: uint32.
+  result = newStmtList()
+  let flags = argsFlags()
+  for i, name in flags:
+    let maskVal = 1'u32 shl uint32(i)
+    let mask = newLit(maskVal)
+    let notMask = newLit(not maskVal)
+    let argsParam = ident("args")
+    let valParam = ident("val")
+
+    # func name*(args: ArgsType): bool = (args.flags and mask) != 0
+    let getter = newProc(
+      newNimNode(nnkPostfix).add(ident("*"), ident(name)),
+      [ident("bool"), newIdentDefs(argsParam, argsType)],
+      newNimNode(nnkInfix).add(ident("!="),
+        newNimNode(nnkInfix).add(ident("and"),
+          newDotExpr(argsParam, ident("flags")), mask),
+        newLit(0'u32)),
+      nnkFuncDef)
+    result.add(getter)
+
+    # func `name=`*(args: var ArgsType, val: bool)
+    let setterBody = newNimNode(nnkIfStmt).add(
+      newNimNode(nnkElifBranch).add(valParam,
+        newStmtList(newAssignment(
+          newDotExpr(argsParam, ident("flags")),
+          newNimNode(nnkInfix).add(ident("or"),
+            newDotExpr(argsParam, ident("flags")), mask)))),
+      newNimNode(nnkElse).add(newStmtList(newAssignment(
+        newDotExpr(argsParam, ident("flags")),
+        newNimNode(nnkInfix).add(ident("and"),
+          newDotExpr(argsParam, ident("flags")), notMask)))))
+    let setter = newProc(
+      newNimNode(nnkPostfix).add(ident("*"),
+        newNimNode(nnkAccQuoted).add(ident(name & "="))),
+      [newEmptyNode(),
+       newIdentDefs(argsParam, newNimNode(nnkVarTy).add(argsType)),
+       newIdentDefs(valParam, ident("bool"))],
+      setterBody,
+      nnkFuncDef)
+    result.add(setter)
+
+macro genCliMacro*(keyIdent, argsIdent: untyped, myOpts: static seq[OptDef]): untyped =
+  ## Generates a case statement for CLI option handling.
+  ## - Flag: sets datum to true (or bitpacks into args.flags if datum starts with "args.")
+  ## - Special: sets args.export to datum string
+  ## - Regular: sets expecting to datum string
+  result = newNimNode(nnkCaseStmt)
+  result.add(keyIdent)
+
+  for opt in myOpts:
+    var branch = newNimNode(nnkOfBranch)
+
+    for name in opt.names.split(", "):
+      branch.add(newStrLitNode(name.strip()))
+
+    var stmts = newStmtList()
+
+    case opt.kind
+    of Flag:
+      # Generate: datum = true  (for args.X, this calls the generated setter)
+      let target =
+        if opt.datum.startsWith("args."):
+          newDotExpr(argsIdent, ident(opt.datum[5..^1]))
+        else:
+          ident(opt.datum)
+      stmts.add(newAssignment(target, ident("true")))
+    of Special:
+      # Generate: args.`export` = "datum"
+      let target = newDotExpr(argsIdent, newNimNode(nnkAccQuoted).add(ident("export")))
+      stmts.add(newAssignment(target, newStrLitNode(opt.datum)))
+    of Regular:
+      # Generate: expecting = "datum"
+      stmts.add(newAssignment(ident("expecting"), newStrLitNode(opt.datum)))
+
+    stmts.add(ident("true"))
+    branch.add(stmts)
+    result.add(branch)
+
+  var elseBranch = newNimNode(nnkElse)
+  elseBranch.add(newStmtList(ident("false")))
+  result.add(elseBranch)

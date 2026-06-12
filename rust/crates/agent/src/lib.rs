@@ -1,12 +1,15 @@
 pub mod tools;
 pub mod executor;
+pub mod director;
 
 use anyhow::{Result, Context, anyhow};
 use reqwest::Client;
 use serde_json::json;
 use async_trait::async_trait;
 
-#[derive(Debug)]
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
 pub enum AgentResponse {
     Text(String),
     ToolCall { name: String, input: serde_json::Value },

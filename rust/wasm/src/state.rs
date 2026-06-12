@@ -73,4 +73,48 @@ impl NLEState {
     pub fn update_clip(&mut self, clip_id: String, start_frame: Option<i32>, is_disabled: Option<bool>) -> bool {
         self.project.update_clip(&clip_id, start_frame, is_disabled)
     }
+
+    #[wasm_bindgen(js_name = "splitClip")]
+    pub fn split_clip(&mut self, clip_id: String, at_frame: i32) {
+        for track in &mut self.project.tracks {
+            let mut split_idx = None;
+            for (idx, clip) in track.clips.iter().enumerate() {
+                if clip.id == clip_id {
+                    if at_frame > clip.start_frame && at_frame < clip.start_frame + clip.duration_frames {
+                        split_idx = Some((idx, clip.clone()));
+                        break;
+                    }
+                }
+            }
+
+            if let Some((idx, mut original_clip)) = split_idx {
+                let dur1 = at_frame - original_clip.start_frame;
+                let dur2 = original_clip.duration_frames - dur1;
+
+                original_clip.duration_frames = dur1;
+                
+                let mut new_clip = original_clip.clone();
+                new_clip.id = format!("{}_split", original_clip.id);
+                new_clip.start_frame = at_frame;
+                new_clip.duration_frames = dur2;
+
+                track.clips[idx] = original_clip;
+                track.clips.insert(idx + 1, new_clip);
+                return;
+            }
+        }
+    }
+
+    #[wasm_bindgen(js_name = "trimClip")]
+    pub fn trim_clip(&mut self, clip_id: String, new_start: i32, new_duration: i32) {
+        for track in &mut self.project.tracks {
+            for clip in &mut track.clips {
+                if clip.id == clip_id {
+                    clip.start_frame = new_start;
+                    clip.duration_frames = new_duration;
+                    return;
+                }
+            }
+        }
+    }
 }

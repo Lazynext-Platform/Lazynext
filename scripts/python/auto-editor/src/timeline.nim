@@ -1,0 +1,357 @@
+import std/[options, os, sets, tables]
+from std/math import round, ceil
+
+import ./[action, av, ffmpeg, media, log, wavutil]
+import ./util/[color, fun, lang, rational]
+
+type v1* = object
+  chunks*: seq[(int64, int64, float64)]
+  source*: string
+
+type Clip2* = object
+  start*: int64
+  `end`*: int64
+  effect*: uint32
+
+type v2* = object
+  source*: string
+  tb*: AVRational
+  effects*: seq[Actions]
+  clips*: seq[Clip2]
+
+type Clip* = object
+  src*: ptr string
+  start*: int64
+  dur*: int64
+  offset*: int64
+  effects*: uint32 # Reference to global effects in Timeline.
+  stream*: int32
+
+type v3* = object
+  layout*: ref AVChannelLayout
+  res*: (int32, int32)
+  tb*: AVRational
+  bg*: RGBColor
+  sr*: cint
+  v*: seq[seq[Clip]]
+  a*: seq[seq[Clip]]
+  s*: seq[seq[Clip]]
+  langs*: seq[Lang]   # Video, Audio (flattened).
+  effects*: seq[Actions]
+  clips2*: seq[Clip2] # Empty when the timeline is non-linear.
+
+func len*(self: v3): int64 =
+  result = 0
+  for clips in self.v:
+    if len(clips) > 0:
+      result = max(result, clips[^1].start + clips[^1].dur)
+  for clips in self.a:
+    if len(clips) > 0:
+      result = max(result, clips[^1].start + clips[^1].dur)
+
+func uniqueSources*(self: v3): HashSet[ptr string] =
+  # A nil src is a synthesized background clip (audio-only `add`); it has no
+  # file to open, so it never belongs in the source set.
+  for vlayer in self.v:
+    for video in vlayer:
+      if video.src != nil:
+        result.incl(video.src)
+  for alayer in self.a:
+    for audio in alayer:
+      if audio.src != nil:
+        result.incl(audio.src)
+
+func timelineIsEmpty(self: v3): bool =
+  (self.v.len == 0 or self.v[0].len == 0) and (self.a.len == 0 or self.a[0].len == 0)
+
+func isNonlinear*(self: v3): bool =
+  return self.clips2.len == 0 and not self.timelineIsEmpty
+
+proc chunkify(arr: seq[int], effects: seq[Actions]): seq[(int64, int64, int, Actions)] =
+  if arr.len == 0:
+    return @[]
+
+  var start: int64 = 0
+  var j: int64 = 1
+  while j < arr.len:
+    if arr[j] != arr[j - 1]:
+      result.add (start, j, arr[j-1], effects[arr[j - 1]])
+      start = j
+    inc j
+  result.add (start, arr.len.int64, arr[j-1], effects[arr[j - 1]])
+
+
+proc mutHelper(tl: var v3, mi: MediaInfo, clips: seq[Clip]) =
+  if mi.v.len > 0:
+    var vlayer = newSeqOfCap[Clip](clips.len)
+    for clip in clips:
+      var videoClip = clip
+      videoClip.stream = 0
+      vlayer.add videoClip
+    tl.v.add vlayer
+    tl.langs.add mi.v[0].lang
+
+  for i in 0 ..< mi.a.len:
+    var alayer = newSeqOfCap[Clip](clips.len)
+    for clip in clips:
+      var audioClip = clip
+      audioClip.stream = i.int32
+      alayer.add audioClip
+    tl.a.add alayer
+    tl.langs.add mi.a[i].lang
+
+  for i in 0 ..< mi.s.len:
+    var slayer = newSeqOfCap[Clip](clips.len)
+    for clip in clips:
+      var subtitleClip = clip
+      subtitleClip.stream = i.int32
+      slayer.add subtitleClip
+    tl.s.add slayer
+
+  if tl.timelineIsEmpty:
+    error "Timeline is empty, nothing to do."
+
+  if mi.a.len > 0:
+    tl.sr = mi.a[0].sampleRate
+    tl.layout = initLayout(mi.a[0].layout)
+  else:
+    tl.sr = 48000
+    tl.layout = initLayout("stereo")
+
+
+func clipBounds(startFrame, endFrame: int64, speed: float64): (int64, int64) =
+  if round(float64(endFrame - startFrame) / speed) == 0:
+    return (0'i64, 0'i64)
+  let offset = int64(ceil(float64(startFrame) / speed))
+  (offset, int64(ceil(float64(endFrame) / speed)) - offset)
+
+proc initLinearTimeline*(src: ptr string, tb: AVRational, bg: RGBColor, mi: MediaInfo,
+  effects: seq[Actions], actionIndex: seq[int]): v3 =
+  var clips: seq[Clip] = @[]
+  var i: int64 = 0
+  var start: int64 = 0
+  var dur: int64
+  var offset: int64
+
+  let pseudoChunks = chunkify(actionIndex, effects)
+  var clips2: seq[Clip2]
+
+  for chunk in pseudoChunks:
+    let actionGroup = chunk[3]
+    var speed = 1.0
+    if actionGroup.isCut:
+      speed = 99999.0
+    else:
+      for action in actionGroup:
+        if action.kind in [actSpeed, actVarispeed]:
+          speed *= action.val
+
+    let effectIndex = chunk[2]
+    if effectIndex > int64(high(uint32)):
+      error "'Number of actions' limit for timeline reached."
+    let e = uint32(effectIndex)
+
+    # Always add to clips2, even for cuts (no holes)
+    clips2.add Clip2(start: chunk[0], `end`: chunk[1], effect: e)
+
+    # Make clips (skip cuts for actual output clips)
+    if speed != 99999.0:
+      (offset, dur) = clipBounds(chunk[0], chunk[1], speed)
+      if dur == 0:
+        continue
+
+      if not (clips.len > 0 and clips[^1].start == start):
+        clips.add Clip(src: src, start: start, dur: dur, offset: offset, effects: e)
+
+      start += dur
+      i += 1
+
+  result = v3(tb: tb, bg: bg, effects: effects, clips2: clips2, res: mi.getRes())
+  mutHelper(result, mi, clips)
+
+proc appendLinearTimeline*(tl: var v3, src: ptr string, mi: MediaInfo, actionIndex: seq[int]) =
+  let startOffset = tl.len
+  var clips: seq[Clip] = @[]
+  var timelineStart: int64 = startOffset
+  var dur: int64
+  var offset: int64
+
+  let pseudoChunks = chunkify(actionIndex, tl.effects)
+
+  for chunk in pseudoChunks:
+    let actionGroup = chunk[3]
+    var speed = 1.0
+    if actionGroup.isCut:
+      speed = 99999.0
+    else:
+      for action in actionGroup:
+        if action.kind in [actSpeed, actVarispeed]:
+          speed *= action.val
+
+    let effectIndex = chunk[2]
+    if effectIndex > int64(high(uint32)):
+      error "'Number of actions' limit for timeline reached."
+    let e = uint32(effectIndex)
+
+    tl.clips2.add Clip2(start: chunk[0], `end`: chunk[1], effect: e)
+
+    if speed != 99999.0:
+      (offset, dur) = clipBounds(chunk[0], chunk[1], speed)
+      if dur == 0:
+        continue
+
+      if not (clips.len > 0 and clips[^1].start == timelineStart):
+        clips.add Clip(src: src, start: timelineStart, dur: dur, offset: offset, effects: e)
+
+      timelineStart += dur
+
+  if mi.v.len > 0:
+    if tl.v.len == 0:
+      tl.v.add @[]
+    for clip in clips:
+      var videoClip = clip
+      videoClip.stream = 0
+      tl.v[0].add videoClip
+
+  for i in 0 ..< mi.a.len:
+    if tl.a.len <= i:
+      tl.a.add @[]
+      tl.langs.add mi.a[i].lang
+    for clip in clips:
+      var audioClip = clip
+      audioClip.stream = i.int32
+      tl.a[i].add audioClip
+
+  for i in 0 ..< mi.s.len:
+    while tl.s.len <= i:
+      tl.s.add @[]
+    for clip in clips:
+      var subtitleClip = clip
+      subtitleClip.stream = i.int32
+      tl.s[i].add subtitleClip
+
+proc toNonLinear*(src: ptr string, tb: AVRational, bg: RGBColor, mi: MediaInfo,
+    chunks: seq[(int64, int64, float64)]): v3 =
+  var clips: seq[Clip] = @[]
+  var clips2: seq[Clip2] = @[]
+  var effects: seq[Actions] = @[]
+  var i: int64 = 0
+  var start: int64 = 0
+  var dur: int64
+  var offset: int64
+
+  for chunk in chunks:
+    if chunk[2] > 0.0 and chunk[2] < 99999.0:
+      (offset, dur) = clipBounds(chunk[0], chunk[1], chunk[2])
+      if dur == 0:
+        continue
+
+      if not (clips.len > 0 and clips[^1].start == start):
+        var effectIndex: int
+        if chunk[2] == 1.0:
+          effectIndex = effects.find(aNil)
+          if effectIndex == -1:
+            effects.add aNil
+            effectIndex = effects.len - 1
+        else:
+          let a = newActions([Action(kind: actSpeed, val: float32(chunk[2]))])
+          effectIndex = effects.find(a)
+          if effectIndex == -1:
+            effects.add a
+            effectIndex = effects.len - 1
+
+        if effectIndex > int64(high(uint32)):
+          error "'Number of actions' limit for timeline reached."
+        let e = uint32(effectIndex)
+        clips.add Clip(src: src, start: start, dur: dur, offset: offset, effects: e)
+        clips2.add Clip2(start: chunk[0], `end`: chunk[1], effect: e)
+
+      start += dur
+      i += 1
+
+  result = v3(tb: tb, bg: bg, effects: effects, clips2: clips2, res: mi.getRes())
+  mutHelper(result, mi, clips)
+
+proc toNonLinear2*(src: ptr string, tb: AVRational, bg: RGBColor, mi: MediaInfo,
+  clips2: seq[Clip2], effects: seq[Actions]): v3 =
+  var clips: seq[Clip] = @[]
+  var start: int64 = 0
+  var dur: int64
+  var offset: int64
+
+  for clip2 in clips2:
+    let effectGroup = effects[clip2.effect]
+    if effectGroup.isCut:
+      continue
+    var speed = 1.0
+    for effect in effectGroup:
+      if effect.kind == actSpeed or effect.kind == actVarispeed:
+        speed *= effect.val
+
+    (offset, dur) = clipBounds(clip2.start, clip2.`end`, speed)
+    if dur == 0:
+      continue
+
+    clips.add(Clip(src: src, start: start, dur: dur, offset: offset, effects: clip2.effect))
+
+    start += dur
+
+  result = v3(tb: tb, bg: bg, effects: effects, clips2: clips2, res: mi.getRes())
+  mutHelper(result, mi, clips)
+
+proc applyArgs*(tl: var v3, args: mainArgs) =
+  if args.sampleRate != -1:
+    tl.sr = args.sampleRate
+  if args.resolution[0] != 0:
+    tl.res = args.resolution
+  if args.audioLayout != "":
+    tl.layout = initLayout(args.audioLayout)
+  if args.frameRate != AVRational(num: 0, den: 0):
+    tl.tb = args.frameRate
+  if args.background.isSome:
+    tl.bg = args.background.get()
+
+func stem(path: string): string =
+  agSplitFile(path).name
+
+func makeSaneTimebase*(tb: AVRational): AVRational =
+  let tbFloat = round(tb.float64, 2)
+
+  let ntsc60 = AVRational(num: 60000, den: 1001)
+  let ntsc = AVRational(num: 30000, den: 1001)
+  let filmNtsc = AVRational(num: 24000, den: 1001)
+
+  if tbFloat == round(ntsc60.float64, 2):
+    return ntsc60
+  if tbFloat == round(ntsc.float64, 2):
+    return ntsc
+  if tbFloat == round(filmNtsc.float64, 2):
+    return filmNtsc
+  return av_d2q(tbFloat, 1000000)
+
+proc setStreamTo0*(tl: var v3, interner: var StringInterner) =
+  var dirExists = false
+  var cache = initTable[string, MediaInfo]()
+
+  proc makeTrack(i: int32, path: string): MediaInfo =
+    let folder: string = path.parentDir / (path.stem & "_tracks")
+    if not dirExists:
+      try:
+        createDir(folder)
+      except OSError:
+        removeDir(folder)
+        createDir(folder)
+      dirExists = true
+
+    let newtrack: string = folder / (path.stem & "_" & $i & ".wav")
+    if newtrack notin cache:
+      transcodeAudio(path, newtrack, i)
+      cache[newtrack] = initMediaInfo(newtrack)
+    return cache[newtrack]
+
+  for layer in tl.a.mitems:
+    for clip in layer.mitems:
+      if clip.stream > 0:
+        let mi = makeTrack(clip.stream, clip.src[])
+        clip.src = interner.intern(mi.path)
+        clip.stream = 0

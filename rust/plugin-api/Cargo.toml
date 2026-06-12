@@ -1,0 +1,9 @@
+[package]
+name = "lazynext_plugin_api"
+version = "0.1.0"
+edition = "2021"
+description = "Third-party plugin API for Lazynext 2025"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

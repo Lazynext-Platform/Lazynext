@@ -1,0 +1,456 @@
+import std/[heapqueue, options, strformat, strutils, tables]
+from std/math import round
+
+import ../[av, ffmpeg, log, media, timeline]
+import ../util/[bar, rules, rational]
+import video
+import audio
+import subtitle
+
+type Priority = object
+  index: float64
+  frame: ptr AVFrame
+  stream: ptr AVStream
+
+func initPriority(index: float64, frame: ptr AVFrame, stream: ptr AVStream): Priority =
+  result.index = index
+  result.frame = frame
+  result.stream = stream
+
+func `<`(a, b: Priority): bool = a.index < b.index
+
+func pngDimensions(data: ptr uint8, size: cint): (cint, cint) =
+  const sig = [0x89'u8, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
+  if size < 24:
+    return (0, 0)
+  let b = cast[ptr UncheckedArray[uint8]](data)
+  for i in 0..7:
+    if b[i] != sig[i]:
+      return (0, 0)
+  # IHDR: sig(8) + chunk_len(4) + "IHDR"(4) + width(4) + height(4)
+  let w = (b[16].cint shl 24) or (b[17].cint shl 16) or
+          (b[18].cint shl 8) or b[19].cint
+  let h = (b[20].cint shl 24) or (b[21].cint shl 16) or
+          (b[22].cint shl 8) or b[23].cint
+  return (w, h)
+
+proc resolveAudioCodec(layer: seq[Clip], rules: Rules, cache: MediaCache): AVCodecID =
+  if layer.len == 0:
+    return rules.defaultAud
+  # PCM-first containers (WAV, AIFF, AU, W64, CAF, ...) prefer PCM over the source codec.
+  if rules.defaultAud.isPCM:
+    return rules.defaultAud
+
+  let firstClip = layer[0]
+  let stream = int(firstClip.stream)
+
+  var codec: AVCodecID
+  if cache != nil:
+    let container = cache.getContainer(firstClip.src)
+    if stream >= container.audio.len:
+      return rules.defaultAud
+    codec = container.audio[stream].codecpar.codec_id
+  else:
+    let srcMi = initMediaInfo(firstClip.src[])
+    if stream >= srcMi.a.len:
+      return rules.defaultAud
+    codec = srcMi.a[stream].codecId
+
+  if rules.allowsCodec(codec):
+    return codec
+  return (if rules.defaultAud == ID_NONE: ID_AAC else: rules.defaultAud)
+
+func opusRate(rate: cint): cint =
+  for r in [8000.cint, 12000, 16000, 24000, 48000]:
+    if rate <= r:
+      return r
+  return 48000
+
+proc checkAudioCtx(ctx: ptr AVCodecContext, rate: cint) =
+  if ctx.codec.sample_fmts == nil:
+    error &"{ctx.codec.name}: No known audio formats avail."
+
+  var myOut: pointer = nil
+  var num: cint = 0
+  discard avcodec_get_supported_config(
+    ctx, nil, AV_CODEC_CONFIG_SAMPLE_RATE, 0.cuint, addr myOut, addr num
+  )
+
+  const AAC_AT_RATES = [48000.cint, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000]
+
+  if myOut == nil:
+    if ctx.codec.id == ID_AAC:
+      if rate notin AAC_AT_RATES:
+        error "AudioToolbox only supports these samplerates: " & AAC_AT_RATES.join(", ")
+    else:
+      debug "audio encoder claims to support every samplerate"
+      return
+
+  let rates = cast[ptr UncheckedArray[cint]](myOut)
+  for i in 0..<num:
+    if rates[i] == rate:
+      return
+
+  error &"samplerate '{rate}' not allowed for {ctx.codec.name}."
+
+proc makeMedia*(args: mainArgs, tl: var v3, outputPath: string, rules: Rules, bar: Bar,
+    cache: MediaCache = nil) =
+  var options: Table[string, string]
+  var movFlags: seq[string] = @[]
+  if args.fragmented and not args.noFragmented:
+    movFlags &= @["empty_moov", "default_base_moof", "frag_keyframe", "separate_moof"]
+    options["frag_duration"] = "0.2"
+    if args.faststart:
+      warning "Fragmented is enabled, will not apply faststart."
+  elif not args.noFaststart:
+    movFlags.add "faststart"
+  if movFlags.len > 0:
+    options["movflags"] = movFlags.join("+")
+
+  var output = openWrite(outputPath)
+  output.options = options
+
+  let includeVideo = not args.vn and rules.defaultVid notin [ID_NONE, ID_PNG]
+  let includeAudio = not args.an and rules.defaultAud != ID_NONE
+  let includeSubtitle = not args.sn and rules.defaultSub != ID_NONE
+
+  var audCodec = ""
+  if includeAudio:
+    if args.audioCodec == "auto":
+      for layer in tl.a:
+        if layer.len > 0:
+          audCodec = $avcodec_get_name(resolveAudioCodec(layer, rules, cache))
+          break
+    else:
+      audCodec = args.audioCodec
+
+    if audCodec in ["opus", "libopus"]:
+      let snapped = opusRate(tl.sr)
+      if snapped != tl.sr:
+        debug &"opus: snapping sample rate {tl.sr} -> {snapped}"
+        tl.sr = snapped
+
+  var vEncCtx: ptr AVCodecContext = nil
+  var vOutStream: ptr AVStream = nil
+  var videoFrameIter: iterator(): (ptr AVFrame, int64) = iterator(): (ptr AVFrame, int64) =
+    return
+
+  if includeVideo and tl.v.len > 0 and tl.v[0].len > 0:
+    (vEncCtx, vOutStream, videoFrameIter) = makeNewVideoFrames(output, tl, args, cache)
+
+  var audioStreams: seq[ptr AVStream] = @[]
+  var audioEncoders: seq[ptr AVCodecContext] = @[]
+  var audioFrameIters: seq[iterator(): (ptr AVFrame, int64)] = @[]
+
+  if includeAudio and args.mixAudioStreams and tl.a.len > 0:
+    # Create a single audio stream for mixed output
+    var hasAnyClips = false
+    for i in 0..<tl.a.len:
+      if tl.a[i].len > 0:
+        hasAnyClips = true
+        break
+
+    if hasAnyClips:
+      let rate = AVRational(num: tl.sr, den: 1)
+      var (aOutStream, aEncCtx) = output.addStream(audCodec, rate = rate,
+          lang = ['u', 'n', 'd', '\0'], layout = tl.layout)
+      let encoder = aEncCtx.codec
+      checkAudioCtx(aEncCtx, tl.sr)
+      aEncCtx.open()
+
+      # Update stream parameters after opening encoder for formats like AAC in MKV
+      # that need codec-specific extra data (global header) to be propagated to stream
+      if avcodec_parameters_from_context(aOutStream.codecpar, aEncCtx) < 0:
+        error "Could not update stream parameters after opening encoder"
+
+      if args.audioBitrate >= 0:
+        aEncCtx.bit_rate = args.audioBitrate
+        debug &"audio bitrate: {aEncCtx.bit_rate}"
+      else:
+        debug &"[auto] audio bitrate: {aEncCtx.bit_rate}"
+
+      audioStreams.add(aOutStream)
+      audioEncoders.add(aEncCtx)
+
+      let frameSize = if aEncCtx.frame_size > 0: aEncCtx.frame_size else: 1024
+      let audioFrameIter = makeMixedAudioFrames(encoder.sample_fmts[0], tl, frameSize,
+          args.audioNormalize, cache)
+      audioFrameIters.add(audioFrameIter)
+  elif includeAudio:
+    # Create separate streams for each timeline layer
+    for i in 0..<tl.a.len:
+      if tl.a[i].len > 0: # Only create stream if track has clips
+        let rate = AVRational(num: tl.sr, den: 1)
+        var (aOutStream, aEncCtx) = output.addStream(audCodec, rate = rate,
+            lang = tl.langs[tl.v.len + i], layout = tl.layout)
+        let encoder = aEncCtx.codec
+        checkAudioCtx(aEncCtx, tl.sr)
+        aEncCtx.open()
+
+        # Update stream parameters after opening encoder for formats like AAC in MKV
+        # that need codec-specific extra data (global header) to be propagated to stream
+        if avcodec_parameters_from_context(aOutStream.codecpar, aEncCtx) < 0:
+          error "Could not update stream parameters after opening encoder"
+
+        if args.audioBitrate >= 0:
+          aEncCtx.bit_rate = args.audioBitrate
+          debug &"audio bitrate: {aEncCtx.bit_rate}"
+        else:
+          debug &"[auto] audio bitrate: {aEncCtx.bit_rate}"
+
+        audioStreams.add(aOutStream)
+        audioEncoders.add(aEncCtx)
+
+        let frameSize = if aEncCtx.frame_size > 0: aEncCtx.frame_size else: 1024
+        let audioFrameIter = makeNewAudioFrames(encoder.sample_fmts[0], i.int32, tl,
+            frameSize, args.audioNormalize, cache)
+        audioFrameIters.add(audioFrameIter)
+
+  defer:
+    if vEncCtx != nil:
+      avcodec_free_context(addr vEncCtx)
+    for aEncCtx in audioEncoders:
+      avcodec_free_context(addr aEncCtx)
+
+  # Setup subtitle streams
+  var subtitleStreams: seq[ptr AVStream] = @[]
+  var subtitleSources: seq[string] = @[]
+
+  if includeSubtitle and tl.s.len > 0:
+    for i in 0..<tl.s.len:
+      if tl.s[i].len > 0:
+        # Get source file and stream index from first clip
+        let firstClip = tl.s[i][0]
+        let sourcePath = firstClip.src[]
+        let streamIdx = firstClip.stream
+
+        var srcContainer: InputContainer
+        var ownsContainer = false
+        if cache != nil:
+          srcContainer = cache.getContainer(firstClip.src)
+        else:
+          srcContainer = av.open(sourcePath)
+          ownsContainer = true
+        if streamIdx >= srcContainer.subtitle.len:
+          error &"Subtitle stream {streamIdx} not found in {sourcePath}"
+
+        let srcStream = srcContainer.subtitle[streamIdx]
+
+        # Add subtitle stream to output by copying from template
+        let sOutStream = output.addStreamFromTemplate(srcStream)
+        subtitleStreams.add(sOutStream)
+        subtitleSources.add(sourcePath)
+
+        if ownsContainer:
+          srcContainer.close()
+
+  var imageStreams: seq[(ptr AVStream, ptr AVPacket)] = @[]
+  var imageSourceCtx: ptr AVFormatContext = nil
+  var ownsImageSourceCtx = false
+  defer:
+    if ownsImageSourceCtx and imageSourceCtx != nil:
+      avformat_close_input(addr imageSourceCtx)
+
+  var outPacket = av_packet_alloc()
+  if outPacket == nil:
+    error "Could not allocate output packet"
+  defer: av_packet_free(addr outPacket)
+
+  if not args.dn:
+    # Get the first source pointer from the timeline so we can hit the cache.
+    var sourceSrc: ptr string = nil
+    block findSource:
+      for vlayer in tl.v:
+        if vlayer.len > 0:
+          sourceSrc = vlayer[0].src
+          break findSource
+      for alayer in tl.a:
+        if alayer.len > 0:
+          sourceSrc = alayer[0].src
+          break findSource
+
+    if sourceSrc != nil:
+      if cache != nil:
+        imageSourceCtx = cache.getContainer(sourceSrc).formatContext
+      else:
+        imageSourceCtx = av.openFormatCtx(sourceSrc[].cstring)
+        ownsImageSourceCtx = true
+
+      for i in 0 ..< imageSourceCtx.nb_streams:
+        let strm = imageSourceCtx.streams[i]
+        if strm.codecpar.codec_type == AVMEDIA_TYPE_ATTACHMENT:
+          let outStrm = avformat_new_stream(output.formatCtx, nil)
+          if outStrm == nil:
+            error "Could not allocate attachment stream"
+          if avcodec_parameters_copy(outStrm.codecpar, strm.codecpar) < 0:
+            error "Could not copy attachment codec parameters"
+          if strm.metadata != nil:
+            discard av_dict_copy(addr outStrm.metadata, strm.metadata, 0)
+        elif strm.codecpar.codec_type == AVMEDIA_TYPE_VIDEO and
+            (strm.disposition and AV_DISPOSITION_ATTACHED_PIC) != 0:
+          if avformat_query_codec(output.formatCtx.oformat, strm.codecpar.codec_id,
+              FF_COMPLIANCE_EXPERIMENTAL) == 0:
+            continue
+          let outStrm = avformat_new_stream(output.formatCtx, nil)
+          if outStrm == nil:
+            error "Could not allocate image stream"
+          if avcodec_parameters_copy(outStrm.codecpar, strm.codecpar) < 0:
+            error "Could not copy image codec parameters"
+          if outStrm.codecpar.width == 0 or outStrm.codecpar.height == 0:
+            if strm.codecpar.codec_id == ID_PNG:
+              let (w, h) = pngDimensions(strm.attached_pic.data, strm.attached_pic.size)
+              if w > 0 and h > 0:
+                outStrm.codecpar.width = w
+                outStrm.codecpar.height = h
+          outStrm.time_base = strm.time_base
+          outStrm.disposition = strm.disposition
+          if strm.metadata != nil:
+            discard av_dict_copy(addr outStrm.metadata, strm.metadata, 0)
+          imageStreams.add((outStrm, addr strm.attached_pic))
+
+  output.startEncoding()
+
+  var title = &"({output.formatCtx.oformat.name}) "
+  var encoderTitles: seq[string] = @[]
+
+  if vEncCtx != nil:
+    let name = vEncCtx.codec.canonicalName
+    encoderTitles.add (if noColor: name else: &"\e[95m{name}")
+  for aEncCtx in audioEncoders:
+    let name = aEncCtx.codec.canonicalName
+    encoderTitles.add (if noColor: name else: &"\e[96m{name}")
+  for sStream in subtitleStreams:
+    let name = $sStream.name()
+    if name != "":
+      encoderTitles.add (if noColor: name else: &"\e[93m{name}")
+
+  if noColor:
+    title &= encoderTitles.join("+")
+  else:
+    title &= encoderTitles.join("\e[0m+") & "\e[0m"
+  bar.start(tl.len.float64, title)
+
+  var shouldGetAudio: seq[bool] = newSeq[bool](audioFrameIters.len)
+  const MAX_AUDIO_AHEAD = 30 # In timebase, how far audio can be ahead of video.
+
+  # Priority queue for ordered frames by time_base.
+  var frameQueue = initHeapQueue[Priority]()
+  var earliestVideoIndex = none(int64)
+  var latestAudioIndices: seq[float64] = @[]
+  for i in 0..<audioFrameIters.len:
+    latestAudioIndices.add(-Inf)
+
+  var videoFrame: ptr AVFrame
+  var audioFrames: seq[ptr AVFrame] = newSeq[ptr AVFrame](audioFrameIters.len)
+  var index: int64
+
+  while true:
+    if not earliestVideoIndex.isSome:
+      for i in 0..<shouldGetAudio.len:
+        shouldGetAudio[i] = true
+    else:
+      for i in 0..<shouldGetAudio.len:
+        for item in frameQueue:
+          if item.stream == audioStreams[i]:
+            latestAudioIndices[i] = max(latestAudioIndices[i], item.index.float64)
+        shouldGetAudio[i] = (latestAudioIndices[i] <= float(earliestVideoIndex.get() +
+            MAX_AUDIO_AHEAD))
+
+    if finished(videoFrameIter):
+      videoFrame = nil
+    else:
+      (videoFrame, index) = videoFrameIter()
+      if videoFrame != nil:
+        earliestVideoIndex = some(index)
+        frameQueue.push(initPriority(float(index), videoFrame, vOutStream))
+
+    for i in 0..<audioFrameIters.len:
+      if finished(audioFrameIters[i]):
+        audioFrames[i] = nil
+      elif shouldGetAudio[i]:
+        (audioFrames[i], _) = audioFrameIters[i]()
+        if audioFrames[i] != nil:
+          let audioIndex = int(round(audioFrames[i].time(audioEncoders[i].time_base) * tl.tb))
+          # Update index to the maximum of video and audio indices to ensure progress
+          index = max(index, audioIndex)
+
+    # Break if no more frames
+    var hasFrames = (videoFrame != nil)
+    for audioFrame in audioFrames:
+      if audioFrame != nil:
+        hasFrames = true
+        break
+    if not hasFrames:
+      break
+
+    # Add audio frames to queue
+    for i in 0..<audioFrameIters.len:
+      if shouldGetAudio[i] and audioFrames[i] != nil:
+        let audioIndex = int(round(audioFrames[i].time(audioEncoders[i].time_base) * tl.tb))
+        frameQueue.push(initPriority(float(audioIndex), audioFrames[i], audioStreams[i]))
+
+    while frameQueue.len > 0 and frameQueue[0].index <= float64(index):
+      let item = frameQueue.pop()
+      let frame = item.frame
+      let outputStream = item.stream
+      let frameType = outputStream.codecpar.codec_type
+      let encCtx = if frameType == AVMEDIA_TYPE_VIDEO:
+        vEncCtx
+      else:
+        var aEncCtx: ptr AVCodecContext = nil
+        for i, stream in audioStreams:
+          if stream == outputStream:
+            aEncCtx = audioEncoders[i]
+            break
+        aEncCtx
+
+      for outPacket in encCtx.encode(frame, outPacket):
+        outPacket.stream_index = outputStream.index
+        av_packet_rescale_ts(outPacket, encCtx.time_base, outputStream.time_base)
+
+        if frameType == AVMEDIA_TYPE_VIDEO or vOutStream == nil:
+          let time = frame.time(encCtx.time_base)
+          if time != -1.0:
+            bar.tick(round(time * tl.tb))
+        output.mux(outPacket[])
+        av_packet_unref(outPacket)
+
+        if frameType == AVMEDIA_TYPE_VIDEO:
+          av_frame_unref(frame)
+
+      if frameType == AVMEDIA_TYPE_AUDIO:
+        av_frame_free(addr frame)
+
+  bar.`end`()
+
+  # Flush streams
+  if vEncCtx != nil:
+    for outPacket in vEncCtx.encode(nil, outPacket):
+      outPacket.stream_index = vOutStream.index
+      av_packet_rescale_ts(outPacket, vEncCtx.time_base, vOutStream.time_base)
+      output.mux(outPacket[])
+      av_packet_unref(outPacket)
+
+  for i, aEncCtx in audioEncoders:
+    for outPacket in aEncCtx.encode(nil, outPacket):
+      outPacket.stream_index = audioStreams[i].index
+      av_packet_rescale_ts(outPacket, aEncCtx.time_base, audioStreams[i].time_base)
+      output.mux(outPacket[])
+      av_packet_unref(outPacket)
+
+  # Copy embedded images
+  for (outStream, cachedPkt) in imageStreams:
+    if cachedPkt != nil and av_packet_ref(outPacket, cachedPkt) >= 0:
+      outPacket.stream_index = outStream.index
+      discard av_interleaved_write_frame(output.formatCtx, outPacket)
+      av_packet_unref(outPacket)
+
+  # Process subtitle streams
+  if includeSubtitle:
+    for i in 0..<subtitleStreams.len:
+      let layer = tl.s[i]
+      let sourcePath = subtitleSources[i]
+      let outputStream = subtitleStreams[i]
+      remuxSubtitles(sourcePath, layer, outputStream, output, tl.tb)
+
+  output.close()

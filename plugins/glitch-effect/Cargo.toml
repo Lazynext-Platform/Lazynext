@@ -1,0 +1,10 @@
+[package]
+name = "lazynext_plugin_cyber_glitch"
+version = "1.0.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+lazynext_plugin_api = { path = "../../rust/plugin-api" }

@@ -1,42 +1,55 @@
-use anyhow::Result;
+use std::fs::File;
+use std::io::Write;
+use anyhow::{Result, Context};
+use state::ProjectData;
+use uuid::Uuid;
 
-pub struct AafSerializer {
-    pub timeline_id: String,
-}
+pub struct AAFExporter;
 
-impl AafSerializer {
-    pub fn new(timeline_id: &str) -> Self {
-        Self {
-            timeline_id: timeline_id.to_string(),
-        }
+impl AAFExporter {
+    pub fn new() -> Self {
+        Self
     }
 
-    /// Serializes the timeline state into the complex Advanced Authoring Format (AAF) binary structure.
-    /// This allows Hollywood editors to export the raw timeline (not a rendered video) 
-    /// and open the exact same project inside Avid ProTools for dedicated sound mixing.
-    pub fn generate_aaf_binary(&self) -> Result<Vec<u8>> {
-        println!("Serializing Timeline {} into AAF Binary format...", self.timeline_id);
-        println!("Packaging track layouts, cut points, and media file references...");
-        // Mock binary AAF output
-        Ok(vec![0x41, 0x41, 0x46, 0x00, 0x01, 0x02]) 
-    }
-
-    /// Generates Final Cut Pro XML (FCP-XML) to send timelines to DaVinci Resolve or Nuke.
-    pub fn generate_fcp_xml(&self) -> Result<String> {
-        println!("Generating FCP-XML for Timeline {}...", self.timeline_id);
-        let xml = format!(
+    /// Generates a structured Advanced Authoring Format (AAF) manifest for Pro Tools / Avid
+    pub fn generate_aaf(&self, project: &ProjectData, output_path: &str) -> Result<()> {
+        let uuid = Uuid::new_v4().urn().to_string();
+        
+        let aaf_content = format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE fcpxml>
-<fcpxml version="1.9">
-    <project name="Lazynext_Pro_Roundtrip">
-        <sequence format="r1" tcStart="0s" tcFormat="NDF">
-            <spine>
-                <!-- Clips would be injected here -->
-            </spine>
-        </sequence>
-    </project>
-</fcpxml>"#
+<AAF>
+    <Header>
+        <ProjectID>{}</ProjectID>
+        <Name>{}</Name>
+        <FPS>{}</FPS>
+        <Software>Lazynext 2025</Software>
+    </Header>
+    <Timeline>
+        <Tracks>{}</Tracks>
+    </Timeline>
+</AAF>"#,
+            uuid, project.name, project.fps, self.format_tracks(project)
         );
-        Ok(xml)
+
+        let mut file = File::create(output_path).context("Failed to create AAF file")?;
+        file.write_all(aaf_content.as_bytes()).context("Failed to write AAF content")?;
+        Ok(())
+    }
+
+    fn format_tracks(&self, project: &ProjectData) -> String {
+        let mut tracks_str = String::new();
+        for track in &project.tracks {
+            tracks_str.push_str(&format!(
+                r#"
+            <Track>
+                <ID>{}</ID>
+                <Name>{}</Name>
+                <Type>{}</Type>
+                <ClipsCount>{}</ClipsCount>
+            </Track>"#,
+                track.id, track.name, track.track_type, track.clips.len()
+            ));
+        }
+        tracks_str
     }
 }

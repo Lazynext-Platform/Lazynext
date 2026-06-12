@@ -1,0 +1,18 @@
+# Dockerfile.render
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install system dependencies for FFmpeg (mocked but good practice)
+RUN apk add --no-cache ffmpeg
+
+# Copy the service files
+COPY services/render-service/package*.json ./
+RUN npm install
+
+COPY services/render-service/ ./
+
+# Expose Render Farm REST Port
+EXPOSE 8003
+
+CMD ["npm", "start"]

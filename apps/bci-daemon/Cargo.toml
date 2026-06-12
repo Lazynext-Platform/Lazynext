@@ -1,0 +1,9 @@
+[package]
+name = "lazynext_bci_daemon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lazynext_core = { path = "../../rust/core" }
+tokio = { version = "1.0", features = ["full"] }
+rand = "0.8"

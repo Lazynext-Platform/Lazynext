@@ -1,3 +1,4 @@
+pub mod crdt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

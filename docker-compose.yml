@@ -1,90 +1,56 @@
+version: '3.8'
+
 services:
-  db:
-    image: postgres:18
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: lazynext
-      POSTGRES_PASSWORD: lazynext
-      POSTGRES_DB: lazynext
-    volumes:
-      - postgres_data:/var/lib/postgresql
-    ports:
-      - "5433:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lazynext"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
-  serverless-redis-http:
-    image: hiett/serverless-redis-http:latest
-    ports:
-      - "8079:80"
-    environment:
-      SRH_MODE: env
-      SRH_TOKEN: example_token
-      SRH_CONNECTION_STRING: "redis://redis:6379"
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:80 || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 10s
-
-  web:
+  # Next.js UI Shell
+  lazynext-web:
     build:
       context: .
-      dockerfile: ./Dockerfile
-      args:
-        - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID}
-        - FREESOUND_API_KEY=${FREESOUND_API_KEY}
-        - NEXT_PUBLIC_MARBLE_API_URL=${NEXT_PUBLIC_MARBLE_API_URL:-https://api.marblecms.com}
-        - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-build-placeholder}
-    restart: unless-stopped
+      dockerfile: Dockerfile.web
     ports:
-      - "3100:3000"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
-      - DATABASE_URL=postgresql://lazynext:lazynext@db:5432/lazynext
-      - BETTER_AUTH_SECRET=your-production-secret-key-here
-      - UPSTASH_REDIS_REST_URL=http://serverless-redis-http:80
-      - UPSTASH_REDIS_REST_TOKEN=example_token
-      - NEXT_PUBLIC_SITE_URL=http://localhost:3100
-      - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
-      - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-placeholder}
-      - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID}
-      - FREESOUND_API_KEY=${FREESOUND_API_KEY}
+      - NEXT_PUBLIC_SYNC_URL=ws://localhost:8002
+      - NEXT_PUBLIC_RENDER_URL=http://localhost:8003
+      - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
     depends_on:
-      db:
-        condition: service_healthy
-      serverless-redis-http:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+      - postgres-db
+    restart: unless-stopped
+
+  # WebRTC / CRDT Signaling Server
+  lazynext-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile.sync
+    ports:
+      - "8002:8002"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # FFmpeg Render Farm
+  lazynext-render:
+    build:
+      context: .
+      dockerfile: Dockerfile.render
+    ports:
+      - "8003:8003"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # Database
+  postgres-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: lazynext
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 volumes:
   postgres_data:
-
-networks:
-  default:
-    name: lazynext-network

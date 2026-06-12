@@ -1,0 +1,199 @@
+import std/[os, strformat, strutils]
+import ../[av, cli, ffmpeg, log]
+import ../util/[fun, term]
+
+proc printHelp(opts: seq[OptDef]) =
+  let termWidth = max(terminalWidth(), 40)
+  let optWidth = min(32, termWidth div 3)
+  let helpWidth = termWidth - optWidth - 4
+
+  echo "Usage: <file> <model> [options]\n"
+  echo "Options:"
+
+  for opt in opts:
+    var optStr = "    " & opt.names
+    if opt.metavar != "":
+      optStr &= " " & opt.metavar
+
+    if optStr.len >= optWidth:
+      echo optStr
+      let wrapped = wrapText(opt.help, helpWidth, 0)
+      for line in wrapped.split("\n"):
+        echo " ".repeat(optWidth) & line
+    else:
+      let padding = optWidth - optStr.len
+      let wrapped = wrapText(opt.help, helpWidth, optWidth)
+      let helpLines = wrapped.split("\n")
+      echo optStr & " ".repeat(padding) & helpLines[0]
+      for i in 1 ..< helpLines.len:
+        echo helpLines[i]
+
+  echo "\n    -h, --help" & " ".repeat(optWidth - 14) &
+    wrapText("Show info about this program then exit", helpWidth, optWidth)
+  echo ""
+  quit(0)
+
+proc main*(cArgs: seq[string]) =
+  var inputPath: string = ""
+  var model: string = ""
+  var isDebug = false
+  var splitWords = false
+  var language = "auto"
+  var translate = false # to English
+  var format = "text"
+  var formatExplicit = false
+  var output = "-"
+  var queue: int = 30
+  var vadModel: string = ""
+  var threads: cint = 4
+
+  var expecting: string = ""
+  for key in cArgs:
+    if genCliMacro(key, args, whisperOptions):
+      continue
+    if key in ["-h", "--help"]:
+      printHelp(whisperOptions)
+    if key.startsWith("--"):
+      error &"Unknown option: {key}"
+    case expecting:
+    of "":
+      if inputPath == "":
+        inputPath = key
+      elif model == "":
+        model = key.replace("\\", "\\\\").replace(":", "\\:")
+      else:
+        error "Got too many arguments\nUsage: <file> <model> [options]"
+    of "language":
+      language = key
+    of "format":
+      format = key
+      formatExplicit = true
+    of "output":
+      output = key.replace("\\", "\\\\").replace(":", "\\:")
+    of "queue":
+      queue = parseInt(key)
+    of "vad-model":
+      vadModel = key.replace("\\", "\\\\").replace(":", "\\:")
+    of "threads":
+      threads = parseInt(key).cint
+    expecting = ""
+
+  if inputPath == "":
+    error "A media file is needed"
+  if model == "":
+    error "A model is needed, you came find them here: https://huggingface.co/ggerganov/whisper.cpp"
+  if queue < 1 or queue > 86400:
+    error &"Invalid queue value: {queue}"
+  if output != "-" and not formatExplicit:
+    case output.splitFile.ext.toLowerAscii
+    of ".srt": format = "srt"
+    of ".json": format = "json"
+    of ".txt", ".text": format = "text"
+    else: discard
+  if format notin ["text", "srt", "json"]:
+    error &"Invalid format: {format}. Choices: text, srt, json"
+
+  av_log_set_level(if isDebug: AV_LOG_DEBUG else: AV_LOG_ERROR)
+
+  let input = (try: av.open(inputPath) except: error "Invalid media file")
+  defer: input.close()
+
+  if input.audio.len == 0:
+    error "No audio stream found"
+
+  let filterGraph = avfilter_graph_alloc()
+  if filterGraph == nil: error "out of memory"
+  defer: avfilter_graph_free(addr filterGraph)
+
+  let abuffer = avfilter_get_by_name("abuffer")
+  let abuffersink = avfilter_get_by_name("abuffersink")
+  let aresample = avfilter_get_by_name("aresample")
+  let whisperFilter = avfilter_get_by_name("whisper")
+  if whisperFilter == nil:
+    error "Could not find whisper filter, it may not be enabled."
+
+  let audioStream = input.audio[0]
+  let sampleRate = audioStream.codecpar.sample_rate
+  let sampleFormat = cast[AVSampleFormat](audioStream.codecpar.format)
+
+  let sampleFmtName = av_get_sample_fmt_name(sampleFormat.cint)
+  let chLayout = $audioStream.codecpar.ch_layout
+  let tb = audioStream.time_base
+  let bufferArgs = &"sample_rate={sampleRate}:sample_fmt={sampleFmtName}:channel_layout={chLayout}:time_base={tb.num}/{tb.den}"
+
+  var bufferCtx: ptr AVFilterContext
+  var ret = avfilter_graph_create_filter(addr bufferCtx, abuffer, nil, bufferArgs.cstring, nil, filterGraph)
+  if ret < 0:
+    error &"Failed to create buffer source: {ret}"
+
+  # Resample to 16kHz for best whisper accuracy; keep original rate if already <=16kHz
+  let targetSampleRate = if sampleRate > 16000: 16000 else: sampleRate
+
+  let resampleArgs = ($targetSampleRate).cstring
+  var resampleCtx: ptr AVFilterContext
+  ret = avfilter_graph_create_filter(addr resampleCtx, aresample, nil, resampleArgs, nil, filterGraph)
+  if ret < 0:
+    error &"Failed to create aresample filter: {ret}"
+
+  var whisperArgs = &"model={model}:language={language}:queue={queue}:format={format}"
+  if splitWords:
+    whisperArgs &= ":max_len=1"
+  if translate:
+    whisperArgs &= ":translate=1"
+  if output == "-":
+    when defined(windows):
+      whisperArgs &= ":destination=CON"
+    else:
+      whisperArgs &= ":destination=/dev/stdout"
+  else:
+    whisperArgs &= ":destination=" & output
+
+  if vadModel != "":
+    whisperArgs &= ":vad_model=" & vadModel
+
+  debug whisperArgs
+  var whisperCtx: ptr AVFilterContext
+  ret = avfilter_graph_create_filter(addr whisperCtx, whisperFilter, nil, whisperArgs.cstring, nil, filterGraph)
+  if ret == -5:
+    if model.fileExists:
+      error &"Invalid model: {model}"
+    else:
+      error &"Expected this path to exist: {model}"
+  elif ret < 0:
+    error &"Failed to create whisper filter with result: {ret}, model: {model}"
+
+  var sinkCtx: ptr AVFilterContext
+  ret = avfilter_graph_create_filter(addr sinkCtx, abuffersink, nil, nil, nil, filterGraph)
+  if ret >= 0: ret = avfilter_link(bufferCtx, 0, resampleCtx, 0)
+  if ret >= 0: ret = avfilter_link(resampleCtx, 0, whisperCtx, 0)
+  if ret >= 0: ret = avfilter_link(whisperCtx, 0, sinkCtx, 0)
+  if ret < 0: error "Failed to connect filters"
+
+  filterGraph.nb_threads = threads
+
+  if avfilter_graph_config(filterGraph, nil) < 0:
+    error "Failed to configure filter graph"
+
+  # Set up decoder for the audio stream
+  let decoderCtx = initDecoder(audioStream.codecpar)
+  defer: avcodec_free_context(addr decoderCtx)
+
+  let frame = av_frame_alloc()
+  defer: av_frame_free(addr frame)
+
+  let outputFrame = av_frame_alloc()
+  defer: av_frame_free(addr outputFrame)
+
+  for decodedFrame in input.decode(input.audio[0].index, decoderCtx, frame):
+    if av_buffersrc_write_frame(bufferCtx, decodedFrame) < 0:
+      echo "Error feeding frame to filter"
+      continue
+
+    # Try to get output from whisper filter
+    while av_buffersink_get_frame_flags(sinkCtx, outputFrame, 0) >= 0:
+      av_frame_unref(outputFrame)
+
+  # Flush the filter
+  if av_buffersrc_write_frame(bufferCtx, nil) >= 0:
+    while av_buffersink_get_frame_flags(sinkCtx, outputFrame, 0) >= 0:
+      av_frame_unref(outputFrame)

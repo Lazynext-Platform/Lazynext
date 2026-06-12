@@ -1,4 +1,0 @@
-name: projects/vertexaiopencode/policies/iam.allowedPolicyMemberDomains
-spec:
-  rules:
-  - allowAll: true

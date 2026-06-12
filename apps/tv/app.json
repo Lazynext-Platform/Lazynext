@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Lazynext Broadcast",
+    "slug": "lazynext-tv",
+    "version": "1.0.0",
+    "isTV": true,
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.lazynext.tv"
+    }
+  }
+}

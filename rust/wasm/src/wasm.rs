@@ -35,3 +35,14 @@ pub use time::*;
 mod state;
 #[cfg(target_arch = "wasm32")]
 pub use state::*;
+
+#[cfg(target_arch = "wasm32")]
+mod neural;
+#[cfg(target_arch = "wasm32")]
+pub use neural::*;
+
+#[cfg(target_arch = "wasm32")]
+mod audio_wasm;
+#[cfg(target_arch = "wasm32")]
+pub use audio_wasm::*;
+
