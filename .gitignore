@@ -28,3 +28,15 @@ target/
 rust-migration-notes.md
 .DS_Store
 .next
+
+# Testing & Logs
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+*.log
+
+# Python
+__pycache__/
+venv/
+.pytest_cache/
