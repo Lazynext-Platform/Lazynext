@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui_platform::application;
 use lazynext_core::{NLEState, AutonomousEditor, VideoIntent};
 
 struct LazynextDesktop {
@@ -8,7 +9,7 @@ struct LazynextDesktop {
 }
 
 impl Render for LazynextDesktop {
-    fn render(&mut self, _cx: &mut ViewContext<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let active_project = self.engine.get_project_data();
         let clip_count = active_project.tracks.iter().map(|t| t.clips.len()).sum::<usize>();
 
@@ -67,7 +68,19 @@ impl Render for LazynextDesktop {
                                     .rounded_md()
                                     .cursor_pointer()
                                     .hover(|s| s.bg(rgb(0x00d4df)))
-                                    .on_mouse_down(MouseButton::Left, |_, cx| cx.dispatch_action(Box::new(ExecuteAutonomousEdit { prompt: "Cut the silence".to_string() })))
+                                    .on_mouse_down(MouseButton::Left, cx.listener(|view: &mut LazynextDesktop, _, _, cx| {
+                                        let intent = VideoIntent {
+                                            prompt: "Cut the silence".to_string(),
+                                            require_plan_approval: false,
+                                            source_files: vec![],
+                                        };
+                                        let result = view.autonomous_agent.process_intent_sync(&mut view.engine, &intent);
+                                        match result {
+                                            Ok(msg) => view.status_text = format!("Success: {}", msg),
+                                            Err(e) => view.status_text = format!("Error: {}", e),
+                                        }
+                                        cx.notify();
+                                    }))
                                     .child(div().font_weight(FontWeight::BOLD).child("Trigger AI 'Cut'"))
                             )
                             .child(
@@ -81,24 +94,23 @@ impl Render for LazynextDesktop {
                                     .rounded_md()
                                     .cursor_pointer()
                                     .hover(|s| s.bg(rgb(0x27272a)))
-                                    .on_mouse_down(MouseButton::Left, |_, cx| cx.dispatch_action(Box::new(ExecuteAutonomousEdit { prompt: "Add cinematic music".to_string() })))
+                                    .on_mouse_down(MouseButton::Left, cx.listener(|view: &mut LazynextDesktop, _, _, cx| {
+                                        let intent = VideoIntent {
+                                            prompt: "Add cinematic music".to_string(),
+                                            require_plan_approval: false,
+                                            source_files: vec![],
+                                        };
+                                        let result = view.autonomous_agent.process_intent_sync(&mut view.engine, &intent);
+                                        match result {
+                                            Ok(msg) => view.status_text = format!("Success: {}", msg),
+                                            Err(e) => view.status_text = format!("Error: {}", e),
+                                        }
+                                        cx.notify();
+                                    }))
                                     .child(div().font_weight(FontWeight::BOLD).child("Trigger AI 'Music'"))
                             )
                     )
             )
-    }
-}
-
-#[derive(Clone, PartialEq, gpui::IntoElement)]
-struct ExecuteAutonomousEdit {
-    prompt: String,
-}
-
-impl gpui::Action for ExecuteAutonomousEdit {
-    fn name(&self) -> &str { "ExecuteAutonomousEdit" }
-    fn debug_name() -> &'static str { "ExecuteAutonomousEdit" }
-    fn build(_: Option<serde_json::Value>) -> anyhow::Result<Self> {
-        Ok(Self { prompt: "".to_string() })
     }
 }
 
@@ -123,23 +135,7 @@ fn main() {
         300
     );
 
-    App::new().run(move |cx: &mut AppContext| {
-        cx.on_action(|action: &ExecuteAutonomousEdit, cx: &mut WindowContext| {
-            cx.update_root(|view: &mut LazynextDesktop, cx| {
-                let intent = VideoIntent {
-                    prompt: action.prompt.clone(),
-                    require_plan_approval: false,
-                    source_files: vec![],
-                };
-                let result = view.autonomous_agent.process_intent_sync(&mut view.engine, &intent);
-                match result {
-                    Ok(msg) => view.status_text = format!("Success: {}", msg),
-                    Err(e) => view.status_text = format!("Error: {}", e),
-                }
-                cx.notify(); // Re-render the UI with new clip count
-            });
-        });
-
+    application().run(move |cx: &mut App| {
         let bounds = Bounds::centered(None, size(px(1200.0), px(800.0)), cx);
         cx.open_window(
             WindowOptions {
@@ -151,11 +147,11 @@ fn main() {
                 }),
                 ..Default::default()
             },
-            |cx| cx.new_view(|_| LazynextDesktop { 
+            |_, cx| cx.new(|_| LazynextDesktop { 
                 engine, 
                 autonomous_agent: AutonomousEditor::new(),
                 status_text: "Awaiting natural language edit...".to_string() 
             }),
-        );
+        ).unwrap();
     });
 }

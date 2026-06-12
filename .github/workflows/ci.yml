@@ -24,6 +24,9 @@ jobs:
         
       - name: Verify Workspace Compilation
         run: cargo check --workspace
+        
+      - name: Run Workspace Tests
+        run: cargo test --workspace
 
   frontend-apps:
     name: Frontend Build (Bun)
@@ -42,3 +45,6 @@ jobs:
       # Only run build if package.json has a build script, otherwise ignore
       - name: Verify Workspace Build
         run: bun run build --if-present
+        
+      - name: Run Frontend Tests
+        run: bun test

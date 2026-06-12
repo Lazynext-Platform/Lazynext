@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { NLEState, detectFaces, processAudioBuffer, initNeuralEngine } from 'lazynext-wasm';
 import { useEditorState } from './useEditorState';
 import { RenderFarmModal } from './RenderFarmModal';
@@ -50,17 +50,19 @@ export default function EditorClient({ project }: { project: Project }) {
   const { activeWorkspace, setActiveWorkspace } = ctx;
 
   // We use a mock clientId for now unless the user context provides one
-  const clientId = `user_${Math.random().toString(36).substring(7)}`;
+  const clientId = useRef(`user_${Math.random().toString(36).substring(7)}`).current;
+
+  const handleDeltaReceived = useCallback((delta: any) => {
+    // Pass delta to Rust WASM engine
+    if ((window as any).applyCrdtDelta) {
+      (window as any).applyCrdtDelta(JSON.stringify(delta));
+    }
+  }, []);
 
   const { broadcastDelta, socket, connected, peerCount } = useMultiplayer({
     projectId: project.id,
     clientId,
-    onDeltaReceived: (delta) => {
-      // Pass delta to Rust WASM engine
-      if ((window as any).applyCrdtDelta) {
-        (window as any).applyCrdtDelta(JSON.stringify(delta));
-      }
-    }
+    onDeltaReceived: handleDeltaReceived
   });
 
   // 3. Initialize WebRTC Voice Chat

@@ -39,8 +39,8 @@ jest.mock('lucide-react', () => ({
 }));
 
 // Mock the child components to simplify testing
-jest.mock('../timeline', () => () => <div data-testid="timeline-component">Timeline Mock</div>);
-jest.mock('../wasm-player', () => () => <div data-testid="wasm-player-component">Player Mock</div>);
+jest.mock('../timeline', () => ({ default: () => <div data-testid="timeline-component">Timeline Mock</div> }));
+jest.mock('../wasm-player', () => ({ default: () => <div data-testid="wasm-player-component">Player Mock</div> }));
 
 const mockProject = {
   id: "test-proj-1",
@@ -53,7 +53,7 @@ const mockProject = {
 };
 
 describe('EditorClient Component', () => {
-  it('renders the Editor without crashing', () => {
+  it('renders the Editor without crashing', async () => {
     render(
       <EditorStateProvider>
         <EditorClient project={mockProject} />
@@ -61,7 +61,7 @@ describe('EditorClient Component', () => {
     );
     
     // Check if the top bar renders the project name
-    expect(screen.getByText('Test Project')).toBeInTheDocument();
+    expect(await screen.findByDisplayValue('Test Project')).toBeInTheDocument();
     
     // Check if the timeline mock renders
     expect(screen.getByTestId('timeline-component')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('EditorClient Component', () => {
     
     // Find the God Mode toggle by role or text if possible. 
     // In EditorClient.tsx, it's a toggle button labeled "God Mode"
-    const godModeBtn = screen.getByText(/God Mode/i);
+    const godModeBtn = screen.getAllByText(/God Mode/i)[0];
     expect(godModeBtn).toBeInTheDocument();
     
     fireEvent.click(godModeBtn);
