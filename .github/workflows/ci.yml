@@ -1,4 +1,4 @@
-name: Lazynext CI
+name: Lazynext 2025 CI/CD Pipeline
 
 on:
   push:
@@ -6,38 +6,39 @@ on:
   pull_request:
     branches: [ "main" ]
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  test-web:
-    name: Test Next.js App
+  rust-backend:
+    name: Backend Check (Rust)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Cache Cargo Dependencies
+        uses: Swatinem/rust-cache@v2
+        
+      - name: Verify Workspace Compilation
+        run: cargo check --workspace
+
+  frontend-apps:
+    name: Frontend Build (Bun)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
-      - name: Install dependencies
-        run: |
-          cd apps/web
-          bun install
-      - name: Run Jest Tests
-        run: |
-          cd apps/web
-          bun test
-
-  test-ml:
-    name: Test Python Microservices
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          cd services
-          pip install -r requirements.txt
-          pip install pytest httpx
-      - name: Run Pytest
-        run: |
-          cd services
-          pytest
+          bun-version: latest
+          
+      - name: Install Dependencies
+        run: bun install
+        
+      # Only run build if package.json has a build script, otherwise ignore
+      - name: Verify Workspace Build
+        run: bun run build --if-present

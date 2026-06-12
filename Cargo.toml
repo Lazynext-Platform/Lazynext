@@ -1,10 +1,15 @@
 [workspace]
 resolver = "2"
 members = [
-    "rust/crates/time",
-    "rust/crates/bridge",
-    "rust/crates/effects",
-    "rust/crates/gpu",
-    "rust/crates/masks",
-    "rust/wasm", "rust/crates/compositor", "rust/crates/plugin", "rust/crates/satellite_uplink", "rust/crates/neural_engine", "rust/crates/decklink", "rust/crates/agent", "rust/crates/ffmpeg_filter", "rust/crates/editor_core", "rust/crates/audio", "rust/crates/state"
+    "rust/crates/*",
+    "rust/core",
+    "rust/p2p-sync",
+    "rust/plugin-api",
+    "rust/provenance",
+    "rust/temporal-versioning",
+    "rust/wasm",
+    "rust/mcp-server",
+    "rust/api-gateway",
+    "rust/cli",
+    "apps/desktop"
 ]

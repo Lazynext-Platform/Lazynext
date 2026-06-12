@@ -8,5 +8,4 @@ wasm-bindgen = "0.2.116"
 wasm-bindgen-futures = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-agent = { path = "../agent" }
 state = { path = "../state" }

@@ -1,0 +1,1 @@
+console.log("Lazynext Content Script running in the page");chrome.runtime.onMessage.addListener((e,o,n)=>{if(e.type==="EXTRACT_VIDEO"){const t=document.querySelectorAll("video");n({videosFound:t.length})}return!0});

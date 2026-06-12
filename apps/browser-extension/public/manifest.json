@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Lazynext Browser Extension",
+  "version": "0.1.0",
+  "description": "Lazynext video editing companion extension for capturing clips and remote control.",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*"
+  ]
+}

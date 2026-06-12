@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
-use crate::{Clip, Track};
+use crate::Clip;
 
 /// A simple Last-Writer-Wins (LWW) Register for CRDT Synchronization
 #[derive(Serialize, Deserialize, Clone, Debug)]
