@@ -1,7 +1,7 @@
 import { Cpu, Combine, Blocks } from "lucide-react";
 
 const PROJECTS = [
-	"Auto-Editor", "Clip-Anything", "FunClip", "Open-Sora", "FFMPEG", 
+	"Auto-Editor", "Clip-Anything", "LazynextClip", "Open-Sora", "FFMPEG", 
 	"Whisper", "VALL-E X", "Stable Diffusion", "ControlNet", "SadTalker",
 	"Thin-Plate Spline", "Wav2Lip", "EB-Synth", "Rembg", "SAM", "NeRF", "GPUI"
 ];

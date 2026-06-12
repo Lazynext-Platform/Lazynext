@@ -1,19 +1,19 @@
 # Claw Code
 
 <p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
+  <a href="https://github.com/Lazynext-Corporation/lazycodex">
     <img src="https://img.shields.io/badge/LazyCodex-codex%20for%20no--brainers-111111?style=for-the-badge&logo=github&logoColor=white" alt="LazyCodex banner" />
   </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
+  <a href="https://github.com/Lazynext-Corporation/gajae-code">
     <img src="https://img.shields.io/badge/Gajae--Code-red--claw%20agent%20harness-B22222?style=for-the-badge&logo=github&logoColor=white" alt="Gajae-Code banner" />
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
+  <a href="https://github.com/Lazynext-Corporation/lazycodex">
     <img src="https://opengraph.githubassets.com/lazycodex-card/code-yeongyu/lazycodex" alt="LazyCodex GitHub card" width="280" />
   </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
+  <a href="https://github.com/Lazynext-Corporation/gajae-code">
     <img src="https://opengraph.githubassets.com/gajae-code-card/Yeachan-Heo/gajae-code" alt="Gajae-Code GitHub card" width="280" />
   </a>
 </p>
@@ -21,16 +21,16 @@
 <h3 align="center">start with the real crab-powered harnesses</h3>
 
 <p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex"><b>github.com/code-yeongyu/lazycodex</b></a>
+  <a href="https://github.com/Lazynext-Corporation/lazycodex"><b>github.com/code-yeongyu/lazycodex</b></a>
   <br/>
-  <a href="https://github.com/Yeachan-Heo/gajae-code"><b>github.com/Yeachan-Heo/gajae-code</b></a>
+  <a href="https://github.com/Lazynext-Corporation/gajae-code"><b>github.com/Yeachan-Heo/gajae-code</b></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/code-yeongyu/lazycodex">
+  <a href="https://github.com/Lazynext-Corporation/lazycodex">
     <img src="https://img.shields.io/badge/Open-LazyCodex-111111?style=flat-square&logo=github&logoColor=white" alt="Open LazyCodex on GitHub" />
   </a>
-  <a href="https://github.com/Yeachan-Heo/gajae-code">
+  <a href="https://github.com/Lazynext-Corporation/gajae-code">
     <img src="https://img.shields.io/badge/Open-Gajae--Code-B22222?style=flat-square&logo=github&logoColor=white" alt="Open Gajae-Code on GitHub" />
   </a>
 </p>
@@ -57,12 +57,12 @@
 >
 > As already described in the project philosophy, this is not meant to be hand-operated like a normal product repo. It is an **agent-managed exhibit**: the harnesses plan, execute, verify, label, and preserve the artifact while the crabs keep the tank running.
 >
-> If you want to actually run work, start with **[LazyCodex](https://github.com/code-yeongyu/lazycodex)** or **[Gajae-Code](https://github.com/Yeachan-Heo/gajae-code)**. If you want to inspect the strange little fossil of the Claw Code moment, continue below.
+> If you want to actually run work, start with **[LazyCodex](https://github.com/Lazynext-Corporation/lazycodex)** or **[Gajae-Code](https://github.com/Lazynext-Corporation/gajae-code)**. If you want to inspect the strange little fossil of the Claw Code moment, continue below.
 >
 > For the longer public explanation behind this philosophy, see [here](https://x.com/realsigridjin/status/2039472968624185713).
 
 <p align="center">
-  <a href="https://github.com/ultraworkers/claw-code">ultraworkers/claw-code</a>
+  <a href="https://github.com/Lazynext-Corporation/claw-code">ultraworkers/claw-code</a>
   ·
   <a href="./USAGE.md">Usage</a>
   ·
@@ -122,7 +122,7 @@ The canonical implementation lives in [`rust/`](./rust), and the current source 
 
 ```bash
 # 1. Clone and build
-git clone https://github.com/ultraworkers/claw-code
+git clone https://github.com/Lazynext-Corporation/claw-code
 cd claw-code/rust
 cargo build --workspace
 
@@ -154,7 +154,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
    If this fails, reopen your terminal or run the PATH setup from the Rust installer output, then retry.
 3. **Clone and build** (works in PowerShell, Git Bash, or WSL):
    ```powershell
-   git clone https://github.com/ultraworkers/claw-code
+   git clone https://github.com/Lazynext-Corporation/claw-code
    cd claw-code/rust
    cargo build --workspace
    ```
@@ -286,11 +286,11 @@ cargo test --workspace
 
 Claw Code is built in the open alongside the broader UltraWorkers toolchain:
 
-- [clawhip](https://github.com/Yeachan-Heo/clawhip)
-- [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode)
-- [oh-my-codex](https://github.com/Yeachan-Heo/oh-my-codex)
-- [gajae-code](https://github.com/Yeachan-Heo/gajae-code)
+- [clawhip](https://github.com/Lazynext-Corporation/clawhip)
+- [oh-my-openagent](https://github.com/Lazynext-Corporation/oh-my-openagent)
+- [oh-my-claudecode](https://github.com/Lazynext-Corporation/oh-my-claudecode)
+- [oh-my-codex](https://github.com/Lazynext-Corporation/oh-my-codex)
+- [gajae-code](https://github.com/Lazynext-Corporation/gajae-code)
 - [UltraWorkers Discord](https://discord.gg/5TUQKqFWd)
 
 ## Ownership / affiliation disclaimer

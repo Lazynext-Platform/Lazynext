@@ -3,18 +3,18 @@ title: whisper
 ---
 
 ## whisper
-`whisper` transcribes the audio of a media file using [whisper.cpp](https://github.com/ggerganov/whisper.cpp) `ggml` models. It is useful both on its own and for generating subtitles that `--edit subtitle` can then cut on.
+`whisper` transcribes the audio of a media file using [whisper.cpp](https://github.com/Lazynext-Corporation/whisper.cpp) `ggml` models. It is useful both on its own and for generating subtitles that `--edit subtitle` can then cut on.
 
 Usage:
 ```
-auto-editor whisper <file> <model> [options]
+Lazynext-Editor whisper <file> <model> [options]
 ```
 
 `<model>` is a path to a `ggml` whisper model. You can download them from [huggingface.co/ggerganov/whisper.cpp](https://huggingface.co/ggerganov/whisper.cpp).
 
 Example:
 ```
-% auto-editor whisper example.mp4 ggml-medium.en.bin
+% Lazynext-Editor whisper example.mp4 ggml-medium.en.bin
 
  And so my fellow Americans, ask not what your country can do for you,
  ask what you can do for your country.
@@ -22,7 +22,7 @@ Example:
 
 By default the transcript is written to stdout as plain text. Use `--output` to write to a file and `--format` to choose the representation:
 ```
-auto-editor whisper example.mp4 ggml-medium.en.bin --format srt -o out.srt
+Lazynext-Editor whisper example.mp4 ggml-medium.en.bin --format srt -o out.srt
 ```
 
 ## Options
@@ -59,4 +59,4 @@ Number of CPU threads to use for whisper processing. (default 4)
 
 ---
 ### Notes
-The `whisper` filter must be enabled in the ffmpeg auto-editor is using. If it isn't, whisper will report that it `Could not find whisper filter`.
+The `whisper` filter must be enabled in the ffmpeg Lazynext-Editor is using. If it isn't, whisper will report that it `Could not find whisper filter`.

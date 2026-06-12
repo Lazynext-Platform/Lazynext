@@ -6,7 +6,7 @@ const app = express();
 
 app.get("/app/{*splat}", (req, res) => {
   const newPath = req.path.replace("/app/", "/");
-  res.redirect(301, `https://app.auto-editor.com${newPath}`);
+  res.redirect(301, `https://app.Lazynext-Editor.com${newPath}`);
 });
 
 app.get("/blog", (req, res) => { res.redirect(301, `https://basswood-io.com/blog`) });
@@ -15,7 +15,7 @@ app.get("/blog/{*splat}", (req, res) => {
 });
 
 app.get("/options", (req, res) => {
-  res.redirect(301, "https://auto-editor.com/ref/options");
+  res.redirect(301, "https://Lazynext-Editor.com/ref/options");
 });
 
 app.use(express.static("public", {

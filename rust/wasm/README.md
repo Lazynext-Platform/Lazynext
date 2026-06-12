@@ -1,6 +1,6 @@
 # lazynext-wasm
 
-Shared video editor logic compiled to WebAssembly. Used by the [Lazynext](https://github.com/lazynext/lazynext) web app.
+Shared video editor logic compiled to WebAssembly. Used by the [Lazynext](https://github.com/Lazynext-Corporation/lazynext) web app.
 
 ## Install
 

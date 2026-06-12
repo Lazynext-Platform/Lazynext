@@ -3,11 +3,11 @@ title: info
 ---
 
 ## info
-`info` is a utility program that displays media information relevant to auto-editor.
+`info` is a utility program that displays media information relevant to Lazynext-Editor.
 
 Here is an example. Note that you can use multiple files at once.
 ```
-auto-editor info example.mp4 resources/only-video/man-on-green-screen.gif
+Lazynext-Editor info example.mp4 resources/only-video/man-on-green-screen.gif
 
 example.mp4:
  - video:
@@ -57,7 +57,7 @@ resources/only-video/man-on-green-screen.gif:
 The default format is pseudo-yaml meant for humans. You can get a machine friendly output with the `--json` option.
 
 ```
-auto-editor info example.mp4 --json
+Lazynext-Editor info example.mp4 --json
 
 {
     "example.mp4": {

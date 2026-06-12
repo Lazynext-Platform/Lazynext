@@ -8,7 +8,7 @@ title: subdump
 Here's an example:
 
 ```
-auto-editor subdump resources/subtitle.mp4
+Lazynext-Editor subdump resources/subtitle.mp4
 
 file: resources/subtitle.mp4 (0:und:srt)
 1

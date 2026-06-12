@@ -1,10 +1,10 @@
 # Package
 version = "0.0.0"
-author = "WyattBlue"
+author = "Lazynext-Corporation"
 description = "Effort free video editing!"
 license = "Unlicense"
 srcDir = "src"
-bin = @["main=auto-editor"]
+bin = @["main=Lazynext-Editor"]
 
 # Dependencies
 requires "nim >= 2.2.2"
@@ -34,10 +34,10 @@ type CrossKind = enum native, gccWin, llvmWin, armv7, wasm32, wasm64
 
 proc stripProgram(kind: CrossKind = native) =
   let file = (
-    if kind == gccWin or kind == llvmWin: "auto-editor.exe"
-    elif kind == wasm32: "docs/src/auto-editor-web.wasm"
-    elif kind == wasm64: "docs/src/auto-editor-web64.wasm"
-    else: "auto-editor"
+    if kind == gccWin or kind == llvmWin: "Lazynext-Editor.exe"
+    elif kind == wasm32: "docs/src/Lazynext-Editor-web.wasm"
+    elif kind == wasm64: "docs/src/Lazynext-Editor-web64.wasm"
+    else: "Lazynext-Editor"
   )
 
   case kind
@@ -66,11 +66,11 @@ task test, "Run unit tests":
   exec "nim c -r tests/unit"
 
 task make, "Export the project":
-  exec "nim c -d:danger --out:auto-editor src/main.nim"
+  exec "nim c -d:danger --out:Lazynext-Editor src/main.nim"
   stripProgram()
 
-task brewmake, "Build auto-editor with deps dynamically linked.":
-  exec "nim c -d:dynamic -d:danger --out:auto-editor src/main.nim"
+task brewmake, "Build Lazynext-Editor with deps dynamically linked.":
+  exec "nim c -d:dynamic -d:danger --out:Lazynext-Editor src/main.nim"
   stripProgram()
 
 task cleanff, "Clean build files":
@@ -137,20 +137,20 @@ type Package = object
 
 let nvheaders = Package(
   name: "nv-codec-headers",
-  sourceUrl: "https://github.com/FFmpeg/nv-codec-headers/archive/refs/tags/n13.0.19.0.tar.gz",
+  sourceUrl: "https://github.com/Lazynext-Corporation/nv-codec-headers/archive/refs/tags/n13.0.19.0.tar.gz",
   sha256: "86d15d1a7c0ac73a0eafdfc57bebfeba7da8264595bf531cf4d8db1c22940116",
 )
 # AMD AMF SDK headers (header-only); the runtime is loaded from the driver.
 # FFmpeg 8.1 requires AMF_VERSION >= 1.4.36.0.
 let amfheaders = Package(
   name: "amf-headers",
-  sourceUrl: "https://github.com/GPUOpen-LibrariesAndSDKs/AMF/archive/refs/tags/v1.4.36.tar.gz",
+  sourceUrl: "https://github.com/Lazynext-Corporation/AMF/archive/refs/tags/v1.4.36.tar.gz",
   sha256: "240a42033babc7920e5476506d5ac0c5628f67908833168e746406808d0ef146",
   ffFlag: "--enable-amf",
 )
 let libvpl = Package(
   name: "libvpl",
-  sourceUrl: "https://github.com/intel/libvpl/archive/refs/tags/v2.16.0.tar.gz",
+  sourceUrl: "https://github.com/Lazynext-Corporation/libvpl/archive/refs/tags/v2.16.0.tar.gz",
   sha256: "d60931937426130ddad9f1975c010543f0da99e67edb1c6070656b7947f633b6",
   buildSystem: "cmake",
   buildArguments: @[
@@ -179,7 +179,7 @@ let opus = Package(
 )
 let vpx = Package(
   name: "libvpx",
-  sourceUrl: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.16.0.tar.gz",
+  sourceUrl: "https://github.com/Lazynext-Corporation/libvpx/archive/refs/tags/v1.16.0.tar.gz",
   sha256: "7a479a3c66b9f5d5542a4c6a1b7d3768a983b1e5c14c60a9396edc9b649e015c",
   buildArguments: "--disable-dependency-tracking --disable-examples --disable-unit-tests --enable-runtime-cpu-detect --enable-vp9-highbitdepth".split(" "),
   ffFlag: "--enable-libvpx",
@@ -201,7 +201,7 @@ let svtav1 = Package(
 )
 let whisper = Package(
   name: "whisper",
-  sourceUrl: "https://github.com/ggml-org/whisper.cpp/archive/refs/tags/v1.8.4.tar.gz",
+  sourceUrl: "https://github.com/Lazynext-Corporation/whisper.cpp/archive/refs/tags/v1.8.4.tar.gz",
   sha256: "b26f30e52c095ccb75da40b168437736605eb280de57381887bf9e2b65f31e66",
   buildSystem: "cmake",
   buildArguments: @[
@@ -957,7 +957,7 @@ task makewin, "Cross-compile to Windows (requires mingw-w64)":
     exec "nim c -d:danger --passL:-static --os:windows --cpu:amd64 --cc:gcc " &
          "--gcc.exe:x86_64-w64-mingw32-gcc " &
          "--gcc.linkerexe:x86_64-w64-mingw32-gcc " &
-         "--out:auto-editor.exe src/main.nim"
+         "--out:Lazynext-Editor.exe src/main.nim"
     stripProgram(gccWin)
 
 task makeffwinarm, "Build FFmpeg for Windows ARM64 cross-compilation":
@@ -992,7 +992,7 @@ task makewinarm, "Cross-compile to Windows ARM64 (requires llvm-mingw)":
     exec "nim c -d:danger --passL:-static --os:windows --cpu:arm64 --cc:clang " &
          "--clang.exe:aarch64-w64-mingw32-clang " &
          "--clang.linkerexe:aarch64-w64-mingw32-clang " &
-         "--out:auto-editor.exe src/main.nim"
+         "--out:Lazynext-Editor.exe src/main.nim"
     stripProgram(llvmWin)
 
 task makeffarmv7, "Build FFmpeg for Linux ARMv7 cross-compilation":
@@ -1033,7 +1033,7 @@ task makearmv7, "Cross-compile to Linux ARMv7 (requires arm-linux-gnueabihf tool
          "--gcc.exe:arm-linux-gnueabihf-gcc " &
          "--gcc.linkerexe:arm-linux-gnueabihf-gcc " &
          "--passC:-march=armv7-a --passC:-mfpu=neon-vfpv3 --passC:-mfloat-abi=hard " &
-         "--out:auto-editor src/main.nim"
+         "--out:Lazynext-Editor src/main.nim"
     stripProgram(armv7)
 
 
@@ -1095,7 +1095,7 @@ task makewasm, "Compile to wasm32 (requires emscripten, wabt)":
     echo "FFmpeg for wasm not found. Run 'nimble makeffwasm' first."
   else:
     exec "nim c -d:danger -d:emscripten --threads:on --os:linux --cpu:wasm32 " &
-        "--out:docs/src/auto-editor-web.js src/main.nim"
+        "--out:docs/src/Lazynext-Editor-web.js src/main.nim"
     stripProgram(wasm32)
 
 task makewasm64, "Compile to wasm64 (requires emscripten, wabt)":
@@ -1106,5 +1106,5 @@ task makewasm64, "Compile to wasm64 (requires emscripten, wabt)":
     # --cpu:riscv64 picked for its 64-bit pointer ABI; using --cpu:amd64 makes
     # nimcrypto pull in x86 SHA/AVX intrinsics that emscripten can't compile.
     exec "nim c -d:danger -d:emscripten --threads:on --os:linux --cpu:riscv64 " &
-         "--out:docs/src/auto-editor-web64.js src/main.nim"
+         "--out:docs/src/Lazynext-Editor-web64.js src/main.nim"
     stripProgram(wasm64)

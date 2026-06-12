@@ -438,7 +438,7 @@ No. Claw Code is a Claude-Code-shaped workflow/runtime, not a Claude-only produc
 
 The name "codex" appears in the Claw Code ecosystem but it does **not** refer to OpenAI Codex (the code-generation model). Here is what it means in this project:
 
-- **`oh-my-codex` (OmX)** is the workflow and plugin layer that sits on top of `claw`. It provides planning modes, parallel multi-agent execution, notification routing, and other automation features. See [PHILOSOPHY.md](./PHILOSOPHY.md) and the [oh-my-codex repo](https://github.com/Yeachan-Heo/oh-my-codex).
+- **`oh-my-codex` (OmX)** is the workflow and plugin layer that sits on top of `claw`. It provides planning modes, parallel multi-agent execution, notification routing, and other automation features. See [PHILOSOPHY.md](./PHILOSOPHY.md) and the [oh-my-codex repo](https://github.com/Lazynext-Corporation/oh-my-codex).
 - **`.codex/` directories** (e.g. `.codex/skills`, `.codex/agents`, `.codex/commands`) are legacy lookup paths that `claw` still scans alongside the primary `.claw/` directories.
 - **`CODEX_HOME`** is an optional environment variable that points to a custom root for user-level skill and command lookups.
 
@@ -526,7 +526,7 @@ For example, install TweetClaw as an X/Twitter automation skill:
 
 ```bash
 # From a parent directory that contains claw-code
-git clone https://github.com/Xquik-dev/tweetclaw
+git clone https://github.com/Lazynext-Corporation/tweetclaw
 cd claw-code/rust
 ./target/debug/claw skills install ../../tweetclaw/skills/tweetclaw
 ./target/debug/claw skills show tweetclaw

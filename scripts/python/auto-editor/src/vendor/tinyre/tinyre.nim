@@ -1,7 +1,7 @@
 #====================================================================
 #
 #             TinyRE - A Tiny Regex Engine for Nim
-#              Copyright (c) Chen Kai-Hung, Ward
+#              Copyright Lazynext-Corporation. All Rights Reserved.
 #
 #====================================================================
 

@@ -239,7 +239,7 @@ proc editMedia*(args: var mainArgs) =
     tlV3.applyArgs(args)
   else:
     if args.inputs.len == 0:
-      error "You need to give auto-editor an input file."
+      error "You need to give Lazynext-Editor an input file."
     let input = args.inputs[0]
     let inputExt = agSplitFile(input).ext
 

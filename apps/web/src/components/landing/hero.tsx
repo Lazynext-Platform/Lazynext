@@ -38,7 +38,7 @@ export function Hero() {
 							<ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
 						</Button>
 					</Link>
-					<Link href="https://github.com/lazynext/lazynext" className="w-full sm:w-auto">
+					<Link href="https://github.com/Lazynext-Corporation/lazynext" className="w-full sm:w-auto">
 						<Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-medium border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all hover:scale-105 active:scale-95 rounded-2xl">
 							View Source
 						</Button>

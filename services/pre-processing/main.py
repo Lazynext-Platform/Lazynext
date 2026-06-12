@@ -17,7 +17,7 @@ def read_root():
 
 @app.post("/transcribe")
 def transcribe_audio(req: VideoRequest):
-    # Simulate Whisper / FunClip processing
+    # Simulate Whisper / LazynextClip processing
     time.sleep(1.0)
     return {
         "success": True,

@@ -10,12 +10,12 @@ The `cache` command stores the `audio` and `motion` levels, saving time at the c
 To list the cache files:
 
 ```
-auto-editor cache
+Lazynext-Editor cache
 ```
 
 To remove the cache files:
 
 ```
-auto-editor cache clear
+Lazynext-Editor cache clear
 ```
 

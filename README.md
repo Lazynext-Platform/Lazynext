@@ -35,7 +35,7 @@ Lazynext 2025 is fully containerized. To spin up the entire multi-billion dollar
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/lazynext-2025.git
+git clone https://github.com/Lazynext-Corporation/lazynext-2025.git
 cd lazynext-2025
 
 # Boot the Microservice Cluster
@@ -66,5 +66,5 @@ wasm-pack build --target web --out-dir pkg rust/wasm
 ---
 
 <div align="center">
-  <p><i>Built with ⚡️ by Antigravity</i></p>
+  <p><i>Built with ⚡️ by Lazynext
 </div>

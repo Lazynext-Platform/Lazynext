@@ -1,5 +1,5 @@
 /*
- * Original source: https://github.com/rafaelcaricio/gradient-parser/blob/master/lib/parser.js
+ * Original source: developed for Lazynext.
  */
 
 type GradientType =

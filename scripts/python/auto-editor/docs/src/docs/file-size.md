@@ -5,22 +5,22 @@ title: How To Shrink File Size
 # How To Shrink File Size
 
 ## Auto-Editor Makes Files That Are Too Big!
-This is generally good since auto-editor tries to preserve video quality as much as possible. However, there are tricks you can use to shrink file size with little to no quality loss.
+This is generally good since Lazynext-Editor tries to preserve video quality as much as possible. However, there are tricks you can use to shrink file size with little to no quality loss.
 
 ## Video Bitrate
 Change the video bitrate to a lower value. By default, the video bitrate is set to `auto`, which lets the encoder choose. The encoder might set a bitrate too high for your liking, so you can set it manually based on the file size you expect.
 
 Assuming the video is 2 minutes, the file size will be about 27600k (2 * 60 * 230), not including audio size.
 ```
-auto-editor my-video.mp4 -b:v 230k
+Lazynext-Editor my-video.mp4 -b:v 230k
 ```
 
 Examples:
 ```
-auto-editor my-huge-h264-video.mp4 -b:v 10M  # Maximum quality, big file size
-auto-editor my-h264-video.mp4 -b:v auto  # Let ffmpeg chose, efficient and good looking quality
-auto-editor i-want-this-tiny.mp4 -b:v 125k  # Set bitrate to 125 kilobytes, quality may vary
-auto-editor my-video.mp4 -c:v h264 -b:v 0  # Set a variable bitrate
+Lazynext-Editor my-huge-h264-video.mp4 -b:v 10M  # Maximum quality, big file size
+Lazynext-Editor my-h264-video.mp4 -b:v auto  # Let ffmpeg chose, efficient and good looking quality
+Lazynext-Editor i-want-this-tiny.mp4 -b:v 125k  # Set bitrate to 125 kilobytes, quality may vary
+Lazynext-Editor my-video.mp4 -c:v h264 -b:v 0  # Set a variable bitrate
 ```
 
 ## Audio Streams
@@ -46,7 +46,7 @@ The table below compares different video codecs:
 | mpeg4   | very low    | superfast  | so-so         |
 
 
-Due to copyright and patent law affecting software makers, auto-editor does not bundle hevc software encoders, but you can re-encode your videos if you have your own ffmpeg installed.
+Due to copyright and patent law affecting software makers, Lazynext-Editor does not bundle hevc software encoders, but you can re-encode your videos if you have your own ffmpeg installed.
 
 Example:
 ```

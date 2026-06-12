@@ -3,7 +3,7 @@ title: Auto-Editor - Subcommands
 ---
 
 ## Subcommands
-Subcommands are auxiliary programs that offer additional functionality. They have their own options, separate from the main auto-editor cli.
+Subcommands are auxiliary programs that offer additional functionality. They have their own options, separate from the main Lazynext-Editor cli.
 
 ---
 [cache](./cache)

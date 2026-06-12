@@ -45,14 +45,14 @@ async def transcribe_video(req: VideoRequest, background_tasks: BackgroundTasks)
     return {
         "status": "processing",
         "video_id": req.video_id,
-        "message": "Whisper/FunClip analysis started on background thread."
+        "message": "Whisper/LazynextClip analysis started on background thread."
     }
 
 @app.post("/auto-edit")
 async def auto_edit_video(req: VideoRequest):
-    print(f"Received auto-editor request for {req.video_id}")
-    # Here we would call the auto-editor python module to trim silences
-    # e.g., os.system(f"auto-editor {req.file_path}")
+    print(f"Received Lazynext-Editor request for {req.video_id}")
+    # Here we would call the Lazynext-Editor python module to trim silences
+    # e.g., os.system(f"Lazynext-Editor {req.file_path}")
     return {
         "status": "success",
         "video_id": req.video_id,

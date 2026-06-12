@@ -13,7 +13,7 @@ Auto-Editor supports two kinds of audio normalization: **peak** and **ebu**. Pea
 Example:
 
 ```
-auto-editor --audio-normalize peak:-3  # set max peak to -3dB
+Lazynext-Editor --audio-normalize peak:-3  # set max peak to -3dB
 ```
 
 The key idea is that peak normalization preserves the dynamic range of your audio—it just scales everything up or down so the loudest moment hits your target level. This is different from EBU normalization which
@@ -26,9 +26,9 @@ EBU R128 normalization analyzes the perceived loudness of your audio over time a
 Example:
 
 ```
-auto-editor --audio-normalize ebu  # use default values
-auto-editor --audio-normalize ebu:i=-16  # set integrated loudness target
-auto-editor --audio-normalize "ebu:i=-5,lra=20,gain=5,tp=-1"  # customize all parameters
+Lazynext-Editor --audio-normalize ebu  # use default values
+Lazynext-Editor --audio-normalize ebu:i=-16  # set integrated loudness target
+Lazynext-Editor --audio-normalize "ebu:i=-5,lra=20,gain=5,tp=-1"  # customize all parameters
 ```
 
 ### Parameters

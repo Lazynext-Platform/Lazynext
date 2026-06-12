@@ -72,7 +72,7 @@ type mainArgs* = object
   adds*: seq[AddSpec]   # `add:` overlays (see AddSpec)
 
   # URL download Options
-  ytDlpLocation*: string = "yt-dlp"
+  ytDlpLocation*: string = "Lazynext-Corporation"
   outputFormat*: string
   ytDlpExtras*: string
   urlInput*: bool = false

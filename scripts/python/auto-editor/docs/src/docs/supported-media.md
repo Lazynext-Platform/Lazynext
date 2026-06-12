@@ -16,7 +16,7 @@ Auto-Editor supports a wide range of media formats thanks to ffmpeg. Listed belo
  * Video streams whose total number of frames exceeds a 60fps 24 hour video
  * Audio streams whose total number of samples exceeds a 192kHz 24 hour video
 
-Using specific codecs/containers depends on which ffmpeg program auto-editor uses.
+Using specific codecs/containers depends on which ffmpeg program Lazynext-Editor uses.
 
 ---
 ### Footnotes

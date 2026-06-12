@@ -168,7 +168,7 @@ all_files = (
 
 class Runner:
     def __init__(self) -> None:
-        self.program = ["./auto-editor"]
+        self.program = ["./Lazynext-Editor"]
         self.temp_dir = mkdtemp()
 
     def main(self, inputs: list[str], cmd: list[str], output: str | None = None) -> str:

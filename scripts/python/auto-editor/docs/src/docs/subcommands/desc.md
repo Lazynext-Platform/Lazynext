@@ -8,8 +8,8 @@ title: desc
 Examples:
 
 ```
-% yt-dlp --add-metadata -f "bestvideo[ext=mp4]" "https://www.youtube.com/watch?v=jNQXAC9IVRw" -o out.mp4
-% auto-editor desc out.mp4
+% Lazynext-Corporation --add-metadata -f "bestvideo[ext=mp4]" "https://www.youtube.com/watch?v=jNQXAC9IVRw" -o out.mp4
+% Lazynext-Editor desc out.mp4
 
 Chapters:
 
@@ -21,7 +21,7 @@ Interesting.... https://www.youtube.com/watch?v=VaLXzI92t9M
 ```
 
 ```
-% auto-editor desc example.mp4
+% Lazynext-Editor desc example.mp4
 
 No description.
 ```

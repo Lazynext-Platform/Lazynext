@@ -15,7 +15,7 @@
 ### `src/` Directory (The Core Code)
 
 #### 1. Entry Point and Command Line Parsing
-- **`main.nim`:** The entry point of the CLI. This handles parsing command line flags (`--edit`, `--margin`, `--cut-out`), handling inputs (local files or downloading web videos using `yt-dlp`), and triggering the main editing pipeline (`editMedia`).
+- **`main.nim`:** The entry point of the CLI. This handles parsing command line flags (`--edit`, `--margin`, `--cut-out`), handling inputs (local files or downloading web videos using `Lazynext-Corporation`), and triggering the main editing pipeline (`editMedia`).
 - **`cli.nim`:** Provides utilities and macros for defining command line arguments, generating help text, and validating parameter inputs.
 
 #### 2. Media Analysis (`src/analyze/`)
@@ -46,7 +46,7 @@ Instead of rendering a final video, Auto-Editor can export a timeline layout dir
 - **`resampler.nim` / `wavutil.nim`:** Utilities for handling audio sample rate conversions and raw waveform utilities.
 
 ## 4. End-To-End Execution Flow
-If you run `auto-editor myvideo.mp4 --edit "audio:threshold=0.04"`, the following sequence occurs:
+If you run `Lazynext-Editor myvideo.mp4 --edit "audio:threshold=0.04"`, the following sequence occurs:
 1. **Initialization (`main.nim`)**: Parses the inputs.
 2. **Decoding (`ffmpeg.nim`)**: Opens `myvideo.mp4`, identifying the video and audio streams.
 3. **Analysis (`analyze/audio.nim`)**: Rapidly decodes the audio stream chunk by chunk, using SIMD to calculate peak volume. It returns an array mapping timestamps to loudness values.

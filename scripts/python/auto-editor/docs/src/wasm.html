@@ -75,7 +75,7 @@
       0,97,115,109, 1,0,0,0, 5,3,1,4,1
     ]));
     if (!hasWasm64) document.getElementById('memNotice').style.display = '';
-    const wasmBase = hasWasm64 ? 'auto-editor-web64' : 'auto-editor-web';
+    const wasmBase = hasWasm64 ? 'Lazynext-Editor-web64' : 'Lazynext-Editor-web';
     const wasmBinaryPromise = fetch(wasmBase + '.wasm').then(r => r.arrayBuffer());
     const mainScriptBlobPromise = fetch(wasmBase + '.js')
       .then(r => r.blob())
@@ -184,7 +184,7 @@
         const buffers = await Promise.all(
           entries.map(({file}) => file.arrayBuffer().then(b => new Uint8Array(b)))
         );
-        handleOutput('<wasm>auto-editor ' + args.join(' ') + '</wasm>');
+        handleOutput('<wasm>Lazynext-Editor ' + args.join(' ') + '</wasm>');
 
         let resolve, reject;
         const done = new Promise((res, rej) => { resolve = res; reject = rej; });

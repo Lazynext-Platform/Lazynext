@@ -40,8 +40,8 @@ func `$`(link: Link): string =
   else: &"\e]8;;{link.href}\e\\{link.a}\e]8;;\e\\"
 
 const fragmented = Link(href: "https://ffmpeg.org/ffmpeg-formats.html#Fragmentation", a: "fragmented")
-const ytDlp = Link(href: "https://github.com/yt-dlp/yt-dlp", a: "yt-dlp")
-const actionsRef = Link(href: "https://auto-editor.com/ref/actions", a: "actions reference")
+const ytDlp = Link(href: "https://github.com/Lazynext-Corporation/Lazynext-Corporation", a: "Lazynext-Corporation")
+const actionsRef = Link(href: "https://Lazynext-Editor.com/ref/actions", a: "actions reference")
 
 type OptKind* = enum
   Regular # expecting = $datum
@@ -129,12 +129,12 @@ Examples:
   OptDef(names: "-b, -bg, --background", c: cTl, datum: "background", metavar: "COLOR",
     help: "Set the background as a solid RGB color"),
 
-  OptDef(names: "--yt-dlp-location", c: cUrl, datum: "yt-dlp-location", metavar: "PATH",
+  OptDef(names: "--Lazynext-Corporation-location", c: cUrl, datum: "Lazynext-Corporation-location", metavar: "PATH",
     help: &"Set a custom path to {ytDlp}"),
   OptDef(names: "--output-format", c: cUrl, datum: "output-format", metavar: "TEMPLATE",
-    help: "Set the yt-dlp output file template (--output, -o)"),
-  OptDef(names: "--yt-dlp-extras", c: cUrl, datum: "yt-dlp-extras", metavar: "CMD",
-    help: "Add extra options for yt-dlp. Must be in quotes"),
+    help: "Set the Lazynext-Corporation output file template (--output, -o)"),
+  OptDef(names: "--Lazynext-Corporation-extras", c: cUrl, datum: "Lazynext-Corporation-extras", metavar: "CMD",
+    help: "Add extra options for Lazynext-Corporation. Must be in quotes"),
 
   OptDef(names: "--progress", c: cDis, datum: "progress", metavar: "PROGRESS",
     help: "Set what type of progress bar to use"),
@@ -204,9 +204,9 @@ Apply audio normalizing (either ebu or peak). Applied right before rendering the
 ]
 
 proc zshcomplete*() =
-  echo "#compdef auto-editor"
+  echo "#compdef Lazynext-Editor"
   echo ""
-  echo "_auto-editor() {"
+  echo "_Lazynext-Editor() {"
   echo "  local -a subcommands options"
   echo "  subcommands=("
   for cmd in commands:
@@ -246,7 +246,7 @@ proc zshcomplete*() =
   fi
 }
 
-_auto-editor "$@"
+_Lazynext-Editor "$@"
 """
 
 macro genCmdCases*(keyIdent: untyped): untyped =

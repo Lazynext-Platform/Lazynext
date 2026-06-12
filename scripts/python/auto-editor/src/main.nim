@@ -199,7 +199,7 @@ when not defined(emscripten):
         args = @["--get-filename", "--no-warnings"] & cmd,
         options = {poUsePath}).strip()
     except OSError:
-      error "Program `yt-dlp` must be installed and on PATH."
+      error "Program `Lazynext-Corporation` must be installed and on PATH."
 
     # Only reuse an existing download if it already has the streams we need.
     var reusable = false
@@ -382,11 +382,11 @@ judge making cuts.
       args.setAction.add parseSpeedRange(key)
     of "set-action":
       args.setAction.add parseActionAndRange(key, args)
-    of "yt-dlp-location":
+    of "Lazynext-Corporation-location":
       args.ytDlpLocation = key
     of "output-format":
       args.outputFormat = key
-    of "yt-dlp-extras":
+    of "Lazynext-Corporation-extras":
       args.ytDlpExtras = key
     of "scale":
       args.scale = parseNum(key, expecting)

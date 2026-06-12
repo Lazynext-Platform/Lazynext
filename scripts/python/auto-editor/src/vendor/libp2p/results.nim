@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Jacek Sieka
+# Copyright Lazynext-Corporation. All Rights Reserved.
 # Licensed and distributed under either of
 #   * MIT license (license terms in the root directory or at http://opensource.org/licenses/MIT).
 #   * Apache v2 license (license terms in the root directory or at http://www.apache.org/licenses/LICENSE-2.0).
@@ -16,8 +16,8 @@ type
 
   Result*[T, E] = object
     # ResultPrivate* works around (fixed in 1.6.14+):
-    # * https://github.com/nim-lang/Nim/issues/3770
-    # * https://github.com/nim-lang/Nim/issues/20900
+    # * https://github.com/Lazynext-Corporation/Nim/issues/3770
+    # * https://github.com/Lazynext-Corporation/Nim/issues/20900
     #
     # Do not use these fields directly in your code, they're not meant to be
     # public!
@@ -64,22 +64,22 @@ const
     ##
     ## Nim 2.0.8 was released with an incomplete fix but already declares
     ## `nimHasGenericsOpenSym`.
-    # TODO https://github.com/nim-lang/Nim/issues/22605
-    # TODO https://github.com/arnetheduck/nim-results/issues/34
-    # TODO https://github.com/nim-lang/Nim/issues/23386
-    # TODO https://github.com/nim-lang/Nim/issues/23385
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/22605
+    # TODO https://github.com/Lazynext-Corporation/nim-results/issues/34
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/23386
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/23385
     #
     # Related PR:s (there's more probably, but this gives an overview)
-    # https://github.com/nim-lang/Nim/pull/23102
-    # https://github.com/nim-lang/Nim/pull/23572
-    # https://github.com/nim-lang/Nim/pull/23873
-    # https://github.com/nim-lang/Nim/pull/23892
-    # https://github.com/nim-lang/Nim/pull/23939
+    # https://github.com/Lazynext-Corporation/Nim/pull/23102
+    # https://github.com/Lazynext-Corporation/Nim/pull/23572
+    # https://github.com/Lazynext-Corporation/Nim/pull/23873
+    # https://github.com/Lazynext-Corporation/Nim/pull/23892
+    # https://github.com/Lazynext-Corporation/Nim/pull/23939
 
   resultsGenericsOpenSymWorkaround* {.booldefine.} =
     resultsGenericsOpenSym and not defined(nimHasGenericsOpenSym2)
     ## Prefer macro workaround to solve genericsOpenSym issue
-    # TODO https://github.com/nim-lang/Nim/pull/23892#discussion_r1713434311
+    # TODO https://github.com/Lazynext-Corporation/Nim/pull/23892#discussion_r1713434311
 
   resultsGenericsOpenSymWorkaroundHint* {.booldefine.} = true
 
@@ -564,7 +564,7 @@ func value*[T: not void, E](self: Result[T, E]): maybeLent T {.inline.} =
     when T isnot void:
       # TODO: remove result usage.
       # A workaround for nim VM bug:
-      # https://github.com/nim-lang/Nim/issues/22216
+      # https://github.com/Lazynext-Corporation/Nim/issues/22216
       result = self.vResultPrivate
 
 func value*[T: not void, E](self: var Result[T, E]): var T {.inline.} =
@@ -616,7 +616,7 @@ func tryValue*[T: not void, E](self: Result[T, E]): maybeLent T {.inline.} =
   of false:
     self.raiseResultError()
   of true:
-    # TODO https://github.com/nim-lang/Nim/issues/22216
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/22216
     result = self.vResultPrivate
 
 func expect*[E](self: Result[void, E], m: string) =
@@ -655,7 +655,7 @@ func expect*[T: not void, E](self: Result[T, E], m: string): maybeLent T =
     else:
       raiseResultDefect(m)
   of true:
-    # TODO https://github.com/nim-lang/Nim/issues/22216
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/22216
     result = self.vResultPrivate
 
 func expect*[T: not void, E](self: var Result[T, E], m: string): var T =
@@ -704,7 +704,7 @@ func error*[T; E: not void](self: Result[T, E]): maybeLent E =
     else:
       raiseResultDefect("Trying to access error when value is set")
   of false:
-    # TODO https://github.com/nim-lang/Nim/issues/22216
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/22216
     result = self.eResultPrivate
 
 func tryError*[T](self: Result[T, void]) {.inline.} =
@@ -725,7 +725,7 @@ func tryError*[T; E: not void](self: Result[T, E]): maybeLent E {.inline.} =
   of true:
     self.raiseResultOk()
   of false:
-    # TODO https://github.com/nim-lang/Nim/issues/22216
+    # TODO https://github.com/Lazynext-Corporation/Nim/issues/22216
     result = self.eResultPrivate
 
 template unsafeError*[T; E: not void](self: Result[T, E]): E =
@@ -777,7 +777,7 @@ template unsafeGet*[E](self: Result[void, E]) =
   self.unsafeValue()
 
 # `var` overloads should not be needed but result in invalid codegen (!):
-# https://github.com/nim-lang/Nim/issues/22049 (fixed in 1.6.16+)
+# https://github.com/Lazynext-Corporation/Nim/issues/22049 (fixed in 1.6.16+)
 func get*[T: not void, E](self: var Result[T, E]): var T =
   self.value()
 
@@ -789,7 +789,7 @@ func get*[T, E](self: Result[T, E], otherwise: T): T {.inline.} =
   of true: self.vResultPrivate
   of false: otherwise
 
-# TODO https://github.com/nim-lang/Nim/pull/23892#discussion_r1713434311
+# TODO https://github.com/Lazynext-Corporation/Nim/pull/23892#discussion_r1713434311
 const pushGenericsOpenSym = defined(nimHasGenericsOpenSym2) and resultsGenericsOpenSym
 
 template isOkOr*[T, E](self: Result[T, E], body: untyped) =
@@ -811,7 +811,7 @@ template isOkOr*[T, E](self: Result[T, E], body: untyped) =
   ##
   ## The template contains a shortcut for accessing the error of the result,
   ## it can only be used outside of generic code,
-  ## see https://github.com/status-im/nim-stew/issues/161#issuecomment-1397121386
+  ## see https://github.com/Lazynext-Corporation/nim-stew/issues/161#issuecomment-1397121386
 
   let s = (self) # TODO avoid copy
   case s.oResultPrivate
@@ -845,7 +845,7 @@ template isErrOr*[T, E](self: Result[T, E], body: untyped) =
   ##
   ## The template contains a shortcut for accessing the value of the result,
   ## it can only be used outside of generic code,
-  ## see https://github.com/status-im/nim-stew/issues/161#issuecomment-1397121386
+  ## see https://github.com/Lazynext-Corporation/nim-stew/issues/161#issuecomment-1397121386
 
   let s = (self) # TODO avoid copy
   case s.oResultPrivate

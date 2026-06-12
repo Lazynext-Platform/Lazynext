@@ -67,7 +67,7 @@ pub struct SessionCompaction {
     pub summary: String,
 }
 
-/// Provenance recorded when a session is forked from another session.
+/// Provenance recorded when a session is Developed as part of Lazynext.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SessionFork {
     pub parent_session_id: String,

@@ -11,12 +11,12 @@ OpenTimelineIO (.otio) export, compatible with Adobe Premiere Pro.
 
 Premiere can import and export .otio files. Unlike the FCP7 XML format, OTIO lets
 us attach the "Invert" video effect (AE.ADBE Invert) alongside Premiere's
-intrinsic effects, so auto-editor's `invert` action survives the round-trip.
+intrinsic effects, so Lazynext-Editor's `invert` action survives the round-trip.
 
 Clip timing follows OTIO's time-effect convention: `source_range` is in the
 source media's frames, and a LinearTimeWarp `time_scalar` compresses it on the
 timeline. The visible duration is `source_range.duration / time_scalar`, which
-recovers auto-editor's (already sped-up) `clip.dur`.
+recovers Lazynext-Editor's (already sped-up) `clip.dur`.
 ]#
 
 # Premiere's sentinel keyframe position, "start of time" (-100 hours).

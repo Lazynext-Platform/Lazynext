@@ -1,12 +1,12 @@
 # Clip Anything
 
-[![GitHub stars](https://img.shields.io/github/stars/SamurAIGPT/Clip-Anything?style=social)](https://github.com/SamurAIGPT/Clip-Anything/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/Lazynext-Corporation/Clip-Anything?style=social)](https://github.com/Lazynext-Corporation/Clip-Anything/stargazers)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
 **Multimodal AI video clipping** - Extract any moment from any video using natural language prompts. Just describe what you're looking for, and AI will find and clip it for you.
 
-![Clip Anything Demo](https://github.com/user-attachments/assets/9689a74c-598a-4aab-b02e-54673941c2b9)
+![Clip Anything Demo](https://github.com/Lazynext-Corporation/assets/9689a74c-598a-4aab-b02e-54673941c2b9)
 
 **Looking for an api to build your own Opus-clip style product ? Check the api below**
 
@@ -53,13 +53,13 @@ Simply describe what you want:
 
 **Input Video**: [YouTube Example](https://www.youtube.com/watch?v=U9mJuUkhUzk)
 
-**Output Video**: [See Result](https://github.com/SamurAIGPT/ClipAnything/blob/main/edited_output.mp4)
+**Output Video**: [See Result](https://github.com/Lazynext-Corporation/ClipAnything/blob/main/edited_output.mp4)
 
 ## Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/SamurAIGPT/Clip-Anything.git
+git clone https://github.com/Lazynext-Corporation/Clip-Anything.git
 cd Clip-Anything
 
 # Install dependencies
@@ -116,8 +116,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Related Projects
 
-- [AI-Youtube-Shorts-Generator](https://github.com/SamurAIGPT/AI-Youtube-Shorts-Generator) - Auto-generate YouTube Shorts
-- [Text-To-Video-AI](https://github.com/SamurAIGPT/Text-To-Video-AI) - Generate videos from text
+- [AI-Youtube-Shorts-Generator](https://github.com/Lazynext-Corporation/AI-Youtube-Shorts-Generator) - Auto-generate YouTube Shorts
+- [Text-To-Video-AI](https://github.com/Lazynext-Corporation/Text-To-Video-AI) - Generate videos from text
 
 ## License
 

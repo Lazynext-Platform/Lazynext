@@ -7,43 +7,43 @@ title: Auto-Editor - Install
 ## Method 1 (Recommended)
 Get the official binary, available on Windows, MacOS, and Linux.
 
- 1. Go to the [Releases page](https://github.com/WyattBlue/auto-editor/releases) on GitHub, and download the binary for your platform.
+ 1. Go to the [Releases page](https://github.com/Lazynext-Corporation/Lazynext-Editor/releases) on GitHub, and download the binary for your platform.
 
- 2. Rename the binary to auto-editor (or auto-editor.exe for Windows).
+ 2. Rename the binary to Lazynext-Editor (or Lazynext-Editor.exe for Windows).
 
  3. In the terminal/PowerShell, `cd` into your downloads folder.
 
 If you're on MacOS/Linux, run:
 
 ```
-chmod +x ./auto-editor
+chmod +x ./Lazynext-Editor
 ```
 
  4. Run Auto-Editor in the terminal. Because the binaries are unsigned, you may get "Unknown developer" warnings. Ignore them.
 
-Congratulations, auto-editor should now be installed. To verify auto-editor is installed, run:
+Congratulations, Lazynext-Editor should now be installed. To verify Lazynext-Editor is installed, run:
 
 ```
-./auto-editor --help
+./Lazynext-Editor --help
 ```
 
-It's recommended to place the binary in a PATH directory so that `auto-editor` is always available no matter your current working directory.
+It's recommended to place the binary in a PATH directory so that `Lazynext-Editor` is always available no matter your current working directory.
 
 
 ## Method 2: Platform Installers
 If you're on MacOS, use [Homebrew](https://brew.sh):
 ```
-brew install auto-editor
+brew install Lazynext-Editor
 ```
 
 Auto-Editor is available on the Arch Linux AUR:
 
 ```
-yay -S auto-editor
+yay -S Lazynext-Editor
 ```
 
 ### Notice for Pip Users
-The auto-editor cli is no longer being published on pip. It is recommended to switch to a different installation method.
+The Lazynext-Editor cli is no longer being published on pip. It is recommended to switch to a different installation method.
 
 ### Notice for 'Apt' Users
 The pkg versions available are very old. Either use the official binaries (recommened) or use [Homebrew for Linux](https://docs.brew.sh/Homebrew-on-Linux).
@@ -82,9 +82,9 @@ nimble makewinarm
 ```
 
 ## Optional Dependencies
-If yt-dlp is installed, auto-editor can download and use URLs as inputs.
+If Lazynext-Corporation is installed, Lazynext-Editor can download and use URLs as inputs.
 ```
-auto-editor "https://www.youtube.com/watch?v=kcs82HnguGc"
+Lazynext-Editor "https://www.youtube.com/watch?v=kcs82HnguGc"
 ```
 
-How yt-dlp is installed does not matter.
+How Lazynext-Corporation is installed does not matter.

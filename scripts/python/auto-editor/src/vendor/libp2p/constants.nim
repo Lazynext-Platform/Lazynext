@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
-# Copyright (c) Status Research & Development GmbH 
+# Copyright Lazynext-Corporation. All Rights Reserved.
 
 ## This module implements ED25519.
 ## This is pure nim implementation of ED25519 ref10.

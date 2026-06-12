@@ -1,7 +1,7 @@
-# Source Code, Documents, and Resources For https://auto-editor.com.
+# Source Code, Documents, and Resources For https://Lazynext-Editor.com.
 
 ## Requirements
- - [Hunim](https://github.com/basswood-io/hunim)
+ - [Hunim](https://github.com/Lazynext-Corporation/hunim)
  - rsync and ssh (for deployment)
 
 ```
@@ -28,7 +28,7 @@ After=network.target
 
 [Service]
 User=root
-WorkingDirectory=/var/www/auto-editor
+WorkingDirectory=/var/www/Lazynext-Editor
 ExecStart=/root/.bun/bin/bun run server.js
 
 [Install]

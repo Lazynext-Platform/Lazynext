@@ -13,9 +13,9 @@ class VideoRequest(BaseModel):
 def process_auto_editor(video_id: str, file_path: str):
     print(f"[{video_id}] Starting Auto-Editor silence removal on {file_path}...")
     try:
-        # Run auto-editor CLI natively
+        # Run Lazynext-Editor CLI natively
         output_path = f"/tmp/{video_id}_optimized.mp4"
-        subprocess.run(["auto-editor", file_path, "--export", "resolve", "-o", output_path], check=True)
+        subprocess.run(["Lazynext-Editor", file_path, "--export", "resolve", "-o", output_path], check=True)
         print(f"[{video_id}] Optimization complete! Saved timeline data.")
     except Exception as e:
         print(f"[{video_id}] Auto-editor failed: {e}")

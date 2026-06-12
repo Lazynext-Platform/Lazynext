@@ -248,7 +248,7 @@ proc openWrite*(file: string): OutputContainer =
   if formatCtx == nil:
     error "Could not create output context"
 
-  # Never abandon interleaving. auto-editor feeds the muxer audio progressively
+  # Never abandon interleaving. Lazynext-Editor feeds the muxer audio progressively
   # further ahead of video (audio is fully buffered upfront, video lags through
   # decode+encode), so the default 10s heuristic eventually flushes audio out of
   # interleave order — leaving it tens of MB ahead of its video in the file. Once
