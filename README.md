@@ -1,11 +1,11 @@
 <div align="center">
-  <h1>LAZYNEXT 2025</h1>
+  <h1>LAZYNEXT</h1>
   <p><strong>The Autonomous, Real-Time Collaborative NLE of the Future.</strong></p>
 </div>
 
 ---
 
-Lazynext 2025 is an enterprise-grade, multi-platform video editing ecosystem. We stripped out the heavy Electron wrappers and generic JavaScript state management to build something fundamentally faster, smarter, and infinitely scalable.
+Lazynext is an enterprise-grade, multi-platform video editing ecosystem. We stripped out the heavy Electron wrappers and generic JavaScript state management to build something fundamentally faster, smarter, and infinitely scalable.
 
 ## 🚀 The Architecture
 
@@ -31,7 +31,7 @@ Lazynext isn't just an editor; it's a network. The built-in `/feed` is a vertica
 
 ## 🛠️ Quick Start (Docker Compose)
 
-Lazynext 2025 is fully containerized. To spin up the entire multi-billion dollar platform locally:
+Lazynext is fully containerized. To spin up the entire multi-billion dollar platform locally:
 
 ```bash
 # Clone the repository

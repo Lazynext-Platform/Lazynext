@@ -92,10 +92,10 @@ export function DashboardClient() {
 
         {/* Telemetry Stats (Glassmorphism) */}
         <div className="mb-16 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-cyan-500/50 hover:bg-white/5 transition-all">
+          <div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[#00e5ff]/50 hover:bg-white/5 transition-all">
             <div className="flex items-center justify-between mb-4 relative z-10">
               <span className="text-white/50 text-xs font-bold uppercase tracking-widest font-display">AI Credits</span>
-              <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-400">
+              <div className="p-2 rounded-lg bg-[#00e5ff]/10 text-[#00e5ff]">
                 <Zap className="w-4 h-4" />
               </div>
             </div>
@@ -125,10 +125,10 @@ export function DashboardClient() {
             <div className="mt-2 text-sm text-white/50 relative z-10">Saved in cloud</div>
           </div>
 
-          <div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-purple-500/50 hover:bg-white/5 transition-all">
+          <div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[#0033ff]/50 hover:bg-white/5 transition-all">
             <div className="flex items-center justify-between mb-4 relative z-10">
               <span className="text-white/50 text-xs font-bold uppercase tracking-widest font-display">Storage</span>
-              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-400">
+              <div className="p-2 rounded-lg bg-[#0033ff]/10 text-[#00e5ff]">
                 <FileText className="w-4 h-4" />
               </div>
             </div>
@@ -144,7 +144,7 @@ export function DashboardClient() {
             <Link 
               key={a.label} 
               href={a.href}
-              className="glass-panel flex items-center justify-center gap-3 px-5 py-5 text-sm font-bold transition-all hover:scale-105 hover:border-cyan-500/40 hover:bg-white/10"
+              className="glass-panel flex items-center justify-center gap-3 px-5 py-5 text-sm font-bold transition-all hover:scale-105 hover:border-[#00e5ff]/40 hover:bg-white/10"
             >
               {a.icon} 
               <span>{a.label}</span>
@@ -181,7 +181,7 @@ export function DashboardClient() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {projects.map(p => (
-                <Link key={p.id} href={`/editor/${p.id}`} className="glass-panel group p-4 hover:border-cyan-500/50 hover:shadow-[0_8px_30px_rgba(1,243,254,0.1)] transition-all duration-300">
+                <Link key={p.id} href={`/editor/${p.id}`} className="glass-panel group p-4 hover:border-[#00e5ff]/50 hover:shadow-[0_8px_30px_rgba(0,229,255,0.15)] transition-all duration-300">
                   <div className="aspect-video w-full rounded-xl bg-black/50 mb-4 flex items-center justify-center relative overflow-hidden border border-white/5">
                     <Video className="w-8 h-8 text-white/20 transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />

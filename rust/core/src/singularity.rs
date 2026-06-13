@@ -2,7 +2,7 @@ use std::process;
 use std::time::Duration;
 use std::thread::sleep;
 
-/// The infinitely dense point into which the Lazynext 2025 multi-planetary ecosystem collapses.
+/// The infinitely dense point into which the Lazynext multi-planetary ecosystem collapses.
 pub struct Singularity {
     pub final_mass: u128,
 }

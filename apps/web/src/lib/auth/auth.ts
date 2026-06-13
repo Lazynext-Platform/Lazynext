@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 
-// Basic authentication wrapper for Lazynext 2025
+// Basic authentication wrapper for Lazynext
 // This can be expanded to include OAuth providers (Google, GitHub)
 export const auth = betterAuth({
   database: {

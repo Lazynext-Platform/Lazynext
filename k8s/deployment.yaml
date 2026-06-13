@@ -377,3 +377,77 @@ spec:
         imagePullPolicy: IfNotPresent
         stdin: true
         tty: true
+---
+# Python Pre-Processing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-pre-processing
+  namespace: lazynext
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-pre-processing
+  template:
+    metadata:
+      labels:
+        app: lazynext-pre-processing
+    spec:
+      containers:
+      - name: lazynext-pre-processing
+        image: lazynext_2025-lazynext-pre-processing:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-pre-processing
+  namespace: lazynext
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-pre-processing
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+---
+# Python Generative Studio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-generative-studio
+  namespace: lazynext
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-generative-studio
+  template:
+    metadata:
+      labels:
+        app: lazynext-generative-studio
+    spec:
+      containers:
+      - name: lazynext-generative-studio
+        image: lazynext_2025-lazynext-generative-studio:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-generative-studio
+  namespace: lazynext
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-generative-studio
+  ports:
+  - protocol: TCP
+    port: 8001
+    targetPort: 8001

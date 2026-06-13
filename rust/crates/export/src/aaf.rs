@@ -22,7 +22,7 @@ impl AAFExporter {
         <ProjectID>{}</ProjectID>
         <Name>{}</Name>
         <FPS>{}</FPS>
-        <Software>Lazynext 2025</Software>
+        <Software>Lazynext</Software>
     </Header>
     <Timeline>
         <Tracks>{}</Tracks>

@@ -29,7 +29,7 @@ struct Args {
 async fn main() {
     let args = Args::parse();
 
-    println!("🚀 Starting Lazynext 2025 Headless CLI...");
+    println!("🚀 Starting Lazynext Headless CLI...");
 
     if let Some(prompt) = args.prompt {
         println!("🤖 Received AI Editing Intent: {}", prompt);
@@ -39,10 +39,21 @@ async fn main() {
             require_plan_approval: true,
             source_files: vec![],
         };
-        let job_id = editor.process_intent(intent).await.unwrap_or_else(|e| e);
-        println!("✅ Job queued. ID: {}", job_id);
+        
+        let mut engine = NLEState::new(
+            "autonomous_session_1".to_string(),
+            "AI Generated Edit".to_string(),
+            60
+        );
+
+        let result = editor.process_intent_with_llm(&mut engine, &intent).await;
+        match result {
+            Ok(msg) => println!("✅ {}", msg),
+            Err(e) => println!("❌ Failed to process intent: {}", e),
+        }
+        
+        println!("✅ Resulting Tracks: {}", engine.get_project_data().tracks.len());
         println!("⏳ Awaiting plan approval from user...");
-        // In real CLI, you'd wait and poll here.
         return;
     }
 

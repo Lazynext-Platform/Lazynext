@@ -9,7 +9,7 @@ export const SITE_CONFIG = {
 	twitterImage: "https://lazynext.com/twitter-image.png",
 	twitterHandle: "@lazynext",
 	locale: "en_US",
-	themeColor: "#269bf9",
+	themeColor: "#00e5ff",
 	backgroundColor: "#09090b",
 };
 

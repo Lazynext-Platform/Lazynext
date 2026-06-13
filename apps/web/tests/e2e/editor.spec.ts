@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Lazynext 2025 E2E - Editor Workspace', () => {
+test.describe('Lazynext E2E - Editor Workspace', () => {
   test.beforeEach(async ({ context }) => {
     // Set bypass cookie to skip authentication middleware during tests
     await context.addCookies([

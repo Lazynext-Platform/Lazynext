@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   cyan: {
-    color: '#01f3fe',
+    color: '#00e5ff',
   },
   subtitle: {
     color: 'rgba(255,255,255,0.6)',
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(24,24,27,0.5)',
     borderColor: 'rgba(255,255,255,0.08)',
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: 24,
     padding: 24,
     width: '100%',
     alignItems: 'center',
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statsText: {
-    color: '#01f3fe',
+    color: '#00e5ff',
     fontSize: 16,
     marginBottom: 32,
     fontWeight: '600',
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   button: {
-    backgroundColor: '#01f3fe',
+    backgroundColor: '#00e5ff',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,

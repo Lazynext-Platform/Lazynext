@@ -81,6 +81,6 @@ function processJob(jobId: string) {
 const PORT = process.env.PORT || 8003;
 
 app.listen(PORT, () => {
-  console.log(`🎬 Lazynext 2025 Render Farm Service running on port ${PORT}`);
+  console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
   console.log(`📡 Accepting FFMPEG / DCP / AAF commands via REST & Socket.io (Mocked)`);
 });

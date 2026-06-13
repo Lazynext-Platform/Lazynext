@@ -1,6 +1,6 @@
-# Lazynext 2025: System Architecture & Design
+# Lazynext: System Architecture & Design
 
-Lazynext 2025 operates on a structured, strict monorepo architecture where clear boundaries separate business logic, presentation logic, and external system integrations.
+Lazynext operates on a structured, strict monorepo architecture where clear boundaries separate business logic, presentation logic, and external system integrations.
 
 ## 1. Core Principle: Rust as the Single Source of Truth
 An ongoing architectural migration places **all business logic inside the `rust/` workspace**. 
@@ -39,7 +39,7 @@ Lazynext_2025/
 ```
 
 ## 5. Development Strategy
-When adding new features to Lazynext 2025:
+When adding new features to Lazynext:
 1. **Model the domain in Rust:** Identify the data structures and logical operations, and write them in the `rust/` workspace.
 2. **Expose the logic:** Create safe boundaries (e.g. FFI, WebAssembly, or IPC) for the shells to consume.
 3. **Build the UI:** Develop the visual interface in the respective `apps/` directory, treating the Rust core as an external, trusted brain.

@@ -1,4 +1,4 @@
-// Mock Database Service for Lazynext 2025 Architecture Admin Dashboards
+// Mock Database Service for Lazynext Architecture Admin Dashboards
 
 export type Organization = {
   id: string;

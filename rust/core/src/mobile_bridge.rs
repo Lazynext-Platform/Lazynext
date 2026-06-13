@@ -2,7 +2,7 @@ use crate::nle_state::NLEState;
 use std::sync::{Arc, Mutex};
 
 // This module exposes the NLEState to React Native via UniFFI or JNI.
-// For the sake of the Lazynext 2025 architecture demonstration, we define the FFI boundary here.
+// For the sake of the Lazynext architecture demonstration, we define the FFI boundary here.
 
 #[derive(Clone)]
 pub struct MobileNLEBridge {

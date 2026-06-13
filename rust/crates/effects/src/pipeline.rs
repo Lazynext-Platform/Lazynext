@@ -13,6 +13,18 @@ const GAUSSIAN_BLUR_SHADER_SOURCE: &str = include_str!("shaders/gaussian_blur.wg
 const CHROMA_KEY_SHADER_ID: &str = "chroma-key";
 const CHROMA_KEY_SHADER_SOURCE: &str = include_str!("shaders/chroma_key.wgsl");
 
+const GLITCH_SHADER_ID: &str = "glitch";
+const GLITCH_SHADER_SOURCE: &str = include_str!("shaders/glitch.wgsl");
+
+const COLOR_GRADE_SHADER_ID: &str = "color-grade";
+const COLOR_GRADE_SHADER_SOURCE: &str = include_str!("shaders/color_grade.wgsl");
+
+const FIRE_SHADER_ID: &str = "fire";
+const FIRE_SHADER_SOURCE: &str = include_str!("shaders/fire.wgsl");
+
+const PORTAL_SHADER_ID: &str = "portal";
+const PORTAL_SHADER_SOURCE: &str = include_str!("shaders/portal.wgsl");
+
 pub struct ApplyEffectsOptions<'a> {
     pub source: &'a wgpu::Texture,
     pub width: u32,
@@ -107,6 +119,34 @@ impl EffectPipeline {
                     label: Some("effects-chroma-key-shader"),
                     source: wgpu::ShaderSource::Wgsl(CHROMA_KEY_SHADER_SOURCE.into()),
                 });
+        let glitch_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-glitch-shader"),
+                    source: wgpu::ShaderSource::Wgsl(GLITCH_SHADER_SOURCE.into()),
+                });
+        let color_grade_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-color-grade-shader"),
+                    source: wgpu::ShaderSource::Wgsl(COLOR_GRADE_SHADER_SOURCE.into()),
+                });
+        let fire_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-fire-shader"),
+                    source: wgpu::ShaderSource::Wgsl(FIRE_SHADER_SOURCE.into()),
+                });
+        let portal_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-portal-shader"),
+                    source: wgpu::ShaderSource::Wgsl(PORTAL_SHADER_SOURCE.into()),
+                });
 
         let gaussian_blur_pipeline =
             context
@@ -182,9 +222,161 @@ impl EffectPipeline {
                     cache: None,
                 });
 
+        let glitch_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-glitch-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &glitch_shader_module,
+                        entry_point: Some("fragment_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
+        let color_grade_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-color-grade-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &color_grade_shader_module,
+                        entry_point: Some("fragment_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
+        let fire_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-fire-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &fire_shader_module,
+                        entry_point: Some("fs_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
+        let portal_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-portal-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &portal_shader_module,
+                        entry_point: Some("fs_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
         let pipelines = HashMap::from([
             (GAUSSIAN_BLUR_SHADER_ID.to_string(), gaussian_blur_pipeline),
             (CHROMA_KEY_SHADER_ID.to_string(), chroma_key_pipeline),
+            (GLITCH_SHADER_ID.to_string(), glitch_pipeline),
+            (COLOR_GRADE_SHADER_ID.to_string(), color_grade_pipeline),
+            (FIRE_SHADER_ID.to_string(), fire_pipeline),
+            (PORTAL_SHADER_ID.to_string(), portal_pipeline),
         ]);
 
         Self {
@@ -322,27 +514,44 @@ fn pack_effect_uniforms(
 ) -> Result<EffectUniformBuffer, EffectsError> {
     let shader = pass.shader.as_str();
     
-    let mut sigma = 0.0;
-    let mut step = 0.0;
     let mut direction = [0.0, 0.0];
     let mut chroma_color = [0.0, 1.0, 0.0, 1.0]; // Default green
     let mut similarity = 0.4;
     let mut smoothness = 0.1;
 
+    let mut scalars = [0.0, 0.0, 0.0, 0.0];
+
     if shader == GAUSSIAN_BLUR_SHADER_ID {
-        sigma = read_number_uniform(pass, "u_sigma")?;
-        step = read_number_uniform(pass, "u_step")?;
+        scalars[0] = read_number_uniform(pass, "u_sigma")?;
+        scalars[1] = read_number_uniform(pass, "u_step")?;
         direction = read_vec2_uniform(pass, "u_direction")?;
     } else if shader == CHROMA_KEY_SHADER_ID {
         chroma_color = read_vec4_uniform(pass, "u_target_color", [0.0, 1.0, 0.0, 1.0])?;
         similarity = read_number_uniform_with_default(pass, "u_similarity", 0.4)?;
         smoothness = read_number_uniform_with_default(pass, "u_smoothness", 0.1)?;
+    } else if shader == GLITCH_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_intensity", 0.5)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_time", 0.0)?;
+    } else if shader == COLOR_GRADE_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_exposure", 0.0)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_contrast", 1.0)?;
+        scalars[2] = read_number_uniform_with_default(pass, "u_saturation", 1.0)?;
+        scalars[3] = read_number_uniform_with_default(pass, "u_temperature", 0.0)?;
+    } else if shader == FIRE_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_time", 0.0)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_intensity", 1.0)?;
+        scalars[2] = read_number_uniform_with_default(pass, "u_scale", 3.0)?;
+    } else if shader == PORTAL_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_time", 0.0)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_intensity", 1.0)?;
+        scalars[2] = read_number_uniform_with_default(pass, "u_radius", 0.3)?;
+        scalars[3] = read_number_uniform_with_default(pass, "u_swirl_speed", 2.0)?;
     }
 
     Ok(EffectUniformBuffer {
         resolution: [width as f32, height as f32],
         direction,
-        scalars: [sigma, step, 0.0, 0.0],
+        scalars,
         chroma_color,
         chroma_thresholds: [similarity, smoothness, 0.0, 0.0],
     })

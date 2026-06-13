@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Lazynext 2025 Headless Render Farm Deployment Script
+# Lazynext Headless Render Farm Deployment Script
 
-echo "🚀 Provisioning Lazynext 2025 Headless Render Node..."
+echo "🚀 Provisioning Lazynext Headless Render Node..."
 
 # 1. Compile the CLI binary in release mode
 cd "$(dirname "$0")/.."

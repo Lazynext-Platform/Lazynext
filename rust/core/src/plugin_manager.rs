@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use lazynext_plugin_api::{VideoEffect, FrameBuffer};
 
 /// The PluginManager is responsible for safely executing third-party WASM code
-/// within the Lazynext 2025 core engine sandbox.
+/// within the Lazynext core engine sandbox.
 pub struct PluginManager {
     loaded_plugins: HashMap<String, Box<dyn VideoEffect>>,
 }

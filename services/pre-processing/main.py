@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import time
+import asyncio
+import httpx
+import os
 
 app = FastAPI(title="Lazynext Pre-Processing Service")
 
@@ -16,22 +18,71 @@ def read_root():
     return {"status": "ok", "service": "pre-processing"}
 
 @app.post("/transcribe")
-def transcribe_audio(req: VideoRequest):
-    # Simulate Whisper / LazynextClip processing
-    time.sleep(1.0)
+async def transcribe_audio(req: VideoRequest):
+    """
+    Connects to OpenAI Whisper API for accurate video transcription.
+    Requires OPENAI_API_KEY. Falls back to mock if key is missing or file not found.
+    """
+    api_key = os.getenv("OPENAI_API_KEY")
+    
+    # In a real deployed environment, we would pull from S3.
+    # For now, we assume the file is mounted or cached locally.
+    file_path = f"/tmp/{req.video_id}.mp4"
+    
+    if api_key and os.path.exists(file_path):
+        try:
+            async with httpx.AsyncClient() as client:
+                with open(file_path, "rb") as audio_file:
+                    files = {
+                        "file": (file_path, audio_file, "audio/mp4"),
+                        "model": (None, "whisper-1"),
+                        "response_format": (None, "verbose_json"),
+                        "timestamp_granularities[]": (None, "word")
+                    }
+                    headers = {"Authorization": f"Bearer {api_key}"}
+                    
+                    response = await client.post(
+                        "https://api.openai.com/v1/audio/transcriptions",
+                        files=files,
+                        headers=headers,
+                        timeout=60.0
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                    
+                    # Map Whisper 'words' output to our subtitle format
+                    subtitles = []
+                    if "words" in data:
+                        for w in data["words"]:
+                            subtitles.append({
+                                "start": w["start"],
+                                "end": w["end"],
+                                "text": w["word"]
+                            })
+                            
+                    return {
+                        "success": True,
+                        "video_id": req.video_id,
+                        "subtitles": subtitles
+                    }
+        except Exception as e:
+            print(f"Whisper API Error: {e}. Falling back to mock.")
+            
+    # Mock Fallback
+    await asyncio.sleep(1.0)
     return {
         "success": True,
         "video_id": req.video_id,
         "subtitles": [
             {"start": 0, "end": 2.5, "text": "Welcome to Lazynext."},
-            {"start": 2.5, "end": 5.0, "text": "This is a simulated transcription."}
+            {"start": 2.5, "end": 5.0, "text": "This is a simulated transcription fallback."}
         ]
     }
 
 @app.post("/process")
-def process_video(req: ProcessRequest):
+async def process_video(req: ProcessRequest):
     # Simulate Auto-Editor silence removal and Clip-Anything isolation
-    time.sleep(2.0)
+    await asyncio.sleep(2.0)
     return {
         "success": True,
         "video_id": req.video_id,
@@ -41,5 +92,4 @@ def process_video(req: ProcessRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    # Pre-processing runs on port 8000
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

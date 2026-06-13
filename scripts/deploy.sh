@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Deploying Lazynext 2025 to Production Architecture..."
+echo "🚀 Deploying Lazynext to Production Architecture..."
 
 # Ensure we are in the root directory
 cd "$(dirname "$0")/.."

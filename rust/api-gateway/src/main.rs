@@ -14,7 +14,7 @@ struct WebhookPayload {
 
 #[tokio::main]
 async fn main() {
-    println!("🌐 Starting Lazynext 2025 Webhook API Gateway...");
+    println!("🌐 Starting Lazynext Webhook API Gateway...");
 
     // Setup an internal channel to receive events from the core engine
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # start-platform.sh
-# Bootstraps and starts all Lazynext 2025 services
+# Bootstraps and starts all Lazynext services
 
 echo "Cleaning up any old background processes..."
 lsof -ti:3000,3001,8000,8081 | xargs kill -9 2>/dev/null || true
 sleep 1
 
-echo "Starting Lazynext 2025 Platform..."
+echo "Starting Lazynext Platform..."
 
 # 1. Start Rust WASM auto-builder (in background)
 echo "Starting Rust WASM builder..."

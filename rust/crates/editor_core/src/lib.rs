@@ -8,7 +8,7 @@ use state::crdt::CRDTTimeline;
 
 #[wasm_bindgen]
 pub fn initialize_editor() {
-    println!("Lazynext 2025 Editor Core Initialized with Multiplayer CRDT");
+    println!("Lazynext Editor Core Initialized with Multiplayer CRDT");
 }
 
 #[wasm_bindgen]

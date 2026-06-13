@@ -23,7 +23,7 @@ impl DCPGenerator {
     <Id>{}</Id>
     <AnnotationText>{}</AnnotationText>
     <IssueDate>{}</IssueDate>
-    <Issuer>Lazynext 2025</Issuer>
+    <Issuer>Lazynext</Issuer>
     <Creator>Lazynext DCP Engine</Creator>
     <ContentTitleText>{}</ContentTitleText>
     <ContentKind>feature</ContentKind>

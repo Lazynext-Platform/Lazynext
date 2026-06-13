@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-// import { useWasm } from "@/hooks/use-wasm";
+import { useWasm } from "@/hooks/use-wasm";
 
 export function MulticamGrid() {
     const [activeAngle, setActiveAngle] = useState(0);
-    // const { time } = useWasm();
+    const { time, frame } = useWasm();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -11,9 +11,9 @@ export function MulticamGrid() {
                 const angle = parseInt(e.key) - 1;
                 setActiveAngle(angle);
                 
-                // MOCK WASM BINDING:
-                // time.trigger_live_cut(angle, currentFrameTimestamp);
-                console.log(`Live cut triggered to Camera ${angle + 1}!`);
+                // Execute WASM Binding:
+                time.trigger_live_cut(angle, frame);
+                console.log(`Live cut triggered to Camera ${angle + 1} at frame ${frame}!`);
             }
         };
 
@@ -37,7 +37,7 @@ export function MulticamGrid() {
                         {idx + 1}
                     </div>
                     {activeAngle === idx && (
-                        <div className="absolute top-2 right-2 bg-red-600 px-2 py-1 rounded text-xs text-white font-bold animate-pulse">
+                        <div className="absolute top-2 right-2 bg-[#00e5ff] px-2 py-1 rounded text-xs text-black font-bold animate-pulse">
                             REC
                         </div>
                     )}

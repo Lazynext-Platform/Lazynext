@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Lazynext 2025 Editor Core Flows', () => {
+test.describe('Lazynext Editor Core Flows', () => {
   
   test('should load the editor and initialize WASM core', async ({ page }) => {
     // Navigate to the editor

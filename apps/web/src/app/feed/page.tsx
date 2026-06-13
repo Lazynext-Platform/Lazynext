@@ -11,7 +11,7 @@ const FEED_DATA = [
     id: "vid_1",
     url: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     author: "neon_director",
-    description: "Cyberpunk short film edited entirely in Lazynext 2025. The AI rotoscoping is insane! 🤯",
+    description: "Cyberpunk short film edited entirely in Lazynext. The AI rotoscoping is insane! 🤯",
     songName: "Synthwave Vibes - Lazynext Original",
     likes: 12400,
     comments: 342,

@@ -20,8 +20,8 @@
     "format": "prettier src --write",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push:local": "cross-env NODE_ENV=development drizzle-kit push",
-    "db:push:prod": "cross-env NODE_ENV=production drizzle-kit push"
+    "db:push:local": "cross-env NODE_ENV=development drizzle-kit push --force",
+    "db:push:prod": "cross-env NODE_ENV=production drizzle-kit push --force"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^3.3.0",

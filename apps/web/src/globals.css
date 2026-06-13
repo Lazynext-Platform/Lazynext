@@ -16,6 +16,19 @@
   
   --font-sans: 'Inter', sans-serif;
   --font-display: 'Outfit', sans-serif;
+
+  /* Global Brand Overrides for all formats */
+  --color-cyan-500: #00e5ff;
+  --color-cyan-400: #33eeff;
+  --color-cyan-600: #00b3cc;
+  
+  --color-purple-500: #0033ff;
+  --color-purple-400: #335cff;
+  --color-purple-600: #0022cc;
+  
+  --color-emerald-500: #00e5ff;
+  --color-emerald-400: #33eeff;
+  --color-emerald-600: #00b3cc;
 }
 
 @layer base {
@@ -26,10 +39,10 @@
     --bg-glass: rgba(255, 255, 255, 0.4);
     --bg-hover: rgba(0, 0, 0, 0.03);
     
-    /* Brand Logo Colors: Vibrant Cyan */
-    --accent-primary: #00d4df;
-    --accent-secondary: #00aeb6;
-    --accent-glow: rgba(0, 212, 223, 0.2);
+    /* Brand Logo Colors: Vibrant Cyan and Deep Blue */
+    --accent-primary: #00e5ff;
+    --accent-secondary: #0033ff;
+    --accent-glow: rgba(0, 229, 255, 0.2);
     
     --text-primary: #09090b;
     --text-secondary: #3f3f46;
@@ -45,9 +58,9 @@
     --bg-glass: rgba(24, 24, 27, 0.3);
     --bg-hover: rgba(255, 255, 255, 0.05);
     
-    --accent-primary: #01f3fe;
-    --accent-secondary: #008f96;
-    --accent-glow: rgba(1, 243, 254, 0.15);
+    --accent-primary: #00e5ff;
+    --accent-secondary: #0033ff;
+    --accent-glow: rgba(0, 229, 255, 0.15);
     
     --text-primary: #fafafa;
     --text-secondary: #a1a1aa;
@@ -77,7 +90,7 @@ h1, h2, h3, h4, h5, h6 {
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-glass);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
-  border-radius: 16px;
+  border-radius: 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -115,7 +128,7 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid var(--border-glass);
   color: var(--text-primary);
   padding: 10px 20px;
-  border-radius: 12px;
+  border-radius: 16px;
   font-family: var(--font-display);
   font-weight: 600;
   cursor: pointer;
@@ -136,7 +149,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   border: none;
   box-shadow: 0 4px 15px var(--accent-glow);
-  border-radius: 12px;
+  border-radius: 16px;
   transition: all 0.2s ease;
 }
 

@@ -1,6 +1,6 @@
-# Lazynext 2025 Architecture Guide
+# Lazynext Architecture Guide
 
-If you are an AI assistant or a new developer modifying Lazynext 2025, you must strictly adhere to the architectural paradigm defined here.
+If you are an AI assistant or a new developer modifying Lazynext, you must strictly adhere to the architectural paradigm defined here.
 
 ## 1. The React Shell (`apps/web` or root)
 - **Role**: A dumb rendering shell.

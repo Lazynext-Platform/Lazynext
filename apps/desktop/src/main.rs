@@ -30,7 +30,7 @@ impl Render for LazynextDesktop {
                             .text_xl()
                             .font_weight(FontWeight::BOLD)
                             .child(
-                                div().flex().child("LAZYNEXT 2025 ").child(div().text_color(rgb(0x01f3fe)).child("NATIVE"))
+                                div().flex().child("LAZYNEXT ").child(div().text_color(rgb(0x00e5ff)).child("NATIVE"))
                             )
                     )
                     .child(
@@ -44,14 +44,14 @@ impl Render for LazynextDesktop {
                         div()
                             .mt_2()
                             .text_sm()
-                            .text_color(rgb(0x01f3fe)) // Vibrant Cyan
+                            .text_color(rgb(0x00e5ff)) // Vibrant Cyan
                             .child(format!("{} Clips Loaded via Core Logic", clip_count))
                     )
                     .child(
                         div()
                             .mt_6()
                             .text_sm()
-                            .text_color(rgb(0x10b981)) // Emerald 500
+                            .text_color(rgb(0x00e5ff)) // Cyan
                             .child(self.status_text.clone())
                     )
                     .child(
@@ -61,13 +61,13 @@ impl Render for LazynextDesktop {
                             .gap_4()
                             .child(
                                 div()
-                                    .bg(rgb(0x01f3fe)) // Cyan Primary
+                                    .bg(rgb(0x00e5ff)) // Cyan Primary
                                     .text_color(rgb(0x050505))
                                     .px_4()
                                     .py_2()
                                     .rounded_md()
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x00d4df)))
+                                    .hover(|s| s.bg(rgb(0x00b3cc)))
                                     .on_mouse_down(MouseButton::Left, cx.listener(|view: &mut LazynextDesktop, _, _, cx| {
                                         let intent = VideoIntent {
                                             prompt: "Cut the silence".to_string(),
@@ -85,15 +85,15 @@ impl Render for LazynextDesktop {
                             )
                             .child(
                                 div()
-                                    .bg(rgb(0x18181b)) // Glass panel approximation
+                                    .bg(rgb(0x0033ff)) // Deep Blue
                                     .border_1()
-                                    .border_color(rgb(0x27272a))
+                                    .border_color(rgb(0x0022cc))
                                     .text_color(rgb(0xffffff))
                                     .px_4()
                                     .py_2()
                                     .rounded_md()
                                     .cursor_pointer()
-                                    .hover(|s| s.bg(rgb(0x27272a)))
+                                    .hover(|s| s.bg(rgb(0x0022cc)))
                                     .on_mouse_down(MouseButton::Left, cx.listener(|view: &mut LazynextDesktop, _, _, cx| {
                                         let intent = VideoIntent {
                                             prompt: "Add cinematic music".to_string(),
@@ -115,7 +115,7 @@ impl Render for LazynextDesktop {
 }
 
 fn main() {
-    println!("Starting Lazynext 2025 Desktop (GPUI)...");
+    println!("Starting Lazynext Desktop (GPUI)...");
     
     // Initialize the shared core business logic (Zero duplication from Web!)
     let mut engine = NLEState::new(
@@ -141,7 +141,7 @@ fn main() {
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 titlebar: Some(TitlebarOptions {
-                    title: Some(SharedString::from("Lazynext 2025")),
+                    title: Some(SharedString::from("Lazynext")),
                     appears_transparent: true,
                     ..Default::default()
                 }),

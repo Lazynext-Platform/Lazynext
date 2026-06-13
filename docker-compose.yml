@@ -109,5 +109,23 @@ services:
       postgres-db:
         condition: service_started
 
+  # Python Pre-Processing
+  lazynext-pre-processing:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Python Generative Studio
+  lazynext-generative-studio:
+    build:
+      context: ./services/generative-studio
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
 volumes:
   postgres_data:

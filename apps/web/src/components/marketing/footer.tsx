@@ -8,7 +8,7 @@ export function MarketingFooter() {
         <div className="col-span-1 md:col-span-2">
           <Link href="/" className="flex items-center gap-2 mb-4 text-white">
             <Film className="w-5 h-5 text-cyan-400" />
-            <span className="font-bold tracking-tight">Lazynext 2025</span>
+            <span className="font-bold tracking-tight">Lazynext</span>
           </Link>
           <p className="text-neutral-400 text-sm max-w-sm mb-6">
             The autonomous non-linear editor built for the next generation of creators. Powered by Rust, WebAssembly, and AI.

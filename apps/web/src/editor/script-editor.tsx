@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-// import { useWasm } from "@/hooks/use-wasm";
+import { useWasm } from "@/hooks/use-wasm";
 
 export function ScriptEditor() {
-    // const { time } = useWasm();
+    const { time } = useWasm();
     const [selectedText, setSelectedText] = useState("");
 
     const mockScript = [
@@ -13,12 +13,12 @@ export function ScriptEditor() {
 
     const handleTextSelection = (sentenceId: string) => {
         console.log(`User highlighted sentence: ${sentenceId}`);
-        // MOCK: Lookup the timestamp for this sentence from the ScriptSyncService
+        // Lookup the timestamp for this sentence from the ScriptSyncService
         const startMs = 15000; 
         const endMs = 18450;
         
         // Command the Rust engine to automatically cut the timeline to this exact dialogue
-        // time.insert_cut_from_script(startMs, endMs);
+        time.insert_cut_from_script(startMs, endMs);
         console.log(`Commanded WebAssembly to cut timeline from ${startMs}ms to ${endMs}ms!`);
     };
 
