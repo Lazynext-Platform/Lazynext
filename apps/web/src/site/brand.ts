@@ -10,4 +10,4 @@ export const SITE_INFO = {
 	favicon: "/favicon.ico",
 };
 
-export const DEFAULT_LOGO_URL = "/lazynext-logo.png";
+export const DEFAULT_LOGO_URL = "/logo.png";

@@ -35,8 +35,8 @@ Lazynext is fully containerized. To spin up the entire multi-billion dollar plat
 
 ```bash
 # Clone the repository
-git clone https://github.com/Lazynext-Corporation/lazynext-2025.git
-cd lazynext-2025
+git clone https://github.com/Lazynext-Corporation/lazynext.git
+cd lazynext
 
 # Boot the Microservice Cluster
 ./scripts/deploy.sh

@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { Film } from 'lucide-react';
+import Image from 'next/image';
 
 export function MarketingNavbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between bg-neutral-900/40 backdrop-blur-xl border border-neutral-800/50 rounded-2xl px-6 py-3 shadow-2xl">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="p-2 bg-[#00e5ff]/10 text-[#00e5ff] rounded-lg group-hover:bg-[#00e5ff]/20 transition-colors">
-            <Film className="w-6 h-6" />
+          <div className="p-1 bg-[#00e5ff]/10 rounded-lg group-hover:bg-[#00e5ff]/20 transition-colors">
+            <Image src="/logo.png" width={24} height={24} alt="Lazynext Logo" className="w-6 h-6 object-contain" />
           </div>
           <span className="text-xl font-bold tracking-tight text-white">Lazynext</span>
         </Link>

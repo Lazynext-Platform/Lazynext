@@ -1,4 +1,4 @@
-name: Lazynext 2025 CI/CD Pipeline
+name: Lazynext CI/CD Pipeline
 
 on:
   push:

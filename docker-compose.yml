@@ -1,4 +1,4 @@
-
+name: lazynext
 services:
   # Next.js UI Shell
   lazynext-web:

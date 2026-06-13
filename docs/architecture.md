@@ -27,7 +27,7 @@ Because each platform has distinct constraints and ideal frameworks, the UI is i
 
 ## 4. Directory Overview
 ```text
-Lazynext_2025/
+Lazynext/
 ├── apps/               # UI Shells (Next.js, GPUI Desktop, Mobile)
 ├── docs/               # System documentation, design docs, references
 ├── rust/               # The single source of truth for all business logic

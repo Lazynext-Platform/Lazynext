@@ -176,14 +176,14 @@ spec:
     spec:
       initContainers:
       - name: db-migrate
-        image: lazynext_2025-db-migrate:latest
+        image: lazynext-db-migrate:latest
         imagePullPolicy: IfNotPresent
         env:
         - name: DATABASE_URL
           value: "postgres://postgres:password@postgres-db:5432/lazynext"
       containers:
       - name: lazynext-web
-        image: lazynext_2025-lazynext-web:latest
+        image: lazynext-lazynext-web:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
@@ -256,7 +256,7 @@ spec:
     spec:
       containers:
       - name: lazynext-api
-        image: lazynext_2025-lazynext-api:latest
+        image: lazynext-lazynext-api:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8005
@@ -293,7 +293,7 @@ spec:
     spec:
       containers:
       - name: lazynext-sync
-        image: lazynext_2025-lazynext-sync:latest
+        image: lazynext-lazynext-sync:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8002
@@ -333,7 +333,7 @@ spec:
     spec:
       containers:
       - name: lazynext-render
-        image: lazynext_2025-lazynext-render:latest
+        image: lazynext-lazynext-render:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8003
@@ -373,7 +373,7 @@ spec:
     spec:
       containers:
       - name: lazynext-mcp
-        image: lazynext_2025-lazynext-mcp:latest
+        image: lazynext-lazynext-mcp:latest
         imagePullPolicy: IfNotPresent
         stdin: true
         tty: true
@@ -396,7 +396,7 @@ spec:
     spec:
       containers:
       - name: lazynext-pre-processing
-        image: lazynext_2025-lazynext-pre-processing:latest
+        image: lazynext-lazynext-pre-processing:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
@@ -433,7 +433,7 @@ spec:
     spec:
       containers:
       - name: lazynext-generative-studio
-        image: lazynext_2025-lazynext-generative-studio:latest
+        image: lazynext-lazynext-generative-studio:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8001

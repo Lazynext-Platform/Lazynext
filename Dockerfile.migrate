@@ -13,4 +13,4 @@ RUN bun install
 ENV NODE_ENV=production
 
 WORKDIR /app/apps/web
-CMD ["bun", "run", "db:push:prod"]
+CMD ["bun", "run", "db:migrate"]

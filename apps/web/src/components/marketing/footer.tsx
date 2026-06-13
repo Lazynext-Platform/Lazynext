@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Film, Twitter, Github, MessageCircle } from 'lucide-react';
+import Image from 'next/image';
 
 export function MarketingFooter() {
   return (
@@ -7,7 +8,7 @@ export function MarketingFooter() {
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-1 md:col-span-2">
           <Link href="/" className="flex items-center gap-2 mb-4 text-white">
-            <Film className="w-5 h-5 text-cyan-400" />
+            <Image src="/logo.png" width={20} height={20} alt="Lazynext Logo" className="w-5 h-5 object-contain" />
             <span className="font-bold tracking-tight">Lazynext</span>
           </Link>
           <p className="text-neutral-400 text-sm max-w-sm mb-6">
