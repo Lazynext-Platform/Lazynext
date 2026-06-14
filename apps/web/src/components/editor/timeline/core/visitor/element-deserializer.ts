@@ -18,253 +18,281 @@ import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
 export class ElementDeserializer {
-  private static customDeserializers: Record<
-    string,
-    (json: ElementJSON) => TrackElement | null
-  > = {};
+	private static customDeserializers: Record<
+		string,
+		(json: ElementJSON) => TrackElement | null
+	> = {};
 
-  static registerCustomType(
-    type: string,
-    deserializer: (json: ElementJSON) => TrackElement | null
-  ): void {
-    if (!type?.trim()) {
-      throw new Error("Element type is required for custom deserializer registration");
-    }
-    this.customDeserializers[type] = deserializer;
-  }
+	static registerCustomType(
+		type: string,
+		deserializer: (json: ElementJSON) => TrackElement | null,
+	): void {
+		if (!type?.trim()) {
+			throw new Error(
+				"Element type is required for custom deserializer registration",
+			);
+		}
+		this.customDeserializers[type] = deserializer;
+	}
 
-  static unregisterCustomType(type: string): void {
-    delete this.customDeserializers[type];
-  }
+	static unregisterCustomType(type: string): void {
+		delete this.customDeserializers[type];
+	}
 
-  private static deserializeBaseElement(element: TrackElement, json: ElementJSON): void {
-    if (json.id) element.setId(json.id);
-    if (json.trackId) element.setTrackId(json.trackId);
-    if (json.name) element.setName(json.name);
-    if (json.s !== undefined) element.setStart(json.s);
-    if (json.e !== undefined) element.setEnd(json.e);
-    const props = { ...(json.props || {}) };
-    if (json.zIndex !== undefined) props.zIndex = json.zIndex;
-    if (Object.keys(props).length) element.setProps(props);
-    if (json.metadata) element.setMetadata(json.metadata);
-    if (json.transition) element.setTransition(json.transition);
-    if (json.animation) element.setAnimation(ElementAnimation.fromJSON(json.animation));
-  }
+	private static deserializeBaseElement(
+		element: TrackElement,
+		json: ElementJSON,
+	): void {
+		if (json.id) element.setId(json.id);
+		if (json.trackId) element.setTrackId(json.trackId);
+		if (json.name) element.setName(json.name);
+		if (json.s !== undefined) element.setStart(json.s);
+		if (json.e !== undefined) element.setEnd(json.e);
+		const props = { ...(json.props || {}) };
+		if (json.zIndex !== undefined) props.zIndex = json.zIndex;
+		if (Object.keys(props).length) element.setProps(props);
+		if (json.metadata) element.setMetadata(json.metadata);
+		if (json.transition) element.setTransition(json.transition);
+		if (json.animation)
+			element.setAnimation(ElementAnimation.fromJSON(json.animation));
+	}
 
-  static deserializeVideoElement(json: ElementJSON): VideoElement {
-    const parentSize = json.frame && json.frame.size 
-      ? { width: json.frame.size[0], height: json.frame.size[1] } 
-      : { width: 0, height: 0 };
-    
-    const videoElement = new VideoElement(json.props?.src || "", parentSize);
-    ElementDeserializer.deserializeBaseElement(videoElement, json);
-    
-    if (json.mediaDuration !== undefined) videoElement.setMediaDuration(json.mediaDuration);
-    if (json.objectFit) videoElement.setObjectFit(json.objectFit);
-    if (json.frame) videoElement.setFrame(json.frame);
-    if (json.frameEffects) videoElement.setFrameEffects(json.frameEffects.map((frameEffect: any) => ElementFrameEffect.fromJSON(frameEffect)));
-    if (json.backgroundColor) videoElement.setBackgroundColor(json.backgroundColor);
-    
-    return videoElement;
-  }
+	static deserializeVideoElement(json: ElementJSON): VideoElement {
+		const parentSize =
+			json.frame && json.frame.size
+				? { width: json.frame.size[0], height: json.frame.size[1] }
+				: { width: 0, height: 0 };
 
-  static deserializeAudioElement(json: ElementJSON): AudioElement {
-    const audioElement = new AudioElement(json.props?.src || "");
-    ElementDeserializer.deserializeBaseElement(audioElement, json);
-    
-    if (json.mediaDuration !== undefined) audioElement.setMediaDuration(json.mediaDuration);
-    
-    return audioElement;
-  }
+		const videoElement = new VideoElement(json.props?.src || "", parentSize);
+		ElementDeserializer.deserializeBaseElement(videoElement, json);
 
-  static deserializeImageElement(json: ElementJSON): ImageElement {
-    const parentSize = json.frame && json.frame.size 
-      ? { width: json.frame.size[0], height: json.frame.size[1] } 
-      : { width: 0, height: 0 };
-    
-    const imageElement = new ImageElement(json.props?.src || "", parentSize);
-    ElementDeserializer.deserializeBaseElement(imageElement, json);
-    
-    if (json.objectFit) imageElement.setObjectFit(json.objectFit);
-    if (json.frame) imageElement.setFrame(json.frame);
-    if (json.frameEffects) imageElement.setFrameEffects(json.frameEffects.map((frameEffect: any) => ElementFrameEffect.fromJSON(frameEffect)));
-    if (json.backgroundColor) imageElement.setBackgroundColor(json.backgroundColor);
-    
-    return imageElement;
-  }
+		if (json.mediaDuration !== undefined)
+			videoElement.setMediaDuration(json.mediaDuration);
+		if (json.objectFit) videoElement.setObjectFit(json.objectFit);
+		if (json.frame) videoElement.setFrame(json.frame);
+		if (json.frameEffects)
+			videoElement.setFrameEffects(
+				json.frameEffects.map((frameEffect: any) =>
+					ElementFrameEffect.fromJSON(frameEffect),
+				),
+			);
+		if (json.backgroundColor)
+			videoElement.setBackgroundColor(json.backgroundColor);
 
-  static deserializeTextElement(json: ElementJSON): TextElement {
-    const textElement = new TextElement(json.props?.text || "");
-    ElementDeserializer.deserializeBaseElement(textElement, json);
-    
-    if (json.textEffect) textElement.setTextEffect(ElementTextEffect.fromJSON(json.textEffect));
-    
-    return textElement;
-  }
+		return videoElement;
+	}
 
-  static deserializeCaptionElement(json: ElementJSON): CaptionElement {
-    const captionElement = new CaptionElement(
-      json.t || "",
-      json.s || 0,
-      json.e || 0
-    );
-    ElementDeserializer.deserializeBaseElement(captionElement, json);
-    
-    return captionElement;
-  }
+	static deserializeAudioElement(json: ElementJSON): AudioElement {
+		const audioElement = new AudioElement(json.props?.src || "");
+		ElementDeserializer.deserializeBaseElement(audioElement, json);
 
-  static deserializeIconElement(json: ElementJSON): IconElement {
-    const size = json.props?.size ?? { width: 100, height: 100 };
-    
-    const iconElement = new IconElement(
-      json.props?.src || "",
-      size,
-      json.props?.fill
-    );
-    ElementDeserializer.deserializeBaseElement(iconElement, json);
-    
-    return iconElement;
-  }
+		if (json.mediaDuration !== undefined)
+			audioElement.setMediaDuration(json.mediaDuration);
 
-  static deserializeEmojiElement(json: ElementJSON): EmojiElement {
-    const parentSize = json.frame && json.frame.size
-      ? { width: json.frame.size[0], height: json.frame.size[1] }
-      : { width: 0, height: 0 };
+		return audioElement;
+	}
 
-    const emojiElement = new EmojiElement(
-      json.props?.emoji || "",
-      json.props?.src || "",
-      parentSize
-    );
-    ElementDeserializer.deserializeBaseElement(emojiElement, json);
+	static deserializeImageElement(json: ElementJSON): ImageElement {
+		const parentSize =
+			json.frame && json.frame.size
+				? { width: json.frame.size[0], height: json.frame.size[1] }
+				: { width: 0, height: 0 };
 
-    if (json.objectFit) emojiElement.setObjectFit(json.objectFit);
-    if (json.frame) {
-      emojiElement.setFrame(json.frame);
-    } else {
-      emojiElement.setFrame({
-        x: 0,
-        y: 0,
-        size: [150, 150],
-      });
-    }
-    if (json.frameEffects) emojiElement.setFrameEffects(json.frameEffects.map((frameEffect: any) => ElementFrameEffect.fromJSON(frameEffect)));
-    if (json.backgroundColor) emojiElement.setBackgroundColor(json.backgroundColor);
+		const imageElement = new ImageElement(json.props?.src || "", parentSize);
+		ElementDeserializer.deserializeBaseElement(imageElement, json);
 
-    return emojiElement;
-  }
+		if (json.objectFit) imageElement.setObjectFit(json.objectFit);
+		if (json.frame) imageElement.setFrame(json.frame);
+		if (json.frameEffects)
+			imageElement.setFrameEffects(
+				json.frameEffects.map((frameEffect: any) =>
+					ElementFrameEffect.fromJSON(frameEffect),
+				),
+			);
+		if (json.backgroundColor)
+			imageElement.setBackgroundColor(json.backgroundColor);
 
-  static deserializeCircleElement(json: ElementJSON): CircleElement {
-    const circleElement = new CircleElement(
-      json.props?.fill || "",
-      json.props?.radius || 0
-    );
-    ElementDeserializer.deserializeBaseElement(circleElement, json);
-    
-    return circleElement;
-  }
+		return imageElement;
+	}
 
-  static deserializeRectElement(json: ElementJSON): RectElement {
-    const rectElement = new RectElement(
-      json.props?.fill || "",
-      { 
-        width: json.props?.width || 0, 
-        height: json.props?.height || 0 
-      }
-    );
-    ElementDeserializer.deserializeBaseElement(rectElement, json);
-    
-    return rectElement;
-  }
+	static deserializeTextElement(json: ElementJSON): TextElement {
+		const textElement = new TextElement(json.props?.text || "");
+		ElementDeserializer.deserializeBaseElement(textElement, json);
 
-  static deserializePlaceholderElement(json: ElementJSON): PlaceholderElement {
-    const parentSize =
-      json.props?.parentSize ??
-      (json.frame?.size
-        ? { width: json.frame.size[0], height: json.frame.size[1] }
-        : { width: 0, height: 0 });
-    const placeholderElement = new PlaceholderElement(
-      json.props?.src ?? "",
-      parentSize,
-      json.props?.expectedDuration
-    );
-    ElementDeserializer.deserializeBaseElement(placeholderElement, json);
-    return placeholderElement;
-  }
+		if (json.textEffect)
+			textElement.setTextEffect(ElementTextEffect.fromJSON(json.textEffect));
 
-  static deserializeArrowElement(json: ElementJSON): ArrowElement {
-    const arrowElement = new ArrowElement(json.props?.fill || "#ffcc00", {
-      width: json.props?.width || 180,
-      height: json.props?.height || 30,
-    });
-    ElementDeserializer.deserializeBaseElement(arrowElement, json);
-    return arrowElement;
-  }
+		return textElement;
+	}
 
-  static deserializeLineElement(json: ElementJSON): LineElement {
-    const lineElement = new LineElement(json.props?.fill || "#f97316", {
-      width: json.props?.width || 200,
-      height: json.props?.height || 4,
-    });
-    ElementDeserializer.deserializeBaseElement(lineElement, json);
-    return lineElement;
-  }
+	static deserializeCaptionElement(json: ElementJSON): CaptionElement {
+		const captionElement = new CaptionElement(
+			json.t || "",
+			json.s || 0,
+			json.e || 0,
+		);
+		ElementDeserializer.deserializeBaseElement(captionElement, json);
 
-  static deserializeEffectElement(json: ElementJSON): EffectElement {
-    const effectKey = (json.props as any)?.effectKey ?? "";
-    const effectElement = new EffectElement(effectKey, json.props as any);
-    ElementDeserializer.deserializeBaseElement(effectElement, json);
-    return effectElement;
-  }
+		return captionElement;
+	}
 
-  static fromJSON(json: ElementJSON): TrackElement | null{
-    try {
-    const customDeserializer = ElementDeserializer.customDeserializers[json.type];
-    if (customDeserializer) {
-      return customDeserializer(json);
-    }
-    switch (json.type) {
-      case "video":
-        return ElementDeserializer.deserializeVideoElement(json);
-      case "audio":
-        return ElementDeserializer.deserializeAudioElement(json);
-      case "image":
-        return ElementDeserializer.deserializeImageElement(json);
-      case "text":
-        return ElementDeserializer.deserializeTextElement(json);
-      case "caption":
-        return ElementDeserializer.deserializeCaptionElement(json);
-      case "icon":
-        return ElementDeserializer.deserializeIconElement(json);
-      case "emoji":
-        return ElementDeserializer.deserializeEmojiElement(json);
-      case "circle":
-        return ElementDeserializer.deserializeCircleElement(json);
-      case "rect":
-        return ElementDeserializer.deserializeRectElement(json);
-      case "placeholder":
-        return ElementDeserializer.deserializePlaceholderElement(json);
-      case "line":
-        return ElementDeserializer.deserializeLineElement(json);
-      case "arrow":
-        return ElementDeserializer.deserializeArrowElement(json);
-      case "effect":
-        return ElementDeserializer.deserializeEffectElement(json);
-      default:
-        return ElementDeserializer.deserializePlaceholderElement({
-          ...json,
-          type: "placeholder",
-          props: {
-            ...(json.props || {}),
-            src: json.props?.src ?? "",
-            parentSize: json.props?.parentSize,
-            expectedDuration: json.e - json.s,
-          },
-        });
-    }
-   } catch(error) {
-    console.error("Error deserializing element:", error);
-    return null;
-   }
-  }
+	static deserializeIconElement(json: ElementJSON): IconElement {
+		const size = json.props?.size ?? { width: 100, height: 100 };
+
+		const iconElement = new IconElement(
+			json.props?.src || "",
+			size,
+			json.props?.fill,
+		);
+		ElementDeserializer.deserializeBaseElement(iconElement, json);
+
+		return iconElement;
+	}
+
+	static deserializeEmojiElement(json: ElementJSON): EmojiElement {
+		const parentSize =
+			json.frame && json.frame.size
+				? { width: json.frame.size[0], height: json.frame.size[1] }
+				: { width: 0, height: 0 };
+
+		const emojiElement = new EmojiElement(
+			json.props?.emoji || "",
+			json.props?.src || "",
+			parentSize,
+		);
+		ElementDeserializer.deserializeBaseElement(emojiElement, json);
+
+		if (json.objectFit) emojiElement.setObjectFit(json.objectFit);
+		if (json.frame) {
+			emojiElement.setFrame(json.frame);
+		} else {
+			emojiElement.setFrame({
+				x: 0,
+				y: 0,
+				size: [150, 150],
+			});
+		}
+		if (json.frameEffects)
+			emojiElement.setFrameEffects(
+				json.frameEffects.map((frameEffect: any) =>
+					ElementFrameEffect.fromJSON(frameEffect),
+				),
+			);
+		if (json.backgroundColor)
+			emojiElement.setBackgroundColor(json.backgroundColor);
+
+		return emojiElement;
+	}
+
+	static deserializeCircleElement(json: ElementJSON): CircleElement {
+		const circleElement = new CircleElement(
+			json.props?.fill || "",
+			json.props?.radius || 0,
+		);
+		ElementDeserializer.deserializeBaseElement(circleElement, json);
+
+		return circleElement;
+	}
+
+	static deserializeRectElement(json: ElementJSON): RectElement {
+		const rectElement = new RectElement(json.props?.fill || "", {
+			width: json.props?.width || 0,
+			height: json.props?.height || 0,
+		});
+		ElementDeserializer.deserializeBaseElement(rectElement, json);
+
+		return rectElement;
+	}
+
+	static deserializePlaceholderElement(json: ElementJSON): PlaceholderElement {
+		const parentSize =
+			json.props?.parentSize ??
+			(json.frame?.size
+				? { width: json.frame.size[0], height: json.frame.size[1] }
+				: { width: 0, height: 0 });
+		const placeholderElement = new PlaceholderElement(
+			json.props?.src ?? "",
+			parentSize,
+			json.props?.expectedDuration,
+		);
+		ElementDeserializer.deserializeBaseElement(placeholderElement, json);
+		return placeholderElement;
+	}
+
+	static deserializeArrowElement(json: ElementJSON): ArrowElement {
+		const arrowElement = new ArrowElement(json.props?.fill || "#ffcc00", {
+			width: json.props?.width || 180,
+			height: json.props?.height || 30,
+		});
+		ElementDeserializer.deserializeBaseElement(arrowElement, json);
+		return arrowElement;
+	}
+
+	static deserializeLineElement(json: ElementJSON): LineElement {
+		const lineElement = new LineElement(json.props?.fill || "#f97316", {
+			width: json.props?.width || 200,
+			height: json.props?.height || 4,
+		});
+		ElementDeserializer.deserializeBaseElement(lineElement, json);
+		return lineElement;
+	}
+
+	static deserializeEffectElement(json: ElementJSON): EffectElement {
+		const effectKey = (json.props as any)?.effectKey ?? "";
+		const effectElement = new EffectElement(effectKey, json.props as any);
+		ElementDeserializer.deserializeBaseElement(effectElement, json);
+		return effectElement;
+	}
+
+	static fromJSON(json: ElementJSON): TrackElement | null {
+		try {
+			const customDeserializer =
+				ElementDeserializer.customDeserializers[json.type];
+			if (customDeserializer) {
+				return customDeserializer(json);
+			}
+			switch (json.type) {
+				case "video":
+					return ElementDeserializer.deserializeVideoElement(json);
+				case "audio":
+					return ElementDeserializer.deserializeAudioElement(json);
+				case "image":
+					return ElementDeserializer.deserializeImageElement(json);
+				case "text":
+					return ElementDeserializer.deserializeTextElement(json);
+				case "caption":
+					return ElementDeserializer.deserializeCaptionElement(json);
+				case "icon":
+					return ElementDeserializer.deserializeIconElement(json);
+				case "emoji":
+					return ElementDeserializer.deserializeEmojiElement(json);
+				case "circle":
+					return ElementDeserializer.deserializeCircleElement(json);
+				case "rect":
+					return ElementDeserializer.deserializeRectElement(json);
+				case "placeholder":
+					return ElementDeserializer.deserializePlaceholderElement(json);
+				case "line":
+					return ElementDeserializer.deserializeLineElement(json);
+				case "arrow":
+					return ElementDeserializer.deserializeArrowElement(json);
+				case "effect":
+					return ElementDeserializer.deserializeEffectElement(json);
+				default:
+					return ElementDeserializer.deserializePlaceholderElement({
+						...json,
+						type: "placeholder",
+						props: {
+							...(json.props || {}),
+							src: json.props?.src ?? "",
+							parentSize: json.props?.parentSize,
+							expectedDuration: json.e - json.s,
+						},
+					});
+			}
+		} catch (error) {
+			console.error("Error deserializing element:", error);
+			return null;
+		}
+	}
 }

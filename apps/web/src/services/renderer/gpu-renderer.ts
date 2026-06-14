@@ -5,12 +5,14 @@ import {
 } from "lazynext-wasm";
 import type { EffectPass, EffectUniformValue } from "@/effects/types";
 
+import { ensureWasmInitialized } from "@/wasm/init";
+
 let gpuAvailable = false;
 let initPromise: Promise<void> | null = null;
 
 export function initializeGpuRenderer(): Promise<void> {
 	if (!initPromise) {
-		initPromise = initializeGpu()
+		initPromise = ensureWasmInitialized()
 			.then(() => {
 				gpuAvailable = true;
 			})

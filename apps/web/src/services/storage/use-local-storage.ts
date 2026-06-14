@@ -47,8 +47,8 @@ export function useLocalStorage<T>({
 		({ value: nextValue }: { value: T | ((previousValue: T) => T) }) => {
 			const resolvedValue =
 				typeof nextValue === "function"
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-					? (nextValue as (previousValue: T) => T)(valueRef.current)
+					? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+						(nextValue as (previousValue: T) => T)(valueRef.current)
 					: nextValue;
 
 			valueRef.current = resolvedValue;

@@ -1,9 +1,9 @@
 import { Dimensions } from "@twick/media-utils";
 
 declare module "fabric" {
-  interface FabricObject {
-    zIndex?: number;
-  }
+	interface FabricObject {
+		zIndex?: number;
+	}
 }
 
 /**
@@ -26,26 +26,26 @@ declare module "fabric" {
  * ```
  */
 export type CanvasProps = {
-  /** Dimensions of the video content */
-  videoSize: Dimensions;
-  /** Dimensions of the canvas element */
-  canvasSize: Dimensions;
-  /** Reference to the HTML canvas element or selector string */
-  canvasRef: HTMLCanvasElement | string;
-  /** Background color of the canvas */
-  backgroundColor?: string;
-  /** Border color for selected objects */
-  selectionBorderColor?: string;
-  /** Width of the selection border */
-  selectionLineWidth?: number;
-  /** Ensures uniform scaling of objects */
-  uniScaleTransform?: boolean;
-  /** Enables retina scaling for higher DPI displays */
-  enableRetinaScaling?: boolean;
-  /** Threshold for touch zoom interactions */
-  touchZoomThreshold?: number;
-  /** Default lock aspect ratio when resizing elements (uniform scaling). Can be overridden per element via props.lockAspectRatio. */
-  lockAspectRatio?: boolean;
+	/** Dimensions of the video content */
+	videoSize: Dimensions;
+	/** Dimensions of the canvas element */
+	canvasSize: Dimensions;
+	/** Reference to the HTML canvas element or selector string */
+	canvasRef: HTMLCanvasElement | string;
+	/** Background color of the canvas */
+	backgroundColor?: string;
+	/** Border color for selected objects */
+	selectionBorderColor?: string;
+	/** Width of the selection border */
+	selectionLineWidth?: number;
+	/** Ensures uniform scaling of objects */
+	uniScaleTransform?: boolean;
+	/** Enables retina scaling for higher DPI displays */
+	enableRetinaScaling?: boolean;
+	/** Threshold for touch zoom interactions */
+	touchZoomThreshold?: number;
+	/** Default lock aspect ratio when resizing elements (uniform scaling). Can be overridden per element via props.lockAspectRatio. */
+	lockAspectRatio?: boolean;
 };
 
 /**
@@ -64,16 +64,16 @@ export type CanvasProps = {
  * ```
  */
 export type CanvasMetadata = {
-  /** Width of the canvas in pixels */
-  width: number;
-  /** Height of the canvas in pixels */
-  height: number;
-  /** Aspect ratio of the canvas (width / height) */
-  aspectRatio: number;
-  /** Horizontal scaling factor from video to canvas */
-  scaleX: number;
-  /** Vertical scaling factor from video to canvas */
-  scaleY: number;
+	/** Width of the canvas in pixels */
+	width: number;
+	/** Height of the canvas in pixels */
+	height: number;
+	/** Aspect ratio of the canvas (width / height) */
+	aspectRatio: number;
+	/** Horizontal scaling factor from video to canvas */
+	scaleX: number;
+	/** Vertical scaling factor from video to canvas */
+	scaleY: number;
 };
 
 /**
@@ -96,28 +96,28 @@ export type CanvasMetadata = {
  * ```
  */
 export type FrameEffect = {
-  /** Start time of the effect in seconds */
-  s: number;
-  /** End time of the effect in seconds */
-  e: number;
-  /** Effect properties and configuration */
-  props: {
-    /** Shape type for the frame effect */
-    shape?: "circle" | "rect";
-    /** Radius for circular effects */
-    radius?: number;
-    /** Rotation angle in degrees */
-    rotation?: number;
-    /** Position of the frame effect */
-    framePosition?: {
-      /** X coordinate */
-      x: number;
-      /** Y coordinate */
-      y: number;
-    };
-    /** Size of the frame effect [width, height] */
-    frameSize?: [number, number];
-  };
+	/** Start time of the effect in seconds */
+	s: number;
+	/** End time of the effect in seconds */
+	e: number;
+	/** Effect properties and configuration */
+	props: {
+		/** Shape type for the frame effect */
+		shape?: "circle" | "rect";
+		/** Radius for circular effects */
+		radius?: number;
+		/** Rotation angle in degrees */
+		rotation?: number;
+		/** Position of the frame effect */
+		framePosition?: {
+			/** X coordinate */
+			x: number;
+			/** Y coordinate */
+			y: number;
+		};
+		/** Size of the frame effect [width, height] */
+		frameSize?: [number, number];
+	};
 };
 
 /**
@@ -142,49 +142,49 @@ export type FrameEffect = {
  * ```
  */
 export type CanvasElement = {
-  /** Unique identifier for the element */
-  id: string;
-  /** Type of element (text, image, video, etc.) */
-  type: string;
-  /** Element properties and styling */
-  props: CanvasElementProps;
-  /** Start time of the element in seconds */
-  s?: number;
-  /** End time of the element in seconds */
-  e?: number;
-  /** Text content for text elements */
-  t?: string;
-  /** Array of frame effects applied to the element */
-  frameEffects?: FrameEffect[];
-  /** Type of timeline element */
-  timelineType?: string;
-  /** Background color for the element */
-  backgoundColor?: string;
-  /** Object fit mode for media elements */
-  objectFit?: "contain" | "cover" | "fill" | "none";
-  /** Frame configuration for the element */
-  frame?: {
-    /** Size of the frame [width, height] */
-    size?: [number, number];
-    /** Rotation angle in degrees */
-    rotation?: number;
-    /** Horizontal scale factor */
-    scaleX?: number;
-    /** Vertical scale factor */
-    scaleY?: number;
-    /** Stroke color */
-    stroke?: string;
-    /** Stroke line width */
-    lineWidth?: number;
-    /** Corner radius for rounded rectangles */
-    radius?: number;
-    /** X coordinate */
-    x: number;
-    /** Y coordinate */
-    y: number;
-  };
-  /** Layering order on the canvas (higher = on top). Updated by bring to front / send to back. */
-  zIndex?: number;
+	/** Unique identifier for the element */
+	id: string;
+	/** Type of element (text, image, video, etc.) */
+	type: string;
+	/** Element properties and styling */
+	props: CanvasElementProps;
+	/** Start time of the element in seconds */
+	s?: number;
+	/** End time of the element in seconds */
+	e?: number;
+	/** Text content for text elements */
+	t?: string;
+	/** Array of frame effects applied to the element */
+	frameEffects?: FrameEffect[];
+	/** Type of timeline element */
+	timelineType?: string;
+	/** Background color for the element */
+	backgoundColor?: string;
+	/** Object fit mode for media elements */
+	objectFit?: "contain" | "cover" | "fill" | "none";
+	/** Frame configuration for the element */
+	frame?: {
+		/** Size of the frame [width, height] */
+		size?: [number, number];
+		/** Rotation angle in degrees */
+		rotation?: number;
+		/** Horizontal scale factor */
+		scaleX?: number;
+		/** Vertical scale factor */
+		scaleY?: number;
+		/** Stroke color */
+		stroke?: string;
+		/** Stroke line width */
+		lineWidth?: number;
+		/** Corner radius for rounded rectangles */
+		radius?: number;
+		/** X coordinate */
+		x: number;
+		/** Y coordinate */
+		y: number;
+	};
+	/** Layering order on the canvas (higher = on top). Updated by bring to front / send to back. */
+	zIndex?: number;
 };
 
 /**
@@ -210,99 +210,99 @@ export type CanvasElement = {
  * ```
  */
 export type CanvasElementProps = {
-  /** Source URL for media elements */
-  src?: string;
-  /** Text content for text elements */
-  text?: string;
-  /** Rotation angle in degrees */
-  rotation?: number;
-  /** Horizontal scale factor */
-  scaleX?: number;
-  /** Vertical scale factor */
-  scaleY?: number;
-  /** Size array [width, height] */
-  size?: [number, number];
-  /** X coordinate position */
-  x?: number;
-  /** Y coordinate position */
-  y?: number;
-  /** Corner radius for rounded shapes */
-  radius?: number;
-  /** Opacity value (0-1) */
-  opacity?: number;
-  /** Width in pixels */
-  width?: number;
-  /** Maximum width in pixels */
-  maxWidth?: number;
-  /** Height in pixels */
-  height?: number;
-  /** Whether text should wrap */
-  textWrap?: boolean;
-  /** Text alignment */
-  textAlign?: "left" | "center" | "right";
-  /** Position object with x, y coordinates */
-  pos?: {
-    /** X coordinate */
-    x: number;
-    /** Y coordinate */
-    y: number;
-  };
-  /** Shadow configuration */
-  shadow?: {
-    /** Shadow color */
-    color: string;
-    /** Shadow blur radius */
-    blur: number;
-    /** Shadow X offset */
-    offsetX: number;
-    /** Shadow Y offset */
-    offsetY?: number;
-  };
-  /** Font configuration object */
-  font?: {
-    /** Font family */
-    family?: string;
-    /** Font size in pixels */
-    size?: number;
-    /** Font style */
-    style?: string;
-    /** Font weight */
-    weight?: string;
-  };
-  /** Font family name */
-  fontFamily?: string;
-  /** Font size in pixels */
-  fontSize?: number;
-  /** Font style (normal, italic, etc.) */
-  fontStyle?: string;
-  /** Font weight (normal, bold, etc.) */
-  fontWeight?: string;
-  /** Fill color */
-  fill?: string;
-  /** Stroke color */
-  stroke?: string;
-  /** Stroke width */
-  strokeWidth?: number;
-  /** Line width for strokes */
-  lineWidth?: number;
-  /** Shadow color */
-  shadowColor?: string;
-  /** Shadow blur radius */
-  shadowBlur?: number;
-  /** Shadow offset [x, y] */
-  shadowOffset?: [number, number];
-  /** Background color for text elements */
-  backgroundColor?: string;
-  /** Background opacity for text elements (0-1) */
-  backgroundOpacity?: number;
-  /** Playback rate for video elements */
-  playbackRate?: number;
-  /** Current time for video elements */
-  time?: number;
-  /** Color preset for image/video; matches timeline `mediaFilter` / visualizer `applyColorFilter`. */
-  mediaFilter?: string;
-  /** When true, resize preserves aspect ratio (uniform scaling). When false, allows non-uniform scale. */
-  lockAspectRatio?: boolean;
+	/** Source URL for media elements */
+	src?: string;
+	/** Text content for text elements */
+	text?: string;
+	/** Rotation angle in degrees */
+	rotation?: number;
+	/** Horizontal scale factor */
+	scaleX?: number;
+	/** Vertical scale factor */
+	scaleY?: number;
+	/** Size array [width, height] */
+	size?: [number, number];
+	/** X coordinate position */
+	x?: number;
+	/** Y coordinate position */
+	y?: number;
+	/** Corner radius for rounded shapes */
+	radius?: number;
+	/** Opacity value (0-1) */
+	opacity?: number;
+	/** Width in pixels */
+	width?: number;
+	/** Maximum width in pixels */
+	maxWidth?: number;
+	/** Height in pixels */
+	height?: number;
+	/** Whether text should wrap */
+	textWrap?: boolean;
+	/** Text alignment */
+	textAlign?: "left" | "center" | "right";
+	/** Position object with x, y coordinates */
+	pos?: {
+		/** X coordinate */
+		x: number;
+		/** Y coordinate */
+		y: number;
+	};
+	/** Shadow configuration */
+	shadow?: {
+		/** Shadow color */
+		color: string;
+		/** Shadow blur radius */
+		blur: number;
+		/** Shadow X offset */
+		offsetX: number;
+		/** Shadow Y offset */
+		offsetY?: number;
+	};
+	/** Font configuration object */
+	font?: {
+		/** Font family */
+		family?: string;
+		/** Font size in pixels */
+		size?: number;
+		/** Font style */
+		style?: string;
+		/** Font weight */
+		weight?: string;
+	};
+	/** Font family name */
+	fontFamily?: string;
+	/** Font size in pixels */
+	fontSize?: number;
+	/** Font style (normal, italic, etc.) */
+	fontStyle?: string;
+	/** Font weight (normal, bold, etc.) */
+	fontWeight?: string;
+	/** Fill color */
+	fill?: string;
+	/** Stroke color */
+	stroke?: string;
+	/** Stroke width */
+	strokeWidth?: number;
+	/** Line width for strokes */
+	lineWidth?: number;
+	/** Shadow color */
+	shadowColor?: string;
+	/** Shadow blur radius */
+	shadowBlur?: number;
+	/** Shadow offset [x, y] */
+	shadowOffset?: [number, number];
+	/** Background color for text elements */
+	backgroundColor?: string;
+	/** Background opacity for text elements (0-1) */
+	backgroundOpacity?: number;
+	/** Playback rate for video elements */
+	playbackRate?: number;
+	/** Current time for video elements */
+	time?: number;
+	/** Color preset for image/video; matches timeline `mediaFilter` / visualizer `applyColorFilter`. */
+	mediaFilter?: string;
+	/** When true, resize preserves aspect ratio (uniform scaling). When false, allows non-uniform scale. */
+	lockAspectRatio?: boolean;
 };
 
 /**
@@ -330,58 +330,58 @@ export type CanvasElementProps = {
  * ```
  */
 export type CaptionProps = {
-  /** Font configuration for caption text */
-  font?: {
-    /** Font family */
-    family?: string;
-    /** Font size in pixels */
-    size?: number;
-    /** Text fill color */
-    fill?: string;
-    /** Font weight */
-    weight?: string;
-    /** Font style */
-    style?: string;
-  };
-  /** Opacity value (0-1) */
-  opacity?: number;
-  /** Stroke color */
-  stroke?: string;
-  /** Stroke width */
-  lineWidth?: number;
-  /** Shadow color */
-  shadowColor?: string;
-  /** Shadow blur radius */
-  shadowBlur?: number;
-  /** Shadow offset [x, y] */
-  shadowOffset?: [number, number];
-  /** X coordinate */
-  x: number;
-  /** Y coordinate */
-  y: number;
-  /** Color configuration for caption styling (alias: use when from track/element) */
-  colors?: {
-    /** Text color */
-    text?: string;
-    /** Highlight color */
-    highlight?: string;
-    /** Background color */
-    bgColor?: string;
-    /** Outline / stroke color for caption text */
-    outlineColor?: string;
-  };
-  /** Color configuration for caption styling (alias: use when from canvas) */
-  color?: {
-    /** Text color */
-    text?: string;
-    /** Background color */
-    background?: string;
-    /** Highlight color */
-    highlight?: string;
-    /** Outline / stroke color for caption text */
-    outlineColor?: string;
-  };
-  applyToAll?: boolean;
+	/** Font configuration for caption text */
+	font?: {
+		/** Font family */
+		family?: string;
+		/** Font size in pixels */
+		size?: number;
+		/** Text fill color */
+		fill?: string;
+		/** Font weight */
+		weight?: string;
+		/** Font style */
+		style?: string;
+	};
+	/** Opacity value (0-1) */
+	opacity?: number;
+	/** Stroke color */
+	stroke?: string;
+	/** Stroke width */
+	lineWidth?: number;
+	/** Shadow color */
+	shadowColor?: string;
+	/** Shadow blur radius */
+	shadowBlur?: number;
+	/** Shadow offset [x, y] */
+	shadowOffset?: [number, number];
+	/** X coordinate */
+	x: number;
+	/** Y coordinate */
+	y: number;
+	/** Color configuration for caption styling (alias: use when from track/element) */
+	colors?: {
+		/** Text color */
+		text?: string;
+		/** Highlight color */
+		highlight?: string;
+		/** Background color */
+		bgColor?: string;
+		/** Outline / stroke color for caption text */
+		outlineColor?: string;
+	};
+	/** Color configuration for caption styling (alias: use when from canvas) */
+	color?: {
+		/** Text color */
+		text?: string;
+		/** Background color */
+		background?: string;
+		/** Highlight color */
+		highlight?: string;
+		/** Outline / stroke color for caption text */
+		outlineColor?: string;
+	};
+	applyToAll?: boolean;
 };
 
 /**
@@ -389,91 +389,94 @@ export type CaptionProps = {
  * CanvasProps plus optional forceBuild to recreate the canvas even when dimensions match.
  */
 export type BuildCanvasOptions = CanvasProps & {
-  /** When true, rebuilds the canvas even if dimensions are unchanged */
-  forceBuild?: boolean;
+	/** When true, rebuilds the canvas even if dimensions are unchanged */
+	forceBuild?: boolean;
 };
 
 /**
  * Options for addElementToCanvas from useTwickCanvas.
  */
 export type AddElementToCanvasOptions = {
-  /** The canvas element to add */
-  element: CanvasElement;
-  /** Z-index / layer order */
-  index: number;
-  /** Whether to reorder canvas objects by zIndex after adding (default true) */
-  reorder?: boolean;
-  /** Seek time for video/frame snap (optional) */
-  seekTime?: number;
-  /** Caption styling (optional) */
-  captionProps?: any;
-  /** When true, element resize keeps aspect ratio (optional) */
-  lockAspectRatio?: boolean;
+	/** The canvas element to add */
+	element: CanvasElement;
+	/** Z-index / layer order */
+	index: number;
+	/** Whether to reorder canvas objects by zIndex after adding (default true) */
+	reorder?: boolean;
+	/** Seek time for video/frame snap (optional) */
+	seekTime?: number;
+	/** Caption styling (optional) */
+	captionProps?: any;
+	/** When true, element resize keeps aspect ratio (optional) */
+	lockAspectRatio?: boolean;
 };
 
 /**
  * Options for setCanvasElements from useTwickCanvas.
  */
 export type SetCanvasElementsOptions = {
-  /** Canvas elements to set */
-  elements: CanvasElement[];
-  /** Optional watermark element */
-  watermark?: CanvasElement;
-  /** Seek time for video/frame snap (default 0) */
-  seekTime?: number;
-  /** Caption styling (optional) */
-  captionProps?: any;
-  /** When true, clear canvas before adding (default false) */
-  cleanAndAdd?: boolean;
-  /** When true, element resize keeps aspect ratio (optional) */
-  lockAspectRatio?: boolean;
+	/** Canvas elements to set */
+	elements: CanvasElement[];
+	/** Optional watermark element */
+	watermark?: CanvasElement;
+	/** Seek time for video/frame snap (default 0) */
+	seekTime?: number;
+	/** Caption styling (optional) */
+	captionProps?: any;
+	/** When true, clear canvas before adding (default false) */
+	cleanAndAdd?: boolean;
+	/** When true, element resize keeps aspect ratio (optional) */
+	lockAspectRatio?: boolean;
 };
 
 /**
  * Options for addWatermarkToCanvas from useTwickCanvas.
  */
 export type AddWatermarkToCanvasOptions = {
-  /** The watermark canvas element to add */
-  element: CanvasElement;
+	/** The watermark canvas element to add */
+	element: CanvasElement;
 };
 
 /**
  * Options for resizeCanvas from useTwickCanvas.
  */
 export type ResizeCanvasOptions = {
-  /** New canvas dimensions (e.g. from ResizeObserver) */
-  canvasSize: Dimensions;
-  /** Optional video dimensions; defaults to current video size ref */
-  videoSize?: Dimensions;
+	/** New canvas dimensions (e.g. from ResizeObserver) */
+	canvasSize: Dimensions;
+	/** Optional video dimensions; defaults to current video size ref */
+	videoSize?: Dimensions;
 };
 
 /**
  * Parameters passed to a canvas element handler when adding an element.
  */
 export type CanvasElementAddParams = {
-  element: CanvasElement;
-  index: number;
-  canvas: import("fabric").Canvas;
-  canvasMetadata: CanvasMetadata;
-  seekTime?: number;
-  captionProps?: CaptionProps | null;
-  elementFrameMapRef?: { current: Record<string, FrameEffect | undefined> };
-  getCurrentFrameEffect?: (item: CanvasElement, seekTime: number) => FrameEffect | undefined;
-  /** Used by watermark handler to store props for WATERMARK_UPDATED */
-  watermarkPropsRef?: { current: any };
-  /** When true, resize keeps aspect ratio (uniform scaling). Overridable by element.props.lockAspectRatio. */
-  lockAspectRatio?: boolean;
+	element: CanvasElement;
+	index: number;
+	canvas: import("fabric").Canvas;
+	canvasMetadata: CanvasMetadata;
+	seekTime?: number;
+	captionProps?: CaptionProps | null;
+	elementFrameMapRef?: { current: Record<string, FrameEffect | undefined> };
+	getCurrentFrameEffect?: (
+		item: CanvasElement,
+		seekTime: number,
+	) => FrameEffect | undefined;
+	/** Used by watermark handler to store props for WATERMARK_UPDATED */
+	watermarkPropsRef?: { current: any };
+	/** When true, resize keeps aspect ratio (uniform scaling). Overridable by element.props.lockAspectRatio. */
+	lockAspectRatio?: boolean;
 };
 
 /**
  * Context passed when updating element state from a Fabric object (e.g. after transform).
  */
 export type CanvasElementUpdateContext = {
-  canvasMetadata: CanvasMetadata;
-  videoSize: { width: number; height: number };
-  elementFrameMapRef: { current: Record<string, FrameEffect | undefined> };
-  captionPropsRef: { current: CaptionProps | null };
-  watermarkPropsRef: { current: any };
+	canvasMetadata: CanvasMetadata;
+	videoSize: { width: number; height: number };
+	elementFrameMapRef: { current: Record<string, FrameEffect | undefined> };
+	captionPropsRef: { current: CaptionProps | null };
+	watermarkPropsRef: { current: any };
 };
 
 /**
@@ -482,9 +485,9 @@ export type CanvasElementUpdateContext = {
  * When operation is WATERMARK_UPDATED, payload is WatermarkUpdatePayload.
  */
 export type CanvasElementUpdateResult = {
-  element: CanvasElement;
-  operation?: string;
-  payload?: any;
+	element: CanvasElement;
+	operation?: string;
+	payload?: any;
 };
 
 /**
@@ -492,21 +495,21 @@ export type CanvasElementUpdateResult = {
  * so video-editor can apply via setWatermark() and panel can update type/props.
  */
 export type WatermarkUpdatePayload = {
-  position: { x: number; y: number };
-  rotation?: number;
-  opacity?: number;
-  props?: Record<string, unknown>;
+	position: { x: number; y: number };
+	rotation?: number;
+	opacity?: number;
+	props?: Record<string, unknown>;
 };
 
 /**
  * Handler for a canvas element type. Register with ElementController for scalable dispatch.
  */
 export type CanvasElementHandler = {
-  name: string;
-  add(params: CanvasElementAddParams): Promise<void>;
-  updateFromFabricObject?: (
-    object: any,
-    element: CanvasElement,
-    context: CanvasElementUpdateContext
-  ) => CanvasElementUpdateResult | null;
+	name: string;
+	add(params: CanvasElementAddParams): Promise<void>;
+	updateFromFabricObject?: (
+		object: any,
+		element: CanvasElement,
+		context: CanvasElementUpdateContext,
+	) => CanvasElementUpdateResult | null;
 };

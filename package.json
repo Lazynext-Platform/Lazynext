@@ -1,34 +1,34 @@
 {
-  "name": "lazynext-workspace",
-  "version": "0.1.0",
-  "private": true,
-  "packageManager": "bun@1.2.18",
-  "workspaces": [
-    "apps/*",
-    "rust/wasm/pkg"
-  ],
-  "scripts": {
-    "dev": "bun run --filter \"@lazynext/*\" dev",
-    "build": "bun run --filter \"@lazynext/*\" build",
-    "lint": "bun run --filter \"@lazynext/*\" lint",
-    "typecheck": "bun run --filter \"@lazynext/*\" typecheck",
-    "test": "bun run --filter \"@lazynext/*\" test",
-    "docker:up": "docker-compose up --build -d",
-    "docker:down": "docker-compose down"
-  },
-  "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@next/eslint-plugin-next": "^16.2.9",
-    "cross-env": "^7.0.3",
-    "dotenv": "^16.6.1",
-    "eslint": "^9.39.4",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^17.6.0",
-    "prettier": "^3.8.4",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.61.0"
-  }
+	"name": "lazynext-workspace",
+	"version": "0.1.0",
+	"private": true,
+	"packageManager": "bun@1.2.18",
+	"workspaces": [
+		"apps/*",
+		"rust/wasm/pkg"
+	],
+	"scripts": {
+		"dev": "bun run --filter \"@lazynext/*\" dev",
+		"build": "bun run --filter \"@lazynext/*\" build",
+		"lint": "bun run --filter \"@lazynext/*\" lint",
+		"typecheck": "bun run --filter \"@lazynext/*\" typecheck",
+		"test": "bun run --filter \"@lazynext/*\" test",
+		"docker:up": "docker-compose up --build -d",
+		"docker:down": "docker-compose down"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"@next/eslint-plugin-next": "^16.2.9",
+		"cross-env": "^10.1.0",
+		"dotenv": "^17.4.2",
+		"eslint": "^9.39.4",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-jsx-a11y": "^6.10.2",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"globals": "^17.6.0",
+		"prettier": "^3.8.4",
+		"typescript": "^6.0.3",
+		"typescript-eslint": "^8.61.0"
+	}
 }

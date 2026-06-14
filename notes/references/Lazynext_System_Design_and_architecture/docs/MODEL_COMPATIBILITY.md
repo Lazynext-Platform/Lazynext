@@ -35,16 +35,18 @@ The `openai_compat.rs` provider translates Claude Code's internal message format
 **Behavior:** The `is_error` field is **excluded** from tool result messages.
 
 **Rationale:** Kimi models (via Moonshot AI and DashScope) reject the `is_error` field with a 400 Bad Request error:
+
 ```json
 {
-  "error": {
-    "type": "invalid_request_error",
-    "message": "Unknown field: is_error"
-  }
+	"error": {
+		"type": "invalid_request_error",
+		"message": "Unknown field: is_error"
+	}
 }
 ```
 
 **Detection:**
+
 ```rust
 fn model_rejects_is_error_field(model: &str) -> bool {
     let lowered = model.to_ascii_lowercase();
@@ -60,11 +62,13 @@ fn model_rejects_is_error_field(model: &str) -> bool {
 ### Reasoning Models (Tuning Parameter Stripping)
 
 **Affected models:**
+
 - OpenAI: `o1`, `o1-*`, `o3`, `o3-*`, `o4`, `o4-*`
 - xAI: `grok-3-mini`
 - Alibaba DashScope: `qwen-qwq-*`, `qwq-*`, `qwen3-*-thinking`
 
 **Behavior:** The following tuning parameters are **stripped** from requests:
+
 - `temperature`
 - `top_p`
 - `frequency_penalty`
@@ -75,6 +79,7 @@ fn model_rejects_is_error_field(model: &str) -> bool {
 **Exception:** `reasoning_effort` is included for compatible models when explicitly set.
 
 **Detection:**
+
 ```rust
 fn is_reasoning_model(model: &str) -> bool {
     let canonical = model.to_ascii_lowercase()
@@ -102,15 +107,17 @@ fn is_reasoning_model(model: &str) -> bool {
 **Behavior:** Uses `max_completion_tokens` instead of `max_tokens` in the request payload.
 
 **Rationale:** GPT-5 models require the `max_completion_tokens` field. Legacy `max_tokens` causes request validation failures:
+
 ```json
 {
-  "error": {
-    "message": "Unknown field: max_tokens"
-  }
+	"error": {
+		"message": "Unknown field: max_tokens"
+	}
 }
 ```
 
 **Implementation:**
+
 ```rust
 let max_tokens_key = if wire_model.starts_with("gpt-5") {
     "max_completion_tokens"
@@ -132,6 +139,7 @@ let max_tokens_key = if wire_model.starts_with("gpt-5") {
 **Rationale:** Qwen and Kimi compatible-mode models are hosted through Alibaba Cloud's DashScope service, not OpenAI or Anthropic.
 
 **Configuration:**
+
 ```rust
 pub const DEFAULT_DASHSCOPE_BASE_URL: &str = "https://dashscope.aliyuncs.com/compatible-mode/v1";
 ```
@@ -140,7 +148,6 @@ pub const DEFAULT_DASHSCOPE_BASE_URL: &str = "https://dashscope.aliyuncs.com/com
 
 **Note:** Some Qwen models are also reasoning models (see [Reasoning Models](#reasoning-models-tuning-parameter-stripping) above) and receive both treatments.
 
-
 ---
 
 ### Custom Gateway Slugs and Extra Body Parameters
@@ -148,6 +155,7 @@ pub const DEFAULT_DASHSCOPE_BASE_URL: &str = "https://dashscope.aliyuncs.com/com
 **Affected models:** Slash-containing model IDs routed through the OpenAI-compatible provider, especially custom gateways configured with `OPENAI_BASE_URL` such as OpenRouter, local routers, or other `/v1/chat/completions` services.
 
 **Behavior:**
+
 - The default OpenAI API and local/private OpenAI-compatible base URLs treat `openai/` as a routing prefix and send the bare model name on the wire.
 - Non-local custom OpenAI-compatible base URLs preserve slash-containing slugs such as `openai/gpt-4.1-mini` so gateways like OpenRouter receive the exact model ID they expect. Local slash-containing model IDs can use `local/`, which strips only that escape-hatch prefix and sends the remainder verbatim.
 - `MessageRequest::extra_body` passes through custom request JSON after core fields are populated. This supports provider-specific options such as `web_search_options` and `parallel_tool_calls`.
@@ -158,19 +166,21 @@ pub const DEFAULT_DASHSCOPE_BASE_URL: &str = "https://dashscope.aliyuncs.com/com
 ## Implementation Details
 
 ### File Location
+
 All model-specific logic is in:
+
 ```
 rust/crates/api/src/providers/openai_compat.rs
 ```
 
 ### Key Functions
 
-| Function | Purpose |
-|----------|---------|
-| `model_rejects_is_error_field()` | Detects models that don't support `is_error` in tool results |
-| `is_reasoning_model()` | Detects reasoning models that need tuning param stripping |
-| `translate_message()` | Converts internal messages to OpenAI format (applies `is_error` logic) |
-| `build_chat_completion_request()` | Constructs full request payload (applies all model-specific logic and safe `extra_body` passthrough) |
+| Function                           | Purpose                                                                                                                                                |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `model_rejects_is_error_field()`   | Detects models that don't support `is_error` in tool results                                                                                           |
+| `is_reasoning_model()`             | Detects reasoning models that need tuning param stripping                                                                                              |
+| `translate_message()`              | Converts internal messages to OpenAI format (applies `is_error` logic)                                                                                 |
+| `build_chat_completion_request()`  | Constructs full request payload (applies all model-specific logic and safe `extra_body` passthrough)                                                   |
 | `provider_diagnostics_for_model()` | Produces provider/status diagnostics including auth/base-url vars, reasoning behavior, proxy support, extra-body support, and slash-model preservation |
 
 ### Provider Prefix Handling
@@ -245,10 +255,10 @@ To verify a model is detected correctly without making API calls:
 fn my_new_model_is_detected() {
     // is_error handling
     assert!(model_rejects_is_error_field("my-model"));
-    
+
     // Reasoning model detection
     assert!(is_reasoning_model("my-model"));
-    
+
     // Provider prefix handling
     assert!(model_rejects_is_error_field("provider/my-model"));
 }
@@ -256,6 +266,6 @@ fn my_new_model_is_detected() {
 
 ---
 
-*Last updated: 2026-05-15*
+_Last updated: 2026-05-15_
 
 For questions or updates, see the implementation in `rust/crates/api/src/providers/openai_compat.rs`.

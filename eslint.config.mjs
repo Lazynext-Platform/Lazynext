@@ -98,7 +98,7 @@ export default [
 			"react-hooks/set-state-in-effect": "warn",
 			"preserve-caught-error": "warn",
 			"jsx-a11y/no-noninteractive-element-interactions": "warn",
-			
+
 			// `react/prop-types` is for the JS-era React workflow where runtime
 			// `propTypes` declarations are the prop contract. In this TS-only
 			// scope the prop types already are the contract; the rule's only
@@ -122,7 +122,7 @@ export default [
 			"react/no-unknown-property": "warn",
 			"jsx-a11y/html-has-lang": "warn",
 			"@next/next/no-html-link-for-pages": "warn",
-			"jsx-a11y/anchor-is-valid": "warn"
-		}
-	}
+			"jsx-a11y/anchor-is-valid": "warn",
+		},
+	},
 ];

@@ -1,26 +1,26 @@
 import {
-  Canvas as FabricCanvas,
-  Textbox,
-  Group,
-  FabricImage,
-  Rect,
-  Circle,
-  Shadow,
+	Canvas as FabricCanvas,
+	Textbox,
+	Group,
+	FabricImage,
+	Rect,
+	Circle,
+	Shadow,
 } from "fabric";
 import {
-  convertToCanvasPosition,
-  hexToRgba,
-  measureTextWidth,
+	convertToCanvasPosition,
+	hexToRgba,
+	measureTextWidth,
 } from "../helpers/canvas.util";
 import {
-  CanvasElement,
-  CanvasMetadata,
-  CaptionProps,
-  FrameEffect,
+	CanvasElement,
+	CanvasMetadata,
+	CaptionProps,
+	FrameEffect,
 } from "../types";
 import {
-  DEFAULT_CAPTION_PROPS,
-  DEFAULT_TEXT_PROPS,
+	DEFAULT_CAPTION_PROPS,
+	DEFAULT_TEXT_PROPS,
 } from "../helpers/constants";
 import { disabledControl, rotateControl } from "./element-controls";
 import { getObjectFitSize, getThumbnailCached } from "@twick/media-utils";
@@ -50,112 +50,113 @@ const MARGIN = 10;
  * ```
  */
 export const addTextElement = ({
-  element,
-  index,
-  canvas,
-  canvasMetadata,
+	element,
+	index,
+	canvas,
+	canvasMetadata,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
 }) => {
-  const { x, y } = convertToCanvasPosition(
-    element.props?.x || 0,
-    element.props?.y || 0,
-    canvasMetadata
-  );
+	const { x, y } = convertToCanvasPosition(
+		element.props?.x || 0,
+		element.props?.y || 0,
+		canvasMetadata,
+	);
 
-  const fontSize = Math.floor(
-    (element.props?.fontSize || DEFAULT_TEXT_PROPS.size) *
-      canvasMetadata.scaleX
-  );
-  const fontFamily = element.props?.fontFamily || DEFAULT_TEXT_PROPS.family;
-  const fontStyle = element.props?.fontStyle || "normal";
-  const fontWeight = element.props?.fontWeight || "normal";
+	const fontSize = Math.floor(
+		(element.props?.fontSize || DEFAULT_TEXT_PROPS.size) *
+			canvasMetadata.scaleX,
+	);
+	const fontFamily = element.props?.fontFamily || DEFAULT_TEXT_PROPS.family;
+	const fontStyle = element.props?.fontStyle || "normal";
+	const fontWeight = element.props?.fontWeight || "normal";
 
-  let width: number;
-  if (element.props?.width != null && element.props.width > 0) {
-    width = element.props.width * canvasMetadata.scaleX;
-    if (element.props?.maxWidth) {
-      width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
-    }
-  } else {
-    const textContent = element.props?.text ?? element.t ?? "";
-    width = measureTextWidth(textContent, {
-      fontSize,
-      fontFamily,
-      fontStyle,
-      fontWeight,
-    });
-    const padding = 4;
-    width = width + padding * 2;
-    if (element.props?.maxWidth) {
-      width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
-    }
-    if (width <= 0) width = 100;
-  }
+	let width: number;
+	if (element.props?.width != null && element.props.width > 0) {
+		width = element.props.width * canvasMetadata.scaleX;
+		if (element.props?.maxWidth) {
+			width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
+		}
+	} else {
+		const textContent = element.props?.text ?? element.t ?? "";
+		width = measureTextWidth(textContent, {
+			fontSize,
+			fontFamily,
+			fontStyle,
+			fontWeight,
+		});
+		const padding = 4;
+		width = width + padding * 2;
+		if (element.props?.maxWidth) {
+			width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
+		}
+		if (width <= 0) width = 100;
+	}
 
-  const backgroundColor = element.props?.backgroundColor
-    ? hexToRgba(
-        element.props.backgroundColor,
-        element.props?.backgroundOpacity ?? 1
-      )
-    : undefined;
+	const backgroundColor = element.props?.backgroundColor
+		? hexToRgba(
+				element.props.backgroundColor,
+				element.props?.backgroundOpacity ?? 1,
+			)
+		: undefined;
 
-  const text = new Textbox(element.props?.text || element.t || "", {
-    left: x,
-    top: y,
-    originX: "center",
-    originY: "center",
-    angle: element.props?.rotation || 0,
-    fontSize,
-    fontFamily,
-    fontStyle: fontStyle as any,
-    fontWeight,
-    fill: element.props?.fill || DEFAULT_TEXT_PROPS.fill,
-    opacity: element.props?.opacity ?? 1,
-    width,
-    splitByGrapheme: false,
-    textAlign: element.props?.textAlign || "center",
-    stroke: element.props?.stroke || DEFAULT_TEXT_PROPS.stroke,
-    strokeWidth: (element.props?.lineWidth || DEFAULT_TEXT_PROPS.lineWidth) * 0.025,
-    ...(backgroundColor && { backgroundColor }),
-    shadow: element.props?.shadowColor
-      ? new Shadow({
-          offsetX:
-            element.props?.shadowOffset?.length &&
-            element.props?.shadowOffset?.length > 1
-              ? element.props.shadowOffset[0] / 2
-              : 1,
-          offsetY:
-            element.props?.shadowOffset?.length &&
-            element.props?.shadowOffset.length > 1
-              ? element.props.shadowOffset[1] / 2
-              : 1,
-          blur: (element.props?.shadowBlur || 2) / 2,
-          color: element.props?.shadowColor,
-        })
-      : undefined,
-  });
+	const text = new Textbox(element.props?.text || element.t || "", {
+		left: x,
+		top: y,
+		originX: "center",
+		originY: "center",
+		angle: element.props?.rotation || 0,
+		fontSize,
+		fontFamily,
+		fontStyle: fontStyle as any,
+		fontWeight,
+		fill: element.props?.fill || DEFAULT_TEXT_PROPS.fill,
+		opacity: element.props?.opacity ?? 1,
+		width,
+		splitByGrapheme: false,
+		textAlign: element.props?.textAlign || "center",
+		stroke: element.props?.stroke || DEFAULT_TEXT_PROPS.stroke,
+		strokeWidth:
+			(element.props?.lineWidth || DEFAULT_TEXT_PROPS.lineWidth) * 0.025,
+		...(backgroundColor && { backgroundColor }),
+		shadow: element.props?.shadowColor
+			? new Shadow({
+					offsetX:
+						element.props?.shadowOffset?.length &&
+						element.props?.shadowOffset?.length > 1
+							? element.props.shadowOffset[0] / 2
+							: 1,
+					offsetY:
+						element.props?.shadowOffset?.length &&
+						element.props?.shadowOffset.length > 1
+							? element.props.shadowOffset[1] / 2
+							: 1,
+					blur: (element.props?.shadowBlur || 2) / 2,
+					color: element.props?.shadowColor,
+				})
+			: undefined,
+	});
 
-  // Assign metadata and custom controls
-  text.set("id", element.id);
-  text.set("zIndex", index);
+	// Assign metadata and custom controls
+	text.set("id", element.id);
+	text.set("zIndex", index);
 
-  // Disable unwanted control points (text is not resizable on canvas)
-  text.controls.mt = disabledControl;
-  text.controls.mb = disabledControl;
-  text.controls.ml = disabledControl;
-  text.controls.mr = disabledControl;
-  text.controls.bl = disabledControl;
-  text.controls.br = disabledControl;
-  text.controls.tl = disabledControl;
-  text.controls.tr = disabledControl;
-  text.controls.mtr = rotateControl;
+	// Disable unwanted control points (text is not resizable on canvas)
+	text.controls.mt = disabledControl;
+	text.controls.mb = disabledControl;
+	text.controls.ml = disabledControl;
+	text.controls.mr = disabledControl;
+	text.controls.bl = disabledControl;
+	text.controls.br = disabledControl;
+	text.controls.tl = disabledControl;
+	text.controls.tr = disabledControl;
+	text.controls.mtr = rotateControl;
 
-  canvas.add(text);
-  return text;
+	canvas.add(text);
+	return text;
 };
 
 /**
@@ -179,43 +180,43 @@ export const addTextElement = ({
  * ```
  */
 const setImageProps = ({
-  img,
-  element,
-  index,
-  canvasMetadata,
-  lockAspectRatio = true,
+	img,
+	element,
+	index,
+	canvasMetadata,
+	lockAspectRatio = true,
 }: {
-  img: FabricImage;
-  element: CanvasElement;
-  index: number;
-  canvasMetadata: CanvasMetadata;
-  lockAspectRatio?: boolean;
+	img: FabricImage;
+	element: CanvasElement;
+	index: number;
+	canvasMetadata: CanvasMetadata;
+	lockAspectRatio?: boolean;
 }) => {
-  const width =
-    (element.props?.width || 0) * canvasMetadata.scaleX || canvasMetadata.width;
-  const height =
-    (element.props?.height || 0) * canvasMetadata.scaleY ||
-    canvasMetadata.height;
-  const { x, y } = convertToCanvasPosition(
-    element.props?.x || 0,
-    element.props?.y || 0,
-    canvasMetadata
-  );
-  img.set("id", element.id);
-  img.set("zIndex", index);
-  img.set("width", width);
-  img.set("height", height);
-  img.set("left", x);
-  img.set("top", y);
-  img.set("selectable", true);
-  img.set("hasControls", true);
-  img.set("touchAction", "all");
-  img.set("lockUniScaling", lockAspectRatio);
-  applyFabricMediaColorFilters(
-    img,
-    element.props?.mediaFilter,
-    element.props?.opacity ?? 1
-  );
+	const width =
+		(element.props?.width || 0) * canvasMetadata.scaleX || canvasMetadata.width;
+	const height =
+		(element.props?.height || 0) * canvasMetadata.scaleY ||
+		canvasMetadata.height;
+	const { x, y } = convertToCanvasPosition(
+		element.props?.x || 0,
+		element.props?.y || 0,
+		canvasMetadata,
+	);
+	img.set("id", element.id);
+	img.set("zIndex", index);
+	img.set("width", width);
+	img.set("height", height);
+	img.set("left", x);
+	img.set("top", y);
+	img.set("selectable", true);
+	img.set("hasControls", true);
+	img.set("touchAction", "all");
+	img.set("lockUniScaling", lockAspectRatio);
+	applyFabricMediaColorFilters(
+		img,
+		element.props?.mediaFilter,
+		element.props?.opacity ?? 1,
+	);
 };
 
 /**
@@ -242,121 +243,134 @@ const setImageProps = ({
  * ```
  */
 export const addCaptionElement = ({
-  element,
-  index,
-  canvas,
-  captionProps,
-  canvasMetadata,
-  lockAspectRatio = false,
+	element,
+	index,
+	canvas,
+	captionProps,
+	canvasMetadata,
+	lockAspectRatio = false,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  captionProps: CaptionProps;
-  canvasMetadata: CanvasMetadata;
-  lockAspectRatio?: boolean;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	captionProps: CaptionProps;
+	canvasMetadata: CanvasMetadata;
+	lockAspectRatio?: boolean;
 }) => {
-  const useTrackDefaults = (element.props as any)?.useTrackDefaults ?? true;
-  const trackColors = captionProps?.colors;
-  const elementColors = (element.props as {
-    colors?: {
-      text?: string;
-      outlineColor?: string;
-      highlight?: string;
-      bgColor?: string;
-    };
-  })?.colors;
-  const resolvedColors = useTrackDefaults
-    ? trackColors
-    : { ...(trackColors ?? {}), ...(elementColors ?? {}) };
-  const captionTextColor = resolvedColors?.text ?? captionProps?.color?.text;
+	const useTrackDefaults = (element.props as any)?.useTrackDefaults ?? true;
+	const trackColors = captionProps?.colors;
+	const elementColors = (
+		element.props as {
+			colors?: {
+				text?: string;
+				outlineColor?: string;
+				highlight?: string;
+				bgColor?: string;
+			};
+		}
+	)?.colors;
+	const resolvedColors = useTrackDefaults
+		? trackColors
+		: { ...(trackColors ?? {}), ...(elementColors ?? {}) };
+	const captionTextColor = resolvedColors?.text ?? captionProps?.color?.text;
 
-  const { x, y } = convertToCanvasPosition(
-    ((useTrackDefaults ? captionProps?.x : element.props?.x) ?? captionProps?.x) ?? 0,
-    ((useTrackDefaults ? captionProps?.y : element.props?.y) ?? captionProps?.y) ?? 0,
-    canvasMetadata
-  );
+	const { x, y } = convertToCanvasPosition(
+		(useTrackDefaults ? captionProps?.x : element.props?.x) ??
+			captionProps?.x ??
+			0,
+		(useTrackDefaults ? captionProps?.y : element.props?.y) ??
+			captionProps?.y ??
+			0,
+		canvasMetadata,
+	);
 
-  let width = element.props?.width ? element.props.width * canvasMetadata.scaleX : canvasMetadata.width - (2 * MARGIN);
-  if (element.props?.maxWidth) {
-    width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
-  }
+	let width = element.props?.width
+		? element.props.width * canvasMetadata.scaleX
+		: canvasMetadata.width - 2 * MARGIN;
+	if (element.props?.maxWidth) {
+		width = Math.min(width, element.props.maxWidth * canvasMetadata.scaleX);
+	}
 
-  const resolvedFill =
-    ((useTrackDefaults ? undefined : element.props?.fill) ?? captionTextColor) ??
-    DEFAULT_CAPTION_PROPS.fill;
+	const resolvedFill =
+		(useTrackDefaults ? undefined : element.props?.fill) ??
+		captionTextColor ??
+		DEFAULT_CAPTION_PROPS.fill;
 
-  const trackStroke = trackColors?.outlineColor;
-  const elementStroke =
-    elementColors?.outlineColor ??
-    element.props?.stroke;
-  const resolvedStroke =
-    (useTrackDefaults ? trackStroke : elementStroke ?? trackStroke) ??
-    undefined;
+	const trackStroke = trackColors?.outlineColor;
+	const elementStroke = elementColors?.outlineColor ?? element.props?.stroke;
+	const resolvedStroke =
+		(useTrackDefaults ? trackStroke : (elementStroke ?? trackStroke)) ??
+		undefined;
 
-  const trackFont = captionProps?.font ?? {};
-  const elementFont = (element.props as any)?.font ?? {};
-  const resolvedFont = useTrackDefaults ? trackFont : { ...trackFont, ...elementFont };
+	const trackFont = captionProps?.font ?? {};
+	const elementFont = (element.props as any)?.font ?? {};
+	const resolvedFont = useTrackDefaults
+		? trackFont
+		: { ...trackFont, ...elementFont };
 
-  const caption = new Textbox(element.props?.text || element.t || "", {
-    left: x,
-    top: y,
-    originX: "center",
-    originY: "center",
-    angle: element.props?.rotation || 0,
-    fontSize: Math.round(
-      ((resolvedFont?.size ?? DEFAULT_CAPTION_PROPS.size) *
-        canvasMetadata.scaleX)
-    ),
-    fontFamily:
-      (resolvedFont?.family ?? DEFAULT_CAPTION_PROPS.family),
-    fill: resolvedFill,
-    fontWeight:
-      (resolvedFont?.weight ?? DEFAULT_CAPTION_PROPS.fontWeight),
-    ...(resolvedStroke ? { stroke: resolvedStroke } : {}),
-    opacity: (((useTrackDefaults ? undefined : element.props?.opacity) ?? captionProps?.opacity) ?? 1),
-    width,
-    splitByGrapheme: false,
-    textAlign: element.props?.textAlign ?? "center",
-    shadow: new Shadow({
-      offsetX:
-        (((useTrackDefaults ? undefined : element.props?.shadowOffset?.[0]) ??
-          captionProps?.shadowOffset?.[0]) ??
-          DEFAULT_CAPTION_PROPS.shadowOffset?.[0]),
-      offsetY:
-        (((useTrackDefaults ? undefined : element.props?.shadowOffset?.[1]) ??
-          captionProps?.shadowOffset?.[1]) ??
-          DEFAULT_CAPTION_PROPS.shadowOffset?.[1]),
-      blur:
-        (((useTrackDefaults ? undefined : element.props?.shadowBlur) ??
-          captionProps?.shadowBlur) ??
-          DEFAULT_CAPTION_PROPS.shadowBlur),
-      color:
-        (((useTrackDefaults ? undefined : element.props?.shadowColor) ??
-          captionProps?.shadowColor) ??
-          DEFAULT_CAPTION_PROPS.shadowColor),
-    }),
-    strokeWidth: ((((useTrackDefaults ? undefined : element.props?.lineWidth) ?? captionProps?.lineWidth) ?? DEFAULT_CAPTION_PROPS.lineWidth) * 0.025),
-  });
+	const caption = new Textbox(element.props?.text || element.t || "", {
+		left: x,
+		top: y,
+		originX: "center",
+		originY: "center",
+		angle: element.props?.rotation || 0,
+		fontSize: Math.round(
+			(resolvedFont?.size ?? DEFAULT_CAPTION_PROPS.size) *
+				canvasMetadata.scaleX,
+		),
+		fontFamily: resolvedFont?.family ?? DEFAULT_CAPTION_PROPS.family,
+		fill: resolvedFill,
+		fontWeight: resolvedFont?.weight ?? DEFAULT_CAPTION_PROPS.fontWeight,
+		...(resolvedStroke ? { stroke: resolvedStroke } : {}),
+		opacity:
+			(useTrackDefaults ? undefined : element.props?.opacity) ??
+			captionProps?.opacity ??
+			1,
+		width,
+		splitByGrapheme: false,
+		textAlign: element.props?.textAlign ?? "center",
+		shadow: new Shadow({
+			offsetX:
+				(useTrackDefaults ? undefined : element.props?.shadowOffset?.[0]) ??
+				captionProps?.shadowOffset?.[0] ??
+				DEFAULT_CAPTION_PROPS.shadowOffset?.[0],
+			offsetY:
+				(useTrackDefaults ? undefined : element.props?.shadowOffset?.[1]) ??
+				captionProps?.shadowOffset?.[1] ??
+				DEFAULT_CAPTION_PROPS.shadowOffset?.[1],
+			blur:
+				(useTrackDefaults ? undefined : element.props?.shadowBlur) ??
+				captionProps?.shadowBlur ??
+				DEFAULT_CAPTION_PROPS.shadowBlur,
+			color:
+				(useTrackDefaults ? undefined : element.props?.shadowColor) ??
+				captionProps?.shadowColor ??
+				DEFAULT_CAPTION_PROPS.shadowColor,
+		}),
+		strokeWidth:
+			((useTrackDefaults ? undefined : element.props?.lineWidth) ??
+				captionProps?.lineWidth ??
+				DEFAULT_CAPTION_PROPS.lineWidth) * 0.025,
+	});
 
-  // Assign metadata and custom controls
-  caption.set("id", element.id);
-  caption.set("zIndex", index);
-  caption.set("lockUniScaling", lockAspectRatio);
+	// Assign metadata and custom controls
+	caption.set("id", element.id);
+	caption.set("zIndex", index);
+	caption.set("lockUniScaling", lockAspectRatio);
 
-  // Disable unwanted control points
-  caption.controls.mt = disabledControl;
-  caption.controls.mb = disabledControl;
-  caption.controls.ml = disabledControl;
-  caption.controls.mr = disabledControl;
-  caption.controls.bl = disabledControl;
-  caption.controls.br = disabledControl;
-  caption.controls.tl = disabledControl;
-  caption.controls.tr = disabledControl;
-  caption.controls.mtr = disabledControl;
+	// Disable unwanted control points
+	caption.controls.mt = disabledControl;
+	caption.controls.mb = disabledControl;
+	caption.controls.ml = disabledControl;
+	caption.controls.mr = disabledControl;
+	caption.controls.bl = disabledControl;
+	caption.controls.br = disabledControl;
+	caption.controls.tl = disabledControl;
+	caption.controls.tr = disabledControl;
+	caption.controls.mtr = disabledControl;
 
-  canvas.add(caption);
-  return caption;
+	canvas.add(caption);
+	return caption;
 };
 
 /**
@@ -388,41 +402,41 @@ export const addCaptionElement = ({
  * ```
  */
 export const addVideoElement = async ({
-  element,
-  index,
-  canvas,
-  snapTime,
-  canvasMetadata,
-  currentFrameEffect,
+	element,
+	index,
+	canvas,
+	snapTime,
+	canvasMetadata,
+	currentFrameEffect,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  snapTime: number;
-  canvasMetadata: CanvasMetadata;
-  currentFrameEffect?: FrameEffect;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	snapTime: number;
+	canvasMetadata: CanvasMetadata;
+	currentFrameEffect?: FrameEffect;
 }) => {
-  try {
-    const thumbnailUrl = await getThumbnailCached(
-      element?.props?.src || "",
-      snapTime
-    );
-    if (!thumbnailUrl) {
-      console.error("Failed to get thumbnail");
-      return;
-    }
+	try {
+		const thumbnailUrl = await getThumbnailCached(
+			element?.props?.src || "",
+			snapTime,
+		);
+		if (!thumbnailUrl) {
+			console.error("Failed to get thumbnail");
+			return;
+		}
 
-    return addImageElement({
-      imageUrl: thumbnailUrl,
-      element,
-      index,
-      canvas,
-      canvasMetadata,
-      currentFrameEffect,
-    });
-  } catch {
-    // Skip element on load error
-  }
+		return addImageElement({
+			imageUrl: thumbnailUrl,
+			element,
+			index,
+			canvas,
+			canvasMetadata,
+			currentFrameEffect,
+		});
+	} catch {
+		// Skip element on load error
+	}
 };
 
 /**
@@ -450,63 +464,62 @@ export const addVideoElement = async ({
  * ```
  */
 export const addImageElement = async ({
-  imageUrl,
-  element,
-  index,
-  canvas,
-  canvasMetadata,
-  currentFrameEffect,
-  lockAspectRatio = true,
+	imageUrl,
+	element,
+	index,
+	canvas,
+	canvasMetadata,
+	currentFrameEffect,
+	lockAspectRatio = true,
 }: {
-  imageUrl?: string;
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
-  currentFrameEffect?: FrameEffect;
-  /** When true, resize keeps aspect ratio (uniform scaling). Default true for images. */
-  lockAspectRatio?: boolean;
+	imageUrl?: string;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
+	currentFrameEffect?: FrameEffect;
+	/** When true, resize keeps aspect ratio (uniform scaling). Default true for images. */
+	lockAspectRatio?: boolean;
 }) => {
-  try {
-    const rawSrc = imageUrl || element.props.src || "";
-    const mediaFilter = element.props?.mediaFilter?.trim();
-    const useFilter =
-      !!mediaFilter && mediaFilter !== "none";
-    // Only for http(s) + active filter: CORS is required so Fabric can sample pixels; without it the filtered image can disappear.
-    const fromUrlOpts =
-      useFilter && /^https?:\/\//i.test(rawSrc)
-        ? { crossOrigin: "anonymous" as const }
-        : {};
-    const img = await FabricImage.fromURL(rawSrc, fromUrlOpts);
-    img.set({
-      originX: "center",
-      originY: "center",
-      lockMovementX: false,
-      lockMovementY: false,
-      lockUniScaling: lockAspectRatio,
-      hasControls: false,
-      selectable: false,
-    });
+	try {
+		const rawSrc = imageUrl || element.props.src || "";
+		const mediaFilter = element.props?.mediaFilter?.trim();
+		const useFilter = !!mediaFilter && mediaFilter !== "none";
+		// Only for http(s) + active filter: CORS is required so Fabric can sample pixels; without it the filtered image can disappear.
+		const fromUrlOpts =
+			useFilter && /^https?:\/\//i.test(rawSrc)
+				? { crossOrigin: "anonymous" as const }
+				: {};
+		const img = await FabricImage.fromURL(rawSrc, fromUrlOpts);
+		img.set({
+			originX: "center",
+			originY: "center",
+			lockMovementX: false,
+			lockMovementY: false,
+			lockUniScaling: lockAspectRatio,
+			hasControls: false,
+			selectable: false,
+		});
 
-    // Return the group if a frame is defined, otherwise return the image
-    if (element.frame) {
-      return addMediaGroup({
-        element,
-        img,
-        index,
-        canvas,
-        canvasMetadata,
-        currentFrameEffect,
-        lockAspectRatio,
-      });
-    } else {
-      setImageProps({ img, element, index, canvasMetadata, lockAspectRatio });
-      canvas.add(img);
-      return img;
-    }
-  } catch {
-    // Skip element on load error
-  }
+		// Return the group if a frame is defined, otherwise return the image
+		if (element.frame) {
+			return addMediaGroup({
+				element,
+				img,
+				index,
+				canvas,
+				canvasMetadata,
+				currentFrameEffect,
+				lockAspectRatio,
+			});
+		} else {
+			setImageProps({ img, element, index, canvasMetadata, lockAspectRatio });
+			canvas.add(img);
+			return img;
+		}
+	} catch {
+		// Skip element on load error
+	}
 };
 
 /**
@@ -534,134 +547,134 @@ export const addImageElement = async ({
  * ```
  */
 const addMediaGroup = ({
-  element,
-  img,
-  index,
-  canvas,
-  canvasMetadata,
-  currentFrameEffect,
-  lockAspectRatio = true,
+	element,
+	img,
+	index,
+	canvas,
+	canvasMetadata,
+	currentFrameEffect,
+	lockAspectRatio = true,
 }: {
-  element: CanvasElement;
-  img: FabricImage;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
-  currentFrameEffect?: FrameEffect;
-  lockAspectRatio?: boolean;
+	element: CanvasElement;
+	img: FabricImage;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
+	currentFrameEffect?: FrameEffect;
+	lockAspectRatio?: boolean;
 }) => {
-  let frameSize;
-  let angle;
-  let framePosition;
-  let frameRadius = 0;
-  if (currentFrameEffect) {
-    frameSize = {
-      width:
-        (currentFrameEffect.props.frameSize?.[0] || 0) *
-          canvasMetadata.scaleX || canvasMetadata.width,
-      height:
-        (currentFrameEffect.props.frameSize?.[1] || 0) *
-          canvasMetadata.scaleY || canvasMetadata.height,
-    };
-    angle = currentFrameEffect.props.rotation || 0;
-    framePosition = currentFrameEffect.props.framePosition;
-    if (currentFrameEffect.props.shape === "circle") {
-      frameRadius = frameSize.width / 2;
-    } else {
-      frameRadius = currentFrameEffect?.props?.radius || 0;
-    }
-  } else {
-    frameRadius = element?.frame?.radius || 0;
-    frameSize = {
-      width:
-        (element?.frame?.size?.[0] || 0) * canvasMetadata.scaleX ||
-        canvasMetadata.width,
-      height:
-        (element?.frame?.size?.[1] || 0) * canvasMetadata.scaleY ||
-        canvasMetadata.height,
-    };
-    angle = element?.frame?.rotation || 0;
-    framePosition = {
-      x: element?.frame?.x || 0,
-      y: element?.frame?.y || 0,
-    };
-  }
+	let frameSize;
+	let angle;
+	let framePosition;
+	let frameRadius = 0;
+	if (currentFrameEffect) {
+		frameSize = {
+			width:
+				(currentFrameEffect.props.frameSize?.[0] || 0) *
+					canvasMetadata.scaleX || canvasMetadata.width,
+			height:
+				(currentFrameEffect.props.frameSize?.[1] || 0) *
+					canvasMetadata.scaleY || canvasMetadata.height,
+		};
+		angle = currentFrameEffect.props.rotation || 0;
+		framePosition = currentFrameEffect.props.framePosition;
+		if (currentFrameEffect.props.shape === "circle") {
+			frameRadius = frameSize.width / 2;
+		} else {
+			frameRadius = currentFrameEffect?.props?.radius || 0;
+		}
+	} else {
+		frameRadius = element?.frame?.radius || 0;
+		frameSize = {
+			width:
+				(element?.frame?.size?.[0] || 0) * canvasMetadata.scaleX ||
+				canvasMetadata.width,
+			height:
+				(element?.frame?.size?.[1] || 0) * canvasMetadata.scaleY ||
+				canvasMetadata.height,
+		};
+		angle = element?.frame?.rotation || 0;
+		framePosition = {
+			x: element?.frame?.x || 0,
+			y: element?.frame?.y || 0,
+		};
+	}
 
-  const newSize = getObjectFitSize(
-    element.objectFit || "cover",
-    { width: img.width!, height: img.height! },
-    frameSize
-  );
+	const newSize = getObjectFitSize(
+		element.objectFit || "cover",
+		{ width: img.width!, height: img.height! },
+		frameSize,
+	);
 
-  const frameRect = new Rect({
-    originX: "center",
-    originY: "center",
-    lockMovementX: false,
-    lockMovementY: false,
-    lockUniScaling: true,
-    hasControls: false,
-    selectable: false,
-    width: frameSize.width,
-    height: frameSize.height,
-    stroke: element?.frame?.stroke || "#ffffff",
-    strokeWidth: element?.frame?.lineWidth || 0,
-    hasRotatingPoint: true,
-    rx: frameRadius || 0,
-    ry: frameRadius || 0,
-  });
+	const frameRect = new Rect({
+		originX: "center",
+		originY: "center",
+		lockMovementX: false,
+		lockMovementY: false,
+		lockUniScaling: true,
+		hasControls: false,
+		selectable: false,
+		width: frameSize.width,
+		height: frameSize.height,
+		stroke: element?.frame?.stroke || "#ffffff",
+		strokeWidth: element?.frame?.lineWidth || 0,
+		hasRotatingPoint: true,
+		rx: frameRadius || 0,
+		ry: frameRadius || 0,
+	});
 
-  img.set({
-    lockUniScaling: true,
-    originX: "center",
-    originY: "center",
-    scaleX: newSize.width / img.width,
-    scaleY: newSize.height / img.height,
-  });
-  applyFabricMediaColorFilters(
-    img,
-    element.props?.mediaFilter,
-    element.props?.opacity ?? 1
-  );
+	img.set({
+		lockUniScaling: true,
+		originX: "center",
+		originY: "center",
+		scaleX: newSize.width / img.width,
+		scaleY: newSize.height / img.height,
+	});
+	applyFabricMediaColorFilters(
+		img,
+		element.props?.mediaFilter,
+		element.props?.opacity ?? 1,
+	);
 
-  const { x, y } = convertToCanvasPosition(
-    framePosition?.x || 0,
-    framePosition?.y || 0,
-    canvasMetadata
-  );
+	const { x, y } = convertToCanvasPosition(
+		framePosition?.x || 0,
+		framePosition?.y || 0,
+		canvasMetadata,
+	);
 
-  const groupProps = {
-    left: x,
-    top: y,
-    width: frameSize.width,
-    height: frameSize.height,
-    angle: angle,
-  };
+	const groupProps = {
+		left: x,
+		top: y,
+		width: frameSize.width,
+		height: frameSize.height,
+		angle: angle,
+	};
 
-  // Customize the control points for the group
-  // Change only the top control to a different style, keep others as circles
+	// Customize the control points for the group
+	// Change only the top control to a different style, keep others as circles
 
-  const group = new Group([frameRect, img], {
-    ...groupProps,
-    originX: "center",
-    originY: "center",
-    angle: groupProps.angle,
-    selectable: true,
-    hasControls: true,
-    hasBorders: true,
-    clipPath: frameRect,
-  });
+	const group = new Group([frameRect, img], {
+		...groupProps,
+		originX: "center",
+		originY: "center",
+		angle: groupProps.angle,
+		selectable: true,
+		hasControls: true,
+		hasBorders: true,
+		clipPath: frameRect,
+	});
 
-  group.controls.mt = disabledControl;
-  group.controls.mb = disabledControl;
-  group.controls.ml = disabledControl;
-  group.controls.mr = disabledControl;
-  group.controls.mtr = rotateControl;
+	group.controls.mt = disabledControl;
+	group.controls.mb = disabledControl;
+	group.controls.ml = disabledControl;
+	group.controls.mr = disabledControl;
+	group.controls.mtr = rotateControl;
 
-  group.set("id", element.id);
-  group.set("zIndex", index);
-  group.set("lockUniScaling", lockAspectRatio);
-  canvas.add(group);
-  return group;
+	group.set("id", element.id);
+	group.set("zIndex", index);
+	group.set("lockUniScaling", lockAspectRatio);
+	canvas.add(group);
+	return group;
 };
 
 /**
@@ -686,99 +699,99 @@ const addMediaGroup = ({
  * ```
  */
 export const addRectElement = ({
-  element,
-  index,
-  canvas,
-  canvasMetadata,
-  lockAspectRatio = false,
+	element,
+	index,
+	canvas,
+	canvasMetadata,
+	lockAspectRatio = false,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
-  lockAspectRatio?: boolean;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
+	lockAspectRatio?: boolean;
 }) => {
-  // Convert element's position to canvas coordinates
-  const { x, y } = convertToCanvasPosition(
-    element.props?.x || 0,
-    element.props?.y || 0,
-    canvasMetadata
-  );
+	// Convert element's position to canvas coordinates
+	const { x, y } = convertToCanvasPosition(
+		element.props?.x || 0,
+		element.props?.y || 0,
+		canvasMetadata,
+	);
 
-  // Create a new rectangular Fabric.js object
-  const rect = new Rect({
-    left: x, // X-coordinate on the canvas
-    top: y, // Y-coordinate on the canvas
-    originX: "center", // Center the rectangle based on its position
-    originY: "center", // Center the rectangle based on its position
-    angle: element.props?.rotation || 0, // Rotation angle
-    rx: (element.props?.radius || 0) * canvasMetadata.scaleX, // Horizontal radius for rounded corners
-    ry: (element.props?.radius || 0) * canvasMetadata.scaleY, // Vertical radius for rounded corners
-    stroke: element.props?.stroke || "#000000", // Stroke color
-    strokeWidth: (element.props?.lineWidth || 0) * canvasMetadata.scaleX, // Scaled stroke width
-    fill: element.props?.fill || "#000000", // Fill color
-    opacity: element.props?.opacity || 1, // Opacity level
-    width: (element.props?.width || 0) * canvasMetadata.scaleX, // Scaled width
-    height: (element.props?.height || 0) * canvasMetadata.scaleY, // Scaled height
-  });
+	// Create a new rectangular Fabric.js object
+	const rect = new Rect({
+		left: x, // X-coordinate on the canvas
+		top: y, // Y-coordinate on the canvas
+		originX: "center", // Center the rectangle based on its position
+		originY: "center", // Center the rectangle based on its position
+		angle: element.props?.rotation || 0, // Rotation angle
+		rx: (element.props?.radius || 0) * canvasMetadata.scaleX, // Horizontal radius for rounded corners
+		ry: (element.props?.radius || 0) * canvasMetadata.scaleY, // Vertical radius for rounded corners
+		stroke: element.props?.stroke || "#000000", // Stroke color
+		strokeWidth: (element.props?.lineWidth || 0) * canvasMetadata.scaleX, // Scaled stroke width
+		fill: element.props?.fill || "#000000", // Fill color
+		opacity: element.props?.opacity || 1, // Opacity level
+		width: (element.props?.width || 0) * canvasMetadata.scaleX, // Scaled width
+		height: (element.props?.height || 0) * canvasMetadata.scaleY, // Scaled height
+	});
 
-  // Set custom properties for the rectangle
-  rect.set("id", element.id); // Unique identifier for the rectangle
-  rect.set("zIndex", index); // zIndex determines rendering order
-  rect.set("lockUniScaling", lockAspectRatio);
+	// Set custom properties for the rectangle
+	rect.set("id", element.id); // Unique identifier for the rectangle
+	rect.set("zIndex", index); // zIndex determines rendering order
+	rect.set("lockUniScaling", lockAspectRatio);
 
-  // Set custom control for rotation
-  rect.controls.mtr = rotateControl;
+	// Set custom control for rotation
+	rect.controls.mtr = rotateControl;
 
-  canvas.add(rect);
-  return rect;
+	canvas.add(rect);
+	return rect;
 };
 
 export const addCircleElement = ({
-  element,
-  index,
-  canvas,
-  canvasMetadata,
-  lockAspectRatio = true,
+	element,
+	index,
+	canvas,
+	canvasMetadata,
+	lockAspectRatio = true,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
-  lockAspectRatio?: boolean;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
+	lockAspectRatio?: boolean;
 }) => {
-  // Convert element's position to canvas coordinates
-  const { x, y } = convertToCanvasPosition(
-    element.props?.x || 0,
-    element.props?.y || 0,
-    canvasMetadata
-  );
+	// Convert element's position to canvas coordinates
+	const { x, y } = convertToCanvasPosition(
+		element.props?.x || 0,
+		element.props?.y || 0,
+		canvasMetadata,
+	);
 
-  const circle = new Circle({
-    left: x, // X-coordinate on the canvas
-    top: y, // Y-coordinate on the canvas
-    radius: (element.props?.radius || 0) * canvasMetadata.scaleX,
-    fill: element.props?.fill || "#000000",
-    stroke: element.props?.stroke || "#000000",
-    strokeWidth: (element.props?.lineWidth || 0) * canvasMetadata.scaleX,
-    originX: "center",
-    originY: "center",
-    // Respect element opacity (0–1). Defaults to fully opaque.
-    opacity: element.props?.opacity ?? 1,
-  });
+	const circle = new Circle({
+		left: x, // X-coordinate on the canvas
+		top: y, // Y-coordinate on the canvas
+		radius: (element.props?.radius || 0) * canvasMetadata.scaleX,
+		fill: element.props?.fill || "#000000",
+		stroke: element.props?.stroke || "#000000",
+		strokeWidth: (element.props?.lineWidth || 0) * canvasMetadata.scaleX,
+		originX: "center",
+		originY: "center",
+		// Respect element opacity (0–1). Defaults to fully opaque.
+		opacity: element.props?.opacity ?? 1,
+	});
 
-  // Set custom control for rotation
-  circle.controls.mt = disabledControl;
-  circle.controls.mb = disabledControl;
-  circle.controls.ml = disabledControl;
-  circle.controls.mr = disabledControl;
-  circle.controls.mtr = disabledControl;
+	// Set custom control for rotation
+	circle.controls.mt = disabledControl;
+	circle.controls.mb = disabledControl;
+	circle.controls.ml = disabledControl;
+	circle.controls.mr = disabledControl;
+	circle.controls.mtr = disabledControl;
 
-  circle.set("id", element.id);
-  circle.set("zIndex", index);
-  circle.set("lockUniScaling", lockAspectRatio);
-  canvas.add(circle);
-  return circle;
+	circle.set("id", element.id);
+	circle.set("zIndex", index);
+	circle.set("lockUniScaling", lockAspectRatio);
+	canvas.add(circle);
+	return circle;
 };
 
 /**
@@ -803,40 +816,40 @@ export const addCircleElement = ({
  * ```
  */
 export const addBackgroundColor = ({
-  element,
-  index,
-  canvas,
-  canvasMetadata,
+	element,
+	index,
+	canvas,
+	canvasMetadata,
 }: {
-  element: CanvasElement;
-  index: number;
-  canvas: FabricCanvas;
-  canvasMetadata: CanvasMetadata;
+	element: CanvasElement;
+	index: number;
+	canvas: FabricCanvas;
+	canvasMetadata: CanvasMetadata;
 }) => {
-  const bgRect = new Rect({
-    width: canvasMetadata.width,
-    height: canvasMetadata.height,
-    left: canvasMetadata.width / 2,
-    top: canvasMetadata.height / 2,
-    fill: element.backgoundColor ?? "#000000",
-    originX: "center",
-    originY: "center",
-    hasControls: false,
-    hasBorders: false,
-    selectable: false,
-  });
+	const bgRect = new Rect({
+		width: canvasMetadata.width,
+		height: canvasMetadata.height,
+		left: canvasMetadata.width / 2,
+		top: canvasMetadata.height / 2,
+		fill: element.backgoundColor ?? "#000000",
+		originX: "center",
+		originY: "center",
+		hasControls: false,
+		hasBorders: false,
+		selectable: false,
+	});
 
-  bgRect.controls.mt = disabledControl;
-  bgRect.controls.mb = disabledControl;
-  bgRect.controls.ml = disabledControl;
-  bgRect.controls.mr = disabledControl;
-  bgRect.controls.bl = disabledControl;
-  bgRect.controls.br = disabledControl;
-  bgRect.controls.tl = disabledControl;
-  bgRect.controls.tr = disabledControl;
-  bgRect.controls.mtr = disabledControl;
-  bgRect.set("zIndex", index - 0.5);
+	bgRect.controls.mt = disabledControl;
+	bgRect.controls.mb = disabledControl;
+	bgRect.controls.ml = disabledControl;
+	bgRect.controls.mr = disabledControl;
+	bgRect.controls.bl = disabledControl;
+	bgRect.controls.br = disabledControl;
+	bgRect.controls.tl = disabledControl;
+	bgRect.controls.tr = disabledControl;
+	bgRect.controls.mtr = disabledControl;
+	bgRect.set("zIndex", index - 0.5);
 
-  canvas.add(bgRect);
-  return bgRect;
+	canvas.add(bgRect);
+	return bgRect;
 };

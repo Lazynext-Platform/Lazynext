@@ -5,12 +5,12 @@ export const editorRegistry = new Map<string, TimelineEditor>();
 
 // Expose the registry to the global window object for console access
 declare global {
-  interface Window {
-    twickTimelineEditors: Map<string, TimelineEditor>;
-  }
+	interface Window {
+		twickTimelineEditors: Map<string, TimelineEditor>;
+	}
 }
 
 // Initialize the global registry on window
-if (typeof window !== 'undefined') {
-  window.twickTimelineEditors = editorRegistry;
+if (typeof window !== "undefined") {
+	window.twickTimelineEditors = editorRegistry;
 }

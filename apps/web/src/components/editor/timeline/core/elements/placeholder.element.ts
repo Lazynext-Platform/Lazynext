@@ -9,30 +9,30 @@ import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
  * Use replaceElementsBySource to replace with the real element once loaded.
  */
 export class PlaceholderElement extends TrackElement {
-  protected parentSize: Size;
+	protected parentSize: Size;
 
-  constructor(src: string, parentSize: Size, expectedDuration?: number) {
-    super(TIMELINE_ELEMENT_TYPE.PLACEHOLDER);
-    this.parentSize = parentSize;
-    this.props = {
-      src,
-      ...(expectedDuration != null && { expectedDuration }),
-    };
-  }
+	constructor(src: string, parentSize: Size, expectedDuration?: number) {
+		super(TIMELINE_ELEMENT_TYPE.PLACEHOLDER);
+		this.parentSize = parentSize;
+		this.props = {
+			src,
+			...(expectedDuration != null && { expectedDuration }),
+		};
+	}
 
-  getSrc(): string {
-    return this.props?.src ?? "";
-  }
+	getSrc(): string {
+		return this.props?.src ?? "";
+	}
 
-  getExpectedDuration(): number | undefined {
-    return this.props?.expectedDuration;
-  }
+	getExpectedDuration(): number | undefined {
+		return this.props?.expectedDuration;
+	}
 
-  getParentSize(): Size {
-    return this.parentSize;
-  }
+	getParentSize(): Size {
+		return this.parentSize;
+	}
 
-  accept<T>(visitor: ElementVisitor<T>): T {
-    return visitor.visitPlaceholderElement(this);
-  }
+	accept<T>(visitor: ElementVisitor<T>): T {
+		return visitor.visitPlaceholderElement(this);
+	}
 }

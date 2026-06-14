@@ -18,7 +18,9 @@ import { type MediaTime } from "@/wasm";
 
 // --- Helpers ---
 
-function createScalarKey(overrides?: Partial<ScalarAnimationKey>): ScalarAnimationKey {
+function createScalarKey(
+	overrides?: Partial<ScalarAnimationKey>,
+): ScalarAnimationKey {
 	return {
 		id: "k1",
 		time: 0 as MediaTime,
@@ -29,11 +31,15 @@ function createScalarKey(overrides?: Partial<ScalarAnimationKey>): ScalarAnimati
 	};
 }
 
-function createScalarChannel(keys: ScalarAnimationKey[]): ScalarAnimationChannel {
+function createScalarChannel(
+	keys: ScalarAnimationKey[],
+): ScalarAnimationChannel {
 	return { keys };
 }
 
-function createDiscreteKey(overrides?: Partial<DiscreteAnimationKey>): DiscreteAnimationKey {
+function createDiscreteKey(
+	overrides?: Partial<DiscreteAnimationKey>,
+): DiscreteAnimationKey {
 	return {
 		id: "k1",
 		time: 0 as MediaTime,
@@ -79,7 +85,9 @@ describe("getScalarSegmentInterpolation", () => {
 	});
 
 	it('defaults to "linear" for unknown segment', () => {
-		expect(getScalarSegmentInterpolation({ segment: "custom" as any })).toBe("linear");
+		expect(getScalarSegmentInterpolation({ segment: "custom" as any })).toBe(
+			"linear",
+		);
 	});
 });
 
@@ -181,8 +189,18 @@ describe("getChannelValueAtTime", () => {
 
 	it("returns interpolated value between two keys", () => {
 		const channel = createScalarChannel([
-			createScalarKey({ id: "k1", time: 0 as MediaTime, value: 0, segmentToNext: "linear" }),
-			createScalarKey({ id: "k2", time: 100 as MediaTime, value: 100, segmentToNext: "linear" }),
+			createScalarKey({
+				id: "k1",
+				time: 0 as MediaTime,
+				value: 0,
+				segmentToNext: "linear",
+			}),
+			createScalarKey({
+				id: "k2",
+				time: 100 as MediaTime,
+				value: 100,
+				segmentToNext: "linear",
+			}),
 		]);
 
 		const result = getChannelValueAtTime({
@@ -228,8 +246,18 @@ describe("getChannelValueAtTime", () => {
 
 	it("returns hold value for hold segment", () => {
 		const channel = createScalarChannel([
-			createScalarKey({ id: "k1", time: 0 as MediaTime, value: 10, segmentToNext: "step" }),
-			createScalarKey({ id: "k2", time: 100 as MediaTime, value: 100, segmentToNext: "step" }),
+			createScalarKey({
+				id: "k1",
+				time: 0 as MediaTime,
+				value: 10,
+				segmentToNext: "step",
+			}),
+			createScalarKey({
+				id: "k2",
+				time: 100 as MediaTime,
+				value: 100,
+				segmentToNext: "step",
+			}),
 		]);
 
 		const result = getChannelValueAtTime({

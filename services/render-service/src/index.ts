@@ -1,86 +1,90 @@
-import express from 'express';
-import cors from 'cors';
-import { v4 as uuidv4 } from 'uuid';
+import express from "express";
+import cors from "cors";
+import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 interface RenderJob {
-  id: string;
-  projectId: string;
-  status: 'queued' | 'rendering' | 'completed' | 'failed';
-  progress: number;
-  format: string; // 'mp4', 'dcp', 'aaf'
-  createdAt: string;
+	id: string;
+	projectId: string;
+	status: "queued" | "rendering" | "completed" | "failed";
+	progress: number;
+	format: string; // 'mp4', 'dcp', 'aaf'
+	createdAt: string;
 }
 
 const renderQueue: Map<string, RenderJob> = new Map();
 
-app.post('/api/v1/jobs', (req, res) => {
-  const { projectId, format = 'mp4' } = req.body;
-  
-  if (!projectId) {
-    return res.status(400).json({ error: 'Missing projectId' });
-  }
+app.post("/api/v1/jobs", (req, res) => {
+	const { projectId, format = "mp4" } = req.body;
 
-  const jobId = uuidv4();
-  const job: RenderJob = {
-    id: jobId,
-    projectId,
-    status: 'queued',
-    progress: 0,
-    format,
-    createdAt: new Date().toISOString()
-  };
+	if (!projectId) {
+		return res.status(400).json({ error: "Missing projectId" });
+	}
 
-  renderQueue.set(jobId, job);
-  
-  // Simulate Render Farm FFMPEG Execution
-  console.log(`[Render Farm] Queued job ${jobId} for project ${projectId} (Format: ${format})`);
-  
-  setTimeout(() => processJob(jobId), 2000);
+	const jobId = uuidv4();
+	const job: RenderJob = {
+		id: jobId,
+		projectId,
+		status: "queued",
+		progress: 0,
+		format,
+		createdAt: new Date().toISOString(),
+	};
 
-  res.status(202).json({ success: true, jobId });
+	renderQueue.set(jobId, job);
+
+	// Simulate Render Farm FFMPEG Execution
+	console.log(
+		`[Render Farm] Queued job ${jobId} for project ${projectId} (Format: ${format})`,
+	);
+
+	setTimeout(() => processJob(jobId), 2000);
+
+	res.status(202).json({ success: true, jobId });
 });
 
-app.get('/api/v1/jobs/:jobId', (req, res) => {
-  const job = renderQueue.get(req.params.jobId);
-  if (!job) {
-    return res.status(404).json({ error: 'Job not found' });
-  }
-  res.json({ success: true, job });
+app.get("/api/v1/jobs/:jobId", (req, res) => {
+	const job = renderQueue.get(req.params.jobId);
+	if (!job) {
+		return res.status(404).json({ error: "Job not found" });
+	}
+	res.json({ success: true, job });
 });
 
 function processJob(jobId: string) {
-  const job = renderQueue.get(jobId);
-  if (!job) return;
+	const job = renderQueue.get(jobId);
+	if (!job) return;
 
-  job.status = 'rendering';
-  console.log(`[Render Farm] Started rendering job ${jobId}...`);
+	job.status = "rendering";
+	console.log(`[Render Farm] Started rendering job ${jobId}...`);
 
-  // Mocking the progress of a large FFMPEG cluster render
-  const interval = setInterval(() => {
-    const currentJob = renderQueue.get(jobId);
-    if (!currentJob) {
-      clearInterval(interval);
-      return;
-    }
+	// Mocking the progress of a large FFMPEG cluster render
+	const interval = setInterval(() => {
+		const currentJob = renderQueue.get(jobId);
+		if (!currentJob) {
+			clearInterval(interval);
+			return;
+		}
 
-    currentJob.progress += Math.floor(Math.random() * 15) + 5;
-    
-    if (currentJob.progress >= 100) {
-      currentJob.progress = 100;
-      currentJob.status = 'completed';
-      console.log(`[Render Farm] Finished job ${jobId}! Output generated.`);
-      clearInterval(interval);
-    }
-  }, 1500);
+		currentJob.progress += Math.floor(Math.random() * 15) + 5;
+
+		if (currentJob.progress >= 100) {
+			currentJob.progress = 100;
+			currentJob.status = "completed";
+			console.log(`[Render Farm] Finished job ${jobId}! Output generated.`);
+			clearInterval(interval);
+		}
+	}, 1500);
 }
 
 const PORT = process.env.PORT || 8003;
 
 app.listen(PORT, () => {
-  console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
-  console.log(`📡 Accepting FFMPEG / DCP / AAF commands via REST & Socket.io (Mocked)`);
+	console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
+	console.log(
+		`📡 Accepting FFMPEG / DCP / AAF commands via REST & Socket.io (Mocked)`,
+	);
 });

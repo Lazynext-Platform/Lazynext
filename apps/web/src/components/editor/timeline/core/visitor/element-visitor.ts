@@ -13,17 +13,17 @@ import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
 export interface ElementVisitor<T> {
-  visitVideoElement(element: VideoElement): T;
-  visitAudioElement(element: AudioElement): T;
-  visitImageElement(element: ImageElement): T;
-  visitTextElement(element: TextElement): T;
-  visitCaptionElement(element: CaptionElement): T;
-  visitIconElement(element: IconElement): T;
-  visitEmojiElement(element: EmojiElement): T;
-  visitCircleElement(element: CircleElement): T;
-  visitRectElement(element: RectElement): T;
-  visitPlaceholderElement(element: PlaceholderElement): T;
-  visitLineElement(element: LineElement): T;
-  visitArrowElement(element: ArrowElement): T;
-  visitEffectElement(element: EffectElement): T;
-} 
+	visitVideoElement(element: VideoElement): T;
+	visitAudioElement(element: AudioElement): T;
+	visitImageElement(element: ImageElement): T;
+	visitTextElement(element: TextElement): T;
+	visitCaptionElement(element: CaptionElement): T;
+	visitIconElement(element: IconElement): T;
+	visitEmojiElement(element: EmojiElement): T;
+	visitCircleElement(element: CircleElement): T;
+	visitRectElement(element: RectElement): T;
+	visitPlaceholderElement(element: PlaceholderElement): T;
+	visitLineElement(element: LineElement): T;
+	visitArrowElement(element: ArrowElement): T;
+	visitEffectElement(element: EffectElement): T;
+}

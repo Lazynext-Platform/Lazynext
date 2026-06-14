@@ -27,20 +27,20 @@ CI checks:
 
 ```json
 {
-  "schema_version": "1.0",
-  "kind": "acp",
-  "status": "unsupported",
-  "phase": "discoverability_only",
-  "supported": false,
-  "exit_code": 0,
-  "serve_alias_only": true,
-  "protocol": {
-    "name": "ACP/Zed",
-    "json_rpc": false,
-    "daemon": false,
-    "endpoint": null,
-    "serve_starts_daemon": false
-  }
+	"schema_version": "1.0",
+	"kind": "acp",
+	"status": "unsupported",
+	"phase": "discoverability_only",
+	"supported": false,
+	"exit_code": 0,
+	"serve_alias_only": true,
+	"protocol": {
+		"name": "ACP/Zed",
+		"json_rpc": false,
+		"daemon": false,
+		"endpoint": null,
+		"serve_starts_daemon": false
+	}
 }
 ```
 
@@ -54,9 +54,9 @@ Malformed ACP invocations, such as `claw acp start`, exit with code `1`. With
 
 ```json
 {
-  "type": "error",
-  "kind": "unsupported_acp_invocation",
-  "exit_code": 1
+	"type": "error",
+	"kind": "unsupported_acp_invocation",
+	"exit_code": 1
 }
 ```
 

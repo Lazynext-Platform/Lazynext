@@ -21,7 +21,7 @@ export function WaveformScope() {
 			// In a real implementation:
 			// const histogram = gpu.analyze_waveform();
 			// Draw the histogram bars based on the GPU atomic counters
-			
+
 			// Mock visualization
 			ctx.fillStyle = "rgba(0, 255, 0, 0.7)";
 			for (let i = 0; i < 256; i++) {

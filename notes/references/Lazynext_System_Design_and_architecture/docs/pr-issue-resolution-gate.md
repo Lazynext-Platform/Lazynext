@@ -41,7 +41,6 @@ The anti-slop classifications are: `actionable-bug`, `actionable-docs`, `actiona
 
 Automation lanes may recommend labels, comments, defer/close rationales, or merge candidates, but must not merge or close remote PRs/issues without maintainer-owned approval.
 
-
 ## G012 final PR reconciliation snapshot
 
 Worker-3 captured a fresh PR ledger for the final Claw Code 2.0 gate in `docs/pr-triage-g012-final-gate.json`.

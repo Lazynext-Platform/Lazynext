@@ -10,23 +10,23 @@ This plan covers a comprehensive analysis of the current terminal user interface
 
 ### Crate Map
 
-| Crate | Purpose | Lines | TUI Relevance |
-|---|---|---|---|
-| `rusty-claude-cli` | Main binary: REPL loop, arg parsing, rendering, API bridge | ~3,600 | **Primary TUI surface** |
-| `runtime` | Session, conversation loop, config, permissions, compaction | ~5,300 | Provides data/state |
-| `api` | Anthropic HTTP client + SSE streaming | ~1,500 | Provides stream events |
-| `commands` | Slash command metadata/parsing/help | ~470 | Drives command dispatch |
-| `tools` | 18 built-in tool implementations | ~3,500 | Tool execution display |
+| Crate              | Purpose                                                     | Lines  | TUI Relevance           |
+| ------------------ | ----------------------------------------------------------- | ------ | ----------------------- |
+| `rusty-claude-cli` | Main binary: REPL loop, arg parsing, rendering, API bridge  | ~3,600 | **Primary TUI surface** |
+| `runtime`          | Session, conversation loop, config, permissions, compaction | ~5,300 | Provides data/state     |
+| `api`              | Anthropic HTTP client + SSE streaming                       | ~1,500 | Provides stream events  |
+| `commands`         | Slash command metadata/parsing/help                         | ~470   | Drives command dispatch |
+| `tools`            | 18 built-in tool implementations                            | ~3,500 | Tool execution display  |
 
 ### Current TUI Components
 
 > Note: The legacy prototype files `app.rs` and `args.rs` were removed on 2026-04-05.
 > References below describe future extraction targets, not current tracked source files.
 
-| Component | File | What It Does Today | Quality |
-|---|---|---|---|
-| **Input** | `input.rs` (269 lines) | `rustyline`-based line editor with slash-command tab completion, Shift+Enter newline, history | ✅ Solid |
-| **Rendering** | `render.rs` (641 lines) | Markdown→terminal rendering (headings, lists, tables, code blocks with syntect highlighting, blockquotes), spinner widget | ✅ Good |
+| Component         | File                    | What It Does Today                                                                                                                                    | Quality       |
+| ----------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| **Input**         | `input.rs` (269 lines)  | `rustyline`-based line editor with slash-command tab completion, Shift+Enter newline, history                                                         | ✅ Solid      |
+| **Rendering**     | `render.rs` (641 lines) | Markdown→terminal rendering (headings, lists, tables, code blocks with syntect highlighting, blockquotes), spinner widget                             | ✅ Good       |
 | **App/REPL loop** | `main.rs` (3,159 lines) | The monolithic `LiveCli` struct: REPL loop, all slash command handlers, streaming output, tool call display, permission prompting, session management | ⚠️ Monolithic |
 
 ### Key Dependencies
@@ -72,82 +72,82 @@ This plan covers a comprehensive analysis of the current terminal user interface
 
 **Goal**: Break the monolith, remove dead code, establish the module structure for TUI work.
 
-| Task | Description | Effort |
-|---|---|---|
-| 0.1 | **Extract `LiveCli` into `app.rs`** — Move the entire `LiveCli` struct, its impl, and helpers (`format_*`, `render_*`, session management) out of `main.rs` into focused modules: `app.rs` (core), `format.rs` (report formatting), `session_manager.rs` (session CRUD) | M |
-| 0.2 | **Keep the legacy `CliApp` removed** — The old `CliApp` prototype has already been deleted; if any unique ideas remain valuable (for example stream event handler patterns), reintroduce them intentionally inside the active `LiveCli` extraction rather than restoring the old file wholesale | S |
-| 0.3 | **Extract `main.rs` arg parsing** — The current `parse_args()` is still a hand-rolled parser in `main.rs`. If parsing is extracted later, do it into a newly-introduced module intentionally rather than reviving the removed prototype `args.rs` by accident | S |
-| 0.4 | **Create a `tui/` module** — Introduce `crates/rusty-claude-cli/src/tui/mod.rs` as the namespace for all new TUI components: `status_bar.rs`, `layout.rs`, `tool_panel.rs`, etc. | S |
+| Task | Description                                                                                                                                                                                                                                                                                     | Effort |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 0.1  | **Extract `LiveCli` into `app.rs`** — Move the entire `LiveCli` struct, its impl, and helpers (`format_*`, `render_*`, session management) out of `main.rs` into focused modules: `app.rs` (core), `format.rs` (report formatting), `session_manager.rs` (session CRUD)                         | M      |
+| 0.2  | **Keep the legacy `CliApp` removed** — The old `CliApp` prototype has already been deleted; if any unique ideas remain valuable (for example stream event handler patterns), reintroduce them intentionally inside the active `LiveCli` extraction rather than restoring the old file wholesale | S      |
+| 0.3  | **Extract `main.rs` arg parsing** — The current `parse_args()` is still a hand-rolled parser in `main.rs`. If parsing is extracted later, do it into a newly-introduced module intentionally rather than reviving the removed prototype `args.rs` by accident                                   | S      |
+| 0.4  | **Create a `tui/` module** — Introduce `crates/rusty-claude-cli/src/tui/mod.rs` as the namespace for all new TUI components: `status_bar.rs`, `layout.rs`, `tool_panel.rs`, etc.                                                                                                                | S      |
 
 ### Phase 1: Status Bar & Live HUD
 
 **Goal**: Persistent information display during interaction.
 
-| Task | Description | Effort |
-|---|---|---|
-| 1.1 | **Terminal-size-aware status line** — Use `crossterm::terminal::size()` to render a bottom-pinned status bar showing: model name, permission mode, session ID, cumulative token count, estimated cost | M |
-| 1.2 | **Live token counter** — Update the status bar in real-time as `AssistantEvent::Usage` and `AssistantEvent::TextDelta` events arrive during streaming | M |
-| 1.3 | **Turn duration timer** — Show elapsed time for the current turn (the `showTurnDuration` config already exists in Config tool but isn't wired up) | S |
-| 1.4 | **Git branch indicator** — Display the current git branch in the status bar (already parsed via `parse_git_status_metadata`) | S |
+| Task | Description                                                                                                                                                                                           | Effort |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 1.1  | **Terminal-size-aware status line** — Use `crossterm::terminal::size()` to render a bottom-pinned status bar showing: model name, permission mode, session ID, cumulative token count, estimated cost | M      |
+| 1.2  | **Live token counter** — Update the status bar in real-time as `AssistantEvent::Usage` and `AssistantEvent::TextDelta` events arrive during streaming                                                 | M      |
+| 1.3  | **Turn duration timer** — Show elapsed time for the current turn (the `showTurnDuration` config already exists in Config tool but isn't wired up)                                                     | S      |
+| 1.4  | **Git branch indicator** — Display the current git branch in the status bar (already parsed via `parse_git_status_metadata`)                                                                          | S      |
 
 ### Phase 2: Enhanced Streaming Output
 
 **Goal**: Make the main response stream visually rich and responsive.
 
-| Task | Description | Effort |
-|---|---|---|
-| 2.1 | **Live markdown rendering** — Instead of raw text streaming, buffer text deltas and incrementally render Markdown as it arrives (heading detection, bold/italic, inline code). The existing `TerminalRenderer::render_markdown` can be adapted for incremental use | L |
-| 2.2 | **Thinking indicator** — When extended thinking/reasoning is active, show a distinct animated indicator (e.g., `🧠 Reasoning...` with pulsing dots or a different spinner) instead of the generic `🦀 Thinking...` | S |
-| 2.3 | **Streaming progress bar** — Add an optional horizontal progress indicator below the spinner showing approximate completion (based on max_tokens vs. output_tokens so far) | M |
-| 2.4 | **Remove artificial stream delay** — The current `stream_markdown` sleeps 8ms per chunk. For tool results this is fine, but for the main response stream it should be immediate or configurable | S |
+| Task | Description                                                                                                                                                                                                                                                        | Effort |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| 2.1  | **Live markdown rendering** — Instead of raw text streaming, buffer text deltas and incrementally render Markdown as it arrives (heading detection, bold/italic, inline code). The existing `TerminalRenderer::render_markdown` can be adapted for incremental use | L      |
+| 2.2  | **Thinking indicator** — When extended thinking/reasoning is active, show a distinct animated indicator (e.g., `🧠 Reasoning...` with pulsing dots or a different spinner) instead of the generic `🦀 Thinking...`                                                 | S      |
+| 2.3  | **Streaming progress bar** — Add an optional horizontal progress indicator below the spinner showing approximate completion (based on max_tokens vs. output_tokens so far)                                                                                         | M      |
+| 2.4  | **Remove artificial stream delay** — The current `stream_markdown` sleeps 8ms per chunk. For tool results this is fine, but for the main response stream it should be immediate or configurable                                                                    | S      |
 
 ### Phase 3: Tool Call Visualization
 
 **Goal**: Make tool execution legible and navigable.
 
-| Task | Description | Effort |
-|---|---|---|
-| 3.1 | **Collapsible tool output** — For tool results longer than N lines (configurable, default 15), show a summary with `[+] Expand` hint; pressing a key reveals the full output. Initially implement as truncation with a "full output saved to file" fallback | M |
-| 3.2 | **Syntax-highlighted tool results** — When tool results contain code (detected by tool name — `bash` stdout, `read_file` content, `REPL` output), apply syntect highlighting rather than rendering as plain text | M |
-| 3.3 | **Tool call timeline** — For multi-tool turns, show a compact summary: `🔧 bash → ✓ | read_file → ✓ | edit_file → ✓ (3 tools, 1.2s)` after all tool calls complete | S |
-| 3.4 | **Diff-aware edit_file display** — When `edit_file` succeeds, show a colored unified diff of the change instead of just `✓ edit_file: path` | M |
-| 3.5 | **Permission prompt enhancement** — Style the approval prompt with box drawing, color the tool name, show a one-line summary of what the tool will do | S |
+| Task | Description                                                                                                                                                                                                                                                 | Effort        |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------ | --- |
+| 3.1  | **Collapsible tool output** — For tool results longer than N lines (configurable, default 15), show a summary with `[+] Expand` hint; pressing a key reveals the full output. Initially implement as truncation with a "full output saved to file" fallback | M             |
+| 3.2  | **Syntax-highlighted tool results** — When tool results contain code (detected by tool name — `bash` stdout, `read_file` content, `REPL` output), apply syntect highlighting rather than rendering as plain text                                            | M             |
+| 3.3  | **Tool call timeline** — For multi-tool turns, show a compact summary: `🔧 bash → ✓                                                                                                                                                                         | read_file → ✓ | edit_file → ✓ (3 tools, 1.2s)` after all tool calls complete | S   |
+| 3.4  | **Diff-aware edit_file display** — When `edit_file` succeeds, show a colored unified diff of the change instead of just `✓ edit_file: path`                                                                                                                 | M             |
+| 3.5  | **Permission prompt enhancement** — Style the approval prompt with box drawing, color the tool name, show a one-line summary of what the tool will do                                                                                                       | S             |
 
 ### Phase 4: Enhanced Slash Commands & Navigation
 
 **Goal**: Improve information display and add missing features.
 
-| Task | Description | Effort |
-|---|---|---|
-| 4.1 | **Colored `/diff` output** — Parse the git diff and render it with red/green coloring for removals/additions, similar to `delta` or `diff-so-fancy` | M |
-| 4.2 | **Pager for long outputs** — When `/status`, `/config`, `/memory`, or `/diff` produce output longer than the terminal height, pipe through an internal pager (scroll with j/k/q) or external `$PAGER` | M |
-| 4.3 | **`/search` command** — Add a new command to search conversation history by keyword | M |
-| 4.4 | **`/undo` command** — Undo the last file edit by restoring from the `originalFile` data in `write_file`/`edit_file` tool results | M |
-| 4.5 | **Interactive session picker** — Replace the text-based `/session list` with an interactive fuzzy-filterable list (up/down arrows to select, enter to switch) | L |
-| 4.6 | **Tab completion for tool arguments** — Extend `SlashCommandHelper` to complete file paths after `/export`, model names after `/model`, session IDs after `/session switch` | M |
+| Task | Description                                                                                                                                                                                           | Effort |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 4.1  | **Colored `/diff` output** — Parse the git diff and render it with red/green coloring for removals/additions, similar to `delta` or `diff-so-fancy`                                                   | M      |
+| 4.2  | **Pager for long outputs** — When `/status`, `/config`, `/memory`, or `/diff` produce output longer than the terminal height, pipe through an internal pager (scroll with j/k/q) or external `$PAGER` | M      |
+| 4.3  | **`/search` command** — Add a new command to search conversation history by keyword                                                                                                                   | M      |
+| 4.4  | **`/undo` command** — Undo the last file edit by restoring from the `originalFile` data in `write_file`/`edit_file` tool results                                                                      | M      |
+| 4.5  | **Interactive session picker** — Replace the text-based `/session list` with an interactive fuzzy-filterable list (up/down arrows to select, enter to switch)                                         | L      |
+| 4.6  | **Tab completion for tool arguments** — Extend `SlashCommandHelper` to complete file paths after `/export`, model names after `/model`, session IDs after `/session switch`                           | M      |
 
 ### Phase 5: Color Themes & Configuration
 
 **Goal**: User-customizable visual appearance.
 
-| Task | Description | Effort |
-|---|---|---|
-| 5.1 | **Named color themes** — Add `dark` (current default), `light`, `solarized`, `catppuccin` themes. Wire to the existing `Config` tool's `theme` setting | M |
-| 5.2 | **ANSI-256 / truecolor detection** — Detect terminal capabilities and fall back gracefully (no colors → 16 colors → 256 → truecolor) | M |
-| 5.3 | **Configurable spinner style** — Allow choosing between braille dots, bar, moon phases, etc. | S |
-| 5.4 | **Banner customization** — Make the ASCII art banner optional or configurable via settings | S |
+| Task | Description                                                                                                                                            | Effort |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| 5.1  | **Named color themes** — Add `dark` (current default), `light`, `solarized`, `catppuccin` themes. Wire to the existing `Config` tool's `theme` setting | M      |
+| 5.2  | **ANSI-256 / truecolor detection** — Detect terminal capabilities and fall back gracefully (no colors → 16 colors → 256 → truecolor)                   | M      |
+| 5.3  | **Configurable spinner style** — Allow choosing between braille dots, bar, moon phases, etc.                                                           | S      |
+| 5.4  | **Banner customization** — Make the ASCII art banner optional or configurable via settings                                                             | S      |
 
 ### Phase 6: Full-Screen TUI Mode (Stretch)
 
 **Goal**: Optional alternate-screen layout for power users.
 
-| Task | Description | Effort |
-|---|---|---|
-| 6.1 | **Add `ratatui` dependency** — Introduce `ratatui` (terminal UI framework) as an optional dependency for the full-screen mode | S |
-| 6.2 | **Split-pane layout** — Top pane: conversation with scrollback; Bottom pane: input area; Right sidebar (optional): tool status/todo list | XL |
-| 6.3 | **Scrollable conversation view** — Navigate past messages with PgUp/PgDn, search within conversation | L |
-| 6.4 | **Keyboard shortcuts panel** — Show `?` help overlay with all keybindings | M |
-| 6.5 | **Mouse support** — Click to expand tool results, scroll conversation, select text for copy | L |
+| Task | Description                                                                                                                              | Effort |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 6.1  | **Add `ratatui` dependency** — Introduce `ratatui` (terminal UI framework) as an optional dependency for the full-screen mode            | S      |
+| 6.2  | **Split-pane layout** — Top pane: conversation with scrollback; Bottom pane: input area; Right sidebar (optional): tool status/todo list | XL     |
+| 6.3  | **Scrollable conversation view** — Navigate past messages with PgUp/PgDn, search within conversation                                     | L      |
+| 6.4  | **Keyboard shortcuts panel** — Show `?` help overlay with all keybindings                                                                | M      |
+| 6.5  | **Mouse support** — Click to expand tool results, scroll conversation, select text for copy                                              | L      |
 
 ---
 
@@ -210,14 +210,14 @@ crates/rusty-claude-cli/src/
 
 ## 5. Risk Assessment
 
-| Risk | Mitigation |
-|---|---|
-| Breaking the working REPL during refactor | Phase 0 is pure restructuring with existing test coverage as safety net |
-| Terminal compatibility issues (tmux, SSH, Windows) | Rely on crossterm's abstraction; test in degraded environments |
-| Performance regression with rich rendering | Profile before/after; keep the fast path (raw streaming) always available |
-| Scope creep into Phase 6 | Ship Phases 0–3 as a coherent release before starting Phase 6 |
-| Historical `app.rs` vs `main.rs` confusion | Keep the legacy prototype removed and avoid reintroducing a second app surface accidentally during extraction |
+| Risk                                               | Mitigation                                                                                                    |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Breaking the working REPL during refactor          | Phase 0 is pure restructuring with existing test coverage as safety net                                       |
+| Terminal compatibility issues (tmux, SSH, Windows) | Rely on crossterm's abstraction; test in degraded environments                                                |
+| Performance regression with rich rendering         | Profile before/after; keep the fast path (raw streaming) always available                                     |
+| Scope creep into Phase 6                           | Ship Phases 0–3 as a coherent release before starting Phase 6                                                 |
+| Historical `app.rs` vs `main.rs` confusion         | Keep the legacy prototype removed and avoid reintroducing a second app surface accidentally during extraction |
 
 ---
 
-*Generated: 2026-03-31 | Workspace: `rust/` | Branch: `dev/rust`*
+_Generated: 2026-03-31 | Workspace: `rust/` | Branch: `dev/rust`_

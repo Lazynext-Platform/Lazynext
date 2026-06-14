@@ -3,7 +3,9 @@ import { parseSubtitleFile } from "../parse";
 
 describe("parseSubtitleFile", () => {
 	it("throws for unsupported format", () => {
-		expect(() => parseSubtitleFile({ fileName: "test.vtt", input: "" })).toThrow();
+		expect(() =>
+			parseSubtitleFile({ fileName: "test.vtt", input: "" }),
+		).toThrow();
 	});
 
 	it("throws for no extension", () => {
@@ -23,7 +25,8 @@ describe("parseSubtitleFile", () => {
 	});
 
 	it("parses SRT with index", () => {
-		const input = "1\n00:00:01,000 --> 00:00:02,500\nFirst line\n\n2\n00:00:03,000 --> 00:00:04,000\nSecond line\n";
+		const input =
+			"1\n00:00:01,000 --> 00:00:02,500\nFirst line\n\n2\n00:00:03,000 --> 00:00:04,000\nSecond line\n";
 		const result = parseSubtitleFile({ fileName: "test.srt", input });
 		expect(result.captions).toHaveLength(2);
 	});

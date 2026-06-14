@@ -4,17 +4,17 @@ Use this checklist before spending engineering time on low-signal issues, genera
 
 ## Classifications
 
-| Classification | Use when | Required evidence | Safe action |
-| --- | --- | --- | --- |
-| `actionable-bug` | The report has a reproducible product failure. | Repro steps, failing test, logs with secrets removed, or matching roadmap item. | Fix, assign, or link to an existing fix. |
-| `actionable-docs` | The report identifies missing, stale, or confusing documentation. | Current doc path plus desired corrected source of truth. | Patch docs or link to the owning docs lane. |
-| `actionable-feature` | The request matches Claw Code direction and has a concrete acceptance shape. | Issue/PR link plus roadmap or maintainer rationale. | Defer to planning or implement if already scoped. |
-| `duplicate` | Another issue/PR already covers the same user-visible outcome. | Link the canonical issue/PR and note any extra evidence worth preserving. | Cross-link; close only with maintainer/owner policy. |
-| `spam-or-promotion` | The content is promotional, irrelevant, or abusive. | URL/title/body excerpt summary, not a full repost. | Label/close per repository policy. |
-| `generated-slop-or-hallucinated` | The change is broad, mechanically generated, unreviewable, or names APIs/files that do not exist. | Diff/path examples, missing symbols, or unverifiable claims. | Request a narrow repro or reject/defer with rationale. |
-| `unsafe-or-security-sensitive` | The report includes secrets, exploit detail, or risky operational instructions. | Redacted summary and security policy link. | Move to the private/security path; do not expand public details. |
-| `not-reproducible-yet` | The claim might be valid but lacks enough evidence to act. | Missing command, environment, expected/actual behavior, or version. | Ask for repro details; do not implement speculative fixes. |
-| `externally-blocked` | Progress depends on upstream services, credentials, policy, or unavailable owner approval. | Blocking dependency and owner/gate. | Defer with a concrete unblock condition. |
+| Classification                   | Use when                                                                                          | Required evidence                                                               | Safe action                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `actionable-bug`                 | The report has a reproducible product failure.                                                    | Repro steps, failing test, logs with secrets removed, or matching roadmap item. | Fix, assign, or link to an existing fix.                         |
+| `actionable-docs`                | The report identifies missing, stale, or confusing documentation.                                 | Current doc path plus desired corrected source of truth.                        | Patch docs or link to the owning docs lane.                      |
+| `actionable-feature`             | The request matches Claw Code direction and has a concrete acceptance shape.                      | Issue/PR link plus roadmap or maintainer rationale.                             | Defer to planning or implement if already scoped.                |
+| `duplicate`                      | Another issue/PR already covers the same user-visible outcome.                                    | Link the canonical issue/PR and note any extra evidence worth preserving.       | Cross-link; close only with maintainer/owner policy.             |
+| `spam-or-promotion`              | The content is promotional, irrelevant, or abusive.                                               | URL/title/body excerpt summary, not a full repost.                              | Label/close per repository policy.                               |
+| `generated-slop-or-hallucinated` | The change is broad, mechanically generated, unreviewable, or names APIs/files that do not exist. | Diff/path examples, missing symbols, or unverifiable claims.                    | Request a narrow repro or reject/defer with rationale.           |
+| `unsafe-or-security-sensitive`   | The report includes secrets, exploit detail, or risky operational instructions.                   | Redacted summary and security policy link.                                      | Move to the private/security path; do not expand public details. |
+| `not-reproducible-yet`           | The claim might be valid but lacks enough evidence to act.                                        | Missing command, environment, expected/actual behavior, or version.             | Ask for repro details; do not implement speculative fixes.       |
+| `externally-blocked`             | Progress depends on upstream services, credentials, policy, or unavailable owner approval.        | Blocking dependency and owner/gate.                                             | Defer with a concrete unblock condition.                         |
 
 ## PR review gate
 

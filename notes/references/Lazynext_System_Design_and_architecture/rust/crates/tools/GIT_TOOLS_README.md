@@ -8,19 +8,21 @@ Adds five native git tools to claw-code that provide structured, read-only acces
 
 Show the working tree status (branch, staged, unstaged, untracked). Equivalent to `git status --short --branch`.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `short` | boolean | no | `true` | Use `--short --branch` format for concise output |
+| Parameter | Type    | Required | Default | Description                                      |
+| --------- | ------- | -------- | ------- | ------------------------------------------------ |
+| `short`   | boolean | no       | `true`  | Use `--short --branch` format for concise output |
 
 **Example input:**
+
 ```json
 {}
 ```
 
 **Example output:**
+
 ```json
 {
-  "output": "## feat/git-aware-tools...upstream/main [ahead 1]\nM rust/crates/tools/src/lib.rs"
+	"output": "## feat/git-aware-tools...upstream/main [ahead 1]\nM rust/crates/tools/src/lib.rs"
 }
 ```
 
@@ -30,23 +32,27 @@ Show the working tree status (branch, staged, unstaged, untracked). Equivalent t
 
 Show changes between commits, the index, and the working tree. Supports staged changes, specific paths, commit ranges, and comparing two commits.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `staged` | boolean | no | `false` | Show staged changes (`git diff --cached`) |
-| `commit` | string | no | — | Commit hash, tag, or branch to diff against |
-| `commit2` | string | no | — | Second commit for range diff (`commit...commit2`) |
-| `path` | string | no | — | File path to restrict the diff to |
+| Parameter | Type    | Required | Default | Description                                       |
+| --------- | ------- | -------- | ------- | ------------------------------------------------- |
+| `staged`  | boolean | no       | `false` | Show staged changes (`git diff --cached`)         |
+| `commit`  | string  | no       | —       | Commit hash, tag, or branch to diff against       |
+| `commit2` | string  | no       | —       | Second commit for range diff (`commit...commit2`) |
+| `path`    | string  | no       | —       | File path to restrict the diff to                 |
 
 **Example inputs:**
+
 ```json
 {}
 ```
+
 ```json
 { "staged": true }
 ```
+
 ```json
 { "commit": "HEAD~3", "path": "rust/crates/tools/src/lib.rs" }
 ```
+
 ```json
 { "commit": "main", "commit2": "feat/git-aware-tools" }
 ```
@@ -57,19 +63,21 @@ Show changes between commits, the index, and the working tree. Supports staged c
 
 Show commit history. Supports limiting count, filtering by author/date/path, and oneline format.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `count` | integer | no | `20` | Maximum number of commits to return |
-| `oneline` | boolean | no | `false` | Use `--oneline` format (hash + subject only) |
-| `author` | string | no | — | Filter commits by author pattern |
-| `since` | string | no | — | Filter commits since date (e.g. `"2024-01-01"` or `"2.weeks"`) |
-| `until` | string | no | — | Filter commits until date |
-| `path` | string | no | — | File or directory path to filter commits by |
+| Parameter | Type    | Required | Default | Description                                                    |
+| --------- | ------- | -------- | ------- | -------------------------------------------------------------- |
+| `count`   | integer | no       | `20`    | Maximum number of commits to return                            |
+| `oneline` | boolean | no       | `false` | Use `--oneline` format (hash + subject only)                   |
+| `author`  | string  | no       | —       | Filter commits by author pattern                               |
+| `since`   | string  | no       | —       | Filter commits since date (e.g. `"2024-01-01"` or `"2.weeks"`) |
+| `until`   | string  | no       | —       | Filter commits until date                                      |
+| `path`    | string  | no       | —       | File or directory path to filter commits by                    |
 
 **Example inputs:**
+
 ```json
 { "count": 5, "oneline": true }
 ```
+
 ```json
 { "author": "alice", "since": "1.week", "path": "src/main.rs" }
 ```
@@ -80,19 +88,22 @@ Show commit history. Supports limiting count, filtering by author/date/path, and
 
 Show a commit, tag, or tree object with its diff. Supports showing a specific file at a commit and stat-only mode.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `commit` | string | **yes** | — | Commit hash, tag, or branch ref to show |
-| `path` | string | no | — | Show only this file at the given commit (`commit:path` syntax) |
-| `stat` | boolean | no | `false` | Show diffstat summary instead of full diff |
+| Parameter | Type    | Required | Default | Description                                                    |
+| --------- | ------- | -------- | ------- | -------------------------------------------------------------- |
+| `commit`  | string  | **yes**  | —       | Commit hash, tag, or branch ref to show                        |
+| `path`    | string  | no       | —       | Show only this file at the given commit (`commit:path` syntax) |
+| `stat`    | boolean | no       | `false` | Show diffstat summary instead of full diff                     |
 
 **Example inputs:**
+
 ```json
 { "commit": "HEAD" }
 ```
+
 ```json
 { "commit": "abc1234", "stat": true }
 ```
+
 ```json
 { "commit": "main", "path": "src/lib.rs" }
 ```
@@ -103,16 +114,18 @@ Show a commit, tag, or tree object with its diff. Supports showing a specific fi
 
 Show what revision and author last modified each line of a file. Supports line range filtering.
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `path` | string | **yes** | — | File path to blame |
-| `start_line` | integer | no | — | Start of line range (1-based) |
-| `end_line` | integer | no | — | End of line range (1-based) |
+| Parameter    | Type    | Required | Default | Description                   |
+| ------------ | ------- | -------- | ------- | ----------------------------- |
+| `path`       | string  | **yes**  | —       | File path to blame            |
+| `start_line` | integer | no       | —       | Start of line range (1-based) |
+| `end_line`   | integer | no       | —       | End of line range (1-based)   |
 
 **Example inputs:**
+
 ```json
 { "path": "src/main.rs" }
 ```
+
 ```json
 { "path": "src/main.rs", "start_line": 100, "end_line": 150 }
 ```

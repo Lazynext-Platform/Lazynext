@@ -61,7 +61,7 @@ async fn main() {
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
         .with_state(editor);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8005));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
     println!("📡 Listening for external API requests on http://{}", addr);
 
     // Mock trigger an event from the CRDT core after a delay

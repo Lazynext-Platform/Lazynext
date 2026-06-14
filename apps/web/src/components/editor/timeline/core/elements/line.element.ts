@@ -13,21 +13,20 @@ import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
  * - props.radius → roundedness of the caps (handled by canvas/visualizer)
  */
 export class LineElement extends TrackElement {
-  protected declare props: LineProps;
+	declare protected props: LineProps;
 
-  constructor(fill: string, size: Size) {
-    super(TIMELINE_ELEMENT_TYPE.LINE);
-    this.props = {
-      fill,
-      width: size.width,
-      height: size.height,
-      radius: 4,
-      lineWidth: size.height,
-    };
-  }
+	constructor(fill: string, size: Size) {
+		super(TIMELINE_ELEMENT_TYPE.LINE);
+		this.props = {
+			fill,
+			width: size.width,
+			height: size.height,
+			radius: 4,
+			lineWidth: size.height,
+		};
+	}
 
-  accept<T>(visitor: ElementVisitor<T>): T {
-    return visitor.visitLineElement(this);
-  }
+	accept<T>(visitor: ElementVisitor<T>): T {
+		return visitor.visitLineElement(this);
+	}
 }
-

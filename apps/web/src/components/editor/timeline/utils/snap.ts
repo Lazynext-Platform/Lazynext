@@ -6,12 +6,12 @@
  */
 
 export interface SnapResult {
-  /** The snapped time (or original if no snap) */
-  time: number;
-  /** Whether snapping occurred */
-  didSnap: boolean;
-  /** The target time we snapped to (undefined if no snap) */
-  snapTarget?: number;
+	/** The snapped time (or original if no snap) */
+	time: number;
+	/** Whether snapping occurred */
+	didSnap: boolean;
+	/** The target time we snapped to (undefined if no snap) */
+	snapTarget?: number;
 }
 
 /**
@@ -31,30 +31,30 @@ export interface SnapResult {
  * ```
  */
 export function snapTime(
-  time: number,
-  targets: number[],
-  thresholdSec: number = 0.1
+	time: number,
+	targets: number[],
+	thresholdSec: number = 0.1,
 ): SnapResult {
-  if (targets.length === 0 || thresholdSec <= 0) {
-    return { time, didSnap: false };
-  }
+	if (targets.length === 0 || thresholdSec <= 0) {
+		return { time, didSnap: false };
+	}
 
-  let nearestTarget: number | undefined;
-  let minDist = thresholdSec;
+	let nearestTarget: number | undefined;
+	let minDist = thresholdSec;
 
-  for (const target of targets) {
-    const dist = Math.abs(time - target);
-    if (dist < minDist) {
-      minDist = dist;
-      nearestTarget = target;
-    }
-  }
+	for (const target of targets) {
+		const dist = Math.abs(time - target);
+		if (dist < minDist) {
+			minDist = dist;
+			nearestTarget = target;
+		}
+	}
 
-  if (nearestTarget !== undefined) {
-    return { time: nearestTarget, didSnap: true, snapTarget: nearestTarget };
-  }
+	if (nearestTarget !== undefined) {
+		return { time: nearestTarget, didSnap: true, snapTarget: nearestTarget };
+	}
 
-  return { time, didSnap: false };
+	return { time, didSnap: false };
 }
 
 /**
@@ -65,9 +65,9 @@ export function snapTime(
  * @returns Threshold in seconds
  */
 export function pxToSecThreshold(
-  thresholdPx: number,
-  pixelsPerSecond: number
+	thresholdPx: number,
+	pixelsPerSecond: number,
 ): number {
-  if (pixelsPerSecond <= 0) return Infinity;
-  return thresholdPx / pixelsPerSecond;
+	if (pixelsPerSecond <= 0) return Infinity;
+	return thresholdPx / pixelsPerSecond;
 }

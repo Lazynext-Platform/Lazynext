@@ -115,9 +115,11 @@ The canonical implementation lives in [`rust/`](./rust), and the current source 
 > [!NOTE]
 > [!WARNING]
 > **`cargo install claw-code` installs the wrong thing.** The `claw-code` crate on crates.io is a deprecated stub that places `claw-code-deprecated.exe` — not `claw`. Running it only prints `"claw-code has been renamed to agent-code"`. **Do not use `cargo install claw-code`.** Either build from source (this repo) or install the upstream binary:
+>
 > ```bash
 > cargo install agent-code   # upstream binary — installs 'agent.exe' (Windows) / 'agent' (Unix), NOT 'agent-code'
 > ```
+>
 > This repo (`ultraworkers/claw-code`) is **build-from-source only** — follow the steps below.
 
 ```bash
@@ -177,10 +179,12 @@ After running `cargo build --workspace`, the `claw` binary is built but **not** 
 After `cargo build --workspace` in `claw-code/rust/`:
 
 **Debug build (default, faster compile):**
+
 - **macOS/Linux:** `rust/target/debug/claw`
 - **Windows:** `rust/target/debug/claw.exe`
 
 **Release build (optimized, slower compile):**
+
 - **macOS/Linux:** `rust/target/release/claw`
 - **Windows:** `rust/target/release/claw.exe`
 
@@ -219,10 +223,13 @@ If these commands succeed, the build is working. `claw doctor` is your first hea
 If you want to run `claw` from any directory without the full path, choose one of these approaches:
 
 **Option 1: Symlink (macOS/Linux)**
+
 ```bash
 ln -s $(pwd)/rust/target/debug/claw /usr/local/bin/claw
 ```
+
 Then reload your shell and test:
+
 ```bash
 claw --help
 ```
@@ -230,6 +237,7 @@ claw --help
 **Option 2: Use `cargo install` (all platforms)**
 
 Build and install to Cargo's default location (`~/.cargo/bin/`, which is usually on PATH):
+
 ```bash
 # From the claw-code/rust/ directory
 cargo install --path . --force
@@ -241,11 +249,13 @@ claw --help
 **Option 3: Update shell profile (bash/zsh)**
 
 Add this line to `~/.bashrc` or `~/.zshrc`:
+
 ```bash
 export PATH="$(pwd)/rust/target/debug:$PATH"
 ```
 
 Reload your shell:
+
 ```bash
 source ~/.bashrc  # or source ~/.zshrc
 claw --help

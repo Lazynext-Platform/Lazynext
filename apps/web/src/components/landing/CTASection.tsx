@@ -6,16 +6,20 @@ export function CTASection() {
 		<section className="relative overflow-hidden bg-slate-50 dark:bg-zinc-950 px-4 py-32 transition-colors duration-300">
 			{/* Dramatic Center Gradient Burst */}
 			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-400/30 dark:from-blue-600/30 via-indigo-400/10 dark:via-indigo-600/10 to-transparent blur-[80px] pointer-events-none" />
-			
+
 			<div className="relative z-10 mx-auto max-w-3xl text-center">
 				<h2 className="text-4xl font-extrabold text-zinc-900 dark:text-white md:text-6xl tracking-tight leading-[1.1]">
-					Ready to edit<br />
-					<span className="bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 bg-clip-text text-transparent drop-shadow-sm">your first video?</span>
+					Ready to edit
+					<br />
+					<span className="bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 bg-clip-text text-transparent drop-shadow-sm">
+						your first video?
+					</span>
 				</h2>
 				<p className="mx-auto mt-6 max-w-xl text-lg text-zinc-600 dark:text-zinc-400">
-					Start editing at the speed of thought. Compile your edits instantly using deterministic Rust and our AI Copilot.
+					Start editing at the speed of thought. Compile your edits instantly
+					using deterministic Rust and our AI Copilot.
 				</p>
-				
+
 				<div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
 					<Link
 						href="/sign-up"
@@ -31,10 +35,12 @@ export function CTASection() {
 						Create Account
 					</Link>
 				</div>
-				
+
 				<div className="mt-8 flex items-center justify-center gap-2 text-sm text-zinc-500">
 					<div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-					<span>Free tier includes unlimited local rendering and 5 API credits.</span>
+					<span>
+						Free tier includes unlimited local rendering and 5 API credits.
+					</span>
 				</div>
 			</div>
 		</section>

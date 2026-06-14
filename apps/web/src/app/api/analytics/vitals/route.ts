@@ -12,7 +12,9 @@ export async function POST(request: Request) {
 
 		// Log to console in production (connect to your analytics service here)
 		if (process.env.NODE_ENV === "production") {
-			console.log(`[Vitals] ${body.name}=${body.value} (${body.rating}) on ${body.page}`);
+			console.log(
+				`[Vitals] ${body.name}=${body.value} (${body.rating}) on ${body.page}`,
+			);
 			// TODO: Send to Google Analytics, Plausible, or custom analytics DB
 		}
 

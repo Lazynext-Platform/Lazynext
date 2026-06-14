@@ -8,7 +8,9 @@ interface MockEditorCore {
 	selection: {
 		getSnapshot: () => MockSnapshot;
 		restoreSnapshot: (opts: { snapshot: MockSnapshot }) => void;
-		applySelectionPatch: (opts: { patch: MockSelectionPatch }) => MockSnapshot | undefined;
+		applySelectionPatch: (opts: {
+			patch: MockSelectionPatch;
+		}) => MockSnapshot | undefined;
 	};
 	scenes: {
 		getActiveSceneOrNull: () => { tracks: unknown } | null;
@@ -196,22 +198,38 @@ describe("CommandManager", () => {
 			editor.selection.restoreSnapshot = (opts) => {
 				restoredSnapshot = opts.snapshot;
 			};
-			editor.selection.getSnapshot = () => ({ selectedElements: ["before-element"] });
-			editor.selection.applySelectionPatch = () => ({ selectedElements: ["after-element"] });
+			editor.selection.getSnapshot = () => ({
+				selectedElements: ["before-element"],
+			});
+			editor.selection.applySelectionPatch = () => ({
+				selectedElements: ["after-element"],
+			});
 
 			const command = createMockCommand({
-				execute: () => ({ selection: { selectedElements: ["after-element"], selectedKeyframes: [], keyframeSelectionAnchor: null as any, selectedMaskPoints: null } } as unknown as CommandResult),
+				execute: () =>
+					({
+						selection: {
+							selectedElements: ["after-element"],
+							selectedKeyframes: [],
+							keyframeSelectionAnchor: null as any,
+							selectedMaskPoints: null,
+						},
+					}) as unknown as CommandResult,
 			});
 
 			manager.execute({ command });
 			manager.undo();
 
-			expect(restoredSnapshot!).toEqual({ selectedElements: ["before-element"] });
+			expect(restoredSnapshot!).toEqual({
+				selectedElements: ["before-element"],
+			});
 		});
 
 		it("does NOT restore selection on undo when command had no selection override", () => {
 			let restoreCalled = false;
-			editor.selection.restoreSnapshot = () => { restoreCalled = true; };
+			editor.selection.restoreSnapshot = () => {
+				restoreCalled = true;
+			};
 
 			const command = createMockCommand({
 				execute: () => undefined,
@@ -262,7 +280,9 @@ describe("CommandManager", () => {
 	describe("reactors", () => {
 		it("calls registered reactors after execute", () => {
 			let called = false;
-			const reactorFn = () => { called = true; };
+			const reactorFn = () => {
+				called = true;
+			};
 			manager.registerReactor(reactorFn);
 
 			manager.execute({ command: createMockCommand() });
@@ -272,7 +292,9 @@ describe("CommandManager", () => {
 
 		it("calls registered reactors after redo", () => {
 			let redoCalled = false;
-			const redoReactor = () => { redoCalled = true; };
+			const redoReactor = () => {
+				redoCalled = true;
+			};
 			manager.registerReactor(redoReactor);
 
 			manager.execute({ command: createMockCommand() });

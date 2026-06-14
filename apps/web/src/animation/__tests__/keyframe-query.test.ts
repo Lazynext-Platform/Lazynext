@@ -1,11 +1,18 @@
 import { describe, expect, it } from "bun:test";
-import { getKeyframeById, getKeyframeAtTime, getElementKeyframes, hasKeyframesForPath } from "../keyframe-query";
+import {
+	getKeyframeById,
+	getKeyframeAtTime,
+	getElementKeyframes,
+	hasKeyframesForPath,
+} from "../keyframe-query";
 import type { ElementAnimations, ScalarAnimationKey } from "@/animation/types";
 import { type MediaTime } from "@/wasm";
 
 // --- Helpers ---
 
-function createScalarKey(overrides?: Partial<ScalarAnimationKey>): ScalarAnimationKey {
+function createScalarKey(
+	overrides?: Partial<ScalarAnimationKey>,
+): ScalarAnimationKey {
 	return {
 		id: "k1",
 		time: 0 as MediaTime,
@@ -50,28 +57,34 @@ describe("getKeyframeById", () => {
 
 	it("returns null for non-existent ID", () => {
 		const animations = createTestAnimations();
-		expect(getKeyframeById({
-			animations,
-			propertyPath: "transform.positionX",
-			keyframeId: "nonexistent",
-		})).toBeNull();
+		expect(
+			getKeyframeById({
+				animations,
+				propertyPath: "transform.positionX",
+				keyframeId: "nonexistent",
+			}),
+		).toBeNull();
 	});
 
 	it("returns null for non-existent property path", () => {
 		const animations = createTestAnimations();
-		expect(getKeyframeById({
-			animations,
-			propertyPath: "volume",
-			keyframeId: "px1",
-		})).toBeNull();
+		expect(
+			getKeyframeById({
+				animations,
+				propertyPath: "volume",
+				keyframeId: "px1",
+			}),
+		).toBeNull();
 	});
 
 	it("returns null when animations is undefined", () => {
-		expect(getKeyframeById({
-			animations: undefined,
-			propertyPath: "opacity",
-			keyframeId: "op1",
-		})).toBeNull();
+		expect(
+			getKeyframeById({
+				animations: undefined,
+				propertyPath: "opacity",
+				keyframeId: "op1",
+			}),
+		).toBeNull();
 	});
 });
 
@@ -89,19 +102,23 @@ describe("getKeyframeAtTime", () => {
 
 	it("returns null when no keyframe at time", () => {
 		const animations = createTestAnimations();
-		expect(getKeyframeAtTime({
-			animations,
-			propertyPath: "transform.positionX",
-			time: 25 as MediaTime,
-		})).toBeNull();
+		expect(
+			getKeyframeAtTime({
+				animations,
+				propertyPath: "transform.positionX",
+				time: 25 as MediaTime,
+			}),
+		).toBeNull();
 	});
 
 	it("returns null when animations is undefined", () => {
-		expect(getKeyframeAtTime({
-			animations: undefined,
-			propertyPath: "opacity",
-			time: 0 as MediaTime,
-		})).toBeNull();
+		expect(
+			getKeyframeAtTime({
+				animations: undefined,
+				propertyPath: "opacity",
+				time: 0 as MediaTime,
+			}),
+		).toBeNull();
 	});
 });
 
@@ -119,7 +136,9 @@ describe("getElementKeyframes", () => {
 	it("includes property path in returned keyframes", () => {
 		const animations = createTestAnimations();
 		const keyframes = getElementKeyframes({ animations });
-		const pxKeys = keyframes.filter(k => k.propertyPath === "transform.positionX");
+		const pxKeys = keyframes.filter(
+			(k) => k.propertyPath === "transform.positionX",
+		);
 		expect(pxKeys).toHaveLength(2);
 	});
 });
@@ -127,24 +146,30 @@ describe("getElementKeyframes", () => {
 describe("hasKeyframesForPath", () => {
 	it("returns true for path with keyframes", () => {
 		const animations = createTestAnimations();
-		expect(hasKeyframesForPath({
-			animations,
-			propertyPath: "transform.positionX",
-		})).toBe(true);
+		expect(
+			hasKeyframesForPath({
+				animations,
+				propertyPath: "transform.positionX",
+			}),
+		).toBe(true);
 	});
 
 	it("returns false for path without keyframes", () => {
 		const animations = createTestAnimations();
-		expect(hasKeyframesForPath({
-			animations,
-			propertyPath: "volume",
-		})).toBe(false);
+		expect(
+			hasKeyframesForPath({
+				animations,
+				propertyPath: "volume",
+			}),
+		).toBe(false);
 	});
 
 	it("returns false for undefined animations", () => {
-		expect(hasKeyframesForPath({
-			animations: undefined,
-			propertyPath: "opacity",
-		})).toBe(false);
+		expect(
+			hasKeyframesForPath({
+				animations: undefined,
+				propertyPath: "opacity",
+			}),
+		).toBe(false);
 	});
 });

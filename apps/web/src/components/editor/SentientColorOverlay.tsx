@@ -12,7 +12,9 @@ export function SentientColorOverlay({ isActive }: SentientColorOverlayProps) {
 	return (
 		<div className="absolute top-20 right-4 z-50 bg-black/80 backdrop-blur-md border border-rose-500/50 rounded-lg p-3 w-56 shadow-[0_0_20px_rgba(225,29,72,0.3)] pointer-events-none">
 			<div className="flex items-center justify-between mb-3">
-				<span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Sentient Color</span>
+				<span className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">
+					Sentient Color
+				</span>
 				<div className="flex gap-1">
 					<div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
 					<div className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse delay-75" />
@@ -20,7 +22,13 @@ export function SentientColorOverlay({ isActive }: SentientColorOverlayProps) {
 				</div>
 			</div>
 			<div className="flex items-center justify-center mb-4 relative">
-				<div className="w-24 h-24 rounded-full border-4 border-zinc-800 relative overflow-hidden" style={{ background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }}>
+				<div
+					className="w-24 h-24 rounded-full border-4 border-zinc-800 relative overflow-hidden"
+					style={{
+						background:
+							"conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
+					}}
+				>
 					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left -rotate-45 shadow-[0_0_5px_white]" />
 					<div className="absolute top-1/2 left-1/2 w-10 h-[2px] bg-white origin-left rotate-135 shadow-[0_0_5px_white]" />
 				</div>

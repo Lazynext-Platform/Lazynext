@@ -3,9 +3,11 @@ title: Auto-Editor - Docs
 ---
 
 ## Docs
+
 See also: [reference](../ref)
 
 ---
+
 [Actions](./actions)
 
 [Audio Normalizing](./anorm)
@@ -19,6 +21,7 @@ See also: [reference](../ref)
 [Range Syntax](./range-syntax)
 
 ### Timeline Documentation
+
 [The v1 format](./v1)
 
 [The v2 format](./v2)

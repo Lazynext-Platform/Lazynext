@@ -44,9 +44,7 @@ export default function TermsPage() {
 								Everything runs locally in your browser - nothing is ever
 								uploaded to our servers
 							</li>
-							<li>
-								We never claim ownership of your content
-							</li>
+							<li>We never claim ownership of your content</li>
 							<li>
 								Free for personal and commercial use with no watermarks or
 								restrictions
@@ -90,9 +88,7 @@ export default function TermsPage() {
 					Lazynext.
 				</p>
 				<ul className="list-disc space-y-2 pl-6">
-					<li>
-						Your content never leaves your device
-					</li>
+					<li>Your content never leaves your device</li>
 					<li>You retain all intellectual property rights to your content</li>
 					<li>You can export and use your content however you choose</li>
 					<li>No watermarks, no licensing restrictions from Lazynext</li>
@@ -130,8 +126,8 @@ export default function TermsPage() {
 			<section className="flex flex-col gap-3">
 				<h2 className="text-2xl font-semibold">Service</h2>
 				<p>
-					Lazynext does not currently require an account. The service is provided
-					&quot;as is&quot; without warranties. While we strive for
+					Lazynext does not currently require an account. The service is
+					provided &quot;as is&quot; without warranties. While we strive for
 					reliability, we can&apos;t guarantee uninterrupted service.
 				</p>
 			</section>

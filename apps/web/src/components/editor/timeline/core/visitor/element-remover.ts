@@ -21,74 +21,74 @@ import { TrackFriend } from "../track/track.friend";
  * Implements the Friend Class Pattern for explicit access control
  */
 export class ElementRemover implements ElementVisitor<boolean> {
-  private trackFriend: TrackFriend;
+	private trackFriend: TrackFriend;
 
-  constructor(track: Track) {
-    this.trackFriend = track.createFriend();
-  }
+	constructor(track: Track) {
+		this.trackFriend = track.createFriend();
+	}
 
-  visitVideoElement(element: VideoElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitVideoElement(element: VideoElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitAudioElement(element: AudioElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitAudioElement(element: AudioElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitImageElement(element: ImageElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitImageElement(element: ImageElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitTextElement(element: TextElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitTextElement(element: TextElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitCaptionElement(element: CaptionElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitCaptionElement(element: CaptionElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitIconElement(element: IconElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitIconElement(element: IconElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitEmojiElement(element: EmojiElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitEmojiElement(element: EmojiElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitCircleElement(element: CircleElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitCircleElement(element: CircleElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitRectElement(element: RectElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitRectElement(element: RectElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitPlaceholderElement(element: PlaceholderElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitPlaceholderElement(element: PlaceholderElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitArrowElement(element: ArrowElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitArrowElement(element: ArrowElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitLineElement(element: LineElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
+	visitLineElement(element: LineElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
 
-  visitEffectElement(element: EffectElement): boolean {
-    this.trackFriend.removeElement(element);
-    return true;
-  }
-} 
+	visitEffectElement(element: EffectElement): boolean {
+		this.trackFriend.removeElement(element);
+		return true;
+	}
+}

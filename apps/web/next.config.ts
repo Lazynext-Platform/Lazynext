@@ -3,9 +3,10 @@ import { withBotId } from "botid/next/config";
 import { withContentCollections } from "@content-collections/next";
 
 const nextConfig: NextConfig = {
-		env: {
-			NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com",
-		},
+	env: {
+		NEXT_PUBLIC_SITE_URL:
+			process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com",
+	},
 
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
@@ -14,38 +15,54 @@ const nextConfig: NextConfig = {
 	productionBrowserSourceMaps: true,
 	output: "standalone",
 
-		// Prevent CDN from caching error responses for 1 year
-		experimental: {
-			staleTimes: { dynamic: 0, static: 60 },
-		},
+	// Prevent CDN from caching error responses for 1 year
+	experimental: {
+		staleTimes: { dynamic: 0, static: 60 },
+	},
 
-
-		async headers() {
-			return [{
+	async headers() {
+		return [
+			{
 				source: "/(.*)",
 				headers: [
-					{ key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+					{
+						key: "Strict-Transport-Security",
+						value: "max-age=31536000; includeSubDomains; preload",
+					},
 					{ key: "X-Frame-Options", value: "DENY" },
 					{ key: "X-Content-Type-Options", value: "nosniff" },
 					{ key: "X-XSS-Protection", value: "1; mode=block" },
 					{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-					{ key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+					{
+						key: "Permissions-Policy",
+						value: "camera=(), microphone=(), geolocation=()",
+					},
 				],
-			}];
-		},
+			},
+		];
+	},
 
-		async redirects() {
-			return [{
+	async redirects() {
+		return [
+			{
 				source: "/:path*",
 				has: [{ type: "host", value: "www.lazynext.com" }],
 				destination: "https://lazynext.com/:path*",
 				permanent: true,
-			}];
-		},
+			},
+			{
+				source: "/login",
+				destination: "/sign-in",
+				permanent: true,
+			},
+			{
+				source: "/register",
+				destination: "/sign-up",
+				permanent: true,
+			},
+		];
+	},
 
-	
-	
-	
 	typescript: {
 		ignoreBuildErrors: true,
 	},

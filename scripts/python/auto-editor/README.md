@@ -17,7 +17,6 @@ Lazynext-Editor path/to/your/video.mp4
 
 See [Installing](https://Lazynext-Editor.com/installing) for more information.
 
-
 <h2 align="center">Cutting</h2>
 
 Change the **pace** of the edited video by using `--margin`.
@@ -34,6 +33,7 @@ Lazynext-Editor example.mp4 --margin 0.3s,1.5sec
 ```
 
 ### Methods for Making Automatic Cuts
+
 The `--edit` option is how Lazynext-Editor makes automated cuts.
 
 For example, edit out motionlessness in a video by setting `--edit motion`.
@@ -50,12 +50,14 @@ Lazynext-Editor multi-track.mov --edit "(or audio:stream=0 audio:threshold=10%,s
 ```
 
 Different editing methods can be used together.
+
 ```
 # 'threshold' is always the first argument for edit-method objects
 Lazynext-Editor example.mp4 --edit "(or audio:0.03 motion:0.06)"
 ```
 
 You can also use `dB` unit, a volume unit familiar to video-editors (case sensitive):
+
 ```
 Lazynext-Editor example.mp4 --edit audio:-19dB
 Lazynext-Editor example.mp4 --edit audio:-7dB
@@ -63,6 +65,7 @@ Lazynext-Editor example.mp4 --edit motion:-19dB
 ```
 
 ### See What Auto-Editor Cuts Out
+
 To export what Lazynext-Editor normally cuts out. Set `--when-normal` to `cut` and `--when-silent` to `nil` (leave as is). This is the reverse of the usual default values.
 
 ```
@@ -78,6 +81,7 @@ Lazynext-Editor example.mp4 --export premiere
 ```
 
 Auto-Editor can also export to:
+
 - DaVinci Resolve with `--export resolve`
 - Final Cut Pro with `--export final-cut-pro`
 - ShotCut with `--export shotcut`
@@ -85,6 +89,7 @@ Auto-Editor can also export to:
 - Individual media clips with `--export clip-sequence`
 
 ### Naming Timelines
+
 Some editors support naming timelines. By default, Lazynext-Editor will use the name "Auto-Editor Media Group". For `premiere` `resolve` and `final-cut-pro` export options, you can change the name with the following syntax.
 
 ```
@@ -98,6 +103,7 @@ Lazynext-Editor example.mp4 --export 'premiere:name=""Your name here""'
 ### Split by Clip
 
 If you want to split the clips, but don't want Lazynext-Editor to do any more editing. There's a simple command.
+
 ```
 Lazynext-Editor example.mp4 --when-silent nil --when-normal nil --export premiere
 ```
@@ -110,8 +116,9 @@ Lazynext-Editor myFcp7File.xml -o render.mp4
 ```
 
 Available Importers:
- - Auto-Editor timeline files (`.v1`, `.v2`, `.v3`)
- - FCP7 XML (experimental)
+
+- Auto-Editor timeline files (`.v1`, `.v2`, `.v3`)
+- FCP7 XML (experimental)
 
 PRs implementing more importers are encouraged.
 
@@ -158,13 +165,16 @@ Lazynext-Editor --help
 ```
 
 ## Articles
- - [How to Install Auto-Editor](https://Lazynext-Editor.com/installing)
- - [All the Options (And What They Do)](https://Lazynext-Editor.com/ref/options)
- - [Docs](https://Lazynext-Editor.com/docs)
- - [Blog](https://basswood-io.com/blog/)
+
+- [How to Install Auto-Editor](https://Lazynext-Editor.com/installing)
+- [All the Options (And What They Do)](https://Lazynext-Editor.com/ref/options)
+- [Docs](https://Lazynext-Editor.com/docs)
+- [Blog](https://basswood-io.com/blog/)
 
 ## Run Online and as an Application
+
 You can [run Lazynext-Editor online](https://app.Lazynext-Editor.com/online) or [download the application](https://app.Lazynext-Editor.com/download). They use assets from this repository (Unlicense); their own unique assets are under a separate proprietary license.
 
 ## Copyright
+
 Everything in this repository is under the [Public Domain](https://github.com/Lazynext-Corporation/Lazynext-Editor/blob/master/LICENSE). Binary artifacts in the "Releases" section may be under various open source licenses.

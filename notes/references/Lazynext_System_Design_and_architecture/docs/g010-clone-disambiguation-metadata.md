@@ -17,16 +17,16 @@ Required metadata and behaviors:
 
 ## Implementation anchors
 
-| Contract area | Repo anchor | Evidence role |
-| --- | --- | --- |
-| Partition layout and canonical workspace root | `rust/crates/runtime/src/session_control.rs:10-18`, `:32-47`, `:54-71` | Documents and implements `.claw/sessions/<workspace_hash>/` for `from_cwd` and explicit data-dir stores. |
-| Fingerprint algorithm | `rust/crates/runtime/src/session_control.rs:300-312` | Defines the 16-character FNV-1a workspace fingerprint used as the clone disambiguator. |
-| Managed create/resolve/list/load/fork APIs | `rust/crates/runtime/src/session_control.rs:86-204` | Ensures handles, `latest`, load, and fork resolve inside the active partition. |
-| Legacy/cross-workspace guard | `rust/crates/runtime/src/session_control.rs:213-233`, `:557-567` | Rejects mismatched persisted `workspace_root` and allows only same-workspace legacy files. |
-| Empty partition copy | `rust/crates/runtime/src/session_control.rs:535-543` | Reports `.claw/sessions/<fingerprint>/` plus the workspace-partition note. |
-| CLI wrapper | `rust/crates/rusty-claude-cli/src/main.rs:5952-6040` | Routes session CLI helpers through `current_session_store()`, so CLI list/latest/load uses the same partition. |
-| CLI session-list lifecycle context | `rust/crates/rusty-claude-cli/src/main.rs:5991-6027`, `:12960-12990` | Renders saved-only/dirty/abandoned lifecycle context for the current partition. |
-| CLI session resolution regression | `rust/crates/rusty-claude-cli/src/main.rs:13470-13579` | Covers JSONL default, legacy flat resolution, latest selection, and workspace mismatch rejection from CLI wrappers. |
+| Contract area                                 | Repo anchor                                                            | Evidence role                                                                                                       |
+| --------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Partition layout and canonical workspace root | `rust/crates/runtime/src/session_control.rs:10-18`, `:32-47`, `:54-71` | Documents and implements `.claw/sessions/<workspace_hash>/` for `from_cwd` and explicit data-dir stores.            |
+| Fingerprint algorithm                         | `rust/crates/runtime/src/session_control.rs:300-312`                   | Defines the 16-character FNV-1a workspace fingerprint used as the clone disambiguator.                              |
+| Managed create/resolve/list/load/fork APIs    | `rust/crates/runtime/src/session_control.rs:86-204`                    | Ensures handles, `latest`, load, and fork resolve inside the active partition.                                      |
+| Legacy/cross-workspace guard                  | `rust/crates/runtime/src/session_control.rs:213-233`, `:557-567`       | Rejects mismatched persisted `workspace_root` and allows only same-workspace legacy files.                          |
+| Empty partition copy                          | `rust/crates/runtime/src/session_control.rs:535-543`                   | Reports `.claw/sessions/<fingerprint>/` plus the workspace-partition note.                                          |
+| CLI wrapper                                   | `rust/crates/rusty-claude-cli/src/main.rs:5952-6040`                   | Routes session CLI helpers through `current_session_store()`, so CLI list/latest/load uses the same partition.      |
+| CLI session-list lifecycle context            | `rust/crates/rusty-claude-cli/src/main.rs:5991-6027`, `:12960-12990`   | Renders saved-only/dirty/abandoned lifecycle context for the current partition.                                     |
+| CLI session resolution regression             | `rust/crates/rusty-claude-cli/src/main.rs:13470-13579`                 | Covers JSONL default, legacy flat resolution, latest selection, and workspace mismatch rejection from CLI wrappers. |
 
 ## Covered roadmap and dogfood anchors
 
@@ -38,17 +38,17 @@ Required metadata and behaviors:
 
 ## Focused verification map
 
-| Claim | Focused check |
-| --- | --- |
-| Same canonical workspace spellings share one partition | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_cwd_canonicalizes_equivalent_paths -- --nocapture` |
-| Distinct clones/worktrees do not see each other's sessions | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_cwd_isolates_sessions_by_workspace -- --nocapture` |
-| Explicit data-dir stores still namespace by workspace | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_data_dir_namespaces_by_workspace -- --nocapture` |
-| Same-workspace legacy sessions are readable; cross-workspace ones are rejected | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_rejects_legacy_session_from_other_workspace session_store_loads_safe_legacy_session_from_same_workspace session_store_loads_unbound_legacy_session_from_same_workspace -- --nocapture` |
-| `latest` and managed reference resolution stay inside the active partition | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_latest_and_resolve_reference -- --nocapture` and `cargo test --manifest-path rust/Cargo.toml -p rusty-claude-cli latest_session_alias_resolves_most_recent_managed_session -- --nocapture` |
-| Forks retain partition and lineage metadata | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_fork_stays_in_same_namespace -- --nocapture` |
-| CLI wrapper rejects wrong-workspace files | `cargo test --manifest-path rust/Cargo.toml -p rusty-claude-cli load_session_reference_rejects_workspace_mismatch -- --nocapture` |
-| Docs-only map is syntactically clean | `git diff --check` |
-| Broader type/test gate for the touched domain | `cargo check --manifest-path rust/Cargo.toml -p runtime -p rusty-claude-cli` plus `cargo test --manifest-path rust/Cargo.toml -p runtime session_control -- --nocapture` |
+| Claim                                                                          | Focused check                                                                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Same canonical workspace spellings share one partition                         | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_cwd_canonicalizes_equivalent_paths -- --nocapture`                                                                                                                                    |
+| Distinct clones/worktrees do not see each other's sessions                     | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_cwd_isolates_sessions_by_workspace -- --nocapture`                                                                                                                                    |
+| Explicit data-dir stores still namespace by workspace                          | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_from_data_dir_namespaces_by_workspace -- --nocapture`                                                                                                                                      |
+| Same-workspace legacy sessions are readable; cross-workspace ones are rejected | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_rejects_legacy_session_from_other_workspace session_store_loads_safe_legacy_session_from_same_workspace session_store_loads_unbound_legacy_session_from_same_workspace -- --nocapture`     |
+| `latest` and managed reference resolution stay inside the active partition     | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_latest_and_resolve_reference -- --nocapture` and `cargo test --manifest-path rust/Cargo.toml -p rusty-claude-cli latest_session_alias_resolves_most_recent_managed_session -- --nocapture` |
+| Forks retain partition and lineage metadata                                    | `cargo test --manifest-path rust/Cargo.toml -p runtime session_store_fork_stays_in_same_namespace -- --nocapture`                                                                                                                                               |
+| CLI wrapper rejects wrong-workspace files                                      | `cargo test --manifest-path rust/Cargo.toml -p rusty-claude-cli load_session_reference_rejects_workspace_mismatch -- --nocapture`                                                                                                                               |
+| Docs-only map is syntactically clean                                           | `git diff --check`                                                                                                                                                                                                                                              |
+| Broader type/test gate for the touched domain                                  | `cargo check --manifest-path rust/Cargo.toml -p runtime -p rusty-claude-cli` plus `cargo test --manifest-path rust/Cargo.toml -p runtime session_control -- --nocapture`                                                                                        |
 
 ## Known boundaries and integration notes
 

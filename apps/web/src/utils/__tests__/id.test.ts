@@ -8,7 +8,9 @@ describe("generateUUID", () => {
 
 	it("returns valid UUID format", () => {
 		const uuid = generateUUID();
-		expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+		expect(uuid).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/,
+		);
 	});
 
 	it("generates unique values", () => {

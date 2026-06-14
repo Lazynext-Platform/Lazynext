@@ -65,6 +65,7 @@ cd /path/to/your/repo
 Text mode (human-readable) shows artifact creation summary with project path and next steps. Idempotent — running multiple times in the same repo marks already-created files as "skipped", reports `.claw/` as "partial" when missing sub-files are materialized, and keeps `.claw/sessions/` deferred until the first successful session save.
 
 JSON mode for scripting:
+
 ```bash
 ./target/debug/claw init --output-format json
 ```
@@ -125,11 +126,13 @@ cd rust
 ```
 
 JSON mode:
+
 ```bash
 ./target/debug/claw state --output-format json
 ```
 
 If you run `claw state` before any worker has executed, you will see a helpful error:
+
 ```
 error: no worker state file found at .claw/worker-state.json
   Hint: worker state is written by the interactive REPL or a non-interactive prompt.
@@ -240,17 +243,16 @@ export ANTHROPIC_AUTH_TOKEN="anthropic-oauth-or-proxy-bearer-token"
 
 `claw` accepts two Anthropic credential env vars and they are **not interchangeable** — the HTTP header Anthropic expects differs per credential shape. Putting the wrong value in the wrong slot is the most common 401 we see.
 
-| Credential shape | Env var | HTTP header | Typical source |
-|---|---|---|---|
-| `sk-ant-*` API key | `ANTHROPIC_API_KEY` | `x-api-key: sk-ant-...` | [console.anthropic.com](https://console.anthropic.com) |
-| OAuth access token (opaque) | `ANTHROPIC_AUTH_TOKEN` | `Authorization: Bearer ...` | an Anthropic-compatible proxy or OAuth flow that mints bearer tokens |
-| OpenRouter key (`sk-or-v1-*`) | `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://openrouter.ai/api/v1` | `Authorization: Bearer ...` | [openrouter.ai/keys](https://openrouter.ai/keys) |
-| Ollama local instance | `OLLAMA_HOST` | no auth header (Ollama requires none) | local Ollama server at `http://127.0.0.1:11434` |
+| Credential shape              | Env var                                                           | HTTP header                           | Typical source                                                       |
+| ----------------------------- | ----------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------- |
+| `sk-ant-*` API key            | `ANTHROPIC_API_KEY`                                               | `x-api-key: sk-ant-...`               | [console.anthropic.com](https://console.anthropic.com)               |
+| OAuth access token (opaque)   | `ANTHROPIC_AUTH_TOKEN`                                            | `Authorization: Bearer ...`           | an Anthropic-compatible proxy or OAuth flow that mints bearer tokens |
+| OpenRouter key (`sk-or-v1-*`) | `OPENAI_API_KEY` + `OPENAI_BASE_URL=https://openrouter.ai/api/v1` | `Authorization: Bearer ...`           | [openrouter.ai/keys](https://openrouter.ai/keys)                     |
+| Ollama local instance         | `OLLAMA_HOST`                                                     | no auth header (Ollama requires none) | local Ollama server at `http://127.0.0.1:11434`                      |
 
 **Why this matters:** if you paste an `sk-ant-*` key into `ANTHROPIC_AUTH_TOKEN`, Anthropic's API will return `401 Invalid bearer token` because `sk-ant-*` keys are rejected over the Bearer header. The fix is a one-line env var swap — move the key to `ANTHROPIC_API_KEY`. Recent `claw` builds detect this exact shape (401 + `sk-ant-*` in the Bearer slot) and append a hint to the error message pointing at the fix.
 
 **If you meant a different provider:** if `claw` reports missing Anthropic credentials but you already have `OPENAI_API_KEY`, `XAI_API_KEY`, or `DASHSCOPE_API_KEY` exported, you most likely forgot to prefix the model name with the provider's routing prefix. Use `--model openai/gpt-4.1-mini` (OpenAI-compat / OpenRouter / Ollama), `--model grok` (xAI), or `--model qwen-plus` (DashScope) and the prefix router will select the right backend regardless of the ambient credentials. The error message now includes a hint that names the detected env var.
-
 
 ### Windows PowerShell provider switching
 
@@ -358,12 +360,12 @@ Reasoning variants (`qwen-qwq-*`, `qwq-*`, `*-thinking`) automatically strip `te
 
 ### Provider matrix
 
-| Provider | Protocol | Auth env var(s) | Base URL env var | Default base URL |
-|---|---|---|---|---|
-| **Anthropic** (direct) | Anthropic Messages API | `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` | `ANTHROPIC_BASE_URL` | `https://api.anthropic.com` |
-| **xAI** | OpenAI-compatible | `XAI_API_KEY` | `XAI_BASE_URL` | `https://api.x.ai/v1` |
-| **OpenAI-compatible** | OpenAI Chat Completions | `OPENAI_API_KEY` | `OPENAI_BASE_URL` | `https://api.openai.com/v1` |
-| **DashScope** (Alibaba) | OpenAI-compatible | `DASHSCOPE_API_KEY` | `DASHSCOPE_BASE_URL` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
+| Provider                | Protocol                | Auth env var(s)                               | Base URL env var     | Default base URL                                    |
+| ----------------------- | ----------------------- | --------------------------------------------- | -------------------- | --------------------------------------------------- |
+| **Anthropic** (direct)  | Anthropic Messages API  | `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` | `ANTHROPIC_BASE_URL` | `https://api.anthropic.com`                         |
+| **xAI**                 | OpenAI-compatible       | `XAI_API_KEY`                                 | `XAI_BASE_URL`       | `https://api.x.ai/v1`                               |
+| **OpenAI-compatible**   | OpenAI Chat Completions | `OPENAI_API_KEY`                              | `OPENAI_BASE_URL`    | `https://api.openai.com/v1`                         |
+| **DashScope** (Alibaba) | OpenAI-compatible       | `DASHSCOPE_API_KEY`                           | `DASHSCOPE_BASE_URL` | `https://dashscope.aliyuncs.com/compatible-mode/v1` |
 
 The OpenAI-compatible backend also serves as the gateway for **OpenRouter**, **Ollama**, and any other service that speaks the OpenAI `/v1/chat/completions` wire format — just point `OPENAI_BASE_URL` at the service.
 
@@ -373,19 +375,19 @@ The OpenAI-compatible backend also serves as the gateway for **OpenRouter**, **O
 
 These are the models registered in the built-in alias table with known token limits:
 
-| Alias | Resolved model name | Provider | Max output tokens | Context window |
-|---|---|---|---|---|
-| `opus` | `claude-opus-4-7` | Anthropic | 32 000 | 200 000 |
-| `sonnet` | `claude-sonnet-4-6` | Anthropic | 64 000 | 200 000 |
-| `haiku` | `claude-haiku-4-5-20251213` | Anthropic | 64 000 | 200 000 |
-| `grok` / `grok-3` | `grok-3` | xAI | 64 000 | 131 072 |
-| `grok-mini` / `grok-3-mini` | `grok-3-mini` | xAI | 64 000 | 131 072 |
-| `grok-2` | `grok-2` | xAI | — | — |
-| `kimi` | `kimi-k2.5` | DashScope | 16 384 | 256 000 |
-| `qwen-max` | `qwen-max` | DashScope | 8 192 | 131 072 |
-| `qwen-plus` | `qwen-plus` | DashScope | 8 192 | 131 072 |
-| `gpt-4.1` / `gpt-4.1-mini` / `gpt-4.1-nano` | same | OpenAI-compatible | 32 768 | 1 047 576 |
-| `gpt-5.4` / `gpt-5.4-mini` / `gpt-5.4-nano` | same | OpenAI-compatible | 128 000 | 1 000 000 / 400 000 |
+| Alias                                       | Resolved model name         | Provider          | Max output tokens | Context window      |
+| ------------------------------------------- | --------------------------- | ----------------- | ----------------- | ------------------- |
+| `opus`                                      | `claude-opus-4-7`           | Anthropic         | 32 000            | 200 000             |
+| `sonnet`                                    | `claude-sonnet-4-6`         | Anthropic         | 64 000            | 200 000             |
+| `haiku`                                     | `claude-haiku-4-5-20251213` | Anthropic         | 64 000            | 200 000             |
+| `grok` / `grok-3`                           | `grok-3`                    | xAI               | 64 000            | 131 072             |
+| `grok-mini` / `grok-3-mini`                 | `grok-3-mini`               | xAI               | 64 000            | 131 072             |
+| `grok-2`                                    | `grok-2`                    | xAI               | —                 | —                   |
+| `kimi`                                      | `kimi-k2.5`                 | DashScope         | 16 384            | 256 000             |
+| `qwen-max`                                  | `qwen-max`                  | DashScope         | 8 192             | 131 072             |
+| `qwen-plus`                                 | `qwen-plus`                 | DashScope         | 8 192             | 131 072             |
+| `gpt-4.1` / `gpt-4.1-mini` / `gpt-4.1-nano` | same                        | OpenAI-compatible | 32 768            | 1 047 576           |
+| `gpt-5.4` / `gpt-5.4-mini` / `gpt-5.4-nano` | same                        | OpenAI-compatible | 128 000           | 1 000 000 / 400 000 |
 
 Any model name that does not match an alias is passed through verbatim after provider routing is resolved. This is how you use OpenRouter model slugs (`openai/gpt-4.1-mini` with a custom `OPENAI_BASE_URL`), Ollama tags (`llama3.2` or `qwen2.5-coder:7b`), slash-containing local IDs (`local/Qwen/Qwen3.6-27B-FP8`), or full Anthropic model IDs (`claude-sonnet-4-20250514`).
 
@@ -395,11 +397,11 @@ You can add custom aliases in any settings file (`~/.claw/settings.json`, `.claw
 
 ```json
 {
-  "aliases": {
-    "fast": "claude-haiku-4-5-20251213",
-    "smart": "claude-opus-4-7",
-    "cheap": "grok-3-mini"
-  }
+	"aliases": {
+		"fast": "claude-haiku-4-5-20251213",
+		"smart": "claude-opus-4-7",
+		"cheap": "grok-3-mini"
+	}
 }
 ```
 
@@ -416,7 +418,6 @@ Model selection precedence is CLI flag, environment, config, then default. The e
 5. If `OPENAI_BASE_URL` is set, local-looking unknown model names such as `llama3.2` or `qwen2.5-coder:7b` route to the OpenAI-compatible client for local/gateway servers.
 6. Otherwise, `claw` checks which credential is set: Anthropic first, then OpenAI, then xAI. If only `OPENAI_BASE_URL` is set, it still routes to OpenAI-compatible for authless local servers.
 7. If nothing matches, it defaults to Anthropic.
-
 
 ### Provider diagnostics and custom OpenAI-compatible parameters
 
@@ -577,19 +578,19 @@ The list is also the precedence chain: project-local settings override project s
 
 ```json
 {
-  "configured_servers": 1,
-  "total_configured": 2,
-  "valid_count": 1,
-  "invalid_count": 1,
-  "servers": [{ "name": "valid-server", "valid": true }],
-  "invalid_servers": [
-    {
-      "name": "missing-command",
-      "error_field": "command",
-      "reason": ".claw.json: mcpServers.missing-command: missing string field command",
-      "valid": false
-    }
-  ]
+	"configured_servers": 1,
+	"total_configured": 2,
+	"valid_count": 1,
+	"invalid_count": 1,
+	"servers": [{ "name": "valid-server", "valid": true }],
+	"invalid_servers": [
+		{
+			"name": "missing-command",
+			"error_field": "command",
+			"reason": ".claw.json: mcpServers.missing-command: missing string field command",
+			"valid": false
+		}
+	]
 }
 ```
 
@@ -601,17 +602,15 @@ The list is also the precedence chain: project-local settings override project s
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      "echo legacy hook",
-      {
-        "matcher": "Bash",
-        "hooks": [
-          { "type": "command", "command": "scripts/audit-bash.sh" }
-        ]
-      }
-    ]
-  }
+	"hooks": {
+		"PreToolUse": [
+			"echo legacy hook",
+			{
+				"matcher": "Bash",
+				"hooks": [{ "type": "command", "command": "scripts/audit-bash.sh" }]
+			}
+		]
+	}
 }
 ```
 
@@ -631,7 +630,7 @@ By default, `claw` also imports detected rules from common AI coding tools such 
 
 ```json
 {
-  "rulesImport": "none"
+	"rulesImport": "none"
 }
 ```
 

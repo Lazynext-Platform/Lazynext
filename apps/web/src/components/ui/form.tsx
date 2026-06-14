@@ -85,7 +85,11 @@ function Form<
 		};
 	}, [persistKey, watch]);
 
-	return <FormProvider {...methods}>{children}</FormProvider>;
+	return (
+		<FormProvider {...methods}>
+			<>{children}</>
+		</FormProvider>
+	);
 }
 
 export function clearFormDraft({

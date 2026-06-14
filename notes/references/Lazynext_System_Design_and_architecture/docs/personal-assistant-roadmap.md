@@ -9,9 +9,11 @@ It is intentionally pragmatic: each section has **MVP scope**, **next step**, an
 ## 1) Interface: out of the terminal
 
 ### Goal
+
 Make `claw` usable without opening an IDE or terminal — from a phone, from chat, and eventually by voice.
 
 ### MVP
+
 - **Chat bridge**: a small service that relays messages from **Discord** (primary) or Telegram to `claw` / `claw-analog`.
   - Treat the chat thread as the “front-end”, and `claw` as the execution runtime.
   - Map a channel/thread to a **session id** (resume/append).
@@ -20,11 +22,13 @@ Make `claw` usable without opening an IDE or terminal — from a phone, from cha
   - “safe mode” defaults (read-only) unless elevated explicitly.
 
 ### Next step
+
 - **Voice**:
   - Speech-to-text input (e.g. Whisper-class STT) into the same chat bridge.
   - Text-to-speech output for hands-free feedback.
 
 ### Evolution
+
 - Multi-modal: attachments (images/PDF) routed into ingest/personal memory.
 - Presence and notifications: summaries pushed back into chat.
 
@@ -33,9 +37,11 @@ Make `claw` usable without opening an IDE or terminal — from a phone, from cha
 ## 2) Memory: from “RAG for code” to “RAG for life”
 
 ### Goal
-Let the assistant answer personal questions and make decisions using *your* long-term context, not only the current repo.
+
+Let the assistant answer personal questions and make decisions using _your_ long-term context, not only the current repo.
 
 ### MVP
+
 - Extend ingestion inputs beyond git workspaces:
   - Notes (Markdown), exported chats, simple text logs.
   - PDFs (initially text extraction outside Rust is OK; later: built-in pipeline).
@@ -44,11 +50,13 @@ Let the assistant answer personal questions and make decisions using *your* long
   - **Personal RAG** (notes, plans, history)
 
 ### Next step
+
 - Evolve `retrieve_context` into a **multi-source retrieval tool**:
   - “where to search” selector (work/personal/both)
   - metadata filters (source, date ranges, tags)
 
 ### Evolution
+
 - Incremental ingestion + event-based updates (watch folders, chat events).
 - Better stores (ANN/Qdrant/etc) when scale demands it.
 
@@ -57,9 +65,11 @@ Let the assistant answer personal questions and make decisions using *your* long
 ## 3) Hands: tools, MCP, plugins
 
 ### Goal
+
 The assistant is valuable because it can **do** things, not only talk.
 
 ### MVP
+
 - Wire in external systems via **MCP servers**:
   - Calendar, notes (Notion), email, task trackers, smart home (as available).
 - Establish a convention for “personal skills”:
@@ -67,10 +77,12 @@ The assistant is valuable because it can **do** things, not only talk.
   - small, composable tools (digest, budgeting, reminders) rather than monoliths
 
 ### Next step
+
 - “Tool discovery” UX: list available MCP/tools/skills directly from chat.
 - Permission boundaries per tool category (read vs write, destructive actions require explicit confirmation).
 
 ### Evolution
+
 - Plugin marketplace flows for reusing “skills”.
 - Audit logging and replay of actions.
 
@@ -79,9 +91,11 @@ The assistant is valuable because it can **do** things, not only talk.
 ## 4) Proactivity: OmX-style loops
 
 ### Goal
+
 Move from reactive “answer me” to proactive “notice + prepare + propose + execute”.
 
 ### MVP
+
 - A scheduled runner that periodically:
   - checks inbox/notifications
   - extracts actionable tasks
@@ -89,12 +103,14 @@ Move from reactive “answer me” to proactive “notice + prepare + propose + 
   - posts a short digest to chat
 
 ### Next step
+
 - Multi-agent patterns (Architect/Executor/Reviewer) for higher reliability:
   - executor proposes actions
   - reviewer validates safety and correctness
   - only then does the bridge run the write/action tool
 
 ### Evolution
+
 - Event-driven triggers (webhooks) instead of only cron.
 - “Autopilot” modes with bounded scopes (time, tools, spend limits).
 
@@ -103,19 +119,23 @@ Move from reactive “answer me” to proactive “notice + prepare + propose + 
 ## 5) Long-lived identity: sessions + profile
 
 ### Goal
+
 Make the assistant feel continuous and personalized across days/weeks.
 
 ### MVP
+
 - Default to resuming the latest session (`--resume latest`-style behavior).
 - Use a short, user-owned profile/system-prompt for tone and preferences.
 
 ### Next step
+
 - Separate:
   - “personality” (style, preferences)
   - “memory” (facts, history)
   - “policies” (permissions, safety rules)
 
 ### Evolution
+
 - Multiple personas (work/personal) with explicit switching.
 - Transparent memory controls (“forget this”, “store this”).
 
@@ -128,4 +148,3 @@ Make the assistant feel continuous and personalized across days/weeks.
 3. **One MCP integration** (calendar or notes) + a single “daily digest” skill.
 4. **Scheduled digest loop** (cron) with bounded permissions.
 5. **Voice input/output** on top of the same bridge.
-

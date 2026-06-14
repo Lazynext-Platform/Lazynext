@@ -39,17 +39,17 @@ Canonical scenario map: `rust/mock_parity_scenarios.json`
 
 ## 9-lane checkpoint
 
-| Lane | Status | Feature commit | Merge commit | Evidence |
-|---|---|---|---|---|
-| 1. Bash validation | merged | `36dac6c` | `1cfd78a` | `jobdori/bash-validation-submodules`, `rust/crates/runtime/src/bash_validation.rs` (`+1004` on `main`) |
-| 2. CI fix | merged | `89104eb` | `f1969ce` | `rust/crates/runtime/src/sandbox.rs` (`+22/-1`) |
-| 3. File-tool | merged | `284163b` | `a98f2b6` | `rust/crates/runtime/src/file_ops.rs` (`+195/-1`) |
-| 4. TaskRegistry | merged | `5ea138e` | `21a1e1d` | `rust/crates/runtime/src/task_registry.rs` (`+336`) |
-| 5. Task wiring | merged | `e8692e4` | `d994be6` | `rust/crates/tools/src/lib.rs` (`+79/-35`) |
-| 6. Team+Cron | merged | `c486ca6` | `49653fe` | `rust/crates/runtime/src/team_cron_registry.rs`, `rust/crates/tools/src/lib.rs` (`+441/-37`) |
-| 7. MCP lifecycle | merged | `730667f` | `cc0f92e` | `rust/crates/runtime/src/mcp_tool_bridge.rs`, `rust/crates/tools/src/lib.rs` (`+491/-24`) |
-| 8. LSP client | merged | `2d66503` | `d7f0dc6` | `rust/crates/runtime/src/lsp_client.rs`, `rust/crates/tools/src/lib.rs` (`+461/-9`) |
-| 9. Permission enforcement | merged | `66283f4` | `336f820` | `rust/crates/runtime/src/permission_enforcer.rs`, `rust/crates/tools/src/lib.rs` (`+357`) |
+| Lane                      | Status | Feature commit | Merge commit | Evidence                                                                                               |
+| ------------------------- | ------ | -------------- | ------------ | ------------------------------------------------------------------------------------------------------ |
+| 1. Bash validation        | merged | `36dac6c`      | `1cfd78a`    | `jobdori/bash-validation-submodules`, `rust/crates/runtime/src/bash_validation.rs` (`+1004` on `main`) |
+| 2. CI fix                 | merged | `89104eb`      | `f1969ce`    | `rust/crates/runtime/src/sandbox.rs` (`+22/-1`)                                                        |
+| 3. File-tool              | merged | `284163b`      | `a98f2b6`    | `rust/crates/runtime/src/file_ops.rs` (`+195/-1`)                                                      |
+| 4. TaskRegistry           | merged | `5ea138e`      | `21a1e1d`    | `rust/crates/runtime/src/task_registry.rs` (`+336`)                                                    |
+| 5. Task wiring            | merged | `e8692e4`      | `d994be6`    | `rust/crates/tools/src/lib.rs` (`+79/-35`)                                                             |
+| 6. Team+Cron              | merged | `c486ca6`      | `49653fe`    | `rust/crates/runtime/src/team_cron_registry.rs`, `rust/crates/tools/src/lib.rs` (`+441/-37`)           |
+| 7. MCP lifecycle          | merged | `730667f`      | `cc0f92e`    | `rust/crates/runtime/src/mcp_tool_bridge.rs`, `rust/crates/tools/src/lib.rs` (`+491/-24`)              |
+| 8. LSP client             | merged | `2d66503`      | `d7f0dc6`    | `rust/crates/runtime/src/lsp_client.rs`, `rust/crates/tools/src/lib.rs` (`+461/-9`)                    |
+| 9. Permission enforcement | merged | `66283f4`      | `336f820`    | `rust/crates/runtime/src/permission_enforcer.rs`, `rust/crates/tools/src/lib.rs` (`+357`)              |
 
 ## Lane details
 

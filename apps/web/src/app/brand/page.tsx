@@ -148,8 +148,8 @@ export default function BrandPage() {
 						Lazynext is open source — the code is free to use under its license.
 						That license does not cover the name or logo. You can say you use
 						Lazynext, that your project integrates with Lazynext, or that it was
-						built on top of Lazynext. You cannot name your product Lazynext, imply
-						we made or endorse your product, or use the marks commercially
+						built on top of Lazynext. You cannot name your product Lazynext,
+						imply we made or endorse your product, or use the marks commercially
 						without asking first. For anything unclear, reach out at{" "}
 						<Link
 							href="mailto:brand@lazynext.com"

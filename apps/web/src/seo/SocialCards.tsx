@@ -37,9 +37,15 @@ export function UniversalSocialMeta({
 			<meta property="og:image:type" content="image/png" />
 			<meta property="og:locale" content="en_US" />
 			<meta property="og:locale:alternate" content="en_GB" />
-			{type === "article" && publishedTime && <meta property="article:published_time" content={publishedTime} />}
-			{type === "article" && author && <meta property="article:author" content={author} />}
-			{tags?.map(t => <meta key={t} property="article:tag" content={t} />)}
+			{type === "article" && publishedTime && (
+				<meta property="article:published_time" content={publishedTime} />
+			)}
+			{type === "article" && author && (
+				<meta property="article:author" content={author} />
+			)}
+			{tags?.map((t) => (
+				<meta key={t} property="article:tag" content={t} />
+			))}
 
 			{/* ── Twitter / X ── */}
 			<meta name="twitter:card" content="summary_large_image" />
@@ -66,7 +72,10 @@ export function UniversalSocialMeta({
 			{/* ── Apple / iOS ── */}
 			<meta name="apple-mobile-web-app-title" content="Lazynext" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
-			<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+			<meta
+				name="apple-mobile-web-app-status-bar-style"
+				content="black-translucent"
+			/>
 			<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 			<link rel="apple-touch-startup-image" href="/og-image.png" />
 

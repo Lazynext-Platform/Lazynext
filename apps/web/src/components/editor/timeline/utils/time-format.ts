@@ -21,19 +21,19 @@
  * ```
  */
 export function formatTimeWithFrames(
-  timeSeconds: number,
-  fps: number = 30
+	timeSeconds: number,
+	fps: number = 30,
 ): string {
-  const totalSeconds = Math.max(0, timeSeconds);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.floor(totalSeconds % 60);
-  const frames = Math.floor((totalSeconds % 1) * fps);
+	const totalSeconds = Math.max(0, timeSeconds);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = Math.floor(totalSeconds % 60);
+	const frames = Math.floor((totalSeconds % 1) * fps);
 
-  const mm = minutes.toString().padStart(2, "0");
-  const ss = seconds.toString().padStart(2, "0");
-  const ff = frames.toString().padStart(2, "0");
+	const mm = minutes.toString().padStart(2, "0");
+	const ss = seconds.toString().padStart(2, "0");
+	const ff = frames.toString().padStart(2, "0");
 
-  return `${mm}:${ss}.${ff}`;
+	return `${mm}:${ss}.${ff}`;
 }
 
 /**
@@ -48,12 +48,12 @@ export function formatTimeWithFrames(
  * ```
  */
 export function formatTimeSimple(timeSeconds: number): string {
-  const totalSeconds = Math.max(0, timeSeconds);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.floor(totalSeconds % 60);
+	const totalSeconds = Math.max(0, timeSeconds);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = Math.floor(totalSeconds % 60);
 
-  const mm = minutes.toString().padStart(2, "0");
-  const ss = seconds.toString().padStart(2, "0");
+	const mm = minutes.toString().padStart(2, "0");
+	const ss = seconds.toString().padStart(2, "0");
 
-  return `${mm}:${ss}`;
+	return `${mm}:${ss}`;
 }

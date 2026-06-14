@@ -19,8 +19,8 @@ export function StoragePersistenceDialog() {
 			<DialogContent className="sm:max-w-md">
 				// eslint-disable-next-line react/jsx-no-comment-textnodes
 				<DialogHeader>
-					// eslint-disable-next-line react/no-unescaped-entities
-					// eslint-disable-next-line react/no-unescaped-entities
+					// eslint-disable-next-line react/no-unescaped-entities //
+					eslint-disable-next-line react/no-unescaped-entities
 					<DialogTitle>Don't lose your projects</DialogTitle>
 				</DialogHeader>
 				<DialogBody>

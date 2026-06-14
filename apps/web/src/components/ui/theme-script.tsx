@@ -1,9 +1,13 @@
 // Inline script to prevent flash of unstyled content (FOUC)
 // This runs before React hydrates, applying the correct theme immediately
 
+import Script from "next/script";
+
 export function ThemeScript() {
 	return (
-		<script
+		<Script
+			id="theme-script"
+			strategy="beforeInteractive"
 			dangerouslySetInnerHTML={{
 				__html: `
 					(function() {

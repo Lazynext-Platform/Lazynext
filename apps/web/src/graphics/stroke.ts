@@ -72,8 +72,10 @@ export function applyAlignedStroke({
 			width: ctx.canvas.width,
 			height: ctx.canvas.height,
 		});
-		 
-		const strokeCtx = strokeCanvas.getContext("2d") as GraphicRenderContext | null;
+
+		const strokeCtx = strokeCanvas.getContext(
+			"2d",
+		) as GraphicRenderContext | null;
 		if (!strokeCtx) {
 			return;
 		}

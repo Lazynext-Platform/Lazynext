@@ -28,7 +28,7 @@ export function SignUpForm() {
 				password,
 				name: name || email.split("@")[0],
 			});
-			
+
 			if (error) {
 				toast.error(error.message ?? "Sign up failed");
 			} else {
@@ -36,7 +36,11 @@ export function SignUpForm() {
 				setEmailSent(true);
 			}
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Signup failed — server may be unreachable");
+			toast.error(
+				err instanceof Error
+					? err.message
+					: "Signup failed — server may be unreachable",
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -50,9 +54,11 @@ export function SignUpForm() {
 				</div>
 				<h3 className="text-xl font-medium text-white">Check your inbox</h3>
 				<p className="text-sm text-zinc-400 max-w-[280px]">
-					We just sent a verification link to <strong className="text-white">{email}</strong>. Please click the link to activate your account.
+					We just sent a verification link to{" "}
+					<strong className="text-white">{email}</strong>. Please click the link
+					to activate your account.
 				</p>
-				<button 
+				<button
 					onClick={() => setEmailSent(false)}
 					className="mt-4 text-xs text-zinc-500 hover:text-white transition-colors"
 				>
@@ -65,7 +71,10 @@ export function SignUpForm() {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div>
-				<label htmlFor="name" className="mb-1 block text-xs font-medium text-zinc-400">
+				<label
+					htmlFor="name"
+					className="mb-1 block text-xs font-medium text-zinc-400"
+				>
 					Name
 				</label>
 				<input
@@ -79,7 +88,10 @@ export function SignUpForm() {
 				/>
 			</div>
 			<div>
-				<label htmlFor="email" className="mb-1 block text-xs font-medium text-zinc-400">
+				<label
+					htmlFor="email"
+					className="mb-1 block text-xs font-medium text-zinc-400"
+				>
 					Email
 				</label>
 				<input
@@ -93,7 +105,10 @@ export function SignUpForm() {
 				/>
 			</div>
 			<div>
-				<label htmlFor="password" className="mb-1 block text-xs font-medium text-zinc-400">
+				<label
+					htmlFor="password"
+					className="mb-1 block text-xs font-medium text-zinc-400"
+				>
 					Password
 				</label>
 				<input

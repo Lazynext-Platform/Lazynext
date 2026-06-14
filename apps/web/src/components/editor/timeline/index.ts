@@ -1,20 +1,20 @@
 /**
  * @twick/timeline - Timeline Package
- * 
+ *
  * A comprehensive timeline management system for the Twick video platform.
  * Provides track-based video editing capabilities with support for multiple
  * element types, undo/redo functionality, and real-time timeline manipulation.
- * 
+ *
  * @example
  * ```jsx
- * import { 
- *   TimelineProvider, 
- *   TimelineEditor, 
- *   Track, 
+ * import {
+ *   TimelineProvider,
+ *   TimelineEditor,
+ *   Track,
  *   VideoElement,
- *   TextElement 
+ *   TextElement
  * } from '@twick/timeline';
- * 
+ *
  * function App() {
  *   return (
  *     <TimelineProvider contextId="my-timeline">
@@ -52,11 +52,11 @@ import { ArrowElement } from "./core/elements/arrow.element";
 import { LineElement } from "./core/elements/line.element";
 import { EffectElement } from "./core/elements/effect.element";
 import {
-  generateShortUuid,
-  getTotalDuration,
-  getCurrentElements,
-  isTrackId,
-  isElementId,
+	generateShortUuid,
+	getTotalDuration,
+	getCurrentElements,
+	isTrackId,
+	isElementId,
 } from "./utils/timeline.utils";
 import { TrackElement } from "./core/elements/base.element";
 import { ElementAnimation } from "./core/addOns/animation";
@@ -66,39 +66,36 @@ import Watermark from "./core/addOns/watermark";
 
 // Core element types
 export {
-  TrackElement,
-  Track,
-  CaptionElement,
-  RectElement,
-  TextElement,
-  ImageElement,
-  IconElement,
-  EmojiElement,
-  AudioElement,
-  CircleElement,
-  VideoElement,
-  PlaceholderElement,
-  ArrowElement,
-  LineElement,
-  EffectElement,
-  ElementAnimation,
-  ElementFrameEffect,
-  ElementTextEffect,
-  Watermark,
+	TrackElement,
+	Track,
+	CaptionElement,
+	RectElement,
+	TextElement,
+	ImageElement,
+	IconElement,
+	EmojiElement,
+	AudioElement,
+	CircleElement,
+	VideoElement,
+	PlaceholderElement,
+	ArrowElement,
+	LineElement,
+	EffectElement,
+	ElementAnimation,
+	ElementFrameEffect,
+	ElementTextEffect,
+	Watermark,
 };
 
 // Timeline management
-export {
-  TimelineProvider,
-  TimelineEditor,
-};
+export { TimelineProvider, TimelineEditor };
 
 // Types and interfaces
 export type { TimelineProviderProps } from "./context/timeline-context";
 export type {
-  TimelineEditorEvent,
-  TrackUpsertInput,
-  TrackOverlapIssue,
+	TimelineEditorEvent,
+	TrackUpsertInput,
+	TrackOverlapIssue,
 } from "./core/editor/timeline.editor";
 export { TIMELINE_ELEMENT_TYPE, TRACK_TYPES };
 export type { TrackType };
@@ -131,42 +128,42 @@ export * from "./core/visitor/element-cloner";
 
 // Expose classes globally on window object for browser access
 if (typeof window !== "undefined") {
-  // Also expose the main exports
-  (window as any).Twick = {
-    Track: Track,
-    TrackElement,
-    ElementDeserializer,
-    ElementSerializer,
-    ElementValidator,
-    ElementAdder,
-    ElementRemover,
-    ElementUpdater,
-    ElementSplitter,
-    ElementCloner,
-    TimelineEditor,
-    TimelineProvider,
-    TIMELINE_ELEMENT_TYPE,
-    // Element types
-    CaptionElement,
-    RectElement,
-    TextElement,
-    ImageElement,
-    AudioElement,
-    CircleElement,
-    IconElement,
-    EmojiElement,
-    VideoElement,
-    PlaceholderElement,
-    ArrowElement,
-    LineElement,
-    ElementAnimation,
-    ElementFrameEffect,
-    ElementTextEffect,
-    // Utility functions
-    generateShortUuid,
-    getTotalDuration,
-    getCurrentElements,
-    isTrackId,
-    isElementId,
-  };
+	// Also expose the main exports
+	(window as any).Twick = {
+		Track: Track,
+		TrackElement,
+		ElementDeserializer,
+		ElementSerializer,
+		ElementValidator,
+		ElementAdder,
+		ElementRemover,
+		ElementUpdater,
+		ElementSplitter,
+		ElementCloner,
+		TimelineEditor,
+		TimelineProvider,
+		TIMELINE_ELEMENT_TYPE,
+		// Element types
+		CaptionElement,
+		RectElement,
+		TextElement,
+		ImageElement,
+		AudioElement,
+		CircleElement,
+		IconElement,
+		EmojiElement,
+		VideoElement,
+		PlaceholderElement,
+		ArrowElement,
+		LineElement,
+		ElementAnimation,
+		ElementFrameEffect,
+		ElementTextEffect,
+		// Utility functions
+		generateShortUuid,
+		getTotalDuration,
+		getCurrentElements,
+		isTrackId,
+		isElementId,
+	};
 }

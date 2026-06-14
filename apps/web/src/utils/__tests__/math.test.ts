@@ -1,5 +1,13 @@
 import { describe, expect, it } from "bun:test";
-import { evaluateMathExpression, solveCubicBezier, clamp, clampRound, snapToStep, isNearlyEqual, formatNumberForDisplay } from "../math";
+import {
+	evaluateMathExpression,
+	solveCubicBezier,
+	clamp,
+	clampRound,
+	snapToStep,
+	isNearlyEqual,
+	formatNumberForDisplay,
+} from "../math";
 
 describe("evaluateMathExpression", () => {
 	describe("basic arithmetic", () => {
@@ -81,7 +89,9 @@ describe("evaluateMathExpression", () => {
 		it("should return null for invalid characters", () => {
 			expect(evaluateMathExpression({ input: "1+2a" })).toBeNull();
 			expect(evaluateMathExpression({ input: "alert(1)" })).toBeNull();
-			expect(evaluateMathExpression({ input: "1+2; doSomething()" })).toBeNull();
+			expect(
+				evaluateMathExpression({ input: "1+2; doSomething()" }),
+			).toBeNull();
 		});
 
 		it("should return null for unbalanced parentheses", () => {
@@ -106,8 +116,14 @@ describe("evaluateMathExpression", () => {
 			expect(evaluateMathExpression({ input: "process.exit()" })).toBeNull();
 			expect(evaluateMathExpression({ input: "require('fs')" })).toBeNull();
 			expect(evaluateMathExpression({ input: "eval('1+1')" })).toBeNull();
-			expect(evaluateMathExpression({ input: "Function('return 1')()" })).toBeNull();
-			expect(evaluateMathExpression({ input: "constructor.constructor('return 1')()" })).toBeNull();
+			expect(
+				evaluateMathExpression({ input: "Function('return 1')()" }),
+			).toBeNull();
+			expect(
+				evaluateMathExpression({
+					input: "constructor.constructor('return 1')()",
+				}),
+			).toBeNull();
 			expect(evaluateMathExpression({ input: "this.toString" })).toBeNull();
 			expect(evaluateMathExpression({ input: "__proto__" })).toBeNull();
 		});
@@ -122,23 +138,39 @@ describe("evaluateMathExpression", () => {
 describe("solveCubicBezier", () => {
 	it("linear bezier (0,0,1,1) returns identity", () => {
 		expect(solveCubicBezier({ p: 0, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBe(0);
-		expect(solveCubicBezier({ p: 0.5, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBeCloseTo(0.5);
+		expect(
+			solveCubicBezier({ p: 0.5, p1x: 0, p1y: 0, p2x: 1, p2y: 1 }),
+		).toBeCloseTo(0.5);
 		expect(solveCubicBezier({ p: 1, p1x: 0, p1y: 0, p2x: 1, p2y: 1 })).toBe(1);
 	});
 
 	it("ease-in-out (0.42,0,0.58,1) returns expected midpoint", () => {
-		const val = solveCubicBezier({ p: 0.5, p1x: 0.42, p1y: 0, p2x: 0.58, p2y: 1 });
+		const val = solveCubicBezier({
+			p: 0.5,
+			p1x: 0.42,
+			p1y: 0,
+			p2x: 0.58,
+			p2y: 1,
+		});
 		expect(val).toBe(0.5); // ease-in-out midpoint is exactly 0.5
 	});
 
 	it("ease-in (0.42,0,1,1) starts slow", () => {
-		expect(solveCubicBezier({ p: 0, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(0);
-		expect(solveCubicBezier({ p: 0.25, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBeLessThan(0.25);
-		expect(solveCubicBezier({ p: 1, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(1);
+		expect(solveCubicBezier({ p: 0, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(
+			0,
+		);
+		expect(
+			solveCubicBezier({ p: 0.25, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 }),
+		).toBeLessThan(0.25);
+		expect(solveCubicBezier({ p: 1, p1x: 0.42, p1y: 0, p2x: 1, p2y: 1 })).toBe(
+			1,
+		);
 	});
 
 	it("ease-out (0,0,0.58,1) ends slow", () => {
-		expect(solveCubicBezier({ p: 0.75, p1x: 0, p1y: 0, p2x: 0.58, p2y: 1 })).toBeGreaterThan(0.75);
+		expect(
+			solveCubicBezier({ p: 0.75, p1x: 0, p1y: 0, p2x: 0.58, p2y: 1 }),
+		).toBeGreaterThan(0.75);
 	});
 
 	it("returns monotonic results", () => {

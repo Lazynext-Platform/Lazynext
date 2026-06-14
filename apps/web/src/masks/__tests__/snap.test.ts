@@ -357,10 +357,12 @@ describe("mask snapping", () => {
 		});
 
 		expect(result.params.scale).toBe(2.5);
-		expect(result.activeLines).toEqual(expect.arrayContaining([
-			{ type: "vertical", position: 100 },
-			{ type: "vertical", position: -100 }
-		]));
+		expect(result.activeLines).toEqual(
+			expect.arrayContaining([
+				{ type: "vertical", position: 100 },
+				{ type: "vertical", position: -100 },
+			]),
+		);
 	});
 
 	test("snaps text mask movement using intrinsic text bounds", () => {

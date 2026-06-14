@@ -52,13 +52,13 @@ export class ReorderClipEffectsCommand extends Command {
 			trackId: this.trackId,
 			elementId: this.elementId,
 			elementPredicate: isVisualElement,
-		update: (element) => {
-			return reorderEffectsOnElement({
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-				element: element as VisualElement,
-				fromIndex: this.fromIndex,
-				toIndex: this.toIndex,
-			});
+			update: (element) => {
+				return reorderEffectsOnElement({
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+					element: element as VisualElement,
+					fromIndex: this.fromIndex,
+					toIndex: this.toIndex,
+				});
 			},
 		});
 

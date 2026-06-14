@@ -82,41 +82,41 @@ Primary artifacts:
 
 ## Features
 
-| Feature | Status |
-|---------|--------|
-| Anthropic / OpenAI-compatible provider flows + streaming | ✅ |
-| Direct bearer-token auth via `ANTHROPIC_AUTH_TOKEN` | ✅ |
-| Interactive REPL (rustyline) | ✅ |
-| Tool system (bash, read, write, edit, grep, glob) | ✅ |
-| Web tools (search, fetch) | ✅ |
-| Sub-agent / agent surfaces | ✅ |
-| Todo tracking | ✅ |
-| Notebook editing | ✅ |
-| CLAUDE.md / CLAW.md / AGENTS.md project memory | ✅ |
-| Config file hierarchy (`.claw.json` + merged config sections) | ✅ |
-| Permission system | ✅ |
-| MCP server lifecycle + inspection | ✅ |
-| Session persistence + resume | ✅ |
-| Cost / usage / stats surfaces | ✅ |
-| Git integration | ✅ |
-| Markdown terminal rendering (ANSI) | ✅ |
-| Model aliases (opus/sonnet/haiku) | ✅ |
-| Direct CLI subcommands (`status`, `sandbox`, `agents`, `mcp`, `skills`, `doctor`) | ✅ |
-| Slash commands (including `/skills`, `/agents`, `/mcp`, `/doctor`, `/plugin`, `/subagent`) | ✅ |
-| Hooks (`/hooks`, config-backed lifecycle hooks) | ✅ |
-| Plugin management surfaces | ✅ |
-| Skills inventory / install / uninstall surfaces | ✅ |
-| Machine-readable JSON output across core CLI surfaces | ✅ |
+| Feature                                                                                    | Status |
+| ------------------------------------------------------------------------------------------ | ------ |
+| Anthropic / OpenAI-compatible provider flows + streaming                                   | ✅     |
+| Direct bearer-token auth via `ANTHROPIC_AUTH_TOKEN`                                        | ✅     |
+| Interactive REPL (rustyline)                                                               | ✅     |
+| Tool system (bash, read, write, edit, grep, glob)                                          | ✅     |
+| Web tools (search, fetch)                                                                  | ✅     |
+| Sub-agent / agent surfaces                                                                 | ✅     |
+| Todo tracking                                                                              | ✅     |
+| Notebook editing                                                                           | ✅     |
+| CLAUDE.md / CLAW.md / AGENTS.md project memory                                             | ✅     |
+| Config file hierarchy (`.claw.json` + merged config sections)                              | ✅     |
+| Permission system                                                                          | ✅     |
+| MCP server lifecycle + inspection                                                          | ✅     |
+| Session persistence + resume                                                               | ✅     |
+| Cost / usage / stats surfaces                                                              | ✅     |
+| Git integration                                                                            | ✅     |
+| Markdown terminal rendering (ANSI)                                                         | ✅     |
+| Model aliases (opus/sonnet/haiku)                                                          | ✅     |
+| Direct CLI subcommands (`status`, `sandbox`, `agents`, `mcp`, `skills`, `doctor`)          | ✅     |
+| Slash commands (including `/skills`, `/agents`, `/mcp`, `/doctor`, `/plugin`, `/subagent`) | ✅     |
+| Hooks (`/hooks`, config-backed lifecycle hooks)                                            | ✅     |
+| Plugin management surfaces                                                                 | ✅     |
+| Skills inventory / install / uninstall surfaces                                            | ✅     |
+| Machine-readable JSON output across core CLI surfaces                                      | ✅     |
 
 ## Model Aliases
 
 Short names resolve to the latest model versions:
 
-| Alias | Resolves To |
-|-------|------------|
-| `opus` | `claude-opus-4-7` |
-| `sonnet` | `claude-sonnet-4-6` |
-| `haiku` | `claude-haiku-4-5-20251213` |
+| Alias    | Resolves To                 |
+| -------- | --------------------------- |
+| `opus`   | `claude-opus-4-7`           |
+| `sonnet` | `claude-sonnet-4-6`         |
+| `haiku`  | `claude-haiku-4-5-20251213` |
 
 ## CLI Flags and Commands
 
@@ -179,6 +179,7 @@ The REPL now exposes a much broader surface than the original minimal shell:
 - plugin management: `/plugin` (with aliases `/plugins`, `/marketplace`)
 
 Notable claw-first surfaces now available directly in slash form:
+
 - `/skills [list|show <name>|install <path>|uninstall <name>|help]`
 - `/agents [list|show <name>|create <name>|help]`
 - `/mcp [list|show <server>|help]`

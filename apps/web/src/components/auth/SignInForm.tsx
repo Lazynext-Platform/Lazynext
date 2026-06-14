@@ -27,7 +27,11 @@ export function SignInForm() {
 				router.push("/projects");
 			}
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Sign in failed — server may be unreachable");
+			toast.error(
+				err instanceof Error
+					? err.message
+					: "Sign in failed — server may be unreachable",
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -36,7 +40,10 @@ export function SignInForm() {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div>
-				<label htmlFor="email" className="mb-1 block text-xs font-medium text-zinc-400">
+				<label
+					htmlFor="email"
+					className="mb-1 block text-xs font-medium text-zinc-400"
+				>
 					Email
 				</label>
 				<input
@@ -50,7 +57,10 @@ export function SignInForm() {
 				/>
 			</div>
 			<div>
-				<label htmlFor="password" className="mb-1 block text-xs font-medium text-zinc-400">
+				<label
+					htmlFor="password"
+					className="mb-1 block text-xs font-medium text-zinc-400"
+				>
 					Password
 				</label>
 				<input

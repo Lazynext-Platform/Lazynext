@@ -2,9 +2,9 @@ name: Lazynext CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -14,101 +14,129 @@ jobs:
     name: Test Rust WASM Core
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Install Rust toolchain
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: wasm32-unknown-unknown
+      - uses: actions/checkout@v4
 
-    - name: Cache cargo registry
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          rust/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
 
-    - name: Run Cargo Tests
-      working-directory: ./rust
-      run: cargo test --workspace --verbose
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Run Cargo Tests
+        working-directory: ./rust
+        run: cargo test --workspace --verbose
 
   test-frontend:
     name: Test React UI & E2E
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Bun
-      uses: oven-sh/setup-bun@v1
-      with:
-        bun-version: latest
-        
-    - name: Install dependencies
-      run: bun install
+      - uses: actions/checkout@v4
 
-    - name: Run Unit Tests
-      run: bun run test
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
 
-    - name: Install Playwright Browsers
-      run: bunx playwright install --with-deps
+      - name: Install dependencies
+        run: bun install
 
-    - name: Run Playwright E2E Tests
-      run: cd apps/web && bun run test:e2e
+      - name: Run Unit Tests
+        run: bun run test
+
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps
+
+      - name: Run Playwright E2E Tests
+        run: cd apps/web && bun run test:e2e
 
   build-docker-images:
     name: Build & Push Docker Images
     needs: [test-rust-core, test-frontend]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build and push Web Shell
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile.web
-        push: true
-        tags: lazynext/web-shell:latest
+      - name: Build and push Web Shell
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.web
+          push: true
+          tags: lazynext-lazynext-web:latest
 
-    - name: Build and push Pre-Processing
-      uses: docker/build-push-action@v5
-      with:
-        context: ./services/pre-processing
-        push: true
-        tags: lazynext/pre-processing:latest
+      - name: Build and push API Gateway
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.api
+          push: true
+          tags: lazynext-lazynext-api:latest
 
-    - name: Build and push Generative Studio
-      uses: docker/build-push-action@v5
-      with:
-        context: ./services/generative-studio
-        push: true
-        tags: lazynext/generative-studio:latest
+      - name: Build and push MCP Agent
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.mcp
+          push: true
+          tags: lazynext-lazynext-mcp:latest
 
-    - name: Build and push AI Agents
-      uses: docker/build-push-action@v5
-      with:
-        context: ./services/ai-agents
-        push: true
-        tags: lazynext/ai-agents:latest
+      - name: Build and push Sync Service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.sync
+          push: true
+          tags: lazynext-lazynext-sync:latest
 
-    - name: Build and push Render Service
-      uses: docker/build-push-action@v5
-      with:
-        context: ./services/render-service
-        push: true
-        tags: lazynext/render-service:latest
+      - name: Build and push Render Farm
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.render
+          push: true
+          tags: lazynext-lazynext-render:latest
+
+      - name: Build and push DB Migrate
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.migrate
+          push: true
+          tags: lazynext-db-migrate:latest
+
+      - name: Build and push Pre-Processing
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/pre-processing
+          file: ./services/pre-processing/Dockerfile
+          push: true
+          tags: lazynext-lazynext-pre-processing:latest
+
+      - name: Build and push Generative Studio
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/generative-studio
+          file: ./services/generative-studio/Dockerfile
+          push: true
+          tags: lazynext-lazynext-generative-studio:latest

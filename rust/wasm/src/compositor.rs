@@ -27,6 +27,10 @@ thread_local! {
 #[wasm_bindgen(js_name = initCompositor)]
 pub fn init_compositor(width: u32, height: u32) -> Result<(), JsValue> {
     with_gpu_runtime(|gpu_runtime| {
+        if COMPOSITOR_RUNTIME.with(|runtime| runtime.borrow().is_some()) {
+            return resize_compositor(width, height);
+        }
+
         // On WebGL, wgpu is bound to a specific canvas; reuse it so the UI
         // can mount the output directly instead of copying pixels through
         // an intermediate 2D canvas every frame. On WebGPU, surface rendering

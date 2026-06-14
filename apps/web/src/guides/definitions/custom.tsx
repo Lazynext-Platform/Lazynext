@@ -1,4 +1,8 @@
-import { PlusSignIcon, RulerIcon, Delete01Icon } from "@hugeicons/core-free-icons";
+import {
+	PlusSignIcon,
+	RulerIcon,
+	Delete01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/components/ui/button";
 import type { GuideDefinition } from "@/guides/types";
@@ -15,7 +19,7 @@ function CustomGuideOverlay() {
 					key={i}
 					className={cn(
 						"absolute bg-red-500",
-						line.axis === "x" ? "top-0 bottom-0 w-px" : "left-0 right-0 h-px"
+						line.axis === "x" ? "top-0 bottom-0 w-px" : "left-0 right-0 h-px",
 					)}
 					style={{
 						[line.axis === "x" ? "left" : "top"]: `${line.percent}%`,
@@ -32,9 +36,9 @@ function CustomGuideOptions() {
 
 	return (
 		<div className="flex gap-2">
-			<Button 
-				variant="outline" 
-				size="sm" 
+			<Button
+				variant="outline"
+				size="sm"
 				className="flex-1"
 				onClick={() => {
 					// Add a vertical line in the center
@@ -44,9 +48,9 @@ function CustomGuideOptions() {
 				<HugeiconsIcon icon={PlusSignIcon} />
 				Add vertical
 			</Button>
-			<Button 
-				variant="outline" 
-				size="sm" 
+			<Button
+				variant="outline"
+				size="sm"
 				className="flex-1"
 				onClick={() => {
 					// Add a horizontal line in the center
@@ -56,9 +60,9 @@ function CustomGuideOptions() {
 				<HugeiconsIcon icon={PlusSignIcon} />
 				Add horizontal
 			</Button>
-			<Button 
-				variant="outline" 
-				size="icon" 
+			<Button
+				variant="outline"
+				size="icon"
 				onClick={clearCustomLines}
 				title="Clear all custom lines"
 			>

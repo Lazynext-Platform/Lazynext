@@ -1,8 +1,9 @@
 # Source Code, Documents, and Resources For https://Lazynext-Editor.com.
 
 ## Requirements
- - [Hunim](https://github.com/Lazynext-Corporation/hunim)
- - rsync and ssh (for deployment)
+
+- [Hunim](https://github.com/Lazynext-Corporation/hunim)
+- rsync and ssh (for deployment)
 
 ```
 # Run local
@@ -13,9 +14,10 @@ make upload
 ```
 
 ## Server Requirements
- - systemd
- - reverse proxy (nginx, etc.)
- - [bun](https://bun.com)
+
+- systemd
+- reverse proxy (nginx, etc.)
+- [bun](https://bun.com)
 
 ## Deployment Example
 

@@ -180,9 +180,25 @@ function CustomColorPreview({
 }
 
 const COLOR_SECTIONS = [
-	{ id: "colors", title: "Colors", backgrounds: colors, useBackgroundColor: true, showCustomPicker: true },
-	{ id: "pattern-craft", title: "Pattern craft", backgrounds: patternCraftGradients, showCustomPicker: false },
-	{ id: "syntax-ui", title: "Syntax UI", backgrounds: syntaxUIGradients, showCustomPicker: false },
+	{
+		id: "colors",
+		title: "Colors",
+		backgrounds: colors,
+		useBackgroundColor: true,
+		showCustomPicker: true,
+	},
+	{
+		id: "pattern-craft",
+		title: "Pattern craft",
+		backgrounds: patternCraftGradients,
+		showCustomPicker: false,
+	},
+	{
+		id: "syntax-ui",
+		title: "Syntax UI",
+		backgrounds: syntaxUIGradients,
+		showCustomPicker: false,
+	},
 ] as const;
 
 export function BackgroundContent() {
@@ -222,14 +238,14 @@ export function BackgroundContent() {
 	const isColorBackground = activeProject.settings.background.type === "color";
 
 	const currentBlurIntensity = isBlurBackground
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-		? (activeProject.settings.background as { blurIntensity: number })
+		? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			(activeProject.settings.background as { blurIntensity: number })
 				.blurIntensity
 		: DEFAULT_BACKGROUND_BLUR_INTENSITY;
 
 	const currentBackgroundColor = isColorBackground
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-		? (activeProject.settings.background as { color: string }).color
+		? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+			(activeProject.settings.background as { color: string }).color
 		: DEFAULT_BACKGROUND_COLOR;
 
 	const hasPresetColorMatch = colors.some(

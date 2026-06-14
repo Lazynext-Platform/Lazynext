@@ -784,8 +784,8 @@ export class TimelineManager {
 			const nextElements = track.elements.map((element) => {
 				const overlay = this.previewOverlay.get(element.id);
 				return overlay
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-					? ({ ...element, ...overlay } as TimelineElement)
+					? // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+						({ ...element, ...overlay } as TimelineElement)
 					: element;
 			});
 
@@ -844,7 +844,9 @@ export class TimelineManager {
 	}): void {
 		const shouldMute = elements.some(({ trackId, elementId }) => {
 			const element = this.getElementByRef({ trackId, elementId });
-			return element && canElementHaveAudio(element) && !isElementMuted({ element });
+			return (
+				element && canElementHaveAudio(element) && !isElementMuted({ element })
+			);
 		});
 
 		const nextUpdates = elements.flatMap(({ trackId, elementId }) => {

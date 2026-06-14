@@ -13,16 +13,16 @@ const queue: Array<() => void> = [];
  * Dequeues and executes the next task when a concurrency slot becomes available.
  */
 function runNext() {
-  // If no tasks are queued or we're already at the concurrency limit, do nothing
-  if (queue.length === 0 || activeCount >= concurrencyLimit) return;
+	// If no tasks are queued or we're already at the concurrency limit, do nothing
+	if (queue.length === 0 || activeCount >= concurrencyLimit) return;
 
-  // Dequeue next task
-  const next = queue.shift();
+	// Dequeue next task
+	const next = queue.shift();
 
-  if (next) {
-    activeCount++; // Mark one more active task
-    next();        // Run it
-  }
+	if (next) {
+		activeCount++; // Mark one more active task
+		next(); // Run it
+	}
 }
 
 /**
@@ -31,10 +31,10 @@ function runNext() {
  * when a slot becomes available. This prevents overwhelming the system with too
  * many concurrent operations, which is useful for resource-intensive tasks like
  * media processing or API calls.
- * 
+ *
  * @param fn - Async function returning a Promise that should be executed with concurrency control
  * @returns Promise resolving with the result of the wrapped function
- * 
+ *
  * @example
  * ```js
  * // Limit concurrent image processing operations
@@ -42,7 +42,7 @@ function runNext() {
  *   // Expensive image processing operation
  *   return await someImageProcessing(imageUrl);
  * };
- * 
+ *
  * // Process multiple images with concurrency limit
  * const results = await Promise.all([
  *   limit(() => processImage("image1.jpg")),
@@ -55,24 +55,24 @@ function runNext() {
  * ```
  */
 export function limit<T>(fn: () => Promise<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    // Task to run the function and handle completion
-    const task = () => {
-      fn()
-        .then(resolve)
-        .catch(reject)
-        .finally(() => {
-          activeCount--; // Mark task as done
-          runNext();     // Trigger next queued task, if any
-        });
-    };
+	return new Promise((resolve, reject) => {
+		// Task to run the function and handle completion
+		const task = () => {
+			fn()
+				.then(resolve)
+				.catch(reject)
+				.finally(() => {
+					activeCount--; // Mark task as done
+					runNext(); // Trigger next queued task, if any
+				});
+		};
 
-    if (activeCount < concurrencyLimit) {
-      activeCount++; // Increment active count for immediate run
-      task();
-    } else {
-      // Queue the task if concurrency limit reached
-      queue.push(task);
-    }
-  });
+		if (activeCount < concurrencyLimit) {
+			activeCount++; // Increment active count for immediate run
+			task();
+		} else {
+			// Queue the task if concurrency limit reached
+			queue.push(task);
+		}
+	});
 }

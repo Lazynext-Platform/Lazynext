@@ -36,6 +36,7 @@ Video Input → AI Analysis → Prompt Matching → Clip Extraction → Output V
 ### Advanced Video Analysis
 
 The AI evaluates every frame of your video:
+
 - **Visual**: Objects, scenes, actions, faces
 - **Audio**: Speech, music, sound effects
 - **Sentiment**: Emotions, reactions, tone
@@ -44,6 +45,7 @@ The AI evaluates every frame of your video:
 ### Prompt-Based Clipping
 
 Simply describe what you want:
+
 - "Find all the funny moments"
 - "Clip when someone scores a goal"
 - "Extract the product reveal"
@@ -88,22 +90,22 @@ response = requests.post(
 
 ## Use Cases
 
-| Use Case | Example Prompt |
-|----------|----------------|
-| Sports Highlights | "Extract all scoring plays" |
-| Podcast Clips | "Find the most insightful moments" |
-| Travel Vlogs | "Clip the scenic views" |
-| Tutorials | "Get the key demonstration steps" |
-| Interviews | "Find emotional reactions" |
+| Use Case          | Example Prompt                     |
+| ----------------- | ---------------------------------- |
+| Sports Highlights | "Extract all scoring plays"        |
+| Podcast Clips     | "Find the most insightful moments" |
+| Travel Vlogs      | "Clip the scenic views"            |
+| Tutorials         | "Get the key demonstration steps"  |
+| Interviews        | "Find emotional reactions"         |
 
 ## Tech Stack
 
-| Component | Purpose |
-|-----------|---------|
-| GPT-4V | Visual understanding |
-| Whisper | Audio transcription |
-| FFmpeg | Video processing |
-| OpenCV | Frame analysis |
+| Component | Purpose              |
+| --------- | -------------------- |
+| GPT-4V    | Visual understanding |
+| Whisper   | Audio transcription  |
+| FFmpeg    | Video processing     |
+| OpenCV    | Frame analysis       |
 
 ## Contributing
 

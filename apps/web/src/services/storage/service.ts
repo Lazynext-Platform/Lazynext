@@ -245,7 +245,9 @@ class StorageService {
 		}
 
 		return projects.sort(
-			(a, b) => b.metadata.updatedAt.getTime() - a.metadata.updatedAt.getTime(),
+			(a, b) =>
+				new Date(b.metadata.updatedAt).getTime() -
+				new Date(a.metadata.updatedAt).getTime(),
 		);
 	}
 
@@ -286,7 +288,8 @@ class StorageService {
 		}
 
 		return metadata.sort(
-			(a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+			(a, b) =>
+				new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
 		);
 	}
 

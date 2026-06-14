@@ -2,7 +2,11 @@
 import React from "react";
 
 /* ── Organization ── */
-export function OrganizationLD({ url = "https://lazynext.com" }: { url?: string }) {
+export function OrganizationLD({
+	url = "https://lazynext.com",
+}: {
+	url?: string;
+}) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "Organization",
@@ -13,13 +17,20 @@ export function OrganizationLD({ url = "https://lazynext.com" }: { url?: string 
 		logo: {
 			"@type": "ImageObject",
 			url: `${url}/logo.png`,
-			width: 512, height: 512,
+			width: 512,
+			height: 512,
 			caption: "Lazynext Logo",
 		},
-		description: "AI-powered video editing platform. Multi-model AI agents, Rust compositor, 6 platform formats, 18 AI providers.",
+		description:
+			"AI-powered video editing platform. Multi-model AI agents, Rust compositor, 6 platform formats, 18 AI providers.",
 		foundingDate: "2025",
 		founder: { "@type": "Person", name: "Avas Patel" },
-		contactPoint: { "@type": "ContactPoint", email: "support@lazynext.com", contactType: "customer support", availableLanguage: ["English"] },
+		contactPoint: {
+			"@type": "ContactPoint",
+			email: "support@lazynext.com",
+			contactType: "customer support",
+			availableLanguage: ["English"],
+		},
 		sameAs: [
 			"https://github.com/Lazynext-Corporation",
 			"https://x.com/lazynext",
@@ -28,11 +39,20 @@ export function OrganizationLD({ url = "https://lazynext.com" }: { url?: string 
 		],
 		address: { "@type": "PostalAddress", addressCountry: "US" },
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── Software Application ── */
-export function SoftwareAppLD({ url = "https://lazynext.com" }: { url?: string }) {
+export function SoftwareAppLD({
+	url = "https://lazynext.com",
+}: {
+	url?: string;
+}) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
@@ -42,13 +62,36 @@ export function SoftwareAppLD({ url = "https://lazynext.com" }: { url?: string }
 		operatingSystem: "Web, macOS, Windows, Linux, iOS, Android",
 		offers: [
 			{ "@type": "Offer", name: "Free", price: "0", priceCurrency: "USD" },
-			{ "@type": "Offer", name: "Pro", price: "19", priceCurrency: "USD", unitText: "/month" },
-			{ "@type": "Offer", name: "Studio", price: "49", priceCurrency: "USD", unitText: "/month" },
+			{
+				"@type": "Offer",
+				name: "Pro",
+				price: "19",
+				priceCurrency: "USD",
+				unitText: "/month",
+			},
+			{
+				"@type": "Offer",
+				name: "Studio",
+				price: "49",
+				priceCurrency: "USD",
+				unitText: "/month",
+			},
 		],
-		aggregateRating: { "@type": "AggregateRating", ratingValue: "4.8", ratingCount: "128", bestRating: "5" },
-		featureList: "AI-powered editing, Multi-model AI agents, Rust compositor, 4K/8K export, Screen recording, Browser extension, 18 AI providers",
+		aggregateRating: {
+			"@type": "AggregateRating",
+			ratingValue: "4.8",
+			ratingCount: "128",
+			bestRating: "5",
+		},
+		featureList:
+			"AI-powered editing, Multi-model AI agents, Rust compositor, 4K/8K export, Screen recording, Browser extension, 18 AI providers",
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── WebSite ── */
@@ -59,24 +102,38 @@ export function WebSiteLD({ url = "https://lazynext.com" }: { url?: string }) {
 		"@id": `${url}/#website`,
 		url,
 		name: "Lazynext",
-		description: "AI-powered video editing platform. Edit videos by describing what you want in natural language.",
+		description:
+			"AI-powered video editing platform. Edit videos by describing what you want in natural language.",
 		potentialAction: {
 			"@type": "SearchAction",
-			target: { "@type": "EntryPoint", urlTemplate: `${url}/search?q={search_term_string}` },
+			target: {
+				"@type": "EntryPoint",
+				urlTemplate: `${url}/search?q={search_term_string}`,
+			},
 			"query-input": "required name=search_term_string",
 		},
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── VideoObject (for demo/tutorial videos) ── */
-export function VideoObjectLD({ url = "https://lazynext.com" }: { url?: string }) {
+export function VideoObjectLD({
+	url = "https://lazynext.com",
+}: {
+	url?: string;
+}) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "VideoObject",
 		"@id": `${url}/#demo`,
 		name: "Lazynext AI Video Editor — Demo",
-		description: "See how Lazynext AI edits videos using natural language prompts.",
+		description:
+			"See how Lazynext AI edits videos using natural language prompts.",
 		thumbnailUrl: `${url}/og-image.png`,
 		uploadDate: "2026-06-07",
 		contentUrl: `${url}/demo.mp4`,
@@ -84,11 +141,22 @@ export function VideoObjectLD({ url = "https://lazynext.com" }: { url?: string }
 		duration: "PT2M30S",
 		publisher: { "@type": "Organization", name: "Lazynext", url },
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── BreadcrumbList ── */
-export function BreadcrumbLD({ items, url = "https://lazynext.com" }: { items: Array<{ name: string; path: string }>; url?: string }) {
+export function BreadcrumbLD({
+	items,
+	url = "https://lazynext.com",
+}: {
+	items: Array<{ name: string; path: string }>;
+	url?: string;
+}) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
@@ -99,11 +167,20 @@ export function BreadcrumbLD({ items, url = "https://lazynext.com" }: { items: A
 			item: `${url}${item.path}`,
 		})),
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── HowTo (for tutorials) ── */
-export function HowToLD({ steps }: { steps: Array<{ name: string; text: string }> }) {
+export function HowToLD({
+	steps,
+}: {
+	steps: Array<{ name: string; text: string }>;
+}) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "HowTo",
@@ -116,7 +193,12 @@ export function HowToLD({ steps }: { steps: Array<{ name: string; text: string }
 			text: s.text,
 		})),
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 /* ── Product ── */
@@ -126,7 +208,8 @@ export function ProductLD({ url = "https://lazynext.com" }: { url?: string }) {
 		"@type": "Product",
 		"@id": `${url}/#product`,
 		name: "Lazynext Pro",
-		description: "Professional AI video editing subscription. Unlimited projects, 4K export, 18 AI models, priority support.",
+		description:
+			"Professional AI video editing subscription. Unlimited projects, 4K export, 18 AI models, priority support.",
 		offers: {
 			"@type": "Offer",
 			price: "19",
@@ -136,5 +219,10 @@ export function ProductLD({ url = "https://lazynext.com" }: { url?: string }) {
 			availability: "https://schema.org/InStock",
 		},
 	};
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }

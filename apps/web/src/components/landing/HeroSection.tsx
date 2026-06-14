@@ -8,7 +8,7 @@ export function HeroSection() {
 			<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400/20 dark:from-blue-900/40 via-slate-50 dark:via-zinc-950 to-slate-50 dark:to-zinc-950" />
 			<div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-400/20 dark:bg-cyan-600/20 rounded-full blur-[120px] mix-blend-multiply dark:mix-blend-screen pointer-events-none animate-pulse" />
 			<div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-indigo-400/10 dark:bg-indigo-600/10 rounded-full blur-[150px] mix-blend-multiply dark:mix-blend-screen pointer-events-none" />
-			
+
 			<div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] dark:opacity-[0.04] mix-blend-overlay pointer-events-none" />
 
 			<div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
@@ -29,7 +29,9 @@ export function HeroSection() {
 
 				{/* Subheadline */}
 				<p className="mx-auto mt-8 max-w-3xl text-lg text-zinc-600 dark:text-zinc-400 md:text-xl font-light leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200">
-					Edit video with natural language, not clicks. Your AI Video Editing Copilot unifies 17 enterprise microservices into a single, lightning-fast Rust architecture.
+					Edit video with natural language, not clicks. Your AI Video Editing
+					Copilot unifies 17 enterprise microservices into a single,
+					lightning-fast Rust architecture.
 				</p>
 
 				{/* Feature Tags */}

@@ -1,13 +1,15 @@
-import React from 'react';
+import React from "react";
 
 // Phase 52: Extracting Top Navigation
 export function TopToolbar() {
-  return (
-    <div className="h-12 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 shrink-0 relative z-40 select-none shadow-md">
-      {/* Extracted content will go here */}
-      <div className="flex items-center gap-4">
-        <span className="text-white font-bold tracking-widest">SYNAPSE RESOLVE</span>
-      </div>
-    </div>
-  );
+	return (
+		<div className="h-12 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-4 shrink-0 relative z-40 select-none shadow-md">
+			{/* Extracted content will go here */}
+			<div className="flex items-center gap-4">
+				<span className="text-white font-bold tracking-widest">
+					SYNAPSE RESOLVE
+				</span>
+			</div>
+		</div>
+	);
 }

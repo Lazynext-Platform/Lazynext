@@ -10,6 +10,7 @@ Lazynext is an enterprise-grade, multi-platform video editing ecosystem. We stri
 ## 🚀 The Architecture
 
 Lazynext is built on a strict, high-performance architecture:
+
 - **Core Logic (`rust/`)**: The single source of truth. All NLE state management, timeline calculations, and CRDT sync logic live in pure, platform-agnostic Rust.
 - **Web Frontend (`apps/web/`)**: A highly optimized Next.js/React shell that imports the Rust core via **WebAssembly**, rendering at 120fps using WebGL.
 - **Native Desktop (`apps/desktop/`)**: A native OS application built with **GPUI** (the engine behind Zed) that calls the exact same Rust core logic with zero duplication.
@@ -43,6 +44,7 @@ cd lazynext
 ```
 
 **Services Started:**
+
 - 🌐 Web App: `http://localhost:3000`
 - 📡 WebRTC Sync: `ws://localhost:8002`
 - 🎬 Render Farm: `http://localhost:8003`
@@ -59,6 +61,7 @@ bun run test:e2e
 ```
 
 To compile the Rust WASM core manually:
+
 ```bash
 wasm-pack build --target web --out-dir pkg rust/wasm
 ```

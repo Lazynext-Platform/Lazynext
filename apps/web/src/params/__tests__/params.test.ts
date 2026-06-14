@@ -29,11 +29,11 @@ function createBooleanParam(): any {
 	return {
 		type: "boolean",
 		label: "visible",
-		default: true, key: "visible",
+		default: true,
+		key: "visible",
 		channelLayout: BOOLEAN_CHANNEL_LAYOUT,
 	};
 }
-
 
 // --- Tests ---
 

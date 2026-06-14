@@ -34,8 +34,12 @@ export function SocialMetaTags({
 			<meta property="og:image:alt" content={title} />
 			<meta property="og:site_name" content="Lazynext" />
 			<meta property="og:locale" content="en_US" />
-			{type === "article" && publishedTime && <meta property="article:published_time" content={publishedTime} />}
-			{type === "article" && author && <meta property="article:author" content={author} />}
+			{type === "article" && publishedTime && (
+				<meta property="article:published_time" content={publishedTime} />
+			)}
+			{type === "article" && author && (
+				<meta property="article:author" content={author} />
+			)}
 
 			{/* Twitter / X Card */}
 			<meta name="twitter:card" content="summary_large_image" />
@@ -54,7 +58,10 @@ export function SocialMetaTags({
 			{/* Apple specific */}
 			<meta name="apple-mobile-web-app-title" content="Lazynext" />
 			<meta name="apple-mobile-web-app-capable" content="yes" />
-			<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+			<meta
+				name="apple-mobile-web-app-status-bar-style"
+				content="black-translucent"
+			/>
 		</>
 	);
 }

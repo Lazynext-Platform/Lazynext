@@ -4,59 +4,58 @@ import { CircleProps } from "../../types";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
 export class CircleElement extends TrackElement {
-  protected declare props: CircleProps;
-  constructor(fill: string, radius: number) {
-    super(TIMELINE_ELEMENT_TYPE.CIRCLE);
-    this.props = {
-      radius,
-      height: radius*2,
-      width: radius*2,
-      fill,
-      strokeColor: fill,
-      lineWidth: 1
-    };
-  }
+	declare protected props: CircleProps;
+	constructor(fill: string, radius: number) {
+		super(TIMELINE_ELEMENT_TYPE.CIRCLE);
+		this.props = {
+			radius,
+			height: radius * 2,
+			width: radius * 2,
+			fill,
+			strokeColor: fill,
+			lineWidth: 1,
+		};
+	}
 
-  getFill(): string {
-    return this.props.fill;
-  }
+	getFill(): string {
+		return this.props.fill;
+	}
 
-  getRadius(): number {
-    return this.props.radius;
-  }
+	getRadius(): number {
+		return this.props.radius;
+	}
 
-  getStrokeColor(): string {
-    return this.props.strokeColor || this.props.fill;
-  }
+	getStrokeColor(): string {
+		return this.props.strokeColor || this.props.fill;
+	}
 
-  getLineWidth(): number {
-    return this.props.lineWidth ?? 0;
-  }
+	getLineWidth(): number {
+		return this.props.lineWidth ?? 0;
+	}
 
-  setFill(fill: string) {
-    this.props.fill = fill;
-    return this;
-  }
+	setFill(fill: string) {
+		this.props.fill = fill;
+		return this;
+	}
 
-  setRadius(radius: number) {
-    this.props.radius = radius;
-    this.props.width = radius*2;
-    this.props.height = radius*2;
-    return this;
-  }
-  
-  setStrokeColor(strokeColor: string) {
-    this.props.strokeColor = strokeColor;
-    return this;
-  }
+	setRadius(radius: number) {
+		this.props.radius = radius;
+		this.props.width = radius * 2;
+		this.props.height = radius * 2;
+		return this;
+	}
 
-  setLineWidth(lineWidth: number) {
-    this.props.lineWidth = lineWidth;
-    return this;
-  }     
+	setStrokeColor(strokeColor: string) {
+		this.props.strokeColor = strokeColor;
+		return this;
+	}
 
+	setLineWidth(lineWidth: number) {
+		this.props.lineWidth = lineWidth;
+		return this;
+	}
 
-  accept<T>(visitor: ElementVisitor<T>): T {
-    return visitor.visitCircleElement(this);
-  }
+	accept<T>(visitor: ElementVisitor<T>): T {
+		return visitor.visitCircleElement(this);
+	}
 }

@@ -22,9 +22,7 @@ const links: CategoryLinks = {
 		{ label: "Privacy", href: "/privacy" },
 		{ label: "Terms of use", href: "/terms" },
 	],
-	company: [
-		{ label: "Brand", href: "/brand" },
-	],
+	company: [{ label: "Brand", href: "/brand" }],
 };
 
 export function Footer() {

@@ -24,8 +24,8 @@ export function useActionHandler<A extends TAction>(
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 	const stableHandler = useCallback(
 		(...parameters: [TArgOfAction<A>, TInvocationTrigger?]) => {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 			(
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
 				handlerRef.current as (
 					...handlerParameters: [TArgOfAction<A>, TInvocationTrigger?]
 				) => void

@@ -5,88 +5,88 @@ import { AudioProps } from "../../types";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
 export class AudioElement extends TrackElement {
-  protected mediaDuration!: number;
-  protected declare props: AudioProps;
+	protected mediaDuration!: number;
+	declare protected props: AudioProps;
 
-  constructor(src: string) {
-    super(TIMELINE_ELEMENT_TYPE.AUDIO);
-    this.props = {
-      src,
-      time: 0,
-      playbackRate: 1,
-      volume: 1,
-      loop: false,
-    };
-  }
+	constructor(src: string) {
+		super(TIMELINE_ELEMENT_TYPE.AUDIO);
+		this.props = {
+			src,
+			time: 0,
+			playbackRate: 1,
+			volume: 1,
+			loop: false,
+		};
+	}
 
-  getMediaDuration() {
-    return this.mediaDuration;
-  }
+	getMediaDuration() {
+		return this.mediaDuration;
+	}
 
-  getStartAt(): number {
-    return this.props.time || 0;
-  }
+	getStartAt(): number {
+		return this.props.time || 0;
+	}
 
-  getEndAt(): number {
-    return this.getDuration() * this.getPlaybackRate();
-  }
+	getEndAt(): number {
+		return this.getDuration() * this.getPlaybackRate();
+	}
 
-  getSrc(): string {
-    return this.props.src;
-  }
+	getSrc(): string {
+		return this.props.src;
+	}
 
-  getPlaybackRate(): number {
-    return this.props.playbackRate ?? 1;
-  }
+	getPlaybackRate(): number {
+		return this.props.playbackRate ?? 1;
+	}
 
-  getVolume(): number {
-    return this.props.volume ?? 1;
-  } 
+	getVolume(): number {
+		return this.props.volume ?? 1;
+	}
 
-  async updateAudioMeta() {
-    this.mediaDuration = await getAudioDuration(this.props.src);
-  }
+	async updateAudioMeta() {
+		this.mediaDuration = await getAudioDuration(this.props.src);
+	}
 
-  async setSrc(src: string) {
-    this.props.src = src;
-    await this.updateAudioMeta();
-    return this;
-  }
+	async setSrc(src: string) {
+		this.props.src = src;
+		await this.updateAudioMeta();
+		return this;
+	}
 
-  setMediaDuration(mediaDuration: number) {
-    this.mediaDuration = mediaDuration;
-    return this;
-  }
+	setMediaDuration(mediaDuration: number) {
+		this.mediaDuration = mediaDuration;
+		return this;
+	}
 
-  setVolume(volume: number) {
-    this.props.volume = volume;
-    return this;
-  }
+	setVolume(volume: number) {
+		this.props.volume = volume;
+		return this;
+	}
 
-  setLoop(loop: boolean) {
-    this.props.loop = loop;
-    return this;
-  }
+	setLoop(loop: boolean) {
+		this.props.loop = loop;
+		return this;
+	}
 
-  setStartAt(time: number) {
-    this.props.time = Math.max(0, time);
-    return this;
-  }
+	setStartAt(time: number) {
+		this.props.time = Math.max(0, time);
+		return this;
+	}
 
-  setPlaybackRate(playbackRate: number) {
-    this.props.playbackRate = playbackRate;
-    return this;
-  }
+	setPlaybackRate(playbackRate: number) {
+		this.props.playbackRate = playbackRate;
+		return this;
+	}
 
-  override setProps(props: Omit<any, "src">) {
-    this.props = {
-      ...structuredClone(props),
-      src: this.props.src,
-    };
-    return this;
-  }
+	override setProps(props: Omit<any, "src">) {
+		this.props = {
+			...structuredClone(props),
+			src: this.props.src,
+		};
+		return this;
+	}
 
-  accept<T>(visitor: ElementVisitor<T>): T {
-    return visitor.visitAudioElement(this);
-  }
+	accept<T>(visitor: ElementVisitor<T>): T {
+		return visitor.visitAudioElement(this);
+	}
 }

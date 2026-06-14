@@ -13,7 +13,9 @@ function buildTransform(): Transform {
 	};
 }
 
-function buildVideoElement(overrides: Partial<VideoElement> = {}): VideoElement {
+function buildVideoElement(
+	overrides: Partial<VideoElement> = {},
+): VideoElement {
 	return {
 		id: "video-1",
 		type: "video",
@@ -66,7 +68,6 @@ describe("applyElementUpdate", () => {
 			},
 		});
 
-		 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		expect(updatedElement.duration).toBe(7 as any);
 		expect(Number.isInteger(updatedElement.duration)).toBe(true);

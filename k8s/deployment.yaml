@@ -36,31 +36,31 @@ spec:
         app: postgres-db
     spec:
       containers:
-      - name: postgres
-        image: postgres:15-alpine
-        env:
-        - name: POSTGRES_USER
-          value: "postgres"
-        - name: POSTGRES_DB
-          value: "lazynext"
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: POSTGRES_PASSWORD
-        ports:
-        - containerPort: 5432
-        volumeMounts:
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_DB
+              value: "lazynext"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTGRES_PASSWORD
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
-  - metadata:
-      name: postgres-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 10Gi
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
@@ -72,9 +72,9 @@ spec:
   selector:
     app: postgres-db
   ports:
-  - protocol: TCP
-    port: 5432
-    targetPort: 5432
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
 ---
 # Redis
 apiVersion: apps/v1
@@ -93,10 +93,10 @@ spec:
         app: redis-db
     spec:
       containers:
-      - name: redis
-        image: redis:alpine
-        ports:
-        - containerPort: 6379
+        - name: redis
+          image: redis:alpine
+          ports:
+            - containerPort: 6379
 ---
 apiVersion: v1
 kind: Service
@@ -108,9 +108,9 @@ spec:
   selector:
     app: redis-db
   ports:
-  - protocol: TCP
-    port: 6379
-    targetPort: 6379
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
 ---
 # Redis Upstash HTTP Proxy
 apiVersion: apps/v1
@@ -129,20 +129,20 @@ spec:
         app: redis-proxy
     spec:
       containers:
-      - name: redis-proxy
-        image: hiett/serverless-redis-http:latest
-        ports:
-        - containerPort: 80
-        env:
-        - name: SRH_MODE
-          value: "env"
-        - name: SRH_CONNECTION_STRING
-          value: "redis://redis-db:6379"
-        - name: SRH_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: UPSTASH_REDIS_REST_TOKEN
+        - name: redis-proxy
+          image: hiett/serverless-redis-http:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: SRH_MODE
+              value: "env"
+            - name: SRH_CONNECTION_STRING
+              value: "redis://redis-db:6379"
+            - name: SRH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: UPSTASH_REDIS_REST_TOKEN
 ---
 apiVersion: v1
 kind: Service
@@ -154,9 +154,9 @@ spec:
   selector:
     app: redis-proxy
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
+    - protocol: TCP
+      port: 80
+      targetPort: 80
 ---
 # Web Frontend
 apiVersion: apps/v1
@@ -174,55 +174,48 @@ spec:
       labels:
         app: lazynext-web
     spec:
-      initContainers:
-      - name: db-migrate
-        image: lazynext-db-migrate:latest
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: DATABASE_URL
-          value: "postgres://postgres:password@postgres-db:5432/lazynext"
       containers:
-      - name: lazynext-web
-        image: lazynext-lazynext-web:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: NEXT_PUBLIC_SYNC_URL
-          value: "ws://lazynext-sync:8002"
-        - name: NEXT_PUBLIC_RENDER_URL
-          value: "http://lazynext-render:8003"
-        - name: UPSTASH_REDIS_REST_URL
-          value: "http://redis-proxy:80"
-        - name: DATABASE_URL
-          value: "postgres://postgres:password@postgres-db:5432/lazynext"
-        - name: BETTER_AUTH_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: BETTER_AUTH_SECRET
-        - name: UPSTASH_REDIS_REST_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: UPSTASH_REDIS_REST_TOKEN
-        - name: MARBLE_WORKSPACE_KEY
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: MARBLE_WORKSPACE_KEY
-        - name: FREESOUND_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: FREESOUND_CLIENT_ID
-        - name: FREESOUND_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: lazynext-secrets
-              key: FREESOUND_API_KEY
+        - name: lazynext-web
+          image: lazynext-lazynext-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_PUBLIC_SYNC_URL
+              value: "ws://lazynext-sync:8002"
+            - name: NEXT_PUBLIC_RENDER_URL
+              value: "http://lazynext-render:8003"
+            - name: UPSTASH_REDIS_REST_URL
+              value: "http://redis-proxy:80"
+            - name: DATABASE_URL
+              value: "postgres://postgres:password@postgres-db:5432/lazynext"
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: UPSTASH_REDIS_REST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: UPSTASH_REDIS_REST_TOKEN
+            - name: MARBLE_WORKSPACE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: MARBLE_WORKSPACE_KEY
+            - name: FREESOUND_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: FREESOUND_CLIENT_ID
+            - name: FREESOUND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: FREESOUND_API_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -234,9 +227,9 @@ spec:
   selector:
     app: lazynext-web
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 3000
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
 ---
 # API Gateway
 apiVersion: apps/v1
@@ -255,11 +248,11 @@ spec:
         app: lazynext-api
     spec:
       containers:
-      - name: lazynext-api
-        image: lazynext-lazynext-api:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8005
+        - name: lazynext-api
+          image: lazynext-lazynext-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8005
 ---
 apiVersion: v1
 kind: Service
@@ -271,9 +264,9 @@ spec:
   selector:
     app: lazynext-api
   ports:
-  - protocol: TCP
-    port: 8005
-    targetPort: 8005
+    - protocol: TCP
+      port: 8005
+      targetPort: 8005
 ---
 # Sync Service
 apiVersion: apps/v1
@@ -292,14 +285,14 @@ spec:
         app: lazynext-sync
     spec:
       containers:
-      - name: lazynext-sync
-        image: lazynext-lazynext-sync:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8002
-        env:
-        - name: NODE_ENV
-          value: "production"
+        - name: lazynext-sync
+          image: lazynext-lazynext-sync:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8002
+          env:
+            - name: NODE_ENV
+              value: "production"
 ---
 apiVersion: v1
 kind: Service
@@ -311,9 +304,9 @@ spec:
   selector:
     app: lazynext-sync
   ports:
-  - protocol: TCP
-    port: 8002
-    targetPort: 8002
+    - protocol: TCP
+      port: 8002
+      targetPort: 8002
 ---
 # Render Farm
 apiVersion: apps/v1
@@ -332,14 +325,14 @@ spec:
         app: lazynext-render
     spec:
       containers:
-      - name: lazynext-render
-        image: lazynext-lazynext-render:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8003
-        env:
-        - name: NODE_ENV
-          value: "production"
+        - name: lazynext-render
+          image: lazynext-lazynext-render:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8003
+          env:
+            - name: NODE_ENV
+              value: "production"
 ---
 apiVersion: v1
 kind: Service
@@ -351,9 +344,9 @@ spec:
   selector:
     app: lazynext-render
   ports:
-  - protocol: TCP
-    port: 8003
-    targetPort: 8003
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
 ---
 # MCP Agent
 apiVersion: apps/v1
@@ -372,11 +365,11 @@ spec:
         app: lazynext-mcp
     spec:
       containers:
-      - name: lazynext-mcp
-        image: lazynext-lazynext-mcp:latest
-        imagePullPolicy: IfNotPresent
-        stdin: true
-        tty: true
+        - name: lazynext-mcp
+          image: lazynext-lazynext-mcp:latest
+          imagePullPolicy: IfNotPresent
+          stdin: true
+          tty: true
 ---
 # Python Pre-Processing
 apiVersion: apps/v1
@@ -395,11 +388,11 @@ spec:
         app: lazynext-pre-processing
     spec:
       containers:
-      - name: lazynext-pre-processing
-        image: lazynext-lazynext-pre-processing:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8000
+        - name: lazynext-pre-processing
+          image: lazynext-lazynext-pre-processing:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
 ---
 apiVersion: v1
 kind: Service
@@ -411,9 +404,9 @@ spec:
   selector:
     app: lazynext-pre-processing
   ports:
-  - protocol: TCP
-    port: 8000
-    targetPort: 8000
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
 ---
 # Python Generative Studio
 apiVersion: apps/v1
@@ -432,11 +425,11 @@ spec:
         app: lazynext-generative-studio
     spec:
       containers:
-      - name: lazynext-generative-studio
-        image: lazynext-lazynext-generative-studio:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8001
+        - name: lazynext-generative-studio
+          image: lazynext-lazynext-generative-studio:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
 ---
 apiVersion: v1
 kind: Service
@@ -448,6 +441,27 @@ spec:
   selector:
     app: lazynext-generative-studio
   ports:
-  - protocol: TCP
-    port: 8001
-    targetPort: 8001
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+---
+# Database Migration Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: lazynext-db-migrate-job
+  namespace: lazynext
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      name: lazynext-db-migrate-job
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-migrate
+          image: lazynext-db-migrate:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              value: "postgres://postgres:password@postgres-db:5432/lazynext"

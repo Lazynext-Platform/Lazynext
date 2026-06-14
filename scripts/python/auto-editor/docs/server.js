@@ -5,38 +5,46 @@ import * as path from "path";
 const app = express();
 
 app.get("/app/{*splat}", (req, res) => {
-  const newPath = req.path.replace("/app/", "/");
-  res.redirect(301, `https://app.Lazynext-Editor.com${newPath}`);
+	const newPath = req.path.replace("/app/", "/");
+	res.redirect(301, `https://app.Lazynext-Editor.com${newPath}`);
 });
 
-app.get("/blog", (req, res) => { res.redirect(301, `https://basswood-io.com/blog`) });
+app.get("/blog", (req, res) => {
+	res.redirect(301, `https://basswood-io.com/blog`);
+});
 app.get("/blog/{*splat}", (req, res) => {
-  res.redirect(301, `https://basswood-io.com${req.path}`);
+	res.redirect(301, `https://basswood-io.com${req.path}`);
 });
 
 app.get("/options", (req, res) => {
-  res.redirect(301, "https://Lazynext-Editor.com/ref/options");
+	res.redirect(301, "https://Lazynext-Editor.com/ref/options");
 });
 
-app.use(express.static("public", {
-  index: ["index.html"],
-  extensions: ["html"],
-  setHeaders: (res, filep, stat) => {
-    if (path.extname(filep) === "") {
-      res.set("Content-Type", "text/html");
-    }
-    if (filep.includes("/wasm") || filep.endsWith(".wasm") || filep.endsWith(".js")) {
-      res.set("Cross-Origin-Opener-Policy", "same-origin");
-      res.set("Cross-Origin-Embedder-Policy", "require-corp");
-    }
-  }
-}));
+app.use(
+	express.static("public", {
+		index: ["index.html"],
+		extensions: ["html"],
+		setHeaders: (res, filep, stat) => {
+			if (path.extname(filep) === "") {
+				res.set("Content-Type", "text/html");
+			}
+			if (
+				filep.includes("/wasm") ||
+				filep.endsWith(".wasm") ||
+				filep.endsWith(".js")
+			) {
+				res.set("Cross-Origin-Opener-Policy", "same-origin");
+				res.set("Cross-Origin-Embedder-Policy", "require-corp");
+			}
+		},
+	}),
+);
 
 app.use((req, res) => {
-  let options = {
-    headers: {"Content-Type": "text/html"}
-  };
-  res.status(404).sendFile(path.join(__dirname, "public/404"), options);
+	let options = {
+		headers: { "Content-Type": "text/html" },
+	};
+	res.status(404).sendFile(path.join(__dirname, "public/404"), options);
 });
 
 app.listen(1337, (req, res) => console.log("running on http://localhost:1337"));

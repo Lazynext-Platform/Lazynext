@@ -9,47 +9,47 @@
  * TODO: Integrate with wasm time.apply_crdt_delta for incoming deltas
  */
 export class CollaborationSocket {
-  private ws: WebSocket | null = null;
-  private roomId: string;
-  private listeners: Array<(delta: Uint8Array) => void> = [];
+	private ws: WebSocket | null = null;
+	private roomId: string;
+	private listeners: Array<(delta: Uint8Array) => void> = [];
 
-  constructor(roomId: string) {
-    this.roomId = roomId;
-  }
+	constructor(roomId: string) {
+		this.roomId = roomId;
+	}
 
-  /** Connect to the collaboration server for the configured room. */
-  connect(): void {
-    console.log(
-      `[Collab] Connecting to room "${this.roomId}" (mock — no server configured)`,
-    );
-    // Production: this.ws = new WebSocket(`wss://sync.lazynext.com/rooms/${this.roomId}`);
-    // this.ws.onmessage = (event) => {
-    //   const delta = new Uint8Array(event.data);
-    //   this.listeners.forEach((fn) => fn(delta));
-    // };
-  }
+	/** Connect to the collaboration server for the configured room. */
+	connect(): void {
+		console.log(
+			`[Collab] Connecting to room "${this.roomId}" (mock — no server configured)`,
+		);
+		// Production: this.ws = new WebSocket(`wss://sync.lazynext.com/rooms/${this.roomId}`);
+		// this.ws.onmessage = (event) => {
+		//   const delta = new Uint8Array(event.data);
+		//   this.listeners.forEach((fn) => fn(delta));
+		// };
+	}
 
-  /** Send a local CRDT delta to all connected peers. */
-  broadcastEdit(delta: Uint8Array): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(delta.buffer as ArrayBuffer);
-    }
-  }
+	/** Send a local CRDT delta to all connected peers. */
+	broadcastEdit(delta: Uint8Array): void {
+		if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+			this.ws.send(delta.buffer as ArrayBuffer);
+		}
+	}
 
-  /** Register a listener for incoming deltas from other peers. */
-  onDelta(fn: (delta: Uint8Array) => void): () => void {
-    this.listeners.push(fn);
-    return () => {
-      this.listeners = this.listeners.filter((l) => l !== fn);
-    };
-  }
+	/** Register a listener for incoming deltas from other peers. */
+	onDelta(fn: (delta: Uint8Array) => void): () => void {
+		this.listeners.push(fn);
+		return () => {
+			this.listeners = this.listeners.filter((l) => l !== fn);
+		};
+	}
 
-  /** Disconnect and clean up. */
-  disconnect(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-    this.listeners = [];
-  }
+	/** Disconnect and clean up. */
+	disconnect(): void {
+		if (this.ws) {
+			this.ws.close();
+			this.ws = null;
+		}
+		this.listeners = [];
+	}
 }

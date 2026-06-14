@@ -6,7 +6,9 @@ interface OrganizationSchemaProps {
 	url?: string;
 }
 
-export function OrganizationSchema({ url = "https://lazynext.com" }: OrganizationSchemaProps) {
+export function OrganizationSchema({
+	url = "https://lazynext.com",
+}: OrganizationSchemaProps) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "Organization",
@@ -14,7 +16,8 @@ export function OrganizationSchema({ url = "https://lazynext.com" }: Organizatio
 		name: "Lazynext",
 		url,
 		logo: `${url}/logo.png`,
-		description: "AI-powered video editing platform with multi-model AI agents, Rust compositor, and 6 platform formats.",
+		description:
+			"AI-powered video editing platform with multi-model AI agents, Rust compositor, and 6 platform formats.",
 		foundingDate: "2025",
 		sameAs: [
 			"https://github.com/Lazynext-Corporation",
@@ -27,14 +30,21 @@ export function OrganizationSchema({ url = "https://lazynext.com" }: Organizatio
 		},
 	};
 
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 interface SoftwareAppSchemaProps {
 	url?: string;
 }
 
-export function SoftwareAppSchema({ url = "https://lazynext.com" }: SoftwareAppSchemaProps) {
+export function SoftwareAppSchema({
+	url = "https://lazynext.com",
+}: SoftwareAppSchemaProps) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
@@ -55,7 +65,12 @@ export function SoftwareAppSchema({ url = "https://lazynext.com" }: SoftwareAppS
 		},
 	};
 
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 interface BreadcrumbSchemaProps {
@@ -63,7 +78,10 @@ interface BreadcrumbSchemaProps {
 	url?: string;
 }
 
-export function BreadcrumbSchema({ items, url = "https://lazynext.com" }: BreadcrumbSchemaProps) {
+export function BreadcrumbSchema({
+	items,
+	url = "https://lazynext.com",
+}: BreadcrumbSchemaProps) {
 	const schema = {
 		"@context": "https://schema.org",
 		"@type": "BreadcrumbList",
@@ -75,7 +93,12 @@ export function BreadcrumbSchema({ items, url = "https://lazynext.com" }: Breadc
 		})),
 	};
 
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 interface FAQSchemaProps {
@@ -96,7 +119,12 @@ export function FAQSchema({ questions }: FAQSchemaProps) {
 		})),
 	};
 
-	return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+	return (
+		<script
+			type="application/ld+json"
+			dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+		/>
+	);
 }
 
 // Combined SEO head component

@@ -4,19 +4,19 @@ import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";
 
 export class ArrowElement extends TrackElement {
-  protected declare props: ArrowProps;
+	declare protected props: ArrowProps;
 
-  constructor(fill: string, size: Size) {
-    super(TIMELINE_ELEMENT_TYPE.ARROW);
-    this.props = {
-      fill,
-      width: size.width,
-      height: size.height,
-      lineWidth: 4,
-    };
-  }
+	constructor(fill: string, size: Size) {
+		super(TIMELINE_ELEMENT_TYPE.ARROW);
+		this.props = {
+			fill,
+			width: size.width,
+			height: size.height,
+			lineWidth: 4,
+		};
+	}
 
-  accept<T>(visitor: ElementVisitor<T>): T {
-    return visitor.visitArrowElement(this);
-  }
+	accept<T>(visitor: ElementVisitor<T>): T {
+		return visitor.visitArrowElement(this);
+	}
 }

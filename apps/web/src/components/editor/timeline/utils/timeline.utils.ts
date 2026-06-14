@@ -11,7 +11,7 @@ import { TrackJSON } from "../types";
  * @param num - The number to round
  * @param precision - The number of decimal places to round to
  * @returns The rounded number
- * 
+ *
  * @example
  * ```js
  * const rounded = getDecimalNumber(3.14159, 2);
@@ -19,7 +19,7 @@ import { TrackJSON } from "../types";
  * ```
  */
 export const getDecimalNumber = (num: number, precision = 3) => {
-  return Number(num.toFixed(precision));
+	return Number(num.toFixed(precision));
 };
 
 /**
@@ -29,7 +29,7 @@ export const getDecimalNumber = (num: number, precision = 3) => {
  *
  * @param tracks - Array of track data containing elements
  * @returns The total duration in seconds
- * 
+ *
  * @example
  * ```js
  * const duration = getTotalDuration(tracks);
@@ -37,17 +37,17 @@ export const getDecimalNumber = (num: number, precision = 3) => {
  * ```
  */
 export const getTotalDuration = (tracks: TrackJSON[]) => {
-  return (tracks || []).reduce(
-    (maxDuration, timeline) =>
-      Math.max(
-        maxDuration,
-        (timeline?.elements || []).reduce(
-          (timelineDuration, element) => Math.max(timelineDuration, element.e),
-          0
-        )
-      ),
-    0
-  );
+	return (tracks || []).reduce(
+		(maxDuration, timeline) =>
+			Math.max(
+				maxDuration,
+				(timeline?.elements || []).reduce(
+					(timelineDuration, element) => Math.max(timelineDuration, element.e),
+					0,
+				),
+			),
+		0,
+	);
 };
 
 /**
@@ -56,7 +56,7 @@ export const getTotalDuration = (tracks: TrackJSON[]) => {
  * UUID generation algorithm.
  *
  * @returns A 12-character unique identifier string
- * 
+ *
  * @example
  * ```js
  * const id = generateShortUuid();
@@ -64,11 +64,11 @@ export const getTotalDuration = (tracks: TrackJSON[]) => {
  * ```
  */
 export const generateShortUuid = (): string => {
-  return "xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0,
-      v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+	return "xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+		const r = (Math.random() * 16) | 0,
+			v = c === "x" ? r : (r & 0x3) | 0x8;
+		return v.toString(16);
+	});
 };
 
 /**
@@ -79,7 +79,7 @@ export const generateShortUuid = (): string => {
  * @param currentTime - The current playback time in seconds
  * @param tracks - Array of track objects to search through
  * @returns Array of elements currently active at the specified time
- * 
+ *
  * @example
  * ```js
  * const activeElements = getCurrentElements(5.5, tracks);
@@ -87,27 +87,27 @@ export const generateShortUuid = (): string => {
  * ```
  */
 export const getCurrentElements = (
-  currentTime: number,
-  tracks: Track[]
+	currentTime: number,
+	tracks: Track[],
 ): Array<Readonly<TrackElement>> => {
-  const currentElements: Array<Readonly<TrackElement>> = [];
-  if (tracks?.length) {
-    for (let i = 0; i < tracks.length; i++) {
-      if (tracks[i]) {
-        const elements = tracks[i].getElements();
-        for (let j = 0; j < elements.length; j++) {
-          const element = elements[j];
-          if (
-            element.getStart() <= currentTime &&
-            element.getEnd() >= currentTime
-          ) {
-            currentElements.push(element);
-          }
-        }
-      }
-    }
-  }
-  return currentElements;
+	const currentElements: Array<Readonly<TrackElement>> = [];
+	if (tracks?.length) {
+		for (let i = 0; i < tracks.length; i++) {
+			if (tracks[i]) {
+				const elements = tracks[i].getElements();
+				for (let j = 0; j < elements.length; j++) {
+					const element = elements[j];
+					if (
+						element.getStart() <= currentTime &&
+						element.getEnd() >= currentTime
+					) {
+						currentElements.push(element);
+					}
+				}
+			}
+		}
+	}
+	return currentElements;
 };
 
 /**
@@ -118,7 +118,7 @@ export const getCurrentElements = (
  * @param element - The element to check for splitting
  * @param currentTime - The time at which to check if splitting is possible
  * @returns True if the element can be split at the specified time
- * 
+ *
  * @example
  * ```js
  * const canSplit = canSplitElement(videoElement, 10.5);
@@ -129,10 +129,10 @@ export const getCurrentElements = (
 export const SPLIT_EDGE_BUFFER_SEC = 0.1;
 
 export const canSplitElement = (element: TrackElement, currentTime: number) => {
-  return (
-    currentTime > element.getStart() + SPLIT_EDGE_BUFFER_SEC &&
-    currentTime < element.getEnd() - SPLIT_EDGE_BUFFER_SEC
-  );
+	return (
+		currentTime > element.getStart() + SPLIT_EDGE_BUFFER_SEC &&
+		currentTime < element.getEnd() - SPLIT_EDGE_BUFFER_SEC
+	);
 };
 
 /**
@@ -141,7 +141,7 @@ export const canSplitElement = (element: TrackElement, currentTime: number) => {
  *
  * @param id - The ID to check
  * @returns True if the ID represents an element
- * 
+ *
  * @example
  * ```js
  * const isElement = isElementId("e-abc123");
@@ -156,7 +156,7 @@ export const isElementId = (id: string) => id.startsWith("e-");
  *
  * @param id - The ID to check
  * @returns True if the ID represents a track
- * 
+ *
  * @example
  * ```js
  * const isTrack = isTrackId("t-xyz789");
@@ -173,7 +173,7 @@ export const isTrackId = (id: string) => id.startsWith("t-");
  * @param tracks - Array of track objects containing video elements
  * @param duration - The total duration of the output audio
  * @returns Promise resolving to a Blob URL of the combined audio
- * 
+ *
  * @example
  * ```js
  * const audioUrl = await extractVideoAudio(tracks, 120);
@@ -181,51 +181,51 @@ export const isTrackId = (id: string) => id.startsWith("t-");
  * ```
  */
 export const extractVideoAudio = async (tracks: Track[], duration: number) => {
-  const videoSegments: {
-    src: string;
-    startAt: number;
-    endAt: number;
-    s: number;
-    e: number;
-    volume: number;
-    playbackRate: number;
-  }[] = [];
-  tracks.forEach((track) =>
-    track.getElements().forEach((element) => {
-      if (element instanceof VideoElement) {
-        videoSegments.push({
-          src: element.getSrc(),
-          startAt: element.getStartAt(),
-          endAt: element.getEndAt(),
-          s: element.getStart(),
-          e: element.getEnd(),
-          volume: element.getVolume(),
-          playbackRate: element.getPlaybackRate(),
-        });
-      }
-    })
-  );
+	const videoSegments: {
+		src: string;
+		startAt: number;
+		endAt: number;
+		s: number;
+		e: number;
+		volume: number;
+		playbackRate: number;
+	}[] = [];
+	tracks.forEach((track) =>
+		track.getElements().forEach((element) => {
+			if (element instanceof VideoElement) {
+				videoSegments.push({
+					src: element.getSrc(),
+					startAt: element.getStartAt(),
+					endAt: element.getEndAt(),
+					s: element.getStart(),
+					e: element.getEnd(),
+					volume: element.getVolume(),
+					playbackRate: element.getPlaybackRate(),
+				});
+			}
+		}),
+	);
 
-  const videoAudioPromises = videoSegments.map((segment) => {
-    return extractAudio({
-      src: segment.src,
-      start: segment.startAt,
-      end: segment.endAt,
-      // volume is handled by the timeline player directly
-      playbackRate: segment.playbackRate,
-    });
-  });
+	const videoAudioPromises = videoSegments.map((segment) => {
+		return extractAudio({
+			src: segment.src,
+			start: segment.startAt,
+			end: segment.endAt,
+			// volume is handled by the timeline player directly
+			playbackRate: segment.playbackRate,
+		});
+	});
 
-  const audioUrls = await Promise.all(videoAudioPromises);
-  const extractedAudio = await stitchAudio(
-    audioUrls.map((url: string, index: number) => ({
-      src: url,
-      s: videoSegments[index].s,
-      e: videoSegments[index].e,
-      volume: videoSegments[index].volume,
-    })),
-    duration
-  );
+	const audioUrls = await Promise.all(videoAudioPromises);
+	const extractedAudio = await stitchAudio(
+		audioUrls.map((url: string, index: number) => ({
+			src: url,
+			s: videoSegments[index].s,
+			e: videoSegments[index].e,
+			volume: videoSegments[index].volume,
+		})),
+		duration,
+	);
 
-  return extractedAudio;
+	return extractedAudio;
 };

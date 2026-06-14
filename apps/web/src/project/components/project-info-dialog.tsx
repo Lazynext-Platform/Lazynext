@@ -8,8 +8,20 @@ import {
 } from "@/components/ui/dialog";
 import type { TProjectMetadata } from "@/project/types";
 import { formatDate } from "@/utils/date";
-import { formatTimecode, mediaTimeToSeconds } from "lazynext-wasm";
 import { Button } from "@/components/ui/button";
+
+function formatProjectDuration(duration: number) {
+	const durationSeconds = duration / 120000;
+	const pad = (n: number) => n.toString().padStart(2, "0");
+	const h = Math.floor(durationSeconds / 3600);
+	const m = Math.floor((durationSeconds % 3600) / 60);
+	const s = Math.floor(durationSeconds % 60);
+
+	if (durationSeconds >= 3600) {
+		return `${pad(h)}:${pad(m)}:${pad(s)}`;
+	}
+	return `${pad(m)}:${pad(s)}`;
+}
 
 function InfoRow({
 	label,
@@ -35,11 +47,8 @@ export function ProjectInfoDialog({
 	onOpenChange: (open: boolean) => void;
 	project: TProjectMetadata;
 }) {
-	const durationSeconds = mediaTimeToSeconds({ time: project.duration });
 	const durationFormatted =
-		project.duration > 0
-		? (formatTimecode({ time: project.duration, format: durationSeconds >= 3600 ? "HH:MM:SS" : "MM:SS" }) ?? "")
-		: "0:00";
+		project.duration > 0 ? formatProjectDuration(project.duration) : "0:00";
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onOpenChange}>

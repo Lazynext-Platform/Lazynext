@@ -19,6 +19,7 @@ Lazynext-Editor video.mp4 --when-normal nil
 ```
 
 These options have aliases:
+
 - `--when-silent` = `--when-inactive`, `-w:0`
 - `--when-normal` = `--when-active`, `-w:1`
 
@@ -62,6 +63,7 @@ Lazynext-Editor video.mp4 --when-normal speed:0.5
 ### varispeed
 
 Change the playback speed by varying pitch, like analog tape or vinyl.
+
 - **Value range:** 0.2 to 100.0
 
 ```bash
@@ -75,6 +77,7 @@ Lazynext-Editor video.mp4 --when-normal varispeed:0.5
 ### volume
 
 Adjust the audio volume level.
+
 - **1.0** = normal volume
 - **0.5** = half volume (-6dB)
 - **2.0** = double volume (+6dB)
@@ -91,6 +94,7 @@ Lazynext-Editor video.mp4 --when-normal volume:1.5
 
 Reduce harsh "s" and "sh" sibilance in the audio section. Takes up to three
 positional args, `deesser:intensity[:max[:freq]]`, each in the range 0.0 to 1.0:
+
 - **intensity** — how much to de-ess (0.0 = none, 1.0 = maximum)
 - **max** — caps the maximum reduction (default 0.5)
 - **freq** — split frequency (default 0.5)
@@ -114,6 +118,7 @@ Lazynext-Editor video.mp4 --when-silent invert
 ### zoom
 
 Zoom in or out by a factor.
+
 - **Value range:** greater than 0.0, up to 100.0
 - **1.0** = no zoom
 
@@ -310,6 +315,7 @@ Lazynext-Editor video.mp4 --when-normal zoom:1..1.5:ease=inout
 ```
 
 `:ease=curve[:duration]`
+
 - **curve** — `linear`, `in`, `out`, or `inout`
 - **duration** — optional; e.g. `2sec` or a bare frame count. Once it elapses,
   the value holds at its end. Omitted, the animation spans the whole section.
@@ -345,35 +351,41 @@ The format is `ACTION,START,END` where `ACTION` can be any action or comma-separ
 ## Common Use Cases
 
 ### Fast-Forward Through Silence
+
 ```bash
 Lazynext-Editor video.mp4 --when-silent speed:8
 ```
 
 ### Subtle Speed Variations
+
 ```bash
 # Slightly slow down normal sections for emphasis
 Lazynext-Editor video.mp4 --when-normal speed:0.9
 ```
 
 ### Duck Audio During Silence
+
 ```bash
 # Keep silent sections but reduce volume
 Lazynext-Editor video.mp4 --when-silent volume:0.3
 ```
 
 ### Podcast Editing
+
 ```bash
 # Cut silence, slightly speed up speech
 Lazynext-Editor podcast.mp3 --when-silent cut --when-normal speed:1.15
 ```
 
 ### Music Editing
+
 ```bash
 # Keep everything but boost quiet parts
 Lazynext-Editor song.mp3 --when-silent volume:1.8 --when-normal volume:1.0
 ```
 
 ### Creative Effects
+
 ```bash
 # Nightcore effect: speed up and pitch up
 Lazynext-Editor video.mp4 --when-normal varispeed:1.25
@@ -398,6 +410,7 @@ Lazynext-Editor video.mp4 --when-silent speed:8 --when-normal speed:1
 ```
 
 ## See Also
+
 - [Complete Actions Reference](/ref/actions)
 - [Range Syntax](./range-syntax) - Manual editing with `--cut-out` and `--add-in`
 - [Audio Normalization](./anorm) - Volume normalization options

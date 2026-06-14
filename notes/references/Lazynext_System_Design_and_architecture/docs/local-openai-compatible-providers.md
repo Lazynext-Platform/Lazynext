@@ -142,10 +142,10 @@ Offline install checklist:
 
 ## Troubleshooting
 
-| Symptom | Check |
-|---|---|
-| Claw still asks for Anthropic credentials | Use an explicit OpenAI-compatible model route or remove unrelated Anthropic env vars during local smoke tests. |
-| `model not found` from local server | Use the exact model ID exposed by Ollama/llama.cpp/vLLM. |
-| Plain prompt works but tools fail | Confirm the model/server supports OpenAI-compatible tool calls and response shapes. |
+| Symptom                                         | Check                                                                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Claw still asks for Anthropic credentials       | Use an explicit OpenAI-compatible model route or remove unrelated Anthropic env vars during local smoke tests.      |
+| `model not found` from local server             | Use the exact model ID exposed by Ollama/llama.cpp/vLLM.                                                            |
+| Plain prompt works but tools fail               | Confirm the model/server supports OpenAI-compatible tool calls and response shapes.                                 |
 | Skill says installed but `/skills <name>` fails | Check `/skills list` for the discovered name and source; verify provider credentials separately with `claw doctor`. |
-| A local docs/log file contains secrets | Redact it before using `@path` file context or attaching it to an issue. |
+| A local docs/log file contains secrets          | Redact it before using `@path` file context or attaching it to an issue.                                            |

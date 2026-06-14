@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signOut } from "@/auth/client";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { Button } from "./ui/button";
@@ -54,7 +55,12 @@ export function Header() {
 						<ContextMenuContent>
 							<ContextMenuItem
 								onClick={async () => {
-									await navigator.clipboard.writeText(new URL(DEFAULT_LOGO_URL, window.location.origin).toString());
+									await navigator.clipboard.writeText(
+										new URL(
+											DEFAULT_LOGO_URL,
+											window.location.origin,
+										).toString(),
+									);
 								}}
 							>
 								<HugeiconsIcon icon={Copy01Icon} />
@@ -103,7 +109,21 @@ export function Header() {
 						</Button>
 					</div>
 					<div className="hidden items-center gap-3 md:flex">
-
+						<Button
+							variant="outline"
+							className="text-sm font-semibold border-white/10 hover:bg-white/5"
+							onClick={async () => {
+								try {
+									await signOut();
+								} catch (err) {
+									console.error("Sign out error", err);
+								} finally {
+									window.location.href = "/sign-in";
+								}
+							}}
+						>
+							Sign Out
+						</Button>
 						<ThemeToggle />
 					</div>
 				</div>

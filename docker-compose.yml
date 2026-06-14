@@ -13,6 +13,7 @@ services:
       - NEXT_PUBLIC_RENDER_URL=http://localhost:8003
       - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
       - BETTER_AUTH_SECRET=super_secret_docker_key_123
+      - BETTER_AUTH_URL=http://localhost:3000
       - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
       - UPSTASH_REDIS_REST_TOKEN=docker_local_mock_token
       - MARBLE_WORKSPACE_KEY=mock_marble_key

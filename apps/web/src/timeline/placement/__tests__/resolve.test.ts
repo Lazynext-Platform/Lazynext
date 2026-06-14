@@ -648,7 +648,7 @@ describe("resolveTrackPlacement", () => {
 			trackId: "video-main",
 			trackIndex: 0,
 			trackType: "video",
-			 
+
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			adjustedStartTime: 0 as any,
 		});

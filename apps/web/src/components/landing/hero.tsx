@@ -18,7 +18,6 @@ export function Hero() {
 			<div className="absolute inset-0 z-[-39] bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
 
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center items-center z-10">
-
 				<div className="inline-block text-6xl font-extrabold tracking-tighter md:text-[6.5rem] leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 drop-shadow-2xl">
 					<h1 className="text-zinc-100">The open source</h1>
 					<div className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent py-2">
@@ -27,25 +26,37 @@ export function Hero() {
 				</div>
 
 				<p className="text-zinc-400 mx-auto mt-8 max-w-2xl text-lg font-light tracking-wide sm:text-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 drop-shadow-md">
-					A stunningly simple, incredibly powerful video editor that just works. 
-					<span className="block mt-2 font-medium text-zinc-300">Run it locally, in the cloud, or straight from your browser.</span>
+					A stunningly simple, incredibly powerful video editor that just works.
+					<span className="block mt-2 font-medium text-zinc-300">
+						Run it locally, in the cloud, or straight from your browser.
+					</span>
 				</p>
 
 				<div className="mt-14 flex flex-col sm:flex-row justify-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300 w-full sm:w-auto">
 					<Link href="/projects" className="w-full sm:w-auto">
-						<Button size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-white text-black hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(255,255,255,0.4)] rounded-2xl group">
+						<Button
+							size="lg"
+							className="w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-white text-black hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(255,255,255,0.4)] rounded-2xl group"
+						>
 							Launch Editor
 							<ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
 						</Button>
 					</Link>
-					<Link href="https://github.com/Lazynext-Corporation/lazynext" className="w-full sm:w-auto">
-						<Button variant="outline" size="lg" className="w-full sm:w-auto h-14 px-8 text-lg font-medium border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all hover:scale-105 active:scale-95 rounded-2xl">
+					<Link
+						href="https://github.com/Lazynext-Corporation/lazynext"
+						className="w-full sm:w-auto"
+					>
+						<Button
+							variant="outline"
+							size="lg"
+							className="w-full sm:w-auto h-14 px-8 text-lg font-medium border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all hover:scale-105 active:scale-95 rounded-2xl"
+						>
 							View Source
 						</Button>
 					</Link>
 				</div>
 			</div>
-			
+
 			{/* Bottom fade out to merge with next section */}
 			<div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-0 pointer-events-none" />
 		</div>

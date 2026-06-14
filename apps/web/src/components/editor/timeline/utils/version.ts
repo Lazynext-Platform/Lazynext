@@ -1,7 +1,7 @@
 /**
  * Package version constant.
  * Imports version directly from package.json
- * 
+ *
  * @example
  * ```typescript
  * import { getPackageVersion } from './utils/version';
@@ -14,7 +14,7 @@
  * @returns The package version from package.json
  */
 export function getPackageVersion(): string {
-  return "0.1.0";
+	return "0.1.0";
 }
 
 /**
@@ -22,5 +22,5 @@ export function getPackageVersion(): string {
  * @returns The package name from package.json
  */
 export function getPackageName(): string {
-  return "@lazynext/web";
+	return "@lazynext/web";
 }

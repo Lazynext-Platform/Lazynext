@@ -1,14 +1,16 @@
-import type { Config } from 'drizzle-kit';
-import * as dotenv from 'dotenv';
+import type { Config } from "drizzle-kit";
+import * as dotenv from "dotenv";
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: ".env.local" });
 dotenv.config(); // fallback to .env
 
 export default {
-  schema: './src/db/schema.ts',
-  out: './drizzle',
-  dialect: 'postgresql',
-  dbCredentials: {
-    url: process.env.DATABASE_URL || 'postgresql://lazynext:password123@localhost:5432/lazynext_db',
-  },
+	schema: "./src/db/schema.ts",
+	out: "./drizzle",
+	dialect: "postgresql",
+	dbCredentials: {
+		url:
+			process.env.DATABASE_URL ||
+			"postgresql://lazynext:password123@localhost:5432/lazynext_db",
+	},
 } satisfies Config;

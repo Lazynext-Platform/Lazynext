@@ -21,61 +21,61 @@ import { TrackFriend } from "../track/track.friend";
  * Implements the Friend Class Pattern for explicit access control
  */
 export class ElementUpdater implements ElementVisitor<boolean> {
-  private trackFriend: TrackFriend;
+	private trackFriend: TrackFriend;
 
-  constructor(track: Track) {
-    this.trackFriend = track.createFriend();
-  }
+	constructor(track: Track) {
+		this.trackFriend = track.createFriend();
+	}
 
-  visitVideoElement(element: VideoElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitVideoElement(element: VideoElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitAudioElement(element: AudioElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitAudioElement(element: AudioElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitImageElement(element: ImageElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitImageElement(element: ImageElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitTextElement(element: TextElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitTextElement(element: TextElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitCaptionElement(element: CaptionElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitCaptionElement(element: CaptionElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitIconElement(element: IconElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitIconElement(element: IconElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitEmojiElement(element: EmojiElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitEmojiElement(element: EmojiElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitCircleElement(element: CircleElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitCircleElement(element: CircleElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitRectElement(element: RectElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitRectElement(element: RectElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitPlaceholderElement(element: PlaceholderElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitPlaceholderElement(element: PlaceholderElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitArrowElement(element: ArrowElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitArrowElement(element: ArrowElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitLineElement(element: LineElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
+	visitLineElement(element: LineElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
 
-  visitEffectElement(element: EffectElement): boolean {
-    return this.trackFriend.updateElement(element);
-  }
-} 
+	visitEffectElement(element: EffectElement): boolean {
+		return this.trackFriend.updateElement(element);
+	}
+}

@@ -6,7 +6,11 @@ import {
 	getChannelEntriesFromData,
 	isAnimationStorageKey,
 } from "../channel-data";
-import type { AnimationChannel, ChannelData, CompositeChannelData } from "@/animation/types";
+import type {
+	AnimationChannel,
+	ChannelData,
+	CompositeChannelData,
+} from "@/animation/types";
 import { type MediaTime } from "@/wasm";
 
 // --- Helpers ---
@@ -14,7 +18,13 @@ import { type MediaTime } from "@/wasm";
 function createScalarChannel(): AnimationChannel {
 	return {
 		keys: [
-			{ id: "k1", time: 0 as MediaTime, value: 0, segmentToNext: "linear", tangentMode: "flat" },
+			{
+				id: "k1",
+				time: 0 as MediaTime,
+				value: 0,
+				segmentToNext: "linear",
+				tangentMode: "flat",
+			},
 		],
 	};
 }

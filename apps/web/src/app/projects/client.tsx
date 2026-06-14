@@ -82,7 +82,7 @@ const formatProjectDuration = ({
 	const h = Math.floor(durationSeconds / 3600);
 	const m = Math.floor((durationSeconds % 3600) / 60);
 	const s = Math.floor(durationSeconds % 60);
-	
+
 	if (durationSeconds >= 3600) {
 		return `${pad(h)}:${pad(m)}:${pad(s)}`;
 	}
@@ -94,7 +94,11 @@ const VIEW_MODE_OPTIONS = [
 	{ mode: "list" as const, icon: LeftToRightListDashIcon, label: "List view" },
 ];
 
-export default function ProjectsClient({ initialProjects }: { initialProjects: any[] }) {
+export default function ProjectsClient({
+	initialProjects,
+}: {
+	initialProjects: any[];
+}) {
 	const { searchQuery, sortKey, sortOrder, viewMode } = useProjectsStore();
 	const editor = useEditor();
 	const sortOption: TProjectSortOption = `${sortKey}-${sortOrder}`;
@@ -110,7 +114,17 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 			// Seed the indexedDB cache with what the server knows
 			// In a real robust app, we might need a more sophisticated merge strategy.
 			initialProjects.forEach(async (p) => {
-				await storageService.saveProject({ project: p });
+				if (p.metadata) {
+					p.metadata.createdAt = new Date(p.metadata.createdAt);
+					p.metadata.updatedAt = new Date(p.metadata.updatedAt);
+					if (p.scenes) {
+						p.scenes.forEach((scene: any) => {
+							scene.createdAt = new Date(scene.createdAt);
+							scene.updatedAt = new Date(scene.updatedAt);
+						});
+					}
+					await storageService.saveProject({ project: p });
+				}
 			});
 			// Give it a tiny delay to ensure indexedDB writes
 			setTimeout(() => {
@@ -132,7 +146,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 				<StoragePersistenceDialog />
 				<ChangelogNotification />
 				<ProjectsHeader />
-				<ProjectsToolbar projectIds={projectsToDisplay.map((p: { id: string }) => p.id)} />
+				<ProjectsToolbar
+					projectIds={projectsToDisplay.map((p: { id: string }) => p.id)}
+				/>
 				<main className="mx-auto px-4 pt-6 pb-12 flex flex-col gap-6 max-w-[1400px]">
 					{isLoading || !isInitialized ? (
 						<ProjectsSkeleton />
@@ -150,7 +166,9 @@ export default function ProjectsClient({ initialProjects }: { initialProjects: a
 								<ProjectItem
 									key={project.id}
 									project={project}
-									allProjectIds={projectsToDisplay.map((p: { id: string }) => p.id)}
+									allProjectIds={projectsToDisplay.map(
+										(p: { id: string }) => p.id,
+									)}
 								/>
 							))}
 						</div>
@@ -674,7 +692,9 @@ function ProjectItem({
 	const listContent = (
 		<div
 			className={`flex items-center gap-4 py-3 px-5 rounded-xl border transition-all duration-200 group ${
-				isSelected ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/50 shadow-[0_0_20px_-5px_rgba(1,243,254,0.15)]" : "bg-[var(--bg-panel)] hover:bg-[var(--bg-main)] backdrop-blur-sm border-[var(--border-glass)] hover:border-[var(--accent-primary)]/50"
+				isSelected
+					? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/50 shadow-[0_0_20px_-5px_rgba(1,243,254,0.15)]"
+					: "bg-[var(--bg-panel)] hover:bg-[var(--bg-main)] backdrop-blur-sm border-[var(--border-glass)] hover:border-[var(--accent-primary)]/50"
 			}`}
 		>
 			<Checkbox
@@ -1005,9 +1025,9 @@ function EmptyState() {
 						<h3 className="text-lg font-medium">No results found</h3>
 						// eslint-disable-next-line react/jsx-no-comment-textnodes
 						<p className="text-muted-foreground max-w-md">
-							// eslint-disable-next-line react/no-unescaped-entities
-							// eslint-disable-next-line react/no-unescaped-entities
-							Your search for "{searchQuery}" did not return any results.
+							// eslint-disable-next-line react/no-unescaped-entities //
+							eslint-disable-next-line react/no-unescaped-entities Your search
+							for "{searchQuery}" did not return any results.
 						</p>
 					</div>
 				</div>

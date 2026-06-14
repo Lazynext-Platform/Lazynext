@@ -13,6 +13,12 @@ export function SettingsPageClient() {
 	const [name, setName] = useState(session?.user?.name ?? "");
 	const [saving, setSaving] = useState(false);
 
+	React.useEffect(() => {
+		if (!isPending && !session) {
+			router.replace("/sign-in");
+		}
+	}, [session, isPending, router]);
+
 	if (isPending) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
@@ -22,7 +28,6 @@ export function SettingsPageClient() {
 	}
 
 	if (!session) {
-		router.push("/sign-in");
 		return null;
 	}
 
@@ -60,16 +65,24 @@ export function SettingsPageClient() {
 				</Link>
 
 				<h1 className="text-3xl font-bold text-white">Settings</h1>
-				<p className="mt-2 text-sm text-zinc-400">Manage your account and preferences.</p>
+				<p className="mt-2 text-sm text-zinc-400">
+					Manage your account and preferences.
+				</p>
 
 				<div className="mt-8 space-y-8">
 					{/* Profile Section */}
 					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[0_0_20px_rgba(1,243,254,0.05)]">
-						<h2 className="text-lg font-bold text-[var(--text-primary)]">Profile</h2>
-						<p className="mt-1 text-sm text-zinc-400">Update your display name and email.</p>
+						<h2 className="text-lg font-bold text-[var(--text-primary)]">
+							Profile
+						</h2>
+						<p className="mt-1 text-sm text-zinc-400">
+							Update your display name and email.
+						</p>
 						<form onSubmit={handleSave} className="mt-4 space-y-4">
 							<div>
-								<label className="mb-1 block text-xs font-medium text-zinc-400">Name</label>
+								<label className="mb-1 block text-xs font-medium text-zinc-400">
+									Name
+								</label>
 								<input
 									type="text"
 									value={name}
@@ -79,14 +92,18 @@ export function SettingsPageClient() {
 								/>
 							</div>
 							<div>
-								<label className="mb-1 block text-xs font-medium text-zinc-400">Email</label>
+								<label className="mb-1 block text-xs font-medium text-zinc-400">
+									Email
+								</label>
 								<input
 									type="email"
 									value={session.user?.email ?? ""}
 									disabled
 									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-3 py-2 text-sm text-zinc-500 outline-none"
 								/>
-								<p className="mt-1 text-xs text-zinc-500">Email cannot be changed</p>
+								<p className="mt-1 text-xs text-zinc-500">
+									Email cannot be changed
+								</p>
 							</div>
 							<button
 								type="submit"
@@ -100,22 +117,42 @@ export function SettingsPageClient() {
 
 					{/* Preferences Section */}
 					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[0_0_20px_rgba(1,243,254,0.05)]">
-						<h2 className="text-lg font-bold text-[var(--text-primary)]">Preferences</h2>
-						<p className="mt-1 text-sm text-zinc-400">Customize your editing experience.</p>
+						<h2 className="text-lg font-bold text-[var(--text-primary)]">
+							Preferences
+						</h2>
+						<p className="mt-1 text-sm text-zinc-400">
+							Customize your editing experience.
+						</p>
 						<div className="mt-4 space-y-3">
 							<label className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
 								<div>
-									<span className="text-sm font-bold text-[var(--text-primary)]">Autosave</span>
-									<p className="text-xs text-zinc-400">Save projects automatically every 30 seconds</p>
+									<span className="text-sm font-bold text-[var(--text-primary)]">
+										Autosave
+									</span>
+									<p className="text-xs text-zinc-400">
+										Save projects automatically every 30 seconds
+									</p>
 								</div>
-								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-[var(--accent-primary)]" />
+								<input
+									type="checkbox"
+									defaultChecked
+									className="h-4 w-4 rounded accent-[var(--accent-primary)]"
+								/>
 							</label>
 							<label className="flex items-center justify-between rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-4 py-3">
 								<div>
-									<span className="text-sm font-bold text-[var(--text-primary)]">Snap to Grid</span>
-									<p className="text-xs text-zinc-400">Snap timeline elements to the nearest frame</p>
+									<span className="text-sm font-bold text-[var(--text-primary)]">
+										Snap to Grid
+									</span>
+									<p className="text-xs text-zinc-400">
+										Snap timeline elements to the nearest frame
+									</p>
 								</div>
-								<input type="checkbox" defaultChecked className="h-4 w-4 rounded accent-[var(--accent-primary)]" />
+								<input
+									type="checkbox"
+									defaultChecked
+									className="h-4 w-4 rounded accent-[var(--accent-primary)]"
+								/>
 							</label>
 						</div>
 					</section>
@@ -123,10 +160,14 @@ export function SettingsPageClient() {
 					{/* Danger Zone */}
 					<section className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
 						<h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
-						<p className="mt-1 text-sm text-zinc-400">Permanently delete your account and all data.</p>
+						<p className="mt-1 text-sm text-zinc-400">
+							Permanently delete your account and all data.
+						</p>
 						<button
 							type="button"
-							onClick={() => toast.error("Account deletion is not yet implemented")}
+							onClick={() =>
+								toast.error("Account deletion is not yet implemented")
+							}
 							className="mt-4 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
 						>
 							Delete Account

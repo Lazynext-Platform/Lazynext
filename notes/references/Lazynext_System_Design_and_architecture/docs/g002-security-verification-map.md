@@ -158,7 +158,6 @@ Run these from the repository root unless noted:
 4. Full regression:
    - `(cd rust && cargo test --workspace)`
 
-
 ## Worker-4 verification evidence (2026-05-14)
 
 PASS:

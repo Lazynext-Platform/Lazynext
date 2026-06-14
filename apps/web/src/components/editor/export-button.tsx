@@ -3,45 +3,45 @@
 import { useState } from "react";
 
 export default function ExportButton({ projectId }: { projectId: string }) {
-  const [isExporting, setIsExporting] = useState(false);
-  const [status, setStatus] = useState("");
+	const [isExporting, setIsExporting] = useState(false);
+	const [status, setStatus] = useState("");
 
-  const handleExport = async () => {
-    setIsExporting(true);
-    setStatus("Exporting...");
+	const handleExport = async () => {
+		setIsExporting(true);
+		setStatus("Exporting...");
 
-    try {
-      const res = await fetch("/api/export", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId }),
-      });
+		try {
+			const res = await fetch("/api/export", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ projectId }),
+			});
 
-      const data = await res.json();
+			const data = await res.json();
 
-      if (!res.ok) {
-        setStatus(`Error: ${data.error || "Failed to export"}`);
-      } else {
-        setStatus(`Success: ${data.message}`);
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("Error: Network failure");
-    } finally {
-      setIsExporting(false);
-    }
-  };
+			if (!res.ok) {
+				setStatus(`Error: ${data.error || "Failed to export"}`);
+			} else {
+				setStatus(`Success: ${data.message}`);
+			}
+		} catch (err) {
+			console.error(err);
+			setStatus("Error: Network failure");
+		} finally {
+			setIsExporting(false);
+		}
+	};
 
-  return (
-    <div className="flex items-center gap-2">
-      {status && <span className="text-xs text-zinc-400">{status}</span>}
-      <button
-        onClick={handleExport}
-        disabled={isExporting}
-        className="rounded-md bg-zinc-700 px-3 py-1 text-sm text-white hover:bg-zinc-600 disabled:opacity-50"
-      >
-        {isExporting ? "Exporting..." : "Export"}
-      </button>
-    </div>
-  );
+	return (
+		<div className="flex items-center gap-2">
+			{status && <span className="text-xs text-zinc-400">{status}</span>}
+			<button
+				onClick={handleExport}
+				disabled={isExporting}
+				className="rounded-md bg-zinc-700 px-3 py-1 text-sm text-white hover:bg-zinc-600 disabled:opacity-50"
+			>
+				{isExporting ? "Exporting..." : "Export"}
+			</button>
+		</div>
+	);
 }

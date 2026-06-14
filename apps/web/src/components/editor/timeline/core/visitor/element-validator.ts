@@ -14,419 +14,451 @@ import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
 export const VALIDATION_ERROR_CODE = {
-  ELEMENT_NOT_FOUND: "ELEMENT_NOT_FOUND",
-  ELEMENT_NOT_ADDED: "ELEMENT_NOT_ADDED",
-  ELEMENT_NOT_UPDATED: "ELEMENT_NOT_UPDATED",
-  ELEMENT_NOT_REMOVED: "ELEMENT_NOT_REMOVED",
-  COLLISION_ERROR: "COLLISION_ERROR",
-  INVALID_TIMING: "INVALID_TIMING",
-}
+	ELEMENT_NOT_FOUND: "ELEMENT_NOT_FOUND",
+	ELEMENT_NOT_ADDED: "ELEMENT_NOT_ADDED",
+	ELEMENT_NOT_UPDATED: "ELEMENT_NOT_UPDATED",
+	ELEMENT_NOT_REMOVED: "ELEMENT_NOT_REMOVED",
+	COLLISION_ERROR: "COLLISION_ERROR",
+	INVALID_TIMING: "INVALID_TIMING",
+};
 
 export class ValidationError extends Error {
-  constructor(
-    message: string,
-    public errors: string[],
-    public warnings: string[] = []
-  ) {
-    super(message);
-    this.name = 'ValidationError';
-  }
+	constructor(
+		message: string,
+		public errors: string[],
+		public warnings: string[] = [],
+	) {
+		super(message);
+		this.name = "ValidationError";
+	}
 }
 
 export class ElementValidator implements ElementVisitor<boolean> {
-  private validateBasicProperties(element: any): { errors: string[]; warnings: string[] } {
-    const errors: string[] = [];
-    const warnings: string[] = [];
+	private validateBasicProperties(element: any): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const errors: string[] = [];
+		const warnings: string[] = [];
 
-    // Check required basic properties
-    if (!element.getId()) {
-      errors.push("Element must have an ID");
-    }
+		// Check required basic properties
+		if (!element.getId()) {
+			errors.push("Element must have an ID");
+		}
 
-    if (!element.getType()) {
-      errors.push("Element must have a type");
-    }
+		if (!element.getType()) {
+			errors.push("Element must have a type");
+		}
 
-    if (element.getStart() === undefined || element.getStart() === null) {
-      errors.push("Element must have a start time (s)");
-    }
+		if (element.getStart() === undefined || element.getStart() === null) {
+			errors.push("Element must have a start time (s)");
+		}
 
-    if (element.getEnd() === undefined || element.getEnd() === null) {
-      errors.push("Element must have an end time (e)");
-    }
+		if (element.getEnd() === undefined || element.getEnd() === null) {
+			errors.push("Element must have an end time (e)");
+		}
 
-    if (element.getStart() !== undefined && element.getEnd() !== undefined) {
-      if (element.getStart() < 0) {
-        errors.push("Start time cannot be negative");
-      }
-      
-      if (element.getEnd() <= element.getStart()) {
-        errors.push("End time must be greater than start time");
-      }
-    }
+		if (element.getStart() !== undefined && element.getEnd() !== undefined) {
+			if (element.getStart() < 0) {
+				errors.push("Start time cannot be negative");
+			}
 
-    if (!element.getName()) {
-      warnings.push("Element should have a name for better identification");
-    }
+			if (element.getEnd() <= element.getStart()) {
+				errors.push("End time must be greater than start time");
+			}
+		}
 
-    if (!element.getTrackId()) {
-      warnings.push("Element should have a track Id");
-    }
+		if (!element.getName()) {
+			warnings.push("Element should have a name for better identification");
+		}
 
-    return { errors, warnings };
-  }
+		if (!element.getTrackId()) {
+			warnings.push("Element should have a track Id");
+		}
 
-  private validateTextElement(element: TextElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check text-specific properties
-    const props = element.getProps();
-    if (!props?.text) {
-      errors.push("Text element must have text content");
-    }
+	private validateTextElement(element: TextElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    if (props?.fontSize !== undefined && props.fontSize <= 0) {
-      errors.push("Font size must be greater than 0");
-    }
+		// Check text-specific properties
+		const props = element.getProps();
+		if (!props?.text) {
+			errors.push("Text element must have text content");
+		}
 
-    if (props?.fontWeight !== undefined && props.fontWeight < 0) {
-      errors.push("Font weight cannot be negative");
-    }
+		if (props?.fontSize !== undefined && props.fontSize <= 0) {
+			errors.push("Font size must be greater than 0");
+		}
 
-    return { errors, warnings };
-  }
+		if (props?.fontWeight !== undefined && props.fontWeight < 0) {
+			errors.push("Font weight cannot be negative");
+		}
 
-  private validateVideoElement(element: VideoElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check video-specific properties
-    const props = element.getProps();
-    if (!props?.src) {
-      errors.push("Video element must have a source URL");
-    }
+	private validateVideoElement(element: VideoElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    if (props?.volume !== undefined && (props.volume < 0 || props.volume > 3)) {
-      errors.push("Volume must be between 0 and 3 (linear; ~+6 dB max)");
-    }
+		// Check video-specific properties
+		const props = element.getProps();
+		if (!props?.src) {
+			errors.push("Video element must have a source URL");
+		}
 
-    if (props?.playbackRate !== undefined && props.playbackRate <= 0) {
-      errors.push("Playback rate must be greater than 0");
-    }
+		if (props?.volume !== undefined && (props.volume < 0 || props.volume > 3)) {
+			errors.push("Volume must be between 0 and 3 (linear; ~+6 dB max)");
+		}
 
-    // Note: frame property is protected, so we can't validate it directly
-    // This would need to be validated through a public method if needed
+		if (props?.playbackRate !== undefined && props.playbackRate <= 0) {
+			errors.push("Playback rate must be greater than 0");
+		}
 
-    return { errors, warnings };
-  }
+		// Note: frame property is protected, so we can't validate it directly
+		// This would need to be validated through a public method if needed
 
-  private validateAudioElement(element: AudioElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check audio-specific properties
-    const props = element.getProps();
-    if (!props?.src) {
-      errors.push("Audio element must have a source URL");
-    }
+	private validateAudioElement(element: AudioElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    if (props?.volume !== undefined && (props.volume < 0 || props.volume > 3)) {
-      errors.push("Volume must be between 0 and 3 (linear; ~+6 dB max)");
-    }
+		// Check audio-specific properties
+		const props = element.getProps();
+		if (!props?.src) {
+			errors.push("Audio element must have a source URL");
+		}
 
-    if (props?.playbackRate !== undefined && props.playbackRate <= 0) {
-      errors.push("Playback rate must be greater than 0");
-    }
+		if (props?.volume !== undefined && (props.volume < 0 || props.volume > 3)) {
+			errors.push("Volume must be between 0 and 3 (linear; ~+6 dB max)");
+		}
 
-    return { errors, warnings };
-  }
+		if (props?.playbackRate !== undefined && props.playbackRate <= 0) {
+			errors.push("Playback rate must be greater than 0");
+		}
 
-  private validateImageElement(element: ImageElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check image-specific properties
-    const props = element.getProps();
-    if (!props?.src) {
-      errors.push("Image element must have a source URL");
-    }
+	private validateImageElement(element: ImageElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    // Note: frame property is protected, so we can't validate it directly
-    // This would need to be validated through a public method if needed
+		// Check image-specific properties
+		const props = element.getProps();
+		if (!props?.src) {
+			errors.push("Image element must have a source URL");
+		}
 
-    return { errors, warnings };
-  }
+		// Note: frame property is protected, so we can't validate it directly
+		// This would need to be validated through a public method if needed
 
-  private validateCaptionElement(element: CaptionElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check caption-specific properties
-    const text = element.getText();
-    if (!text || text.trim() === "") {
-      errors.push("Caption element must have text content");
-    }
+	private validateCaptionElement(element: CaptionElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    return { errors, warnings };
-  }
+		// Check caption-specific properties
+		const text = element.getText();
+		if (!text || text.trim() === "") {
+			errors.push("Caption element must have text content");
+		}
 
-  private validateIconElement(element: IconElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
-    return { errors, warnings };
-  }
+		return { errors, warnings };
+	}
 
-  private validateEmojiElement(element: EmojiElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
-    const props = element.getProps();
+	private validateIconElement(element: IconElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    if (!props?.src) {
-      errors.push("Emoji element must have an image source URL");
-    }
-    if (!props?.emoji) {
-      warnings.push("Emoji element should include the source emoji character");
-    }
-    return { errors, warnings };
-  }
+	private validateEmojiElement(element: EmojiElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
+		const props = element.getProps();
 
-  private validateCircleElement(element: CircleElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		if (!props?.src) {
+			errors.push("Emoji element must have an image source URL");
+		}
+		if (!props?.emoji) {
+			warnings.push("Emoji element should include the source emoji character");
+		}
+		return { errors, warnings };
+	}
 
-    // Check circle-specific properties
-    const props = element.getProps();
-    if (props?.radius !== undefined && props.radius <= 0) {
-      errors.push("Circle radius must be greater than 0");
-    }
+	private validateCircleElement(element: CircleElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    // Note: frame property is protected, so we can't validate it directly
-    // This would need to be validated through a public method if needed
+		// Check circle-specific properties
+		const props = element.getProps();
+		if (props?.radius !== undefined && props.radius <= 0) {
+			errors.push("Circle radius must be greater than 0");
+		}
 
-    return { errors, warnings };
-  }
+		// Note: frame property is protected, so we can't validate it directly
+		// This would need to be validated through a public method if needed
 
-  private validateRectElement(element: RectElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    // Check rectangle-specific properties
-    const props = element.getProps();
-    if (props?.width !== undefined && props.width <= 0) {
-      errors.push("Rectangle width must be greater than 0");
-    }
+	private validateRectElement(element: RectElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    if (props?.height !== undefined && props.height <= 0) {
-      errors.push("Rectangle height must be greater than 0");
-    }
+		// Check rectangle-specific properties
+		const props = element.getProps();
+		if (props?.width !== undefined && props.width <= 0) {
+			errors.push("Rectangle width must be greater than 0");
+		}
 
-    // Note: frame property is protected, so we can't validate it directly
-    // This would need to be validated through a public method if needed
+		if (props?.height !== undefined && props.height <= 0) {
+			errors.push("Rectangle height must be greater than 0");
+		}
 
-    return { errors, warnings };
-  }
+		// Note: frame property is protected, so we can't validate it directly
+		// This would need to be validated through a public method if needed
 
-  private validateEffectElement(element: EffectElement): { errors: string[]; warnings: string[] } {
-    const basicValidation = this.validateBasicProperties(element);
-    const errors = [...basicValidation.errors];
-    const warnings = [...basicValidation.warnings];
+		return { errors, warnings };
+	}
 
-    const props = element.getProps();
-    if (!props?.effectKey || typeof props.effectKey !== "string") {
-      errors.push("Effect element must have a valid effectKey");
-    }
+	private validateEffectElement(element: EffectElement): {
+		errors: string[];
+		warnings: string[];
+	} {
+		const basicValidation = this.validateBasicProperties(element);
+		const errors = [...basicValidation.errors];
+		const warnings = [...basicValidation.warnings];
 
-    if (props?.intensity !== undefined) {
-      if (props.intensity < 0 || props.intensity > 1) {
-        errors.push("Effect intensity must be between 0 and 1");
-      }
-    }
+		const props = element.getProps();
+		if (!props?.effectKey || typeof props.effectKey !== "string") {
+			errors.push("Effect element must have a valid effectKey");
+		}
 
-    return { errors, warnings };
-  }
+		if (props?.intensity !== undefined) {
+			if (props.intensity < 0 || props.intensity > 1) {
+				errors.push("Effect intensity must be between 0 and 1");
+			}
+		}
 
-  visitVideoElement(element: VideoElement): boolean {
-    const validation = this.validateVideoElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Video element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+		return { errors, warnings };
+	}
 
-  visitAudioElement(element: AudioElement): boolean {
-    const validation = this.validateAudioElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Audio element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+	visitVideoElement(element: VideoElement): boolean {
+		const validation = this.validateVideoElement(element);
 
-  visitImageElement(element: ImageElement): boolean {
-    const validation = this.validateImageElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Image element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Video element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
 
-  visitTextElement(element: TextElement): boolean {
-    const validation = this.validateTextElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Text element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+		return true;
+	}
 
-  visitCaptionElement(element: CaptionElement): boolean {
-    const validation = this.validateCaptionElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Caption element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+	visitAudioElement(element: AudioElement): boolean {
+		const validation = this.validateAudioElement(element);
 
-  visitIconElement(element: IconElement): boolean {
-    const validation = this.validateIconElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Icon element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Audio element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
 
-  visitEmojiElement(element: EmojiElement): boolean {
-    const validation = this.validateEmojiElement(element);
+		return true;
+	}
 
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Emoji element validation failed: ${validation.errors.join(", ")}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
+	visitImageElement(element: ImageElement): boolean {
+		const validation = this.validateImageElement(element);
 
-    return true;
-  }
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Image element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
 
-  visitCircleElement(element: CircleElement): boolean {
-    const validation = this.validateCircleElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Circle element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+		return true;
+	}
 
-  visitRectElement(element: RectElement): boolean {
-    const validation = this.validateRectElement(element);
-    
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Rectangle element validation failed: ${validation.errors.join(', ')}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    
-    return true;
-  }
+	visitTextElement(element: TextElement): boolean {
+		const validation = this.validateTextElement(element);
 
-  visitPlaceholderElement(element: PlaceholderElement): boolean {
-    const validation = this.validateBasicProperties(element);
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Placeholder element validation failed: ${validation.errors.join(", ")}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    return true;
-  }
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Text element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
 
-  visitArrowElement(element: ArrowElement): boolean {
-    const validation = this.validateBasicProperties(element);
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Arrow element validation failed: ${validation.errors.join(", ")}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    return true;
-  }
+		return true;
+	}
 
-  visitLineElement(element: LineElement): boolean {
-    const validation = this.validateBasicProperties(element);
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Line element validation failed: ${validation.errors.join(", ")}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    return true;
-  }
+	visitCaptionElement(element: CaptionElement): boolean {
+		const validation = this.validateCaptionElement(element);
 
-  visitEffectElement(element: EffectElement): boolean {
-    const validation = this.validateEffectElement(element);
-    if (validation.errors.length > 0) {
-      throw new ValidationError(
-        `Effect element validation failed: ${validation.errors.join(", ")}`,
-        validation.errors,
-        validation.warnings
-      );
-    }
-    return true;
-  }
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Caption element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
 
-} 
+		return true;
+	}
+
+	visitIconElement(element: IconElement): boolean {
+		const validation = this.validateIconElement(element);
+
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Icon element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+
+		return true;
+	}
+
+	visitEmojiElement(element: EmojiElement): boolean {
+		const validation = this.validateEmojiElement(element);
+
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Emoji element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+
+		return true;
+	}
+
+	visitCircleElement(element: CircleElement): boolean {
+		const validation = this.validateCircleElement(element);
+
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Circle element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+
+		return true;
+	}
+
+	visitRectElement(element: RectElement): boolean {
+		const validation = this.validateRectElement(element);
+
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Rectangle element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+
+		return true;
+	}
+
+	visitPlaceholderElement(element: PlaceholderElement): boolean {
+		const validation = this.validateBasicProperties(element);
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Placeholder element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+		return true;
+	}
+
+	visitArrowElement(element: ArrowElement): boolean {
+		const validation = this.validateBasicProperties(element);
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Arrow element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+		return true;
+	}
+
+	visitLineElement(element: LineElement): boolean {
+		const validation = this.validateBasicProperties(element);
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Line element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+		return true;
+	}
+
+	visitEffectElement(element: EffectElement): boolean {
+		const validation = this.validateEffectElement(element);
+		if (validation.errors.length > 0) {
+			throw new ValidationError(
+				`Effect element validation failed: ${validation.errors.join(", ")}`,
+				validation.errors,
+				validation.warnings,
+			);
+		}
+		return true;
+	}
+}

@@ -1,8 +1,6 @@
 {
-  "archive_name": "assistant",
-  "package_name": "assistant",
-  "module_count": 1,
-  "sample_files": [
-    "assistant/sessionHistory.ts"
-  ]
+	"archive_name": "assistant",
+	"package_name": "assistant",
+	"module_count": 1,
+	"sample_files": ["assistant/sessionHistory.ts"]
 }

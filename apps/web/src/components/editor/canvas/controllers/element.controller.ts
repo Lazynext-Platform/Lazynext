@@ -16,45 +16,47 @@ import { EmojiElement } from "../elements/emoji.element";
  * elementController.get(element.type)?.add(params) and updateFromFabricObject(...).
  */
 export class ElementController {
-  private elements = new Map<string, CanvasElementHandler>();
+	private elements = new Map<string, CanvasElementHandler>();
 
-  register(handler: CanvasElementHandler) {
-    this.elements.set(handler.name, handler);
-  }
+	register(handler: CanvasElementHandler) {
+		this.elements.set(handler.name, handler);
+	}
 
-  get(name: string): CanvasElementHandler | undefined {
-    return this.elements.get(name);
-  }
+	get(name: string): CanvasElementHandler | undefined {
+		return this.elements.get(name);
+	}
 
-  list(): string[] {
-    return Array.from(this.elements.keys());
-  }
+	list(): string[] {
+		return Array.from(this.elements.keys());
+	}
 }
 
 const elementController = new ElementController();
 
 function registerElements() {
-  elementController.register(VideoElement);
-  elementController.register(ImageElement);
-  elementController.register(RectElement);
-  elementController.register(CircleElement);
-  elementController.register(TextElement);
-  elementController.register(EmojiElement);
-  elementController.register(CaptionElement);
-  elementController.register(WatermarkElement);
-  elementController.register(ArrowElement);
-  elementController.register(LineElement);
-  elementController.register(EffectElement);
+	elementController.register(VideoElement);
+	elementController.register(ImageElement);
+	elementController.register(RectElement);
+	elementController.register(CircleElement);
+	elementController.register(TextElement);
+	elementController.register(EmojiElement);
+	elementController.register(CaptionElement);
+	elementController.register(WatermarkElement);
+	elementController.register(ArrowElement);
+	elementController.register(LineElement);
+	elementController.register(EffectElement);
 }
 
 registerElements();
 
 export function registerCanvasHandler(handler: CanvasElementHandler): void {
-  elementController.register(handler);
+	elementController.register(handler);
 }
 
-export function getCanvasHandler(name: string): CanvasElementHandler | undefined {
-  return elementController.get(name);
+export function getCanvasHandler(
+	name: string,
+): CanvasElementHandler | undefined {
+	return elementController.get(name);
 }
 
 export default elementController;

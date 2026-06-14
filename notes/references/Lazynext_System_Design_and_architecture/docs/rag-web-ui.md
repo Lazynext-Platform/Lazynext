@@ -60,11 +60,11 @@ cargo run -p claw-analog -- ...   # при RAG_BASE_URL или rag_base_url в T
 
 ### Дальше по фазам
 
-| Фаза | Содержание |
-|------|------------|
-| 1 | ~~Ingest + SQLite + embeddings~~ (базово сделано; улучшения: инкремент, ANN, Docker-векторка). |
-| 2 | ~~Инструмент `retrieve_context`~~: `RAG_BASE_URL` / `rag_base_url`, `rag_timeout_secs`, `rag_top_k_max` в `.claw-analog.toml`. |
-| 3 | ~~Минимальный UI~~: `GET /` + те же `/v1/*` (дальше: чат, кнопка re-index из UI). |
+| Фаза | Содержание                                                                                                                     |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | ~~Ingest + SQLite + embeddings~~ (базово сделано; улучшения: инкремент, ANN, Docker-векторка).                                 |
+| 2    | ~~Инструмент `retrieve_context`~~: `RAG_BASE_URL` / `rag_base_url`, `rag_timeout_secs`, `rag_top_k_max` в `.claw-analog.toml`. |
+| 3    | ~~Минимальный UI~~: `GET /` + те же `/v1/*` (дальше: чат, кнопка re-index из UI).                                              |
 
 ## Риски и ограничения
 
