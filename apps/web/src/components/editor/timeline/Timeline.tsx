@@ -1,14 +1,13 @@
-import React from "react";
-
 /**
- * Timeline Component integrated from OpenReel WebCodecs/WebGPU engine.
+ * Timeline Component — Re-exports the full interactive timeline from the parent directory.
+ *
+ * The primary implementation lives in `components/editor/timeline.tsx` (1428 lines)
+ * which includes drag-and-drop, trimming, snapping, razor/slip/ripple/slide/roll tools,
+ * minimap navigator, audio waveforms, markers, cloud comments, and more.
+ *
+ * This file exists for import convenience when components import from
+ * `@/components/editor/timeline/Timeline`.
  */
-export const Timeline: React.FC = () => {
-	return (
-		<div className="w-full h-64 bg-gray-900 border-t border-gray-700 flex items-center justify-center">
-			<span className="text-gray-400">
-				Timeline Engine (OpenReel integration pending)
-			</span>
-		</div>
-	);
-};
+
+export { default as Timeline } from "../timeline";
+export type { default as TimelineDefault } from "../timeline";

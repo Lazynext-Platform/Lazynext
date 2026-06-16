@@ -20,6 +20,7 @@ const PLANS = [
 		priceId: null,
 		cta: "Current Plan",
 		current: true,
+		highlight: false,
 	},
 	{
 		name: "Pro",
@@ -34,6 +35,7 @@ const PLANS = [
 		],
 		cta: "Upgrade to Pro",
 		priceId: "price_pro_placeholder_123", // Replace with real Stripe Price ID
+		highlight: true,
 	},
 	{
 		name: "Studio",
@@ -48,6 +50,7 @@ const PLANS = [
 		],
 		cta: "Upgrade to Studio",
 		priceId: "price_studio_placeholder_123", // Replace with real Stripe Price ID
+		highlight: false,
 	},
 ];
 
@@ -56,14 +59,24 @@ export function BillingPageClient() {
 	const router = useRouter();
 
 	const [org, setOrg] = useState<Organization | null>(null);
+	const [realCredits, setRealCredits] = useState<number | null>(null);
 
 	useEffect(() => {
-		// Simulate fetching from mock DB
+		// Fetch real AI credits from database
+		fetch("/api/user/credits")
+			.then((res) => res.json())
+			.then((data) => {
+				if (typeof data.aiCredits === "number") {
+					setRealCredits(data.aiCredits);
+				}
+			})
+			.catch(console.error);
+
+		// Fetch org data for usage stats
 		fetch("/api/mock-db?org=org_acme_123")
 			.then((res) => res.json())
 			.then((data) => setOrg(data.org))
 			.catch(() => {
-				// Fallback if API route doesn't exist
 				setOrg({
 					id: "org_acme_123",
 					name: "Acme Video Corp",
@@ -145,7 +158,7 @@ export function BillingPageClient() {
 										AI Credits
 									</p>
 									<p className="font-bold text-xl text-[var(--text-primary)]">
-										{org.aiCreditsUsed.toLocaleString()} / 50K
+										{realCredits !== null ? realCredits.toLocaleString() : org.aiCreditsUsed.toLocaleString()} / 50K
 									</p>
 								</div>
 							</div>
