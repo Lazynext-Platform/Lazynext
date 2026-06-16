@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  rust-core:
+    name: Build & Test Rust Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+      - name: Build Rust Workspace
+        run: cargo build --verbose
+      - name: Run Rust Tests
+        run: cargo test --verbose
+
+  web-app:
+    name: Build & Test Next.js App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      - name: Lint Code
+        run: bun run lint
+      - name: Build Web App
+        run: bun run build
+      - name: Run Web Tests
+        run: bun run test
+
+  docker-build:
+    name: Docker Sanity Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test Docker Compose
+        run: docker-compose config
