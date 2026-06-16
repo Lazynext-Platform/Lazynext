@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: pre-processing
-        image: lazynext/pre-processing:latest
+        image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
         ports:
         - containerPort: 8000
         env:

@@ -164,3 +164,12 @@ jobs:
           file: ./services/generative-studio/Dockerfile
           push: true
           tags: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
+
+      - name: Build and Push DB Migrate
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.migrate
+          push: true
+          tags: ghcr.io/lazynext-platform/lazynext-db-migrate:latest

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: lazynext/web:latest
+        image: ghcr.io/lazynext-platform/lazynext-web:latest
         ports:
         - containerPort: 3000
         env:

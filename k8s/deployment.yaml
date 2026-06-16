@@ -176,7 +176,7 @@ spec:
     spec:
       containers:
         - name: lazynext-web
-          image: lazynext-lazynext-web:latest
+          image: ghcr.io/lazynext-platform/lazynext-web:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
@@ -249,7 +249,7 @@ spec:
     spec:
       containers:
         - name: lazynext-api
-          image: lazynext-lazynext-api:latest
+          image: ghcr.io/lazynext-platform/lazynext-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8005
@@ -286,7 +286,7 @@ spec:
     spec:
       containers:
         - name: lazynext-sync
-          image: lazynext-lazynext-sync:latest
+          image: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8002
@@ -326,7 +326,7 @@ spec:
     spec:
       containers:
         - name: lazynext-render
-          image: lazynext-lazynext-render:latest
+          image: ghcr.io/lazynext-platform/lazynext-render-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8003
@@ -366,7 +366,7 @@ spec:
     spec:
       containers:
         - name: lazynext-mcp
-          image: lazynext-lazynext-mcp:latest
+          image: ghcr.io/lazynext-platform/lazynext-mcp:latest
           imagePullPolicy: IfNotPresent
           stdin: true
           tty: true
@@ -389,7 +389,7 @@ spec:
     spec:
       containers:
         - name: lazynext-pre-processing
-          image: lazynext-lazynext-pre-processing:latest
+          image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -426,7 +426,7 @@ spec:
     spec:
       containers:
         - name: lazynext-generative-studio
-          image: lazynext-lazynext-generative-studio:latest
+          image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8001
@@ -460,7 +460,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: db-migrate
-          image: lazynext-db-migrate:latest
+          image: ghcr.io/lazynext-platform/lazynext-db-migrate:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: DATABASE_URL

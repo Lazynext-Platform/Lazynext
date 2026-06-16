@@ -139,7 +139,7 @@ resource "google_cloud_run_v2_service" "web" {
 
   template {
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/lazynext/web:latest"
+      image = "ghcr.io/lazynext-platform/lazynext-web:latest"
 
       ports {
         container_port = 3000
@@ -189,7 +189,7 @@ resource "google_cloud_run_v2_service" "generative_studio" {
 
   template {
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/lazynext/generative-studio:latest"
+      image = "ghcr.io/lazynext-platform/lazynext-generative-studio:latest"
 
       ports {
         container_port = 8001
@@ -234,7 +234,7 @@ resource "google_cloud_run_v2_service" "render_service" {
 
   template {
     containers {
-      image = "${var.region}-docker.pkg.dev/${var.project_id}/lazynext/render-service:latest"
+      image = "ghcr.io/lazynext-platform/lazynext-render-service:latest"
 
       ports {
         container_port = 8003

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: generative-studio
-        image: lazynext/generative-studio:latest
+        image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
         ports:
         - containerPort: 8001
         env:

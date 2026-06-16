@@ -1,8 +1,8 @@
-FROM oven/bun:1 as base
+FROM oven/bun:1
 
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
+COPY package.json ./
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 RUN bun install
 
