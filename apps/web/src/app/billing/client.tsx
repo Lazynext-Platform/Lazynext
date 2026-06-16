@@ -17,6 +17,7 @@ const PLANS = [
 		price: "$0",
 		period: "forever",
 		features: ["1 project", "720p export", "Basic AI tools (Local Models)"],
+		priceId: null,
 		cta: "Current Plan",
 		current: true,
 	},
@@ -32,7 +33,7 @@ const PLANS = [
 			"50GB Cloud storage",
 		],
 		cta: "Upgrade to Pro",
-		highlight: false,
+		priceId: "price_pro_placeholder_123", // Replace with real Stripe Price ID
 	},
 	{
 		name: "Studio",
@@ -46,7 +47,7 @@ const PLANS = [
 			"Dedicated Render Node",
 		],
 		cta: "Upgrade to Studio",
-		highlight: true,
+		priceId: "price_studio_placeholder_123", // Replace with real Stripe Price ID
 	},
 ];
 
@@ -84,6 +85,31 @@ export function BillingPageClient() {
 			</div>
 		);
 	}
+
+	const handleCheckout = async (priceId: string | null, planName: string) => {
+		if (!priceId) return;
+		try {
+			toast.loading(`Preparing checkout for ${planName}...`, { id: "checkout" });
+			const res = await fetch("/api/stripe/checkout", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ priceId, mode: "subscription" }),
+			});
+
+			if (!res.ok) {
+				throw new Error("Failed to create checkout session");
+			}
+
+			const data = await res.json();
+			if (data.url) {
+				toast.dismiss("checkout");
+				window.location.href = data.url;
+			}
+		} catch (error) {
+			console.error(error);
+			toast.error("Error connecting to Stripe. Did you add your STRIPE_SECRET_KEY?", { id: "checkout" });
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
@@ -190,9 +216,7 @@ export function BillingPageClient() {
 								onClick={() =>
 									plan.current
 										? null
-										: toast.info(
-												`Redirecting to Stripe checkout for ${plan.name}...`,
-											)
+										: handleCheckout(plan.priceId, plan.name)
 								}
 								className={`mt-8 w-full rounded-xl py-4 font-bold transition-all ${
 									plan.current

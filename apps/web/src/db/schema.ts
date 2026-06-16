@@ -16,6 +16,7 @@ export const user = pgTable("user", {
 	image: text("image"),
 	role: text("role").notNull().default("user"), // 'user' or 'admin'
 	stripeCustomerId: text("stripe_customer_id"),
+	aiCredits: integer("ai_credits").notNull().default(50), // Grant 50 free credits
 	createdAt: timestamp("created_at").notNull(),
 	updatedAt: timestamp("updated_at").notNull(),
 });

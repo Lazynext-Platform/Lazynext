@@ -20,7 +20,10 @@ export function AIMagicTools() {
 				body: JSON.stringify({ prompt, type: activeTab }),
 			});
 
-			if (!response.ok) throw new Error("Generation failed");
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "Generation failed");
+			}
 
 			const data = await response.json();
 
@@ -37,8 +40,8 @@ export function AIMagicTools() {
 				`${activeTab === "video" ? "Video" : "Voiceover"} generated and added to Media Pool!`,
 			);
 			setPrompt("");
-		} catch (error) {
-			toast.error("Failed to generate media.");
+		} catch (error: any) {
+			toast.error(error.message || "Failed to generate media.");
 			console.error(error);
 		} finally {
 			setIsGenerating(false);
