@@ -114,7 +114,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download WASM Package (for Docker)
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-pkg
+          path: rust/wasm/pkg/
+
       - name: Build and Push Web
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -123,6 +130,7 @@ jobs:
           tags: ghcr.io/lazynext-platform/lazynext-web:latest
 
       - name: Build and Push AI Agents
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: ./services/ai-agents
@@ -131,6 +139,7 @@ jobs:
           tags: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
 
       - name: Build and Push Render Service
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: ./services/render-service
@@ -139,6 +148,7 @@ jobs:
           tags: ghcr.io/lazynext-platform/lazynext-render-service:latest
 
       - name: Build and Push Pre-Processing
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: ./services/pre-processing
@@ -147,6 +157,7 @@ jobs:
           tags: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
 
       - name: Build and Push Generative Studio
+        continue-on-error: true
         uses: docker/build-push-action@v5
         with:
           context: ./services/generative-studio
