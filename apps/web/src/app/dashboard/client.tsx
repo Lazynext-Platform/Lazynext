@@ -48,13 +48,19 @@ export function DashboardClient() {
 	const [projects, setProjects] = useState<any[]>([]);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [aiCredits, setAiCredits] = useState<number>(0);
 
 	useEffect(() => {
-		fetch("/api/projects")
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.projects) {
-					setProjects(data.projects);
+		Promise.all([
+			fetch("/api/projects").then((res) => res.json()),
+			fetch("/api/user/credits").then((res) => res.json()),
+		])
+			.then(([projectsData, creditsData]) => {
+				if (projectsData.projects) {
+					setProjects(projectsData.projects);
+				}
+				if (typeof creditsData.aiCredits === "number") {
+					setAiCredits(creditsData.aiCredits);
 				}
 			})
 			.catch(console.error)
@@ -147,7 +153,7 @@ export function DashboardClient() {
 							</div>
 						</div>
 						<div className="text-4xl font-display font-black text-white relative z-10">
-							15,000
+							{aiCredits.toLocaleString()}
 						</div>
 						<div className="mt-2 text-sm text-white/50 relative z-10">
 							Available this month

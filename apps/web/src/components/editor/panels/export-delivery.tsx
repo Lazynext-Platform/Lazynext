@@ -13,10 +13,14 @@ export function ExportDelivery({
 	const [format, setFormat] = useState("mp4");
 	const [preset, setPreset] = useState("youtube-4k");
 	const [isExporting, setIsExporting] = useState(false);
+	const [renderProgress, setRenderProgress] = useState<number | null>(null);
+	const [renderStatus, setRenderStatus] = useState<string | null>(null);
 	const posthog = usePostHog();
 
 	const handleExport = async () => {
 		setIsExporting(true);
+		setRenderProgress(0);
+		setRenderStatus("queued");
 
 		try {
 			// Dispatch to Render Farm Microservice
@@ -44,13 +48,44 @@ export function ExportDelivery({
 			toast.success(
 				`Successfully queued project as ${format.toUpperCase()} on Render Farm!`,
 			);
+
+			// Subscribe to SSE for real-time render progress
+			const eventSource = new EventSource(
+				`http://localhost:8003/api/v1/jobs/${data.jobId}/stream`,
+			);
+
+			eventSource.onmessage = (event) => {
+				try {
+					const job = JSON.parse(event.data);
+					setRenderProgress(job.progress);
+					setRenderStatus(job.status);
+
+					if (job.status === "completed") {
+						eventSource.close();
+						setIsExporting(false);
+						toast.success("Render complete! Your video is ready.");
+					} else if (job.status === "failed") {
+						eventSource.close();
+						setIsExporting(false);
+						toast.error("Render job failed.");
+					}
+				} catch (e) {
+					console.error("SSE parse error:", e);
+				}
+			};
+
+			eventSource.onerror = () => {
+				eventSource.close();
+				setIsExporting(false);
+			};
 		} catch (err) {
 			console.error(err);
 			toast.error(
 				"Failed to communicate with Render Farm service. Make sure it is running.",
 			);
-		} finally {
 			setIsExporting(false);
+			setRenderProgress(null);
+			setRenderStatus(null);
 		}
 	};
 
@@ -146,12 +181,32 @@ export function ExportDelivery({
 				</div>
 
 				<div className="p-4 border-t border-zinc-800 bg-zinc-950">
+					{renderProgress !== null && (
+						<div className="mb-4">
+							<div className="flex justify-between items-center mb-2">
+								<span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+									{renderStatus === "completed" ? "Render Complete" : renderStatus === "failed" ? "Render Failed" : "Rendering..."}
+								</span>
+								<span className="text-xs font-mono text-zinc-300">
+									{Math.round(renderProgress)}%
+								</span>
+							</div>
+							<div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+								<div
+									className={`h-full transition-all duration-300 rounded-full ${
+										renderStatus === "completed" ? "bg-emerald-500" : renderStatus === "failed" ? "bg-red-500" : "bg-indigo-500"
+									}`}
+									style={{ width: `${renderProgress}%` }}
+								/>
+							</div>
+						</div>
+					)}
 					<button
 						onClick={handleExport}
 						disabled={isExporting}
 						className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold tracking-wider rounded-lg shadow-lg transition-colors"
 					>
-						{isExporting ? "RENDERING..." : "ADD TO RENDER QUEUE"}
+						{isExporting ? "RENDERING..." : renderStatus === "completed" ? "RENDER AGAIN" : "ADD TO RENDER QUEUE"}
 					</button>
 				</div>
 			</div>

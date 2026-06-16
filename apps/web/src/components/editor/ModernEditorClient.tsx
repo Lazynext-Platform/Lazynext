@@ -46,17 +46,41 @@ export default function ModernEditorClient({ project }: { project: any }) {
 		setPrompt("");
 		setIsProcessing(true);
 
-		setTimeout(() => {
+		try {
+			const response = await fetch("/api/ai/generate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ prompt, type: "video" }),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.error || "AI generation failed");
+			}
+
+			const data = await response.json();
+
 			setChat([
 				...newChat,
 				{
 					role: "agent",
-					content: `I've analyzed your intent. I trimmed the silences, color-graded the footage, and added a cinematic soundtrack. The timeline has been updated globally.`,
+					content: `I generated a ${data.type} clip from your prompt. It has been added to the Media Pool — you can drag it onto the timeline.`,
+					videoUrl: data.url,
 				},
 			]);
-			setIsProcessing(false);
 			toast.success("AI Edit Applied!");
-		}, 2500);
+		} catch (error: any) {
+			setChat([
+				...newChat,
+				{
+					role: "agent",
+					content: `I encountered an issue: ${error.message}. Please try again or check your AI credits.`,
+				},
+			]);
+			toast.error(error.message || "AI generation failed");
+		} finally {
+			setIsProcessing(false);
+		}
 	};
 
 	const togglePlayback = () => {
