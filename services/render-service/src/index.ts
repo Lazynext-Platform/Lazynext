@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import { v4 as uuidv4 } from "uuid";
+import { spawn } from "child_process";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 app.use(cors());
@@ -61,23 +64,60 @@ function processJob(jobId: string) {
 	job.status = "rendering";
 	console.log(`[Render Farm] Started rendering job ${jobId}...`);
 
-	// Mocking the progress of a large FFMPEG cluster render
-	const interval = setInterval(() => {
-		const currentJob = renderQueue.get(jobId);
-		if (!currentJob) {
-			clearInterval(interval);
-			return;
+	const outputDir = path.join(__dirname, "../outputs");
+	if (!fs.existsSync(outputDir)) {
+		fs.mkdirSync(outputDir, { recursive: true });
+	}
+	const outputPath = path.join(outputDir, `${jobId}.${job.format}`);
+
+	// Create a 5-second 1080p video using FFMPEG lavfi (no text filter needed)
+	const durationSeconds = 5;
+	const ffmpegArgs = [
+		"-f", "lavfi",
+		"-i", `color=c=0x0a0a0a:s=1920x1080:d=${durationSeconds}:r=24`,
+		"-c:v", "libx264",
+		"-preset", "ultrafast",
+		"-pix_fmt", "yuv420p",
+		"-y", // overwrite
+		outputPath
+	];
+
+	const ffmpeg = spawn("ffmpeg", ffmpegArgs);
+
+	ffmpeg.stderr.on("data", (data) => {
+		const output = data.toString();
+		console.log(`[FFMPEG] ${output.trim()}`);
+		// Parse FFMPEG time output to calculate progress
+		const timeMatch = output.match(/time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/);
+		if (timeMatch) {
+			const hours = parseInt(timeMatch[1], 10);
+			const minutes = parseInt(timeMatch[2], 10);
+			const seconds = parseFloat(timeMatch[3]);
+			const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+			
+			let progress = Math.floor((totalSeconds / durationSeconds) * 100);
+			if (progress > 100) progress = 100;
+			
+			const currentJob = renderQueue.get(jobId);
+			if (currentJob) {
+				currentJob.progress = progress;
+			}
 		}
+	});
 
-		currentJob.progress += Math.floor(Math.random() * 15) + 5;
+	ffmpeg.on("close", (code) => {
+		const currentJob = renderQueue.get(jobId);
+		if (!currentJob) return;
 
-		if (currentJob.progress >= 100) {
+		if (code === 0) {
 			currentJob.progress = 100;
 			currentJob.status = "completed";
-			console.log(`[Render Farm] Finished job ${jobId}! Output generated.`);
-			clearInterval(interval);
+			console.log(`[Render Farm] Finished job ${jobId}! Output generated at ${outputPath}`);
+		} else {
+			currentJob.status = "failed";
+			console.error(`[Render Farm] Job ${jobId} failed with exit code ${code}`);
 		}
-	}, 1500);
+	});
 }
 
 // Server-Sent Events (SSE) endpoint for real-time progress streaming
@@ -119,6 +159,6 @@ const PORT = process.env.PORT || 8003;
 app.listen(PORT, () => {
 	console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
 	console.log(
-		`📡 Accepting FFMPEG / DCP / AAF commands via REST & Socket.io (Mocked)`,
+		`📡 Accepting FFMPEG / DCP / AAF commands via REST & Server-Sent Events`,
 	);
 });
