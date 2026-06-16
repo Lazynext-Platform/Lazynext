@@ -1,85 +1,77 @@
-import { useEffect, useState } from "react";
-// Since we don't have the fully compiled lazynext-wasm yet, we'll build a mock abstraction
-// that mirrors the real NLEState for our React components to consume.
+import { useEffect, useState, useRef } from "react";
 
-export class MockNLEState {
-	private frame: number = 0;
-	private isPlaying: boolean = false;
-	private listeners: (() => void)[] = [];
-
-	getFrame() {
-		return this.frame;
-	}
-
-	setFrame(f: number) {
-		this.frame = f;
-		this.notify();
-	}
-
-	play() {
-		this.isPlaying = true;
-		this.notify();
-	}
-
-	pause() {
-		this.isPlaying = false;
-		this.notify();
-	}
-
-	insert_cut_from_script(startMs: number, endMs: number) {
-		console.log(
-			`[WASM NLEState] insert_cut_from_script(${startMs}, ${endMs}) executed`,
-		);
-	}
-
-	trigger_live_cut(angle: number, frame: number) {
-		console.log(
-			`[WASM NLEState] trigger_live_cut(angle=${angle}, frame=${frame}) executed`,
-		);
-	}
-
-	subscribe(listener: () => void) {
-		this.listeners.push(listener);
-		return () => {
-			this.listeners = this.listeners.filter((l) => l !== listener);
-		};
-	}
-
-	private notify() {
-		for (const l of this.listeners) {
-			l();
-		}
-	}
-}
-
-// Global singleton
-const globalState = new MockNLEState();
+// We use dynamic import for WASM since it's asyncWebAssembly
+let wasmPromise: Promise<typeof import("lazynext-wasm")> | null = null;
+let globalNLEState: any = null;
 
 export function useWasm() {
-	const [frame, setFrame] = useState(globalState.getFrame());
+	const [isReady, setIsReady] = useState(!!globalNLEState);
+	const [frame, setFrame] = useState(globalNLEState ? globalNLEState.getFrame() : 0);
+	const stateRef = useRef<any>(globalNLEState);
 
 	useEffect(() => {
-		return globalState.subscribe(() => {
-			setFrame(globalState.getFrame());
-		});
-	}, []);
+		if (!wasmPromise) {
+			wasmPromise = import("lazynext-wasm").then(async (wasm) => {
+				// If init is required (depending on target), we might need to call it.
+				// But Next.js asyncWebAssembly usually resolves the module directly.
+				if (wasm.default && typeof wasm.default === "function") {
+					// @ts-ignore
+					await wasm.default();
+				}
+				
+				if (!globalNLEState) {
+					globalNLEState = new wasm.NLEState("proj_1", "Project 1", 30);
+				}
+				stateRef.current = globalNLEState;
+				setIsReady(true);
+				return wasm;
+			}).catch(err => {
+				console.error("Failed to load WASM:", err);
+				throw err;
+			});
+		} else if (!isReady) {
+			wasmPromise.then(() => {
+				stateRef.current = globalNLEState;
+				setIsReady(true);
+			});
+		}
+	}, [isReady]);
 
-	// Also set up a mock playback loop if isPlaying is true
+	// Polling loop to sync React state with Rust WASM state
 	useEffect(() => {
+		if (!isReady) return;
+
 		let handle: number;
 		const tick = () => {
-			// @ts-ignore
-			if (globalState.isPlaying) {
-				globalState.setFrame(globalState.getFrame() + 1);
+			if (stateRef.current) {
+				const currentFrame = stateRef.current.getFrame();
+				if (currentFrame !== frame) {
+					setFrame(currentFrame);
+				}
 			}
 			handle = requestAnimationFrame(tick);
 		};
 		handle = requestAnimationFrame(tick);
 		return () => cancelAnimationFrame(handle);
-	}, []);
+	}, [isReady, frame]);
+
+	// Provide a wrapper that matches the expected interface but calls Rust
+	const time = {
+		getFrame: () => stateRef.current?.getFrame() || 0,
+		setFrame: (f: number) => {
+			stateRef.current?.setFrame(f);
+			setFrame(f);
+		},
+		play: () => stateRef.current?.play(),
+		pause: () => stateRef.current?.pause(),
+		insert_cut_from_script: (s: number, e: number) => stateRef.current?.insertCutFromScript(s, e),
+		trigger_live_cut: (a: number, f: number) => stateRef.current?.triggerLiveCut(a, f),
+		get isPlaying() { return stateRef.current?.getIsPlaying() || false; }
+	};
 
 	return {
-		time: globalState, // Matches `const { time } = useWasm()`
-		frame, // For convenient re-rendering
+		isReady,
+		time,
+		frame,
 	};
 }

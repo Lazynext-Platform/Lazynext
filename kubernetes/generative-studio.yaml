@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generative-studio
+  labels:
+    app: generative-studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generative-studio
+  template:
+    metadata:
+      labels:
+        app: generative-studio
+    spec:
+      containers:
+      - name: generative-studio
+        image: lazynext/generative-studio:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: PYTHONUNBUFFERED
+          value: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: generative-studio
+spec:
+  type: ClusterIP
+  selector:
+    app: generative-studio
+  ports:
+  - port: 8001
+    targetPort: 8001

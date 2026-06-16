@@ -80,6 +80,40 @@ function processJob(jobId: string) {
 	}, 1500);
 }
 
+// Server-Sent Events (SSE) endpoint for real-time progress streaming
+app.get("/api/v1/jobs/:jobId/stream", (req, res) => {
+	const job = renderQueue.get(req.params.jobId);
+	if (!job) {
+		return res.status(404).json({ error: "Job not found" });
+	}
+
+	res.setHeader("Content-Type", "text/event-stream");
+	res.setHeader("Cache-Control", "no-cache");
+	res.setHeader("Connection", "keep-alive");
+
+	const sendProgress = () => {
+		const currentJob = renderQueue.get(req.params.jobId);
+		if (!currentJob) return;
+
+		res.write(`data: ${JSON.stringify(currentJob)}\n\n`);
+
+		if (currentJob.status === "completed" || currentJob.status === "failed") {
+			clearInterval(intervalId);
+			res.end();
+		}
+	};
+
+	// Send initial state immediately
+	sendProgress();
+
+	// Poll and send updates every 1.5s matching the render speed
+	const intervalId = setInterval(sendProgress, 1500);
+
+	req.on("close", () => {
+		clearInterval(intervalId);
+	});
+});
+
 const PORT = process.env.PORT || 8003;
 
 app.listen(PORT, () => {

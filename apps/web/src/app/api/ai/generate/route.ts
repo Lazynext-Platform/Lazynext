@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
 	try {
 		const body = await req.json();
-		const { prompt, mediaContext } = body;
+		const { prompt, mediaContext, type } = body;
 
 		if (!prompt) {
 			return NextResponse.json(
@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Forward the prompt to the local Python generative studio service
-		const response = await fetch("http://localhost:8002/generate", {
+		const endpoint = type === "audio" ? "generate-audio" : "generate-video";
+		const response = await fetch(`http://localhost:8001/${endpoint}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -30,7 +31,12 @@ export async function POST(req: NextRequest) {
 
 		const data = await response.json();
 
-		return NextResponse.json(data);
+		// Normalize the response so the frontend always gets { url, name, type }
+		return NextResponse.json({
+			url: data.url,
+			name: `Generated ${type === "audio" ? "Audio" : "Video"}`,
+			type: type === "audio" ? "audio" : "video",
+		});
 	} catch (error: any) {
 		console.error("[Generative API Error]:", error);
 		return NextResponse.json(

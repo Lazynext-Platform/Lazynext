@@ -8,7 +8,7 @@ export function ExportDelivery({
 	onQueueRender,
 }: {
 	projectData: any;
-	onQueueRender?: (format: string) => void;
+	onQueueRender?: (format: string, jobId: string) => void;
 }) {
 	const [format, setFormat] = useState("mp4");
 	const [preset, setPreset] = useState("youtube-4k");
@@ -28,6 +28,8 @@ export function ExportDelivery({
 
 			if (!res.ok) throw new Error("Failed to queue job");
 
+			const data = await res.json();
+
 			// Track telemetry
 			posthog?.capture("export_queued", {
 				format: format,
@@ -35,8 +37,8 @@ export function ExportDelivery({
 				projectId: projectData.id,
 			});
 
-			if (onQueueRender) {
-				onQueueRender(format);
+			if (onQueueRender && data.jobId) {
+				onQueueRender(format, data.jobId);
 			}
 
 			toast.success(

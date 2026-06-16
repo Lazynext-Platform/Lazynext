@@ -33,7 +33,7 @@ export function SignUpForm() {
 				toast.error(error.message ?? "Sign up failed");
 			} else {
 				toast.success("Account created!");
-				setEmailSent(true);
+				router.push("/dashboard");
 			}
 		} catch (err) {
 			toast.error(

@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen;
-use neural_engine::{FacialRecognitionModel, FaceDetection};
+use neural_engine::FacialRecognitionModel;
 
 #[wasm_bindgen(js_name = initNeuralEngine)]
 pub fn init_neural_engine() -> Result<JsValue, JsValue> {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useWasm } from "@/hooks/use-wasm";
 import {
 	Send,
 	Bot,
@@ -9,6 +10,7 @@ import {
 	Video,
 	Settings,
 	Play,
+	Pause,
 	Rewind,
 	FastForward,
 	Scissors,
@@ -17,6 +19,8 @@ import {
 } from "lucide-react";
 
 export default function EditorPage() {
+	const { isReady, time, frame } = useWasm();
+
 	const [prompt, setPrompt] = useState("");
 	const [chat, setChat] = useState<
 		{ role: "user" | "agent"; content: string; videoUrl?: string }[]
@@ -37,6 +41,11 @@ export default function EditorPage() {
 		setPrompt("");
 		setIsProcessing(true);
 
+		// Example of calling Rust WASM from UI!
+		if (isReady && time) {
+			time.insert_cut_from_script(0, 5000);
+		}
+
 		setTimeout(() => {
 			setChat([
 				...newChat,
@@ -48,6 +57,15 @@ export default function EditorPage() {
 			]);
 			setIsProcessing(false);
 		}, 2500);
+	};
+
+	const togglePlayback = () => {
+		if (!isReady) return;
+		if (time.isPlaying) {
+			time.pause();
+		} else {
+			time.play();
+		}
 	};
 
 	return (
@@ -63,6 +81,9 @@ export default function EditorPage() {
 					</span>
 				</div>
 				<div className="flex items-center gap-4">
+					<div className="text-xs text-white/40 mr-4">
+						WASM Core: {isReady ? <span className="text-green-400">Online</span> : <span className="text-yellow-400">Loading...</span>}
+					</div>
 					<button className="btn-premium flex items-center gap-2 text-sm">
 						<Settings className="w-4 h-4" /> Workspace Settings
 					</button>
@@ -105,13 +126,17 @@ export default function EditorPage() {
 
 						{/* Floating Playback Controls */}
 						<div className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-full flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-							<button className="text-white/70 hover:text-white transition-colors">
+							<button className="text-white/70 hover:text-white transition-colors" onClick={() => time?.setFrame(Math.max(0, frame - 30))}>
 								<Rewind className="w-5 h-5 fill-current" />
 							</button>
-							<button className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform">
-								<Play className="w-5 h-5 fill-current ml-1" />
+							<button onClick={togglePlayback} className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform">
+								{time?.isPlaying ? (
+									<Pause className="w-5 h-5 fill-current" />
+								) : (
+									<Play className="w-5 h-5 fill-current ml-1" />
+								)}
 							</button>
-							<button className="text-white/70 hover:text-white transition-colors">
+							<button className="text-white/70 hover:text-white transition-colors" onClick={() => time?.setFrame(frame + 30)}>
 								<FastForward className="w-5 h-5 fill-current" />
 							</button>
 						</div>
@@ -123,13 +148,24 @@ export default function EditorPage() {
 							<h3 className="font-display font-bold text-white/80 uppercase tracking-wider text-xs">
 								Sequence 01
 							</h3>
-							<div className="text-xs text-white/40 font-mono">00:01:24:15</div>
+							<div className="text-xs text-white/40 font-mono flex items-center gap-2">
+								<div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+								Frame: {frame.toString().padStart(5, '0')} | 00:01:24:15
+							</div>
 						</div>
 
 						<div className="flex-1 relative bg-black/20 rounded-xl overflow-x-auto overflow-y-hidden border border-white/5 p-2 space-y-2">
+							{/* Playhead Indicator tied to frame */}
+							<div 
+								className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
+								style={{ left: `calc(40px + ${(frame / 30) * 10}px)` }}
+							>
+								<div className="w-3 h-3 bg-red-500 rounded-sm absolute -top-1 -translate-x-[5px]"></div>
+							</div>
+
 							{/* Mock Timeline Tracks */}
 							<div className="flex items-center gap-2 h-14 w-[150%]">
-								<div className="w-8 flex items-center justify-center text-white/30 text-xs">
+								<div className="w-8 flex items-center justify-center text-white/30 text-xs shrink-0">
 									V1
 								</div>
 								<div className="timeline-clip flex-1 h-full px-4 flex items-center shadow-lg relative overflow-hidden group">
@@ -141,7 +177,7 @@ export default function EditorPage() {
 								</div>
 							</div>
 							<div className="flex items-center gap-2 h-14 w-[150%]">
-								<div className="w-8 flex items-center justify-center text-white/30 text-xs">
+								<div className="w-8 flex items-center justify-center text-white/30 text-xs shrink-0">
 									A1
 								</div>
 								<div className="timeline-clip flex-1 h-full px-4 flex items-center bg-emerald-500/80 border-emerald-400 text-black">

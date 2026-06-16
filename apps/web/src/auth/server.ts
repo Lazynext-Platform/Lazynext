@@ -65,7 +65,7 @@ export const auth = betterAuth({
 		"lazynext-secret-key-for-auth-minimum-32-long",
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: true,
+		requireEmailVerification: false,
 		sendResetPassword: async ({ user, url }: { user: any; url: string }) => {
 			try {
 				await sendEmail({

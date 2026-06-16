@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProject } from "@/actions/project";
 import { exec } from "child_process";
-import fs from "fs/promises";
+import { StorageService } from "@/lib/storage";
 import path from "path";
 
 export async function POST(request: Request) {
@@ -36,14 +36,13 @@ export async function POST(request: Request) {
 			tracks,
 		};
 
-		// 3. Write temp project.json
 		const tempDir = path.join(process.cwd(), ".tmp");
-		await fs.mkdir(tempDir, { recursive: true });
+		await StorageService.ensureDirectory(tempDir);
 
 		const projectJsonPath = path.join(tempDir, `project_${projectId}.json`);
 		const outputMp4Path = path.join(tempDir, `output_${projectId}.mp4`);
 
-		await fs.writeFile(projectJsonPath, JSON.stringify(projectConfig, null, 2));
+		await StorageService.writeFile(projectJsonPath, JSON.stringify(projectConfig, null, 2));
 
 		// 4. Invoke the Rust CLI via Cargo
 		// Note: In production, the CLI would be a built binary. For dev, we use cargo.

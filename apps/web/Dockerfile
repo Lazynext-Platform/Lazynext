@@ -1,28 +1,28 @@
-# Build stage
-FROM node:20-alpine AS builder
+# Use an official Node.js runtime as a parent image
+FROM oven/bun:1 as base
 
+# Set working directory
 WORKDIR /app
-COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
-# Assuming monorepo structure
-RUN npm install
 
+# Install Rust toolchain to build the WASM module
+RUN apt-get update && apt-get install -y curl build-essential \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN cargo install wasm-pack
+
+# Copy the entire monorepo
 COPY . .
+
+# Build the Rust WASM module
+RUN ./build-wasm.sh
+
+# Change to the web app directory
 WORKDIR /app/apps/web
-RUN npm run build
 
-# Production stage
-FROM node:20-alpine AS runner
+# Install dependencies and build the Next.js app
+RUN bun install
+RUN bun run build
 
-WORKDIR /app
-ENV NODE_ENV production
-
-COPY --from=builder /app/apps/web/next.config.ts ./
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/web/package.json ./package.json
-
+# Start the application
+CMD ["bun", "run", "start"]
 EXPOSE 3000
-
-CMD ["npm", "run", "start"]

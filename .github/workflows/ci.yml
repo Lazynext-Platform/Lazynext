@@ -32,6 +32,8 @@ jobs:
           bun-version: latest
       - name: Install dependencies
         run: bun install
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Lint Code
         run: bun run lint
       - name: Build Web App

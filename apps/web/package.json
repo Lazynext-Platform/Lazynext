@@ -5,6 +5,7 @@
 	"packageManager": "bun@1.2.18",
 	"scripts": {
 		"dev": "next dev",
+		"prebuild": "cd ../../ && ./build-wasm.sh",
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint src",

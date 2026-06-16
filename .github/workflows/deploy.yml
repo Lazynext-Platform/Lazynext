@@ -77,53 +77,29 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Web Shell
+      - name: Build and push Web
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.web
+          file: ./apps/web/Dockerfile
           push: true
           tags: lazynext-lazynext-web:latest
 
-      - name: Build and push API Gateway
+      - name: Build and push AI Agents
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile.api
+          context: ./services/ai-agents
+          file: ./services/ai-agents/Dockerfile
           push: true
-          tags: lazynext-lazynext-api:latest
+          tags: lazynext-lazynext-ai-agents:latest
 
-      - name: Build and push MCP Agent
+      - name: Build and push Render Service
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile.mcp
+          context: ./services/render-service
+          file: ./services/render-service/Dockerfile
           push: true
-          tags: lazynext-lazynext-mcp:latest
-
-      - name: Build and push Sync Service
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.sync
-          push: true
-          tags: lazynext-lazynext-sync:latest
-
-      - name: Build and push Render Farm
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.render
-          push: true
-          tags: lazynext-lazynext-render:latest
-
-      - name: Build and push DB Migrate
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.migrate
-          push: true
-          tags: lazynext-db-migrate:latest
+          tags: lazynext-lazynext-render-service:latest
 
       - name: Build and push Pre-Processing
         uses: docker/build-push-action@v5

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agents
+  labels:
+    app: ai-agents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-agents
+  template:
+    metadata:
+      labels:
+        app: ai-agents
+    spec:
+      containers:
+      - name: ai-agents
+        image: lazynext/ai-agents:latest
+        ports:
+        - containerPort: 8002
+        env:
+        - name: NODE_ENV
+          value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-agents
+spec:
+  type: ClusterIP
+  selector:
+    app: ai-agents
+  ports:
+  - port: 8002
+    targetPort: 8002

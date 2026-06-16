@@ -1,132 +1,74 @@
-name: lazynext
+version: "3.8"
+
 services:
-  # Next.js UI Shell
-  lazynext-web:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: lazynext
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: lazynext_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
     build:
       context: .
-      dockerfile: Dockerfile.web
+      dockerfile: apps/web/Dockerfile
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - NEXT_PUBLIC_SYNC_URL=ws://localhost:8002
-      - NEXT_PUBLIC_RENDER_URL=http://localhost:8003
-      - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
-      - BETTER_AUTH_SECRET=super_secret_docker_key_123
-      - BETTER_AUTH_URL=http://localhost:3000
-      - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
-      - UPSTASH_REDIS_REST_TOKEN=docker_local_mock_token
-      - MARBLE_WORKSPACE_KEY=mock_marble_key
-      - FREESOUND_CLIENT_ID=mock_freesound_client
-      - FREESOUND_API_KEY=mock_freesound_key
+      - STORAGE_PROVIDER=local
+      - DATABASE_URL=postgresql://lazynext:password123@db:5432/lazynext_db
+      - RENDER_SERVICE_URL=http://render-service:8003
+      - GENERATIVE_STUDIO_URL=http://generative-studio:8001
+      - PRE_PROCESSING_URL=http://pre-processing:8000
+      - AI_AGENTS_URL=http://ai-agents:8002
     depends_on:
-      postgres-db:
-        condition: service_started
-      lazynext-api:
-        condition: service_started
-    restart: unless-stopped
+      - db
+      - render-service
+      - generative-studio
+      - pre-processing
+      - ai-agents
 
-  # Agentic REST API Gateway
-  lazynext-api:
+  render-service:
     build:
-      context: .
-      dockerfile: Dockerfile.api
-    ports:
-      - "8005:8005"
-    restart: unless-stopped
-
-  # MCP Server (Agent Interface)
-  lazynext-mcp:
-    build:
-      context: .
-      dockerfile: Dockerfile.mcp
-    stdin_open: true
-    tty: true
-    restart: unless-stopped
-
-  # WebRTC / CRDT Signaling Server
-  lazynext-sync:
-    build:
-      context: .
-      dockerfile: Dockerfile.sync
-    ports:
-      - "8002:8002"
-    environment:
-      - NODE_ENV=production
-    restart: unless-stopped
-
-  # FFmpeg Render Farm
-  lazynext-render:
-    build:
-      context: .
-      dockerfile: Dockerfile.render
+      context: ./services/render-service
+      dockerfile: Dockerfile
     ports:
       - "8003:8003"
     environment:
       - NODE_ENV=production
-    restart: unless-stopped
 
-  # Database
-  postgres-db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: lazynext
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
-  # Local Standard Redis
-  redis-db:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    restart: unless-stopped
-
-  # Upstash REST API Proxy for local Redis
-  redis-proxy:
-    image: hiett/serverless-redis-http:latest
-    environment:
-      - SRH_MODE=env
-      - SRH_TOKEN=docker_local_mock_token
-      - SRH_CONNECTION_STRING=redis://redis-db:6379
-    ports:
-      - "8079:80"
-    depends_on:
-      - redis-db
-    restart: unless-stopped
-
-  # Run Database Migrations
-  db-migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile.migrate
-    environment:
-      - DATABASE_URL=postgres://postgres:password@postgres-db:5432/lazynext
-    depends_on:
-      postgres-db:
-        condition: service_started
-
-  # Python Pre-Processing
-  lazynext-pre-processing:
-    build:
-      context: ./services/pre-processing
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
-  # Python Generative Studio
-  lazynext-generative-studio:
+  generative-studio:
     build:
       context: ./services/generative-studio
       dockerfile: Dockerfile
     ports:
       - "8001:8001"
-    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  pre-processing:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  ai-agents:
+    build:
+      context: ./services/ai-agents
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - NODE_ENV=production
 
 volumes:
   postgres_data:

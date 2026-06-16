@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen::{from_value, to_value};
-use state::{ProjectData, Track, Clip};
+use state::{ProjectData, Track};
 
 #[wasm_bindgen]
 pub struct NLEState {
@@ -138,7 +138,7 @@ impl NLEState {
     }
 
     #[wasm_bindgen(js_name = "triggerLiveCut")]
-    pub fn trigger_live_cut(&mut self, camera_angle: i32, current_frame: i32) {
+    pub fn trigger_live_cut(&mut self, _camera_angle: i32, current_frame: i32) {
         // Find the active multicam clip
         let mut target_clip_id = None;
         for track in &self.project.tracks {

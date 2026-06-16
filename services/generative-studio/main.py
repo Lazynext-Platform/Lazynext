@@ -17,6 +17,10 @@ class DubRequest(BaseModel):
 class NerfRequest(BaseModel):
     video_id: str
 
+class StemSplitRequest(BaseModel):
+    audio_id: str
+    stems: int = 4 # Options: 2 (vocals/accomp), 4 (vocals/drums/bass/other), 5 (adds piano)
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "service": "generative-studio"}
@@ -137,6 +141,33 @@ async def extract_nerf(req: NerfRequest):
         "success": True,
         "video_id": req.video_id,
         "model_url": f"/mock/assets/nerf_{req.video_id}.ply"
+    }
+
+@app.post("/split-stems")
+async def split_stems(req: StemSplitRequest):
+    """
+    Simulates sending an audio file to Spleeter / Demucs for stem separation.
+    """
+    # Simulate AI processing time
+    await asyncio.sleep(5.0)
+    
+    stems_output = {
+        "vocals": f"/mock/assets/stems/{req.audio_id}_vocals.wav",
+        "accompaniment": f"/mock/assets/stems/{req.audio_id}_accomp.wav"
+    }
+    
+    if req.stems >= 4:
+        stems_output = {
+            "vocals": f"/mock/assets/stems/{req.audio_id}_vocals.wav",
+            "drums": f"/mock/assets/stems/{req.audio_id}_drums.wav",
+            "bass": f"/mock/assets/stems/{req.audio_id}_bass.wav",
+            "other": f"/mock/assets/stems/{req.audio_id}_other.wav"
+        }
+
+    return {
+        "success": True,
+        "audio_id": req.audio_id,
+        "stems": stems_output
     }
 
 if __name__ == "__main__":

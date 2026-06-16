@@ -2029,6 +2029,62 @@ export default function EditorClient({ project }: { project: Project }) {
 		setSelectedClipId(audioClip.id);
 	};
 
+	const handleSplitStems = async () => {
+		if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
+		const newProject = JSON.parse(JSON.stringify(projectData));
+		const audioTrack = newProject.tracks[selectedTrackIdx];
+		const audioClip = audioTrack.clips[selectedClipIdx];
+
+		if (audioClip.type !== "audio") return;
+
+		const toastId = toast.loading("Splitting Stems with AI...");
+
+		try {
+			const res = await fetch("http://localhost:8001/split-stems", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ audio_id: audioClip.id, stems: 4 }),
+			});
+			if (!res.ok) throw new Error("Failed to split stems");
+			const data = await res.json();
+
+			if (data.success && data.stems) {
+				// Mute the original clip
+				audioClip.volume = 0;
+
+				const stemTypes = Object.keys(data.stems);
+				stemTypes.forEach((stemName, i) => {
+					const trackIdx = selectedTrackIdx + 1 + i;
+					// Create tracks if they don't exist
+					if (!newProject.tracks[trackIdx]) {
+						newProject.tracks.splice(trackIdx, 0, {
+							id: `track-${Date.now()}-${i}`,
+							name: `${audioClip.name} - ${stemName.toUpperCase()}`,
+							clips: [],
+						});
+					}
+
+					const stemTrack = newProject.tracks[trackIdx];
+					const stemClip = JSON.parse(JSON.stringify(audioClip));
+					stemClip.id = `stem-${Date.now()}-${i}`;
+					stemClip.name = `${audioClip.name} (${stemName})`;
+					stemClip.volume = 1.0;
+					// Note: the backend mocked urls aren't real files right now, 
+					// but in a real app this would point to the separated files.
+					stemClip.url = data.stems[stemName];
+
+					stemTrack.clips.push(stemClip);
+				});
+
+				commitState(newProject);
+				toast.success("AI Stems Split Successfully!", { id: toastId });
+			}
+		} catch (err) {
+			console.error(err);
+			toast.error("AI Stem Splitting Failed.", { id: toastId });
+		}
+	};
+
 	const latestStateRef = useRef({
 		handleUndo,
 		handleRedo,
@@ -9623,31 +9679,43 @@ export default function EditorClient({ project }: { project: Project }) {
 					) : activeWorkspace === "export" ? (
 						<ExportDelivery
 							projectData={projectData}
-							onQueueRender={(format: string) => {
+							onQueueRender={(format: string, jobId: string) => {
 								setIsFarmRendering(true);
 								setFarmProgress([
-									{ node: "A-01 (GPU)", status: "Initializing", progress: 0 },
-									{ node: "B-02 (CPU)", status: "Initializing", progress: 0 },
-									{ node: "C-03 (GPU)", status: "Initializing", progress: 0 },
-									{ node: "D-04 (CPU)", status: "Initializing", progress: 0 },
+									{ node: "Node-1 (Master)", status: "Connecting", progress: 0 },
 								]);
-								// Simulate polling
-								let p = 0;
-								const int = setInterval(() => {
-									p += 10;
-									if (p > 100) {
-										clearInterval(int);
-										setTimeout(() => setIsFarmRendering(false), 2000);
-										return;
+
+								const sse = new EventSource(
+									`http://localhost:8003/api/v1/jobs/${jobId}/stream`,
+								);
+
+								sse.onmessage = (event) => {
+									const job = JSON.parse(event.data);
+									setFarmProgress([
+										{
+											node: "Distributed Farm Cluster",
+											status: job.status === "rendering" ? "Rendering" : "Completed",
+											progress: job.progress,
+										},
+									]);
+
+									if (job.status === "completed" || job.status === "failed") {
+										sse.close();
+										if (job.status === "completed") {
+											toast.success(`Render ${jobId} Completed!`);
+										} else {
+											toast.error(`Render ${jobId} Failed.`);
+										}
+										setTimeout(() => setIsFarmRendering(false), 3000);
 									}
-									setFarmProgress((prev: any) =>
-										prev.map((node: any) => ({
-											...node,
-											status: p === 100 ? "Complete" : "Rendering",
-											progress: p,
-										})),
-									);
-								}, 500);
+								};
+
+								sse.onerror = (error) => {
+									console.error("SSE Render stream error:", error);
+									sse.close();
+									toast.error("Lost connection to Render Farm stream.");
+									setTimeout(() => setIsFarmRendering(false), 2000);
+								};
 							}}
 						/>
 					) : activeWorkspace === "fusion" ? (
@@ -10305,6 +10373,18 @@ export default function EditorClient({ project }: { project: Project }) {
 							}}
 						>
 							Detach Audio
+						</button>
+					)}
+					{selectedClip?.type === "audio" && (
+						<button
+							className="text-left px-4 py-1.5 hover:bg-indigo-600 text-zinc-300 w-full flex items-center gap-2"
+							onClick={() => {
+								handleSplitStems();
+								setContextMenu(null);
+							}}
+						>
+							<Sparkles className="w-3 h-3 text-cyan-400" />
+							AI Split Stems
 						</button>
 					)}
 					{(selectedClip?.type === "video" ||

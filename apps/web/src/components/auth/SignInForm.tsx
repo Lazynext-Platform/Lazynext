@@ -24,7 +24,7 @@ export function SignInForm() {
 				toast.error(result.error.message ?? "Sign in failed");
 			} else {
 				toast.success("Signed in successfully!");
-				router.push("/projects");
+				router.push("/dashboard");
 			}
 		} catch (err) {
 			toast.error(
