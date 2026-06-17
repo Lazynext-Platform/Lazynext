@@ -9,11 +9,11 @@ terraform {
   }
 
   # Store terraform state in a GCS bucket for team collaboration.
-  # Create the bucket first: gsutil mb gs://<project>-terraform-state
-  # backend "gcs" {
-  #   bucket = "lazynext-terraform-state"
-  #   prefix = "terraform/state"
-  # }
+  # Prerequisite: gsutil mb gs://<project>-terraform-state
+  backend "gcs" {
+    bucket = "vertexaiopencode-terraform-state"
+    prefix = "terraform/state"
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -10,6 +10,9 @@ pub enum NLEEvent {
     RenderComplete(String, String),
 }
 
+/// NLE engine-level clip representation for timeline operations.
+/// This is the engine's working model; for CRDT synchronization use
+/// `state::crdt::CRDTClip` from `rust/crates/state/src/crdt.rs`.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub id: String,

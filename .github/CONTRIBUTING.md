@@ -51,7 +51,7 @@ Thank you for your interest in contributing to Lazynext! This document provides 
 
 ### Desktop setup
 
-Only needed if you're working on `apps/desktop`. See [`apps/desktop/README.md`](../apps/desktop/README.md) — it's a two-step process: Rust toolchain first via `script/setup-rust`, then desktop native dependencies via `apps/desktop/script/setup`.
+Only needed if you're working on `apps/desktop`. The desktop app uses GPUI (the Zed editor framework). First install the Rust toolchain via `scripts/setup-rust`, then build with `cargo build` from the `apps/desktop` directory.
 
 ## What to Focus On
 
@@ -112,7 +112,7 @@ If you're unsure whether your idea falls into the preview category, feel free to
 
    ```bash
    # Database (matches docker-compose.yaml)
-   DATABASE_URL="postgresql://lazynext:lazynext@localhost:5433/lazynext"
+   DATABASE_URL="postgresql://lazynext:password123@localhost:5434/lazynext_db"
 
    # Generate a secure secret for Better Auth
    BETTER_AUTH_SECRET="your-generated-secret-here"
@@ -146,7 +146,7 @@ If you're unsure whether your idea falls into the preview category, feel free to
 
 ### Desktop
 
-Working on `apps/desktop`? See [`apps/desktop/README.md`](../apps/desktop/README.md) for setup. Web-only contributors can ignore this entirely.
+Working on `apps/desktop`? The desktop app uses GPUI (the Zed editor framework) with the shared Rust core. Web-only contributors can ignore this entirely.
 
 ## How to Contribute
 
@@ -169,7 +169,7 @@ Working on `apps/desktop`? See [`apps/desktop/README.md`](../apps/desktop/README
 3. Run the relevant checks for the area you touched:
 
    - Web changes: from `apps/web`, run `bun run lint` and `bun run format`
-   - Desktop changes: run `./apps/desktop/script/setup` if your environment isn't set up yet
+   - Desktop changes: run `cargo check` from `apps/desktop` to verify compilation
 
 4. Commit your changes with a descriptive message
 5. Push to your fork and create a pull request

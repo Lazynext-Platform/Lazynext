@@ -1,20 +1,101 @@
+# Cloud Build — GCP CI/CD Pipeline for Lazynext
+# Triggers on pushes to main, builds all Docker images and deploys to Cloud Run.
+# Mirrors the GitHub Actions CI in .github/workflows/ci.yml but targets GCP Artifact Registry.
+
 steps:
+  # Build Web App
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "build",
         "-t",
-        "us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest",
         "-f",
-        "Dockerfile.web",
+        "apps/web/Dockerfile",
         ".",
+      ]
+
+  # Build AI Agents
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest",
+        "-f",
+        "services/ai-agents/Dockerfile",
+        "./services/ai-agents",
+      ]
+
+  # Build Render Service
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest",
+        "-f",
+        "services/render-service/Dockerfile",
+        "./services/render-service",
+      ]
+
+  # Build Pre-Processing
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest",
+        "-f",
+        "services/pre-processing/Dockerfile",
+        "./services/pre-processing",
+      ]
+
+  # Build Generative Studio
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest",
+        "-f",
+        "services/generative-studio/Dockerfile",
+        "./services/generative-studio",
+      ]
+
+  # Push all images
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest",
       ]
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "push",
-        "us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest",
       ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest",
+      ]
+
+  # Deploy to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -22,14 +103,21 @@ steps:
       - "deploy"
       - "lazynext-web"
       - "--image"
-      - "us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web:latest"
+      - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest"
       - "--region"
       - "us-central1"
       - "--add-cloudsql-instances"
-      - "vertexaiopencode:us-central1:lazynext-db"
+      - "${PROJECT_ID}:us-central1:lazynext-db"
+      - "--allow-unauthenticated"
+
 images:
-  - "us-central1-docker.pkg.dev/vertexaiopencode/cloud-run-source-deploy/lazynext-web"
-timeout: "1800s"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest"
+
+timeout: "3600s"
 options:
   machineType: "E2_HIGHCPU_8"
   logging: "CLOUD_LOGGING_ONLY"

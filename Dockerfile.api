@@ -1,6 +1,6 @@
 # LEGACY — Prefer service-specific Dockerfiles in services/*/Dockerfile
 # Build stage
-FROM rust:1-slim-bullseye AS builder
+FROM rust:1.96-slim-bookworm AS builder
 
 WORKDIR /usr/src/lazynext
 
@@ -15,7 +15,7 @@ COPY apps/ ./apps/
 RUN cargo build --release --bin lazynext_api_gateway
 
 # Production stage
-FROM debian:bullseye-slim AS runner
+FROM debian:bookworm-slim AS runner
 WORKDIR /usr/local/bin
 
 # Install runtime dependencies (e.g. OpenSSL if reqwest needs it)

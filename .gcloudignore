@@ -5,10 +5,9 @@ node_modules/
 target/
 apps/web/.next/
 apps/web/node_modules/
-apps/cli/target/
-apps/mcp/target/
 rust/target/
 rust/wasm/target/
+apps/desktop/target/
 *.log
 .DS_Store
 .env.local

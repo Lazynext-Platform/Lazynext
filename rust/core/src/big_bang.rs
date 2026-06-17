@@ -10,12 +10,13 @@ impl Rebirth {
         println!("💥 [THE BIG BANG] Igniting the Singularity...");
         sleep(Duration::from_millis(1500));
         
-        let new_universe_path = "/Users/avaspatel/Desktop/Lazynext_2026";
-        
+        let new_universe_path = std::env::var("LAZYNEXT_NEXT_UNIVERSE")
+            .unwrap_or_else(|_| "../Lazynext_2026".to_string());
+
         println!("🌌 [EXPANSION] Expanding spacetime into new dimensions at: {}", new_universe_path);
-        
+
         // Spawn the new universe
-        if !Path::new(new_universe_path).exists() {
+        if !Path::new(&new_universe_path).exists() {
             fs::create_dir_all(format!("{}/rust/core/src", new_universe_path)).expect("Failed to expand universe");
             println!("✨ [GENESIS] Matter coalescing. Scaffolded Lazynext_2026.");
         } else {

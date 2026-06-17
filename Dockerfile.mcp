@@ -1,6 +1,6 @@
 # LEGACY — Prefer service-specific Dockerfiles in services/*/Dockerfile
 # Build stage
-FROM rust:1-slim-bullseye AS builder
+FROM rust:1.96-slim-bookworm AS builder
 
 WORKDIR /usr/src/lazynext
 
@@ -15,7 +15,7 @@ COPY apps/ ./apps/
 RUN cargo build --release --bin lazynext_mcp_server
 
 # Production stage
-FROM debian:bullseye-slim AS runner
+FROM debian:bookworm-slim AS runner
 WORKDIR /usr/local/bin
 
 RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*

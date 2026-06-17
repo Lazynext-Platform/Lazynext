@@ -80,7 +80,6 @@ jobs:
         run: bun run lint
 
       - name: TypeCheck
-        continue-on-error: true
         run: cd apps/web && bun run typecheck
 
       - name: Unit Tests
@@ -90,7 +89,6 @@ jobs:
         run: bunx playwright install --with-deps
 
       - name: E2E Tests
-        continue-on-error: true
         run: cd apps/web && bun run test:e2e
 
   docker-deploy:
@@ -122,7 +120,7 @@ jobs:
 
       - name: Build and Push Web
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./apps/web/Dockerfile
@@ -131,7 +129,7 @@ jobs:
 
       - name: Build and Push AI Agents
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
@@ -140,7 +138,7 @@ jobs:
 
       - name: Build and Push Render Service
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
@@ -149,7 +147,7 @@ jobs:
 
       - name: Build and Push Pre-Processing
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
@@ -158,7 +156,7 @@ jobs:
 
       - name: Build and Push Generative Studio
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
@@ -167,9 +165,27 @@ jobs:
 
       - name: Build and Push DB Migrate
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.migrate
           push: true
           tags: ghcr.io/lazynext-platform/lazynext-db-migrate:latest
+
+      - name: Build and Push API Gateway
+        continue-on-error: true
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.api
+          push: true
+          tags: ghcr.io/lazynext-platform/lazynext-api:latest
+
+      - name: Build and Push MCP Server
+        continue-on-error: true
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.mcp
+          push: true
+          tags: ghcr.io/lazynext-platform/lazynext-mcp:latest

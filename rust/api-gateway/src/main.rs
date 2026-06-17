@@ -62,6 +62,7 @@ async fn main() {
         .with_state(editor);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     println!("📡 Listening for external API requests on http://{}", addr);
 
     // Mock trigger an event from the CRDT core after a delay
@@ -74,7 +75,7 @@ async fn main() {
         });
     }
 
-    axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
 use axum::extract::{State, Json};
