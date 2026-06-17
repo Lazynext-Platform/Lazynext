@@ -19,7 +19,7 @@ FROM debian:bookworm-slim AS runner
 WORKDIR /usr/local/bin
 
 # Install runtime dependencies (e.g. OpenSSL if reqwest needs it)
-RUN apt-get update && apt-get install -y libssl1.1 ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/src/lazynext/target/release/lazynext_api_gateway .
 

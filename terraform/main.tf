@@ -8,12 +8,12 @@ terraform {
     }
   }
 
-  # Store terraform state in a GCS bucket for team collaboration.
-  # Prerequisite: gsutil mb gs://<project>-terraform-state
-  backend "gcs" {
-    bucket = "vertexaiopencode-terraform-state"
-    prefix = "terraform/state"
-  }
+  # Store terraform state locally (override with -backend-config for GCS in CI)
+  # Prerequisite for GCS: gsutil mb gs://<project>-terraform-state
+  # backend "gcs" {
+  #   bucket = "vertexaiopencode-terraform-state"
+  #   prefix = "terraform/state"
+  # }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ resource "google_cloud_run_v2_service" "web" {
 
   template {
     containers {
-      image = "ghcr.io/lazynext-platform/lazynext-web:latest"
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-web:latest"
 
       ports {
         container_port = 3000
@@ -192,7 +192,7 @@ resource "google_cloud_run_v2_service" "generative_studio" {
 
   template {
     containers {
-      image = "ghcr.io/lazynext-platform/lazynext-generative-studio:latest"
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-generative-studio:latest"
 
       ports {
         container_port = 8001
@@ -237,7 +237,7 @@ resource "google_cloud_run_v2_service" "render_service" {
 
   template {
     containers {
-      image = "ghcr.io/lazynext-platform/lazynext-render-service:latest"
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-render-service:latest"
 
       ports {
         container_port = 8003
@@ -280,7 +280,7 @@ resource "google_cloud_run_v2_service" "ai_agents" {
 
   template {
     containers {
-      image = "ghcr.io/lazynext-platform/lazynext-ai-agents:latest"
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-ai-agents:latest"
 
       ports {
         container_port = 8002
@@ -320,7 +320,7 @@ resource "google_cloud_run_v2_service" "pre_processing" {
 
   template {
     containers {
-      image = "ghcr.io/lazynext-platform/lazynext-pre-processing:latest"
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-pre-processing:latest"
 
       ports {
         container_port = 8000
