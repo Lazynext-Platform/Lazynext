@@ -79,6 +79,9 @@ jobs:
         continue-on-error: true
         run: bun run lint
 
+      - name: Generate Content Collections
+        run: cd apps/web && bunx @content-collections/core build
+
       - name: TypeCheck
         run: cd apps/web && bun run typecheck
 

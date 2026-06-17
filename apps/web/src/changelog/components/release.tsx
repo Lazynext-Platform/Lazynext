@@ -68,7 +68,6 @@ export function ReleaseTitle({
 		<As className={cn("font-bold tracking-tight", titleSizes[As])}>
 			{href ? (
 				<Link href={href} className="hover:underline underline-offset-4">
-					{/* @ts-expect-error React types mismatch */}
 					{children}
 				</Link>
 			) : (

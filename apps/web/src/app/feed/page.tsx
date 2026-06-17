@@ -133,7 +133,6 @@ export default function FeedPage() {
 				))}
 			</div>
 
-			{/* @ts-expect-error styled-jsx type mismatch */}
 			<style jsx global>{`
 				.hide-scrollbar::-webkit-scrollbar {
 					display: none;

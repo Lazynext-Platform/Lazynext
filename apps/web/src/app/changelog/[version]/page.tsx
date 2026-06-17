@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BasePage } from "@/app/base-page";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { getReleaseByVersion, getSortedReleases } from "@/changelog/utils";
+import { getReleaseByVersion, getSortedReleases, type Release as ReleaseType } from "@/changelog/utils";
 import {
 	ReleaseArticle,
 	ReleaseMeta,
@@ -16,7 +16,7 @@ import { CopyMarkdownButton } from "@/changelog/components/copy-markdown-button"
 type Props = { params: Promise<{ version: string }> };
 
 export async function generateStaticParams() {
-	return getSortedReleases().map((release) => ({ version: release.version }));
+	return getSortedReleases().map((release: ReleaseType) => ({ version: release.version }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ReleaseDetailPage({ params }: Props) {
 	const { version } = await params;
 	const releases = getSortedReleases();
-	const index = releases.findIndex((entry) => entry.version === version);
+	const index = releases.findIndex((entry: ReleaseType) => entry.version === version);
 	if (index === -1) notFound();
 	const release = releases[index];
 	const newer = index > 0 ? releases[index - 1] : null;
