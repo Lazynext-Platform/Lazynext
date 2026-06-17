@@ -1,3 +1,4 @@
+# LEGACY — Prefer service-specific Dockerfiles in services/*/Dockerfile
 # Dockerfile.render
 FROM oven/bun:1-alpine
 

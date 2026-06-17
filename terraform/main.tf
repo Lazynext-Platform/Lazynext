@@ -76,7 +76,10 @@ resource "google_sql_database_instance" "postgres" {
 
     ip_configuration {
       ipv4_enabled = true
-      # Allow Cloud Run to connect via public IP with SSL
+      # WARNING: 0.0.0.0/0 allows connections from any IP. For production,
+      # use Cloud SQL Auth Proxy sidecar in Cloud Run or configure private IP
+      # with Serverless VPC Access connector:
+      #   https://cloud.google.com/sql/docs/postgres/connect-run
       authorized_networks {
         name  = "allow-all"
         value = "0.0.0.0/0"
@@ -269,6 +272,88 @@ resource "google_cloud_run_v2_service" "render_service" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Cloud Run — AI Agents (Node.js Chronos Copilot)
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_cloud_run_v2_service" "ai_agents" {
+  name     = "lazynext-ai-agents-${var.environment}"
+  location = var.region
+
+  template {
+    containers {
+      image = "ghcr.io/lazynext-platform/lazynext-ai-agents:latest"
+
+      ports {
+        container_port = 8002
+      }
+
+      resources {
+        limits = {
+          cpu    = "2"
+          memory = "2Gi"
+        }
+      }
+
+      env {
+        name  = "NODE_ENV"
+        value = "production"
+      }
+    }
+
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 5
+    }
+  }
+
+  depends_on = [
+    google_project_service.apis,
+    google_artifact_registry_repository.docker,
+  ]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cloud Run — Pre-Processing (Python NeRFs + Rotoscoping)
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_cloud_run_v2_service" "pre_processing" {
+  name     = "lazynext-pre-processing-${var.environment}"
+  location = var.region
+
+  template {
+    containers {
+      image = "ghcr.io/lazynext-platform/lazynext-pre-processing:latest"
+
+      ports {
+        container_port = 8000
+      }
+
+      resources {
+        limits = {
+          cpu    = "4"
+          memory = "8Gi"
+        }
+      }
+
+      env {
+        name  = "MEDIA_BUCKET"
+        value = google_storage_bucket.media.name
+      }
+    }
+
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 5
+    }
+
+    timeout = "900s"
+  }
+
+  depends_on = [
+    google_project_service.apis,
+    google_artifact_registry_repository.docker,
+  ]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # IAM — Allow unauthenticated access to the web frontend (public)
 # ─────────────────────────────────────────────────────────────────────────────
 resource "google_cloud_run_v2_service_iam_member" "web_public" {
@@ -294,6 +379,16 @@ output "generative_studio_url" {
 output "render_service_url" {
   description = "Internal URL of the Render Service"
   value       = google_cloud_run_v2_service.render_service.uri
+}
+
+output "ai_agents_url" {
+  description = "Internal URL of the AI Agents service"
+  value       = google_cloud_run_v2_service.ai_agents.uri
+}
+
+output "pre_processing_url" {
+  description = "Internal URL of the Pre-Processing service"
+  value       = google_cloud_run_v2_service.pre_processing.uri
 }
 
 output "database_ip" {

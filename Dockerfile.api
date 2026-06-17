@@ -1,3 +1,4 @@
+# LEGACY — Prefer service-specific Dockerfiles in services/*/Dockerfile
 # Build stage
 FROM rust:1-slim-bullseye AS builder
 

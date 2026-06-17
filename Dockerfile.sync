@@ -1,15 +1,14 @@
-# Dockerfile.sync
+# LEGACY — Use services/ai-agents/Dockerfile for new deployments
+# Sync Service (WebRTC signaling + CRDT sync)
 FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-# Copy the service files
-COPY services/ai-agents/package*.json ./
+COPY services/ai-agents/package.json ./
 RUN bun install
 
 COPY services/ai-agents/ ./
 
-# Expose WebRTC Signaling Port
 EXPOSE 8002
 
 CMD ["bun", "run", "start"]
