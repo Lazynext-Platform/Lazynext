@@ -79,9 +79,8 @@ jobs:
         continue-on-error: true
         run: bun run lint
 
-
-      - name: TypeCheck
-        run: cd apps/web && bun run typecheck
+      - name: Build (includes typecheck + content-collections)
+        run: cd apps/web && npx next build
 
       - name: Unit Tests
         run: bun run test
