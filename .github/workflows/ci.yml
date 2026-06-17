@@ -80,6 +80,11 @@ jobs:
         run: bun run lint
 
       - name: Build (includes typecheck + content-collections)
+        env:
+          SKIP_ENV_VALIDATION: "1"
+          MARBLE_WORKSPACE_KEY: "ci-placeholder"
+          FREESOUND_CLIENT_ID: "ci-placeholder"
+          FREESOUND_API_KEY: "ci-placeholder"
         run: cd apps/web && npx next build
 
       - name: Unit Tests
