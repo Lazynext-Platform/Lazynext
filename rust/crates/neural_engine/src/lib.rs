@@ -33,6 +33,7 @@ pub struct SmartBin {
 pub struct FacialRecognitionModel {
     pub is_loaded: bool,
     /// Path to ONNX model directory (for future ort/tract integration).
+    #[allow(dead_code)]
     model_dir: String,
 }
 
