@@ -1,0 +1,71 @@
+---
+# ── ServiceAccount for Lazynext workloads ──
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: lazynext-sa
+  namespace: lazynext
+  annotations:
+    iam.gke.io/gcp-service-account: lazynext-cloud-run@vertexaiopencode.iam.gserviceaccount.com
+---
+# ── Role: read K8s resources for health/status ──
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lazynext-reader
+  namespace: lazynext
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints", "configmaps", "persistentvolumeclaims"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["autoscaling"]
+    resources: ["horizontalpodautoscalers"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lazynext-reader-binding
+  namespace: lazynext
+subjects:
+  - kind: ServiceAccount
+    name: lazynext-sa
+    namespace: lazynext
+roleRef:
+  kind: Role
+  name: lazynext-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# ── Role: manage jobs (for DB migrations + backups) ──
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lazynext-job-manager
+  namespace: lazynext
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods/logs"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: lazynext-job-manager-binding
+  namespace: lazynext
+subjects:
+  - kind: ServiceAccount
+    name: lazynext-sa
+    namespace: lazynext
+roleRef:
+  kind: Role
+  name: lazynext-job-manager
+  apiGroup: rbac.authorization.k8s.io

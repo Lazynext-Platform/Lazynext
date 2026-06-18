@@ -1,0 +1,230 @@
+---
+# PostgreSQL Backup CronJob — runs daily at 3 AM
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: lazynext
+  labels:
+    app: postgres-backup
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: postgres-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: postgres:17-alpine
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/lazynext_${TIMESTAMP}.sql.gz"
+
+                  echo "[Backup] Starting PostgreSQL dump..."
+                  pg_dump -h postgres-db -U lazynext -d lazynext --no-owner --no-acl | gzip > "$BACKUP_FILE"
+
+                  echo "[Backup] File: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
+
+                  # Upload to GCS if configured
+                  if [ -n "$GCS_BACKUP_BUCKET" ]; then
+                    echo "[Backup] Uploading to gs://$GCS_BACKUP_BUCKET/backups/"
+                    gcloud storage cp "$BACKUP_FILE" "gs://$GCS_BACKUP_BUCKET/backups/" || true
+                  fi
+
+                  # Cleanup local backups older than 7 days
+                  find /backups -name "lazynext_*.sql.gz" -mtime +7 -delete
+                  echo "[Backup] Complete."
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: lazynext-secrets
+                      key: POSTGRES_PASSWORD
+                - name: GCS_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: lazynext-config
+                      key: MEDIA_BUCKET
+                      optional: true
+              resources:
+                requests:
+                  cpu: "100m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "500m"
+                  memory: "512Mi"
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-backup-pvc
+  namespace: lazynext
+  labels:
+    app: postgres-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+# Redis Backup CronJob — runs every 6 hours
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: redis-backup
+  namespace: lazynext
+  labels:
+    app: redis-backup
+spec:
+  schedule: "0 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: redis-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: redis-backup
+              image: redis:8-alpine
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/redis_${TIMESTAMP}.rdb"
+
+                  echo "[Redis Backup] Triggering BGSAVE..."
+                  redis-cli -h redis-db BGSAVE
+
+                  echo "[Redis Backup] Waiting for BGSAVE to complete..."
+                  while [ "$(redis-cli -h redis-db LASTSAVE)" -lt "$(date +%s)" ]; do
+                    sleep 2
+                  done
+
+                  echo "[Redis Backup] Copying RDB file..."
+                  redis-cli -h redis-db --rdb "$BACKUP_FILE"
+
+                  echo "[Redis Backup] File: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
+
+                  # Cleanup older than 7 days
+                  find /backups -name "redis_*.rdb" -mtime +7 -delete
+                  echo "[Redis Backup] Complete."
+              resources:
+                requests:
+                  cpu: "50m"
+                  memory: "64Mi"
+                limits:
+                  cpu: "200m"
+                  memory: "256Mi"
+              volumeMounts:
+                - name: redis-backup-storage
+                  mountPath: /backups
+          volumes:
+            - name: redis-backup-storage
+              persistentVolumeClaim:
+                claimName: redis-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-backup-pvc
+  namespace: lazynext
+  labels:
+    app: redis-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Database Vacuum CronJob — runs weekly on Sunday at 4 AM
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-maintenance
+  namespace: lazynext
+  labels:
+    app: postgres-maintenance
+spec:
+  schedule: "0 4 * * 0"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 4
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: postgres-maintenance
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-maintenance
+              image: postgres:17-alpine
+              command:
+                - sh
+                - -c
+                - |
+                  set -e
+                  echo "[Maintenance] Running VACUUM ANALYZE..."
+                  PGPASSWORD="$PGPASSWORD" psql -h postgres-db -U lazynext -d lazynext -c "VACUUM ANALYZE VERBOSE;"
+
+                  echo "[Maintenance] Running REINDEX..."
+                  PGPASSWORD="$PGPASSWORD" psql -h postgres-db -U lazynext -d lazynext -c "REINDEX DATABASE lazynext;"
+
+                  echo "[Maintenance] Checking bloat..."
+                  PGPASSWORD="$PGPASSWORD" psql -h postgres-db -U lazynext -d lazynext -c "
+                    SELECT schemaname, tablename,
+                           pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
+                    FROM pg_tables
+                    WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+                    ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+                    LIMIT 10;
+                  "
+
+                  echo "[Maintenance] Complete."
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: lazynext-secrets
+                      key: POSTGRES_PASSWORD
+              resources:
+                requests:
+                  cpu: "250m"
+                  memory: "256Mi"
+                limits:
+                  cpu: "1"
+                  memory: "512Mi"

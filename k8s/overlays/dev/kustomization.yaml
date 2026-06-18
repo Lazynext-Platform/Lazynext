@@ -1,0 +1,67 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: lazynext-dev
+
+resources:
+  - ../..
+
+namePrefix: dev-
+
+commonLabels:
+  environment: dev
+
+patches:
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-web
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: lazynext-web
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-sync
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: lazynext-sync
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-render
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: lazynext-render
+  - patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: lazynext-web-hpa
+      spec:
+        minReplicas: 1
+        maxReplicas: 3
+    target:
+      kind: HorizontalPodAutoscaler
+      name: lazynext-web-hpa
+
+images:
+  - name: ghcr.io/lazynext-platform/lazynext-web
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-ai-agents
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-render-service
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-pre-processing
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-generative-studio
+    newTag: dev

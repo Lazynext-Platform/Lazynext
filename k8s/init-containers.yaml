@@ -1,0 +1,169 @@
+# ── Init Container Patches ───────────────────────────────────────
+# Apply these patches to add DB/Redis readiness waits to Deployments.
+# Usage: kubectl patch deployment lazynext-web -n lazynext --patch-file init-containers.yaml
+#
+# Each init container waits for its dependency before the main container starts.
+
+# PostgreSQL readiness init container snippet (for Deployment patches)
+# Add to spec.template.spec.initContainers:
+---
+# ── Web App Init: Wait for DB + Redis ──
+# Patch for lazynext-web Deployment
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-template-web
+  annotations:
+    description: "Template showing init containers needed for lazynext-web"
+spec:
+  initContainers:
+    - name: wait-for-postgres
+      image: postgres:17-alpine
+      command:
+        - sh
+        - -c
+        - |
+          echo "⏳ Waiting for PostgreSQL..."
+          until pg_isready -h postgres-db -U lazynext -d lazynext; do
+            echo "   PostgreSQL not ready. Retrying in 3s..."
+            sleep 3
+          done
+          echo "✅ PostgreSQL ready."
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lazynext-secrets
+              key: POSTGRES_PASSWORD
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "32Mi"
+        limits:
+          cpu: "100m"
+          memory: "64Mi"
+
+    - name: wait-for-redis
+      image: redis:8-alpine
+      command:
+        - sh
+        - -c
+        - |
+          echo "⏳ Waiting for Redis..."
+          until redis-cli -h redis-db ping | grep -q PONG; do
+            echo "   Redis not ready. Retrying in 2s..."
+            sleep 2
+          done
+          echo "✅ Redis ready."
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "16Mi"
+        limits:
+          cpu: "50m"
+          memory: "32Mi"
+
+    - name: wait-for-services
+      image: curlimages/curl:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "⏳ Waiting for backend services..."
+
+          for svc in lazynext-sync:8002 lazynext-render:8003 lazynext-pre-processing:8000 lazynext-generative-studio:8001; do
+            host=$(echo $svc | cut -d: -f1)
+            port=$(echo $svc | cut -d: -f2)
+
+            echo "   Checking $host:$port..."
+            for i in $(seq 1 30); do
+              if curl -sf --max-time 2 "http://$host:$port/health" > /dev/null 2>&1 || \
+                 curl -sf --max-time 2 "http://$host:$port/" > /dev/null 2>&1; then
+                echo "   ✅ $host:$port ready"
+                break
+              fi
+              sleep 2
+            done
+          done
+
+          echo "✅ All backend services ready."
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "32Mi"
+        limits:
+          cpu: "100m"
+          memory: "64Mi"
+
+    # Run DB migrations before main container starts
+    - name: db-migrate
+      image: ghcr.io/lazynext-platform/lazynext-web:latest
+      command: ["bun", "run", "apps/web/migrate.ts"]
+      env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: lazynext-secrets
+              key: DATABASE_URL
+      resources:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "1"
+          memory: "512Mi"
+
+  containers:
+    - name: lazynext-web
+      image: ghcr.io/lazynext-platform/lazynext-web:latest
+  restartPolicy: Never
+---
+# ── AI Agents Init: Wait for DB + Redis ──
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-template-sync
+spec:
+  initContainers:
+    - name: wait-for-postgres
+      image: postgres:17-alpine
+      command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-db -U lazynext -d lazynext; do sleep 3; done
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lazynext-secrets
+              key: POSTGRES_PASSWORD
+  containers:
+    - name: lazynext-sync
+      image: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
+  restartPolicy: Never
+---
+# ── Render Service Init: Wait for DB ──
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-template-render
+spec:
+  initContainers:
+    - name: wait-for-postgres
+      image: postgres:17-alpine
+      command:
+        - sh
+        - -c
+        - |
+          until pg_isready -h postgres-db -U lazynext -d lazynext; do sleep 3; done
+      env:
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: lazynext-secrets
+              key: POSTGRES_PASSWORD
+  containers:
+    - name: lazynext-render
+      image: ghcr.io/lazynext-platform/lazynext-render-service:latest
+  restartPolicy: Never

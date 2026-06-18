@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     // 2. Build project config for export
     const tracks = project.tracks || project.timeline?.tracks || [];
-    const maxClipEnd = tracks.reduce((max: number, track: any) => {
+    const maxClipEnd = tracks.reduce((max: number, track: Record<string, unknown>) => {
       for (const clip of track.clips || []) {
         const end = (clip.start_frame || 0) + (clip.duration_frames || 0);
         if (end > max) max = end;
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       projectId,
       manifestPath: projectJsonPath,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Export API Error:", err);
     return NextResponse.json(
       { error: "Internal Server Error" },

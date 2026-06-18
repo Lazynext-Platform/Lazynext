@@ -1,0 +1,152 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: lazynext
+
+resources:
+  - ../..
+
+commonLabels:
+  environment: production
+
+# Production-specific resource bumps + HPA
+patches:
+  # ── Postgres — larger disk for production ──
+  - patch: |
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: postgres-db
+      spec:
+        volumeClaimTemplates:
+          - metadata:
+              name: postgres-data
+            spec:
+              resources:
+                requests:
+                  storage: 200Gi
+    target:
+      kind: StatefulSet
+      name: postgres-db
+
+  # ── Web App — production resources ──
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-web
+      spec:
+        replicas: 3
+        template:
+          spec:
+            containers:
+              - name: lazynext-web
+                resources:
+                  limits:
+                    cpu: "4"
+                    memory: "4Gi"
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+    target:
+      kind: Deployment
+      name: lazynext-web
+
+  # ── Sync Service — production resources ──
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-sync
+      spec:
+        replicas: 2
+        template:
+          spec:
+            containers:
+              - name: lazynext-sync
+                resources:
+                  limits:
+                    cpu: "2"
+                    memory: "2Gi"
+                  requests:
+                    cpu: "500m"
+                    memory: "512Mi"
+    target:
+      kind: Deployment
+      name: lazynext-sync
+
+  # ── Render Service — production resources ──
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-render
+      spec:
+        replicas: 3
+        template:
+          spec:
+            containers:
+              - name: lazynext-render
+                resources:
+                  limits:
+                    cpu: "8"
+                    memory: "8Gi"
+                  requests:
+                    cpu: "1"
+                    memory: "2Gi"
+    target:
+      kind: Deployment
+      name: lazynext-render
+
+  # ── Web HPA — production autoscaling (2-10 replicas) ──
+  - patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: lazynext-web-hpa
+      spec:
+        minReplicas: 2
+        maxReplicas: 10
+    target:
+      kind: HorizontalPodAutoscaler
+      name: lazynext-web-hpa
+
+  # ── Sync HPA — production autoscaling (2-8 replicas) ──
+  - patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: lazynext-sync-hpa
+      spec:
+        minReplicas: 2
+        maxReplicas: 8
+    target:
+      kind: HorizontalPodAutoscaler
+      name: lazynext-sync-hpa
+
+  # ── Render HPA — production autoscaling (3-15 replicas) ──
+  - patch: |
+      apiVersion: autoscaling/v2
+      kind: HorizontalPodAutoscaler
+      metadata:
+        name: lazynext-render-hpa
+      spec:
+        minReplicas: 3
+        maxReplicas: 15
+    target:
+      kind: HorizontalPodAutoscaler
+      name: lazynext-render-hpa
+
+images:
+  - name: ghcr.io/lazynext-platform/lazynext-web
+    newTag: production
+  - name: ghcr.io/lazynext-platform/lazynext-ai-agents
+    newTag: production
+  - name: ghcr.io/lazynext-platform/lazynext-render-service
+    newTag: production
+  - name: ghcr.io/lazynext-platform/lazynext-pre-processing
+    newTag: production
+  - name: ghcr.io/lazynext-platform/lazynext-generative-studio
+    newTag: production
+  - name: ghcr.io/lazynext-platform/lazynext-mcp
+    newTag: production

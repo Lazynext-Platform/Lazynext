@@ -89,7 +89,7 @@ async def generate_video(req: DiffusionRequest):
             print(f"[GenerativeStudio] Replicate API error: {e}")
 
     # Development / no-API-key fallback
-    if os.getenv("NODE_ENV") == "production":
+    if os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Video generation unavailable — Replicate API token not configured",
@@ -148,7 +148,7 @@ async def dub_video(req: DubRequest):
         except Exception as e:
             print(f"[GenerativeStudio] ElevenLabs API error: {e}")
 
-    if os.getenv("NODE_ENV") == "production":
+    if os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Dubbing unavailable — ElevenLabs API key not configured",
@@ -183,7 +183,7 @@ async def split_stems(req: StemSplitRequest):
             "Install: pip install demucs"
         )
 
-    if not demucs_available and os.getenv("NODE_ENV") == "production":
+    if not demucs_available and os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Stem separation unavailable — demucs not installed",
@@ -225,7 +225,7 @@ async def upscale_video(req: UpscaleRequest):
     except ImportError:
         esrgan_available = False
 
-    if not esrgan_available and os.getenv("NODE_ENV") == "production":
+    if not esrgan_available and os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Upscaling unavailable — RealESRGAN not installed",
@@ -245,12 +245,17 @@ async def upscale_video(req: UpscaleRequest):
 async def extract_nerf(req: NeRFRequest):
     """NeRF extraction from 2D video (deprecated in generative-studio; use pre-processing)."""
     await asyncio.sleep(2.0)
-    return {
-        "success": True,
-        "video_id": req.video_id,
-        "model_url": f"/mock/assets/nerf/{req.video_id}.ply",
-        "note": "Use pre-processing service for production NeRF extraction",
-    }
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=200,
+        content={
+            "success": True,
+            "video_id": req.video_id,
+            "model_url": f"/mock/assets/nerf/{req.video_id}.ply",
+            "note": "Use pre-processing service for production NeRF extraction",
+        },
+        headers={"Deprecation": "true", "Sunset": "Sat, 01 Aug 2026 00:00:00 GMT"},
+    )
 
 
 if __name__ == "__main__":

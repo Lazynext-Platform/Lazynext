@@ -1,49 +1,83 @@
+#!/usr/bin/env python3
+"""
+Clean attribution references in source files.
+
+Only replaces known Lazynext-Corporation attribution patterns.
+Does NOT rewrite arbitrary GitHub URLs — only matches known org-owned repos.
+"""
+
 import os
 import re
 
-def clean_file(filepath):
+# Known Lazynext-Corporation repositories (owner/repo)
+KNOWN_LAZYNEXT_REPOS = {
+    "clip-anything",
+    "lazynext-clip",
+    "lazynext-asr",
+    "lazynext-editor",
+}
+
+# Attribution patterns to replace (old → new)
+ATTRIBUTION_REPLACEMENTS = [
+    # Normalize org name case
+    (r'(?i)lazynext[-_]corporation', 'Lazynext-Corporation'),
+    # Normalize repo name references
+    (r'(?i)lazynext\s*[-_]\s*asr', 'LazynextASR'),
+    (r'(?i)lazynext\s*[-_]\s*clip', 'LazynextClip'),
+    (r'(?i)lazynext\s*[-_]\s*editor', 'Lazynext-Editor'),
+    # Normalize attribution strings
+    (r'Original source: developed for Lazynext\.', 'Original source: developed for Lazynext.'),
+    (r'Developed as part of Lazynext\.', 'Developed as part of Lazynext.'),
+    (r'Built with [^\s]+ by Lazynext', r'Built with ⚡️ by Lazynext'),
+    (r'Copyright Lazynext-Corporation\. All Rights Reserved\.',
+     'Copyright Lazynext-Corporation. All Rights Reserved.'),
+]
+
+# GitHub URL pattern — only match KNOWN Lazynext-Corporation repos
+GITHUB_URL_PATTERN = re.compile(
+    r'https?://github\.com/Lazynext-Corporation/([^/\s"\'<>\\)]+)',
+    re.IGNORECASE,
+)
+
+
+def clean_file(filepath: str) -> None:
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-    except Exception as e:
+    except Exception:
         return
 
     original_content = content
 
-    # 1. Replace specific attribution comments and authors
-    content = re.sub(r'(?i)Original source: developed for Lazynext.
-    content = re.sub(r'(?i)Developed as part of Lazynext.
-    content = re.sub(r'(?i)Built with ⚡️ by Lazynext
-    content = re.sub(r'Copyright Lazynext-Corporation. All Rights Reserved.
-    
-    # Replace author names
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'(?i)Lazynext-Corporation', 'Lazynext-Corporation', content)
-    content = re.sub(r'LazynextASR', 'LazynextASR', content)
-    content = re.sub(r'LazynextClip', 'LazynextClip', content)
-    content = re.sub(r'Lazynext-Editor', 'Lazynext-Editor', content)
-    
-    # 2. Replace any GitHub URLs
-    # Match https://github.com/Lazynext-Corporation/REPO and replace USER with Lazynext-Corporation
-    content = re.sub(r'https?://github\.com/([^/\s"\'\>]+)/([^/\s"\'\>]+)', r'https://github.com/Lazynext-Corporation/\2', content)
-    
+    # Apply attribution replacements
+    for pattern, replacement in ATTRIBUTION_REPLACEMENTS:
+        content = re.sub(pattern, replacement, content)
+
+    # Normalize known Lazynext-Corporation GitHub URLs (lowercase repo name)
+    def normalize_github_url(match: re.Match) -> str:
+        repo = match.group(1)
+        if repo.lower() in {r.lower() for r in KNOWN_LAZYNEXT_REPOS}:
+            return f'https://github.com/Lazynext-Corporation/{repo.lower()}'
+        return match.group(0)  # Leave unknown repos unchanged
+
+    content = GITHUB_URL_PATTERN.sub(normalize_github_url, content)
+
     if content != original_content:
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(content)
         print(f"Cleaned {filepath}")
 
-def main():
+
+def main() -> None:
     for root, dirs, files in os.walk('.'):
-        if '.git' in root or 'node_modules' in root or 'target' in root:
+        # Skip VCS, dependency, and build directories
+        if any(skip in root for skip in ('.git', 'node_modules', 'target', '__pycache__', '.terraform')):
             continue
         for file in files:
-            if file.endswith(('.js', '.ts', '.tsx', '.py', '.md', '.txt', '.toml', '.json', '.nim', '.rs', '.html', '.css', '.scss', '.yaml', '.yml', '.nimble')):
-                filepath = os.path.join(root, file)
-                clean_file(filepath)
+            if file.endswith(('.js', '.ts', '.tsx', '.py', '.md', '.txt', '.toml',
+                              '.json', '.rs', '.html', '.css', '.scss', '.yaml', '.yml')):
+                clean_file(os.path.join(root, file))
+
 
 if __name__ == '__main__':
     main()

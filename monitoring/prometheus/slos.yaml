@@ -1,0 +1,98 @@
+# ── Service Level Objectives (SLOs) ──────────────────────────────
+# Defined as PrometheusRule for automated burn-rate alerting.
+# SLO threshold: 99.9% availability (43m 50s max downtime/month)
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lazynext-slos
+  namespace: lazynext
+  labels:
+    release: prometheus
+    role: slo-rules
+spec:
+  groups:
+    - name: slo-web-availability
+      rules:
+        # Error budget burn rate: 14.4x (alerts in 1h if 2% of budget consumed in 1h)
+        - alert: SLOBurnRateCritical
+          expr: |
+            (
+              sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[1h]))
+              /
+              sum(rate(http_requests_total{service="lazynext-web"}[1h]))
+            ) > 0.02 * 14.4
+          for: 2m
+          labels:
+            severity: critical
+            slo: "99.9"
+            service: web
+          annotations:
+            summary: "SLO burn rate > 14.4x for web availability"
+            description: "Error budget is burning at {{ $value | humanizePercentage }} of budget per hour. Service: web"
+
+        # Error budget burn rate: 6x (alerts in 6h)
+        - alert: SLOBurnRateWarning
+          expr: |
+            (
+              sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[6h]))
+              /
+              sum(rate(http_requests_total{service="lazynext-web"}[6h]))
+            ) > 0.02 * 6
+          for: 10m
+          labels:
+            severity: warning
+            slo: "99.9"
+            service: web
+          annotations:
+            summary: "SLO burn rate > 6x for web availability"
+
+    - name: slo-render-latency
+      rules:
+        # p95 render latency < 30 minutes SLO
+        - alert: RenderLatencySLO
+          expr: |
+            histogram_quantile(0.95,
+              rate(render_duration_seconds_bucket[1h])
+            ) > 1800
+          for: 15m
+          labels:
+            severity: warning
+            slo: "p95 < 30m"
+            service: render
+          annotations:
+            summary: "p95 render latency exceeding 30-minute SLO"
+            description: "p95 render time is {{ $value | humanizeDuration }}. Target: 30 minutes."
+
+    - name: slo-ml-inference
+      rules:
+        # 95% of ML requests complete within 5 minutes
+        - alert: MLInferenceLatencySLO
+          expr: |
+            histogram_quantile(0.95,
+              rate(http_request_duration_seconds_bucket{service=~"lazynext-pre-processing|lazynext-generative-studio"}[1h])
+            ) > 300
+          for: 15m
+          labels:
+            severity: warning
+            slo: "p95 < 5m"
+            service: ml
+          annotations:
+            summary: "p95 ML inference latency exceeding 5-minute SLO"
+            description: "{{ $labels.service }} p95 latency is {{ $value | humanizeDuration }}."
+
+    - name: slo-database
+      rules:
+        # Database available 99.95% of the time
+        - alert: DatabaseAvailabilitySLO
+          expr: |
+            avg_over_time(
+              pg_up[30d]
+            ) < 0.9995
+          for: 5m
+          labels:
+            severity: critical
+            slo: "99.95"
+            service: database
+          annotations:
+            summary: "Database availability below 99.95% SLO over 30 days"
+            description: "Current availability: {{ $value | humanizePercentage }}."

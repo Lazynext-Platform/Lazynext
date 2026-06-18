@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 		const data = await response.json();
 
 		return NextResponse.json(data);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("[Transcription API Error]:", error);
 		return NextResponse.json(
 			{ error: "Failed to process audio for transcription" },

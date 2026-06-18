@@ -1,0 +1,58 @@
+# ── Docker Compose Override — Development Profile ──
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Enables: hot reload, debug ports, source mounts, dev TLS
+
+services:
+  web:
+    build:
+      target: builder  # Use builder stage for dev tooling
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - ./apps/web/src:/app/apps/web/src:delegated
+      - ./apps/web/public:/app/apps/web/public:delegated
+      - ./apps/web/next.config.ts:/app/apps/web/next.config.ts:delegated
+    command: ["bun", "run", "dev"]
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Node.js debugger
+    healthcheck:
+      start_period: 60s
+
+  ai-agents:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/ai-agents/src:/app/src:delegated
+    command: ["bun", "--watch", "run", "src/index.ts"]
+
+  render-service:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/render-service/src:/app/src:delegated
+    command: ["bun", "--watch", "run", "src/index.ts"]
+
+  pre-processing:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/pre-processing:/app:delegated
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  generative-studio:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/generative-studio:/app:delegated
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+
+  db:
+    ports:
+      - "5434:5432"  # Already exposed, keep for local tooling
+
+  redis:
+    ports:
+      - "6379:6379"  # Local Redis Insight / CLI access

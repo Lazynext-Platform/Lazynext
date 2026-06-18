@@ -47,10 +47,10 @@ export async function POST(request: Request) {
 				message: "Video successfully generated via Open-Sora",
 				clip: mappedVideoClip,
 			});
-		} catch (microserviceError: any) {
+		} catch (microserviceError: unknown) {
 			console.warn(
 				"[API] Microservice unreachable or failed. Falling back to mock data.",
-				microserviceError.message,
+				(microserviceError instanceof Error ? microserviceError.message : String(microserviceError)),
 			);
 
 			// Fallback mechanism if the Python service is offline
@@ -70,10 +70,10 @@ export async function POST(request: Request) {
 				clip: mockVideoClip,
 			});
 		}
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Diffusion API Error:", error);
 		return NextResponse.json(
-			{ success: false, error: error.message },
+			{ success: false, error: error instanceof Error ? error.message : String(error) },
 			{ status: 500 },
 		);
 	}

@@ -93,38 +93,48 @@ Respond ONLY with a JSON object:
   ]
 }`;
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: prompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30_000);
 
-  if (!response.ok) {
-    throw new Error(`LLM API error: ${response.status}`);
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`LLM API error: ${response.status}`);
+    }
+
+    const data = (await response.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    const parsed = JSON.parse(data.choices[0].message.content) as {
+      reasoning: string;
+      steps: OrchestrationStep[];
+    };
+
+    return {
+      steps: parsed.steps || [],
+      reasoning: parsed.reasoning || "No reasoning provided",
+    };
+  } catch (err) {
+    clearTimeout(timeoutId);
+    throw err;
   }
-
-  const data = (await response.json()) as {
-    choices: Array<{ message: { content: string } }>;
-  };
-  const parsed = JSON.parse(data.choices[0].message.content) as {
-    reasoning: string;
-    steps: OrchestrationStep[];
-  };
-
-  return {
-    steps: parsed.steps || [],
-    reasoning: parsed.reasoning || "No reasoning provided",
-  };
 }
 
 /**

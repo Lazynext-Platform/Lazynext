@@ -6,7 +6,7 @@ import { subscriptions, user } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_123", {
-	apiVersion: "2024-04-10",
+	apiVersion: "2025-06-15",
 });
 
 export async function POST(req: Request) {
@@ -22,8 +22,9 @@ export async function POST(req: Request) {
 			signature,
 			process.env.STRIPE_WEBHOOK_SECRET || "whsec_123",
 		);
-	} catch (error: any) {
-		return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+	} catch (error: unknown) {
+		const errMsg = error instanceof Error ? error.message : String(error);
+		return new NextResponse(`Webhook Error: ${errMsg}`, { status: 400 });
 	}
 
 	const session = event.data.object as Stripe.Checkout.Session;

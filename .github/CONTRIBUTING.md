@@ -51,7 +51,7 @@ Thank you for your interest in contributing to Lazynext! This document provides 
 
 ### Desktop setup
 
-Only needed if you're working on `apps/desktop`. The desktop app uses GPUI (the Zed editor framework). First install the Rust toolchain via `scripts/setup-rust`, then build with `cargo build` from the `apps/desktop` directory.
+Only needed if you're working on `apps/desktop`. The desktop app uses GPUI (the Zed editor framework). First install the Rust toolchain via [rustup](https://rustup.rs), then build with `cargo build` from the `apps/desktop` directory.
 
 ## What to Focus On
 
@@ -84,7 +84,7 @@ If you're unsure whether your idea falls into the preview category, feel free to
 
    ```bash
    # From project root
-   docker-compose up -d
+   docker compose up -d
    ```
 
 2. Navigate to the web app directory:

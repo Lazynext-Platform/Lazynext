@@ -1,0 +1,53 @@
+# ── TensorFlow Serving — Standalone ──────────────────────────────
+# Usage: docker compose -f docker-compose.tensorflow.yml up
+services:
+  tensorflow-serving:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile.tensorflow
+    ports:
+      - "8500:8500"  # gRPC
+      - "8501:8501"  # REST
+    environment:
+      - MODEL_NAME=lazynext_models
+      - MODEL_BASE_PATH=/models
+      - OMP_NUM_THREADS=4
+    volumes:
+      - models_data:/models
+      - ./services/pre-processing/model_config.conf:/models/model_config.conf:ro
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/lazynext_models"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 5
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - tf-net
+
+  # REST-to-gRPC bridge for efficient batch inference
+  tf-bridge:
+    image: nginx:alpine
+    ports:
+      - "8502:80"
+    volumes:
+      - ./services/pre-processing/tf-bridge.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      tensorflow-serving:
+        condition: service_healthy
+    networks:
+      - tf-net
+
+volumes:
+  models_data:
+    driver: local
+
+networks:
+  tf-net:
+    driver: bridge

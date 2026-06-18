@@ -1,0 +1,35 @@
+# ── TensorFlow Serving ─────────────────────────────────────────
+# Standalone TensorFlow model server for production inference
+# Used by: pre-processing (Whisper, SAM2) and generative-studio (RealESRGAN)
+#
+# Build: docker build -f Dockerfile.tensorflow -t lazynext-tf-serving .
+
+FROM tensorflow/serving:2.16.1-gpu AS base
+
+# Install additional dependencies for custom ops
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ffmpeg \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy model config
+COPY model_config.conf /models/model_config.conf
+
+# Default model path (mount models at runtime)
+ENV MODEL_NAME=lazynext_models
+ENV MODEL_BASE_PATH=/models
+ENV OMP_NUM_THREADS=4
+ENV TF_CPP_MIN_LOG_LEVEL=1
+
+# Monitoring endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -sf http://localhost:8501/v1/models/lazynext_models || exit 1
+
+EXPOSE 8500 8501
+
+USER tensorflow
+
+ENTRYPOINT ["tensorflow_model_server"]
+CMD ["--rest_api_port=8501", "--grpc_port=8500", "--model_config_file=/models/model_config.conf", "--model_config_file_poll_wait_seconds=60"]

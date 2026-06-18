@@ -1,0 +1,57 @@
+# ── GPU-accelerated Generative Studio (CUDA 12.4 + PyTorch) ──
+# Build: docker build -f Dockerfile.gpu -t lazynext-generative-studio-gpu .
+# Runtime: docker run --gpus all -p 8001:8001 lazynext-generative-studio-gpu
+
+FROM nvidia/cuda:12.4.0-runtime-ubuntu22.04 AS base
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-dev \
+    python3.12-venv \
+    python3-pip \
+    ffmpeg \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libgomp1 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libsndfile1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1
+
+# Install PyTorch with CUDA + xformers for memory-efficient attention
+RUN pip3 install --no-cache-dir \
+    torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124 \
+    && pip3 install --no-cache-dir xformers --index-url https://download.pytorch.org/whl/cu124
+
+# Install application + diffusers with CUDA support
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt \
+    && pip3 install --no-cache-dir accelerate xformers
+
+WORKDIR /app
+
+COPY main.py .
+COPY requirements.txt .
+
+# Hugging Face model cache (mount persistent volume in production)
+ENV HF_HOME=/models/huggingface
+ENV TRANSFORMERS_CACHE=/models/huggingface
+RUN mkdir -p /models/huggingface /tmp/generative \
+    && chmod 777 /tmp/generative
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV CUDA_VISIBLE_DEVICES=0
+ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+ENV PORT=8001
+
+EXPOSE 8001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD curl -sf http://localhost:8001/ || exit 1
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "1"]

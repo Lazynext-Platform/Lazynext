@@ -28,7 +28,7 @@ pub struct AutonomousEditor {
 impl AutonomousEditor {
     pub fn new() -> Self {
         Self {
-            client: Client::new(),
+            client: Client::new().expect("Failed to create HTTP client"),
         }
     }
 

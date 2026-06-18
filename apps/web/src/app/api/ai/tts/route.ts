@@ -82,7 +82,7 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     console.error("TTS API Error:", error);
     return NextResponse.json(
-      { success: false, error: (error as Error).message },
+      { success: false, error: error instanceof Error ? error.message : String(error) },
       { status: 500 },
     );
   }

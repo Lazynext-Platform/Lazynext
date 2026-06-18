@@ -1,0 +1,140 @@
+---
+# ML Model Cache Warmup — Downloads models to shared PVC
+# Runs on deployment and weekly to keep model cache fresh.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: model-warmup
+  namespace: lazynext
+  labels:
+    app: model-warmup
+spec:
+  schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: model-warmup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: warmup-whisper
+              image: python:3.12-slim
+              command:
+                - sh
+                - -c
+                - |
+                  pip install --quiet huggingface_hub
+                  echo "📥 Downloading Whisper model..."
+                  python3 -c "
+                  from huggingface_hub import snapshot_download
+                  snapshot_download('openai/whisper-large-v3', cache_dir='/models/huggingface')
+                  print('✅ Whisper model cached')
+                  "
+
+                  echo "📥 Downloading SAM2 model..."
+                  python3 -c "
+                  from huggingface_hub import snapshot_download
+                  snapshot_download('facebook/sam2-hiera-large', cache_dir='/models/huggingface')
+                  print('✅ SAM2 model cached')
+                  "
+
+                  echo "📥 Verifying RealESRGAN..."
+                  python3 -c "
+                  from huggingface_hub import snapshot_download
+                  snapshot_download('ai-forever/Real-ESRGAN', cache_dir='/models/huggingface')
+                  print('✅ RealESRGAN model cached')
+                  "
+              volumeMounts:
+                - name: model-cache
+                  mountPath: /models
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: "2Gi"
+                limits:
+                  cpu: "2"
+                  memory: "4Gi"
+          volumes:
+            - name: model-cache
+              persistentVolumeClaim:
+                claimName: model-cache-pvc
+---
+# One-shot Job to warm models immediately (run once on first deploy)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: model-warmup-once
+  namespace: lazynext
+  labels:
+    app: model-warmup
+spec:
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: warmup-all
+          image: python:3.12-slim
+          command:
+            - sh
+            - -c
+            - |
+              pip install --quiet huggingface_hub
+
+              MODELS="openai/whisper-large-v3 facebook/sam2-hiera-large ai-forever/Real-ESRGAN google/t5-v1_1-large s sentence-transformers/all-MiniLM-L6-v2"
+
+              for model in $MODELS; do
+                echo "📥 Downloading: $model"
+                python3 -c "
+                from huggingface_hub import snapshot_download
+                import sys
+                try:
+                  snapshot_download('$model', cache_dir='/models/huggingface')
+                  print('✅ $model')
+                except Exception as e:
+                  print(f'⚠️ $model: {e}')
+                "
+              done
+
+              echo "📊 Cache size:"
+              du -sh /models/huggingface
+
+              echo "📋 Cached models:"
+              ls /models/huggingface/models--*/
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+          resources:
+            requests:
+              cpu: "2"
+              memory: "8Gi"
+            limits:
+              cpu: "4"
+              memory: "16Gi"
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: model-cache-pvc
+---
+# PersistentVolumeClaim for shared media rendering workspace
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: media-workspace-pvc
+  namespace: lazynext
+  labels:
+    app: media-workspace
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: premium-rwx

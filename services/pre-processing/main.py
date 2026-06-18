@@ -88,7 +88,7 @@ async def transcribe_audio(req: VideoRequest):
             # Fall through to development fallback
 
     # Development fallback — returns a placeholder
-    if os.getenv("NODE_ENV") == "production":
+    if os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Transcription service unavailable — Whisper API key not configured",
@@ -169,7 +169,7 @@ async def rotoscope_video(req: RotoscopeRequest):
         model_available = False
         print("[Pre-Processing] SAM not installed. Install: pip install segment-anything")
 
-    if not model_available and os.getenv("NODE_ENV") == "production":
+    if not model_available and os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="Rotoscoping unavailable — segment-anything not installed",
@@ -204,7 +204,7 @@ async def extract_nerf(req: NeRFRequest):
             "Install: pip install torch nerfstudio"
         )
 
-    if not nerf_available and os.getenv("NODE_ENV") == "production":
+    if not nerf_available and os.getenv("APP_ENV") == "production":
         raise HTTPException(
             status_code=503,
             detail="NeRF extraction unavailable — PyTorch/nerfstudio not installed",

@@ -1,15 +1,22 @@
-# Terraform Dev Environment
-# Copy this to terraform.tfvars and fill in the values.
+# Terraform variables — copy to terraform.tfvars and fill in actual values
 
 project_id  = "vertexaiopencode"
 region      = "us-central1"
 environment = "dev"
 
-db_password = "CHANGE_ME_TO_A_STRONG_PASSWORD"
-db_tier     = "db-f1-micro"
+# Database
+db_password       = "CHANGE_ME_TO_A_STRONG_RANDOM_PASSWORD_64_CHARS"
+db_tier           = "db-f1-micro"                          # dev: db-f1-micro, prod: db-custom-2-4096
+db_replica_tier   = "db-f1-micro"                          # prod: db-custom-1-4096
 
-app_domain = "https://lazynext.ai"
+# Application
+app_domain         = "https://lazynext.ai"
+better_auth_secret = "CHANGE_ME_TO_A_RANDOM_64_CHAR_STRING"
 
-# Optional — leave empty to use mock/demo mode
+# API Keys — leave empty to use mock/demo mode
 replicate_api_token = ""
 elevenlabs_api_key  = ""
+openai_api_key      = ""
+anthropic_api_key   = ""
+stripe_secret_key   = ""
+resend_api_key      = ""

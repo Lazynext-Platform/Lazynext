@@ -1,0 +1,225 @@
+{
+  "dashboard": {
+    "uid": "lazynext-overview",
+    "title": "Lazynext — Platform Overview",
+    "tags": ["lazynext", "production"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "HTTP Request Rate (Web App)",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{service=\"lazynext-web\"}[5m])",
+            "legendFormat": "{{status_code}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Error Rate (5xx %)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{service=\"lazynext-web\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"lazynext-web\"}[5m])) * 100",
+            "legendFormat": "5xx Error Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 2, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Database Connections",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"lazynext\"}",
+            "legendFormat": "Active Connections"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Database Transaction Rate",
+        "type": "graph",
+        "gridPos": {"x": 8, "y": 8, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "rate(pg_stat_database_xact_commit{datname=\"lazynext\"}[5m])",
+            "legendFormat": "Commits/s"
+          },
+          {
+            "expr": "rate(pg_stat_database_xact_rollback{datname=\"lazynext\"}[5m])",
+            "legendFormat": "Rollbacks/s"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Render Queue Size",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 8, "w": 4, "h": 6},
+        "targets": [
+          {
+            "expr": "avg(render_queue_size)",
+            "legendFormat": "Queue"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 20, "color": "yellow"},
+                {"value": 50, "color": "orange"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "AI Agent Orchestration Rate",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 14, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "rate(ai_orchestrations_total[5m])",
+            "legendFormat": "Orchestrations"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "ML Service Latency (p95)",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 14, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=~\"lazynext-pre-processing|lazynext-generative-studio\"}[5m]))",
+            "legendFormat": "{{service}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Redis Memory Usage %",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 20, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "(redis_memory_used_bytes / redis_memory_max_bytes) * 100",
+            "legendFormat": "Memory"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 85, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Pod Restarts (last 1h)",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 20, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=\"lazynext\"}[1h]))",
+            "legendFormat": "Restarts"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "GPU Utilization %",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 20, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "DCGM_FI_DEV_GPU_UTIL{namespace=\"lazynext\"}",
+            "legendFormat": "GPU {{gpu}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Last Successful Backup",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 8, "w": 4, "h": 6},
+        "targets": [
+          {
+            "expr": "time() - (max(kube_cronjob_status_last_schedule_time{cronjob=\"postgres-backup\"}) or vector(0))",
+            "legendFormat": "Seconds since last backup"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 86400, "color": "yellow"},
+                {"value": 172800, "color": "red"}
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

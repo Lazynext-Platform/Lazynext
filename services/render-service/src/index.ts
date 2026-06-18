@@ -5,6 +5,9 @@ import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 
+const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
+const RENDER_TIMEOUT_MS = parseInt(process.env.RENDER_TIMEOUT_MS || "300000", 10); // 5 min default
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -64,11 +67,10 @@ function processJob(jobId: string) {
 	job.status = "rendering";
 	console.log(`[Render Farm] Started rendering job ${jobId}...`);
 
-	const outputDir = path.join(__dirname, "../outputs");
-	if (!fs.existsSync(outputDir)) {
-		fs.mkdirSync(outputDir, { recursive: true });
+	if (!fs.existsSync(OUTPUT_DIR)) {
+		fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 	}
-	const outputPath = path.join(outputDir, `${jobId}.${job.format}`);
+	const outputPath = path.join(OUTPUT_DIR, `${jobId}.${job.format}`);
 
 	// Create a 5-second 1080p video using FFMPEG lavfi (no text filter needed)
 	const durationSeconds = 5;
@@ -82,7 +84,9 @@ function processJob(jobId: string) {
 		outputPath
 	];
 
-	const ffmpeg = spawn("ffmpeg", ffmpegArgs);
+	const ffmpeg = spawn("ffmpeg", ffmpegArgs, {
+		timeout: RENDER_TIMEOUT_MS,
+	});
 
 	ffmpeg.stderr.on("data", (data) => {
 		const output = data.toString();
@@ -133,13 +137,20 @@ app.get("/api/v1/jobs/:jobId/stream", (req, res) => {
 
 	const sendProgress = () => {
 		const currentJob = renderQueue.get(req.params.jobId);
-		if (!currentJob) return;
+		if (!currentJob) {
+			// Job was cleaned up externally — stop streaming
+			clearInterval(intervalId);
+			res.end();
+			return;
+		}
 
 		res.write(`data: ${JSON.stringify(currentJob)}\n\n`);
 
 		if (currentJob.status === "completed" || currentJob.status === "failed") {
 			clearInterval(intervalId);
 			res.end();
+			// Clean up completed/failed jobs after 5 minutes
+			setTimeout(() => renderQueue.delete(req.params.jobId), 5 * 60 * 1000);
 		}
 	};
 
@@ -147,11 +158,23 @@ app.get("/api/v1/jobs/:jobId/stream", (req, res) => {
 	sendProgress();
 
 	// Poll and send updates every 1.5s matching the render speed
-	const intervalId = setInterval(sendProgress, 1500);
+	let intervalId: ReturnType<typeof setInterval>;
+	intervalId = setInterval(sendProgress, 1500);
 
 	req.on("close", () => {
 		clearInterval(intervalId);
 	});
+});
+
+/**
+ * Health check endpoint for K8s/Cloud Run probes.
+ */
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    queue_size: renderQueue.size,
+    ffmpeg_available: true,
+  });
 });
 
 const PORT = process.env.PORT || 8003;

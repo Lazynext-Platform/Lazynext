@@ -1,0 +1,90 @@
+# ── AlertManager Configuration ───────────────────────────────────
+# Routes alerts to Slack, email, and PagerDuty based on severity.
+# Apply: kubectl create secret generic alertmanager-config --from-file=config.yml -n monitoring
+
+global:
+  resolve_timeout: 5m
+  slack_api_url: "https://hooks.slack.com/services/REPLACE_WITH_SLACK_WEBHOOK"
+  pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
+
+# ── Route Tree ───────────────────────────────────────────────────
+route:
+  receiver: "slack-warnings"
+  group_by: ["alertname", "severity"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  routes:
+    # Critical alerts → PagerDuty + Slack
+    - match:
+        severity: critical
+      receiver: "pagerduty-critical"
+      continue: true
+    - match:
+        severity: critical
+      receiver: "slack-critical"
+      continue: false
+
+    # Warning alerts → Slack only
+    - match:
+        severity: warning
+      receiver: "slack-warnings"
+
+    # Database alerts → email to DBA
+    - match_re:
+        alertname: "Database.*|PostgreSQL.*"
+      receiver: "email-dba"
+
+# ── Receivers ────────────────────────────────────────────────────
+receivers:
+  - name: "slack-critical"
+    slack_configs:
+      - channel: "#lazynext-alerts-critical"
+        title: "🚨 {{ .GroupLabels.alertname }}"
+        text: |
+          *Severity:* {{ .CommonLabels.severity }}
+          *Description:* {{ .CommonAnnotations.description }}
+          *Summary:* {{ .CommonAnnotations.summary }}
+          {{ range .Alerts }}
+          • {{ .Annotations.summary }} — {{ .Labels.instance }}
+          {{ end }}
+        color: "danger"
+        send_resolved: true
+
+  - name: "slack-warnings"
+    slack_configs:
+      - channel: "#lazynext-alerts"
+        title: "⚠️ {{ .GroupLabels.alertname }}"
+        text: |
+          *Severity:* {{ .CommonLabels.severity }}
+          *Summary:* {{ .CommonAnnotations.summary }}
+        color: "warning"
+        send_resolved: true
+
+  - name: "pagerduty-critical"
+    pagerduty_configs:
+      - routing_key: "REPLACE_WITH_PAGERDUTY_INTEGRATION_KEY"
+        severity: "critical"
+        description: "{{ .CommonAnnotations.description }}"
+        client: "Lazynext Monitoring"
+        client_url: "https://monitoring.lazynext.ai"
+
+  - name: "email-dba"
+    email_configs:
+      - to: "dba@lazynext.ai"
+        from: "alerts@lazynext.ai"
+        smarthost: "smtp.resend.com:587"
+        auth_username: "resend"
+        auth_password: "REPLACE_WITH_RESEND_API_KEY"
+        headers:
+          Subject: "[Lazynext DB] {{ .GroupLabels.alertname }}"
+
+# ── Inhibition Rules ────────────────────────────────────────────
+inhibit_rules:
+  # If a critical alert fires, suppress warnings for same service
+  - source_match:
+      severity: "critical"
+    target_match:
+      severity: "warning"
+    equal: ["alertname", "instance"]

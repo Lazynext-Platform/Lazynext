@@ -1,0 +1,202 @@
+---
+# Ingress — external HTTP/S traffic routing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lazynext-ingress
+  namespace: lazynext
+  labels:
+    app: lazynext
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - lazynext.ai
+        - www.lazynext.ai
+      secretName: lazynext-tls
+  rules:
+    - host: lazynext.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lazynext-web
+                port:
+                  number: 80
+    - host: www.lazynext.ai
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lazynext-web
+                port:
+                  number: 80
+---
+# NetworkPolicy — deny all by default, allow specific
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow ingress from nginx controller to web
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-web
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 3000
+          protocol: TCP
+---
+# Allow web -> all backend services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-to-backend
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-web
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              component: backend
+      ports:
+        - port: 8002
+          protocol: TCP
+        - port: 8003
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              component: ml
+      ports:
+        - port: 8000
+          protocol: TCP
+        - port: 8001
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgres-db
+      ports:
+        - port: 5432
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis-db
+      ports:
+        - port: 6379
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis-proxy
+      ports:
+        - port: 80
+          protocol: TCP
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+---
+# Allow backend services -> database
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-db
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              component: backend
+        - podSelector:
+            matchLabels:
+              component: frontend
+      ports:
+        - port: 5432
+          protocol: TCP
+---
+# Allow all pods in namespace to communicate with DNS
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# Certificate (via cert-manager)
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-tls
+  namespace: lazynext
+spec:
+  secretName: lazynext-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - lazynext.ai
+    - www.lazynext.ai

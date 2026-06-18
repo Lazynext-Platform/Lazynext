@@ -1,0 +1,125 @@
+# ── Docker Compose GPU Profile ───────────────────────────────────
+# Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+#
+# Overrides pre-processing and generative-studio to use GPU images.
+# Requires: nvidia-container-toolkit + docker compose --profile gpu
+
+services:
+  pre-processing:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile.gpu
+    profiles: ["gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, compute, utility]
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+    ports:
+      - "8000:8000"
+
+  generative-studio:
+    build:
+      context: ./services/generative-studio
+      dockerfile: Dockerfile.gpu
+    profiles: ["gpu"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, compute, utility]
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+    ports:
+      - "8001:8001"
+
+  tensorflow-serving:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile.tensorflow
+    profiles: ["gpu", "tf"]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    ports:
+      - "8500:8500"
+      - "8501:8501"
+    volumes:
+      - models_data:/models
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/lazynext_models"]
+      interval: 30s
+      start_period: 60s
+      retries: 3
+
+  # Non-GPU services with resource limits for fairness
+  web:
+    profiles: []  # Always on (no profile)
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2G"
+        reservations:
+          cpus: "0.5"
+          memory: "512M"
+
+  ai-agents:
+    profiles: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1G"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+
+  render-service:
+    profiles: []
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: "4G"
+        reservations:
+          cpus: "0.5"
+          memory: "1G"
+
+  db:
+    profiles: []
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "2G"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+
+  redis:
+    profiles: []
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "1G"
+        reservations:
+          cpus: "0.1"
+          memory: "128M"
+
+volumes:
+  models_data:
+    driver: local

@@ -37,7 +37,7 @@ async fn main() {
     )));
 
     // Background webhook dispatcher
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::new().expect("Failed to create HTTP client");
     let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL")
         .unwrap_or_else(|_| "https://hooks.slack.com/services/REPLACE/WITH/YOUR_WEBHOOK".to_string());
 

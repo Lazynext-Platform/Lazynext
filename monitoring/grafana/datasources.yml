@@ -1,0 +1,46 @@
+# ── Grafana Datasources ──────────────────────────────────────────
+# Auto-provisioned when Grafana starts with this ConfigMap mounted.
+# Apply: kubectl create configmap grafana-datasources --from-file=datasources.yml -n monitoring
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus-operated.monitoring:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "30s"
+      queryTimeout: "60s"
+      httpMethod: "POST"
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki.monitoring:3100
+    editable: false
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: "trace_id=(\\w+)"
+          name: trace_id
+          url: "$${__value.raw}"
+
+  - name: Cloud SQL (PostgreSQL)
+    type: postgres
+    access: proxy
+    url: postgres-db.lazynext:5432
+    database: lazynext
+    user: lazynext_app
+    secureJsonData:
+      password: "${DB_PASSWORD}"
+    jsonData:
+      sslmode: "require"
+      postgresVersion: 1600
+      timescaledb: false
+    editable: false

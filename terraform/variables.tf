@@ -36,7 +36,13 @@ variable "db_password" {
 }
 
 variable "db_tier" {
-  description = "Cloud SQL machine tier (e.g. db-f1-micro for dev, db-custom-2-4096 for prod)"
+  description = "Cloud SQL machine tier"
+  type        = string
+  default     = "db-f1-micro"
+}
+
+variable "db_replica_tier" {
+  description = "Cloud SQL read replica machine tier"
   type        = string
   default     = "db-f1-micro"
 }
@@ -46,38 +52,58 @@ variable "db_tier" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 variable "app_domain" {
-  description = "The public domain of the Lazynext web app (e.g. https://app.lazynext.ai)"
+  description = "The public domain of the Lazynext web app"
   type        = string
   default     = "https://lazynext.ai"
 }
 
+variable "better_auth_secret" {
+  description = "Secret key for Better Auth (64+ chars recommended)"
+  type        = string
+  sensitive   = true
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
-# API Keys (optional — services fall back to mock mode without these)
+# API Keys
 # ─────────────────────────────────────────────────────────────────────────────
 
 variable "replicate_api_token" {
-  description = "API token for Replicate (AI video generation). Leave empty to use mock mode."
+  description = "API token for Replicate (AI video generation)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "elevenlabs_api_key" {
-  description = "API key for ElevenLabs (AI dubbing). Leave empty to use mock mode."
+  description = "API key for ElevenLabs (AI dubbing)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "openai_api_key" {
-  description = "API key for OpenAI (Whisper transcription, GPT)."
+  description = "API key for OpenAI (Whisper, GPT)"
   type        = string
   sensitive   = true
   default     = ""
 }
 
 variable "anthropic_api_key" {
-  description = "API key for Anthropic (Claude — Chronos Copilot)."
+  description = "API key for Anthropic (Claude — Chronos Copilot)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "stripe_secret_key" {
+  description = "Stripe secret key for payment processing"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "resend_api_key" {
+  description = "Resend API key for transactional email"
   type        = string
   sensitive   = true
   default     = ""

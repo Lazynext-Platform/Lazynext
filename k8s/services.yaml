@@ -1,0 +1,637 @@
+---
+# Web Frontend (Next.js)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-web
+  namespace: lazynext
+  labels:
+    app: lazynext-web
+    component: frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: lazynext-web
+  template:
+    metadata:
+      labels:
+        app: lazynext-web
+        component: frontend
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: lazynext-web
+          image: ghcr.io/lazynext-platform/lazynext-web:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: NEXT_PUBLIC_SITE_URL
+              value: "https://lazynext.ai"
+            # From ConfigMap
+            - name: BETTER_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: BETTER_AUTH_URL
+            - name: UPSTASH_REDIS_REST_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: UPSTASH_REDIS_REST_URL
+            - name: AI_AGENTS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: AI_AGENTS_URL
+            - name: RENDER_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: RENDER_SERVICE_URL
+            - name: PRE_PROCESSING_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: PRE_PROCESSING_URL
+            - name: GENERATIVE_STUDIO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: GENERATIVE_STUDIO_URL
+            - name: MEDIA_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: MEDIA_BUCKET
+            - name: STORAGE_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: STORAGE_PROVIDER
+            - name: NEXT_PUBLIC_POSTHOG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NEXT_PUBLIC_POSTHOG_HOST
+            # From Secrets
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: DATABASE_URL
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: UPSTASH_REDIS_REST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: UPSTASH_REDIS_REST_TOKEN
+            - name: MARBLE_WORKSPACE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: MARBLE_WORKSPACE_KEY
+            - name: FREESOUND_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: FREESOUND_CLIENT_ID
+            - name: FREESOUND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: FREESOUND_API_KEY
+            - name: NEXT_PUBLIC_POSTHOG_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTHOG_KEY
+                  optional: true
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: STRIPE_SECRET_KEY
+                  optional: true
+            - name: STRIPE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: STRIPE_WEBHOOK_SECRET
+                  optional: true
+            - name: RESEND_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: RESEND_API_KEY
+                  optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-web
+  namespace: lazynext
+  labels:
+    app: lazynext-web
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-web
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+# AI Agents / Sync Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-sync
+  namespace: lazynext
+  labels:
+    app: lazynext-sync
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: lazynext-sync
+  template:
+    metadata:
+      labels:
+        app: lazynext-sync
+        component: backend
+    spec:
+      terminationGracePeriodSeconds: 25
+      containers:
+        - name: lazynext-sync
+          image: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8002
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NODE_ENV
+            - name: LLM_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: LLM_PROVIDER
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: OPENAI_API_KEY
+                  optional: true
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: ANTHROPIC_API_KEY
+                  optional: true
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: GEMINI_API_KEY
+                  optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-sync
+  namespace: lazynext
+  labels:
+    app: lazynext-sync
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-sync
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8002
+      targetPort: 8002
+---
+# Render Farm
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-render
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: lazynext-render
+  template:
+    metadata:
+      labels:
+        app: lazynext-render
+        component: backend
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: lazynext-render
+          image: ghcr.io/lazynext-platform/lazynext-render-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8003
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "4"
+              memory: "4Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NODE_ENV
+            - name: MEDIA_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: MEDIA_BUCKET
+            - name: STORAGE_PROVIDER
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: STORAGE_PROVIDER
+          volumeMounts:
+            - name: render-tmp
+              mountPath: /tmp/renders
+      volumes:
+        - name: render-tmp
+          emptyDir:
+            sizeLimit: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-render
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-render
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8003
+      targetPort: 8003
+---
+# Python Pre-Processing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-pre-processing
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing
+    component: ml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-pre-processing
+  template:
+    metadata:
+      labels:
+        app: lazynext-pre-processing
+        component: ml
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: lazynext-pre-processing
+          image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: MEDIA_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: MEDIA_BUCKET
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: OPENAI_API_KEY
+                  optional: true
+            - name: REPLICATE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: REPLICATE_API_TOKEN
+                  optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-pre-processing
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-pre-processing
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+# Python Generative Studio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-generative-studio
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio
+    component: ml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-generative-studio
+  template:
+    metadata:
+      labels:
+        app: lazynext-generative-studio
+        component: ml
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: lazynext-generative-studio
+          image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8001
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: REPLICATE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: REPLICATE_API_TOKEN
+                  optional: true
+            - name: ELEVENLABS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: ELEVENLABS_API_KEY
+                  optional: true
+          volumeMounts:
+            - name: hf-cache
+              mountPath: /tmp/huggingface
+      volumes:
+        - name: hf-cache
+          emptyDir:
+            sizeLimit: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-generative-studio
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-generative-studio
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8001
+      targetPort: 8001
+---
+# MCP Server (Model Context Protocol)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-mcp
+  namespace: lazynext
+  labels:
+    app: lazynext-mcp
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-mcp
+  template:
+    metadata:
+      labels:
+        app: lazynext-mcp
+        component: backend
+    spec:
+      containers:
+        - name: lazynext-mcp
+          image: ghcr.io/lazynext-platform/lazynext-mcp:latest
+          imagePullPolicy: IfNotPresent
+          stdin: true
+          tty: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 5173
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NODE_ENV
+---
+# DB Migration Job
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: lazynext-db-migrate
+  namespace: lazynext
+  labels:
+    app: lazynext-db-migrate
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: lazynext-db-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-migrate
+          image: ghcr.io/lazynext-platform/lazynext-web:latest
+          imagePullPolicy: IfNotPresent
+          command: ["bun", "run", "apps/web/migrate.ts"]
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: DATABASE_URL

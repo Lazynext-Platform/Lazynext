@@ -1,0 +1,46 @@
+# ── Base Kustomization ──
+# Overlays for dev/staging/production extend this base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: lazynext
+
+bases:
+  - .
+
+resources:
+  - namespace.yaml
+  - secrets.yaml
+  - configmap.yaml
+  - databases.yaml
+  - services.yaml
+  - networking.yaml
+  - autoscaling.yaml
+  - budgets.yaml
+  - backups.yaml
+  - monitoring.yaml
+  - gpu.yaml
+  - redis-configmap.yaml
+  - security-policies.yaml
+  - rbac.yaml
+  - init-containers.yaml
+  - model-warmup.yaml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: lazynext
+
+# Transform images for environment-specific tags
+images:
+  - name: ghcr.io/lazynext-platform/lazynext-web
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-ai-agents
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-render-service
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-pre-processing
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-generative-studio
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-mcp
+    newTag: latest

@@ -44,10 +44,10 @@ export async function POST(request: Request) {
 					videoTrackUrl: `/api/assets/lipsync_${clipId}_${targetLanguage}.mp4`,
 				},
 			});
-		} catch (microserviceError: any) {
+		} catch (microserviceError: unknown) {
 			console.warn(
 				"[API] Microservice unreachable or failed. Falling back to mock data.",
-				microserviceError.message,
+				(microserviceError instanceof Error ? microserviceError.message : String(microserviceError)),
 			);
 
 			// Fallback mechanism if the Python service is offline
@@ -61,10 +61,10 @@ export async function POST(request: Request) {
 				},
 			});
 		}
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Dubbing API Error:", error);
 		return NextResponse.json(
-			{ success: false, error: error.message },
+			{ success: false, error: error instanceof Error ? error.message : String(error) },
 			{ status: 500 },
 		);
 	}

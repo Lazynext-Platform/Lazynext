@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lazynext-config
+  namespace: lazynext
+data:
+  # Environment
+  NODE_ENV: "production"
+  STORAGE_PROVIDER: "gcs"
+  LLM_PROVIDER: "anthropic"
+
+  # Service URLs (internal K8s DNS)
+  AI_AGENTS_URL: "http://lazynext-sync:8002"
+  RENDER_SERVICE_URL: "http://lazynext-render:8003"
+  PRE_PROCESSING_URL: "http://lazynext-pre-processing:8000"
+  GENERATIVE_STUDIO_URL: "http://lazynext-generative-studio:8001"
+  API_GATEWAY_URL: "http://lazynext-api:8005"
+
+  # Public-facing URLs
+  BETTER_AUTH_URL: "https://lazynext.ai"
+
+  # Redis
+  UPSTASH_REDIS_REST_URL: "http://redis-proxy:80"
+
+  # Media bucket
+  MEDIA_BUCKET: "vertexaiopencode-lazynext-media-production"
+
+  # Monitoring
+  NEXT_PUBLIC_POSTHOG_HOST: "https://app.posthog.com"

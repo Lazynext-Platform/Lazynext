@@ -1,5 +1,4 @@
 {
-	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"[javascript][typescript][javascriptreact][typescriptreact][json][jsonc][css][graphql]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},
@@ -8,6 +7,5 @@
 	"editor.formatOnPaste": true,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "explicit"
-	},
-	"emmet.showExpandedAbbreviation": "never"
+	}
 }

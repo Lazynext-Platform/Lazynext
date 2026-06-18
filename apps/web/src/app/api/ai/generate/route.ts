@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 			name: `Generated ${type === "audio" ? "Audio" : "Video"}`,
 			type: type === "audio" ? "audio" : "video",
 		});
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("[Generative API Error]:", error);
 		return NextResponse.json(
 			{ error: "Failed to generate AI response" },

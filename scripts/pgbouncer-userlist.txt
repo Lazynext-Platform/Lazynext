@@ -1,0 +1,5 @@
+# PgBouncer User List — maps auth credentials to PostgreSQL users
+# Format: "username" "password"
+# Apply with: kubectl create secret generic pgbouncer-users --from-file=userlist.txt -n lazynext
+
+"lazynext_app" "CHANGE_ME_TO_DB_PASSWORD"

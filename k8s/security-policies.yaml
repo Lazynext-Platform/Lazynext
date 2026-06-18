@@ -1,0 +1,244 @@
+---
+# ── Pod Security Standards (restricted) ──
+# Enforces best-practice security on all pods
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lazynext
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+# ── ResourceQuota ──
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: lazynext-quota
+  namespace: lazynext
+spec:
+  hard:
+    requests.cpu: "30"
+    requests.memory: "64Gi"
+    limits.cpu: "80"
+    limits.memory: "128Gi"
+    requests.nvidia.com/gpu: "4"
+    persistentvolumeclaims: "20"
+    requests.storage: "500Gi"
+    count/deployments.apps: "20"
+    count/services: "20"
+    count/jobs.batch: "10"
+    count/cronjobs.batch: "5"
+    count/secrets: "30"
+    count/configmaps: "15"
+---
+# ── LimitRange (default resource limits) ──
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lazynext-limits
+  namespace: lazynext
+spec:
+  limits:
+    # Default for all containers
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      max:
+        cpu: "8"
+        memory: "32Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+    # Max total per pod
+    - type: Pod
+      max:
+        cpu: "16"
+        memory: "64Gi"
+---
+# ── NetworkPolicy — default deny ingress (zero trust) ──
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+# ── SecurityContext defaults via PodPreset-like pattern ──
+# Applied via Kyverno or manually in each Deployment
+# Key settings:
+#   runAsNonRoot: true
+#   runAsUser: 1001
+#   allowPrivilegeEscalation: false
+#   seccompProfile: RuntimeDefault
+#   capabilities.drop: [ALL]
+#   readOnlyRootFilesystem: true (where possible)
+---
+# ── RuntimeClass for GPU workloads ──
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: nvidia-gpu
+handler: nvidia
+scheduling:
+  nodeSelector:
+    accelerator: nvidia
+---
+# ── PodPriorityClass (scheduling priority) ──
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-critical
+value: 1000000
+globalDefault: false
+description: "Critical Lazynext services — web app, database, sync server"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-high
+value: 100000
+globalDefault: false
+description: "High priority — render service, AI agents"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-low
+value: 10000
+globalDefault: true
+description: "Low priority — batch jobs, ML inference that can wait"
+---
+# ── TopologySpreadConstraints — applied per Deployment ──
+# Example (put this in each Deployment spec):
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: topology.kubernetes.io/zone
+#     whenUnsatisfiable: ScheduleAnyway
+#     labelSelector:
+#       matchLabels:
+#         app: lazynext-web
+#   - maxSkew: 1
+#     topologyKey: kubernetes.io/hostname
+#     whenUnsatisfiable: ScheduleAnyway
+#     labelSelector:
+#       matchLabels:
+#         app: lazynext-web
+---
+# ── External Secrets Operator — SecretStore ──
+# Uses GCP Secret Manager as the external secrets backend
+# Requires: helm install external-secrets external-secrets/external-secrets
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: gcp-secret-manager
+  namespace: lazynext
+spec:
+  provider:
+    gcpsm:
+      projectID: vertexaiopencode
+      auth:
+        workloadIdentity:
+          clusterLocation: us-central1
+          clusterName: lazynext-cluster
+          serviceAccountRef:
+            name: lazynext-cloud-run
+---
+# ── ExternalSecret — syncs GCP Secret Manager → K8s Secret ──
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: lazynext-external-secrets
+  namespace: lazynext
+spec:
+  refreshInterval: "1h"
+  secretStoreRef:
+    name: gcp-secret-manager
+    kind: SecretStore
+  target:
+    name: lazynext-secrets
+    creationPolicy: Owner
+  data:
+    - secretKey: DATABASE_URL
+      remoteRef:
+        key: DATABASE_URL
+    - secretKey: BETTER_AUTH_SECRET
+      remoteRef:
+        key: BETTER_AUTH_SECRET
+    - secretKey: OPENAI_API_KEY
+      remoteRef:
+        key: OPENAI_API_KEY
+    - secretKey: ANTHROPIC_API_KEY
+      remoteRef:
+        key: ANTHROPIC_API_KEY
+    - secretKey: GEMINI_API_KEY
+      remoteRef:
+        key: GEMINI_API_KEY
+    - secretKey: REPLICATE_API_TOKEN
+      remoteRef:
+        key: REPLICATE_API_TOKEN
+    - secretKey: ELEVENLABS_API_KEY
+      remoteRef:
+        key: ELEVENLABS_API_KEY
+    - secretKey: STRIPE_SECRET_KEY
+      remoteRef:
+        key: STRIPE_SECRET_KEY
+    - secretKey: RESEND_API_KEY
+      remoteRef:
+        key: RESEND_API_KEY
+---
+# ── VerticalPodAutoscaler — Web App ──
+# Requires: helm install vpa fairwinds/vpa
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: lazynext-web-vpa
+  namespace: lazynext
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-web
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: lazynext-web
+        minAllowed:
+          cpu: "100m"
+          memory: "256Mi"
+        maxAllowed:
+          cpu: "4"
+          memory: "8Gi"
+        controlledResources: ["cpu", "memory"]
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: lazynext-render-vpa
+  namespace: lazynext
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-render
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: lazynext-render
+        minAllowed:
+          cpu: "250m"
+          memory: "512Mi"
+        maxAllowed:
+          cpu: "8"
+          memory: "16Gi"
+        controlledResources: ["cpu", "memory"]

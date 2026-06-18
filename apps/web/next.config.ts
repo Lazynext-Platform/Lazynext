@@ -64,8 +64,8 @@ const nextConfig: NextConfig = {
 	},
 
 	typescript: {
-		// TODO: Remove once all TypeScript errors are resolved (tracked in Phase 9)
-		ignoreBuildErrors: process.env.CI != null,
+		// TypeScript errors fail the build — fix them, don't bypass
+		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
 	webpack(config) {

@@ -1,0 +1,258 @@
+---
+# GPU Node Pool Configuration
+# Requires NVIDIA GPU Operator installed on the cluster:
+#   helm install nvidia-gpu-operator nvidia/gpu-operator --set driver.version=550
+
+# GPU-accelerated Pre-Processing (Whisper, SAM2, NeRF)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-pre-processing-gpu
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing-gpu
+    component: ml
+    accelerator: nvidia-t4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-pre-processing-gpu
+  template:
+    metadata:
+      labels:
+        app: lazynext-pre-processing-gpu
+        component: ml
+    spec:
+      terminationGracePeriodSeconds: 300
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-tesla-t4
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "present"
+          effect: "NoSchedule"
+      containers:
+        - name: lazynext-pre-processing-gpu
+          image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest-gpu
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "2"
+              memory: "8Gi"
+              nvidia.com/gpu: "1"
+            limits:
+              cpu: "4"
+              memory: "16Gi"
+              nvidia.com/gpu: "1"
+          env:
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
+            - name: PYTORCH_CUDA_ALLOC_CONF
+              value: "max_split_size_mb:512"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: MEDIA_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: MEDIA_BUCKET
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: OPENAI_API_KEY
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: model-cache-pvc
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-pre-processing-gpu
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing-gpu
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-pre-processing-gpu
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+# GPU-accelerated Generative Studio (Diffusion, RealESRGAN, Demucs)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-generative-studio-gpu
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio-gpu
+    component: ml
+    accelerator: nvidia-l4
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-generative-studio-gpu
+  template:
+    metadata:
+      labels:
+        app: lazynext-generative-studio-gpu
+        component: ml
+    spec:
+      terminationGracePeriodSeconds: 300
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-l4
+      tolerations:
+        - key: "nvidia.com/gpu"
+          operator: "Equal"
+          value: "present"
+          effect: "NoSchedule"
+      containers:
+        - name: lazynext-generative-studio-gpu
+          image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest-gpu
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8001
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "4"
+              memory: "16Gi"
+              nvidia.com/gpu: "1"
+            limits:
+              cpu: "8"
+              memory: "32Gi"
+              nvidia.com/gpu: "1"
+          env:
+            - name: CUDA_VISIBLE_DEVICES
+              value: "0"
+            - name: PYTORCH_CUDA_ALLOC_CONF
+              value: "max_split_size_mb:512"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: HF_HOME
+              value: "/models/huggingface"
+            - name: TRANSFORMERS_CACHE
+              value: "/models/huggingface"
+            - name: REPLICATE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: REPLICATE_API_TOKEN
+                  optional: true
+            - name: ELEVENLABS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: ELEVENLABS_API_KEY
+                  optional: true
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: model-cache
+              mountPath: /models
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: model-cache-pvc
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-generative-studio-gpu
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio-gpu
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-generative-studio-gpu
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8001
+      targetPort: 8001
+---
+# Persistent Volume Claim for ML Model Cache
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-cache-pvc
+  namespace: lazynext
+  labels:
+    app: model-cache
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: premium-rwo
+---
+# NVIDIA GPU Operator ClusterPolicy (if using GPU Operator)
+# apiVersion: nvidia.com/v1
+# kind: ClusterPolicy
+# metadata:
+#   name: gpu-cluster-policy
+# spec:
+#   driver:
+#     version: "550"
+#   toolkit:
+#     version: "1.15.0"
+#   operator:
+#     defaultRuntime: containerd

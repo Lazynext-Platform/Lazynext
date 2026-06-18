@@ -1,12 +1,22 @@
 # Cloud Build — GCP CI/CD Pipeline for Lazynext
 # Triggers on pushes to main, builds all Docker images and deploys to Cloud Run.
-# Mirrors the GitHub Actions CI in .github/workflows/ci.yml but targets GCP Artifact Registry.
 
 steps:
-  # ── Build ──
+  # ── Install Rust + wasm-pack for WASM build ──
+  - name: "rust:latest"
+    id: "install-wasm-pack"
+    entrypoint: sh
+    args:
+      - "-c"
+      - |
+        cargo install wasm-pack
+        wasm-pack build --target web rust/wasm
+
+  # ── Build Docker Images ──
 
   - name: "gcr.io/cloud-builders/docker"
     id: "build-web"
+    waitFor: ["install-wasm-pack"]
     args:
       [
         "build",
@@ -75,51 +85,63 @@ steps:
         "./services/generative-studio",
       ]
 
-  # ── Push ──
+  # ── Push Images ──
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-web"
     waitFor: ["build-web"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA}"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-web-latest"
+    waitFor: ["push-web"]
+    args:
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-ai-agents"
     waitFor: ["build-ai-agents"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-render-service"
     waitFor: ["build-render-service"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-pre-processing"
     waitFor: ["build-pre-processing"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-generative-studio"
     waitFor: ["build-generative-studio"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest"]
 
-  # ── DB Migration ──
+  # ── Run Database Migrations ──
 
-  - name: "gcr.io/cloud-builders/docker"
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "db-migrate"
     waitFor: ["push-web"]
     entrypoint: sh
     args:
       - "-c"
       - |
-        docker run --rm \
-          -e DATABASE_URL="$$DATABASE_URL" \
-          us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA} \
-          node apps/web/migrate.ts
+        gcloud run jobs create lazynext-db-migrate-${SHORT_SHA} \
+          --image us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA} \
+          --region us-central1 \
+          --command "bun" \
+          --args "run,apps/web/migrate.ts" \
+          --set-secrets DATABASE_URL=DATABASE_URL:latest \
+          --service-account lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com \
+          --region us-central1 || true
+
+        gcloud run jobs execute lazynext-db-migrate-${SHORT_SHA} --region us-central1 --wait
     secretEnv: ["DATABASE_URL"]
 
   # ── Deploy to Cloud Run ──
@@ -131,14 +153,26 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "lazynext-web"
+      - "lazynext-web-${_ENVIRONMENT}"
       - "--image"
       - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA}"
       - "--region"
       - "us-central1"
-      - "--add-cloudsql-instances"
-      - "${PROJECT_ID}:us-central1:lazynext-db"
+      - "--cpu"
+      - "2"
+      - "--memory"
+      - "2Gi"
+      - "--timeout"
+      - "300"
+      - "--concurrency"
+      - "80"
+      - "--vpc-connector"
+      - "lazynext-vpc-connector-${_ENVIRONMENT}"
+      - "--service-account"
+      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
       - "--allow-unauthenticated"
+      - "--set-secrets"
+      - "DATABASE_URL=DATABASE_URL:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy-ai-agents"
@@ -147,12 +181,22 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "lazynext-ai-agents"
+      - "lazynext-ai-agents-${_ENVIRONMENT}"
       - "--image"
       - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:${SHORT_SHA}"
       - "--region"
       - "us-central1"
+      - "--cpu"
+      - "2"
+      - "--memory"
+      - "2Gi"
+      - "--timeout"
+      - "300"
+      - "--service-account"
+      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
       - "--no-allow-unauthenticated"
+      - "--set-secrets"
+      - "OPENAI_API_KEY=OPENAI_API_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy-render-service"
@@ -161,11 +205,19 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "lazynext-render-service"
+      - "lazynext-render-${_ENVIRONMENT}"
       - "--image"
       - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:${SHORT_SHA}"
       - "--region"
       - "us-central1"
+      - "--cpu"
+      - "4"
+      - "--memory"
+      - "8Gi"
+      - "--timeout"
+      - "900"
+      - "--service-account"
+      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
       - "--no-allow-unauthenticated"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -175,12 +227,22 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "lazynext-pre-processing"
+      - "lazynext-pre-processing-${_ENVIRONMENT}"
       - "--image"
       - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:${SHORT_SHA}"
       - "--region"
       - "us-central1"
+      - "--cpu"
+      - "4"
+      - "--memory"
+      - "8Gi"
+      - "--timeout"
+      - "900"
+      - "--service-account"
+      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
       - "--no-allow-unauthenticated"
+      - "--set-secrets"
+      - "OPENAI_API_KEY=OPENAI_API_KEY:latest"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: "deploy-generative-studio"
@@ -189,19 +251,37 @@ steps:
     args:
       - "run"
       - "deploy"
-      - "lazynext-generative-studio"
+      - "lazynext-gen-studio-${_ENVIRONMENT}"
       - "--image"
       - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:${SHORT_SHA}"
       - "--region"
       - "us-central1"
+      - "--cpu"
+      - "4"
+      - "--memory"
+      - "8Gi"
+      - "--timeout"
+      - "900"
+      - "--service-account"
+      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
       - "--no-allow-unauthenticated"
+      - "--set-secrets"
+      - "REPLICATE_API_TOKEN=REPLICATE_API_TOKEN:latest,ELEVENLABS_API_KEY=ELEVENLABS_API_KEY:latest"
 
 images:
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA}"
   - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:${SHORT_SHA}"
   - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:${SHORT_SHA}"
   - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:${SHORT_SHA}"
   - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest"
+  - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:${SHORT_SHA}"
   - "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest"
+
+substitutions:
+  _ENVIRONMENT: dev
 
 timeout: "3600s"
 options:

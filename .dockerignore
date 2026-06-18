@@ -1,17 +1,58 @@
+# Dependencies
 **/node_modules
+**/bun.lock
+
+# Build outputs
 **/.next
 **/target
+**/dist
+**/build
 **/.turbo
+
+# Git
 .git
 .gitignore
-*.md
+
+# Environment
 .env*
 !.env.example
+
+# IDE / Editor
 .cursor
 .vscode
-diffs
+.DS_Store
+*.swp
+*.swo
+
+# Documentation (not needed in images)
 docs
+notes
+*.md
+!README.md
+
+# Development artifacts
+diffs
 agent-transcripts
 mcps
 terminals
+
+# Cache directories
 apps/web/.font-cache
+**/__pycache__
+**/*.pyc
+
+# Test files
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+e2e
+
+# Infrastructure files (not needed in app images)
+terraform
+k8s
+scripts
+.github
+
+# Logs
+*.log

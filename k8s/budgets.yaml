@@ -1,0 +1,42 @@
+---
+# PodDisruptionBudget — Web App
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-web-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-web
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: lazynext-web
+---
+# PodDisruptionBudget — Sync Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-sync-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-sync
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-sync
+---
+# PodDisruptionBudget — Render Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-render-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-render
