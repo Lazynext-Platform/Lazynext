@@ -93,10 +93,6 @@ export default function Timeline({
 	trackHeight = "md",
 	isQuantumSuperposition = false,
 }: TimelineProps) {
-	if (!project || !project.tracks) {
-		return <div className="text-zinc-400 p-4 text-xs">No tracks</div>;
-	}
-
 	const playheadX = frame * pxPerFrame;
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -741,6 +737,10 @@ export default function Timeline({
 			scrollContainerRef.current.scrollLeft = Math.max(0, targetScrollLeft);
 		}
 	};
+
+	if (!project || !project.tracks) {
+		return <div className="text-zinc-400 p-4 text-xs">No tracks</div>;
+	}
 
 	return (
 		<div
