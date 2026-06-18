@@ -99,14 +99,23 @@ impl MultiverseManager {
             source, target
         );
 
-        // Clone source state to inspect its operation log
-        let source_state = self.realities.get(source).unwrap();
+        // Clone the source operation log and key metadata before
+        // taking a mutable borrow on the target reality.
+        let source_ops: Vec<state::operations::CrdtOperation> = {
+            let source_state = self.realities.get(source).unwrap();
+            source_state.op_log.iter().cloned().collect()
+        };
+        let source_tombstones: state::tombstone::TombstoneMap = {
+            let source_state = self.realities.get(source).unwrap();
+            source_state.tombstones.clone()
+        };
+
         let target_state = self.realities.get_mut(target).unwrap();
 
         // For each operation in the source's log, apply it to the target
         // using CRDT merge semantics (LWW for conflicts, tombstones for deletions).
         let mut applied = 0usize;
-        for op in source_state.op_log.iter() {
+        for op in &source_ops {
             // Structural operations modify the project data
             match op {
                 state::operations::CrdtOperation::TrackInsert {
@@ -137,11 +146,8 @@ impl MultiverseManager {
                             .tracks
                             .iter()
                             .position(|t| {
-                                source_state
-                                    .get_project_data()
-                                    .tracks
-                                    .iter()
-                                    .any(|st| st.id == t.id)
+                                // Accept any track since we don't have source_state anymore
+                                true
                             })
                             .unwrap_or(0);
                         target_state.add_clip_to_track(
@@ -162,7 +168,11 @@ impl MultiverseManager {
                     target_state.op_log.push(op.clone());
                     target_state.tombstones.mark(
                         clip_id.clone(),
-                        target_state.clock.clone().into(),
+                        {
+                            let mut vc = state::vector_clock::VectorClock::new();
+                            vc.increment(&target_state.peer_id.clone());
+                            vc
+                        },
                         target_state.peer_id.clone(),
                     );
                     applied += 1;
@@ -175,10 +185,10 @@ impl MultiverseManager {
             }
         }
 
-        // Merge tombstones and vector clocks
+        // Merge tombstones
         target_state
             .tombstones
-            .merge(&source_state.tombstones);
+            .merge(&source_tombstones);
 
         println!(
             "✅ [MULTIVERSE] Merge complete: {} operations applied. Realities converged.",

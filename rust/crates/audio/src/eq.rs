@@ -271,9 +271,12 @@ mod tests {
         // 1kHz lowpass at 44.1kHz should pass DC but attenuate Nyquist
         let mut filter =
             BiquadFilter::new(FilterType::LowPass, 1000.0, 0.707, 0.0, 44100);
-        // DC signal should pass through
-        let dc = filter.process(1.0);
-        assert!(dc.abs() > 0.9);
+        // DC signal needs a few samples to reach steady-state
+        let mut output = 0.0;
+        for _ in 0..20 {
+            output = filter.process(1.0);
+        }
+        assert!(output.abs() > 0.9, "DC gain should be ~1.0, got {}", output);
     }
 
     #[test]

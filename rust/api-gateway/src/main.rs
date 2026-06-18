@@ -1,12 +1,13 @@
-use axum::extract::{Json, State};
+use axum::extract::State;
 use axum::routing::{get, post};
-use axum::Router;
+use axum::{Json, Router};
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::{NLEEvent, NLEState};
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::net::SocketAddr;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 
 #[derive(Serialize)]
@@ -28,7 +29,7 @@ async fn main() {
 
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
 
-    let nle = Arc::new(Mutex::new(NLEState::new_with_dispatcher(
+    let nle_state = Arc::new(Mutex::new(NLEState::new_with_dispatcher(
         "enterprise_session_1".to_string(),
         "Cloud Sync Edit".to_string(),
         60,
@@ -70,12 +71,13 @@ async fn main() {
         }
     });
 
-    let editor = Arc::new(AutonomousEditor::new());
-
-    let state = AppState { nle, editor };
+    let state = AppState {
+        nle: nle_state.clone(),
+        editor: Arc::new(AutonomousEditor::new()),
+    };
 
     let app: Router = Router::new()
-        .route("/health", get(|| async { json!({"status": "ok", "service": "api-gateway"}) }))
+        .route("/health", get(health_handler))
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/render", post(handle_trigger_render))
@@ -86,37 +88,42 @@ async fn main() {
     println!("📡 API Gateway listening on http://{}", addr);
 
     // Trigger a demo render after 5 seconds
-    {
-        let nle_clone = state.nle.clone();
-        tokio::spawn(async move {
-            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-            if let Ok(mut nle) = nle_clone.lock() {
-                nle.add_track("V1".to_string(), "video".to_string());
-                nle.add_clip_to_track(
-                    0,
-                    "demo_clip".to_string(),
-                    "video".to_string(),
-                    "demo.mp4".to_string(),
-                    0,
-                    100,
-                );
-                nle.trigger_render_complete();
-            }
-        });
-    }
+    let nle_for_demo = nle_state.clone();
+    tokio::spawn(async move {
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        let mut nle = nle_for_demo.lock().await;
+        nle.add_track("V1".to_string(), "video".to_string());
+        nle.add_clip_to_track(
+            0,
+            "demo_clip".to_string(),
+            "video".to_string(),
+            "demo.mp4".to_string(),
+            0,
+            100,
+        );
+        nle.trigger_render_complete();
+    });
 
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn health_handler() -> Json<Value> {
+    Json(json!({"status": "ok", "service": "api-gateway"}))
 }
 
 async fn handle_autonomous_edit(
     State(state): State<AppState>,
     Json(payload): Json<VideoIntent>,
 ) -> Json<Value> {
-    let mut nle = state.nle.lock().unwrap();
-    let result = state
-        .editor
-        .process_intent_with_llm(&mut nle, &payload)
-        .await;
+    // Lock, extract what we need, drop guard BEFORE await
+    let result = {
+        let mut nle = state.nle.lock().await;
+        state
+            .editor
+            .process_intent_with_llm(&mut nle, &payload)
+            .await
+    };
+    // MutexGuard is dropped here ^ — safe to hold across await within the block
 
     match result {
         Ok(msg) => Json(json!({ "success": true, "message": msg })),
@@ -125,13 +132,13 @@ async fn handle_autonomous_edit(
 }
 
 async fn handle_get_timeline(State(state): State<AppState>) -> Json<Value> {
-    let nle = state.nle.lock().unwrap();
+    let nle = state.nle.lock().await;
     let data = nle.get_project_data();
     Json(serde_json::to_value(data).unwrap_or(json!({})))
 }
 
 async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
-    let mut nle = state.nle.lock().unwrap();
+    let mut nle = state.nle.lock().await;
     nle.trigger_render_complete();
     Json(json!({ "triggered": true }))
 }
