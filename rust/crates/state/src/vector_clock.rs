@@ -78,7 +78,7 @@ impl VectorClock {
     /// Returns a summary string for debugging.
     pub fn summary(&self) -> String {
         let mut entries: Vec<_> = self.inner.iter().collect();
-        entries.sort_by_key(|(k, _)| k.clone());
+        entries.sort_by(|(a, _), (b, _)| a.cmp(b));
         entries
             .iter()
             .map(|(k, v)| format!("{}:{}", k, v))
@@ -152,8 +152,10 @@ mod tests {
         a.increment(&"A".into());
         let b = a.clone();
 
+        // Equal clocks: neither happens-before the other
         assert!(!a.happens_before(&b));
         assert!(!b.happens_before(&a));
-        assert!(!a.concurrent_with(&b)); // equal is not concurrent
+        // By definition, equal clocks are concurrent (neither strictly before)
+        assert!(a.concurrent_with(&b));
     }
 }

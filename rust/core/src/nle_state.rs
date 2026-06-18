@@ -70,6 +70,9 @@ pub struct ProjectData {
     pub id: String,
     pub name: String,
     pub framerate: u32,
+    pub width: u32,
+    pub height: u32,
+    pub bg_color: [f32; 4],
     pub tracks: Vec<Track>,
 }
 
@@ -100,6 +103,9 @@ impl NLEState {
                 id,
                 name,
                 framerate,
+                width: 1920,
+                height: 1080,
+                bg_color: [0.0, 0.0, 0.0, 1.0],
                 tracks: Vec::new(),
             },
             dispatcher: None,
@@ -119,6 +125,9 @@ impl NLEState {
         dispatcher: Sender<NLEEvent>,
     ) -> Self {
         let mut state = Self::new(id, name, framerate);
+        // Override with dispatcher-enabled defaults
+        state.data.width = 1920;
+        state.data.height = 1080;
         state.dispatcher = Some(dispatcher);
         state
     }
@@ -173,7 +182,6 @@ impl NLEState {
                     end,
                 },
             };
-            self.apply_and_record(op);
             track.clips.push(Clip {
                 id,
                 clip_type,
@@ -182,6 +190,9 @@ impl NLEState {
                 end,
                 animations: HashMap::new(),
             });
+            // Drop track borrow before calling apply_and_record
+            drop(track);
+            self.apply_and_record(op);
         }
     }
 
@@ -208,6 +219,9 @@ impl NLEState {
                         "easing": easing,
                     }),
                 };
+                // Let go of track/clip borrows before calling apply_and_record
+                drop(clip);
+                drop(track);
                 self.apply_and_record(op);
                 return true;
             }
@@ -238,9 +252,11 @@ impl NLEState {
                     new_start,
                     new_end,
                 };
-                self.apply_and_record(op);
                 clip.start = new_start;
                 clip.end = new_end;
+                drop(clip);
+                drop(track);
+                self.apply_and_record(op);
                 return true;
             }
         }

@@ -61,7 +61,16 @@ impl TombstoneMap {
     /// Returns the number of entries removed.
     pub fn gc(&mut self, horizon: &VectorClock) -> usize {
         let before = self.inner.len();
-        self.inner.retain(|id, _| !self.should_gc(id, horizon));
+        // Collect IDs to remove first to avoid borrow conflicts
+        let to_remove: Vec<String> = self
+            .inner
+            .iter()
+            .filter(|(id, _)| self.should_gc(id, horizon))
+            .map(|(id, _)| id.clone())
+            .collect();
+        for id in &to_remove {
+            self.inner.remove(id);
+        }
         before - self.inner.len()
     }
 
