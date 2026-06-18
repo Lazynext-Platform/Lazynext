@@ -1,4 +1,4 @@
-use crate::encoder::{ExportConfig, ExportEncoder, ExportFormat};
+use crate::encoder::{ExportConfig, ExportEncoder};
 use anyhow::Result;
 
 /// An export pipeline that renders compositor frames and pipes them to ffmpeg.

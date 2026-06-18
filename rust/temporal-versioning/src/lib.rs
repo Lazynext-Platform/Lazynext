@@ -145,10 +145,7 @@ impl MultiverseManager {
                             .get_project_data()
                             .tracks
                             .iter()
-                            .position(|t| {
-                                // Accept any track since we don't have source_state anymore
-                                true
-                            })
+                            .position(|_t| true)
                             .unwrap_or(0);
                         target_state.add_clip_to_track(
                             track_idx,
