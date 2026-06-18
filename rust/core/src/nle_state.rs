@@ -191,8 +191,7 @@ impl NLEState {
                 animations: HashMap::new(),
             });
             // Drop track borrow before calling apply_and_record
-            drop(track);
-            self.apply_and_record(op);
+        self.apply_and_record(op);
         }
     }
 
@@ -206,27 +205,34 @@ impl NLEState {
         value: f64,
         easing: state::keyframe::Easing,
     ) -> bool {
-        if let Some(track) = self.data.tracks.get_mut(track_idx) {
-            if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
-                clip.set_keyframe(property, frame, value, easing.clone());
-                let op = CrdtOperation::PropertyUpdate {
-                    target_id: clip_id.to_string(),
-                    property: property.to_string(),
-                    value: serde_json::json!({
-                        "action": "set_keyframe",
-                        "frame": frame,
-                        "value": value,
-                        "easing": easing,
-                    }),
-                };
-                // Let go of track/clip borrows before calling apply_and_record
-                drop(clip);
-                drop(track);
-                self.apply_and_record(op);
-                return true;
+        let op = {
+            if let Some(track) = self.data.tracks.get_mut(track_idx) {
+                if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
+                    clip.set_keyframe(property, frame, value, easing.clone());
+                    let op = CrdtOperation::PropertyUpdate {
+                        target_id: clip_id.to_string(),
+                        property: property.to_string(),
+                        value: serde_json::json!({
+                            "action": "set_keyframe",
+                            "frame": frame,
+                            "value": value,
+                            "easing": easing,
+                        }),
+                    };
+                    Some(op)
+                } else {
+                    None
+                }
+            } else {
+                None
             }
+        };
+        if let Some(op) = op {
+            self.apply_and_record(op);
+            true
+        } else {
+            false
         }
-        false
     }
 
     /// Get the animated value of a clip property at a given frame.
@@ -245,22 +251,29 @@ impl NLEState {
 
     /// Trim a clip in a track.
     pub fn trim_clip(&mut self, track_idx: usize, clip_id: &str, new_start: u32, new_end: u32) -> bool {
-        if let Some(track) = self.data.tracks.get_mut(track_idx) {
-            if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
-                let op = CrdtOperation::ClipTrim {
-                    clip_id: clip_id.to_string(),
-                    new_start,
-                    new_end,
-                };
-                clip.start = new_start;
-                clip.end = new_end;
-                drop(clip);
-                drop(track);
-                self.apply_and_record(op);
-                return true;
+        let op = {
+            if let Some(track) = self.data.tracks.get_mut(track_idx) {
+                if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
+                    clip.start = new_start;
+                    clip.end = new_end;
+                    Some(CrdtOperation::ClipTrim {
+                        clip_id: clip_id.to_string(),
+                        new_start,
+                        new_end,
+                    })
+                } else {
+                    None
+                }
+            } else {
+                None
             }
+        };
+        if let Some(op) = op {
+            self.apply_and_record(op);
+            true
+        } else {
+            false
         }
-        false
     }
 
     // ── Undo / Redo ──
