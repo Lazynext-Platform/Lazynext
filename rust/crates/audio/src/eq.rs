@@ -205,6 +205,7 @@ fn design_biquad(
 }
 
 /// A three-band parametric EQ (low, mid, high).
+#[allow(clippy::large_enum_variant)]
 pub struct ParametricEq {
     low_shelf: BiquadFilter,
     mid_peaking: BiquadFilter,

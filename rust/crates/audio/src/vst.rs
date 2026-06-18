@@ -1,8 +1,15 @@
 use anyhow::Result;
 
+#[allow(clippy::large_enum_variant)]
 pub struct VstHost {
     plugin_path: String,
     is_loaded: bool,
+}
+
+impl Default for VstHost {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl VstHost {

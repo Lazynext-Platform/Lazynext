@@ -6,6 +6,12 @@ use uuid::Uuid;
 
 pub struct AAFExporter;
 
+impl Default for AAFExporter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AAFExporter {
     pub fn new() -> Self {
         Self

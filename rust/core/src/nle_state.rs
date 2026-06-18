@@ -48,10 +48,7 @@ impl Clip {
         value: f64,
         easing: state::keyframe::Easing,
     ) {
-        let channel = self
-            .animations
-            .entry(property.to_string())
-            .or_insert_with(ScalarAnimationChannel::new);
+        let channel = self.animations.entry(property.to_string()).or_default();
         channel.add_keyframe(frame, value, easing);
     }
 
@@ -332,29 +329,29 @@ impl NLEState {
     // ── AI Agent logic ──
 
     pub fn auto_trim_silence(&mut self, track_idx: usize) {
-        if let Some(track) = self.data.tracks.get_mut(track_idx) {
-            if track.kind == "audio" {
-                // Silences are now detected by the real extract_silence() in
-                // editor_core::processing. This method is the structural trigger
-                // that the autonomous agent calls; the actual DSP happens there.
-                track.clips.clear();
-                track.clips.push(Clip {
-                    id: "clip_interview_1_pt1".to_string(),
-                    clip_type: "audio".to_string(),
-                    name: "interview_pt1".to_string(),
-                    start: 0,
-                    end: 300,
-                    animations: HashMap::new(),
-                });
-                track.clips.push(Clip {
-                    id: "clip_interview_1_pt2".to_string(),
-                    clip_type: "audio".to_string(),
-                    name: "interview_pt2".to_string(),
-                    start: 450,
-                    end: 1000,
-                    animations: HashMap::new(),
-                });
-            }
+        if let Some(track) = self.data.tracks.get_mut(track_idx)
+            && track.kind == "audio"
+        {
+            // Silences are now detected by the real extract_silence() in
+            // editor_core::processing. This method is the structural trigger
+            // that the autonomous agent calls; the actual DSP happens there.
+            track.clips.clear();
+            track.clips.push(Clip {
+                id: "clip_interview_1_pt1".to_string(),
+                clip_type: "audio".to_string(),
+                name: "interview_pt1".to_string(),
+                start: 0,
+                end: 300,
+                animations: HashMap::new(),
+            });
+            track.clips.push(Clip {
+                id: "clip_interview_1_pt2".to_string(),
+                clip_type: "audio".to_string(),
+                name: "interview_pt2".to_string(),
+                start: 450,
+                end: 1000,
+                animations: HashMap::new(),
+            });
         }
     }
 

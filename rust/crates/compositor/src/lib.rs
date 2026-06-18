@@ -1,3 +1,5 @@
+#![allow(clippy::large_enum_variant)]
+#![allow(clippy::too_many_arguments)]
 mod blend_mode;
 mod compositor;
 mod frame;

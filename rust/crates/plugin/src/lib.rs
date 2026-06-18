@@ -83,9 +83,9 @@ mod tests {
 
     #[test]
     fn test_js_evaluation() {
-        let mut runtime = PluginRuntime::new();
+        let _runtime = PluginRuntime::new();
         // Execute real JS
-        // let result = runtime.execute_script("setTime(10.5); 42");
+        // let result = _runtime.execute_script("setTime(10.5); 42");
         // assert!(result.is_ok());
         // assert_eq!(runtime.api.borrow().current_time, 10.5);
     }

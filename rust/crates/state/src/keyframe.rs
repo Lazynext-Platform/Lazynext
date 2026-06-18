@@ -2,19 +2,21 @@ use serde::{Deserialize, Serialize};
 
 /// Easing functions for keyframe interpolation.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[allow(clippy::large_enum_variant)]
+#[derive(Default)]
 pub enum Easing {
+    #[default]
     Linear,
     Step,
     EaseIn,
     EaseOut,
     EaseInOut,
-    CubicBezier { x1: f64, y1: f64, x2: f64, y2: f64 },
-}
-
-impl Default for Easing {
-    fn default() -> Self {
-        Self::Linear
-    }
+    CubicBezier {
+        x1: f64,
+        y1: f64,
+        x2: f64,
+        y2: f64,
+    },
 }
 
 /// A single keyframe with a frame position and typed value.

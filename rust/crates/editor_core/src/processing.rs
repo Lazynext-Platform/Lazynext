@@ -46,10 +46,10 @@ pub fn extract_silence(
             }
             silence_window_count += 1;
         } else {
-            if silence_window_count >= min_silence_windows {
-                if let Some(start) = silence_start_sample {
-                    silence_regions.push((start, sample_offset));
-                }
+            if silence_window_count >= min_silence_windows
+                && let Some(start) = silence_start_sample
+            {
+                silence_regions.push((start, sample_offset));
             }
             silence_start_sample = None;
             silence_window_count = 0;
@@ -59,10 +59,10 @@ pub fn extract_silence(
     }
 
     // Don't forget trailing silence
-    if silence_window_count >= min_silence_windows {
-        if let Some(start) = silence_start_sample {
-            silence_regions.push((start, sample_offset));
-        }
+    if silence_window_count >= min_silence_windows
+        && let Some(start) = silence_start_sample
+    {
+        silence_regions.push((start, sample_offset));
     }
 
     silence_regions
@@ -79,7 +79,7 @@ pub fn lossless_trim(start_frame: u32, end_frame: u32, gop_size: u32) -> (u32, u
     let gop = gop_size.max(1);
 
     // Snap start forward to next keyframe boundary
-    let adjusted_start = if start_frame % gop == 0 {
+    let adjusted_start = if start_frame.is_multiple_of(gop) {
         start_frame
     } else {
         start_frame + (gop - start_frame % gop)
@@ -129,9 +129,9 @@ pub fn detect_scene_changes(
         // Sample every 4th pixel for performance (still > 99% accurate)
         for p in (0..pixel_count).step_by(4) {
             let idx = p * stride;
-            let dr = (prev[idx] as i16 - curr[idx] as i16).abs() as u64;
-            let dg = (prev[idx + 1] as i16 - curr[idx + 1] as i16).abs() as u64;
-            let db = (prev[idx + 2] as i16 - curr[idx + 2] as i16).abs() as u64;
+            let dr = (prev[idx] as i16 - curr[idx] as i16).unsigned_abs() as u64;
+            let dg = (prev[idx + 1] as i16 - curr[idx + 1] as i16).unsigned_abs() as u64;
+            let db = (prev[idx + 2] as i16 - curr[idx + 2] as i16).unsigned_abs() as u64;
             total_diff += dr + dg + db;
         }
 

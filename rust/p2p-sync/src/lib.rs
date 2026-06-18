@@ -56,16 +56,16 @@ impl P2PNetwork {
         ];
 
         for (addr_str, name, caps) in candidates {
-            if let Ok(addr) = addr_str.parse::<SocketAddr>() {
-                if self.discovered.insert(addr) {
-                    let peer = Peer {
-                        addr,
-                        display_name: name.to_string(),
-                        capabilities: caps.iter().map(|s| s.to_string()).collect(),
-                    };
-                    self.peers.push(peer.clone());
-                    println!("   ✓ Discovered: {} ({})", name, addr);
-                }
+            if let Ok(addr) = addr_str.parse::<SocketAddr>()
+                && self.discovered.insert(addr)
+            {
+                let peer = Peer {
+                    addr,
+                    display_name: name.to_string(),
+                    capabilities: caps.iter().map(|s| s.to_string()).collect(),
+                };
+                self.peers.push(peer.clone());
+                println!("   ✓ Discovered: {} ({})", name, addr);
             }
         }
 

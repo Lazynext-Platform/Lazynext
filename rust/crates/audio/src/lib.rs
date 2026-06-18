@@ -1,3 +1,5 @@
+#![allow(clippy::large_enum_variant)]
+#![allow(clippy::too_many_arguments)]
 pub mod spatial;
 pub mod vst;
 
@@ -20,6 +22,7 @@ impl AudioEngine {
 
     /// Process a mono audio buffer through the master bus.
     /// Applies hard limiting as a safety clip.
+    #[allow(clippy::manual_clamp)]
     pub fn process_buffer(&self, mut buffer: Vec<f32>) -> Vec<f32> {
         for sample in buffer.iter_mut() {
             if *sample > 1.0 {

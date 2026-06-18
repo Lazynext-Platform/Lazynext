@@ -57,8 +57,15 @@ impl CRDTClip {
 
 /// A CRDT Map managing multiple clips by ID
 #[derive(Serialize, Deserialize, Clone, Debug)]
+#[allow(clippy::large_enum_variant)]
 pub struct CRDTTimeline {
     pub clips: HashMap<String, CRDTClip>,
+}
+
+impl Default for CRDTTimeline {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl CRDTTimeline {
@@ -151,12 +158,12 @@ impl CRDTTimeline {
             } => {
                 // For now, property updates only affect is_disabled.
                 // Extended in Phase 3 with full property channels.
-                if property == "is_disabled" {
-                    if let Some(clip) = self.clips.get_mut(target_id) {
-                        clip.is_disabled
-                            .merge(&LWWRegister::new(true, peer_id.to_string()));
-                        return true;
-                    }
+                if property == "is_disabled"
+                    && let Some(clip) = self.clips.get_mut(target_id)
+                {
+                    clip.is_disabled
+                        .merge(&LWWRegister::new(true, peer_id.to_string()));
+                    return true;
                 }
                 false
             }

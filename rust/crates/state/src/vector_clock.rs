@@ -1,3 +1,4 @@
+#![allow(clippy::large_enum_variant)]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -78,7 +79,7 @@ impl VectorClock {
     /// Returns a summary string for debugging.
     pub fn summary(&self) -> String {
         let mut entries: Vec<_> = self.inner.iter().collect();
-        entries.sort_by(|(a, _), (b, _)| a.cmp(b));
+        entries.sort_by_key(|(a, _)| *a);
         entries
             .iter()
             .map(|(k, v)| format!("{}:{}", k, v))

@@ -25,10 +25,16 @@ pub struct AutonomousEditor {
     client: Client,
 }
 
+impl Default for AutonomousEditor {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AutonomousEditor {
     pub fn new() -> Self {
         Self {
-            client: Client::new().expect("Failed to create HTTP client"),
+            client: Client::new(),
         }
     }
 

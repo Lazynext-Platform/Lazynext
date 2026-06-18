@@ -37,33 +37,30 @@ async fn main() {
     )));
 
     // Background webhook dispatcher
-    let client = reqwest::Client::new().expect("Failed to create HTTP client");
+    let client = reqwest::Client::new();
     let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL").unwrap_or_else(|_| {
         "https://hooks.slack.com/services/REPLACE/WITH/YOUR_WEBHOOK".to_string()
     });
 
     tokio::spawn(async move {
         while let Some(event) = rx.recv().await {
-            match event {
-                NLEEvent::RenderComplete(project_id, fingerprint) => {
-                    println!("🚀 [GATEWAY] Render complete — dispatching webhook");
-                    let payload = WebhookPayload {
-                        event_type: "render_complete".to_string(),
-                        project_id: project_id.clone(),
-                        message: format!(
-                            "Render completed. C2PA Provenance: {}",
-                            &fingerprint[..12.min(fingerprint.len())]
-                        ),
-                    };
+            if let NLEEvent::RenderComplete(project_id, fingerprint) = event {
+                println!("🚀 [GATEWAY] Render complete — dispatching webhook");
+                let payload = WebhookPayload {
+                    event_type: "render_complete".to_string(),
+                    project_id: project_id.clone(),
+                    message: format!(
+                        "Render completed. C2PA Provenance: {}",
+                        &fingerprint[..12.min(fingerprint.len())]
+                    ),
+                };
 
-                    let res = client.post(&webhook_url).json(&payload).send().await;
+                let res = client.post(&webhook_url).json(&payload).send().await;
 
-                    match res {
-                        Ok(r) => println!("✅ Webhook dispatched: {}", r.status()),
-                        Err(e) => eprintln!("⚠️  Webhook failed: {}", e),
-                    }
+                match res {
+                    Ok(r) => println!("✅ Webhook dispatched: {}", r.status()),
+                    Err(e) => eprintln!("⚠️  Webhook failed: {}", e),
                 }
-                _ => {}
             }
         }
     });

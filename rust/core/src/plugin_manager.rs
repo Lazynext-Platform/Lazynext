@@ -7,6 +7,12 @@ pub struct PluginManager {
     loaded_plugins: HashMap<String, Box<dyn VideoEffect>>,
 }
 
+impl Default for PluginManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PluginManager {
     pub fn new() -> Self {
         PluginManager {

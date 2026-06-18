@@ -7,6 +7,12 @@ use uuid::Uuid;
 
 pub struct DCPGenerator;
 
+impl Default for DCPGenerator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DCPGenerator {
     pub fn new() -> Self {
         Self
@@ -45,8 +51,8 @@ impl DCPGenerator {
             project.name,
             issue_date,
             project.name,
-            Uuid::new_v4().urn().to_string(),
-            Uuid::new_v4().urn().to_string(),
+            Uuid::new_v4().urn(),
+            Uuid::new_v4().urn(),
             project.duration_frames
         );
 
