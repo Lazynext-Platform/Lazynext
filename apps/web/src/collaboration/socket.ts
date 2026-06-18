@@ -4,7 +4,7 @@
  * Connects to the CRDT sync server at the configured WebSocket URL
  * and bridges between network messages and the WASM CRDT engine.
  */
-import type { CrdtEngine } from "@/wasm/wasm";
+import type { CrdtEngine } from "lazynext-wasm";
 
 type CrdtDeltaHandler = (delta: Uint8Array) => void;
 type PresenceHandler = (presence: PresenceUpdate) => void;
