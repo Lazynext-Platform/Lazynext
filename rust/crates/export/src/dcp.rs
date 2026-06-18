@@ -1,9 +1,9 @@
+use anyhow::{Context, Result};
+use chrono::Utc;
+use state::ProjectData;
 use std::fs::File;
 use std::io::Write;
-use anyhow::{Result, Context};
-use state::ProjectData;
 use uuid::Uuid;
-use chrono::Utc;
 
 pub struct DCPGenerator;
 
@@ -16,7 +16,7 @@ impl DCPGenerator {
     pub fn generate_cpl(&self, project: &ProjectData, output_path: &str) -> Result<()> {
         let uuid = Uuid::new_v4().urn().to_string();
         let issue_date = Utc::now().to_rfc3339();
-        
+
         let cpl_content = format!(
             r#"<?xml version="1.0" encoding="UTF-8"?>
 <CompositionPlaylist xmlns="http://www.smpte-ra.org/schemas/429-7/2006/CPL">
@@ -41,11 +41,18 @@ impl DCPGenerator {
         </Reel>
     </ReelList>
 </CompositionPlaylist>"#,
-            uuid, project.name, issue_date, project.name, Uuid::new_v4().urn().to_string(), Uuid::new_v4().urn().to_string(), project.duration_frames
+            uuid,
+            project.name,
+            issue_date,
+            project.name,
+            Uuid::new_v4().urn().to_string(),
+            Uuid::new_v4().urn().to_string(),
+            project.duration_frames
         );
 
         let mut file = File::create(output_path).context("Failed to create CPL file")?;
-        file.write_all(cpl_content.as_bytes()).context("Failed to write CPL content")?;
+        file.write_all(cpl_content.as_bytes())
+            .context("Failed to write CPL content")?;
         Ok(())
     }
 }

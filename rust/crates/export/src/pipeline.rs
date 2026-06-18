@@ -74,10 +74,7 @@ impl ExportPipeline {
             return Err(anyhow::anyhow!("ffmpeg exited with error: {}", stderr));
         }
 
-        println!(
-            "✅ Export complete: {}",
-            self.config.output_path
-        );
+        println!("✅ Export complete: {}", self.config.output_path);
         Ok(())
     }
 }

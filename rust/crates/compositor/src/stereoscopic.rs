@@ -2,7 +2,7 @@ pub struct StereoscopicCamera {
     pub left_eye_clip_id: String,
     pub right_eye_clip_id: String,
     /// Distance between the two cameras, controls the 3D depth effect
-    pub interocular_distance: f32, 
+    pub interocular_distance: f32,
     /// Convergence point where the two camera views intersect
     pub convergence_plane: f32,
 }
@@ -22,8 +22,17 @@ impl StereoscopicCamera {
     /// and the Green/Blue (Cyan) channels from the Right Eye, blending them together.
     pub fn render_anaglyph_preview(&self) {
         println!("Rendering Stereoscopic 3D Preview...");
-        println!("Left Eye: [{}] -> Extracting RED channel", self.left_eye_clip_id);
-        println!("Right Eye: [{}] -> Extracting CYAN (Green+Blue) channels", self.right_eye_clip_id);
-        println!("Applying Divergence: {} (Interocular) at Plane: {}", self.interocular_distance, self.convergence_plane);
+        println!(
+            "Left Eye: [{}] -> Extracting RED channel",
+            self.left_eye_clip_id
+        );
+        println!(
+            "Right Eye: [{}] -> Extracting CYAN (Green+Blue) channels",
+            self.right_eye_clip_id
+        );
+        println!(
+            "Applying Divergence: {} (Interocular) at Plane: {}",
+            self.interocular_distance, self.convergence_plane
+        );
     }
 }

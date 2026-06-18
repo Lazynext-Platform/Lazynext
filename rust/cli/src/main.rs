@@ -40,7 +40,9 @@ async fn main() {
     println!("🚀 Lazynext Headless CLI v{}", env!("CARGO_PKG_VERSION"));
 
     // Set LLM provider from CLI arg
-    unsafe { std::env::set_var("LLM_PROVIDER", &args.llm_provider); }
+    unsafe {
+        std::env::set_var("LLM_PROVIDER", &args.llm_provider);
+    }
 
     if let Some(prompt) = args.prompt {
         println!("🤖 AI Intent: {}", prompt);

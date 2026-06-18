@@ -4,7 +4,7 @@ pub struct AudioObject {
     pub x: f32, // -1.0 (Left) to 1.0 (Right)
     pub y: f32, // -1.0 (Rear) to 1.0 (Front)
     pub z: f32, // 0.0 (Floor) to 1.0 (Ceiling)
-    
+
     pub volume_db: f32,
 }
 
@@ -23,9 +23,11 @@ impl AudioObject {
     /// In a real engine, this would distribute audio signal amplitude across 12 discrete channels
     /// based on the Euclidean distance from the listener at (0,0,0).
     pub fn pan_spatial(&self) {
-        println!("Panning Audio Object [{}] to Spatial Coordinates: (X: {}, Y: {}, Z: {})", 
-            self.id, self.x, self.y, self.z);
-            
+        println!(
+            "Panning Audio Object [{}] to Spatial Coordinates: (X: {}, Y: {}, Z: {})",
+            self.id, self.x, self.y, self.z
+        );
+
         if self.z > 0.5 {
             println!("-> Routing signal to overhead ceiling speakers (Atmos 0.0.4)");
         }

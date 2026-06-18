@@ -19,9 +19,21 @@ impl Default for Transform3D {
 impl Transform3D {
     pub fn new() -> Self {
         Self {
-            position: Vector3 { x: 0.0, y: 0.0, z: 0.0 },
-            rotation: Vector3 { x: 0.0, y: 0.0, z: 0.0 },
-            scale: Vector3 { x: 1.0, y: 1.0, z: 1.0 },
+            position: Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            rotation: Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            scale: Vector3 {
+                x: 1.0,
+                y: 1.0,
+                z: 1.0,
+            },
         }
     }
 
@@ -29,7 +41,7 @@ impl Transform3D {
     pub fn compute_model_matrix(&self) -> [[f32; 4]; 4] {
         // Mock matrix math (normally we'd use `cgmath` or `nalgebra` here)
         println!("Computing 3D model matrix at Z: {}", self.position.z);
-        
+
         [
             [self.scale.x, 0.0, 0.0, 0.0],
             [0.0, self.scale.y, 0.0, 0.0],
@@ -48,10 +60,18 @@ pub struct Camera3D {
 impl Camera3D {
     /// Computes the Perspective Projection Matrix for WebGPU
     pub fn compute_projection_matrix(&self, aspect_ratio: f32) -> [[f32; 4]; 4] {
-        println!("Computing 3D perspective projection with FOV: {}", self.fov_degrees);
+        println!(
+            "Computing 3D perspective projection with FOV: {}",
+            self.fov_degrees
+        );
         // Mock projection matrix
         [
-            [1.0 / (aspect_ratio * (self.fov_degrees / 2.0).tan()), 0.0, 0.0, 0.0],
+            [
+                1.0 / (aspect_ratio * (self.fov_degrees / 2.0).tan()),
+                0.0,
+                0.0,
+                0.0,
+            ],
             [0.0, 1.0 / (self.fov_degrees / 2.0).tan(), 0.0, 0.0],
             [0.0, 0.0, -1.0, -1.0],
             [0.0, 0.0, -0.1, 0.0],

@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use crate::NLEState;
-use std::env;
 use reqwest::Client;
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use std::env;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VideoIntent {
@@ -93,8 +93,7 @@ impl AutonomousEditor {
         );
 
         // 2. Build the system prompt with current timeline state
-        let state_json =
-            serde_json::to_string(&nle_state.get_project_data()).unwrap_or_default();
+        let state_json = serde_json::to_string(&nle_state.get_project_data()).unwrap_or_default();
 
         let system_prompt = format!(
             "You are the Lazynext Agentic Video Editor core. You manipulate a non-linear editing timeline. \
@@ -144,25 +143,18 @@ impl AutonomousEditor {
                     match action_type {
                         "add_track" => {
                             let kind = action["kind"].as_str().unwrap_or("video").to_string();
-                            let id = action["id"]
-                                .as_str()
-                                .unwrap_or("Track")
-                                .to_string();
+                            let id = action["id"].as_str().unwrap_or("Track").to_string();
                             nle_state.add_track(id, kind);
                         }
                         "add_clip" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             let id = action["id"].as_str().unwrap_or("clip").to_string();
-                            let clip_type = action["clip_type"]
-                                .as_str()
-                                .unwrap_or("video")
-                                .to_string();
+                            let clip_type =
+                                action["clip_type"].as_str().unwrap_or("video").to_string();
                             let name = action["name"].as_str().unwrap_or("media").to_string();
                             let start = action["start"].as_u64().unwrap_or(0) as u32;
                             let end = action["end"].as_u64().unwrap_or(100) as u32;
-                            nle_state.add_clip_to_track(
-                                track_idx, id, clip_type, name, start, end,
-                            );
+                            nle_state.add_clip_to_track(track_idx, id, clip_type, name, start, end);
                         }
                         "trim_silence" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
@@ -212,9 +204,11 @@ impl AutonomousEditor {
             })
         };
 
-        let mut req = self.client.post(api_url).json(&payload).timeout(
-            std::time::Duration::from_secs(60),
-        );
+        let mut req = self
+            .client
+            .post(api_url)
+            .json(&payload)
+            .timeout(std::time::Duration::from_secs(60));
 
         if !api_key.is_empty() {
             if is_anthropic {
@@ -273,8 +267,13 @@ impl AutonomousEditor {
         };
 
         // Parse the JSON content as an actions array
-        let parsed: Value = serde_json::from_str(&content)
-            .map_err(|e| format!("Failed to parse LLM JSON response: {} — content was: {}", e, &content[..content.len().min(200)]))?;
+        let parsed: Value = serde_json::from_str(&content).map_err(|e| {
+            format!(
+                "Failed to parse LLM JSON response: {} — content was: {}",
+                e,
+                &content[..content.len().min(200)]
+            )
+        })?;
 
         // Accept both {"actions": [...]} and bare [...] shapes
         if let Some(actions) = parsed.get("actions").cloned() {

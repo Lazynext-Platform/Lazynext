@@ -1,7 +1,7 @@
+use crate::Clip;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
-use serde::{Deserialize, Serialize};
-use crate::Clip;
 
 /// A simple Last-Writer-Wins (LWW) Register for CRDT Synchronization
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -25,7 +25,9 @@ impl<T: Clone> LWWRegister<T> {
 
     /// Merges another register into this one, keeping the latest value
     pub fn merge(&mut self, other: &LWWRegister<T>) {
-        if other.timestamp > self.timestamp || (other.timestamp == self.timestamp && other.client_id > self.client_id) {
+        if other.timestamp > self.timestamp
+            || (other.timestamp == self.timestamp && other.client_id > self.client_id)
+        {
             self.value = other.value.clone();
             self.timestamp = other.timestamp;
             self.client_id = other.client_id.clone();
@@ -71,7 +73,9 @@ impl CRDTTimeline {
         for (id, incoming_clip) in &delta.clips {
             if let Some(existing_clip) = self.clips.get_mut(id) {
                 existing_clip.start_frame.merge(&incoming_clip.start_frame);
-                existing_clip.duration_frames.merge(&incoming_clip.duration_frames);
+                existing_clip
+                    .duration_frames
+                    .merge(&incoming_clip.duration_frames);
                 existing_clip.is_disabled.merge(&incoming_clip.is_disabled);
             } else {
                 self.clips.insert(id.clone(), incoming_clip.clone());
@@ -107,13 +111,19 @@ impl CRDTTimeline {
                 let crdt_clip = CRDTClip {
                     id: clip_id.clone(),
                     start_frame: LWWRegister::new(clip.start as i32, peer_id.to_string()),
-                    duration_frames: LWWRegister::new((clip.end - clip.start) as i32, peer_id.to_string()),
+                    duration_frames: LWWRegister::new(
+                        (clip.end - clip.start) as i32,
+                        peer_id.to_string(),
+                    ),
                     is_disabled: LWWRegister::new(false, peer_id.to_string()),
                 };
                 self.clips.insert(clip_id.clone(), crdt_clip);
                 true
             }
-            CrdtOperation::ClipDelete { clip_id, track_id: _ } => {
+            CrdtOperation::ClipDelete {
+                clip_id,
+                track_id: _,
+            } => {
                 self.clips.remove(clip_id);
                 tombstones.mark(clip_id.clone(), clock.clone(), peer_id.to_string());
                 true
@@ -125,8 +135,10 @@ impl CRDTTimeline {
             } => {
                 if let Some(clip) = self.clips.get_mut(clip_id) {
                     let duration = *new_end as i32 - *new_start as i32;
-                    clip.start_frame.merge(&LWWRegister::new(*new_start as i32, peer_id.to_string()));
-                    clip.duration_frames.merge(&LWWRegister::new(duration, peer_id.to_string()));
+                    clip.start_frame
+                        .merge(&LWWRegister::new(*new_start as i32, peer_id.to_string()));
+                    clip.duration_frames
+                        .merge(&LWWRegister::new(duration, peer_id.to_string()));
                     true
                 } else {
                     false
@@ -141,7 +153,8 @@ impl CRDTTimeline {
                 // Extended in Phase 3 with full property channels.
                 if property == "is_disabled" {
                     if let Some(clip) = self.clips.get_mut(target_id) {
-                        clip.is_disabled.merge(&LWWRegister::new(true, peer_id.to_string()));
+                        clip.is_disabled
+                            .merge(&LWWRegister::new(true, peer_id.to_string()));
                         return true;
                     }
                 }

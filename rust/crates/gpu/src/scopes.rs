@@ -1,4 +1,4 @@
-use wgpu::{Device, Queue, ComputePipeline, Buffer};
+use wgpu::{Buffer, ComputePipeline, Device, Queue};
 
 #[allow(dead_code)]
 pub struct ColorScopesAnalyzer {

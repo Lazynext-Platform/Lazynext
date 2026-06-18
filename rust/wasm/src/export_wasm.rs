@@ -50,10 +50,7 @@ fn build_ffmpeg_command_str(
 
 /// Build an AAF composition manifest (XML).
 #[wasm_bindgen(js_name = "buildAafManifest")]
-pub fn build_aaf_manifest(
-    project_name: String,
-    clip_ids_js: JsValue,
-) -> Result<String, JsValue> {
+pub fn build_aaf_manifest(project_name: String, clip_ids_js: JsValue) -> Result<String, JsValue> {
     let clip_ids: Vec<String> = serde_wasm_bindgen::from_value(clip_ids_js)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
@@ -88,20 +85,20 @@ pub fn build_dcp_cpl(
     xml.push_str(&format!(
         "<CompositionPlaylist xmlns=\"http://www.digicine.com/PROTO-ASDCP-CPL-20040511#\">\n"
     ));
+    xml.push_str(&format!("  <Id>urn:uuid:{}</Id>\n", uuid));
     xml.push_str(&format!(
-        "  <Id>urn:uuid:{}</Id>\n", uuid
+        "  <ContentTitleText>{}</ContentTitleText>\n",
+        project_name
     ));
-    xml.push_str(&format!(
-        "  <ContentTitleText>{}</ContentTitleText>\n", project_name
-    ));
-    xml.push_str(&format!(
-        "  <IssueDate>{}</IssueDate>\n", timestamp
-    ));
+    xml.push_str(&format!("  <IssueDate>{}</IssueDate>\n", timestamp));
     xml.push_str("  <ReelList>\n");
 
     for i in 0..reel_count {
         xml.push_str("    <Reel>\n");
-        xml.push_str(&format!("      <Id>urn:uuid:{}</Id>\n", uuid::Uuid::new_v4()));
+        xml.push_str(&format!(
+            "      <Id>urn:uuid:{}</Id>\n",
+            uuid::Uuid::new_v4()
+        ));
         xml.push_str(&format!(
             "      <Duration>{}</Duration>\n",
             duration_frames / reel_count.max(1)

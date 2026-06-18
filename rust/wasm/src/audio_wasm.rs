@@ -2,11 +2,7 @@ use wasm_bindgen::prelude::*;
 
 /// Process an audio buffer through the master bus (hard limiting).
 #[wasm_bindgen(js_name = "processAudioBuffer")]
-pub fn process_audio_buffer(
-    buffer: Vec<f32>,
-    sample_rate: u32,
-    channels: u16,
-) -> Vec<f32> {
+pub fn process_audio_buffer(buffer: Vec<f32>, sample_rate: u32, channels: u16) -> Vec<f32> {
     let engine = audio::AudioEngine::new(sample_rate, channels);
     engine.process_buffer(buffer)
 }
@@ -27,8 +23,14 @@ pub fn apply_parametric_eq(
     high_gain_db: f64,
 ) -> Vec<f64> {
     let mut eq = audio::eq::ParametricEq::new(
-        low_freq, low_gain_db, mid_freq, mid_gain_db, mid_q, high_freq,
-        high_gain_db, sample_rate,
+        low_freq,
+        low_gain_db,
+        mid_freq,
+        mid_gain_db,
+        mid_q,
+        high_freq,
+        high_gain_db,
+        sample_rate,
     );
     let mut output = buffer;
     eq.process_buffer(&mut output);
@@ -47,7 +49,12 @@ pub fn apply_compressor(
     makeup_gain_db: f64,
 ) -> Vec<f64> {
     let mut comp = audio::compressor::Compressor::new(
-        threshold_db, ratio, 3.0, attack_ms, release_ms, makeup_gain_db,
+        threshold_db,
+        ratio,
+        3.0,
+        attack_ms,
+        release_ms,
+        makeup_gain_db,
         sample_rate,
     );
     let mut output = buffer;

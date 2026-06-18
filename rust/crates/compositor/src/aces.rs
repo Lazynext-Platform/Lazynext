@@ -1,6 +1,6 @@
 pub struct AcesColorPipeline {
     pub is_enabled: bool,
-    pub input_transform: InputDeviceTransform, // IDT
+    pub input_transform: InputDeviceTransform,   // IDT
     pub output_transform: OutputDeviceTransform, // ODT
 }
 
@@ -12,9 +12,9 @@ pub enum InputDeviceTransform {
 }
 
 pub enum OutputDeviceTransform {
-    Rec709,       // Standard SDR Web
-    Rec2020Hdr,  // HDR TV
-    DciP3,       // Theatrical Cinema
+    Rec709,     // Standard SDR Web
+    Rec2020Hdr, // HDR TV
+    DciP3,      // Theatrical Cinema
 }
 
 impl Default for AcesColorPipeline {
@@ -38,11 +38,7 @@ impl AcesColorPipeline {
     pub fn compute_idt_matrix(&self) -> [[f32; 3]; 3] {
         println!("Converting ARRI LogC4 footage into ACES AP0 Linear Space...");
         // Mock matrix math for WebGPU Shader
-        [
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-        ]
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
     }
 
     /// Exports XML metadata containing Dolby Vision dynamic HDR trims.

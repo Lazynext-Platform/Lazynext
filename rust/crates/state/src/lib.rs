@@ -53,7 +53,12 @@ impl ProjectData {
         self.tracks.push(track);
     }
 
-    pub fn update_clip(&mut self, clip_id: &str, start_frame: Option<i32>, is_disabled: Option<bool>) -> bool {
+    pub fn update_clip(
+        &mut self,
+        clip_id: &str,
+        start_frame: Option<i32>,
+        is_disabled: Option<bool>,
+    ) -> bool {
         for track in &mut self.tracks {
             for clip in &mut track.clips {
                 if clip.id == clip_id {
@@ -103,7 +108,7 @@ mod tests {
             media_id: "my_video.mp4".into(),
             is_disabled: false,
         };
-        
+
         track.clips.push(clip);
         proj.add_track(track);
 

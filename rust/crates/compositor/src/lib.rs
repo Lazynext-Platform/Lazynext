@@ -7,9 +7,10 @@ mod texture_store;
 pub use blend_mode::BlendMode;
 pub use compositor::{Compositor, CompositorError, RenderFrameOptions};
 pub use frame::{
-    CanvasClearDescriptor, CanvasTextureDescriptor, EffectPassDescriptor, EffectUniformValueDescriptor, FrameDescriptor,
-    FrameItemDescriptor, LayerDescriptor, LayerMaskDescriptor, QuadTransformDescriptor, ColorGradingDescriptor, CropDescriptor, ShadowDescriptor
+    CanvasClearDescriptor, CanvasTextureDescriptor, ColorGradingDescriptor, CropDescriptor,
+    EffectPassDescriptor, EffectUniformValueDescriptor, FrameDescriptor, FrameItemDescriptor,
+    LayerDescriptor, LayerMaskDescriptor, QuadTransformDescriptor, ShadowDescriptor,
 };
-pub mod transforms3d;
 pub mod aces;
 pub mod stereoscopic;
+pub mod transforms3d;

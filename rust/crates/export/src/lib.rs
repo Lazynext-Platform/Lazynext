@@ -7,4 +7,4 @@ pub mod pipeline;
 pub mod prores;
 
 pub use encoder::{ExportConfig, ExportEncoder, ExportFormat};
-pub use pipeline::{build_export_command, ExportPipeline};
+pub use pipeline::{ExportPipeline, build_export_command};

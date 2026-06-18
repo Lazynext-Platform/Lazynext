@@ -621,12 +621,36 @@ impl Compositor {
                         opacity: layer.opacity,
                         flip_x: if layer.transform.flip_x { 1.0 } else { 0.0 },
                         flip_y: if layer.transform.flip_y { 1.0 } else { 0.0 },
-                        brightness: layer.color_grading.as_ref().map(|cg| cg.brightness).unwrap_or(1.0),
-                        contrast: layer.color_grading.as_ref().map(|cg| cg.contrast).unwrap_or(1.0),
-                        saturation: layer.color_grading.as_ref().map(|cg| cg.saturation).unwrap_or(1.0),
-                        grayscale: layer.color_grading.as_ref().map(|cg| cg.grayscale.unwrap_or(0.0)).unwrap_or(0.0),
-                        pixelate: layer.color_grading.as_ref().map(|cg| cg.pixelate.unwrap_or(0.0)).unwrap_or(0.0),
-                        edge_detect: layer.color_grading.as_ref().map(|cg| cg.edge_detect.unwrap_or(0.0)).unwrap_or(0.0),
+                        brightness: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.brightness)
+                            .unwrap_or(1.0),
+                        contrast: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.contrast)
+                            .unwrap_or(1.0),
+                        saturation: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.saturation)
+                            .unwrap_or(1.0),
+                        grayscale: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.grayscale.unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        pixelate: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.pixelate.unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        edge_detect: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.edge_detect.unwrap_or(0.0))
+                            .unwrap_or(0.0),
                         crop: [
                             layer.crop.as_ref().map(|c| c.left).unwrap_or(0.0),
                             layer.crop.as_ref().map(|c| c.top).unwrap_or(0.0),
@@ -634,10 +658,26 @@ impl Compositor {
                             layer.crop.as_ref().map(|c| c.bottom).unwrap_or(0.0),
                         ],
                         border_radius: layer.border_radius.unwrap_or(0.0),
-                        sepia: layer.color_grading.as_ref().map(|cg| cg.sepia.unwrap_or(0.0)).unwrap_or(0.0),
-                        invert: layer.color_grading.as_ref().map(|cg| cg.invert.unwrap_or(0.0)).unwrap_or(0.0),
-                        hue_rotate: layer.color_grading.as_ref().map(|cg| cg.hue_rotate.unwrap_or(0.0)).unwrap_or(0.0),
-                        shadow_color: layer.shadow.as_ref().map(|s| s.color).unwrap_or([0.0, 0.0, 0.0, 0.0]),
+                        sepia: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.sepia.unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        invert: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.invert.unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        hue_rotate: layer
+                            .color_grading
+                            .as_ref()
+                            .map(|cg| cg.hue_rotate.unwrap_or(0.0))
+                            .unwrap_or(0.0),
+                        shadow_color: layer
+                            .shadow
+                            .as_ref()
+                            .map(|s| s.color)
+                            .unwrap_or([0.0, 0.0, 0.0, 0.0]),
                         shadow_distance: layer.shadow.as_ref().map(|s| s.distance).unwrap_or(0.0),
                         shadow_angle: layer.shadow.as_ref().map(|s| s.angle).unwrap_or(0.0),
                         shadow_blur: layer.shadow.as_ref().map(|s| s.blur).unwrap_or(0.0),

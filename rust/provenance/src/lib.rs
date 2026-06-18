@@ -1,5 +1,5 @@
-use sha2::{Sha256, Digest};
 use serde::Serialize;
+use sha2::{Digest, Sha256};
 
 /// Generates a C2PA-compliant cryptographic fingerprint for a timeline state
 pub fn generate_state_fingerprint<T: Serialize>(state: &T) -> Result<String, String> {

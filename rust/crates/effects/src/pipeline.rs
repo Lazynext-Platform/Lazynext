@@ -513,7 +513,7 @@ fn pack_effect_uniforms(
     height: u32,
 ) -> Result<EffectUniformBuffer, EffectsError> {
     let shader = pass.shader.as_str();
-    
+
     let mut direction = [0.0, 0.0];
     let mut chroma_color = [0.0, 1.0, 0.0, 1.0]; // Default green
     let mut similarity = 0.4;
@@ -597,7 +597,11 @@ fn read_vec2_uniform(pass: &EffectPass, uniform: &str) -> Result<[f32; 2], Effec
     Ok([values[0], values[1]])
 }
 
-fn read_vec4_uniform(pass: &EffectPass, uniform: &str, default: [f32; 4]) -> Result<[f32; 4], EffectsError> {
+fn read_vec4_uniform(
+    pass: &EffectPass,
+    uniform: &str,
+    default: [f32; 4],
+) -> Result<[f32; 4], EffectsError> {
     let Some(value) = pass.uniforms.get(uniform) else {
         return Ok(default);
     };
@@ -619,7 +623,11 @@ fn read_vec4_uniform(pass: &EffectPass, uniform: &str, default: [f32; 4]) -> Res
     Ok([values[0], values[1], values[2], a])
 }
 
-fn read_number_uniform_with_default(pass: &EffectPass, uniform: &str, default: f32) -> Result<f32, EffectsError> {
+fn read_number_uniform_with_default(
+    pass: &EffectPass,
+    uniform: &str,
+    default: f32,
+) -> Result<f32, EffectsError> {
     let Some(value) = pass.uniforms.get(uniform) else {
         return Ok(default);
     };

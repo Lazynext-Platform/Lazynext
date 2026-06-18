@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use boa_engine::{Context, Source};
+use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -39,7 +39,7 @@ impl PluginRuntime {
     pub fn new() -> Self {
         let context = Context::default();
         let api = Rc::new(RefCell::new(EditorAPI::new()));
-        
+
         // Expose a native `setTime` function to JS
         /*
         context.register_global_callable(

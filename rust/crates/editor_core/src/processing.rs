@@ -28,8 +28,7 @@ pub fn extract_silence(
     let window_size = window_size.max(1);
 
     // Minimum silence windows
-    let min_silence_windows =
-        ((min_silence_duration_ms as f64 / 10.0).ceil() as usize).max(1);
+    let min_silence_windows = ((min_silence_duration_ms as f64 / 10.0).ceil() as usize).max(1);
 
     let mut silence_regions: Vec<(usize, usize)> = Vec::new();
     let mut silence_window_count = 0usize;
@@ -138,8 +137,7 @@ pub fn detect_scene_changes(
 
         let samples = pixel_count / 4;
         let max_diff_per_pixel = 255 * 3; // RGB
-        let normalized =
-            total_diff as f64 / (samples as f64 * max_diff_per_pixel as f64);
+        let normalized = total_diff as f64 / (samples as f64 * max_diff_per_pixel as f64);
 
         if normalized > threshold {
             cuts.push(i as u32);
@@ -177,12 +175,13 @@ mod tests {
         let freq = 440.0;
         let amplitude = 0.5; // -6dB
         let samples: Vec<f64> = (0..sample_rate)
-            .map(|i| {
-                amplitude * (TAU * freq * i as f64 / sample_rate as f64).sin()
-            })
+            .map(|i| amplitude * (TAU * freq * i as f64 / sample_rate as f64).sin())
             .collect();
         let result = extract_silence(&samples, sample_rate, -40.0, 500);
-        assert!(result.is_empty(), "Loud signal should not trigger silence detection");
+        assert!(
+            result.is_empty(),
+            "Loud signal should not trigger silence detection"
+        );
     }
 
     #[test]

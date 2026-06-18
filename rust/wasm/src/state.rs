@@ -1,6 +1,6 @@
-use wasm_bindgen::prelude::*;
 use serde_wasm_bindgen::{from_value, to_value};
 use state::{ProjectData, Track};
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct NLEState {
@@ -70,7 +70,12 @@ impl NLEState {
     }
 
     #[wasm_bindgen(js_name = "updateClip")]
-    pub fn update_clip(&mut self, clip_id: String, start_frame: Option<i32>, is_disabled: Option<bool>) -> bool {
+    pub fn update_clip(
+        &mut self,
+        clip_id: String,
+        start_frame: Option<i32>,
+        is_disabled: Option<bool>,
+    ) -> bool {
         self.project.update_clip(&clip_id, start_frame, is_disabled)
     }
 
@@ -80,7 +85,9 @@ impl NLEState {
             let mut split_idx = None;
             for (idx, clip) in track.clips.iter().enumerate() {
                 if clip.id == clip_id {
-                    if at_frame > clip.start_frame && at_frame < clip.start_frame + clip.duration_frames {
+                    if at_frame > clip.start_frame
+                        && at_frame < clip.start_frame + clip.duration_frames
+                    {
                         split_idx = Some((idx, clip.clone()));
                         break;
                     }
@@ -92,7 +99,7 @@ impl NLEState {
                 let dur2 = original_clip.duration_frames - dur1;
 
                 original_clip.duration_frames = dur1;
-                
+
                 let mut new_clip = original_clip.clone();
                 new_clip.id = format!("{}_split", original_clip.id);
                 new_clip.start_frame = at_frame;
@@ -125,9 +132,14 @@ impl NLEState {
         let end_frame = (end_ms / 1000.0 * self.project.fps) as i32;
 
         // Apply cut to all clips that overlap this region
-        let clip_ids: Vec<String> = self.project.tracks.iter()
+        let clip_ids: Vec<String> = self
+            .project
+            .tracks
+            .iter()
             .flat_map(|t| t.clips.iter())
-            .filter(|c| c.start_frame < end_frame && (c.start_frame + c.duration_frames) > start_frame)
+            .filter(|c| {
+                c.start_frame < end_frame && (c.start_frame + c.duration_frames) > start_frame
+            })
             .map(|c| c.id.clone())
             .collect();
 
@@ -144,7 +156,9 @@ impl NLEState {
         for track in &self.project.tracks {
             if track.name.to_lowercase().contains("multicam") {
                 for clip in &track.clips {
-                    if clip.start_frame <= current_frame && (clip.start_frame + clip.duration_frames) > current_frame {
+                    if clip.start_frame <= current_frame
+                        && (clip.start_frame + clip.duration_frames) > current_frame
+                    {
                         target_clip_id = Some(clip.id.clone());
                         break;
                     }

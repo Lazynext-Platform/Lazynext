@@ -85,7 +85,9 @@ impl TombstoneMap {
     /// Merge tombstones from another map (union — once deleted, always deleted).
     pub fn merge(&mut self, other: &TombstoneMap) {
         for (id, entry) in &other.inner {
-            self.inner.entry(id.clone()).or_insert_with(|| entry.clone());
+            self.inner
+                .entry(id.clone())
+                .or_insert_with(|| entry.clone());
         }
     }
 }

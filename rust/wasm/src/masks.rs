@@ -71,7 +71,7 @@ struct ApplyPolygonMaskOptions {
 pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     // Scaffold for Polygon Masking
     let _apply_polygon_mask_options = parse_apply_polygon_mask_options(options)?;
-    
+
     // In a full implementation, we would pass these vertices to a WebGPU stencil buffer
     // For now, we return a blank canvas to satisfy the WebAssembly signature
     let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();

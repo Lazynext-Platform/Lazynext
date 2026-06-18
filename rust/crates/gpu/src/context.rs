@@ -218,7 +218,9 @@ impl GpuContext {
         )
         .await;
 
-        if let Ok((adapter, device, queue)) = Self::try_request_device(&instance, None).await { return Ok((instance, adapter, device, queue)) }
+        if let Ok((adapter, device, queue)) = Self::try_request_device(&instance, None).await {
+            return Ok((instance, adapter, device, queue));
+        }
 
         Self::try_gl_fallback().await
     }

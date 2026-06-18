@@ -1,8 +1,8 @@
+use std::sync::{Arc, Mutex};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
-use std::sync::{Arc, Mutex};
 
-/// ProxyGenerator handles background downscaling of high-res video 
+/// ProxyGenerator handles background downscaling of high-res video
 /// files into 720p intra-frame proxies for smooth timeline scrubbing.
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
@@ -27,19 +27,19 @@ impl ProxyGenerator {
     #[wasm_bindgen]
     pub fn generate_proxy(&self, file_name: &str) -> js_sys::Promise {
         let is_processing = self.is_processing.clone();
-        
+
         // This is a placeholder for multi-threaded ffmpeg-wasm integration.
         // In a real implementation, we would bridge into a Worker pool here.
         let promise = js_sys::Promise::new(&mut |resolve, _reject| {
             if let Ok(mut processing) = is_processing.lock() {
                 *processing = true;
             }
-            
+
             // Simulate work
             let js_str = js_sys::JsString::from(format!("Proxy generated for {}", file_name));
             resolve.call1(&JsValue::NULL, &js_str).unwrap();
         });
-        
+
         promise
     }
 }

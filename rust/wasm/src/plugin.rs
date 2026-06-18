@@ -1,5 +1,5 @@
-use wasm_bindgen::prelude::*;
 use plugin::PluginRuntime;
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub struct WasmPluginRuntime {

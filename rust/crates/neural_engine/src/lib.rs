@@ -63,12 +63,7 @@ impl FacialRecognitionModel {
     ///
     /// When ONNX models are available (`onnx` feature), runs real SCRFD/YOLO-face inference.
     /// Otherwise uses a lightweight skin-tone heuristic as a proxy.
-    pub fn detect_faces(
-        &self,
-        frame_data: &[u8],
-        width: u32,
-        height: u32,
-    ) -> Vec<FaceDetection> {
+    pub fn detect_faces(&self, frame_data: &[u8], width: u32, height: u32) -> Vec<FaceDetection> {
         if !self.is_loaded {
             return vec![];
         }
@@ -212,9 +207,7 @@ impl FacialRecognitionModel {
     }
 
     /// Build structured `SmartBin` objects from a tagged HashMap.
-    pub fn build_smart_bins(
-        tagged: &HashMap<String, Vec<String>>,
-    ) -> Vec<SmartBin> {
+    pub fn build_smart_bins(tagged: &HashMap<String, Vec<String>>) -> Vec<SmartBin> {
         tagged
             .iter()
             .map(|(label, clip_ids)| SmartBin {
@@ -281,10 +274,8 @@ mod tests {
     #[test]
     fn test_build_smart_bins() {
         let model = FacialRecognitionModel::new();
-        let tagged = model.auto_tag_footage(vec![
-            "drone_city.mp4".into(),
-            "drone_coast.mp4".into(),
-        ]);
+        let tagged =
+            model.auto_tag_footage(vec!["drone_city.mp4".into(), "drone_coast.mp4".into()]);
         let bins = FacialRecognitionModel::build_smart_bins(&tagged);
         assert_eq!(bins.len(), 1);
         assert_eq!(bins[0].label, "aerial");

@@ -2,10 +2,15 @@ use crate::encoder::ExportFormat;
 
 /// Re-export for discoverability.
 pub use crate::encoder::ExportEncoder;
-pub use crate::pipeline::{build_export_command, ExportPipeline};
+pub use crate::pipeline::{ExportPipeline, build_export_command};
 
 /// Convenience: MP4 export with standard settings.
-pub fn mp4_config(output_path: &str, width: u32, height: u32, framerate: u32) -> crate::encoder::ExportConfig {
+pub fn mp4_config(
+    output_path: &str,
+    width: u32,
+    height: u32,
+    framerate: u32,
+) -> crate::encoder::ExportConfig {
     crate::encoder::ExportConfig {
         format: ExportFormat::Mp4,
         width,

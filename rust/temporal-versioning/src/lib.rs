@@ -59,14 +59,16 @@ impl MultiverseManager {
             self.history.push(TimelineSnapshot {
                 branch_name: branch_name.to_string(),
                 parent: Some(self.current_reality.clone()),
-                state_json: serde_json::to_string(branch.get_project_data())
-                    .unwrap_or_default(),
+                state_json: serde_json::to_string(branch.get_project_data()).unwrap_or_default(),
                 lamport_clock: branch.clock.current(),
                 created_at: chrono::Utc::now().to_rfc3339(),
             });
         }
 
-        println!("🌌 [MULTIVERSE] Branched '{}' from '{}'.", branch_name, self.current_reality);
+        println!(
+            "🌌 [MULTIVERSE] Branched '{}' from '{}'.",
+            branch_name, self.current_reality
+        );
         Ok(())
     }
 
@@ -118,9 +120,7 @@ impl MultiverseManager {
         for op in &source_ops {
             // Structural operations modify the project data
             match op {
-                state::operations::CrdtOperation::TrackInsert {
-                    track_id, kind, ..
-                } => {
+                state::operations::CrdtOperation::TrackInsert { track_id, kind, .. } => {
                     // Only add if not already present (idempotent via tombstones)
                     if !target_state.tombstones.is_deleted(track_id)
                         && !target_state
@@ -183,9 +183,7 @@ impl MultiverseManager {
         }
 
         // Merge tombstones
-        target_state
-            .tombstones
-            .merge(&source_tombstones);
+        target_state.tombstones.merge(&source_tombstones);
 
         println!(
             "✅ [MULTIVERSE] Merge complete: {} operations applied. Realities converged.",

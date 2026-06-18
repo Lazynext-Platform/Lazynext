@@ -1,7 +1,7 @@
+use lazynext_provenance::generate_state_fingerprint;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tokio::sync::mpsc::Sender;
-use lazynext_provenance::generate_state_fingerprint;
 
 pub use state::keyframe::{Easing, Keyframe, ScalarAnimationChannel};
 pub use state::operations::{CrdtClock, CrdtOperation, CrdtOperationLog};
@@ -41,7 +41,13 @@ impl Clip {
     }
 
     /// Add or update a keyframe for a given property.
-    pub fn set_keyframe(&mut self, property: &str, frame: u32, value: f64, easing: state::keyframe::Easing) {
+    pub fn set_keyframe(
+        &mut self,
+        property: &str,
+        frame: u32,
+        value: f64,
+        easing: state::keyframe::Easing,
+    ) {
         let channel = self
             .animations
             .entry(property.to_string())
@@ -191,7 +197,7 @@ impl NLEState {
                 animations: HashMap::new(),
             });
             // Drop track borrow before calling apply_and_record
-        self.apply_and_record(op);
+            self.apply_and_record(op);
         }
     }
 
@@ -250,7 +256,13 @@ impl NLEState {
     }
 
     /// Trim a clip in a track.
-    pub fn trim_clip(&mut self, track_idx: usize, clip_id: &str, new_start: u32, new_end: u32) -> bool {
+    pub fn trim_clip(
+        &mut self,
+        track_idx: usize,
+        clip_id: &str,
+        new_start: u32,
+        new_end: u32,
+    ) -> bool {
         let op = {
             if let Some(track) = self.data.tracks.get_mut(track_idx) {
                 if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
@@ -306,8 +318,8 @@ impl NLEState {
             let id = self.data.id.clone();
             let tx_clone = tx.clone();
 
-            let fingerprint = generate_state_fingerprint(&self.data)
-                .unwrap_or_else(|_| "hash_error".to_string());
+            let fingerprint =
+                generate_state_fingerprint(&self.data).unwrap_or_else(|_| "hash_error".to_string());
 
             tokio::spawn(async move {
                 let _ = tx_clone

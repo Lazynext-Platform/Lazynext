@@ -4,7 +4,7 @@ use axum::{Json, Router};
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::{NLEEvent, NLEState};
 use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -38,8 +38,9 @@ async fn main() {
 
     // Background webhook dispatcher
     let client = reqwest::Client::new().expect("Failed to create HTTP client");
-    let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL")
-        .unwrap_or_else(|_| "https://hooks.slack.com/services/REPLACE/WITH/YOUR_WEBHOOK".to_string());
+    let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL").unwrap_or_else(|_| {
+        "https://hooks.slack.com/services/REPLACE/WITH/YOUR_WEBHOOK".to_string()
+    });
 
     tokio::spawn(async move {
         while let Some(event) = rx.recv().await {
@@ -55,11 +56,7 @@ async fn main() {
                         ),
                     };
 
-                    let res = client
-                        .post(&webhook_url)
-                        .json(&payload)
-                        .send()
-                        .await;
+                    let res = client.post(&webhook_url).json(&payload).send().await;
 
                     match res {
                         Ok(r) => println!("✅ Webhook dispatched: {}", r.status()),

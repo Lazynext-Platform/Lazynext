@@ -29,10 +29,8 @@ impl Compressor {
         makeup_gain_db: f64,
         sample_rate: u32,
     ) -> Self {
-        let attack_coeff =
-            (-1.0 / (attack_ms / 1000.0 * sample_rate as f64)).exp();
-        let release_coeff =
-            (-1.0 / (release_ms / 1000.0 * sample_rate as f64)).exp();
+        let attack_coeff = (-1.0 / (attack_ms / 1000.0 * sample_rate as f64)).exp();
+        let release_coeff = (-1.0 / (release_ms / 1000.0 * sample_rate as f64)).exp();
         let makeup_gain_linear = 10.0_f64.powf(makeup_gain_db / 20.0);
 
         Self {

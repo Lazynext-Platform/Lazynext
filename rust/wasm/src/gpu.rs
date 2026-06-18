@@ -151,5 +151,5 @@ pub fn get_wgpu_limits() -> JsValue {
 pub fn analyze_waveform() -> Vec<u32> {
     // MOCK: In the real implementation, this would dispatch `ColorScopesAnalyzer::compute_waveform(&self.queue)`
     // and map the buffer asynchronously to read the histogram data.
-    vec![0; 256] 
+    vec![0; 256]
 }

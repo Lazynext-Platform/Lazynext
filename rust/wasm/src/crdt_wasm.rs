@@ -70,16 +70,16 @@ impl CrdtEngine {
     /// Returns true if this clock happens-before the given clock.
     #[wasm_bindgen(js_name = "happensBefore")]
     pub fn happens_before(&self, other_json: JsValue) -> Result<bool, JsValue> {
-        let other: VectorClock = from_value(other_json)
-            .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        let other: VectorClock =
+            from_value(other_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
         Ok(self.clock.happens_before(&other))
     }
 
     /// Returns true if the clocks are concurrent (neither happens-before the other).
     #[wasm_bindgen(js_name = "isConcurrentWith")]
     pub fn is_concurrent_with(&self, other_json: JsValue) -> Result<bool, JsValue> {
-        let other: VectorClock = from_value(other_json)
-            .map_err(|e| JsValue::from_str(&e.to_string()))?;
+        let other: VectorClock =
+            from_value(other_json).map_err(|e| JsValue::from_str(&e.to_string()))?;
         Ok(self.clock.concurrent_with(&other))
     }
 

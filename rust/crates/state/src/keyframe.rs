@@ -8,12 +8,7 @@ pub enum Easing {
     EaseIn,
     EaseOut,
     EaseInOut,
-    CubicBezier {
-        x1: f64,
-        y1: f64,
-        x2: f64,
-        y2: f64,
-    },
+    CubicBezier { x1: f64, y1: f64, x2: f64, y2: f64 },
 }
 
 impl Default for Easing {

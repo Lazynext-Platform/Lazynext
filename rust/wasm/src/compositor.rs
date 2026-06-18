@@ -245,10 +245,13 @@ fn parse_upload_texture_options(value: JsValue) -> Result<UploadTextureOptions, 
 
 // === Project Rendering Logic ===
 
+use compositor::{
+    BlendMode, CanvasClearDescriptor, ColorGradingDescriptor, CropDescriptor, FrameItemDescriptor,
+    LayerDescriptor, QuadTransformDescriptor, ShadowDescriptor,
+};
 use serde::Deserialize;
-use std::hash::{Hash, Hasher};
 use std::collections::hash_map::DefaultHasher;
-use compositor::{CanvasClearDescriptor, FrameItemDescriptor, LayerDescriptor, QuadTransformDescriptor, BlendMode, ColorGradingDescriptor, CropDescriptor, ShadowDescriptor};
+use std::hash::{Hash, Hasher};
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipTransform {
@@ -397,17 +400,23 @@ fn get_color_for_name(name: &str) -> [u8; 4] {
         (hash & 0xFF) as u8,
         ((hash >> 8) & 0xFF) as u8,
         ((hash >> 16) & 0xFF) as u8,
-        255
+        255,
     ]
 }
 
-fn create_solid_texture(gpu_context: &gpu::GpuContext, color: [u8; 4], width: u32, height: u32, label: &'static str) -> wgpu::Texture {
+fn create_solid_texture(
+    gpu_context: &gpu::GpuContext,
+    color: [u8; 4],
+    width: u32,
+    height: u32,
+    label: &'static str,
+) -> wgpu::Texture {
     let texture = gpu_context.create_render_texture(width, height, label);
     let pixel_count = width * height;
-    
+
     // wgpu texture format is Bgra8Unorm
     let bgra_color = [color[2], color[1], color[0], color[3]];
-    
+
     let mut pixels = Vec::with_capacity((pixel_count * 4) as usize);
     for _ in 0..pixel_count {
         pixels.extend_from_slice(&bgra_color);
@@ -448,140 +457,187 @@ pub fn render_project_frame(project_json: &str, frame_idx: u32) -> Result<(), Js
                 ));
             };
 
-fn create_text_texture(
-    context: &gpu::GpuContext,
-    text: &str,
-    font_size: f32,
-    color: &str,
-    font_family: &str,
-    bg_color: Option<&str>,
-    bg_padding: Option<f32>,
-    stroke_color: Option<&str>,
-    stroke_width: Option<f32>,
-    letter_spacing: Option<f32>,
-    text_align: &str,
-    width: u32,
-    height: u32,
-    label: &'static str,
-) -> Result<wgpu::Texture, JsValue> {
-    let canvas = web_sys::OffscreenCanvas::new(width, height)?;
-    let ctx = canvas
-        .get_context("2d")?
-        .ok_or_else(|| JsValue::from_str("Failed to get 2d context"))?
-        .dyn_into::<web_sys::OffscreenCanvasRenderingContext2d>()?;
+            fn create_text_texture(
+                context: &gpu::GpuContext,
+                text: &str,
+                font_size: f32,
+                color: &str,
+                font_family: &str,
+                bg_color: Option<&str>,
+                bg_padding: Option<f32>,
+                stroke_color: Option<&str>,
+                stroke_width: Option<f32>,
+                letter_spacing: Option<f32>,
+                text_align: &str,
+                width: u32,
+                height: u32,
+                label: &'static str,
+            ) -> Result<wgpu::Texture, JsValue> {
+                let canvas = web_sys::OffscreenCanvas::new(width, height)?;
+                let ctx = canvas
+                    .get_context("2d")?
+                    .ok_or_else(|| JsValue::from_str("Failed to get 2d context"))?
+                    .dyn_into::<web_sys::OffscreenCanvasRenderingContext2d>()?;
 
-    ctx.set_fill_style_str("rgba(0, 0, 0, 0)");
-    ctx.fill_rect(0.0, 0.0, width as f64, height as f64);
+                ctx.set_fill_style_str("rgba(0, 0, 0, 0)");
+                ctx.fill_rect(0.0, 0.0, width as f64, height as f64);
 
-    let font_str = format!("{}px {}", font_size, font_family);
-    ctx.set_font(&font_str);
-    
-    // Attempt to set letter-spacing if supported (requires newer JS spec, might need to set it via canvas style)
-    if let Some(ls) = letter_spacing {
-        let _ = js_sys::Reflect::set(&ctx, &JsValue::from_str("letterSpacing"), &JsValue::from_str(&format!("{}px", ls)));
-    }
-    
-    if let Some(bg) = bg_color {
-        let metrics = ctx.measure_text(text)?;
-        let padding = bg_padding.unwrap_or(20.0);
-        let text_width = metrics.width();
-        
-        let rect_x = ((width as f64) - text_width) / 2.0 - (padding as f64);
-        let rect_y = ((height as f64) - (font_size as f64)) / 2.0 - (padding as f64);
-        let rect_width = text_width + (padding as f64) * 2.0;
-        let rect_height = (font_size as f64) + (padding as f64) * 2.0;
-        
-        ctx.set_fill_style_str(bg);
-        ctx.fill_rect(rect_x, rect_y, rect_width, rect_height);
-    }
+                let font_str = format!("{}px {}", font_size, font_family);
+                ctx.set_font(&font_str);
 
-    ctx.set_text_align(text_align);
-    ctx.set_text_baseline("middle");
-    
-    let x = match text_align {
-        "left" => 50.0,
-        "right" => (width as f64) - 50.0,
-        _ => (width as f64) / 2.0, // center
-    };
-    
-    let y = (height as f64) / 2.0;
+                // Attempt to set letter-spacing if supported (requires newer JS spec, might need to set it via canvas style)
+                if let Some(ls) = letter_spacing {
+                    let _ = js_sys::Reflect::set(
+                        &ctx,
+                        &JsValue::from_str("letterSpacing"),
+                        &JsValue::from_str(&format!("{}px", ls)),
+                    );
+                }
 
-    if let (Some(s_color), Some(s_width)) = (stroke_color, stroke_width) {
-        ctx.set_stroke_style_str(s_color);
-        ctx.set_line_width(s_width as f64);
-        ctx.set_line_join("round");
-        ctx.stroke_text(text, x, y)?;
-    }
+                if let Some(bg) = bg_color {
+                    let metrics = ctx.measure_text(text)?;
+                    let padding = bg_padding.unwrap_or(20.0);
+                    let text_width = metrics.width();
 
-    ctx.set_fill_style_str(color);
-    ctx.fill_text(text, x, y)?;
+                    let rect_x = ((width as f64) - text_width) / 2.0 - (padding as f64);
+                    let rect_y = ((height as f64) - (font_size as f64)) / 2.0 - (padding as f64);
+                    let rect_width = text_width + (padding as f64) * 2.0;
+                    let rect_height = (font_size as f64) + (padding as f64) * 2.0;
 
-    Ok(context.import_offscreen_canvas_texture(&canvas, width, height, label))
-}
+                    ctx.set_fill_style_str(bg);
+                    ctx.fill_rect(rect_x, rect_y, rect_width, rect_height);
+                }
+
+                ctx.set_text_align(text_align);
+                ctx.set_text_baseline("middle");
+
+                let x = match text_align {
+                    "left" => 50.0,
+                    "right" => (width as f64) - 50.0,
+                    _ => (width as f64) / 2.0, // center
+                };
+
+                let y = (height as f64) / 2.0;
+
+                if let (Some(s_color), Some(s_width)) = (stroke_color, stroke_width) {
+                    ctx.set_stroke_style_str(s_color);
+                    ctx.set_line_width(s_width as f64);
+                    ctx.set_line_join("round");
+                    ctx.stroke_text(text, x, y)?;
+                }
+
+                ctx.set_fill_style_str(color);
+                ctx.fill_text(text, x, y)?;
+
+                Ok(context.import_offscreen_canvas_texture(&canvas, width, height, label))
+            }
 
             // 1. Ensure textures exist
             for track in &project.tracks {
                 for clip in &track.clips {
-                        if clip.type_ == "text" {
-                            let text_str = clip.text_content.as_deref().unwrap_or("Text");
-                            let size = clip.font_size.unwrap_or(100.0);
-                            let col = clip.color.as_deref().unwrap_or("#ffffff");
-                            let font_family = clip.font_family.as_deref().unwrap_or("sans-serif");
-                            let bg_col = clip.bg_color.as_deref();
-                            let bg_pad = clip.bg_padding;
-                            let stroke_col = clip.text_stroke_color.as_deref();
-                            let stroke_width = clip.text_stroke_width;
-                            let ls = clip.letter_spacing;
-                            let t_align = clip.text_align.as_deref().unwrap_or("center");
-                            
-                            // Include new properties in cache key!
-                            let cache_key = format!("{}-{}-{}-{}-{}-{:?}-{:?}-{:?}-{:?}-{:?}-{}", clip.id, text_str, size, col, font_family, bg_col, bg_pad, stroke_col, stroke_width, ls, t_align);
-                            if !runtime.compositor.has_texture(&cache_key) {
-                                if let Ok(tex) = create_text_texture(&gpu_runtime.context, text_str, size, col, font_family, bg_col, bg_pad, stroke_col, stroke_width, ls, t_align, project.width, project.height, "text_texture") {
-                                    runtime.compositor.upsert_texture(cache_key, tex);
-                                }
+                    if clip.type_ == "text" {
+                        let text_str = clip.text_content.as_deref().unwrap_or("Text");
+                        let size = clip.font_size.unwrap_or(100.0);
+                        let col = clip.color.as_deref().unwrap_or("#ffffff");
+                        let font_family = clip.font_family.as_deref().unwrap_or("sans-serif");
+                        let bg_col = clip.bg_color.as_deref();
+                        let bg_pad = clip.bg_padding;
+                        let stroke_col = clip.text_stroke_color.as_deref();
+                        let stroke_width = clip.text_stroke_width;
+                        let ls = clip.letter_spacing;
+                        let t_align = clip.text_align.as_deref().unwrap_or("center");
+
+                        // Include new properties in cache key!
+                        let cache_key = format!(
+                            "{}-{}-{}-{}-{}-{:?}-{:?}-{:?}-{:?}-{:?}-{}",
+                            clip.id,
+                            text_str,
+                            size,
+                            col,
+                            font_family,
+                            bg_col,
+                            bg_pad,
+                            stroke_col,
+                            stroke_width,
+                            ls,
+                            t_align
+                        );
+                        if !runtime.compositor.has_texture(&cache_key) {
+                            if let Ok(tex) = create_text_texture(
+                                &gpu_runtime.context,
+                                text_str,
+                                size,
+                                col,
+                                font_family,
+                                bg_col,
+                                bg_pad,
+                                stroke_col,
+                                stroke_width,
+                                ls,
+                                t_align,
+                                project.width,
+                                project.height,
+                                "text_texture",
+                            ) {
+                                runtime.compositor.upsert_texture(cache_key, tex);
                             }
-                        } else {
-                            if !runtime.compositor.has_texture(&clip.id) {
-                                let color = get_color_for_name(&clip.name);
-                                let tex = create_solid_texture(&gpu_runtime.context, color, project.width, project.height, "clip_texture");
-                                runtime.compositor.upsert_texture(clip.id.clone(), tex);
-                            }
+                        }
+                    } else {
+                        if !runtime.compositor.has_texture(&clip.id) {
+                            let color = get_color_for_name(&clip.name);
+                            let tex = create_solid_texture(
+                                &gpu_runtime.context,
+                                color,
+                                project.width,
+                                project.height,
+                                "clip_texture",
+                            );
+                            runtime.compositor.upsert_texture(clip.id.clone(), tex);
                         }
                     }
                 }
+            }
 
-            fn get_keyframed_value(keyframes: &Option<Vec<ClipKeyframe>>, property: &str, current_frame: u32, default_val: f32) -> f32 {
+            fn get_keyframed_value(
+                keyframes: &Option<Vec<ClipKeyframe>>,
+                property: &str,
+                current_frame: u32,
+                default_val: f32,
+            ) -> f32 {
                 if let Some(kfs) = keyframes {
-                    let mut prop_kfs: Vec<&ClipKeyframe> = kfs.iter().filter(|k| k.property == property).collect();
+                    let mut prop_kfs: Vec<&ClipKeyframe> =
+                        kfs.iter().filter(|k| k.property == property).collect();
                     if prop_kfs.is_empty() {
                         return default_val;
                     }
                     prop_kfs.sort_by_key(|k| k.frame);
-                    
+
                     if current_frame <= prop_kfs.first().unwrap().frame {
                         return prop_kfs.first().unwrap().value;
                     }
                     if current_frame >= prop_kfs.last().unwrap().frame {
                         return prop_kfs.last().unwrap().value;
                     }
-                    
+
                     for i in 0..prop_kfs.len() - 1 {
                         let k1 = prop_kfs[i];
                         let k2 = prop_kfs[i + 1];
                         if current_frame >= k1.frame && current_frame < k2.frame {
-                            let mut progress = (current_frame - k1.frame) as f32 / (k2.frame - k1.frame) as f32;
-                            
+                            let mut progress =
+                                (current_frame - k1.frame) as f32 / (k2.frame - k1.frame) as f32;
+
                             if let Some(easing) = &k1.easing {
                                 match easing.as_str() {
                                     "ease-in" => progress = progress * progress,
                                     "ease-out" => progress = progress * (2.0 - progress),
-                                    "ease-in-out" => progress = progress * progress * (3.0 - 2.0 * progress),
+                                    "ease-in-out" => {
+                                        progress = progress * progress * (3.0 - 2.0 * progress)
+                                    }
                                     "step" => progress = 0.0,
                                     _ => {} // linear
                                 }
                             }
-                            
+
                             return k1.value + (k2.value - k1.value) * progress;
                         }
                     }
@@ -593,34 +649,48 @@ fn create_text_texture(
             let mut items = vec![];
             for track in &project.tracks {
                 for clip in &track.clips {
-                    if frame_idx >= clip.start_frame && frame_idx < clip.start_frame + clip.duration_frames {
-                        let (mut cx, mut cy, mut w, mut h, mut rot, mut opac) = match &clip.transform {
-                            Some(t) => (
-                                t.x + (project.width as f32 / 2.0), 
-                                t.y + (project.height as f32 / 2.0), 
-                                project.width as f32 * t.scale, 
-                                project.height as f32 * t.scale, 
-                                t.rotation, 
-                                t.opacity
-                            ),
-                            None => (
-                                project.width as f32 / 2.0, 
-                                project.height as f32 / 2.0, 
-                                project.width as f32, 
-                                project.height as f32, 
-                                0.0,
-                                1.0
-                            )
-                        };
+                    if frame_idx >= clip.start_frame
+                        && frame_idx < clip.start_frame + clip.duration_frames
+                    {
+                        let (mut cx, mut cy, mut w, mut h, mut rot, mut opac) =
+                            match &clip.transform {
+                                Some(t) => (
+                                    t.x + (project.width as f32 / 2.0),
+                                    t.y + (project.height as f32 / 2.0),
+                                    project.width as f32 * t.scale,
+                                    project.height as f32 * t.scale,
+                                    t.rotation,
+                                    t.opacity,
+                                ),
+                                None => (
+                                    project.width as f32 / 2.0,
+                                    project.height as f32 / 2.0,
+                                    project.width as f32,
+                                    project.height as f32,
+                                    0.0,
+                                    1.0,
+                                ),
+                            };
 
                         if let Some(t) = &clip.transform {
                             // Apply keyframes for transform properties
                             let kf_x = get_keyframed_value(&clip.keyframes, "x", frame_idx, t.x);
                             let kf_y = get_keyframed_value(&clip.keyframes, "y", frame_idx, t.y);
-                            let kf_scale = get_keyframed_value(&clip.keyframes, "scale", frame_idx, t.scale);
-                            let kf_rot = get_keyframed_value(&clip.keyframes, "rotation", frame_idx, t.rotation);
-                            let kf_opac = get_keyframed_value(&clip.keyframes, "opacity", frame_idx, t.opacity);
-                            
+                            let kf_scale =
+                                get_keyframed_value(&clip.keyframes, "scale", frame_idx, t.scale);
+                            let kf_rot = get_keyframed_value(
+                                &clip.keyframes,
+                                "rotation",
+                                frame_idx,
+                                t.rotation,
+                            );
+                            let kf_opac = get_keyframed_value(
+                                &clip.keyframes,
+                                "opacity",
+                                frame_idx,
+                                t.opacity,
+                            );
+
                             cx = kf_x + (project.width as f32 / 2.0);
                             cy = kf_y + (project.height as f32 / 2.0);
                             w = project.width as f32 * kf_scale;
@@ -631,33 +701,84 @@ fn create_text_texture(
 
                         // Parse color grading with keyframes
                         let cg = clip.filters.as_ref().map(|f| ColorGradingDescriptor {
-                            brightness: get_keyframed_value(&clip.keyframes, "filters.brightness", frame_idx, f.brightness.unwrap_or(1.0)),
-                            contrast: get_keyframed_value(&clip.keyframes, "filters.contrast", frame_idx, f.contrast.unwrap_or(1.0)),
-                            saturation: get_keyframed_value(&clip.keyframes, "filters.saturation", frame_idx, f.saturation.unwrap_or(1.0)),
-                            grayscale: Some(get_keyframed_value(&clip.keyframes, "filters.grayscale", frame_idx, f.grayscale.unwrap_or(0.0))),
-                            sepia: Some(get_keyframed_value(&clip.keyframes, "filters.sepia", frame_idx, f.sepia.unwrap_or(0.0))),
-                            invert: Some(get_keyframed_value(&clip.keyframes, "filters.invert", frame_idx, f.invert.unwrap_or(0.0))),
-                            hue_rotate: Some(get_keyframed_value(&clip.keyframes, "filters.hue_rotate", frame_idx, f.hue_rotate.unwrap_or(0.0))),
-                            pixelate: Some(get_keyframed_value(&clip.keyframes, "filters.pixelate", frame_idx, f.pixelate.unwrap_or(0.0))),
-                            edge_detect: Some(get_keyframed_value(&clip.keyframes, "filters.edge_detect", frame_idx, f.edge_detect.unwrap_or(0.0))),
+                            brightness: get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.brightness",
+                                frame_idx,
+                                f.brightness.unwrap_or(1.0),
+                            ),
+                            contrast: get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.contrast",
+                                frame_idx,
+                                f.contrast.unwrap_or(1.0),
+                            ),
+                            saturation: get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.saturation",
+                                frame_idx,
+                                f.saturation.unwrap_or(1.0),
+                            ),
+                            grayscale: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.grayscale",
+                                frame_idx,
+                                f.grayscale.unwrap_or(0.0),
+                            )),
+                            sepia: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.sepia",
+                                frame_idx,
+                                f.sepia.unwrap_or(0.0),
+                            )),
+                            invert: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.invert",
+                                frame_idx,
+                                f.invert.unwrap_or(0.0),
+                            )),
+                            hue_rotate: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.hue_rotate",
+                                frame_idx,
+                                f.hue_rotate.unwrap_or(0.0),
+                            )),
+                            pixelate: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.pixelate",
+                                frame_idx,
+                                f.pixelate.unwrap_or(0.0),
+                            )),
+                            edge_detect: Some(get_keyframed_value(
+                                &clip.keyframes,
+                                "filters.edge_detect",
+                                frame_idx,
+                                f.edge_detect.unwrap_or(0.0),
+                            )),
                         });
-                        
+
                         if let Some(ref trans) = clip.transitions {
                             if let Some(ref in_t) = trans.in_ {
-                                if frame_idx >= clip.start_frame && frame_idx < clip.start_frame + in_t.duration_frames {
-                                    let progress = (frame_idx - clip.start_frame) as f32 / in_t.duration_frames as f32;
+                                if frame_idx >= clip.start_frame
+                                    && frame_idx < clip.start_frame + in_t.duration_frames
+                                {
+                                    let progress = (frame_idx - clip.start_frame) as f32
+                                        / in_t.duration_frames as f32;
                                     opac *= progress;
                                 }
                             }
                             if let Some(ref out_t) = trans.out {
                                 let clip_end = clip.start_frame + clip.duration_frames;
-                                if frame_idx < clip_end && frame_idx >= clip_end - out_t.duration_frames {
-                                    let progress = (clip_end - frame_idx) as f32 / out_t.duration_frames as f32;
+                                if frame_idx < clip_end
+                                    && frame_idx >= clip_end - out_t.duration_frames
+                                {
+                                    let progress = (clip_end - frame_idx) as f32
+                                        / out_t.duration_frames as f32;
                                     opac *= progress;
                                 }
                             }
                         }
-                        
+
                         let mut b_mode = BlendMode::Normal;
                         if let Some(ref bm_str) = clip.blend_mode {
                             b_mode = match bm_str.to_lowercase().as_str() {
@@ -686,25 +807,31 @@ fn create_text_texture(
                             for effect in effects {
                                 if effect.type_ == "chroma_key" {
                                     let mut uniforms = std::collections::HashMap::new();
-                                    
+
                                     if let Some(target_color) = &effect.color {
                                         uniforms.insert(
                                             "u_target_color".to_string(),
-                                            compositor::EffectUniformValueDescriptor::Vector(target_color.clone()),
+                                            compositor::EffectUniformValueDescriptor::Vector(
+                                                target_color.clone(),
+                                            ),
                                         );
                                     }
-                                    
+
                                     if let Some(similarity) = effect.properties.get("similarity") {
                                         uniforms.insert(
                                             "u_similarity".to_string(),
-                                            compositor::EffectUniformValueDescriptor::Number(*similarity),
+                                            compositor::EffectUniformValueDescriptor::Number(
+                                                *similarity,
+                                            ),
                                         );
                                     }
-                                    
+
                                     if let Some(smoothness) = effect.properties.get("smoothness") {
                                         uniforms.insert(
                                             "u_smoothness".to_string(),
-                                            compositor::EffectUniformValueDescriptor::Number(*smoothness),
+                                            compositor::EffectUniformValueDescriptor::Number(
+                                                *smoothness,
+                                            ),
                                         );
                                     }
 
@@ -746,24 +873,53 @@ fn create_text_texture(
                                 mask: None,
                                 color_grading: cg,
                                 crop: clip.crop.as_ref().map(|c| CropDescriptor {
-                                    left: get_keyframed_value(&clip.keyframes, "crop_left", frame_idx, c.left),
-                                    top: get_keyframed_value(&clip.keyframes, "crop_top", frame_idx, c.top),
-                                    right: get_keyframed_value(&clip.keyframes, "crop_right", frame_idx, c.right),
-                                    bottom: get_keyframed_value(&clip.keyframes, "crop_bottom", frame_idx, c.bottom),
+                                    left: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "crop_left",
+                                        frame_idx,
+                                        c.left,
+                                    ),
+                                    top: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "crop_top",
+                                        frame_idx,
+                                        c.top,
+                                    ),
+                                    right: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "crop_right",
+                                        frame_idx,
+                                        c.right,
+                                    ),
+                                    bottom: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "crop_bottom",
+                                        frame_idx,
+                                        c.bottom,
+                                    ),
                                 }),
-                                border_radius: Some(get_keyframed_value(&clip.keyframes, "border_radius", frame_idx, clip.border_radius.unwrap_or(0.0))),
+                                border_radius: Some(get_keyframed_value(
+                                    &clip.keyframes,
+                                    "border_radius",
+                                    frame_idx,
+                                    clip.border_radius.unwrap_or(0.0),
+                                )),
                                 shadow: clip.shadow.as_ref().map(|s| ShadowDescriptor {
                                     color: {
                                         // Parse rgba string like "rgba(0,0,0,0.5)"
                                         let col = s.color.as_deref().unwrap_or("rgba(0,0,0,0.5)");
                                         if col.starts_with("rgba(") {
-                                            let parts: Vec<&str> = col[5..col.len()-1].split(',').collect();
+                                            let parts: Vec<&str> =
+                                                col[5..col.len() - 1].split(',').collect();
                                             if parts.len() == 4 {
                                                 [
-                                                    parts[0].trim().parse::<f32>().unwrap_or(0.0) / 255.0,
-                                                    parts[1].trim().parse::<f32>().unwrap_or(0.0) / 255.0,
-                                                    parts[2].trim().parse::<f32>().unwrap_or(0.0) / 255.0,
-                                                    parts[3].trim().parse::<f32>().unwrap_or(0.5)
+                                                    parts[0].trim().parse::<f32>().unwrap_or(0.0)
+                                                        / 255.0,
+                                                    parts[1].trim().parse::<f32>().unwrap_or(0.0)
+                                                        / 255.0,
+                                                    parts[2].trim().parse::<f32>().unwrap_or(0.0)
+                                                        / 255.0,
+                                                    parts[3].trim().parse::<f32>().unwrap_or(0.5),
                                                 ]
                                             } else {
                                                 [0.0, 0.0, 0.0, 0.5]
@@ -772,20 +928,37 @@ fn create_text_texture(
                                             [0.0, 0.0, 0.0, 0.5]
                                         }
                                     },
-                                    distance: get_keyframed_value(&clip.keyframes, "shadow_distance", frame_idx, s.distance.unwrap_or(0.0)),
-                                    angle: get_keyframed_value(&clip.keyframes, "shadow_angle", frame_idx, s.angle.unwrap_or(0.0)),
-                                    blur: get_keyframed_value(&clip.keyframes, "shadow_blur", frame_idx, s.blur.unwrap_or(0.0)),
+                                    distance: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "shadow_distance",
+                                        frame_idx,
+                                        s.distance.unwrap_or(0.0),
+                                    ),
+                                    angle: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "shadow_angle",
+                                        frame_idx,
+                                        s.angle.unwrap_or(0.0),
+                                    ),
+                                    blur: get_keyframed_value(
+                                        &clip.keyframes,
+                                        "shadow_blur",
+                                        frame_idx,
+                                        s.blur.unwrap_or(0.0),
+                                    ),
                                 }),
                             }));
                         }
                     }
                 }
             }
-            
+
             let frame = FrameDescriptor {
                 width: project.width,
                 height: project.height,
-                clear: CanvasClearDescriptor { color: project.bg_color },
+                clear: CanvasClearDescriptor {
+                    color: project.bg_color,
+                },
                 items,
             };
 

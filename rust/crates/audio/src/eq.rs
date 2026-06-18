@@ -50,9 +50,7 @@ impl BiquadFilter {
 
     /// Process a single sample through the filter.
     pub fn process(&mut self, input: f64) -> f64 {
-        let output = self.coeffs.b0 * input
-            + self.coeffs.b1 * self.x1
-            + self.coeffs.b2 * self.x2
+        let output = self.coeffs.b0 * input + self.coeffs.b1 * self.x1 + self.coeffs.b2 * self.x2
             - self.coeffs.a1 * self.y1
             - self.coeffs.a2 * self.y2;
 
@@ -269,8 +267,7 @@ mod tests {
     #[test]
     fn test_lowpass_attenuates_high() {
         // 1kHz lowpass at 44.1kHz should pass DC but attenuate Nyquist
-        let mut filter =
-            BiquadFilter::new(FilterType::LowPass, 1000.0, 0.707, 0.0, 44100);
+        let mut filter = BiquadFilter::new(FilterType::LowPass, 1000.0, 0.707, 0.0, 44100);
         // DC signal needs a few samples to reach steady-state
         let mut output = 0.0;
         for _ in 0..20 {
@@ -281,8 +278,7 @@ mod tests {
 
     #[test]
     fn test_filter_reset() {
-        let mut filter =
-            BiquadFilter::new(FilterType::LowPass, 1000.0, 0.707, 0.0, 44100);
+        let mut filter = BiquadFilter::new(FilterType::LowPass, 1000.0, 0.707, 0.0, 44100);
         filter.process(1.0);
         filter.process(1.0);
         filter.reset();

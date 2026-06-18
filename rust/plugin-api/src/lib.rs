@@ -10,14 +10,14 @@ pub struct FrameBuffer {
 pub trait VideoEffect {
     /// The unique identifier for this effect plugin
     fn plugin_id(&self) -> &'static str;
-    
+
     /// The display name shown in the Lazynext UI
     fn name(&self) -> &'static str;
-    
+
     /// Initialize any internal state before rendering begins
     fn init(&mut self) {}
 
-    /// Process a single frame buffer. 
+    /// Process a single frame buffer.
     /// This is where the third-party developer writes their logic.
     fn process_frame(&self, frame: &mut FrameBuffer, time: f64);
 }

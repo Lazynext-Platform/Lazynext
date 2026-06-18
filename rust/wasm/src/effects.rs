@@ -112,7 +112,7 @@ struct ApplyLutOptions {
 pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     // Scaffold for 3D LUT application
     let _apply_lut_options = parse_apply_lut_options(options)?;
-    
+
     // In a full implementation, this passes the 3D texture to WebGPU for color interpolation.
     // Returning a blank canvas for scaffolding signature.
     let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();
@@ -145,7 +145,7 @@ struct ApplyChromaKeyOptions {
 #[wasm_bindgen(js_name = applyChromaKey)]
 pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let _options = parse_apply_chroma_key_options(options)?;
-    
+
     // Scaffold for WebGPU chroma key shader application.
     // Calculates YUV distance from key_color and alpha masks pixels.
     let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();

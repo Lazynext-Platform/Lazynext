@@ -6,7 +6,12 @@ mod ffi {
         type DeckLinkDevice;
 
         fn initialize_decklink() -> UniquePtr<DeckLinkDevice>;
-        fn schedule_sdi_frame(device: &DeckLinkDevice, buffer: &[u8], width: u32, height: u32) -> bool;
+        fn schedule_sdi_frame(
+            device: &DeckLinkDevice,
+            buffer: &[u8],
+            width: u32,
+            height: u32,
+        ) -> bool;
     }
 }
 
@@ -28,7 +33,12 @@ impl DecklinkEngine {
         }
     }
 
-    pub fn pump_frame_to_sdi(&self, buffer: &[u8], width: u32, height: u32) -> Result<(), &'static str> {
+    pub fn pump_frame_to_sdi(
+        &self,
+        buffer: &[u8],
+        width: u32,
+        height: u32,
+    ) -> Result<(), &'static str> {
         let success = ffi::schedule_sdi_frame(&self.device, buffer, width, height);
         if success {
             Ok(())

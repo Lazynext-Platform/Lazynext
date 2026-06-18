@@ -1,6 +1,6 @@
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::nle_state::NLEState;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::io::{self, BufRead};
 
 /// Lazynext MCP Server — exposes the autonomous editor as an MCP tool.
@@ -108,10 +108,7 @@ async fn main() {
                             source_files: vec![],
                         };
 
-                        match editor
-                            .process_intent_with_llm(&mut nle, &intent)
-                            .await
-                        {
+                        match editor.process_intent_with_llm(&mut nle, &intent).await {
                             Ok(msg) => json!({
                                 "jsonrpc": "2.0",
                                 "id": id,
@@ -133,8 +130,7 @@ async fn main() {
 
                     "get_timeline_state" => {
                         let data = nle.get_project_data();
-                        let state_json =
-                            serde_json::to_string_pretty(data).unwrap_or_default();
+                        let state_json = serde_json::to_string_pretty(data).unwrap_or_default();
                         json!({
                             "jsonrpc": "2.0",
                             "id": id,
@@ -147,10 +143,8 @@ async fn main() {
 
                     "apply_crdt_operation" => {
                         let op_value = &req["params"]["arguments"]["operation"];
-                        let op: Result<
-                            state::operations::CrdtOperation,
-                            _,
-                        > = serde_json::from_value(op_value.clone());
+                        let op: Result<state::operations::CrdtOperation, _> =
+                            serde_json::from_value(op_value.clone());
                         match op {
                             Ok(operation) => {
                                 nle.op_log.push(operation);

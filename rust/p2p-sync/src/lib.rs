@@ -38,9 +38,7 @@ impl P2PNetwork {
         // mDNS discovery via libp2p-mdns or zeroconf crate.
         // For LAN-only operation, we scan the local subnet.
         // Newly discovered peers are added to the mesh.
-        println!(
-            "🕸️  [P2P] Starting mDNS discovery for _lazynext._tcp.local..."
-        );
+        println!("🕸️  [P2P] Starting mDNS discovery for _lazynext._tcp.local...");
 
         // In a real deployment, this uses the mdns crate:
         // let mdns = mdns::Responder::new()?;
@@ -48,7 +46,11 @@ impl P2PNetwork {
 
         // Scan common local addresses for demo/LAN use
         let candidates = vec![
-            ("192.168.1.10:8000", "VR Headset", vec!["vr_headset", "reviewer"]),
+            (
+                "192.168.1.10:8000",
+                "VR Headset",
+                vec!["vr_headset", "reviewer"],
+            ),
             ("192.168.1.11:8000", "Smart TV", vec!["smart_tv"]),
             ("192.168.1.12:8000", "Color Grading Station", vec!["editor"]),
         ];
@@ -87,10 +89,7 @@ impl P2PNetwork {
                     );
                     for peer in &self.peers {
                         // In production: send over UDP/WebRTC data channel
-                        println!(
-                            "   → Sent to {} ({})",
-                            peer.display_name, peer.addr
-                        );
+                        println!("   → Sent to {} ({})", peer.display_name, peer.addr);
                     }
                 }
                 NLEEvent::ClipAdded(clip_id) => {

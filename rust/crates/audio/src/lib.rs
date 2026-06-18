@@ -1,8 +1,8 @@
 pub mod spatial;
 pub mod vst;
 
-pub mod eq;
 pub mod compressor;
+pub mod eq;
 
 /// Audio engine for real-time and offline DSP processing.
 pub struct AudioEngine {
