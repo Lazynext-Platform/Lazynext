@@ -107,9 +107,6 @@ jobs:
       - name: Lint
         run: bun run lint
 
-      - name: Generate Content Collections
-        run: cd apps/web && npx content-collections build
-
       - name: Typecheck
         env:
           SKIP_ENV_VALIDATION: "1"
