@@ -6,7 +6,7 @@
  * the network layer and the Rust WASM core.
  */
 
-import type { CrdtEngine } from "@/wasm/wasm";
+import type { CrdtEngine } from "lazynext-wasm";
 import type { CollaborationSocket } from "./socket";
 
 /**
