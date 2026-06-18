@@ -1,47 +1,89 @@
 import { NextResponse } from "next/server";
 
+const GENERATIVE_STUDIO_URL =
+  process.env.GENERATIVE_STUDIO_URL || "http://localhost:8001";
+
 export async function POST(request: Request) {
-	try {
-		const { text, voiceId } = await request.json();
+  try {
+    const { text, voiceId } = (await request.json()) as {
+      text?: string;
+      voiceId?: string;
+    };
 
-		if (!text) {
-			return NextResponse.json(
-				{ success: false, error: "Text prompt is required" },
-				{ status: 400 },
-			);
-		}
+    if (!text) {
+      return NextResponse.json(
+        { success: false, error: "Text prompt is required" },
+        { status: 400 },
+      );
+    }
 
-		console.log(
-			`[API] Dispatching TTS generation task to Generative Studio... Voice: ${voiceId || "default"}`,
-		);
+    console.log(
+      `[API] Dispatching TTS to Generative Studio: "${text.substring(0, 80)}..."`,
+    );
 
-		// In a production environment, this would call the Python Text-To-Speech API
-		// e.g., ElevenLabs proxy or EdgeTTS from Text-To-Video-AI.
-		await new Promise((resolve) => setTimeout(resolve, 800));
+    // Forward to generative-studio dub endpoint
+    try {
+      const response = await fetch(`${GENERATIVE_STUDIO_URL}/dub`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          clip_id: `tts-${Date.now()}`,
+          target_language: "en-US",
+          text_to_dub: text,
+          ...(voiceId ? { voice_id: voiceId } : {}),
+        }),
+      });
 
-		// Simulated TTS output clip mapped to the timeline format
-		const mockAudioClip = {
-			id: `audio-${Date.now()}`,
-			name: `AI Voiceover: "${text.substring(0, 15)}..."`,
-			type: "audio",
-			start_frame: 0,
-			duration_frames: 180, // Approx 3 seconds
-			source:
-				"https://actions.google.com/sounds/v1/speech/voices_local_male.ogg",
-			volume: 1.0,
-			isAI: true,
-		};
+      if (response.ok) {
+        const data = (await response.json()) as { audio_url?: string };
+        return NextResponse.json({
+          success: true,
+          message: "AI Voiceover generated",
+          audioClip: {
+            id: `audio-${Date.now()}`,
+            name: `AI Voiceover: "${text.substring(0, 30)}..."`,
+            type: "audio",
+            start_frame: 0,
+            duration_frames: Math.ceil(text.split(" ").length * 15),
+            source: data.audio_url,
+            volume: 1.0,
+            isAI: true,
+          },
+        });
+      }
+    } catch (err) {
+      console.warn(`[TTS] Generative Studio unreachable: ${err}`);
+    }
 
-		return NextResponse.json({
-			success: true,
-			message: "AI Voiceover generated successfully",
-			audioClip: mockAudioClip,
-		});
-	} catch (error: any) {
-		console.error("TTS API Error:", error);
-		return NextResponse.json(
-			{ success: false, error: error.message },
-			{ status: 500 },
-		);
-	}
+    // Dev-only fallback
+    if (process.env.NODE_ENV !== "production") {
+      return NextResponse.json({
+        success: true,
+        message: "AI Voiceover generated (dev fallback)",
+        audioClip: {
+          id: `audio-${Date.now()}`,
+          name: `AI Voiceover: "${text.substring(0, 30)}..."`,
+          type: "audio",
+          start_frame: 0,
+          duration_frames: 180,
+          source:
+            "https://actions.google.com/sounds/v1/speech/voices_local_male.ogg",
+          volume: 1.0,
+          isAI: true,
+          source_note: "dev-fallback",
+        },
+      });
+    }
+
+    return NextResponse.json(
+      { success: false, error: "TTS service unavailable" },
+      { status: 503 },
+    );
+  } catch (error: unknown) {
+    console.error("TTS API Error:", error);
+    return NextResponse.json(
+      { success: false, error: (error as Error).message },
+      { status: 500 },
+    );
+  }
 }

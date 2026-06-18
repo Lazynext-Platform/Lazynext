@@ -5,69 +5,138 @@
 
 ---
 
-Lazynext is an enterprise-grade, multi-platform video editing ecosystem. We stripped out the heavy Electron wrappers and generic JavaScript state management to build something fundamentally faster, smarter, and infinitely scalable.
+Lazynext is an enterprise-grade, multi-platform video editing ecosystem built on a strict high-performance architecture where Rust owns all business logic and the web/desktop/mobile shells are pure rendering layers.
 
-## 🚀 The Architecture
+## 🚀 Architecture
 
-Lazynext is built on a strict, high-performance architecture:
-
-- **Core Logic (`rust/`)**: The single source of truth. All NLE state management, timeline calculations, and CRDT sync logic live in pure, platform-agnostic Rust.
-- **Web Frontend (`apps/web/`)**: A highly optimized Next.js/React shell that imports the Rust core via **WebAssembly**, rendering at 120fps using WebGL.
-- **Native Desktop (`apps/desktop/`)**: A native OS application built with **GPUI** (the engine behind Zed) that calls the exact same Rust core logic with zero duplication.
-- **Microservices (`services/`)**: Node.js backends handling CRDT WebSocket signaling, Mocked FFmpeg Render Farms, and Generative AI bridging.
+- **Core Logic (`rust/`)**: Single source of truth — CRDT state management, timeline engine, GPU compositor, AI agent orchestration, and export pipeline. All compiled to WebAssembly for the web shell and called natively on desktop.
+- **Web Frontend (`apps/web/`)**: Next.js/React shell importing Rust via WASM. Premium Glassmorphism UI with real-time GPU compositing.
+- **Native Desktop (`apps/desktop/`)**: GPUI (Zed) application calling Rust core directly with native wgpu rendering.
+- **Mobile (`apps/mobile/`)**: React Native shell with UniFFI-generated native bindings to the Rust core.
+- **Browser Extension (`apps/browser-extension/`)**: Capture video from any webpage directly into your Lazynext timeline.
+- **Microservices (`services/`)**: 
+  - `pre-processing` (Python FastAPI, :8000) — Whisper transcription, SAM2 rotoscoping, NeRF extraction
+  - `generative-studio` (Python FastAPI, :8001) — Stable Video Diffusion, ElevenLabs dubbing, Demucs stem separation
+  - `ai-agents` (Node.js, :8002) — Chronos Copilot LLM orchestration + CRDT WebSocket sync server
+  - `render-service` (Node.js, :8003) — FFMPEG render farm with SSE progress streaming
 
 ## 🧠 Autonomous AI Agents
 
-Lazynext features **Chronos**, an integrated LLM copilot that understands your timeline. Need an establishing shot of a cyberpunk city? Ask Chronos, and it will orchestrate the Generative AI microservices (text-to-video, text-to-audio) to synthesize the asset and drop it directly onto your timeline.
+**Chronos**, the integrated LLM copilot, understands your timeline. Supports OpenAI, Anthropic, Gemini, and local Ollama models. Ask it to generate B-roll, dub in any language, remove silence, or color-grade your footage — it orchestrates the microservices and edits your timeline directly via CRDT operations.
 
-## 🤝 Figma for Video
+## 🤝 Real-Time Collaboration
 
-Using custom LWW (Last-Writer-Wins) CRDTs and a scalable WebSocket signaling hub, Lazynext supports massive real-time multiplayer editing. You and your colleagues can edit the exact same timeline, on the exact same frame, simultaneously across the globe. Built-in WebRTC Voice Chat ensures you're always in sync.
+Operation-based CRDTs (CmRDT) with vector clocks and tombstones enable massive real-time multiplayer editing. WebSocket sync server with JWT auth, WebRTC voice chat signaling, and remote cursor presence. You and your colleagues can edit the same timeline simultaneously across the globe.
 
 ## 📱 The Distribution Network
 
-Lazynext isn't just an editor; it's a network. The built-in `/feed` is a vertical-scrolling social discovery platform. Watch incredible edits, and click "Remix" to instantly clone their CRDT timeline state into your own editor to learn from and modify.
+Built-in `/feed` is a vertical-scrolling social discovery platform. Watch incredible edits and click "Remix" to clone their CRDT timeline state into your own editor.
 
 ---
 
 ## 🛠️ Quick Start (Docker Compose)
 
-Lazynext is fully containerized. To spin up the entire multi-billion dollar platform locally:
-
 ```bash
 # Clone the repository
-git clone https://github.com/Lazynext-Corporation/lazynext.git
-cd lazynext
+git clone https://github.com/Lazynext-Platform/Lazynext.git
+cd Lazynext
 
-# Boot the Microservice Cluster
-./scripts/deploy.sh
+# Boot the entire platform
+docker compose up --build -d
 ```
 
 **Services Started:**
 
-- 🌐 Web App: `http://localhost:3000`
-- 📡 WebRTC Sync: `ws://localhost:8002`
-- 🎬 Render Farm: `http://localhost:8003`
-- 🗄️ PostgreSQL: `localhost:5432`
+| Service | URL | Description |
+|---------|-----|-------------|
+| 🌐 Web App | `http://localhost:3000` | Full editor + API |
+| 📡 Sync Server | `ws://localhost:8002` | CRDT WebSocket + WebRTC signaling |
+| 🎬 Render Farm | `http://localhost:8003` | FFMPEG export with SSE progress |
+| 🎨 Generative Studio | `http://localhost:8001` | AI video/audio generation |
+| 🔧 Pre-Processing | `http://localhost:8000` | Whisper, SAM2, NeRF |
+| 🗄️ PostgreSQL | `localhost:5434` | User data, projects, AI credits |
 
-## 🧪 Development & Testing
-
-We enforce strict CI/CD pipelines via GitHub Actions.
-To run the Playwright End-to-End test suite locally:
+## 🧪 Development
 
 ```bash
+# Rust (requires Rust toolchain + wasm-pack)
+cd rust
+cargo test --workspace
+wasm-pack build --target web rust/wasm
+
+# Web app (requires Bun)
 bun install
+bun run dev
+bun run test
 bun run test:e2e
+
+# Python microservices
+cd services/pre-processing && pip install -r requirements.txt && uvicorn main:app --reload
+cd services/generative-studio && pip install -r requirements.txt && uvicorn main:app --reload
 ```
 
-To compile the Rust WASM core manually:
+**Environment Variables:**
 
-```bash
-wasm-pack build --target web --out-dir pkg rust/wasm
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string |
+| `LLM_PROVIDER` | No | `openai`, `anthropic`, `gemini`, or `ollama` (default) |
+| `OPENAI_API_KEY` | No | For Whisper + GPT-4o features |
+| `ANTHROPIC_API_KEY` | No | For Claude-powered Chronos |
+| `REPLICATE_API_TOKEN` | No | For AI video generation |
+| `ELEVENLABS_API_KEY` | No | For AI dubbing |
+| `LAZYNEXT_WEBHOOK_URL` | No | Slack/Discord webhook for render notifications |
+
+Services gracefully fall back to local processing when API keys are not configured — no mock data in production.
+
+## 🏗️ Infrastructure
+
+- **CI/CD**: GitHub Actions (Rust + web tests, Docker build/push) + Google Cloud Build
+- **Deployment**: Cloud Run (all 5 services) + Cloud SQL (private IP) + Artifact Registry + Secret Manager
+- **Terraform**: Full GCP infrastructure as code with VPC, Serverless VPC Access, GCS backend
+- **Kubernetes**: Optional K8s manifests for self-hosted deployments
+
+## 📂 Project Structure
+
+```
+├── apps/
+│   ├── web/                # Next.js editor + API
+│   ├── desktop/            # GPUI native desktop app
+│   ├── mobile/             # React Native mobile app
+│   └── browser-extension/  # Chrome extension
+├── rust/
+│   ├── core/               # NLE state, autonomous editor
+│   ├── crates/
+│   │   ├── audio/          # DSP: EQ, compressor, VST host
+│   │   ├── compositor/     # GPU compositor (18 blend modes)
+│   │   ├── editor_core/    # Silence detection, scene detection
+│   │   ├── effects/        # 6 GPU effect shaders
+│   │   ├── export/         # FFMPEG encoding pipeline (MP4, ProRes, DCP, AAF)
+│   │   ├── ffmpeg_filter/  # Type-safe FFMPEG filter graph builder
+│   │   ├── gpu/            # wgpu context + scopes analyzer
+│   │   ├── masks/          # JFA signed distance field masking
+│   │   ├── neural_engine/  # Face detection, clip tagging, smart bins
+│   │   ├── state/          # CRDT (LWW + operation-based), keyframes, vector clocks
+│   │   ├── time/           # MediaTime, FrameRate, TimeCode
+│   │   └── ...
+│   ├── wasm/               # WASM bridge (all crates → JS)
+│   ├── api-gateway/        # Axum REST gateway (:8005)
+│   ├── cli/                # Headless CLI renderer
+│   ├── mcp-server/         # MCP protocol server
+│   └── p2p-sync/           # libp2p mesh networking
+├── services/
+│   ├── pre-processing/     # Python FastAPI (:8000)
+│   ├── generative-studio/  # Python FastAPI (:8001)
+│   ├── ai-agents/          # Node.js orchestrator + sync (:8002)
+│   └── render-service/     # Node.js FFMPEG farm (:8003)
+├── terraform/              # GCP Infrastructure as Code
+├── k8s/                    # Kubernetes manifests
+├── scripts/                # Build, deploy, and test utilities
+└── docs/                   # Architecture and design docs
 ```
 
 ---
 
 <div align="center">
-  <p><i>Built with ⚡️ by Lazynext
+  <p><i>Built with ⚡️ by Lazynext</i></p>
 </div>

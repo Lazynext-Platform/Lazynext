@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
 		removeConsole: process.env.NODE_ENV === "production",
 	},
 	reactStrictMode: true,
-	productionBrowserSourceMaps: true,
+	productionBrowserSourceMaps: false,
 	output: "standalone",
 
 	// Prevent CDN from caching error responses for 1 year
@@ -64,7 +64,8 @@ const nextConfig: NextConfig = {
 	},
 
 	typescript: {
-		ignoreBuildErrors: true,
+		// TODO: Remove once all TypeScript errors are resolved (tracked in Phase 9)
+		ignoreBuildErrors: process.env.CI != null,
 	},
 	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
 	webpack(config) {

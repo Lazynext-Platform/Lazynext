@@ -8,12 +8,11 @@ terraform {
     }
   }
 
-  # Store terraform state locally (override with -backend-config for GCS in CI)
-  # Prerequisite for GCS: gsutil mb gs://<project>-terraform-state
-  # backend "gcs" {
-  #   bucket = "vertexaiopencode-terraform-state"
-  #   prefix = "terraform/state"
-  # }
+  backend "gcs" {
+    # Create the bucket first: gsutil mb gs://<project>-terraform-state
+    bucket = "vertexaiopencode-terraform-state"
+    prefix = "terraform/state"
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -35,12 +34,41 @@ resource "google_project_service" "apis" {
     "cloudbuild.googleapis.com",
     "secretmanager.googleapis.com",
     "storage.googleapis.com",
+    "vpcaccess.googleapis.com",
+    "compute.googleapis.com",
   ])
 
   project = var.project_id
   service = each.value
 
   disable_on_destroy = false
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VPC Network for Cloud SQL private connectivity
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_compute_network" "vpc" {
+  name                    = "lazynext-vpc-${var.environment}"
+  auto_create_subnetworks = false
+
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "lazynext-subnet-${var.environment}"
+  network       = google_compute_network.vpc.id
+  ip_cidr_range = "10.0.0.0/24"
+  region        = var.region
+}
+
+# Serverless VPC Access connector for Cloud Run → Cloud SQL private path
+resource "google_vpc_access_connector" "connector" {
+  name          = "lazynext-vpc-connector-${var.environment}"
+  region        = var.region
+  network       = google_compute_network.vpc.name
+  ip_cidr_range = "10.8.0.0/28"
+
+  depends_on = [google_project_service.apis]
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,7 +84,7 @@ resource "google_artifact_registry_repository" "docker" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Cloud SQL — PostgreSQL for user data, projects, and AI credits
+# Cloud SQL — PostgreSQL with private IP (no public exposure)
 # ─────────────────────────────────────────────────────────────────────────────
 resource "google_sql_database_instance" "postgres" {
   name             = "lazynext-db-${var.environment}"
@@ -75,15 +103,8 @@ resource "google_sql_database_instance" "postgres" {
     }
 
     ip_configuration {
-      ipv4_enabled = true
-      # WARNING: 0.0.0.0/0 allows connections from any IP. For production,
-      # use Cloud SQL Auth Proxy sidecar in Cloud Run or configure private IP
-      # with Serverless VPC Access connector:
-      #   https://cloud.google.com/sql/docs/postgres/connect-run
-      authorized_networks {
-        name  = "allow-all"
-        value = "0.0.0.0/0"
-      }
+      ipv4_enabled    = false
+      private_network = google_compute_network.vpc.id
     }
   }
 
@@ -101,6 +122,69 @@ resource "google_sql_user" "app_user" {
   name     = "lazynext_app"
   instance = google_sql_database_instance.postgres.name
   password = var.db_password
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Secret Manager — API keys (referenced by Cloud Run, not plain env vars)
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_secret_manager_secret" "database_url" {
+  secret_id = "DATABASE_URL"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "database_url" {
+  secret      = google_secret_manager_secret.database_url.id
+  secret_data = "postgresql://lazynext_app:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/lazynext"
+}
+
+resource "google_secret_manager_secret" "replicate_api_token" {
+  secret_id = "REPLICATE_API_TOKEN"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "replicate_api_token" {
+  secret      = google_secret_manager_secret.replicate_api_token.id
+  secret_data = var.replicate_api_token != "" ? var.replicate_api_token : "mock-token"
+}
+
+resource "google_secret_manager_secret" "elevenlabs_api_key" {
+  secret_id = "ELEVENLABS_API_KEY"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "elevenlabs_api_key" {
+  secret      = google_secret_manager_secret.elevenlabs_api_key.id
+  secret_data = var.elevenlabs_api_key != "" ? var.elevenlabs_api_key : "mock-key"
+}
+
+resource "google_secret_manager_secret" "openai_api_key" {
+  secret_id = "OPENAI_API_KEY"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "openai_api_key" {
+  secret      = google_secret_manager_secret.openai_api_key.id
+  secret_data = var.openai_api_key
+}
+
+resource "google_secret_manager_secret" "anthropic_api_key" {
+  secret_id = "ANTHROPIC_API_KEY"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "anthropic_api_key" {
+  secret      = google_secret_manager_secret.anthropic_api_key.id
+  secret_data = var.anthropic_api_key
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -122,7 +206,7 @@ resource "google_storage_bucket" "media" {
 
   lifecycle_rule {
     condition {
-      age = 90 # Delete temporary render outputs after 90 days
+      age = 90
     }
     action {
       type          = "SetStorageClass"
@@ -156,8 +240,13 @@ resource "google_cloud_run_v2_service" "web" {
       }
 
       env {
-        name  = "DATABASE_URL"
-        value = "postgresql://lazynext_app:${var.db_password}@${google_sql_database_instance.postgres.public_ip_address}:5432/lazynext"
+        name = "DATABASE_URL"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.database_url.secret_id
+            version = "latest"
+          }
+        }
       }
 
       env {
@@ -175,11 +264,17 @@ resource "google_cloud_run_v2_service" "web" {
       min_instance_count = var.environment == "production" ? 1 : 0
       max_instance_count = 10
     }
+
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "PRIVATE_RANGES_ONLY"
+    }
   }
 
   depends_on = [
     google_project_service.apis,
     google_artifact_registry_repository.docker,
+    google_vpc_access_connector.connector,
   ]
 }
 
@@ -206,13 +301,23 @@ resource "google_cloud_run_v2_service" "generative_studio" {
       }
 
       env {
-        name  = "REPLICATE_API_TOKEN"
-        value = var.replicate_api_token
+        name = "REPLICATE_API_TOKEN"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.replicate_api_token.secret_id
+            version = "latest"
+          }
+        }
       }
 
       env {
-        name  = "ELEVENLABS_API_KEY"
-        value = var.elevenlabs_api_key
+        name = "ELEVENLABS_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.elevenlabs_api_key.secret_id
+            version = "latest"
+          }
+        }
       }
     }
 
@@ -261,7 +366,6 @@ resource "google_cloud_run_v2_service" "render_service" {
       max_instance_count = 10
     }
 
-    # Render jobs can take several minutes
     timeout = "600s"
   }
 
@@ -334,6 +438,16 @@ resource "google_cloud_run_v2_service" "pre_processing" {
       }
 
       env {
+        name = "OPENAI_API_KEY"
+        value_source {
+          secret_key_ref {
+            secret  = google_secret_manager_secret.openai_api_key.secret_id
+            version = "latest"
+          }
+        }
+      }
+
+      env {
         name  = "MEDIA_BUCKET"
         value = google_storage_bucket.media.name
       }
@@ -354,7 +468,7 @@ resource "google_cloud_run_v2_service" "pre_processing" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# IAM — Allow unauthenticated access to the web frontend (public)
+# IAM — Allow unauthenticated access only to the web frontend (public)
 # ─────────────────────────────────────────────────────────────────────────────
 resource "google_cloud_run_v2_service_iam_member" "web_public" {
   name     = google_cloud_run_v2_service.web.name
@@ -362,6 +476,9 @@ resource "google_cloud_run_v2_service_iam_member" "web_public" {
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
+
+# Backend services are internal-only — no allUsers IAM binding.
+# Cloud Run services within the same project can invoke each other by default.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Outputs
@@ -391,9 +508,9 @@ output "pre_processing_url" {
   value       = google_cloud_run_v2_service.pre_processing.uri
 }
 
-output "database_ip" {
-  description = "Public IP of the Cloud SQL PostgreSQL instance"
-  value       = google_sql_database_instance.postgres.public_ip_address
+output "database_private_ip" {
+  description = "Private IP of the Cloud SQL PostgreSQL instance"
+  value       = google_sql_database_instance.postgres.private_ip_address
 }
 
 output "media_bucket" {

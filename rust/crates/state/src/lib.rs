@@ -1,4 +1,8 @@
 pub mod crdt;
+pub mod keyframe;
+pub mod operations;
+pub mod tombstone;
+pub mod vector_clock;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
