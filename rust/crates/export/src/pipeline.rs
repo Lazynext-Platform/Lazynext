@@ -62,7 +62,7 @@ impl ExportPipeline {
         }
 
         // Close stdin to signal EOF to ffmpeg
-        drop(stdin);
+        let _ = stdin;
 
         let output = child
             .wait_with_output()
