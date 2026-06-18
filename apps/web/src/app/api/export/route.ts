@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     // 2. Build project config for export
     const tracks = project.tracks || project.timeline?.tracks || [];
-    const maxClipEnd = tracks.reduce((max: number, track: Record<string, unknown>) => {
+    const maxClipEnd = tracks.reduce((max: number, track: { clips?: Array<{ start_frame?: number; duration_frames?: number }> }) => {
       for (const clip of track.clips || []) {
         const end = (clip.start_frame || 0) + (clip.duration_frames || 0);
         if (end > max) max = end;

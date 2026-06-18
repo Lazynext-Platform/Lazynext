@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 			const data = await res.json();
 
 			// Parse Microservice Output into Timeline Format
-			const mappedSubtitles = data.subtitles.map((sub: Record<string, unknown>, i: number) => ({
+			const mappedSubtitles = data.subtitles.map((sub: { text: string; start: number; end: number }, i: number) => ({
 				id: `clip-${Date.now()}-${i}`,
 				name: sub.text.substring(0, 15) + "...",
 				type: "text",

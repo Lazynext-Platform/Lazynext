@@ -6,7 +6,7 @@ import { subscriptions, user } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_123", {
-	apiVersion: "2025-06-15",
+	apiVersion: "2026-05-27.dahlia",
 });
 
 export async function POST(req: Request) {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 				userId: session.metadata.userId,
 				stripeSubscriptionId: subscription.id,
 				stripePriceId: subscription.items.data[0].price.id,
-				stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
+				stripeCurrentPeriodEnd: new Date((subscription as unknown as Record<string, number>).current_period_end * 1000),
 				tier: "pro",
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 			.set({
 				stripePriceId: subscription.items.data[0].price.id,
 				stripeCurrentPeriodEnd: new Date(
-					subscription.current_period_end * 1000,
+					(subscription as unknown as Record<string, number>).current_period_end * 1000,
 				),
 				updatedAt: new Date(),
 			})

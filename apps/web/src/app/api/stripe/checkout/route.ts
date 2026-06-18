@@ -4,7 +4,7 @@ import { auth } from "@/auth/server";
 import { headers } from "next/headers";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_123", {
-	apiVersion: "2025-06-15",
+	apiVersion: "2026-05-27.dahlia",
 });
 
 export async function POST(req: Request) {
