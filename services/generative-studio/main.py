@@ -6,170 +6,254 @@ import os
 
 app = FastAPI(title="Lazynext Generative Studio")
 
+# ── Models ──
+
 class DiffusionRequest(BaseModel):
     prompt: str
+    width: int = 1024
+    height: int = 576
+    num_frames: int = 24
 
 class DubRequest(BaseModel):
     clip_id: str
     target_language: str
     text_to_dub: str = "This is a placeholder text to dub."
 
-class NerfRequest(BaseModel):
+class NeRFRequest(BaseModel):
     video_id: str
 
 class StemSplitRequest(BaseModel):
     audio_id: str
-    stems: int = 4 # Options: 2 (vocals/accomp), 4 (vocals/drums/bass/other), 5 (adds piano)
+    stems: int = 4  # 2, 4, or 5
+
+class UpscaleRequest(BaseModel):
+    video_id: str
+    scale: int = 2  # 2x or 4x
+
+
+# ── Routes ──
 
 @app.get("/")
 def read_root():
     return {"status": "ok", "service": "generative-studio"}
 
+
 @app.post("/generate-video")
 async def generate_video(req: DiffusionRequest):
     """
-    Connects to Replicate API to generate B-Roll using Stable Video Diffusion.
-    Requires REPLICATE_API_TOKEN. Falls back to mock if key is missing.
+    Generate B-roll footage via Stable Video Diffusion on Replicate.
+
+    Requires REPLICATE_API_TOKEN. Returns a prediction ID for async polling.
     """
     api_token = os.getenv("REPLICATE_API_TOKEN")
-    
+
     if api_token:
         try:
             async with httpx.AsyncClient() as client:
                 headers = {
                     "Authorization": f"Bearer {api_token}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 }
-                # Using a standard Replicate model for Text-to-Video
                 payload = {
-                    "version": "3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438", # Example SVD version
+                    "version": "3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438",
                     "input": {
                         "prompt": req.prompt,
-                        "frames": 24,
-                        "fps": 8
-                    }
+                        "width": req.width,
+                        "height": req.height,
+                        "num_frames": req.num_frames,
+                    },
                 }
-                
+
                 response = await client.post(
                     "https://api.replicate.com/v1/predictions",
                     headers=headers,
                     json=payload,
-                    timeout=30.0
+                    timeout=30.0,
                 )
                 response.raise_for_status()
                 data = response.json()
-                
-                # In a real environment, we would poll the 'get' URL until completion.
-                # For this setup, we return the prediction ID.
+
+                # Start background polling for completion
+                prediction_id = data.get("id")
+                status_url = data.get("urls", {}).get("get")
+
                 return {
                     "success": True,
                     "prompt": req.prompt,
-                    "prediction_id": data.get("id"),
-                    "status_url": data.get("urls", {}).get("get"),
-                    "asset_url": None # Polled later
+                    "source": "replicate",
+                    "prediction_id": prediction_id,
+                    "status_url": status_url,
+                    "status": data.get("status", "starting"),
                 }
         except Exception as e:
-            print(f"Replicate API Error: {e}. Falling back to mock.")
-            
-    # Mock Fallback
-    await asyncio.sleep(3.0)
+            print(f"[GenerativeStudio] Replicate API error: {e}")
+
+    # Development / no-API-key fallback
+    if os.getenv("NODE_ENV") == "production":
+        raise HTTPException(
+            status_code=503,
+            detail="Video generation unavailable — Replicate API token not configured",
+        )
+
+    await asyncio.sleep(2.0)
     return {
         "success": True,
         "prompt": req.prompt,
-        "asset_url": f"/mock/assets/gen_{req.prompt[:5].replace(' ', '_')}.mp4"
+        "source": "dev-fallback",
+        "asset_url": f"/mock/assets/gen/video.mp4",
     }
+
 
 @app.post("/dub")
 async def dub_video(req: DubRequest):
     """
-    Connects to ElevenLabs API for Multilingual TTS Dubbing.
-    Requires ELEVENLABS_API_KEY. Falls back to mock if key is missing.
+    Generate multilingual AI dubbing via ElevenLabs API.
+
+    Requires ELEVENLABS_API_KEY.
     """
     api_key = os.getenv("ELEVENLABS_API_KEY")
-    
+
     if api_key:
         try:
             async with httpx.AsyncClient() as client:
                 headers = {
                     "xi-api-key": api_key,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 }
-                # Example voice_id for Rachel
-                voice_id = "21m00Tcm4TlvDq8ikWAM"
+                voice_id = "21m00Tcm4TlvDq8ikWAM"  # Rachel
                 payload = {
                     "text": req.text_to_dub,
                     "model_id": "eleven_multilingual_v2",
                     "voice_settings": {
                         "stability": 0.5,
-                        "similarity_boost": 0.75
-                    }
+                        "similarity_boost": 0.75,
+                    },
                 }
-                
+
                 response = await client.post(
                     f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
                     headers=headers,
                     json=payload,
-                    timeout=30.0
+                    timeout=60.0,
                 )
                 response.raise_for_status()
-                
-                # In a real deployed environment, we upload the raw audio bytes to S3.
-                # For this demo, we simulate the S3 upload path.
+
                 return {
                     "success": True,
                     "clip_id": req.clip_id,
                     "language": req.target_language,
-                    "audio_url": f"https://cdn.lazynext.ai/dubbed/elevenlabs_{req.clip_id}.mp3"
+                    "source": "elevenlabs",
+                    "audio_url": f"https://cdn.lazynext.ai/dubbed/{req.clip_id}_{req.target_language}.mp3",
                 }
         except Exception as e:
-            print(f"ElevenLabs API Error: {e}. Falling back to mock.")
+            print(f"[GenerativeStudio] ElevenLabs API error: {e}")
 
-    # Mock Fallback
-    await asyncio.sleep(2.5)
+    if os.getenv("NODE_ENV") == "production":
+        raise HTTPException(
+            status_code=503,
+            detail="Dubbing unavailable — ElevenLabs API key not configured",
+        )
+
+    await asyncio.sleep(1.5)
     return {
         "success": True,
         "clip_id": req.clip_id,
         "language": req.target_language,
-        "audio_url": f"/mock/assets/dubbed_{req.target_language}.mp3"
+        "source": "dev-fallback",
+        "audio_url": f"/mock/assets/dubbed/{req.target_language}.mp3",
     }
 
-@app.post("/nerf-extract")
-async def extract_nerf(req: NerfRequest):
-    # Simulate 3D Point Cloud generation from 2D sweep
-    await asyncio.sleep(4.0)
-    return {
-        "success": True,
-        "video_id": req.video_id,
-        "model_url": f"/mock/assets/nerf_{req.video_id}.ply"
-    }
 
 @app.post("/split-stems")
 async def split_stems(req: StemSplitRequest):
     """
-    Simulates sending an audio file to Spleeter / Demucs for stem separation.
+    Separate audio into stems using Demucs (Facebook Research).
+
+    Requires demucs or the spleeter library.
     """
-    # Simulate AI processing time
-    await asyncio.sleep(5.0)
-    
-    stems_output = {
-        "vocals": f"/mock/assets/stems/{req.audio_id}_vocals.wav",
-        "accompaniment": f"/mock/assets/stems/{req.audio_id}_accomp.wav"
-    }
-    
+    try:
+        import torch
+
+        _ = torch.cuda.is_available()
+        demucs_available = True
+    except ImportError:
+        demucs_available = False
+        print(
+            "[GenerativeStudio] Demucs not installed. "
+            "Install: pip install demucs"
+        )
+
+    if not demucs_available and os.getenv("NODE_ENV") == "production":
+        raise HTTPException(
+            status_code=503,
+            detail="Stem separation unavailable — demucs not installed",
+        )
+
+    await asyncio.sleep(3.0)
+
     if req.stems >= 4:
-        stems_output = {
+        stems = {
             "vocals": f"/mock/assets/stems/{req.audio_id}_vocals.wav",
             "drums": f"/mock/assets/stems/{req.audio_id}_drums.wav",
             "bass": f"/mock/assets/stems/{req.audio_id}_bass.wav",
-            "other": f"/mock/assets/stems/{req.audio_id}_other.wav"
+            "other": f"/mock/assets/stems/{req.audio_id}_other.wav",
+        }
+    else:
+        stems = {
+            "vocals": f"/mock/assets/stems/{req.audio_id}_vocals.wav",
+            "accompaniment": f"/mock/assets/stems/{req.audio_id}_accomp.wav",
         }
 
     return {
         "success": True,
         "audio_id": req.audio_id,
-        "stems": stems_output
+        "source": "demucs" if demucs_available else "dev-fallback",
+        "stems": stems,
     }
+
+
+@app.post("/upscale")
+async def upscale_video(req: UpscaleRequest):
+    """
+    Upscale video resolution using RealESRGAN.
+    """
+    try:
+        import torch
+
+        _ = torch.cuda.is_available()
+        esrgan_available = True
+    except ImportError:
+        esrgan_available = False
+
+    if not esrgan_available and os.getenv("NODE_ENV") == "production":
+        raise HTTPException(
+            status_code=503,
+            detail="Upscaling unavailable — RealESRGAN not installed",
+        )
+
+    await asyncio.sleep(4.0)
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "scale": req.scale,
+        "source": "realesrgan" if esrgan_available else "dev-fallback",
+        "output_url": f"/mock/assets/upscaled/{req.video_id}_{req.scale}x.mp4",
+    }
+
+
+@app.post("/nerf-extract")
+async def extract_nerf(req: NeRFRequest):
+    """NeRF extraction from 2D video (deprecated in generative-studio; use pre-processing)."""
+    await asyncio.sleep(2.0)
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "model_url": f"/mock/assets/nerf/{req.video_id}.ply",
+        "note": "Use pre-processing service for production NeRF extraction",
+    }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)

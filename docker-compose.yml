@@ -1,8 +1,7 @@
-
 services:
   db:
     image: postgres:15-alpine
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: lazynext
       POSTGRES_PASSWORD: password123
@@ -11,6 +10,14 @@ services:
       - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lazynext -d lazynext_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   web:
     build:
@@ -27,11 +34,19 @@ services:
       - PRE_PROCESSING_URL=http://pre-processing:8000
       - AI_AGENTS_URL=http://ai-agents:8002
     depends_on:
-      - db
-      - render-service
-      - generative-studio
-      - pre-processing
-      - ai-agents
+      db:
+        condition: service_healthy
+      render-service:
+        condition: service_started
+      generative-studio:
+        condition: service_started
+      pre-processing:
+        condition: service_started
+      ai-agents:
+        condition: service_started
+    networks:
+      - lazynext-network
+    restart: unless-stopped
 
   render-service:
     build:
@@ -41,6 +56,9 @@ services:
       - "8003:8003"
     environment:
       - NODE_ENV=production
+    networks:
+      - lazynext-network
+    restart: unless-stopped
 
   generative-studio:
     build:
@@ -50,6 +68,9 @@ services:
       - "8001:8001"
     environment:
       - PYTHONUNBUFFERED=1
+    networks:
+      - lazynext-network
+    restart: unless-stopped
 
   pre-processing:
     build:
@@ -59,6 +80,9 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+    networks:
+      - lazynext-network
+    restart: unless-stopped
 
   ai-agents:
     build:
@@ -68,6 +92,13 @@ services:
       - "8002:8002"
     environment:
       - NODE_ENV=production
+    networks:
+      - lazynext-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+
+networks:
+  lazynext-network:
+    driver: bridge
