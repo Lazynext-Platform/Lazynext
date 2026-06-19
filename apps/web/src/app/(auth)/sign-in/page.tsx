@@ -1,6 +1,9 @@
 import { AuthCard } from "@/components/auth/AuthCard";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { generateMetadata } from "@/seo/metadata";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth/server";
 
 export const metadata = generateMetadata({
 	title: "Sign In",
@@ -9,7 +12,15 @@ export const metadata = generateMetadata({
 	path: "/sign-in",
 });
 
-export default function SignInPage() {
+export default async function SignInPage() {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	if (session?.user) {
+		redirect("/dashboard");
+	}
+
 	return (
 		<AuthCard
 			title="Welcome back"
