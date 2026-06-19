@@ -11,7 +11,7 @@ export function NeuralCinemaOverlay({ isActive }: NeuralCinemaOverlayProps) {
 
 	return (
 		<>
-			<div className="absolute top-4 left-4 z-50 bg-black/80 backdrop-blur-md border border-cyan-500/50 rounded-lg p-3 w-64 shadow-[0_0_20px_rgba(6,182,212,0.3)] pointer-events-none">
+			<div className="absolute top-4 left-4 z-50 bg-background/80 backdrop-blur-md border border-cyan-500/50 rounded-lg p-3 w-64 shadow-[0_0_20px_rgba(6,182,212,0.3)] pointer-events-none">
 				<div className="flex items-center justify-between mb-2">
 					<span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">
 						Neural Cinema AI
@@ -20,22 +20,22 @@ export function NeuralCinemaOverlay({ isActive }: NeuralCinemaOverlayProps) {
 				</div>
 				<div className="space-y-2">
 					<div className="flex justify-between items-center text-xs">
-						<span className="text-zinc-400">Shot Type</span>
-						<span className="text-white font-medium">Medium Close-Up</span>
+						<span className="text-muted">Shot Type</span>
+						<span className="text-foreground font-medium">Medium Close-Up</span>
 					</div>
 					<div className="flex justify-between items-center text-xs">
-						<span className="text-zinc-400">Subject Focus</span>
-						<span className="text-white font-medium text-emerald-400">
+						<span className="text-muted">Subject Focus</span>
+						<span className="text-foreground font-medium text-emerald-400">
 							Locked (Center)
 						</span>
 					</div>
 					<div className="flex justify-between items-center text-xs">
-						<span className="text-zinc-400">Cinematic Score</span>
-						<span className="text-white font-medium text-yellow-400">
+						<span className="text-muted">Cinematic Score</span>
+						<span className="text-foreground font-medium text-yellow-400">
 							8.9 / 10
 						</span>
 					</div>
-					<div className="w-full h-1 bg-zinc-800 rounded overflow-hidden mt-1">
+					<div className="w-full h-1 bg-panel rounded overflow-hidden mt-1">
 						<div className="h-full bg-gradient-to-r from-yellow-500 to-emerald-500 w-[89%]" />
 					</div>
 				</div>

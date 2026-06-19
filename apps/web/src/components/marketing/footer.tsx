@@ -7,7 +7,7 @@ export function MarketingFooter() {
 		<footer className="border-t border-neutral-800 bg-neutral-950 py-12 mt-24">
 			<div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
 				<div className="col-span-1 md:col-span-2">
-					<Link href="/" className="flex items-center gap-2 mb-4 text-white">
+					<Link href="/" className="flex items-center gap-2 mb-4 text-foreground">
 						<Image
 							src="/logo.png"
 							width={20}
@@ -22,20 +22,20 @@ export function MarketingFooter() {
 						creators. Powered by Rust, WebAssembly, and AI.
 					</p>
 					<div className="flex items-center gap-4 text-neutral-400">
-						<Link href="#" className="hover:text-white transition-colors">
+						<Link href="#" className="hover:text-foreground transition-colors">
 							<Globe className="w-5 h-5" />
 						</Link>
-						<Link href="#" className="hover:text-white transition-colors">
+						<Link href="#" className="hover:text-foreground transition-colors">
 							<Code className="w-5 h-5" />
 						</Link>
-						<Link href="#" className="hover:text-white transition-colors">
+						<Link href="#" className="hover:text-foreground transition-colors">
 							<MessageCircle className="w-5 h-5" />
 						</Link>
 					</div>
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-white mb-4">Product</h3>
+					<h3 className="font-semibold text-foreground mb-4">Product</h3>
 					<ul className="space-y-3 text-sm text-neutral-400">
 						<li>
 							<Link
@@ -65,7 +65,7 @@ export function MarketingFooter() {
 				</div>
 
 				<div>
-					<h3 className="font-semibold text-white mb-4">Legal</h3>
+					<h3 className="font-semibold text-foreground mb-4">Legal</h3>
 					<ul className="space-y-3 text-sm text-neutral-400">
 						<li>
 							<Link

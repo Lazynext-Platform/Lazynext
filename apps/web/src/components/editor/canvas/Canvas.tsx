@@ -157,7 +157,7 @@ export const Canvas: React.FC<CanvasProps> = ({
 	return (
 		<div
 			ref={containerRef}
-			className="flex-1 bg-black flex items-center justify-center relative overflow-hidden select-none"
+			className="flex-1 bg-background flex items-center justify-center relative overflow-hidden select-none"
 			onWheel={handleWheel}
 			onMouseDown={handleMouseDown}
 			onMouseMove={handleMouseMove}
@@ -193,17 +193,17 @@ export const Canvas: React.FC<CanvasProps> = ({
 
 			{/* Bottom HUD: Timecode + Zoom */}
 			<div className="absolute bottom-3 right-3 flex items-center gap-3 z-20">
-				<span className="text-[10px] font-mono text-zinc-500 bg-black/60 px-2 py-1 rounded border border-zinc-800">
+				<span className="text-[10px] font-mono text-muted bg-background/60 px-2 py-1 rounded border border-border">
 					{mm}:{ss}:{ff}
 				</span>
-				<span className="text-[10px] font-mono text-zinc-500 bg-black/60 px-2 py-1 rounded border border-zinc-800">
+				<span className="text-[10px] font-mono text-muted bg-background/60 px-2 py-1 rounded border border-border">
 					{Math.round(zoom * 100)}%
 				</span>
 			</div>
 
 			{/* Resolution Badge */}
 			<div className="absolute top-3 left-3 z-20">
-				<span className="text-[9px] font-mono text-zinc-600 bg-black/60 px-2 py-0.5 rounded border border-zinc-800">
+				<span className="text-[9px] font-mono text-zinc-600 bg-background/60 px-2 py-0.5 rounded border border-border">
 					{width}×{height}
 				</span>
 			</div>

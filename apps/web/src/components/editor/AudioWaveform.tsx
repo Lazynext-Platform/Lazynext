@@ -69,7 +69,7 @@ export default function AudioWaveform({
 		<svg
 			width="100%"
 			height="100%"
-			className="absolute inset-0 pointer-events-none text-white/50"
+			className="absolute inset-0 pointer-events-none text-foreground/50"
 			preserveAspectRatio="none"
 		>
 			{lines}

@@ -45,10 +45,10 @@ export function BezierEditorModal({
 	};
 
 	return (
-		<div className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-			<div className="bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl p-6 w-[400px] flex flex-col relative overflow-hidden">
-				<div className="flex justify-between items-center mb-4 border-b border-zinc-800 pb-3">
-					<h3 className="text-zinc-200 font-medium text-sm flex items-center gap-2">
+		<div className="fixed inset-0 z-[200] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+			<div className="bg-background border border-border/50 rounded-xl shadow-2xl p-6 w-[400px] flex flex-col relative overflow-hidden">
+				<div className="flex justify-between items-center mb-4 border-b border-border pb-3">
+					<h3 className="text-foreground font-medium text-sm flex items-center gap-2">
 						<svg
 							className="w-4 h-4 text-indigo-400"
 							fill="none"
@@ -66,7 +66,7 @@ export function BezierEditorModal({
 					</h3>
 					<button
 						onClick={() => setBezierEditor(null)}
-						className="text-zinc-500 hover:text-white transition-colors"
+						className="text-muted hover:text-foreground transition-colors"
 					>
 						<svg
 							className="w-5 h-5"
@@ -84,7 +84,7 @@ export function BezierEditorModal({
 					</button>
 				</div>
 
-				<div className="relative w-full aspect-square bg-zinc-950 border border-zinc-800 rounded-lg mb-6 group overflow-hidden">
+				<div className="relative w-full aspect-square bg-background border border-border rounded-lg mb-6 group overflow-hidden">
 					<svg
 						className="w-full h-full absolute inset-0 pointer-events-none"
 						viewBox="0 0 100 100"
@@ -181,12 +181,12 @@ export function BezierEditorModal({
 				</div>
 
 				<div className="grid grid-cols-2 gap-4 mb-4">
-					<div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+					<div className="flex flex-col gap-2 p-3 bg-panel/50 rounded-lg border border-border/50">
 						<span className="text-xs text-indigo-400 font-semibold mb-1">
 							Point 1
 						</span>
 						<div className="flex items-center justify-between">
-							<span className="text-[10px] text-zinc-500 w-4">X</span>
+							<span className="text-[10px] text-muted w-4">X</span>
 							<input
 								type="range"
 								min="0"
@@ -210,12 +210,12 @@ export function BezierEditorModal({
 								}
 								className="flex-1 accent-indigo-500 mx-2 h-1"
 							/>
-							<span className="text-[10px] text-zinc-300 w-6">
+							<span className="text-[10px] text-foreground w-6">
 								{bezierEditor.curve[0].toFixed(2)}
 							</span>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-[10px] text-zinc-500 w-4">Y</span>
+							<span className="text-[10px] text-muted w-4">Y</span>
 							<input
 								type="range"
 								min="-0.5"
@@ -239,18 +239,18 @@ export function BezierEditorModal({
 								}
 								className="flex-1 accent-indigo-500 mx-2 h-1"
 							/>
-							<span className="text-[10px] text-zinc-300 w-6">
+							<span className="text-[10px] text-foreground w-6">
 								{bezierEditor.curve[1].toFixed(2)}
 							</span>
 						</div>
 					</div>
 
-					<div className="flex flex-col gap-2 p-3 bg-zinc-800/50 rounded-lg border border-zinc-700/50">
+					<div className="flex flex-col gap-2 p-3 bg-panel/50 rounded-lg border border-border/50">
 						<span className="text-xs text-pink-400 font-semibold mb-1">
 							Point 2
 						</span>
 						<div className="flex items-center justify-between">
-							<span className="text-[10px] text-zinc-500 w-4">X</span>
+							<span className="text-[10px] text-muted w-4">X</span>
 							<input
 								type="range"
 								min="0"
@@ -274,12 +274,12 @@ export function BezierEditorModal({
 								}
 								className="flex-1 accent-pink-500 mx-2 h-1"
 							/>
-							<span className="text-[10px] text-zinc-300 w-6">
+							<span className="text-[10px] text-foreground w-6">
 								{bezierEditor.curve[2].toFixed(2)}
 							</span>
 						</div>
 						<div className="flex items-center justify-between">
-							<span className="text-[10px] text-zinc-500 w-4">Y</span>
+							<span className="text-[10px] text-muted w-4">Y</span>
 							<input
 								type="range"
 								min="-0.5"
@@ -303,7 +303,7 @@ export function BezierEditorModal({
 								}
 								className="flex-1 accent-pink-500 mx-2 h-1"
 							/>
-							<span className="text-[10px] text-zinc-300 w-6">
+							<span className="text-[10px] text-foreground w-6">
 								{bezierEditor.curve[3].toFixed(2)}
 							</span>
 						</div>
@@ -311,7 +311,7 @@ export function BezierEditorModal({
 				</div>
 
 				<button
-					className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded transition-colors"
+					className="w-full bg-indigo-600 hover:bg-indigo-500 text-foreground font-medium py-2 rounded transition-colors"
 					onClick={handleSaveCurve}
 				>
 					Save Curve

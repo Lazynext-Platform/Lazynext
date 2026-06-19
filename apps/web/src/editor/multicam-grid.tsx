@@ -31,18 +31,18 @@ export function MulticamGrid() {
 	];
 
 	return (
-		<div className="grid grid-cols-2 gap-2 p-4 bg-gray-900 border border-gray-800 rounded">
+		<div className="grid grid-cols-2 gap-2 p-4 bg-background border border-gray-800 rounded">
 			{angles.map((label, idx) => (
 				<div
 					key={idx}
 					className={`relative w-full aspect-video flex items-center justify-center rounded border-2 transition-all ${
 						activeAngle === idx
 							? "border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]"
-							: "border-gray-700"
+							: "border-border"
 					}`}
 				>
-					<span className="text-gray-400 font-mono text-sm">{label}</span>
-					<div className="absolute top-2 left-2 bg-black bg-opacity-70 px-2 py-1 rounded text-xs text-white font-bold">
+					<span className="text-muted font-mono text-sm">{label}</span>
+					<div className="absolute top-2 left-2 bg-background bg-opacity-70 px-2 py-1 rounded text-xs text-foreground font-bold">
 						{idx + 1}
 					</div>
 					{activeAngle === idx && (

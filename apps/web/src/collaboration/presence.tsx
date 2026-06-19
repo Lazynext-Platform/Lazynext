@@ -37,7 +37,7 @@ export function MultiplayerPresence({
 						/>
 					</svg>
 					<span
-						className="ml-2 px-2 py-1 text-xs font-bold text-white rounded shadow-md"
+						className="ml-2 px-2 py-1 text-xs font-bold text-foreground rounded shadow-md"
 						style={{ backgroundColor: cursor.color }}
 					>
 						{cursor.userId}

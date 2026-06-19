@@ -46,7 +46,7 @@ export class EditorErrorBoundary extends Component<
 			if (this.props.fallback) return this.props.fallback;
 
 			return (
-				<div className="flex h-full w-full items-center justify-center bg-zinc-950 p-6">
+				<div className="flex h-full w-full items-center justify-center bg-background p-6">
 					<div className="flex flex-col items-center gap-4 rounded-xl border border-red-500/20 bg-red-500/5 p-6 text-center max-w-md">
 						<div className="rounded-full bg-red-500/10 p-2">
 							<svg
@@ -64,10 +64,10 @@ export class EditorErrorBoundary extends Component<
 							</svg>
 						</div>
 						<div>
-							<h3 className="text-sm font-semibold text-zinc-100">
+							<h3 className="text-sm font-semibold text-foreground">
 								{this.props.section} section crashed
 							</h3>
-							<p className="mt-1 text-xs text-zinc-400">
+							<p className="mt-1 text-xs text-muted">
 								{this.state.error?.message ?? "An unexpected error occurred."}
 							</p>
 						</div>

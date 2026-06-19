@@ -13,21 +13,21 @@ export function SpeedRamping({
 	}
 
 	return (
-		<div className="flex flex-col gap-4 mt-4 border-t border-zinc-800 pt-4">
-			<div className="bg-zinc-950 p-4 rounded-lg border border-zinc-800 shadow-inner">
+		<div className="flex flex-col gap-4 mt-4 border-t border-border pt-4">
+			<div className="bg-background p-4 rounded-lg border border-border shadow-inner">
 				<div className="flex items-center gap-2 mb-3">
 					<FastForward className="w-4 h-4 text-cyan-400" />
-					<h3 className="text-sm font-semibold text-zinc-200">
+					<h3 className="text-sm font-semibold text-foreground">
 						Speed & Retime
 					</h3>
 				</div>
 
 				<div className="mb-4">
 					// eslint-disable-next-line jsx-a11y/label-has-associated-control
-					<label className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-2 block">
+					<label className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
 						Interpolation Mode
 					</label>
-					<select className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-300 focus:outline-none focus:border-cyan-500">
+					<select className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus:border-cyan-500">
 						<option>Nearest Neighbor</option>
 						<option>Frame Blend</option>
 						<option>Optical Flow (Smooth)</option>
@@ -36,10 +36,10 @@ export function SpeedRamping({
 
 				<div>
 					// eslint-disable-next-line jsx-a11y/label-has-associated-control
-					<label className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-2 block">
+					<label className="text-[10px] font-medium text-muted uppercase tracking-wider mb-2 block">
 						Speed Ramp Curve
 					</label>
-					<div className="h-24 bg-zinc-900 border border-zinc-800 rounded relative overflow-hidden group cursor-crosshair">
+					<div className="h-24 bg-background border border-border rounded relative overflow-hidden group cursor-crosshair">
 						{/* Mock Curve Editor */}
 						<svg
 							className="w-full h-full"
@@ -77,7 +77,7 @@ export function SpeedRamping({
 						</svg>
 						<div className="absolute inset-0 bg-gradient-to-t from-cyan-900/20 to-transparent pointer-events-none"></div>
 					</div>
-					<div className="flex justify-between text-[9px] text-zinc-500 mt-1 font-mono">
+					<div className="flex justify-between text-[9px] text-muted mt-1 font-mono">
 						<span>0%</span>
 						<span>100%</span>
 						<span>200%</span>

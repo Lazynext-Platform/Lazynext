@@ -19,20 +19,20 @@ export function AvatarPrompt() {
 	};
 
 	return (
-		<div className="p-4 bg-gray-900 border border-purple-500 rounded flex flex-col gap-3 w-80 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-			<h3 className="text-white font-bold text-sm">🤖 AI Actor Studio</h3>
+		<div className="p-4 bg-background border border-purple-500 rounded flex flex-col gap-3 w-80 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+			<h3 className="text-foreground font-bold text-sm">🤖 AI Actor Studio</h3>
 
 			<textarea
 				value={script}
 				onChange={(e) => setScript(e.target.value)}
 				placeholder="Type the script for your AI avatar to read..."
-				className="w-full h-24 bg-gray-800 text-white p-2 rounded border border-gray-700 focus:border-purple-500 text-sm"
+				className="w-full h-24 bg-panel text-foreground p-2 rounded border border-border focus:border-purple-500 text-sm"
 			/>
 
 			<button
 				onClick={handleGenerate}
 				disabled={isGenerating || script.length === 0}
-				className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 px-4 rounded disabled:opacity-50 transition-colors"
+				className="w-full bg-purple-600 hover:bg-purple-500 text-foreground font-bold py-2 px-4 rounded disabled:opacity-50 transition-colors"
 			>
 				{isGenerating ? "Synthesizing..." : "Generate & Insert"}
 			</button>

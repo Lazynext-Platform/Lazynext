@@ -53,10 +53,10 @@ export function AudioMixer({
 	};
 
 	return (
-		<div className="flex bg-zinc-900 border border-zinc-800 rounded-lg overflow-x-auto overflow-y-hidden h-64 shadow-xl">
-			<div className="flex items-center justify-center p-2 border-r border-zinc-800 bg-zinc-950/50 min-w-[40px]">
+		<div className="flex bg-background border border-border rounded-lg overflow-x-auto overflow-y-hidden h-64 shadow-xl">
+			<div className="flex items-center justify-center p-2 border-r border-border bg-background/50 min-w-[40px]">
 				<span
-					className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest"
+					className="text-muted font-bold text-[10px] uppercase tracking-widest"
 					style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
 				>
 					Fairlight Mixer
@@ -68,15 +68,15 @@ export function AudioMixer({
 				{audioTracks.map((track: any, idx: number) => (
 					<div
 						key={track.id}
-						className="flex flex-col items-center min-w-[80px] bg-zinc-950 rounded-lg p-2 border border-zinc-800"
+						className="flex flex-col items-center min-w-[80px] bg-background rounded-lg p-2 border border-border"
 					>
-						<span className="text-[10px] text-zinc-300 font-mono truncate w-full text-center">
+						<span className="text-[10px] text-foreground font-mono truncate w-full text-center">
 							{track.name || `A${idx + 1}`}
 						</span>
 
 						<div className="flex-1 flex gap-2 my-2 relative">
 							{/* Meter */}
-							<div className="w-2 h-full bg-black rounded-full overflow-hidden flex flex-col justify-end">
+							<div className="w-2 h-full bg-background rounded-full overflow-hidden flex flex-col justify-end">
 								<div
 									className="w-full transition-all duration-75"
 									style={{
@@ -92,7 +92,7 @@ export function AudioMixer({
 							</div>
 
 							{/* Fader Track */}
-							<div className="w-4 h-full bg-black rounded-full relative group">
+							<div className="w-4 h-full bg-background rounded-full relative group">
 								<input
 									type="range"
 									min="0"
@@ -115,7 +115,7 @@ export function AudioMixer({
 						<div className="flex gap-1 w-full justify-center">
 							<button
 								onClick={() => handleMuteToggle(track.id)}
-								className={`w-6 h-6 rounded flex items-center justify-center ${track.isMuted ? "bg-red-900/50 text-red-400 border border-red-700" : "bg-zinc-800 text-zinc-400 hover:text-white border border-transparent hover:border-zinc-700"}`}
+								className={`w-6 h-6 rounded flex items-center justify-center ${track.isMuted ? "bg-red-900/50 text-red-400 border border-red-700" : "bg-panel text-muted hover:text-foreground border border-transparent hover:border-border"}`}
 							>
 								{track.isMuted ? (
 									<VolumeX className="w-3 h-3" />
@@ -124,7 +124,7 @@ export function AudioMixer({
 								)}
 							</button>
 						</div>
-						<span className="text-[9px] font-mono text-zinc-500 mt-1">
+						<span className="text-[9px] font-mono text-muted mt-1">
 							{track.volume ? track.volume.toFixed(2) : "1.00"}
 						</span>
 					</div>
@@ -132,14 +132,14 @@ export function AudioMixer({
 			</div>
 
 			{/* Master Fader */}
-			<div className="flex flex-col items-center min-w-[90px] bg-zinc-950 p-2 border-l border-zinc-800">
+			<div className="flex flex-col items-center min-w-[90px] bg-background p-2 border-l border-border">
 				<span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider mb-2">
 					Master
 				</span>
 				<div className="flex-1 flex gap-2 mb-2 relative">
 					{/* L/R Meters */}
 					<div className="flex gap-[1px]">
-						<div className="w-2 h-full bg-black rounded-sm overflow-hidden flex flex-col justify-end">
+						<div className="w-2 h-full bg-background rounded-sm overflow-hidden flex flex-col justify-end">
 							<div
 								className="w-full transition-all duration-75"
 								style={{
@@ -153,7 +153,7 @@ export function AudioMixer({
 								}}
 							/>
 						</div>
-						<div className="w-2 h-full bg-black rounded-sm overflow-hidden flex flex-col justify-end">
+						<div className="w-2 h-full bg-background rounded-sm overflow-hidden flex flex-col justify-end">
 							<div
 								className="w-full transition-all duration-75"
 								style={{
@@ -169,7 +169,7 @@ export function AudioMixer({
 						</div>
 					</div>
 					{/* Master Fader Track */}
-					<div className="w-4 h-full bg-black rounded-full relative group">
+					<div className="w-4 h-full bg-background rounded-full relative group">
 						<input
 							type="range"
 							min="0"
@@ -186,7 +186,7 @@ export function AudioMixer({
 					</div>
 				</div>
 				<div className="flex gap-1 w-full justify-center">
-					<button className="w-full h-6 rounded flex items-center justify-center bg-zinc-800 text-zinc-400 hover:text-white border border-transparent hover:border-zinc-700">
+					<button className="w-full h-6 rounded flex items-center justify-center bg-panel text-muted hover:text-foreground border border-transparent hover:border-border">
 						<Sliders className="w-3 h-3 mr-1" />{" "}
 						<span className="text-[9px]">EQ</span>
 					</button>

@@ -38,15 +38,15 @@ export function WaveformScope() {
 	}, []);
 
 	return (
-		<div className="flex flex-col bg-gray-900 border border-gray-700 rounded p-2 m-2">
-			<span className="text-xs text-gray-400 font-mono mb-2 uppercase tracking-widest">
+		<div className="flex flex-col bg-background border border-border rounded p-2 m-2">
+			<span className="text-xs text-muted font-mono mb-2 uppercase tracking-widest">
 				Waveform Monitor
 			</span>
 			<canvas
 				ref={canvasRef}
 				width={512}
 				height={200}
-				className="bg-black w-full h-[150px] rounded"
+				className="bg-background w-full h-[150px] rounded"
 			/>
 		</div>
 	);

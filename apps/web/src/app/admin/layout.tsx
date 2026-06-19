@@ -29,7 +29,7 @@ export default async function AdminLayout({
 	}
 
 	return (
-		<div className="min-h-screen bg-neutral-950 text-white">
+		<div className="min-h-screen bg-neutral-950 text-foreground">
 			<nav className="border-b border-neutral-800 bg-neutral-900/50 p-4 sticky top-0 z-50 backdrop-blur-xl">
 				<h1 className="text-xl font-bold text-cyan-400">
 					Lazynext Command Center

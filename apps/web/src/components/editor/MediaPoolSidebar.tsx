@@ -84,7 +84,7 @@ export function MediaPoolSidebar({
 }: MediaPoolSidebarProps) {
 	return (
 		<aside
-			className={`${mediaPoolPos.floating ? "fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-zinc-700 bg-zinc-900/95 backdrop-blur overflow-hidden flex flex-col" : "border-r border-zinc-700 bg-zinc-900 flex flex-col h-full shrink-0"} transition-shadow`}
+			className={`${mediaPoolPos.floating ? "fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-border bg-background/95 backdrop-blur overflow-hidden flex flex-col" : "border-r border-border bg-background flex flex-col h-full shrink-0"} transition-shadow`}
 			style={
 				mediaPoolPos.floating
 					? {
@@ -100,7 +100,7 @@ export function MediaPoolSidebar({
 			{mediaPoolPos.floating && (
 				// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 				<div
-					className="h-8 bg-zinc-800 flex items-center justify-between px-3 cursor-move border-b border-zinc-700 select-none"
+					className="h-8 bg-panel flex items-center justify-between px-3 cursor-move border-b border-border select-none"
 					onMouseDown={(e: React.MouseEvent) => {
 						const startX = e.clientX - mediaPoolPos.x;
 						const startY = e.clientY - mediaPoolPos.y;
@@ -121,7 +121,7 @@ export function MediaPoolSidebar({
 					}}
 				>
 					<div className="flex items-center gap-2">
-						<span className="text-[10px] text-zinc-400 font-medium tracking-wide">
+						<span className="text-[10px] text-muted font-medium tracking-wide">
 							MEDIA POOL
 						</span>
 						<label
@@ -132,9 +132,9 @@ export function MediaPoolSidebar({
 								type="checkbox"
 								checked={splitAudioVideoOnImport}
 								onChange={(e) => setSplitAudioVideoOnImport(e.target.checked)}
-								className="w-3 h-3 bg-zinc-800 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
+								className="w-3 h-3 bg-panel border-border rounded accent-indigo-500 cursor-pointer"
 							/>
-							<span className="text-[10px] text-zinc-400 uppercase">
+							<span className="text-[10px] text-muted uppercase">
 								Split A/V
 							</span>
 						</label>
@@ -143,7 +143,7 @@ export function MediaPoolSidebar({
 						onClick={() =>
 							setMediaPoolPos((p: any) => ({ ...p, floating: false }))
 						}
-						className="text-zinc-400 hover:text-white p-0.5 rounded hover:bg-zinc-700"
+						className="text-muted hover:text-foreground p-0.5 rounded hover:bg-glass"
 					>
 						<svg
 							className="w-3 h-3"
@@ -162,53 +162,53 @@ export function MediaPoolSidebar({
 				</div>
 			)}
 
-			<div className="flex border-b border-zinc-700 items-center">
+			<div className="flex border-b border-border items-center">
 				<button
-					className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === "media" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === "media" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("media")}
 				>
 					MEDIA
 				</button>
 				<button
-					className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === "titles" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-xs font-semibold tracking-wider transition-colors ${sidebarTab === "titles" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("titles")}
 				>
 					TITLES
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "effects" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "effects" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("effects")}
 				>
 					FX
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "transitions" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "transitions" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("transitions")}
 				>
 					TRANS
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "history" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "history" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("history")}
 					title="Undo History"
 				>
 					HIST
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "transcript" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "transcript" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("transcript")}
 					title="AI Transcript"
 				>
 					TEXT
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "index" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "index" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("index")}
 				>
 					INDEX
 				</button>
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "fusion" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "fusion" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("fusion")}
 					title="Node Compositing"
 				>
@@ -216,7 +216,7 @@ export function MediaPoolSidebar({
 				</button>
 				{/* Cloud Asset Library (Phase 196) */}
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "stock" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "stock" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("stock")}
 					title="Cloud Asset Library"
 				>
@@ -224,7 +224,7 @@ export function MediaPoolSidebar({
 				</button>
 				{/* Phase 24: Extension API / Plugins */}
 				<button
-					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "plugins" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-zinc-400 hover:text-zinc-300"}`}
+					className={`flex-1 py-3 text-[10px] font-semibold tracking-wider transition-colors ${sidebarTab === "plugins" ? "text-indigo-400 border-b-2 border-indigo-500" : "text-muted hover:text-foreground"}`}
 					onClick={() => setSidebarTab("plugins")}
 					title="Extension API & Plugins"
 				>
@@ -237,7 +237,7 @@ export function MediaPoolSidebar({
 				<div className="px-4 pt-4 pb-2 flex flex-col gap-3 shrink-0">
 					<div className="relative">
 						<svg
-							className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2"
+							className="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -254,22 +254,22 @@ export function MediaPoolSidebar({
 							placeholder="Search Media..."
 							value={mediaSearchQuery}
 							onChange={(e) => setMediaSearchQuery(e.target.value)}
-							className="w-full bg-zinc-950 border border-zinc-700 rounded pl-9 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus-ring focus:border-indigo-500 transition-colors"
+							className="w-full bg-background border border-border rounded pl-9 pr-3 py-1.5 text-xs text-foreground placeholder-zinc-500 focus:outline-none focus-ring focus:border-indigo-500 transition-colors"
 						/>
 					</div>
-					<div className="flex gap-1 bg-zinc-950 p-1 rounded border border-zinc-700 overflow-x-auto custom-scrollbar">
+					<div className="flex gap-1 bg-background p-1 rounded border border-border overflow-x-auto custom-scrollbar">
 						{["all", "video", "audio", "image"].map((f) => (
 							<button
 								key={f}
 								onClick={() => setMediaFilter(f as any)}
-								className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${mediaFilter === f ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-300"}`}
+								className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${mediaFilter === f ? "bg-panel text-foreground" : "text-muted hover:text-foreground"}`}
 							>
 								{f}
 							</button>
 						))}
 						<button
 							onClick={() => setIsEmotionHeatmapMode(!isEmotionHeatmapMode)}
-							className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${isEmotionHeatmapMode ? "bg-purple-600 text-white" : "text-zinc-400 hover:text-zinc-300"}`}
+							className={`flex-1 px-2 py-1 text-[10px] uppercase font-bold rounded transition-colors ${isEmotionHeatmapMode ? "bg-purple-600 text-foreground" : "text-muted hover:text-foreground"}`}
 						>
 							HEATMAP
 						</button>
@@ -277,7 +277,7 @@ export function MediaPoolSidebar({
 
 					{/* Smart Bins (Phase 182) */}
 					<div className="flex gap-1 overflow-x-auto custom-scrollbar mt-1">
-						<span className="text-[10px] text-zinc-400 font-bold uppercase py-1 mr-1 shrink-0">
+						<span className="text-[10px] text-muted font-bold uppercase py-1 mr-1 shrink-0">
 							Smart Bins:
 						</span>
 						{[
@@ -297,7 +297,7 @@ export function MediaPoolSidebar({
 					</div>
 
 					<button
-						className="mt-1 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-300 bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 p-1.5 rounded uppercase tracking-wider transition-colors"
+						className="mt-1 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-foreground bg-panel/80 hover:bg-glass border border-border p-1.5 rounded uppercase tracking-wider transition-colors"
 						onClick={handleCreateMulticam}
 						title="Create a Multicam Sequence from selected clips"
 					>
@@ -305,21 +305,21 @@ export function MediaPoolSidebar({
 					</button>
 
 					<button
-						className="mt-2 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-300 bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 p-1.5 rounded uppercase tracking-wider transition-colors"
+						className="mt-2 w-full flex items-center justify-center gap-2 text-[10px] font-bold text-foreground bg-panel/80 hover:bg-glass border border-border p-1.5 rounded uppercase tracking-wider transition-colors"
 						onClick={handleSyncAudioVideo}
 						title="Automatically sync audio and video clips based on waveform analysis"
 					>
 						〰️ Auto-Sync Audio by Waveform
 					</button>
 
-					<div className="mt-4 pt-3 border-t border-zinc-700/50">
-						<label className="text-[10px] text-zinc-400 font-bold uppercase block mb-1">
+					<div className="mt-4 pt-3 border-t border-border/50">
+						<label className="text-[10px] text-muted font-bold uppercase block mb-1">
 							🤖 Generative AI B-Roll (Sora/Runway)
 						</label>
 						<div className="flex flex-col gap-2">
 							<textarea
 								placeholder="E.g., Cinematic drone shot of a cyberpunk city at night, neon lights reflecting on wet streets..."
-								className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 min-h-[60px] resize-none"
+								className="w-full bg-background border border-border rounded p-2 text-xs text-foreground placeholder-zinc-600 focus:outline-none focus:border-indigo-500 min-h-[60px] resize-none"
 								onKeyDown={(e) => {
 									if (e.key === "Enter" && !e.shiftKey) {
 										e.preventDefault();
@@ -349,7 +349,7 @@ export function MediaPoolSidebar({
 								}}
 							/>
 							<button
-								className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition-all shadow-md"
+								className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-foreground text-[10px] font-bold py-1.5 rounded uppercase tracking-wider transition-all shadow-md"
 								onClick={(e) => {
 									const textarea = e.currentTarget
 										.previousElementSibling as HTMLTextAreaElement;
@@ -392,7 +392,7 @@ export function MediaPoolSidebar({
 					<>
 						{/* Phase 21: Multi-Cam Generation */}
 						<button
-							className="w-full mb-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-300 text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors"
+							className="w-full mb-2 bg-panel hover:bg-glass border border-zinc-600 text-foreground text-[10px] font-bold py-1.5 rounded flex items-center justify-center gap-1.5 transition-colors"
 							onClick={() => {
 								const vids = assets.filter((a: any) => a.type === "video");
 								if (vids.length < 2) {
@@ -453,10 +453,10 @@ export function MediaPoolSidebar({
 									key={asset.id}
 									draggable
 									onDragStart={(e) => handleDragStart(e, asset)}
-									className="group relative flex flex-col p-2 bg-zinc-950/50 rounded-lg border border-zinc-700/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-zinc-900 transition-all shadow-sm"
+									className="group relative flex flex-col p-2 bg-background/50 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-background transition-all shadow-sm"
 								>
 									{asset.type === "video" || asset.type === "image" ? (
-										<div className="w-full aspect-video bg-black rounded overflow-hidden mb-2 border border-zinc-700/50 relative">
+										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-border/50 relative">
 											{asset.thumbnail ? (
 												<img
 													src={asset.thumbnail}
@@ -482,10 +482,10 @@ export function MediaPoolSidebar({
 													}}
 												/>
 											)}
-											<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+											<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/20">
 												{asset.type === "video" && (
 													<svg
-														className="w-6 h-6 text-white drop-shadow-md"
+														className="w-6 h-6 text-foreground drop-shadow-md"
 														fill="currentColor"
 														viewBox="0 0 20 20"
 													>
@@ -495,9 +495,9 @@ export function MediaPoolSidebar({
 											</div>
 										</div>
 									) : asset.type === "audio" ? (
-										<div className="w-full h-10 bg-zinc-900 rounded mb-2 border border-zinc-700/50 flex items-center justify-center relative overflow-hidden">
+										<div className="w-full h-10 bg-background rounded mb-2 border border-border/50 flex items-center justify-center relative overflow-hidden">
 											<svg
-												className="w-5 h-5 text-zinc-400 absolute left-2"
+												className="w-5 h-5 text-muted absolute left-2"
 												fill="none"
 												viewBox="0 0 24 24"
 												stroke="currentColor"
@@ -528,10 +528,10 @@ export function MediaPoolSidebar({
 											</div>
 										</div>
 									) : asset.type === "multicam" ? (
-										<div className="w-full aspect-video bg-zinc-900 rounded overflow-hidden mb-2 border border-indigo-500/50 relative flex items-center justify-center p-1 gap-1">
-											<div className="flex-1 h-full bg-zinc-800 rounded"></div>
-											<div className="flex-1 h-full bg-zinc-800 rounded"></div>
-											<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-indigo-500/50 relative flex items-center justify-center p-1 gap-1">
+											<div className="flex-1 h-full bg-panel rounded"></div>
+											<div className="flex-1 h-full bg-panel rounded"></div>
+											<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-background/40">
 												<svg
 													className="w-6 h-6 text-indigo-400 drop-shadow-md"
 													fill="none"
@@ -551,7 +551,7 @@ export function MediaPoolSidebar({
 
 									<div className="flex items-center justify-between w-full px-1">
 										<span
-											className="truncate text-xs font-medium text-zinc-300 group-hover:text-white transition-colors flex-1 pr-2"
+											className="truncate text-xs font-medium text-foreground group-hover:text-foreground transition-colors flex-1 pr-2"
 											title={asset.name}
 										>
 											{asset.name}
@@ -559,13 +559,13 @@ export function MediaPoolSidebar({
 										{asset.type === "video" && (
 											<button
 												onClick={() => handleSceneCutDetection()}
-												className="opacity-0 group-hover:opacity-100 mr-1 text-[10px] bg-zinc-700 hover:bg-indigo-600 px-1 rounded transition-all"
+												className="opacity-0 group-hover:opacity-100 mr-1 text-[10px] bg-glass hover:bg-indigo-600 px-1 rounded transition-all"
 												title="Scene Cut Detection"
 											>
 												✂️
 											</button>
 										)}
-										<span className="text-[10px] text-zinc-400 font-mono tracking-wider bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50 shrink-0">
+										<span className="text-[10px] text-muted font-mono tracking-wider bg-panel/80 px-1.5 py-0.5 rounded border border-border/50 shrink-0">
 											{asset.duration_frames}f
 										</span>
 									</div>
@@ -578,7 +578,7 @@ export function MediaPoolSidebar({
 					<div className="col-span-full mb-2 flex gap-2">
 						<button
 							onClick={handleAutoSubtitleTrack}
-							className="flex-1 bg-amber-600/80 hover:bg-amber-500 text-white text-xs font-medium py-2 rounded border border-amber-500 transition-colors flex items-center justify-center gap-2"
+							className="flex-1 bg-amber-600/80 hover:bg-amber-500 text-foreground text-xs font-medium py-2 rounded border border-amber-500 transition-colors flex items-center justify-center gap-2"
 						>
 							🎙️ Auto-Generate Subtitles (AI)
 						</button>
@@ -642,15 +642,15 @@ export function MediaPoolSidebar({
 								);
 								e.dataTransfer.effectAllowed = "copy";
 							}}
-							className="p-4 bg-zinc-950/50 rounded-lg border border-zinc-700/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-zinc-900 transition-all shadow-sm flex flex-col items-center justify-center min-h-20"
+							className="p-4 bg-background/50 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-background transition-all shadow-sm flex flex-col items-center justify-center min-h-20"
 						>
 							<span
-								className="text-xl font-bold text-white mb-2"
+								className="text-xl font-bold text-foreground mb-2"
 								style={{ fontFamily: preset.font_family, color: preset.color }}
 							>
 								T
 							</span>
-							<span className="text-xs font-medium text-zinc-400">
+							<span className="text-xs font-medium text-muted">
 								{preset.name}
 							</span>
 						</div>
@@ -693,10 +693,10 @@ export function MediaPoolSidebar({
 								);
 								e.dataTransfer.effectAllowed = "copy";
 							}}
-							className="p-4 bg-zinc-950/50 rounded-lg border border-zinc-700/50 cursor-grab active:cursor-grabbing hover:border-purple-500/50 hover:bg-zinc-900 transition-all shadow-sm flex flex-col items-center justify-center min-h-20"
+							className="p-4 bg-background/50 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-purple-500/50 hover:bg-background transition-all shadow-sm flex flex-col items-center justify-center min-h-20"
 						>
 							<span className="text-2xl mb-2">{preset.icon}</span>
-							<span className="text-xs font-medium text-zinc-400">
+							<span className="text-xs font-medium text-muted">
 								{preset.name}
 							</span>
 						</div>
@@ -863,7 +863,7 @@ export function MediaPoolSidebar({
 							},
 						].map((group, gi) => (
 							<div key={gi} className={gi > 0 ? "mt-3" : ""}>
-								<h4 className="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold mb-2 px-1">
+								<h4 className="text-[10px] text-muted uppercase tracking-widest font-semibold mb-2 px-1">
 									{group.category}
 								</h4>
 								<div className="grid grid-cols-2 gap-1.5">
@@ -882,7 +882,7 @@ export function MediaPoolSidebar({
 												);
 												e.dataTransfer.effectAllowed = "copy";
 											}}
-											className="group/card relative bg-zinc-950/80 rounded-lg border border-zinc-700/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-zinc-900 transition-all shadow-sm overflow-hidden"
+											className="group/card relative bg-background/80 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-indigo-500/50 hover:bg-background transition-all shadow-sm overflow-hidden"
 										>
 											{/* Mini SVG transition preview */}
 											<div className="h-12 relative overflow-hidden">
@@ -959,10 +959,10 @@ export function MediaPoolSidebar({
 												</svg>
 											</div>
 											<div className="px-2 py-1.5 flex items-center justify-between">
-												<span className="text-[10px] font-medium text-zinc-400 group-hover/card:text-zinc-200 truncate transition-colors">
+												<span className="text-[10px] font-medium text-muted group-hover/card:text-foreground truncate transition-colors">
 													{item.name}
 												</span>
-												<span className="text-[8px] text-zinc-400 font-mono">
+												<span className="text-[8px] text-muted font-mono">
 													{item.duration}f
 												</span>
 											</div>
@@ -974,9 +974,9 @@ export function MediaPoolSidebar({
 					</>
 				)}
 				{sidebarTab === "transcript" && (
-					<div className="flex flex-col h-full bg-zinc-950">
-						<div className="px-3 py-2 border-b border-zinc-700 flex items-center justify-between sticky top-0 bg-zinc-950 z-10">
-							<span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+					<div className="flex flex-col h-full bg-background">
+						<div className="px-3 py-2 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
+							<span className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
 								<svg
 									className="w-3 h-3 text-indigo-400"
 									fill="none"
@@ -994,20 +994,20 @@ export function MediaPoolSidebar({
 							</span>
 							<div className="flex gap-1">
 								<button
-									className="flex-1 flex items-center justify-center gap-1 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-300 transition-colors border border-zinc-700"
+									className="flex-1 flex items-center justify-center gap-1 py-1 bg-panel hover:bg-glass rounded text-foreground transition-colors border border-border"
 									onClick={handleDubVoiceTrack}
 								>
 									Dub to ES
 								</button>
 								<button
-									className="flex items-center justify-center gap-1 py-1 px-3 bg-fuchsia-600 hover:bg-fuchsia-500 rounded text-white transition-colors shadow-sm"
+									className="flex items-center justify-center gap-1 py-1 px-3 bg-fuchsia-600 hover:bg-fuchsia-500 rounded text-foreground transition-colors shadow-sm"
 									onClick={handleMorphLips}
 									title="Morph Lips to Dubbed Audio"
 								>
 									👄 Lip-Sync
 								</button>
 								<button
-									className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded transition-colors flex items-center gap-1"
+									className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-foreground px-2 py-1 rounded transition-colors flex items-center gap-1"
 									onClick={handleTranscribeAudio}
 								>
 									<svg
@@ -1028,29 +1028,29 @@ export function MediaPoolSidebar({
 							</div>
 						</div>
 						<div className="flex-1 overflow-y-auto custom-scrollbar p-3">
-							<p className="text-xs text-zinc-400 leading-loose">
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+							<p className="text-xs text-muted leading-loose">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									So
 								</span>
 
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									today
 								</span>
 
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									we're
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									going
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									to
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									talk
 								</span>
 
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									about
 								</span>
 
@@ -1061,23 +1061,23 @@ export function MediaPoolSidebar({
 								>
 									um
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									the
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									new
 								</span>
-								<span className="hover:bg-zinc-800 cursor-pointer rounded px-1 transition-colors">
+								<span className="hover:bg-panel cursor-pointer rounded px-1 transition-colors">
 									features.
 								</span>
 							</p>
-							<div className="mt-4 p-2 bg-zinc-900 border border-zinc-700 rounded flex flex-col gap-1">
-								<span className="text-[10px] text-zinc-400 font-semibold uppercase">
+							<div className="mt-4 p-2 bg-background border border-border rounded flex flex-col gap-1">
+								<span className="text-[10px] text-muted font-semibold uppercase">
 									Instructions
 								</span>
-								<span className="text-[10px] text-zinc-400">
+								<span className="text-[10px] text-muted">
 									Click a word to jump playhead. Press{" "}
-									<kbd className="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">
+									<kbd className="bg-panel px-1 rounded text-foreground font-mono">
 										Delete
 									</kbd>{" "}
 									to ripple-cut.
@@ -1088,9 +1088,9 @@ export function MediaPoolSidebar({
 				)}
 
 				{sidebarTab === "fusion" && (
-					<div className="flex flex-col h-full bg-zinc-950">
-						<div className="px-3 py-2 border-b border-zinc-700 flex items-center justify-between sticky top-0 bg-zinc-950 z-10">
-							<span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+					<div className="flex flex-col h-full bg-background">
+						<div className="px-3 py-2 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
+							<span className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
 								<svg
 									className="w-3 h-3 text-indigo-400"
 									fill="none"
@@ -1114,7 +1114,7 @@ export function MediaPoolSidebar({
 									🐛 Debugger
 								</button>
 								<button
-									className="text-[10px] bg-zinc-800 hover:bg-indigo-600 text-white px-2 py-1 rounded transition-colors"
+									className="text-[10px] bg-panel hover:bg-indigo-600 text-foreground px-2 py-1 rounded transition-colors"
 									onClick={handleAddNodeToGraph}
 								>
 									+ Node
@@ -1126,11 +1126,11 @@ export function MediaPoolSidebar({
 								{Array.from({ length: 36 }).map((_, i) => (
 									<div
 										key={i}
-										className="border-r border-b border-zinc-700"
+										className="border-r border-b border-border"
 									></div>
 								))}
 							</div>
-							<div className="absolute top-1/4 left-4 p-2 bg-zinc-900 border border-zinc-700 rounded shadow-lg text-[10px] text-zinc-300 font-semibold cursor-move hover:border-indigo-500 transition-colors">
+							<div className="absolute top-1/4 left-4 p-2 bg-background border border-border rounded shadow-lg text-[10px] text-foreground font-semibold cursor-move hover:border-indigo-500 transition-colors">
 								MediaIn1
 								<div className="absolute -right-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-500 rounded-full" />
 							</div>
@@ -1148,12 +1148,12 @@ export function MediaPoolSidebar({
 									fill="none"
 								/>
 							</svg>
-							<div className="absolute top-1/2 left-32 p-2 bg-zinc-900 border border-zinc-700 rounded shadow-lg text-[10px] text-zinc-300 font-semibold cursor-move hover:border-indigo-500 transition-colors">
+							<div className="absolute top-1/2 left-32 p-2 bg-background border border-border rounded shadow-lg text-[10px] text-foreground font-semibold cursor-move hover:border-indigo-500 transition-colors">
 								<div className="absolute -left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-yellow-500 rounded-full" />
 								Merge1
 								<div className="absolute -right-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full" />
 							</div>
-							<div className="absolute top-3/4 left-60 p-2 bg-zinc-900 border border-zinc-700 rounded shadow-lg text-[10px] text-zinc-300 font-semibold cursor-move hover:border-indigo-500 transition-colors">
+							<div className="absolute top-3/4 left-60 p-2 bg-background border border-border rounded shadow-lg text-[10px] text-foreground font-semibold cursor-move hover:border-indigo-500 transition-colors">
 								<div className="absolute -left-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-500 rounded-full" />
 								MediaOut1
 							</div>
@@ -1162,8 +1162,8 @@ export function MediaPoolSidebar({
 				)}
 
 				{sidebarTab === "plugins" && (
-					<div className="flex flex-col h-full bg-zinc-950 p-4 overflow-y-auto custom-scrollbar">
-						<h3 className="text-sm font-bold text-zinc-200 mb-2 flex items-center gap-2">
+					<div className="flex flex-col h-full bg-background p-4 overflow-y-auto custom-scrollbar">
+						<h3 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
 							<svg
 								className="w-4 h-4 text-indigo-400"
 								fill="none"
@@ -1179,7 +1179,7 @@ export function MediaPoolSidebar({
 							</svg>
 							Plugin Manager
 						</h3>
-						<p className="text-xs text-zinc-500 mb-4">
+						<p className="text-xs text-muted mb-4">
 							Manage 3rd-party extensions and dockable panel scripts (CEP
 							Parity).
 						</p>
@@ -1230,14 +1230,14 @@ export function MediaPoolSidebar({
 							{installedPlugins.map((plugin: any) => (
 								<div
 									key={plugin.id}
-									className="bg-zinc-900 border border-zinc-800 rounded p-3 flex flex-col gap-2"
+									className="bg-background border border-border rounded p-3 flex flex-col gap-2"
 								>
 									<div className="flex items-start justify-between">
 										<div>
-											<h4 className="text-xs font-bold text-zinc-200">
+											<h4 className="text-xs font-bold text-foreground">
 												{plugin.name}
 											</h4>
-											<span className="text-[10px] text-zinc-500">
+											<span className="text-[10px] text-muted">
 												v{plugin.version} • by {plugin.author}
 											</span>
 										</div>
@@ -1258,7 +1258,7 @@ export function MediaPoolSidebar({
 													}}
 												/>
 												<div
-													className={`block w-8 h-5 rounded-full transition-colors ${plugin.enabled ? "bg-indigo-500" : "bg-zinc-700"}`}
+													className={`block w-8 h-5 rounded-full transition-colors ${plugin.enabled ? "bg-indigo-500" : "bg-glass"}`}
 												></div>
 												<div
 													className={`dot absolute left-1 top-1 bg-white w-3 h-3 rounded-full transition-transform ${plugin.enabled ? "transform translate-x-3" : ""}`}
@@ -1273,9 +1273,9 @@ export function MediaPoolSidebar({
 				)}
 
 				{sidebarTab === "index" && (
-					<div className="flex flex-col h-full bg-zinc-950">
-						<div className="px-3 py-2 border-b border-zinc-700 flex items-center justify-between sticky top-0 bg-zinc-950 z-10">
-							<span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+					<div className="flex flex-col h-full bg-background">
+						<div className="px-3 py-2 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
+							<span className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
 								<svg
 									className="w-3 h-3 text-indigo-400"
 									fill="none"
@@ -1292,7 +1292,7 @@ export function MediaPoolSidebar({
 								Edit Index
 							</span>
 
-							<span className="text-[10px] text-zinc-400 font-mono">
+							<span className="text-[10px] text-muted font-mono">
 								{markers.length +
 									(projectData.tracks?.reduce(
 										(acc: number, t: any) =>
@@ -1371,7 +1371,7 @@ export function MediaPoolSidebar({
 													d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
 												/>
 											</svg>
-											<p className="text-[10px] text-zinc-400">
+											<p className="text-[10px] text-muted">
 												No markers or notes found.
 											</p>
 										</div>
@@ -1380,7 +1380,7 @@ export function MediaPoolSidebar({
 								return events.map((ev, i) => (
 									<div
 										key={`${ev.id}-${i}`}
-										className="group flex flex-col p-2 bg-zinc-900/50 border border-zinc-700/80 hover:bg-zinc-800 hover:border-zinc-700 rounded cursor-pointer transition-colors"
+										className="group flex flex-col p-2 bg-background/50 border border-border/80 hover:bg-panel hover:border-border rounded cursor-pointer transition-colors"
 										onClick={() => setFrame(ev.frame)}
 									>
 										<div className="flex items-center gap-2 mb-1">
@@ -1388,18 +1388,18 @@ export function MediaPoolSidebar({
 												className="w-2 h-2 rounded-full shadow-[0_0_5px_rgba(0,0,0,0.5)]"
 												style={{ backgroundColor: ev.color }}
 											/>
-											<span className="text-[10px] font-bold text-zinc-300 font-mono tracking-wider">
+											<span className="text-[10px] font-bold text-foreground font-mono tracking-wider">
 												@{ev.frame}f
 											</span>
-											<span className="text-[10px] text-zinc-400 uppercase ml-auto">
+											<span className="text-[10px] text-muted uppercase ml-auto">
 												{ev.type.replace("_", " ")}
 											</span>
 										</div>
-										<p className="text-xs text-zinc-400 leading-relaxed truncate">
+										<p className="text-xs text-muted leading-relaxed truncate">
 											{ev.icon} {ev.label}
 										</p>
 										{ev.clipName && (
-											<span className="text-[8px] text-zinc-400 mt-1 truncate block">
+											<span className="text-[8px] text-muted mt-1 truncate block">
 												Clip: {ev.clipName}
 											</span>
 										)}
@@ -1411,8 +1411,8 @@ export function MediaPoolSidebar({
 				)}
 
 				{sidebarTab === "history" && (
-					<div className="flex flex-col h-full bg-zinc-950 p-2 overflow-y-auto custom-scrollbar">
-						<h3 className="text-[10px] uppercase text-zinc-400 font-semibold tracking-widest mb-3 px-2">
+					<div className="flex flex-col h-full bg-background p-2 overflow-y-auto custom-scrollbar">
+						<h3 className="text-[10px] uppercase text-muted font-semibold tracking-widest mb-3 px-2">
 							Undo Stack
 						</h3>
 						<div className="flex flex-col gap-1">
@@ -1420,19 +1420,19 @@ export function MediaPoolSidebar({
 								<span>Move Clip</span>
 								<span className="text-[10px] opacity-70">Current</span>
 							</div>
-							<div className="text-xs text-zinc-400 hover:bg-zinc-800 px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
+							<div className="text-xs text-muted hover:bg-panel px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
 								<span>Add Color Grade</span>
 								<span className="text-[10px] opacity-50">Undo (⌘Z)</span>
 							</div>
-							<div className="text-xs text-zinc-400 hover:bg-zinc-800 px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
+							<div className="text-xs text-muted hover:bg-panel px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
 								<span>Delete Track</span>
 								<span className="text-[10px] opacity-50">1m ago</span>
 							</div>
-							<div className="text-xs text-zinc-400 hover:bg-zinc-800 px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
+							<div className="text-xs text-muted hover:bg-panel px-3 py-2 rounded flex justify-between items-center cursor-pointer transition-colors">
 								<span>Import Media</span>
 								<span className="text-[10px] opacity-50">5m ago</span>
 							</div>
-							<div className="text-xs text-zinc-400 px-3 py-2 rounded flex justify-between items-center">
+							<div className="text-xs text-muted px-3 py-2 rounded flex justify-between items-center">
 								<span>Project Created</span>
 								<span className="text-[10px] opacity-50">Initial</span>
 							</div>
@@ -1442,11 +1442,11 @@ export function MediaPoolSidebar({
 			</div>
 
 			{sidebarTab === "media" && (
-				<div className="flex flex-col border-t border-zinc-700 mt-auto">
+				<div className="flex flex-col border-t border-border mt-auto">
 					<div className="px-4 py-2 flex flex-col gap-2">
 						<input
 							type="text"
-							className="w-full bg-zinc-900 border border-zinc-700 rounded-full px-4 py-1.5 text-xs text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500 placeholder-zinc-600 transition-colors"
+							className="w-full bg-background border border-border rounded-full px-4 py-1.5 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500 placeholder-zinc-600 transition-colors"
 							placeholder="Search Media..."
 						/>
 
@@ -1454,18 +1454,18 @@ export function MediaPoolSidebar({
 						<div className="flex gap-2">
 							<input
 								type="text"
-								className="flex-1 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-3 py-1 text-[10px] text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500 placeholder-indigo-400/50 transition-colors"
+								className="flex-1 bg-indigo-900/20 border border-indigo-500/30 rounded-full px-3 py-1 text-[10px] text-foreground focus:outline-none focus-ring focus:border-indigo-500 placeholder-indigo-400/50 transition-colors"
 								placeholder="Type to generate AI video..."
 							/>
 							<button
-								className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-3 py-1 rounded-full transition-colors flex items-center gap-1"
+								className="bg-indigo-600 hover:bg-indigo-500 text-foreground text-[10px] px-3 py-1 rounded-full transition-colors flex items-center gap-1"
 								onClick={handleDiffusionPrompt}
 							>
 								✨ Generate
 							</button>
 						</div>
 					</div>
-					<label className="block w-full text-center text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded py-2 cursor-pointer transition-colors shadow-sm">
+					<label className="block w-full text-center text-xs font-medium text-foreground bg-indigo-600 hover:bg-indigo-500 rounded py-2 cursor-pointer transition-colors shadow-sm">
 						Upload Media
 						<input
 							type="file"

@@ -52,15 +52,15 @@ export function SignUpForm() {
 				<div className="rounded-full bg-blue-500/20 p-4 text-blue-400">
 					<MailCheck className="size-10" />
 				</div>
-				<h3 className="text-xl font-medium text-white">Check your inbox</h3>
-				<p className="text-sm text-zinc-400 max-w-[280px]">
+				<h3 className="text-xl font-medium text-foreground">Check your inbox</h3>
+				<p className="text-sm text-muted max-w-[280px]">
 					We just sent a verification link to{" "}
-					<strong className="text-white">{email}</strong>. Please click the link
+					<strong className="text-foreground">{email}</strong>. Please click the link
 					to activate your account.
 				</p>
 				<button
 					onClick={() => setEmailSent(false)}
-					className="mt-4 text-xs text-zinc-500 hover:text-white transition-colors"
+					className="mt-4 text-xs text-muted hover:text-foreground transition-colors"
 				>
 					Used the wrong email? Go back
 				</button>
@@ -73,7 +73,7 @@ export function SignUpForm() {
 			<div>
 				<label
 					htmlFor="name"
-					className="mb-1 block text-xs font-medium text-zinc-400"
+					className="mb-1 block text-xs font-medium text-muted"
 				>
 					Name
 				</label>
@@ -83,14 +83,14 @@ export function SignUpForm() {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					required
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					placeholder="Your name"
 				/>
 			</div>
 			<div>
 				<label
 					htmlFor="email"
-					className="mb-1 block text-xs font-medium text-zinc-400"
+					className="mb-1 block text-xs font-medium text-muted"
 				>
 					Email
 				</label>
@@ -100,14 +100,14 @@ export function SignUpForm() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					placeholder="you@example.com"
 				/>
 			</div>
 			<div>
 				<label
 					htmlFor="password"
-					className="mb-1 block text-xs font-medium text-zinc-400"
+					className="mb-1 block text-xs font-medium text-muted"
 				>
 					Password
 				</label>
@@ -118,18 +118,18 @@ export function SignUpForm() {
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					minLength={8}
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					placeholder="Min. 8 characters"
 				/>
 			</div>
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
+				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-blue-500 disabled:opacity-50"
 			>
 				{loading ? "Creating account..." : "Create Account"}
 			</button>
-			<p className="text-center text-xs text-zinc-500">
+			<p className="text-center text-xs text-muted">
 				Already have an account?{" "}
 				<Link href="/sign-in" className="text-blue-400 hover:text-blue-300">
 					Sign In

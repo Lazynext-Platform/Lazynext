@@ -48,7 +48,7 @@ export function ScriptEditor() {
 				))}
 			</div>
 
-			<div className="mt-6 text-sm text-gray-500 italic">
+			<div className="mt-6 text-sm text-muted italic">
 				Highlight text to instantly cut the video timeline.
 			</div>
 		</div>

@@ -35,7 +35,7 @@ export default function BillingPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center p-4">
+		<div className="min-h-screen bg-neutral-950 text-foreground flex items-center justify-center p-4">
 			<div className="max-w-md w-full bg-neutral-900/50 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
 				{/* Decorative glass gradient */}
 				<div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />

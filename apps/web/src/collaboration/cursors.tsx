@@ -47,7 +47,7 @@ export function CursorsOverlay({ cursors }: CursorsOverlayProps) {
             />
           </svg>
           <span
-            className="absolute left-3 top-3 text-xs font-semibold text-white px-1.5 py-0.5 rounded whitespace-nowrap"
+            className="absolute left-3 top-3 text-xs font-semibold text-foreground px-1.5 py-0.5 rounded whitespace-nowrap"
             style={{ backgroundColor: cursor.color }}
           >
             {cursor.userName}

@@ -134,9 +134,9 @@ function StatusBadge({
 	return (
 		<Badge
 			className={cn("shadow-none", className, {
-				"bg-green-500! text-white": status.type === "complete",
-				"bg-yellow-500! text-white": status.type === "pending",
-				"bg-blue-500! text-white": status.type === "info",
+				"bg-green-500! text-foreground": status.type === "complete",
+				"bg-yellow-500! text-foreground": status.type === "pending",
+				"bg-blue-500! text-foreground": status.type === "info",
 				"bg-foreground/10! text-accent-foreground": status.type === "default",
 			})}
 		>

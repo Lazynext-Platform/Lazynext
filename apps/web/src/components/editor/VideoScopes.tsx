@@ -141,12 +141,12 @@ export function VideoScopes({ isPlaying, frame }: VideoScopesProps) {
 	}, [isPlaying, frame, scopeType]);
 
 	return (
-		<div className="w-full bg-zinc-950 border border-zinc-700 rounded relative">
+		<div className="w-full bg-background border border-border rounded relative">
 			<div className="absolute top-1 left-2 z-20">
 				<select
 					value={scopeType}
 					onChange={(e) => setScopeType(e.target.value as ScopeType)}
-					className="bg-transparent text-[10px] text-zinc-400 uppercase font-bold outline-none cursor-pointer hover:text-white"
+					className="bg-transparent text-[10px] text-muted uppercase font-bold outline-none cursor-pointer hover:text-foreground"
 				>
 					<option value="parade">RGB Parade</option>
 					<option value="waveform">Waveform</option>
@@ -164,8 +164,8 @@ export function VideoScopes({ isPlaying, frame }: VideoScopesProps) {
 					<div className="absolute top-1 left-2/3 ml-2 text-[8px] text-blue-500 font-bold z-10">
 						B
 					</div>
-					<div className="absolute top-0 bottom-0 left-1/3 w-px bg-zinc-800 z-10 pointer-events-none" />
-					<div className="absolute top-0 bottom-0 left-2/3 w-px bg-zinc-800 z-10 pointer-events-none" />
+					<div className="absolute top-0 bottom-0 left-1/3 w-px bg-panel z-10 pointer-events-none" />
+					<div className="absolute top-0 bottom-0 left-2/3 w-px bg-panel z-10 pointer-events-none" />
 				</>
 			)}
 			<canvas

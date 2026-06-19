@@ -5,7 +5,7 @@ import { Sparkles, Zap, Users, Cpu } from "lucide-react";
 
 export default function Home() {
 	return (
-		<div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+		<div className="min-h-screen bg-neutral-950 text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
 			<MarketingNavbar />
 
 			<main>
@@ -45,7 +45,7 @@ export default function Home() {
 							</Link>
 							<Link
 								href="/billing"
-								className="w-full sm:w-auto px-8 py-4 bg-neutral-900 border border-neutral-800 text-white font-semibold rounded-2xl hover:bg-neutral-800 transition-colors"
+								className="w-full sm:w-auto px-8 py-4 bg-neutral-900 border border-neutral-800 text-foreground font-semibold rounded-2xl hover:bg-neutral-800 transition-colors"
 							>
 								View Pro Plans
 							</Link>

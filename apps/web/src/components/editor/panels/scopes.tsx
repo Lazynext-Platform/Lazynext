@@ -130,22 +130,22 @@ export function LumetriScopes({
 	}, [activeScope, sourceCanvasRef]);
 
 	return (
-		<div className="flex flex-col bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden h-64 shadow-xl">
-			<div className="flex border-b border-zinc-800 text-xs">
+		<div className="flex flex-col bg-background border border-border rounded-lg overflow-hidden h-64 shadow-xl">
+			<div className="flex border-b border-border text-xs">
 				<button
-					className={`flex-1 py-2 font-medium ${activeScope === "waveform" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"}`}
+					className={`flex-1 py-2 font-medium ${activeScope === "waveform" ? "bg-panel text-foreground" : "text-muted hover:text-foreground"}`}
 					onClick={() => setActiveScope("waveform")}
 				>
 					Waveform (Luma)
 				</button>
 				<button
-					className={`flex-1 py-2 font-medium ${activeScope === "vectorscope" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"}`}
+					className={`flex-1 py-2 font-medium ${activeScope === "vectorscope" ? "bg-panel text-foreground" : "text-muted hover:text-foreground"}`}
 					onClick={() => setActiveScope("vectorscope")}
 				>
 					Vectorscope
 				</button>
 			</div>
-			<div className="flex-1 relative bg-black p-2">
+			<div className="flex-1 relative bg-background p-2">
 				<canvas
 					ref={waveformRef}
 					width={400}

@@ -7,9 +7,13 @@
 @theme {
 	--color-background: var(--bg-main);
 	--color-foreground: var(--text-primary);
+	--color-panel: var(--bg-panel);
+	--color-glass: var(--bg-glass);
+	--color-hover: var(--bg-hover);
 
 	--color-primary: var(--accent-primary);
 	--color-primary-foreground: var(--bg-main);
+	--color-secondary: var(--accent-secondary);
 
 	--color-muted: var(--text-muted);
 	--color-border: var(--border-glass);

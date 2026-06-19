@@ -911,7 +911,7 @@ function TextElementContent({
 }) {
 	return (
 		<div className="flex size-full items-center justify-start pl-2">
-			<span className="truncate text-xs text-white">
+			<span className="truncate text-xs text-foreground">
 				{typeof element.params.content === "string"
 					? element.params.content
 					: ""}
@@ -929,9 +929,9 @@ function EffectElementContent({
 		<div className="flex size-full items-center justify-start gap-1 pl-2">
 			<HugeiconsIcon
 				icon={MagicWand05Icon}
-				className="size-4 shrink-0 text-white"
+				className="size-4 shrink-0 text-foreground"
 			/>
-			<span className="truncate text-xs text-white">{element.name}</span>
+			<span className="truncate text-xs text-foreground">{element.name}</span>
 		</div>
 	);
 }
@@ -954,7 +954,7 @@ function StickerElementContent({
 				height={20}
 				unoptimized
 			/>
-			<span className="truncate text-xs text-white">{element.name}</span>
+			<span className="truncate text-xs text-foreground">{element.name}</span>
 		</div>
 	);
 }
@@ -978,7 +978,7 @@ function GraphicElementContent({
 				height={20}
 				unoptimized
 			/>
-			<span className="truncate text-xs text-white">{element.name}</span>
+			<span className="truncate text-xs text-foreground">{element.name}</span>
 		</div>
 	);
 }
@@ -1077,7 +1077,7 @@ function EffectsButton({
 	return (
 		<button
 			type="button"
-			className="flex shrink-0 justify-center text-white cursor-pointer"
+			className="flex shrink-0 justify-center text-foreground cursor-pointer"
 			onMouseDown={(event) => event.stopPropagation()}
 			onClick={handleClick}
 		>
@@ -1160,7 +1160,7 @@ function MediaElementHeader({
 		>
 			{leading && <div className="pl-1">{leading}</div>}
 			{name && (
-				<span className="truncate px-1.5 text-[0.6rem] leading-tight text-white/75">
+				<span className="truncate px-1.5 text-[0.6rem] leading-tight text-foreground/75">
 					{name}
 				</span>
 			)}

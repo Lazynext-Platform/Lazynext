@@ -416,7 +416,7 @@ export default function WasmPlayer({
 	}, [isWasmReady, project, frame, assets]);
 
 	return (
-		<div className="flex h-full w-full items-center justify-center bg-black relative">
+		<div className="flex h-full w-full items-center justify-center bg-background relative">
 			<canvas
 				id="lazynext-canvas"
 				ref={canvasRef}
@@ -426,7 +426,7 @@ export default function WasmPlayer({
 				}}
 			/>
 			{!isWasmReady && (
-				<div className="absolute inset-0 flex items-center justify-center bg-black/50 text-zinc-400">
+				<div className="absolute inset-0 flex items-center justify-center bg-background/50 text-muted">
 					Loading GPU Engine...
 				</div>
 			)}

@@ -90,13 +90,13 @@ export default function FeedPage() {
 					</Link>
 					<Link
 						href="/editor"
-						className="flex items-center gap-4 text-white/50 hover:text-white font-bold text-lg p-3 rounded-xl hover:bg-white/5 transition-colors"
+						className="flex items-center gap-4 text-foreground/50 hover:text-foreground font-bold text-lg p-3 rounded-xl hover:bg-hover transition-colors"
 					>
 						<VideoIcon className="w-6 h-6" /> Create
 					</Link>
 					<Link
 						href="/dashboard"
-						className="flex items-center gap-4 text-white/50 hover:text-white font-bold text-lg p-3 rounded-xl hover:bg-white/5 transition-colors"
+						className="flex items-center gap-4 text-foreground/50 hover:text-foreground font-bold text-lg p-3 rounded-xl hover:bg-hover transition-colors"
 					>
 						<Sparkles className="w-6 h-6" /> Dashboard
 					</Link>
@@ -106,18 +106,18 @@ export default function FeedPage() {
 			{/* Mobile-Style Feed Container */}
 			<div
 				ref={containerRef}
-				className="relative w-full max-w-[500px] h-full mx-auto snap-y snap-mandatory overflow-y-scroll overflow-x-hidden hide-scrollbar shadow-2xl rounded-3xl border border-white/10 bg-black/40 backdrop-blur-3xl"
+				className="relative w-full max-w-[500px] h-full mx-auto snap-y snap-mandatory overflow-y-scroll overflow-x-hidden hide-scrollbar shadow-2xl rounded-3xl border border-border bg-background/40 backdrop-blur-3xl"
 				style={{ scrollBehavior: "smooth" }}
 			>
 				{/* Navigation Overlay */}
 				<div className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
 					<Link href="/" className="pointer-events-auto">
-						<div className="p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
+						<div className="p-3 bg-glass backdrop-blur-xl border border-white/20 rounded-full text-foreground hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
 							<ArrowLeft className="w-5 h-5" />
 						</div>
 					</Link>
-					<div className="flex gap-4 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full pointer-events-auto shadow-2xl">
-						<div className="px-5 py-2 text-white/60 font-semibold text-sm hover:text-white transition-colors cursor-pointer rounded-full">
+					<div className="flex gap-4 p-1.5 bg-background/40 backdrop-blur-xl border border-border rounded-full pointer-events-auto shadow-2xl">
+						<div className="px-5 py-2 text-foreground/60 font-semibold text-sm hover:text-foreground transition-colors cursor-pointer rounded-full">
 							Following
 						</div>
 						<div className="px-5 py-2 bg-gradient-to-tr from-cyan-400 to-blue-500 text-black font-bold text-sm rounded-full shadow-[0_0_20px_rgba(0,212,223,0.4)]">

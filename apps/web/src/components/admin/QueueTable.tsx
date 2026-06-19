@@ -43,7 +43,7 @@ export function QueueTable({ items }: { items: QueueItem[] }) {
 												? "bg-green-500/20 text-green-400"
 												: item.status === "failed"
 													? "bg-red-500/20 text-red-400"
-													: "bg-gray-500/20 text-gray-400"
+													: "bg-gray-500/20 text-muted"
 									}`}
 								>
 									{item.status}

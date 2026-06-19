@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export function Hero() {
 	return (
-		<div className="relative flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-between px-4 text-center overflow-hidden bg-zinc-950">
+		<div className="relative flex min-h-[calc(100svh-4.5rem)] flex-col items-center justify-between px-4 text-center overflow-hidden bg-background">
 			{/* Stunning Ambient Background Gradients */}
 			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/30 via-fuchsia-600/10 to-transparent blur-[120px] -z-40 rounded-full animate-pulse duration-10000" />
 			<div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-blue-500/20 to-transparent blur-[100px] -z-40 rounded-full" />
@@ -19,15 +19,15 @@ export function Hero() {
 
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center items-center z-10">
 				<div className="inline-block text-6xl font-extrabold tracking-tighter md:text-[6.5rem] leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 drop-shadow-2xl">
-					<h1 className="text-zinc-100">The open source</h1>
+					<h1 className="text-foreground">The open source</h1>
 					<div className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent py-2">
 						<Handlebars>Video editor</Handlebars>
 					</div>
 				</div>
 
-				<p className="text-zinc-400 mx-auto mt-8 max-w-2xl text-lg font-light tracking-wide sm:text-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 drop-shadow-md">
+				<p className="text-muted mx-auto mt-8 max-w-2xl text-lg font-light tracking-wide sm:text-xl animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200 drop-shadow-md">
 					A stunningly simple, incredibly powerful video editor that just works.
-					<span className="block mt-2 font-medium text-zinc-300">
+					<span className="block mt-2 font-medium text-foreground">
 						Run it locally, in the cloud, or straight from your browser.
 					</span>
 				</p>
@@ -49,7 +49,7 @@ export function Hero() {
 						<Button
 							variant="outline"
 							size="lg"
-							className="w-full sm:w-auto h-14 px-8 text-lg font-medium border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-md transition-all hover:scale-105 active:scale-95 rounded-2xl"
+							className="w-full sm:w-auto h-14 px-8 text-lg font-medium border-border bg-hover hover:bg-glass text-foreground backdrop-blur-md transition-all hover:scale-105 active:scale-95 rounded-2xl"
 						>
 							View Source
 						</Button>

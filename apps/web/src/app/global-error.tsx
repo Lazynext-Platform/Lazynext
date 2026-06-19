@@ -19,10 +19,10 @@ export default function GlobalError({
 				<div className="flex min-h-screen items-center justify-center px-4">
 					<div className="text-center">
 						<div className="text-7xl font-bold text-zinc-800">500</div>
-						<h1 className="mt-4 text-2xl font-bold text-white">
+						<h1 className="mt-4 text-2xl font-bold text-foreground">
 							Something went wrong
 						</h1>
-						<p className="mt-2 text-sm text-zinc-400">
+						<p className="mt-2 text-sm text-muted">
 							{error.message ??
 								"An unexpected error occurred. Please try again."}
 						</p>
@@ -30,13 +30,13 @@ export default function GlobalError({
 							<button
 								type="button"
 								onClick={reset}
-								className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
+								className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-foreground hover:bg-blue-500 transition-colors"
 							>
 								Try Again
 							</button>
 							<a
 								href="/"
-								className="rounded-lg border border-zinc-700 bg-zinc-800 px-6 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-700 transition-colors"
+								className="rounded-lg border border-border bg-panel px-6 py-2.5 text-sm font-medium text-foreground hover:bg-glass transition-colors"
 							>
 								Go Home
 							</a>

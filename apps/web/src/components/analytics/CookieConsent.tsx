@@ -24,10 +24,10 @@ export function CookieConsent() {
 	if (!visible) return null;
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 z-[9999] border-t border-zinc-700 bg-zinc-900/95 backdrop-blur-md p-4 shadow-2xl">
+		<div className="fixed bottom-0 left-0 right-0 z-[9999] border-t border-border bg-background/95 backdrop-blur-md p-4 shadow-2xl">
 			<div className="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex-1">
-					<p className="text-sm text-zinc-300">
+					<p className="text-sm text-foreground">
 						We use cookies to enhance your experience, analyze site usage, and
 						improve our services.{" "}
 						<Link
@@ -42,14 +42,14 @@ export function CookieConsent() {
 					<button
 						type="button"
 						onClick={acceptEssential}
-						className="rounded-lg border border-zinc-600 px-4 py-2 text-xs font-medium text-zinc-300 hover:bg-zinc-800 transition-colors"
+						className="rounded-lg border border-zinc-600 px-4 py-2 text-xs font-medium text-foreground hover:bg-panel transition-colors"
 					>
 						Essential Only
 					</button>
 					<button
 						type="button"
 						onClick={acceptAll}
-						className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-500 transition-colors"
+						className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-foreground hover:bg-blue-500 transition-colors"
 					>
 						Accept All
 					</button>

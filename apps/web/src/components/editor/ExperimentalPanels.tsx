@@ -90,12 +90,12 @@ function SpatialEditorPanel({
 	const drag = useDragMove(pos, setPos);
 	return (
 		<div
-			className="fixed z-[100] w-72 bg-zinc-900/95 backdrop-blur-xl border border-fuchsia-500/50 rounded-lg shadow-[0_0_20px_rgba(217,70,239,0.3)] overflow-hidden flex flex-col"
+			className="fixed z-[100] w-72 bg-background/95 backdrop-blur-xl border border-fuchsia-500/50 rounded-lg shadow-[0_0_20px_rgba(217,70,239,0.3)] overflow-hidden flex flex-col"
 			style={{ left: pos.x, top: pos.y }}
 		>
 			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
 			<div
-				className="h-8 bg-zinc-800/80 border-b border-fuchsia-500/30 flex items-center justify-between px-3 cursor-move select-none"
+				className="h-8 bg-panel/80 border-b border-fuchsia-500/30 flex items-center justify-between px-3 cursor-move select-none"
 				onMouseDown={drag.onMouseDown}
 			>
 				<div className="flex items-center gap-2">
@@ -117,14 +117,14 @@ function SpatialEditorPanel({
 					</span>
 				</div>
 				<button
-					className={`px-3 py-1 text-xs rounded border transition-colors ${isReviewMode ? "bg-orange-600 border-orange-500 text-white shadow-[0_0_10px_rgba(234,88,12,0.4)]" : "bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white"}`}
+					className={`px-3 py-1 text-xs rounded border transition-colors ${isReviewMode ? "bg-orange-600 border-orange-500 text-foreground shadow-[0_0_10px_rgba(234,88,12,0.4)]" : "bg-panel border-border text-muted hover:text-foreground"}`}
 					onClick={() => setIsReviewMode(!isReviewMode)}
 				>
 					📝 Review & Annotate
 				</button>
 				<button
 					onClick={onClose}
-					className="text-zinc-400 hover:text-white transition-colors"
+					className="text-muted hover:text-foreground transition-colors"
 				>
 					<svg
 						className="w-4 h-4"
@@ -142,15 +142,15 @@ function SpatialEditorPanel({
 				</button>
 			</div>
 			<div className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[60vh] custom-scrollbar">
-				<div className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest border-b border-zinc-800 pb-1">
+				<div className="text-[10px] text-muted uppercase font-bold tracking-widest border-b border-border pb-1">
 					Volumetric Positioning
 				</div>
 				<div className="flex flex-col gap-2">
 					<div className="flex justify-between items-center">
-						<span className="text-[10px] text-zinc-300">
+						<span className="text-[10px] text-foreground">
 							Z-Depth (Parallax)
 						</span>
-						<span className="text-[10px] text-zinc-500 font-mono">
+						<span className="text-[10px] text-muted font-mono">
 							{(selectedClip?.transform?.z || 0).toFixed(2)}
 						</span>
 					</div>
@@ -164,10 +164,10 @@ function SpatialEditorPanel({
 				</div>
 				<div className="flex flex-col gap-2">
 					<div className="flex justify-between items-center">
-						<span className="text-[10px] text-zinc-300">
+						<span className="text-[10px] text-foreground">
 							Volumetric Extrusion
 						</span>
-						<span className="text-[10px] text-zinc-500 font-mono">1.0</span>
+						<span className="text-[10px] text-muted font-mono">1.0</span>
 					</div>
 					<input
 						type="range"
@@ -177,12 +177,12 @@ function SpatialEditorPanel({
 						className="w-full accent-fuchsia-500"
 					/>
 				</div>
-				<div className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest border-b border-zinc-800 pb-1 mt-2">
+				<div className="text-[10px] text-muted uppercase font-bold tracking-widest border-b border-border pb-1 mt-2">
 					Holographic Material
 				</div>
 				<div className="flex flex-col gap-2">
 					<div className="flex justify-between items-center">
-						<span className="text-[10px] text-zinc-300">
+						<span className="text-[10px] text-foreground">
 							Scattering Density
 						</span>
 					</div>
@@ -196,7 +196,7 @@ function SpatialEditorPanel({
 				</div>
 				<div className="flex flex-col gap-2">
 					<div className="flex justify-between items-center">
-						<span className="text-[10px] text-zinc-300">
+						<span className="text-[10px] text-foreground">
 							Chromatic Dispersion
 						</span>
 					</div>
@@ -215,7 +215,7 @@ function SpatialEditorPanel({
 						defaultChecked
 						className="accent-fuchsia-500"
 					/>
-					<label htmlFor="holo-glow" className="text-[10px] text-zinc-300">
+					<label htmlFor="holo-glow" className="text-[10px] text-foreground">
 						Enable Holographic Glow
 					</label>
 				</div>
@@ -258,7 +258,7 @@ function OmniOrbPanel({ onDismiss }: { onDismiss: () => void }) {
 					></div>
 				</div>
 			</div>
-			<div className="bg-zinc-900/80 backdrop-blur border border-cyan-500/30 px-3 py-1 rounded-full text-[10px] text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)] animate-pulse">
+			<div className="bg-background/80 backdrop-blur border border-cyan-500/30 px-3 py-1 rounded-full text-[10px] text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)] animate-pulse">
 				Listening for voice commands...
 			</div>
 		</div>
@@ -327,7 +327,7 @@ function SwarmPanel() {
 					className="animate-ping"
 				/>
 			</svg>
-			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-4 bg-black/40 backdrop-blur border border-fuchsia-500/50 rounded-lg shadow-[0_0_20px_rgba(217,70,239,0.5)]">
+			<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center p-4 bg-background/40 backdrop-blur border border-fuchsia-500/50 rounded-lg shadow-[0_0_20px_rgba(217,70,239,0.5)]">
 				<span className="text-[10px] text-fuchsia-300 font-mono font-bold tracking-widest uppercase">
 					Agent Swarm Active
 				</span>
@@ -352,8 +352,8 @@ function GenerativeSynthesisPanel({
 	onClose: () => void;
 }) {
 	return (
-		<div className="fixed inset-0 z-[130] flex items-center justify-center pointer-events-none bg-black/60 backdrop-blur-sm">
-			<div className="relative w-[600px] bg-zinc-900/90 backdrop-blur-xl border border-blue-500/50 rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] pointer-events-auto overflow-hidden">
+		<div className="fixed inset-0 z-[130] flex items-center justify-center pointer-events-none bg-background/60 backdrop-blur-sm">
+			<div className="relative w-[600px] bg-background/90 backdrop-blur-xl border border-blue-500/50 rounded-2xl shadow-[0_0_50px_rgba(59,130,246,0.3)] pointer-events-auto overflow-hidden">
 				<div className="p-1 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-gradient-x w-full"></div>
 				<div className="p-6 flex flex-col gap-4">
 					<div className="flex items-center justify-between">
@@ -375,7 +375,7 @@ function GenerativeSynthesisPanel({
 						</h3>
 						<button
 							onClick={onClose}
-							className="text-zinc-500 hover:text-white"
+							className="text-muted hover:text-foreground"
 						>
 							<svg
 								className="w-5 h-5"
@@ -396,11 +396,11 @@ function GenerativeSynthesisPanel({
 						<textarea
 							value={prompt}
 							onChange={(e) => setPrompt(e.target.value)}
-							className="w-full h-32 bg-zinc-950/50 border border-zinc-700 rounded-xl p-4 text-zinc-300 focus:outline-none focus:border-blue-500 transition-colors resize-none placeholder-zinc-600"
+							className="w-full h-32 bg-background/50 border border-border rounded-xl p-4 text-foreground focus:outline-none focus:border-blue-500 transition-colors resize-none placeholder-zinc-600"
 							placeholder="Describe the footage you want to hallucinate..."
 						/>
 						{isDreaming && (
-							<div className="absolute inset-0 bg-black/80 rounded-xl flex items-center justify-center overflow-hidden">
+							<div className="absolute inset-0 bg-background/80 rounded-xl flex items-center justify-center overflow-hidden">
 								<div className="absolute inset-0 flex items-center justify-center">
 									<div
 										className="w-16 h-16 rounded-full border-4 border-transparent border-t-blue-500 border-l-purple-500 animate-spin"
@@ -423,14 +423,14 @@ function GenerativeSynthesisPanel({
 					<div className="flex justify-end gap-2">
 						<button
 							onClick={onClose}
-							className="px-4 py-2 text-xs text-zinc-400 hover:text-white transition-colors"
+							className="px-4 py-2 text-xs text-muted hover:text-foreground transition-colors"
 						>
 							Cancel
 						</button>
 						<button
 							onClick={onDream}
 							disabled={!prompt || isDreaming}
-							className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-sm font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+							className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-foreground text-sm font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(59,130,246,0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{isDreaming ? "Synthesizing..." : "Generate Clip"}
 						</button>
@@ -457,7 +457,7 @@ function DirectorPanel({
 	const drag = useDragMove(pos, setPos);
 	return (
 		<div
-			className="fixed z-[105] w-96 bg-black/95 backdrop-blur-3xl border-2 border-red-500/50 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] overflow-hidden flex flex-col font-mono"
+			className="fixed z-[105] w-96 bg-background/95 backdrop-blur-3xl border-2 border-red-500/50 rounded-lg shadow-[0_0_30px_rgba(220,38,38,0.4)] overflow-hidden flex flex-col font-mono"
 			style={{ left: pos.x, top: pos.y }}
 		>
 			{/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
@@ -491,10 +491,10 @@ function DirectorPanel({
 				</button>
 			</div>
 			<div className="p-4 flex flex-col gap-1 overflow-y-auto h-64 custom-scrollbar text-[10px] text-green-500">
-				<div className="mb-2 text-zinc-400">
+				<div className="mb-2 text-muted">
 					Initializing Neural Director Subsystem v4.0...
 				</div>
-				<div className="mb-4 text-zinc-400">
+				<div className="mb-4 text-muted">
 					Handing over timeline controls to AI...
 				</div>
 				{logs.map((log, i) => (
@@ -591,8 +591,8 @@ function ColorScopesPanel({
 }) {
 	if (!isOpen) return null;
 	return (
-		<div className="absolute top-20 left-4 z-50 bg-zinc-950/90 backdrop-blur-xl border border-teal-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(20,184,166,0.2)] flex flex-col pointer-events-auto">
-			<div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2">
+		<div className="absolute top-20 left-4 z-50 bg-background/90 backdrop-blur-xl border border-teal-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(20,184,166,0.2)] flex flex-col pointer-events-auto">
+			<div className="flex items-center justify-between mb-4 border-b border-border pb-2">
 				<span className="text-xs font-bold text-teal-400 uppercase tracking-widest flex items-center gap-2">
 					<svg
 						className="w-4 h-4"
@@ -611,7 +611,7 @@ function ColorScopesPanel({
 				</span>
 				<button
 					onClick={onClose}
-					className="text-zinc-500 hover:text-white transition-colors"
+					className="text-muted hover:text-foreground transition-colors"
 				>
 					<svg
 						className="w-4 h-4"
@@ -630,10 +630,10 @@ function ColorScopesPanel({
 			</div>
 			<div className="flex gap-4">
 				<div className="flex flex-col items-center">
-					<span className="text-[10px] text-zinc-400 font-bold mb-1">
+					<span className="text-[10px] text-muted font-bold mb-1">
 						WAVEFORM
 					</span>
-					<div className="w-48 h-32 bg-black border border-zinc-800 rounded relative overflow-hidden flex items-end">
+					<div className="w-48 h-32 bg-background border border-border rounded relative overflow-hidden flex items-end">
 						{Array.from({ length: 48 }).map((_, idx) => {
 							const rand1 = Math.abs(Math.sin(idx * 1234.5678));
 							const rand2 = Math.abs(Math.cos(idx * 9876.5432));
@@ -653,20 +653,20 @@ function ColorScopesPanel({
 							);
 						})}
 						<div className="absolute inset-0 pointer-events-none">
-							<div className="w-full h-[25%] border-b border-zinc-800/50" />
-							<div className="w-full h-[25%] border-b border-zinc-800/50" />
-							<div className="w-full h-[25%] border-b border-zinc-800/50" />
+							<div className="w-full h-[25%] border-b border-border/50" />
+							<div className="w-full h-[25%] border-b border-border/50" />
+							<div className="w-full h-[25%] border-b border-border/50" />
 						</div>
 					</div>
 				</div>
 				<div className="flex flex-col items-center">
-					<span className="text-[10px] text-zinc-400 font-bold mb-1">
+					<span className="text-[10px] text-muted font-bold mb-1">
 						VECTORSCOPE
 					</span>
-					<div className="w-32 h-32 bg-black border border-zinc-800 rounded-full relative overflow-hidden flex items-center justify-center">
-						<div className="absolute inset-0 border border-zinc-800/50 rounded-full m-2" />
-						<div className="absolute w-full h-px bg-zinc-800/80" />
-						<div className="absolute h-full w-px bg-zinc-800/80" />
+					<div className="w-32 h-32 bg-background border border-border rounded-full relative overflow-hidden flex items-center justify-center">
+						<div className="absolute inset-0 border border-border/50 rounded-full m-2" />
+						<div className="absolute w-full h-px bg-panel/80" />
+						<div className="absolute h-full w-px bg-panel/80" />
 						<div className="absolute w-1/2 h-px bg-orange-900/50 origin-left rotate-[-15deg] translate-x-1/2" />
 						<div
 							className="absolute w-16 h-16 rounded-full mix-blend-screen blur-md animate-pulse"
@@ -702,8 +702,8 @@ function AutoCaptionModal({
 }) {
 	if (!isOpen) return null;
 	return (
-		<div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-md flex items-center justify-center">
-			<div className="bg-zinc-900 border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">
+		<div className="fixed inset-0 z-[60] bg-background/60 backdrop-blur-md flex items-center justify-center">
+			<div className="bg-background border border-orange-500/30 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.15)] flex flex-col items-center text-center">
 				<div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mb-6">
 					<svg
 						className="w-8 h-8 text-orange-400 animate-bounce"
@@ -719,13 +719,13 @@ function AutoCaptionModal({
 						/>
 					</svg>
 				</div>
-				<h3 className="text-xl font-black text-white mb-2">
+				<h3 className="text-xl font-black text-foreground mb-2">
 					Transcribing Audio...
 				</h3>
-				<p className="text-sm text-zinc-400 mb-6">
+				<p className="text-sm text-muted mb-6">
 					Lazynext AI is analyzing speech to text.
 				</p>
-				<div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+				<div className="w-full h-2 bg-panel rounded-full overflow-hidden">
 					<div
 						className="h-full bg-gradient-to-r from-orange-600 to-yellow-500 transition-all duration-100 ease-out"
 						style={{ width: `${progress}%` }}

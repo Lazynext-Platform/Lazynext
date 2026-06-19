@@ -8,7 +8,7 @@ export function SmartBinsPanel() {
 	]);
 
 	return (
-		<div className="p-4 bg-gray-900 text-white h-full border-r border-gray-700">
+		<div className="p-4 bg-background text-foreground h-full border-r border-border">
 			<h2 className="text-xl font-bold mb-4">🧠 Neural Smart Bins</h2>
 			<button className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded mb-6 w-full text-sm font-semibold">
 				Auto-Analyze Footage
@@ -16,11 +16,11 @@ export function SmartBinsPanel() {
 
 			<div className="space-y-4">
 				{smartBins.map((bin, index) => (
-					<div key={index} className="bg-gray-800 p-3 rounded">
+					<div key={index} className="bg-panel p-3 rounded">
 						<h3 className="font-semibold text-blue-300">📁 {bin.actorName}</h3>
-						<ul className="text-sm mt-2 space-y-1 text-gray-400 pl-4">
+						<ul className="text-sm mt-2 space-y-1 text-muted pl-4">
 							{bin.clips.map((clip, i) => (
-								<li key={i} className="hover:text-white cursor-pointer">
+								<li key={i} className="hover:text-foreground cursor-pointer">
 									📄 {clip}
 								</li>
 							))}

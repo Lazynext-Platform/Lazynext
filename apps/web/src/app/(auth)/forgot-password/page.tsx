@@ -61,17 +61,17 @@ export default function ForgotPasswordPage() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500"
 					placeholder="you@example.com"
 				/>
 				<button
 					type="submit"
 					disabled={loading}
-					className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+					className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground hover:bg-blue-500 disabled:opacity-50"
 				>
 					{loading ? "Sending..." : "Send Reset Link"}
 				</button>
-				<p className="text-center text-xs text-zinc-500">
+				<p className="text-center text-xs text-muted">
 					<Link href="/sign-in" className="text-blue-400 hover:text-blue-300">
 						Back to Sign In
 					</Link>

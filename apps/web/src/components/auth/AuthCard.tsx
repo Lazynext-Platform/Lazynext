@@ -10,10 +10,10 @@ interface AuthCardProps {
 
 export function AuthCard({ title, subtitle, children }: AuthCardProps) {
 	return (
-		<div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-8 shadow-2xl backdrop-blur-sm">
+		<div className="rounded-2xl border border-border bg-background/80 p-8 shadow-2xl backdrop-blur-sm">
 			<div className="mb-8 text-center">
-				<h1 className="text-2xl font-bold text-white">{title}</h1>
-				<p className="mt-2 text-sm text-zinc-400">{subtitle}</p>
+				<h1 className="text-2xl font-bold text-foreground">{title}</h1>
+				<p className="mt-2 text-sm text-muted">{subtitle}</p>
 			</div>
 			{children}
 		</div>

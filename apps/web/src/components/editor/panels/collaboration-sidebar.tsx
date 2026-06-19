@@ -58,15 +58,15 @@ export function CollaborationSidebar({
 			return "text-emerald-400 bg-emerald-400/10 border-emerald-500/20";
 		if (status === "needs-work")
 			return "text-orange-400 bg-orange-400/10 border-orange-500/20";
-		return "text-zinc-400 bg-zinc-800 border-zinc-700";
+		return "text-muted bg-panel border-border";
 	};
 
 	return (
-		<div className="w-80 h-full bg-zinc-950 border-l border-zinc-800 flex flex-col z-[100] shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
-			<div className="h-10 border-b border-zinc-800 flex items-center px-4 bg-zinc-900 justify-between">
+		<div className="w-80 h-full bg-background border-l border-border flex flex-col z-[100] shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
+			<div className="h-10 border-b border-border flex items-center px-4 bg-background justify-between">
 				<div className="flex items-center gap-2">
 					<MessageSquare className="w-4 h-4 text-blue-400" />
-					<span className="text-xs font-bold text-zinc-200">
+					<span className="text-xs font-bold text-foreground">
 						Review & Approval
 					</span>
 				</div>
@@ -86,7 +86,7 @@ export function CollaborationSidebar({
 						// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 						<div
 							key={c.id}
-							className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 hover:border-zinc-600 transition-colors cursor-pointer group"
+							className="bg-background border border-border rounded-lg p-3 hover:border-zinc-600 transition-colors cursor-pointer group"
 							onClick={() => onNavigateToFrame(c.frame)}
 						>
 							<div className="flex justify-between items-start mb-2">
@@ -94,18 +94,18 @@ export function CollaborationSidebar({
 									<img
 										src={c.avatar}
 										alt="avatar"
-										className="w-6 h-6 rounded-full bg-zinc-800"
+										className="w-6 h-6 rounded-full bg-panel"
 									/>
-									<span className="text-[10px] font-bold text-zinc-300">
+									<span className="text-[10px] font-bold text-foreground">
 										{c.author}
 									</span>
 								</div>
-								<span className="text-[9px] font-mono text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800 group-hover:text-blue-400 group-hover:border-blue-500/50 transition-colors">
+								<span className="text-[9px] font-mono text-muted bg-background px-1.5 py-0.5 rounded border border-border group-hover:text-blue-400 group-hover:border-blue-500/50 transition-colors">
 									{Math.floor(c.frame / 60)}:
 									{(c.frame % 60).toString().padStart(2, "0")}
 								</span>
 							</div>
-							<p className="text-xs text-zinc-400 mb-3">{c.text}</p>
+							<p className="text-xs text-muted mb-3">{c.text}</p>
 							<div className="flex gap-2">
 								<span
 									className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${getStatusColor(c.status)}`}
@@ -117,9 +117,9 @@ export function CollaborationSidebar({
 					))}
 			</div>
 
-			<div className="p-3 border-t border-zinc-800 bg-zinc-900">
+			<div className="p-3 border-t border-border bg-background">
 				<div className="flex items-center justify-between mb-2">
-					<span className="text-[10px] font-mono text-zinc-500">
+					<span className="text-[10px] font-mono text-muted">
 						Current Frame: {currentFrame}
 					</span>
 				</div>
@@ -128,12 +128,12 @@ export function CollaborationSidebar({
 						value={newComment}
 						onChange={(e) => setNewComment(e.target.value)}
 						placeholder="Add a comment at this exact frame..."
-						className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white placeholder-zinc-600 resize-none h-20 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+						className="w-full bg-background border border-border rounded-lg p-2 text-xs text-foreground placeholder-zinc-600 resize-none h-20 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					/>
 					<button
 						onClick={handleAddComment}
 						disabled={!newComment.trim()}
-						className="absolute bottom-2 right-2 p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
+						className="absolute bottom-2 right-2 p-1.5 bg-blue-600 text-foreground rounded-md hover:bg-blue-500 disabled:opacity-50 disabled:hover:bg-blue-600 transition-colors"
 					>
 						<Send className="w-3 h-3" />
 					</button>

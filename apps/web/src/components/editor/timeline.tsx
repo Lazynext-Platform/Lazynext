@@ -739,26 +739,26 @@ export default function Timeline({
 	};
 
 	if (!project || !project.tracks) {
-		return <div className="text-zinc-400 p-4 text-xs">No tracks</div>;
+		return <div className="text-muted p-4 text-xs">No tracks</div>;
 	}
 
 	return (
 		<div
 			ref={scrollContainerRef}
-			className="flex h-full w-full flex-col relative overflow-y-auto overflow-x-auto bg-zinc-900"
+			className="flex h-full w-full flex-col relative overflow-y-auto overflow-x-auto bg-background"
 		>
 			{/* Timeline Mini-Map (Navigator) */}
 			<div
-				className="h-8 bg-black border-b border-zinc-700 flex sticky top-0 z-30 min-w-max"
+				className="h-8 bg-background border-b border-border flex sticky top-0 z-30 min-w-max"
 				style={{ minWidth: `${totalWidth + 128}px` }}
 			>
-				<div className="w-32 h-full bg-zinc-950 border-r border-zinc-700 shrink-0 flex items-center px-2 sticky left-0 z-40">
-					<span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
+				<div className="w-32 h-full bg-background border-r border-border shrink-0 flex items-center px-2 sticky left-0 z-40">
+					<span className="text-[10px] text-muted font-medium uppercase tracking-wider">
 						Navigator
 					</span>
 				</div>
 				<div
-					className="flex-1 relative cursor-pointer hover:bg-zinc-900/50 transition-colors sticky left-32"
+					className="flex-1 relative cursor-pointer hover:bg-background/50 transition-colors sticky left-32"
 					style={{ width: `${minimapViewWidth}px` }}
 					onMouseDown={handleMinimapClick}
 				>
@@ -800,7 +800,7 @@ export default function Timeline({
 
 			{/* Timeline Timecodes Ruler */}
 			<div
-				className="h-6 min-w-max border-b border-zinc-700 bg-zinc-950 flex items-end relative sticky top-8 z-20"
+				className="h-6 min-w-max border-b border-border bg-background flex items-end relative sticky top-8 z-20"
 				style={{ minWidth: `${totalWidth + 128}px` }}
 				onMouseDown={(e) => {
 					const rect = e.currentTarget.getBoundingClientRect();
@@ -812,8 +812,8 @@ export default function Timeline({
 				}}
 			>
 				{/* Track header spacer */}
-				<div className="w-32 h-full bg-zinc-950 border-r border-zinc-700 sticky left-0 z-20 flex items-center px-2">
-					<span className="text-[10px] text-zinc-400 font-medium uppercase tracking-wider">
+				<div className="w-32 h-full bg-background border-r border-border sticky left-0 z-20 flex items-center px-2">
+					<span className="text-[10px] text-muted font-medium uppercase tracking-wider">
 						Time
 					</span>
 				</div>
@@ -825,12 +825,12 @@ export default function Timeline({
 						style={{ left: `${mark.x + 128}px` }}
 					>
 						<span
-							className={`text-[10px] mb-0.5 select-none ${mark.isMajor ? "text-zinc-400" : "text-zinc-700"}`}
+							className={`text-[10px] mb-0.5 select-none ${mark.isMajor ? "text-muted" : "text-zinc-700"}`}
 						>
 							{mark.label}
 						</span>
 						<div
-							className={`w-px ${mark.isMajor ? "h-2 bg-zinc-600" : "h-1 bg-zinc-800"}`}
+							className={`w-px ${mark.isMajor ? "h-2 bg-zinc-600" : "h-1 bg-panel"}`}
 						/>
 					</div>
 				))}
@@ -846,7 +846,7 @@ export default function Timeline({
 							onChangeFrame(marker.frame);
 						}}
 					>
-						<span className="text-[8px] text-white bg-black/70 px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap mb-0.5">
+						<span className="text-[8px] text-foreground bg-background/70 px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap mb-0.5">
 							{marker.label}
 						</span>
 						<div
@@ -866,27 +866,27 @@ export default function Timeline({
 							onChangeFrame(comment.frame);
 						}}
 					>
-						<div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-zinc-800 border border-zinc-700 shadow-xl rounded w-48 p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-left z-50">
+						<div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-panel border border-border shadow-xl rounded w-48 p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none text-left z-50">
 							<div className="flex items-center gap-2 mb-1">
 								<img
 									src={comment.avatar}
 									alt="Avatar"
-									className="w-4 h-4 rounded-full bg-zinc-700"
+									className="w-4 h-4 rounded-full bg-glass"
 								/>
-								<span className="text-[9px] font-bold text-zinc-300">
+								<span className="text-[9px] font-bold text-foreground">
 									{comment.author}
 								</span>
-								<span className="text-[8px] text-zinc-500 ml-auto">
+								<span className="text-[8px] text-muted ml-auto">
 									{new Date(comment.timestamp).toLocaleTimeString([], {
 										hour: "2-digit",
 										minute: "2-digit",
 									})}
 								</span>
 							</div>
-							<p className="text-[10px] text-zinc-200 leading-tight">
+							<p className="text-[10px] text-foreground leading-tight">
 								{comment.text}
 							</p>
-							<div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-zinc-800 border-b border-r border-zinc-700 rotate-45" />
+							<div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-panel border-b border-r border-border rotate-45" />
 						</div>
 						<div className="w-4 h-4 rounded-full bg-sky-500 shadow-[0_0_8px_rgba(14,165,233,0.8)] border border-sky-300 flex items-center justify-center relative overflow-hidden">
 							<img
@@ -905,11 +905,11 @@ export default function Timeline({
 				{project.tracks.map((track: any, trackIdx: number) => (
 					<div
 						key={track.id || trackIdx}
-						className={`flex ${trackHeight === "sm" ? "h-8" : trackHeight === "lg" ? "h-24" : "h-12"} w-full items-center bg-zinc-800/50 border-y border-zinc-700/50 relative ${track.isHidden ? "opacity-50" : ""} ${track.isLocked ? "bg-[url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==)]" : ""}`}
+						className={`flex ${trackHeight === "sm" ? "h-8" : trackHeight === "lg" ? "h-24" : "h-12"} w-full items-center bg-panel/50 border-y border-border/50 relative ${track.isHidden ? "opacity-50" : ""} ${track.isLocked ? "bg-[url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAIklEQVQIW2NkQAKrVq36zwjjgzhhYWGMYAEYB8RmROaABADeOQ8CXl/xfgAAAABJRU5ErkJggg==)]" : ""}`}
 					>
 						{/* Track Header */}
 						<div
-							className="w-32 h-full bg-zinc-950 border-r border-zinc-700 flex items-center justify-between px-2 sticky left-0 z-20 cursor-grab active:cursor-grabbing hover:bg-zinc-900 transition-colors"
+							className="w-32 h-full bg-background border-r border-border flex items-center justify-between px-2 sticky left-0 z-20 cursor-grab active:cursor-grabbing hover:bg-background transition-colors"
 							style={{
 								borderLeft: track.color
 									? `4px solid ${track.color}`
@@ -947,7 +947,7 @@ export default function Timeline({
 							}}
 						>
 							<span
-								className="text-xs font-medium text-zinc-400 truncate w-16 select-none"
+								className="text-xs font-medium text-muted truncate w-16 select-none"
 								onDoubleClick={(e) => {
 									e.stopPropagation();
 									onRenameTrack?.(trackIdx, track.name);
@@ -963,7 +963,7 @@ export default function Timeline({
 										onToggleTrackHide?.(trackIdx);
 									}}
 									title="Toggle Visibility"
-									className={`p-1 hover:bg-zinc-800 rounded ${track.isHidden ? "text-zinc-400" : "text-zinc-400 hover:text-white"}`}
+									className={`p-1 hover:bg-panel rounded ${track.isHidden ? "text-muted" : "text-muted hover:text-foreground"}`}
 								>
 									<svg
 										className="w-3 h-3"
@@ -991,7 +991,7 @@ export default function Timeline({
 										onToggleTrackMute?.(trackIdx);
 									}}
 									title="Mute Audio"
-									className={`p-1 hover:bg-zinc-800 rounded ${track.isMuted ? "text-red-400" : "text-zinc-400 hover:text-white"}`}
+									className={`p-1 hover:bg-panel rounded ${track.isMuted ? "text-red-400" : "text-muted hover:text-foreground"}`}
 								>
 									<svg
 										className="w-3 h-3"
@@ -1020,7 +1020,7 @@ export default function Timeline({
 										onToggleTrackSolo?.(trackIdx);
 									}}
 									title="Solo Audio"
-									className={`p-1 text-[10px] font-bold hover:bg-zinc-800 rounded ${track.isSoloed ? "text-yellow-400" : "text-zinc-400 hover:text-white"}`}
+									className={`p-1 text-[10px] font-bold hover:bg-panel rounded ${track.isSoloed ? "text-yellow-400" : "text-muted hover:text-foreground"}`}
 								>
 									S
 								</button>
@@ -1030,7 +1030,7 @@ export default function Timeline({
 										onToggleTrackLock?.(trackIdx);
 									}}
 									title="Lock Track"
-									className={`p-1 hover:bg-zinc-800 rounded ${track.isLocked ? "text-red-400" : "text-zinc-400 hover:text-white"}`}
+									className={`p-1 hover:bg-panel rounded ${track.isLocked ? "text-red-400" : "text-muted hover:text-foreground"}`}
 								>
 									<svg
 										className="w-3 h-3"
@@ -1163,11 +1163,11 @@ export default function Timeline({
 										{/* Phase 50: Remote Lock Indicator */}
 										{clip.lockedBy && (
 											<div
-												className="absolute top-0 right-0 bg-black/80 px-1 py-0.5 rounded-bl flex items-center gap-1 z-30"
+												className="absolute top-0 right-0 bg-background/80 px-1 py-0.5 rounded-bl flex items-center gap-1 z-30"
 												style={{ backgroundColor: clip.lockedColor }}
 											>
 												<svg
-													className="w-2.5 h-2.5 text-white"
+													className="w-2.5 h-2.5 text-foreground"
 													fill="none"
 													stroke="currentColor"
 													viewBox="0 0 24 24"
@@ -1179,7 +1179,7 @@ export default function Timeline({
 														d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
 													></path>
 												</svg>
-												<span className="text-[8px] font-bold text-white uppercase">
+												<span className="text-[8px] font-bold text-foreground uppercase">
 													{clip.lockedBy}
 												</span>
 											</div>
@@ -1203,7 +1203,7 @@ export default function Timeline({
 
 										<div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden">
 											{clip.type === "text" && (
-												<div className="h-full flex items-center px-2 text-[10px] text-white opacity-50 overflow-hidden whitespace-nowrap">
+												<div className="h-full flex items-center px-2 text-[10px] text-foreground opacity-50 overflow-hidden whitespace-nowrap">
 													{clip.text_content}
 												</div>
 											)}
@@ -1247,7 +1247,7 @@ export default function Timeline({
 												})()}
 										</div>
 										<div className="flex items-center gap-2 relative z-10 drop-shadow-md">
-											<span className="text-[10px] text-white truncate font-medium">
+											<span className="text-[10px] text-foreground truncate font-medium">
 												{clip.name}
 											</span>
 											{clip.playback_rate && clip.playback_rate !== 1.0 && (
@@ -1304,7 +1304,7 @@ export default function Timeline({
 										{clip.transitions?.in &&
 											clip.transitions.in.duration_frames > 0 && (
 												<div
-													className="absolute left-0 top-0 bottom-0 bg-white/10 z-10 pointer-events-none"
+													className="absolute left-0 top-0 bottom-0 bg-glass z-10 pointer-events-none"
 													style={{
 														width: `${clip.transitions.in.duration_frames * pxPerFrame}px`,
 														clipPath: "polygon(0 100%, 100% 0, 100% 100%)",
@@ -1314,7 +1314,7 @@ export default function Timeline({
 										{clip.transitions?.out &&
 											clip.transitions.out.duration_frames > 0 && (
 												<div
-													className="absolute right-0 top-0 bottom-0 bg-white/10 z-10 pointer-events-none"
+													className="absolute right-0 top-0 bottom-0 bg-glass z-10 pointer-events-none"
 													style={{
 														width: `${clip.transitions.out.duration_frames * pxPerFrame}px`,
 														clipPath: "polygon(0 0, 100% 100%, 0 100%)",
@@ -1363,7 +1363,7 @@ export default function Timeline({
 															backgroundColor: marker.color || "#ec4899",
 														}}
 													/>
-													<div className="absolute top-2 left-1 text-[8px] bg-black/80 text-white px-1 rounded opacity-0 group-hover/marker:opacity-100 whitespace-nowrap">
+													<div className="absolute top-2 left-1 text-[8px] bg-background/80 text-foreground px-1 rounded opacity-0 group-hover/marker:opacity-100 whitespace-nowrap">
 														{marker.label}
 													</div>
 												</div>

@@ -41,7 +41,7 @@ export default function ResetPasswordPage() {
 	return (
 		<AuthCard title="Set new password" subtitle="Enter your new password.">
 			{!token ? (
-				<p className="text-center text-sm text-zinc-400">
+				<p className="text-center text-sm text-muted">
 					Invalid reset link. Please request a new one.
 				</p>
 			) : (
@@ -52,13 +52,13 @@ export default function ResetPasswordPage() {
 						onChange={(e) => setPassword(e.target.value)}
 						required
 						minLength={8}
-						className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500"
+						className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500"
 						placeholder="New password (min 8 chars)"
 					/>
 					<button
 						type="submit"
 						disabled={loading}
-						className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+						className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground hover:bg-blue-500 disabled:opacity-50"
 					>
 						{loading ? "Resetting..." : "Reset Password"}
 					</button>

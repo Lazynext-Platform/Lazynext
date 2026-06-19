@@ -20,17 +20,17 @@ export function KaraokeText({ words }: KaraokeTextProps) {
 
 	return (
 		<div className="absolute bottom-10 left-0 w-full text-center pointer-events-none drop-shadow-md">
-			<div className="inline-block bg-black bg-opacity-50 px-6 py-4 rounded-xl">
+			<div className="inline-block bg-background bg-opacity-50 px-6 py-4 rounded-xl">
 				{words.map((word, idx) => {
 					const isPassed = frame >= word.endFrame;
 					const isActive = frame >= word.startFrame && frame < word.endFrame;
 
-					let colorClass = "text-white";
+					let colorClass = "text-foreground";
 					if (isActive) {
 						colorClass =
 							"text-yellow-400 scale-110 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]";
 					} else if (isPassed) {
-						colorClass = "text-gray-400";
+						colorClass = "text-muted";
 					}
 
 					return (

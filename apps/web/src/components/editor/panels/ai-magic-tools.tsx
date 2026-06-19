@@ -53,7 +53,7 @@ export function AIMagicTools() {
 			<div className="p-4 border-b border-neutral-800 bg-neutral-950/50 backdrop-blur-xl">
 				<div className="flex items-center gap-2 mb-4">
 					<Wand2 className="w-5 h-5 text-cyan-400" />
-					<h2 className="font-semibold text-white">Generative Studio</h2>
+					<h2 className="font-semibold text-foreground">Generative Studio</h2>
 				</div>
 
 				{/* Tabs */}
@@ -62,8 +62,8 @@ export function AIMagicTools() {
 						onClick={() => setActiveTab("video")}
 						className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
 							activeTab === "video"
-								? "bg-neutral-800 text-white shadow-sm"
-								: "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+								? "bg-neutral-800 text-foreground shadow-sm"
+								: "text-neutral-400 hover:text-foreground hover:bg-neutral-800/50"
 						}`}
 					>
 						<Video className="w-3 h-3" /> Video
@@ -72,8 +72,8 @@ export function AIMagicTools() {
 						onClick={() => setActiveTab("audio")}
 						className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-colors flex items-center justify-center gap-2 ${
 							activeTab === "audio"
-								? "bg-neutral-800 text-white shadow-sm"
-								: "text-neutral-400 hover:text-white hover:bg-neutral-800/50"
+								? "bg-neutral-800 text-foreground shadow-sm"
+								: "text-neutral-400 hover:text-foreground hover:bg-neutral-800/50"
 						}`}
 					>
 						<Mic className="w-3 h-3" /> Voice
@@ -103,7 +103,7 @@ export function AIMagicTools() {
 				<button
 					onClick={handleGenerate}
 					disabled={isGenerating || !prompt.trim()}
-					className="w-full relative group overflow-hidden bg-neutral-800 hover:bg-neutral-700 text-white font-medium py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700 flex items-center justify-center gap-2"
+					className="w-full relative group overflow-hidden bg-neutral-800 hover:bg-neutral-700 text-foreground font-medium py-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-neutral-700 flex items-center justify-center gap-2"
 				>
 					{isGenerating ? (
 						<>

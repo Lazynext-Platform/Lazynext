@@ -16,7 +16,7 @@ export function MarketingNavbar() {
 							className="w-6 h-6 object-contain"
 						/>
 					</div>
-					<span className="text-xl font-bold tracking-tight text-white">
+					<span className="text-xl font-bold tracking-tight text-foreground">
 						Lazynext
 					</span>
 				</Link>
@@ -48,7 +48,7 @@ export function MarketingNavbar() {
 				<div className="flex items-center gap-4">
 					<Link
 						href="/sign-in"
-						className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl border border-white/10 transition-colors"
+						className="px-6 py-2 bg-hover hover:bg-glass text-foreground font-medium rounded-xl border border-border transition-colors"
 					>
 						Login
 					</Link>

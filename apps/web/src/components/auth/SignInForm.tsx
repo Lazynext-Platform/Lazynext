@@ -42,7 +42,7 @@ export function SignInForm() {
 			<div>
 				<label
 					htmlFor="email"
-					className="mb-1 block text-xs font-medium text-zinc-400"
+					className="mb-1 block text-xs font-medium text-muted"
 				>
 					Email
 				</label>
@@ -52,7 +52,7 @@ export function SignInForm() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					placeholder="you@example.com"
 				/>
 			</div>
@@ -60,7 +60,7 @@ export function SignInForm() {
 				<div className="mb-1 flex items-center justify-between">
 					<label
 						htmlFor="password"
-						className="block text-xs font-medium text-zinc-400"
+						className="block text-xs font-medium text-muted"
 					>
 						Password
 					</label>
@@ -78,18 +78,18 @@ export function SignInForm() {
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					minLength={8}
-					className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
 					placeholder="••••••••"
 				/>
 			</div>
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:opacity-50"
+				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-blue-500 disabled:opacity-50"
 			>
 				{loading ? "Signing in..." : "Sign In"}
 			</button>
-			<p className="text-center text-xs text-zinc-500">
+			<p className="text-center text-xs text-muted">
 				Don&apos;t have an account?{" "}
 				<Link href="/sign-up" className="text-blue-400 hover:text-blue-300">
 					Sign Up

@@ -2413,14 +2413,14 @@ export default function EditorClient({ project }: { project: Project }) {
 							toast.success(`Expression applied to ${property}!`);
 						}
 					}}
-					className={`mr-1 text-[10px] font-mono font-bold ${selectedClip?.expressions?.[property] ? "text-rose-400" : "text-zinc-500 hover:text-zinc-300"}`}
+					className={`mr-1 text-[10px] font-mono font-bold ${selectedClip?.expressions?.[property] ? "text-rose-400" : "text-muted hover:text-foreground"}`}
 					title="Add JS Expression (After Effects Parity)"
 				>
 					ƒx
 				</button>
 				<button
 					onClick={() => toggleKeyframe(property, value)}
-					className={`mr-1 text-[10px] ${active ? "text-indigo-400" : "text-zinc-400"}`}
+					className={`mr-1 text-[10px] ${active ? "text-indigo-400" : "text-muted"}`}
 					title="Toggle Keyframe"
 				>
 					♦
@@ -2429,7 +2429,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					<select
 						value={keyframe.easing || "linear"}
 						onChange={(e) => updateKeyframeEasing(property, e.target.value)}
-						className="bg-zinc-800 border border-zinc-700 rounded text-[10px] text-zinc-300 py-0.5 px-1 focus:outline-none focus-ring"
+						className="bg-panel border border-border rounded text-[10px] text-foreground py-0.5 px-1 focus:outline-none focus-ring"
 						title="Easing Curve"
 					>
 						<option value="linear">Lin</option>
@@ -2452,7 +2452,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								curve: keyframe.bezierCurve || [0.25, 0.1, 0.25, 1],
 							})
 						}
-						className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-1.5 py-0.5 rounded ml-1 transition-colors flex items-center gap-1"
+						className="bg-indigo-600 hover:bg-indigo-500 text-foreground text-[10px] px-1.5 py-0.5 rounded ml-1 transition-colors flex items-center gap-1"
 						title="Open Graph Editor"
 					>
 						<svg
@@ -3353,7 +3353,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 	return (
 		<div
-			className={`relative h-full w-full overflow-hidden transition-colors duration-1000 ${isInfiniteCanvas ? "bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)] bg-zinc-950" : ""}`}
+			className={`relative h-full w-full overflow-hidden transition-colors duration-1000 ${isInfiniteCanvas ? "bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)] bg-background" : ""}`}
 			style={{
 				backgroundColor: isBioResponsive
 					? `rgb(${Math.floor(20 + systemStress * 0.4)}, ${Math.floor(20 - systemStress * 0.2)}, ${Math.floor(20 - systemStress * 0.2)})`
@@ -3483,7 +3483,7 @@ export default function EditorClient({ project }: { project: Project }) {
 				{/* Left Splitter */}
 				{!mediaPoolPos.floating && (
 					<div
-						className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
+						className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
 						onMouseDown={(e: React.MouseEvent) => {
 							e.preventDefault();
 							const startX = e.clientX;
@@ -3510,7 +3510,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						{/* Preview Area */}
 
 						<div
-							className="flex-1 flex flex-col items-center justify-center bg-black relative"
+							className="flex-1 flex flex-col items-center justify-center bg-background relative"
 							onClick={(e) => {
 								if (activeTool === "pen" && selectedClipId) {
 									// Handle pen tool drawing on canvas
@@ -3633,7 +3633,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											}}
 										>
 											<div
-												className="bg-zinc-900 border text-white p-2 rounded-lg shadow-2xl max-w-[200px]"
+												className="bg-background border text-foreground p-2 rounded-lg shadow-2xl max-w-[200px]"
 												style={{ borderColor: annotation.color }}
 											>
 												<div
@@ -3645,7 +3645,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												<div className="text-xs">{annotation.text}</div>
 											</div>
 											<div
-												className="absolute left-1/2 bottom-0 w-3 h-3 bg-zinc-900 border-b border-r transform -translate-x-1/2 translate-y-1/2 rotate-45"
+												className="absolute left-1/2 bottom-0 w-3 h-3 bg-background border-b border-r transform -translate-x-1/2 translate-y-1/2 rotate-45"
 												style={{ borderColor: annotation.color }}
 											/>
 											<div
@@ -3713,7 +3713,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								/>
 							</div>
 
-							<div className="text-xs text-zinc-400 font-medium px-2">
+							<div className="text-xs text-muted font-medium px-2">
 								{isAutoSaving ? "Saving..." : "Saved"}
 							</div>
 
@@ -3721,38 +3721,38 @@ export default function EditorClient({ project }: { project: Project }) {
 								className="flex -space-x-2 mr-2 cursor-pointer"
 								title="Multiplayer Session (2 Active Editors)"
 							>
-								<div className="w-6 h-6 rounded-full bg-indigo-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-white z-20">
+								<div className="w-6 h-6 rounded-full bg-indigo-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-foreground z-20">
 									You
 								</div>
-								<div className="w-6 h-6 rounded-full bg-pink-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-white z-10">
+								<div className="w-6 h-6 rounded-full bg-pink-600 border border-zinc-900 flex items-center justify-center text-[10px] font-bold text-foreground z-10">
 									AL
 								</div>
 							</div>
 
 							<button
 								onClick={handleAutoReframe}
-								className="text-xs bg-amber-600/80 hover:bg-amber-500 text-white px-3 py-1.5 rounded font-medium border border-amber-500 transition-colors flex items-center gap-1.5 mr-2"
+								className="text-xs bg-amber-600/80 hover:bg-amber-500 text-foreground px-3 py-1.5 rounded font-medium border border-amber-500 transition-colors flex items-center gap-1.5 mr-2"
 								title="Auto-Reframe to 9:16 Vertical"
 							>
 								📱 Reframe
 							</button>
 							<button
 								onClick={handleBeatSync}
-								className="text-xs bg-pink-600/80 hover:bg-pink-500 text-white px-3 py-1.5 rounded font-medium border border-pink-500 transition-colors flex items-center gap-1.5 mr-2"
+								className="text-xs bg-pink-600/80 hover:bg-pink-500 text-foreground px-3 py-1.5 rounded font-medium border border-pink-500 transition-colors flex items-center gap-1.5 mr-2"
 								title="Auto Beat Sync Markers"
 							>
 								🥁 Beat Sync
 							</button>
 							<button
 								onClick={handleGenerateProxies}
-								className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5 mr-2"
+								className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-foreground px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5 mr-2"
 								title="Generate 720p Proxies"
 							>
 								⚡ Proxies
 							</button>
 
 							<div className="relative group mr-2">
-								<button className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-4 py-1.5 rounded font-medium border border-zinc-700 transition-colors flex items-center gap-2">
+								<button className="text-xs bg-panel text-foreground hover:text-foreground px-4 py-1.5 rounded font-medium border border-border transition-colors flex items-center gap-2">
 									<svg
 										className="w-3.5 h-3.5"
 										fill="none"
@@ -3768,13 +3768,13 @@ export default function EditorClient({ project }: { project: Project }) {
 									</svg>
 									Workspace
 								</button>
-								<div className="absolute top-full right-0 mt-1 w-32 bg-zinc-800 border border-zinc-700 rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50 overflow-hidden">
+								<div className="absolute top-full right-0 mt-1 w-32 bg-panel border border-border rounded shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity z-50 overflow-hidden">
 									<button
 										onClick={() => {
 											setInspectorPos({ floating: false, x: 800, y: 100 });
 											setMediaPoolPos({ floating: false, x: 50, y: 100 });
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-foreground hover:bg-glass hover:text-foreground"
 									>
 										Default
 									</button>
@@ -3788,7 +3788,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											setMediaPoolPos({ floating: false, x: 50, y: 100 });
 											setSelectedClipId(null);
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-foreground hover:bg-glass hover:text-foreground"
 									>
 										Color Grading
 									</button>
@@ -3801,7 +3801,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												y: 50,
 											});
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-foreground hover:bg-glass hover:text-foreground"
 									>
 										Dual Screen
 									</button>
@@ -3814,7 +3814,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											setActiveWorkspace("timeline");
 											setShowAudioMixer(true);
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-zinc-300 hover:bg-zinc-700 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-foreground hover:bg-glass hover:text-foreground"
 									>
 										Audio Workspace
 									</button>
@@ -3822,7 +3822,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										onClick={() => {
 											setActiveWorkspace("fusion");
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-indigo-400 font-semibold hover:bg-indigo-600 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-indigo-400 font-semibold hover:bg-indigo-600 hover:text-foreground"
 									>
 										Fusion (Nodes)
 									</button>
@@ -3830,7 +3830,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										onClick={() => {
 											setActiveWorkspace("color");
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-teal-400 font-semibold hover:bg-teal-600 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-teal-400 font-semibold hover:bg-teal-600 hover:text-foreground"
 									>
 										Color (Scopes)
 									</button>
@@ -3838,7 +3838,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										onClick={() => {
 											setActiveWorkspace("audio");
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-amber-400 font-semibold hover:bg-amber-600 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-amber-400 font-semibold hover:bg-amber-600 hover:text-foreground"
 									>
 										Audio (Fairlight)
 									</button>
@@ -3846,7 +3846,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										onClick={() => {
 											setActiveWorkspace("ai");
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-cyan-400 font-semibold hover:bg-fuchsia-600 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-cyan-400 font-semibold hover:bg-fuchsia-600 hover:text-foreground"
 									>
 										AI Magic Tools
 									</button>
@@ -3854,11 +3854,11 @@ export default function EditorClient({ project }: { project: Project }) {
 										onClick={() => {
 											setActiveWorkspace("export");
 										}}
-										className="w-full text-left px-3 py-2 text-xs text-orange-400 font-semibold hover:bg-orange-600 hover:text-white"
+										className="w-full text-left px-3 py-2 text-xs text-orange-400 font-semibold hover:bg-orange-600 hover:text-foreground"
 									>
 										Deliver (Export)
 									</button>
-									<div className="border-t border-zinc-700 my-1"></div>
+									<div className="border-t border-border my-1"></div>
 									<button
 										onClick={() => {
 											setIsInfiniteCanvas(!isInfiniteCanvas);
@@ -3876,7 +3876,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												setInfinitePanZoom({ x: 0, y: 0, scale: 1 });
 											}
 										}}
-										className={`w-full text-left px-3 py-2 text-xs font-semibold ${isInfiniteCanvas ? "bg-indigo-600 text-white" : "text-zinc-300 hover:bg-zinc-700 hover:text-white"}`}
+										className={`w-full text-left px-3 py-2 text-xs font-semibold ${isInfiniteCanvas ? "bg-indigo-600 text-foreground" : "text-foreground hover:bg-glass hover:text-foreground"}`}
 									>
 										∞ Infinite Canvas
 									</button>
@@ -3884,7 +3884,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 							<button
 								onClick={() => setShowCommandPalette(true)}
-								className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-3 py-1.5 rounded font-medium border border-zinc-700 transition-colors flex items-center gap-1.5"
+								className="text-xs bg-panel text-foreground hover:text-foreground px-3 py-1.5 rounded font-medium border border-border transition-colors flex items-center gap-1.5"
 								title="Keyboard Shortcuts (⌘K)"
 							>
 								<svg
@@ -3905,14 +3905,14 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Brain-Computer Interface Controls (Phase 215) */}
 							<button
 								onClick={handleEEGHeadband}
-								className="text-xs bg-indigo-600/80 hover:bg-indigo-500 text-white px-3 py-1.5 rounded font-medium border border-indigo-500 transition-colors flex items-center gap-1.5 mr-2"
+								className="text-xs bg-indigo-600/80 hover:bg-indigo-500 text-foreground px-3 py-1.5 rounded font-medium border border-indigo-500 transition-colors flex items-center gap-1.5 mr-2"
 								title="BCI Neural Mapping"
 							>
 								🧠 Neural Input
 							</button>
 							<button
 								onClick={handleProjectInfoDump}
-								className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-3 py-1.5 rounded font-medium border border-zinc-700 transition-colors flex items-center gap-1.5"
+								className="text-xs bg-panel text-foreground hover:text-foreground px-3 py-1.5 rounded font-medium border border-border transition-colors flex items-center gap-1.5"
 								title="Project Info"
 							>
 								ℹ️ Info
@@ -3920,27 +3920,27 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Zero-Latency CRDT Sync (Phase 214) */}
 							<button
 								onClick={handleCRDTSync}
-								className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-white px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5"
+								className="text-xs bg-emerald-600/80 hover:bg-emerald-500 text-foreground px-3 py-1.5 rounded font-medium border border-emerald-500 transition-colors flex items-center gap-1.5"
 								title="Share CRDT Collaboration Link"
 							>
 								🤝 100-Player Sync
 							</button>
 							<button
 								onClick={handleNewProject}
-								className="text-xs bg-zinc-800 text-zinc-300 hover:text-white px-4 py-1.5 rounded font-medium border border-zinc-700 transition-colors"
+								className="text-xs bg-panel text-foreground hover:text-foreground px-4 py-1.5 rounded font-medium border border-border transition-colors"
 							>
 								New Project
 							</button>
 							<button
 								onClick={handleExport}
-								className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded font-medium transition-colors"
+								className="text-xs bg-indigo-600 hover:bg-indigo-500 text-foreground px-4 py-1.5 rounded font-medium transition-colors"
 							>
 								Export
 							</button>
 						</div>
 
 						<div
-							className="text-zinc-300 absolute top-4 left-4 z-10 text-sm font-mono bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-zinc-700 cursor-pointer hover:border-indigo-500/50 transition-colors group"
+							className="text-foreground absolute top-4 left-4 z-10 text-sm font-mono bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-border cursor-pointer hover:border-indigo-500/50 transition-colors group"
 							title="Click to jump to a specific frame"
 							onClick={() => {
 								const input = prompt("Jump to frame:", String(frame));
@@ -3961,7 +3961,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								}
 							}}
 						>
-							<span className="text-zinc-400 text-[10px] mr-2 group-hover:text-indigo-400 transition-colors">
+							<span className="text-muted text-[10px] mr-2 group-hover:text-indigo-400 transition-colors">
 								TC
 							</span>
 							{(() => {
@@ -3973,9 +3973,9 @@ export default function EditorClient({ project }: { project: Project }) {
 								const hh = Math.floor(totalSeconds / 3600);
 								return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}:${String(ff).padStart(2, "0")}`;
 							})()}
-							<span className="text-zinc-400 text-[10px] ml-2">f{frame}</span>
+							<span className="text-muted text-[10px] ml-2">f{frame}</span>
 						</div>
-						<div className="w-full max-w-4xl max-h-full aspect-video border border-zinc-700 bg-zinc-950 relative overflow-hidden shadow-2xl">
+						<div className="w-full max-w-4xl max-h-full aspect-video border border-border bg-background relative overflow-hidden shadow-2xl">
 							{/* Sentient AGI Co-Editor (Phase 218) */}
 
 							<div
@@ -4005,9 +4005,9 @@ export default function EditorClient({ project }: { project: Project }) {
 							/>
 							{/* Phase 27: Cinematic Multiverse Prototyping */}
 							{isMultiverseMode && (
-								<div className="absolute inset-0 bg-black z-[36] flex">
+								<div className="absolute inset-0 bg-background z-[36] flex">
 									<div className="flex-1 relative border-r-2 border-fuchsia-500/50 flex flex-col items-center justify-center overflow-hidden">
-										<div className="absolute top-2 left-2 bg-fuchsia-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
+										<div className="absolute top-2 left-2 bg-fuchsia-600 text-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
 											Universe A (Master)
 										</div>
 										<WasmPlayer
@@ -4027,7 +4027,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										/>
 									</div>
 									<div className="flex-1 relative border-l-2 border-indigo-500/50 flex flex-col items-center justify-center overflow-hidden">
-										<div className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
+										<div className="absolute top-2 right-2 bg-indigo-600 text-foreground text-[10px] font-bold px-2 py-0.5 rounded shadow-lg z-10">
 											Universe B (Alternate Pacing)
 										</div>
 										{/* Simulated alternate timeline with slight time offset */}
@@ -4046,11 +4046,11 @@ export default function EditorClient({ project }: { project: Project }) {
 											showSafeMargins={false}
 											renderQuality="half"
 										/>
-										<div className="absolute bottom-4 right-4 bg-black/80 border border-indigo-500/50 p-2 rounded backdrop-blur">
-											<div className="text-[10px] text-zinc-300 font-mono mb-1">
+										<div className="absolute bottom-4 right-4 bg-background/80 border border-indigo-500/50 p-2 rounded backdrop-blur">
+											<div className="text-[10px] text-foreground font-mono mb-1">
 												Pacing Delta: -0.5s
 											</div>
-											<div className="w-32 h-1 bg-zinc-800 rounded-full overflow-hidden">
+											<div className="w-32 h-1 bg-panel rounded-full overflow-hidden">
 												<div
 													className="h-full bg-indigo-500"
 													style={{ width: "40%" }}
@@ -4063,7 +4063,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							<MulticamGrid isMulticamMode={multiCamMode} />
 							{showDataBurnIn && (
 								<div className="absolute top-8 left-0 right-0 pointer-events-none z-[60] flex flex-col items-center justify-start opacity-80 mix-blend-difference">
-									<div className="bg-black text-white font-mono text-[2vw] px-4 py-1 leading-none shadow-lg tracking-widest border-2 border-white/20">
+									<div className="bg-background text-foreground font-mono text-[2vw] px-4 py-1 leading-none shadow-lg tracking-widest border-2 border-white/20">
 										TC:{" "}
 										{(() => {
 											const totalSecs = Math.max(0, frame / 60);
@@ -4075,14 +4075,14 @@ export default function EditorClient({ project }: { project: Project }) {
 										})()}
 									</div>
 									<div className="flex gap-4 mt-2">
-										<div className="bg-black text-white font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
+										<div className="bg-background text-foreground font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
 											FR: {frame}
 										</div>
-										<div className="bg-black text-white font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
+										<div className="bg-background text-foreground font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
 											RES: {projectData.width || 1920}x
 											{projectData.height || 1080}
 										</div>
-										<div className="bg-black text-amber-400 font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
+										<div className="bg-background text-amber-400 font-mono text-[1vw] px-2 py-0.5 shadow-lg border border-white/20">
 											PROXY: {playbackQuality}
 										</div>
 									</div>
@@ -4102,17 +4102,17 @@ export default function EditorClient({ project }: { project: Project }) {
 
 							{/* Multicam Grid Overlay */}
 							{isMulticamMode && (
-								<div className="absolute inset-0 z-40 grid grid-cols-2 grid-rows-2 bg-black">
+								<div className="absolute inset-0 z-40 grid grid-cols-2 grid-rows-2 bg-background">
 									{[1, 2, 3, 4].map((camIndex) => (
 										<div
 											key={camIndex}
-											className="relative border border-zinc-700 bg-zinc-900 overflow-hidden cursor-pointer group hover:border-indigo-500 transition-colors"
+											className="relative border border-border bg-background overflow-hidden cursor-pointer group hover:border-indigo-500 transition-colors"
 											onClick={() => {
 												// Simulate cutting to a camera angle
 												console.log("Cut to camera", camIndex);
 											}}
 										>
-											<div className="absolute top-2 left-2 bg-black/60 backdrop-blur text-white text-xs px-2 py-1 rounded font-mono z-10 group-hover:bg-indigo-600 transition-colors">
+											<div className="absolute top-2 left-2 bg-background/60 backdrop-blur text-foreground text-xs px-2 py-1 rounded font-mono z-10 group-hover:bg-indigo-600 transition-colors">
 												CAM {camIndex}
 											</div>
 											{/* Dummy content for other cameras */}
@@ -4134,7 +4134,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						<div className="absolute top-4 right-4 z-50 flex items-center gap-2">
 							<button
 								onClick={() => setIsMulticamMode(!isMulticamMode)}
-								className={`p-2 rounded transition-colors flex items-center gap-1.5 ${isMulticamMode ? "text-indigo-400 bg-indigo-500/20" : "text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700"}`}
+								className={`p-2 rounded transition-colors flex items-center gap-1.5 ${isMulticamMode ? "text-indigo-400 bg-indigo-500/20" : "text-foreground hover:text-foreground bg-panel/80 hover:bg-glass"}`}
 								title="Toggle Multicam Mode"
 							>
 								<svg
@@ -4154,7 +4154,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							<select
 								value={playbackQuality}
 								onChange={(e) => setPlaybackQuality(e.target.value as any)}
-								className="bg-zinc-800/80 text-zinc-300 text-xs px-2 py-1.5 rounded border border-zinc-700 outline-none hover:bg-zinc-700"
+								className="bg-panel/80 text-foreground text-xs px-2 py-1.5 rounded border border-border outline-none hover:bg-glass"
 							>
 								<option value="full">Full Res</option>
 								<option value="half">1/2 Proxy</option>
@@ -4162,7 +4162,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							</select>
 							<button
 								onClick={() => setShowSafeMargins(!showSafeMargins)}
-								className={`p-2 rounded transition-colors ${showSafeMargins ? "text-indigo-400 bg-indigo-500/20" : "text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700"}`}
+								className={`p-2 rounded transition-colors ${showSafeMargins ? "text-indigo-400 bg-indigo-500/20" : "text-foreground hover:text-foreground bg-panel/80 hover:bg-glass"}`}
 								title="Toggle Safe Margins"
 							>
 								<svg
@@ -4184,7 +4184,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									setShowScopes(!showScopes);
 									if (!showScopes) setShowMixer(false);
 								}}
-								className={`p-2 rounded transition-colors ${showScopes ? "text-emerald-400 bg-emerald-500/20" : "text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700"}`}
+								className={`p-2 rounded transition-colors ${showScopes ? "text-emerald-400 bg-emerald-500/20" : "text-foreground hover:text-foreground bg-panel/80 hover:bg-glass"}`}
 								title="Toggle Video Scopes"
 							>
 								<svg
@@ -4206,7 +4206,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									setShowMixer(!showMixer);
 									if (!showMixer) setShowScopes(false);
 								}}
-								className={`p-2 rounded transition-colors ${showMixer ? "text-amber-400 bg-amber-500/20" : "text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700"}`}
+								className={`p-2 rounded transition-colors ${showMixer ? "text-amber-400 bg-amber-500/20" : "text-foreground hover:text-foreground bg-panel/80 hover:bg-glass"}`}
 								title="Toggle Audio Mixer"
 							>
 								<svg
@@ -4225,7 +4225,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							</button>
 							{/* Holographic Display Rendering (Phase 211) */}
 							<button
-								className="px-2 py-1.5 rounded hover:bg-zinc-700 transition-colors flex items-center gap-1 bg-zinc-800/80 border border-fuchsia-500/30 text-fuchsia-300"
+								className="px-2 py-1.5 rounded hover:bg-glass transition-colors flex items-center gap-1 bg-panel/80 border border-fuchsia-500/30 text-fuchsia-300"
 								title="Spatial Stereoscopic Output"
 								onClick={handleStereoscopicAppleVision}
 							>
@@ -4251,7 +4251,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								Spatial 3D
 							</button>
 							<button
-								className="p-2 text-zinc-300 hover:text-white bg-zinc-800/80 hover:bg-zinc-700 rounded transition-colors"
+								className="p-2 text-foreground hover:text-foreground bg-panel/80 hover:bg-glass rounded transition-colors"
 								title="Fullscreen"
 							>
 								<Maximize2 size={16} />
@@ -4260,15 +4260,15 @@ export default function EditorClient({ project }: { project: Project }) {
 
 						{/* Video Scopes Panel */}
 						{showScopes && (
-							<div className="absolute bottom-0 left-0 right-0 z-40 bg-black/90 backdrop-blur-sm border-t border-zinc-700">
+							<div className="absolute bottom-0 left-0 right-0 z-40 bg-background/90 backdrop-blur-sm border-t border-border">
 								<VideoScopes isPlaying={isPlaying} frame={frame} />
 							</div>
 						)}
 
 						{/* Audio Mixer Panel */}
 						{showMixer && (
-							<div className="absolute bottom-0 left-0 right-0 h-56 z-40 bg-zinc-950/95 backdrop-blur-md border-t border-zinc-700 flex flex-col shadow-2xl">
-								<div className="h-7 flex items-center px-3 border-b border-zinc-700/80 shrink-0 bg-zinc-900/50">
+							<div className="absolute bottom-0 left-0 right-0 h-56 z-40 bg-background/95 backdrop-blur-md border-t border-border flex flex-col shadow-2xl">
+								<div className="h-7 flex items-center px-3 border-b border-border/80 shrink-0 bg-background/50">
 									<span className="text-[10px] font-bold text-amber-400 uppercase tracking-widest flex items-center gap-2">
 										<svg
 											className="w-3 h-3"
@@ -4311,11 +4311,11 @@ export default function EditorClient({ project }: { project: Project }) {
 											return (
 												<div
 													key={track.id}
-													className="w-20 shrink-0 flex flex-col items-center bg-zinc-900/50 border border-zinc-700/80 rounded py-2 shadow-inner"
+													className="w-20 shrink-0 flex flex-col items-center bg-background/50 border border-border/80 rounded py-2 shadow-inner"
 												>
 													{/* Pan Knob */}
 													<div className="mb-2 w-full flex flex-col items-center group">
-														<div className="w-8 h-8 rounded-full border border-zinc-700 bg-zinc-800 shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] relative cursor-ns-resize group-hover:border-zinc-500 transition-colors">
+														<div className="w-8 h-8 rounded-full border border-border bg-panel shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)] relative cursor-ns-resize group-hover:border-zinc-500 transition-colors">
 															<div
 																className="absolute top-0 left-1/2 w-0.5 h-2 bg-amber-400 origin-[50%_16px] transition-transform"
 																style={{
@@ -4323,7 +4323,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																}}
 															/>
 														</div>
-														<span className="text-[8px] text-zinc-400 font-mono mt-1 group-hover:text-amber-400 transition-colors">
+														<span className="text-[8px] text-muted font-mono mt-1 group-hover:text-amber-400 transition-colors">
 															{(track.pan ?? 0).toFixed(2)}
 														</span>
 													</div>
@@ -4331,27 +4331,27 @@ export default function EditorClient({ project }: { project: Project }) {
 													{/* Fader & Meters */}
 													<div className="flex-1 flex gap-2 h-24 relative">
 														{/* Left/Right Meters */}
-														<div className="w-2 bg-black rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
+														<div className="w-2 bg-background rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
 															<div
 																className="w-full bg-gradient-to-t from-emerald-500 via-yellow-400 to-red-500 transition-all duration-75"
 																style={{ height: `${leftMeter * 100}%` }}
 															/>
 														</div>
-														<div className="w-2 bg-black rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
+														<div className="w-2 bg-background rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
 															<div
 																className="w-full bg-gradient-to-t from-emerald-500 via-yellow-400 to-red-500 transition-all duration-75"
 																style={{ height: `${rightMeter * 100}%` }}
 															/>
 														</div>
 														{/* Fader Track */}
-														<div className="absolute right-[-14px] top-0 bottom-0 w-1 bg-black rounded-full shadow-inner flex flex-col items-center justify-center">
+														<div className="absolute right-[-14px] top-0 bottom-0 w-1 bg-background rounded-full shadow-inner flex flex-col items-center justify-center">
 															<div className="w-3 h-1 bg-zinc-600 rounded-full" />
 															<div className="w-3 h-1 bg-zinc-600 rounded-full mt-4" />
 															<div className="w-3 h-1 bg-zinc-600 rounded-full mt-4" />
 														</div>
 														{/* Fader Cap */}
 														<div
-															className="absolute right-[-24px] w-5 h-8 bg-zinc-700 border-y-4 border-zinc-900 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-zinc-600 transition-colors z-10 flex items-center justify-center"
+															className="absolute right-[-24px] w-5 h-8 bg-glass border-y-4 border-zinc-900 rounded shadow-[0_4px_6px_rgba(0,0,0,0.5)] cursor-ns-resize hover:bg-zinc-600 transition-colors z-10 flex items-center justify-center"
 															style={{
 																bottom: `${((trackVol + 60) / 72) * 100}%`,
 																transform: "translateY(50%)",
@@ -4362,11 +4362,11 @@ export default function EditorClient({ project }: { project: Project }) {
 													</div>
 
 													{/* Track Label */}
-													<div className="mt-3 w-full border-t border-zinc-700/80 pt-1 text-center">
-														<span className="text-[10px] font-bold text-zinc-300">
+													<div className="mt-3 w-full border-t border-border/80 pt-1 text-center">
+														<span className="text-[10px] font-bold text-foreground">
 															{track.name}
 														</span>
-														<div className="text-[8px] text-zinc-400 font-mono mt-0.5">
+														<div className="text-[8px] text-muted font-mono mt-0.5">
 															{trackVol > 0 ? "+" : ""}
 															{trackVol.toFixed(1)} dB
 														</div>
@@ -4376,17 +4376,17 @@ export default function EditorClient({ project }: { project: Project }) {
 										})}
 
 									{/* Divider */}
-									<div className="w-px h-full bg-zinc-800/80 mx-2" />
+									<div className="w-px h-full bg-panel/80 mx-2" />
 
 									{/* Master Out */}
-									<div className="w-24 shrink-0 flex flex-col items-center bg-zinc-900 border border-zinc-700 rounded py-2 shadow-inner">
+									<div className="w-24 shrink-0 flex flex-col items-center bg-background border border-border rounded py-2 shadow-inner">
 										<div className="mb-2 w-full flex flex-col items-center">
 											<span className="text-[10px] font-bold text-amber-500 tracking-wider">
 												MASTER
 											</span>
 										</div>
 										<div className="flex-1 flex gap-2 h-24 relative">
-											<div className="w-3 bg-black rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
+											<div className="w-3 bg-background rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
 												<div
 													className="w-full bg-gradient-to-t from-emerald-500 via-yellow-400 to-red-500 transition-all duration-75"
 													style={{
@@ -4394,7 +4394,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													}}
 												/>
 											</div>
-											<div className="w-3 bg-black rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
+											<div className="w-3 bg-background rounded-full overflow-hidden flex flex-col-reverse shadow-inner">
 												<div
 													className="w-full bg-gradient-to-t from-emerald-500 via-yellow-400 to-red-500 transition-all duration-75"
 													style={{
@@ -4402,7 +4402,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													}}
 												/>
 											</div>
-											<div className="absolute right-[-18px] top-0 bottom-0 w-1 bg-black rounded-full shadow-inner flex flex-col items-center justify-center">
+											<div className="absolute right-[-18px] top-0 bottom-0 w-1 bg-background rounded-full shadow-inner flex flex-col items-center justify-center">
 												<div className="w-4 h-1 bg-zinc-600 rounded-full" />
 												<div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
 												<div className="w-4 h-1 bg-zinc-600 rounded-full mt-4" />
@@ -4414,8 +4414,8 @@ export default function EditorClient({ project }: { project: Project }) {
 												<div className="w-full h-0.5 bg-red-500/50" />
 											</div>
 										</div>
-										<div className="mt-3 w-full border-t border-zinc-700 pt-1 text-center">
-											<div className="text-[8px] text-zinc-400 font-mono">
+										<div className="mt-3 w-full border-t border-border pt-1 text-center">
+											<div className="text-[8px] text-muted font-mono">
 												0.0 dB
 											</div>
 										</div>
@@ -4428,7 +4428,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					{/* Right Splitter */}
 					{!inspectorPos.floating && (
 						<div
-							className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
+							className="w-1 cursor-col-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
 							onMouseDown={(e: React.MouseEvent) => {
 								e.preventDefault();
 								const startX = e.clientX;
@@ -4452,7 +4452,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 					{/* Inspector Sidebar */}
 					<aside
-						className={`${inspectorPos.floating ? "fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-zinc-700 bg-zinc-950/95 backdrop-blur overflow-hidden flex flex-col" : "border-l border-zinc-700 bg-zinc-950 flex flex-col shrink-0"} transition-shadow`}
+						className={`${inspectorPos.floating ? "fixed z-50 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] resize border border-border bg-background/95 backdrop-blur overflow-hidden flex flex-col" : "border-l border-border bg-background flex flex-col shrink-0"} transition-shadow`}
 						style={
 							inspectorPos.floating
 								? {
@@ -4467,7 +4467,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						{/* Floating Header */}
 						{inspectorPos.floating && (
 							<div
-								className="h-8 bg-zinc-800 flex items-center justify-between px-3 cursor-move border-b border-zinc-700 select-none"
+								className="h-8 bg-panel flex items-center justify-between px-3 cursor-move border-b border-border select-none"
 								onMouseDown={(e: React.MouseEvent) => {
 									const startX = e.clientX - inspectorPos.x;
 									const startY = e.clientY - inspectorPos.y;
@@ -4485,14 +4485,14 @@ export default function EditorClient({ project }: { project: Project }) {
 									window.addEventListener("mouseup", onUp);
 								}}
 							>
-								<span className="text-[10px] text-zinc-400 font-medium tracking-wide">
+								<span className="text-[10px] text-muted font-medium tracking-wide">
 									INSPECTOR
 								</span>
 								<button
 									onClick={() =>
 										setInspectorPos((p) => ({ ...p, floating: false }))
 									}
-									className="text-zinc-400 hover:text-white p-0.5 rounded hover:bg-zinc-700"
+									className="text-muted hover:text-foreground p-0.5 rounded hover:bg-glass"
 								>
 									<svg
 										className="w-3 h-3"
@@ -4511,8 +4511,8 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 						)}
 
-						<div className="flex border-b border-zinc-700 p-3 items-center justify-between bg-zinc-900">
-							<span className="text-xs font-semibold text-zinc-300 tracking-wider uppercase">
+						<div className="flex border-b border-border p-3 items-center justify-between bg-background">
+							<span className="text-xs font-semibold text-foreground tracking-wider uppercase">
 								Inspector
 							</span>
 							{!inspectorPos.floating && (
@@ -4520,7 +4520,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									onClick={() =>
 										setInspectorPos((p) => ({ ...p, floating: true }))
 									}
-									className="text-zinc-400 hover:text-white"
+									className="text-muted hover:text-foreground"
 									title="Detach Panel"
 								>
 									<svg
@@ -4557,7 +4557,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{selectedClip ? (
 								<>
 									<div>
-										<label className="text-xs font-medium text-zinc-400 block mb-1">
+										<label className="text-xs font-medium text-muted block mb-1">
 											Name
 										</label>
 										<input
@@ -4566,12 +4566,12 @@ export default function EditorClient({ project }: { project: Project }) {
 											onChange={(e) =>
 												updateSelectedClip({ name: e.target.value })
 											}
-											className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+											className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 										/>
 									</div>
 									<div className="flex gap-2">
 										<div className="flex-1">
-											<label className="text-xs font-medium text-zinc-400 block mb-1">
+											<label className="text-xs font-medium text-muted block mb-1">
 												Start Frame
 											</label>
 											<input
@@ -4582,12 +4582,12 @@ export default function EditorClient({ project }: { project: Project }) {
 														start_frame: parseInt(e.target.value) || 0,
 													})
 												}
-												className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+												className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 											/>
 										</div>
 
 										<div className="flex-1">
-											<label className="text-xs font-medium text-zinc-400 block mb-1">
+											<label className="text-xs font-medium text-muted block mb-1">
 												Duration
 											</label>
 											<input
@@ -4598,20 +4598,20 @@ export default function EditorClient({ project }: { project: Project }) {
 														duration_frames: parseInt(e.target.value) || 1,
 													})
 												}
-												className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+												className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 											/>
 										</div>
 									</div>
 
 									{/* Text Settings */}
 									{selectedClip.type === "text" && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												Text Settings
 											</label>
 											<div className="flex flex-col gap-3">
 												<div>
-													<span className="text-xs text-zinc-400 block mb-1">
+													<span className="text-xs text-muted block mb-1">
 														Content
 													</span>
 													<textarea
@@ -4621,11 +4621,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																text_content: e.target.value,
 															})
 														}
-														className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500 h-20"
+														className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500 h-20"
 													/>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-400 w-16">
+													<span className="text-xs text-muted w-16">
 														Animation
 													</span>
 													<select
@@ -4635,7 +4635,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																text_animation: e.target.value,
 															})
 														}
-														className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+														className="flex-1 bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 													>
 														<option value="none">None</option>
 														<option value="typewriter">Typewriter</option>
@@ -4648,7 +4648,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</select>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-400 w-16">
+													<span className="text-xs text-muted w-16">
 														Font Family
 													</span>
 													<select
@@ -4658,7 +4658,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																font_family: e.target.value,
 															})
 														}
-														className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+														className="flex-1 bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 													>
 														<option value="Inter">Inter</option>
 														<option value="Roboto">Roboto</option>
@@ -4677,7 +4677,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</select>
 												</div>
 
-												<label className="block w-full mt-2 text-center text-[10px] font-medium text-zinc-400 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700 rounded py-1.5 cursor-pointer transition-colors">
+												<label className="block w-full mt-2 text-center text-[10px] font-medium text-muted bg-panel/50 hover:bg-panel border border-border rounded py-1.5 cursor-pointer transition-colors">
 													+ Upload Custom Font (.ttf, .otf)
 													<input
 														type="file"
@@ -4688,7 +4688,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</label>
 
 												<div className="flex items-center justify-between mt-3">
-													<span className="text-xs text-zinc-400 w-16">
+													<span className="text-xs text-muted w-16">
 														Font Size
 													</span>
 													<input
@@ -4702,16 +4702,16 @@ export default function EditorClient({ project }: { project: Project }) {
 																font_size: parseInt(e.target.value),
 															})
 														}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{selectedClip.font_size ?? 100}
 													</span>
 												</div>
 
 												<div className="flex gap-4">
 													<div className="flex flex-col gap-1 w-1/3">
-														<span className="text-[10px] text-zinc-400 text-center">
+														<span className="text-[10px] text-muted text-center">
 															Fill
 														</span>
 														<input
@@ -4720,11 +4720,11 @@ export default function EditorClient({ project }: { project: Project }) {
 															onChange={(e) =>
 																updateSelectedClip({ color: e.target.value })
 															}
-															className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+															className="w-full h-8 rounded cursor-pointer bg-background border-none p-0"
 														/>
 													</div>
 													<div className="flex flex-col gap-1 w-1/3">
-														<span className="text-[10px] text-zinc-400 text-center">
+														<span className="text-[10px] text-muted text-center">
 															Stroke
 														</span>
 														<input
@@ -4737,12 +4737,12 @@ export default function EditorClient({ project }: { project: Project }) {
 																	text_stroke_color: e.target.value,
 																})
 															}
-															className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+															className="w-full h-8 rounded cursor-pointer bg-background border-none p-0"
 														/>
 													</div>
 													<div className="flex flex-col gap-1 w-1/3">
 														<div className="flex justify-center items-center h-[15px]">
-															<span className="text-[10px] text-zinc-400 text-center mr-1">
+															<span className="text-[10px] text-muted text-center mr-1">
 																Background
 															</span>
 															<input
@@ -4769,7 +4769,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																		bg_color: e.target.value + "80",
 																	})
 																}
-																className="w-full h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+																className="w-full h-8 rounded cursor-pointer bg-background border-none p-0"
 															/>
 														)}
 													</div>
@@ -4777,7 +4777,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 												{selectedClip.bg_color && (
 													<div className="flex items-center justify-between mt-2">
-														<span className="text-xs text-zinc-400 w-20">
+														<span className="text-xs text-muted w-20">
 															Bg Padding
 														</span>
 														<input
@@ -4791,15 +4791,15 @@ export default function EditorClient({ project }: { project: Project }) {
 																	bg_padding: parseInt(e.target.value),
 																})
 															}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{selectedClip.bg_padding ?? 20}
 														</span>
 													</div>
 												)}
 												<div className="flex items-center justify-between mt-2">
-													<span className="text-xs text-zinc-400 w-20">
+													<span className="text-xs text-muted w-20">
 														Stroke Size
 													</span>
 													<input
@@ -4813,15 +4813,15 @@ export default function EditorClient({ project }: { project: Project }) {
 																text_stroke_width: parseInt(e.target.value),
 															})
 														}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{selectedClip.text_stroke_width ?? 0}px
 													</span>
 												</div>
 
 												<div className="flex items-center justify-between mt-2">
-													<span className="text-xs text-zinc-400 w-20">
+													<span className="text-xs text-muted w-20">
 														Letter Spacing
 													</span>
 													<input
@@ -4835,15 +4835,15 @@ export default function EditorClient({ project }: { project: Project }) {
 																letter_spacing: parseInt(e.target.value),
 															})
 														}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{selectedClip.letter_spacing ?? 0}px
 													</span>
 												</div>
 
 												<div className="flex items-center justify-between mt-2">
-													<span className="text-xs text-zinc-400 w-16">
+													<span className="text-xs text-muted w-16">
 														Alignment
 													</span>
 													<select
@@ -4851,7 +4851,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														onChange={(e) =>
 															updateSelectedClip({ text_align: e.target.value })
 														}
-														className="flex-1 bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+														className="flex-1 bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 													>
 														<option value="left">Left</option>
 														<option value="center">Center</option>
@@ -4860,7 +4860,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												<div className="flex items-center justify-between mt-2">
-													<span className="text-xs text-zinc-400 w-20">
+													<span className="text-xs text-muted w-20">
 														Shadow Blur
 													</span>
 													<input
@@ -4874,15 +4874,15 @@ export default function EditorClient({ project }: { project: Project }) {
 																shadow_blur: parseInt(e.target.value),
 															})
 														}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{selectedClip.shadow_blur ?? 10}
 													</span>
 												</div>
 
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-400 w-20">
+													<span className="text-xs text-muted w-20">
 														Shadow Dist
 													</span>
 													<input
@@ -4896,20 +4896,20 @@ export default function EditorClient({ project }: { project: Project }) {
 																shadow_offset: parseInt(e.target.value),
 															})
 														}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{selectedClip.shadow_offset ?? 4}
 													</span>
 												</div>
 
-												<div className="pt-2 border-t border-zinc-700 mt-2">
-													<label className="text-xs font-bold text-zinc-400 block mb-3 text-indigo-400">
+												<div className="pt-2 border-t border-border mt-2">
+													<label className="text-xs font-bold text-muted block mb-3 text-indigo-400">
 														3D Fusion Controls
 													</label>
 
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-xs text-zinc-400 w-24">
+														<span className="text-xs text-muted w-24">
 															Extrusion Depth
 														</span>
 														<input
@@ -4923,14 +4923,14 @@ export default function EditorClient({ project }: { project: Project }) {
 																	extrusion_depth: parseInt(e.target.value),
 																})
 															}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{selectedClip.extrusion_depth ?? 0}
 														</span>
 													</div>
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-xs text-zinc-400 w-24">
+														<span className="text-xs text-muted w-24">
 															Rotate X
 														</span>
 														<input
@@ -4944,14 +4944,14 @@ export default function EditorClient({ project }: { project: Project }) {
 																	rotate_x: parseInt(e.target.value),
 																})
 															}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{selectedClip.rotate_x ?? 0}°
 														</span>
 													</div>
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-xs text-zinc-400 w-24">
+														<span className="text-xs text-muted w-24">
 															Rotate Y
 														</span>
 														<input
@@ -4965,14 +4965,14 @@ export default function EditorClient({ project }: { project: Project }) {
 																	rotate_y: parseInt(e.target.value),
 																})
 															}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{selectedClip.rotate_y ?? 0}°
 														</span>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-xs text-zinc-400 w-24">
+														<span className="text-xs text-muted w-24">
 															Rotate Z
 														</span>
 														<input
@@ -4986,9 +4986,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																	rotate_z: parseInt(e.target.value),
 																})
 															}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{selectedClip.rotate_z ?? 0}°
 														</span>
 													</div>
@@ -5018,7 +5018,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															toast.success("AI Voiceover Generated!");
 														}
 													}}
-													className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded text-xs font-bold text-white shadow-lg flex items-center justify-center gap-2"
+													className="w-full mt-2 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded text-xs font-bold text-foreground shadow-lg flex items-center justify-center gap-2"
 												>
 													🎙️ Generate AI Voiceover
 												</button>
@@ -5028,14 +5028,14 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* AI Auto-Caption */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "audio") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												AI Services
 											</label>
 											<button
 												onClick={startAutoCaption}
 												disabled={isCaptioning}
-												className="w-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors relative overflow-hidden"
+												className="w-full bg-panel hover:bg-glass border border-border text-foreground text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors relative overflow-hidden"
 											>
 												{isCaptioning ? (
 													<>
@@ -5068,7 +5068,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											</button>
 											<button
 												onClick={handleDetectBeats}
-												className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors relative overflow-hidden"
+												className="w-full mt-2 bg-panel hover:bg-glass border border-border text-foreground text-xs py-2 rounded flex items-center justify-center gap-2 transition-colors relative overflow-hidden"
 											>
 												<svg
 													className="w-3.5 h-3.5 text-amber-400"
@@ -5091,8 +5091,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Playback Speed (Video & Audio) */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "audio") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												Playback Speed
 											</label>
 											<div className="flex items-center justify-between mb-2">
@@ -5100,7 +5100,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"playback_rate",
 													selectedClip.playback_rate ?? 1.0,
 												)}
-												<span className="text-xs text-zinc-300 w-10 text-left">
+												<span className="text-xs text-foreground w-10 text-left">
 													{(selectedClip.playback_rate ?? 1.0).toFixed(2)}x
 												</span>
 											</div>
@@ -5123,13 +5123,13 @@ export default function EditorClient({ project }: { project: Project }) {
 														toggleKeyframe("playback_rate", val);
 												}}
 												onMouseUp={() => commitState(projectData)}
-												className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+												className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 											/>
 
 											{/* Speed Ramp / Time Remap */}
-											<div className="mt-4 pt-3 border-t border-zinc-700/60">
+											<div className="mt-4 pt-3 border-t border-border/60">
 												<div className="flex items-center justify-between mb-3">
-													<label className="text-xs font-medium text-zinc-400 uppercase tracking-wider">
+													<label className="text-xs font-medium text-muted uppercase tracking-wider">
 														Speed Ramp
 													</label>
 													<button
@@ -5157,7 +5157,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														className={`text-[10px] px-2 py-0.5 rounded border transition-colors ${
 															selectedClip.speed_ramp_enabled
 																? "text-indigo-400 border-indigo-500/50 bg-indigo-500/10"
-																: "text-zinc-400 border-zinc-700 hover:text-zinc-300"
+																: "text-muted border-border hover:text-foreground"
 														}`}
 													>
 														{selectedClip.speed_ramp_enabled
@@ -5167,7 +5167,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												{/* Speed Ramp Curve Visualization */}
-												<div className="bg-zinc-950 rounded-lg border border-zinc-700 p-2 mb-3">
+												<div className="bg-background rounded-lg border border-border p-2 mb-3">
 													<svg
 														viewBox="0 0 200 60"
 														className="w-full h-14"
@@ -5373,7 +5373,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																});
 																commitState(projectData);
 															}}
-															className="text-[10px] text-zinc-400 hover:text-zinc-200 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 transition-colors text-left truncate"
+															className="text-[10px] text-muted hover:text-foreground bg-background hover:bg-panel border border-border rounded px-2 py-1.5 transition-colors text-left truncate"
 														>
 															{preset.label}
 														</button>
@@ -5391,7 +5391,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														});
 														commitState(projectData);
 													}}
-													className="mt-2 w-full text-[10px] text-zinc-400 hover:text-red-400 transition-colors py-1"
+													className="mt-2 w-full text-[10px] text-muted hover:text-red-400 transition-colors py-1"
 												>
 													Reset Ramp
 												</button>
@@ -5401,8 +5401,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Retiming Process (for video clips) */}
 									{selectedClip.type === "video" && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												Retiming & Scaling Process
 											</label>
 
@@ -5412,7 +5412,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													📱 AI Auto-Reframe
 												</span>
 												<button
-													className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-0.5 rounded transition-colors"
+													className="text-[10px] bg-indigo-600 hover:bg-indigo-500 text-foreground px-2 py-0.5 rounded transition-colors"
 													onClick={handleAnalyzeAspectRatio}
 												>
 													Reframe to 9:16
@@ -5420,21 +5420,21 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 											{/* Super Scale / AI Upscaling (Phase 189) */}
 											<div className="flex items-center justify-between mb-3">
-												<span className="text-xs text-zinc-400 w-24">
+												<span className="text-xs text-muted w-24">
 													Super Scale
 												</span>
-												<select className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500">
+												<select className="bg-background border border-border text-foreground text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500">
 													<option>None</option>
 													<option>2x Enhanced</option>
 													<option>4x Enhanced (AI)</option>
 												</select>
 											</div>
 											<div className="flex items-center justify-between mb-3">
-												<span className="text-xs text-zinc-400 w-24">
+												<span className="text-xs text-muted w-24">
 													Process
 												</span>
 												<select
-													className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
+													className="bg-background border border-border text-foreground text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
 													value={selectedClip.retiming_process || "nearest"}
 													onChange={(e) => {
 														updateSelectedClip({
@@ -5453,11 +5453,11 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{selectedClip.retiming_process === "optical_flow" && (
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-400 w-24">
+													<span className="text-xs text-muted w-24">
 														Motion Est.
 													</span>
 													<select
-														className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
+														className="bg-background border border-border text-foreground text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
 														value={selectedClip.motion_estimation || "standard"}
 														onChange={(e) => {
 															updateSelectedClip({
@@ -5478,18 +5478,18 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Audio Mix (for audio/video clips) */}
 									{(selectedClip.type === "audio" ||
 										selectedClip.type === "video") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												Audio Mix
 											</label>
 											<div className="flex items-center justify-between mb-4">
 												<div className="flex-1 flex flex-col items-center gap-1">
-													<div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden flex shadow-inner">
+													<div className="w-full h-1.5 bg-background rounded-full overflow-hidden flex shadow-inner">
 														<div className="h-full bg-green-500 w-1/2" />
 														<div className="h-full bg-yellow-400 w-1/4" />
 														<div className="h-full bg-red-500 w-1/12" />
 													</div>
-													<span className="text-[10px] text-zinc-400 font-mono tracking-widest">
+													<span className="text-[10px] text-muted font-mono tracking-widest">
 														LUFS: -14.2
 													</span>
 												</div>
@@ -5501,21 +5501,21 @@ export default function EditorClient({ project }: { project: Project }) {
 													🎵 AI Music Extender
 												</span>
 												<button
-													className="bg-amber-600 hover:bg-amber-500 text-white text-[10px] px-2 py-1 rounded transition-colors"
+													className="bg-amber-600 hover:bg-amber-500 text-foreground text-[10px] px-2 py-1 rounded transition-colors"
 													onClick={handleExtendMusicTrack}
 												>
 													Extend Track
 												</button>
 											</div>
 											<div className="flex items-center justify-between">
-												<span className="text-xs text-zinc-400 w-16">
+												<span className="text-xs text-muted w-16">
 													Volume
 												</span>
 												<button
 													onClick={() =>
 														toggleKeyframe("volume", selectedClip.volume ?? 1.0)
 													}
-													className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "volume", frame }) ? "text-amber-500" : "text-zinc-400 hover:text-zinc-400"}`}
+													className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "volume", frame }) ? "text-amber-500" : "text-muted hover:text-muted"}`}
 													title="Toggle Volume Keyframe"
 												>
 													♦
@@ -5565,9 +5565,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															updateSelectedClip({ volume: val });
 														}
 													}}
-													className="w-full accent-amber-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-amber-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{getKeyframedValue({
 														clip: selectedClip,
 														property: "volume",
@@ -5579,14 +5579,14 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 
 											<div className="flex items-center justify-between mt-3">
-												<span className="text-xs text-zinc-400 w-16">
+												<span className="text-xs text-muted w-16">
 													Pan (L/R)
 												</span>
 												<button
 													onClick={() =>
 														toggleKeyframe("pan", selectedClip.pan ?? 0.0)
 													}
-													className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "pan", frame }) ? "text-amber-500" : "text-zinc-400 hover:text-zinc-400"}`}
+													className={`text-xs mr-2 transition-colors ${hasKeyframe({ clip: selectedClip, property: "pan", frame }) ? "text-amber-500" : "text-muted hover:text-muted"}`}
 													title="Toggle Pan Keyframe"
 												>
 													♦
@@ -5636,9 +5636,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															updateSelectedClip({ pan: val });
 														}
 													}}
-													className="w-full accent-amber-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-amber-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{getKeyframedValue({
 														clip: selectedClip,
 														property: "pan",
@@ -5649,7 +5649,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 
 											{/* Essential Sound Auto-Ducking (Phase 14) */}
-											<div className="mt-4 pt-4 border-t border-zinc-800">
+											<div className="mt-4 pt-4 border-t border-border">
 												<button
 													onClick={() => {
 														const duckPromise = new Promise((resolve) =>
@@ -5691,19 +5691,19 @@ export default function EditorClient({ project }: { project: Project }) {
 															error: "Failed to apply auto-ducking.",
 														});
 													}}
-													className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium py-2 rounded border border-zinc-700 transition-colors flex items-center justify-center gap-2"
+													className="w-full bg-panel hover:bg-glass text-foreground text-xs font-medium py-2 rounded border border-border transition-colors flex items-center justify-center gap-2"
 												>
 													🦆 Auto-Duck against Dialog
 												</button>
-												<p className="text-[10px] text-zinc-500 mt-1.5 text-center leading-tight">
+												<p className="text-[10px] text-muted mt-1.5 text-center leading-tight">
 													Automatically lowers volume when dialogue is present
 													on other tracks.
 												</p>
 											</div>
 
 											{/* Phase 22: AI Voice Cloning & Dubbing */}
-											<div className="mt-4 pt-4 border-t border-zinc-800">
-												<label className="text-xs font-medium text-zinc-400 block mb-3">
+											<div className="mt-4 pt-4 border-t border-border">
+												<label className="text-xs font-medium text-muted block mb-3">
 													AI Voice / Dubbing (ElevenLabs Parity)
 												</label>
 												<button
@@ -5748,17 +5748,17 @@ export default function EditorClient({ project }: { project: Project }) {
 												>
 													🗣️ Generate ADR / TTS
 												</button>
-												<p className="text-[10px] text-zinc-500 mt-1.5 text-center leading-tight">
+												<p className="text-[10px] text-muted mt-1.5 text-center leading-tight">
 													Clone the actor's voice and generate seamless
 													Automated Dialogue Replacement.
 												</p>
 											</div>
 
 											{/* Planar Tracker & 3D Tracker */}
-											<div className="mt-4 pt-4 border-t border-zinc-800">
+											<div className="mt-4 pt-4 border-t border-border">
 												<button
 													onClick={handlePlanarTrack}
-													className="w-full bg-indigo-600/80 hover:bg-indigo-500 text-white text-xs font-medium py-2 rounded border border-indigo-500 transition-colors flex items-center justify-center gap-2"
+													className="w-full bg-indigo-600/80 hover:bg-indigo-500 text-foreground text-xs font-medium py-2 rounded border border-indigo-500 transition-colors flex items-center justify-center gap-2"
 												>
 													🎯 Track Object (Planar)
 												</button>
@@ -5780,11 +5780,11 @@ export default function EditorClient({ project }: { project: Project }) {
 															error: "Tracking failed.",
 														});
 													}}
-													className="w-full bg-teal-600/80 hover:bg-teal-500 text-white text-xs font-medium py-2 rounded border border-teal-500 transition-colors flex items-center justify-center gap-2 mt-2"
+													className="w-full bg-teal-600/80 hover:bg-teal-500 text-foreground text-xs font-medium py-2 rounded border border-teal-500 transition-colors flex items-center justify-center gap-2 mt-2"
 												>
 													📹 3D Camera Tracker
 												</button>
-												<p className="text-[10px] text-zinc-500 mt-1.5 text-center leading-tight">
+												<p className="text-[10px] text-muted mt-1.5 text-center leading-tight">
 													Extracts a 3D camera solve and point cloud from 2D
 													footage for compositing.
 												</p>
@@ -5792,28 +5792,28 @@ export default function EditorClient({ project }: { project: Project }) {
 												{/* Auto-Reframe (Phase 18) */}
 												<button
 													onClick={handleAutoReframe}
-													className="w-full bg-fuchsia-600/80 hover:bg-fuchsia-500 text-white text-xs font-medium py-2 rounded border border-fuchsia-500 transition-colors flex items-center justify-center gap-2 mt-4"
+													className="w-full bg-fuchsia-600/80 hover:bg-fuchsia-500 text-foreground text-xs font-medium py-2 rounded border border-fuchsia-500 transition-colors flex items-center justify-center gap-2 mt-4"
 												>
 													📱 Auto-Reframe (9:16)
 												</button>
-												<p className="text-[10px] text-zinc-500 mt-1.5 text-center leading-tight">
+												<p className="text-[10px] text-muted mt-1.5 text-center leading-tight">
 													Uses AI to keep the subject in frame while converting
 													to vertical video.
 												</p>
 											</div>
 
 											{/* Compositing (Mask & LUTs) */}
-											<div className="mt-4 pt-4 border-t border-zinc-800">
-												<label className="text-xs font-medium text-zinc-400 block mb-3">
+											<div className="mt-4 pt-4 border-t border-border">
+												<label className="text-xs font-medium text-muted block mb-3">
 													Compositing
 												</label>
 												<div className="flex items-center justify-between mb-3">
-													<span className="text-xs text-zinc-300">
+													<span className="text-xs text-foreground">
 														Polygon Mask
 													</span>
 													<div className="flex items-center gap-2">
 														<button
-															className={`p-1 hover:bg-zinc-700 rounded transition-colors ${selectedClip.mask ? "text-indigo-400" : "text-zinc-500"}`}
+															className={`p-1 hover:bg-glass rounded transition-colors ${selectedClip.mask ? "text-indigo-400" : "text-muted"}`}
 															onClick={() =>
 																updateSelectedClip({ mask: !selectedClip.mask })
 															}
@@ -5836,9 +5836,9 @@ export default function EditorClient({ project }: { project: Project }) {
 													</div>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-300">3D LUT</span>
+													<span className="text-xs text-foreground">3D LUT</span>
 													<select
-														className="bg-zinc-900 border border-zinc-700 rounded text-[10px] text-zinc-300 px-2 py-1 outline-none"
+														className="bg-background border border-border rounded text-[10px] text-foreground px-2 py-1 outline-none"
 														value={selectedClip.lut || "none"}
 														onChange={(e) =>
 															updateSelectedClip({ lut: e.target.value })
@@ -5852,9 +5852,9 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 											</div>
 
-											<div className="mt-4 pt-3 border-t border-zinc-700/50">
+											<div className="mt-4 pt-3 border-t border-border/50">
 												<div className="flex items-center justify-between mb-2">
-													<label className="text-xs font-medium text-zinc-400 block">
+													<label className="text-xs font-medium text-muted block">
 														Voice Isolation (AI)
 													</label>
 
@@ -5867,12 +5867,12 @@ export default function EditorClient({ project }: { project: Project }) {
 																	voiceIsolation: e.target.checked,
 																})
 															}
-															className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
+															className="w-3.5 h-3.5 bg-background border-border rounded accent-indigo-500 cursor-pointer"
 														/>
 													</label>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-zinc-400 w-16">
+													<span className="text-xs text-muted w-16">
 														Amount
 													</span>
 													<input
@@ -5892,16 +5892,16 @@ export default function EditorClient({ project }: { project: Project }) {
 															)
 														}
 														disabled={!selectedClip.voiceIsolation}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer disabled:opacity-50"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer disabled:opacity-50"
 													/>
-													<span className="text-[10px] text-zinc-300 w-8 text-right">
+													<span className="text-[10px] text-foreground w-8 text-right">
 														{selectedClip.voiceIsolationAmount ?? 100}%
 													</span>
 												</div>
 											</div>
 
 											{/* Auto-Ducking */}
-											<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-zinc-700/50">
+											<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-border/50">
 												<label className="flex items-center gap-2 cursor-pointer">
 													<input
 														type="checkbox"
@@ -5917,7 +5917,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-indigo-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-400 font-semibold tracking-wider uppercase">
+													<span className="text-[10px] text-muted font-semibold tracking-wider uppercase">
 														Auto-Duck against Voiceover
 													</span>
 												</label>
@@ -5925,7 +5925,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												{selectedClip.audio_fx?.autoDuck && (
 													<>
 														<div className="flex items-center justify-between">
-															<span className="text-[10px] text-zinc-400 w-16">
+															<span className="text-[10px] text-muted w-16">
 																Sensitivity
 															</span>
 															<input
@@ -5950,9 +5950,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																	);
 																}}
 																onMouseUp={commitCurrentState}
-																className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+																className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 															/>
-															<span className="text-[10px] text-zinc-300 w-8 text-right">
+															<span className="text-[10px] text-foreground w-8 text-right">
 																{(
 																	(selectedClip.audio_fx?.duckSensitivity ??
 																		0.5) * 100
@@ -5961,7 +5961,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															</span>
 														</div>
 														<div className="flex items-center justify-between">
-															<span className="text-[10px] text-zinc-400 w-16">
+															<span className="text-[10px] text-muted w-16">
 																Duck Amount
 															</span>
 															<input
@@ -5982,9 +5982,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																	);
 																}}
 																onMouseUp={commitCurrentState}
-																className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+																className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 															/>
-															<span className="text-[10px] text-zinc-300 w-8 text-right">
+															<span className="text-[10px] text-foreground w-8 text-right">
 																{selectedClip.audio_fx?.duckAmount ?? -18}dB
 															</span>
 														</div>
@@ -5996,7 +5996,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* AI Voice Isolation (Phase 191) */}
 									{selectedClip.type === "audio" && (
-										<div className="pt-2 border-t border-zinc-700 mt-3 mb-3">
+										<div className="pt-2 border-t border-border mt-3 mb-3">
 											<div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/20 p-2 rounded">
 												<span className="text-[10px] font-semibold text-indigo-300 flex items-center gap-1">
 													✨ AI Voice Isolation
@@ -6008,7 +6008,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														className="sr-only peer"
 														defaultChecked
 													/>
-													<div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
+													<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-500"></div>
 												</label>
 											</div>
 										</div>
@@ -6016,15 +6016,15 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Audio Track Routing (Phase 186) */}
 									{selectedClip.type === "audio" && (
-										<div className="pt-2 border-t border-zinc-700 mt-2 mb-4">
+										<div className="pt-2 border-t border-border mt-2 mb-4">
 											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Output Routing
 											</label>
 											<div className="flex items-center justify-between">
-												<span className="text-[10px] text-zinc-400 w-16">
+												<span className="text-[10px] text-muted w-16">
 													Bus Send
 												</span>
-												<select className="bg-zinc-900 border border-zinc-700 text-zinc-300 text-[10px] rounded px-2 py-1 flex-1 outline-none focus:border-sky-500">
+												<select className="bg-background border border-border text-foreground text-[10px] rounded px-2 py-1 flex-1 outline-none focus:border-sky-500">
 													<option>Master (Stereo)</option>
 													<option>Submix 1 (Dialogue)</option>
 													<option>Submix 2 (SFX)</option>
@@ -6036,16 +6036,16 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Audio EQ Graphic (Phase 162) */}
 									{selectedClip.type === "audio" && (
-										<div className="pt-2 border-t border-zinc-700 mt-4 mb-4">
+										<div className="pt-2 border-t border-border mt-4 mb-4">
 											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Parametric EQ
 											</label>
-											<div className="relative w-full h-24 bg-zinc-950 border border-zinc-700 rounded mb-3 overflow-hidden shadow-inner group">
+											<div className="relative w-full h-24 bg-background border border-border rounded mb-3 overflow-hidden shadow-inner group">
 												<div className="absolute inset-0 pointer-events-none grid grid-cols-4 grid-rows-3 opacity-20">
 													{Array.from({ length: 12 }).map((_, i) => (
 														<div
 															key={i}
-															className="border-r border-b border-zinc-700"
+															className="border-r border-b border-border"
 														></div>
 													))}
 												</div>
@@ -6079,7 +6079,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														className="pointer-events-auto cursor-pointer"
 													/>
 												</svg>
-												<div className="absolute bottom-1 left-0 w-full flex justify-between px-2 text-[8px] text-zinc-400 font-mono">
+												<div className="absolute bottom-1 left-0 w-full flex justify-between px-2 text-[8px] text-muted font-mono">
 													<span>Lows</span>
 													<span>Mids</span>
 													<span>Highs</span>
@@ -6090,17 +6090,17 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Spatial Audio / Ambisonics (Phase 183) */}
 									{selectedClip.type === "audio" && (
-										<div className="pt-2 border-t border-zinc-700 mt-4 mb-4">
+										<div className="pt-2 border-t border-border mt-4 mb-4">
 											<label className="text-[10px] font-bold text-sky-400 block mb-2 uppercase tracking-wider">
 												Spatial 360 Panner
 											</label>
 											<div className="w-full flex items-center justify-center p-4">
-												<div className="relative w-24 h-24 rounded-full border-2 border-zinc-700 bg-zinc-950 flex items-center justify-center cursor-move group hover:border-sky-500/50 transition-colors">
-													<div className="absolute inset-0 border border-zinc-700 rounded-full scale-50"></div>
-													<div className="absolute inset-0 border border-zinc-700 rounded-full scale-75"></div>
+												<div className="relative w-24 h-24 rounded-full border-2 border-border bg-background flex items-center justify-center cursor-move group hover:border-sky-500/50 transition-colors">
+													<div className="absolute inset-0 border border-border rounded-full scale-50"></div>
+													<div className="absolute inset-0 border border-border rounded-full scale-75"></div>
 													{/* Panner puck */}
 													<div className="w-3 h-3 bg-sky-500 rounded-full absolute top-4 right-6 shadow-[0_0_10px_rgba(56,189,248,0.8)]"></div>
-													<span className="text-[8px] text-zinc-400 font-bold uppercase pointer-events-none">
+													<span className="text-[8px] text-muted font-bold uppercase pointer-events-none">
 														Top
 													</span>
 												</div>
@@ -6111,16 +6111,16 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Voice FX & Pitch Shifter */}
 									{(selectedClip.type === "audio" ||
 										selectedClip.type === "video") && (
-										<div className="pt-3 border-t border-zinc-700 mt-3">
+										<div className="pt-3 border-t border-border mt-3">
 											<label className="text-[10px] font-bold text-indigo-400 block mb-2 uppercase tracking-wider">
 												Voice FX & Pitch
 											</label>
 											<div className="flex items-center justify-between mb-2">
-												<span className="text-[10px] text-zinc-400">
+												<span className="text-[10px] text-muted">
 													Preset
 												</span>
 												<select
-													className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-[10px] rounded px-1.5 py-1 outline-none focus:border-indigo-500"
+													className="bg-background border border-border text-foreground text-[10px] rounded px-1.5 py-1 outline-none focus:border-indigo-500"
 													value={selectedClip.audio_fx?.voicePreset || "none"}
 													onChange={(e) => {
 														const val = e.target.value;
@@ -6147,7 +6147,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</select>
 											</div>
 											<div className="flex items-center justify-between">
-												<span className="text-[10px] text-zinc-400 w-16">
+												<span className="text-[10px] text-muted w-16">
 													Pitch Offset
 												</span>
 												<input
@@ -6169,9 +6169,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-[10px] text-zinc-300 w-8 text-right">
+												<span className="text-[10px] text-foreground w-8 text-right">
 													{selectedClip.audio_fx?.pitch > 0 ? "+" : ""}
 													{selectedClip.audio_fx?.pitch ?? 0} st
 												</span>
@@ -6179,12 +6179,12 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{/* Audio Clean-up */}
 
-											<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-zinc-700/50">
+											<div className="flex flex-col gap-2 mt-3 pt-3 border-t border-border/50">
 												<label className="text-[10px] font-bold text-indigo-400 block uppercase tracking-wider mb-1">
 													Audio Clean-up
 												</label>
 												<div className="flex items-center justify-between">
-													<span className="text-[10px] text-zinc-400 w-16 text-left leading-tight">
+													<span className="text-[10px] text-muted w-16 text-left leading-tight">
 														Noise
 														<br />
 														Reduction
@@ -6207,9 +6207,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-300 w-8 text-right">
+													<span className="text-[10px] text-foreground w-8 text-right">
 														{(
 															(selectedClip.audio_fx?.noiseReduction ?? 0) * 100
 														).toFixed(0)}
@@ -6217,7 +6217,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</span>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-[10px] text-zinc-400 w-16">
+													<span className="text-[10px] text-muted w-16">
 														De-Reverb
 													</span>
 													<input
@@ -6238,9 +6238,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-300 w-8 text-right">
+													<span className="text-[10px] text-foreground w-8 text-right">
 														{(
 															(selectedClip.audio_fx?.deReverb ?? 0) * 100
 														).toFixed(0)}
@@ -6253,8 +6253,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Visuals */}
 
-									<div className="pt-2 border-t border-zinc-700 mt-2">
-										<label className="text-xs font-medium text-zinc-400 block mb-1">
+									<div className="pt-2 border-t border-border mt-2">
+										<label className="text-xs font-medium text-muted block mb-1">
 											Color Overlay (WASM)
 										</label>
 										<div className="flex items-center gap-2 mb-3">
@@ -6269,14 +6269,14 @@ export default function EditorClient({ project }: { project: Project }) {
 														},
 													})
 												}
-												className="w-8 h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+												className="w-8 h-8 rounded cursor-pointer bg-background border-none p-0"
 											/>
-											<span className="text-xs text-zinc-400 uppercase">
+											<span className="text-xs text-muted uppercase">
 												{rgbaToHex(selectedClip.layer?.color)}
 											</span>
 										</div>
 
-										<label className="text-xs font-medium text-zinc-400 block mb-1">
+										<label className="text-xs font-medium text-muted block mb-1">
 											Blend Mode
 										</label>
 										<select
@@ -6284,7 +6284,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											onChange={(e) =>
 												updateSelectedClip({ blend_mode: e.target.value })
 											}
-											className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500 cursor-pointer"
+											className="w-full bg-background border border-border rounded px-2 py-1.5 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500 cursor-pointer"
 										>
 											<option value="normal">Normal</option>
 											<option value="darken">Darken</option>
@@ -6306,13 +6306,13 @@ export default function EditorClient({ project }: { project: Project }) {
 
 										{/* Blend If */}
 
-										<div className="mt-3 pt-3 border-t border-zinc-700/50">
-											<label className="text-[10px] font-bold text-zinc-400 block mb-2 uppercase tracking-wider">
+										<div className="mt-3 pt-3 border-t border-border/50">
+											<label className="text-[10px] font-bold text-muted block mb-2 uppercase tracking-wider">
 												Blend If (Luma)
 											</label>
 											<div className="flex flex-col gap-2">
 												<div className="flex items-center justify-between">
-													<span className="text-[10px] text-zinc-400 w-16 leading-tight text-left">
+													<span className="text-[10px] text-muted w-16 leading-tight text-left">
 														This
 														<br />
 														Layer
@@ -6335,14 +6335,14 @@ export default function EditorClient({ project }: { project: Project }) {
 															)
 														}
 														onMouseUp={commitCurrentState}
-														className="flex-1 accent-zinc-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-zinc-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-300 w-8 text-right">
+													<span className="text-[10px] text-foreground w-8 text-right">
 														{selectedClip.blendIf?.thisLayer ?? 255}
 													</span>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-[10px] text-zinc-400 w-16 leading-tight text-left">
+													<span className="text-[10px] text-muted w-16 leading-tight text-left">
 														Underlying
 														<br />
 														Layer
@@ -6365,9 +6365,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															)
 														}
 														onMouseUp={commitCurrentState}
-														className="flex-1 accent-zinc-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="flex-1 accent-zinc-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-300 w-8 text-right">
+													<span className="text-[10px] text-foreground w-8 text-right">
 														{selectedClip.blendIf?.underlyingLayer ?? 0}
 													</span>
 												</div>
@@ -6378,15 +6378,15 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Color Grading (3-Way Wheels) */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-4 border-t border-zinc-700 mt-4 mb-4">
+										<div className="pt-4 border-t border-border mt-4 mb-4">
 											<div className="flex items-center justify-between mb-4">
 												<div className="flex items-center gap-2">
-													<label className="text-xs font-medium text-zinc-400 block">
+													<label className="text-xs font-medium text-muted block">
 														Color Wheels (Lift/Gamma/Gain)
 													</label>
 													{/* Custom LUT Creator (Phase 192) */}
 													<button
-														className="text-[10px] bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white px-2 py-0.5 rounded border border-zinc-700 transition-colors flex items-center gap-1"
+														className="text-[10px] bg-panel text-muted hover:bg-glass hover:text-foreground px-2 py-0.5 rounded border border-border transition-colors flex items-center gap-1"
 														onClick={() => handleExportLUT()}
 													>
 														<svg
@@ -6450,12 +6450,12 @@ export default function EditorClient({ project }: { project: Project }) {
 															key={wheel.id}
 															className="flex flex-col items-center gap-2"
 														>
-															<span className="text-[10px] text-zinc-400 uppercase font-medium">
+															<span className="text-[10px] text-muted uppercase font-medium">
 																{wheel.label}
 															</span>
 
 															<div
-																className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-zinc-700 hover:border-zinc-500 transition-colors"
+																className="w-16 h-16 rounded-full relative shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] cursor-crosshair border border-border hover:border-zinc-500 transition-colors"
 																style={{
 																	background:
 																		"radial-gradient(circle at center, #71717a, transparent), conic-gradient(red, yellow, lime, aqua, blue, magenta, red)",
@@ -6506,7 +6506,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																}}
 															>
 																<div
-																	className="absolute w-2.5 h-2.5 bg-zinc-900 border-2 border-white rounded-full shadow-md pointer-events-none"
+																	className="absolute w-2.5 h-2.5 bg-background border-2 border-white rounded-full shadow-md pointer-events-none"
 																	style={{
 																		left: `${50 + val.s * Math.cos((val.h * Math.PI) / 180) * 50}%`,
 																		top: `${50 + val.s * Math.sin((val.h * Math.PI) / 180) * 50}%`,
@@ -6535,9 +6535,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																	)
 																}
 																onMouseUp={commitCurrentState}
-																className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mt-1"
+																className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mt-1"
 															/>
-															<span className="text-[10px] text-zinc-400 font-mono">
+															<span className="text-[10px] text-muted font-mono">
 																{val.v > 0 ? "+" : ""}
 																{val.v.toFixed(2)}
 															</span>
@@ -6547,19 +6547,19 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 											{/* Custom RGB Curves */}
 
-											<div className="mt-5 pt-4 border-t border-zinc-700">
+											<div className="mt-5 pt-4 border-t border-border">
 												<label className="text-[10px] font-bold text-amber-500 block mb-3 uppercase tracking-wider">
 													Custom Curves
 												</label>
-												<div className="relative w-full aspect-square bg-zinc-950 border border-zinc-700 rounded mb-3 overflow-hidden cursor-crosshair group shadow-inner">
+												<div className="relative w-full aspect-square bg-background border border-border rounded mb-3 overflow-hidden cursor-crosshair group shadow-inner">
 													{/* Grid */}
 													<div className="absolute inset-0 pointer-events-none">
-														<div className="w-full h-px bg-zinc-800/50 absolute top-1/4" />
-														<div className="w-full h-px bg-zinc-800/50 absolute top-2/4" />
-														<div className="w-full h-px bg-zinc-800/50 absolute top-3/4" />
-														<div className="h-full w-px bg-zinc-800/50 absolute left-1/4" />
-														<div className="h-full w-px bg-zinc-800/50 absolute left-2/4" />
-														<div className="h-full w-px bg-zinc-800/50 absolute left-3/4" />
+														<div className="w-full h-px bg-panel/50 absolute top-1/4" />
+														<div className="w-full h-px bg-panel/50 absolute top-2/4" />
+														<div className="w-full h-px bg-panel/50 absolute top-3/4" />
+														<div className="h-full w-px bg-panel/50 absolute left-1/4" />
+														<div className="h-full w-px bg-panel/50 absolute left-2/4" />
+														<div className="h-full w-px bg-panel/50 absolute left-3/4" />
 													</div>
 													{/* Default Diagonal Line */}
 													<svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
@@ -6598,7 +6598,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 												<div className="flex gap-4">
 													<div className="flex-1 group">
-														<span className="text-[10px] text-zinc-400 block mb-1 font-semibold group-hover:text-zinc-300 transition-colors">
+														<span className="text-[10px] text-muted block mb-1 font-semibold group-hover:text-foreground transition-colors">
 															Shadows Point
 														</span>
 														<input
@@ -6618,11 +6618,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																)
 															}
 															onMouseUp={commitCurrentState}
-															className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer"
+															className="w-full h-1 bg-panel accent-amber-500 rounded-lg appearance-none cursor-pointer"
 														/>
 													</div>
 													<div className="flex-1 group">
-														<span className="text-[10px] text-zinc-400 block mb-1 font-semibold group-hover:text-zinc-300 transition-colors">
+														<span className="text-[10px] text-muted block mb-1 font-semibold group-hover:text-foreground transition-colors">
 															Highlights Point
 														</span>
 														<input
@@ -6644,7 +6644,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																)
 															}
 															onMouseUp={commitCurrentState}
-															className="w-full h-1 bg-zinc-800 accent-amber-500 rounded-lg appearance-none cursor-pointer"
+															className="w-full h-1 bg-panel accent-amber-500 rounded-lg appearance-none cursor-pointer"
 														/>
 													</div>
 												</div>
@@ -6652,13 +6652,13 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{/* 3D LUT Support */}
 
-											<div className="mt-5 pt-4 border-t border-zinc-700">
+											<div className="mt-5 pt-4 border-t border-border">
 												<label className="text-[10px] font-bold text-indigo-400 block mb-3 uppercase tracking-wider">
 													3D LUT
 												</label>
 												<div className="flex items-center gap-2">
 													<select
-														className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-xs rounded px-2 py-1.5 flex-1 outline-none focus:border-indigo-500"
+														className="bg-background border border-border text-foreground text-xs rounded px-2 py-1.5 flex-1 outline-none focus:border-indigo-500"
 														value={selectedClip.filters?.lut || "none"}
 														onChange={(e) => {
 															updateSelectedClip({
@@ -6695,7 +6695,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														</optgroup>
 													</select>
 													<button
-														className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1.5 rounded text-xs transition-colors border border-zinc-700"
+														className="bg-panel hover:bg-glass text-foreground px-2 py-1.5 rounded text-xs transition-colors border border-border"
 														title="Import Custom LUT (.cube)"
 													>
 														<svg
@@ -6715,7 +6715,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												{/* Face Refinement AI (Phase 165) */}
-												<div className="mt-5 pt-4 border-t border-zinc-700">
+												<div className="mt-5 pt-4 border-t border-border">
 													<div className="flex items-center justify-between">
 														<label className="text-[10px] font-bold text-pink-400 uppercase tracking-wider flex items-center gap-1">
 															✨ Face Refinement (AI)
@@ -6738,7 +6738,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																}
 															/>
 															<div
-																className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.filters?.faceRefinement ? "bg-pink-500" : "bg-zinc-700"}`}
+																className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.filters?.faceRefinement ? "bg-pink-500" : "bg-glass"}`}
 															>
 																<div
 																	className={`absolute top-0.5 left-0.5 bg-white w-2 h-2 rounded-full transition-transform ${selectedClip.filters?.faceRefinement ? "translate-x-3" : "translate-x-0"}`}
@@ -6749,7 +6749,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													{selectedClip.filters?.faceRefinement && (
 														<div className="mt-3 flex flex-col gap-3">
 															<div className="flex items-center justify-between">
-																<span className="text-[10px] text-zinc-400 w-20">
+																<span className="text-[10px] text-muted w-20">
 																	Smoothness
 																</span>
 																<input
@@ -6772,14 +6772,14 @@ export default function EditorClient({ project }: { project: Project }) {
 																			false,
 																		)
 																	}
-																	className="flex-1 h-1 bg-zinc-800 accent-pink-500 rounded-lg appearance-none cursor-pointer"
+																	className="flex-1 h-1 bg-panel accent-pink-500 rounded-lg appearance-none cursor-pointer"
 																/>
-																<span className="text-[10px] text-zinc-300 w-6 text-right">
+																<span className="text-[10px] text-foreground w-6 text-right">
 																	{selectedClip.filters?.faceSmoothness ?? 50}
 																</span>
 															</div>
 															<div className="flex items-center justify-between">
-																<span className="text-[10px] text-zinc-400 w-20">
+																<span className="text-[10px] text-muted w-20">
 																	Eye Light
 																</span>
 																<input
@@ -6798,9 +6798,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																			false,
 																		)
 																	}
-																	className="flex-1 h-1 bg-zinc-800 accent-pink-500 rounded-lg appearance-none cursor-pointer"
+																	className="flex-1 h-1 bg-panel accent-pink-500 rounded-lg appearance-none cursor-pointer"
 																/>
-																<span className="text-[10px] text-zinc-300 w-6 text-right">
+																<span className="text-[10px] text-foreground w-6 text-right">
 																	{selectedClip.filters?.eyeLight ?? 20}
 																</span>
 															</div>
@@ -6811,7 +6811,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												{selectedClip.filters?.lut &&
 													selectedClip.filters.lut !== "none" && (
 														<div className="flex items-center justify-between mt-3">
-															<span className="text-[10px] text-zinc-400 w-16">
+															<span className="text-[10px] text-muted w-16">
 																Intensity
 															</span>
 															<input
@@ -6835,9 +6835,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																	);
 																}}
 																onMouseUp={commitCurrentState}
-																className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+																className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 															/>
-															<span className="text-xs text-zinc-300 w-10 text-right">
+															<span className="text-xs text-foreground w-10 text-right">
 																{(
 																	(selectedClip.filters?.lutIntensity ?? 1.0) *
 																	100
@@ -6853,13 +6853,13 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Retiming & Speed Ramp (for video clips) */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
+										<div className="pt-2 border-t border-border mt-2">
 											<div className="flex items-center justify-between mb-3">
-												<label className="text-xs font-medium text-zinc-400 block">
+												<label className="text-xs font-medium text-muted block">
 													Retiming & Speed
 												</label>
 												<button
-													className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-1 rounded border border-zinc-700 transition-colors"
+													className="text-[10px] bg-panel hover:bg-glass text-foreground px-2 py-1 rounded border border-border transition-colors"
 													onClick={() => handleSpeedRamp()}
 												>
 													📈 Speed Ramp
@@ -6873,11 +6873,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.grayscale ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "grayscale", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "grayscale", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Grayscale
 													</span>
 													<input
@@ -6905,9 +6905,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "grayscale",
@@ -6926,11 +6926,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.sepia ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "sepia", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "sepia", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Sepia
 													</span>
 													<input
@@ -6957,9 +6957,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "sepia",
@@ -6977,11 +6977,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.invert ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "invert", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "invert", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Invert
 													</span>
 													<input
@@ -7008,9 +7008,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "invert",
@@ -7028,11 +7028,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.hue_rotate ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "hue_rotate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "hue_rotate", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Hue Rotate
 													</span>
 													<input
@@ -7060,9 +7060,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "hue_rotate",
@@ -7079,8 +7079,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Image Effects */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 block mb-3">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted block mb-3">
 												Image Effects
 											</label>
 											<div className="flex flex-col gap-3">
@@ -7093,11 +7093,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.pixelate ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "pixelate", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "pixelate", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Pixelate
 													</span>
 													<input
@@ -7125,9 +7125,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "pixelate",
@@ -7147,11 +7147,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.filters?.edge_detect ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "edge_detect", frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: "edge_detect", frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-14">
+													<span className="text-[10px] text-muted w-14">
 														Edge Detect
 													</span>
 													<input
@@ -7179,9 +7179,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													/>
-													<span className="text-xs text-zinc-300 w-10 text-right">
+													<span className="text-xs text-foreground w-10 text-right">
 														{getKeyframedValue({
 															clip: selectedClip,
 															property: "edge_detect",
@@ -7193,16 +7193,16 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 												{/* Stabilization (Warp Stabilizer) */}
 
-												<div className="pt-3 mt-3 border-t border-zinc-700">
+												<div className="pt-3 mt-3 border-t border-border">
 													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Warp Stabilizer
 													</label>
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-[10px] text-zinc-400">
+														<span className="text-[10px] text-muted">
 															Method
 														</span>
 														<select
-															className="bg-zinc-950 border border-zinc-700 text-zinc-300 text-[10px] rounded px-1.5 py-1 outline-none"
+															className="bg-background border border-border text-foreground text-[10px] rounded px-1.5 py-1 outline-none"
 															value={
 																selectedClip.filters?.stabilizationMethod ||
 																"subspace"
@@ -7223,7 +7223,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														</select>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Smoothness
 														</span>
 														<input
@@ -7249,9 +7249,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																(selectedClip.filters
 																	?.stabilizationSmoothness ?? 0.5) * 100
@@ -7263,12 +7263,12 @@ export default function EditorClient({ project }: { project: Project }) {
 
 												{/* Lens Correction / Optics */}
 
-												<div className="pt-3 mt-3 border-t border-zinc-700">
+												<div className="pt-3 mt-3 border-t border-border">
 													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Lens / Optics
 													</label>
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Distortion
 														</span>
 														<input
@@ -7291,9 +7291,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																(selectedClip.filters?.lensDistortion ?? 0) *
 																100
@@ -7301,7 +7301,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														</span>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16 text-left leading-tight">
+														<span className="text-[10px] text-muted w-16 text-left leading-tight">
 															Chromatic
 															<br />
 															Aberration
@@ -7328,9 +7328,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																(selectedClip.filters?.chromaticAberration ??
 																	0) * 100
@@ -7342,12 +7342,12 @@ export default function EditorClient({ project }: { project: Project }) {
 
 												{/* Glow / Bloom */}
 
-												<div className="pt-3 mt-3 border-t border-zinc-700">
+												<div className="pt-3 mt-3 border-t border-border">
 													<label className="text-[10px] font-bold text-emerald-400 block mb-2 uppercase tracking-wider">
 														Glow / Bloom
 													</label>
 													<div className="flex items-center justify-between mb-2">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Intensity
 														</span>
 														<input
@@ -7368,9 +7368,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																(selectedClip.filters?.glowIntensity ?? 0) * 100
 															).toFixed(0)}
@@ -7378,7 +7378,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														</span>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Radius
 														</span>
 														<input
@@ -7399,9 +7399,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{selectedClip.filters?.glowRadius ?? 20}px
 														</span>
 													</div>
@@ -7413,8 +7413,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Crop */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 mb-2 block">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted mb-2 block">
 												Crop
 											</label>
 											<div className="flex flex-col gap-2">
@@ -7430,11 +7430,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																	selectedClip.crop?.[edge] ?? 0.0,
 																)
 															}
-															className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `crop_${edge}`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+															className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `crop_${edge}`, frame }) ? "text-indigo-400" : "text-muted"}`}
 														>
 															♦
 														</button>
-														<span className="text-[10px] text-zinc-400 w-8 capitalize">
+														<span className="text-[10px] text-muted w-8 capitalize">
 															{edge}
 														</span>
 														<input
@@ -7466,9 +7466,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
+															className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mx-2"
 														/>
-														<span className="text-xs text-zinc-300 w-8 text-right">
+														<span className="text-xs text-foreground w-8 text-right">
 															{(
 																getKeyframedValue({
 																	clip: selectedClip,
@@ -7489,8 +7489,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Masking / Power Windows */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 mb-2 block flex items-center justify-between">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted mb-2 block flex items-center justify-between">
 												Power Window / Mask
 												<label className="flex items-center gap-1 cursor-pointer">
 													<input
@@ -7512,7 +7512,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-indigo-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-400">
+													<span className="text-[10px] text-muted">
 														Enable
 													</span>
 												</label>
@@ -7527,14 +7527,14 @@ export default function EditorClient({ project }: { project: Project }) {
 														</span>
 														<div className="flex gap-1">
 															<button
-																className="bg-zinc-800 hover:bg-indigo-600 text-white text-[10px] px-2 py-1 rounded transition-colors"
+																className="bg-panel hover:bg-indigo-600 text-foreground text-[10px] px-2 py-1 rounded transition-colors"
 																onClick={handleTrackMaskBackward}
 																title="Track Backward"
 															>
 																◀ Track
 															</button>
 															<button
-																className="bg-zinc-800 hover:bg-indigo-600 text-white text-[10px] px-2 py-1 rounded transition-colors"
+																className="bg-panel hover:bg-indigo-600 text-foreground text-[10px] px-2 py-1 rounded transition-colors"
 																onClick={handleTrackMaskForward}
 																title="Track Forward"
 															>
@@ -7549,7 +7549,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															🎥 3D Point Cloud Tracker
 														</span>
 														<button
-															className="bg-sky-600 hover:bg-sky-500 text-white text-[10px] px-2 py-1 rounded transition-colors"
+															className="bg-sky-600 hover:bg-sky-500 text-foreground text-[10px] px-2 py-1 rounded transition-colors"
 															onClick={handleExtract3DPointCloud}
 														>
 															Extract 3D
@@ -7562,14 +7562,14 @@ export default function EditorClient({ project }: { project: Project }) {
 															🌌 Neural Radiance Field
 														</span>
 														<button
-															className="bg-teal-600 hover:bg-teal-500 text-white text-[10px] px-2 py-1 rounded transition-colors"
+															className="bg-teal-600 hover:bg-teal-500 text-foreground text-[10px] px-2 py-1 rounded transition-colors"
 															onClick={handleGenerateNerf}
 														>
 															Convert to NeRF
 														</button>
 													</div>
 
-													<div className="flex gap-1 bg-zinc-950 p-1 rounded border border-zinc-700">
+													<div className="flex gap-1 bg-background p-1 rounded border border-border">
 														{[
 															{ id: "rectangle", icon: "M4 4h16v16H4z" },
 															{
@@ -7596,7 +7596,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																	});
 																	commitState(projectData);
 																}}
-																className={`flex-1 flex justify-center py-1.5 rounded transition-colors ${selectedClip.mask?.shape === shape.id ? "bg-indigo-600 text-white" : "text-zinc-400 hover:text-zinc-300 hover:bg-zinc-900"}`}
+																className={`flex-1 flex justify-center py-1.5 rounded transition-colors ${selectedClip.mask?.shape === shape.id ? "bg-indigo-600 text-foreground" : "text-muted hover:text-foreground hover:bg-background"}`}
 															>
 																<svg
 																	className="w-4 h-4"
@@ -7610,7 +7610,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</div>
 
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Feather
 														</span>
 														<input
@@ -7632,15 +7632,15 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(selectedClip.mask?.feather ?? 0.1).toFixed(2)}
 														</span>
 													</div>
 
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Opacity
 														</span>
 														<input
@@ -7662,9 +7662,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																);
 															}}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-indigo-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-indigo-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																(selectedClip.mask?.opacity ?? 1.0) * 100
 															).toFixed(0)}
@@ -7687,7 +7687,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															}}
 															className="w-3 h-3 accent-indigo-500 rounded cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-400">
+														<span className="text-[10px] text-muted">
 															Invert Mask
 														</span>
 													</label>
@@ -7701,16 +7701,16 @@ export default function EditorClient({ project }: { project: Project }) {
 										selectedClip.type === "image") &&
 										selectedClip.magicEraseMask &&
 										selectedClip.magicEraseMask.length > 0 && (
-											<div className="pt-2 border-t border-zinc-700 mt-2">
+											<div className="pt-2 border-t border-border mt-2">
 												<label className="text-xs font-medium text-emerald-400 mb-2 block">
 													🪄 AI Magic Eraser
 												</label>
-												<p className="text-[10px] text-zinc-400 mb-2">
+												<p className="text-[10px] text-muted mb-2">
 													Mask contains {selectedClip.magicEraseMask.length}{" "}
 													brush strokes.
 												</p>
 												<button
-													className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 rounded transition-colors shadow-lg flex items-center justify-center gap-2"
+													className="w-full bg-emerald-600 hover:bg-emerald-500 text-foreground text-xs py-1.5 rounded transition-colors shadow-lg flex items-center justify-center gap-2"
 													onClick={() => {
 														const erasePromise = new Promise((resolve) =>
 															setTimeout(resolve, 2000),
@@ -7749,8 +7749,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Chroma Key / Ultra Key */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 mb-2 flex items-center justify-between">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted mb-2 flex items-center justify-between">
 												Chroma Key (Ultra Key)
 												<label className="flex items-center gap-1 cursor-pointer">
 													<input
@@ -7771,7 +7771,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-emerald-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-400">
+													<span className="text-[10px] text-muted">
 														Enable
 													</span>
 												</label>
@@ -7780,7 +7780,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											{selectedClip.chromaKey?.enabled && (
 												<div className="flex flex-col gap-3 mt-3">
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Key Color
 														</span>
 														<input
@@ -7799,7 +7799,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														/>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Similarity
 														</span>
 														<input
@@ -7820,16 +7820,16 @@ export default function EditorClient({ project }: { project: Project }) {
 																)
 															}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																selectedClip.chromaKey?.similarity ?? 0.4
 															).toFixed(2)}
 														</span>
 													</div>
 													<div className="flex items-center justify-between">
-														<span className="text-[10px] text-zinc-400 w-16">
+														<span className="text-[10px] text-muted w-16">
 															Smoothness
 														</span>
 														<input
@@ -7850,9 +7850,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																)
 															}
 															onMouseUp={commitCurrentState}
-															className="flex-1 accent-emerald-500 mx-2 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+															className="flex-1 accent-emerald-500 mx-2 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														/>
-														<span className="text-[10px] text-zinc-300 w-8 text-right">
+														<span className="text-[10px] text-foreground w-8 text-right">
 															{(
 																selectedClip.chromaKey?.smoothness ?? 0.1
 															).toFixed(2)}
@@ -7866,8 +7866,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Border Radius */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 mb-2 block">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted mb-2 block">
 												Border Radius
 											</label>
 											<div className="flex flex-col gap-2">
@@ -7879,11 +7879,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.border_radius ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `border_radius`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `border_radius`, frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-12">
+													<span className="text-[10px] text-muted w-12">
 														Radius
 													</span>
 													<input
@@ -7902,9 +7902,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															updateSelectedClip({ border_radius: val }, false);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mx-2"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{(
 															getKeyframedValue({
 																clip: selectedClip,
@@ -7924,13 +7924,13 @@ export default function EditorClient({ project }: { project: Project }) {
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image" ||
 										selectedClip.type === "text") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
-											<label className="text-xs font-medium text-zinc-400 mb-2 block">
+										<div className="pt-2 border-t border-border mt-2">
+											<label className="text-xs font-medium text-muted mb-2 block">
 												Drop Shadow
 											</label>
 											<div className="flex flex-col gap-2">
 												<div className="flex items-center justify-between mb-1">
-													<span className="text-[10px] text-zinc-400 w-12">
+													<span className="text-[10px] text-muted w-12">
 														Color
 													</span>
 													<input
@@ -7977,11 +7977,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.shadow?.distance ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_distance`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_distance`, frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-12">
+													<span className="text-[10px] text-muted w-12">
 														Distance
 													</span>
 													<input
@@ -8009,9 +8009,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mx-2"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{(
 															getKeyframedValue({
 																clip: selectedClip,
@@ -8031,11 +8031,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.shadow?.angle ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_angle`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_angle`, frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-12">
+													<span className="text-[10px] text-muted w-12">
 														Angle
 													</span>
 													<input
@@ -8062,9 +8062,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mx-2"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{(
 															getKeyframedValue({
 																clip: selectedClip,
@@ -8085,11 +8085,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																selectedClip.shadow?.blur ?? 0.0,
 															)
 														}
-														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_blur`, frame }) ? "text-indigo-400" : "text-zinc-400"}`}
+														className={`mr-1 text-[10px] ${hasKeyframe({ clip: selectedClip, property: `shadow_blur`, frame }) ? "text-indigo-400" : "text-muted"}`}
 													>
 														♦
 													</button>
-													<span className="text-[10px] text-zinc-400 w-12">
+													<span className="text-[10px] text-muted w-12">
 														Blur
 													</span>
 													<input
@@ -8116,9 +8116,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer mx-2"
+														className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer mx-2"
 													/>
-													<span className="text-xs text-zinc-300 w-8 text-right">
+													<span className="text-xs text-foreground w-8 text-right">
 														{(
 															getKeyframedValue({
 																clip: selectedClip,
@@ -8136,9 +8136,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Effects (GPU Shaders) */}
 									{(selectedClip.type === "video" ||
 										selectedClip.type === "image") && (
-										<div className="pt-2 border-t border-zinc-700 mt-2">
+										<div className="pt-2 border-t border-border mt-2">
 											<div className="flex items-center justify-between mb-3">
-												<label className="text-xs font-medium text-zinc-400">
+												<label className="text-xs font-medium text-muted">
 													Effects (GPU Shaders)
 												</label>
 												<button
@@ -8162,7 +8162,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															updateSelectedClip({ effects: newEffects });
 														}
 													}}
-													className="text-[10px] bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded"
+													className="text-[10px] bg-panel hover:bg-glass text-foreground px-2 py-0.5 rounded"
 												>
 													+ Chroma Key
 												</button>
@@ -8175,9 +8175,9 @@ export default function EditorClient({ project }: { project: Project }) {
 															return (
 																<div
 																	key={effect.id}
-																	className="bg-zinc-900 border border-zinc-700 rounded p-2 flex flex-col gap-2"
+																	className="bg-background border border-border rounded p-2 flex flex-col gap-2"
 																>
-																	<div className="flex items-center justify-between border-b border-zinc-700 pb-1 mb-1">
+																	<div className="flex items-center justify-between border-b border-border pb-1 mb-1">
 																		<span className="text-xs text-indigo-400 font-medium">
 																			Chroma Key
 																		</span>
@@ -8198,7 +8198,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																	</div>
 																	{/* Target Color */}
 																	<div className="flex items-center justify-between">
-																		<span className="text-[10px] text-zinc-400 w-16">
+																		<span className="text-[10px] text-muted w-16">
 																			Target Color
 																		</span>
 																		<input
@@ -8221,12 +8221,12 @@ export default function EditorClient({ project }: { project: Project }) {
 																					effects: newEffects,
 																				});
 																			}}
-																			className="w-8 h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+																			className="w-8 h-8 rounded cursor-pointer bg-background border-none p-0"
 																		/>
 																	</div>
 																	{/* Similarity */}
 																	<div className="flex items-center justify-between">
-																		<span className="text-[10px] text-zinc-400 w-16">
+																		<span className="text-[10px] text-muted w-16">
 																			Similarity
 																		</span>
 																		<input
@@ -8255,9 +8255,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																				);
 																			}}
 																			onMouseUp={commitCurrentState}
-																			className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+																			className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 																		/>
-																		<span className="text-[10px] text-zinc-300 w-8 text-right">
+																		<span className="text-[10px] text-foreground w-8 text-right">
 																			{(
 																				effect.properties.similarity ?? 0.4
 																			).toFixed(2)}
@@ -8265,7 +8265,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																	</div>
 																	{/* Smoothness */}
 																	<div className="flex items-center justify-between">
-																		<span className="text-[10px] text-zinc-400 w-16">
+																		<span className="text-[10px] text-muted w-16">
 																			Smoothness
 																		</span>
 																		<input
@@ -8294,9 +8294,9 @@ export default function EditorClient({ project }: { project: Project }) {
 																				);
 																			}}
 																			onMouseUp={commitCurrentState}
-																			className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+																			className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 																		/>
-																		<span className="text-[10px] text-zinc-300 w-8 text-right">
+																		<span className="text-[10px] text-foreground w-8 text-right">
 																			{(
 																				effect.properties.smoothness ?? 0.1
 																			).toFixed(2)}
@@ -8314,14 +8314,14 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Transitions */}
 
-									<div className="pt-2 border-t border-zinc-700 mt-2">
-										<label className="text-xs font-medium text-zinc-400 block mb-3">
+									<div className="pt-2 border-t border-border mt-2">
+										<label className="text-xs font-medium text-muted block mb-3">
 											Transitions
 										</label>
 										<div className="flex flex-col gap-3">
 											{/* Fade In */}
 											<div className="flex items-center justify-between">
-												<span className="text-[10px] text-zinc-400 w-16">
+												<span className="text-[10px] text-muted w-16">
 													Fade In (f)
 												</span>
 												<input
@@ -8348,15 +8348,15 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{selectedClip.transitions?.in?.duration_frames || 0}
 												</span>
 											</div>
 											{/* Fade Out */}
 											<div className="flex items-center justify-between">
-												<span className="text-[10px] text-zinc-400 w-16">
+												<span className="text-[10px] text-muted w-16">
 													Fade Out (f)
 												</span>
 												<input
@@ -8383,9 +8383,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{selectedClip.transitions?.out?.duration_frames || 0}
 												</span>
 											</div>
@@ -8393,9 +8393,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									{/* Clip Notes & Annotations */}
-									<div className="pt-2 border-t border-zinc-700 mt-2">
+									<div className="pt-2 border-t border-border mt-2">
 										<div className="flex items-center justify-between mb-3">
-											<label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
+											<label className="text-xs font-medium text-muted flex items-center gap-1.5">
 												<svg
 													className="w-3 h-3 text-amber-400"
 													fill="none"
@@ -8411,7 +8411,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</svg>
 												Clip Notes
 											</label>
-											<span className="text-[10px] text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded font-mono">
+											<span className="text-[10px] text-muted bg-panel px-1.5 py-0.5 rounded font-mono">
 												{(selectedClip.notes || []).length}
 											</span>
 										</div>
@@ -8421,14 +8421,14 @@ export default function EditorClient({ project }: { project: Project }) {
 											<textarea
 												id={`clip-note-input-${selectedClip.id}`}
 												placeholder="Add a review note..."
-												className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner resize-none h-16 placeholder-zinc-600"
+												className="bg-background border border-border/50 rounded text-xs text-foreground px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner resize-none h-16 placeholder-zinc-600"
 											/>
 											<div className="flex items-center gap-1.5">
 												{[
 													{
 														label: "📝 Note",
 														type: "note",
-														color: "bg-zinc-700 text-zinc-300",
+														color: "bg-glass text-foreground",
 													},
 													{
 														label: "📋 To-Do",
@@ -8470,7 +8470,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															commitState(projectData);
 															inputEl.value = "";
 														}}
-														className={`text-[10px] px-2 py-1 rounded border border-zinc-700 transition-colors hover:brightness-125 ${noteType.color}`}
+														className={`text-[10px] px-2 py-1 rounded border border-border transition-colors hover:brightness-125 ${noteType.color}`}
 													>
 														{noteType.label}
 													</button>
@@ -8494,11 +8494,11 @@ export default function EditorClient({ project }: { project: Project }) {
 																		? "bg-amber-950/30 border-amber-900/40"
 																		: note.type === "approved"
 																			? "bg-emerald-950/30 border-emerald-900/40"
-																			: "bg-zinc-900/50 border-zinc-700/50"
+																			: "bg-background/50 border-border/50"
 															}`}
 														>
 															<div className="flex items-start justify-between gap-2">
-																<p className="text-[10px] text-zinc-300 leading-relaxed flex-1">
+																<p className="text-[10px] text-foreground leading-relaxed flex-1">
 																	{note.text}
 																</p>
 																<button
@@ -8534,7 +8534,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																>
 																	@{note.frame}f
 																</button>
-																<span className="text-[8px] text-zinc-400">
+																<span className="text-[8px] text-muted">
 																	{note.author}
 																</span>
 																<span className="text-[8px] text-zinc-700">
@@ -8552,8 +8552,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Transform */}
 
-									<div className="pt-2 border-t border-zinc-700 mt-2">
-										<label className="text-xs font-medium text-zinc-400 block mb-3">
+									<div className="pt-2 border-t border-border mt-2">
+										<label className="text-xs font-medium text-muted block mb-3">
 											Transform
 										</label>
 										<div className="flex flex-col gap-3">
@@ -8563,7 +8563,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"transform.x",
 													selectedClip.transform?.x ?? 0,
 												)}
-												<span className="text-[10px] text-zinc-400 w-14">
+												<span className="text-[10px] text-muted w-14">
 													Pos X
 												</span>
 												<input
@@ -8603,9 +8603,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{getKeyframedValue({
 														clip: selectedClip,
 														property: "transform.x",
@@ -8620,7 +8620,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"transform.y",
 													selectedClip.transform?.y ?? 0,
 												)}
-												<span className="text-[10px] text-zinc-400 w-14">
+												<span className="text-[10px] text-muted w-14">
 													Pos Y
 												</span>
 												<input
@@ -8660,9 +8660,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{getKeyframedValue({
 														clip: selectedClip,
 														property: "transform.y",
@@ -8677,7 +8677,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"transform.scale",
 													selectedClip.transform?.scale ?? 1.0,
 												)}
-												<span className="text-[10px] text-zinc-400 w-14">
+												<span className="text-[10px] text-muted w-14">
 													Scale
 												</span>
 												<input
@@ -8717,9 +8717,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														);
 													}}
 													onMouseUp={commitCurrentState}
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{getKeyframedValue({
 														clip: selectedClip,
 														property: "transform.scale",
@@ -8734,7 +8734,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"rotation",
 													selectedClip.transform?.rotation ?? 0,
 												)}
-												<span className="text-[10px] text-zinc-400 w-14">
+												<span className="text-[10px] text-muted w-14">
 													Rotation
 												</span>
 												<input
@@ -8742,7 +8742,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													min="-360"
 													max="360"
 													step="1"
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													value={getKeyframedValue({
 														clip: selectedClip,
 														property: "rotation",
@@ -8780,7 +8780,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													"opacity",
 													selectedClip.transform?.opacity ?? 1.0,
 												)}
-												<span className="text-[10px] text-zinc-400 w-14">
+												<span className="text-[10px] text-muted w-14">
 													Opacity
 												</span>
 												<input
@@ -8788,7 +8788,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													min="0"
 													max="1"
 													step="0.01"
-													className="w-full accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+													className="w-full accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 													value={getKeyframedValue({
 														clip: selectedClip,
 														property: "opacity",
@@ -8823,7 +8823,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													}}
 													onMouseUp={commitCurrentState}
 												/>
-												<span className="text-xs text-zinc-300 w-10 text-right">
+												<span className="text-xs text-foreground w-10 text-right">
 													{Math.round(
 														getKeyframedValue({
 															clip: selectedClip,
@@ -8837,16 +8837,16 @@ export default function EditorClient({ project }: { project: Project }) {
 												</span>
 											</div>
 											{/* Keyframe Easing Presets */}
-											<div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-700/50">
-												<span className="text-[10px] text-zinc-400 w-14">
+											<div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+												<span className="text-[10px] text-muted w-14">
 													Easing
 												</span>
-												<div className="flex gap-1 flex-1 bg-zinc-950 p-1 rounded border border-zinc-700">
+												<div className="flex gap-1 flex-1 bg-background p-1 rounded border border-border">
 													{["Linear", "Ease In", "Ease Out", "Bezier"].map(
 														(ease) => (
 															<button
 																key={ease}
-																className="flex-1 text-[10px] py-1 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+																className="flex-1 text-[10px] py-1 text-muted hover:text-foreground hover:bg-panel rounded transition-colors"
 															>
 																{ease}
 															</button>
@@ -8856,7 +8856,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											</div>
 
 											{/* Motion Blur */}
-											<div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-700/50">
+											<div className="flex items-center justify-between mt-2 pt-2 border-t border-border/50">
 												<label className="flex items-center gap-2 cursor-pointer">
 													<input
 														type="checkbox"
@@ -8880,12 +8880,12 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-indigo-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-zinc-400">
+													<span className="text-[10px] text-muted">
 														Motion Blur
 													</span>
 												</label>
 												<div className="flex items-center gap-2">
-													<span className="text-[10px] text-zinc-400">
+													<span className="text-[10px] text-muted">
 														Angle
 													</span>
 													<input
@@ -8912,18 +8912,18 @@ export default function EditorClient({ project }: { project: Project }) {
 															);
 														}}
 														onMouseUp={commitCurrentState}
-														className="w-16 accent-indigo-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+														className="w-16 accent-indigo-500 h-1 bg-panel rounded-lg appearance-none cursor-pointer"
 														title="Shutter Angle"
 														disabled={!selectedClip.transform?.motionBlur}
 													/>
-													<span className="text-[10px] text-zinc-300 w-6 text-right">
+													<span className="text-[10px] text-foreground w-6 text-right">
 														{selectedClip.transform?.shutterAngle ?? 180}°
 													</span>
 												</div>
 											</div>
 
 											{/* Dynamic Zoom (Phase 168) */}
-											<div className="pt-2 border-t border-zinc-700 mt-2">
+											<div className="pt-2 border-t border-border mt-2">
 												<div className="flex items-center justify-between mb-2">
 													<label className="text-[10px] font-bold text-emerald-400 block uppercase tracking-wider">
 														Dynamic Zoom (Ken Burns)
@@ -8952,7 +8952,7 @@ export default function EditorClient({ project }: { project: Project }) {
 															}
 														/>
 														<div
-															className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.transform?.dynamicZoom ? "bg-emerald-500" : "bg-zinc-700"}`}
+															className={`w-6 h-3 rounded-full relative transition-colors ${selectedClip.transform?.dynamicZoom ? "bg-emerald-500" : "bg-glass"}`}
 														>
 															<div
 																className={`absolute top-0.5 left-0.5 bg-white w-2 h-2 rounded-full transition-transform ${selectedClip.transform?.dynamicZoom ? "translate-x-3" : "translate-x-0"}`}
@@ -8961,7 +8961,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</label>
 												</div>
 												{selectedClip.transform?.dynamicZoom && (
-													<div className="flex justify-between items-center bg-zinc-950 p-2 rounded border border-zinc-700">
+													<div className="flex justify-between items-center bg-background p-2 rounded border border-border">
 														<button
 															className="text-[10px] hover:text-emerald-400 transition-colors"
 															onClick={handleSwapDynamicZoom}
@@ -8980,7 +8980,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 											{/* Lens Distortion (Phase 171) */}
 											<div className="flex items-center justify-between">
-												<span className="text-[10px] text-zinc-400 w-24 leading-tight">
+												<span className="text-[10px] text-muted w-24 leading-tight">
 													Lens Distortion (Correction)
 												</span>
 												<input
@@ -8993,16 +8993,16 @@ export default function EditorClient({ project }: { project: Project }) {
 															lens_distortion: parseInt(e.target.value),
 														})
 													}
-													className="flex-1 h-1 bg-zinc-800 accent-indigo-500 rounded-lg appearance-none cursor-pointer"
+													className="flex-1 h-1 bg-panel accent-indigo-500 rounded-lg appearance-none cursor-pointer"
 												/>
-												<span className="text-[10px] text-zinc-300 w-6 text-right font-mono">
+												<span className="text-[10px] text-foreground w-6 text-right font-mono">
 													{selectedClip.lens_distortion || 0}
 												</span>
 											</div>
 										</div>
 									</div>
 
-									<div className="mt-4 border-t border-zinc-700 pt-4 flex flex-col gap-2">
+									<div className="mt-4 border-t border-border pt-4 flex flex-col gap-2">
 										<button
 											onClick={() => handleSplitClip()}
 											disabled={
@@ -9011,7 +9011,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													selectedClip.start_frame +
 														selectedClip.duration_frames
 											}
-											className="w-full bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-700 text-zinc-300 text-xs font-medium py-1.5 rounded transition-colors"
+											className="w-full bg-panel hover:bg-glass disabled:opacity-50 disabled:cursor-not-allowed border border-border text-foreground text-xs font-medium py-1.5 rounded transition-colors"
 										>
 											Split at Playhead
 										</button>
@@ -9034,7 +9034,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										{selectedClip.type === "video" && (
 											<button
 												onClick={handleDetachAudio}
-												className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-indigo-400 text-xs font-medium py-1.5 rounded transition-colors"
+												className="w-full mt-2 bg-panel hover:bg-glass border border-border text-indigo-400 text-xs font-medium py-1.5 rounded transition-colors"
 											>
 												Detach Audio
 											</button>
@@ -9044,8 +9044,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									{/* Animation Curves */}
 									{selectedClip.keyframes &&
 										selectedClip.keyframes.length > 0 && (
-											<div className="pt-4 border-t border-zinc-700 mt-4 mb-4">
-												<label className="text-xs font-medium text-zinc-400 block mb-3">
+											<div className="pt-4 border-t border-border mt-4 mb-4">
+												<label className="text-xs font-medium text-muted block mb-3">
 													Animation Curves
 												</label>
 												<div className="flex flex-col gap-4">
@@ -9072,10 +9072,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
 														return (
 															<div key={prop} className="flex flex-col gap-1">
-																<div className="text-[10px] text-zinc-400 uppercase">
+																<div className="text-[10px] text-muted uppercase">
 																	{prop.replace(".", " ")}
 																</div>
-																<div className="h-20 bg-zinc-900 rounded border border-zinc-700 relative overflow-hidden">
+																<div className="h-20 bg-background rounded border border-border relative overflow-hidden">
 																	<svg
 																		className="absolute inset-0 w-full h-full overflow-visible"
 																		preserveAspectRatio="none"
@@ -9174,7 +9174,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</>
 							) : (
 								<div className="flex flex-col gap-4">
-									<div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">
+									<div className="text-xs text-muted mb-2 uppercase tracking-wider font-semibold">
 										Project Settings
 									</div>
 
@@ -9191,7 +9191,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 										<label className="relative inline-flex items-center cursor-pointer">
 											<input type="checkbox" className="sr-only peer" />
-											<div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
+											<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-fuchsia-500"></div>
 										</label>
 									</div>
 
@@ -9207,7 +9207,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</span>
 											</div>
 											<button
-												className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-3 py-1 rounded-full transition-colors font-bold"
+												className="bg-indigo-600 hover:bg-indigo-500 text-foreground text-[10px] px-3 py-1 rounded-full transition-colors font-bold"
 												onClick={() => handleQuantumRender()}
 											>
 												Link Cluster
@@ -9216,16 +9216,16 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									{/* WebGPU Hardware Engine (Phase 199) */}
-									<div className="mb-4 p-3 bg-zinc-950 border border-zinc-700 rounded flex flex-col gap-2">
+									<div className="mb-4 p-3 bg-background border border-border rounded flex flex-col gap-2">
 										<div className="flex items-center justify-between">
-											<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+											<label className="text-[10px] font-bold text-muted uppercase tracking-wider">
 												Rendering Engine
 											</label>
 											<span className="text-[10px] px-1.5 py-0.5 bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 rounded">
 												Experimental
 											</span>
 										</div>
-										<select className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500">
+										<select className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
 											<option>WebGL 2.0 (Stable)</option>
 											<option>WebGPU Hardware (Fast)</option>
 											<option>Software (CPU)</option>
@@ -9233,7 +9233,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-zinc-400 block mb-1">
+										<label className="text-xs font-medium text-muted block mb-1">
 											Project Name
 										</label>
 										<input
@@ -9242,14 +9242,14 @@ export default function EditorClient({ project }: { project: Project }) {
 											onChange={(e) =>
 												commitState({ ...projectData, name: e.target.value })
 											}
-											className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+											className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 										/>
 									</div>
 
 									{/* Hardware Control Surface (Phase 184) */}
-									<div className="mt-2 p-3 bg-zinc-950 border border-zinc-700 rounded flex flex-col gap-2">
+									<div className="mt-2 p-3 bg-background border border-border rounded flex flex-col gap-2">
 										<div className="flex items-center justify-between">
-											<label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+											<label className="text-[10px] font-bold text-muted uppercase tracking-wider flex items-center gap-1">
 												<svg
 													className="w-3 h-3"
 													fill="none"
@@ -9269,7 +9269,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												WebMIDI Active
 											</span>
 										</div>
-										<select className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-300 focus:outline-none focus-ring focus:border-indigo-500">
+										<select className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500">
 											<option>Tangent Ripple (Connected)</option>
 											<option>Blackmagic Micro Panel</option>
 											<option>Generic MIDI CC</option>
@@ -9279,7 +9279,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									<div className="flex gap-2">
 										<div className="flex-1">
-											<label className="text-xs font-medium text-zinc-400 block mb-1">
+											<label className="text-xs font-medium text-muted block mb-1">
 												Width
 											</label>
 											<input
@@ -9291,12 +9291,12 @@ export default function EditorClient({ project }: { project: Project }) {
 														width: parseInt(e.target.value) || 1920,
 													})
 												}
-												className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+												className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 											/>
 										</div>
 
 										<div className="flex-1">
-											<label className="text-xs font-medium text-zinc-400 block mb-1">
+											<label className="text-xs font-medium text-muted block mb-1">
 												Height
 											</label>
 											<input
@@ -9308,13 +9308,13 @@ export default function EditorClient({ project }: { project: Project }) {
 														height: parseInt(e.target.value) || 1080,
 													})
 												}
-												className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-sm text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+												className="w-full bg-background border border-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 											/>
 										</div>
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-zinc-400 block mb-1">
+										<label className="text-xs font-medium text-muted block mb-1">
 											Aspect Ratio Presets
 										</label>
 										<div className="flex gap-2">
@@ -9326,7 +9326,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														height: 1080,
 													})
 												}
-												className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
+												className="flex-1 bg-panel hover:bg-glass border border-border text-foreground text-[10px] py-1 rounded transition-colors"
 											>
 												16:9 (1080p)
 											</button>
@@ -9338,7 +9338,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														height: 1920,
 													})
 												}
-												className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
+												className="flex-1 bg-panel hover:bg-glass border border-border text-foreground text-[10px] py-1 rounded transition-colors"
 											>
 												9:16 (Shorts)
 											</button>
@@ -9350,7 +9350,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														height: 1080,
 													})
 												}
-												className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[10px] py-1 rounded transition-colors"
+												className="flex-1 bg-panel hover:bg-glass border border-border text-foreground text-[10px] py-1 rounded transition-colors"
 											>
 												1:1 (Square)
 											</button>
@@ -9358,7 +9358,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div>
-										<label className="text-xs font-medium text-zinc-400 block mb-2">
+										<label className="text-xs font-medium text-muted block mb-2">
 											Background Color
 										</label>
 										<div className="flex items-center gap-2">
@@ -9384,13 +9384,13 @@ export default function EditorClient({ project }: { project: Project }) {
 														bg_color: [r, g, b, 1.0],
 													});
 												}}
-												className="w-8 h-8 rounded cursor-pointer bg-zinc-900 border-none p-0"
+												className="w-8 h-8 rounded cursor-pointer bg-background border-none p-0"
 											/>
 										</div>
 									</div>
 
-									<div className="mt-4 pt-4 border-t border-zinc-700">
-										<div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">
+									<div className="mt-4 pt-4 border-t border-border">
+										<div className="text-xs text-muted mb-2 uppercase tracking-wider font-semibold">
 											Timecode Burn-In Overlay
 										</div>
 										<label
@@ -9406,16 +9406,16 @@ export default function EditorClient({ project }: { project: Project }) {
 														burnInEnabled: e.target.checked,
 													})
 												}
-												className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
+												className="w-3.5 h-3.5 bg-background border-border rounded accent-indigo-500 cursor-pointer"
 											/>
-											<span className="text-xs text-zinc-300">
+											<span className="text-xs text-foreground">
 												Enable Timecode Burn-In
 											</span>
 										</label>
 										{projectData.burnInEnabled && (
 											<div className="flex gap-2">
 												<div className="flex-1">
-													<label className="text-[10px] font-medium text-zinc-400 block mb-1">
+													<label className="text-[10px] font-medium text-muted block mb-1">
 														Position
 													</label>
 													<select
@@ -9426,7 +9426,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																burnInPosition: e.target.value,
 															})
 														}
-														className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+														className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 													>
 														<option value="top-left">Top Left</option>
 														<option value="top-right">Top Right</option>
@@ -9437,7 +9437,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</div>
 
 												<div className="flex-1">
-													<label className="text-[10px] font-medium text-zinc-400 block mb-1">
+													<label className="text-[10px] font-medium text-muted block mb-1">
 														Size
 													</label>
 													<select
@@ -9448,7 +9448,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																burnInSize: e.target.value,
 															})
 														}
-														className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+														className="w-full bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 													>
 														<option value="small">Small</option>
 														<option value="medium">Medium</option>
@@ -9459,8 +9459,8 @@ export default function EditorClient({ project }: { project: Project }) {
 										)}
 									</div>
 
-									<div className="mt-4 pt-4 border-t border-zinc-700">
-										<div className="text-xs text-zinc-400 mb-2 uppercase tracking-wider font-semibold">
+									<div className="mt-4 pt-4 border-t border-border">
+										<div className="text-xs text-muted mb-2 uppercase tracking-wider font-semibold">
 											Performance & Saving
 										</div>
 										<label
@@ -9476,9 +9476,9 @@ export default function EditorClient({ project }: { project: Project }) {
 														useHardwareAcceleration: e.target.checked,
 													})
 												}
-												className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
+												className="w-3.5 h-3.5 bg-background border-border rounded accent-indigo-500 cursor-pointer"
 											/>
-											<span className="text-xs text-zinc-300">
+											<span className="text-xs text-foreground">
 												Use Hardware Acceleration (GPU)
 											</span>
 										</label>
@@ -9496,15 +9496,15 @@ export default function EditorClient({ project }: { project: Project }) {
 														smartRenderCache: e.target.checked,
 													})
 												}
-												className="w-3.5 h-3.5 bg-zinc-900 border-zinc-700 rounded accent-indigo-500 cursor-pointer"
+												className="w-3.5 h-3.5 bg-background border-border rounded accent-indigo-500 cursor-pointer"
 											/>
-											<span className="text-xs text-zinc-300">
+											<span className="text-xs text-foreground">
 												Smart Render Cache
 											</span>
 										</label>
 
 										<div className="flex flex-col gap-2 mb-3">
-											<label className="text-[10px] font-medium text-zinc-400">
+											<label className="text-[10px] font-medium text-muted">
 												Project FPS
 											</label>
 											<select
@@ -9515,7 +9515,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														fps: parseInt(e.target.value),
 													})
 												}
-												className="bg-zinc-900 border border-zinc-700 rounded px-2 py-1 text-xs text-zinc-200 focus:outline-none focus-ring focus:border-indigo-500"
+												className="bg-background border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus-ring focus:border-indigo-500"
 											>
 												<option value="24">24 fps (Cinematic)</option>
 												<option value="25">25 fps (PAL)</option>
@@ -9527,10 +9527,10 @@ export default function EditorClient({ project }: { project: Project }) {
 
 										<div>
 											<div className="flex justify-between items-center mb-1">
-												<label className="text-[10px] font-medium text-zinc-400">
+												<label className="text-[10px] font-medium text-muted">
 													Auto-Save Frequency
 												</label>
-												<span className="text-[10px] text-zinc-400">
+												<span className="text-[10px] text-muted">
 													{projectData.autoSaveInterval || 5} mins
 												</span>
 											</div>
@@ -9546,7 +9546,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														autoSaveInterval: parseInt(e.target.value),
 													})
 												}
-												className="w-full accent-indigo-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+												className="w-full accent-indigo-500 h-1.5 bg-panel rounded-lg appearance-none cursor-pointer"
 											/>
 										</div>
 									</div>
@@ -9558,7 +9558,7 @@ export default function EditorClient({ project }: { project: Project }) {
 				{/* End Top Half */}
 				{/* Horizontal Splitter */}
 				<div
-					className="h-1 cursor-row-resize hover:bg-indigo-500/50 bg-zinc-950 shrink-0 z-40 transition-colors"
+					className="h-1 cursor-row-resize hover:bg-indigo-500/50 bg-background shrink-0 z-40 transition-colors"
 					onMouseDown={(e) => {
 						e.preventDefault();
 						const startY = e.clientY;
@@ -9580,11 +9580,11 @@ export default function EditorClient({ project }: { project: Project }) {
 				/>
 				{/* Timeline or Node Graph */}
 				<section
-					className="w-full border-t border-zinc-700 bg-zinc-900 flex flex-col shrink-0 relative overflow-hidden"
+					className="w-full border-t border-border bg-background flex flex-col shrink-0 relative overflow-hidden"
 					style={{ height: timelineHeight }}
 				>
 					{activeWorkspace === "color" ? (
-						<div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+						<div className="absolute inset-0 bg-background flex flex-col p-4">
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-sm font-bold text-teal-400 uppercase tracking-widest flex items-center gap-2">
 									<svg
@@ -9604,7 +9604,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</h2>
 								<button
 									onClick={() => setActiveWorkspace("timeline")}
-									className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded"
+									className="text-[10px] text-muted hover:text-foreground px-2 py-1 bg-panel rounded"
 								>
 									Close Scopes
 								</button>
@@ -9614,7 +9614,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 						</div>
 					) : activeWorkspace === "audio" ? (
-						<div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+						<div className="absolute inset-0 bg-background flex flex-col p-4">
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-sm font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
 									<svg
@@ -9634,7 +9634,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</h2>
 								<button
 									onClick={() => setActiveWorkspace("timeline")}
-									className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded"
+									className="text-[10px] text-muted hover:text-foreground px-2 py-1 bg-panel rounded"
 								>
 									Close Mixer
 								</button>
@@ -9647,7 +9647,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 						</div>
 					) : activeWorkspace === "ai" ? (
-						<div className="absolute inset-0 bg-zinc-950 flex flex-col p-4">
+						<div className="absolute inset-0 bg-background flex flex-col p-4">
 							<div className="flex items-center justify-between mb-4">
 								<h2 className="text-sm font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
 									<svg
@@ -9667,7 +9667,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</h2>
 								<button
 									onClick={() => setActiveWorkspace("timeline")}
-									className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded"
+									className="text-[10px] text-muted hover:text-foreground px-2 py-1 bg-panel rounded"
 								>
 									Close AI
 								</button>
@@ -9719,15 +9719,15 @@ export default function EditorClient({ project }: { project: Project }) {
 							}}
 						/>
 					) : activeWorkspace === "fusion" ? (
-						<div className="absolute inset-0 bg-zinc-950 flex flex-col">
+						<div className="absolute inset-0 bg-background flex flex-col">
 							{/* Node Graph UI */}
-							<div className="h-8 border-b border-zinc-800 bg-zinc-900 flex items-center px-4 justify-between">
-								<span className="text-xs text-zinc-300 font-medium tracking-wide">
+							<div className="h-8 border-b border-border bg-background flex items-center px-4 justify-between">
+								<span className="text-xs text-foreground font-medium tracking-wide">
 									FUSION GRAPH
 								</span>
 								<button
 									onClick={() => setActiveWorkspace("timeline")}
-									className="text-[10px] text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded"
+									className="text-[10px] text-muted hover:text-foreground px-2 py-1 bg-panel rounded"
 								>
 									Close Nodes
 								</button>
@@ -9751,9 +9751,9 @@ export default function EditorClient({ project }: { project: Project }) {
 								</svg>
 
 								{/* MediaIn Node */}
-								<div className="absolute top-[120px] left-[50px] w-[100px] bg-zinc-800 border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
-									<div className="h-6 bg-zinc-700 border-b border-zinc-600 flex items-center px-2">
-										<span className="text-[10px] font-semibold text-white">
+								<div className="absolute top-[120px] left-[50px] w-[100px] bg-panel border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
+									<div className="h-6 bg-glass border-b border-zinc-600 flex items-center px-2">
+										<span className="text-[10px] font-semibold text-foreground">
 											MediaIn1
 										</span>
 									</div>
@@ -9763,7 +9763,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								{/* Effect Node */}
-								<div className="absolute top-[120px] left-[350px] w-[100px] bg-zinc-800 border border-emerald-500 rounded-md shadow-xl flex flex-col overflow-hidden ring-2 ring-emerald-500/50">
+								<div className="absolute top-[120px] left-[350px] w-[100px] bg-panel border border-emerald-500 rounded-md shadow-xl flex flex-col overflow-hidden ring-2 ring-emerald-500/50">
 									<div className="h-6 bg-emerald-600/20 border-b border-emerald-500/50 flex items-center px-2">
 										<span className="text-[10px] font-semibold text-emerald-300">
 											UltraKey
@@ -9776,9 +9776,9 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								{/* MediaOut Node */}
-								<div className="absolute top-[120px] left-[650px] w-[100px] bg-zinc-800 border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
-									<div className="h-6 bg-zinc-700 border-b border-zinc-600 flex items-center px-2">
-										<span className="text-[10px] font-semibold text-white">
+								<div className="absolute top-[120px] left-[650px] w-[100px] bg-panel border border-zinc-600 rounded-md shadow-xl flex flex-col overflow-hidden">
+									<div className="h-6 bg-glass border-b border-zinc-600 flex items-center px-2">
+										<span className="text-[10px] font-semibold text-foreground">
 											MediaOut1
 										</span>
 									</div>
@@ -9793,7 +9793,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Timeline Minimap */}
 
 							<div
-								className="h-10 bg-zinc-950 border-b border-zinc-700 relative w-full overflow-hidden cursor-crosshair group flex-shrink-0"
+								className="h-10 bg-background border-b border-border relative w-full overflow-hidden cursor-crosshair group flex-shrink-0"
 								onMouseDown={(e) => {
 									const rect = e.currentTarget.getBoundingClientRect();
 									const x = e.clientX - rect.left;
@@ -9858,16 +9858,16 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								{/* Hover overlay hint */}
-								<div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center">
-									<span className="text-[10px] uppercase tracking-widest text-white/50 font-semibold bg-black/50 px-2 py-0.5 rounded backdrop-blur">
+								<div className="absolute inset-0 bg-hover opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity flex items-center justify-center">
+									<span className="text-[10px] uppercase tracking-widest text-foreground/50 font-semibold bg-background/50 px-2 py-0.5 rounded backdrop-blur">
 										Timeline Minimap Navigator
 									</span>
 								</div>
 							</div>
 							{/* Timeline Header Toolbar */}
-							<div className="h-8 w-full border-b border-zinc-700 bg-zinc-950 flex items-center px-4 gap-2">
+							<div className="h-8 w-full border-b border-border bg-background flex items-center px-4 gap-2">
 								<button
-									className="text-xs font-medium text-white bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 active:bg-zinc-600 transition-colors"
+									className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass active:bg-zinc-600 transition-colors"
 									onClick={() => {
 										setFrame(0);
 										setIsPlaying(false);
@@ -9877,7 +9877,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									Start
 								</button>
 								<button
-									className={`text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm ${
+									className={`text-xs font-medium text-foreground border px-4 py-1 rounded transition-colors shadow-sm ${
 										isPlaying
 											? "bg-rose-600 border-rose-500 hover:bg-rose-500 active:bg-rose-700"
 											: "bg-indigo-600 border-indigo-500 hover:bg-indigo-500 active:bg-indigo-700"
@@ -9887,7 +9887,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									{isPlaying ? "Pause" : "Play"}
 								</button>
 								<button
-									className={`text-xs font-medium border px-3 py-1 rounded transition-colors shadow-sm ${projectData.bypassEffects ? "bg-amber-600 text-white border-amber-500 hover:bg-amber-500" : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200"}`}
+									className={`text-xs font-medium border px-3 py-1 rounded transition-colors shadow-sm ${projectData.bypassEffects ? "bg-amber-600 text-foreground border-amber-500 hover:bg-amber-500" : "bg-panel text-muted border-border hover:text-foreground"}`}
 									onClick={() =>
 										commitState({
 											...projectData,
@@ -9899,7 +9899,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									🪄 Bypass FX
 								</button>
 								<button
-									className={`text-xs font-medium border px-4 py-1 rounded transition-colors shadow-sm ${showDataBurnIn ? "bg-amber-600 text-white border-amber-500 hover:bg-amber-500" : "bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200"}`}
+									className={`text-xs font-medium border px-4 py-1 rounded transition-colors shadow-sm ${showDataBurnIn ? "bg-amber-600 text-foreground border-amber-500 hover:bg-amber-500" : "bg-panel text-muted border-border hover:text-foreground"}`}
 									onClick={() => setShowDataBurnIn(!showDataBurnIn)}
 									title="Toggle Data Burn-In Overlay"
 								>
@@ -9907,7 +9907,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</button>
 								{/* Phase 28: BCI Emotion Mapping */}
 								<button
-									className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isEmotionHeatmapMode ? "bg-orange-600 text-white border-orange-500" : "bg-zinc-800 text-orange-400 border-zinc-700 hover:bg-zinc-700"}`}
+									className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isEmotionHeatmapMode ? "bg-orange-600 text-foreground border-orange-500" : "bg-panel text-orange-400 border-border hover:bg-glass"}`}
 									onClick={() => setIsEmotionHeatmapMode(!isEmotionHeatmapMode)}
 									title="BCI Emotion Heatmap (Arousal/Valence Pacing Analysis)"
 								>
@@ -9915,14 +9915,14 @@ export default function EditorClient({ project }: { project: Project }) {
 								</button>
 								{/* Phase 27: Cinematic Multiverse */}
 								<button
-									className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isMultiverseMode ? "bg-fuchsia-600 text-white border-fuchsia-500" : "bg-zinc-800 text-cyan-400 border-zinc-700 hover:bg-zinc-700"}`}
+									className={`text-[10px] font-bold border px-2 py-1 mr-2 rounded transition-colors shadow-sm ${isMultiverseMode ? "bg-fuchsia-600 text-foreground border-fuchsia-500" : "bg-panel text-cyan-400 border-border hover:bg-glass"}`}
 									onClick={() => setIsMultiverseMode(!isMultiverseMode)}
 									title="Branch Timeline (A/B Multiverse Prototyping)"
 								>
 									🌌 Branch A/B
 								</button>
 								<button
-									className="text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
+									className="text-xs font-medium text-foreground border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
 									onClick={handleUndo}
 									disabled={historyIndex <= 0}
 									title="Undo (Cmd+Z)"
@@ -9938,7 +9938,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									⏳ Undo Reality
 								</button>
 								<button
-									className="text-xs font-medium text-white border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
+									className="text-xs font-medium text-foreground border px-4 py-1 rounded transition-colors shadow-sm bg-indigo-600 border-indigo-500 hover:bg-indigo-500 disabled:opacity-50"
 									onClick={handleRedo}
 									disabled={historyIndex >= history.length - 1}
 									title="Redo (Cmd+Shift+Z)"
@@ -9965,8 +9965,8 @@ export default function EditorClient({ project }: { project: Project }) {
 								>
 									🌌 5D View
 								</button>
-								<div className="flex items-center gap-2 ml-auto pl-4 border-l border-zinc-700">
-									<span className="text-zinc-400 text-[10px] font-medium tracking-wider">
+								<div className="flex items-center gap-2 ml-auto pl-4 border-l border-border">
+									<span className="text-muted text-[10px] font-medium tracking-wider">
 										ZOOM
 									</span>
 									<input
@@ -9979,16 +9979,16 @@ export default function EditorClient({ project }: { project: Project }) {
 										className="w-24 accent-zinc-500"
 									/>
 								</div>
-								<div className="ml-2 pl-4 border-l border-zinc-700 flex items-center gap-2">
+								<div className="ml-2 pl-4 border-l border-border flex items-center gap-2">
 									<button
-										className="text-xs font-medium text-white bg-emerald-600 border border-emerald-500 px-3 py-1 rounded hover:bg-emerald-500 active:bg-emerald-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-emerald-600 border border-emerald-500 px-3 py-1 rounded hover:bg-emerald-500 active:bg-emerald-700 transition-colors shadow-sm"
 										onClick={handleExport}
 									>
 										Export
 									</button>
 									{/* Phase 25: Distributed Render Farm */}
 									<button
-										className="text-xs font-medium text-white bg-blue-600 border border-blue-500 px-3 py-1 rounded hover:bg-blue-500 active:bg-blue-700 transition-colors shadow-sm flex items-center gap-1"
+										className="text-xs font-medium text-foreground bg-blue-600 border border-blue-500 px-3 py-1 rounded hover:bg-blue-500 active:bg-blue-700 transition-colors shadow-sm flex items-center gap-1"
 										onClick={() =>
 											alert("Render Farm feature coming in Phase 25")
 										}
@@ -10010,9 +10010,9 @@ export default function EditorClient({ project }: { project: Project }) {
 										Farm
 									</button>
 								</div>
-								<div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2 items-center">
+								<div className="ml-2 pl-4 border-l border-border flex gap-2 items-center">
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${isSnappingEnabled ? "bg-indigo-600 border border-indigo-500 hover:bg-indigo-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${isSnappingEnabled ? "bg-indigo-600 border border-indigo-500 hover:bg-indigo-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setIsSnappingEnabled(!isSnappingEnabled)}
 										title={`Toggle Snapping (S) - ${isSnappingEnabled ? "ON" : "OFF"}`}
 									>
@@ -10033,7 +10033,7 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Neural Auto-Rotoscoping (Phase 201) */}
 									<button
-										className="text-xs font-medium bg-fuchsia-600 hover:bg-fuchsia-500 text-white px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
+										className="text-xs font-medium bg-fuchsia-600 hover:bg-fuchsia-500 text-foreground px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
 										onClick={() => handleAutoRotoscoping()}
 										title="Neural Auto-Rotoscoping Magic Wand"
 									>
@@ -10042,37 +10042,37 @@ export default function EditorClient({ project }: { project: Project }) {
 
 									{/* Multi-Camera Angle Auto-Sync (Phase 205) */}
 									<button
-										className="text-xs font-medium bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
+										className="text-xs font-medium bg-amber-600 hover:bg-amber-500 text-foreground px-2 py-1 rounded transition-colors shadow-sm flex items-center gap-1"
 										onClick={() => handleMulticamSync()}
 										title="Auto-Sync Multi-Cam via Audio"
 									>
 										🎧 Sync Audio
 									</button>
 
-									<div className="h-4 w-px bg-zinc-700 mx-1"></div>
+									<div className="h-4 w-px bg-glass mx-1"></div>
 
 									<div className="flex items-center gap-2">
-										<span className="text-[10px] text-zinc-400 uppercase font-semibold">
+										<span className="text-[10px] text-muted uppercase font-semibold">
 											Track Height
 										</span>
-										<div className="flex gap-1 bg-zinc-900 p-0.5 rounded border border-zinc-700">
+										<div className="flex gap-1 bg-background p-0.5 rounded border border-border">
 											<button
 												onClick={() => setTrackHeightSize("sm")}
-												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "sm" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-300"}`}
+												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "sm" ? "bg-glass text-foreground" : "text-muted hover:text-foreground"}`}
 												title="Small Track Height"
 											>
 												S
 											</button>
 											<button
 												onClick={() => setTrackHeightSize("md")}
-												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "md" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-300"}`}
+												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "md" ? "bg-glass text-foreground" : "text-muted hover:text-foreground"}`}
 												title="Medium Track Height"
 											>
 												M
 											</button>
 											<button
 												onClick={() => setTrackHeightSize("lg")}
-												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "lg" ? "bg-zinc-700 text-white" : "text-zinc-400 hover:text-zinc-300"}`}
+												className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${trackHeightSize === "lg" ? "bg-glass text-foreground" : "text-muted hover:text-foreground"}`}
 												title="Large Track Height"
 											>
 												L
@@ -10080,44 +10080,44 @@ export default function EditorClient({ project }: { project: Project }) {
 										</div>
 									</div>
 								</div>
-								<div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2">
+								<div className="ml-2 pl-4 border-l border-border flex gap-2">
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "select" ? "bg-zinc-700 border border-zinc-600" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "select" ? "bg-glass border border-zinc-600" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("select")}
 										title="Selection Tool (V)"
 									>
 										👆 Select
 									</button>
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "pen" ? "bg-indigo-600 border border-indigo-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "pen" ? "bg-indigo-600 border border-indigo-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("pen")}
 										title="Pen Tool - Draw Vector Masks (P)"
 									>
 										🖋️ Pen
 									</button>
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "magic-eraser" ? "bg-emerald-600 border border-emerald-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "magic-eraser" ? "bg-emerald-600 border border-emerald-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("magic-eraser")}
 										title="Magic Eraser Tool - Object Removal"
 									>
 										🪄 Eraser
 									</button>
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "razor" ? "bg-red-600 border border-red-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "razor" ? "bg-red-600 border border-red-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("razor")}
 										title="Razor Tool (C)"
 									>
 										✂️ Razor
 									</button>
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "slip" ? "bg-amber-600 border border-amber-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "slip" ? "bg-amber-600 border border-amber-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("slip")}
 										title="Slip Tool (Y)"
 									>
 										🔄 Slip
 									</button>
 									<button
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "ripple" ? "bg-purple-600 border border-purple-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "ripple" ? "bg-purple-600 border border-purple-500" : "bg-panel border border-border hover:bg-glass"}`}
 										onClick={() => setActiveTool("ripple")}
 										title="Ripple Tool (B)"
 									>
@@ -10125,22 +10125,22 @@ export default function EditorClient({ project }: { project: Project }) {
 									</button>
 									<button
 										onClick={() => setActiveTool("slide")}
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "slide" ? "bg-cyan-600 border border-cyan-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "slide" ? "bg-cyan-600 border border-cyan-500" : "bg-panel border border-border hover:bg-glass"}`}
 										title="Slide Edit Tool (Move clip without changing duration or timeline length)"
 									>
 										Slide
 									</button>
 									<button
 										onClick={() => setActiveTool("roll")}
-										className={`text-xs font-medium text-white px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "roll" ? "bg-pink-600 border border-pink-500" : "bg-zinc-800 border border-zinc-700 hover:bg-zinc-700"}`}
+										className={`text-xs font-medium text-foreground px-3 py-1 rounded transition-colors shadow-sm ${activeTool === "roll" ? "bg-pink-600 border border-pink-500" : "bg-panel border border-border hover:bg-glass"}`}
 										title="Roll Edit Tool (Trim adjoining clips simultaneously)"
 									>
 										Roll
 									</button>
 								</div>
-								<div className="ml-2 pl-4 border-l border-zinc-700 flex gap-2">
+								<div className="ml-2 pl-4 border-l border-border flex gap-2">
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 disabled:opacity-50 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass disabled:opacity-50 transition-colors shadow-sm"
 										onClick={() => handleSplitClip()}
 										disabled={
 											!selectedClip ||
@@ -10161,14 +10161,14 @@ export default function EditorClient({ project }: { project: Project }) {
 										🪄 AI Scene Detect
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleCompoundClip}
 										title="Create Compound Clip (Opt+C)"
 									>
 										📦 Compound Clip
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleAddMarker}
 										title="Add Marker at Playhead (M)"
 									>
@@ -10183,34 +10183,34 @@ export default function EditorClient({ project }: { project: Project }) {
 										💬 Comment
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleAddText}
 									>
 										+ Add Text
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleAddAdjustmentLayer}
 										title="Add an Adjustment Layer to apply effects to all clips below it"
 									>
 										✨ Adj. Layer
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleAutoCaption}
 										title="Generate Auto-Captions from Audio"
 									>
 										✨ Auto-Caption
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-red-900/50 hover:text-red-400 hover:border-red-900/50 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-red-900/50 hover:text-red-400 hover:border-red-900/50 transition-colors shadow-sm"
 										onClick={handleRecordVoiceover}
 										title="Record Voiceover at Playhead"
 									>
 										🎤 Record Voiceover
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 disabled:opacity-50 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass disabled:opacity-50 transition-colors shadow-sm"
 										onClick={handleDuplicateClip}
 										disabled={!selectedClip}
 										title="Duplicate Selected Clip (Cmd+D)"
@@ -10218,7 +10218,7 @@ export default function EditorClient({ project }: { project: Project }) {
 										📋 Duplicate
 									</button>
 									<button
-										className="text-xs font-medium text-zinc-300 bg-zinc-800 border border-zinc-700 px-3 py-1 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-xs font-medium text-foreground bg-panel border border-border px-3 py-1 rounded hover:bg-glass transition-colors shadow-sm"
 										onClick={handleAddMarker}
 										title="Add Marker at Playhead (M)"
 									>
@@ -10323,12 +10323,12 @@ export default function EditorClient({ project }: { project: Project }) {
 			{/* Context Menu */}
 			{contextMenu && (
 				<div
-					className="fixed z-[100] bg-zinc-800 border border-zinc-700 shadow-2xl rounded py-1 flex flex-col w-48 text-sm"
+					className="fixed z-[100] bg-panel border border-border shadow-2xl rounded py-1 flex flex-col w-48 text-sm"
 					style={{ top: contextMenu.y, left: contextMenu.x }}
 					onClick={(e) => e.stopPropagation()}
 				>
 					<button
-						className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 						onClick={() => {
 							handleCopy();
 							setContextMenu(null);
@@ -10337,7 +10337,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						Copy
 					</button>
 					<button
-						className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 						onClick={() => {
 							handleDuplicateClip();
 							setContextMenu(null);
@@ -10346,7 +10346,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						Duplicate
 					</button>
 					<button
-						className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 						onClick={() => {
 							handleSplitClip();
 							setContextMenu(null);
@@ -10354,9 +10354,9 @@ export default function EditorClient({ project }: { project: Project }) {
 					>
 						Split at Playhead
 					</button>
-					<div className="h-px bg-zinc-700 my-1"></div>
+					<div className="h-px bg-glass my-1"></div>
 					<button
-						className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 						onClick={() => {
 							handleToggleDisabled();
 							setContextMenu(null);
@@ -10366,7 +10366,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					</button>
 					{selectedClip?.type === "video" && (
 						<button
-							className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+							className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 							onClick={() => {
 								handleDetachAudio();
 								setContextMenu(null);
@@ -10377,7 +10377,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					)}
 					{selectedClip?.type === "audio" && (
 						<button
-							className="text-left px-4 py-1.5 hover:bg-indigo-600 text-zinc-300 w-full flex items-center gap-2"
+							className="text-left px-4 py-1.5 hover:bg-indigo-600 text-foreground w-full flex items-center gap-2"
 							onClick={() => {
 								handleSplitStems();
 								setContextMenu(null);
@@ -10390,7 +10390,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					{(selectedClip?.type === "video" ||
 						selectedClip?.type === "audio") && (
 						<button
-							className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+							className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 							onClick={() => {
 								if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
 								const clip =
@@ -10424,7 +10424,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							Auto-Sync Audio
 						</button>
 					)}
-					<div className="h-px bg-zinc-700 my-1"></div>
+					<div className="h-px bg-glass my-1"></div>
 
 					<div className="px-4 py-1.5 flex gap-1 justify-between">
 						<button
@@ -10492,10 +10492,10 @@ export default function EditorClient({ project }: { project: Project }) {
 						/>
 					</div>
 
-					<div className="h-px bg-zinc-700 my-1"></div>
+					<div className="h-px bg-glass my-1"></div>
 
 					<button
-						className="text-left px-4 py-1.5 hover:bg-zinc-700 text-zinc-300 w-full"
+						className="text-left px-4 py-1.5 hover:bg-glass text-foreground w-full"
 						onClick={() => {
 							if (selectedTrackIdx === -1 || selectedClipIdx === -1) return;
 							const clip =
@@ -10520,7 +10520,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						Add Marker at Playhead
 					</button>
 
-					<div className="h-px bg-zinc-700 my-1"></div>
+					<div className="h-px bg-glass my-1"></div>
 					<button
 						className="text-left px-4 py-1.5 hover:bg-red-500/20 text-red-400 w-full"
 						onClick={() => {
@@ -10544,8 +10544,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 			{/* Export Modal Overlay */}
 			{isExporting && (
-				<div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
-					<div className="bg-zinc-900/90 border border-zinc-700/50 p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] w-[400px] flex flex-col items-center relative overflow-hidden">
+				<div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center transition-opacity duration-300">
+					<div className="bg-background/90 border border-border/50 p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] w-[400px] flex flex-col items-center relative overflow-hidden">
 						{/* Animated background glow */}
 						<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse"></div>
 
@@ -10571,15 +10571,15 @@ export default function EditorClient({ project }: { project: Project }) {
 							</svg>
 						</div>
 
-						<h3 className="text-white text-xl font-medium mb-2 tracking-tight">
+						<h3 className="text-foreground text-xl font-medium mb-2 tracking-tight">
 							Exporting Master
 						</h3>
-						<p className="text-zinc-400 text-sm mb-8 text-center px-4">
+						<p className="text-muted text-sm mb-8 text-center px-4">
 							Your video is being processed using WebCodecs hardware
 							acceleration.
 						</p>
 
-						<div className="w-full bg-zinc-800/80 rounded-full h-3 overflow-hidden mb-3 border border-zinc-700/50 relative">
+						<div className="w-full bg-panel/80 rounded-full h-3 overflow-hidden mb-3 border border-border/50 relative">
 							<div
 								className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-300 ease-out"
 								style={{ width: `${exportProgress}%` }}
@@ -10589,7 +10589,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						</div>
 
 						<div className="flex justify-between w-full text-xs font-medium">
-							<span className="text-zinc-400">Processing...</span>
+							<span className="text-muted">Processing...</span>
 							<span className="text-indigo-400">
 								{Math.round(exportProgress)}%
 							</span>
@@ -10614,10 +10614,10 @@ export default function EditorClient({ project }: { project: Project }) {
 						}}
 					/>
 					<div
-						className="fixed z-50 bg-zinc-900 border border-zinc-700 rounded shadow-xl py-1 w-48"
+						className="fixed z-50 bg-background border border-border rounded shadow-xl py-1 w-48"
 						style={{ left: trackContextMenu.x, top: trackContextMenu.y }}
 					>
-						<div className="px-3 py-1 text-xs text-zinc-400 font-medium">
+						<div className="px-3 py-1 text-xs text-muted font-medium">
 							Track Color
 						</div>
 						<div className="flex flex-wrap gap-1.5 px-3 py-2">
@@ -10633,7 +10633,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							].map((color) => (
 								<button
 									key={color}
-									className="w-5 h-5 rounded-full border border-zinc-700 hover:scale-110 transition-transform"
+									className="w-5 h-5 rounded-full border border-border hover:scale-110 transition-transform"
 									style={{
 										backgroundColor:
 											color === "transparent" ? "#18181b" : color,
@@ -10656,9 +10656,9 @@ export default function EditorClient({ project }: { project: Project }) {
 								/>
 							))}
 						</div>
-						<hr className="border-zinc-700 my-1" />
+						<hr className="border-border my-1" />
 						<button
-							className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-zinc-800"
+							className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-panel"
 							onClick={() => {
 								setProjectData((prev: any) => {
 									const np = JSON.parse(JSON.stringify(prev));
@@ -10679,8 +10679,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 			{/* Advanced Audio Mixer Panel */}
 			{showAudioMixer && (
-				<div className="fixed bottom-0 right-0 w-[500px] h-[350px] bg-zinc-900 border-t border-l border-zinc-700 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] z-[150] flex flex-col">
-					<div className="h-8 bg-zinc-950 border-b border-zinc-800 flex items-center justify-between px-3">
+				<div className="fixed bottom-0 right-0 w-[500px] h-[350px] bg-background border-t border-l border-border shadow-[0_-10px_40px_rgba(0,0,0,0.8)] z-[150] flex flex-col">
+					<div className="h-8 bg-background border-b border-border flex items-center justify-between px-3">
 						<div className="flex items-center gap-2">
 							<svg
 								className="w-3.5 h-3.5 text-emerald-500"
@@ -10695,13 +10695,13 @@ export default function EditorClient({ project }: { project: Project }) {
 									d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
 								/>
 							</svg>
-							<span className="text-[10px] font-bold tracking-widest text-zinc-300 uppercase">
+							<span className="text-[10px] font-bold tracking-widest text-foreground uppercase">
 								Fairlight Audio Mixer
 							</span>
 						</div>
 						<button
 							onClick={() => setShowAudioMixer(false)}
-							className="text-zinc-500 hover:text-white transition-colors"
+							className="text-muted hover:text-foreground transition-colors"
 						>
 							<svg
 								className="w-4 h-4"
@@ -10719,29 +10719,29 @@ export default function EditorClient({ project }: { project: Project }) {
 						</button>
 					</div>
 
-					<div className="flex-1 flex p-2 gap-2 overflow-x-auto bg-zinc-950/50 hide-scrollbar">
+					<div className="flex-1 flex p-2 gap-2 overflow-x-auto bg-background/50 hide-scrollbar">
 						{/* Render audio tracks */}
 						{projectData.tracks
 							?.filter((t: any) => t.type === "audio")
 							.map((track: any, i: number) => (
 								<div
 									key={track.id}
-									className="w-20 bg-zinc-800 border border-zinc-700 rounded flex flex-col items-center py-2 shrink-0"
+									className="w-20 bg-panel border border-border rounded flex flex-col items-center py-2 shrink-0"
 								>
-									<span className="text-[10px] font-semibold text-zinc-400 mb-2 truncate w-full text-center px-1">
+									<span className="text-[10px] font-semibold text-muted mb-2 truncate w-full text-center px-1">
 										A{i + 1}
 									</span>
 
 									{/* Pan knob */}
-									<div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-600 mb-2 relative">
+									<div className="w-8 h-8 rounded-full bg-background border border-zinc-600 mb-2 relative">
 										<div className="absolute top-1 left-1/2 w-0.5 h-3 bg-zinc-400 origin-bottom transform rotate-0"></div>
 									</div>
-									<span className="text-[8px] text-zinc-500 mb-4">PAN</span>
+									<span className="text-[8px] text-muted mb-4">PAN</span>
 
 									{/* VST / Effects Rack (Phase 19) */}
 									<div className="w-full px-1 mb-3 flex flex-col gap-1">
 										<div
-											className="w-full h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-500 flex items-center justify-center cursor-pointer hover:bg-zinc-700 hover:text-white transition-colors"
+											className="w-full h-4 bg-background border border-border rounded text-[8px] text-muted flex items-center justify-center cursor-pointer hover:bg-glass hover:text-foreground transition-colors"
 											title="Add VST Plugin"
 											onClick={() =>
 												toast.success(
@@ -10751,20 +10751,20 @@ export default function EditorClient({ project }: { project: Project }) {
 										>
 											+ VST
 										</div>
-										<div className="w-full h-4 bg-zinc-900/50 border border-zinc-800 rounded text-[8px] text-zinc-600 flex items-center justify-center border-dashed">
+										<div className="w-full h-4 bg-background/50 border border-border rounded text-[8px] text-zinc-600 flex items-center justify-center border-dashed">
 											empty
 										</div>
 									</div>
 
 									{/* Fader Track */}
 									<div className="flex-1 w-full flex justify-center relative px-2">
-										<div className="w-1.5 h-full bg-black rounded-full border border-zinc-900 relative">
-											<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-8 bg-zinc-700 border-b-4 border-zinc-900 rounded cursor-ns-resize hover:bg-zinc-600 shadow-lg flex items-center justify-center">
+										<div className="w-1.5 h-full bg-background rounded-full border border-zinc-900 relative">
+											<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-8 bg-glass border-b-4 border-zinc-900 rounded cursor-ns-resize hover:bg-zinc-600 shadow-lg flex items-center justify-center">
 												<div className="w-3 h-0.5 bg-zinc-400"></div>
 											</div>
 										</div>
 										{/* Volume Meter */}
-										<div className="w-2 h-full bg-black rounded-sm border border-zinc-900 ml-2 relative overflow-hidden flex flex-col justify-end">
+										<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 ml-2 relative overflow-hidden flex flex-col justify-end">
 											<div
 												className={`w-full bg-emerald-500 transition-all duration-100 ${isPlaying ? "h-[60%] animate-pulse" : "h-0"}`}
 											></div>
@@ -10784,35 +10784,35 @@ export default function EditorClient({ project }: { project: Project }) {
 							))}
 
 						{/* Master Bus */}
-						<div className="w-24 bg-zinc-800 border-2 border-zinc-600 rounded flex flex-col items-center py-2 shrink-0 ml-auto shadow-lg relative overflow-hidden">
+						<div className="w-24 bg-panel border-2 border-zinc-600 rounded flex flex-col items-center py-2 shrink-0 ml-auto shadow-lg relative overflow-hidden">
 							<div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 to-amber-500"></div>
-							<span className="text-[11px] font-bold text-white mb-2 truncate w-full text-center px-1">
+							<span className="text-[11px] font-bold text-foreground mb-2 truncate w-full text-center px-1">
 								MAIN
 							</span>
 
 							<div className="flex gap-1 mb-4">
-								<button className="w-6 h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-400 hover:text-white">
+								<button className="w-6 h-4 bg-background border border-border rounded text-[8px] text-muted hover:text-foreground">
 									EQ
 								</button>
-								<button className="w-6 h-4 bg-zinc-900 border border-zinc-700 rounded text-[8px] text-zinc-400 hover:text-white">
+								<button className="w-6 h-4 bg-background border border-border rounded text-[8px] text-muted hover:text-foreground">
 									DYN
 								</button>
 							</div>
 
 							<div className="flex-1 w-full flex justify-center relative px-2">
-								<div className="w-2 h-full bg-black rounded-full border border-zinc-900 relative">
+								<div className="w-2 h-full bg-background rounded-full border border-zinc-900 relative">
 									<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-zinc-300 border-b-4 border-zinc-500 rounded cursor-ns-resize hover:bg-white shadow-lg flex items-center justify-center">
-										<div className="w-4 h-0.5 bg-zinc-800"></div>
+										<div className="w-4 h-0.5 bg-panel"></div>
 									</div>
 								</div>
 								{/* Stereo Volume Meter */}
 								<div className="flex gap-0.5 ml-2">
-									<div className="w-2 h-full bg-black rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
+									<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
 										<div
 											className={`w-full bg-emerald-400 transition-all duration-75 ${isPlaying ? "h-[75%]" : "h-0"}`}
 										></div>
 									</div>
-									<div className="w-2 h-full bg-black rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
+									<div className="w-2 h-full bg-background rounded-sm border border-zinc-900 relative overflow-hidden flex flex-col justify-end">
 										<div
 											className={`w-full bg-emerald-400 transition-all duration-75 ${isPlaying ? "h-[70%]" : "h-0"}`}
 										></div>
@@ -10820,7 +10820,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 							</div>
 
-							<span className="text-[10px] text-white mt-2 font-mono">
+							<span className="text-[10px] text-foreground mt-2 font-mono">
 								-3.2 dB
 							</span>
 						</div>
@@ -10851,7 +10851,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						/>
 					</svg>
 					<div
-						className="absolute top-6 left-4 px-2 py-1 rounded shadow-lg text-[10px] font-bold text-white whitespace-nowrap"
+						className="absolute top-6 left-4 px-2 py-1 rounded shadow-lg text-[10px] font-bold text-foreground whitespace-nowrap"
 						style={{ backgroundColor: cursor.color }}
 					>
 						{cursor.name}
@@ -10869,8 +10869,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 			{/* Deliver Page Overlay */}
 			{showDeliverPage && (
-				<div className="absolute inset-0 bg-zinc-950 z-50 flex flex-col font-sans">
-					<div className="h-14 border-b border-zinc-700 flex items-center px-6 justify-between bg-zinc-900 shadow-md z-10">
+				<div className="absolute inset-0 bg-background z-50 flex flex-col font-sans">
+					<div className="h-14 border-b border-border flex items-center px-6 justify-between bg-background shadow-md z-10">
 						<div className="flex items-center gap-3">
 							<svg
 								className="w-5 h-5 text-indigo-400"
@@ -10885,14 +10885,14 @@ export default function EditorClient({ project }: { project: Project }) {
 									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
 								/>
 							</svg>
-							<h2 className="text-white font-medium tracking-wide">Deliver</h2>
-							<span className="text-[10px] text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-full font-mono">
+							<h2 className="text-foreground font-medium tracking-wide">Deliver</h2>
+							<span className="text-[10px] text-muted bg-panel px-2 py-0.5 rounded-full font-mono">
 								{projectData.name || "Untitled"}
 							</span>
 						</div>
 						<button
 							onClick={() => setShowDeliverPage(false)}
-							className="text-zinc-400 hover:text-white transition-colors bg-zinc-800 p-1.5 rounded hover:bg-zinc-700"
+							className="text-muted hover:text-foreground transition-colors bg-panel p-1.5 rounded hover:bg-glass"
 						>
 							<svg
 								className="w-5 h-5"
@@ -10911,10 +10911,10 @@ export default function EditorClient({ project }: { project: Project }) {
 					</div>
 					<div className="flex flex-1 overflow-hidden">
 						{/* Preset Cards + Settings Sidebar */}
-						<div className="w-[420px] bg-zinc-900 border-r border-zinc-700 flex flex-col overflow-y-auto custom-scrollbar shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-10">
+						<div className="w-[420px] bg-background border-r border-border flex flex-col overflow-y-auto custom-scrollbar shadow-[4px_0_24px_rgba(0,0,0,0.5)] z-10">
 							{/* Presets Grid */}
-							<div className="p-5 border-b border-zinc-700">
-								<h3 className="text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-4 flex items-center gap-2">
+							<div className="p-5 border-b border-border">
+								<h3 className="text-xs text-muted uppercase tracking-widest font-semibold mb-4 flex items-center gap-2">
 									<svg
 										className="w-3.5 h-3.5 text-indigo-400"
 										fill="none"
@@ -11029,19 +11029,19 @@ export default function EditorClient({ project }: { project: Project }) {
 											}`}
 										>
 											<div className="text-lg mb-1">{preset.icon}</div>
-											<div className="text-xs font-semibold text-zinc-200 truncate">
+											<div className="text-xs font-semibold text-foreground truncate">
 												{preset.name}
 											</div>
-											<div className="text-[10px] text-zinc-400 mt-0.5">
+											<div className="text-[10px] text-muted mt-0.5">
 												{preset.format}
 											</div>
-											<div className="text-[10px] text-zinc-400">
+											<div className="text-[10px] text-muted">
 												{preset.res} · {preset.fps}fps
 											</div>
 											{selectedExportPreset === preset.id && (
 												<div className="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-500 rounded-full flex items-center justify-center">
 													<svg
-														className="w-2.5 h-2.5 text-white"
+														className="w-2.5 h-2.5 text-foreground"
 														fill="none"
 														viewBox="0 0 24 24"
 														stroke="currentColor"
@@ -11063,7 +11063,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Detailed Settings */}
 							<div className="p-5 flex flex-col gap-4">
 								<div className="flex items-center justify-between mb-1">
-									<h3 className="text-xs text-zinc-400 uppercase tracking-widest font-semibold flex items-center gap-2">
+									<h3 className="text-xs text-muted uppercase tracking-widest font-semibold flex items-center gap-2">
 										<svg
 											className="w-3.5 h-3.5 text-indigo-400"
 											fill="none"
@@ -11081,28 +11081,28 @@ export default function EditorClient({ project }: { project: Project }) {
 									</h3>
 									<button
 										onClick={handleCustomPresetSave}
-										className="text-[10px] text-zinc-300 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded hover:bg-zinc-700 transition-colors shadow-sm"
+										className="text-[10px] text-foreground bg-panel border border-border px-2 py-0.5 rounded hover:bg-glass transition-colors shadow-sm"
 									>
 										💾 Save Preset
 									</button>
 								</div>
 
 								<div className="flex flex-col gap-1">
-									<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+									<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 										File Name
 									</label>
 									<input
 										type="text"
 										defaultValue="lazynext-export"
-										className="bg-zinc-950 border border-zinc-700/50 rounded text-sm text-white px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner"
+										className="bg-background border border-border/50 rounded text-sm text-foreground px-3 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner"
 									/>
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Format
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="mp4">MP4 (H.264)</option>
 											<option value="webm">WebM (VP9)</option>
 											<option value="mov">QuickTime (ProRes)</option>
@@ -11111,10 +11111,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Resolution
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="3840x2160">3840×2160 (4K)</option>
 											<option value="1920x1080">1920×1080 (HD)</option>
 											<option value="1280x720">1280×720</option>
@@ -11125,10 +11125,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Frame Rate
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="24">23.976</option>
 											<option value="25">25</option>
 											<option value="30">29.97</option>
@@ -11138,10 +11138,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Quality
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="best">Best (Highest)</option>
 											<option value="high">High</option>
 											<option value="medium">Medium</option>
@@ -11151,10 +11151,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Audio Codec
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="aac">AAC (256kbps)</option>
 											<option value="pcm">PCM (Uncompressed)</option>
 											<option value="none">No Audio</option>
@@ -11162,10 +11162,10 @@ export default function EditorClient({ project }: { project: Project }) {
 									</div>
 
 									<div className="flex flex-col gap-1">
-										<label className="text-[10px] text-zinc-400 uppercase tracking-wide font-medium">
+										<label className="text-[10px] text-muted uppercase tracking-wide font-medium">
 											Color Space
 										</label>
-										<select className="bg-zinc-950 border border-zinc-700/50 rounded text-xs text-white px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
+										<select className="bg-background border border-border/50 rounded text-xs text-foreground px-2 py-2 focus:outline-none focus-ring focus:border-indigo-500 shadow-inner">
 											<option value="rec709">Rec. 709</option>
 											<option value="rec2020">Rec. 2020 (HDR)</option>
 											<option value="srgb">sRGB</option>
@@ -11183,7 +11183,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									/>
 									<label
 										htmlFor="chapterMarkers"
-										className="text-xs text-zinc-300 cursor-pointer"
+										className="text-xs text-foreground cursor-pointer"
 									>
 										Export Markers as YouTube Chapters
 									</label>
@@ -11191,8 +11191,8 @@ export default function EditorClient({ project }: { project: Project }) {
 
 								{/* Direct Cloud Export (Phase 185) */}
 
-								<div className="mt-4 pt-4 border-t border-zinc-700">
-									<label className="text-xs font-medium text-zinc-400 block mb-2">
+								<div className="mt-4 pt-4 border-t border-border">
+									<label className="text-xs font-medium text-muted block mb-2">
 										Publish To
 									</label>
 									<div className="grid grid-cols-2 gap-2">
@@ -11219,7 +11219,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Real-Time Live Streaming (Phase 208) */}
 							<div className="px-5 mt-4">
 								<button
-									className="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 text-white font-bold tracking-wide rounded-lg shadow-lg shadow-red-900/20 transition-all border border-red-500"
+									className="w-full flex items-center justify-center gap-2 py-3 bg-red-600 hover:bg-red-500 text-foreground font-bold tracking-wide rounded-lg shadow-lg shadow-red-900/20 transition-all border border-red-500"
 									onClick={() => handleLiveStream()}
 								>
 									<svg
@@ -11242,7 +11242,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{/* Universe Simulation Export (Phase 220) */}
 							<div className="px-5 mt-4">
 								<button
-									className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold tracking-wide rounded-lg shadow-[0_0_25px_rgba(147,51,234,0.5)] transition-all border border-purple-400"
+									className="w-full flex items-center justify-center gap-2 py-3 bg-purple-600 hover:bg-purple-500 text-foreground font-bold tracking-wide rounded-lg shadow-[0_0_25px_rgba(147,51,234,0.5)] transition-all border border-purple-400"
 									onClick={() =>
 										toast.success(
 											"Exporting... Creating a self-contained, interactive physical universe simulation based on your timeline data. (Universe ID: U-84729)",
@@ -11287,12 +11287,12 @@ export default function EditorClient({ project }: { project: Project }) {
 
 								<label className="relative inline-flex items-center cursor-pointer">
 									<input type="checkbox" className="sr-only peer" />
-									<div className="w-7 h-4 bg-zinc-700 peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
+									<div className="w-7 h-4 bg-glass peer-focus:outline-none focus-ring rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-emerald-500"></div>
 								</label>
 							</div>
 
 							{/* Add to Queue Button */}
-							<div className="p-5 mt-auto border-t border-zinc-700">
+							<div className="p-5 mt-auto border-t border-border">
 								<button
 									onClick={() => {
 										const presetName = selectedExportPreset || "custom";
@@ -11330,7 +11330,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											);
 										}, 200);
 									}}
-									className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-[0.98] flex items-center justify-center gap-2"
+									className="w-full bg-indigo-600 hover:bg-indigo-500 text-foreground font-medium py-3 rounded-lg transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] active:scale-[0.98] flex items-center justify-center gap-2"
 								>
 									<svg
 										className="w-4 h-4"
@@ -11349,7 +11349,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</button>
 								<button
 									onClick={() => startExport({})}
-									className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-medium py-2.5 rounded-lg transition-all border border-zinc-700 text-sm"
+									className="w-full mt-2 bg-panel hover:bg-glass text-foreground font-medium py-2.5 rounded-lg transition-all border border-border text-sm"
 								>
 									Render Now (Single)
 								</button>
@@ -11357,10 +11357,10 @@ export default function EditorClient({ project }: { project: Project }) {
 						</div>
 
 						{/* Right Side: Preview + Render Queue */}
-						<div className="flex-1 flex flex-col bg-zinc-950">
+						<div className="flex-1 flex flex-col bg-background">
 							{/* Preview */}
 							<div className="flex-1 flex flex-col items-center justify-center p-8 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0%,transparent_100%)]">
-								<div className="w-full max-w-4xl aspect-video bg-black/50 rounded-xl border border-zinc-700 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center backdrop-blur-sm group">
+								<div className="w-full max-w-4xl aspect-video bg-background/50 rounded-xl border border-border shadow-2xl relative overflow-hidden flex flex-col items-center justify-center backdrop-blur-sm group">
 									<div
 										className="absolute inset-0 opacity-10 pointer-events-none transition-opacity duration-1000 group-hover:opacity-20"
 										style={{
@@ -11381,10 +11381,10 @@ export default function EditorClient({ project }: { project: Project }) {
 											d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
 										/>
 									</svg>
-									<span className="text-zinc-400 font-medium tracking-widest uppercase text-xs z-10">
+									<span className="text-muted font-medium tracking-widest uppercase text-xs z-10">
 										Output Preview
 									</span>
-									<span className="text-zinc-400 text-[10px] mt-1 z-10">
+									<span className="text-muted text-[10px] mt-1 z-10">
 										{projectData.width || 1920} × {projectData.height || 1080} ·{" "}
 										{Math.ceil((projectData.duration_frames || 300) / 60)}s
 									</span>
@@ -11392,9 +11392,9 @@ export default function EditorClient({ project }: { project: Project }) {
 							</div>
 
 							{/* Render Queue */}
-							<div className="h-56 border-t border-zinc-700 bg-zinc-900 flex flex-col shrink-0">
-								<div className="h-10 border-b border-zinc-700 flex items-center justify-between px-5">
-									<h3 className="text-xs text-zinc-400 uppercase tracking-widest font-semibold flex items-center gap-2">
+							<div className="h-56 border-t border-border bg-background flex flex-col shrink-0">
+								<div className="h-10 border-b border-border flex items-center justify-between px-5">
+									<h3 className="text-xs text-muted uppercase tracking-widest font-semibold flex items-center gap-2">
 										<svg
 											className="w-3.5 h-3.5 text-indigo-400"
 											fill="none"
@@ -11417,7 +11417,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													prev.filter((i) => i.status === "rendering"),
 												)
 											}
-											className="text-[10px] text-zinc-400 hover:text-red-400 transition-colors"
+											className="text-[10px] text-muted hover:text-red-400 transition-colors"
 										>
 											Clear Completed
 										</button>
@@ -11425,7 +11425,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 								<div className="flex-1 overflow-y-auto custom-scrollbar">
 									{renderQueue.length === 0 ? (
-										<div className="flex items-center justify-center h-full text-zinc-400 text-xs">
+										<div className="flex items-center justify-center h-full text-muted text-xs">
 											<div className="text-center">
 												<svg
 													className="w-8 h-8 mx-auto mb-2 text-zinc-700"
@@ -11448,7 +11448,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											{renderQueue.map((item) => (
 												<div
 													key={item.id}
-													className="flex items-center gap-4 px-5 py-3 border-b border-zinc-700/50 hover:bg-zinc-800/30 transition-colors"
+													className="flex items-center gap-4 px-5 py-3 border-b border-border/50 hover:bg-panel/30 transition-colors"
 												>
 													<div
 														className={`w-2 h-2 rounded-full shrink-0 ${
@@ -11462,17 +11462,17 @@ export default function EditorClient({ project }: { project: Project }) {
 														}`}
 													/>
 													<div className="flex-1 min-w-0">
-														<div className="text-xs text-zinc-300 font-medium truncate">
+														<div className="text-xs text-foreground font-medium truncate">
 															{item.name}
 														</div>
-														<div className="text-[10px] text-zinc-400 truncate">
+														<div className="text-[10px] text-muted truncate">
 															Preset: {item.preset}
 														</div>
 													</div>
 													<div className="w-32 shrink-0">
 														{item.status === "rendering" ? (
 															<div className="flex items-center gap-2">
-																<div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+																<div className="flex-1 h-1.5 bg-panel rounded-full overflow-hidden">
 																	<div
 																		className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full transition-all duration-200"
 																		style={{ width: `${item.progress}%` }}
@@ -11500,7 +11500,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																Complete
 															</span>
 														) : (
-															<span className="text-[10px] text-zinc-400 font-medium">
+															<span className="text-[10px] text-muted font-medium">
 																Queued
 															</span>
 														)}
@@ -11511,7 +11511,7 @@ export default function EditorClient({ project }: { project: Project }) {
 																prev.filter((i) => i.id !== item.id),
 															)
 														}
-														className="text-zinc-400 hover:text-red-400 transition-colors p-1"
+														className="text-muted hover:text-red-400 transition-colors p-1"
 													>
 														<svg
 															className="w-3.5 h-3.5"
@@ -11540,7 +11540,7 @@ export default function EditorClient({ project }: { project: Project }) {
 			{/* Phase 38: Holographic Asset Forge Modal */}
 			{isAssetForgeOpen && (
 				<div
-					className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-8"
+					className="absolute inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-sm p-8"
 					onClick={() => setIsAssetForgeOpen(false)}
 				>
 					<div
@@ -11557,7 +11557,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						{/* Background Holographic Grid */}
 						<div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBhdGggZD0iTTAgMGg0MHY0MEgwem0yMCAyMGgyMHYyMEgyMHoiIGZpbGw9IiNkOTQ2ZWYiIGZpbGwtb3BhY2l0eT0iMC4wNSIvPjwvc3ZnPg==')] opacity-30 mix-blend-screen pointer-events-none" />
 
-						<div className="w-64 border-r border-fuchsia-500/20 bg-black/40 p-4 flex flex-col z-10">
+						<div className="w-64 border-r border-fuchsia-500/20 bg-background/40 p-4 flex flex-col z-10">
 							<h3 className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 uppercase tracking-widest mb-6 flex items-center gap-2">
 								<svg
 									className="w-5 h-5 text-cyan-400"
@@ -11577,11 +11577,11 @@ export default function EditorClient({ project }: { project: Project }) {
 
 							<div className="space-y-4 flex-1">
 								<div>
-									<label className="text-[10px] text-zinc-400 uppercase font-semibold mb-2 block">
+									<label className="text-[10px] text-muted uppercase font-semibold mb-2 block">
 										Material Type
 									</label>
 									<select
-										className="w-full bg-zinc-900 border border-zinc-700 rounded p-1.5 text-xs text-white"
+										className="w-full bg-background border border-border rounded p-1.5 text-xs text-foreground"
 										value={assetForgeMaterial}
 										onChange={(e) => setAssetForgeMaterial(e.target.value)}
 									>
@@ -11594,23 +11594,23 @@ export default function EditorClient({ project }: { project: Project }) {
 								</div>
 
 								<div>
-									<label className="text-[10px] text-zinc-400 uppercase font-semibold mb-2 block">
+									<label className="text-[10px] text-muted uppercase font-semibold mb-2 block">
 										Generation Prompt
 									</label>
 									<textarea
-										className="w-full bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white resize-none h-24 focus:border-fuchsia-500 focus:outline-none"
+										className="w-full bg-background border border-border rounded p-2 text-xs text-foreground resize-none h-24 focus:border-fuchsia-500 focus:outline-none"
 										placeholder="Describe the 3D asset to forge... (e.g. 'A floating cyberpunk city element with glowing pink accents')"
 									/>
 								</div>
 
-								<button className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-white font-bold py-2 rounded text-xs shadow-[0_0_15px_rgba(217,70,239,0.4)] transition-all active:scale-95">
+								<button className="w-full bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 text-foreground font-bold py-2 rounded text-xs shadow-[0_0_15px_rgba(217,70,239,0.4)] transition-all active:scale-95">
 									Forge Asset
 								</button>
 							</div>
 						</div>
 
 						<div className="flex-1 flex flex-col relative z-10 p-6">
-							<div className="flex-1 border-2 border-dashed border-fuchsia-500/20 rounded-xl bg-black/20 flex items-center justify-center relative overflow-hidden group">
+							<div className="flex-1 border-2 border-dashed border-fuchsia-500/20 rounded-xl bg-background/20 flex items-center justify-center relative overflow-hidden group">
 								<div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/10 pointer-events-none" />
 								<div className="text-center">
 									<div className="w-24 h-24 mx-auto border-4 border-fuchsia-500/30 rounded-full flex items-center justify-center animate-spin-slow mb-4 shadow-[0_0_30px_rgba(217,70,239,0.2)]">
@@ -11628,7 +11628,7 @@ export default function EditorClient({ project }: { project: Project }) {
 											/>
 										</svg>
 									</div>
-									<p className="text-zinc-500 text-sm">
+									<p className="text-muted text-sm">
 										Holographic projection area
 									</p>
 									<p className="text-zinc-600 text-xs mt-1">
@@ -11643,16 +11643,16 @@ export default function EditorClient({ project }: { project: Project }) {
 			{/* Command Palette Overlay */}
 			{showCommandPalette && (
 				<div
-					className="absolute inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-black/60 backdrop-blur-sm"
+					className="absolute inset-0 z-[100] flex items-start justify-center pt-[15vh] bg-background/60 backdrop-blur-sm"
 					onClick={() => setShowCommandPalette(false)}
 				>
 					<div
-						className="w-full max-w-2xl bg-zinc-900 border border-zinc-700/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
+						className="w-full max-w-2xl bg-background border border-border/50 rounded-xl shadow-2xl overflow-hidden flex flex-col"
 						onClick={(e) => e.stopPropagation()}
 					>
-						<div className="flex items-center px-4 py-3 border-b border-zinc-700">
+						<div className="flex items-center px-4 py-3 border-b border-border">
 							<svg
-								className="w-5 h-5 text-zinc-400 mr-3"
+								className="w-5 h-5 text-muted mr-3"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
@@ -11666,13 +11666,13 @@ export default function EditorClient({ project }: { project: Project }) {
 							</svg>
 							<input
 								type="text"
-								className="flex-1 bg-transparent border-none text-white text-lg focus:outline-none focus-ring placeholder-zinc-500"
+								className="flex-1 bg-transparent border-none text-foreground text-lg focus:outline-none focus-ring placeholder-zinc-500"
 								placeholder="Search commands... (e.g. 'Add Text')"
 								autoFocus
 								value={commandQuery}
 								onChange={(e) => setCommandQuery(e.target.value)}
 							/>
-							<span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
+							<span className="text-xs font-mono text-muted bg-panel px-1.5 py-0.5 rounded">
 								ESC
 							</span>
 						</div>
@@ -11714,11 +11714,11 @@ export default function EditorClient({ project }: { project: Project }) {
 								.map((cmd, idx) => (
 									<div
 										key={idx}
-										className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-zinc-700/50 group"
+										className="flex items-center px-4 py-3 hover:bg-indigo-600/20 cursor-pointer border-b border-border/50 group"
 										onClick={() => setShowCommandPalette(false)}
 									>
 										<svg
-											className="w-5 h-5 text-zinc-400 mr-4 group-hover:text-indigo-400"
+											className="w-5 h-5 text-muted mr-4 group-hover:text-indigo-400"
 											fill="none"
 											viewBox="0 0 24 24"
 											stroke="currentColor"
@@ -11731,10 +11731,10 @@ export default function EditorClient({ project }: { project: Project }) {
 											/>
 										</svg>
 										<div>
-											<div className="text-sm font-medium text-zinc-200 group-hover:text-white">
+											<div className="text-sm font-medium text-foreground group-hover:text-foreground">
 												{cmd.name}
 											</div>
-											<div className="text-xs text-zinc-400 group-hover:text-indigo-200/70">
+											<div className="text-xs text-muted group-hover:text-indigo-200/70">
 												{cmd.desc}
 											</div>
 										</div>
@@ -11772,7 +11772,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					<div className="fixed inset-0 pointer-events-none z-[200] border-2 border-yellow-500/30 rounded-none shadow-[inset_0_0_80px_rgba(234,179,8,0.15),inset_0_0_200px_rgba(220,38,38,0.08)]"></div>
 					{/* God Mode Badge */}
 					<div className="fixed top-3 left-1/2 -translate-x-1/2 z-[210] pointer-events-none">
-						<div className="bg-black/70 backdrop-blur-xl border border-yellow-500/60 px-6 py-1.5 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.5)]">
+						<div className="bg-background/70 backdrop-blur-xl border border-yellow-500/60 px-6 py-1.5 rounded-full shadow-[0_0_30px_rgba(234,179,8,0.5)]">
 							<span className="text-xs font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-400 to-cyan-400 tracking-[0.3em] uppercase animate-pulse">
 								⚡ GOD MODE ACTIVE ⚡
 							</span>
@@ -11782,16 +11782,16 @@ export default function EditorClient({ project }: { project: Project }) {
 			)}
 			{/* Phase 40: The Singularity ∞ Overlay */}
 			{isSingularity && (
-				<div className="fixed inset-0 z-[1000] bg-black text-white overflow-hidden flex flex-col items-center justify-center animate-in fade-in duration-1000">
+				<div className="fixed inset-0 z-[1000] bg-background text-foreground overflow-hidden flex flex-col items-center justify-center animate-in fade-in duration-1000">
 					<div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-900/40 via-black to-black" />
 
 					{/* Orbital rings */}
 					<div
-						className="absolute w-[800px] h-[800px] border border-white/5 rounded-full animate-spin-slow pointer-events-none"
+						className="absolute w-[800px] h-[800px] border border-border rounded-full animate-spin-slow pointer-events-none"
 						style={{ animationDuration: "60s" }}
 					/>
 					<div
-						className="absolute w-[600px] h-[600px] border border-white/10 rounded-full animate-spin-slow pointer-events-none"
+						className="absolute w-[600px] h-[600px] border border-border rounded-full animate-spin-slow pointer-events-none"
 						style={{ animationDuration: "40s", animationDirection: "reverse" }}
 					/>
 					<div
@@ -11802,7 +11802,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					<h1 className="text-6xl font-black tracking-tighter mix-blend-difference z-10 mb-8 blur-[1px] animate-pulse">
 						THE SINGULARITY
 					</h1>
-					<p className="text-zinc-400 max-w-lg text-center text-sm z-10 font-mono mix-blend-screen">
+					<p className="text-muted max-w-lg text-center text-sm z-10 font-mono mix-blend-screen">
 						Boundless timeline-free canvas engaged. Clips orbit in a fluid,
 						non-linear quantum continuum.
 					</p>
@@ -11815,7 +11815,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							.map((clip: any, i: number) => (
 								<div
 									key={clip.id}
-									className="absolute top-1/2 left-1/2 w-32 h-20 bg-zinc-900 border border-zinc-700 rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden mix-blend-screen"
+									className="absolute top-1/2 left-1/2 w-32 h-20 bg-background border border-border rounded-lg shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center overflow-hidden mix-blend-screen"
 									style={{
 										transform: `translate(-50%, -50%) rotateY(${i * 24}deg) translateZ(${300 + 0.5 * 200}px)`,
 										animation: `spin ${20 + i * 2}s linear infinite ${i % 2 === 0 ? "reverse" : "normal"}`,
@@ -11823,7 +11823,7 @@ export default function EditorClient({ project }: { project: Project }) {
 									}}
 								>
 									<div className="absolute inset-0 bg-indigo-500/20" />
-									<span className="text-[8px] font-mono text-zinc-400 z-10 text-center px-2 truncate w-full">
+									<span className="text-[8px] font-mono text-muted z-10 text-center px-2 truncate w-full">
 										{clip.name}
 									</span>
 									{clip.thumbnail && (
@@ -11847,12 +11847,12 @@ export default function EditorClient({ project }: { project: Project }) {
 			)}
 			{/* Phase 43: Professional Audio Mixer Panel */}
 			{isAudioMixerOpen && (
-				<div className="absolute bottom-20 right-4 z-50 bg-zinc-950/90 backdrop-blur-xl border border-indigo-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(79,70,229,0.2)] flex flex-col pointer-events-auto">
-					<div className="flex border-b border-zinc-800">
-						<button className="flex-1 py-2 text-xs font-medium text-white border-b-2 border-indigo-500 bg-zinc-800/50">
+				<div className="absolute bottom-20 right-4 z-50 bg-background/90 backdrop-blur-xl border border-indigo-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(79,70,229,0.2)] flex flex-col pointer-events-auto">
+					<div className="flex border-b border-border">
+						<button className="flex-1 py-2 text-xs font-medium text-foreground border-b-2 border-indigo-500 bg-panel/50">
 							Clips
 						</button>
-						<button className="flex-1 py-2 text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/30">
+						<button className="flex-1 py-2 text-xs font-medium text-muted hover:text-foreground hover:bg-panel/30">
 							Folders
 						</button>
 						{/* Phase 49: Cloud Bin Tab */}
@@ -11875,7 +11875,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						</button>
 					</div>
 
-					<div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2 pt-2">
+					<div className="flex items-center justify-between mb-4 border-b border-border pb-2 pt-2">
 						<span className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
 							<svg
 								className="w-4 h-4"
@@ -11894,7 +11894,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						</span>
 						<button
 							onClick={() => setIsAudioMixerOpen(false)}
-							className="text-zinc-500 hover:text-white transition-colors"
+							className="text-muted hover:text-foreground transition-colors"
 						>
 							<svg
 								className="w-4 h-4"
@@ -11919,17 +11919,17 @@ export default function EditorClient({ project }: { project: Project }) {
 							.map((track: any, i: number) => (
 								<div
 									key={track.id}
-									className="flex flex-col items-center bg-zinc-900/50 p-2 rounded-lg border border-zinc-800 w-20"
+									className="flex flex-col items-center bg-background/50 p-2 rounded-lg border border-border w-20"
 								>
-									<span className="text-[10px] text-zinc-400 font-bold mb-2">
+									<span className="text-[10px] text-muted font-bold mb-2">
 										A{i + 1}
 									</span>
 									{/* Simulated LED Meter */}
-									<div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden mb-2 flex flex-col-reverse">
+									<div className="w-4 h-32 bg-background rounded-sm border border-border relative overflow-hidden mb-2 flex flex-col-reverse">
 										{Array.from({ length: 20 }).map((_, idx) => (
 											<div
 												key={idx}
-												className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-zinc-800"}`}
+												className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-panel"}`}
 											/>
 										))}
 									</div>
@@ -11939,44 +11939,44 @@ export default function EditorClient({ project }: { project: Project }) {
 										min="-60"
 										max="12"
 										defaultValue="0"
-										className="w-24 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer -rotate-90 my-12"
+										className="w-24 h-1 bg-panel rounded-lg appearance-none cursor-pointer -rotate-90 my-12"
 									/>
-									<div className="text-[9px] font-mono text-zinc-500 mt-2">
+									<div className="text-[9px] font-mono text-muted mt-2">
 										0 dB
 									</div>
 									<div className="flex gap-1 mt-2">
-										<button className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-[8px] font-bold text-zinc-400 flex items-center justify-center border border-zinc-700">
+										<button className="w-5 h-5 rounded bg-panel hover:bg-glass text-[8px] font-bold text-muted flex items-center justify-center border border-border">
 											M
 										</button>
-										<button className="w-5 h-5 rounded bg-zinc-800 hover:bg-zinc-700 text-[8px] font-bold text-zinc-400 flex items-center justify-center border border-zinc-700">
+										<button className="w-5 h-5 rounded bg-panel hover:bg-glass text-[8px] font-bold text-muted flex items-center justify-center border border-border">
 											S
 										</button>
 									</div>
 								</div>
 							))}
 
-						<div className="w-px bg-zinc-800 mx-2" />
+						<div className="w-px bg-panel mx-2" />
 
 						{/* Master Track */}
-						<div className="flex flex-col items-center bg-zinc-900/80 p-2 rounded-lg border border-indigo-900/50 w-24 shadow-[0_0_20px_rgba(79,70,229,0.1)]">
+						<div className="flex flex-col items-center bg-background/80 p-2 rounded-lg border border-indigo-900/50 w-24 shadow-[0_0_20px_rgba(79,70,229,0.1)]">
 							<span className="text-[10px] text-indigo-400 font-bold mb-2">
 								MASTER
 							</span>
 							{/* Stereo LED Meter */}
 							<div className="flex gap-1 mb-2">
-								<div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden flex flex-col-reverse">
+								<div className="w-4 h-32 bg-background rounded-sm border border-border relative overflow-hidden flex flex-col-reverse">
 									{Array.from({ length: 20 }).map((_, idx) => (
 										<div
 											key={`l-${idx}`}
-											className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-zinc-800"}`}
+											className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-panel"}`}
 										/>
 									))}
 								</div>
-								<div className="w-4 h-32 bg-black rounded-sm border border-zinc-800 relative overflow-hidden flex flex-col-reverse">
+								<div className="w-4 h-32 bg-background rounded-sm border border-border relative overflow-hidden flex flex-col-reverse">
 									{Array.from({ length: 20 }).map((_, idx) => (
 										<div
 											key={`r-${idx}`}
-											className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-zinc-800"}`}
+											className={`w-full h-[1.5px] mb-[1px] ${isPlaying && 0.5 > idx / 20 ? (idx > 16 ? "bg-red-500 shadow-[0_0_5px_red]" : idx > 12 ? "bg-yellow-400 shadow-[0_0_5px_yellow]" : "bg-green-500 shadow-[0_0_5px_lime]") : "bg-panel"}`}
 										/>
 									))}
 								</div>
@@ -11989,10 +11989,10 @@ export default function EditorClient({ project }: { project: Project }) {
 								defaultValue="0"
 								className="w-24 h-1 bg-indigo-900 rounded-lg appearance-none cursor-pointer -rotate-90 my-12"
 							/>
-							<div className="text-[9px] font-mono text-zinc-300 mt-2">
+							<div className="text-[9px] font-mono text-foreground mt-2">
 								0.0 dB
 							</div>
-							<button className="w-full mt-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-[9px] font-bold text-white rounded">
+							<button className="w-full mt-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-[9px] font-bold text-foreground rounded">
 								EQ
 							</button>
 						</div>
@@ -12001,8 +12001,8 @@ export default function EditorClient({ project }: { project: Project }) {
 			)}
 			{/* Phase 44: DaVinci-Style Color Scopes Panel */}
 			{isColorScopesOpen && (
-				<div className="absolute top-20 left-4 z-50 bg-zinc-950/90 backdrop-blur-xl border border-teal-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(20,184,166,0.2)] flex flex-col pointer-events-auto">
-					<div className="flex items-center justify-between mb-4 border-b border-zinc-800 pb-2">
+				<div className="absolute top-20 left-4 z-50 bg-background/90 backdrop-blur-xl border border-teal-500/30 rounded-xl p-4 shadow-[0_0_40px_rgba(20,184,166,0.2)] flex flex-col pointer-events-auto">
+					<div className="flex items-center justify-between mb-4 border-b border-border pb-2">
 						<span className="text-xs font-bold text-teal-400 uppercase tracking-widest flex items-center gap-2">
 							<svg
 								className="w-4 h-4"
@@ -12021,7 +12021,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						</span>
 						<button
 							onClick={() => setIsColorScopesOpen(false)}
-							className="text-zinc-500 hover:text-white transition-colors"
+							className="text-muted hover:text-foreground transition-colors"
 						>
 							<svg
 								className="w-4 h-4"
@@ -12042,10 +12042,10 @@ export default function EditorClient({ project }: { project: Project }) {
 					<div className="flex gap-4">
 						{/* Waveform Monitor */}
 						<div className="flex flex-col items-center">
-							<span className="text-[10px] text-zinc-400 font-bold mb-1">
+							<span className="text-[10px] text-muted font-bold mb-1">
 								WAVEFORM
 							</span>
-							<div className="w-48 h-32 bg-black border border-zinc-800 rounded relative overflow-hidden flex items-end">
+							<div className="w-48 h-32 bg-background border border-border rounded relative overflow-hidden flex items-end">
 								{/* Simulated Waveform Data */}
 								{Array.from({ length: 48 }).map((_, idx) => (
 									<div
@@ -12063,23 +12063,23 @@ export default function EditorClient({ project }: { project: Project }) {
 								))}
 								{/* Graticule Overlay */}
 								<div className="absolute inset-0 pointer-events-none">
-									<div className="w-full h-[25%] border-b border-zinc-800/50" />
-									<div className="w-full h-[25%] border-b border-zinc-800/50" />
-									<div className="w-full h-[25%] border-b border-zinc-800/50" />
+									<div className="w-full h-[25%] border-b border-border/50" />
+									<div className="w-full h-[25%] border-b border-border/50" />
+									<div className="w-full h-[25%] border-b border-border/50" />
 								</div>
 							</div>
 						</div>
 
 						{/* Vectorscope */}
 						<div className="flex flex-col items-center">
-							<span className="text-[10px] text-zinc-400 font-bold mb-1">
+							<span className="text-[10px] text-muted font-bold mb-1">
 								VECTORSCOPE
 							</span>
-							<div className="w-32 h-32 bg-black border border-zinc-800 rounded-full relative overflow-hidden flex items-center justify-center">
+							<div className="w-32 h-32 bg-background border border-border rounded-full relative overflow-hidden flex items-center justify-center">
 								{/* Graticule Crosshairs */}
-								<div className="absolute inset-0 border border-zinc-800/50 rounded-full m-2" />
-								<div className="absolute w-full h-px bg-zinc-800/80" />
-								<div className="absolute h-full w-px bg-zinc-800/80" />
+								<div className="absolute inset-0 border border-border/50 rounded-full m-2" />
+								<div className="absolute w-full h-px bg-panel/80" />
+								<div className="absolute h-full w-px bg-panel/80" />
 
 								{/* Skin Tone Indicator Line */}
 								<div className="absolute w-1/2 h-px bg-orange-900/50 origin-left rotate-[-15deg] translate-x-1/2" />
@@ -12145,7 +12145,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							/>
 						</svg>
 						<div
-							className="absolute top-6 left-6 whitespace-nowrap bg-zinc-900 border text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-2"
+							className="absolute top-6 left-6 whitespace-nowrap bg-background border text-foreground text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-2"
 							style={{ borderColor: cursor.color }}
 						>
 							<div
@@ -12154,7 +12154,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							/>
 							<span>
 								{cursor.name}{" "}
-								<span className="text-zinc-500 font-normal">
+								<span className="text-muted font-normal">
 									| {cursor.role}
 								</span>
 							</span>

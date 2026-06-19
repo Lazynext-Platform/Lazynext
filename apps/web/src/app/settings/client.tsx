@@ -22,7 +22,7 @@ export function SettingsPageClient() {
 	if (isPending) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-background">
-				<div className="text-zinc-400">Loading...</div>
+				<div className="text-muted">Loading...</div>
 			</div>
 		);
 	}
@@ -59,13 +59,13 @@ export function SettingsPageClient() {
 			<div className="mx-auto max-w-2xl px-4 py-16 relative z-10">
 				<Link
 					href="/projects"
-					className="mb-8 inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+					className="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
 				>
 					← Back to Projects
 				</Link>
 
-				<h1 className="text-3xl font-bold text-white">Settings</h1>
-				<p className="mt-2 text-sm text-zinc-400">
+				<h1 className="text-3xl font-bold text-foreground">Settings</h1>
+				<p className="mt-2 text-sm text-muted">
 					Manage your account and preferences.
 				</p>
 
@@ -75,12 +75,12 @@ export function SettingsPageClient() {
 						<h2 className="text-lg font-bold text-[var(--text-primary)]">
 							Profile
 						</h2>
-						<p className="mt-1 text-sm text-zinc-400">
+						<p className="mt-1 text-sm text-muted">
 							Update your display name and email.
 						</p>
 						<form onSubmit={handleSave} className="mt-4 space-y-4">
 							<div>
-								<label className="mb-1 block text-xs font-medium text-zinc-400">
+								<label className="mb-1 block text-xs font-medium text-muted">
 									Name
 								</label>
 								<input
@@ -92,16 +92,16 @@ export function SettingsPageClient() {
 								/>
 							</div>
 							<div>
-								<label className="mb-1 block text-xs font-medium text-zinc-400">
+								<label className="mb-1 block text-xs font-medium text-muted">
 									Email
 								</label>
 								<input
 									type="email"
 									value={session.user?.email ?? ""}
 									disabled
-									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-3 py-2 text-sm text-zinc-500 outline-none"
+									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)]/50 px-3 py-2 text-sm text-muted outline-none"
 								/>
-								<p className="mt-1 text-xs text-zinc-500">
+								<p className="mt-1 text-xs text-muted">
 									Email cannot be changed
 								</p>
 							</div>
@@ -120,7 +120,7 @@ export function SettingsPageClient() {
 						<h2 className="text-lg font-bold text-[var(--text-primary)]">
 							Preferences
 						</h2>
-						<p className="mt-1 text-sm text-zinc-400">
+						<p className="mt-1 text-sm text-muted">
 							Customize your editing experience.
 						</p>
 						<div className="mt-4 space-y-3">
@@ -129,7 +129,7 @@ export function SettingsPageClient() {
 									<span className="text-sm font-bold text-[var(--text-primary)]">
 										Autosave
 									</span>
-									<p className="text-xs text-zinc-400">
+									<p className="text-xs text-muted">
 										Save projects automatically every 30 seconds
 									</p>
 								</div>
@@ -144,7 +144,7 @@ export function SettingsPageClient() {
 									<span className="text-sm font-bold text-[var(--text-primary)]">
 										Snap to Grid
 									</span>
-									<p className="text-xs text-zinc-400">
+									<p className="text-xs text-muted">
 										Snap timeline elements to the nearest frame
 									</p>
 								</div>
@@ -160,7 +160,7 @@ export function SettingsPageClient() {
 					{/* Danger Zone */}
 					<section className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
 						<h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
-						<p className="mt-1 text-sm text-zinc-400">
+						<p className="mt-1 text-sm text-muted">
 							Permanently delete your account and all data.
 						</p>
 						<button

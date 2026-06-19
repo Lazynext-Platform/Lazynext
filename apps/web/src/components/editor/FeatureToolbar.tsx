@@ -76,7 +76,7 @@ function ToggleBtn({
 			className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 				active
 					? activeClass
-					: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+					: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 			}`}
 			onClick={onToggle}
 			title={title}
@@ -201,7 +201,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				onToggle={() => props.setIs3DWorkspace(!props.is3DWorkspace)}
 				icon={CubeIcon}
 				label="3D Mode"
-				activeClass="bg-teal-600 border-teal-500 text-white"
+				activeClass="bg-teal-600 border-teal-500 text-foreground"
 				title="Toggle 3D Compositing Workspace"
 			/>
 
@@ -213,7 +213,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				}
 				icon={MonitorIcon}
 				label="Spatial Editor"
-				activeClass="bg-fuchsia-600 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]"
+				activeClass="bg-fuchsia-600 border-fuchsia-500 text-foreground shadow-[0_0_10px_rgba(217,70,239,0.5)]"
 				title="Toggle Holographic Volumetric Spatial Editor"
 			/>
 
@@ -221,8 +221,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${
 					props.isAutonomousDirector
-						? "bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-red-600 border-red-500 text-foreground shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() =>
 					props.setIsAutonomousDirector(!props.isAutonomousDirector)
@@ -236,8 +236,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-bold backdrop-blur border px-2 py-1 rounded transition-all flex items-center gap-1 mr-2 ${
 					props.isBioResponsive
-						? "bg-orange-600 border-orange-500 text-white shadow-[0_0_15px_rgba(234,88,12,0.8)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-orange-600 border-orange-500 text-foreground shadow-[0_0_15px_rgba(234,88,12,0.8)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsBioResponsive(!props.isBioResponsive)}
 				title={`Toggle Bio-Responsive UI Theme (Current Stress: ${props.systemStress.toFixed(1)}%)`}
@@ -252,7 +252,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				onToggle={() => props.setIsOmniOrbActive(!props.isOmniOrbActive)}
 				icon={MicIcon}
 				label="Omni Orb"
-				activeClass="bg-cyan-600 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+				activeClass="bg-cyan-600 border-cyan-500 text-foreground shadow-[0_0_10px_rgba(6,182,212,0.6)]"
 				title="Toggle AI Voice Command Orb"
 			/>
 
@@ -262,7 +262,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				onToggle={() => props.setIsSwarmActive(!props.isSwarmActive)}
 				icon={BoltIcon}
 				label="Agent Swarm"
-				activeClass="bg-indigo-600 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.6)]"
+				activeClass="bg-indigo-600 border-indigo-500 text-foreground shadow-[0_0_10px_rgba(79,70,229,0.6)]"
 				title="Toggle Multi-Agent Rendering Swarm"
 			/>
 
@@ -274,7 +274,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				}
 				icon={FlaskIcon}
 				label="Dream Clip"
-				activeClass="bg-blue-600 border-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.7)]"
+				activeClass="bg-blue-600 border-blue-500 text-foreground shadow-[0_0_15px_rgba(59,130,246,0.7)]"
 				title="Toggle Neuro-Symbolic Scene Synthesis"
 			/>
 
@@ -282,8 +282,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 mr-2 ${
 					props.isGodMode
-						? "bg-gradient-to-r from-yellow-500 via-red-500 to-cyan-600 border-yellow-400 text-white shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105"
-						: "bg-zinc-900/80 border-zinc-600/50 hover:bg-zinc-800 text-zinc-400 hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+						? "bg-gradient-to-r from-yellow-500 via-red-500 to-cyan-600 border-yellow-400 text-foreground shadow-[0_0_25px_rgba(234,179,8,0.9),0_0_50px_rgba(220,38,38,0.5)] animate-pulse scale-105"
+						: "bg-background/80 border-zinc-600/50 hover:bg-panel text-muted hover:text-yellow-400 hover:border-yellow-500/50 hover:shadow-[0_0_15px_rgba(234,179,8,0.3)]"
 				}`}
 				onClick={props.activateGodMode}
 				title="Activate God Mode — Enable All AI Modes Simultaneously"
@@ -296,7 +296,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				className={`text-[10px] font-black backdrop-blur border-2 px-3 py-1.5 rounded-full transition-all flex items-center gap-1.5 mr-2 ${
 					props.isSingularity
 						? "bg-white text-black border-white shadow-[0_0_50px_rgba(255,255,255,1)] animate-bounce scale-110"
-						: "bg-black text-white border-zinc-700 hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]"
+						: "bg-background text-foreground border-border hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.5)]"
 				}`}
 				onClick={() => props.setIsSingularity(!props.isSingularity)}
 				title="Activate The Singularity: Infinite Canvas Mode"
@@ -309,7 +309,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				{props.isQuantumSuperposition && (
 					<button
 						onClick={() => props.setIsQuantumSuperposition(false)}
-						className="text-[10px] font-black bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded-l animate-pulse shadow-[0_0_15px_rgba(79,70,229,0.8)]"
+						className="text-[10px] font-black bg-indigo-600 hover:bg-indigo-500 text-foreground px-2 py-1 rounded-l animate-pulse shadow-[0_0_15px_rgba(79,70,229,0.8)]"
 					>
 						👁️ OBSERVE
 					</button>
@@ -318,7 +318,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 					className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 						props.isQuantumSuperposition
 							? "bg-indigo-900/80 border-indigo-500 text-indigo-300 rounded-r shadow-[0_0_10px_rgba(79,70,229,0.4)]"
-							: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+							: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 					}`}
 					onClick={() =>
 						props.setIsQuantumSuperposition(!props.isQuantumSuperposition)
@@ -334,8 +334,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isCinematographyAI
-						? "bg-cyan-600/80 border-cyan-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.6)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-cyan-600/80 border-cyan-500 text-foreground shadow-[0_0_10px_rgba(6,182,212,0.6)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsCinematographyAI(!props.isCinematographyAI)}
 				title="Toggle Neural Cinematography Analysis"
@@ -349,7 +349,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				onToggle={() => props.setIsAssetForgeOpen(!props.isAssetForgeOpen)}
 				icon={FlaskIcon}
 				label="Asset Forge"
-				activeClass="bg-fuchsia-600/80 border-fuchsia-500 text-white shadow-[0_0_10px_rgba(217,70,239,0.5)]"
+				activeClass="bg-fuchsia-600/80 border-fuchsia-500 text-foreground shadow-[0_0_10px_rgba(217,70,239,0.5)]"
 				title="Open Holographic Asset Forge"
 			/>
 
@@ -357,8 +357,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isSentientColorOpen
-						? "bg-rose-600/80 border-rose-500 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-rose-600/80 border-rose-500 text-foreground shadow-[0_0_10px_rgba(225,29,72,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsSentientColorOpen(!props.isSentientColorOpen)}
 				title="Open Sentient Color Intelligence"
@@ -370,8 +370,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isAudioMixerOpen
-						? "bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-indigo-600/80 border-indigo-500 text-foreground shadow-[0_0_10px_rgba(79,70,229,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsAudioMixerOpen(!props.isAudioMixerOpen)}
 				title="Open Professional Audio Mixer"
@@ -383,8 +383,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isColorScopesOpen
-						? "bg-teal-600/80 border-teal-500 text-white shadow-[0_0_10px_rgba(20,184,166,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-teal-600/80 border-teal-500 text-foreground shadow-[0_0_10px_rgba(20,184,166,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsColorScopesOpen(!props.isColorScopesOpen)}
 				title="Open Color Scopes (Waveform / Vectorscope)"
@@ -396,8 +396,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isAutoCaptioning
-						? "bg-orange-600/80 border-orange-500 text-white animate-pulse"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-orange-600/80 border-orange-500 text-foreground animate-pulse"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => {
 					props.setIsAutoCaptioning(true);
@@ -411,8 +411,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.hasBeatSync
-						? "bg-pink-600/80 border-pink-500 text-white shadow-[0_0_10px_rgba(236,72,153,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-pink-600/80 border-pink-500 text-foreground shadow-[0_0_10px_rgba(236,72,153,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setHasBeatSync(!props.hasBeatSync)}
 				title="Auto Beat Sync Markers"
@@ -424,8 +424,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isMultiplayer
-						? "bg-blue-600/80 border-blue-500 text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-blue-600/80 border-blue-500 text-foreground shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsMultiplayer(!props.isMultiplayer)}
 				title="Toggle Live Multiplayer Mode"
@@ -437,8 +437,8 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			<button
 				className={`text-[10px] font-medium backdrop-blur border px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2 ${
 					props.isChatOpen
-						? "bg-indigo-600/80 border-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.5)]"
-						: "bg-zinc-900/80 border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+						? "bg-indigo-600/80 border-indigo-500 text-foreground shadow-[0_0_10px_rgba(79,70,229,0.5)]"
+						: "bg-background/80 border-border/50 hover:bg-panel text-muted hover:text-foreground"
 				}`}
 				onClick={() => props.setIsChatOpen(!props.isChatOpen)}
 				title="Open Session Chat"
@@ -448,7 +448,7 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 
 			{/* Dev Console */}
 			<button
-				className="text-[10px] bg-zinc-900/80 backdrop-blur border border-zinc-700/50 hover:bg-zinc-800 text-zinc-400 hover:text-white px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2"
+				className="text-[10px] bg-background/80 backdrop-blur border border-border/50 hover:bg-panel text-muted hover:text-foreground px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2"
 				onClick={props.handleOpenDevConsole}
 			>
 				{CodeIcon}
@@ -456,9 +456,9 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 			</button>
 
 			{/* Annotation / Color Picker */}
-			<div className="flex items-center gap-1 bg-zinc-900/80 backdrop-blur border border-zinc-700/50 rounded-lg p-1 mr-4">
+			<div className="flex items-center gap-1 bg-background/80 backdrop-blur border border-border/50 rounded-lg p-1 mr-4">
 				<button
-					className="p-1.5 rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+					className="p-1.5 rounded hover:bg-glass text-muted hover:text-foreground transition-colors"
 					title="Draw Annotation (Arrow)"
 					onClick={props.handleCanvasAnnotation}
 				>

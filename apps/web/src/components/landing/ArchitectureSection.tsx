@@ -22,7 +22,7 @@ const PROJECTS = [
 
 export function ArchitectureSection() {
 	return (
-		<section className="relative overflow-hidden bg-slate-50 dark:bg-zinc-950 px-4 py-24 border-y border-zinc-200 dark:border-white/5 transition-colors duration-300">
+		<section className="relative overflow-hidden bg-slate-50 dark:bg-background px-4 py-24 border-y border-zinc-200 dark:border-border transition-colors duration-300">
 			<div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] dark:opacity-[0.04] mix-blend-overlay pointer-events-none" />
 
 			<div className="mx-auto max-w-6xl">
@@ -33,12 +33,12 @@ export function ArchitectureSection() {
 							<Combine className="size-4" />
 							<span className="text-sm font-semibold">The Monorepo</span>
 						</div>
-						<h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white md:text-4xl mb-6 leading-tight">
+						<h2 className="text-3xl font-extrabold text-zinc-900 dark:text-foreground md:text-4xl mb-6 leading-tight">
 							17 Enterprise Microservices.
 							<br />
 							One Unified Timeline.
 						</h2>
-						<p className="mt-4 text-zinc-600 dark:text-zinc-400 text-lg leading-relaxed max-w-2xl mx-auto">
+						<p className="mt-4 text-zinc-600 dark:text-muted text-lg leading-relaxed max-w-2xl mx-auto">
 							We didn't just build an editor. We built an AI Copilot that edits
 							footage for you based on text prompts. Lazynext acts as the
 							central nervous system bridging Python ML servers, Rust core
@@ -52,10 +52,10 @@ export function ArchitectureSection() {
 									<Cpu className="size-4 text-cyan-600 dark:text-cyan-400" />
 								</div>
 								<div>
-									<h4 className="font-semibold text-zinc-900 dark:text-white">
+									<h4 className="font-semibold text-zinc-900 dark:text-foreground">
 										GPU-Accelerated Inference
 									</h4>
-									<p className="text-sm text-zinc-600 dark:text-zinc-400">
+									<p className="text-sm text-zinc-600 dark:text-muted">
 										Seamlessly runs tensor operations via PyTorch and ONNX,
 										directly managed by our FastAPI orchestration layer.
 									</p>
@@ -66,10 +66,10 @@ export function ArchitectureSection() {
 									<Blocks className="size-4 text-emerald-600 dark:text-emerald-400" />
 								</div>
 								<div>
-									<h4 className="font-semibold text-zinc-900 dark:text-white">
+									<h4 className="font-semibold text-zinc-900 dark:text-foreground">
 										Modular Architecture
 									</h4>
-									<p className="text-sm text-zinc-600 dark:text-zinc-400">
+									<p className="text-sm text-zinc-600 dark:text-muted">
 										Easily swap out any model. Upgrade Whisper to Deepgram, or
 										swap SDXL for Midjourney without breaking the timeline
 										structure.
@@ -80,7 +80,7 @@ export function ArchitectureSection() {
 					</div>
 
 					{/* Right Visual Ticker */}
-					<div className="relative h-[400px] rounded-3xl border border-zinc-200 dark:border-white/10 bg-white/50 dark:bg-zinc-900/30 p-8 overflow-hidden flex flex-col justify-center">
+					<div className="relative h-[400px] rounded-3xl border border-zinc-200 dark:border-border bg-white/50 dark:bg-background/30 p-8 overflow-hidden flex flex-col justify-center">
 						<div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-zinc-950 via-transparent to-slate-50 dark:to-zinc-950 z-10 pointer-events-none" />
 
 						<div className="flex flex-col gap-6 transform rotate-[-2deg] scale-110">
@@ -89,7 +89,7 @@ export function ArchitectureSection() {
 								{[...PROJECTS, ...PROJECTS].slice(0, 10).map((p, i) => (
 									<div
 										key={`r1-${i}`}
-										className="whitespace-nowrap rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 px-6 py-3 font-mono text-sm text-zinc-700 dark:text-zinc-300 backdrop-blur-md shadow-sm dark:shadow-none"
+										className="whitespace-nowrap rounded-xl border border-zinc-200 dark:border-border bg-white dark:bg-hover px-6 py-3 font-mono text-sm text-zinc-700 dark:text-foreground backdrop-blur-md shadow-sm dark:shadow-none"
 									>
 										{p}
 									</div>
@@ -113,7 +113,7 @@ export function ArchitectureSection() {
 								{[...PROJECTS, ...PROJECTS].slice(10, 20).map((p, i) => (
 									<div
 										key={`r3-${i}`}
-										className="whitespace-nowrap rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 px-6 py-3 font-mono text-sm text-zinc-700 dark:text-zinc-300 backdrop-blur-md shadow-sm dark:shadow-none"
+										className="whitespace-nowrap rounded-xl border border-zinc-200 dark:border-border bg-white dark:bg-hover px-6 py-3 font-mono text-sm text-zinc-700 dark:text-foreground backdrop-blur-md shadow-sm dark:shadow-none"
 									>
 										{p}
 									</div>

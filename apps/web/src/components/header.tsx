@@ -111,7 +111,7 @@ export function Header() {
 					<div className="hidden items-center gap-3 md:flex">
 						<Button
 							variant="outline"
-							className="text-sm font-semibold border-white/10 hover:bg-white/5"
+							className="text-sm font-semibold border-border hover:bg-hover"
 							onClick={async () => {
 								try {
 									await signOut();

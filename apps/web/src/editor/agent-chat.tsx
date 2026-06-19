@@ -95,7 +95,7 @@ export function AgentChat({
 	};
 
 	return (
-		<div className="flex flex-col w-full h-64 bg-zinc-900 border-t border-zinc-800 p-4">
+		<div className="flex flex-col w-full h-64 bg-background border-t border-border p-4">
 			<div className="text-sm font-bold text-blue-500 mb-2">AGENT CHAT</div>
 
 			<div
@@ -107,10 +107,10 @@ export function AgentChat({
 						key={idx}
 						className={`text-sm whitespace-pre-wrap ${
 							msg.role === "user"
-								? "text-zinc-100 text-right"
+								? "text-foreground text-right"
 								: msg.role === "tool"
 									? "text-amber-400 text-left font-mono text-xs"
-									: "text-zinc-400 text-left"
+									: "text-muted text-left"
 						}`}
 					>
 						{msg.role === "tool" && (
@@ -122,7 +122,7 @@ export function AgentChat({
 					</div>
 				))}
 				{isLoading && (
-					<div className="text-xs text-zinc-500 animate-pulse">
+					<div className="text-xs text-muted animate-pulse">
 						Agent is thinking...
 					</div>
 				)}
@@ -135,13 +135,13 @@ export function AgentChat({
 					onChange={(e) => setInput(e.target.value)}
 					onKeyDown={(e) => e.key === "Enter" && handleSend()}
 					placeholder="Type a command (e.g., 'Cut out the silences')..."
-					className="flex-1 h-10 bg-zinc-800 rounded-md px-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-zinc-500"
+					className="flex-1 h-10 bg-panel rounded-md px-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder:text-muted"
 					disabled={isLoading}
 				/>
 				<button
 					onClick={handleSend}
 					disabled={isLoading}
-					className="h-10 px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-zinc-400 text-white text-sm font-medium rounded-md transition-colors"
+					className="h-10 px-4 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-muted text-foreground text-sm font-medium rounded-md transition-colors"
 				>
 					{isLoading ? "..." : "Send"}
 				</button>

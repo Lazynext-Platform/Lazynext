@@ -58,7 +58,7 @@ export default async function SuperAdminDashboard() {
 					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[var(--border-glass)] pb-6">
 						<div>
 							<div className="flex items-center gap-3">
-								<h1 className="text-3xl font-bold tracking-tight text-white">
+								<h1 className="text-3xl font-bold tracking-tight text-foreground">
 									Platform God Mode
 								</h1>
 								<span className="bg-red-500/20 text-red-500 border border-red-500/50 text-xs px-2 py-0.5 rounded animate-pulse font-bold">
@@ -73,7 +73,7 @@ export default async function SuperAdminDashboard() {
 							<button className="bg-[var(--bg-panel)] border border-[var(--border-glass)] text-[var(--text-primary)] px-4 py-2 rounded-lg font-medium hover:bg-[var(--bg-hover)] transition-colors">
 								Export Logs
 							</button>
-							<button className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+							<button className="bg-red-600 text-foreground px-4 py-2 rounded-lg font-medium hover:bg-red-500 transition-colors shadow-[0_0_15px_rgba(220,38,38,0.4)]">
 								Emergency Halt
 							</button>
 						</div>
@@ -110,7 +110,7 @@ export default async function SuperAdminDashboard() {
 							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
 								Total Active Users
 							</h3>
-							<p className="text-4xl font-black mt-2 text-white">8,492</p>
+							<p className="text-4xl font-black mt-2 text-foreground">8,492</p>
 							<p className="text-[10px] text-green-400 mt-2">+12% this hour</p>
 						</div>
 						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
@@ -141,7 +141,7 @@ export default async function SuperAdminDashboard() {
 							</thead>
 							<tbody className="divide-y divide-[var(--border-glass)]">
 								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-white flex items-center gap-2">
+									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
 										<div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></div>
 										Anthropic Claude 3.5 Sonnet
 									</td>
@@ -154,7 +154,7 @@ export default async function SuperAdminDashboard() {
 									</td>
 								</tr>
 								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-white flex items-center gap-2">
+									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
 										<div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
 										OpenAI GPT-4o
 									</td>
@@ -167,7 +167,7 @@ export default async function SuperAdminDashboard() {
 									</td>
 								</tr>
 								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-white flex items-center gap-2">
+									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
 										<div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
 										Google Gemini 1.5 Pro
 									</td>
@@ -180,7 +180,7 @@ export default async function SuperAdminDashboard() {
 									</td>
 								</tr>
 								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-white flex items-center gap-2">
+									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
 										<div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></div>
 										Local Ollama (Llama 3)
 									</td>
@@ -197,12 +197,12 @@ export default async function SuperAdminDashboard() {
 					</div>
 
 					{/* Terminal Console */}
-					<div className="mt-4 bg-black border border-zinc-800 rounded-xl overflow-hidden font-mono text-xs">
-						<div className="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex items-center gap-2 text-zinc-400">
+					<div className="mt-4 bg-background border border-border rounded-xl overflow-hidden font-mono text-xs">
+						<div className="bg-background px-4 py-2 border-b border-border flex items-center gap-2 text-muted">
 							<TerminalSquare className="w-4 h-4" />
 							Live Platform Logs
 						</div>
-						<div className="p-4 h-48 overflow-y-auto space-y-1 text-zinc-300">
+						<div className="p-4 h-48 overflow-y-auto space-y-1 text-foreground">
 							<p>
 								<span className="text-green-500">[INFO]</span> New user sign-up:
 								vaspatel@gmail.com

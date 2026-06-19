@@ -621,7 +621,7 @@ function ProjectItem({
 
 	const gridContent = (
 		<Card className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-glass)] overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[0_0_30px_-5px_rgba(1,243,254,0.15)] group rounded-2xl">
-			<div className="bg-zinc-800/50 relative aspect-video overflow-hidden">
+			<div className="bg-panel/50 relative aspect-video overflow-hidden">
 				<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
 					{project.thumbnail ? (
 						<Image
@@ -640,7 +640,7 @@ function ProjectItem({
 				</div>
 
 				{durationLabel && (
-					<div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-lg">
+					<div className="absolute bottom-3 right-3 bg-background/70 backdrop-blur-md text-foreground text-xs font-semibold px-2.5 py-1 rounded-md border border-border shadow-lg">
 						{durationLabel}
 					</div>
 				)}
@@ -650,7 +650,7 @@ function ProjectItem({
 				<h3 className="text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] line-clamp-2 text-base leading-snug font-semibold transition-colors">
 					{project.name}
 				</h3>
-				<div className="text-zinc-400 flex items-center gap-2 text-xs font-medium">
+				<div className="text-muted flex items-center gap-2 text-xs font-medium">
 					<HugeiconsIcon icon={Calendar04Icon} className="size-3.5" />
 					<span>Created {formatDate({ date: project.createdAt })}</span>
 				</div>

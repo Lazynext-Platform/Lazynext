@@ -34,11 +34,11 @@ export default function ExportButton({ projectId }: { projectId: string }) {
 
 	return (
 		<div className="flex items-center gap-2">
-			{status && <span className="text-xs text-zinc-400">{status}</span>}
+			{status && <span className="text-xs text-muted">{status}</span>}
 			<button
 				onClick={handleExport}
 				disabled={isExporting}
-				className="rounded-md bg-zinc-700 px-3 py-1 text-sm text-white hover:bg-zinc-600 disabled:opacity-50"
+				className="rounded-md bg-glass px-3 py-1 text-sm text-foreground hover:bg-zinc-600 disabled:opacity-50"
 			>
 				{isExporting ? "Exporting..." : "Export"}
 			</button>
