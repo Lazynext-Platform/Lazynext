@@ -18,6 +18,7 @@ resource "google_project_service" "apis" {
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
     "cloudkms.googleapis.com",
+    "servicenetworking.googleapis.com",
   ])
 
   project = var.project_id
@@ -76,6 +77,22 @@ resource "google_compute_subnetwork" "subnet" {
   network       = google_compute_network.vpc.id
   ip_cidr_range = "10.0.0.0/24"
   region        = var.region
+}
+
+# Service Networking for Cloud SQL Private IP
+resource "google_compute_global_address" "private_ip_address" {
+  name          = "lazynext-private-ip-${var.environment}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 16
+  network       = google_compute_network.vpc.id
+}
+
+resource "google_service_networking_connection" "private_vpc_connection" {
+  network                 = google_compute_network.vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_address.name]
+  depends_on              = [google_project_service.apis]
 }
 
 # Serverless VPC Access connector for Cloud Run → Cloud SQL private path
@@ -162,7 +179,10 @@ resource "google_sql_database_instance" "postgres" {
 
   deletion_protection = var.environment == "production"
 
-  depends_on = [google_project_service.apis]
+  depends_on = [
+    google_project_service.apis,
+    google_service_networking_connection.private_vpc_connection
+  ]
 }
 
 resource "google_sql_database" "lazynext" {
@@ -756,6 +776,12 @@ resource "google_monitoring_alert_policy" "web_error_rate" {
       comparison      = "COMPARISON_GT"
       threshold_value = 0.05
 
+      aggregations {
+        alignment_period   = "60s"
+        cross_series_reducer = "REDUCE_SUM"
+        per_series_aligner = "ALIGN_RATE"
+      }
+
       trigger {
         count = 1
       }
@@ -808,10 +834,11 @@ resource "google_sql_database_instance" "postgres_replica" {
 # ─────────────────────────────────────────────────────────────────────────────
 # Cloud SQL — Data encryption with CMEK (Customer-Managed Encryption Key)
 # ─────────────────────────────────────────────────────────────────────────────
+
+
 resource "google_kms_key_ring" "db_keyring" {
   name     = "lazynext-db-keyring-${var.environment}"
   location = var.region
-
   depends_on = [google_project_service.apis]
 }
 
@@ -1093,7 +1120,6 @@ resource "google_compute_managed_ssl_certificate" "web_cert" {
 resource "google_compute_backend_service" "web_backend" {
   name        = "lazynext-backend-${var.environment}"
   protocol    = "HTTPS"
-  port_name   = "https"
   timeout_sec = 300
 
   backend {
