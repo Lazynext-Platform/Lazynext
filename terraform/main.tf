@@ -17,6 +17,7 @@ resource "google_project_service" "apis" {
     "logging.googleapis.com",
     "cloudresourcemanager.googleapis.com",
     "iam.googleapis.com",
+    "cloudkms.googleapis.com",
   ])
 
   project = var.project_id
@@ -79,7 +80,7 @@ resource "google_compute_subnetwork" "subnet" {
 
 # Serverless VPC Access connector for Cloud Run → Cloud SQL private path
 resource "google_vpc_access_connector" "connector" {
-  name          = "lazynext-vpc-connector-${var.environment}"
+  name          = "lazynext-vpc-con-${var.environment}"
   region        = var.region
   network       = google_compute_network.vpc.name
   ip_cidr_range = "10.8.0.0/28"
@@ -235,7 +236,7 @@ resource "google_secret_manager_secret" "openai_api_key" {
 
 resource "google_secret_manager_secret_version" "openai_api_key" {
   secret      = google_secret_manager_secret.openai_api_key.id
-  secret_data = var.openai_api_key
+  secret_data = var.openai_api_key != "" ? var.openai_api_key : "mock-key"
 }
 
 resource "google_secret_manager_secret" "anthropic_api_key" {
@@ -247,7 +248,7 @@ resource "google_secret_manager_secret" "anthropic_api_key" {
 
 resource "google_secret_manager_secret_version" "anthropic_api_key" {
   secret      = google_secret_manager_secret.anthropic_api_key.id
-  secret_data = var.anthropic_api_key
+  secret_data = var.anthropic_api_key != "" ? var.anthropic_api_key : "mock-key"
 }
 
 resource "google_secret_manager_secret" "stripe_secret_key" {
@@ -259,7 +260,7 @@ resource "google_secret_manager_secret" "stripe_secret_key" {
 
 resource "google_secret_manager_secret_version" "stripe_secret_key" {
   secret      = google_secret_manager_secret.stripe_secret_key.id
-  secret_data = var.stripe_secret_key
+  secret_data = var.stripe_secret_key != "" ? var.stripe_secret_key : "mock-key"
 }
 
 resource "google_secret_manager_secret" "resend_api_key" {
@@ -271,7 +272,7 @@ resource "google_secret_manager_secret" "resend_api_key" {
 
 resource "google_secret_manager_secret_version" "resend_api_key" {
   secret      = google_secret_manager_secret.resend_api_key.id
-  secret_data = var.resend_api_key
+  secret_data = var.resend_api_key != "" ? var.resend_api_key : "mock-key"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1000,10 +1001,9 @@ resource "google_compute_security_policy" "waf" {
     action   = "throttle"
     priority = "1000"
     match {
-      versioned_expr = "1"
+      versioned_expr = "SRC_IPS_V1"
       config {
         src_ip_ranges = ["*"]
-        expression    = "true"
       }
     }
     rate_limit_options {
@@ -1044,14 +1044,27 @@ resource "google_compute_security_policy" "waf" {
   # Allow health check probes
   rule {
     action   = "allow"
-    priority = "2147483647"
+    priority = "2147483646"
     match {
-      versioned_expr = "1"
+      versioned_expr = "SRC_IPS_V1"
       config {
         src_ip_ranges = ["130.211.0.0/22", "35.191.0.0/16", "209.85.152.0/22", "209.85.204.0/22"]
       }
     }
     description = "Allow Google Cloud health check probes"
+  }
+
+  # Default rule
+  rule {
+    action   = "allow"
+    priority = "2147483647"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+    description = "Default rule"
   }
 
   depends_on = [google_project_service.apis]
