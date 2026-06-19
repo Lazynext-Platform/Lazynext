@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Film, Twitter, Github, MessageCircle } from "lucide-react";
+import { Film, Globe, Code, MessageCircle } from "lucide-react";
 import Image from "next/image";
 
 export function MarketingFooter() {
@@ -23,10 +23,10 @@ export function MarketingFooter() {
 					</p>
 					<div className="flex items-center gap-4 text-neutral-400">
 						<Link href="#" className="hover:text-white transition-colors">
-							<Twitter className="w-5 h-5" />
+							<Globe className="w-5 h-5" />
 						</Link>
 						<Link href="#" className="hover:text-white transition-colors">
-							<Github className="w-5 h-5" />
+							<Code className="w-5 h-5" />
 						</Link>
 						<Link href="#" className="hover:text-white transition-colors">
 							<MessageCircle className="w-5 h-5" />
