@@ -103,25 +103,49 @@ steps:
     id: "push-ai-agents"
     waitFor: ["build-ai-agents"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:${SHORT_SHA}"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-ai-agents-latest"
+    waitFor: ["push-ai-agents"]
+    args:
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-ai-agents:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-render-service"
     waitFor: ["build-render-service"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:${SHORT_SHA}"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-render-service-latest"
+    waitFor: ["push-render-service"]
+    args:
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-render-service:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-pre-processing"
     waitFor: ["build-pre-processing"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:${SHORT_SHA}"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-pre-processing-latest"
+    waitFor: ["push-pre-processing"]
+    args:
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-pre-processing:latest"]
 
   - name: "gcr.io/cloud-builders/docker"
     id: "push-generative-studio"
     waitFor: ["build-generative-studio"]
     args:
-      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:${SHORT_SHA}", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest"]
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:${SHORT_SHA}"]
+
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-generative-studio-latest"
+    waitFor: ["push-generative-studio"]
+    args:
+      ["push", "us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-generative-studio:latest"]
 
   # ── Run Database Migrations ──
 

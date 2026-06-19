@@ -72,18 +72,21 @@ WORKDIR /app
 RUN groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs nextjs
 
+# Create cache directory and set ownership
+RUN mkdir -p /app/apps/web/.next/cache && chown -R nextjs:nodejs /app
+
 # Copy standalone output
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
 # Copy WASM artifacts needed at runtime
-COPY --from=builder /app/rust/wasm/pkg ./rust/wasm/pkg
+COPY --from=builder --chown=nextjs:nodejs /app/rust/wasm/pkg ./rust/wasm/pkg
 
 # Copy drizzle migrations for runtime DB operations
-COPY --from=builder /app/apps/web/drizzle ./apps/web/drizzle
-COPY --from=builder /app/apps/web/migrations ./apps/web/migrations
-COPY --from=builder /app/apps/web/migrate.ts ./apps/web/migrate.ts
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/drizzle ./apps/web/drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/migrations ./apps/web/migrations
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/migrate.ts ./apps/web/migrate.ts
 
 USER nextjs
 
