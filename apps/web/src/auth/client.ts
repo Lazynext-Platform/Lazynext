@@ -10,5 +10,5 @@ const baseURL =
 
 const authClient = createAuthClient({ baseURL });
 export const { signIn, signUp, signOut, useSession } = authClient;
-export const forgetPassword = (authClient as any).forgetPassword;
+export const forgetPassword = (authClient as any).requestPasswordReset || (authClient as any).forgetPassword;
 export const resetPassword = (authClient as any).resetPassword;

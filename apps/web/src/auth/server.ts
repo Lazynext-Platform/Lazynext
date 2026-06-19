@@ -14,18 +14,20 @@ async function sendEmail({
 	subject: string;
 	html: string;
 }) {
-	const from = process.env.EMAIL_FROM || "no-reply@lazynext.com";
+	const from = process.env["EMAIL_FROM"] || "no-reply@lazynext.com";
+	console.log(`[Auth Debug] sendEmail called! to: ${to}, subject: ${subject}`);
+	console.log(`[Auth Debug] RESEND_API_KEY length: ${process.env["RESEND_API_KEY"]?.length}, SMTP_HOST: ${process.env["SMTP_HOST"]}`);
 
 	// Configure Nodemailer for permanent robust email delivery
 	// Users can provide SMTP credentials in .env.local
-	const transporter = process.env.SMTP_HOST
+	const transporter = process.env["SMTP_HOST"]
 		? nodemailer.createTransport({
-				host: process.env.SMTP_HOST,
-				port: Number(process.env.SMTP_PORT) || 587,
-				secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+				host: process.env["SMTP_HOST"],
+				port: Number(process.env["SMTP_PORT"]) || 587,
+				secure: process.env["SMTP_SECURE"] === "true", // true for 465, false for other ports
 				auth: {
-					user: process.env.SMTP_USER,
-					pass: process.env.SMTP_PASSWORD,
+					user: process.env["SMTP_USER"],
+					pass: process.env["SMTP_PASSWORD"],
 				},
 			})
 		: null;
@@ -36,9 +38,9 @@ async function sendEmail({
 		return;
 	}
 
-	if (process.env.RESEND_API_KEY) {
+	if (process.env["RESEND_API_KEY"]) {
 		console.log(`[Auth] Sending email via Resend to ${to} from ${from}`);
-		const resendClient = new Resend(process.env.RESEND_API_KEY);
+		const resendClient = new Resend(process.env["RESEND_API_KEY"]);
 		const { data, error } = await resendClient.emails.send({
 			from,
 			to,
