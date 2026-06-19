@@ -471,7 +471,7 @@ resource "google_cloud_run_v2_service" "web" {
 resource "google_cloud_run_v2_service" "generative_studio" {
   name     = "lazynext-gen-studio-${var.environment}"
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.cloud_run.email
@@ -546,7 +546,7 @@ resource "google_cloud_run_v2_service" "generative_studio" {
 resource "google_cloud_run_v2_service" "render_service" {
   name     = "lazynext-render-${var.environment}"
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.cloud_run.email
@@ -606,7 +606,7 @@ resource "google_cloud_run_v2_service" "render_service" {
 resource "google_cloud_run_v2_service" "ai_agents" {
   name     = "lazynext-ai-agents-${var.environment}"
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.cloud_run.email
@@ -679,7 +679,7 @@ resource "google_cloud_run_v2_service" "ai_agents" {
 resource "google_cloud_run_v2_service" "pre_processing" {
   name     = "lazynext-pre-processing-${var.environment}"
   location = var.region
-  ingress  = "INGRESS_TRAFFIC_INTERNAL_ONLY"
+  ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.cloud_run.email
@@ -744,6 +744,34 @@ resource "google_cloud_run_v2_service" "pre_processing" {
 resource "google_cloud_run_v2_service_iam_member" "web_public" {
   name     = google_cloud_run_v2_service.web.name
   location = google_cloud_run_v2_service.web.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "gen_studio_public" {
+  name     = google_cloud_run_v2_service.generative_studio.name
+  location = google_cloud_run_v2_service.generative_studio.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "render_service_public" {
+  name     = google_cloud_run_v2_service.render_service.name
+  location = google_cloud_run_v2_service.render_service.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "ai_agents_public" {
+  name     = google_cloud_run_v2_service.ai_agents.name
+  location = google_cloud_run_v2_service.ai_agents.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_v2_service_iam_member" "pre_processing_public" {
+  name     = google_cloud_run_v2_service.pre_processing.name
+  location = google_cloud_run_v2_service.pre_processing.location
   role     = "roles/run.invoker"
   member   = "allUsers"
 }
