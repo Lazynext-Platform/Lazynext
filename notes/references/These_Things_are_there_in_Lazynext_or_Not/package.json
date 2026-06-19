@@ -102,5 +102,10 @@
 				"LEVEA_API_KEY"
 			]
 		}
+	},
+	"overrides": {
+		"undici": "latest",
+		"protobufjs": "latest",
+		"tar": "latest"
 	}
 }

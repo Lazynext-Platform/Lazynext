@@ -1,0 +1,34 @@
+logging {
+  level = "info"
+  format = "logfmt"
+}
+
+prometheus.scrape "docker_services" {
+  targets = [
+    {"__address__" = "pre-processing:8000"},
+    {"__address__" = "generative-studio:8001"},
+    {"__address__" = "ai-agents:8002"},
+    {"__address__" = "render-service:8003"},
+  ]
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+  }
+}
+
+loki.source.docker "default" {
+  host = "unix:///var/run/docker.sock"
+  targets = [
+    {"__address__" = "localhost"},
+  ]
+  forward_to = [loki.write.default.receiver]
+}
+
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

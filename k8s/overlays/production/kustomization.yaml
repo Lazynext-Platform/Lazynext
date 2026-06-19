@@ -4,10 +4,11 @@ kind: Kustomization
 namespace: lazynext
 
 resources:
-  - ../..
+  - ../../base
 
-commonLabels:
-  environment: production
+labels:
+  - pairs:
+      environment: production
 
 # Production-specific resource bumps + HPA
 patches:

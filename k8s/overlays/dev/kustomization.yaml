@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: lazynext-dev
 
 resources:
-  - ../..
+  - ../../base
 
 namePrefix: dev-
 

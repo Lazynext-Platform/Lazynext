@@ -772,9 +772,9 @@ resource "google_monitoring_alert_policy" "web_error_rate" {
   conditions {
     display_name = "5xx error rate > 5%"
     condition_threshold {
-      filter     = "resource.type = \"cloud_run_revision\" AND resource.labels.service_name = \"${google_cloud_run_v2_service.web.name}\" AND metric.type = \"run.googleapis.com/request_count\" AND metric.labels.response_code_class = \"5xx\""
-      duration   = "300s"
-      comparison = "COMPARISON_GT"
+      filter          = "resource.type = \"cloud_run_revision\" AND resource.labels.service_name = \"${google_cloud_run_v2_service.web.name}\" AND metric.type = \"run.googleapis.com/request_count\" AND metric.labels.response_code_class = \"5xx\""
+      duration        = "300s"
+      comparison      = "COMPARISON_GT"
       threshold_value = 0.05
 
       trigger {
@@ -994,7 +994,7 @@ resource "google_cloud_scheduler_job" "db_backup" {
     body = base64encode(jsonencode({
       steps = [
         {
-          name = "postgres:17-alpine"
+          name       = "postgres:17-alpine"
           entrypoint = "sh"
           args = [
             "-c",

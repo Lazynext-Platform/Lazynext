@@ -246,3 +246,20 @@ jobs:
           file: ./services/generative-studio/Dockerfile
           push: true
           tags: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
+
+  deploy-k8s:
+    name: Deploy — Kubernetes
+    needs: docker-deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Kubectl
+        uses: azure/setup-kubectl@v3
+      - name: Deploy to Cluster
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DATA }}
+        run: |
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
+          kubectl kustomize k8s/overlays/production | kubectl apply -f -

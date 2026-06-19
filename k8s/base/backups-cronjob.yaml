@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: lazynext
+spec:
+  schedule: "0 3 * * *" # Run at 3 AM daily
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: pg-backup
+            image: postgres:17-alpine
+            command:
+            - /bin/sh
+            - -c
+            - |
+              pg_dump $DATABASE_URL > /backup/lazynext_$(date +%Y%m%d_%H%M%S).sql
+              # Add upload script here (e.g. to GCS using gsutil or AWS CLI for S3)
+            env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: DATABASE_URL
+            volumeMounts:
+            - name: backup-volume
+              mountPath: /backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup-volume
+            emptyDir: {}

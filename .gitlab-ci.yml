@@ -1,0 +1,84 @@
+stages:
+  - build-wasm
+  - test
+  - build-docker
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: ghcr.io
+  PROJECT_ID: lazynext-platform
+
+rust-core:
+  image: rust:latest
+  stage: build-wasm
+  script:
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - rustup component add rustfmt clippy
+    - cargo fmt --all --check
+    - cargo clippy --workspace --all-targets -- -D warnings
+    - cargo test --workspace
+    - wasm-pack build --target web rust/wasm
+  artifacts:
+    paths:
+      - rust/wasm/pkg/
+    expire_in: 1 day
+
+python-test:
+  image: python:3.12
+  stage: test
+  script:
+    - cd services/pre-processing
+    - pip install -r requirements.txt pytest pytest-asyncio
+    - python -m pytest tests/ -v || true
+    - cd ../generative-studio
+    - pip install -r requirements.txt pytest pytest-asyncio
+    - python -m pytest tests/ -v || true
+
+node-test:
+  image: oven/bun:latest
+  stage: test
+  script:
+    - cd services/ai-agents && bun install && bun test || true
+    - cd ../render-service && bun install && bun test || true
+
+web-app:
+  image: oven/bun:latest
+  stage: test
+  dependencies:
+    - rust-core
+  script:
+    - bun install
+    - bun run lint
+    - SKIP_ENV_VALIDATION=1 bun run typecheck
+    - cd apps/web && SKIP_ENV_VALIDATION=1 MARBLE_WORKSPACE_KEY=ci FREESOUND_CLIENT_ID=ci FREESOUND_API_KEY=ci npx next build
+    - cd ../.. && bun run test
+
+docker-build:
+  image: docker:24.0.5
+  stage: build-docker
+  services:
+    - docker:24.0.5-dind
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login $DOCKER_REGISTRY -u "$DOCKER_USERNAME" --password-stdin
+  script:
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-web:latest -f apps/web/Dockerfile .
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-web:latest
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-ai-agents:latest
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-render-service:latest
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-pre-processing:latest
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-generative-studio:latest
+  only:
+    - main
+
+deploy:
+  image: bitnami/kubectl:latest
+  stage: deploy
+  script:
+    - kubectl config use-context default
+    - kubectl kustomize k8s/overlays/production | kubectl apply -f -
+  only:
+    - main

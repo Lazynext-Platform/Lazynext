@@ -3,10 +3,12 @@ FROM oven/bun:1.3 AS wasm-builder
 
 WORKDIR /wasm
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential \
-    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable \
+ENV RUSTUP_HOME=/usr/local/rustup \
+    CARGO_HOME=/usr/local/cargo \
+    PATH=/usr/local/cargo/bin:$PATH
+RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential ca-certificates \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal \
     && rm -rf /var/lib/apt/lists/*
-ENV PATH="/root/.cargo/bin:${PATH}"
 RUN cargo install wasm-pack
 
 COPY rust/ /wasm/rust/
@@ -36,6 +38,9 @@ RUN bun install
 # Copy WASM artifact from stage 1 (replaces stub)
 COPY --from=wasm-builder /wasm/rust/wasm/pkg /app/rust/wasm/pkg
 
+# Re-run bun install to link the WASM module correctly now that the real package.json is present
+RUN bun install
+
 # Copy source
 COPY apps/web/ apps/web/
 COPY .env.example apps/web/.env.local
@@ -57,7 +62,7 @@ ENV NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
 ENV NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
 ENV NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
 
-RUN bun run build
+RUN bunx next build
 
 # ── Stage 3: Production runtime ──
 FROM oven/bun:1.3-slim AS runner
