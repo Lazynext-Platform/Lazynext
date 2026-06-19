@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
 		try {
 			const { error } = await forgetPassword({
 				email,
-				redirectTo: "/sign-in",
+				redirectTo: "/reset-password",
 			});
 			if (!error) {
 				setSent(true);

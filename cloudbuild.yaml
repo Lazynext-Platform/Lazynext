@@ -162,7 +162,7 @@ steps:
           --command "bun" \
           --args "run,apps/web/migrate.ts" \
           --set-secrets DATABASE_URL=DATABASE_URL:latest \
-          --service-account lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com \
+          --service-account ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
           --vpc-connector lazynext-vpc-connector-${_ENVIRONMENT} \
           --region us-central1 || true
 
@@ -194,7 +194,7 @@ steps:
       - "--vpc-connector"
       - "lazynext-vpc-connector-${_ENVIRONMENT}"
       - "--service-account"
-      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--allow-unauthenticated"
       - "--set-secrets"
       - "DATABASE_URL=DATABASE_URL:latest,BETTER_AUTH_SECRET=BETTER_AUTH_SECRET:latest"
@@ -218,7 +218,7 @@ steps:
       - "--timeout"
       - "300"
       - "--service-account"
-      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--no-allow-unauthenticated"
       - "--set-secrets"
       - "OPENAI_API_KEY=OPENAI_API_KEY:latest,ANTHROPIC_API_KEY=ANTHROPIC_API_KEY:latest"
@@ -242,7 +242,7 @@ steps:
       - "--timeout"
       - "900"
       - "--service-account"
-      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--no-allow-unauthenticated"
 
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -264,7 +264,7 @@ steps:
       - "--timeout"
       - "900"
       - "--service-account"
-      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--no-allow-unauthenticated"
       - "--set-secrets"
       - "OPENAI_API_KEY=OPENAI_API_KEY:latest"
@@ -288,7 +288,7 @@ steps:
       - "--timeout"
       - "900"
       - "--service-account"
-      - "lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com"
+      - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--no-allow-unauthenticated"
       - "--set-secrets"
       - "REPLICATE_API_TOKEN=REPLICATE_API_TOKEN:latest,ELEVENLABS_API_KEY=ELEVENLABS_API_KEY:latest"
