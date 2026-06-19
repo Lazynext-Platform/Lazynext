@@ -1,0 +1,13 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "build"
+      - "-t"
+      - "us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest-fix2"
+      - "-f"
+      - "apps/web/Dockerfile"
+      - "."
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - "push"
+      - "us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest-fix2"

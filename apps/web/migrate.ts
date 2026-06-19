@@ -5,9 +5,10 @@ import path from "path";
 
 const connectionString = process.env.DATABASE_URL || "postgresql://lazynext:password123@127.0.0.1:5434/lazynext_db";
 const isProd = process.env.NODE_ENV === "production";
+const isUnixSocket = connectionString.includes("%2Fcloudsql");
 const pool = new Pool({
   connectionString,
-  ssl: isProd ? { rejectUnauthorized: false } : undefined,
+  ssl: isProd && !isUnixSocket ? { rejectUnauthorized: false } : undefined,
 });
 const db = drizzle(pool);
 
