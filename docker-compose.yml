@@ -224,7 +224,7 @@ services:
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--enable-feature=remote-write-receiver'
+      - '--web.enable-remote-write-receiver'
     networks:
       - lazynext-network
     restart: unless-stopped
