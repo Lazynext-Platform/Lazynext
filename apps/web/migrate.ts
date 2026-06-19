@@ -2,7 +2,8 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 
-const pool = new Pool({ connectionString: "postgresql://lazynext:password123@127.0.0.1:5434/lazynext_db" });
+const connectionString = process.env.DATABASE_URL || "postgresql://lazynext:password123@127.0.0.1:5434/lazynext_db";
+const pool = new Pool({ connectionString });
 const db = drizzle(pool);
 
 async function main() {
@@ -12,4 +13,7 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
