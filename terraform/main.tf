@@ -848,7 +848,7 @@ resource "google_kms_crypto_key" "db_cmek" {
   }
 
   lifecycle {
-    prevent_destroy = var.environment == "production"
+    prevent_destroy = true
   }
 }
 

@@ -15,7 +15,6 @@ resources:
   - autoscaling.yaml
   - budgets.yaml
   - backups.yaml
-  - backups-cronjob.yaml
   - monitoring.yaml
   - gpu.yaml
   - redis-configmap.yaml
