@@ -212,6 +212,18 @@ resource "google_secret_manager_secret_version" "database_url" {
   secret_data = "postgresql://lazynext_app:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/lazynext"
 }
 
+resource "google_secret_manager_secret" "db_password" {
+  secret_id = "DB_PASSWORD"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "db_password" {
+  secret      = google_secret_manager_secret.db_password.id
+  secret_data = var.db_password
+}
+
 resource "google_secret_manager_secret" "better_auth_secret" {
   secret_id = "BETTER_AUTH_SECRET"
   replication {
@@ -884,7 +896,7 @@ resource "google_cloud_run_v2_service" "pgbouncer" {
       name  = "pgbouncer"
 
       ports {
-        container_port = 6432
+        container_port = 5432
       }
 
       resources {
@@ -910,7 +922,7 @@ resource "google_cloud_run_v2_service" "pgbouncer" {
         name = "DB_PASSWORD"
         value_source {
           secret_key_ref {
-            secret  = google_secret_manager_secret.database_url.secret_id
+            secret  = google_secret_manager_secret.db_password.secret_id
             version = "latest"
           }
         }
