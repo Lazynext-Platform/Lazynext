@@ -27,9 +27,13 @@ COPY apps/web/package.json apps/web/package.json
 COPY biome.json .
 COPY eslint.config.mjs .
 
+# Create stub package.json for WASM workspace so bun install resolves
+RUN mkdir -p /app/rust/wasm/pkg && \
+    echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > /app/rust/wasm/pkg/package.json
+
 RUN bun install
 
-# Copy WASM artifact from stage 1
+# Copy WASM artifact from stage 1 (replaces stub)
 COPY --from=wasm-builder /wasm/rust/wasm/pkg /app/rust/wasm/pkg
 
 # Copy source
