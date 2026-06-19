@@ -139,6 +139,7 @@ steps:
           --args "run,apps/web/migrate.ts" \
           --set-secrets DATABASE_URL=DATABASE_URL:latest \
           --service-account lazynext-cloud-run-${_ENVIRONMENT}@${PROJECT_ID}.iam.gserviceaccount.com \
+          --vpc-connector lazynext-vpc-connector-${_ENVIRONMENT} \
           --region us-central1 || true
 
         gcloud run jobs execute lazynext-db-migrate-${SHORT_SHA} --region us-central1 --wait
