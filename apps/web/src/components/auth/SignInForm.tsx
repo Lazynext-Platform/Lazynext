@@ -57,12 +57,20 @@ export function SignInForm() {
 				/>
 			</div>
 			<div>
-				<label
-					htmlFor="password"
-					className="mb-1 block text-xs font-medium text-zinc-400"
-				>
-					Password
-				</label>
+				<div className="mb-1 flex items-center justify-between">
+					<label
+						htmlFor="password"
+						className="block text-xs font-medium text-zinc-400"
+					>
+						Password
+					</label>
+					<Link
+						href="/forgot-password"
+						className="text-xs text-blue-400 hover:text-blue-300"
+					>
+						Forgot password?
+					</Link>
+				</div>
 				<input
 					id="password"
 					type="password"
