@@ -19,6 +19,7 @@ resource "google_project_service" "apis" {
     "iam.googleapis.com",
     "cloudkms.googleapis.com",
     "servicenetworking.googleapis.com",
+    "cloudscheduler.googleapis.com",
   ])
 
   project = var.project_id
@@ -879,7 +880,8 @@ resource "google_cloud_run_v2_service" "pgbouncer" {
     service_account = google_service_account.cloud_run.email
 
     containers {
-      image = "edoburu/pgbouncer:1.22.0"
+      image = "edoburu/pgbouncer:latest"
+      name  = "pgbouncer"
 
       ports {
         container_port = 6432
@@ -1120,7 +1122,6 @@ resource "google_compute_managed_ssl_certificate" "web_cert" {
 resource "google_compute_backend_service" "web_backend" {
   name        = "lazynext-backend-${var.environment}"
   protocol    = "HTTPS"
-  timeout_sec = 300
 
   backend {
     group = google_compute_region_network_endpoint_group.web_neg.id
