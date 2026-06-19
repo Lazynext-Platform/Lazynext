@@ -639,6 +639,18 @@ resource "google_cloud_run_v2_service" "ai_agents" {
         name  = "NODE_ENV"
         value = "production"
       }
+      env {
+        name  = "PRE_PROCESSING_URL"
+        value = google_cloud_run_v2_service.pre_processing.uri
+      }
+      env {
+        name  = "GENERATIVE_STUDIO_URL"
+        value = google_cloud_run_v2_service.generative_studio.uri
+      }
+      env {
+        name  = "RENDER_SERVICE_URL"
+        value = google_cloud_run_v2_service.render_service.uri
+      }
 
       env {
         name = "OPENAI_API_KEY"
@@ -1289,4 +1301,60 @@ output "load_balancer_ip" {
 output "backup_bucket" {
   description = "Name of the backup storage bucket"
   value       = google_storage_bucket.backups.name
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Workload Identity Federation (GitHub Actions CI/CD)
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_service_account" "github_actions" {
+  account_id   = "github-actions-deploy"
+  display_name = "Service Account for GitHub Actions CI/CD"
+  project      = var.project_id
+}
+
+resource "google_project_iam_member" "github_actions_owner" {
+  project = var.project_id
+  role    = "roles/owner"
+  member  = "serviceAccount:${google_service_account.github_actions.email}"
+}
+
+resource "google_iam_workload_identity_pool" "github_actions_pool" {
+  workload_identity_pool_id = "github-actions-pool"
+  display_name              = "GitHub Actions Pool"
+  description               = "Identity pool for GitHub Actions CI/CD deployments"
+}
+
+resource "google_iam_workload_identity_pool_provider" "github_actions_provider" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.github_actions_pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "github-actions-provider"
+  display_name                       = "GitHub Actions Provider"
+  description                        = "OIDC identity pool provider for automated deployments"
+
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.repository" = "assertion.repository"
+  }
+
+  attribute_condition = "attribute.repository == \"Lazynext-Platform/Lazynext\""
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
+resource "google_service_account_iam_member" "github_actions_impersonation" {
+  service_account_id = google_service_account.github_actions.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.github_actions_pool.name}/attribute.repository/Lazynext-Platform/Lazynext"
+}
+
+output "github_actions_service_account_email" {
+  description = "The service account email for GitHub Actions to impersonate"
+  value       = google_service_account.github_actions.email
+}
+
+output "workload_identity_provider_name" {
+  description = "The Workload Identity Provider ID for GitHub Actions"
+  value       = google_iam_workload_identity_pool_provider.github_actions_provider.name
 }

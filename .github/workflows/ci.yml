@@ -14,6 +14,7 @@ env:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 jobs:
   rust-core:
@@ -179,15 +180,21 @@ jobs:
         with:
           submodules: false
 
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker Auth
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download WASM Package (for Docker)
         uses: actions/download-artifact@v4
@@ -213,7 +220,7 @@ jobs:
           context: .
           file: ./apps/web/Dockerfile
           push: true
-          tags: ghcr.io/lazynext-platform/lazynext-web:latest
+          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest
 
       - name: Build and Push AI Agents
         uses: docker/build-push-action@v6
@@ -221,7 +228,7 @@ jobs:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
           push: true
-          tags: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
+          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest
 
       - name: Build and Push Render Service
         uses: docker/build-push-action@v6
@@ -229,7 +236,7 @@ jobs:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
           push: true
-          tags: ghcr.io/lazynext-platform/lazynext-render-service:latest
+          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service:latest
 
       - name: Build and Push Pre-Processing
         uses: docker/build-push-action@v6
@@ -237,7 +244,7 @@ jobs:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
           push: true
-          tags: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
+          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing:latest
 
       - name: Build and Push Generative Studio
         uses: docker/build-push-action@v6
@@ -245,5 +252,34 @@ jobs:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
           push: true
-          tags: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
+          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-generative-studio:latest
+
+  terraform-deploy:
+    name: Terraform — Deploy Infrastructure
+    needs: docker-deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
 
