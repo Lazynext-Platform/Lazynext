@@ -1,26 +1,36 @@
-import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
-import path from "path";
-
-const connectionString = process.env.DATABASE_URL || "postgresql://lazynext:password123@127.0.0.1:5434/lazynext_db";
-const isProd = process.env.NODE_ENV === "production";
-const isUnixSocket = connectionString.includes("%2Fcloudsql");
-const pool = new Pool({
-  connectionString,
-  ssl: isProd && !isUnixSocket ? { rejectUnauthorized: false } : undefined,
-});
-const db = drizzle(pool);
 
 async function main() {
-  const migrationsFolder = path.join(__dirname, "drizzle");
-  console.log(`Migrating using folder: ${migrationsFolder}...`);
-  await migrate(db, { migrationsFolder });
-  console.log("Done!");
+  const connectionString = process.env.DATABASE_URL;
+  console.log("Probing database schema...");
+  
+  const isUnixSocket = connectionString?.includes("%2Fcloudsql");
+  const pool = new Pool({
+    connectionString,
+    ssl: !isUnixSocket ? { rejectUnauthorized: false } : undefined,
+  });
+
+  try {
+    const res = await pool.query(`
+      SELECT column_name, data_type 
+      FROM information_schema.columns 
+      WHERE table_name = 'projects';
+    `);
+    console.log("PROJECTS TABLE COLUMNS:", res.rows);
+    
+    // Also try doing the exact query
+    try {
+      await pool.query('select "id", "user_id", "name", "fps", "width", "height", "duration_frames", "data", "created_at", "updated_at" from "projects" limit 1');
+      console.log("QUERY SUCCESS!");
+    } catch(err: any) {
+      console.error("QUERY ERROR:", err.message);
+    }
+
+  } catch (err) {
+    console.error("PROBE ERROR:", err);
+  }
+  
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Migration failed:", err);
-  process.exit(1);
-});
+main();

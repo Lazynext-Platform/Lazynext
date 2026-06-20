@@ -77,7 +77,7 @@ export default function FeedPage() {
 		<div className="w-full h-[calc(100vh-73px)] flex overflow-hidden bg-transparent pt-10">
 			{/* Desktop Sidebar Navigation */}
 			<div className="hidden lg:flex flex-col gap-8 w-[250px] ml-6 h-[calc(100%-40px)] glass-panel p-6 shadow-2xl relative z-10">
-				<h1 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+				<h1 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-black to-black/70 dark:from-white dark:to-white/70">
 					LAZYNEXT<span className="text-cyan-500">.</span>
 				</h1>
 
