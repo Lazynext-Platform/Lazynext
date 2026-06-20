@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Film } from "lucide-react";
 import Image from "next/image";
+import { ThemeToggle } from "../theme-toggle";
 
 export function MarketingNavbar() {
 	return (
@@ -46,6 +47,7 @@ export function MarketingNavbar() {
 				</div>
 
 				<div className="flex items-center gap-4">
+					<ThemeToggle className="size-10 [&>svg]:size-5" />
 					<Link
 						href="/sign-in"
 						className="px-6 py-2 bg-hover hover:bg-glass text-foreground font-medium rounded-xl border border-border transition-colors"
