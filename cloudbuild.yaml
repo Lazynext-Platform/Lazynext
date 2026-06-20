@@ -163,7 +163,7 @@ steps:
           --args "run,apps/web/migrate.ts" \
           --set-secrets DATABASE_URL=DATABASE_URL:latest \
           --service-account ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
-          --vpc-connector lazynext-vpc-connector-${_ENVIRONMENT} \
+          --vpc-connector lazynext-vpc-con-${_ENVIRONMENT} \
           --region us-central1 || true
 
         gcloud run jobs execute lazynext-db-migrate-${SHORT_SHA} --region us-central1 --wait
@@ -192,7 +192,7 @@ steps:
       - "--concurrency"
       - "80"
       - "--vpc-connector"
-      - "lazynext-vpc-connector-${_ENVIRONMENT}"
+      - "lazynext-vpc-con-${_ENVIRONMENT}"
       - "--service-account"
       - "${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
       - "--allow-unauthenticated"
