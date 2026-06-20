@@ -22,10 +22,18 @@ export async function GET(req: Request) {
 			.orderBy(desc(projects.updatedAt));
 
 		return NextResponse.json({ projects: userProjects });
-	} catch (error) {
-		console.error("GET /api/projects error:", error);
+	} catch (error: any) {
+		const errMsg = error?.message || String(error);
+		const errStack = error?.stack || "";
+		// Structured JSON log so Cloud Logging captures it
+		console.log(JSON.stringify({
+			severity: "ERROR",
+			message: `GET /api/projects error: ${errMsg}`,
+			stack: errStack,
+			code: error?.code,
+		}));
 		return NextResponse.json(
-			{ error: "Internal Server Error" },
+			{ error: "Internal Server Error", detail: errMsg },
 			{ status: 500 },
 		);
 	}
@@ -96,10 +104,18 @@ export async function POST(req: Request) {
 		]);
 
 		return NextResponse.json({ success: true, projectId });
-	} catch (error) {
-		console.error("POST /api/projects error:", error);
+	} catch (error: any) {
+		const errMsg = error?.message || String(error);
+		const errStack = error?.stack || "";
+		// Structured JSON log so Cloud Logging captures it
+		console.log(JSON.stringify({
+			severity: "ERROR",
+			message: `POST /api/projects error: ${errMsg}`,
+			stack: errStack,
+			code: error?.code,
+		}));
 		return NextResponse.json(
-			{ error: "Internal Server Error" },
+			{ error: "Internal Server Error", detail: errMsg },
 			{ status: 500 },
 		);
 	}
