@@ -179,10 +179,6 @@ export function Header() {
 						<ThemeToggle
 							className="absolute right-8 bottom-8 size-10"
 							iconClassName="!size-[1.2rem]"
-							onToggle={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-							}}
 						/>
 					</div>
 				</div>
