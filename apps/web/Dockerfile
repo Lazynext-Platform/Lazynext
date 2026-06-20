@@ -64,6 +64,9 @@ ENV NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
 
 RUN bunx next build
 
+# Bundle the migration script so it doesn't rely on Next.js standalone node_modules
+RUN bun build apps/web/migrate.ts --target=bun --outfile=apps/web/migrate.js
+
 # ── Stage 3: Production runtime ──
 FROM oven/bun:1.3-slim AS runner
 
@@ -86,7 +89,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/rust/wasm/pkg ./rust/wasm/pkg
 # Copy drizzle migrations for runtime DB operations
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/drizzle ./apps/web/drizzle
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/migrations ./apps/web/migrations
-COPY --from=builder --chown=nextjs:nodejs /app/apps/web/migrate.ts ./apps/web/migrate.ts
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/migrate.js ./apps/web/migrate.js
 
 USER nextjs
 

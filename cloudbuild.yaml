@@ -160,7 +160,7 @@ steps:
           --image us-central1-docker.pkg.dev/${PROJECT_ID}/lazynext/lazynext-web:${SHORT_SHA} \
           --region us-central1 \
           --command "bun" \
-          --args "run,apps/web/migrate.ts" \
+          --args "run,apps/web/migrate.js" \
           --set-secrets DATABASE_URL=DATABASE_URL:latest \
           --service-account ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
           --vpc-connector lazynext-vpc-con-${_ENVIRONMENT} \
