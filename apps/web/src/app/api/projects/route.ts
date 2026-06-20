@@ -77,6 +77,7 @@ export async function POST(req: Request) {
 		await db.insert(tracks).values([
 			{
 				id: trackVideoId,
+				projectId,
 				timelineId,
 				name: "Video 1",
 				type: "video",
@@ -84,6 +85,7 @@ export async function POST(req: Request) {
 			},
 			{
 				id: trackAudioId,
+				projectId,
 				timelineId,
 				name: "Audio 1",
 				type: "audio",

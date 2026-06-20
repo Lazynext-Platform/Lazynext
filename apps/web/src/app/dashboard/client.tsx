@@ -78,6 +78,9 @@ export function DashboardClient() {
 			const data = await res.json();
 			if (data.success) {
 				router.push(`/editor/${data.projectId}`);
+			} else {
+				console.error("API error:", data);
+				setIsCreating(false);
 			}
 		} catch (err) {
 			console.error(err);
