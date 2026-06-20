@@ -5,7 +5,7 @@ import { Sparkles, Zap, Users, Cpu } from "lucide-react";
 
 export default function Home() {
 	return (
-		<div className="min-h-screen bg-neutral-950 text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+		<div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
 			<MarketingNavbar />
 
 			<main>
@@ -29,7 +29,7 @@ export default function Home() {
 							Video Editor.
 						</h1>
 
-						<p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto mb-12">
+						<p className="text-xl md:text-2xl text-muted max-w-3xl mx-auto mb-12">
 							Say goodbye to Premiere, DaVinci, CapCut, and Descript. No more
 							manual timelines or keyframes. Just type or speak in simple
 							language, and our Agentic AI will completely edit the video for
@@ -39,13 +39,13 @@ export default function Home() {
 						<div className="flex flex-col sm:flex-row items-center justify-center gap-4">
 							<Link
 								href="/editor"
-								className="w-full sm:w-auto px-8 py-4 bg-white text-black font-semibold rounded-2xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(255,255,255,0.2)]"
+								className="w-full sm:w-auto px-8 py-4 bg-foreground text-background font-semibold rounded-2xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(0,0,0,0.1)] dark:shadow-[0_0_40px_rgba(255,255,255,0.2)]"
 							>
 								Start Editing with AI
 							</Link>
 							<Link
 								href="/billing"
-								className="w-full sm:w-auto px-8 py-4 bg-neutral-900 border border-neutral-800 text-foreground font-semibold rounded-2xl hover:bg-neutral-800 transition-colors"
+								className="w-full sm:w-auto px-8 py-4 bg-panel border border-border text-foreground font-semibold rounded-2xl hover:bg-hover transition-colors"
 							>
 								View Pro Plans
 							</Link>
@@ -69,7 +69,7 @@ export default function Home() {
 								<h3 className="text-xl font-bold mb-3">
 									Text & Voice Commands
 								</h3>
-								<p className="text-neutral-400">
+								<p className="text-muted">
 									Just type or speak. No need to learn complicated manual
 									editing tools. Our Agentic engine understands plain language
 									and executes complex video edits instantly.
@@ -84,7 +84,7 @@ export default function Home() {
 								<h3 className="text-xl font-bold mb-3">
 									Real-Time Multiplayer
 								</h3>
-								<p className="text-neutral-400">
+								<p className="text-muted">
 									Figma for video. Thanks to our custom LWW CRDT networking
 									layer, you can edit the exact same timeline simultaneously
 									with your colleagues across the globe.
@@ -97,7 +97,7 @@ export default function Home() {
 									<Cpu className="w-6 h-6" />
 								</div>
 								<h3 className="text-xl font-bold mb-3">Autonomous AI Agents</h3>
-								<p className="text-neutral-400">
+								<p className="text-muted">
 									Stop looking for B-Roll. The Visionary and Chronos AI agents
 									analyze your timeline structure and proactively orchestrate
 									the Render Farm to generate missing assets.
