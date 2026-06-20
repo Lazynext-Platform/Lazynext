@@ -5,6 +5,11 @@ global:
 rule_files:
   - "/etc/prometheus/slos.yaml"
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
 scrape_configs:
   - job_name: "prometheus"
     static_configs:
@@ -21,3 +26,12 @@ scrape_configs:
   - job_name: "render-service"
     static_configs:
       - targets: ["render-service:8003"]
+
+  - job_name: "pre-processing"
+    static_configs:
+      - targets: ["pre-processing:8000"]
+
+  - job_name: "generative-studio"
+    static_configs:
+      - targets: ["generative-studio:8001"]
+
