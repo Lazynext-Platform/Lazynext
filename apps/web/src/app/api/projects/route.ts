@@ -82,6 +82,7 @@ export async function POST(req: Request) {
 				name: "Video 1",
 				type: "video",
 				zIndex: 1,
+				order: 1,
 			},
 			{
 				id: trackAudioId,
@@ -90,6 +91,7 @@ export async function POST(req: Request) {
 				name: "Audio 1",
 				type: "audio",
 				zIndex: 0,
+				order: 0,
 			},
 		]);
 
