@@ -65,7 +65,7 @@ ENV NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
 RUN bunx next build
 
 # Bundle the migration script so it doesn't rely on Next.js standalone node_modules
-RUN bun build apps/web/migrate.ts --target=bun --outfile=apps/web/migrate.js
+RUN bun build migrate.ts --target=bun --outfile=migrate.js
 
 # ── Stage 3: Production runtime ──
 FROM oven/bun:1.3-slim AS runner
