@@ -61,6 +61,7 @@ variable "better_auth_secret" {
   description = "Secret key for Better Auth (64+ chars recommended)"
   type        = string
   sensitive   = true
+  default     = ""
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
