@@ -108,3 +108,17 @@ variable "resend_api_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "openai_api_key" {
+  description = "API key for OpenAI (Whisper transcription, GPT)."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "anthropic_api_key" {
+  description = "API key for Anthropic (Claude — Chronos Copilot)."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
