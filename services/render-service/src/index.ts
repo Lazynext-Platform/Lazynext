@@ -179,9 +179,13 @@ app.get("/health", (_req, res) => {
 
 const PORT = process.env.PORT || 8003;
 
-app.listen(PORT, () => {
-	console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
-	console.log(
-		`📡 Accepting FFMPEG / DCP / AAF commands via REST & Server-Sent Events`,
-	);
-});
+if (import.meta.main) { 
+	app.listen(PORT, () => {
+		console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
+		console.log(
+			`📡 Accepting FFMPEG / DCP / AAF commands via REST & Server-Sent Events`,
+		);
+	});
+}
+
+export default app;
