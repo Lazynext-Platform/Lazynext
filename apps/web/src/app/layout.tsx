@@ -4,7 +4,7 @@ import "../globals.css";
 import { Toaster } from "../components/ui/sonner";
 import { ChangelogNotification } from "@/changelog/components/changelog-notification";
 import { TooltipProvider } from "../components/ui/tooltip";
-import { BotIdClient } from "botid/client";
+
 import { Inter } from "next/font/google";
 import { OrganizationLD, SoftwareAppLD, WebSiteLD } from "@/seo/SchemaOrg";
 import { generateMetadata } from "@/seo/metadata";
@@ -16,7 +16,7 @@ const siteFont = Inter({ subsets: ["latin"] });
 
 export const metadata = generateMetadata({});
 
-const protectedRoutes = [{ path: "/none", method: "GET" }];
+
 
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 
@@ -26,7 +26,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
-				<BotIdClient protect={protectedRoutes} />
+
 				<OrganizationLD />
 				<SoftwareAppLD />
 				<WebSiteLD />
