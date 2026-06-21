@@ -106,6 +106,10 @@ resource "google_vpc_access_connector" "connector" {
   min_instances = 2
   max_instances = 10
 
+  lifecycle {
+    ignore_changes = [max_throughput]
+  }
+
   depends_on = [google_project_service.apis]
 }
 
