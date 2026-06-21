@@ -296,5 +296,4 @@ jobs:
 
       - name: Run Database Migrations
         run: |
-          BETTER_AUTH_SECRET=$(gcloud secrets versions access latest --secret="BETTER_AUTH_SECRET")
-          curl -s -v -H "Authorization: Bearer $BETTER_AUTH_SECRET" "https://lazynext.com/api/migrate?cb=$RANDOM"
+          curl -s -v -H "Authorization: Bearer temp-migration-token-123" "https://lazynext-web-dev-tt4wmaqnzq-uc.a.run.app/api/migrate?cb=$RANDOM"
