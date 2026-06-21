@@ -245,7 +245,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:3.0.0
+    image: grafana/loki:3.4.2
     ports:
       - "3100:3100"
     volumes:
@@ -270,7 +270,7 @@ services:
     restart: unless-stopped
 
   alloy:
-    image: grafana/alloy:v1.0.0
+    image: grafana/alloy:v1.8.0
     ports:
       - "12345:12345"
     volumes:
