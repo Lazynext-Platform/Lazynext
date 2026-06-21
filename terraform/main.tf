@@ -217,6 +217,9 @@ resource "google_secret_manager_secret" "database_url" {
 resource "google_secret_manager_secret_version" "database_url" {
   secret      = google_secret_manager_secret.database_url.id
   secret_data = "postgresql://lazynext_app:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/lazynext"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "db_password" {
