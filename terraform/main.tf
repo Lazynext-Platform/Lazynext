@@ -1190,7 +1190,7 @@ resource "google_compute_global_address" "web_lb" {
 }
 
 resource "google_compute_managed_ssl_certificate" "web_cert" {
-  name = "lazynext-cert-${var.environment}-v2"
+  name = "lazynext-cert-${var.environment}-v3"
 
   managed {
     domains = [
@@ -1199,7 +1199,9 @@ resource "google_compute_managed_ssl_certificate" "web_cert" {
     ]
   }
 
-  depends_on = [google_project_service.apis]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_backend_service" "web_backend" {
