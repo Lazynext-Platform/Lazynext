@@ -199,9 +199,6 @@ resource "google_sql_user" "app_user" {
   name     = "lazynext_app"
   instance = google_sql_database_instance.postgres.name
   password = var.db_password
-  lifecycle {
-    ignore_changes = [password]
-  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
