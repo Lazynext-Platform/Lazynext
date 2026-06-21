@@ -199,6 +199,9 @@ resource "google_sql_user" "app_user" {
   name     = "lazynext_app"
   instance = google_sql_database_instance.postgres.name
   password = var.db_password
+  lifecycle {
+    ignore_changes = [password]
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -226,6 +229,9 @@ resource "google_secret_manager_secret" "db_password" {
 resource "google_secret_manager_secret_version" "db_password" {
   secret      = google_secret_manager_secret.db_password.id
   secret_data = var.db_password
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "better_auth_secret" {
@@ -238,6 +244,9 @@ resource "google_secret_manager_secret" "better_auth_secret" {
 resource "google_secret_manager_secret_version" "better_auth_secret" {
   secret      = google_secret_manager_secret.better_auth_secret.id
   secret_data = var.better_auth_secret
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "replicate_api_token" {
@@ -250,6 +259,9 @@ resource "google_secret_manager_secret" "replicate_api_token" {
 resource "google_secret_manager_secret_version" "replicate_api_token" {
   secret      = google_secret_manager_secret.replicate_api_token.id
   secret_data = var.replicate_api_token != "" ? var.replicate_api_token : "mock-token"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "elevenlabs_api_key" {
@@ -262,6 +274,9 @@ resource "google_secret_manager_secret" "elevenlabs_api_key" {
 resource "google_secret_manager_secret_version" "elevenlabs_api_key" {
   secret      = google_secret_manager_secret.elevenlabs_api_key.id
   secret_data = var.elevenlabs_api_key != "" ? var.elevenlabs_api_key : "mock-key"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "openai_api_key" {
@@ -274,6 +289,9 @@ resource "google_secret_manager_secret" "openai_api_key" {
 resource "google_secret_manager_secret_version" "openai_api_key" {
   secret      = google_secret_manager_secret.openai_api_key.id
   secret_data = var.openai_api_key != "" ? var.openai_api_key : "mock-key"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "anthropic_api_key" {
@@ -286,6 +304,9 @@ resource "google_secret_manager_secret" "anthropic_api_key" {
 resource "google_secret_manager_secret_version" "anthropic_api_key" {
   secret      = google_secret_manager_secret.anthropic_api_key.id
   secret_data = var.anthropic_api_key != "" ? var.anthropic_api_key : "mock-key"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "stripe_secret_key" {
@@ -298,6 +319,9 @@ resource "google_secret_manager_secret" "stripe_secret_key" {
 resource "google_secret_manager_secret_version" "stripe_secret_key" {
   secret      = google_secret_manager_secret.stripe_secret_key.id
   secret_data = var.stripe_secret_key != "" ? var.stripe_secret_key : "mock-key"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 resource "google_secret_manager_secret" "resend_api_key" {
@@ -310,6 +334,9 @@ resource "google_secret_manager_secret" "resend_api_key" {
 resource "google_secret_manager_secret_version" "resend_api_key" {
   secret      = google_secret_manager_secret.resend_api_key.id
   secret_data = var.resend_api_key != "" ? var.resend_api_key : "mock-key"
+  lifecycle {
+    ignore_changes = [secret_data]
+  }
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

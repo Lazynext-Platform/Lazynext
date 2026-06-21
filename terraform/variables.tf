@@ -33,7 +33,7 @@ variable "db_password" {
   description = "Password for the PostgreSQL application user"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "db_tier" {
@@ -62,7 +62,7 @@ variable "better_auth_secret" {
   description = "Secret key for Better Auth (64+ chars recommended)"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -73,42 +73,42 @@ variable "replicate_api_token" {
   description = "API token for Replicate (AI video generation)"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "elevenlabs_api_key" {
   description = "API key for ElevenLabs (AI dubbing)"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "openai_api_key" {
   description = "API key for OpenAI (Whisper, GPT)"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "anthropic_api_key" {
   description = "API key for Anthropic (Claude — Chronos Copilot)"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "stripe_secret_key" {
   description = "Stripe secret key for payment processing"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 variable "resend_api_key" {
   description = "Resend API key for transactional email"
   type        = string
   sensitive   = true
-  default     = ""
+  default     = "UNSET_SECRET"
 }
 
 
