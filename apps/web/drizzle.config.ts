@@ -11,6 +11,6 @@ export default {
 	dbCredentials: {
 		url:
 			process.env.DATABASE_URL ||
-			"postgresql://lazynext:password123@localhost:5434/lazynext_db",
+			"postgresql://lazynext:password123@localhost:5434/lazynext",
 	},
 } satisfies Config;

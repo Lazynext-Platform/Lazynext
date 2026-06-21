@@ -1,33 +1,31 @@
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";
+import * as schema from "./src/db/schema.js";
+import path from "path";
 
 async function main() {
   const connectionString = process.env.DATABASE_URL;
-  console.log("Probing database schema...");
+  console.log("Connecting to database at:", connectionString?.replace(/:[^:@]+@/, ':***@'));
   
   const isUnixSocket = connectionString?.includes("%2Fcloudsql");
   const pool = new Pool({
     connectionString,
-    ssl: !isUnixSocket ? { rejectUnauthorized: false } : undefined,
+    ssl: process.env.NODE_ENV === "production" && !isUnixSocket ? { rejectUnauthorized: false } : undefined,
   });
 
-  try {
-    const res = await pool.query(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'projects';
-    `);
-    console.log("PROJECTS TABLE COLUMNS:", res.rows);
-    
-    // Also try doing the exact query
-    try {
-      await pool.query('select "id", "user_id", "name", "fps", "width", "height", "duration_frames", "data", "created_at", "updated_at" from "projects" limit 1');
-      console.log("QUERY SUCCESS!");
-    } catch(err: any) {
-      console.error("QUERY ERROR:", err.message);
-    }
+  const db = drizzle(pool, { schema });
 
+  try {
+    console.log("Running migrations...");
+    // Provide path to the migrations folder
+    // In production, this runs from the /app directory and the folder is in /app/apps/web/drizzle
+    const migrationsFolder = process.env.NODE_ENV === "production" ? path.join(process.cwd(), "apps/web/drizzle") : path.join(process.cwd(), "drizzle");
+    await migrate(db, { migrationsFolder });
+    console.log("Migrations complete!");
   } catch (err) {
-    console.error("PROBE ERROR:", err);
+    console.error("Migration error:", err);
+    process.exit(1);
   }
   
   process.exit(0);
