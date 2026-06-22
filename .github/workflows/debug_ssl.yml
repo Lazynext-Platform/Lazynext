@@ -13,7 +13,7 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: "projects/769665933727/locations/global/workloadIdentityPools/github/providers/github-provider"
+          workload_identity_provider: "projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider"
           service_account: "gha-deployer@vertexaiopencode.iam.gserviceaccount.com"
       - name: 'Set up Cloud SDK'
         uses: google-github-actions/setup-gcloud@v2
