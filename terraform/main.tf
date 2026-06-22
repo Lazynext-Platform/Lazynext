@@ -1190,7 +1190,7 @@ resource "google_compute_global_address" "web_lb" {
 }
 
 resource "google_compute_managed_ssl_certificate" "web_cert" {
-  name = "lazynext-cert-${var.environment}-v3"
+  name = "lazynext-cert-${var.environment}-v4"
 
   managed {
     domains = [

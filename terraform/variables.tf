@@ -55,7 +55,7 @@ variable "db_replica_tier" {
 variable "app_domain" {
   description = "The public domain of the Lazynext web app"
   type        = string
-  default     = "https://lazynext.ai"
+  default     = "https://lazynext.com"
 }
 
 variable "better_auth_secret" {
