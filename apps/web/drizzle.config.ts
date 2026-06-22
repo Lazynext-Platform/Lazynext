@@ -1,10 +1,10 @@
-import type { Config } from "drizzle-kit";
+import { defineConfig } from "drizzle-kit";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 dotenv.config(); // fallback to .env
 
-export default {
+export default defineConfig({
 	schema: "./src/db/schema.ts",
 	out: "./drizzle",
 	dialect: "postgresql",
@@ -13,4 +13,4 @@ export default {
 			process.env.DATABASE_URL ||
 			"postgresql://lazynext:password123@localhost:5434/lazynext",
 	},
-} satisfies Config;
+});
