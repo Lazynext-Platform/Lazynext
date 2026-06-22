@@ -2,7 +2,9 @@
 
 import { db } from "@/db";
 import { users, projects, timelines, tracks, clips } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
 // eslint-disable-next-line lazynext/prefer-object-params
 export async function createProject(userId: string, name: string) {
@@ -149,18 +151,45 @@ export async function getProject(projectId: string) {
 }
 
 export async function getAllProjects() {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	if (!session || !session.user) {
+		return [];
+	}
+
 	const allProjects = await db
 		.select()
 		.from(projects)
-		.orderBy(projects.updatedAt);
+		.where(eq(projects.userId, session.user.id))
+		.orderBy(desc(projects.updatedAt));
+
 	return allProjects.map((p) => {
-		if (p.data) {
-			return {
-				...p,
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-				...(p.data as object),
-			} as any;
-		}
-		return p as any;
+		const parsedData = p.data ? (p.data as any) : {};
+		
+		const metadata = parsedData.metadata || {
+			id: p.id,
+			name: p.name,
+			duration: 0,
+			createdAt: p.createdAt,
+			updatedAt: p.updatedAt,
+		};
+		
+		const scenes = parsedData.scenes || [];
+		
+		const settings = parsedData.settings || {
+			fps: p.fps,
+			canvasSize: { width: p.width, height: p.height },
+			background: { type: "color", color: "#000000" },
+		};
+
+		return {
+			...p,
+			...parsedData,
+			metadata,
+			scenes,
+			settings,
+		} as any;
 	});
 }
