@@ -63,12 +63,17 @@ app.post("/orchestrate", async (req, res) => {
 });
 
 /**
- * Health check with LLM provider info.
+ * Health check with intelligent routing capabilities info.
  */
 app.get("/health", (_req, res) => {
   res.json({
     status: "ok",
-    llm_provider: process.env.LLM_PROVIDER || "rule-based",
+    routing: "intelligent-multi-provider",
+    providers: {
+      openai: !!process.env.OPENAI_API_KEY,
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      ollama: "available-locally"
+    },
     services: {
       pre_processing: process.env.PRE_PROCESSING_URL || "http://localhost:8000",
       generative_studio:

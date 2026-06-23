@@ -52,6 +52,11 @@ mod crdt_wasm;
 pub use crdt_wasm::*;
 
 #[cfg(target_arch = "wasm32")]
+mod crdt_bridge;
+#[cfg(target_arch = "wasm32")]
+pub use crdt_bridge::*;
+
+#[cfg(target_arch = "wasm32")]
 mod export_wasm;
 #[cfg(target_arch = "wasm32")]
 pub use export_wasm::*;

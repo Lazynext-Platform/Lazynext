@@ -215,6 +215,40 @@ const LAZYNEXT_TOOLS = [
 			required: ["search_query"],
 		},
 	},
+	{
+		name: "generate_music",
+		description:
+			"Generates an AI background music track based on a genre and mood description.",
+		input_schema: {
+			type: "object" as const,
+			properties: {
+				prompt: {
+					type: "string",
+					description: "The description of the music (e.g. 'upbeat synthwave for a coding montage').",
+				},
+				duration_sec: {
+					type: "number",
+					description: "Duration of the requested audio track.",
+				},
+			},
+			required: ["prompt", "duration_sec"],
+		},
+	},
+	{
+		name: "apply_slow_motion",
+		description:
+			"Applies AI-based optical flow slow motion (like Twixtor) to the selected clip.",
+		input_schema: {
+			type: "object" as const,
+			properties: {
+				speed_factor: {
+					type: "number",
+					description: "The speed factor (e.g., 0.5 for half speed, 0.25 for quarter speed).",
+				},
+			},
+			required: ["speed_factor"],
+		},
+	},
 ];
 
 // ── Direct LLM Call (fallback when CLI binary isn't available) ──

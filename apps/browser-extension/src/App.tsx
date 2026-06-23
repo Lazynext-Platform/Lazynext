@@ -7,96 +7,91 @@ function App() {
 
   useEffect(() => {
     // Detect <video> elements on the current page
-    chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.id) {
-        chrome.scripting
-          .executeScript({
-            target: { tabId: tab.id },
-            func: () => {
-              const videos = document.querySelectorAll("video");
-              return Array.from(videos).map((v, i) => ({
-                id: `video-${i}`,
-                src: v.src || v.querySelector("source")?.src || "Embedded video",
-                currentTime: v.currentTime,
-                duration: v.duration,
-              }));
-            },
-          })
-          .then((results) => {
-            const data = results[0]?.result as
-              | Array<{ id: string; src: string }>
-              | undefined;
-            if (data && data.length > 0) {
-              setDetectedVideos(data.map((v: { src: string }) => v.src));
-            }
-          })
-          .catch(() => {
-            // No videos found or can't access page
-          });
+    (async () => {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (!tab?.id) return;
+
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => {
+            const videos = document.querySelectorAll("video");
+            return Array.from(videos).map((v, i) => ({
+              id: `video-${i}`,
+              src: v.src || v.querySelector("source")?.src || "Embedded video",
+              currentTime: v.currentTime,
+              duration: v.duration,
+            }));
+          },
+        });
+
+        const data = results[0]?.result as Array<{ id: string; src: string }> | undefined;
+        if (data && data.length > 0) {
+          setDetectedVideos(data.map((v: { src: string }) => v.src));
+        }
+      } catch (err) {
+        // No videos found or can't access page
       }
-    });
+    })();
   }, []);
 
   const handleImport = async (videoSrc: string) => {
     setImporting(true);
     setStatus(`Importing "${videoSrc.substring(0, 40)}..."`);
 
-    // Capture a thumbnail from the video
-    chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
-      if (tab?.id) {
-        chrome.scripting
-          .executeScript({
-            target: { tabId: tab.id },
-            func: (src) => {
-              const video = Array.from(document.querySelectorAll("video")).find(
-                (v) => v.src === src || v.querySelector(`source[src="${src}"]`),
-              );
-              if (video) {
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth || 640;
-                canvas.height = video.videoHeight || 360;
-                const ctx = canvas.getContext("2d");
-                if (ctx) {
-                  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                  return {
-                    thumbnailUrl: canvas.toDataURL("image/jpeg", 0.8),
-                    source: src,
-                    duration: video.duration,
-                    width: canvas.width,
-                    height: canvas.height,
-                  };
-                }
-              }
-              return null;
-            },
-            args: [videoSrc],
-          })
-          .then((results) => {
-            const capture = results[0]?.result as {
-              thumbnailUrl: string;
-              source: string;
-              duration: number;
-              width: number;
-              height: number;
-            } | null;
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) throw new Error("No active tab");
 
-            if (capture) {
-              // In production: send to Lazynext web app via REST API or postMessage
-              // POST /api/projects/{projectId}/import with the captured metadata
-              setStatus(
-                `✓ Captured ${capture.width}×${capture.height} frame. Open Lazynext to import.`,
-              );
-            } else {
-              setStatus("Could not capture — video may be DRM-protected.");
+      const results = await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: (src) => {
+          const video = Array.from(document.querySelectorAll("video")).find(
+            (v) => v.src === src || v.querySelector(`source[src="${src}"]`),
+          );
+          if (video) {
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 360;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              return {
+                thumbnailUrl: canvas.toDataURL("image/jpeg", 0.8),
+                source: src,
+                duration: video.duration,
+                width: canvas.width,
+                height: canvas.height,
+              };
             }
-            setImporting(false);
-          })
-          .catch(() => {
-            setStatus("Failed to access page. Try refreshing.");
-            setImporting(false);
-          });
+          }
+          return null;
+        },
+        args: [videoSrc],
+      });
+
+      const capture = results[0]?.result as {
+        thumbnailUrl: string;
+        source: string;
+        duration: number;
+        width: number;
+        height: number;
+      } | null;
+
+      if (capture) {
+        // In production: send to Lazynext web app via REST API or postMessage
+        // POST /api/projects/{projectId}/import with the captured metadata
+        setStatus(
+          `✓ Captured ${capture.width}×${capture.height} frame. Open Lazynext to import.`,
+        );
+      } else {
+        setStatus("Could not capture — video may be DRM-protected.");
       }
-    });
+    } catch (err) {
+      setStatus("Failed to access page. Try refreshing.");
+    } finally {
+      setImporting(false);
+    }
   };
 
   return (

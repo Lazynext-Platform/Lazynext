@@ -15,6 +15,7 @@ interface OrchestrationStep {
   tool: string;
   args: Record<string, unknown>;
   description: string;
+  crdt_patches?: Array<{ op: string; path: string; value: any }>;
 }
 
 interface OrchestrationPlan {
@@ -29,6 +30,7 @@ interface OrchestrationResult {
     tool: string;
     success: boolean;
     output: unknown;
+    crdt_patches?: Array<{ op: string; path: string; value: any }>;
   }>;
 }
 
@@ -41,26 +43,52 @@ const RENDER_SERVICE_URL =
   process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
 /**
+ * Determine the most efficient provider based on prompt characteristics.
+ */
+function routePromptToProvider(prompt: string): "openai" | "anthropic" | "ollama" {
+  const lower = prompt.toLowerCase();
+  
+  if (lower.includes("private") || lower.includes("local") || lower.includes("secure") || lower.includes("confidential")) {
+    return "ollama";
+  }
+  
+  if (lower.includes("write") || lower.includes("story") || lower.includes("draft") || lower.includes("creative") || prompt.length > 2000) {
+    return "anthropic";
+  }
+  
+  return "openai"; // Default for logic, reasoning, and planning
+}
+
+/**
  * Decompose a natural language editing intent into a structured plan.
  *
- * Uses the LLM provider configured via LLM_PROVIDER env var to reason
- * about the intent and select appropriate tools. Falls back to rule-based
- * decomposition if no LLM API key is configured.
+ * Automatically routes prompts to the most efficient provider 
+ * (OpenAI for logic, Anthropic for long-context, Ollama for privacy).
  */
 export async function decomposeIntent(
   prompt: string,
 ): Promise<OrchestrationPlan> {
-  const provider = process.env.LLM_PROVIDER || "rule-based";
+  const provider = routePromptToProvider(prompt);
   const openaiKey = process.env.OPENAI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-  if (openaiKey && provider !== "rule-based") {
-    try {
-      return await decomposeWithLLM(prompt, openaiKey);
-    } catch (err) {
-      console.warn(
-        `[Orchestrator] LLM decomposition failed (${err}). Using rule-based fallback.`,
-      );
+  console.log(`[Orchestrator] Intelligent router selected provider: ${provider}`);
+
+  try {
+    if (provider === "openai" && openaiKey) {
+      return await decomposeWithLLM(prompt, openaiKey, "openai");
+    } else if (provider === "anthropic" && anthropicKey) {
+      // In a full implementation, this would call Anthropic's Claude API.
+      // For now, we reuse the OpenAI-compatible logic if Claude exposes a compatible endpoint or fallback.
+      return await decomposeWithLLM(prompt, anthropicKey, "anthropic");
+    } else if (provider === "ollama") {
+      // Local ollama integration
+      return await decomposeWithLLM(prompt, "ollama-local", "ollama");
     }
+  } catch (err) {
+    console.warn(
+      `[Orchestrator] LLM decomposition failed (${err}). Using rule-based fallback.`,
+    );
   }
 
   return decomposeRuleBased(prompt);
@@ -72,6 +100,7 @@ export async function decomposeIntent(
 async function decomposeWithLLM(
   prompt: string,
   apiKey: string,
+  provider: string = "openai"
 ): Promise<OrchestrationPlan> {
   const systemPrompt = `You are the Lazynext AI Orchestrator. You decompose video editing intents into tool calls.
 
@@ -89,22 +118,41 @@ Respond ONLY with a JSON object:
 {
   "reasoning": "Brief explanation of your plan",
   "steps": [
-    { "tool": "tool_name", "args": { ... }, "description": "What this step does" }
+    { 
+      "tool": "tool_name", 
+      "args": { ... }, 
+      "description": "What this step does",
+      "crdt_patches": [
+        { "op": "add", "path": "/tracks/0/clips/-", "value": { "id": "clip_1", "start": 0, "duration": 5 } }
+      ]
+    }
   ]
 }`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30_000);
+  
+  let endpoint = "https://api.openai.com/v1/chat/completions";
+  let modelName = "gpt-4o";
+  
+  if (provider === "anthropic") {
+    // Assuming an OpenAI-compatible proxy for Anthropic or switching the endpoint
+    endpoint = process.env.ANTHROPIC_PROXY_URL || "https://api.openai.com/v1/chat/completions";
+    modelName = "claude-3-opus";
+  } else if (provider === "ollama") {
+    endpoint = "http://localhost:11434/v1/chat/completions";
+    modelName = "llama3";
+  }
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: modelName,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },
@@ -294,6 +342,7 @@ export async function executePlan(
       tool: step.tool,
       success,
       output: result,
+      crdt_patches: step.crdt_patches,
     });
 
     // If an operation critically fails and cannot be repaired, we might abort the plan

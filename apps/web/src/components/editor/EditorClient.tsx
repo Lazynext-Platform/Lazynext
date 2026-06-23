@@ -413,6 +413,41 @@ export default function EditorClient({ project }: { project: Project }) {
 				}
 			}
 
+			// Apply direct CRDT timeline patches from the AI orchestrator
+			if (data.crdt_patches && Array.isArray(data.crdt_patches)) {
+				setProjectData((prev) => {
+					let newProject = { ...prev };
+					for (const patch of data.crdt_patches) {
+						// Extremely basic implementation of JSON patch for demonstration
+						// In production, we'd use 'fast-json-patch' or similar CRDT library.
+						if (patch.op === "add" || patch.op === "replace") {
+							// Example path: "/tracks/0/clips/1/start_frame"
+							const parts = patch.path.split("/").filter(Boolean);
+							let target = newProject as any;
+							for (let i = 0; i < parts.length - 1; i++) {
+								if (!target[parts[i]]) target[parts[i]] = Array.isArray(target) ? [] : {};
+								target = target[parts[i]];
+							}
+							target[parts[parts.length - 1]] = patch.value;
+						} else if (patch.op === "remove") {
+							const parts = patch.path.split("/").filter(Boolean);
+							let target = newProject as any;
+							for (let i = 0; i < parts.length - 1; i++) {
+								if (!target[parts[i]]) return newProject;
+								target = target[parts[i]];
+							}
+							if (Array.isArray(target)) {
+								target.splice(parseInt(parts[parts.length - 1], 10), 1);
+							} else {
+								delete target[parts[parts.length - 1]];
+							}
+						}
+					}
+					return newProject;
+				});
+				toast.success(`Chronos AI applied ${data.crdt_patches.length} structural edits!`);
+			}
+
 			setCopilotHistory((prev) => [...prev, aiMsg]);
 		} catch (err) {
 			console.error("Copilot Error:", err);

@@ -5,7 +5,8 @@
   "description": "Send videos directly from your browser to your Lazynext timeline using AI orchestration.",
   "permissions": [
     "activeTab",
-    "contextMenus"
+    "contextMenus",
+    "scripting"
   ],
   "background": {
     "service_worker": "background.js",

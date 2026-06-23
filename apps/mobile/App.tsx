@@ -10,36 +10,18 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-/**
- * Mobile Native Bridge — connects to the Rust core via UniFFI-generated bindings.
- *
- * In production, this uses:
- *   import { MobileNLEBridge } from 'lazynext-core-native';
- *
- * The Rust core functions are:
- *   - get_project_name() -> String
- *   - get_track_count() -> u32
- *   - process_intent(prompt: String) -> Result<String, String>
- *   - get_project_data_json() -> String (full CRDT state)
- *   - add_clip(track_idx: u32, name: String, start: u32, end: u32) -> bool
- */
-
-// UniFFI bridge — uncomment when native modules are built:
-// import { NativeModules } from 'react-native';
-// const { LazynextCore } = NativeModules;
-
+// UniFFI bridge mockup
 const NativeBridge = {
   get_project_name: (): string => {
-    // In production: return LazynextCore.getProjectName()
     return "Mobile CRDT Session";
   },
   get_track_count: (): number => {
-    // In production: return LazynextCore.getTrackCount()
     return 3;
   },
   process_intent: (prompt: string): string => {
-    // In production: return LazynextCore.processIntent(prompt)
     if (prompt.toLowerCase().includes("cut"))
       return "Trimmed silence from audio tracks.";
     if (prompt.toLowerCase().includes("music"))
@@ -50,7 +32,7 @@ const NativeBridge = {
   },
 };
 
-export default function App() {
+function DashboardScreen() {
   const [projectName, setProjectName] = useState("Loading...");
   const [trackCount, setTrackCount] = useState(0);
   const [clipCount, setClipCount] = useState(0);
@@ -63,13 +45,11 @@ export default function App() {
   useEffect(() => {
     setProjectName(NativeBridge.get_project_name());
     setTrackCount(NativeBridge.get_track_count());
-    setClipCount(NativeBridge.get_track_count() * 2); // mock clip count
+    setClipCount(NativeBridge.get_track_count() * 2);
   }, []);
 
-  // Detect Apple Pencil / Stylus hover or touch
   const handleTouchStart = (e: any) => {
     if (e.nativeEvent?.touches?.[0]?.force !== undefined) {
-      // Basic heuristic for Stylus/Apple Pencil on iOS/iPadOS
       setIsApplePencil(true);
     }
   };
@@ -79,7 +59,6 @@ export default function App() {
     setProcessing(true);
     setStatus("Processing via Rust Core...");
 
-    // Simulate async FFI call
     setTimeout(() => {
       const result = NativeBridge.process_intent(prompt);
       setStatus(`✓ ${result}`);
@@ -109,7 +88,6 @@ export default function App() {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
-        {/* Project info card */}
         <View style={styles.glassPanel}>
           <Text style={styles.projectText}>{projectName}</Text>
           <View style={styles.statsRow}>
@@ -124,7 +102,6 @@ export default function App() {
           </View>
         </View>
 
-        {/* Status */}
         <View style={styles.statusRow}>
           {processing && <ActivityIndicator color="#f59e0b" size="small" />}
           <Text
@@ -137,7 +114,6 @@ export default function App() {
           </Text>
         </View>
 
-        {/* Quick actions */}
         <View style={styles.quickActions}>
           {quickActions.map((action) => (
             <TouchableOpacity
@@ -153,7 +129,6 @@ export default function App() {
           ))}
         </View>
 
-        {/* Recent commands */}
         {history.length > 0 && (
           <View style={styles.historyPanel}>
             <Text style={styles.historyTitle}>Recent</Text>
@@ -166,7 +141,6 @@ export default function App() {
         )}
       </ScrollView>
 
-      {/* Input bar */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -186,6 +160,38 @@ export default function App() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+  );
+}
+
+function AIChatScreen() {
+  return (
+    <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>AI Copilot Chat</Text>
+      <Text style={{ color: "rgba(255,255,255,0.6)", marginTop: 8 }}>Ask complex production questions here.</Text>
+    </SafeAreaView>
+  );
+}
+
+const Tab = createBottomTabNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: "#050505",
+            borderTopColor: "rgba(255,255,255,0.08)",
+          },
+          tabBarActiveTintColor: "#00e5ff",
+          tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
+        }}
+      >
+        <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        <Tab.Screen name="AI Copilot" component={AIChatScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 

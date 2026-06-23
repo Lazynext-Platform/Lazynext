@@ -1,21 +1,11 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 
-// Setup connection pool
-const isProd = process.env.NODE_ENV === "production";
-const dbUrl =
-	process.env.DATABASE_URL ||
-	"postgresql://lazynext:password123@localhost:5434/lazynext";
-const isUnixSocket = dbUrl.includes("%2Fcloudsql");
-
-const pool = new Pool({
-	connectionString: dbUrl,
-	ssl: isProd && !isUnixSocket ? { rejectUnauthorized: false } : undefined,
+// Ensure fallback to local sqlite for development if TURSO_URL is missing
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL || "file:sqlite.db",
+  authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Initialize Drizzle ORM
-export const db = drizzle(pool, { schema });
-
-// Re-export tables needed by other modules
-export { feedback } from "./schema";
+export const db = drizzle(client, { schema });

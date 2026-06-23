@@ -5,6 +5,7 @@ import {
 	type MouseEvent as ReactMouseEvent,
 	type DragEvent,
 } from "react";
+import { motion } from "framer-motion";
 import AudioWaveform from "./AudioWaveform";
 
 interface TimelineProps {
@@ -1072,11 +1073,15 @@ export default function Timeline({
 									: "";
 
 								return (
-									<div
+									<motion.div
+										layout
+										initial={{ opacity: 0, scale: 0.95 }}
+										animate={{ opacity: 1, scale: 1 }}
+										transition={{ type: "spring", stiffness: 300, damping: 30 }}
 										key={clip.id}
 										onDragStart={(e) => {
 											if (activeTool === "select") {
-												handleClipDragStart(e, clip, trackIdx);
+												handleClipDragStart(e as unknown as DragEvent<HTMLDivElement>, clip, trackIdx);
 											} else {
 												e.preventDefault();
 											}
@@ -1153,12 +1158,13 @@ export default function Timeline({
 											}
 										}}
 										// Phase 50: Track & Clip Locking
-										className={`${baseClass} ${selectedClass} ${track.isLocked ? "cursor-not-allowed opacity-80" : ""} ${activeTool === "razor" && !track.isLocked ? "!cursor-crosshair" : ""} ${activeTool === "slip" && !track.isLocked ? "!cursor-ew-resize" : ""} ${clip.lockedBy ? "!cursor-not-allowed border-2 border-dashed" : ""}`}
+										className={`${baseClass} ${selectedClass} transition-shadow duration-200 ${track.isLocked ? "cursor-not-allowed opacity-80" : ""} ${activeTool === "razor" && !track.isLocked ? "!cursor-crosshair" : ""} ${activeTool === "slip" && !track.isLocked ? "!cursor-ew-resize" : ""} ${clip.lockedBy ? "!cursor-not-allowed border-2 border-dashed" : ""}`}
 										style={{
 											left: `${left}px`,
 											width: `${width}px`,
-											borderColor: clip.lockedBy ? clip.lockedColor : undefined,
+											backdropFilter: "blur(8px)",
 										}}
+										draggable={!track.isLocked && activeTool === "select"}
 									>
 										{/* Phase 50: Remote Lock Indicator */}
 										{clip.lockedBy && (
@@ -1407,7 +1413,7 @@ export default function Timeline({
 												}}
 											/>
 										)}
-									</div>
+									</motion.div>
 								);
 							})}
 						</div>
