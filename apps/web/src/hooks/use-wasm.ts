@@ -70,6 +70,8 @@ export function useWasm() {
 		pause: () => stateRef.current?.pause(),
 		insert_cut_from_script: (s: number, e: number) =>
 			stateRef.current?.insertCutFromScript(s, e),
+		delete_cut_from_script: (s: number, e: number) =>
+			stateRef.current?.deleteCutFromScript(s, e),
 		trigger_live_cut: (a: number, f: number) =>
 			stateRef.current?.triggerLiveCut(a, f),
 		get isPlaying() {

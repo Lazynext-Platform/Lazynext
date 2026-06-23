@@ -19,6 +19,25 @@ class DubRequest(BaseModel):
     target_language: str
     text_to_dub: str = "This is a placeholder text to dub."
 
+class OverdubRequest(BaseModel):
+    text: str
+    voice_id: str = "default_voice"
+    original_audio_url: str | None = None
+
+class StyleTransferRequest(BaseModel):
+    video_id: str
+    style_prompt: str = "anime style, Studio Ghibli, 4k"
+
+class GenerativeFillRequest(BaseModel):
+    video_id: str
+    prompt: str = "add a spaceship"
+    mask_coordinates: list[float] = [100.0, 100.0, 200.0, 200.0]
+
+class AvatarRequest(BaseModel):
+    script: str
+    voice_id: str = "default_avatar_voice"
+    avatar_model: str = "realistic_human_1"
+
 class NeRFRequest(BaseModel):
     video_id: str
 
@@ -226,6 +245,56 @@ async def dub_video(req: DubRequest):
     }
 
 
+@app.post("/overdub")
+async def overdub_audio(req: OverdubRequest):
+    """
+    Generate voice-cloned overdub via ElevenLabs or XTTS.
+    """
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+
+    if api_key:
+        try:
+            async with httpx.AsyncClient() as client:
+                headers = {
+                    "xi-api-key": api_key,
+                    "Content-Type": "application/json",
+                }
+                voice_id = "cloned_user_voice"
+                payload = {
+                    "text": req.text_to_speak,
+                    "model_id": "eleven_multilingual_v2",
+                    "voice_settings": {
+                        "stability": 0.7,
+                        "similarity_boost": 0.8,
+                    },
+                }
+
+                response = await client.post(
+                    f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+                    headers=headers,
+                    json=payload,
+                    timeout=60.0,
+                )
+                response.raise_for_status()
+
+                return {
+                    "success": True,
+                    "clip_id": req.clip_id,
+                    "source": "elevenlabs-cloned",
+                    "audio_url": f"https://cdn.lazynext.ai/overdub/{req.clip_id}_overdub.mp3",
+                }
+        except Exception as e:
+            print(f"[GenerativeStudio] ElevenLabs API error: {e}")
+
+    await asyncio.sleep(1.5)
+    return {
+        "success": True,
+        "clip_id": req.clip_id,
+        "source": "dev-fallback",
+        "audio_url": f"/mock/assets/overdub/{req.clip_id}_overdub.mp3",
+    }
+
+
 @app.post("/split-stems")
 async def split_stems(req: StemSplitRequest):
     """
@@ -319,6 +388,47 @@ async def extract_nerf(req: NeRFRequest):
         headers={"Deprecation": "true", "Sunset": "Sat, 01 Aug 2026 00:00:00 GMT"},
     )
 
+
+@app.post("/style-transfer")
+async def style_transfer(req: StyleTransferRequest):
+    """
+    Simulate video-to-video style transfer using generative AI.
+    """
+    await asyncio.sleep(2.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "style_applied": req.style_prompt,
+        "styled_video_url": f"s3://lazynext-assets/generated/{req.video_id}_styled.mp4"
+    }
+
+@app.post("/generative-fill")
+async def generative_fill(req: GenerativeFillRequest):
+    """
+    Simulate temporal generative fill / video inpainting.
+    """
+    await asyncio.sleep(2.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "fill_prompt": req.prompt,
+        "filled_video_url": f"s3://lazynext-assets/generated/{req.video_id}_genfill.mp4"
+    }
+
+@app.post("/generate-avatar")
+async def generate_avatar(req: AvatarRequest):
+    """
+    Simulate generating a lip-synced AI avatar from a script.
+    """
+    await asyncio.sleep(2.5)
+    
+    return {
+        "success": True,
+        "avatar_video_url": f"s3://lazynext-assets/generated/avatar_{hash(req.script)}.mp4",
+        "script": req.script
+    }
 
 if __name__ == "__main__":
     import uvicorn

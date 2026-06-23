@@ -31,6 +31,26 @@ class TrackRequest(BaseModel):
     end_frame: int
     roi: list[float]  # [x, y, width, height]
 
+class ReframeRequest(BaseModel):
+    video_id: str
+    target_aspect_ratio: str = "9:16"
+
+class EnhanceAudioRequest(BaseModel):
+    video_id: str
+    target_profile: str = "studio_podcast"
+
+class RetouchRequest(BaseModel):
+    video_id: str
+    intensity: float = 0.5
+
+class ExtractHookRequest(BaseModel):
+    video_id: str
+    target_duration: float = 3.0
+
+class ProxyRequest(BaseModel):
+    video_id: str
+    proxy_quality: str = "720p_low"
+
 
 # ── Routes ──
 
@@ -106,9 +126,17 @@ async def transcribe_audio(req: VideoRequest):
         "video_id": req.video_id,
         "source": "dev-fallback",
         "subtitles": [
-            {"start": 0.0, "end": 2.5, "text": "Welcome to Lazynext."},
-            {"start": 2.5, "end": 5.0, "text": "Real-time collaborative video editing."},
-            {"start": 5.0, "end": 8.0, "text": "Powered by CRDT technology."},
+            {"start": 0.0, "end": 0.5, "text": "Welcome"},
+            {"start": 0.6, "end": 0.8, "text": "to"},
+            {"start": 0.9, "end": 2.5, "text": "Lazynext."},
+            {"start": 2.5, "end": 3.0, "text": "Real-time"},
+            {"start": 3.1, "end": 4.0, "text": "collaborative"},
+            {"start": 4.1, "end": 4.5, "text": "video"},
+            {"start": 4.6, "end": 5.0, "text": "editing."},
+            {"start": 5.0, "end": 5.5, "text": "Powered"},
+            {"start": 5.6, "end": 6.0, "text": "by"},
+            {"start": 6.1, "end": 7.0, "text": "CRDT"},
+            {"start": 7.1, "end": 8.0, "text": "technology."}
         ],
     }
 
@@ -121,6 +149,7 @@ async def process_video(req: ProcessRequest):
     Supported operations:
       - auto_editor: Detect and remove silence
       - scene_detect: Find scene change boundaries
+      - clean_audio: Analyze transcripts/audio for filler words ("um/uh") and dead air
     """
     await asyncio.sleep(1.0)
     completed = []
@@ -144,6 +173,19 @@ async def process_video(req: ProcessRequest):
                     "operation": "scene_detect",
                     "cuts": [0, 145, 302, 478, 620],
                     "scene_count": 5,
+                }
+            )
+        elif op == "clean_audio":
+            completed.append(
+                {
+                    "operation": "clean_audio",
+                    "cuts_to_delete": [
+                        {"start": 1.2, "end": 1.5, "reason": "filler_word", "text": "um"},
+                        {"start": 4.2, "end": 8.1, "reason": "dead_air", "text": None},
+                        {"start": 15.0, "end": 15.6, "reason": "filler_word", "text": "uh"},
+                        {"start": 30.0, "end": 32.5, "reason": "dead_air", "text": None},
+                    ],
+                    "total_removed_seconds": 7.0,
                 }
             )
         else:
@@ -328,6 +370,87 @@ async def track_motion(req: TrackRequest):
         "tracker": "csrt" if opencv_available else "dev-fallback",
         "frames_tracked": num_frames,
         "keyframes": keyframes
+    }
+
+@app.post("/auto-reframe")
+async def auto_reframe(req: ReframeRequest):
+    """
+    Simulate Smart Auto-Reframe tracking subject to keep them in center.
+    Returns crop/pan coordinates per keyframe.
+    """
+    await asyncio.sleep(2.0)
+    
+    # In production, this would use YOLO or MediaPipe to track the main subject.
+    keyframes = []
+    for i in range(0, 100, 10):
+        keyframes.append({
+            "frame": i,
+            "crop_x": 420 + (i * 2), # e.g. panning slightly right
+            "crop_y": 0,
+            "crop_w": 1080,
+            "crop_h": 1920
+        })
+        
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "target_aspect_ratio": req.target_aspect_ratio,
+        "keyframes": keyframes
+    }
+
+@app.post("/enhance-audio")
+async def enhance_audio(req: EnhanceAudioRequest):
+    """
+    Simulate Studio Sound Enhancement (noise reduction, EQ matching).
+    """
+    await asyncio.sleep(1.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "enhanced_audio_url": f"s3://lazynext-assets/processed/{req.video_id}_enhanced.wav",
+        "profile_applied": req.target_profile
+    }
+
+@app.post("/retouch")
+async def apply_retouch(req: RetouchRequest):
+    """
+    Simulate AI Facial Beauty and Body Retouching.
+    """
+    await asyncio.sleep(1.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "intensity_applied": req.intensity,
+        "filter_id": "smart_beauty_v2"
+    }
+
+@app.post("/extract-hook")
+async def extract_hook(req: ExtractHookRequest):
+    """
+    Simulate AI analyzing video to extract the most engaging N-second hook.
+    """
+    await asyncio.sleep(1.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "hook_start_time": 12.5, # Found the climax at 12.5s
+        "hook_duration": req.target_duration
+    }
+
+@app.post("/generate-proxies")
+async def generate_proxies(req: ProxyRequest):
+    """
+    Simulate generating low-resolution proxies for a video.
+    """
+    await asyncio.sleep(2.0)
+    
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "proxy_url": f"s3://lazynext-assets/proxies/{req.video_id}_{req.proxy_quality}.mp4"
     }
 
 if __name__ == "__main__":

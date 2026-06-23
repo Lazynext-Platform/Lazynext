@@ -227,6 +227,24 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	req.on("close", () => clearInterval(intervalId));
 });
 
+app.post("/api/v1/publish", async (req: Request, res: Response) => {
+	const { video_url, platform = "tiktok", description } = req.body;
+
+	if (!video_url) {
+		return res.status(400).json({ error: "Missing video_url" });
+	}
+
+	// Simulate API upload delay
+	await new Promise(r => setTimeout(r, 2500));
+
+	res.status(200).json({
+		success: true,
+		platform,
+		post_url: `https://www.${platform}.com/video/${Date.now()}`,
+		status: "published"
+	});
+});
+
 /**
  * Health check endpoint for K8s/Cloud Run probes.
  */

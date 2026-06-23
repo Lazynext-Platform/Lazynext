@@ -24,6 +24,7 @@ pub struct CanvasClearDescriptor {
 #[allow(clippy::large_enum_variant)]
 pub enum FrameItemDescriptor {
     Layer(LayerDescriptor),
+    TextLayer(TextLayerDescriptor),
     SceneEffect {
         effect_pass_groups: Vec<Vec<EffectPassDescriptor>>,
     },
@@ -43,6 +44,21 @@ pub struct LayerDescriptor {
     pub crop: Option<CropDescriptor>,
     pub border_radius: Option<f32>,
     pub shadow: Option<ShadowDescriptor>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextLayerDescriptor {
+    pub text_texture_id: String, // The rendered MSDF atlas or glyphs (or pre-rendered MSDF string)
+    pub transform: QuadTransformDescriptor,
+    pub opacity: f32,
+    pub color: [f32; 4],
+    pub outline_color: [f32; 4],
+    pub shadow_color: [f32; 4],
+    pub px_range: f32,
+    pub outline_width: f32,
+    pub shadow_offset: [f32; 2],
+    pub shadow_blur: f32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

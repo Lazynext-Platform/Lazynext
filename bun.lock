@@ -32,7 +32,7 @@
         "@types/chrome": "^0.1.43",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^6.0.2",
+        "@vitejs/plugin-react": "^6.0.3",
         "typescript": "^6.0.3",
         "vite": "^8.0.16",
       },
@@ -3404,6 +3404,10 @@
     "@jridgewell/remapping/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
     "@jridgewell/source-map/@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
+
+    "@lazynext/browser-extension/lazynext-wasm": ["lazynext-wasm@file:rust/wasm/pkg", {}],
+
+    "@lazynext/web/lazynext-wasm": ["lazynext-wasm@file:rust/wasm/pkg", {}],
 
     "@libsql/isomorphic-ws/ws": ["ws@8.21.0", "", { "peerDependencies": { "bufferutil": "^4.0.1", "utf-8-validate": ">=5.0.2" }, "optionalPeers": ["bufferutil", "utf-8-validate"] }, "sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g=="],
 

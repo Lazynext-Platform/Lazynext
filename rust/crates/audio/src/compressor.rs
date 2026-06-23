@@ -87,6 +87,47 @@ impl Compressor {
         }
     }
 
+    /// Process a single sample with sidechain input.
+    /// The gain reduction is computed from `sidechain_input` but applied to `input`.
+    pub fn process_sidechain(&mut self, input: f64, sidechain_input: f64) -> f64 {
+        // Compute sidechain input level in dB
+        let sidechain_db = if sidechain_input.abs() < 1e-10 {
+            -120.0
+        } else {
+            20.0 * sidechain_input.abs().log10()
+        };
+
+        // Soft-knee gain computer based on SIDECHAIN
+        let half_knee = self.knee_width_db / 2.0;
+        let gain_reduction_db = if sidechain_db < self.threshold_db - half_knee {
+            0.0
+        } else if sidechain_db > self.threshold_db + half_knee {
+            (self.threshold_db - sidechain_db) * (1.0 - 1.0 / self.ratio)
+        } else {
+            let t = (sidechain_db - self.threshold_db + half_knee) / self.knee_width_db;
+            (self.threshold_db - sidechain_db) * (1.0 - 1.0 / self.ratio) * t * t
+        };
+
+        // Envelope follower
+        let coeff = if gain_reduction_db < self.envelope {
+            self.attack_coeff
+        } else {
+            self.release_coeff
+        };
+        self.envelope = coeff * self.envelope + (1.0 - coeff) * gain_reduction_db;
+
+        // Apply gain reduction and makeup gain to MAIN input
+        let gain_linear = 10.0_f64.powf(self.envelope / 20.0);
+        input * gain_linear * self.makeup_gain_linear
+    }
+
+    /// Process a buffer in-place using a sidechain buffer.
+    pub fn process_buffer_sidechain(&mut self, buffer: &mut [f64], sidechain_buffer: &[f64]) {
+        for (sample, &sidechain_sample) in buffer.iter_mut().zip(sidechain_buffer.iter()) {
+            *sample = self.process_sidechain(*sample, sidechain_sample);
+        }
+    }
+
     /// Reset the envelope follower.
     pub fn reset(&mut self) {
         self.envelope = 0.0;
@@ -118,5 +159,18 @@ mod tests {
         let mut comp = Compressor::new(-10.0, 4.0, 0.1, 1.0, 100.0, 6.0, 44100);
         let output = comp.process(0.1); // quiet signal should get makeup gain
         assert!(output.abs() > 0.1);
+    }
+
+    #[test]
+    fn test_sidechain_ducking() {
+        let mut comp = Compressor::new(-20.0, 4.0, 0.1, 1.0, 100.0, 0.0, 44100);
+        let loud_voice = 1.0; // 0dB
+        let quiet_bgm = 0.1; // -20dB
+
+        let output_with_ducking = comp.process_sidechain(quiet_bgm, loud_voice);
+        let output_without_ducking = comp.process_sidechain(quiet_bgm, 0.0);
+        
+        // BGM should be compressed strictly due to the loud sidechain
+        assert!(output_with_ducking.abs() < output_without_ducking.abs());
     }
 }

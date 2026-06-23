@@ -52,6 +52,7 @@ interface FeatureToolbarProps {
 	activateGodMode: () => void;
 	handleOpenDevConsole: () => void;
 	handleCanvasAnnotation: () => void;
+	handleAttachToObject?: () => void;
 }
 
 // ── Toggle Button Helper ──
@@ -444,6 +445,15 @@ export function FeatureToolbar(props: FeatureToolbarProps) {
 				title="Open Session Chat"
 			>
 				💬 Chat
+			</button>
+
+			{/* Phase 4: Attach to Object (Motion Tracking) */}
+			<button
+				className="text-[10px] font-medium backdrop-blur border border-border/50 hover:bg-panel text-muted hover:text-foreground px-2 py-1 rounded transition-colors flex items-center gap-1 mr-2"
+				onClick={props.handleAttachToObject}
+				title="Track motion and attach text/sticker to object"
+			>
+				🎯 Attach to Object
 			</button>
 
 			{/* Dev Console */}

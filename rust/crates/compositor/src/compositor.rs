@@ -2,6 +2,7 @@ use bytemuck::{Pod, Zeroable};
 use effects::{ApplyEffectsOptions, EffectPass, EffectPipeline, UniformValue};
 use gpu::{FULLSCREEN_SHADER_SOURCE, GpuContext, wgpu};
 use masks::{ApplyMaskFeatherOptions, MaskFeatherPipeline};
+use crate::msdf::{ApplyMSDFOptions, MSDFPipeline};
 use thiserror::Error;
 use wgpu::util::DeviceExt;
 
@@ -9,7 +10,7 @@ use crate::{
     BlendMode,
     frame::{
         EffectPassDescriptor, EffectUniformValueDescriptor, FrameDescriptor, FrameItemDescriptor,
-        LayerDescriptor,
+        LayerDescriptor, TextLayerDescriptor,
     },
     texture_pool::TexturePool,
     texture_store::TextureStore,
@@ -29,6 +30,7 @@ pub struct Compositor {
     texture_pool: TexturePool,
     effects: EffectPipeline,
     masks: MaskFeatherPipeline,
+    msdf: MSDFPipeline,
     layer_uniform_bind_group_layout: wgpu::BindGroupLayout,
     layer_pipeline: wgpu::RenderPipeline,
     blend_uniform_bind_group_layout: wgpu::BindGroupLayout,
@@ -286,6 +288,7 @@ impl Compositor {
             texture_pool: TexturePool::default(),
             effects: EffectPipeline::new(context),
             masks: MaskFeatherPipeline::new(context),
+            msdf: MSDFPipeline::new(context),
             layer_uniform_bind_group_layout,
             layer_pipeline,
             blend_uniform_bind_group_layout,
@@ -352,6 +355,9 @@ impl Compositor {
                         frame.height,
                         effect_pass_groups,
                     )?;
+                }
+                FrameItemDescriptor::TextLayer(text_layer) => {
+                    scene = self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
                 }
             }
         }
@@ -438,6 +444,9 @@ impl Compositor {
                         effect_pass_groups,
                     )?;
                 }
+                FrameItemDescriptor::TextLayer(text_layer) => {
+                    scene = self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
+                }
             }
         }
 
@@ -450,6 +459,69 @@ impl Compositor {
         context.queue().submit([encoder.finish()]);
         surface_texture.present();
         Ok(())
+    }
+
+    fn render_text_layer(
+        &mut self,
+        context: &GpuContext,
+        encoder: &mut wgpu::CommandEncoder,
+        scene: &wgpu::Texture,
+        frame: &FrameDescriptor,
+        text_layer: &TextLayerDescriptor,
+    ) -> Result<wgpu::Texture, CompositorError> {
+        // Render the MSDF into a clear intermediate texture
+        let rasterized_text = self.create_cleared_texture(context, encoder, frame.width, frame.height, [0.0, 0.0, 0.0, 0.0]);
+        let rasterized_view = rasterized_text.create_view(&wgpu::TextureViewDescriptor::default());
+
+        {
+            let msdf_source = self.textures.get(&text_layer.text_texture_id).ok_or_else(|| {
+                CompositorError::MissingTexture {
+                    texture_id: text_layer.text_texture_id.clone(),
+                }
+            })?;
+
+            self.msdf.apply_with_encoder(
+                context,
+                encoder,
+                ApplyMSDFOptions {
+                    target_view: &rasterized_view,
+                    msdf_texture: msdf_source.texture(),
+                color: text_layer.color,
+                outline_color: text_layer.outline_color,
+                shadow_color: text_layer.shadow_color,
+                px_range: text_layer.px_range,
+                outline_width: text_layer.outline_width,
+                shadow_offset: text_layer.shadow_offset,
+                shadow_blur: text_layer.shadow_blur,
+            },
+        );
+        }
+
+        // Store the rasterized text temporarily in the pool
+        let temp_id = format!("{}_rasterized", text_layer.text_texture_id);
+        self.textures.upsert(temp_id.clone(), rasterized_text);
+
+        // Map TextLayerDescriptor to LayerDescriptor to handle transforms
+        let layer_desc = LayerDescriptor {
+            texture_id: temp_id.clone(),
+            transform: text_layer.transform.clone(),
+            opacity: text_layer.opacity,
+            blend_mode: BlendMode::Normal,
+            effect_pass_groups: vec![],
+            mask: None,
+            color_grading: None,
+            crop: None,
+            border_radius: None,
+            shadow: None,
+        };
+
+        let layer_texture = self.render_layer(context, encoder, frame, &layer_desc)?;
+        let result = self.blend_texture(context, encoder, scene, &layer_texture, BlendMode::Normal, frame.width, frame.height)?;
+
+        // Clean up temporary texture
+        self.textures.remove(&temp_id);
+
+        Ok(result)
     }
 
     fn render_layer(

@@ -149,6 +149,33 @@ impl NLEState {
         }
     }
 
+    #[wasm_bindgen(js_name = "deleteCutFromScript")]
+    pub fn delete_cut_from_script(&mut self, start_ms: f64, end_ms: f64) {
+        // Convert ms to frames using project FPS
+        let start_frame = (start_ms / 1000.0 * self.project.fps) as i32;
+        let end_frame = (end_ms / 1000.0 * self.project.fps) as i32;
+
+        // Find clips that overlap this region
+        let clip_ids: Vec<String> = self
+            .project
+            .tracks
+            .iter()
+            .flat_map(|t| t.clips.iter())
+            .filter(|c| {
+                c.start_frame < end_frame && (c.start_frame + c.duration_frames) > start_frame
+            })
+            .map(|c| c.id.clone())
+            .collect();
+
+        for id in clip_ids {
+            self.split_clip(id.clone(), start_frame);
+            let split_id = format!("{}_split", id);
+            self.split_clip(split_id.clone(), end_frame);
+            // Disable the middle clip (which represents the deleted text)
+            self.update_clip(split_id, None, Some(true));
+        }
+    }
+
     #[wasm_bindgen(js_name = "triggerLiveCut")]
     pub fn trigger_live_cut(&mut self, _camera_angle: i32, current_frame: i32) {
         // Find the active multicam clip
