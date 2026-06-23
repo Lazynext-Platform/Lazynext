@@ -28,6 +28,7 @@ if command -v python3 &>/dev/null; then
     rm -rf venv
     python3 -m venv venv
     source venv/bin/activate
+    export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
     pip install -r requirements.txt fastapi uvicorn pydantic
     python3 main.py
 else
@@ -43,6 +44,7 @@ if command -v python3 &>/dev/null; then
     rm -rf venv
     python3 -m venv venv
     source venv/bin/activate
+    export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
     # Create a basic requirements file if missing
     if [ ! -f "requirements.txt" ]; then
         echo -e "fastapi\nuvicorn\npydantic" > requirements.txt
