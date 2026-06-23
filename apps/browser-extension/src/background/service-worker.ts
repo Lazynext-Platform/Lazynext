@@ -1,11 +1,37 @@
 // Service Worker (Background Script)
-// Important: Service workers are ephemeral. Do not store state in global variables.
+
 chrome.runtime.onInstalled.addListener(() => {
 	console.log("Lazynext Extension Installed");
+	
+	chrome.contextMenus.create({
+		id: "send-to-lazynext",
+		title: "Send Video to Lazynext Timeline",
+		contexts: ["video", "link"]
+	});
 });
 
-chrome.action.onClicked.addListener(async (tab) => {
-	// If we wanted a Side Panel instead of a Popup, we would trigger it here.
-	// Because we defined default_popup in manifest, this onClicked may not fire.
-	console.log("Action clicked", tab);
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+	if (info.menuItemId === "send-to-lazynext") {
+		const mediaUrl = info.srcUrl || info.linkUrl;
+		if (!mediaUrl) return;
+
+		console.log(`Sending media to Lazynext: ${mediaUrl}`);
+
+		try {
+			// Ping the new Rust API Gateway
+			const response = await fetch("http://127.0.0.1:8005/api/v1/ai/ingest", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					url: mediaUrl,
+					crdtAction: "APPEND_TRACK"
+				})
+			});
+
+			const data = await response.json();
+			console.log("Success:", data);
+		} catch (error) {
+			console.error("Error:", error);
+		}
+	}
 });

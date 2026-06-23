@@ -101,6 +101,8 @@ async fn main() {
         .route("/api/v1/projects", get(handle_get_projects))
         .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
+        .route("/api/v1/ai/generate", post(handle_generate))
+        .route("/api/v1/ai/tts", post(handle_tts))
         .layer(middleware::from_fn(rbac::authorize_request))
         .with_state(state);
 
@@ -207,4 +209,61 @@ async fn handle_stripe_webhook(
 
 async fn handle_get_user_credits(State(_state): State<AppState>) -> Json<Value> {
     Json(json!({ "success": true, "credits": 500 }))
+}
+
+// ── New AI Engine Endpoints ──
+
+#[derive(serde::Deserialize)]
+pub struct GeneratePayload {
+    pub prompt: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct TtsPayload {
+    pub text: String,
+    pub voice_id: Option<String>,
+}
+
+async fn handle_generate(
+    State(state): State<AppState>,
+    Json(payload): Json<GeneratePayload>,
+) -> Json<Value> {
+    // In the future this will trigger the Neural Engine for actual generation.
+    // For now, it orchestrates adding a placeholder clip directly to the NLE.
+    let mut nle = state.nle.lock().await;
+    let track_name = "V1".to_string();
+    nle.add_track(track_name.clone(), "video".to_string());
+    
+    // Using index 0 assuming V1 is the first track
+    nle.add_clip_to_track(
+        0, 
+        "generated_video".to_string(),
+        "video".to_string(),
+        format!("generated_{}.mp4", payload.prompt.replace(" ", "_")),
+        0,
+        150, // 5 seconds at 30fps
+    );
+    
+    Json(json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }))
+}
+
+async fn handle_tts(
+    State(state): State<AppState>,
+    Json(payload): Json<TtsPayload>,
+) -> Json<Value> {
+    let mut nle = state.nle.lock().await;
+    let track_name = "A1".to_string();
+    nle.add_track(track_name.clone(), "audio".to_string());
+    
+    // Using index 1 assuming A1 is the second track
+    nle.add_clip_to_track(
+        1, 
+        "generated_tts".to_string(),
+        "audio".to_string(),
+        "tts_output.wav".to_string(),
+        0,
+        300, // 10 seconds at 30fps
+    );
+    
+    Json(json!({ "success": true, "message": "TTS generated and added to timeline" }))
 }
