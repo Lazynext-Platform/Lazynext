@@ -1,4 +1,6 @@
 terraform {
+  required_version = ">= 1.5.0"
+  
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -11,47 +13,37 @@ provider "azurerm" {
   features {}
 }
 
-variable "resource_group_name" {
-  default = "lazynext-rg"
+variable "location" {
+  description = "Azure region for the deployment"
+  default     = "East US"
 }
 
-variable "location" {
-  default = "East US"
+variable "environment" {
+  description = "Deployment environment (e.g. dev, staging, prod)"
+  default     = "prod"
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = var.resource_group_name
+  name     = "lazynext-rg-${var.environment}"
   location = var.location
-}
-
-# ── Azure Kubernetes Service (AKS) ───────────────────────────────────────
-resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "lazynext-aks"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = "lazynextaks"
-
-  default_node_pool {
-    name       = "default"
-    node_count = 2
-    vm_size    = "Standard_DS2_v2"
-  }
-
-  identity {
-    type = "SystemAssigned"
-  }
 
   tags = {
-    Environment = "Production"
+    Environment = var.environment
     Project     = "Lazynext"
   }
 }
 
-# ── Azure Container Registry (ACR) ───────────────────────────────────────
-resource "azurerm_container_registry" "acr" {
-  name                = "lazynextacr"
-  resource_group_name = azurerm_resource_group.rg.name
+# ── Virtual Network for Lazynext (Azure) ──────────────────────────────────
+resource "azurerm_virtual_network" "vnet" {
+  name                = "lazynext-vnet-${var.environment}"
   location            = azurerm_resource_group.rg.location
-  sku                 = "Standard"
-  admin_enabled       = true
+  resource_group_name = azurerm_resource_group.rg.name
+  address_space       = ["10.0.0.0/16"]
+}
+
+resource "azurerm_subnet" "aks_subnet" {
+  name                 = "lazynext-aks-subnet"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = ["10.0.1.0/24"]
 }

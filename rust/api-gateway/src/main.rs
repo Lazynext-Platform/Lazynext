@@ -95,7 +95,10 @@ async fn main() {
     let app: Router = Router::new()
         .route("/health", get(health_handler))
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
-        .route("/api/v1/timeline", get(handle_get_timeline))
+        .route("/api/v1/timeline", get(handle_get_timeline).post(handle_add_clip))
+        .route("/api/v1/user/profile", get(handle_get_profile))
+        .route("/api/v1/user/integrations/connect", post(handle_integration_connect))
+        .route("/api/v1/ai/ingest", post(handle_ai_ingest))
         .route("/api/v1/render", post(handle_trigger_render))
         .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
         .route("/api/v1/projects", get(handle_get_projects))
@@ -228,42 +231,106 @@ async fn handle_generate(
     State(state): State<AppState>,
     Json(payload): Json<GeneratePayload>,
 ) -> Json<Value> {
-    // In the future this will trigger the Neural Engine for actual generation.
-    // For now, it orchestrates adding a placeholder clip directly to the NLE.
-    let mut nle = state.nle.lock().await;
-    let track_name = "V1".to_string();
-    nle.add_track(track_name.clone(), "video".to_string());
+    use neural_engine::generative::{GenerativeModel, VideoGenerationOptions};
     
-    // Using index 0 assuming V1 is the first track
-    nle.add_clip_to_track(
-        0, 
-        "generated_video".to_string(),
-        "video".to_string(),
-        format!("generated_{}.mp4", payload.prompt.replace(" ", "_")),
-        0,
-        150, // 5 seconds at 30fps
-    );
+    let generator = GenerativeModel::new();
+    let options = VideoGenerationOptions {
+        prompt: payload.prompt.clone(),
+        width: 1920,
+        height: 1080,
+        num_frames: 150,
+        fps: 30,
+    };
     
-    Json(json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }))
+    match generator.generate_video(&options).await {
+        Ok(filename) => {
+            let mut nle = state.nle.lock().await;
+            let track_name = "V1".to_string();
+            nle.add_track(track_name.clone(), "video".to_string());
+            
+            nle.add_clip_to_track(
+                0, 
+                "generated_video".to_string(),
+                "video".to_string(),
+                filename,
+                0,
+                150,
+            );
+            Json(json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }))
+        },
+        Err(e) => Json(json!({ "success": false, "error": e }))
+    }
 }
 
 async fn handle_tts(
     State(state): State<AppState>,
     Json(payload): Json<TtsPayload>,
 ) -> Json<Value> {
-    let mut nle = state.nle.lock().await;
-    let track_name = "A1".to_string();
-    nle.add_track(track_name.clone(), "audio".to_string());
+    use neural_engine::generative::{GenerativeModel, AudioGenerationOptions};
     
-    // Using index 1 assuming A1 is the second track
-    nle.add_clip_to_track(
-        1, 
-        "generated_tts".to_string(),
-        "audio".to_string(),
-        "tts_output.wav".to_string(),
-        0,
-        300, // 10 seconds at 30fps
-    );
+    let generator = GenerativeModel::new();
+    let options = AudioGenerationOptions {
+        text: payload.text.clone(),
+        voice_id: payload.voice_id.clone(),
+    };
     
-    Json(json!({ "success": true, "message": "TTS generated and added to timeline" }))
+    match generator.generate_tts(&options).await {
+        Ok(filename) => {
+            let mut nle = state.nle.lock().await;
+            let track_name = "A1".to_string();
+            nle.add_track(track_name.clone(), "audio".to_string());
+            
+            nle.add_clip_to_track(
+                1, 
+                "generated_tts".to_string(),
+                "audio".to_string(),
+                filename,
+                0,
+                300,
+            );
+            Json(json!({ "success": true, "message": "TTS generated and added to timeline" }))
+        },
+        Err(e) => Json(json!({ "success": false, "error": e }))
+    }
+}
+
+async fn handle_get_profile() -> Json<Value> {
+    // In a real app, this would fetch from PostgreSQL via SQLx
+    Json(json!({
+        "success": true,
+        "profile": {
+            "name": "Avas Patel",
+            "email": "avas@example.com",
+            "tier": "Pro Creator Tier",
+            "initials": "AP",
+            "storage_used": 45,
+            "storage_total": 100
+        }
+    }))
+}
+
+#[derive(serde::Deserialize)]
+struct IntegrationPayload {
+    platform: String,
+}
+
+async fn handle_integration_connect(Json(payload): Json<IntegrationPayload>) -> Json<Value> {
+    println!("[API Gateway] Mock OAuth connect for {}", payload.platform);
+    // Simulate OAuth delay
+    tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
+    
+    Json(json!({
+        "success": true,
+        "message": format!("Successfully connected to {}", payload.platform)
+    }))
+}
+
+// Restored stub for handle_add_clip
+async fn handle_add_clip() -> Json<Value> {
+    Json(json!({ "success": true, "message": "Clip added" }))
+}
+
+// Restored stub for handle_ai_ingest
+async fn handle_ai_ingest() -> Json<Value> {
+    Json(json!({ "success": true, "message": "Media ingested via AI Gateway" }))
 }

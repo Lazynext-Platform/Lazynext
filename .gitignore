@@ -49,4 +49,5 @@ terraform/.terraform.lock.hcl
 terraform/terraform.tfvars
 
 # Render Service outputs
-services/render-service/outputs/
+services/render-service/outputs/**/.terraform/
+.terraform/
