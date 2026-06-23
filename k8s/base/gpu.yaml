@@ -42,7 +42,7 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: "2"
+              cpu: "1.5"
               memory: "8Gi"
               nvidia.com/gpu: "1"
             limits:
@@ -122,7 +122,7 @@ metadata:
   labels:
     app: lazynext-generative-studio-gpu
     component: ml
-    accelerator: nvidia-l4
+    accelerator: nvidia-t4
 spec:
   replicas: 1
   selector:
@@ -136,7 +136,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       nodeSelector:
-        cloud.google.com/gke-accelerator: nvidia-l4
+        cloud.google.com/gke-accelerator: nvidia-tesla-t4
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Equal"
@@ -152,7 +152,7 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: "4"
+              cpu: "3"
               memory: "16Gi"
               nvidia.com/gpu: "1"
             limits:
