@@ -249,6 +249,21 @@ const LAZYNEXT_TOOLS = [
 			required: ["speed_factor"],
 		},
 	},
+	{
+		name: "generate_video",
+		description:
+			"Generates a synthetic video clip from a text prompt using a diffusion model.",
+		input_schema: {
+			type: "object" as const,
+			properties: {
+				prompt: {
+					type: "string",
+					description: "Text prompt to generate the video.",
+				},
+			},
+			required: ["prompt"],
+		},
+	},
 ];
 
 // ── Direct LLM Call (fallback when CLI binary isn't available) ──

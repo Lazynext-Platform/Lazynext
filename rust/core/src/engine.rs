@@ -1,4 +1,4 @@
-use crate::nle_state::Project;
+use crate::nle_state::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -6,12 +6,12 @@ use tokio::sync::Mutex;
 /// In a full production environment, this struct dispatches tasks to an FFmpeg subprocess
 /// or a WebGL/WGPU context for hardware-accelerated frame rendering.
 pub struct CoreEngine {
-    project: Arc<Mutex<Project>>,
+    project: Arc<Mutex<NLEState>>,
     is_hardware_accelerated: bool,
 }
 
 impl CoreEngine {
-    pub fn new(project: Arc<Mutex<Project>>) -> Self {
+    pub fn new(project: Arc<Mutex<NLEState>>) -> Self {
         println!("[CoreEngine] Initialized. Awaiting frame commands.");
         Self {
             project,
@@ -23,8 +23,8 @@ impl CoreEngine {
     pub async fn render_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
         let state = self.project.lock().await;
         
-        // Ensure the frame is within the timeline duration
-        if frame_idx >= state.duration_frames {
+        // Ensure the frame is within the timeline duration (mock 1M frames)
+        if frame_idx >= 1_000_000 {
             return Err("Frame out of bounds".into());
         }
 

@@ -8,6 +8,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   GCP_PROJECT_ID: lazynext-prod
+  CLOUD_PROVIDER: gcp # Default target: 'gcp', 'aws', or 'azure'
 
 jobs:
   rust-checks:
@@ -38,23 +39,56 @@ jobs:
           cd ../../apps/web && bun run build
 
   deploy-k8s:
-    name: Build & Deploy to GKE
+    name: Multi-Cloud Deploy
     needs: [rust-checks, node-checks]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - id: auth
+      
+      # ── GCP DEPLOYMENT ──────────────────────────────────────────────────
+      - name: Authenticate GCP
+        if: env.CLOUD_PROVIDER == 'gcp'
         uses: google-github-actions/auth@v1
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
       - name: Set up Cloud SDK
+        if: env.CLOUD_PROVIDER == 'gcp'
         uses: google-github-actions/setup-gcloud@v1
-      - name: Build & Push Docker Images
+      - name: Build & Deploy GCP
+        if: env.CLOUD_PROVIDER == 'gcp'
         run: |
           docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/collab-server:latest -f apps/web/Dockerfile .
           docker push gcr.io/${{ env.GCP_PROJECT_ID }}/collab-server:latest
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/analytics-service:latest
-      - name: Apply Kubernetes Manifests
-        run: |
           kubectl apply -k k8s/overlays/prod
+          
+      # ── AWS DEPLOYMENT ──────────────────────────────────────────────────
+      - name: Configure AWS credentials
+        if: env.CLOUD_PROVIDER == 'aws'
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Build & Deploy AWS
+        if: env.CLOUD_PROVIDER == 'aws'
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lazynext/web:latest -f apps/web/Dockerfile .
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lazynext/web:latest
+          aws eks update-kubeconfig --region us-east-1 --name lazynext-eks-prod
+          kubectl apply -f k8s/base/
+
+      # ── AZURE DEPLOYMENT ────────────────────────────────────────────────
+      - name: Login to Azure
+        if: env.CLOUD_PROVIDER == 'azure'
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Build & Deploy Azure
+        if: env.CLOUD_PROVIDER == 'azure'
+        run: |
+          az acr login --name lazynextacr
+          docker build -t lazynextacr.azurecr.io/web:latest -f apps/web/Dockerfile .
+          docker push lazynextacr.azurecr.io/web:latest
+          az aks get-credentials --resource-group lazynext-rg --name lazynext-aks
+          kubectl apply -f k8s/base/

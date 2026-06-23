@@ -7,6 +7,7 @@ stages:
 variables:
   DOCKER_REGISTRY: ghcr.io
   PROJECT_ID: lazynext-platform
+  CLOUD_PROVIDER: gcp # Default target: 'gcp', 'aws', or 'azure'
 
 rust-core:
   image: rust:latest
@@ -77,11 +78,29 @@ docker-build:
   only:
     - main
 
-deploy:
+deploy-gcp:
   image: bitnami/kubectl:latest
   stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CLOUD_PROVIDER == "gcp"'
   script:
     - kubectl config use-context default
     - kubectl kustomize k8s/overlays/production | kubectl apply -f -
-  only:
-    - main
+
+deploy-aws:
+  image: bitnami/kubectl:latest
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CLOUD_PROVIDER == "aws"'
+  script:
+    - aws eks update-kubeconfig --region us-east-1 --name lazynext-eks-prod
+    - kubectl apply -f k8s/base/
+
+deploy-azure:
+  image: bitnami/kubectl:latest
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CLOUD_PROVIDER == "azure"'
+  script:
+    - az aks get-credentials --resource-group lazynext-rg --name lazynext-aks
+    - kubectl apply -f k8s/base/

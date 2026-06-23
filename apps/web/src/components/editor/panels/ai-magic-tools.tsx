@@ -50,7 +50,7 @@ export function AIMagicTools() {
 	};
 
 	const tabOptions = [
-		{ id: "video", icon: Video, label: "Video" },
+		{ id: "video", icon: Video, label: "Text-to-Video" },
 		{ id: "audio", icon: Mic, label: "Voice" },
 		{ id: "music", icon: Music, label: "Music" },
 	] as const;
