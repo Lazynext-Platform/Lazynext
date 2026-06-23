@@ -12,10 +12,10 @@ resources:
   - databases.yaml
   - services.yaml
   - networking.yaml
-  - autoscaling.yaml
+  # - autoscaling.yaml
   - budgets.yaml
   - backups.yaml
-  - monitoring.yaml
+  # - monitoring.yaml
   - gpu.yaml
   - redis-configmap.yaml
   - security-policies.yaml

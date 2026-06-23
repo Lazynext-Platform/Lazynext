@@ -13,7 +13,7 @@ spec:
     limits.memory: "128Gi"
     requests.nvidia.com/gpu: "4"
     persistentvolumeclaims: "20"
-    requests.storage: "500Gi"
+    requests.storage: "1Ti"
     count/deployments.apps: "20"
     count/services: "20"
     count/jobs.batch: "10"
@@ -41,8 +41,8 @@ spec:
         cpu: "8"
         memory: "32Gi"
       min:
-        cpu: "50m"
-        memory: "64Mi"
+        cpu: "10m"
+        memory: "16Mi"
     # Max total per pod
     - type: Pod
       max:
@@ -124,109 +124,109 @@ description: "Low priority — batch jobs, ML inference that can wait"
 # ── External Secrets Operator — SecretStore ──
 # Uses GCP Secret Manager as the external secrets backend
 # Requires: helm install external-secrets external-secrets/external-secrets
-apiVersion: external-secrets.io/v1beta1
-kind: SecretStore
-metadata:
-  name: gcp-secret-manager
-  namespace: lazynext
-spec:
-  provider:
-    gcpsm:
-      projectID: vertexaiopencode
-      auth:
-        workloadIdentity:
-          clusterLocation: us-central1
-          clusterName: lazynext-cluster
-          serviceAccountRef:
-            name: lazynext-cloud-run
----
-# ── ExternalSecret — syncs GCP Secret Manager → K8s Secret ──
-apiVersion: external-secrets.io/v1beta1
-kind: ExternalSecret
-metadata:
-  name: lazynext-external-secrets
-  namespace: lazynext
-spec:
-  refreshInterval: "1h"
-  secretStoreRef:
-    name: gcp-secret-manager
-    kind: SecretStore
-  target:
-    name: lazynext-secrets
-    creationPolicy: Owner
-  data:
-    - secretKey: DATABASE_URL
-      remoteRef:
-        key: DATABASE_URL
-    - secretKey: BETTER_AUTH_SECRET
-      remoteRef:
-        key: BETTER_AUTH_SECRET
-    - secretKey: OPENAI_API_KEY
-      remoteRef:
-        key: OPENAI_API_KEY
-    - secretKey: ANTHROPIC_API_KEY
-      remoteRef:
-        key: ANTHROPIC_API_KEY
-    - secretKey: GEMINI_API_KEY
-      remoteRef:
-        key: GEMINI_API_KEY
-    - secretKey: REPLICATE_API_TOKEN
-      remoteRef:
-        key: REPLICATE_API_TOKEN
-    - secretKey: ELEVENLABS_API_KEY
-      remoteRef:
-        key: ELEVENLABS_API_KEY
-    - secretKey: STRIPE_SECRET_KEY
-      remoteRef:
-        key: STRIPE_SECRET_KEY
-    - secretKey: RESEND_API_KEY
-      remoteRef:
-        key: RESEND_API_KEY
----
-# ── VerticalPodAutoscaler — Web App ──
-# Requires: helm install vpa fairwinds/vpa
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: lazynext-web-vpa
-  namespace: lazynext
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: lazynext-web
-  updatePolicy:
-    updateMode: "Auto"
-  resourcePolicy:
-    containerPolicies:
-      - containerName: lazynext-web
-        minAllowed:
-          cpu: "100m"
-          memory: "256Mi"
-        maxAllowed:
-          cpu: "4"
-          memory: "8Gi"
-        controlledResources: ["cpu", "memory"]
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: lazynext-render-vpa
-  namespace: lazynext
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: lazynext-render
-  updatePolicy:
-    updateMode: "Auto"
-  resourcePolicy:
-    containerPolicies:
-      - containerName: lazynext-render
-        minAllowed:
-          cpu: "250m"
-          memory: "512Mi"
-        maxAllowed:
-          cpu: "8"
-          memory: "16Gi"
-        controlledResources: ["cpu", "memory"]
+# apiVersion: external-secrets.io/v1beta1
+# kind: SecretStore
+# metadata:
+#   name: gcp-secret-manager
+#   namespace: lazynext
+# spec:
+#   provider:
+#     gcpsm:
+#       projectID: vertexaiopencode
+#       auth:
+#         workloadIdentity:
+#           clusterLocation: us-central1
+#           clusterName: lazynext-cluster
+#           serviceAccountRef:
+#             name: lazynext-cloud-run
+# ---
+# # ── ExternalSecret — syncs GCP Secret Manager → K8s Secret ──
+# apiVersion: external-secrets.io/v1beta1
+# kind: ExternalSecret
+# metadata:
+#   name: lazynext-external-secrets
+#   namespace: lazynext
+# spec:
+#   refreshInterval: "1h"
+#   secretStoreRef:
+#     name: gcp-secret-manager
+#     kind: SecretStore
+#   target:
+#     name: lazynext-secrets
+#     creationPolicy: Owner
+#   data:
+#     - secretKey: DATABASE_URL
+#       remoteRef:
+#         key: DATABASE_URL
+#     - secretKey: BETTER_AUTH_SECRET
+#       remoteRef:
+#         key: BETTER_AUTH_SECRET
+#     - secretKey: OPENAI_API_KEY
+#       remoteRef:
+#         key: OPENAI_API_KEY
+#     - secretKey: ANTHROPIC_API_KEY
+#       remoteRef:
+#         key: ANTHROPIC_API_KEY
+#     - secretKey: GEMINI_API_KEY
+#       remoteRef:
+#         key: GEMINI_API_KEY
+#     - secretKey: REPLICATE_API_TOKEN
+#       remoteRef:
+#         key: REPLICATE_API_TOKEN
+#     - secretKey: ELEVENLABS_API_KEY
+#       remoteRef:
+#         key: ELEVENLABS_API_KEY
+#     - secretKey: STRIPE_SECRET_KEY
+#       remoteRef:
+#         key: STRIPE_SECRET_KEY
+#     - secretKey: RESEND_API_KEY
+#       remoteRef:
+#         key: RESEND_API_KEY
+# ---
+# # ── VerticalPodAutoscaler — Web App ──
+# # Requires: helm install vpa fairwinds/vpa
+# apiVersion: autoscaling.k8s.io/v1
+# kind: VerticalPodAutoscaler
+# metadata:
+#   name: lazynext-web-vpa
+#   namespace: lazynext
+# spec:
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: lazynext-web
+#   updatePolicy:
+#     updateMode: "Auto"
+#   resourcePolicy:
+#     containerPolicies:
+#       - containerName: lazynext-web
+#         minAllowed:
+#           cpu: "100m"
+#           memory: "256Mi"
+#         maxAllowed:
+#           cpu: "4"
+#           memory: "8Gi"
+#         controlledResources: ["cpu", "memory"]
+# ---
+# apiVersion: autoscaling.k8s.io/v1
+# kind: VerticalPodAutoscaler
+# metadata:
+#   name: lazynext-render-vpa
+#   namespace: lazynext
+# spec:
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: lazynext-render
+#   updatePolicy:
+#     updateMode: "Auto"
+#   resourcePolicy:
+#     containerPolicies:
+#       - containerName: lazynext-render
+#         minAllowed:
+#           cpu: "250m"
+#           memory: "512Mi"
+#         maxAllowed:
+#           cpu: "8"
+#           memory: "16Gi"
+#         controlledResources: ["cpu", "memory"]

@@ -1,7 +1,7 @@
 # ── Google Kubernetes Engine (GKE) ───────────────────────────────────────
 resource "google_container_cluster" "gke" {
   name     = "lazynext-gke-${var.environment}"
-  location = var.gcp_region
+  location = var.region
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
@@ -16,12 +16,13 @@ resource "google_container_cluster" "gke" {
 # General compute pool
 resource "google_container_node_pool" "general_nodes" {
   name       = "general-pool"
-  location   = var.gcp_region
+  location   = var.region
   cluster    = google_container_cluster.gke.name
   node_count = 2
 
   node_config {
     machine_type = "e2-medium"
+    disk_size_gb = 40
 
     labels = {
       environment = var.environment
@@ -34,7 +35,7 @@ resource "google_container_node_pool" "general_nodes" {
 # GPU pool for AI 
 resource "google_container_node_pool" "gpu_nodes" {
   name     = "gpu-pool"
-  location = var.gcp_region
+  location = var.region
   cluster  = google_container_cluster.gke.name
 
   autoscaling {
@@ -44,17 +45,13 @@ resource "google_container_node_pool" "gpu_nodes" {
 
   node_config {
     machine_type = "n1-standard-4"
+    disk_size_gb = 40
 
     guest_accelerator {
       type  = "nvidia-tesla-t4"
       count = 1
     }
 
-    taint {
-      key    = "nvidia.com/gpu"
-      value  = "true"
-      effect = "NO_SCHEDULE"
-    }
 
     labels = {
       environment = var.environment
