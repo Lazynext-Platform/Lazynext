@@ -187,16 +187,16 @@ spec:
           protocol: TCP
 ---
 # Certificate (via cert-manager)
-# apiVersion: cert-manager.io/v1
-# kind: Certificate
-# metadata:
-#   name: lazynext-tls
-#   namespace: lazynext
-# spec:
-#   secretName: lazynext-tls
-#   issuerRef:
-#     name: letsencrypt-production
-#     kind: ClusterIssuer
-#   dnsNames:
-#     - lazynext.ai
-#     - www.lazynext.ai
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-tls
+  namespace: lazynext
+spec:
+  secretName: lazynext-tls
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  dnsNames:
+    - lazynext.ai
+    - www.lazynext.ai
