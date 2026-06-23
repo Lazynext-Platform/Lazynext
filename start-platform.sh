@@ -8,6 +8,10 @@ sleep 1
 
 echo "Starting Lazynext Platform..."
 
+echo "Booting up required infrastructure (Redis & Postgres)..."
+docker-compose up -d redis db redis-proxy
+sleep 2
+
 # 1. Start Rust WASM auto-builder (in background)
 echo "Starting Rust WASM builder..."
 (cd rust/wasm && wasm-pack build --target web --out-dir pkg) &
