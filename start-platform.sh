@@ -9,7 +9,10 @@ sleep 1
 echo "Starting Lazynext Platform..."
 
 echo "Booting up required infrastructure (Redis & Postgres)..."
-docker-compose up -d redis db redis-proxy
+if ! docker-compose up -d redis db redis-proxy; then
+    echo "❌ ERROR: Failed to start infrastructure. Is Docker Desktop running?"
+    exit 1
+fi
 sleep 2
 
 # 1. Start Rust WASM auto-builder (in background)
