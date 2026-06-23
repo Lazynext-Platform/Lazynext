@@ -40,6 +40,7 @@ node-test:
   script:
     - cd services/ai-agents && bun install && bun test || true
     - cd ../render-service && bun install && bun test || true
+    - cd ../analytics-service && bun install && bun run typecheck || true
 
 web-app:
   image: oven/bun:latest
@@ -71,6 +72,8 @@ docker-build:
     - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-pre-processing:latest
     - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
     - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-generative-studio:latest
+    - docker build -t $DOCKER_REGISTRY/$PROJECT_ID/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
+    - docker push $DOCKER_REGISTRY/$PROJECT_ID/lazynext-analytics-service:latest
   only:
     - main
 

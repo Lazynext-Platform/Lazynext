@@ -153,46 +153,48 @@ export function PreviewOverlayLayer({
 						return null;
 				}
 			})}
-			{// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
-			(
-				Object.entries(hudInstancesByAnchor) as Array<
-					[PreviewOverlayHudAnchor, PreviewOverlayInstance[]]
-				>
-			).map(([anchor, anchorInstances]) => {
-				if (anchorInstances.length === 0) {
-					return null;
-				}
+			{
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion
+				(
+					Object.entries(hudInstancesByAnchor) as Array<
+						[PreviewOverlayHudAnchor, PreviewOverlayInstance[]]
+					>
+				).map(([anchor, anchorInstances]) => {
+					if (anchorInstances.length === 0) {
+						return null;
+					}
 
-				const sortedAnchorInstances = [...anchorInstances].sort(
-					(left, right) =>
-						(left.mount.kind === "hud" ? (left.mount.order ?? 0) : 0) -
-						(right.mount.kind === "hud" ? (right.mount.order ?? 0) : 0),
-				);
+					const sortedAnchorInstances = [...anchorInstances].sort(
+						(left, right) =>
+							(left.mount.kind === "hud" ? (left.mount.order ?? 0) : 0) -
+							(right.mount.kind === "hud" ? (right.mount.order ?? 0) : 0),
+					);
 
-				return (
-					<div key={anchor} className={HUD_ANCHOR_CLASS_NAMES[anchor]}>
-						{sortedAnchorInstances.map((instance) => {
-							const pointerEvents = instance.pointerEvents ?? "none";
-							const content = instance.render({
-								sceneHeight: viewport.sceneHeight,
-								sceneWidth: viewport.sceneWidth,
-							});
+					return (
+						<div key={anchor} className={HUD_ANCHOR_CLASS_NAMES[anchor]}>
+							{sortedAnchorInstances.map((instance) => {
+								const pointerEvents = instance.pointerEvents ?? "none";
+								const content = instance.render({
+									sceneHeight: viewport.sceneHeight,
+									sceneWidth: viewport.sceneWidth,
+								});
 
-							return (
-								<div
-									key={instance.id}
-									style={{
-										pointerEvents,
-										zIndex: instance.zIndex,
-									}}
-								>
-									{content}
-								</div>
-							);
-						})}
-					</div>
-				);
-			})}
+								return (
+									<div
+										key={instance.id}
+										style={{
+											pointerEvents,
+											zIndex: instance.zIndex,
+										}}
+									>
+										{content}
+									</div>
+								);
+							})}
+						</div>
+					);
+				})
+			}
 		</>
 	);
 }

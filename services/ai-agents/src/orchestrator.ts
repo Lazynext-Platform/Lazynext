@@ -257,7 +257,7 @@ function extractPrompt(prompt: string, _tool: string): string {
 }
 
 /**
- * Execute an orchestration plan step-by-step.
+ * Execute an orchestration plan step-by-step with an Agentic Repair Loop.
  */
 export async function executePlan(
   plan: OrchestrationPlan,
@@ -265,12 +265,42 @@ export async function executePlan(
   const results: OrchestrationResult["results"] = [];
 
   for (const step of plan.steps) {
-    const result = await executeToolCall(step.tool, step.args);
+    let attempts = 0;
+    const maxRetries = 2;
+    let success = false;
+    let result: any = null;
+
+    while (attempts <= maxRetries && !success) {
+      result = await executeToolCall(step.tool, step.args);
+      
+      // Simulate verification against Rust Core / CRDT state
+      // In a full implementation, this would query the Rust API Gateway
+      // to ensure the operation was valid (e.g., face was tracked successfully)
+      if (result.success) {
+        success = true;
+      } else {
+        attempts++;
+        console.warn(`[Agentic Repair Loop] Step ${step.tool} failed. Retry ${attempts}/${maxRetries}...`);
+        
+        // If it's a reframe or tracking failure, we might adjust args here
+        // Example: if (step.tool === 'punch_in') step.args.scale = 1.0;
+        
+        // Wait before retry
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
     results.push({
       tool: step.tool,
-      success: result.success as boolean,
+      success,
       output: result,
     });
+
+    // If an operation critically fails and cannot be repaired, we might abort the plan
+    if (!success) {
+      console.error(`[Agentic Repair Loop] Failed to repair operation ${step.tool} after ${maxRetries} retries. Halting plan.`);
+      break;
+    }
   }
 
   return {

@@ -185,7 +185,11 @@ export function ExportDelivery({
 						<div className="mb-4">
 							<div className="flex justify-between items-center mb-2">
 								<span className="text-xs font-bold text-muted uppercase tracking-wider">
-									{renderStatus === "completed" ? "Render Complete" : renderStatus === "failed" ? "Render Failed" : "Rendering..."}
+									{renderStatus === "completed"
+										? "Render Complete"
+										: renderStatus === "failed"
+											? "Render Failed"
+											: "Rendering..."}
 								</span>
 								<span className="text-xs font-mono text-foreground">
 									{Math.round(renderProgress)}%
@@ -194,7 +198,11 @@ export function ExportDelivery({
 							<div className="w-full bg-panel rounded-full h-2 overflow-hidden">
 								<div
 									className={`h-full transition-all duration-300 rounded-full ${
-										renderStatus === "completed" ? "bg-emerald-500" : renderStatus === "failed" ? "bg-red-500" : "bg-indigo-500"
+										renderStatus === "completed"
+											? "bg-emerald-500"
+											: renderStatus === "failed"
+												? "bg-red-500"
+												: "bg-indigo-500"
 									}`}
 									style={{ width: `${renderProgress}%` }}
 								/>
@@ -206,7 +214,11 @@ export function ExportDelivery({
 						disabled={isExporting}
 						className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-foreground font-bold tracking-wider rounded-lg shadow-lg transition-colors"
 					>
-						{isExporting ? "RENDERING..." : renderStatus === "completed" ? "RENDER AGAIN" : "ADD TO RENDER QUEUE"}
+						{isExporting
+							? "RENDERING..."
+							: renderStatus === "completed"
+								? "RENDER AGAIN"
+								: "ADD TO RENDER QUEUE"}
 					</button>
 				</div>
 			</div>

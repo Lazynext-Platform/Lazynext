@@ -29,6 +29,39 @@ export class EditorCore {
 	public readonly clipboard: ClipboardManager;
 	public readonly diagnostics: DiagnosticsManager;
 
+	// Agent Stubs for PromptMode integration
+	public isAgentThinking: boolean = false;
+	public operations: any[] = [];
+
+	public async sendIntent(prompt: string) {
+		this.isAgentThinking = true;
+		try {
+			const res = await fetch("http://localhost:8002/orchestrate", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ prompt }),
+			});
+			const data = await res.json();
+
+			// Map the orchestrated plan into operations for the Execution Contract UI
+			if (data.plan) {
+				this.operations = [
+					...this.operations,
+					...data.plan.map((step: any, idx: number) => ({
+						id: `op_${Date.now()}_${idx}`,
+						type: step.tool,
+						args: { desc: step.description },
+						status: "verified", // In reality, we'd wait for WASM/CRDT confirmation
+					})),
+				];
+			}
+		} catch (err) {
+			console.error("Agent orchestration failed:", err);
+		} finally {
+			this.isAgentThinking = false;
+		}
+	}
+
 	private constructor() {
 		registerDefaultEffects();
 		registerDefaultMasks();

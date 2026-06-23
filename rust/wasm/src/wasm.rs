@@ -55,3 +55,8 @@ pub use crdt_wasm::*;
 mod export_wasm;
 #[cfg(target_arch = "wasm32")]
 pub use export_wasm::*;
+
+#[cfg(target_arch = "wasm32")]
+mod webcodecs;
+#[cfg(target_arch = "wasm32")]
+pub use webcodecs::*;

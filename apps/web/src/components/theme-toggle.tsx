@@ -18,10 +18,7 @@ interface ThemeToggleProps {
 	iconClassName?: string;
 }
 
-export function ThemeToggle({
-	className,
-	iconClassName,
-}: ThemeToggleProps) {
+export function ThemeToggle({ className, iconClassName }: ThemeToggleProps) {
 	const { setTheme, resolvedTheme } = useTheme();
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => setMounted(true), []);

@@ -52,11 +52,13 @@ export function SignUpForm() {
 				<div className="rounded-full bg-blue-500/20 p-4 text-blue-400">
 					<MailCheck className="size-10" />
 				</div>
-				<h3 className="text-xl font-medium text-foreground">Check your inbox</h3>
+				<h3 className="text-xl font-medium text-foreground">
+					Check your inbox
+				</h3>
 				<p className="text-sm text-muted max-w-[280px]">
 					We just sent a verification link to{" "}
-					<strong className="text-foreground">{email}</strong>. Please click the link
-					to activate your account.
+					<strong className="text-foreground">{email}</strong>. Please click the
+					link to activate your account.
 				</p>
 				<button
 					onClick={() => setEmailSent(false)}

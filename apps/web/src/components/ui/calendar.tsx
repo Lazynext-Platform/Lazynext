@@ -35,7 +35,8 @@ function Calendar({
 				),
 				month_grid: "w-full border-collapse space-y-1",
 				weekdays: "flex",
-				weekday: "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
+				weekday:
+					"text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
 				week: "flex w-full mt-2",
 				day: cn(
 					"relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected].day-range-end)]:rounded-r-md",
@@ -61,7 +62,12 @@ function Calendar({
 				...classNames,
 			}}
 			components={{
-				Chevron: ({ orientation }) => orientation === "left" ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />,
+				Chevron: ({ orientation }) =>
+					orientation === "left" ? (
+						<ChevronLeft className="size-4" />
+					) : (
+						<ChevronRight className="size-4" />
+					),
 			}}
 			{...props}
 		/>

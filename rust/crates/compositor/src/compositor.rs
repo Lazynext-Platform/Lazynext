@@ -360,6 +360,35 @@ impl Compositor {
         Ok(scene)
     }
 
+    /// Renders the frame into multiple textures corresponding to different aspect ratios in a single pass.
+    /// This drastically reduces render COGS by only computing effects and layers once, and then slicing.
+    pub fn render_multi_format_frame_to_textures(
+        &mut self,
+        context: &GpuContext,
+        frame: &FrameDescriptor,
+        aspect_ratios: &[(u32, u32)], // (width, height)
+    ) -> Result<Vec<wgpu::Texture>, CompositorError> {
+        let base_scene = self.render_frame_to_texture(context, frame)?;
+        
+        let mut results = Vec::new();
+        for &(width, height) in aspect_ratios {
+            let mut encoder = context.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("compositor-multi-format-encoder"),
+            });
+            
+            // In a full implementation, this copy_texture would involve a custom shader
+            // to crop/scale the base_scene to fit the target aspect ratio, ensuring the
+            // center/subject is maintained (auto-reframing).
+            // For now, we perform a simple copy of the center region.
+            let target = self.copy_texture(context, &mut encoder, &base_scene, width, height);
+            
+            context.queue().submit([encoder.finish()]);
+            results.push(target);
+        }
+        
+        Ok(results)
+    }
+
     pub fn render_frame(
         &mut self,
         context: &GpuContext,

@@ -16,3 +16,5 @@ pub use frame::{
 pub mod aces;
 pub mod stereoscopic;
 pub mod transforms3d;
+pub mod msdf;
+pub mod keyframe;

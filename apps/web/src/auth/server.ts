@@ -16,7 +16,9 @@ async function sendEmail({
 }) {
 	const from = process.env["EMAIL_FROM"] || "no-reply@lazynext.com";
 	console.log(`[Auth Debug] sendEmail called! to: ${to}, subject: ${subject}`);
-	console.log(`[Auth Debug] RESEND_API_KEY length: ${process.env["RESEND_API_KEY"]?.length}, SMTP_HOST: ${process.env["SMTP_HOST"]}`);
+	console.log(
+		`[Auth Debug] RESEND_API_KEY length: ${process.env["RESEND_API_KEY"]?.length}, SMTP_HOST: ${process.env["SMTP_HOST"]}`,
+	);
 
 	// Configure Nodemailer for permanent robust email delivery
 	// Users can provide SMTP credentials in .env.local

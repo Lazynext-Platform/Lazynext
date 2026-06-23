@@ -36,3 +36,64 @@ impl AudioObject {
         }
     }
 }
+
+/// Head-Related Transfer Function (HRTF) Processor
+/// Converts 3D monaural sound sources into a Binaural (2-channel stereo) output
+/// that tricks the human brain into perceiving accurate 3D spatial positioning using standard headphones.
+pub struct HRTFProcessor {
+    pub sample_rate: u32,
+    pub head_radius_meters: f32, // Typical human head ~ 0.0875m
+    pub speed_of_sound: f32,     // ~ 343.0 m/s
+}
+
+impl HRTFProcessor {
+    pub fn new(sample_rate: u32) -> Self {
+        Self {
+            sample_rate,
+            head_radius_meters: 0.0875,
+            speed_of_sound: 343.0,
+        }
+    }
+
+    /// Apply Interaural Time Difference (ITD) and Interaural Level Difference (ILD)
+    /// Returns a tuple of (Left Channel Output, Right Channel Output)
+    pub fn process_binaural(&self, audio_object: &AudioObject, input_buffer: &[f32]) -> (Vec<f32>, Vec<f32>) {
+        // Calculate the azimuth angle based on X and Y coordinates (-1.0 to 1.0)
+        let azimuth_rad = audio_object.x.atan2(audio_object.y);
+        
+        // Woodworth's formula for ITD (Interaural Time Difference)
+        let itd_seconds = (self.head_radius_meters / self.speed_of_sound) * (azimuth_rad + azimuth_rad.sin());
+        let itd_samples = (itd_seconds * self.sample_rate as f32).abs() as usize;
+
+        // Simple ILD (Interaural Level Difference) based on shadowing
+        let shadow_factor = 0.5 * (1.0 - azimuth_rad.cos());
+        let mut left_gain = 1.0;
+        let mut right_gain = 1.0;
+
+        if audio_object.x > 0.0 {
+            // Source is to the right
+            left_gain -= shadow_factor;
+        } else {
+            // Source is to the left
+            right_gain -= shadow_factor;
+        }
+
+        // Apply delay (ITD) and attenuation (ILD)
+        let mut left_output = vec![0.0; input_buffer.len() + itd_samples];
+        let mut right_output = vec![0.0; input_buffer.len() + itd_samples];
+
+        for (i, &sample) in input_buffer.iter().enumerate() {
+            if audio_object.x > 0.0 {
+                // Delay left ear
+                left_output[i + itd_samples] = sample * left_gain;
+                right_output[i] = sample * right_gain;
+            } else {
+                // Delay right ear
+                left_output[i] = sample * left_gain;
+                right_output[i + itd_samples] = sample * right_gain;
+            }
+        }
+
+        (left_output, right_output)
+    }
+}

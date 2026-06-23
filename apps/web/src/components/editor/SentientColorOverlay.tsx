@@ -45,7 +45,9 @@ export function SentientColorOverlay({ isActive }: SentientColorOverlayProps) {
 				</div>
 				<div className="flex justify-between items-center text-[10px]">
 					<span className="text-muted">Harmony Profile</span>
-					<span className="text-foreground font-medium">Split-Complementary</span>
+					<span className="text-foreground font-medium">
+						Split-Complementary
+					</span>
 				</div>
 				<div className="flex justify-between items-center text-[10px]">
 					<span className="text-muted">Emotional Resonance</span>

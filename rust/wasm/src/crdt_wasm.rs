@@ -1,3 +1,4 @@
+use state::entity_graph::EntityGraph;
 use serde_wasm_bindgen::{from_value, to_value};
 use state::operations::{CrdtOperation, CrdtOperationLog};
 use state::tombstone::TombstoneMap;
@@ -11,6 +12,7 @@ pub struct CrdtEngine {
     tombstones: TombstoneMap,
     clock: VectorClock,
     peer_id: String,
+    entity_graph: EntityGraph,
 }
 
 #[wasm_bindgen]
@@ -23,6 +25,7 @@ impl CrdtEngine {
             tombstones: TombstoneMap::new(),
             clock: VectorClock::new(),
             peer_id,
+            entity_graph: EntityGraph::new(),
         }
     }
 
@@ -117,5 +120,23 @@ impl CrdtEngine {
     #[wasm_bindgen(js_name = "getPeerId")]
     pub fn get_peer_id(&self) -> String {
         self.peer_id.clone()
+    }
+
+    /// Set an entity's global value in the EntityGraph
+    #[wasm_bindgen(js_name = "setEntity")]
+    pub fn set_entity(&mut self, entity_id: String, value: String) {
+        self.entity_graph.set_entity(&entity_id, &value);
+    }
+
+    /// Link a timeline clip to an entity in the EntityGraph
+    #[wasm_bindgen(js_name = "linkClipToEntity")]
+    pub fn link_clip_to_entity(&mut self, clip_id: String, entity_id: String) {
+        self.entity_graph.link_clip_to_entity(&clip_id, &entity_id);
+    }
+
+    /// Get the serialized EntityGraph for Javascript consumption
+    #[wasm_bindgen(js_name = "getEntityGraph")]
+    pub fn get_entity_graph(&self) -> Result<JsValue, JsValue> {
+        to_value(&self.entity_graph).map_err(|e| JsValue::from_str(&e.to_string()))
     }
 }

@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import { setupSyncServer } from "./sync";
 import { decomposeIntent, executePlan } from "./orchestrator";
+import { generateBroll, generateDub } from "./generative";
 
 const app = express();
 const port = process.env.PORT || 8002;
@@ -11,6 +12,10 @@ app.use(express.json());
 app.get("/", (_req, res) => {
   res.json({ status: "ok", service: "ai-agents" });
 });
+
+// Generative Studio Sub-routes
+app.post("/generative/broll", generateBroll);
+app.post("/generative/dub", generateDub);
 
 /**
  * Orchestrate an AI-powered editing intent.

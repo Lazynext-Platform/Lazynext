@@ -16,8 +16,6 @@ const siteFont = Inter({ subsets: ["latin"] });
 
 export const metadata = generateMetadata({});
 
-
-
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 
 export default function RootLayout({
@@ -26,7 +24,6 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
-
 				<OrganizationLD />
 				<SoftwareAppLD />
 				<WebSiteLD />

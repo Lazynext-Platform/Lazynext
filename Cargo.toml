@@ -11,5 +11,6 @@ members = [
     "rust/mcp-server",
     "rust/api-gateway",
     "rust/cli",
-    "apps/desktop"
+    "apps/desktop",
+    "services/collab-server"
 ]

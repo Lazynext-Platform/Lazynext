@@ -30,6 +30,11 @@ class UpscaleRequest(BaseModel):
     video_id: str
     scale: int = 2  # 2x or 4x
 
+class InpaintRequest(BaseModel):
+    video_id: str
+    mask_url: str
+    prompt: str
+
 
 # ── Routes ──
 
@@ -101,6 +106,63 @@ async def generate_video(req: DiffusionRequest):
         "prompt": req.prompt,
         "source": "dev-fallback",
         "asset_url": f"/mock/assets/gen/video.mp4",
+    }
+
+
+@app.post("/inpaint")
+async def inpaint_video(req: InpaintRequest):
+    """
+    Inpaint video using RunwayML Gen-2.
+    Requires RUNWAYML_API_SECRET.
+    """
+    api_key = os.getenv("RUNWAYML_API_SECRET")
+
+    if api_key:
+        try:
+            async with httpx.AsyncClient() as client:
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                    "X-Runway-Version": "2023-09-06",
+                }
+                payload = {
+                    "prompt": req.prompt,
+                    "video_url": f"https://cdn.lazynext.ai/renders/{req.video_id}.mp4",
+                    "mask_url": req.mask_url,
+                }
+
+                # Hypothetical Runway Inpainting API
+                response = await client.post(
+                    "https://api.runwayml.com/v1/inpaint",
+                    headers=headers,
+                    json=payload,
+                    timeout=30.0,
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                return {
+                    "success": True,
+                    "video_id": req.video_id,
+                    "source": "runwayml",
+                    "task_id": data.get("id"),
+                    "status": "processing",
+                }
+        except Exception as e:
+            print(f"[GenerativeStudio] RunwayML API error: {e}")
+
+    if os.getenv("APP_ENV") == "production":
+        raise HTTPException(
+            status_code=503,
+            detail="Inpainting unavailable — RunwayML API key not configured",
+        )
+
+    await asyncio.sleep(2.0)
+    return {
+        "success": True,
+        "video_id": req.video_id,
+        "source": "dev-fallback",
+        "asset_url": f"/mock/assets/inpainted/{req.video_id}_out.mp4",
     }
 
 

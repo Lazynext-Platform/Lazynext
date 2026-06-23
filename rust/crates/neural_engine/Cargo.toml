@@ -11,6 +11,7 @@ image = "0.24.7"
 # ONNX Runtime — uncomment when model files are available
 # ort = { version = "2.0", features = ["load-dynamic"] }
 # tract-onnx = "0.21"
+wgpu = "22.0" # Matches workspace version (or we will rely on workspace version)
 
 [features]
 default = []

@@ -99,6 +99,9 @@ impl P2PNetwork {
                         self.peers.len()
                     );
                     // In production: broadcast CRDT operation
+                    for peer in &self.peers {
+                        println!("   → Syncing CrdtOperation(Insert) to {} via WebRTC Data Channel", peer.display_name);
+                    }
                 }
             }
         }

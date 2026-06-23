@@ -52,6 +52,11 @@ pipeline {
                 cd ../render-service
                 bun install
                 bun test || true
+
+                # Analytics Service
+                cd ../analytics-service
+                bun install
+                bun run typecheck || true
                 '''
             }
         }
@@ -90,6 +95,9 @@ pipeline {
 
                         def genImg = docker.build("${DOCKER_REGISTRY}/${PROJECT_ID}/lazynext-generative-studio:latest", "-f services/generative-studio/Dockerfile services/generative-studio")
                         genImg.push()
+
+                        def analyticsImg = docker.build("${DOCKER_REGISTRY}/${PROJECT_ID}/lazynext-analytics-service:latest", "-f services/analytics-service/Dockerfile services/analytics-service")
+                        analyticsImg.push()
                     }
                 }
             }

@@ -2069,7 +2069,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					stemClip.id = `stem-${Date.now()}-${i}`;
 					stemClip.name = `${audioClip.name} (${stemName})`;
 					stemClip.volume = 1.0;
-					// Note: the backend mocked urls aren't real files right now, 
+					// Note: the backend mocked urls aren't real files right now,
 					// but in a real app this would point to the separated files.
 					stemClip.url = data.stems[stemName];
 
@@ -5430,9 +5430,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</select>
 											</div>
 											<div className="flex items-center justify-between mb-3">
-												<span className="text-xs text-muted w-24">
-													Process
-												</span>
+												<span className="text-xs text-muted w-24">Process</span>
 												<select
 													className="bg-background border border-border text-foreground text-xs rounded px-2 py-1 flex-1 outline-none focus:border-indigo-500"
 													value={selectedClip.retiming_process || "nearest"}
@@ -5508,9 +5506,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												</button>
 											</div>
 											<div className="flex items-center justify-between">
-												<span className="text-xs text-muted w-16">
-													Volume
-												</span>
+												<span className="text-xs text-muted w-16">Volume</span>
 												<button
 													onClick={() =>
 														toggleKeyframe("volume", selectedClip.volume ?? 1.0)
@@ -5836,7 +5832,9 @@ export default function EditorClient({ project }: { project: Project }) {
 													</div>
 												</div>
 												<div className="flex items-center justify-between">
-													<span className="text-xs text-foreground">3D LUT</span>
+													<span className="text-xs text-foreground">
+														3D LUT
+													</span>
 													<select
 														className="bg-background border border-border rounded text-[10px] text-foreground px-2 py-1 outline-none"
 														value={selectedClip.lut || "none"}
@@ -6116,9 +6114,7 @@ export default function EditorClient({ project }: { project: Project }) {
 												Voice FX & Pitch
 											</label>
 											<div className="flex items-center justify-between mb-2">
-												<span className="text-[10px] text-muted">
-													Preset
-												</span>
+												<span className="text-[10px] text-muted">Preset</span>
 												<select
 													className="bg-background border border-border text-foreground text-[10px] rounded px-1.5 py-1 outline-none focus:border-indigo-500"
 													value={selectedClip.audio_fx?.voicePreset || "none"}
@@ -7512,9 +7508,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-indigo-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-muted">
-														Enable
-													</span>
+													<span className="text-[10px] text-muted">Enable</span>
 												</label>
 											</label>
 
@@ -7771,9 +7765,7 @@ export default function EditorClient({ project }: { project: Project }) {
 														}}
 														className="w-3 h-3 accent-emerald-500 rounded cursor-pointer"
 													/>
-													<span className="text-[10px] text-muted">
-														Enable
-													</span>
+													<span className="text-[10px] text-muted">Enable</span>
 												</label>
 											</label>
 
@@ -8885,9 +8877,7 @@ export default function EditorClient({ project }: { project: Project }) {
 													</span>
 												</label>
 												<div className="flex items-center gap-2">
-													<span className="text-[10px] text-muted">
-														Angle
-													</span>
+													<span className="text-[10px] text-muted">Angle</span>
 													<input
 														type="range"
 														min="0"
@@ -9682,7 +9672,11 @@ export default function EditorClient({ project }: { project: Project }) {
 							onQueueRender={(format: string, jobId: string) => {
 								setIsFarmRendering(true);
 								setFarmProgress([
-									{ node: "Node-1 (Master)", status: "Connecting", progress: 0 },
+									{
+										node: "Node-1 (Master)",
+										status: "Connecting",
+										progress: 0,
+									},
 								]);
 
 								const sse = new EventSource(
@@ -9694,7 +9688,8 @@ export default function EditorClient({ project }: { project: Project }) {
 									setFarmProgress([
 										{
 											node: "Distributed Farm Cluster",
-											status: job.status === "rendering" ? "Rendering" : "Completed",
+											status:
+												job.status === "rendering" ? "Rendering" : "Completed",
 											progress: job.progress,
 										},
 									]);
@@ -10885,7 +10880,9 @@ export default function EditorClient({ project }: { project: Project }) {
 									d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
 								/>
 							</svg>
-							<h2 className="text-foreground font-medium tracking-wide">Deliver</h2>
+							<h2 className="text-foreground font-medium tracking-wide">
+								Deliver
+							</h2>
 							<span className="text-[10px] text-muted bg-panel px-2 py-0.5 rounded-full font-mono">
 								{projectData.name || "Untitled"}
 							</span>
@@ -12154,9 +12151,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							/>
 							<span>
 								{cursor.name}{" "}
-								<span className="text-muted font-normal">
-									| {cursor.role}
-								</span>
+								<span className="text-muted font-normal">| {cursor.role}</span>
 							</span>
 						</div>
 					</div>

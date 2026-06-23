@@ -27,15 +27,15 @@ import Timeline from "./timeline";
 import { toast } from "sonner";
 
 export default function ModernEditorClient({ project }: { project: any }) {
-	const { 
-		projectData: ctxProject, 
-		setProjectData, 
-		isPlaying, 
+	const {
+		projectData: ctxProject,
+		setProjectData,
+		isPlaying,
 		setIsPlaying,
 		assets,
 		setAssets,
 		currentTime,
-		setCurrentTime
+		setCurrentTime,
 	} = useEditorState();
 	const [prompt, setPrompt] = useState("");
 	const [chat, setChat] = useState<
@@ -77,14 +77,17 @@ export default function ModernEditorClient({ project }: { project: any }) {
 			const data = await response.json();
 			const assetId = `ai-asset-${Date.now()}`;
 			const duration_frames = 150; // default 5 seconds
-			
+
 			const newAsset = {
 				id: assetId,
 				type: data.type,
 				name: data.name,
 				url: data.url,
 				duration_frames: duration_frames,
-				color: data.type === "audio" ? "bg-amber-600/80 border-amber-400" : "bg-indigo-600/80 border-indigo-400",
+				color:
+					data.type === "audio"
+						? "bg-amber-600/80 border-amber-400"
+						: "bg-indigo-600/80 border-indigo-400",
 			};
 
 			setAssets((prev: any[]) => [...prev, newAsset]);
@@ -102,24 +105,26 @@ export default function ModernEditorClient({ project }: { project: any }) {
 
 			// Ensure tracks exist
 			if (!updatedProject.tracks) updatedProject.tracks = [];
-			
+
 			// Find or create appropriate track
-			let trackIdx = updatedProject.tracks.findIndex((t: any) => t.type === data.type);
+			let trackIdx = updatedProject.tracks.findIndex(
+				(t: any) => t.type === data.type,
+			);
 			if (trackIdx === -1) {
 				updatedProject.tracks.push({
 					id: `track-${Date.now()}`,
 					type: data.type,
 					name: data.type === "video" ? "Video 1" : "Audio 1",
 					clips: [],
-					elements: []
+					elements: [],
 				});
 				trackIdx = updatedProject.tracks.length - 1;
 			}
-			
+
 			updatedProject.tracks[trackIdx].clips.push(newClip);
-			
+
 			setProjectData(updatedProject);
-			
+
 			// Save the project with the new AI clip to IndexedDB via storage service
 			try {
 				await storageService.saveProject(updatedProject);
@@ -188,7 +193,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 			// Save the actual File object into the OPFS via storageService
 			await storageService.saveMediaAsset({
 				projectId: activeProject.id,
-				mediaAsset: newAsset as any
+				mediaAsset: newAsset as any,
 			});
 
 			setAssets((prev: any[]) => [...prev, newAsset]);
@@ -224,7 +229,12 @@ export default function ModernEditorClient({ project }: { project: any }) {
 				<aside className="w-16 glass-panel flex flex-col items-center py-6 gap-6 h-full shadow-2xl shrink-0 border-r border-border/50">
 					<label className="p-3 rounded-xl hover:bg-glass text-cyan-400 cursor-pointer transition-all hover:scale-105 shadow-[0_0_15px_rgba(0,212,223,0.2)]">
 						<Upload className="w-6 h-6" />
-						<input type="file" className="hidden" onChange={handleFileUpload} accept="video/*,audio/*,image/*" />
+						<input
+							type="file"
+							className="hidden"
+							onChange={handleFileUpload}
+							accept="video/*,audio/*,image/*"
+						/>
 					</label>
 					<div className="w-8 h-px bg-border/50 my-2"></div>
 					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-cyan-400 transition-all">
@@ -241,11 +251,15 @@ export default function ModernEditorClient({ project }: { project: any }) {
 				{/* Media Pool Panel */}
 				<aside className="w-64 glass-panel flex flex-col shadow-2xl h-full shrink-0 border-r border-border/50">
 					<div className="p-4 border-b border-border/50 flex items-center justify-between">
-						<h3 className="font-display font-bold text-sm tracking-wide text-foreground/90 uppercase">Media Pool</h3>
-						<span className="text-xs text-foreground/50 bg-background/50 px-2 py-0.5 rounded-full border border-border/50">{assets?.length || 0}</span>
+						<h3 className="font-display font-bold text-sm tracking-wide text-foreground/90 uppercase">
+							Media Pool
+						</h3>
+						<span className="text-xs text-foreground/50 bg-background/50 px-2 py-0.5 rounded-full border border-border/50">
+							{assets?.length || 0}
+						</span>
 					</div>
 					<div className="flex-1 overflow-y-auto p-3 flex flex-col gap-3 custom-scrollbar">
-						{(!assets || assets.length === 0) ? (
+						{!assets || assets.length === 0 ? (
 							<div className="flex flex-col items-center justify-center h-40 text-center text-foreground/40 border-2 border-dashed border-border/50 rounded-xl p-4">
 								<ImageIcon className="w-8 h-8 mb-2 opacity-50" />
 								<p className="text-xs">No media uploaded yet.</p>
@@ -262,12 +276,23 @@ export default function ModernEditorClient({ project }: { project: any }) {
 									{asset.type === "video" || asset.type === "image" ? (
 										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-border/50 relative">
 											{asset.type === "image" ? (
-												<img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+												<img
+													src={asset.url}
+													alt={asset.name}
+													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+												/>
 											) : (
-												<video src={asset.url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+												<video
+													src={asset.url}
+													className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+												/>
 											)}
 											<div className="absolute top-1 right-1 bg-background/80 p-1 rounded">
-												{asset.type === "video" ? <FileVideo className="w-3 h-3 text-cyan-400" /> : <ImageIcon className="w-3 h-3 text-indigo-400" />}
+												{asset.type === "video" ? (
+													<FileVideo className="w-3 h-3 text-cyan-400" />
+												) : (
+													<ImageIcon className="w-3 h-3 text-indigo-400" />
+												)}
 											</div>
 										</div>
 									) : (
@@ -276,7 +301,10 @@ export default function ModernEditorClient({ project }: { project: any }) {
 										</div>
 									)}
 									<div className="flex items-center justify-between w-full px-1">
-										<span className="truncate text-xs font-medium text-foreground group-hover:text-foreground transition-colors flex-1 pr-2" title={asset.name}>
+										<span
+											className="truncate text-xs font-medium text-foreground group-hover:text-foreground transition-colors flex-1 pr-2"
+											title={asset.name}
+										>
 											{asset.name}
 										</span>
 									</div>

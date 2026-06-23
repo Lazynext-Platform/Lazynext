@@ -60,7 +60,10 @@ export default function BillingPage() {
 						"Visionary AI Director Agent",
 						"100GB Cloud Storage",
 					].map((feature, i) => (
-						<div key={i} className="flex items-center gap-3 text-neutral-700 dark:text-neutral-300">
+						<div
+							key={i}
+							className="flex items-center gap-3 text-neutral-700 dark:text-neutral-300"
+						>
 							<CheckCircle2 className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
 							<span>{feature}</span>
 						</div>

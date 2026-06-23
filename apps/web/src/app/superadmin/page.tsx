@@ -1,4 +1,5 @@
 import { Header } from "@/components/header";
+import Link from "next/link";
 import {
 	Activity,
 	Server,
@@ -22,13 +23,13 @@ export default async function SuperAdminDashboard() {
 				{/* Sidebar Nav */}
 				<aside className="w-full md:w-64 flex-shrink-0">
 					<nav className="flex flex-col gap-2">
-						<a
-							href="#"
-							className="flex items-center gap-3 px-4 py-3 bg-[var(--accent-secondary)]/10 text-[var(--accent-secondary)] rounded-lg font-medium border border-[var(--accent-secondary)]/20"
+						<Link
+							href="/superadmin/analytics"
+							className="flex items-center gap-3 px-4 py-3 bg-[var(--accent-secondary)]/10 text-[var(--accent-secondary)] rounded-lg font-medium border border-[var(--accent-secondary)]/20 hover:bg-[var(--accent-secondary)]/20 transition-colors"
 						>
 							<Activity className="w-5 h-5" />
 							Global Telemetry
-						</a>
+						</Link>
 						<a
 							href="#"
 							className="flex items-center gap-3 px-4 py-3 text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] rounded-lg transition-colors"

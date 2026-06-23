@@ -167,7 +167,7 @@ export async function getAllProjects() {
 
 	return allProjects.map((p) => {
 		const parsedData = p.data ? (p.data as any) : {};
-		
+
 		const metadata = parsedData.metadata || {
 			id: p.id,
 			name: p.name,
@@ -175,9 +175,9 @@ export async function getAllProjects() {
 			createdAt: p.createdAt,
 			updatedAt: p.updatedAt,
 		};
-		
+
 		const scenes = parsedData.scenes || [];
-		
+
 		const settings = parsedData.settings || {
 			fps: p.fps,
 			canvasSize: { width: p.width, height: p.height },

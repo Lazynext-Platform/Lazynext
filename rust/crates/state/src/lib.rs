@@ -4,6 +4,7 @@ pub mod keyframe;
 pub mod operations;
 pub mod tombstone;
 pub mod vector_clock;
+pub mod entity_graph;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

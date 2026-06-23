@@ -102,7 +102,9 @@ export function BillingPageClient() {
 	const handleCheckout = async (priceId: string | null, planName: string) => {
 		if (!priceId) return;
 		try {
-			toast.loading(`Preparing checkout for ${planName}...`, { id: "checkout" });
+			toast.loading(`Preparing checkout for ${planName}...`, {
+				id: "checkout",
+			});
 			const res = await fetch("/api/stripe/checkout", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -120,7 +122,10 @@ export function BillingPageClient() {
 			}
 		} catch (error) {
 			console.error(error);
-			toast.error("Error connecting to Stripe. Did you add your STRIPE_SECRET_KEY?", { id: "checkout" });
+			toast.error(
+				"Error connecting to Stripe. Did you add your STRIPE_SECRET_KEY?",
+				{ id: "checkout" },
+			);
 		}
 	};
 
@@ -158,7 +163,10 @@ export function BillingPageClient() {
 										AI Credits
 									</p>
 									<p className="font-bold text-xl text-[var(--text-primary)]">
-										{realCredits !== null ? realCredits.toLocaleString() : org.aiCreditsUsed.toLocaleString()} / 50K
+										{realCredits !== null
+											? realCredits.toLocaleString()
+											: org.aiCreditsUsed.toLocaleString()}{" "}
+										/ 50K
 									</p>
 								</div>
 							</div>
@@ -227,9 +235,7 @@ export function BillingPageClient() {
 								type="button"
 								disabled={plan.current}
 								onClick={() =>
-									plan.current
-										? null
-										: handleCheckout(plan.priceId, plan.name)
+									plan.current ? null : handleCheckout(plan.priceId, plan.name)
 								}
 								className={`mt-8 w-full rounded-xl py-4 font-bold transition-all ${
 									plan.current

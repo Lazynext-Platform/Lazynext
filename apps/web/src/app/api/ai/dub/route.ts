@@ -47,7 +47,9 @@ export async function POST(request: Request) {
 		} catch (microserviceError: unknown) {
 			console.warn(
 				"[API] Microservice unreachable or failed. Falling back to mock data.",
-				(microserviceError instanceof Error ? microserviceError.message : String(microserviceError)),
+				microserviceError instanceof Error
+					? microserviceError.message
+					: String(microserviceError),
 			);
 
 			// Fallback mechanism if the Python service is offline
@@ -64,7 +66,10 @@ export async function POST(request: Request) {
 	} catch (error: unknown) {
 		console.error("Dubbing API Error:", error);
 		return NextResponse.json(
-			{ success: false, error: error instanceof Error ? error.message : String(error) },
+			{
+				success: false,
+				error: error instanceof Error ? error.message : String(error),
+			},
 			{ status: 500 },
 		);
 	}

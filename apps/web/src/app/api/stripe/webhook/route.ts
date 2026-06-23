@@ -45,7 +45,10 @@ export async function POST(req: Request) {
 				userId: session.metadata.userId,
 				stripeSubscriptionId: subscription.id,
 				stripePriceId: subscription.items.data[0].price.id,
-				stripeCurrentPeriodEnd: new Date((subscription as unknown as Record<string, number>).current_period_end * 1000),
+				stripeCurrentPeriodEnd: new Date(
+					(subscription as unknown as Record<string, number>)
+						.current_period_end * 1000,
+				),
 				tier: "pro",
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -54,9 +57,9 @@ export async function POST(req: Request) {
 			// Update user with stripe customer ID and grant 1000 monthly credits
 			await db
 				.update(user)
-				.set({ 
+				.set({
 					stripeCustomerId: subscription.customer as string,
-					aiCredits: sql`${user.aiCredits} + 1000`
+					aiCredits: sql`${user.aiCredits} + 1000`,
 				})
 				.where(eq(user.id, session.metadata.userId));
 		} else if (session.mode === "payment") {
@@ -78,7 +81,8 @@ export async function POST(req: Request) {
 			.set({
 				stripePriceId: subscription.items.data[0].price.id,
 				stripeCurrentPeriodEnd: new Date(
-					(subscription as unknown as Record<string, number>).current_period_end * 1000,
+					(subscription as unknown as Record<string, number>)
+						.current_period_end * 1000,
 				),
 				updatedAt: new Date(),
 			})

@@ -58,12 +58,21 @@ export default function App() {
   const [status, setStatus] = useState("Ready");
   const [processing, setProcessing] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
+  const [isApplePencil, setIsApplePencil] = useState(false);
 
   useEffect(() => {
     setProjectName(NativeBridge.get_project_name());
     setTrackCount(NativeBridge.get_track_count());
     setClipCount(NativeBridge.get_track_count() * 2); // mock clip count
   }, []);
+
+  // Detect Apple Pencil / Stylus hover or touch
+  const handleTouchStart = (e: any) => {
+    if (e.nativeEvent?.touches?.[0]?.force !== undefined) {
+      // Basic heuristic for Stylus/Apple Pencil on iOS/iPadOS
+      setIsApplePencil(true);
+    }
+  };
 
   const handleProcessIntent = () => {
     if (!prompt.trim()) return;
@@ -84,7 +93,7 @@ export default function App() {
   const quickActions = ["Cut silence", "Add music", "Color grade", "Generate B-roll"];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} onTouchStart={handleTouchStart}>
       <StatusBar barStyle="light-content" backgroundColor="#050505" />
 
       <View style={styles.header}>
@@ -92,6 +101,11 @@ export default function App() {
           LAZYNEXT<Text style={styles.cyan}>.</Text>
         </Text>
         <Text style={styles.subtitle}>Mobile NLE Shell</Text>
+        {isApplePencil && (
+          <Text style={{ color: "#00e5ff", fontSize: 12, marginTop: 4 }}>
+            Apple Pencil Detected
+          </Text>
+        )}
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>

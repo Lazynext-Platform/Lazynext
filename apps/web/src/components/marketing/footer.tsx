@@ -7,7 +7,10 @@ export function MarketingFooter() {
 		<footer className="border-t border-border bg-background py-12 mt-24">
 			<div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
 				<div className="col-span-1 md:col-span-2">
-					<Link href="/" className="flex items-center gap-2 mb-4 text-foreground">
+					<Link
+						href="/"
+						className="flex items-center gap-2 mb-4 text-foreground"
+					>
 						<Image
 							src="/logo.png"
 							width={20}

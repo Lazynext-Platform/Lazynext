@@ -2,6 +2,9 @@
 name = "lazynext_core"
 version = "0.1.0"
 edition = "2024"
+description = "The ultra-fast rust compositor and CRDT synchronization engine for Lazynext."
+repository = "https://github.com/lazynext/lazynext"
+license = "MIT"
 
 [dependencies]
 lazynext_plugin_api = { path = "../plugin-api" }

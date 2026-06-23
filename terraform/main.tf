@@ -798,6 +798,49 @@ resource "google_cloud_run_v2_service_iam_member" "gen_studio_public" {
   member   = "allUsers"
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Cloud Run — Analytics Service
+# ─────────────────────────────────────────────────────────────────────────────
+resource "google_cloud_run_v2_service" "analytics_service" {
+  name     = "lazynext-analytics-${var.environment}"
+  location = var.region
+  ingress  = "INGRESS_TRAFFIC_ALL"
+
+  template {
+    service_account = google_service_account.cloud_run.email
+
+    containers {
+      image = "us-central1-docker.pkg.dev/${var.project_id}/lazynext/lazynext-analytics-service:latest"
+
+      ports {
+        container_port = 8005
+      }
+
+      resources {
+        limits = {
+          cpu    = "1"
+          memory = "1Gi"
+        }
+      }
+
+      env {
+        name  = "NODE_ENV"
+        value = "production"
+      }
+    }
+
+    scaling {
+      min_instance_count = var.environment == "production" ? 1 : 0
+      max_instance_count = 5
+    }
+  }
+
+  depends_on = [
+    google_project_service.apis,
+    google_artifact_registry_repository.docker,
+  ]
+}
+
 resource "google_cloud_run_v2_service_iam_member" "render_service_public" {
   name     = google_cloud_run_v2_service.render_service.name
   location = google_cloud_run_v2_service.render_service.location
@@ -861,9 +904,9 @@ resource "google_monitoring_alert_policy" "web_error_rate" {
       threshold_value = 0.05
 
       aggregations {
-        alignment_period   = "60s"
+        alignment_period     = "60s"
         cross_series_reducer = "REDUCE_SUM"
-        per_series_aligner = "ALIGN_RATE"
+        per_series_aligner   = "ALIGN_RATE"
       }
 
       trigger {
@@ -921,8 +964,8 @@ resource "google_sql_database_instance" "postgres_replica" {
 
 
 resource "google_kms_key_ring" "db_keyring" {
-  name     = "lazynext-db-keyring-${var.environment}"
-  location = var.region
+  name       = "lazynext-db-keyring-${var.environment}"
+  location   = var.region
   depends_on = [google_project_service.apis]
 }
 
@@ -1205,8 +1248,8 @@ resource "google_compute_managed_ssl_certificate" "web_cert" {
 }
 
 resource "google_compute_backend_service" "web_backend" {
-  name        = "lazynext-backend-${var.environment}"
-  protocol    = "HTTPS"
+  name     = "lazynext-backend-${var.environment}"
+  protocol = "HTTPS"
 
   backend {
     group = google_compute_region_network_endpoint_group.web_neg.id

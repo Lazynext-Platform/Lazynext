@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useWasm } from "@/hooks/use-wasm";
+import { PromptMode } from "@/editor/PromptMode";
+import { ExecutionContract } from "@/editor/ExecutionContract";
 import {
 	Send,
 	Bot,
@@ -21,6 +23,7 @@ import {
 export default function EditorPage() {
 	const { isReady, time, frame } = useWasm();
 
+	const [isPromptModeOpen, setIsPromptModeOpen] = useState(false);
 	const [prompt, setPrompt] = useState("");
 	const [chat, setChat] = useState<
 		{ role: "user" | "agent"; content: string; videoUrl?: string }[]
@@ -82,10 +85,21 @@ export default function EditorPage() {
 				</div>
 				<div className="flex items-center gap-4">
 					<div className="text-xs text-foreground/40 mr-4">
-						WASM Core: {isReady ? <span className="text-green-400">Online</span> : <span className="text-yellow-400">Loading...</span>}
+						WASM Core:{" "}
+						{isReady ? (
+							<span className="text-green-400">Online</span>
+						) : (
+							<span className="text-yellow-400">Loading...</span>
+						)}
 					</div>
 					<button className="btn-premium flex items-center gap-2 text-sm">
 						<Settings className="w-4 h-4" /> Workspace Settings
+					</button>
+					<button
+						className="btn-primary px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-black border-none"
+						onClick={() => setIsPromptModeOpen(true)}
+					>
+						Enter Prompt Mode
 					</button>
 					<button className="btn-primary px-6 py-2">Export Project</button>
 				</div>
@@ -126,17 +140,26 @@ export default function EditorPage() {
 
 						{/* Floating Playback Controls */}
 						<div className="absolute bottom-6 left-1/2 -translate-x-1/2 glass-panel px-6 py-3 rounded-full flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-							<button className="text-foreground/70 hover:text-foreground transition-colors" onClick={() => time?.setFrame(Math.max(0, frame - 30))}>
+							<button
+								className="text-foreground/70 hover:text-foreground transition-colors"
+								onClick={() => time?.setFrame(Math.max(0, frame - 30))}
+							>
 								<Rewind className="w-5 h-5 fill-current" />
 							</button>
-							<button onClick={togglePlayback} className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform">
+							<button
+								onClick={togglePlayback}
+								className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform"
+							>
 								{time?.isPlaying ? (
 									<Pause className="w-5 h-5 fill-current" />
 								) : (
 									<Play className="w-5 h-5 fill-current ml-1" />
 								)}
 							</button>
-							<button className="text-foreground/70 hover:text-foreground transition-colors" onClick={() => time?.setFrame(frame + 30)}>
+							<button
+								className="text-foreground/70 hover:text-foreground transition-colors"
+								onClick={() => time?.setFrame(frame + 30)}
+							>
 								<FastForward className="w-5 h-5 fill-current" />
 							</button>
 						</div>
@@ -150,13 +173,13 @@ export default function EditorPage() {
 							</h3>
 							<div className="text-xs text-foreground/40 font-mono flex items-center gap-2">
 								<div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
-								Frame: {frame.toString().padStart(5, '0')} | 00:01:24:15
+								Frame: {frame.toString().padStart(5, "0")} | 00:01:24:15
 							</div>
 						</div>
 
 						<div className="flex-1 relative bg-background/20 rounded-xl overflow-x-auto overflow-y-hidden border border-border p-2 space-y-2">
 							{/* Playhead Indicator tied to frame */}
-							<div 
+							<div
 								className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none"
 								style={{ left: `calc(40px + ${(frame / 30) * 10}px)` }}
 							>
@@ -200,37 +223,7 @@ export default function EditorPage() {
 					</div>
 
 					<div className="flex-1 overflow-y-auto p-5 space-y-6">
-						{chat.map((msg, idx) => (
-							<div
-								key={idx}
-								className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-							>
-								<div
-									className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "agent" ? "bg-cyan-500/20" : "bg-glass"}`}
-								>
-									{msg.role === "agent" ? (
-										<Bot className="w-4 h-4 text-cyan-400" />
-									) : (
-										<User className="w-4 h-4 text-foreground/60" />
-									)}
-								</div>
-								<div
-									className={`text-sm leading-relaxed p-4 rounded-2xl ${msg.role === "user" ? "bg-glass text-foreground rounded-tr-none" : "bg-background/40 text-foreground/80 border border-border rounded-tl-none shadow-inner"}`}
-								>
-									<p>{msg.content}</p>
-								</div>
-							</div>
-						))}
-						{isProcessing && (
-							<div className="flex gap-4">
-								<div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
-									<Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
-								</div>
-								<div className="bg-background/40 border border-border rounded-2xl p-4 text-sm text-foreground/50 rounded-tl-none">
-									Orchestrating timeline edits...
-								</div>
-							</div>
-						)}
+						<ExecutionContract />
 					</div>
 
 					<div className="p-4 border-t border-border bg-background/20">
@@ -254,6 +247,20 @@ export default function EditorPage() {
 					</div>
 				</aside>
 			</main>
+
+			{isPromptModeOpen && (
+				<div className="fixed inset-0 z-[100]">
+					<div className="absolute top-4 right-4 z-[101]">
+						<button
+							onClick={() => setIsPromptModeOpen(false)}
+							className="bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-600 transition-colors"
+						>
+							Close Prompt Mode
+						</button>
+					</div>
+					<PromptMode />
+				</div>
+			)}
 		</div>
 	);
 }

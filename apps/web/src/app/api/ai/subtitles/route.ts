@@ -33,14 +33,16 @@ export async function POST(request: Request) {
 			const data = await res.json();
 
 			// Parse Microservice Output into Timeline Format
-			const mappedSubtitles = data.subtitles.map((sub: { text: string; start: number; end: number }, i: number) => ({
-				id: `clip-${Date.now()}-${i}`,
-				name: sub.text.substring(0, 15) + "...",
-				type: "text",
-				start_frame: Math.floor(sub.start * 60), // Assuming 60fps
-				duration_frames: Math.floor((sub.end - sub.start) * 60),
-				text: sub.text,
-			}));
+			const mappedSubtitles = data.subtitles.map(
+				(sub: { text: string; start: number; end: number }, i: number) => ({
+					id: `clip-${Date.now()}-${i}`,
+					name: sub.text.substring(0, 15) + "...",
+					type: "text",
+					start_frame: Math.floor(sub.start * 60), // Assuming 60fps
+					duration_frames: Math.floor((sub.end - sub.start) * 60),
+					text: sub.text,
+				}),
+			);
 
 			return NextResponse.json({
 				success: true,
@@ -51,7 +53,9 @@ export async function POST(request: Request) {
 		} catch (microserviceError: unknown) {
 			console.warn(
 				"[API] Microservice unreachable or failed. Falling back to mock data.",
-				(microserviceError instanceof Error ? microserviceError.message : String(microserviceError)),
+				microserviceError instanceof Error
+					? microserviceError.message
+					: String(microserviceError),
 			);
 
 			// Fallback mechanism if the Python service is offline
@@ -99,7 +103,10 @@ export async function POST(request: Request) {
 	} catch (error: unknown) {
 		console.error("Transcription API Error:", error);
 		return NextResponse.json(
-			{ success: false, error: error instanceof Error ? error.message : String(error) },
+			{
+				success: false,
+				error: error instanceof Error ? error.message : String(error),
+			},
 			{ status: 500 },
 		);
 	}

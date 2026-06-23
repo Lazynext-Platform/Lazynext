@@ -635,3 +635,60 @@ spec:
                 secretKeyRef:
                   name: lazynext-secrets
                   key: DATABASE_URL
+---
+# Analytics Service (Node.js/Kafka)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-analytics-service
+  namespace: lazynext
+  labels:
+    app: lazynext-analytics-service
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lazynext-analytics-service
+  template:
+    metadata:
+      labels:
+        app: lazynext-analytics-service
+        component: backend
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: lazynext-analytics-service
+          image: ghcr.io/lazynext-platform/lazynext-analytics-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8005
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          env:
+            - name: NODE_ENV
+              value: "production"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-analytics-service
+  namespace: lazynext
+  labels:
+    app: lazynext-analytics-service
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-analytics-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8005
+      targetPort: 8005

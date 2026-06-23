@@ -60,6 +60,7 @@ impl CRDTClip {
 #[allow(clippy::large_enum_variant)]
 pub struct CRDTTimeline {
     pub clips: HashMap<String, CRDTClip>,
+    pub entity_graph: crate::entity_graph::EntityGraph,
 }
 
 impl Default for CRDTTimeline {
@@ -72,6 +73,7 @@ impl CRDTTimeline {
     pub fn new() -> Self {
         Self {
             clips: HashMap::new(),
+            entity_graph: crate::entity_graph::EntityGraph::new(),
         }
     }
 
@@ -87,6 +89,14 @@ impl CRDTTimeline {
             } else {
                 self.clips.insert(id.clone(), incoming_clip.clone());
             }
+        }
+        
+        // Simple entity graph merge: last writer wins for entities (naive implementation for demo)
+        for (k, v) in &delta.entity_graph.entities {
+            self.entity_graph.entities.insert(k.clone(), v.clone());
+        }
+        for (k, v) in &delta.entity_graph.links {
+            self.entity_graph.links.insert(k.clone(), v.clone());
         }
     }
 

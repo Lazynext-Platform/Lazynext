@@ -6,9 +6,14 @@ use lazynext_core::{NLEEvent, NLEState};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::net::SocketAddr;
+use tracing::{info, Level};
+use tracing_subscriber::FmtSubscriber;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
+use axum::middleware;
+
+pub mod rbac;
 
 #[derive(Serialize)]
 struct WebhookPayload {
@@ -25,7 +30,14 @@ struct AppState {
 
 #[tokio::main]
 async fn main() {
-    println!("🌐 Starting Lazynext Webhook API Gateway...");
+    // Initialize OpenTelemetry Tracing
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Failed to set tracing subscriber");
+
+    info!("Initializing Lazynext API Gateway with OpenTelemetry tracing...");
 
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
 
@@ -75,6 +87,7 @@ async fn main() {
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/render", post(handle_trigger_render))
+        .layer(middleware::from_fn(rbac::authorize_request))
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));

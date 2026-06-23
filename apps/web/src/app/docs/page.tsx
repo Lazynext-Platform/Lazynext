@@ -23,7 +23,9 @@ export default function DocsPage() {
 	return (
 		<div className="min-h-screen bg-background text-foreground">
 			<div className="mx-auto max-w-4xl px-4 py-16">
-				<h1 className="text-4xl font-bold text-foreground">API Documentation</h1>
+				<h1 className="text-4xl font-bold text-foreground">
+					API Documentation
+				</h1>
 				<p className="mt-2 text-muted">
 					Complete reference for Lazynext API endpoints.
 				</p>
