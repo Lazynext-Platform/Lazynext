@@ -8,8 +8,7 @@ pub struct ColorScopesAnalyzer {
 
 impl ColorScopesAnalyzer {
     pub fn new(device: &Device) -> Self {
-        // TODO: Load the WGSL shader for Waveform & Vectorscope computation
-        // For now, we mock the compute pipeline setup
+        // Load the WGSL shader for Waveform & Vectorscope computation
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Scopes Compute Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("shaders/scopes.wgsl").into()),
