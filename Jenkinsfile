@@ -26,13 +26,13 @@ pipeline {
                 sh '''
                 # Pre-processing
                 cd services/pre-processing
-                pip install -r requirements.txt
-                pip install pytest pytest-asyncio
+                pip install --upgrade -r requirements.txt
+                pip install --upgrade pytest pytest-asyncio
                 python -m pytest tests/ -v || true
 
                 # Generative Studio
                 cd ../generative-studio
-                pip install -r requirements.txt
+                pip install --upgrade -r requirements.txt
                 python -m pytest tests/ -v || true
                 '''
             }

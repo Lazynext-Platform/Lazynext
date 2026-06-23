@@ -25,7 +25,7 @@ rust-core:
     expire_in: 1 day
 
 python-test:
-  image: python:3.12
+  image: python:3.13
   stage: test
   script:
     - cd services/pre-processing
@@ -56,10 +56,10 @@ web-app:
     - cd ../.. && bun run test
 
 docker-build:
-  image: docker:24.0.5
+  image: docker:27.0.3
   stage: build-docker
   services:
-    - docker:24.0.5-dind
+    - docker:27.0.3-dind
   before_script:
     - echo "$DOCKER_PASSWORD" | docker login $DOCKER_REGISTRY -u "$DOCKER_USERNAME" --password-stdin
   script:

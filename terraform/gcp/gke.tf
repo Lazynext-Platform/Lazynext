@@ -22,7 +22,7 @@ resource "google_container_node_pool" "general_nodes" {
 
   node_config {
     machine_type = "e2-medium"
-    
+
     labels = {
       environment = var.environment
     }
@@ -33,9 +33,9 @@ resource "google_container_node_pool" "general_nodes" {
 
 # GPU pool for AI 
 resource "google_container_node_pool" "gpu_nodes" {
-  name       = "gpu-pool"
-  location   = var.gcp_region
-  cluster    = google_container_cluster.gke.name
+  name     = "gpu-pool"
+  location = var.gcp_region
+  cluster  = google_container_cluster.gke.name
 
   autoscaling {
     total_min_node_count = 0

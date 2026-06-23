@@ -55,11 +55,10 @@ impl PluginRuntime {
         match self.context.eval(source) {
             Ok(value) => {
                 // Read the JS global variable
-                if let Ok(js_time) = self.context.global_object().get(boa_engine::JsString::from("current_time"), &mut self.context) {
-                    if let Ok(time_f64) = js_time.to_number(&mut self.context) {
+                if let Ok(js_time) = self.context.global_object().get(boa_engine::JsString::from("current_time"), &mut self.context)
+                    && let Ok(time_f64) = js_time.to_number(&mut self.context) {
                         self.api.borrow_mut().current_time = time_f64;
                     }
-                }
 
                 let display = value.display().to_string();
                 let api_ref = self.api.borrow();

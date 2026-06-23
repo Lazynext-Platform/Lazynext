@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -42,8 +42,8 @@ module "vpc" {
   enable_vpn_gateway = false
 
   tags = {
-    Environment = var.environment
-    Project     = "Lazynext"
+    Environment                                             = var.environment
+    Project                                                 = "Lazynext"
     "kubernetes.io/cluster/lazynext-eks-${var.environment}" = "shared"
   }
 }

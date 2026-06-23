@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 /// files into 720p intra-frame proxies for smooth timeline scrubbing.
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
+#[allow(dead_code)]
 pub struct ProxyGenerator {
     target_resolution: (u32, u32),
     is_processing: Arc<Mutex<bool>>,

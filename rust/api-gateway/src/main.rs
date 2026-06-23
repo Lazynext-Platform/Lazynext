@@ -189,7 +189,7 @@ async fn handle_admin_dashboard(State(state): State<AppState>) -> Json<Value> {
 
 async fn handle_get_projects(
     State(state): State<AppState>,
-    headers: HeaderMap,
+    _headers: HeaderMap,
 ) -> Json<Value> {
     // In a real app, parse the JWT from Authorization header to get user_id.
     // For now, mock it.

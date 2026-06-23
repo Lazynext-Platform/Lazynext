@@ -59,6 +59,7 @@ fn parse_apply_mask_feather_options(value: JsValue) -> Result<ApplyMaskFeatherOp
     })
 }
 
+#[allow(dead_code)]
 struct ApplyPolygonMaskOptions {
     mask: wgpu::web_sys::OffscreenCanvas,
     width: u32,

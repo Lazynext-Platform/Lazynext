@@ -21,7 +21,7 @@ impl ColorGradingProcessor {
     /// Applies color grading to a flat RGBA buffer.
     /// Modifies the buffer in-place to avoid allocations.
     #[wasm_bindgen]
-    pub fn apply_grading(&self, mut frame_data: &mut [u8]) {
+    pub fn apply_grading(&self, frame_data: &mut [u8]) {
         for chunk in frame_data.chunks_exact_mut(4) {
             let r = chunk[0] as f32 / 255.0;
             let g = chunk[1] as f32 / 255.0;
@@ -45,9 +45,9 @@ impl ColorGradingProcessor {
             b = luma + self.saturation * (b - luma);
 
             // Clamp and write back
-            chunk[0] = (r.max(0.0).min(1.0) * 255.0) as u8;
-            chunk[1] = (g.max(0.0).min(1.0) * 255.0) as u8;
-            chunk[2] = (b.max(0.0).min(1.0) * 255.0) as u8;
+            chunk[0] = (r.clamp(0.0, 1.0) * 255.0) as u8;
+            chunk[1] = (g.clamp(0.0, 1.0) * 255.0) as u8;
+            chunk[2] = (b.clamp(0.0, 1.0) * 255.0) as u8;
             chunk[3] = a; // alpha remains unchanged
         }
     }

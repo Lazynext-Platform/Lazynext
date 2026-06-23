@@ -2,6 +2,7 @@ use rustfft::{FftPlanner, num_complex::Complex};
 
 /// An FFT-based audio analyzer for generating frequency bins.
 /// Designed for extracting low, mid, and high frequencies for audio-reactive WebGPU shaders.
+#[allow(dead_code)]
 pub struct AudioAnalyzer {
     sample_rate: u32,
     fft_size: usize,

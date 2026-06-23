@@ -1,13 +1,18 @@
 /// Simulated WebAssembly sandbox execution environment for untrusted third-party plugins.
 /// In production, this utilizes `wasmtime` or `wasmer` to securely load compiled .wasm
 /// binaries provided by community developers, exposing only safe host APIs.
-
 pub struct WasmSandbox {
     // In a real implementation:
     // engine: wasmtime::Engine,
     // module: wasmtime::Module,
     // store: wasmtime::Store<()>,
     is_initialized: bool,
+}
+
+impl Default for WasmSandbox {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl WasmSandbox {

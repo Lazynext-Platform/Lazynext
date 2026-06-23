@@ -13,7 +13,7 @@ pub enum WorkspaceRole {
 }
 
 impl WorkspaceRole {
-    pub fn from_str(role: &str) -> Option<Self> {
+    pub fn parse(role: &str) -> Option<Self> {
         match role.to_lowercase().as_str() {
             "admin" => Some(WorkspaceRole::Admin),
             "editor" => Some(WorkspaceRole::Editor),

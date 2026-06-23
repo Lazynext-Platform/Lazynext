@@ -34,7 +34,7 @@ impl EntityGraph {
     /// Link a specific timeline clip to an entity
     pub fn link_clip_to_entity(&mut self, clip_id: &str, entity_id: &str) {
         self.links.entry(clip_id.to_string())
-            .or_insert_with(Vec::new)
+            .or_default()
             .push(entity_id.to_string());
     }
 

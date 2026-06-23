@@ -31,13 +31,13 @@ echo "Starting Render Service..."
 echo "Starting Pre-Processing ML Service..."
 (
 cd services/pre-processing
-if command -v python3 &>/dev/null; then
-    rm -rf venv
-    python3 -m venv venv
-    source venv/bin/activate
+PYTHON_EXEC=$(which python3.13 || which python3)
+if command -v $PYTHON_EXEC &>/dev/null; then
+    PYTHON_EXEC=$(which python3.13 || which python3)
+    $PYTHON_EXEC -m venv venv
     export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
-    pip install -r requirements.txt fastapi uvicorn pydantic
-    python3 main.py
+    venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt fastapi uvicorn pydantic
+    venv/bin/python main.py
 else
     echo "Python 3 not found, skipping pre-processing service."
 fi
@@ -47,17 +47,17 @@ fi
 echo "Starting Generative Studio..."
 (
 cd services/generative-studio
-if command -v python3 &>/dev/null; then
-    rm -rf venv
-    python3 -m venv venv
-    source venv/bin/activate
+PYTHON_EXEC=$(which python3.13 || which python3)
+if command -v $PYTHON_EXEC &>/dev/null; then
+    PYTHON_EXEC=$(which python3.13 || which python3)
+    $PYTHON_EXEC -m venv venv
     export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
     # Create a basic requirements file if missing
     if [ ! -f "requirements.txt" ]; then
         echo -e "fastapi\nuvicorn\npydantic" > requirements.txt
     fi
-    pip install -r requirements.txt
-    python3 main.py
+    venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt
+    venv/bin/python main.py
 else
     echo "Python 3 not found, skipping generative studio."
 fi

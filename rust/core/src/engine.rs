@@ -21,7 +21,7 @@ impl CoreEngine {
 
     /// Renders a single frame from the CRDT timeline state.
     pub async fn render_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
-        let state = self.project.lock().await;
+        let _state = self.project.lock().await;
         
         // Ensure the frame is within the timeline duration (mock 1M frames)
         if frame_idx >= 1_000_000 {

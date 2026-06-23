@@ -274,15 +274,15 @@ impl NeuralComputePipeline {
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("neural-compute-pipeline-layout"),
-            bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
+            bind_group_layouts: &[Some(&bind_group_layout)],
+            immediate_size: 0,
         });
 
         let pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("neural-compute-pipeline"),
             layout: Some(&pipeline_layout),
             module: &shader,
-            entry_point: "compute_main",
+            entry_point: Some("compute_main"),
             compilation_options: Default::default(),
             cache: None,
         });

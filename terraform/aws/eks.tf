@@ -32,7 +32,7 @@ module "eks" {
 
       instance_types = ["g4dn.xlarge"] # GPU instance for SAM2/Diffusion
       capacity_type  = "SPOT"
-      
+
       taints = {
         dedicated = {
           key    = "nvidia.com/gpu"

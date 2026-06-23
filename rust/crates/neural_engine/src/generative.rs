@@ -43,6 +43,7 @@ impl GenerativeModel {
     pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
         let Some(api_key) = &self.api_key else {
             println!("[NeuralEngine] Warning: REPLICATE_API_TOKEN not found. Using local mock generation.");
+            #[cfg(not(target_arch = "wasm32"))]
             tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
             return Ok(format!("generated_{}.mp4", options.prompt.replace(" ", "_").to_lowercase()));
         };
@@ -86,6 +87,7 @@ impl GenerativeModel {
     pub async fn generate_tts(&self, options: &AudioGenerationOptions) -> Result<String, String> {
         let Some(api_key) = &self.api_key else {
             println!("[NeuralEngine] Warning: TTS API key not found. Mocking audio output.");
+            #[cfg(not(target_arch = "wasm32"))]
             tokio::time::sleep(tokio::time::Duration::from_millis(800)).await;
             return Ok("tts_output.wav".to_string());
         };

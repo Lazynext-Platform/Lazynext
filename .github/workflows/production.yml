@@ -15,7 +15,7 @@ jobs:
     name: Rust Core Tests & Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - name: Cargo Check
         run: cargo check --workspace
@@ -28,8 +28,8 @@ jobs:
     name: Node.js Services Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
       - name: Install dependencies
         run: bun install
       - name: Typecheck Services
@@ -43,17 +43,17 @@ jobs:
     needs: [rust-checks, node-checks]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       # ── GCP DEPLOYMENT ──────────────────────────────────────────────────
       - name: Authenticate GCP
         if: env.CLOUD_PROVIDER == 'gcp'
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
       - name: Set up Cloud SDK
         if: env.CLOUD_PROVIDER == 'gcp'
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
       - name: Build & Deploy GCP
         if: env.CLOUD_PROVIDER == 'gcp'
         run: |
@@ -64,7 +64,7 @@ jobs:
       # ── AWS DEPLOYMENT ──────────────────────────────────────────────────
       - name: Configure AWS credentials
         if: env.CLOUD_PROVIDER == 'aws'
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -81,7 +81,7 @@ jobs:
       # ── AZURE DEPLOYMENT ────────────────────────────────────────────────
       - name: Login to Azure
         if: env.CLOUD_PROVIDER == 'azure'
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Build & Deploy Azure

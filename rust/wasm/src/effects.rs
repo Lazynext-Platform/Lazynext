@@ -100,6 +100,7 @@ fn parse_apply_effect_passes_options(value: JsValue) -> Result<ApplyEffectPasses
     })
 }
 
+#[allow(dead_code)]
 struct ApplyLutOptions {
     source: wgpu::web_sys::OffscreenCanvas,
     width: u32,
