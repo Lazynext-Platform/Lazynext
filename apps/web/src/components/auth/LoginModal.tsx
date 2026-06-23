@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Mail, Lock, Github, Check } from "lucide-react";
+import { X, Mail, Lock, Check } from "lucide-react";
 import { authClient } from "@/lib/auth-client"; // We need to create this!
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -135,8 +135,8 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							disabled={isLoading}
 							className="mt-6 w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm text-white/90"
 						>
-							<Github className="w-4 h-4" />
-							GitHub
+							<span className="w-5 h-5 flex items-center justify-center">G</span>
+							<span>Continue with GitHub</span>
 						</button>
 
 						<div className="mt-6 text-center text-sm text-muted">

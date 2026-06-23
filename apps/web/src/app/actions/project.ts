@@ -1,61 +1,27 @@
 "use server";
 
-import { db } from "@/db";
-import { projects, tracks, clips, agents } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
-export async function getProjectData(projectId: string) {
-	const projectResult = await db
-		.select()
-		.from(projects)
-		.where(eq(projects.id, projectId));
+const RUST_API_GATEWAY_URL = process.env.RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
 
-	if (projectResult.length === 0) {
-		return null;
+export async function createProject(title: string) {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+	if (!session || !session.user) throw new Error("Unauthorized");
+
+	const res = await fetch(`${RUST_API_GATEWAY_URL}/api/v1/projects`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({ title, userId: session.user.id }),
+	});
+
+	if (!res.ok) {
+		throw new Error("Failed to create project");
 	}
 
-	const project = projectResult[0];
-
-	const trackResults = await db
-		.select()
-		.from(tracks)
-		.where(eq(tracks.projectId, projectId));
-
-	const tracksWithClips = await Promise.all(
-		trackResults.map(async (track) => {
-			const clipResults = await db
-				.select()
-				.from(clips)
-				.where(eq(clips.trackId, track.id));
-			return {
-				...track,
-				clips: clipResults,
-			};
-		}),
-	);
-
-	return {
-		...project,
-		tracks: tracksWithClips,
-	};
-}
-
-export async function createProject(name: string) {
-	const newId = `proj_${Date.now()}`;
-	await db.insert(projects).values({
-		id: newId,
-		name,
-		fps: 60,
-		width: 1920,
-		height: 1080,
-		durationFrames: 1000,
-	});
-	return newId;
-}
-
-export async function syncProjectState(projectId: string, stateUpdate: any) {
-	// In a real app, this would process the CRDT deltas from the Rust WASM module
-	// and persist the timeline changes to Postgres
-	console.log(`Syncing state for project ${projectId}`, stateUpdate);
-	return { success: true };
+	return await res.json();
 }

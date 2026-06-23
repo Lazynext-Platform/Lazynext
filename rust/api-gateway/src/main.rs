@@ -12,8 +12,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 use axum::middleware;
+use axum::http::HeaderMap;
 
 pub mod rbac;
+pub mod db;
 
 #[derive(Serialize)]
 struct WebhookPayload {
@@ -26,10 +28,13 @@ struct WebhookPayload {
 struct AppState {
     nle: Arc<Mutex<NLEState>>,
     editor: Arc<AutonomousEditor>,
+    db: Arc<db::DbStore>,
 }
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().ok();
+    
     // Initialize OpenTelemetry Tracing
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
@@ -38,6 +43,10 @@ async fn main() {
         .expect("Failed to set tracing subscriber");
 
     info!("Initializing Lazynext API Gateway with OpenTelemetry tracing...");
+
+    let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite::memory:".to_string());
+    let db_store = db::DbStore::new(&database_url).await.expect("Failed to initialize database");
+    let db_store_arc = Arc::new(db_store);
 
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
 
@@ -80,6 +89,7 @@ async fn main() {
     let state = AppState {
         nle: nle_state.clone(),
         editor: Arc::new(AutonomousEditor::new()),
+        db: db_store_arc,
     };
 
     let app: Router = Router::new()
@@ -87,6 +97,10 @@ async fn main() {
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
         .route("/api/v1/timeline", get(handle_get_timeline))
         .route("/api/v1/render", post(handle_trigger_render))
+        .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
+        .route("/api/v1/projects", get(handle_get_projects))
+        .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
+        .route("/api/v1/user/credits", get(handle_get_user_credits))
         .layer(middleware::from_fn(rbac::authorize_request))
         .with_state(state);
 
@@ -148,4 +162,49 @@ async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
     let mut nle = state.nle.lock().await;
     nle.trigger_render_complete();
     Json(json!({ "triggered": true }))
+}
+
+// ── New Database Endpoints for Next.js Migration ──
+
+async fn handle_admin_dashboard(State(state): State<AppState>) -> Json<Value> {
+    match state.db.get_admin_metrics().await {
+        Ok((total_users, active_subs)) => {
+            Json(json!({
+                "success": true,
+                "metrics": {
+                    "totalUsers": total_users,
+                    "activeSubscriptions": active_subs,
+                    "monthlyRecurringRevenue": active_subs * 29
+                }
+            }))
+        }
+        Err(e) => Json(json!({ "success": false, "error": e.to_string() }))
+    }
+}
+
+async fn handle_get_projects(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+) -> Json<Value> {
+    // In a real app, parse the JWT from Authorization header to get user_id.
+    // For now, mock it.
+    let user_id = "mock_user_id";
+    
+    match state.db.get_projects_for_user(user_id).await {
+        Ok(projects) => Json(json!({ "success": true, "projects": projects })),
+        Err(e) => Json(json!({ "success": false, "error": e.to_string() }))
+    }
+}
+
+async fn handle_stripe_webhook(
+    State(_state): State<AppState>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    println!("Received Stripe webhook: {:?}", payload["type"]);
+    // Here we would parse the stripe event and update the DB subscription status
+    Json(json!({ "received": true }))
+}
+
+async fn handle_get_user_credits(State(_state): State<AppState>) -> Json<Value> {
+    Json(json!({ "success": true, "credits": 500 }))
 }
