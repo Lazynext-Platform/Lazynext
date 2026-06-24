@@ -152,12 +152,7 @@ impl FacialRecognitionModel {
     }
 
     #[cfg(feature = "onnx")]
-    fn detect_faces_onnx(
-        &self,
-        frame_data: &[u8],
-        width: u32,
-        height: u32,
-    ) -> Vec<FaceDetection> {
+    fn detect_faces_onnx(&self, frame_data: &[u8], width: u32, height: u32) -> Vec<FaceDetection> {
         // Mock ONNX Runtime inference fallback
         println!("[NeuralEngine] Running hardware-accelerated ONNX facial detection...");
         self.detect_faces_heuristic(frame_data, width, height)

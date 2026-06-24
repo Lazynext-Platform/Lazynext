@@ -169,7 +169,7 @@ mod tests {
 
         let output_with_ducking = comp.process_sidechain(quiet_bgm, loud_voice);
         let output_without_ducking = comp.process_sidechain(quiet_bgm, 0.0);
-        
+
         // BGM should be compressed strictly due to the loud sidechain
         assert!(output_with_ducking.abs() < output_without_ducking.abs());
     }

@@ -14,7 +14,7 @@ pub use frame::{
     LayerDescriptor, LayerMaskDescriptor, QuadTransformDescriptor, ShadowDescriptor,
 };
 pub mod aces;
+pub mod keyframe;
+pub mod msdf;
 pub mod stereoscopic;
 pub mod transforms3d;
-pub mod msdf;
-pub mod keyframe;

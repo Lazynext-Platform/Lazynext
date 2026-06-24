@@ -14,19 +14,21 @@ impl AudioSynchronizer {
     pub fn calculate_offset(&self, master: &[f32], secondary: &[f32]) -> isize {
         // Find next power of two for fast FFT
         let n = (master.len() + secondary.len() - 1).next_power_of_two();
-        
+
         let mut planner = FftPlanner::new();
         let fft = planner.plan_fft_forward(n);
         let ifft = planner.plan_fft_inverse(n);
 
         // Pad with zeros and convert to Complex
-        let mut master_complex: Vec<Complex<f32>> = master.iter()
+        let mut master_complex: Vec<Complex<f32>> = master
+            .iter()
             .map(|&val| Complex::new(val, 0.0))
             .chain(std::iter::repeat(Complex::new(0.0, 0.0)))
             .take(n)
             .collect();
-            
-        let mut secondary_complex: Vec<Complex<f32>> = secondary.iter()
+
+        let mut secondary_complex: Vec<Complex<f32>> = secondary
+            .iter()
             .map(|&val| Complex::new(val, 0.0))
             .chain(std::iter::repeat(Complex::new(0.0, 0.0)))
             .take(n)
@@ -37,7 +39,9 @@ impl AudioSynchronizer {
         fft.process(&mut secondary_complex);
 
         // Multiply Master by the complex conjugate of Secondary
-        let mut cross_corr: Vec<Complex<f32>> = master_complex.iter().zip(secondary_complex.iter())
+        let mut cross_corr: Vec<Complex<f32>> = master_complex
+            .iter()
+            .zip(secondary_complex.iter())
             .map(|(m, s)| m * s.conj())
             .collect();
 
@@ -47,7 +51,7 @@ impl AudioSynchronizer {
         // Find the peak magnitude in the cross-correlation result
         let mut max_val = 0.0;
         let mut max_idx = 0;
-        
+
         for (i, val) in cross_corr.iter().enumerate() {
             let magnitude = val.norm();
             if magnitude > max_val {

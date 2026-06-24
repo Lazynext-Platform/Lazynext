@@ -28,7 +28,7 @@ impl WorkspaceRole {
 pub async fn authorize_request(req: Request, next: Next) -> Result<Response, StatusCode> {
     // 1. Extract Authorization Header
     let auth_header = req.headers().get(header::AUTHORIZATION);
-    
+
     let token = match auth_header {
         Some(value) => value.to_str().unwrap_or("").replace("Bearer ", ""),
         None => {
@@ -51,7 +51,7 @@ pub async fn authorize_request(req: Request, next: Next) -> Result<Response, Sta
     };
 
     println!("🔓 [RBAC] Access Granted. Assigned Role: {:?}", role);
-    
+
     // 3. Inject User Identity / Role into request extensions if needed
     // req.extensions_mut().insert(role);
 

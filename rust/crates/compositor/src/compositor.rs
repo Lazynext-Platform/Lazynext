@@ -1,8 +1,8 @@
+use crate::msdf::{ApplyMSDFOptions, MSDFPipeline};
 use bytemuck::{Pod, Zeroable};
 use effects::{ApplyEffectsOptions, EffectPass, EffectPipeline, UniformValue};
 use gpu::{FULLSCREEN_SHADER_SOURCE, GpuContext, wgpu};
 use masks::{ApplyMaskFeatherOptions, MaskFeatherPipeline};
-use crate::msdf::{ApplyMSDFOptions, MSDFPipeline};
 use thiserror::Error;
 use wgpu::util::DeviceExt;
 
@@ -357,7 +357,8 @@ impl Compositor {
                     )?;
                 }
                 FrameItemDescriptor::TextLayer(text_layer) => {
-                    scene = self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
+                    scene =
+                        self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
                 }
             }
         }
@@ -375,23 +376,26 @@ impl Compositor {
         aspect_ratios: &[(u32, u32)], // (width, height)
     ) -> Result<Vec<wgpu::Texture>, CompositorError> {
         let base_scene = self.render_frame_to_texture(context, frame)?;
-        
+
         let mut results = Vec::new();
         for &(width, height) in aspect_ratios {
-            let mut encoder = context.device().create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("compositor-multi-format-encoder"),
-            });
-            
+            let mut encoder =
+                context
+                    .device()
+                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                        label: Some("compositor-multi-format-encoder"),
+                    });
+
             // In a full implementation, this copy_texture would involve a custom shader
             // to crop/scale the base_scene to fit the target aspect ratio, ensuring the
             // center/subject is maintained (auto-reframing).
             // For now, we perform a simple copy of the center region.
             let target = self.copy_texture(context, &mut encoder, &base_scene, width, height);
-            
+
             context.queue().submit([encoder.finish()]);
             results.push(target);
         }
-        
+
         Ok(results)
     }
 
@@ -445,7 +449,8 @@ impl Compositor {
                     )?;
                 }
                 FrameItemDescriptor::TextLayer(text_layer) => {
-                    scene = self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
+                    scene =
+                        self.render_text_layer(context, &mut encoder, &scene, frame, text_layer)?;
                 }
             }
         }
@@ -470,15 +475,22 @@ impl Compositor {
         text_layer: &TextLayerDescriptor,
     ) -> Result<wgpu::Texture, CompositorError> {
         // Render the MSDF into a clear intermediate texture
-        let rasterized_text = self.create_cleared_texture(context, encoder, frame.width, frame.height, [0.0, 0.0, 0.0, 0.0]);
+        let rasterized_text = self.create_cleared_texture(
+            context,
+            encoder,
+            frame.width,
+            frame.height,
+            [0.0, 0.0, 0.0, 0.0],
+        );
         let rasterized_view = rasterized_text.create_view(&wgpu::TextureViewDescriptor::default());
 
         {
-            let msdf_source = self.textures.get(&text_layer.text_texture_id).ok_or_else(|| {
-                CompositorError::MissingTexture {
+            let msdf_source = self
+                .textures
+                .get(&text_layer.text_texture_id)
+                .ok_or_else(|| CompositorError::MissingTexture {
                     texture_id: text_layer.text_texture_id.clone(),
-                }
-            })?;
+                })?;
 
             self.msdf.apply_with_encoder(
                 context,
@@ -486,15 +498,15 @@ impl Compositor {
                 ApplyMSDFOptions {
                     target_view: &rasterized_view,
                     msdf_texture: msdf_source.texture(),
-                color: text_layer.color,
-                outline_color: text_layer.outline_color,
-                shadow_color: text_layer.shadow_color,
-                px_range: text_layer.px_range,
-                outline_width: text_layer.outline_width,
-                shadow_offset: text_layer.shadow_offset,
-                shadow_blur: text_layer.shadow_blur,
-            },
-        );
+                    color: text_layer.color,
+                    outline_color: text_layer.outline_color,
+                    shadow_color: text_layer.shadow_color,
+                    px_range: text_layer.px_range,
+                    outline_width: text_layer.outline_width,
+                    shadow_offset: text_layer.shadow_offset,
+                    shadow_blur: text_layer.shadow_blur,
+                },
+            );
         }
 
         // Store the rasterized text temporarily in the pool
@@ -516,7 +528,15 @@ impl Compositor {
         };
 
         let layer_texture = self.render_layer(context, encoder, frame, &layer_desc)?;
-        let result = self.blend_texture(context, encoder, scene, &layer_texture, BlendMode::Normal, frame.width, frame.height)?;
+        let result = self.blend_texture(
+            context,
+            encoder,
+            scene,
+            &layer_texture,
+            BlendMode::Normal,
+            frame.width,
+            frame.height,
+        )?;
 
         // Clean up temporary texture
         self.textures.remove(&temp_id);

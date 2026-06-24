@@ -61,7 +61,7 @@ impl Sam2MaskEngine {
         }
 
         println!("[SAM2] Running inference on frame {}x{}...", width, height);
-        
+
         // MOCK: Return a solid white circle mask around the center
         let mut data = vec![0u8; (width * height) as usize];
         let cx = width as f32 / 2.0;
@@ -96,12 +96,15 @@ impl Sam2MaskEngine {
     ) -> AlphaMatte {
         let center_x = (bbox.x_min + bbox.x_max) / 2.0;
         let center_y = (bbox.y_min + bbox.y_max) / 2.0;
-        
+
         self.generate_mask_from_points(
             frame_data,
             width,
             height,
-            &[Coordinate { x: center_x, y: center_y }],
+            &[Coordinate {
+                x: center_x,
+                y: center_y,
+            }],
             &[],
         )
     }

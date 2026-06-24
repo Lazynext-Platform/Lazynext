@@ -42,16 +42,24 @@ impl GenerativeModel {
     /// Generates a video using the Replicate API (Stable Video Diffusion).
     pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
         let Some(api_key) = &self.api_key else {
-            println!("[NeuralEngine] Warning: REPLICATE_API_TOKEN not found. Using local mock generation.");
+            println!(
+                "[NeuralEngine] Warning: REPLICATE_API_TOKEN not found. Using local mock generation."
+            );
             #[cfg(not(target_arch = "wasm32"))]
             tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-            return Ok(format!("generated_{}.mp4", options.prompt.replace(" ", "_").to_lowercase()));
+            return Ok(format!(
+                "generated_{}.mp4",
+                options.prompt.replace(" ", "_").to_lowercase()
+            ));
         };
 
-        println!("[NeuralEngine] Sending request to Replicate for video: '{}'", options.prompt);
+        println!(
+            "[NeuralEngine] Sending request to Replicate for video: '{}'",
+            options.prompt
+        );
 
         let client = reqwest::Client::new();
-        
+
         let payload = serde_json::json!({
             "version": "3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438", // An Example SVD model
             "input": {
@@ -61,7 +69,8 @@ impl GenerativeModel {
             }
         });
 
-        let res = client.post("https://api.replicate.com/v1/predictions")
+        let res = client
+            .post("https://api.replicate.com/v1/predictions")
             .header("Authorization", format!("Token {}", api_key))
             .json(&payload)
             .send()
@@ -72,14 +81,24 @@ impl GenerativeModel {
             return Err(format!("Replicate API returned error: {}", res.status()));
         }
 
-        let body: serde_json::Value = res.json().await.map_err(|e| format!("Failed to parse JSON: {}", e))?;
-        
+        let body: serde_json::Value = res
+            .json()
+            .await
+            .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+
         // In a full implementation, we would poll the "urls.get" endpoint until "status" == "succeeded"
         // Here we just extract the ID to simulate successful submission.
         let prediction_id = body["id"].as_str().unwrap_or("unknown_id");
-        println!("[NeuralEngine] Replicate prediction started with ID: {}", prediction_id);
-        
-        let output_filename = format!("generated_{}_{}.mp4", options.prompt.replace(" ", "_").to_lowercase(), prediction_id);
+        println!(
+            "[NeuralEngine] Replicate prediction started with ID: {}",
+            prediction_id
+        );
+
+        let output_filename = format!(
+            "generated_{}_{}.mp4",
+            options.prompt.replace(" ", "_").to_lowercase(),
+            prediction_id
+        );
         Ok(output_filename)
     }
 
@@ -92,7 +111,10 @@ impl GenerativeModel {
             return Ok("tts_output.wav".to_string());
         };
 
-        println!("[NeuralEngine] Sending request to TTS provider for: '{}'", options.text);
+        println!(
+            "[NeuralEngine] Sending request to TTS provider for: '{}'",
+            options.text
+        );
 
         // Simulated HTTP call for TTS logic
         let client = reqwest::Client::new();
@@ -106,10 +128,14 @@ impl GenerativeModel {
         });
 
         // E.g. targeting ElevenLabs API
-        let voice_id = options.voice_id.as_deref().unwrap_or("21m00Tcm4TlvDq8ikWAM");
+        let voice_id = options
+            .voice_id
+            .as_deref()
+            .unwrap_or("21m00Tcm4TlvDq8ikWAM");
         let url = format!("https://api.elevenlabs.io/v1/text-to-speech/{}", voice_id);
 
-        let res = client.post(&url)
+        let res = client
+            .post(&url)
             .header("xi-api-key", api_key)
             .json(&payload)
             .send()

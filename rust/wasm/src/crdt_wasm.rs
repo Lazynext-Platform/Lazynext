@@ -1,5 +1,5 @@
-use state::entity_graph::EntityGraph;
 use serde_wasm_bindgen::{from_value, to_value};
+use state::entity_graph::EntityGraph;
 use state::operations::{CrdtOperation, CrdtOperationLog};
 use state::tombstone::TombstoneMap;
 use state::vector_clock::VectorClock;

@@ -1,4 +1,6 @@
 use axum::extract::State;
+use axum::http::HeaderMap;
+use axum::middleware;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
@@ -6,16 +8,14 @@ use lazynext_core::{NLEEvent, NLEState};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::net::SocketAddr;
-use tracing::{info, Level};
-use tracing_subscriber::FmtSubscriber;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
-use axum::middleware;
-use axum::http::HeaderMap;
+use tracing::{Level, info};
+use tracing_subscriber::FmtSubscriber;
 
-pub mod rbac;
 pub mod db;
+pub mod rbac;
 
 #[derive(Serialize)]
 struct WebhookPayload {
@@ -34,18 +34,20 @@ struct AppState {
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
-    
+
     // Initialize OpenTelemetry Tracing
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to set tracing subscriber");
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
 
     info!("Initializing Lazynext API Gateway with OpenTelemetry tracing...");
 
-    let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite::memory:".to_string());
-    let db_store = db::DbStore::new(&database_url).await.expect("Failed to initialize database");
+    let database_url =
+        std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite::memory:".to_string());
+    let db_store = db::DbStore::new(&database_url)
+        .await
+        .expect("Failed to initialize database");
     let db_store_arc = Arc::new(db_store);
 
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
@@ -95,9 +97,15 @@ async fn main() {
     let app: Router = Router::new()
         .route("/health", get(health_handler))
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
-        .route("/api/v1/timeline", get(handle_get_timeline).post(handle_add_clip))
+        .route(
+            "/api/v1/timeline",
+            get(handle_get_timeline).post(handle_add_clip),
+        )
         .route("/api/v1/user/profile", get(handle_get_profile))
-        .route("/api/v1/user/integrations/connect", post(handle_integration_connect))
+        .route(
+            "/api/v1/user/integrations/connect",
+            post(handle_integration_connect),
+        )
         .route("/api/v1/ai/ingest", post(handle_ai_ingest))
         .route("/api/v1/render", post(handle_trigger_render))
         .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
@@ -173,31 +181,26 @@ async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
 
 async fn handle_admin_dashboard(State(state): State<AppState>) -> Json<Value> {
     match state.db.get_admin_metrics().await {
-        Ok((total_users, active_subs)) => {
-            Json(json!({
-                "success": true,
-                "metrics": {
-                    "totalUsers": total_users,
-                    "activeSubscriptions": active_subs,
-                    "monthlyRecurringRevenue": active_subs * 29
-                }
-            }))
-        }
-        Err(e) => Json(json!({ "success": false, "error": e.to_string() }))
+        Ok((total_users, active_subs)) => Json(json!({
+            "success": true,
+            "metrics": {
+                "totalUsers": total_users,
+                "activeSubscriptions": active_subs,
+                "monthlyRecurringRevenue": active_subs * 29
+            }
+        })),
+        Err(e) => Json(json!({ "success": false, "error": e.to_string() })),
     }
 }
 
-async fn handle_get_projects(
-    State(state): State<AppState>,
-    _headers: HeaderMap,
-) -> Json<Value> {
+async fn handle_get_projects(State(state): State<AppState>, _headers: HeaderMap) -> Json<Value> {
     // In a real app, parse the JWT from Authorization header to get user_id.
     // For now, mock it.
     let user_id = "mock_user_id";
-    
+
     match state.db.get_projects_for_user(user_id).await {
         Ok(projects) => Json(json!({ "success": true, "projects": projects })),
-        Err(e) => Json(json!({ "success": false, "error": e.to_string() }))
+        Err(e) => Json(json!({ "success": false, "error": e.to_string() })),
     }
 }
 
@@ -232,7 +235,7 @@ async fn handle_generate(
     Json(payload): Json<GeneratePayload>,
 ) -> Json<Value> {
     use neural_engine::generative::{GenerativeModel, VideoGenerationOptions};
-    
+
     let generator = GenerativeModel::new();
     let options = VideoGenerationOptions {
         prompt: payload.prompt.clone(),
@@ -241,47 +244,46 @@ async fn handle_generate(
         num_frames: 150,
         fps: 30,
     };
-    
+
     match generator.generate_video(&options).await {
         Ok(filename) => {
             let mut nle = state.nle.lock().await;
             let track_name = "V1".to_string();
             nle.add_track(track_name.clone(), "video".to_string());
-            
+
             nle.add_clip_to_track(
-                0, 
+                0,
                 "generated_video".to_string(),
                 "video".to_string(),
                 filename,
                 0,
                 150,
             );
-            Json(json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }))
-        },
-        Err(e) => Json(json!({ "success": false, "error": e }))
+            Json(
+                json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }),
+            )
+        }
+        Err(e) => Json(json!({ "success": false, "error": e })),
     }
 }
 
-async fn handle_tts(
-    State(state): State<AppState>,
-    Json(payload): Json<TtsPayload>,
-) -> Json<Value> {
-    use neural_engine::generative::{GenerativeModel, AudioGenerationOptions};
-    
+async fn handle_tts(State(state): State<AppState>, Json(payload): Json<TtsPayload>) -> Json<Value> {
+    use neural_engine::generative::{AudioGenerationOptions, GenerativeModel};
+
     let generator = GenerativeModel::new();
     let options = AudioGenerationOptions {
         text: payload.text.clone(),
         voice_id: payload.voice_id.clone(),
     };
-    
+
     match generator.generate_tts(&options).await {
         Ok(filename) => {
             let mut nle = state.nle.lock().await;
             let track_name = "A1".to_string();
             nle.add_track(track_name.clone(), "audio".to_string());
-            
+
             nle.add_clip_to_track(
-                1, 
+                1,
                 "generated_tts".to_string(),
                 "audio".to_string(),
                 filename,
@@ -289,8 +291,8 @@ async fn handle_tts(
                 300,
             );
             Json(json!({ "success": true, "message": "TTS generated and added to timeline" }))
-        },
-        Err(e) => Json(json!({ "success": false, "error": e }))
+        }
+        Err(e) => Json(json!({ "success": false, "error": e })),
     }
 }
 
@@ -318,7 +320,7 @@ async fn handle_integration_connect(Json(payload): Json<IntegrationPayload>) -> 
     println!("[API Gateway] Mock OAuth connect for {}", payload.platform);
     // Simulate OAuth delay
     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-    
+
     Json(json!({
         "success": true,
         "message": format!("Successfully connected to {}", payload.platform)

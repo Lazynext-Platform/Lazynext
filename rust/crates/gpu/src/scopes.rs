@@ -33,9 +33,16 @@ impl ColorScopesAnalyzer {
         Self { pipeline, buffer }
     }
 
-    pub fn compute_waveform(&self, device: &wgpu::Device, _queue: &Queue, encoder: &mut wgpu::CommandEncoder, frame_texture_view: &wgpu::TextureView, bind_group_layout: &wgpu::BindGroupLayout) {
+    pub fn compute_waveform(
+        &self,
+        device: &wgpu::Device,
+        _queue: &Queue,
+        encoder: &mut wgpu::CommandEncoder,
+        frame_texture_view: &wgpu::TextureView,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) {
         println!("Dispatching compute pass to analyze frame luminance for Waveform Monitor...");
-        
+
         let actual_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Scopes Bind Group"),
             layout: bind_group_layout,
@@ -58,7 +65,7 @@ impl ColorScopesAnalyzer {
 
         compute_pass.set_pipeline(&self.pipeline);
         compute_pass.set_bind_group(0, &actual_bind_group, &[]);
-        
+
         // Dispatching 256 groups as a mock (1 for each luminance bucket)
         compute_pass.dispatch_workgroups(256, 1, 1);
     }

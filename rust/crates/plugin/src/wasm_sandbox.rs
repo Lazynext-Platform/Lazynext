@@ -27,7 +27,7 @@ impl WasmSandbox {
         // engine = Engine::default();
         // module = Module::new(&engine, wasm_binary).map_err(|e| e.to_string())?;
         // store = Store::new(&engine, ());
-        
+
         self.is_initialized = true;
         Ok(())
     }
@@ -38,13 +38,16 @@ impl WasmSandbox {
             return Err("WASM Sandbox not initialized with a plugin module.".into());
         }
 
-        println!("[WASM Sandbox] Executing untrusted plugin function: '{}'", function_name);
-        
+        println!(
+            "[WASM Sandbox] Executing untrusted plugin function: '{}'",
+            function_name
+        );
+
         // In a real implementation:
         // let instance = wasmtime::Instance::new(&mut self.store, &self.module, &[]).unwrap();
         // let func = instance.get_typed_func::<f64, f64>(&mut self.store, function_name).unwrap();
         // let result = func.call(&mut self.store, args[0]).unwrap();
-        
+
         // Mock successful execution
         let simulated_result = args.iter().sum::<f64>() * 2.0;
         Ok(simulated_result)

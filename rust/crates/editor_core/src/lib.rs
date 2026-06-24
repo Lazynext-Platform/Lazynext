@@ -1,7 +1,7 @@
+pub mod color_grading;
 pub mod models;
 pub mod processing;
 pub mod timeline;
-pub mod color_grading;
 use state::crdt::CRDTTimeline;
 use wasm_bindgen::prelude::*;
 

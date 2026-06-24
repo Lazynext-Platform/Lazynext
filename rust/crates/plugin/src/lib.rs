@@ -44,7 +44,9 @@ impl PluginRuntime {
 
         // Inject a simple JS shim for setTime that writes to a global variable
         // which Rust can read out later if needed.
-        let shim = boa_engine::Source::from_bytes("var current_time = 0.0; function setTime(t) { current_time = t; }");
+        let shim = boa_engine::Source::from_bytes(
+            "var current_time = 0.0; function setTime(t) { current_time = t; }",
+        );
         context.eval(shim).unwrap();
 
         Self { api, context }
@@ -55,10 +57,13 @@ impl PluginRuntime {
         match self.context.eval(source) {
             Ok(value) => {
                 // Read the JS global variable
-                if let Ok(js_time) = self.context.global_object().get(boa_engine::JsString::from("current_time"), &mut self.context)
-                    && let Ok(time_f64) = js_time.to_number(&mut self.context) {
-                        self.api.borrow_mut().current_time = time_f64;
-                    }
+                if let Ok(js_time) = self.context.global_object().get(
+                    boa_engine::JsString::from("current_time"),
+                    &mut self.context,
+                ) && let Ok(time_f64) = js_time.to_number(&mut self.context)
+                {
+                    self.api.borrow_mut().current_time = time_f64;
+                }
 
                 let display = value.display().to_string();
                 let api_ref = self.api.borrow();

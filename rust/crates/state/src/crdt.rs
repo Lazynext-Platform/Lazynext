@@ -90,7 +90,7 @@ impl CRDTTimeline {
                 self.clips.insert(id.clone(), incoming_clip.clone());
             }
         }
-        
+
         // Simple entity graph merge: last writer wins for entities (naive implementation for demo)
         for (k, v) in &delta.entity_graph.entities {
             self.entity_graph.entities.insert(k.clone(), v.clone());

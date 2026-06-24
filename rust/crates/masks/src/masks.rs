@@ -1,7 +1,7 @@
 mod feather;
-mod sdf;
 mod sam2;
+mod sdf;
 
 pub use feather::{ApplyMaskFeatherOptions, MaskFeatherPipeline};
+pub use sam2::{AlphaMatte, BoundingBox, Coordinate, Sam2MaskEngine};
 pub use sdf::{SdfPipeline, SignedDistanceFieldTextures};
-pub use sam2::{Sam2MaskEngine, AlphaMatte, Coordinate, BoundingBox};

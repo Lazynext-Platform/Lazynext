@@ -22,7 +22,7 @@ impl CoreEngine {
     /// Renders a single frame from the CRDT timeline state.
     pub async fn render_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
         let _state = self.project.lock().await;
-        
+
         // Ensure the frame is within the timeline duration (mock 1M frames)
         if frame_idx >= 1_000_000 {
             return Err("Frame out of bounds".into());
@@ -31,7 +31,7 @@ impl CoreEngine {
         // Mocking frame byte generation
         // In reality, this would traverse `state.tracks`, compute composite layers via WebGL/WGPU.
         println!("[CoreEngine] Rendering frame {} natively...", frame_idx);
-        
+
         let mut mock_buffer = vec![0u8; 1920 * 1080 * 4]; // Mock 1080p RGBA buffer
         mock_buffer[0] = 255; // Red pixel top-left
 
@@ -40,16 +40,19 @@ impl CoreEngine {
 
     /// Dispatches an asynchronous export job to FFmpeg using the current CRDT state.
     pub async fn dispatch_export(&self, output_path: &str) -> Result<(), String> {
-        println!("[CoreEngine] Dispatching export to {} via FFmpeg pipeline...", output_path);
-        
+        println!(
+            "[CoreEngine] Dispatching export to {} via FFmpeg pipeline...",
+            output_path
+        );
+
         // Mock FFmpeg subprocess execution
         if self.is_hardware_accelerated {
             println!("[CoreEngine] Using NVENC/VideoToolbox hardware acceleration.");
         }
-        
+
         // Simulate IO delay
         tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-        
+
         println!("[CoreEngine] Export complete!");
         Ok(())
     }

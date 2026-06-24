@@ -56,12 +56,13 @@ impl AudioAnalyzer {
         }
 
         let total_bins = bins.len();
-        
-        let low_end = total_bins / 10;          // e.g. 0-2kHz (very roughly)
-        let mid_end = total_bins * 6 / 10;      // e.g. 2k-12kHz
+
+        let low_end = total_bins / 10; // e.g. 0-2kHz (very roughly)
+        let mid_end = total_bins * 6 / 10; // e.g. 2k-12kHz
 
         let low = bins[0..low_end].iter().sum::<f32>() / (low_end as f32).max(1.0);
-        let mid = bins[low_end..mid_end].iter().sum::<f32>() / ((mid_end - low_end) as f32).max(1.0);
+        let mid =
+            bins[low_end..mid_end].iter().sum::<f32>() / ((mid_end - low_end) as f32).max(1.0);
         let high = bins[mid_end..].iter().sum::<f32>() / ((total_bins - mid_end) as f32).max(1.0);
 
         (low, mid, high)
@@ -82,7 +83,7 @@ mod tests {
 
         let bins = analyzer.compute_frequency_bins(&sine_wave);
         assert_eq!(bins.len(), 128); // Nyquist limit
-        
+
         let (low, mid, high) = analyzer.compute_3band(&sine_wave);
         assert!(low > 0.0 || mid > 0.0 || high > 0.0);
     }

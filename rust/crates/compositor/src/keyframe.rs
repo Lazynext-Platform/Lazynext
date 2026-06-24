@@ -9,29 +9,49 @@ pub struct BezierCurve {
 impl BezierCurve {
     /// Ease In Out
     pub fn ease_in_out() -> Self {
-        Self { p0: 0.0, p1: 0.42, p2: 0.58, p3: 1.0 }
+        Self {
+            p0: 0.0,
+            p1: 0.42,
+            p2: 0.58,
+            p3: 1.0,
+        }
     }
 
     /// Ease In
     pub fn ease_in() -> Self {
-        Self { p0: 0.0, p1: 0.42, p2: 1.0, p3: 1.0 }
+        Self {
+            p0: 0.0,
+            p1: 0.42,
+            p2: 1.0,
+            p3: 1.0,
+        }
     }
 
     /// Ease Out
     pub fn ease_out() -> Self {
-        Self { p0: 0.0, p1: 0.0, p2: 0.58, p3: 1.0 }
+        Self {
+            p0: 0.0,
+            p1: 0.0,
+            p2: 0.58,
+            p3: 1.0,
+        }
     }
 
     /// Linear
     pub fn linear() -> Self {
-        Self { p0: 0.0, p1: 0.0, p2: 1.0, p3: 1.0 }
+        Self {
+            p0: 0.0,
+            p1: 0.0,
+            p2: 1.0,
+            p3: 1.0,
+        }
     }
 
     /// Calculate cubic bezier value at normalized time t (0.0 to 1.0)
     pub fn sample(&self, t: f32) -> f32 {
         let t = t.clamp(0.0, 1.0);
         let mt = 1.0 - t;
-        
+
         let mt3 = mt * mt * mt;
         let mt2_t = 3.0 * mt * mt * t;
         let mt_t2 = 3.0 * mt * t * t;
@@ -43,7 +63,7 @@ impl BezierCurve {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Keyframe {
-    pub time: f32, // Absolute time in seconds
+    pub time: f32,  // Absolute time in seconds
     pub value: f32, // Property value
     pub curve: BezierCurve,
 }

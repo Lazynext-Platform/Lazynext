@@ -1,12 +1,11 @@
 use axum::{
+    Json, Router,
     extract::{
+        Path, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
-        State, Path,
     },
     response::IntoResponse,
     routing::{get, post},
-    Json,
-    Router,
 };
 use dashmap::DashMap;
 use futures::{sink::SinkExt, stream::StreamExt};
@@ -31,7 +30,7 @@ async fn main() {
 
     let port = std::env::var("PORT").unwrap_or_else(|_| "8002".to_string());
     let addr = format!("0.0.0.0:{}", port);
-    
+
     println!("📡 Lazynext Collab Server running on ws://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
@@ -99,8 +98,11 @@ async fn save_handler(Path(project_id): Path<String>) -> Json<StatusResponse> {
     // 1. Get the current state vector for the room
     // 2. Dump the binary Yjs vector
     // 3. Save to Postgres/S3
-    println!("Persistent state saved to database for project: {}", project_id);
-    
+    println!(
+        "Persistent state saved to database for project: {}",
+        project_id
+    );
+
     Json(StatusResponse {
         success: true,
         status: format!("Saved CRDT state for project {}", project_id),
@@ -113,8 +115,11 @@ async fn load_handler(Path(project_id): Path<String>) -> Json<StatusResponse> {
     // 1. Fetch Yjs binary blob from DB
     // 2. Load into memory room
     // 3. Return awareness state
-    println!("Persistent state loaded from database for project: {}", project_id);
-    
+    println!(
+        "Persistent state loaded from database for project: {}",
+        project_id
+    );
+
     Json(StatusResponse {
         success: true,
         status: format!("Loaded CRDT state for project {}", project_id),

@@ -1,6 +1,6 @@
-use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
-use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use sqlx::sqlite::{SqlitePool, SqlitePoolOptions};
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
@@ -43,7 +43,7 @@ impl DbStore {
             .max_connections(5)
             .connect(database_url)
             .await?;
-        
+
         // Ensure tables exist for our new Rust schema
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS users (
@@ -51,8 +51,10 @@ impl DbStore {
                 email TEXT NOT NULL UNIQUE,
                 name TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )"
-        ).execute(&pool).await?;
+            )",
+        )
+        .execute(&pool)
+        .await?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS projects (
@@ -62,8 +64,10 @@ impl DbStore {
                 crdt_state TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )"
-        ).execute(&pool).await?;
+            )",
+        )
+        .execute(&pool)
+        .await?;
 
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS subscriptions (
@@ -73,8 +77,10 @@ impl DbStore {
                 stripe_customer_id TEXT,
                 status TEXT NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )"
-        ).execute(&pool).await?;
+            )",
+        )
+        .execute(&pool)
+        .await?;
 
         Ok(Self { pool })
     }
@@ -84,9 +90,11 @@ impl DbStore {
             .fetch_one(&self.pool)
             .await?;
 
-        let active_subs: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM subscriptions WHERE tier = 'pro' AND status = 'active'")
-            .fetch_one(&self.pool)
-            .await?;
+        let active_subs: (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM subscriptions WHERE tier = 'pro' AND status = 'active'",
+        )
+        .fetch_one(&self.pool)
+        .await?;
 
         Ok((total_users.0, active_subs.0))
     }

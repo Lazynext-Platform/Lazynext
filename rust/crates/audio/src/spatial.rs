@@ -57,12 +57,17 @@ impl HRTFProcessor {
 
     /// Apply Interaural Time Difference (ITD) and Interaural Level Difference (ILD)
     /// Returns a tuple of (Left Channel Output, Right Channel Output)
-    pub fn process_binaural(&self, audio_object: &AudioObject, input_buffer: &[f32]) -> (Vec<f32>, Vec<f32>) {
+    pub fn process_binaural(
+        &self,
+        audio_object: &AudioObject,
+        input_buffer: &[f32],
+    ) -> (Vec<f32>, Vec<f32>) {
         // Calculate the azimuth angle based on X and Y coordinates (-1.0 to 1.0)
         let azimuth_rad = audio_object.x.atan2(audio_object.y);
-        
+
         // Woodworth's formula for ITD (Interaural Time Difference)
-        let itd_seconds = (self.head_radius_meters / self.speed_of_sound) * (azimuth_rad + azimuth_rad.sin());
+        let itd_seconds =
+            (self.head_radius_meters / self.speed_of_sound) * (azimuth_rad + azimuth_rad.sin());
         let itd_samples = (itd_seconds * self.sample_rate as f32).abs() as usize;
 
         // Simple ILD (Interaural Level Difference) based on shadowing
