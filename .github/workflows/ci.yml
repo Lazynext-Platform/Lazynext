@@ -267,40 +267,12 @@ jobs:
           push: true
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-mcp:latest
 
-  terraform-deploy:
-    name: Terraform — Deploy Infrastructure
-    needs: [rust-core, web-app]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
-
-      - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Init
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
-        run: terraform init
-        working-directory: ./terraform/gcp
-
-      - name: Terraform Apply
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
-        run: terraform apply -auto-approve
-        working-directory: ./terraform/gcp
+  # Terraform deploy is manual — auto-apply on push is unsafe.
+# Run locally: cd terraform/gcp && terraform apply -auto-approve
+# The Terraform state is synced manually and doesn't need CI automation.
 
       - name: Set up Cloud SDK
+        id: setup-gcloud
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Force Redeploy Cloud Run Services
