@@ -189,3 +189,198 @@ impl CRDTTimeline {
         }
     }
 }
+
+#[cfg(test)]
+mod convergence_tests {
+    use super::*;
+    use crate::operations::{CrdtOperation, ClipPayload};
+    use crate::tombstone::TombstoneMap;
+    use crate::vector_clock::VectorClock;
+
+    fn make_clip_payload(id: &str, start: u32, end: u32) -> ClipPayload {
+        ClipPayload {
+            id: id.to_string(),
+            clip_type: "video".to_string(),
+            name: format!("clip_{}", id),
+            start,
+            end,
+        }
+    }
+
+    /// Two peers inserting the same clip concurrently should converge
+    /// to the same value — the LWW register picks the latest timestamp.
+    #[test]
+    fn concurrent_inserts_converge() {
+        let mut t1 = CRDTTimeline::new();
+        let mut t2 = CRDTTimeline::new();
+
+        let clip_a = make_clip_payload("c1", 0, 100);
+        let clip_b = make_clip_payload("c1", 0, 200); // different end — conflict
+
+        let mut tm1 = TombstoneMap::new();
+        let mut tm2 = TombstoneMap::new();
+        let mut vc1 = VectorClock::new();
+        let mut vc2 = VectorClock::new();
+
+        t1.apply_operation(
+            &CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: clip_a,
+            },
+            &mut tm1, &mut vc1, "peer-a",
+        );
+        t2.apply_operation(
+            &CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: clip_b,
+            },
+            &mut tm2, &mut vc2, "peer-b",
+        );
+
+        // After merge, both should contain the clip
+        let delta_1to2 = t1.clone();
+        t2.apply_delta(&delta_1to2);
+        let delta_2to1 = t2.clone();
+        t1.apply_delta(&delta_2to1);
+
+        assert!(t1.clips.contains_key("c1"));
+        assert!(t2.clips.contains_key("c1"));
+        // LWW ensures both see the same duration
+        assert_eq!(
+            t1.clips["c1"].duration_frames.value,
+            t2.clips["c1"].duration_frames.value
+        );
+    }
+
+    /// A delete followed by a concurrent insert on a different peer
+    /// should not resurrect the deleted clip (tombstone wins).
+    #[test]
+    fn tombstone_prevents_resurrection() {
+        let mut t1 = CRDTTimeline::new();
+        let mut tm1 = TombstoneMap::new();
+        let mut vc1 = VectorClock::new();
+
+        // Peer A inserts then deletes
+        t1.apply_operation(
+            &CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: make_clip_payload("c1", 0, 100),
+            },
+            &mut tm1, &mut vc1, "peer-a",
+        );
+        t1.apply_operation(
+            &CrdtOperation::ClipDelete {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+            },
+            &mut tm1, &mut vc1, "peer-a",
+        );
+
+        // Peer B concurrently tries to insert the same clip
+        let inserted = t1.apply_operation(
+            &CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: make_clip_payload("c1", 50, 150),
+            },
+            &mut tm1, &mut vc1, "peer-b",
+        );
+
+        // Should be rejected — tombstone exists
+        assert!(!inserted);
+        assert!(!t1.clips.contains_key("c1"));
+    }
+
+    /// Applying operations in different orders should converge to the
+    /// same final state (commutativity property).
+    #[test]
+    fn operation_ordering_converges() {
+        let mut t_a = CRDTTimeline::new();
+        let mut t_b = CRDTTimeline::new();
+
+        let ops = vec![
+            CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: make_clip_payload("c1", 0, 100),
+            },
+            CrdtOperation::ClipInsert {
+                clip_id: "c2".into(),
+                track_id: "t1".into(),
+                position: 1,
+                clip: make_clip_payload("c2", 100, 200),
+            },
+            CrdtOperation::ClipTrim {
+                clip_id: "c1".into(),
+                new_start: 10,
+                new_end: 90,
+            },
+        ];
+
+        // Peer A: op1, op2, op3
+        {
+            let mut tm = TombstoneMap::new();
+            let mut vc = VectorClock::new();
+            for op in &ops {
+                t_a.apply_operation(op, &mut tm, &mut vc, "peer-a");
+            }
+        }
+
+        // Peer B: op3, op1, op2 (different order)
+        {
+            let mut tm = TombstoneMap::new();
+            let mut vc = VectorClock::new();
+            for op in [&ops[2], &ops[0], &ops[1]] {
+                t_b.apply_operation(op, &mut tm, &mut vc, "peer-b");
+            }
+        }
+
+        // Merge both ways
+        t_a.apply_delta(&t_b.clone());
+        t_b.apply_delta(&t_a.clone());
+
+        // Both should have the same clips with the same values
+        assert_eq!(t_a.clips.len(), t_b.clips.len());
+        for (id, clip_a) in &t_a.clips {
+            let clip_b = &t_b.clips[id];
+            assert_eq!(clip_a.start_frame.value, clip_b.start_frame.value);
+            assert_eq!(clip_a.duration_frames.value, clip_b.duration_frames.value);
+        }
+    }
+
+    /// Merging with an empty delta should be a no-op (idempotence).
+    #[test]
+    fn merge_with_empty_delta_is_idempotent() {
+        let mut t = CRDTTimeline::new();
+        let mut tm = TombstoneMap::new();
+        let mut vc = VectorClock::new();
+
+        t.apply_operation(
+            &CrdtOperation::ClipInsert {
+                clip_id: "c1".into(),
+                track_id: "t1".into(),
+                position: 0,
+                clip: make_clip_payload("c1", 0, 100),
+            },
+            &mut tm, &mut vc, "peer-a",
+        );
+
+        let snapshot = t.clone();
+        t.apply_delta(&CRDTTimeline::new());
+        // State must be unchanged
+        assert_eq!(t.clips.len(), snapshot.clips.len());
+        for (id, clip) in &t.clips {
+            let snap_clip = &snapshot.clips[id];
+            assert_eq!(clip.start_frame.value, snap_clip.start_frame.value);
+            assert_eq!(clip.duration_frames.value, snap_clip.duration_frames.value);
+        }
+    }
+}
