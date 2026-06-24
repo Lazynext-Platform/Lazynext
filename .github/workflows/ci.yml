@@ -289,10 +289,14 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
         run: terraform init
         working-directory: ./terraform/gcp
 
       - name: Terraform Apply
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.auth.outputs.credentials_file_path }}
         run: terraform apply -auto-approve
         working-directory: ./terraform/gcp
 
