@@ -1,21 +1,40 @@
 {
-	"manifest_version": 3,
-	"name": "Lazynext Browser Extension",
-	"version": "0.1.0",
-	"description": "Lazynext video editing companion extension for capturing clips and remote control.",
-	"action": {
-		"default_popup": "index.html"
-	},
-	"background": {
-		"service_worker": "background.js",
-		"type": "module"
-	},
-	"content_scripts": [
-		{
-			"matches": ["<all_urls>"],
-			"js": ["content.js"]
-		}
-	],
-	"permissions": ["activeTab", "storage", "scripting"],
-	"host_permissions": ["http://localhost:3000/*"]
+  "manifest_version": 3,
+  "name": "Lazynext Browser Extension",
+  "version": "0.1.0",
+  "description": "Capture video from any webpage into your Lazynext timeline.",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://localhost:8005/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "/icons/icon16.png",
+      "48": "/icons/icon48.png",
+      "128": "/icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "/icons/icon16.png",
+    "48": "/icons/icon48.png",
+    "128": "/icons/icon128.png"
+  }
 }

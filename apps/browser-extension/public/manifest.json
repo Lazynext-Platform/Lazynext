@@ -1,17 +1,29 @@
 {
   "manifest_version": 3,
-  "name": "Lazynext - AI Video Editor",
-  "version": "1.0.0",
-  "description": "Send videos directly from your browser to your Lazynext timeline using AI orchestration.",
+  "name": "Lazynext Browser Extension",
+  "version": "0.1.0",
+  "description": "Capture video from any webpage into your Lazynext timeline.",
   "permissions": [
     "activeTab",
     "contextMenus",
-    "scripting"
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://localhost:8005/*"
   ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": {

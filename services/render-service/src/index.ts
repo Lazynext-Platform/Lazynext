@@ -30,14 +30,21 @@ const connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
 
 const renderQueue = new Queue<RenderJob>("render-jobs", { connection: connection as any });
 
-// S3 Setup
-const s3 = new S3Client({
-	region: process.env.AWS_REGION || "us-east-1",
-	credentials: {
-		accessKeyId: process.env.AWS_ACCESS_KEY_ID || "mock-key",
-		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "mock-secret"
-	}
-});
+// S3 Setup — only initialised when credentials are explicitly provided.
+// Falls back to local filesystem storage when AWS keys are absent.
+const s3Credentials = process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
+	? {
+		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+	  }
+	: null;
+
+const s3 = s3Credentials
+	? new S3Client({
+		region: process.env.AWS_REGION || "us-east-1",
+		credentials: s3Credentials,
+	  })
+	: null;
 
 app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 	const { projectId, format = "mp4" } = req.body;
@@ -169,17 +176,21 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 					console.error(`[Render Farm] C2PA Signing failed:`, e);
 				}
 
-				// S3 Upload Stub
+				// S3 Upload
 				try {
-					const fileStream = fs.createReadStream(outputPath);
-					await s3.send(new PutObjectCommand({
-						Bucket: process.env.MEDIA_BUCKET || "lazynext-media-dev",
-						Key: `renders/${job.id}.${job.data.format}`,
-						Body: fileStream,
-					}));
-					console.log(`[Render Farm] Successfully uploaded ${job.id} to S3.`);
+					if (!s3) {
+						console.log(`[Render Farm] S3 not configured — keeping output at ${outputPath}`);
+					} else {
+						const fileStream = fs.createReadStream(outputPath);
+						await s3.send(new PutObjectCommand({
+							Bucket: process.env.MEDIA_BUCKET || "lazynext-media-dev",
+							Key: `renders/${job.id}.${job.data.format}`,
+							Body: fileStream,
+						}));
+						console.log(`[Render Farm] Successfully uploaded ${job.id} to S3.`);
+					}
 				} catch (e) {
-					console.error(`[Render Farm] S3 Upload failed (expected in local dev without keys):`, e);
+					console.error(`[Render Farm] S3 Upload failed:`, e);
 				}
 
 				resolve(outputPath);
@@ -272,7 +283,21 @@ app.get("/health", async (_req: Request, res: Response) => {
 
 const PORT = process.env.PORT || 8003;
 
-if (import.meta.main) { 
+// ── Graceful shutdown ────────────────────────────────────────────────────
+// Give in-progress FFmpeg jobs time to finish before the process exits.
+// K8s sends SIGTERM → we stop accepting new work → drain running jobs → exit.
+async function shutdown() {
+	console.log("[Render Farm] Received shutdown signal — draining jobs...");
+	await worker.close(); // stop picking up new jobs, wait for active ones
+	await connection.quit();
+	console.log("[Render Farm] Shutdown complete.");
+	process.exit(0);
+}
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
+if (import.meta.main) {
 	app.listen(PORT, () => {
 		console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
 		console.log(

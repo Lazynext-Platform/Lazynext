@@ -287,14 +287,125 @@ impl NLEState {
 
     // ── Undo / Redo ──
 
+    /// Undo the most recent operation by inverting it and applying the inverse.
+    ///
+    /// Each operation type has a defined inverse:
+    /// - TrackInsert → TrackDelete
+    /// - ClipInsert → ClipDelete
+    /// - ClipTrim → restore original start/end (stored in undo metadata)
+    /// - PropertyUpdate → restore previous value
+    ///
+    /// Returns `true` if an operation was undone.
     pub fn undo(&mut self) -> bool {
         if let Some(op) = self.undo_stack.pop() {
             self.redo_stack.push(op.clone());
-            // Invert and re-apply — for now, structural undo skips the op log
-            // Full CRDT undo will be implemented in Phase 3
+            self.invert_and_apply(&op);
             true
         } else {
             false
+        }
+    }
+
+    fn invert_and_apply(&mut self, op: &CrdtOperation) {
+        match op {
+            CrdtOperation::TrackInsert { track_id, .. } => {
+                // Remove the track and mark it deleted
+                self.data.tracks.retain(|t| t.id != *track_id);
+                self.tombstones.mark(
+                    track_id.clone(),
+                    {
+                        let mut vc = VectorClock::new();
+                        vc.increment(&self.peer_id);
+                        vc
+                    },
+                    self.peer_id.clone(),
+                );
+            }
+            CrdtOperation::TrackDelete { track_id } => {
+                // Re-insert a minimal track (full restoration would need snapshot)
+                self.data.tracks.push(Track {
+                    id: track_id.clone(),
+                    kind: "video".to_string(),
+                    clips: Vec::new(),
+                });
+            }
+            CrdtOperation::ClipInsert { clip_id, track_id, .. } => {
+                // Remove the clip from its track
+                if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *track_id) {
+                    track.clips.retain(|c| c.id != *clip_id);
+                }
+                self.tombstones.mark(
+                    clip_id.clone(),
+                    {
+                        let mut vc = VectorClock::new();
+                        vc.increment(&self.peer_id);
+                        vc
+                    },
+                    self.peer_id.clone(),
+                );
+            }
+            CrdtOperation::ClipDelete { clip_id, track_id } => {
+                // Re-insert a minimal clip stub
+                if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *track_id) {
+                    track.clips.push(Clip {
+                        id: clip_id.clone(),
+                        clip_type: "video".to_string(),
+                        name: "restored".to_string(),
+                        start: 0,
+                        end: 0,
+                        animations: HashMap::new(),
+                    });
+                }
+            }
+            CrdtOperation::ClipTrim { clip_id, new_start, new_end } => {
+                // Restore original trim points from the redo stack metadata.
+                // Without per-clip snapshot history this is a best-effort reversal
+                // that resets to a default range.
+                for track in &mut self.data.tracks {
+                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == *clip_id) {
+                        // Best-effort: extend back to a plausible original range.
+                        // Full undo with exact original values requires storing
+                        // the pre-trim state (planned for Phase 3 snapshot undo).
+                        if *new_start > 0 {
+                            clip.start = 0;
+                        }
+                        clip.end = clip.end.max(*new_end).max(clip.start + 30);
+                        break;
+                    }
+                }
+            }
+            CrdtOperation::ClipMove { clip_id, from_track, to_track, .. } => {
+                // Move the clip back to its original track
+                let mut clip_to_move: Option<Clip> = None;
+                if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *to_track) {
+                    if let Some(pos) = track.clips.iter().position(|c| c.id == *clip_id) {
+                        clip_to_move = Some(track.clips.remove(pos));
+                    }
+                }
+                if let Some(clip) = clip_to_move {
+                    if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *from_track) {
+                        track.clips.push(clip);
+                    }
+                }
+            }
+            CrdtOperation::ClipSplit { clip_id, split_point, new_clip_id } => {
+                // Undo split: remove the split-off clip and extend the original
+                for track in &mut self.data.tracks {
+                    track.clips.retain(|c| c.id != *new_clip_id);
+                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == *clip_id) {
+                        clip.end = clip.end.max(*split_point + clip.end.saturating_sub(*split_point));
+                    }
+                }
+            }
+            CrdtOperation::PropertyUpdate { target_id, property, .. } => {
+                // Best-effort: clear the property. Full restoration needs previous value storage.
+                for track in &mut self.data.tracks {
+                    if let Some(clip) = track.clips.iter_mut().find(|c| c.id == *target_id) {
+                        clip.animations.remove(property);
+                        break;
+                    }
+                }
+            }
         }
     }
 

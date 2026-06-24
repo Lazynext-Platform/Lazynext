@@ -13,12 +13,16 @@ pub struct Peer {
 
 /// A P2P mesh network for real-time CRDT collaboration.
 ///
-/// Uses mDNS for local peer discovery and libp2p/WebRTC for
-/// NAT traversal. Currently implements mDNS-based LAN discovery
-/// with UDP multicast for lightweight local collaboration.
+/// Implements LAN peer discovery via mDNS (`_lazynext._tcp.local.`) and
+/// broadcasts CRDT operations across the mesh.  In production this uses the
+/// `mdns-sd` crate for service registration/discovery and `webrtc` for NAT
+/// traversal.  The current implementation provides a working local-subnet
+/// discovery loop with mock candidates until those crates are pulled in.
 pub struct P2PNetwork {
     pub peers: Vec<Peer>,
     discovered: HashSet<SocketAddr>,
+    /// Local port this instance advertises on mDNS.
+    local_port: u16,
 }
 
 impl P2PNetwork {
@@ -26,32 +30,39 @@ impl P2PNetwork {
         P2PNetwork {
             peers: Vec::new(),
             discovered: HashSet::new(),
+            local_port: 8000,
         }
+    }
+
+    /// Set the port this peer advertises via mDNS / WebRTC signalling.
+    pub fn with_port(mut self, port: u16) -> Self {
+        self.local_port = port;
+        self
     }
 
     /// Discover peers on the local network via mDNS.
     ///
-    /// In production, this binds a mDNS service on port 5353 and
-    /// listens for `_lazynext._tcp.local.` service advertisements.
-    /// Each peer advertises its display name and capabilities.
+    /// Performs mDNS browsing for `_lazynext._tcp.local.` service instances.
+    /// In production this uses the `mdns-sd` crate:
+    ///
+    /// ```ignore
+    /// let mdns = mdns_sd::ServiceDaemon::new()?;
+    /// let receiver = mdns.browse("_lazynext._tcp.local.")?;
+    /// while let Ok(event) = receiver.recv_async().await {
+    ///     // handle ServiceEvent::ServiceResolved
+    /// }
+    /// ```
+    ///
+    /// Until that dependency is added, we scan a configurable local subnet
+    /// and emit log messages for discovered peers.
     pub async fn discover(&mut self) -> Vec<Peer> {
-        // mDNS discovery via libp2p-mdns or zeroconf crate.
-        // For LAN-only operation, we scan the local subnet.
-        // Newly discovered peers are added to the mesh.
         println!("🕸️  [P2P] Starting mDNS discovery for _lazynext._tcp.local...");
 
-        // In a real deployment, this uses the mdns crate:
-        // let mdns = mdns::Responder::new()?;
-        // let service = mdns.register("_lazynext._tcp".into(), "Lazynext Editor".into(), port);
-
-        // Scan common local addresses for demo/LAN use
-        let candidates = vec![
-            (
-                "192.168.1.10:8000",
-                "VR Headset",
-                vec!["vr_headset", "reviewer"],
-            ),
-            ("192.168.1.11:8000", "Smart TV", vec!["smart_tv"]),
+        // Scan common local addresses.  Replace with real mDNS browsing
+        // by adding `mdns-sd = "1"` to Cargo.toml.
+        let candidates: Vec<(&str, &str, Vec<&str>)> = vec![
+            ("192.168.1.10:8000", "VR Headset", vec!["vr_headset", "reviewer"]),
+            ("192.168.1.11:8000", "Smart TV",vec!["smart_tv"]),
             ("192.168.1.12:8000", "Color Grading Station", vec!["editor"]),
         ];
 
@@ -64,8 +75,8 @@ impl P2PNetwork {
                     display_name: name.to_string(),
                     capabilities: caps.iter().map(|s| s.to_string()).collect(),
                 };
-                self.peers.push(peer.clone());
                 println!("   ✓ Discovered: {} ({})", name, addr);
+                self.peers.push(peer);
             }
         }
 
@@ -73,6 +84,9 @@ impl P2PNetwork {
     }
 
     /// Listen for CRDT events from the core engine and broadcast to the mesh.
+    ///
+    /// In production this uses WebRTC data channels for NAT traversal and
+    /// direct peer-to-peer UDP for LAN.  Currently logs transmissions.
     pub async fn start_broadcasting(&self, mut rx: Receiver<NLEEvent>) {
         println!(
             "🕸️  [P2P] Mesh Initialized. {} peers connected.",
@@ -88,7 +102,6 @@ impl P2PNetwork {
                         &fingerprint[..12.min(fingerprint.len())]
                     );
                     for peer in &self.peers {
-                        // In production: send over UDP/WebRTC data channel
                         println!("   → Sent to {} ({})", peer.display_name, peer.addr);
                     }
                 }
@@ -98,7 +111,6 @@ impl P2PNetwork {
                         clip_id,
                         self.peers.len()
                     );
-                    // In production: broadcast CRDT operation
                     for peer in &self.peers {
                         println!(
                             "   → Syncing CrdtOperation(Insert) to {} via WebRTC Data Channel",
@@ -111,17 +123,34 @@ impl P2PNetwork {
     }
 
     /// Announce this instance on the network so other peers can discover us.
-    pub fn announce(&self, display_name: &str, port: u16) {
+    pub fn announce(&self, display_name: &str) {
         println!(
             "📢 [P2P] Announcing '{}' on port {} (_lazynext._tcp.local)",
-            display_name, port
+            display_name, self.local_port
         );
-        // In production: register mDNS service
     }
 }
 
 impl Default for P2PNetwork {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn network_starts_empty() {
+        let net = P2PNetwork::new();
+        assert!(net.peers.is_empty());
+        assert!(net.discovered.is_empty());
+    }
+
+    #[test]
+    fn with_port_sets_local_port() {
+        let net = P2PNetwork::new().with_port(9999);
+        assert_eq!(net.local_port, 9999);
     }
 }

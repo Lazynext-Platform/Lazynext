@@ -150,7 +150,9 @@ async def inpaint_video(req: InpaintRequest):
                     "mask_url": req.mask_url,
                 }
 
-                # Hypothetical Runway Inpainting API
+                # RunwayML does not currently expose a public inpainting REST API.
+                # When available, the endpoint will be documented at:
+                # https://docs.runwayml.com/reference/api
                 response = await client.post(
                     "https://api.runwayml.com/v1/inpaint",
                     headers=headers,
@@ -374,16 +376,15 @@ async def upscale_video(req: UpscaleRequest):
 
 @app.post("/nerf-extract")
 async def extract_nerf(req: NeRFRequest):
-    """NeRF extraction from 2D video (deprecated in generative-studio; use pre-processing)."""
-    await asyncio.sleep(2.0)
+    """NeRF extraction from 2D video (deprecated — use pre-processing service)."""
     from fastapi.responses import JSONResponse
+
     return JSONResponse(
-        status_code=200,
+        status_code=410,
         content={
-            "success": True,
+            "success": False,
+            "error": "This endpoint has been removed from generative-studio. Use /nerf-extract on the pre-processing service (port 8000).",
             "video_id": req.video_id,
-            "model_url": f"/mock/assets/nerf/{req.video_id}.ply",
-            "note": "Use pre-processing service for production NeRF extraction",
         },
         headers={"Deprecation": "true", "Sunset": "Sat, 01 Aug 2026 00:00:00 GMT"},
     )

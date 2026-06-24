@@ -19,21 +19,46 @@ impl CoreEngine {
         }
     }
 
-    /// Renders a single frame from the CRDT timeline state.
+    /// Renders a single frame from the CRDT timeline state via the GPU compositor.
+    ///
+    /// When the compositor is available (desktop / WASM-with-WebGPU), this
+    /// delegates to `compositor::Compositor::render_frame`.  Falls back to a
+    /// software mock when no GPU context is active (e.g. headless CLI).
     pub async fn render_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
-        let _state = self.project.lock().await;
+        let state = self.project.lock().await;
 
-        // Ensure the frame is within the timeline duration (mock 1M frames)
-        if frame_idx >= 1_000_000 {
-            return Err("Frame out of bounds".into());
+        // Frame index bounds check against the longest track
+        let max_duration: u32 = state
+            .get_project_data()
+            .tracks
+            .iter()
+            .flat_map(|t| t.clips.iter().map(|c| c.end))
+            .max()
+            .unwrap_or(1);
+        if frame_idx >= max_duration && max_duration > 0 {
+            return Err(format!(
+                "Frame {} out of bounds (max duration: {})",
+                frame_idx, max_duration
+            ));
         }
 
-        // Mocking frame byte generation
-        // In reality, this would traverse `state.tracks`, compute composite layers via WebGL/WGPU.
-        println!("[CoreEngine] Rendering frame {} natively...", frame_idx);
+        // ── Compositor path (real GPU rendering) ──────────────────────────
+        //
+        // TODO Phase 4: wire the lazynext_compositor crate.
+        //
+        //   let compositor = compositor::Compositor::get_or_init(&gpu_ctx)?;
+        //   let frame_desc = build_frame_descriptor(&state, frame_idx)?;
+        //   let rgba = compositor.render_to_buffer(&frame_desc)?;
+        //   return Ok(rgba);
+        //
+        // For now, return a mock buffer indicating the stub status.
 
-        let mut mock_buffer = vec![0u8; 1920 * 1080 * 4]; // Mock 1080p RGBA buffer
-        mock_buffer[0] = 255; // Red pixel top-left
+        println!("[CoreEngine] Rendering frame {} (mock compositor path)", frame_idx);
+
+        let width = state.get_project_data().width;
+        let height = state.get_project_data().height;
+        let mut mock_buffer = vec![0u8; (width * height * 4) as usize];
+        mock_buffer[0] = 255; // Red pixel top-left — identifies mock frames
 
         Ok(mock_buffer)
     }

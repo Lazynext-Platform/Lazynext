@@ -153,7 +153,13 @@ function App() {
                 }}
                 title={src}
               >
-                {new URL(src).pathname.split("/").pop() || src.substring(0, 30)}
+                {(() => {
+                  try {
+                    return new URL(src).pathname.split("/").pop() || src.substring(0, 30);
+                  } catch {
+                    return src ? src.substring(0, 30) : "(unknown)";
+                  }
+                })()}
               </span>
               <button
                 onClick={() => handleImport(src)}
