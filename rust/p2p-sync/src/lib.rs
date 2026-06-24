@@ -61,8 +61,12 @@ impl P2PNetwork {
         // Scan common local addresses.  Replace with real mDNS browsing
         // by adding `mdns-sd = "1"` to Cargo.toml.
         let candidates: Vec<(&str, &str, Vec<&str>)> = vec![
-            ("192.168.1.10:8000", "VR Headset", vec!["vr_headset", "reviewer"]),
-            ("192.168.1.11:8000", "Smart TV",vec!["smart_tv"]),
+            (
+                "192.168.1.10:8000",
+                "VR Headset",
+                vec!["vr_headset", "reviewer"],
+            ),
+            ("192.168.1.11:8000", "Smart TV", vec!["smart_tv"]),
             ("192.168.1.12:8000", "Color Grading Station", vec!["editor"]),
         ];
 

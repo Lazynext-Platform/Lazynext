@@ -45,8 +45,7 @@ async fn main() {
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to set tracing subscriber");
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
 
     info!("Initializing Lazynext API Gateway...");
 
@@ -135,9 +134,7 @@ async fn main() {
         .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
         .layer(middleware::from_fn(rbac::authorize_request));
 
-    let app = public_routes
-        .merge(authenticated_routes)
-        .with_state(state);
+    let app = public_routes.merge(authenticated_routes).with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -334,18 +331,14 @@ async fn handle_stripe_webhook(
                 let period_end = sub_obj["current_period_end"].as_i64().unwrap_or(0);
 
                 // Fetch user by Stripe customer ID
-                if let Ok(Some(user)) =
-                    find_user_by_stripe_customer(&state.db, customer_id).await
-                {
+                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_id.to_string(),
                         user_id: user.id,
                         stripe_subscription_id: sub_id.to_string(),
                         stripe_price_id: price_id.to_string(),
-                        stripe_current_period_end: chrono::DateTime::from_timestamp(
-                            period_end, 0,
-                        )
-                        .unwrap_or_else(chrono::Utc::now),
+                        stripe_current_period_end: chrono::DateTime::from_timestamp(period_end, 0)
+                            .unwrap_or_else(chrono::Utc::now),
                         tier: if status == "active" {
                             "pro".to_string()
                         } else {
@@ -364,9 +357,7 @@ async fn handle_stripe_webhook(
             // Handle cancellation
             if let Some(sub_obj) = payload["data"]["object"].as_object() {
                 let customer_id = sub_obj["customer"].as_str().unwrap_or("");
-                if let Ok(Some(user)) =
-                    find_user_by_stripe_customer(&state.db, customer_id).await
-                {
+                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_obj["id"].as_str().unwrap_or("").to_string(),
                         user_id: user.id,

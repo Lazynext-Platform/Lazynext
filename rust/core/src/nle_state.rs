@@ -329,7 +329,9 @@ impl NLEState {
                     clips: Vec::new(),
                 });
             }
-            CrdtOperation::ClipInsert { clip_id, track_id, .. } => {
+            CrdtOperation::ClipInsert {
+                clip_id, track_id, ..
+            } => {
                 // Remove the clip from its track
                 if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *track_id) {
                     track.clips.retain(|c| c.id != *clip_id);
@@ -357,7 +359,11 @@ impl NLEState {
                     });
                 }
             }
-            CrdtOperation::ClipTrim { clip_id, new_start, new_end } => {
+            CrdtOperation::ClipTrim {
+                clip_id,
+                new_start,
+                new_end,
+            } => {
                 // Restore original trim points from the redo stack metadata.
                 // Without per-clip snapshot history this is a best-effort reversal
                 // that resets to a default range.
@@ -374,7 +380,12 @@ impl NLEState {
                     }
                 }
             }
-            CrdtOperation::ClipMove { clip_id, from_track, to_track, .. } => {
+            CrdtOperation::ClipMove {
+                clip_id,
+                from_track,
+                to_track,
+                ..
+            } => {
                 // Move the clip back to its original track
                 let mut clip_to_move: Option<Clip> = None;
                 if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *to_track) {
@@ -388,16 +399,26 @@ impl NLEState {
                     }
                 }
             }
-            CrdtOperation::ClipSplit { clip_id, split_point, new_clip_id } => {
+            CrdtOperation::ClipSplit {
+                clip_id,
+                split_point,
+                new_clip_id,
+            } => {
                 // Undo split: remove the split-off clip and extend the original
                 for track in &mut self.data.tracks {
                     track.clips.retain(|c| c.id != *new_clip_id);
                     if let Some(clip) = track.clips.iter_mut().find(|c| c.id == *clip_id) {
-                        clip.end = clip.end.max(*split_point + clip.end.saturating_sub(*split_point));
+                        clip.end = clip
+                            .end
+                            .max(*split_point + clip.end.saturating_sub(*split_point));
                     }
                 }
             }
-            CrdtOperation::PropertyUpdate { target_id, property, .. } => {
+            CrdtOperation::PropertyUpdate {
+                target_id,
+                property,
+                ..
+            } => {
                 // Best-effort: clear the property. Full restoration needs previous value storage.
                 for track in &mut self.data.tracks {
                     if let Some(clip) = track.clips.iter_mut().find(|c| c.id == *target_id) {

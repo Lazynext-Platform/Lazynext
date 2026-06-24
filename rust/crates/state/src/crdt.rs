@@ -193,7 +193,7 @@ impl CRDTTimeline {
 #[cfg(test)]
 mod convergence_tests {
     use super::*;
-    use crate::operations::{CrdtOperation, ClipPayload};
+    use crate::operations::{ClipPayload, CrdtOperation};
     use crate::tombstone::TombstoneMap;
     use crate::vector_clock::VectorClock;
 
@@ -229,7 +229,9 @@ mod convergence_tests {
                 position: 0,
                 clip: clip_a,
             },
-            &mut tm1, &mut vc1, "peer-a",
+            &mut tm1,
+            &mut vc1,
+            "peer-a",
         );
         t2.apply_operation(
             &CrdtOperation::ClipInsert {
@@ -238,7 +240,9 @@ mod convergence_tests {
                 position: 0,
                 clip: clip_b,
             },
-            &mut tm2, &mut vc2, "peer-b",
+            &mut tm2,
+            &mut vc2,
+            "peer-b",
         );
 
         // After merge, both should contain the clip
@@ -272,14 +276,18 @@ mod convergence_tests {
                 position: 0,
                 clip: make_clip_payload("c1", 0, 100),
             },
-            &mut tm1, &mut vc1, "peer-a",
+            &mut tm1,
+            &mut vc1,
+            "peer-a",
         );
         t1.apply_operation(
             &CrdtOperation::ClipDelete {
                 clip_id: "c1".into(),
                 track_id: "t1".into(),
             },
-            &mut tm1, &mut vc1, "peer-a",
+            &mut tm1,
+            &mut vc1,
+            "peer-a",
         );
 
         // Peer B concurrently tries to insert the same clip
@@ -290,7 +298,9 @@ mod convergence_tests {
                 position: 0,
                 clip: make_clip_payload("c1", 50, 150),
             },
-            &mut tm1, &mut vc1, "peer-b",
+            &mut tm1,
+            &mut vc1,
+            "peer-b",
         );
 
         // Should be rejected — tombstone exists
@@ -370,7 +380,9 @@ mod convergence_tests {
                 position: 0,
                 clip: make_clip_payload("c1", 0, 100),
             },
-            &mut tm, &mut vc, "peer-a",
+            &mut tm,
+            &mut vc,
+            "peer-a",
         );
 
         let snapshot = t.clone();

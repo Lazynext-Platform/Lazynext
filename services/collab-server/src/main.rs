@@ -115,12 +115,7 @@ async fn ws_handler(
     Ok(ws.on_upgrade(move |socket| handle_socket(socket, project_id, claims, rooms)))
 }
 
-async fn handle_socket(
-    socket: WebSocket,
-    project_id: String,
-    claims: AuthClaims,
-    rooms: RoomMap,
-) {
+async fn handle_socket(socket: WebSocket, project_id: String, claims: AuthClaims, rooms: RoomMap) {
     let (mut sender, mut receiver) = socket.split();
 
     // Get or create the broadcast channel for this room.

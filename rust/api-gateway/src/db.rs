@@ -115,16 +115,14 @@ impl DbStore {
 
     /// Fetch admin dashboard metrics.
     pub async fn get_admin_metrics(&self) -> Result<AdminMetrics, sqlx::Error> {
-        let total_users: (i64,) =
-            sqlx::query_as("SELECT COUNT(*)::bigint FROM \"user\"")
+        let total_users: (i64,) = sqlx::query_as("SELECT COUNT(*)::bigint FROM \"user\"")
+            .fetch_one(&self.pool)
+            .await?;
+
+        let active_subs: (i64,) =
+            sqlx::query_as("SELECT COUNT(*)::bigint FROM subscriptions WHERE tier != 'free'")
                 .fetch_one(&self.pool)
                 .await?;
-
-        let active_subs: (i64,) = sqlx::query_as(
-            "SELECT COUNT(*)::bigint FROM subscriptions WHERE tier != 'free'",
-        )
-        .fetch_one(&self.pool)
-        .await?;
 
         // Monthly revenue: all paid tiers at $29/mo (simplified).
         Ok(AdminMetrics {
@@ -135,16 +133,11 @@ impl DbStore {
     }
 
     /// Fetch all projects belonging to a user.
-    pub async fn get_projects_for_user(
-        &self,
-        user_id: &str,
-    ) -> Result<Vec<Project>, sqlx::Error> {
-        sqlx::query_as(
-            "SELECT * FROM projects WHERE user_id = $1 ORDER BY updated_at DESC",
-        )
-        .bind(user_id)
-        .fetch_all(&self.pool)
-        .await
+    pub async fn get_projects_for_user(&self, user_id: &str) -> Result<Vec<Project>, sqlx::Error> {
+        sqlx::query_as("SELECT * FROM projects WHERE user_id = $1 ORDER BY updated_at DESC")
+            .bind(user_id)
+            .fetch_all(&self.pool)
+            .await
     }
 
     /// Get a subscription for a given user.
@@ -161,10 +154,7 @@ impl DbStore {
     }
 
     /// Update (or create) a subscription record after a Stripe webhook.
-    pub async fn upsert_subscription(
-        &self,
-        sub: &Subscription,
-    ) -> Result<(), sqlx::Error> {
+    pub async fn upsert_subscription(&self, sub: &Subscription) -> Result<(), sqlx::Error> {
         sqlx::query(
             "INSERT INTO subscriptions (id, user_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, tier, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -188,11 +178,7 @@ impl DbStore {
     }
 
     /// Deduct AI credits from a user. Returns the new balance.
-    pub async fn deduct_credits(
-        &self,
-        user_id: &str,
-        amount: i32,
-    ) -> Result<i32, sqlx::Error> {
+    pub async fn deduct_credits(&self, user_id: &str, amount: i32) -> Result<i32, sqlx::Error> {
         let row: (i32,) = sqlx::query_as(
             "UPDATE \"user\" SET ai_credits = ai_credits - $2 WHERE id = $1 RETURNING ai_credits",
         )

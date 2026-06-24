@@ -4,7 +4,7 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use jsonwebtoken::{DecodingKey, Validation, decode, Algorithm};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
 use serde::Deserialize;
 use std::sync::LazyLock;
 
@@ -103,12 +103,8 @@ fn jwt_validation() -> &'static Validation {
 /// 3. On success: inserts [`AuthClaims`] into request extensions and
 ///    forwards to the next layer / handler.
 /// 4. On failure: returns 401 with a JSON error body.
-pub async fn authorize_request(
-    mut req: Request,
-    next: Next,
-) -> Result<Response, StatusCode> {
-    let token = extract_bearer_token(req.headers())
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response, StatusCode> {
+    let token = extract_bearer_token(req.headers()).ok_or(StatusCode::UNAUTHORIZED)?;
 
     let claims = decode::<AuthClaims>(&token, jwt_decoding_key(), jwt_validation())
         .map(|data| data.claims)
@@ -133,8 +129,7 @@ pub async fn authorize_request(
 /// Pull a `Bearer <token>` value from the Authorization header.
 fn extract_bearer_token(headers: &axum::http::HeaderMap) -> Option<String> {
     let raw = headers.get(header::AUTHORIZATION)?.to_str().ok()?;
-    raw.strip_prefix("Bearer ")
-        .map(|t| t.trim().to_string())
+    raw.strip_prefix("Bearer ").map(|t| t.trim().to_string())
 }
 
 /// Convenience: extract [`AuthClaims`] from request extensions.

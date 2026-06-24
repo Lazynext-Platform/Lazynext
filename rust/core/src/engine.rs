@@ -53,7 +53,10 @@ impl CoreEngine {
         //
         // For now, return a mock buffer indicating the stub status.
 
-        println!("[CoreEngine] Rendering frame {} (mock compositor path)", frame_idx);
+        println!(
+            "[CoreEngine] Rendering frame {} (mock compositor path)",
+            frame_idx
+        );
 
         let width = state.get_project_data().width;
         let height = state.get_project_data().height;
