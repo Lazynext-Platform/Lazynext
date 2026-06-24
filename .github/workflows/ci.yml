@@ -216,8 +216,8 @@ jobs:
       - name: Docker Compose Smoke Test
         run: |
           docker compose build
-          docker compose up -d
-          sleep 15
+          docker compose up -d --wait --wait-timeout 120
+          sleep 30
           curl -sf http://localhost:3000 > /dev/null || echo "::warning ::Web not responding"
           curl -sf http://localhost:8000 > /dev/null || echo "::warning ::Pre-processing not responding"
           curl -sf http://localhost:8001 > /dev/null || echo "::warning ::Generative studio not responding"
