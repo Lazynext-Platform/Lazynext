@@ -9,6 +9,6 @@ torch>=2.4.0
 torchvision>=0.19.0
 scikit-image>=0.24.0
 # NeRF/Rotoscoping
-rembg>=2.0.50
+rembg>=2.0.76
 pillow>=11.0.0
 segment-anything>=1.0.0
