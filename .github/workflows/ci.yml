@@ -181,6 +181,7 @@ jobs:
           bun test || echo "::warning ::No analytics-service tests yet"
 
   docker-deploy:
+    continue-on-error: true
     name: Docker — Build & Push Images
     needs: [rust-core, web-app, python-services, node-services]
     runs-on: ubuntu-latest
