@@ -3,10 +3,6 @@ resource "google_container_cluster" "gke" {
   name     = "lazynext-gke-${var.environment}"
   location = var.gcp_region
 
-  lifecycle {
-    ignore_changes = [private_cluster_config]
-  }
-
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
@@ -16,15 +12,6 @@ resource "google_container_cluster" "gke" {
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.gke_subnet.name
 
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = "172.16.0.0/28"
-  }
-
-  workload_identity_config {
-    workload_pool = "${var.project_id}.svc.id.goog"
-  }
 }
 
 # General compute pool
