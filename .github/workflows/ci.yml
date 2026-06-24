@@ -277,7 +277,7 @@ jobs:
       - name: Build and Push MCP Server
         uses: docker/build-push-action@v7
         with:
-          context: ./rust/mcp-server
+          context: .
           file: ./rust/mcp-server/Dockerfile
           push: true
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-mcp:latest

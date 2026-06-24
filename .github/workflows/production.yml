@@ -61,7 +61,7 @@ jobs:
           docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
           docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest
 
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest -f rust/mcp-server/Dockerfile rust/mcp-server
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
           docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest
 
       - name: Deploy to GKE
