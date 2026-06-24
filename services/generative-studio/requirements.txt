@@ -2,7 +2,7 @@ fastapi==0.115.0
 uvicorn==0.34.0
 pydantic==2.10.0
 httpx==0.28.1
-# AI Video/Audio
+# AI Video/Audio (import-checked for production path)
 numpy>=1.26.0
 torch>=2.4.0
 torchaudio>=2.4.0
@@ -12,6 +12,3 @@ accelerate>=1.2.0
 # Audio Synthesis
 librosa>=0.10.2
 soundfile>=0.13.0
-# API clients
-replicate>=0.34.0
-elevenlabs>=1.50.0

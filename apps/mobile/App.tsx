@@ -49,22 +49,28 @@ function DashboardScreen() {
   }, []);
 
   const handleTouchStart = (e: any) => {
-    if (e.nativeEvent?.touches?.[0]?.force !== undefined) {
+    // Detect pressure-sensitive input (Apple Pencil or 3D Touch).
+    // Clear the flag when no force is present (e.g. finger touch).
+    if (e.nativeEvent?.touches?.[0]?.force !== undefined && e.nativeEvent.touches[0].force > 0) {
       setIsApplePencil(true);
+      // Reset after 3s so the indicator doesn't stay forever
+      const timer = setTimeout(() => setIsApplePencil(false), 3000);
+      return () => clearTimeout(timer);
     }
   };
 
   const handleProcessIntent = () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || processing) return;
+    const currentPrompt = prompt;
     setProcessing(true);
     setStatus("Processing via Rust Core...");
+    setPrompt("");
 
     setTimeout(() => {
-      const result = NativeBridge.process_intent(prompt);
+      const result = NativeBridge.process_intent(currentPrompt);
       setStatus(`✓ ${result}`);
       setClipCount((prev) => prev + 1);
-      setHistory((prev) => [prompt, ...prev].slice(0, 10));
-      setPrompt("");
+      setHistory((prev) => [currentPrompt, ...prev].slice(0, 10));
       setProcessing(false);
     }, 600);
   };

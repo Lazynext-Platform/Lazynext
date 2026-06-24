@@ -1,12 +1,14 @@
 // Service Worker (Background Script)
 
+const API_GATEWAY = "http://localhost:8005";
+
 chrome.runtime.onInstalled.addListener(() => {
 	console.log("Lazynext Extension Installed");
-	
+
 	chrome.contextMenus.create({
 		id: "send-to-lazynext",
 		title: "Send Video to Lazynext Timeline",
-		contexts: ["video", "link"]
+		contexts: ["video", "link"],
 	});
 });
 
@@ -18,20 +20,26 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 		console.log(`Sending media to Lazynext: ${mediaUrl}`);
 
 		try {
-			// Ping the new Rust API Gateway
-			const response = await fetch("http://127.0.0.1:8005/api/v1/ai/ingest", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					url: mediaUrl,
-					crdtAction: "APPEND_TRACK"
-				})
-			});
+			const response = await fetch(
+				`${API_GATEWAY}/api/v1/ai/ingest`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						url: mediaUrl,
+						crdtAction: "APPEND_TRACK",
+					}),
+				},
+			);
 
+			if (!response.ok) {
+				console.error(`Gateway returned ${response.status}`);
+				return;
+			}
 			const data = await response.json();
 			console.log("Success:", data);
 		} catch (error) {
-			console.error("Error:", error);
+			console.error("Failed to reach Lazynext API Gateway:", error);
 		}
 	}
 });
