@@ -135,17 +135,19 @@ impl MultiverseManager {
                 }
                 state::operations::CrdtOperation::ClipInsert {
                     clip_id,
-                    track_id: _,
+                    track_id,
                     clip,
                     ..
                 } => {
                     if !target_state.tombstones.is_deleted(clip_id) {
-                        // Find the matching track
+                        // Find the matching track by ID, fall back to the
+                        // first track if the referenced track doesn't exist
+                        // (e.g. it was deleted on the target branch).
                         let track_idx = target_state
                             .get_project_data()
                             .tracks
                             .iter()
-                            .position(|_t| true)
+                            .position(|t| t.id == *track_id)
                             .unwrap_or(0);
                         target_state.add_clip_to_track(
                             track_idx,

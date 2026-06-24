@@ -3,7 +3,7 @@ import express from "express";
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 8005;
+const PORT = process.env.PORT || 8006; // Default 8006 to avoid conflict with api-gateway (8005)
 
 // Health check endpoint (required by K8s probes)
 app.get("/health", (_req, res) => {

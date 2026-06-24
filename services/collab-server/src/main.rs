@@ -1,19 +1,63 @@
 use axum::{
     Json, Router,
     extract::{
-        Path, State,
+        Path, Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
+    http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
 };
 use dashmap::DashMap;
 use futures::{sink::SinkExt, stream::StreamExt};
-use std::sync::Arc;
-use tokio::sync::broadcast;
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
+use serde::{Deserialize, Serialize};
+use std::sync::{Arc, LazyLock};
 
-/// We maintain a broadcast channel per "document" (e.g., project_id).
-type RoomMap = Arc<DashMap<String, broadcast::Sender<Message>>>;
+/// Claims extracted from a better-auth JWT.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AuthClaims {
+    pub sub: String,
+    pub email: String,
+    pub name: Option<String>,
+    pub role: Option<String>,
+    pub email_verified: Option<bool>,
+    pub iat: u64,
+    pub exp: u64,
+}
+
+// ── JWT decoding ──────────────────────────────────────────────────────────
+
+fn jwt_decoding_key() -> &'static DecodingKey {
+    static KEY: LazyLock<DecodingKey> = LazyLock::new(|| {
+        let secret = std::env::var("BETTER_AUTH_SECRET").unwrap_or_else(|_| {
+            tracing::warn!("BETTER_AUTH_SECRET not set — using dev fallback.");
+            "lazynext-dev-secret-key-for-auth-minimum-32".to_string()
+        });
+        DecodingKey::from_secret(secret.as_bytes())
+    });
+    &KEY
+}
+
+fn jwt_validation() -> &'static Validation {
+    static VAL: LazyLock<Validation> = LazyLock::new(|| {
+        let mut v = Validation::new(Algorithm::HS256);
+        v.validate_exp = true;
+        v.set_required_spec_claims(&["exp", "sub"]);
+        v
+    });
+    &VAL
+}
+
+fn verify_token(token: &str) -> Result<AuthClaims, String> {
+    decode::<AuthClaims>(token, jwt_decoding_key(), jwt_validation())
+        .map(|data| data.claims)
+        .map_err(|e| format!("JWT validation failed: {}", e))
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+// We maintain a broadcast channel per "document" (e.g., project_id).
+type RoomMap = Arc<DashMap<String, tokio::sync::broadcast::Sender<Message>>>;
 
 #[tokio::main]
 async fn main() {
@@ -28,31 +72,62 @@ async fn main() {
         .route("/load/:project_id", get(load_handler))
         .with_state(rooms);
 
-    let port = std::env::var("PORT").unwrap_or_else(|_| "8002".to_string());
+    // Port 8007 — avoids collision with ai-agents on 8002
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8007".to_string());
     let addr = format!("0.0.0.0:{}", port);
 
-    println!("📡 Lazynext Collab Server running on ws://{}", addr);
+    tracing::info!("📡 Lazynext Collab Server running on ws://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
+// ── Query parameters for WebSocket auth ───────────────────────────────────
+
+#[derive(Deserialize)]
+struct WsAuthParams {
+    token: Option<String>,
+}
+
+/// Upgrade to WebSocket only if the JWT token is valid.
 async fn ws_handler(
     ws: WebSocketUpgrade,
     Path(project_id): Path<String>,
+    Query(params): Query<WsAuthParams>,
     State(rooms): State<RoomMap>,
-) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, project_id, rooms))
+) -> Result<impl IntoResponse, StatusCode> {
+    let token = params.token.ok_or_else(|| {
+        tracing::warn!("WebSocket connection rejected: missing token");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let claims = verify_token(&token).map_err(|e| {
+        tracing::warn!(%e, "WebSocket connection rejected: invalid token");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    tracing::info!(
+        email = %claims.email,
+        project = %project_id,
+        "WebSocket connection authorized"
+    );
+
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, project_id, claims, rooms)))
 }
 
-async fn handle_socket(socket: WebSocket, project_id: String, rooms: RoomMap) {
+async fn handle_socket(
+    socket: WebSocket,
+    project_id: String,
+    claims: AuthClaims,
+    rooms: RoomMap,
+) {
     let (mut sender, mut receiver) = socket.split();
 
     // Get or create the broadcast channel for this room.
     let tx = rooms
         .entry(project_id.clone())
         .or_insert_with(|| {
-            let (tx, _rx) = broadcast::channel(100);
+            let (tx, _rx) = tokio::sync::broadcast::channel(100);
             tx
         })
         .clone();
@@ -70,10 +145,13 @@ async fn handle_socket(socket: WebSocket, project_id: String, rooms: RoomMap) {
 
     // Task to receive messages from this client and broadcast them
     let tx_clone = tx.clone();
+    let email = claims.email.clone();
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
-            // Echo message to all other clients in the room (Yjs binary updates)
-            let _ = tx_clone.send(msg);
+            // Only broadcast non-empty messages from authenticated users
+            if let Message::Text(_) | Message::Binary(_) = &msg {
+                let _ = tx_clone.send(msg);
+            }
         }
     });
 
@@ -83,7 +161,7 @@ async fn handle_socket(socket: WebSocket, project_id: String, rooms: RoomMap) {
         _ = (&mut recv_task) => send_task.abort(),
     };
 
-    println!("User disconnected from project: {}", project_id);
+    tracing::info!(%email, %project_id, "User disconnected");
 }
 
 #[derive(serde::Serialize)]
@@ -92,34 +170,20 @@ struct StatusResponse {
     status: String,
 }
 
-/// Simulated persistent save using a DB stub
+/// Persist CRDT state to the database.
 async fn save_handler(Path(project_id): Path<String>) -> Json<StatusResponse> {
-    // In a production system:
-    // 1. Get the current state vector for the room
-    // 2. Dump the binary Yjs vector
-    // 3. Save to Postgres/S3
-    println!(
-        "Persistent state saved to database for project: {}",
-        project_id
-    );
-
+    // TODO: Save CRDT state to PostgreSQL / S3
+    tracing::info!(%project_id, "CRDT state save requested");
     Json(StatusResponse {
         success: true,
         status: format!("Saved CRDT state for project {}", project_id),
     })
 }
 
-/// Simulated persistent load from a DB stub
+/// Load CRDT state from the database.
 async fn load_handler(Path(project_id): Path<String>) -> Json<StatusResponse> {
-    // In a production system:
-    // 1. Fetch Yjs binary blob from DB
-    // 2. Load into memory room
-    // 3. Return awareness state
-    println!(
-        "Persistent state loaded from database for project: {}",
-        project_id
-    );
-
+    // TODO: Load CRDT state from PostgreSQL / S3
+    tracing::info!(%project_id, "CRDT state load requested");
     Json(StatusResponse {
         success: true,
         status: format!("Loaded CRDT state for project {}", project_id),

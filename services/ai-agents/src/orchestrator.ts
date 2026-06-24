@@ -168,19 +168,60 @@ Respond ONLY with a JSON object:
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30_000);
   
-  let endpoint = "https://api.openai.com/v1/chat/completions";
-  let modelName = "gpt-4o";
-  
-  if (provider === "anthropic") {
-    // Assuming an OpenAI-compatible proxy for Anthropic or switching the endpoint
-    endpoint = process.env.ANTHROPIC_PROXY_URL || "https://api.openai.com/v1/chat/completions";
-    modelName = "claude-3-opus";
-  } else if (provider === "ollama") {
-    endpoint = "http://localhost:11434/v1/chat/completions";
-    modelName = "llama3";
-  }
-
   try {
+    clearTimeout(timeoutId);
+
+    if (provider === "anthropic") {
+      // Use the native Anthropic Messages API
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 4096,
+          system: systemPrompt,
+          messages: [{ role: "user", content: prompt }],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Anthropic API error: ${response.status}`);
+      }
+
+      const data = (await response.json()) as {
+        content: Array<{ type: string; text: string }>;
+      };
+      const raw = data.content
+        .filter((c) => c.type === "text")
+        .map((c) => c.text)
+        .join("");
+      // Anthropic may wrap JSON in markdown — strip ``` fences
+      const json = raw.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```$/, "");
+      const parsed = JSON.parse(json) as {
+        reasoning: string;
+        steps: OrchestrationStep[];
+      };
+
+      return {
+        steps: parsed.steps || [],
+        reasoning: parsed.reasoning || "No reasoning provided",
+      };
+    }
+
+    // OpenAI-compatible path (OpenAI, Ollama)
+    let endpoint = "https://api.openai.com/v1/chat/completions";
+    let modelName = "gpt-4o";
+
+    if (provider === "ollama") {
+      endpoint = "http://localhost:11434/v1/chat/completions";
+      modelName = "llama3";
+    }
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
@@ -197,7 +238,6 @@ Respond ONLY with a JSON object:
       }),
       signal: controller.signal,
     });
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error(`LLM API error: ${response.status}`);
@@ -877,7 +917,7 @@ async function executeToolCall(
 
     case "style_transfer":
       const styleResult: any = await callService(
-          `${GEN_STUDIO_URL}/style-transfer`,
+          `${GENERATIVE_STUDIO_URL}/style-transfer`,
           "POST",
           args
       );
@@ -943,7 +983,7 @@ async function executeToolCall(
 
     case "generative_fill":
       const genFillResult: any = await callService(
-          `${GEN_STUDIO_URL}/generative-fill`,
+          `${GENERATIVE_STUDIO_URL}/generative-fill`,
           "POST",
           args
       );
@@ -1042,7 +1082,7 @@ async function executeToolCall(
 
     case "generate_ai_avatar":
       const avatarResult: any = await callService(
-          `${GEN_STUDIO_URL}/generate-avatar`,
+          `${GENERATIVE_STUDIO_URL}/generate-avatar`,
           "POST",
           args
       );

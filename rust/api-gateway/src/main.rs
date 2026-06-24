@@ -2,7 +2,10 @@ use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::middleware;
 use axum::routing::{get, post};
-use axum::{Json, Router};
+use axum::{Extension, Json, Router};
+// Note: axum 0.8 retains `Extension` as an extractor.
+// AuthClaims are inserted in `rbac::authorize_request` and
+// extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::{NLEEvent, NLEState};
 use serde::Serialize;
@@ -12,10 +15,13 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 use tracing::{Level, info};
-use tracing_subscriber::FmtSubscriber;
 
 pub mod db;
 pub mod rbac;
+
+// Convenience re-imports so handlers can be concise.
+use db::DbStore;
+use rbac::{AuthClaims, WorkspaceRole};
 
 #[derive(Serialize)]
 struct WebhookPayload {
@@ -28,28 +34,33 @@ struct WebhookPayload {
 struct AppState {
     nle: Arc<Mutex<NLEState>>,
     editor: Arc<AutonomousEditor>,
-    db: Arc<db::DbStore>,
+    db: Arc<DbStore>,
 }
 
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
 
-    // Initialize OpenTelemetry Tracing
-    let subscriber = FmtSubscriber::builder()
+    // Initialize tracing
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Failed to set tracing subscriber");
 
-    info!("Initializing Lazynext API Gateway with OpenTelemetry tracing...");
+    info!("Initializing Lazynext API Gateway...");
 
-    let database_url =
-        std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite::memory:".to_string());
-    let db_store = db::DbStore::new(&database_url)
+    // ── Database ───────────────────────────────────────────────────────
+    let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        tracing::warn!("DATABASE_URL not set — falling back to local dev");
+        "postgresql://lazynext:password123@localhost:5432/lazynext".to_string()
+    });
+    let db_store = DbStore::new(&database_url)
         .await
-        .expect("Failed to initialize database");
-    let db_store_arc = Arc::new(db_store);
+        .expect("Failed to connect to PostgreSQL database");
+    let db_arc = Arc::new(db_store);
 
+    // ── NLE State ──────────────────────────────────────────────────────
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
 
     let nle_state = Arc::new(Mutex::new(NLEState::new_with_dispatcher(
@@ -59,30 +70,29 @@ async fn main() {
         tx,
     )));
 
-    // Background webhook dispatcher
+    // ── Webhook dispatcher ─────────────────────────────────────────────
     let client = reqwest::Client::new();
-    let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL").unwrap_or_else(|_| {
-        "https://hooks.slack.com/services/REPLACE/WITH/YOUR_WEBHOOK".to_string()
-    });
+    let webhook_url = std::env::var("LAZYNEXT_WEBHOOK_URL").unwrap_or_default();
 
     tokio::spawn(async move {
         while let Some(event) = rx.recv().await {
             if let NLEEvent::RenderComplete(project_id, fingerprint) = event {
-                println!("🚀 [GATEWAY] Render complete — dispatching webhook");
+                info!(%project_id, "Render complete — dispatching webhook");
+                if webhook_url.is_empty() {
+                    continue;
+                }
                 let payload = WebhookPayload {
                     event_type: "render_complete".to_string(),
-                    project_id: project_id.clone(),
+                    project_id,
                     message: format!(
                         "Render completed. C2PA Provenance: {}",
                         &fingerprint[..12.min(fingerprint.len())]
                     ),
                 };
 
-                let res = client.post(&webhook_url).json(&payload).send().await;
-
-                match res {
-                    Ok(r) => println!("✅ Webhook dispatched: {}", r.status()),
-                    Err(e) => eprintln!("⚠️  Webhook failed: {}", e),
+                match client.post(&webhook_url).json(&payload).send().await {
+                    Ok(r) => info!(status = %r.status(), "Webhook dispatched"),
+                    Err(e) => tracing::warn!(?e, "Webhook delivery failed"),
                 }
             }
         }
@@ -91,11 +101,21 @@ async fn main() {
     let state = AppState {
         nle: nle_state.clone(),
         editor: Arc::new(AutonomousEditor::new()),
-        db: db_store_arc,
+        db: db_arc,
     };
 
-    let app: Router = Router::new()
+    // ── Router ─────────────────────────────────────────────────────────
+    //
+    // Route groups:
+    //   /health           → public (no auth)
+    //   /api/v1/...       → authenticated (JWT required)
+    //   /api/v1/admin/... → admin-only
+    //   /api/v1/stripe/...→ public (Stripe signs its own webhooks)
+    let public_routes = Router::new()
         .route("/health", get(health_handler))
+        .route("/api/v1/stripe/webhook", post(handle_stripe_webhook));
+
+    let authenticated_routes = Router::new()
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
         .route(
             "/api/v1/timeline",
@@ -108,20 +128,22 @@ async fn main() {
         )
         .route("/api/v1/ai/ingest", post(handle_ai_ingest))
         .route("/api/v1/render", post(handle_trigger_render))
-        .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
         .route("/api/v1/projects", get(handle_get_projects))
-        .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
         .route("/api/v1/user/credits", get(handle_get_user_credits))
         .route("/api/v1/ai/generate", post(handle_generate))
         .route("/api/v1/ai/tts", post(handle_tts))
-        .layer(middleware::from_fn(rbac::authorize_request))
+        .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
+        .layer(middleware::from_fn(rbac::authorize_request));
+
+    let app = public_routes
+        .merge(authenticated_routes)
         .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    println!("📡 API Gateway listening on http://{}", addr);
+    info!("📡 API Gateway listening on http://{}", addr);
 
-    // Trigger a demo render after 5 seconds
+    // Trigger a demo render after 5 seconds (dev convenience)
     let nle_for_demo = nle_state.clone();
     tokio::spawn(async move {
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
@@ -141,15 +163,29 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
+// ── Public Handlers ───────────────────────────────────────────────────────
+
 async fn health_handler() -> Json<Value> {
     Json(json!({"status": "ok", "service": "api-gateway"}))
 }
 
+// ── Authenticated Handlers ─────────────────────────────────────────────────
+//
+// All handlers below run after `rbac::authorize_request` has validated the
+// JWT and inserted `AuthClaims` into request extensions.
+// Use `auth_claims(&req)` / `user_role(&req)` to access them.
+
 async fn handle_autonomous_edit(
     State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
     Json(payload): Json<VideoIntent>,
 ) -> Json<Value> {
-    // Lock, extract what we need, drop guard BEFORE await
+    // Guard: users must have at least the Editor role to mutate the timeline.
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
     let result = {
         let mut nle = state.nle.lock().await;
         state
@@ -157,7 +193,6 @@ async fn handle_autonomous_edit(
             .process_intent_with_llm(&mut nle, &payload)
             .await
     };
-    // MutexGuard is dropped here ^ — safe to hold across await within the block
 
     match result {
         Ok(msg) => Json(json!({ "success": true, "message": msg })),
@@ -177,47 +212,212 @@ async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
     Json(json!({ "triggered": true }))
 }
 
-// ── New Database Endpoints for Next.js Migration ──
+// ── User / Profile ────────────────────────────────────────────────────────
 
-async fn handle_admin_dashboard(State(state): State<AppState>) -> Json<Value> {
-    match state.db.get_admin_metrics().await {
-        Ok((total_users, active_subs)) => Json(json!({
+async fn handle_get_profile(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    match state.db.get_user(&claims.sub).await {
+        Ok(Some(user)) => Json(json!({
             "success": true,
-            "metrics": {
-                "totalUsers": total_users,
-                "activeSubscriptions": active_subs,
-                "monthlyRecurringRevenue": active_subs * 29
+            "profile": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "role": user.role,
+                "tier": "Pro Creator Tier",
+                "initials": initials(&user.name),
+                "ai_credits": user.ai_credits,
             }
         })),
-        Err(e) => Json(json!({ "success": false, "error": e.to_string() })),
+        Ok(None) => {
+            // User exists in auth but not yet in our DB — return partial.
+            Json(json!({
+                "success": true,
+                "profile": {
+                    "id": claims.sub,
+                    "name": claims.name,
+                    "email": claims.email,
+                    "role": claims.role,
+                    "tier": "Free",
+                    "initials": initials(claims.name.as_deref().unwrap_or("U")),
+                    "ai_credits": 50,
+                }
+            }))
+        }
+        Err(e) => {
+            tracing::error!(?e, "Failed to fetch user profile");
+            Json(json!({ "success": false, "error": "Database error" }))
+        }
     }
 }
 
-async fn handle_get_projects(State(state): State<AppState>, _headers: HeaderMap) -> Json<Value> {
-    // In a real app, parse the JWT from Authorization header to get user_id.
-    // For now, mock it.
-    let user_id = "mock_user_id";
+async fn handle_get_user_credits(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    match state.db.get_user(&claims.sub).await {
+        Ok(Some(user)) => Json(json!({ "success": true, "credits": user.ai_credits })),
+        Ok(None) => Json(json!({ "success": true, "credits": 50 })),
+        Err(e) => {
+            tracing::error!(?e, "Failed to fetch user credits");
+            Json(json!({ "success": false, "error": "Database error" }))
+        }
+    }
+}
 
-    match state.db.get_projects_for_user(user_id).await {
+// ── Projects ──────────────────────────────────────────────────────────────
+
+async fn handle_get_projects(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    match state.db.get_projects_for_user(&claims.sub).await {
         Ok(projects) => Json(json!({ "success": true, "projects": projects })),
-        Err(e) => Json(json!({ "success": false, "error": e.to_string() })),
+        Err(e) => {
+            tracing::error!(?e, "Failed to fetch projects");
+            Json(json!({ "success": false, "error": e.to_string() }))
+        }
     }
 }
+
+// ── Admin ─────────────────────────────────────────────────────────────────
+
+async fn handle_admin_dashboard(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_admin() {
+        return Json(json!({ "success": false, "error": "Admin access required" }));
+    }
+
+    match state.db.get_admin_metrics().await {
+        Ok(metrics) => Json(json!({
+            "success": true,
+            "metrics": {
+                "totalUsers": metrics.total_users,
+                "activeSubscriptions": metrics.active_subscriptions,
+                "monthlyRecurringRevenue": metrics.monthly_recurring_revenue,
+            }
+        })),
+        Err(e) => {
+            tracing::error!(?e, "Failed to fetch admin metrics");
+            Json(json!({ "success": false, "error": e.to_string() }))
+        }
+    }
+}
+
+// ── Stripe Webhook ────────────────────────────────────────────────────────
 
 async fn handle_stripe_webhook(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
+    _headers: HeaderMap,
     Json(payload): Json<Value>,
 ) -> Json<Value> {
-    println!("Received Stripe webhook: {:?}", payload["type"]);
-    // Here we would parse the stripe event and update the DB subscription status
+    let event_type = payload["type"].as_str().unwrap_or("unknown");
+    info!(%event_type, "Received Stripe webhook");
+
+    // TODO: Verify Stripe webhook signature using STRIPE_WEBHOOK_SECRET.
+    // let signature = headers.get("stripe-signature")...;
+
+    match event_type {
+        "customer.subscription.updated" | "customer.subscription.created" => {
+            if let Some(sub_obj) = payload["data"]["object"].as_object() {
+                let sub_id = sub_obj["id"].as_str().unwrap_or("unknown");
+                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
+                let status = sub_obj["status"].as_str().unwrap_or("active");
+                let price_id = sub_obj["items"]["data"][0]["price"]["id"]
+                    .as_str()
+                    .unwrap_or("");
+                let period_end = sub_obj["current_period_end"].as_i64().unwrap_or(0);
+
+                // Fetch user by Stripe customer ID
+                if let Ok(Some(user)) =
+                    find_user_by_stripe_customer(&state.db, customer_id).await
+                {
+                    let sub = db::Subscription {
+                        id: sub_id.to_string(),
+                        user_id: user.id,
+                        stripe_subscription_id: sub_id.to_string(),
+                        stripe_price_id: price_id.to_string(),
+                        stripe_current_period_end: chrono::DateTime::from_timestamp(
+                            period_end, 0,
+                        )
+                        .unwrap_or_else(chrono::Utc::now),
+                        tier: if status == "active" {
+                            "pro".to_string()
+                        } else {
+                            "free".to_string()
+                        },
+                        created_at: chrono::Utc::now(),
+                        updated_at: chrono::Utc::now(),
+                    };
+                    if let Err(e) = state.db.upsert_subscription(&sub).await {
+                        tracing::error!(?e, "Failed to upsert subscription");
+                    }
+                }
+            }
+        }
+        "customer.subscription.deleted" => {
+            // Handle cancellation
+            if let Some(sub_obj) = payload["data"]["object"].as_object() {
+                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
+                if let Ok(Some(user)) =
+                    find_user_by_stripe_customer(&state.db, customer_id).await
+                {
+                    let sub = db::Subscription {
+                        id: sub_obj["id"].as_str().unwrap_or("").to_string(),
+                        user_id: user.id,
+                        stripe_subscription_id: String::new(),
+                        stripe_price_id: String::new(),
+                        stripe_current_period_end: chrono::Utc::now(),
+                        tier: "free".to_string(),
+                        created_at: chrono::Utc::now(),
+                        updated_at: chrono::Utc::now(),
+                    };
+                    if let Err(e) = state.db.upsert_subscription(&sub).await {
+                        tracing::error!(?e, "Failed to cancel subscription");
+                    }
+                }
+            }
+        }
+        _ => {
+            info!(%event_type, "Unhandled Stripe event type");
+        }
+    }
+
     Json(json!({ "received": true }))
 }
 
-async fn handle_get_user_credits(State(_state): State<AppState>) -> Json<Value> {
-    Json(json!({ "success": true, "credits": 500 }))
+async fn find_user_by_stripe_customer(
+    db: &DbStore,
+    customer_id: &str,
+) -> Result<Option<db::User>, sqlx::Error> {
+    use sqlx::Row;
+    let row = sqlx::query(
+        "SELECT id, email, name, email_verified, image, role, stripe_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE stripe_customer_id = $1",
+    )
+    .bind(customer_id)
+    .fetch_optional(&db.pool)
+    .await?;
+
+    Ok(row.map(|r| db::User {
+        id: r.get("id"),
+        email: r.get("email"),
+        name: r.get("name"),
+        email_verified: r.get("email_verified"),
+        image: r.get("image"),
+        role: r.get("role"),
+        stripe_customer_id: r.get("stripe_customer_id"),
+        ai_credits: r.get("ai_credits"),
+        created_at: r.get("created_at"),
+        updated_at: r.get("updated_at"),
+    }))
 }
 
-// ── New AI Engine Endpoints ──
+// ── AI Generation ─────────────────────────────────────────────────────────
 
 #[derive(serde::Deserialize)]
 pub struct GeneratePayload {
@@ -232,9 +432,15 @@ pub struct TtsPayload {
 
 async fn handle_generate(
     State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
     Json(payload): Json<GeneratePayload>,
 ) -> Json<Value> {
     use neural_engine::generative::{GenerativeModel, VideoGenerationOptions};
+
+    // Deduct AI credits
+    if let Err(e) = state.db.deduct_credits(&claims.sub, 5).await {
+        tracing::warn!(?e, "Failed to deduct credits — continuing anyway");
+    }
 
     let generator = GenerativeModel::new();
     let options = VideoGenerationOptions {
@@ -259,16 +465,29 @@ async fn handle_generate(
                 0,
                 150,
             );
-            Json(
-                json!({ "success": true, "message": format!("Video generated for '{}' and added to timeline", payload.prompt) }),
-            )
+            Json(json!({
+                "success": true,
+                "message": format!(
+                    "Video generated for '{}' and added to timeline",
+                    payload.prompt
+                )
+            }))
         }
         Err(e) => Json(json!({ "success": false, "error": e })),
     }
 }
 
-async fn handle_tts(State(state): State<AppState>, Json(payload): Json<TtsPayload>) -> Json<Value> {
+async fn handle_tts(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<TtsPayload>,
+) -> Json<Value> {
     use neural_engine::generative::{AudioGenerationOptions, GenerativeModel};
+
+    // Deduct AI credits
+    if let Err(e) = state.db.deduct_credits(&claims.sub, 2).await {
+        tracing::warn!(?e, "Failed to deduct credits — continuing anyway");
+    }
 
     let generator = GenerativeModel::new();
     let options = AudioGenerationOptions {
@@ -290,25 +509,23 @@ async fn handle_tts(State(state): State<AppState>, Json(payload): Json<TtsPayloa
                 0,
                 300,
             );
-            Json(json!({ "success": true, "message": "TTS generated and added to timeline" }))
+            Json(json!({
+                "success": true,
+                "message": "TTS generated and added to timeline"
+            }))
         }
         Err(e) => Json(json!({ "success": false, "error": e })),
     }
 }
 
-async fn handle_get_profile() -> Json<Value> {
-    // In a real app, this would fetch from PostgreSQL via SQLx
-    Json(json!({
-        "success": true,
-        "profile": {
-            "name": "Avas Patel",
-            "email": "avas@example.com",
-            "tier": "Pro Creator Tier",
-            "initials": "AP",
-            "storage_used": 45,
-            "storage_total": 100
-        }
-    }))
+// ── Lightweight Stubs ─────────────────────────────────────────────────────
+
+async fn handle_add_clip() -> Json<Value> {
+    Json(json!({ "success": true, "message": "Clip added" }))
+}
+
+async fn handle_ai_ingest() -> Json<Value> {
+    Json(json!({ "success": true, "message": "Media ingested via AI Gateway" }))
 }
 
 #[derive(serde::Deserialize)]
@@ -316,23 +533,25 @@ struct IntegrationPayload {
     platform: String,
 }
 
-async fn handle_integration_connect(Json(payload): Json<IntegrationPayload>) -> Json<Value> {
-    println!("[API Gateway] Mock OAuth connect for {}", payload.platform);
-    // Simulate OAuth delay
+async fn handle_integration_connect(
+    Extension(_claims): Extension<AuthClaims>,
+    Json(payload): Json<IntegrationPayload>,
+) -> Json<Value> {
+    info!("[API Gateway] OAuth connect for {}", payload.platform);
     tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
-
     Json(json!({
         "success": true,
         "message": format!("Successfully connected to {}", payload.platform)
     }))
 }
 
-// Restored stub for handle_add_clip
-async fn handle_add_clip() -> Json<Value> {
-    Json(json!({ "success": true, "message": "Clip added" }))
-}
+// ── Helpers ───────────────────────────────────────────────────────────────
 
-// Restored stub for handle_ai_ingest
-async fn handle_ai_ingest() -> Json<Value> {
-    Json(json!({ "success": true, "message": "Media ingested via AI Gateway" }))
+/// Extract initials from a full name: "Avas Patel" → "AP".
+fn initials(name: &str) -> String {
+    name.split_whitespace()
+        .filter_map(|w| w.chars().next())
+        .take(2)
+        .collect::<String>()
+        .to_uppercase()
 }

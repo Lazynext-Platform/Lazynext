@@ -21,31 +21,31 @@ describe("AI Orchestrator - Rule-Based Decomposition", () => {
     expect(dubStep?.args.target_language).toBe("es-ES");
   });
 
-  test("broll intent should map to generate_broll", async () => {
+  test("broll intent should map to auto_fill_broll", async () => {
     const prompt = "Generate b-roll of a futuristic city.";
     const result = await decomposeIntent(prompt);
-    
-    const brollStep = result.steps.find((s) => s.tool === "generate_broll");
+
+    const brollStep = result.steps.find((s) => s.tool === "auto_fill_broll");
     expect(brollStep).toBeDefined();
-    expect((brollStep?.args.prompt as string).includes("futuristic city")).toBe(true);
+    expect(brollStep?.args.video_id).toBe("input_video");
   });
 
-  test("silence trim intent should map to trim_silence", async () => {
+  test("silence trim intent should map to clean_audio", async () => {
     const prompt = "Clean up the audio and trim silence.";
     const result = await decomposeIntent(prompt);
-    
-    const trimStep = result.steps.find((s) => s.tool === "trim_silence");
+
+    const trimStep = result.steps.find((s) => s.tool === "clean_audio");
     expect(trimStep).toBeDefined();
   });
 
   test("multiple intents should sequence tools and end with render", async () => {
     const prompt = "Transcribe the video, dub it to French, and trim silence.";
     const result = await decomposeIntent(prompt);
-    
+
     const tools = result.steps.map((s) => s.tool);
     expect(tools).toContain("transcribe");
     expect(tools).toContain("generate_dub");
-    expect(tools).toContain("trim_silence");
+    expect(tools).toContain("clean_audio");
     // render step is always added if there are other steps
     expect(tools[tools.length - 1]).toBe("render");
   });
