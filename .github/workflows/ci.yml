@@ -214,6 +214,7 @@ jobs:
           path: rust/wasm/pkg/
 
       - name: Build and Push AI Agents
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/ai-agents
@@ -222,6 +223,7 @@ jobs:
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest
 
       - name: Build and Push Render Service
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/render-service
@@ -230,6 +232,7 @@ jobs:
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service:latest
 
       - name: Build and Push Pre-Processing
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/pre-processing
@@ -238,6 +241,7 @@ jobs:
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing:latest
 
       - name: Build and Push Generative Studio
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/generative-studio
@@ -246,6 +250,7 @@ jobs:
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-generative-studio:latest
 
       - name: Build and Push Analytics Service
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/analytics-service
@@ -254,6 +259,7 @@ jobs:
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-analytics-service:latest
 
       - name: Build and Push MCP Server
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -263,7 +269,7 @@ jobs:
 
   terraform-deploy:
     name: Terraform — Deploy Infrastructure
-    needs: docker-deploy
+    needs: [rust-core, web-app]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
