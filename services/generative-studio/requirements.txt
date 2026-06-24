@@ -14,4 +14,4 @@ librosa>=0.10.2
 soundfile>=0.13.0
 # API clients
 replicate>=0.34.0
-elevenlabs>=1.50.0
+elevenlabs>=2.54.0
