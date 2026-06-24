@@ -123,6 +123,7 @@ jobs:
           MARBLE_WORKSPACE_KEY: "ci-placeholder"
           FREESOUND_CLIENT_ID: "ci-placeholder"
           FREESOUND_API_KEY: "ci-placeholder"
+          BETTER_AUTH_SECRET: "ci-build-placeholder-secret-64chars-long"
         run: cd apps/web && npx next build
 
       - name: Unit Tests
