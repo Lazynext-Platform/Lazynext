@@ -215,9 +215,11 @@ jobs:
 
       - name: Build and Push Web
         uses: docker/build-push-action@v7
+        timeout-minutes: 45
         with:
           context: .
           file: ./apps/web/Dockerfile
+          platforms: linux/amd64
           push: true
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest
 
