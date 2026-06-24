@@ -13,5 +13,5 @@ accelerate>=1.2.0
 librosa>=0.10.2
 soundfile>=0.13.0
 # API clients
-replicate>=0.34.0
+replicate>=1.0.7
 elevenlabs>=1.50.0
