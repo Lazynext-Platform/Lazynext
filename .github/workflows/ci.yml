@@ -213,16 +213,6 @@ jobs:
           name: wasm-pkg
           path: rust/wasm/pkg/
 
-      - name: Build and Push Web
-        uses: docker/build-push-action@v7
-        timeout-minutes: 45
-        with:
-          context: .
-          file: ./apps/web/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest
-
       - name: Build and Push AI Agents
         uses: docker/build-push-action@v7
         with:
@@ -305,7 +295,6 @@ jobs:
 
       - name: Force Redeploy Cloud Run Services
         run: |
-          gcloud run services update lazynext-web-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web:latest --region us-central1
           gcloud run services update lazynext-ai-agents-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest --region us-central1
           gcloud run services update lazynext-pre-processing-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing:latest --region us-central1
           gcloud run services update lazynext-render-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service:latest --region us-central1
