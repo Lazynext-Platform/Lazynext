@@ -36,6 +36,14 @@ spec:
         - name: lazynext-pre-processing-gpu
           image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest-gpu
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8000
@@ -146,6 +154,14 @@ spec:
         - name: lazynext-generative-studio-gpu
           image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest-gpu
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8001
@@ -242,17 +258,89 @@ spec:
   resources:
     requests:
       storage: 100Gi
-  storageClassName: premium-rwo
+  storageClassName: premium-rwx
+  # NOTE: If premium-rwx is unavailable on your cloud provider, change
+  # accessModes to ReadWriteOnce and use premium-rwo, but this will
+  # limit model cache sharing to pods on the same node only.
 ---
-# NVIDIA GPU Operator ClusterPolicy (if using GPU Operator)
-# apiVersion: nvidia.com/v1
-# kind: ClusterPolicy
-# metadata:
-#   name: gpu-cluster-policy
-# spec:
-#   driver:
-#     version: "550"
-#   toolkit:
-#     version: "1.15.0"
-#   operator:
-#     defaultRuntime: containerd
+# ── NVIDIA GPU Operator ClusterPolicy ──
+# DEPLOY: helm install nvidia-gpu-operator nvidia/gpu-operator \
+#   --namespace gpu-operator --create-namespace \
+#   --set driver.version=550.90.07 \
+#   --set toolkit.version=1.15.0
+#
+# Then apply this ClusterPolicy:
+apiVersion: nvidia.com/v1
+kind: ClusterPolicy
+metadata:
+  name: gpu-cluster-policy
+  labels:
+    app.kubernetes.io/part-of: lazynext
+spec:
+  driver:
+    enabled: true
+    version: "550.90.07"
+    repo:
+      repository: nvcr.io/nvidia/driver
+    licensingConfig:
+      nlsEnabled: false
+    certConfig:
+      name: ""
+    virtualTopology:
+      config: ""
+  toolkit:
+    enabled: true
+    version: "1.15.0-ubuntu20.04"
+    installDir: /usr/local/nvidia
+  devicePlugin:
+    enabled: true
+    version: "v0.14.5"
+    config:
+      name: ""
+      default: ""
+      fallback: ""
+    mps:
+      root: /run/nvidia/mps
+  mig:
+    enabled: false  # Enable for A100/A30 GPUs
+    strategy: mixed
+  gfd:
+    enabled: true
+    version: "v0.8.4"
+  dcgm:
+    enabled: true
+    version: "3.3.5-1-ubuntu20.04"
+  dcgmExporter:
+    enabled: true
+    version: "3.3.5-3.4.1-ubuntu20.04"
+    serviceMonitor:
+      enabled: true
+      namespace: lazynext
+  gpuFeatureDiscovery:
+    enabled: true
+    version: "v0.8.2"
+  operator:
+    defaultRuntime: containerd
+    runtimeClass: nvidia-gpu
+    use_ocp_driver_toolkit: false
+    initContainer:
+      repository: nvcr.io/nvidia
+      image: cuda
+      version: "12.4.0-base-ubuntu20.04"
+      imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+  sandboxDevicePlugin:
+    enabled: false
+  vgpuManager:
+    enabled: false
+  vgpuDeviceManager:
+    enabled: false
+  sandboxWorkloads:
+    enabled: false

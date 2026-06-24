@@ -5,6 +5,16 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 8005;
 
+// Health check endpoint (required by K8s probes)
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "analytics-service",
+    uptime: process.uptime(),
+    kafka: "connected", // Mock — real implementation would check Kafka connection
+  });
+});
+
 // Mock Kafka / ClickHouse connection
 const kafkaProducer = {
     send: async (topic: string, message: any) => {

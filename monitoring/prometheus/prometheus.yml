@@ -3,7 +3,8 @@ global:
   evaluation_interval: 15s
 
 rule_files:
-  - "/etc/prometheus/slos.yaml"
+  - "/etc/prometheus/rules.yml"
+  # slos.yaml is a K8s PrometheusRule CRD — only load in K8s, not Docker Compose
 
 alerting:
   alertmanagers:
@@ -18,14 +19,26 @@ scrape_configs:
   - job_name: "lazynext-web"
     static_configs:
       - targets: ["web:3000"]
+    metrics_path: /api/health
 
   - job_name: "ai-agents"
     static_configs:
       - targets: ["ai-agents:8002"]
+    metrics_path: /health
 
   - job_name: "render-service"
     static_configs:
       - targets: ["render-service:8003"]
+    metrics_path: /health
+
+  - job_name: "analytics-service"
+    static_configs:
+      - targets: ["analytics-service:8006"]
+    metrics_path: /health
+
+  - job_name: "mcp-server"
+    static_configs:
+      - targets: ["mcp-server:5173"]
 
   - job_name: "pre-processing"
     static_configs:
@@ -35,3 +48,19 @@ scrape_configs:
     static_configs:
       - targets: ["generative-studio:8001"]
 
+  # ── Database Exporters ─────────────────────────────────────────
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: ["postgres-exporter:9187"]
+    metrics_path: /metrics
+
+  - job_name: "redis-exporter"
+    static_configs:
+      - targets: ["redis-exporter:9121"]
+    metrics_path: /metrics
+
+  # ── Node Exporter (if running on host) ─────────────────────────
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["node-exporter:9100"]
+    metrics_path: /metrics

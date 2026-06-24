@@ -4,7 +4,7 @@
 #
 # Build: docker build -f Dockerfile.tensorflow -t lazynext-tf-serving .
 
-FROM tensorflow/serving:2.16.1-gpu AS base
+FROM tensorflow/serving:2.18.0-gpu AS base
 
 # Install additional dependencies for custom ops
 USER root
@@ -23,9 +23,9 @@ ENV MODEL_BASE_PATH=/models
 ENV OMP_NUM_THREADS=4
 ENV TF_CPP_MIN_LOG_LEVEL=1
 
-# Monitoring endpoint
+# Monitoring endpoint — queries the whisper model (first model in model_config.conf)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD curl -sf http://localhost:8501/v1/models/lazynext_models || exit 1
+    CMD curl -sf http://localhost:8501/v1/models/whisper || exit 1
 
 EXPOSE 8500 8501
 

@@ -2,48 +2,14 @@
 - name: Configure Lazynext Worker Nodes
   hosts: all
   become: yes
+  roles:
+    - common
+    - docker
+    - nvidia
+    - k8s
   tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
-
-    - name: Install prerequisite packages
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-          - gnupg2
-        state: present
-
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
-        state: present
-
-    - name: Install Docker & Containerd
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-        state: present
-        update_cache: yes
-
-    - name: Start and enable Docker service
-      systemd:
-        name: docker
-        state: started
-        enabled: yes
-
-    - name: Install FFmpeg (Required for render farm nodes)
+    - name: Install FFmpeg (required for render farm nodes)
       apt:
         name: ffmpeg
         state: present
+      when: "'workers' in group_names or 'gpu_nodes' in group_names"

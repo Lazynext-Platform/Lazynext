@@ -1,0 +1,76 @@
+# ── Patroni PostgreSQL HA — Helm Values ───────────────────────────
+# Deploy with:
+#   helm repo add patroni https://patroni.github.io/helm-charts
+#   helm install postgres patroni/patroni -f k8s/ha/patroni-values.yaml -n lazynext
+#
+# This provides: 3-node PostgreSQL cluster with automatic failover,
+# streaming replication, and etcd-based leader election.
+#
+# For managed HA without K8s complexity, use Cloud SQL (see terraform/gcp/cloudsql.tf)
+# which has availability_type = "REGIONAL" for production.
+
+replicaCount: 3
+
+image:
+  repository: patroni
+  tag: 3.3.2-postgres17
+  pullPolicy: IfNotPresent
+
+postgresql:
+  version: "17"
+  parameters:
+    max_connections: "200"
+    shared_buffers: "256MB"
+    effective_cache_size: "768MB"
+    maintenance_work_mem: "64MB"
+    checkpoint_completion_target: "0.9"
+    wal_buffers: "16MB"
+    default_statistics_target: "100"
+    random_page_cost: "1.1"
+    effective_io_concurrency: "200"
+    work_mem: "1310kB"
+    min_wal_size: "1GB"
+    max_wal_size: "4GB"
+    max_worker_processes: "4"
+    max_parallel_workers_per_gather: "2"
+    max_parallel_workers: "4"
+    max_parallel_maintenance_workers: "2"
+  pg_hba:
+    - local all all trust
+    - host all all 0.0.0.0/0 scram-sha-256
+    - host replication replicator 0.0.0.0/0 scram-sha-256
+
+persistentVolume:
+  size: 100Gi
+  storageClass: standard
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+  limits:
+    cpu: "2"
+    memory: "4Gi"
+
+etcd:
+  replicaCount: 3
+  persistentVolume:
+    size: 10Gi
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# ServiceMonitor for Prometheus metrics
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    namespace: lazynext
+
+# Connection pooler (optional — use separate pgbouncer.yaml if preferred)
+pgbouncer:
+  enabled: false  # We use the standalone PgBouncer in k8s/base/pgbouncer.yaml

@@ -5,10 +5,12 @@ logging {
 
 prometheus.scrape "docker_services" {
   targets = [
-    {"__address__" = "pre-processing:8000"},
-    {"__address__" = "generative-studio:8001"},
-    {"__address__" = "ai-agents:8002"},
-    {"__address__" = "render-service:8003"},
+    {"__address__" = "web:3000",           "job" = "lazynext-web",            "metrics_path" = "/api/health"},
+    {"__address__" = "pre-processing:8000", "job" = "pre-processing",         "metrics_path" = "/"},
+    {"__address__" = "generative-studio:8001", "job" = "generative-studio",   "metrics_path" = "/"},
+    {"__address__" = "ai-agents:8002",      "job" = "ai-agents",              "metrics_path" = "/health"},
+    {"__address__" = "render-service:8003", "job" = "render-service",         "metrics_path" = "/health"},
+    {"__address__" = "analytics-service:8006", "job" = "analytics-service",   "metrics_path" = "/health"},
   ]
   forward_to = [prometheus.remote_write.default.receiver]
 }

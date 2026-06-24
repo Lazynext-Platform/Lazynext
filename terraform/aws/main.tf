@@ -7,20 +7,16 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket = "lazynext-terraform-state"
+    key    = "aws/terraform.tfstate"
+    region = "us-east-1"
+  }
 }
 
 provider "aws" {
   region = var.aws_region
-}
-
-variable "aws_region" {
-  description = "AWS region for the deployment"
-  default     = "us-east-1"
-}
-
-variable "environment" {
-  description = "Deployment environment (e.g. dev, staging, prod)"
-  default     = "prod"
 }
 
 data "aws_availability_zones" "available" {}

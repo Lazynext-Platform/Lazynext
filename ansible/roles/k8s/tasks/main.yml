@@ -1,13 +1,21 @@
 ---
+- name: Create directory for K8s GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
 - name: Add Kubernetes GPG key
-  shell: curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-  args:
-    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version | default('1.32') }}/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    mode: '0644'
 
 - name: Add Kubernetes repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version | default('1.32') }}/deb/ /"
     state: present
+    update_cache: yes
 
 - name: Install kubelet, kubeadm, and kubectl
   apt:
@@ -17,7 +25,7 @@
       - kubectl
     state: present
 
-- name: Hold kubelet, kubeadm, and kubectl
+- name: Hold Kubernetes packages at current version
   dpkg_selections:
     name: "{{ item }}"
     selection: hold
@@ -25,3 +33,9 @@
     - kubelet
     - kubeadm
     - kubectl
+
+- name: Enable kubelet
+  systemd:
+    name: kubelet
+    enabled: yes
+    state: started

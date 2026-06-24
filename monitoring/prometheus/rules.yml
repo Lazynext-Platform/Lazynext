@@ -1,0 +1,76 @@
+# ── Prometheus Alert Rules (Docker Compose format) ──
+# These are the plain YAML rules compatible with standalone Prometheus.
+# The slos.yaml file is a K8s PrometheusRule CRD — use that for K8s deployments.
+groups:
+  - name: lazynext-alerts
+    rules:
+      - alert: WebAppDown
+        expr: up{job="lazynext-web"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: web
+        annotations:
+          summary: "Web app is down"
+          description: "The lazynext-web service has been unreachable for 5 minutes."
+
+      - alert: PythonServiceDown
+        expr: up{job=~"pre-processing|generative-studio"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: ml
+        annotations:
+          summary: "Python ML service is down"
+          description: "{{ $labels.job }} has been unreachable for 5 minutes."
+
+      - alert: AIServiceDown
+        expr: up{job="ai-agents"} == 0
+        for: 3m
+        labels:
+          severity: warning
+          service: ai
+        annotations:
+          summary: "AI Agents service is down"
+
+      - alert: RenderServiceDown
+        expr: up{job="render-service"} == 0
+        for: 3m
+        labels:
+          severity: warning
+          service: render
+        annotations:
+          summary: "Render service is down"
+
+  - name: slo-web-availability
+    rules:
+      - alert: SLOBurnRateCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{service="lazynext-web"}[1h]))
+          ) > 0.02 * 14.4
+        for: 2m
+        labels:
+          severity: critical
+          slo: "99.9"
+          service: web
+        annotations:
+          summary: "SLO burn rate > 14.4x for web availability"
+          description: "Error budget burning at {{ $value | humanizePercentage }} per hour."
+
+      - alert: SLOBurnRateWarning
+        expr: |
+          (
+            sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{service="lazynext-web"}[6h]))
+          ) > 0.02 * 6
+        for: 10m
+        labels:
+          severity: warning
+          slo: "99.9"
+          service: web
+        annotations:
+          summary: "SLO burn rate > 6x for web availability"

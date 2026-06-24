@@ -4,8 +4,9 @@ FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 
 # Layer 1: Dependencies
-COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+COPY package.json ./
+# Monorepo — lockfile at root level. Use --no-lockfile for service-only build.
+RUN bun install --no-lockfile
 
 # Layer 2: Source
 COPY tsconfig.json ./

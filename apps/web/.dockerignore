@@ -1,0 +1,15 @@
+node_modules
+.next
+.cache
+dist
+build
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage
+test-results
+playwright-report

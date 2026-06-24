@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Youtube, MonitorPlay, Cloud, Link as LinkIcon, CheckCircle2, Loader2 } from "lucide-react";
+import { Film, MonitorPlay, Cloud, Link as LinkIcon, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 export default function IntegrationsPage() {
@@ -15,11 +15,11 @@ export default function IntegrationsPage() {
 
 	const itemVariants = {
 		hidden: { opacity: 0, scale: 0.95, y: 20 },
-		visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 300 } },
+		visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring" as const, stiffness: 300 } },
 	};
 
 	const [integrations, setIntegrations] = useState([
-		{ name: "YouTube", icon: <Youtube className="w-8 h-8 text-[#FF0000]" />, desc: "Directly publish rendered videos to your channel.", connected: true, loading: false },
+		{ name: "YouTube", icon: <Film className="w-8 h-8 text-[#FF0000]" />, desc: "Directly publish rendered videos to your channel.", connected: true, loading: false },
 		{ name: "TikTok", icon: <MonitorPlay className="w-8 h-8 text-[#00f2fe]" />, desc: "Sync vertical shorts seamlessly.", connected: false, loading: false },
 		{ name: "Google Drive", icon: <Cloud className="w-8 h-8 text-[#00e5ff]" />, desc: "Import raw 4K footage straight into your timeline.", connected: false, loading: false },
 		{ name: "Browser Extension", icon: <LinkIcon className="w-8 h-8 text-white" />, desc: "The Lazynext Chrome Extension.", connected: true, loading: false },

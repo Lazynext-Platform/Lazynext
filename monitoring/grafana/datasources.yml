@@ -1,13 +1,16 @@
 # ── Grafana Datasources ──────────────────────────────────────────
 # Auto-provisioned when Grafana starts with this ConfigMap mounted.
-# Apply: kubectl create configmap grafana-datasources --from-file=datasources.yml -n monitoring
+# Docker Compose: uses service-name URLs (prometheus:9090, loki:3100, etc.)
+# K8s: override with namespace-qualified URLs via a K8s-specific ConfigMap patch
+#  (http://prometheus-operated.monitoring:9090, http://loki.monitoring:3100, etc.)
 apiVersion: 1
 
 datasources:
   - name: Prometheus
     type: prometheus
     access: proxy
-    url: http://prometheus-operated.monitoring:9090
+    # Docker Compose default; K8s overlay should patch to: http://prometheus-operated.monitoring:9090
+    url: http://prometheus:9090
     isDefault: true
     editable: false
     jsonData:
@@ -21,7 +24,8 @@ datasources:
   - name: Loki
     type: loki
     access: proxy
-    url: http://loki.monitoring:3100
+    # Docker Compose default; K8s overlay should patch to: http://loki.monitoring:3100
+    url: http://loki:3100
     editable: false
     jsonData:
       maxLines: 1000
@@ -31,16 +35,35 @@ datasources:
           name: trace_id
           url: "$${__value.raw}"
 
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    uid: tempo
+    editable: false
+    jsonData:
+      httpMethod: "GET"
+      tracesToLogsV2:
+        datasourceUid: "loki"
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        filterByTraceID: true
+        filterBySpanID: false
+        tags:
+          - key: "service.name"
+            value: "service"
+
   - name: Cloud SQL (PostgreSQL)
     type: postgres
     access: proxy
-    url: postgres-db.lazynext:5432
+    # Docker Compose default; K8s overlay should patch to: postgres-db.lazynext:5432
+    url: db:5432
     database: lazynext
-    user: lazynext_app
+    user: lazynext
     secureJsonData:
       password: "${DB_PASSWORD}"
     jsonData:
-      sslmode: "require"
-      postgresVersion: 1600
+      sslmode: "disable"
+      postgresVersion: 1700
       timescaledb: false
     editable: false

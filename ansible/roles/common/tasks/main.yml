@@ -1,11 +1,11 @@
 ---
 - name: Update apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
 
 - name: Install essential packages
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - wget
@@ -16,4 +16,106 @@
       - apt-transport-https
       - ca-certificates
       - software-properties-common
+      - gnupg2
+      - jq
+      - unzip
+      - nfs-common
+      - unattended-upgrades
+      - systemd-timesyncd
+      - fail2ban
     state: present
+
+- name: Enable time synchronization
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: started
+    enabled: yes
+
+- name: Configure automatic security updates
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Download-Upgradeable-Packages "1";
+      APT::Periodic::AutocleanInterval "7";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+
+- name: Configure UFW firewall
+  community.general.ufw:
+    rule: "{{ item.rule }}"
+    port: "{{ item.port }}"
+    proto: "{{ item.proto | default('tcp') }}"
+  loop:
+    - { rule: allow, port: "22", proto: tcp }
+    - { rule: allow, port: "80", proto: tcp }
+    - { rule: allow, port: "443", proto: tcp }
+    - { rule: allow, port: "3000", proto: tcp }
+    - { rule: allow, port: "6443", proto: tcp }   # K8s API
+    - { rule: allow, port: "10250", proto: tcp }   # Kubelet
+    - { rule: allow, port: "8000", proto: tcp }    # Pre-processing
+    - { rule: allow, port: "8001", proto: tcp }    # Generative Studio
+    - { rule: allow, port: "8002", proto: tcp }    # AI Agents / Sync
+    - { rule: allow, port: "8003", proto: tcp }    # Render Service
+    - { rule: allow, port: "8005", proto: tcp }    # API Gateway
+    - { rule: allow, port: "2379-2380", proto: tcp } # etcd
+    - { rule: allow, port: "8472", proto: udp }      # Flannel VXLAN
+    - { rule: allow, port: "30000-32767", proto: tcp } # NodePorts
+  when: configure_firewall | default(true) | bool
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  when: configure_firewall | default(true) | bool
+
+- name: Set system limits for file descriptors
+  community.general.pam_limits:
+    domain: "*"
+    limit_type: "{{ item.type }}"
+    limit_item: "{{ item.item }}"
+    value: "{{ item.value }}"
+  loop:
+    - { type: soft, item: nofile, value: "65536" }
+    - { type: hard, item: nofile, value: "65536" }
+    - { type: soft, item: nproc, value: "32768" }
+    - { type: hard, item: nproc, value: "32768" }
+
+- name: Disable swap (required for Kubernetes)
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+  changed_when: true
+
+- name: Remove swap from fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*\s+swap\s+swap\s+.*)$'
+    replace: '# \1'
+  when: ansible_swaptotal_mb > 0
+
+- name: Load kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Configure kernel parameters for Kubernetes
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+  loop:
+    - { name: net.bridge.bridge-nf-call-iptables, value: "1" }
+    - { name: net.bridge.bridge-nf-call-ip6tables, value: "1" }
+    - { name: net.ipv4.ip_forward, value: "1" }
+    - { name: net.ipv4.tcp_syncookies, value: "1" }
+    - { name: net.ipv4.conf.all.rp_filter, value: "1" }
+    - { name: net.ipv4.conf.default.rp_filter, value: "1" }
+    - { name: net.ipv4.conf.all.accept_redirects, value: "0" }
+    - { name: kernel.kptr_restrict, value: "1" }
+    - { name: kernel.dmesg_restrict, value: "1" }
+    - { name: fs.suid_dumpable, value: "0" }

@@ -1,0 +1,144 @@
+# ── PgBouncer Connection Pooler ───────────────────────────────────
+# Reduces PostgreSQL connection overhead by pooling client connections.
+# All application services should connect through PgBouncer, not directly to PostgreSQL.
+#
+# The Service name is: pgbouncer (port 6432)
+# Update DATABASE_URL to: postgresql://lazynext:PASS@pgbouncer:6432/lazynext
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgbouncer-config
+  namespace: lazynext
+  labels:
+    app: pgbouncer
+data:
+  pgbouncer.ini: |
+    [databases]
+    lazynext = host=postgres-db port=5432 dbname=lazynext
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 6432
+    auth_type = scram-sha-256
+    auth_file = /etc/pgbouncer/userlist.txt
+    admin_users = lazynext_admin
+    stats_users = lazynext_admin
+    pool_mode = transaction
+    max_client_conn = 500
+    default_pool_size = 25
+    reserve_pool_size = 5
+    reserve_pool_timeout = 3
+    max_db_connections = 100
+    max_user_connections = 100
+    server_round_robin = 1
+    ignore_startup_parameters = extra_float_digits,search_path
+    server_reset_query = DISCARD ALL
+    server_check_query = SELECT 1
+    server_check_delay = 30
+    client_login_timeout = 15
+    server_lifetime = 3600
+    server_idle_timeout = 600
+    server_connect_timeout = 15
+    query_timeout = 120
+    query_wait_timeout = 120
+    log_connections = 1
+    log_disconnections = 1
+    log_pooler_errors = 1
+    stats_period = 60
+    verbose = 0
+
+  # Userlist for PgBouncer authentication
+  # NOTE: Passwords must be injected from a Secret in production;
+  # the placeholder values below must be updated via ExternalSecret or similar.
+  userlist.txt: |
+    "lazynext" "CHANGE_ME_PASSWORD"
+    "lazynext_admin" "CHANGE_ME_ADMIN_PASSWORD"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: lazynext
+  labels:
+    app: pgbouncer
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgbouncer
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+        component: database
+    spec:
+      containers:
+        - name: pgbouncer
+          image: edoburu/pgbouncer:1.24
+          ports:
+            - name: pgbouncer
+              containerPort: 6432
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 6432
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - |
+                  printf "SHOW VERSION;\n" | nc -w 2 localhost 6432 | grep -q PgBouncer
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: pgbouncer-config
+              mountPath: /etc/pgbouncer/pgbouncer.ini
+              subPath: pgbouncer.ini
+            - name: pgbouncer-config
+              mountPath: /etc/pgbouncer/userlist.txt
+              subPath: userlist.txt
+      volumes:
+        - name: pgbouncer-config
+          configMap:
+            name: pgbouncer-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer
+  namespace: lazynext
+  labels:
+    app: pgbouncer
+spec:
+  type: ClusterIP
+  selector:
+    app: pgbouncer
+  ports:
+    - name: pgbouncer
+      protocol: TCP
+      port: 6432
+      targetPort: 6432

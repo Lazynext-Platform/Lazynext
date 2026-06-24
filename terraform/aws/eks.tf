@@ -4,9 +4,9 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = "lazynext-eks-${var.environment}"
-  cluster_version = "1.30"
+  cluster_version = var.cluster_version
 
-  cluster_endpoint_public_access  = true
+  cluster_endpoint_public_access  = false
   cluster_endpoint_private_access = true
 
   vpc_id                   = module.vpc.vpc_id

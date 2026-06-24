@@ -1,0 +1,7 @@
+*.retry
+*.log
+inventory.ini.local
+group_vars/local.yml
+host_vars/
+vault-password.txt
+.vault/

@@ -124,7 +124,7 @@ description: "Low priority — batch jobs, ML inference that can wait"
 # ── External Secrets Operator — SecretStore ──
 # Uses GCP Secret Manager as the external secrets backend
 # Requires: helm install external-secrets external-secrets/external-secrets
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
   name: gcp-secret-manager
@@ -138,10 +138,10 @@ spec:
           clusterLocation: us-central1
           clusterName: lazynext-cluster
           serviceAccountRef:
-            name: lazynext-cloud-run
+            name: lazynext-sa
 ---
 # ── ExternalSecret — syncs GCP Secret Manager → K8s Secret ──
-apiVersion: external-secrets.io/v1beta1
+apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: lazynext-external-secrets
@@ -179,54 +179,24 @@ spec:
     - secretKey: STRIPE_SECRET_KEY
       remoteRef:
         key: STRIPE_SECRET_KEY
+    - secretKey: STRIPE_WEBHOOK_SECRET
+      remoteRef:
+        key: STRIPE_WEBHOOK_SECRET
     - secretKey: RESEND_API_KEY
       remoteRef:
         key: RESEND_API_KEY
----
-# ── VerticalPodAutoscaler — Web App ──
-# Requires: helm install vpa fairwinds/vpa
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: lazynext-web-vpa
-  namespace: lazynext
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: lazynext-web
-  updatePolicy:
-    updateMode: "Auto"
-  resourcePolicy:
-    containerPolicies:
-      - containerName: lazynext-web
-        minAllowed:
-          cpu: "100m"
-          memory: "256Mi"
-        maxAllowed:
-          cpu: "4"
-          memory: "8Gi"
-        controlledResources: ["cpu", "memory"]
----
-apiVersion: autoscaling.k8s.io/v1
-kind: VerticalPodAutoscaler
-metadata:
-  name: lazynext-render-vpa
-  namespace: lazynext
-spec:
-  targetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: lazynext-render
-  updatePolicy:
-    updateMode: "Auto"
-  resourcePolicy:
-    containerPolicies:
-      - containerName: lazynext-render
-        minAllowed:
-          cpu: "250m"
-          memory: "512Mi"
-        maxAllowed:
-          cpu: "8"
-          memory: "16Gi"
-        controlledResources: ["cpu", "memory"]
+    - secretKey: UPSTASH_REDIS_REST_TOKEN
+      remoteRef:
+        key: UPSTASH_REDIS_REST_TOKEN
+    - secretKey: MARBLE_WORKSPACE_KEY
+      remoteRef:
+        key: MARBLE_WORKSPACE_KEY
+    - secretKey: FREESOUND_CLIENT_ID
+      remoteRef:
+        key: FREESOUND_CLIENT_ID
+    - secretKey: FREESOUND_API_KEY
+      remoteRef:
+        key: FREESOUND_API_KEY
+    - secretKey: POSTHOG_KEY
+      remoteRef:
+        key: POSTHOG_KEY

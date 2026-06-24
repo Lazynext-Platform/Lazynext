@@ -21,6 +21,10 @@ fi
 cd rust/wasm
 
 echo "Running wasm-pack build..."
-wasm-pack build --target web --release
+# getrandom 0.3 on wasm32 target needs cfg flag for JS backend
+export RUSTFLAGS="--cfg getrandom_backend=\"wasm_js\""
+# Lock cargo to avoid multi-version conflicts
+wasm-pack build --target web --release -- --locked 2>/dev/null || \
+  wasm-pack build --target web --release
 
 echo "WASM compilation successful!"

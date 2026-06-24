@@ -18,6 +18,7 @@ spec:
       labels:
         app: postgres-db
     spec:
+      priorityClassName: lazynext-critical
       terminationGracePeriodSeconds: 30
       securityContext:
         fsGroup: 999
@@ -25,6 +26,14 @@ spec:
         - name: postgres
           image: postgres:17-alpine
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
           env:
             - name: POSTGRES_USER
               value: "lazynext"
@@ -117,6 +126,14 @@ spec:
         - name: redis
           image: redis:8-alpine
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
           command:
             - redis-server
             - --appendonly
@@ -208,6 +225,14 @@ spec:
         - name: redis-proxy
           image: hiett/serverless-redis-http:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 80

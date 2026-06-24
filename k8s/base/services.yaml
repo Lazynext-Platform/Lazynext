@@ -24,11 +24,20 @@ spec:
         app: lazynext-web
         component: frontend
     spec:
+      priorityClassName: lazynext-critical
       terminationGracePeriodSeconds: 30
       containers:
         - name: lazynext-web
           image: ghcr.io/lazynext-platform/lazynext-web:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 3000
@@ -204,11 +213,20 @@ spec:
         app: lazynext-sync
         component: backend
     spec:
+      priorityClassName: lazynext-high
       terminationGracePeriodSeconds: 25
       containers:
         - name: lazynext-sync
           image: ghcr.io/lazynext-platform/lazynext-ai-agents:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8002
@@ -305,11 +323,20 @@ spec:
         app: lazynext-render
         component: backend
     spec:
+      priorityClassName: lazynext-high
       terminationGracePeriodSeconds: 60
       containers:
         - name: lazynext-render
           image: ghcr.io/lazynext-platform/lazynext-render-service:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8003
@@ -400,6 +427,14 @@ spec:
         - name: lazynext-pre-processing
           image: ghcr.io/lazynext-platform/lazynext-pre-processing:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8000
@@ -489,6 +524,14 @@ spec:
         - name: lazynext-generative-studio
           image: ghcr.io/lazynext-platform/lazynext-generative-studio:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8001
@@ -579,6 +622,14 @@ spec:
         - name: lazynext-mcp
           image: ghcr.io/lazynext-platform/lazynext-mcp:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           stdin: true
           tty: true
           resources:
@@ -599,6 +650,23 @@ spec:
                 configMapKeyRef:
                   name: lazynext-config
                   key: NODE_ENV
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-mcp
+  namespace: lazynext
+  labels:
+    app: lazynext-mcp
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-mcp
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5173
+      targetPort: 5173
 ---
 # DB Migration Job
 apiVersion: batch/v1
@@ -621,6 +689,14 @@ spec:
         - name: db-migrate
           image: ghcr.io/lazynext-platform/lazynext-web:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           command: ["bun", "run", "apps/web/migrate.ts"]
           resources:
             requests:
@@ -661,6 +737,14 @@ spec:
         - name: lazynext-analytics-service
           image: ghcr.io/lazynext-platform/lazynext-analytics-service:latest
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
           ports:
             - name: http
               containerPort: 8005
@@ -675,6 +759,21 @@ spec:
           env:
             - name: NODE_ENV
               value: "production"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
 ---
 apiVersion: v1
 kind: Service

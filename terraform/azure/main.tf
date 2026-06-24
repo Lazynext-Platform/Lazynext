@@ -7,20 +7,17 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  backend "azurerm" {
+    resource_group_name  = "lazynext-terraform-rg"
+    storage_account_name = "lazynexttfstate"
+    container_name       = "tfstate"
+    key                  = "azure/terraform.tfstate"
+  }
 }
 
 provider "azurerm" {
   features {}
-}
-
-variable "location" {
-  description = "Azure region for the deployment"
-  default     = "East US"
-}
-
-variable "environment" {
-  description = "Deployment environment (e.g. dev, staging, prod)"
-  default     = "prod"
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -42,7 +39,7 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "aks_subnet" {
-  name                 = "lazynext-aks-subnet"
+  name                 = "lazynext-aks-subnet-${var.environment}"
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.1.0/24"]

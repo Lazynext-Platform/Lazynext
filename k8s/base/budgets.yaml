@@ -40,3 +40,115 @@ spec:
   selector:
     matchLabels:
       app: lazynext-render
+---
+# PodDisruptionBudget — PostgreSQL
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-db-pdb
+  namespace: lazynext
+  labels:
+    app: postgres-db
+spec:
+  maxUnavailable: 0  # Database must never be voluntarily evicted
+  selector:
+    matchLabels:
+      app: postgres-db
+---
+# PodDisruptionBudget — Pre-Processing
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-pre-processing-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-pre-processing
+---
+# PodDisruptionBudget — Generative Studio
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-gen-studio-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-generative-studio
+---
+# PodDisruptionBudget — Analytics Service
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-analytics-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-analytics-service
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-analytics-service
+---
+# PodDisruptionBudget — MCP Server
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-mcp-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-mcp
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-mcp
+---
+# PodDisruptionBudget — Redis DB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-db-pdb
+  namespace: lazynext
+  labels:
+    app: redis-db
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: redis-db
+---
+# PodDisruptionBudget — Redis Proxy
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-proxy-pdb
+  namespace: lazynext
+  labels:
+    app: redis-proxy
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: redis-proxy
+---
+# PodDisruptionBudget — PgBouncer
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: pgbouncer-pdb
+  namespace: lazynext
+  labels:
+    app: pgbouncer
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: pgbouncer

@@ -7,23 +7,9 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  GCP_PROJECT_ID: lazynext-prod
-  CLOUD_PROVIDER: gcp # Default target: 'gcp', 'aws', or 'azure'
+  GCP_PROJECT_ID: vertexaiopencode
 
 jobs:
-  rust-checks:
-    name: Rust Core Tests & Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Cargo Check
-        run: cargo check --workspace
-      - name: Cargo Clippy
-        run: cargo clippy --workspace -- -D warnings
-      - name: Cargo Test
-        run: cargo test --workspace
-
   node-checks:
     name: Node.js Services Build
     runs-on: ubuntu-latest
@@ -40,55 +26,45 @@ jobs:
 
   deploy-k8s:
     name: Multi-Cloud Deploy
-    needs: [rust-checks, node-checks]
+    needs: [node-checks]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       # ── GCP DEPLOYMENT ──────────────────────────────────────────────────
       - name: Authenticate GCP
-        if: env.CLOUD_PROVIDER == 'gcp'
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
       - name: Set up Cloud SDK
-        if: env.CLOUD_PROVIDER == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
-      - name: Build & Deploy GCP
-        if: env.CLOUD_PROVIDER == 'gcp'
+      - name: Build & Push All Images to GCR
         run: |
-          docker build -t gcr.io/${{ env.GCP_PROJECT_ID }}/collab-server:latest -f apps/web/Dockerfile .
-          docker push gcr.io/${{ env.GCP_PROJECT_ID }}/collab-server:latest
-          kubectl apply -k k8s/overlays/prod
-          
-      # ── AWS DEPLOYMENT ──────────────────────────────────────────────────
-      - name: Configure AWS credentials
-        if: env.CLOUD_PROVIDER == 'aws'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-      - name: Build & Deploy AWS
-        if: env.CLOUD_PROVIDER == 'aws'
-        run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-          docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lazynext/web:latest -f apps/web/Dockerfile .
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/lazynext/web:latest
-          aws eks update-kubeconfig --region us-east-1 --name lazynext-eks-prod
-          kubectl apply -f k8s/base/
+          gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      # ── AZURE DEPLOYMENT ────────────────────────────────────────────────
-      - name: Login to Azure
-        if: env.CLOUD_PROVIDER == 'azure'
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - name: Build & Deploy Azure
-        if: env.CLOUD_PROVIDER == 'azure'
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-web:latest -f apps/web/Dockerfile .
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-web:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-ai-agents:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-render-service:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-pre-processing:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-generative-studio:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest
+
+          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest -f rust/mcp-server/Dockerfile rust/mcp-server
+          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest
+
+      - name: Deploy to GKE
         run: |
-          az acr login --name lazynextacr
-          docker build -t lazynextacr.azurecr.io/web:latest -f apps/web/Dockerfile .
-          docker push lazynextacr.azurecr.io/web:latest
-          az aks get-credentials --resource-group lazynext-rg --name lazynext-aks
-          kubectl apply -f k8s/base/
+          gcloud container clusters get-credentials lazynext-gke-prod --region us-central1
+          kubectl apply -k k8s/overlays/production

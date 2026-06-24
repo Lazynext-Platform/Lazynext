@@ -43,11 +43,37 @@ venv/
 
 # Terraform
 terraform/.terraform/
-terraform/*.tfstate
-terraform/*.tfstate.backup
+terraform/**/*.tfstate
+terraform/**/*.tfstate.backup
 terraform/.terraform.lock.hcl
-terraform/terraform.tfvars
+terraform/**/terraform.tfvars
+# Track example tfvars only
+!terraform/**/terraform.tfvars.example
 
 # Render Service outputs
 services/render-service/outputs/**/.terraform/
 .terraform/
+
+# Sensitive config files
+env.yaml
+web.json
+db.json
+
+# Claude Code
+.claude/
+
+# JetBrains IDE
+.idea/
+
+# VS Code workspace settings
+.vscode/
+
+# Vim
+*.swp
+*.swo
+
+# Merge conflict artifacts
+*.orig
+
+# Ansible
+*.retry

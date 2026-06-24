@@ -16,29 +16,43 @@ resources:
   - budgets.yaml
   - backups.yaml
   - monitoring.yaml
-  - gpu.yaml
   - redis-configmap.yaml
   - security-policies.yaml
   - rbac.yaml
-  - init-containers.yaml
+  - pgbouncer.yaml
   - model-warmup.yaml
+  - gpu.yaml
+  - ingress.yaml
 
 labels:
   - pairs:
       app.kubernetes.io/managed-by: kustomize
       app.kubernetes.io/part-of: lazynext
 
-# Transform images for environment-specific tags
+# Transform images to use GCP Artifact Registry (same images as Cloud Run)
 images:
   - name: ghcr.io/lazynext-platform/lazynext-web
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-web
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-ai-agents
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-render-service
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-pre-processing
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-generative-studio
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-generative-studio
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-mcp
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-mcp
     newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-analytics-service
+    newName: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-analytics-service
+    newTag: latest
+
+# Strategic merge patches for init containers
+patches:
+  - path: init-containers.yaml

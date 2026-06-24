@@ -1,7 +1,7 @@
 import { generateUUID } from "@/utils/id";
+import { db } from "@/db";
+import { feedback } from "@/db/schema";
 import type { FeedbackEntry, SubmitFeedbackInput } from "./types";
-
-const RUST_API_GATEWAY_URL = process.env.RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
 
 export async function submitFeedback({
 	message,
@@ -9,8 +9,12 @@ export async function submitFeedback({
 	const id = generateUUID();
 	const now = new Date();
 
-	// Proxied to Rust
-	console.log("Submitting feedback to rust gateway:", message);
+	// Persist feedback to the database
+	await db.insert(feedback).values({
+		id,
+		message,
+		createdAt: now,
+	});
 
 	return { id, message, createdAt: now.toISOString() };
 }

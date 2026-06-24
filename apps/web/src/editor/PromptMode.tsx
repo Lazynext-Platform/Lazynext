@@ -66,6 +66,7 @@ export const PromptMode: React.FC = () => {
 								placeholder="Ask Chronos to edit, cut, or style..."
 								className="w-full bg-transparent text-2xl text-white placeholder:text-white/20 focus:outline-none"
 								disabled={isAgentThinking}
+								// eslint-disable-next-line jsx-a11y/no-autofocus
 								autoFocus
 							/>
 						</div>

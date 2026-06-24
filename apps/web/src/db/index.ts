@@ -1,11 +1,17 @@
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-// Ensure fallback to local sqlite for development if TURSO_URL is missing
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL || "file:sqlite.db",
-  authToken: process.env.TURSO_AUTH_TOKEN,
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  "postgresql://lazynext:password123@localhost:5434/lazynext";
+
+// PostgreSQL client with connection pooling via postgres.js
+const queryClient = postgres(databaseUrl, {
+  max: 20, // Max connections in pool
+  idle_timeout: 30, // Close idle connections after 30s
+  connect_timeout: 10, // Connection timeout in seconds
+  prepare: false, // Disable prepared statements (better for serverless)
 });
 
-export const db = drizzle(client, { schema });
+export const db = drizzle(queryClient, { schema });

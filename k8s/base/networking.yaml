@@ -186,6 +186,202 @@ spec:
         - port: 53
           protocol: TCP
 ---
+# Allow web -> analytics service
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-web-to-analytics
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-web
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: lazynext-analytics-service
+      ports:
+        - port: 8005
+          protocol: TCP
+---
+# Allow ingress to GPU pre-processing from web
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-gpu-preprocessing
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-pre-processing-gpu
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: lazynext-web
+      ports:
+        - port: 8000
+          protocol: TCP
+---
+# Allow ingress to GPU generative-studio from web
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-gpu-genstudio
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-generative-studio-gpu
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: lazynext-web
+      ports:
+        - port: 8001
+          protocol: TCP
+---
+# Allow MCP server ingress from web
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-mcp
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: lazynext-web
+      ports:
+        - port: 5173
+          protocol: TCP
+---
+# Allow backend/frontend → PgBouncer
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-to-pgbouncer
+  namespace: lazynext
+spec:
+  podSelector:
+    matchLabels:
+      app: pgbouncer
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              component: backend
+        - podSelector:
+            matchLabels:
+              component: frontend
+      ports:
+        - port: 6432
+          protocol: TCP
+---
+# Allow egress to external internet for API/LLM/registry access
+# Needed by web (Stripe, PostHog, Resend), sync (LLM APIs),
+# pre-processing/generative-studio (Replicate, ElevenLabs, HuggingFace),
+# and all pods for image pulls
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-internet
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+        - port: 80
+          protocol: TCP
+---
+# Allow egress to container registries (GCR, GHCR, Docker Hub, Quay)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-registries
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+---
+# Allow monitoring stack to scrape all services (Prometheus/Alloy)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-scrape
+  namespace: lazynext
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+        - podSelector:
+            matchLabels:
+              app: prometheus
+        - podSelector:
+            matchLabels:
+              app: alloy
+      ports:
+        - port: 3000
+          protocol: TCP
+        - port: 8000
+          protocol: TCP
+        - port: 8001
+          protocol: TCP
+        - port: 8002
+          protocol: TCP
+        - port: 8003
+          protocol: TCP
+        - port: 8005
+          protocol: TCP
+        - port: 9187
+          protocol: TCP
+        - port: 9121
+          protocol: TCP
+---
 # Certificate (via cert-manager)
 apiVersion: cert-manager.io/v1
 kind: Certificate

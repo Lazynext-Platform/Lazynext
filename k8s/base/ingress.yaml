@@ -1,45 +1,84 @@
+# ── Internal API Ingress ──────────────────────────────────────────
+# Routes backend service APIs through the ingress controller.
+# The main web traffic Ingress is in networking.yaml.
+# This Ingress is for direct API access to backend services.
+#
+# NOTE: For production, consider keeping backend services internal
+# and routing all traffic through the Next.js API routes instead.
+# Enable this Ingress only if you need direct external API access.
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: lazynext-ingress
-  namespace: lazynext-production
+  name: lazynext-api-ingress
+  namespace: lazynext
   annotations:
     kubernetes.io/ingress.class: "nginx"
-    # Essential for proxying Yjs WebSockets
+    cert-manager.io/cluster-issuer: "letsencrypt-production"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "500m"
+    # Long timeouts for render jobs and ML inference
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
+    # WebSocket support for sync service
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/websocket-services: "collab-server"
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: "lazynext-sync"
 spec:
   tls:
     - hosts:
         - api.lazynext.ai
-      secretName: lazynext-tls-secret
+      secretName: lazynext-api-tls
   rules:
     - host: api.lazynext.ai
       http:
         paths:
-          # WebSockets Route
-          - path: /ws
+          # AI Agents / Sync (WebSocket)
+          - path: /sync
             pathType: Prefix
             backend:
               service:
-                name: collab-server
+                name: lazynext-sync
                 port:
                   number: 8002
-          # Render API Route
+          # AI Agents Orchestration API
+          - path: /orchestrate
+            pathType: Prefix
+            backend:
+              service:
+                name: lazynext-sync
+                port:
+                  number: 8002
+          # Render Service API
           - path: /api/v1/jobs
             pathType: Prefix
             backend:
               service:
-                name: render-service
+                name: lazynext-render
                 port:
                   number: 8003
-          # AI Pre-Processing Route
+          # Render Export API
+          - path: /api/v1/export
+            pathType: Prefix
+            backend:
+              service:
+                name: lazynext-render
+                port:
+                  number: 8003
+          # Pre-Processing API
           - path: /api/v1/ai
             pathType: Prefix
             backend:
               service:
-                name: pre-processing
+                name: lazynext-pre-processing
                 port:
-                  number: 8004
+                  number: 8000
+          # Generative Studio API
+          - path: /api/v1/generate
+            pathType: Prefix
+            backend:
+              service:
+                name: lazynext-generative-studio
+                port:
+                  number: 8001

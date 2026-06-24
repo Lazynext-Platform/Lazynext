@@ -140,14 +140,16 @@ patches:
 
 images:
   - name: ghcr.io/lazynext-platform/lazynext-web
-    newTag: production
+    newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-ai-agents
-    newTag: production
+    newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-render-service
-    newTag: production
+    newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-pre-processing
-    newTag: production
+    newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-generative-studio
-    newTag: production
+    newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-mcp
-    newTag: production
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-analytics-service
+    newTag: latest

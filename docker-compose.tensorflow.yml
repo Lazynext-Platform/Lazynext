@@ -16,7 +16,7 @@ services:
       - models_data:/models
       - ./services/pre-processing/model_config.conf:/models/model_config.conf:ro
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/lazynext_models"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/whisper"]
       interval: 30s
       timeout: 5s
       start_period: 60s
@@ -30,6 +30,7 @@ services:
               capabilities: [gpu]
     networks:
       - tf-net
+      - lazynext-network
 
   # REST-to-gRPC bridge for efficient batch inference
   tf-bridge:
@@ -43,6 +44,7 @@ services:
         condition: service_healthy
     networks:
       - tf-net
+      - lazynext-network
 
 volumes:
   models_data:
@@ -51,3 +53,5 @@ volumes:
 networks:
   tf-net:
     driver: bridge
+  lazynext-network:
+    external: true

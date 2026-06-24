@@ -111,4 +111,23 @@ variable "resend_api_key" {
   default     = "UNSET_SECRET"
 }
 
+# ─────────────────────────────────────────────────────────────────────────────
+# LLM Configuration
+# ─────────────────────────────────────────────────────────────────────────────
 
+variable "llm_provider" {
+  description = "Default LLM provider for the Chronos Copilot"
+  type        = string
+  default     = "anthropic"
+
+  validation {
+    condition     = contains(["openai", "anthropic", "gemini", "ollama"], var.llm_provider)
+    error_message = "LLM provider must be one of: openai, anthropic, gemini, ollama."
+  }
+}
+
+variable "gcp_region" {
+  description = "The GCP region for GKE (may differ from general region)"
+  type        = string
+  default     = "us-central1"
+}

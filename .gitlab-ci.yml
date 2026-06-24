@@ -94,7 +94,7 @@ deploy-aws:
     - if: '$CI_COMMIT_BRANCH == "main" && $CLOUD_PROVIDER == "aws"'
   script:
     - aws eks update-kubeconfig --region us-east-1 --name lazynext-eks-prod
-    - kubectl apply -f k8s/base/
+    - kubectl apply -k k8s/overlays/production
 
 deploy-azure:
   image: bitnami/kubectl:latest
@@ -102,5 +102,5 @@ deploy-azure:
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CLOUD_PROVIDER == "azure"'
   script:
-    - az aks get-credentials --resource-group lazynext-rg --name lazynext-aks
-    - kubectl apply -f k8s/base/
+    - az aks get-credentials --resource-group lazynext-rg-prod --name lazynext-aks-prod
+    - kubectl apply -k k8s/overlays/production

@@ -63,10 +63,12 @@ async function sendEmail({
 }
 
 export const auth = betterAuth({
-	database: drizzleAdapter(db, { provider: "sqlite", usePlural: false, schema }),
+	database: drizzleAdapter(db, { provider: "pg", usePlural: false, schema }),
 	secret:
 		process.env.BETTER_AUTH_SECRET ||
-		"lazynext-secret-key-for-auth-minimum-32-long",
+		(process.env.NODE_ENV === "production"
+			? (() => { throw new Error("BETTER_AUTH_SECRET must be set in production"); })()
+			: "lazynext-dev-secret-key-for-auth-minimum-32"),
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false,

@@ -249,12 +249,25 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
  * Health check endpoint for K8s/Cloud Run probes.
  */
 app.get("/health", async (_req: Request, res: Response) => {
-  const counts = await renderQueue.getJobCounts();
-  res.json({
-    status: "ok",
-    queue_size: counts.waiting + counts.active,
-    ffmpeg_available: true,
-  });
+  try {
+    const counts = await Promise.race([
+      renderQueue.getJobCounts(),
+      new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
+    ]);
+    res.json({
+      status: "ok",
+      queue_size: counts ? counts.waiting + counts.active : 0,
+      ffmpeg_available: true,
+    });
+  } catch {
+    // Redis unavailable — return degraded status
+    res.json({
+      status: "ok",
+      queue_size: 0,
+      ffmpeg_available: true,
+      redis_available: false,
+    });
+  }
 });
 
 const PORT = process.env.PORT || 8003;

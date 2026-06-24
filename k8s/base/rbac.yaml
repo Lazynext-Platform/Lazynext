@@ -69,3 +69,48 @@ roleRef:
   kind: Role
   name: lazynext-job-manager
   apiGroup: rbac.authorization.k8s.io
+---
+# ── ClusterRole: cross-namespace read access for monitoring ──
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: lazynext-cluster-reader
+  labels:
+    app.kubernetes.io/part-of: lazynext
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/metrics
+      - namespaces
+      - persistentvolumes
+      - storageclasses
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources:
+      - nodes
+      - pods
+    verbs: ["get", "list"]
+  - apiGroups: ["autoscaling"]
+    resources:
+      - horizontalpodautoscalers
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources:
+      - poddisruptionbudgets
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: lazynext-cluster-reader-binding
+  labels:
+    app.kubernetes.io/part-of: lazynext
+subjects:
+  - kind: ServiceAccount
+    name: lazynext-sa
+    namespace: lazynext
+roleRef:
+  kind: ClusterRole
+  name: lazynext-cluster-reader
+  apiGroup: rbac.authorization.k8s.io

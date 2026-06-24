@@ -16,7 +16,7 @@ route:
   repeat_interval: 4h
 
   routes:
-    # Critical alerts → PagerDuty + Slack
+    # Critical alerts → PagerDuty + Slack + Email (DBA)
     - match:
         severity: critical
       receiver: "pagerduty-critical"
@@ -24,15 +24,22 @@ route:
     - match:
         severity: critical
       receiver: "slack-critical"
+      continue: true
+    - match:
+        severity: critical
+      match_re:
+        alertname: "Database.*|PostgreSQL.*"
+      receiver: "email-dba"
       continue: false
 
-    # Warning alerts → Slack only
+    # Warning alerts → Slack + Email (DBA if DB-related)
     - match:
         severity: warning
       receiver: "slack-warnings"
-
-    # Database alerts → email to DBA
-    - match_re:
+      continue: true
+    - match:
+        severity: warning
+      match_re:
         alertname: "Database.*|PostgreSQL.*"
       receiver: "email-dba"
 

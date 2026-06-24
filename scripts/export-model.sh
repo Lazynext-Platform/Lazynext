@@ -19,7 +19,7 @@ declare -A MODELS=(
   ["whisper"]="openai/whisper-large-v3"
   ["sam2"]="facebook/sam2-hiera-large"
   ["realesrgan"]="ai-forever/Real-ESRGAN"
-  ["mobilenet"]="google/mobilenet_v2_1.0_224"
+  ["mobilenet_v2"]="google/mobilenet_v2_1.0_224"
   ["efficientnet"]="google/efficientnet-b7"
 )
 
@@ -156,7 +156,7 @@ case "${1:-}" in
     echo "🚀 Exporting ALL models..."
     export_whisper
     export_sam2
-    export_generic "mobilenet"
+    export_generic "mobilenet_v2"
     export_generic "efficientnet"
     echo "✅ All models exported to $MODEL_DIR"
     echo ""

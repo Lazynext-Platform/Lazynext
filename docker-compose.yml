@@ -5,12 +5,12 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: lazynext
-      POSTGRES_PASSWORD: password123
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password123}
       POSTGRES_DB: lazynext
     ports:
       - "5434:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - /tmp/lazynext-pg-data:/var/lib/postgresql/data
     networks:
       - lazynext-network
     healthcheck:
@@ -47,7 +47,7 @@ services:
     environment:
       SRH_MODE: env
       SRH_CONNECTION_STRING: redis://redis:6379
-      SRH_TOKEN: mock_upstash_token
+      SRH_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-mock_upstash_token}
     networks:
       - lazynext-network
     depends_on:
@@ -71,7 +71,7 @@ services:
       - NODE_ENV=production
       - STORAGE_PROVIDER=local
       - DATABASE_URL=postgresql://lazynext:password123@db:5432/lazynext
-      - BETTER_AUTH_SECRET=local-dev-secret-change-in-production-64chars
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-local-dev-secret-change-in-production-64chars}
       - BETTER_AUTH_URL=http://localhost:3000
       - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
       - UPSTASH_REDIS_REST_TOKEN=mock_upstash_token
@@ -220,17 +220,17 @@ services:
       context: ./services/analytics-service
       dockerfile: Dockerfile
     ports:
-      - "8005:8005"
+      - "8006:8006"
     environment:
       - NODE_ENV=production
-      - PORT=8005
+      - PORT=8006
     networks:
       - lazynext-network
     restart: unless-stopped
 
   # ── Observability (Prometheus, Grafana, Loki, Alloy) ──────────
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.3.1
     ports:
       - "9090:9090"
     volumes:
@@ -244,11 +244,11 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.5.1
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
     volumes:
       - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
       - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
@@ -259,7 +259,7 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:3.4.2
+    image: grafana/loki:3.7.2
     ports:
       - "3100:3100"
     volumes:
@@ -271,7 +271,7 @@ services:
     restart: unless-stopped
 
   alertmanager:
-    image: prom/alertmanager:latest
+    image: prom/alertmanager:v0.28.1
     ports:
       - "9093:9093"
     volumes:
@@ -284,7 +284,7 @@ services:
     restart: unless-stopped
 
   alloy:
-    image: grafana/alloy:v1.8.0
+    image: grafana/alloy:v1.17.0
     ports:
       - "12345:12345"
     volumes:
@@ -295,12 +295,33 @@ services:
       - lazynext-network
     restart: unless-stopped
 
+  # ── Tempo — Distributed Tracing Backend ─────────────────────────
+  tempo:
+    image: grafana/tempo:2.6.1
+    # Run as the built-in tempo user (not root)
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+    volumes:
+      - ./monitoring/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml
+      - tempo_data:/tmp/tempo
+    command: -config.file=/etc/tempo/tempo-config.yaml
+    networks:
+      - lazynext-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
 volumes:
-  postgres_data:
   redis_data:
   prometheus_data:
   grafana_data:
   loki_data:
+  tempo_data:
 
 networks:
   lazynext-network:

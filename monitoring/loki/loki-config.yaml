@@ -24,5 +24,17 @@ schema_config:
         prefix: index_
         period: 24h
 
+limits_config:
+  retention_period: 720h       # 30 days retention
+  max_entries_limit_per_query: 5000
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h  # 7 days
+  ingestion_rate_mb: 16
+  ingestion_burst_size_mb: 32
+  # For production, GCS-backed storage is recommended:
+  # storage_config:
+  #   gcs:
+  #     bucket_name: lazynext-loki-chunks
+
 ruler:
   alertmanager_url: http://alertmanager:9093

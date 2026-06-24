@@ -1,6 +1,6 @@
 import { auth } from "@/auth/server";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -15,7 +15,7 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Name is required" }, { status: 400 });
 	}
 
-	await db.update(users).set({ name }).where(eq(users.id, session.user.id));
+	await db.update(user).set({ name }).where(eq(user.id, session.user.id));
 
 	return NextResponse.json({ success: true, name });
 }

@@ -6,26 +6,56 @@
     mode: '0755'
 
 - name: Add Docker GPG key
-  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  args:
-    creates: /etc/apt/keyrings/docker.gpg
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
 
 - name: Add Docker repository
   apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    repo: "deb [arch={{ ansible_architecture }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
+    update_cache: yes
 
-- name: Install Docker Engine
+- name: Install Docker Engine and containerd
   apt:
     name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
+      - docker-buildx-plugin
       - docker-compose-plugin
     state: present
 
-- name: Ensure Docker is running
-  systemd:
+- name: Configure containerd
+  copy:
+    dest: /etc/containerd/config.toml
+    content: |
+      version = 2
+      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc]
+        runtime_type = "io.containerd.runc.v2"
+        [plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+          SystemdCgroup = true
+    mode: '0644'
+  notify: restart containerd
+
+- name: Create docker group
+  group:
     name: docker
+    state: present
+
+- name: Add users to docker group
+  user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users | default([ansible_user | default('ubuntu')]) }}"
+
+- name: Ensure Docker and containerd are running
+  systemd:
+    name: "{{ item }}"
     state: started
     enabled: yes
+  loop:
+    - docker
+    - containerd

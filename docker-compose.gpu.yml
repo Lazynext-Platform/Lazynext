@@ -45,7 +45,7 @@ services:
     build:
       context: ./services/pre-processing
       dockerfile: Dockerfile.tensorflow
-    profiles: ["gpu", "tf"]
+    profiles: ["tf"]  # Only start with --profile tf (separate from GPU PyTorch services)
     deploy:
       resources:
         reservations:
@@ -58,11 +58,15 @@ services:
       - "8501:8501"
     volumes:
       - models_data:/models
+      - ./services/pre-processing/model_config.conf:/models/model_config.conf:ro
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/lazynext_models"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/whisper"]
       interval: 30s
+      timeout: 5s
       start_period: 60s
       retries: 3
+    networks:
+      - lazynext-network
 
   # Non-GPU services with resource limits for fairness
   web:

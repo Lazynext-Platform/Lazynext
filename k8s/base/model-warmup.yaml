@@ -88,7 +88,7 @@ spec:
             - |
               pip install --quiet huggingface_hub
 
-              MODELS="openai/whisper-large-v3 facebook/sam2-hiera-large ai-forever/Real-ESRGAN google/t5-v1_1-large s sentence-transformers/all-MiniLM-L6-v2"
+              MODELS="openai/whisper-large-v3 facebook/sam2-hiera-large ai-forever/Real-ESRGAN google/t5-v1_1-large sentence-transformers/all-MiniLM-L6-v2"
 
               for model in $MODELS; do
                 echo "📥 Downloading: $model"
@@ -136,5 +136,5 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 500Gi
-  storageClassName: premium-rwx
+      storage: 50Gi
+  storageClassName: standard

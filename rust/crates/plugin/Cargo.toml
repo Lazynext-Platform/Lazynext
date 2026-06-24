@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-boa_engine = "0.19"
-getrandom = { version = "0.2", features = ["js"] }
+boa_engine = "0.21"
+getrandom = { version = "0.4", features = ["wasm_js"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 time = { path = "../time" }

@@ -1,5 +1,5 @@
-# ── Pre-Processing Service (Python 3.12) ──
-FROM python:3.12-slim AS builder
+# ── Pre-Processing Service (Python 3.13) ──
+FROM python:3.13-slim AS builder
 
 WORKDIR /app
 
@@ -21,11 +21,12 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
 # ── Runtime ──
-FROM python:3.12-slim AS runner
+FROM python:3.13-slim AS runner
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     ffmpeg \
     libgl1 \
     libglib2.0-0 \
@@ -38,7 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupadd --system --gid 1001 python && useradd --system --uid 1001 --gid python mlrunner
 
 # Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 # Copy application
