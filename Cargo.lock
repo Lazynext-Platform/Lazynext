@@ -2215,7 +2215,7 @@ dependencies = [
  "console_error_panic_hook",
  "editor_core",
  "effects",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "gpu",
  "js-sys",
  "masks",
