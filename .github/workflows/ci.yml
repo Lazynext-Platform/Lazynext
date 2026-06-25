@@ -213,7 +213,7 @@ jobs:
 
       - name: Login to Azure Container Registry
         run: |
-          az acr login --name lazynextacrdev
+          az acr login --name lazynextacrdevlmblwn
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -231,7 +231,7 @@ jobs:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-ai-agents:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-ai-agents:latest
 
       - name: Build and Push Render Service
         continue-on-error: true
@@ -240,7 +240,7 @@ jobs:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-render-service:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-render-service:latest
 
       - name: Build and Push Pre-Processing
         continue-on-error: true
@@ -249,7 +249,7 @@ jobs:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-pre-processing:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-pre-processing:latest
 
       - name: Build and Push Generative Studio
         continue-on-error: true
@@ -258,7 +258,7 @@ jobs:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-generative-studio:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-generative-studio:latest
 
       - name: Build and Push Analytics Service
         continue-on-error: true
@@ -267,7 +267,7 @@ jobs:
           context: ./services/analytics-service
           file: ./services/analytics-service/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-analytics-service:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-analytics-service:latest
 
       - name: Build and Push MCP Server
         continue-on-error: true
@@ -276,7 +276,7 @@ jobs:
           context: .
           file: ./rust/mcp-server/Dockerfile
           push: true
-          tags: lazynextacrdev.azurecr.io/lazynext-mcp:latest
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-mcp:latest
 
       # ── Container Apps Deploy ─────────────────────────────────────
       # Terraform manages infrastructure; Container Apps are updated
@@ -286,19 +286,19 @@ jobs:
           az containerapp update \
             --name lazynext-ai-agents-dev \
             --resource-group lazynext-rg-dev \
-            --image lazynextacrdev.azurecr.io/lazynext-ai-agents:latest
+            --image lazynextacrdevlmblwn.azurecr.io/lazynext-ai-agents:latest
           az containerapp update \
             --name lazynext-pre-processing-dev \
             --resource-group lazynext-rg-dev \
-            --image lazynextacrdev.azurecr.io/lazynext-pre-processing:latest
+            --image lazynextacrdevlmblwn.azurecr.io/lazynext-pre-processing:latest
           az containerapp update \
             --name lazynext-render-dev \
             --resource-group lazynext-rg-dev \
-            --image lazynextacrdev.azurecr.io/lazynext-render-service:latest
+            --image lazynextacrdevlmblwn.azurecr.io/lazynext-render-service:latest
           az containerapp update \
             --name lazynext-gen-studio-dev \
             --resource-group lazynext-rg-dev \
-            --image lazynextacrdev.azurecr.io/lazynext-generative-studio:latest
+            --image lazynextacrdevlmblwn.azurecr.io/lazynext-generative-studio:latest
 
       - name: Run Database Migrations
         run: |
