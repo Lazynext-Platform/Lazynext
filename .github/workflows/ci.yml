@@ -52,7 +52,7 @@ jobs:
       - name: Build WASM Package
         run: |
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          wasm-pack build --target web rust/wasm
+          RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --target web rust/wasm
 
       - name: Upload WASM Package
         uses: actions/upload-artifact@v4

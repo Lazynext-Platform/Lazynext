@@ -33,8 +33,10 @@ wasm-bindgen-futures = "0.4.66"
 web-sys = { version = "0.3.93", features = ["OffscreenCanvas", "HtmlCanvasElement", "CanvasRenderingContext2d", "OffscreenCanvasRenderingContext2d", "Document", "Window", "Performance", "TextMetrics", "console"] }
 uuid = { version = "1.0", features = ["v4", "js"] }
 chrono = "0.4"
-# Required for WASM target: enables JS-based randomness via browser crypto APIs
+# Required for WASM target: enables JS-based randomness via browser crypto APIs.
+# Both 0.3 and 0.4 are declared because transitive deps pull in 0.3 without wasm_js.
 getrandom = { version = "0.4", features = ["wasm_js"] }
+getrandom-03 = { package = "getrandom", version = "0.3", features = ["wasm_js"] }
 
 [features]
 default = ["wasm"]
