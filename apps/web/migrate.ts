@@ -9,8 +9,8 @@ async function main() {
   console.log("Connecting to database at:", connectionString?.replace(/:[^:@]+@/, ':***@'));
   
   const isUnixSocket = connectionString?.includes("%2Fcloudsql");
-  // Use SSL in production unless connecting via Unix socket (Cloud SQL proxy).
-  // Never disable certificate validation — the proxy handles TLS for private-IP connections.
+  // Use SSL in production.
+  // Never disable certificate validation — use sslmode=require for Azure PostgreSQL.
   const pool = new Pool({
     connectionString,
     ssl: process.env.NODE_ENV === "production" && !isUnixSocket ? { rejectUnauthorized: true } : undefined,

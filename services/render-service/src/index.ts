@@ -23,8 +23,6 @@ interface RenderJob {
 
 import { Queue, Worker, Job } from "bullmq";
 import Redis from "ioredis";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.replace("http", "redis") || "redis://localhost:6379";
 
 // ── Lazy Redis / BullMQ initialisation ────────────────────────────────
@@ -80,21 +78,31 @@ async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> 
 	return worker;
 }
 
-// S3 Setup — only initialised when credentials are explicitly provided.
-// Falls back to local filesystem storage when AWS keys are absent.
-const s3Credentials = process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
-	? {
-		accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-		secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-	  }
-	: null;
+// Azure Blob Storage — initialised when STORAGE_PROVIDER=azure.
+// Falls back to local filesystem storage when not configured.
+// Uses DefaultAzureCredential (Managed Identity in Container Apps, az login locally).
+let blobClient: any = null;
 
-const s3 = s3Credentials
-	? new S3Client({
-		region: process.env.AWS_REGION || "us-east-1",
-		credentials: s3Credentials,
-	  })
-	: null;
+async function getBlobClient(): Promise<any> {
+	if (blobClient) return blobClient;
+	if (process.env.STORAGE_PROVIDER !== "azure") return null;
+
+	try {
+		const { BlobServiceClient } = await import("@azure/storage-blob");
+		const { DefaultAzureCredential } = await import("@azure/identity");
+		const account = process.env.AZURE_STORAGE_ACCOUNT || "lazynextmediadev";
+		const credential = new DefaultAzureCredential();
+		blobClient = new BlobServiceClient(
+			`https://${account}.blob.core.windows.net`,
+			credential,
+		);
+		console.log("[Render Farm] Azure Blob Storage configured via Managed Identity");
+	} catch (e) {
+		console.warn("[Render Farm] Azure Blob Storage not available — using local filesystem");
+		return null;
+	}
+	return blobClient;
+}
 
 app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 	const { projectId, format = "mp4" } = req.body;
@@ -238,19 +246,19 @@ async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) 
 				}
 
 				try {
-					if (!s3) {
-						console.log(`[Render Farm] S3 not configured — keeping output at ${outputPath}`);
+					const azureBlob = await getBlobClient();
+					if (!azureBlob) {
+						console.log(`[Render Farm] Azure Blob not configured — keeping output at ${outputPath}`);
 					} else {
+						const containerName = process.env.MEDIA_BUCKET || "media";
+						const containerClient = azureBlob.getContainerClient(containerName);
+						const blockBlobClient = containerClient.getBlockBlobClient(`renders/${job.id}.${job.data.format}`);
 						const fileStream = fs.createReadStream(outputPath);
-						await s3.send(new PutObjectCommand({
-							Bucket: process.env.MEDIA_BUCKET || "lazynext-media-dev",
-							Key: `renders/${job.id}.${job.data.format}`,
-							Body: fileStream,
-						}));
-						console.log(`[Render Farm] Successfully uploaded ${job.id} to S3.`);
+						await blockBlobClient.uploadStream(fileStream);
+						console.log(`[Render Farm] Successfully uploaded ${job.id} to Azure Blob.`);
 					}
 				} catch (e) {
-					console.error(`[Render Farm] S3 Upload failed:`, e);
+					console.error(`[Render Farm] Azure Blob Upload failed:`, e);
 				}
 
 				resolve(outputPath);
@@ -321,7 +329,7 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 });
 
 /**
- * Health check endpoint for K8s/Cloud Run probes.
+ * Health check endpoint for K8s/Container Apps probes.
  */
 app.get("/health", async (_req: Request, res: Response) => {
   try {

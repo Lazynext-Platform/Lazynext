@@ -53,7 +53,7 @@ resource "azurerm_resource_group" "rg" {
 # ── Locals ──────────────────────────────────────────────────────────────────
 
 locals {
-  # Match GCP Cloud Run resource configs
+  # Container App resource configurations
   container_apps = {
     web = {
       cpu    = var.environment == "production" ? 2.0 : 1.0

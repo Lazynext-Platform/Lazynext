@@ -17,7 +17,7 @@ The error budget for the web application is being consumed faster than expected.
 
 1. **Check the Grafana dashboard**: [Lazynext Overview](https://monitoring.lazynext.ai/d/lazynext-overview)
 2. **Check recent deployments**: `kubectl rollout history deployment/lazynext-web -n lazynext`
-3. **Check Cloud Run logs**: Open Cloud Logging → filter for 5xx errors
+3. **Check Container Apps logs**: Open Azure Monitor → filter for 5xx errors
 4. **Database connectivity**: Run `scripts/health-check.sh` from the repo root
 
 ## Common Causes

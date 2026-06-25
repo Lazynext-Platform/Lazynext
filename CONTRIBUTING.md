@@ -18,7 +18,7 @@ Welcome! Lazynext is an autonomous, real-time collaborative NLE built on Rust + 
 | `apps/mobile` | React Native mobile app |
 | `apps/browser-extension` | Chrome extension for video capture |
 | `services/` | Backend microservices (ports 8000–8007) |
-| `terraform/` | GCP infrastructure as code |
+| `terraform/` | Azure infrastructure as code |
 | `k8s/` | Kubernetes manifests |
 | `monitoring/` | Prometheus, Grafana, Loki, Tempo |
 

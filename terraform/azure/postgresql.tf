@@ -43,7 +43,7 @@ resource "azurerm_postgresql_flexible_server_database" "lazynext" {
   collation = "en_US.utf8"
 }
 
-# Server parameters (mirrors GCP Cloud SQL flags)
+# Server parameters
 resource "azurerm_postgresql_flexible_server_configuration" "log_min_duration" {
   name      = "log_min_duration_statement"
   server_id = azurerm_postgresql_flexible_server.postgres.id

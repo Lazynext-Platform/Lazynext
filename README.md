@@ -91,10 +91,10 @@ Services gracefully fall back to local processing when API keys are not configur
 
 ## 🏗️ Infrastructure
 
-- **CI/CD**: GitHub Actions (Rust + web tests, Docker build/push) + Google Cloud Build
-- **Deployment**: Cloud Run (all 5 services) + Cloud SQL (private IP) + Artifact Registry + Secret Manager
-- **Terraform**: Full GCP infrastructure as code with VPC, Serverless VPC Access, GCS backend
-- **Kubernetes**: Optional K8s manifests for self-hosted deployments
+- **CI/CD**: GitHub Actions (Rust + web tests, Docker build/push + ACR deploy)
+- **Deployment**: Azure Container Apps (all 5 services) + Azure PostgreSQL Flexible Server + Azure Container Registry + Azure Key Vault
+- **Terraform**: Full Azure infrastructure as code with VNet, delegated subnets, Blob Storage backend
+- **Kubernetes**: Optional AKS manifests for self-hosted deployments
 
 ## 📂 Project Structure
 
@@ -129,7 +129,7 @@ Services gracefully fall back to local processing when API keys are not configur
 │   ├── generative-studio/  # Python FastAPI (:8001)
 │   ├── ai-agents/          # Node.js orchestrator + sync (:8002)
 │   └── render-service/     # Node.js FFMPEG farm (:8003)
-├── terraform/              # GCP Infrastructure as Code
+├── terraform/              # Azure Infrastructure as Code
 ├── k8s/                    # Kubernetes manifests
 ├── scripts/                # Build, deploy, and test utilities
 └── docs/                   # Architecture and design docs
