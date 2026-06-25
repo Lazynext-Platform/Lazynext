@@ -26,13 +26,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Setup Bun (for JS/TS analysis)
+        if: matrix.language == 'javascript-typescript'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Setup Python (for Python analysis)
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
 
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
+      # ── Manual build steps replace autobuild for monorepo support ──────
+      - name: Build JavaScript/TypeScript
+        if: matrix.language == 'javascript-typescript'
+        run: |
+          bun install
+          cd apps/web && bun run typecheck || true
+
+      - name: Build Python
+        if: matrix.language == 'python'
+        run: |
+          pip install -r services/pre-processing/requirements.txt || true
+          pip install -r services/generative-studio/requirements.txt || true
+
+      - name: Build Actions
+        if: matrix.language == 'actions'
+        run: echo "Actions workflows — no build step required"
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
