@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rotate-secrets.sh — Rotate database passwords and API keys
+# rotate-secrets.sh — Rotate database passwords and API keys in Azure Key Vault
 # Usage:
 #   ./scripts/rotate-secrets.sh --db          # Rotate DB password
 #   ./scripts/rotate-secrets.sh --api-keys    # Rotate all API keys
@@ -8,10 +8,10 @@ set -euo pipefail
 
 # ── Config ──────────────────────────────────────────────────────────────────
 
-PROJECT_ID="${PROJECT_ID:-vertexaiopencode}"
 ENVIRONMENT="${ENVIRONMENT:-production}"
-DB_INSTANCE="${DB_INSTANCE:-lazynext-db-$ENVIRONMENT}"
-SECRET_PREFIX="lazynext"
+KV_NAME="lazynext-kv-${ENVIRONMENT}"
+DB_SERVER="${DB_SERVER:-lazynext-postgres-${ENVIRONMENT}}"
+RG_NAME="lazynext-rg-${ENVIRONMENT}"
 
 # ── Generate random passwords/keys ──────────────────────────────────────────
 
@@ -28,67 +28,65 @@ generate_api_key() {
 # ── Rotate Database Password ────────────────────────────────────────────────
 
 rotate_db_password() {
-  echo "🔐 Rotating database password for $DB_INSTANCE..."
-
   local new_password
   new_password=$(generate_password 32)
 
-  # Update Cloud SQL user password
-  echo "   Updating Cloud SQL user..."
-  gcloud sql users set-password lazynext_app \
-    --instance="$DB_INSTANCE" \
-    --password="$new_password" \
-    --project="$PROJECT_ID"
+  echo "🔐 Rotating database password for server: $DB_SERVER"
 
-  # Update Secret Manager
-  echo "   Updating Secret Manager..."
-  printf "%s" "$new_password" | gcloud secrets versions add DATABASE_URL \
-    --data-file=- \
-    --project="$PROJECT_ID"
+  # Update Azure PostgreSQL admin password
+  az postgres flexible-server update \
+    --resource-group "$RG_NAME" \
+    --name "$DB_SERVER" \
+    --admin-password "$new_password"
 
-  # Update Kubernetes secret
-  echo "   Updating Kubernetes secret..."
-  kubectl create secret generic lazynext-secrets \
-    --namespace=lazynext \
-    --from-literal=POSTGRES_PASSWORD="$new_password" \
-    --dry-run=client -o yaml | kubectl apply -f -
+  # Update the connection string in Key Vault
+  local fqdn
+  fqdn=$(az postgres flexible-server show \
+    --resource-group "$RG_NAME" \
+    --name "$DB_SERVER" \
+    --query "fullyQualifiedDomainName" -o tsv)
 
-  # Restart deployments to pick up new secrets
-  echo "   Restarting deployments..."
-  kubectl rollout restart deployment/lazynext-web -n lazynext
-  kubectl rollout restart deployment/lazynext-sync -n lazynext
+  local connection_string="postgresql://lazynext_app:${new_password}@${fqdn}:5432/lazynext?sslmode=require"
 
-  echo "✅ Database password rotated. Restart complete."
+  az keyvault secret set \
+    --vault-name "$KV_NAME" \
+    --name "DATABASE--URL" \
+    --value "$connection_string"
+
+  echo "✅ Database password rotated. Secret updated: $KV_NAME/DATABASE--URL"
+  echo "   Restart Container Apps to pick up the new password:"
+  echo "   az containerapp revision restart --name lazynext-web-${ENVIRONMENT} --resource-group $RG_NAME"
 }
 
 # ── Rotate API Keys ─────────────────────────────────────────────────────────
 
-rotate_api_keys() {
-  echo "🔑 Rotating API keys..."
+rotate_api_key() {
+  local key_name="$1"
+  local prefix="$2"
+  local new_value
+  new_value=$(generate_api_key "$prefix")
 
-  local secrets=(
-    "BETTER_AUTH_SECRET"
-  )
+  echo "🔑 Rotating: $key_name"
 
-  for secret_name in "${secrets[@]}"; do
-    local new_value
-    new_value=$(generate_password 64)
+  az keyvault secret set \
+    --vault-name "$KV_NAME" \
+    --name "$key_name" \
+    --value "$new_value"
 
-    echo "   Rotating: $secret_name"
+  echo "   Updated: $KV_NAME/$key_name"
+}
 
-    printf "%s" "$new_value" | gcloud secrets versions add "$secret_name" \
-      --data-file=- \
-      --project="$PROJECT_ID" 2>/dev/null || echo "   ⚠️  Secret $secret_name not in GCP Secret Manager"
-
-    # Update K8s
-    # Patch only this key, preserving all other secrets
-    kubectl create secret generic lazynext-secrets \
-      --namespace=lazynext \
-      --from-literal="$secret_name=$new_value" \
-      --dry-run=client -o yaml | kubectl apply -f -
-  done
-
-  echo "✅ API keys rotated."
+rotate_all_api_keys() {
+  echo "🔑 Rotating all API keys..."
+  rotate_api_key "openai--api--key" "sk"
+  rotate_api_key "anthropic--api--key" "sk-ant"
+  rotate_api_key "gemini--api--key" "AIza"
+  rotate_api_key "replicate--api--token" "r8"
+  rotate_api_key "elevenlabs--api--key" "el"
+  rotate_api_key "stripe--secret--key" "sk_test"
+  rotate_api_key "stripe--webhook--secret" "whsec"
+  rotate_api_key "resend--api--key" "re"
+  echo "✅ All API keys rotated."
 }
 
 # ── Main ────────────────────────────────────────────────────────────────────
@@ -98,29 +96,15 @@ case "${1:-}" in
     rotate_db_password
     ;;
   --api-keys)
-    rotate_api_keys
+    rotate_all_api_keys
     ;;
   --all)
     rotate_db_password
-    rotate_api_keys
     echo ""
-    echo "✅ All secrets rotated."
-    echo "⚠️  Remember to update any external integrations:"
-    echo "   - Stripe webhook secrets"
-    echo "   - Resend API keys"
-    echo "   - CI/CD environment variables"
-    ;;
-  --help|-h)
-    echo "Usage: $0 [--db | --api-keys | --all]"
-    echo ""
-    echo "  --db        Rotate database password + restart deployments"
-    echo "  --api-keys  Rotate Better Auth secret + other generated secrets"
-    echo "  --all       Rotate everything"
-    exit 0
+    rotate_all_api_keys
     ;;
   *)
-    echo "Unknown flag: ${1:-}"
-    echo "Usage: $0 [--db | --api-keys | --all]"
+    echo "Usage: $0 --db | --api-keys | --all"
     exit 1
     ;;
 esac

@@ -16,5 +16,5 @@ COPY apps/web/src/db/ apps/web/src/db/
 RUN bun install --frozen-lockfile
 
 # Run the migration script.  The DATABASE_URL env var must point to
-# the target PostgreSQL instance (provided by K8s secrets / Cloud Run).
+# the target PostgreSQL instance (provided by K8s secrets / ECS).
 CMD ["sh", "-c", "cd apps/web && bun run db:migrate"]

@@ -1,0 +1,33 @@
+# Lazynext Azure Terraform Variables
+# Copy to terraform.tfvars and fill in actual values.
+
+# ── Core ─────────────────────────────────────────────────────────────────
+location     = "southeastasia"
+environment  = "dev"                 # dev | staging | production
+app_domain   = "lazynext.ai"
+
+# ── AKS ──────────────────────────────────────────────────────────────────
+kubernetes_version = "1.30"
+node_count         = 2
+
+# ── Database ─────────────────────────────────────────────────────────────
+db_password  = "CHANGE_ME_strong_password_here"
+# B_Standard_B1ms = 1 vCore, 2 GB (dev)
+# GP_Standard_D2s_v3 = 2 vCore, 8 GB (production)
+db_sku_name  = "B_Standard_B1ms"
+
+# ── Application ──────────────────────────────────────────────────────────
+better_auth_secret = "CHANGE_ME_64_char_random_secret"
+
+# ── API Keys ─────────────────────────────────────────────────────────────
+openai_api_key        = "sk-..."
+anthropic_api_key     = "sk-ant-..."
+gemini_api_key        = "..."
+replicate_api_token   = "r8_..."
+elevenlabs_api_key    = "..."
+stripe_secret_key     = "sk_test_..."
+stripe_webhook_secret = "whsec_..."
+resend_api_key        = "re_..."
+
+# ── LLM ──────────────────────────────────────────────────────────────────
+llm_provider = "anthropic"   # openai | anthropic | gemini | ollama

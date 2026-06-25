@@ -38,10 +38,15 @@ spec:
 
                   echo "[Backup] File: $BACKUP_FILE ($(du -h "$BACKUP_FILE" | cut -f1))"
 
-                  # Upload to GCS if configured
-                  if [ -n "$GCS_BACKUP_BUCKET" ]; then
-                    echo "[Backup] Uploading to gs://$GCS_BACKUP_BUCKET/backups/"
-                    gcloud storage cp "$BACKUP_FILE" "gs://$GCS_BACKUP_BUCKET/backups/" || true
+                  # Upload to Azure Blob Storage if configured
+                  if [ -n "$AZURE_STORAGE_ACCOUNT" ] && [ -n "$AZURE_STORAGE_CONTAINER" ]; then
+                    echo "[Backup] Uploading to Azure Blob: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/"
+                    az storage blob upload \
+                      --account-name "$AZURE_STORAGE_ACCOUNT" \
+                      --container-name "$AZURE_STORAGE_CONTAINER" \
+                      --name "backups/$(basename $BACKUP_FILE)" \
+                      --file "$BACKUP_FILE" \
+                      --auth-mode login || true
                   fi
 
                   # Cleanup local backups older than 7 days
@@ -53,7 +58,7 @@ spec:
                     secretKeyRef:
                       name: lazynext-secrets
                       key: POSTGRES_PASSWORD
-                - name: GCS_BACKUP_BUCKET
+                - name: AZURE_STORAGE_ACCOUNT
                   valueFrom:
                     configMapKeyRef:
                       name: lazynext-config

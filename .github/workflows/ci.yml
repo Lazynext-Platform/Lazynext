@@ -204,18 +204,16 @@ jobs:
         with:
           submodules: false
 
-      - id: auth
-        name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
         with:
-          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Configure Docker Auth
-        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+      - name: Login to Azure Container Registry
+        run: |
+          az acr login --name lazynextacrdev
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -233,7 +231,7 @@ jobs:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-ai-agents:latest
 
       - name: Build and Push Render Service
         continue-on-error: true
@@ -242,7 +240,7 @@ jobs:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-render-service:latest
 
       - name: Build and Push Pre-Processing
         continue-on-error: true
@@ -251,7 +249,7 @@ jobs:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-pre-processing:latest
 
       - name: Build and Push Generative Studio
         continue-on-error: true
@@ -260,7 +258,7 @@ jobs:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-generative-studio:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-generative-studio:latest
 
       - name: Build and Push Analytics Service
         continue-on-error: true
@@ -269,7 +267,7 @@ jobs:
           context: ./services/analytics-service
           file: ./services/analytics-service/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-analytics-service:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-analytics-service:latest
 
       - name: Build and Push MCP Server
         continue-on-error: true
@@ -278,20 +276,37 @@ jobs:
           context: .
           file: ./rust/mcp-server/Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-mcp:latest
+          tags: lazynextacrdev.azurecr.io/lazynext-mcp:latest
 
-      # ── Cloud Run Deploy ─────────────────────────────────────────
-      # Terraform manages infrastructure; Cloud Run services are updated
+      # ── Container Apps Deploy ─────────────────────────────────────
+      # Terraform manages infrastructure; Container Apps are updated
       # here to pick up the new container images pushed above.
-      - name: Force Redeploy Cloud Run Services
+      - name: Force Redeploy Container Apps
         run: |
-          gcloud run services update lazynext-ai-agents-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest --region us-central1
-          gcloud run services update lazynext-pre-processing-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-pre-processing:latest --region us-central1
-          gcloud run services update lazynext-render-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-render-service:latest --region us-central1
-          gcloud run services update lazynext-gen-studio-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-generative-studio:latest --region us-central1
+          az containerapp update \
+            --name lazynext-ai-agents-dev \
+            --resource-group lazynext-rg-dev \
+            --image lazynextacrdev.azurecr.io/lazynext-ai-agents:latest
+          az containerapp update \
+            --name lazynext-pre-processing-dev \
+            --resource-group lazynext-rg-dev \
+            --image lazynextacrdev.azurecr.io/lazynext-pre-processing:latest
+          az containerapp update \
+            --name lazynext-render-dev \
+            --resource-group lazynext-rg-dev \
+            --image lazynextacrdev.azurecr.io/lazynext-render-service:latest
+          az containerapp update \
+            --name lazynext-gen-studio-dev \
+            --resource-group lazynext-rg-dev \
+            --image lazynextacrdev.azurecr.io/lazynext-generative-studio:latest
 
       - name: Run Database Migrations
         run: |
-          curl -s -f -H "Authorization: Bearer temp-migration-token-123" \
-            "https://lazynext-web-dev-tt4wmaqnzq-uc.a.run.app/api/migrate?cb=$RANDOM" || \
-            echo "::warning ::Migration endpoint not reachable (may need manual run)"
+          WEB_FQDN=$(az containerapp show --name lazynext-web-dev --resource-group lazynext-rg-dev --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
+          if [ -n "$WEB_FQDN" ]; then
+            curl -s -f -H "Authorization: Bearer temp-migration-token-123" \
+              "https://$WEB_FQDN/api/migrate?cb=$RANDOM" || \
+              echo "::warning ::Migration endpoint not reachable (may need manual run)"
+          else
+            echo "::warning ::Could not determine Container App FQDN — skip migration"
+          fi

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# backup-db.sh — PostgreSQL backup to local file or GCS
+# backup-db.sh — PostgreSQL backup to local file or Azure Blob Storage
 # Usage:
-#   ./scripts/backup-db.sh                 # Local backup
-#   ./scripts/backup-db.sh --gcs           # Upload to GCS
-#   ./scripts/backup-db.sh --restore FILE  # Restore from backup
+#   ./scripts/backup-db.sh                   # Local backup
+#   ./scripts/backup-db.sh --azure           # Upload to Azure Blob
+#   ./scripts/backup-db.sh --restore FILE    # Restore from backup
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -18,7 +18,8 @@ DB_NAME="${DB_NAME:-lazynext}"
 DB_PASSWORD="${DB_PASSWORD:-password123}"
 
 BACKUP_DIR="${BACKUP_DIR:-$REPO_ROOT/.backups}"
-GCS_BUCKET="${GCS_BUCKET:-}"
+AZURE_STORAGE_ACCOUNT="${AZURE_STORAGE_ACCOUNT:-}"
+AZURE_STORAGE_CONTAINER="${AZURE_STORAGE_CONTAINER:-media}"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 
 export PGPASSWORD="$DB_PASSWORD"
@@ -30,14 +31,14 @@ RESTORE_FILE=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --gcs) ACTION="backup-gcs" ;;
+    --azure) ACTION="backup-azure" ;;
     --restore) RESTORE_FILE="$2"; ACTION="restore"; shift ;;
     --help|-h)
-      echo "Usage: $0 [--gcs] [--restore FILE]"
+      echo "Usage: $0 [--azure] [--restore FILE]"
       echo ""
-      echo "  (no flags)     Create local pg_dump backup"
-      echo "  --gcs           Create backup and upload to GCS"
-      echo "  --restore FILE  Restore database from backup file"
+      echo "  (no flags)       Create local pg_dump backup"
+      echo "  --azure           Create backup and upload to Azure Blob Storage"
+      echo "  --restore FILE    Restore database from backup file"
       exit 0
       ;;
     *) echo "Unknown flag: $1"; exit 1 ;;
@@ -77,19 +78,24 @@ do_backup() {
   echo "$backup_file"
 }
 
-do_backup_gcs() {
-  if [ -z "$GCS_BUCKET" ]; then
-    echo "❌ GCS_BUCKET not set. Set GCS_BUCKET=gs://your-bucket or pass it."
+do_backup_azure() {
+  if [ -z "$AZURE_STORAGE_ACCOUNT" ]; then
+    echo "❌ AZURE_STORAGE_ACCOUNT not set."
     exit 1
   fi
 
   local backup_file
   backup_file=$(do_backup)
 
-  echo "☁️  Uploading to $GCS_BUCKET/backups/..."
-  gcloud storage cp "$backup_file" "$GCS_BUCKET/backups/"
+  echo "☁️  Uploading to Azure Blob: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/..."
+  az storage blob upload \
+    --account-name "$AZURE_STORAGE_ACCOUNT" \
+    --container-name "$AZURE_STORAGE_CONTAINER" \
+    --name "backups/$(basename "$backup_file")" \
+    --file "$backup_file" \
+    --auth-mode login
 
-  echo "✅ Uploaded to GCS: $GCS_BUCKET/backups/$(basename "$backup_file")"
+  echo "✅ Uploaded to Azure: $AZURE_STORAGE_ACCOUNT/$AZURE_STORAGE_CONTAINER/backups/$(basename "$backup_file")"
 }
 
 # ── Restore ─────────────────────────────────────────────────────────────────
@@ -135,8 +141,8 @@ case "$ACTION" in
   backup)
     do_backup
     ;;
-  backup-gcs)
-    do_backup_gcs
+  backup-azure)
+    do_backup_azure
     ;;
   restore)
     do_restore "$RESTORE_FILE"

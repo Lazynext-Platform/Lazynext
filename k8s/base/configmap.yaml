@@ -6,7 +6,7 @@ metadata:
 data:
   # Environment
   NODE_ENV: "production"
-  STORAGE_PROVIDER: "gcs"
+  STORAGE_PROVIDER: "azure"
   LLM_PROVIDER: "anthropic"
 
   # Service URLs (internal K8s DNS)
@@ -25,7 +25,7 @@ data:
   UPSTASH_REDIS_REST_URL: "http://redis-proxy:80"
 
   # Media bucket
-  MEDIA_BUCKET: "vertexaiopencode-lazynext-media-production"
+  MEDIA_BUCKET: "media"
 
   # Monitoring
   NEXT_PUBLIC_POSTHOG_HOST: "https://app.posthog.com"

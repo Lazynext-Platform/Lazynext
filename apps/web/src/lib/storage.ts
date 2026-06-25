@@ -5,8 +5,7 @@ import path from "path";
  * Cloud-Agnostic Storage Service
  *
  * In local development, this saves to the local filesystem.
- * In production (AWS/GCP), this interface can be seamlessly swapped to
- * upload files directly to an S3 bucket or Google Cloud Storage.
+ * In production (Azure), this interface uploads files to Azure Blob Storage.
  */
 
 export interface StorageAdapter {
@@ -14,6 +13,8 @@ export interface StorageAdapter {
 	readFile(filePath: string): Promise<Buffer>;
 	ensureDirectory(dirPath: string): Promise<void>;
 }
+
+// ── Local Filesystem Adapter ──────────────────────────────────────────────
 
 class LocalStorageAdapter implements StorageAdapter {
 	async writeFile(filePath: string, data: string | Buffer): Promise<void> {
@@ -29,22 +30,62 @@ class LocalStorageAdapter implements StorageAdapter {
 	}
 }
 
-// AWS S3 Adapter (Example Implementation for the future)
-/*
-class S3StorageAdapter implements StorageAdapter {
+// ── Azure Blob Storage Adapter ────────────────────────────────────────────
+// Uses @azure/storage-blob and DefaultAzureCredential for authentication.
+// In Container Apps / AKS, this uses Managed Identity automatically.
+// For local dev, az login or AZURE_STORAGE_CONNECTION_STRING works.
+
+class AzureBlobStorageAdapter implements StorageAdapter {
+	private container: string;
+	private account: string;
+	private blobClient: any | null = null;
+
+	constructor() {
+		this.container = process.env.MEDIA_BUCKET || "media";
+		this.account = process.env.AZURE_STORAGE_ACCOUNT || "lazynextmediadev";
+	}
+
+	private async getContainerClient(): Promise<any> {
+		if (this.blobClient) return this.blobClient;
+
+		const { BlobServiceClient } = await import("@azure/storage-blob");
+		const { DefaultAzureCredential } = await import("@azure/identity");
+
+		// DefaultAzureCredential tries:
+		// 1. Managed Identity (AZURE_CLIENT_ID)
+		// 2. Azure CLI (az login)
+		// 3. Environment vars (AZURE_TENANT_ID, etc.)
+		const credential = new DefaultAzureCredential();
+
+		const serviceClient = new BlobServiceClient(
+			`https://${this.account}.blob.core.windows.net`,
+			credential,
+		);
+
+		this.blobClient = serviceClient.getContainerClient(this.container);
+		return this.blobClient;
+	}
+
 	async writeFile(filePath: string, data: string | Buffer): Promise<void> {
-		// Use aws-sdk to upload to S3
+		const client = await this.getContainerClient();
+		const blockBlobClient = client.getBlockBlobClient(filePath);
+		await blockBlobClient.upload(data, data.length);
 	}
+
 	async readFile(filePath: string): Promise<Buffer> {
-		// Use aws-sdk to download from S3
+		const client = await this.getContainerClient();
+		const blockBlobClient = client.getBlockBlobClient(filePath);
+		return await blockBlobClient.downloadToBuffer();
 	}
-	async ensureDirectory(dirPath: string): Promise<void> {
-		// S3 is flat, no directories needed
+
+	async ensureDirectory(_dirPath: string): Promise<void> {
+		// Azure Blob Storage is flat — no directories needed
 	}
 }
-*/
+
+// ── Storage Service Export ────────────────────────────────────────────────
 
 export const StorageService: StorageAdapter =
-	process.env.STORAGE_PROVIDER === "s3"
-		? new LocalStorageAdapter() // Replace with S3StorageAdapter when implementing
+	process.env.STORAGE_PROVIDER === "azure"
+		? new AzureBlobStorageAdapter()
 		: new LocalStorageAdapter();

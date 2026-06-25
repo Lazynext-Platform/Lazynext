@@ -2,11 +2,11 @@
 # ───────────────────────────────────────────────────────────────────
 # Lazynext — NVIDIA GPU Operator Setup
 # ───────────────────────────────────────────────────────────────────
-# Installs the NVIDIA GPU Operator on a GKE cluster with GPU nodes.
+# Installs the NVIDIA GPU Operator on an AKS cluster with GPU nodes.
 # This enables GPU scheduling, monitoring (DCGM), and MIG support.
 #
 # Prerequisites:
-#   1. GKE cluster with GPU node pools (nvidia-tesla-t4, nvidia-l4)
+#   1. AKS cluster with GPU node pool (Standard_NC4as_T4_v3)
 #   2. kubectl configured for the target cluster
 #   3. Helm 3 installed
 #
@@ -53,7 +53,7 @@ command -v kubectl >/dev/null 2>&1 || err "kubectl is required but not installed
 # Check if connected to a cluster
 if ! kubectl cluster-info &>/dev/null; then
   warn "Not connected to a Kubernetes cluster."
-  echo "Run: gcloud container clusters get-credentials lazynext-gke-dev --region us-central1"
+  echo "Run: az aks get-credentials --name lazynext-aks-dev --resource-group lazynext-rg-dev"
   log "Skipping GPU Operator install (no cluster). Config is ready in k8s/base/gpu.yaml"
   exit 0
 fi
@@ -64,15 +64,15 @@ if [[ "$GPU_NODES" -eq 0 ]]; then
   warn "No GPU nodes found in cluster (missing label: nvidia.com/gpu=true)."
   echo
   echo "The NVIDIA GPU Operator requires nodes with physical NVIDIA GPUs."
-  echo "For GKE, create a GPU node pool first:"
-  echo "  cd terraform/gcp && terraform apply  # creates gpu-pool"
-  echo "Or manually:"
-  echo "  gcloud container node-pools create gpu-pool --cluster lazynext-gke-dev \\"
-  echo "    --accelerator type=nvidia-tesla-t4,count=1 --num-nodes 1"
+  echo "For AKS, create a GPU node pool first:"
+  echo "  cd terraform/azure && terraform apply  # creates gpu-pool node pool"
+  echo "Or via Azure CLI:"
+  echo "  az aks nodepool add --cluster-name lazynext-aks-dev \\"
+  echo "    --name gpunp --node-vm-size Standard_NC4as_T4_v3 --node-count 1"
   echo
   log "Skipping GPU Operator install (no GPU hardware detected)"
   log "GPU manifests and ClusterPolicy are ready in k8s/base/gpu.yaml"
-  log "Run this script on the GKE cluster after GPU nodes are provisioned"
+  log "Run this script on the AKS cluster after GPU nodes are provisioned"
   exit 0
 fi
 

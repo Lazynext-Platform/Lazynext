@@ -56,9 +56,9 @@ All services communicate via REST over the `lazynext-network` Docker bridge.
 
 ### Infrastructure
 
-- **CI/CD**: GitHub Actions (`.github/workflows/ci.yml`) + Google Cloud Build (`cloudbuild.yaml`)
-- **Deployment**: Cloud Run (all 5 services) + Cloud SQL with private IP
-- **Terraform**: GCP infrastructure-as-code in `terraform/`
+- **CI/CD**: GitHub Actions (`.github/workflows/ci.yml` and `.github/workflows/production.yml`)
+- **Deployment**: Azure Container Apps (5 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
+- **Terraform**: Azure infrastructure-as-code in `terraform/azure/` (GCP config archived at `terraform/gcp-archive/`)
 - **Kubernetes**: Optional K8s manifests in `k8s/`
 - **Database**: PostgreSQL via Drizzle ORM (schema: `apps/web/src/db/schema.ts`, migrations: `apps/web/src/drizzle/`)
 - **Auth**: better-auth library with Upstash Redis rate limiting

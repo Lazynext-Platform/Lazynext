@@ -31,9 +31,9 @@ rotoscoping, video generation, dubbing, etc.) exceeds 5 minutes over a 1-hour wi
 - **Symptom:** Jobs queue up, GPU utilization is 0% or pods stuck in Pending
 - **Fix:** Check GPU node pool status:
   ```bash
-  gcloud container node-pools describe gpu-pool --cluster lazynext-gke-prod --region us-central1
+  az aks nodepool show --cluster-name lazynext-aks-prod --name gpunp --resource-group lazynext-rg-prod
   ```
-  Scale up if needed: `gcloud container clusters resize lazynext-gke-prod --node-pool gpu-pool --num-nodes 2`
+  Scale up if needed: `az aks nodepool scale --cluster-name lazynext-aks-prod --name gpunp --node-count 2 --resource-group lazynext-rg-prod`
 
 ### 2. External API rate limiting (Replicate, ElevenLabs, OpenAI)
 - **Symptom:** 429 HTTP status codes in logs, latency spikes

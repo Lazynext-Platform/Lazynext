@@ -6,7 +6,7 @@ metadata:
   name: lazynext-sa
   namespace: lazynext
   annotations:
-    iam.gke.io/gcp-service-account: lazynext-cloud-run@vertexaiopencode.iam.gserviceaccount.com
+    azure.workload.identity/client-id: <AZURE_MI_CLIENT_ID>
 ---
 # ── Role: read K8s resources for health/status ──
 apiVersion: rbac.authorization.k8s.io/v1

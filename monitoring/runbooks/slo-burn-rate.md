@@ -37,13 +37,13 @@ curl -s http://pgbouncer:6432/stats | grep -E "total_|active_|waiting"
 kubectl rollout restart deployment/lazynext-pgbouncer -n lazynext
 ```
 
-### Cloud SQL Overload
+### PostgreSQL Overload
 ```bash
 # Check active connections
-gcloud sql databases describe lazynext --instance=lazynext-db-prod
+az postgres flexible-server show --name lazynext-postgres-prod --resource-group lazynext-rg-prod
 
 # Restart if absolutely necessary (last resort)
-gcloud sql instances restart lazynext-db-prod
+az postgres flexible-server restart --name lazynext-postgres-prod --resource-group lazynext-rg-prod
 ```
 
 ### API Key Expired (Stripe/Resend/OpenAI)

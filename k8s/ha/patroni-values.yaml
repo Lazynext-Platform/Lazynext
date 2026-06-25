@@ -6,8 +6,8 @@
 # This provides: 3-node PostgreSQL cluster with automatic failover,
 # streaming replication, and etcd-based leader election.
 #
-# For managed HA without K8s complexity, use Cloud SQL (see terraform/gcp/cloudsql.tf)
-# which has availability_type = "REGIONAL" for production.
+# For managed HA without K8s complexity, use Azure PostgreSQL Flexible Server
+# (see terraform/azure/postgresql.tf) which has high_availability_mode for production.
 
 replicaCount: 3
 

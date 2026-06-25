@@ -38,9 +38,9 @@ budget will be exhausted.
 
 ### 3. Storage backend slow (S3/GCS)
 - **Symptom:** Render completes but upload to storage is slow
-- **Fix:** Check cloud provider status. If GCS, run:
+- **Fix:** Check cloud provider status. If Azure Blob, run:
   ```bash
-  gcloud storage ls gs://$(MEDIA_BUCKET)/
+  az storage blob list --container-name media --account-name $(AZURE_STORAGE_ACCOUNT) --auth-mode login
   ```
 
 ### 4. CPU throttling / resource exhaustion

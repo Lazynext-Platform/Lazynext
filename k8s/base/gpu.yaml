@@ -26,7 +26,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       nodeSelector:
-        cloud.google.com/gke-accelerator: nvidia-tesla-t4
+        accelerator: nvidia
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Equal"
@@ -144,7 +144,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 300
       nodeSelector:
-        cloud.google.com/gke-accelerator: nvidia-l4
+        accelerator: nvidia
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Equal"

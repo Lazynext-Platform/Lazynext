@@ -122,25 +122,23 @@ description: "Low priority — batch jobs, ML inference that can wait"
 #         app: lazynext-web
 ---
 # ── External Secrets Operator — SecretStore ──
-# Uses GCP Secret Manager as the external secrets backend
+# Uses Azure Key Vault as the external secrets backend
 # Requires: helm install external-secrets external-secrets/external-secrets
+# Also requires Azure Workload Identity setup on AKS
 apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
-  name: gcp-secret-manager
+  name: azure-key-vault
   namespace: lazynext
 spec:
   provider:
-    gcpsm:
-      projectID: vertexaiopencode
-      auth:
-        workloadIdentity:
-          clusterLocation: us-central1
-          clusterName: lazynext-cluster
-          serviceAccountRef:
-            name: lazynext-sa
+    azurekv:
+      vaultUrl: https://lazynext-kv-production.vault.azure.net/
+      authType: WorkloadIdentity
+      serviceAccountRef:
+        name: lazynext-sa
 ---
-# ── ExternalSecret — syncs GCP Secret Manager → K8s Secret ──
+# ── ExternalSecret — syncs Azure Key Vault → K8s Secret ──
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -149,7 +147,7 @@ metadata:
 spec:
   refreshInterval: "1h"
   secretStoreRef:
-    name: gcp-secret-manager
+    name: azure-key-vault
     kind: SecretStore
   target:
     name: lazynext-secrets
@@ -157,46 +155,46 @@ spec:
   data:
     - secretKey: DATABASE_URL
       remoteRef:
-        key: DATABASE_URL
+        key: DATABASE--URL
     - secretKey: BETTER_AUTH_SECRET
       remoteRef:
-        key: BETTER_AUTH_SECRET
+        key: better--auth--secret
     - secretKey: OPENAI_API_KEY
       remoteRef:
-        key: OPENAI_API_KEY
+        key: openai--api--key
     - secretKey: ANTHROPIC_API_KEY
       remoteRef:
-        key: ANTHROPIC_API_KEY
+        key: anthropic--api--key
     - secretKey: GEMINI_API_KEY
       remoteRef:
-        key: GEMINI_API_KEY
+        key: gemini--api--key
     - secretKey: REPLICATE_API_TOKEN
       remoteRef:
-        key: REPLICATE_API_TOKEN
+        key: replicate--api--token
     - secretKey: ELEVENLABS_API_KEY
       remoteRef:
-        key: ELEVENLABS_API_KEY
+        key: elevenlabs--api--key
     - secretKey: STRIPE_SECRET_KEY
       remoteRef:
-        key: STRIPE_SECRET_KEY
+        key: stripe--secret--key
     - secretKey: STRIPE_WEBHOOK_SECRET
       remoteRef:
-        key: STRIPE_WEBHOOK_SECRET
+        key: stripe--webhook--secret
     - secretKey: RESEND_API_KEY
       remoteRef:
-        key: RESEND_API_KEY
+        key: resend--api--key
     - secretKey: UPSTASH_REDIS_REST_TOKEN
       remoteRef:
-        key: UPSTASH_REDIS_REST_TOKEN
+        key: UPSTASH--REDIS--REST--TOKEN
     - secretKey: MARBLE_WORKSPACE_KEY
       remoteRef:
-        key: MARBLE_WORKSPACE_KEY
+        key: MARBLE--WORKSPACE--KEY
     - secretKey: FREESOUND_CLIENT_ID
       remoteRef:
-        key: FREESOUND_CLIENT_ID
+        key: FREESOUND--CLIENT--ID
     - secretKey: FREESOUND_API_KEY
       remoteRef:
-        key: FREESOUND_API_KEY
+        key: FREESOUND--API--KEY
     - secretKey: POSTHOG_KEY
       remoteRef:
-        key: POSTHOG_KEY
+        key: POSTHOG--KEY

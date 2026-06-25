@@ -60,12 +60,12 @@ This is the most severe infrastructure alert — database downtime affects ALL s
     "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle' AND age(now(), query_start) > interval '10 minutes';"
   ```
 
-### 4. Cloud SQL-specific (if using Cloud SQL instead)
-- **Symptom:** Instance not reachable via Cloud SQL proxy
+### 4. Azure PostgreSQL-specific (if using managed PostgreSQL)
+- **Symptom:** Instance not reachable via FQDN
 - **Fix:**
   ```bash
-  gcloud sql instances describe lazynext-postgres-prod
-  gcloud sql instances restart lazynext-postgres-prod
+  az postgres flexible-server show --name lazynext-postgres-prod --resource-group lazynext-rg-prod
+  az postgres flexible-server restart --name lazynext-postgres-prod --resource-group lazynext-rg-prod
   ```
 
 ### 5. Replication lag (production with read replicas)

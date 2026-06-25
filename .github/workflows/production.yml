@@ -7,7 +7,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  GCP_PROJECT_ID: vertexaiopencode
 
 permissions:
   contents: read
@@ -31,49 +30,59 @@ jobs:
       - name: Typecheck Web App
         run: cd apps/web && bun run typecheck || echo "::warning ::web typecheck failed"
 
-  deploy-k8s:
-    name: Multi-Cloud Deploy
+  deploy-azure:
+    name: Azure Deploy — Build, Push & Deploy
     needs: [node-checks]
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v7
 
-      - name: Authenticate GCP
-        uses: google-github-actions/auth@v2
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
         with:
-          workload_identity_provider: 'projects/769665933727/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-          service_account: 'github-actions-deploy@vertexaiopencode.iam.gserviceaccount.com'
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Build & Push All Images to GCR
+      - name: Login to Azure Container Registry
         run: |
-          gcloud auth configure-docker us-central1-docker.pkg.dev
+          az acr login --name lazynextacrproduction
 
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-web:latest -f apps/web/Dockerfile .
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-web:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-ai-agents:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-render-service:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-pre-processing:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-generative-studio:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-analytics-service:latest
-
-          docker build -t us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
-          docker push us-central1-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/lazynext/lazynext-mcp:latest
-
-      - name: Deploy to GKE
+      - name: Build & Push All Images to ACR
         run: |
-          gcloud container clusters get-credentials lazynext-gke-prod --region us-central1 || echo "::warning ::GKE cluster not reachable"
+          ACR="lazynextacrproduction.azurecr.io"
+
+          docker build -t $ACR/lazynext-web:latest -f apps/web/Dockerfile apps/web
+          docker push $ACR/lazynext-web:latest
+
+          docker build -t $ACR/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
+          docker push $ACR/lazynext-ai-agents:latest
+
+          docker build -t $ACR/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
+          docker push $ACR/lazynext-render-service:latest
+
+          docker build -t $ACR/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
+          docker push $ACR/lazynext-pre-processing:latest
+
+          docker build -t $ACR/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
+          docker push $ACR/lazynext-generative-studio:latest
+
+          docker build -t $ACR/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
+          docker push $ACR/lazynext-analytics-service:latest
+
+          docker build -t $ACR/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
+          docker push $ACR/lazynext-mcp:latest
+
+      - name: Deploy to AKS
+        run: |
+          az aks get-credentials --name lazynext-aks-production --resource-group lazynext-rg-production || echo "::warning ::AKS cluster not reachable"
           kubectl apply -k k8s/overlays/production || echo "::warning ::K8s apply failed"
+
+      - name: Force Redeploy Container Apps
+        run: |
+          az containerapp update \
+            --name lazynext-web-production \
+            --resource-group lazynext-rg-production \
+            --image lazynextacrproduction.azurecr.io/lazynext-web:latest || \
+            echo "::warning ::Container App web deploy failed"
