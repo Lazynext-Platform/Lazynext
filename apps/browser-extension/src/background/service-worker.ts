@@ -1,6 +1,14 @@
 // Service Worker (Background Script)
 
-const API_GATEWAY = "http://localhost:8005";
+let API_GATEWAY = "http://localhost:8005";
+
+// Restore the configured gateway URL from extension storage, falling
+// back to the localhost default for development.
+chrome.storage.local.get("apiGatewayUrl", (items) => {
+	if (items.apiGatewayUrl) {
+		API_GATEWAY = items.apiGatewayUrl;
+	}
+});
 
 chrome.runtime.onInstalled.addListener(() => {
 	console.log("Lazynext Extension Installed");

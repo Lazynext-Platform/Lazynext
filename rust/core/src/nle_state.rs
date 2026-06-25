@@ -388,15 +388,15 @@ impl NLEState {
             } => {
                 // Move the clip back to its original track
                 let mut clip_to_move: Option<Clip> = None;
-                if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *to_track) {
-                    if let Some(pos) = track.clips.iter().position(|c| c.id == *clip_id) {
-                        clip_to_move = Some(track.clips.remove(pos));
-                    }
+                if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *to_track)
+                    && let Some(pos) = track.clips.iter().position(|c| c.id == *clip_id)
+                {
+                    clip_to_move = Some(track.clips.remove(pos));
                 }
-                if let Some(clip) = clip_to_move {
-                    if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *from_track) {
-                        track.clips.push(clip);
-                    }
+                if let Some(clip) = clip_to_move
+                    && let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == *from_track)
+                {
+                    track.clips.push(clip);
                 }
             }
             CrdtOperation::ClipSplit {

@@ -36,7 +36,9 @@ export class EditorCore {
 	public async sendIntent(prompt: string) {
 		this.isAgentThinking = true;
 		try {
-			const res = await fetch("http://localhost:8002/orchestrate", {
+			const aiAgentsUrl =
+					process.env.NEXT_PUBLIC_AI_AGENTS_URL || "http://localhost:8002";
+				const res = await fetch(`${aiAgentsUrl}/orchestrate`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ prompt }),
