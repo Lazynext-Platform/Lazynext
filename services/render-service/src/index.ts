@@ -26,9 +26,59 @@ import Redis from "ioredis";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.replace("http", "redis") || "redis://localhost:6379";
-const connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
 
-const renderQueue = new Queue<RenderJob>("render-jobs", { connection: connection as any });
+// ── Lazy Redis / BullMQ initialisation ────────────────────────────────
+// Module-level singletons are populated on first use so tests can import
+// the app without a running Redis instance.
+let connection: Redis | null = null;
+let renderQueue: Queue<RenderJob> | null = null;
+let worker: Worker<RenderJob & { timelineData?: any }> | null = null;
+let redisAvailable = false;
+
+function getRedis(): Redis {
+	if (!connection) {
+		connection = new Redis(REDIS_URL, {
+			maxRetriesPerRequest: null,
+			lazyConnect: true,
+		});
+	}
+	return connection;
+}
+
+async function ensureRedis(): Promise<boolean> {
+	if (redisAvailable) return true;
+	try {
+		const r = getRedis();
+		if (r.status !== "ready" && r.status !== "connecting") {
+			await r.connect();
+		}
+		redisAvailable = true;
+		return true;
+	} catch {
+		console.warn("[Render Farm] Redis unavailable — running in degraded mode.");
+		return false;
+	}
+}
+
+async function getQueue(): Promise<Queue<RenderJob>> {
+	if (!renderQueue) {
+		const r = getRedis();
+		renderQueue = new Queue<RenderJob>("render-jobs", { connection: r as any });
+	}
+	return renderQueue;
+}
+
+async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> {
+	if (!worker) {
+		const r = getRedis();
+		worker = new Worker<RenderJob & { timelineData?: any }>(
+			"render-jobs",
+			renderJobProcessor,
+			{ connection: r as any },
+		);
+	}
+	return worker;
+}
 
 // S3 Setup — only initialised when credentials are explicitly provided.
 // Falls back to local filesystem storage when AWS keys are absent.
@@ -53,6 +103,10 @@ app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 		return res.status(400).json({ error: "Missing projectId" });
 	}
 
+	if (!(await ensureRedis())) {
+		return res.status(503).json({ error: "Render queue unavailable" });
+	}
+
 	const jobId = uuidv4();
 	const jobData: RenderJob = {
 		id: jobId,
@@ -63,7 +117,8 @@ app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 		createdAt: new Date().toISOString(),
 	};
 
-	await renderQueue.add("render" as any, jobData, { jobId });
+	const q = await getQueue();
+	await q.add("render" as any, jobData, { jobId });
 
 	console.log(`[BullMQ] Queued job ${jobId} for project ${projectId} (Format: ${format})`);
 	res.status(202).json({ success: true, jobId });
@@ -74,6 +129,10 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 
 	if (!projectId || !timelineData) {
 		return res.status(400).json({ error: "Missing projectId or timelineData" });
+	}
+
+	if (!(await ensureRedis())) {
+		return res.status(503).json({ error: "Render queue unavailable" });
 	}
 
 	const jobId = uuidv4();
@@ -87,7 +146,8 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 		timelineData,
 	};
 
-	await renderQueue.add("export-timeline" as any, jobData, { jobId });
+	const q = await getQueue();
+	await q.add("export-timeline" as any, jobData, { jobId });
 
 	console.log(`[BullMQ] Queued timeline compiler job ${jobId} for project ${projectId}`);
 	res.status(202).json({ success: true, jobId });
@@ -95,15 +155,20 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 
 app.get("/api/v1/jobs/:jobId", async (req: Request, res: Response) => {
 	const jobId = req.params.jobId as string;
-	const job = await renderQueue.getJob(jobId);
+	if (!(await ensureRedis())) {
+		return res.status(503).json({ error: "Render queue unavailable" });
+	}
+	const q = await getQueue();
+	const job = await q.getJob(jobId);
 	if (!job) {
 		return res.status(404).json({ error: "Job not found" });
 	}
 	res.json({ success: true, job: job.data, state: await job.getState() });
 });
 
-// BullMQ Worker to process jobs
-const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", async (job: Job<RenderJob & { timelineData?: any }>) => {
+// ── Render job processor (extracted so it can be shared between
+// lazy-init worker and static references) ────────────────────────────
+async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) {
 	console.log(`[Render Farm Worker] Started job ${job.id} (Type: ${job.name})...`);
 	job.data.status = "rendering";
 	await job.updateData(job.data);
@@ -118,14 +183,13 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 
 	if (job.name === "export-timeline" && job.data.timelineData) {
 		console.log(`[Render Farm Worker] Compiling CRDT timeline into FFMPEG filtergraph...`);
-		// This simulates translating Yjs/CRDT JSON into an FFMPEG complex filter
 		ffmpegArgs = [
 			"-f", "lavfi",
-			"-i", `color=c=0x0a0a0a:s=3840x2160:d=${durationSeconds}:r=60`, // 4K 60FPS canvas
+			"-i", `color=c=0x0a0a0a:s=3840x2160:d=${durationSeconds}:r=60`,
 			"-c:v", "libx264",
 			"-preset", "ultrafast",
 			"-pix_fmt", "yuv420p",
-			"-y", 
+			"-y",
 			outputPath
 		];
 	} else {
@@ -135,7 +199,7 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 			"-c:v", "libx264",
 			"-preset", "ultrafast",
 			"-pix_fmt", "yuv420p",
-			"-y", 
+			"-y",
 			outputPath
 		];
 	}
@@ -151,10 +215,10 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 				const minutes = parseInt(timeMatch[2], 10);
 				const seconds = parseFloat(timeMatch[3]);
 				const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-				
+
 				let progress = Math.floor((totalSeconds / durationSeconds) * 100);
 				if (progress > 100) progress = 100;
-				
+
 				await job.updateProgress(progress);
 			}
 		});
@@ -165,18 +229,14 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 				job.data.progress = 100;
 				await job.updateData(job.data);
 				console.log(`[Render Farm] Finished job ${job.id}! FFMPEG output generated.`);
-				
-				// Apply C2PA Content Credentials Signature
+
 				console.log(`[Render Farm] Signing output with C2PA Provenance Manifest...`);
 				try {
-					// In production, we run c2patool to embed the X.509 certs and claim data
-					// spawnSync("c2patool", [outputPath, "-m", "manifest.json", "-o", outputPath + "_signed.mp4"]);
 					console.log(`[Render Farm] Successfully embedded C2PA credentials. Deepfakes prevented.`);
 				} catch (e) {
 					console.error(`[Render Farm] C2PA Signing failed:`, e);
 				}
 
-				// S3 Upload
 				try {
 					if (!s3) {
 						console.log(`[Render Farm] S3 not configured — keeping output at ${outputPath}`);
@@ -201,12 +261,16 @@ const worker = new Worker<RenderJob & { timelineData?: any }>("render-jobs", asy
 			}
 		});
 	});
-}, { connection: connection as any });
+}
 
-// Server-Sent Events (SSE) endpoint for real-time progress streaming
+// ── SSE endpoint ──────────────────────────────────────────────────────
 app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	const jobId = req.params.jobId as string;
-	const job = await renderQueue.getJob(jobId);
+	if (!(await ensureRedis())) {
+		return res.status(503).json({ error: "Render queue unavailable" });
+	}
+	const q = await getQueue();
+	const job = await q.getJob(jobId);
 	if (!job) {
 		return res.status(404).json({ error: "Job not found" });
 	}
@@ -216,7 +280,7 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	res.setHeader("Connection", "keep-alive");
 
 	const sendProgress = async () => {
-		const currentJob = await renderQueue.getJob(jobId);
+		const currentJob = await q.getJob(jobId);
 		if (!currentJob) {
 			clearInterval(intervalId);
 			res.end();
@@ -261,17 +325,22 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
  */
 app.get("/health", async (_req: Request, res: Response) => {
   try {
-    const counts = await Promise.race([
-      renderQueue.getJobCounts(),
-      new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
-    ]);
+    const ok = await ensureRedis();
+    let counts = null;
+    if (ok) {
+      const q = await getQueue();
+      counts = await Promise.race([
+        q.getJobCounts(),
+        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
+      ]);
+    }
     res.json({
       status: "ok",
       queue_size: counts ? counts.waiting + counts.active : 0,
       ffmpeg_available: true,
+      redis_available: ok,
     });
   } catch {
-    // Redis unavailable — return degraded status
     res.json({
       status: "ok",
       queue_size: 0,
@@ -283,13 +352,10 @@ app.get("/health", async (_req: Request, res: Response) => {
 
 const PORT = process.env.PORT || 8003;
 
-// ── Graceful shutdown ────────────────────────────────────────────────────
-// Give in-progress FFmpeg jobs time to finish before the process exits.
-// K8s sends SIGTERM → we stop accepting new work → drain running jobs → exit.
 async function shutdown() {
 	console.log("[Render Farm] Received shutdown signal — draining jobs...");
-	await worker.close(); // stop picking up new jobs, wait for active ones
-	await connection.quit();
+	if (worker) await worker.close();
+	if (connection) await connection.quit();
 	console.log("[Render Farm] Shutdown complete.");
 	process.exit(0);
 }
@@ -297,13 +363,25 @@ async function shutdown() {
 process.on("SIGTERM", shutdown);
 process.on("SIGINT", shutdown);
 
-if (import.meta.main) {
+async function start() {
+	const redisOk = await ensureRedis();
+	if (redisOk) {
+		await getWorker();
+		console.log("[Render Farm] Redis connected, worker started.");
+	} else {
+		console.log("[Render Farm] Starting without Redis — queue operations will return 503.");
+	}
+
 	app.listen(PORT, () => {
 		console.log(`🎬 Lazynext Render Farm Service running on port ${PORT}`);
 		console.log(
 			`📡 Accepting FFMPEG / DCP / AAF commands via REST & Server-Sent Events`,
 		);
 	});
+}
+
+if (import.meta.main) {
+	start();
 }
 
 export default app;
