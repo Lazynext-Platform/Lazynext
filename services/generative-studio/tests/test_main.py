@@ -97,8 +97,9 @@ def test_nerf_extract_deprecated():
     response = client.post("/nerf-extract", json={
         "video_id": "vid_nerf_old"
     })
-    assert response.status_code == 200
+    # Endpoint was removed — returns 410 Gone per Sunset header
+    assert response.status_code == 410
     data = response.json()
-    assert data["success"] is True
-    assert "note" in data
+    assert data["success"] is False
+    assert "pre-processing" in data.get("error", "")
     assert response.headers.get("Deprecation") == "true"

@@ -1,2 +1,5 @@
 [test]
 preload = ["./setupTests.ts"]
+# Only discover tests in src/ to avoid picking up Playwright E2E specs
+# in tests/e2e/.  E2E tests run via `bun run test:e2e` (playwright test).
+root = "src"
