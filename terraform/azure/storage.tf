@@ -9,10 +9,9 @@ resource "azurerm_storage_account" "media" {
   account_kind             = "StorageV2"
   min_tls_version          = "TLS1_2"
 
-  # Block public access
+  # Block public access (management via shared key)
   public_network_access_enabled   = true
-  shared_access_key_enabled       = false
-  default_to_oauth_authentication = true
+  shared_access_key_enabled       = true
 
   blob_properties {
     versioning_enabled = var.environment == "production"

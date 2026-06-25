@@ -50,6 +50,11 @@ resource "azurerm_container_app_environment" "main" {
 
   infrastructure_subnet_id = azurerm_subnet.container_apps.id
 
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
+
   tags = {
     Environment = var.environment
     Project     = "lazynext"
@@ -68,6 +73,12 @@ resource "azurerm_container_app" "web" {
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
   }
 
   template {
@@ -128,6 +139,11 @@ resource "azurerm_container_app" "web" {
     value = var.better_auth_secret
   }
 
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
   lifecycle {
     ignore_changes = [
       template[0].container[0].image,
@@ -151,6 +167,12 @@ resource "azurerm_container_app" "ai_agents" {
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
   }
 
   template {
@@ -211,6 +233,11 @@ resource "azurerm_container_app" "ai_agents" {
     value = var.better_auth_secret
   }
 
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
   lifecycle {
     ignore_changes = [
       template[0].container[0].image,
@@ -234,6 +261,12 @@ resource "azurerm_container_app" "render_service" {
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
   }
 
   template {
@@ -277,6 +310,11 @@ resource "azurerm_container_app" "render_service" {
     }
   }
 
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
   lifecycle {
     ignore_changes = [
       template[0].container[0].image,
@@ -299,6 +337,12 @@ resource "azurerm_container_app" "pre_processing" {
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
   }
 
   template {
@@ -355,6 +399,11 @@ resource "azurerm_container_app" "pre_processing" {
     value = var.replicate_api_token
   }
 
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
   lifecycle {
     ignore_changes = [
       template[0].container[0].image,
@@ -378,6 +427,12 @@ resource "azurerm_container_app" "generative_studio" {
   identity {
     type         = "UserAssigned"
     identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
   }
 
   template {
@@ -432,6 +487,11 @@ resource "azurerm_container_app" "generative_studio" {
   secret {
     name  = "elevenlabs-api-key"
     value = var.elevenlabs_api_key
+  }
+
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
   }
 
   lifecycle {

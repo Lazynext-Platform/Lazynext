@@ -73,23 +73,8 @@ output "container_app_urls" {
   }
 }
 
-# ── AKS ─────────────────────────────────────────────────────────────────────
-
-output "aks_cluster_name" {
-  description = "AKS cluster name"
-  value       = azurerm_kubernetes_cluster.aks.name
-}
-
-output "aks_oidc_issuer_url" {
-  description = "AKS OIDC issuer URL (for Workload Identity)"
-  value       = azurerm_kubernetes_cluster.aks.oidc_issuer_url
-}
-
-output "aks_kubeconfig" {
-  description = "AKS kubeconfig (sensitive)"
-  value       = azurerm_kubernetes_cluster.aks.kube_config_raw
-  sensitive   = true
-}
+# AKS not available on Azure for Students — requires Premium tier.
+# To enable AKS for production: az account upgrade or use Pay-As-You-Go subscription.
 
 # ── Key Vault ───────────────────────────────────────────────────────────────
 
