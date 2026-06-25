@@ -38,7 +38,9 @@ describe("Render Service API", () => {
     const jobData = await jobRes.json();
     expect(jobData.success).toBe(true);
     expect(jobData.job.projectId).toBe("test_proj_1");
-    expect(jobData.job.status).toBe("queued");
+    // Worker runs in-process and may have already picked up the job.
+    // Accept either "queued" or "rendering" as valid initial states.
+    expect(["queued", "rendering"]).toContain(jobData.job.status);
   });
 
   test("POST /api/v1/jobs without projectId should fail", async () => {
