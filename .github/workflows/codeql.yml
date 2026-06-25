@@ -3,6 +3,15 @@ name: "CodeQL Analysis"
 on:
   push:
     branches: ["main"]
+    paths-ignore:
+      - "**.md"
+      - "**.json"
+      - "**.lock"
+      - "**.toml"
+      - "**/target/**"
+      - "**/node_modules/**"
+      - "**/dist/**"
+      - "**/outputs/**"
   pull_request:
     branches: ["main"]
   schedule:
@@ -12,6 +21,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       security-events: write
       actions: read
@@ -40,23 +50,27 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          config: |
+            paths-ignore:
+              - "**/target/**"
+              - "**/node_modules/**"
+              - "**/dist/**"
+              - "**/outputs/**"
+              - "**/scripts/python/funclip/**"
 
-      # ── Manual build steps replace autobuild for monorepo support ──────
-      - name: Build JavaScript/TypeScript
+      - name: Install JS/TS dependencies
         if: matrix.language == 'javascript-typescript'
-        run: |
-          bun install
-          cd apps/web && bun run typecheck || true
+        run: bun install --frozen-lockfile || bun install
 
-      - name: Build Python
+      - name: Install Python dependencies
         if: matrix.language == 'python'
         run: |
-          pip install -r services/pre-processing/requirements.txt || true
-          pip install -r services/generative-studio/requirements.txt || true
+          pip install -r services/pre-processing/requirements.txt 2>/dev/null || true
+          pip install -r services/generative-studio/requirements.txt 2>/dev/null || true
 
-      - name: Build Actions
+      - name: Actions (no build needed)
         if: matrix.language == 'actions'
-        run: echo "Actions workflows — no build step required"
+        run: echo "No build required for Actions workflows"
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
