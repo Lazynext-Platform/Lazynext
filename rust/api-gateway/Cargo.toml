@@ -17,5 +17,5 @@ sqlx = { version = "0.9", features = ["postgres", "runtime-tokio", "tls-rustls-r
 dotenvy = "0.15"
 uuid = { version = "1.8", features = ["serde", "v4"] }
 chrono = { version = "0.4", features = ["serde"] }
-jsonwebtoken = "9"
+jsonwebtoken = "10"
 base64 = "0.22"
