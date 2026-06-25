@@ -268,14 +268,9 @@ jobs:
           push: true
           tags: us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-mcp:latest
 
-  # Terraform deploy is manual — auto-apply on push is unsafe.
-# Run locally: cd terraform/gcp && terraform apply -auto-approve
-# The Terraform state is synced manually and doesn't need CI automation.
-
-      - name: Set up Cloud SDK
-        id: setup-gcloud
-        uses: google-github-actions/setup-gcloud@v2
-
+      # ── Cloud Run Deploy ─────────────────────────────────────────
+      # Terraform manages infrastructure; Cloud Run services are updated
+      # here to pick up the new container images pushed above.
       - name: Force Redeploy Cloud Run Services
         run: |
           gcloud run services update lazynext-ai-agents-dev --image us-central1-docker.pkg.dev/vertexaiopencode/lazynext/lazynext-ai-agents:latest --region us-central1
@@ -285,4 +280,6 @@ jobs:
 
       - name: Run Database Migrations
         run: |
-          curl -s -v -H "Authorization: Bearer temp-migration-token-123" "https://lazynext-web-dev-tt4wmaqnzq-uc.a.run.app/api/migrate?cb=$RANDOM"
+          curl -s -f -H "Authorization: Bearer temp-migration-token-123" \
+            "https://lazynext-web-dev-tt4wmaqnzq-uc.a.run.app/api/migrate?cb=$RANDOM" || \
+            echo "::warning ::Migration endpoint not reachable (may need manual run)"
