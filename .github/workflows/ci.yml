@@ -224,6 +224,14 @@ jobs:
           name: wasm-pkg
           path: rust/wasm/pkg/
 
+      - name: Build and Push Web App
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-web:latest
+
       - name: Build and Push AI Agents
         continue-on-error: true
         uses: docker/build-push-action@v7
@@ -283,6 +291,10 @@ jobs:
       # here to pick up the new container images pushed above.
       - name: Force Redeploy Container Apps
         run: |
+          az containerapp update \
+            --name lazynext-web-dev \
+            --resource-group lazynext-rg-dev \
+            --image lazynextacrdevlmblwn.azurecr.io/lazynext-web:latest
           az containerapp update \
             --name lazynext-ai-agents-dev \
             --resource-group lazynext-rg-dev \
