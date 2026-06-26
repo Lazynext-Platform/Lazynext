@@ -24,9 +24,9 @@ PATTERNS=(
   '\bNVENC\b'
   '\bPerceptionState\b'
   '\bONNX\b'
-  # Internal GCS buckets / model mirrors
-  'gs://livecore-ml-models'
-  'gs://adscene-'
+  # Internal Azure Blob / model mirrors
+  'https://lazynextmediadev.blob.core.windows.net/models'
+  'https://adscene-'
   'gs://livecore-'
   # Internal architecture phrasing
   'four-tier intelligence'

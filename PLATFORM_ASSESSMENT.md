@@ -147,7 +147,7 @@ The infrastructure (Docker, K8s, Terraform GCP, monitoring) is paradoxically the
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
 | 6.1 | **Replace hardcoded auth tokens with real JWT** — Three literal tokens (`admin-token-123`, `editor-token-456`, `viewer-token-789`) must be replaced with proper better-auth JWT HS256 validation. | Critical | Medium |
-| 6.2 | **Replace SQLite with PostgreSQL** — `DbStore` uses in-memory SQLite as fallback. Must connect to Cloud SQL / DATABASE_URL. | Critical | Medium |
+| 6.2 | **Replace SQLite with PostgreSQL** — `DbStore` uses in-memory SQLite as fallback. Must connect to Azure PostgreSQL / DATABASE_URL. | Critical | Medium |
 | 6.3 | **Implement Stripe webhook verification** — `handle_stripe_webhook` only prints event type. Must verify Stripe signatures with `STRIPE_WEBHOOK_SECRET`. | Critical | Medium |
 | 6.4 | **Fix hardcoded user ID** — `handle_get_projects` uses literal `"mock_user_id"` instead of decoded JWT subject. | Critical | Small |
 | 6.5 | **Add rate limiting middleware** — No rate limiter exists on any route. | High | Medium |
@@ -223,9 +223,9 @@ These underpin all 7 formats:
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| I1 | **Remove sensitive files from repo** — `env.yaml`, `web.json`, `db.json` contain real config data. `cloud-sql-proxy` is a 32MB binary. | Critical | Small |
+| I1 | **Remove sensitive files from repo** — `env.yaml`, `web.json`, `db.json` contain real config data. `cloud-sql-proxy` binary removed. | Critical | Small |
 | I2 | **Fix docker-compose env var gaps** — Stripe, Resend, Freesound, Marble vars missing from docker-compose.yml. | High | Small |
-| I3 | **Consolidate CI/CD** — 4 overlapping systems (GitHub Actions, GitLab CI, Jenkins, Cloud Build). Keep GitHub Actions + Cloud Build. | Medium | Medium |
+| I3 | **Consolidate CI/CD** — 4 overlapping systems (GitHub Actions, GitLab CI, Jenkins). Keep GitHub Actions. | Medium | Medium |
 | I4 | **Consolidate docker-compose files** — 7 files, many redundant. Reduce to 2 (main + dev). | Low | Small |
 | I5 | **Standardize env var naming** — `RENDER_SERVICE_URL` vs `NEXT_PUBLIC_RENDER_SERVICE_URL` inconsistency. | Low | Small |
 | I6 | **Add OpenTelemetry instrumentation** — No OTel in any service code despite having Tempo for tracing. | Medium | Large |
