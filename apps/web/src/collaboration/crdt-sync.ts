@@ -8,6 +8,8 @@
 
 import type { CrdtEngine } from "lazynext-wasm";
 import type { CollaborationSocket } from "./socket";
+import { hydrateScenesFromEntityGraph } from "./crdt-mapper";
+import { EditorCore } from "@/core";
 
 /**
  * Initialize CRDT sync between the collaboration socket and WASM engine.
@@ -60,11 +62,21 @@ export function broadcastOperation(
  * Reads the CRDT operation log and applies structural changes
  * to the React timeline state.
  */
-function syncTimelineFromEngine(_engine: CrdtEngine): void {
-	// In production, this reads the operation log from the CRDT engine
-	// and updates the React Zustand/Jotai timeline store.
-	// For now, the React state is driven by WASM via the useWasm() hook.
-	// The CRDT engine is the source of truth; React mirrors it.
+export function syncTimelineFromEngine(_engine: CrdtEngine): void {
+	try {
+		const entityGraph = _engine.getEntityGraph();
+		const hydratedScenes = hydrateScenesFromEntityGraph(entityGraph);
+		if (hydratedScenes.length > 0) {
+			const editor = EditorCore.getInstance();
+			const currentActive = editor.scenes.getActiveSceneOrNull();
+			editor.scenes.setScenes({ 
+				scenes: hydratedScenes,
+				activeSceneId: currentActive?.id
+			});
+		}
+	} catch (e) {
+		console.error("[CRDT-Sync] Failed to sync timeline from engine:", e);
+	}
 }
 
 /**

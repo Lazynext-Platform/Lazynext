@@ -18,5 +18,7 @@ pub enum GpuError {
     CreateSurface(#[from] wgpu::CreateSurfaceError),
     #[error("The output surface does not support the required texture format")]
     UnsupportedSurfaceFormat,
+    #[error("GPU device lost or readback failed: {0}")]
+    DeviceLost(String),
 }
 pub mod scopes;

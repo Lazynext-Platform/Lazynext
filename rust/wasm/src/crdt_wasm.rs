@@ -13,6 +13,8 @@ pub struct CrdtEngine {
     clock: VectorClock,
     peer_id: String,
     entity_graph: EntityGraph,
+    undo_stack: Vec<CrdtOperation>,
+    redo_stack: Vec<CrdtOperation>,
 }
 
 #[wasm_bindgen]
@@ -26,6 +28,8 @@ impl CrdtEngine {
             clock: VectorClock::new(),
             peer_id,
             entity_graph: EntityGraph::new(),
+            undo_stack: Vec::new(),
+            redo_stack: Vec::new(),
         }
     }
 
@@ -36,9 +40,37 @@ impl CrdtEngine {
             .map_err(|e| JsValue::from_str(&format!("Invalid operation: {}", e)))?;
 
         self.clock.increment(&self.peer_id.clone());
+        self.undo_stack.push(op.clone());
+        self.redo_stack.clear(); // Clear redo stack on new operation
         self.log.push(op);
 
         Ok(true)
+    }
+
+    /// Undo the last local operation
+    #[wasm_bindgen]
+    pub fn undo(&mut self) -> Result<bool, JsValue> {
+        if let Some(op) = self.undo_stack.pop() {
+            if let Some(inverse) = op.inverse() {
+                self.clock.increment(&self.peer_id.clone());
+                self.log.push(inverse.clone());
+                self.redo_stack.push(op); // Push original to redo stack
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    /// Redo the last undone operation
+    #[wasm_bindgen]
+    pub fn redo(&mut self) -> Result<bool, JsValue> {
+        if let Some(op) = self.redo_stack.pop() {
+            self.clock.increment(&self.peer_id.clone());
+            self.log.push(op.clone());
+            self.undo_stack.push(op);
+            return Ok(true);
+        }
+        Ok(false)
     }
 
     /// Get the full operation log as a JSON array.

@@ -1,5 +1,6 @@
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
+import { buildEntityInsertOp, buildPropertyUpdateOp } from "@/collaboration/crdt-builders";
 import type {
 	CreateTimelineElement,
 	SceneTracks,
@@ -110,7 +111,14 @@ export class InsertElementCommand extends Command {
 			}
 		}
 
-		editor.timeline.updateTracks(updatedTracks);
+		const elementOp = buildEntityInsertOp(newElement.id, newElement.type, newElement);
+		editor.engine.applyOperation(elementOp);
+
+		const activeScene = editor.scenes.getActiveSceneOrNull();
+		if (activeScene) {
+			const trackOp = buildPropertyUpdateOp(activeScene.id, "tracks", this.savedState, updatedTracks);
+			editor.engine.applyOperation(trackOp);
+		}
 
 		return {
 			selection: {
@@ -125,10 +133,7 @@ export class InsertElementCommand extends Command {
 	}
 
 	undo(): void {
-		if (this.savedState) {
-			const editor = EditorCore.getInstance();
-			editor.timeline.updateTracks(this.savedState);
-		}
+		// Undo is handled natively by the CRDT engine
 	}
 
 	getElementId(): string {

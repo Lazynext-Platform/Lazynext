@@ -259,7 +259,7 @@ export type ElementDragView =
 export interface DropTarget {
 	trackIndex: number;
 	isNewTrack: boolean;
-	insertPosition: "above" | "below" | null;
+	insertPosition?: "above" | "below";
 	xPosition: MediaTime;
 	targetElement: { elementId: string; trackId: string } | null;
 }

@@ -9,7 +9,7 @@ import type {
 	ScalarSegmentType,
 } from "@/animation/types";
 import type { ParamValue } from "@/params";
-import { mediaTime } from "@/wasm";
+import { mediaTime, evaluateScalarChannel } from "@/wasm";
 import {
 	getBezierPoint,
 	getDefaultLeftHandle,
@@ -256,102 +256,9 @@ export function getScalarChannelValueAtTime({
 		return fallbackValue;
 	}
 
-	const normalizedChannel = normalizeScalarChannel({ channel });
-	const firstKey = normalizedChannel.keys[0];
-	const lastKey = normalizedChannel.keys[normalizedChannel.keys.length - 1];
-	if (!firstKey || !lastKey) {
-		return fallbackValue;
-	}
-
-	if (time <= firstKey.time) {
-		if (time < firstKey.time) {
-			return extrapolateScalarEdge({
-				mode: normalizedChannel.extrapolation?.before ?? "hold",
-				edgeKey: firstKey,
-				neighborKey: normalizedChannel.keys[1],
-				time,
-			});
-		}
-
-		return firstKey.value;
-	}
-
-	if (time >= lastKey.time) {
-		if (time > lastKey.time) {
-			return extrapolateScalarEdge({
-				mode: normalizedChannel.extrapolation?.after ?? "hold",
-				edgeKey: lastKey,
-				neighborKey: normalizedChannel.keys[normalizedChannel.keys.length - 2],
-				time,
-			});
-		}
-
-		return lastKey.value;
-	}
-
-	for (
-		let keyIndex = 0;
-		keyIndex < normalizedChannel.keys.length - 1;
-		keyIndex++
-	) {
-		const leftKey = normalizedChannel.keys[keyIndex];
-		const rightKey = normalizedChannel.keys[keyIndex + 1];
-		if (time === rightKey.time) {
-			return rightKey.value;
-		}
-
-		if (
-			!isWithinTimePair({
-				time,
-				leftTime: leftKey.time,
-				rightTime: rightKey.time,
-			})
-		) {
-			continue;
-		}
-
-		if (leftKey.segmentToNext === "step") {
-			return leftKey.value;
-		}
-
-		const span = rightKey.time - leftKey.time;
-		if (span === 0) {
-			return rightKey.value;
-		}
-
-		const progress = clamp({
-			value: (time - leftKey.time) / span,
-			min: 0,
-			max: 1,
-		});
-		if (leftKey.segmentToNext === "linear") {
-			return lerpNumber({
-				leftValue: leftKey.value,
-				rightValue: rightKey.value,
-				progress,
-			});
-		}
-
-		const curveProgress = solveBezierProgressForTime({
-			time,
-			leftKey,
-			rightKey,
-		});
-		const rightHandle =
-			leftKey.rightHandle ?? getDefaultRightHandle({ leftKey, rightKey });
-		const leftHandle =
-			rightKey.leftHandle ?? getDefaultLeftHandle({ leftKey, rightKey });
-		return getBezierPoint({
-			progress: curveProgress,
-			p0: leftKey.value,
-			p1: leftKey.value + rightHandle.dv,
-			p2: rightKey.value + leftHandle.dv,
-			p3: rightKey.value,
-		});
-	}
-
-	return lastKey.value;
+	return evaluateScalarChannel(channel, time, fallbackValue);
 }
+
 
 export function getDiscreteChannelValueAtTime({
 	channel,

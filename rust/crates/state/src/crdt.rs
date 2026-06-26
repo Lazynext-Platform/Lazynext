@@ -163,19 +163,29 @@ impl CRDTTimeline {
             }
             CrdtOperation::PropertyUpdate {
                 target_id,
-                property,
-                value: _,
+                property: _,
+                value,
+                old_value: _,
             } => {
-                // For now, property updates only affect is_disabled.
-                // Extended in Phase 3 with full property channels.
-                if property == "is_disabled"
-                    && let Some(clip) = self.clips.get_mut(target_id)
-                {
-                    clip.is_disabled
-                        .merge(&LWWRegister::new(true, peer_id.to_string()));
-                    return true;
+                if let Ok(value_str) = serde_json::to_string(value) {
+                    self.entity_graph.set_entity(target_id, &value_str);
                 }
-                false
+                true
+            }
+            CrdtOperation::EntityInsert {
+                entity_id,
+                entity_type: _,
+                data,
+            } => {
+                if let Ok(value_str) = serde_json::to_string(data) {
+                    self.entity_graph.set_entity(entity_id, &value_str);
+                }
+                true
+            }
+            CrdtOperation::EntityDelete { entity_id } => {
+                self.entity_graph.entities.remove(entity_id);
+                tombstones.mark(entity_id.clone(), clock.clone(), peer_id.to_string());
+                true
             }
             // Structural operations — handled by the caller (NLEState)
             CrdtOperation::ClipMove { .. }

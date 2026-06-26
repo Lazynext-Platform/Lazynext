@@ -308,16 +308,48 @@ async fn handle_admin_dashboard(
 
 // ── Stripe Webhook ────────────────────────────────────────────────────────
 
+/// Maximum age (in seconds) of a webhook timestamp before we reject it.
+/// Stripe recommends a tolerance of ~5 minutes.
+const STRIPE_WEBHOOK_TOLERANCE_SECS: i64 = 300;
+
 async fn handle_stripe_webhook(
     State(state): State<AppState>,
-    _headers: HeaderMap,
-    Json(payload): Json<Value>,
+    headers: HeaderMap,
+    body: axum::body::Bytes,
 ) -> Json<Value> {
-    let event_type = payload["type"].as_str().unwrap_or("unknown");
-    info!(%event_type, "Received Stripe webhook");
+    // ── 1. Verify Stripe signature ──────────────────────────────────────
+    let webhook_secret = match std::env::var("STRIPE_WEBHOOK_SECRET") {
+        Ok(s) if !s.is_empty() => s,
+        _ => {
+            tracing::error!("STRIPE_WEBHOOK_SECRET is not configured — rejecting webhook");
+            return Json(json!({ "error": "webhook secret not configured" }));
+        }
+    };
 
-    // TODO: Verify Stripe webhook signature using STRIPE_WEBHOOK_SECRET.
-    // let signature = headers.get("stripe-signature")...;
+    let sig_header = match headers.get("stripe-signature").and_then(|v| v.to_str().ok()) {
+        Some(h) => h.to_string(),
+        None => {
+            tracing::warn!("Missing Stripe-Signature header");
+            return Json(json!({ "error": "missing signature" }));
+        }
+    };
+
+    if let Err(e) = verify_stripe_signature(&sig_header, &body, &webhook_secret) {
+        tracing::warn!(%e, "Stripe webhook signature verification failed");
+        return Json(json!({ "error": format!("signature verification failed: {e}") }));
+    }
+
+    // ── 2. Parse and handle the event ───────────────────────────────────
+    let payload: Value = match serde_json::from_slice(&body) {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::error!(?e, "Failed to parse Stripe webhook JSON");
+            return Json(json!({ "error": "invalid JSON" }));
+        }
+    };
+
+    let event_type = payload["type"].as_str().unwrap_or("unknown");
+    info!(%event_type, "Received verified Stripe webhook");
 
     match event_type {
         "customer.subscription.updated" | "customer.subscription.created" => {
@@ -380,6 +412,71 @@ async fn handle_stripe_webhook(
     }
 
     Json(json!({ "received": true }))
+}
+
+/// Verifies a Stripe webhook signature (v1) using HMAC-SHA256.
+///
+/// The `Stripe-Signature` header has the format:
+///   `t=<timestamp>,v1=<hex_signature>[,v0=...]`
+///
+/// The signed payload is `"<timestamp>.<raw_body>"`.
+fn verify_stripe_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<(), String> {
+    use hmac::{Hmac, Mac, digest::KeyInit};
+    use sha2::Sha256;
+
+    type HmacSha256 = Hmac<Sha256>;
+
+    let mut timestamp: Option<&str> = None;
+    let mut v1_signatures: Vec<&str> = Vec::new();
+
+    for part in sig_header.split(',') {
+        let part = part.trim();
+        if let Some(ts) = part.strip_prefix("t=") {
+            timestamp = Some(ts);
+        } else if let Some(sig) = part.strip_prefix("v1=") {
+            v1_signatures.push(sig);
+        }
+    }
+
+    let ts = timestamp.ok_or_else(|| "no timestamp in Stripe-Signature".to_string())?;
+    if v1_signatures.is_empty() {
+        return Err("no v1 signature in Stripe-Signature".to_string());
+    }
+
+    // Check timestamp freshness to prevent replay attacks
+    let ts_num: i64 = ts
+        .parse()
+        .map_err(|_| "invalid timestamp in Stripe-Signature".to_string())?;
+    let now = chrono::Utc::now().timestamp();
+    if (now - ts_num).abs() > STRIPE_WEBHOOK_TOLERANCE_SECS {
+        return Err(format!(
+            "webhook timestamp too old ({ts_num}), current time is {now}"
+        ));
+    }
+
+    // Compute expected signature: HMAC-SHA256(secret, "timestamp.body")
+    let mut mac =
+        HmacSha256::new_from_slice(secret.as_bytes()).map_err(|e| format!("HMAC init: {e}"))?;
+    mac.update(ts.as_bytes());
+    mac.update(b".");
+    mac.update(body);
+    let expected = hex::encode(mac.finalize().into_bytes());
+
+    // Constant-time comparison against all provided v1 signatures
+    if v1_signatures.iter().any(|sig| {
+        // Use constant-time comparison to prevent timing attacks
+        sig.len() == expected.len()
+            && sig
+                .as_bytes()
+                .iter()
+                .zip(expected.as_bytes())
+                .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+                == 0
+    }) {
+        Ok(())
+    } else {
+        Err("signature mismatch".to_string())
+    }
 }
 
 async fn find_user_by_stripe_customer(

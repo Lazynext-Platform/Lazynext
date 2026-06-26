@@ -106,6 +106,7 @@ async fn main() {
                             prompt,
                             require_plan_approval,
                             source_files: vec![],
+                            llm_provider: None,
                         };
 
                         match editor.process_intent_with_llm(&mut nle, &intent).await {

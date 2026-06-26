@@ -371,6 +371,106 @@ impl GpuContext {
         self.gl_canvas.as_ref()
     }
 
+    /// Read the contents of a GPU texture back to CPU memory as RGBA bytes.
+    ///
+    /// This performs `copy_texture_to_buffer` + async `map_async` readback.
+    /// Used by the headless renderer and export pipeline to get pixel data
+    /// out of the GPU.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn read_texture_to_cpu(
+        &self,
+        texture: &wgpu::Texture,
+        width: u32,
+        height: u32,
+    ) -> Result<Vec<u8>, GpuError> {
+        let bytes_per_pixel = 4u32; // RGBA8 or BGRA8
+        let unpadded_bytes_per_row = width * bytes_per_pixel;
+        // wgpu requires rows to be aligned to COPY_BYTES_PER_ROW_ALIGNMENT (256)
+        let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
+        let padded_bytes_per_row = (unpadded_bytes_per_row + align - 1) / align * align;
+        let buffer_size = (padded_bytes_per_row * height) as u64;
+
+        let staging_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("texture-readback-buffer"),
+            size: buffer_size,
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("texture-readback-encoder"),
+            });
+
+        encoder.copy_texture_to_buffer(
+            wgpu::TexelCopyTextureInfo {
+                texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            wgpu::TexelCopyBufferInfo {
+                buffer: &staging_buffer,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(padded_bytes_per_row),
+                    rows_per_image: Some(height),
+                },
+            },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+        );
+
+        let submission_idx = self.queue.submit(std::iter::once(encoder.finish()));
+
+        // Map the buffer asynchronously
+        let buffer_slice = staging_buffer.slice(..);
+        let (tx, rx) = std::sync::mpsc::channel();
+        buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
+            let _ = tx.send(result);
+        });
+        // Poll the device until the buffer is mapped. In wgpu 29.x,
+        // `poll` takes `PollType` instead of the removed `Maintain`.
+        let _ = self.device.poll(wgpu::PollType::Wait {
+            submission_index: Some(submission_idx),
+            timeout: Some(std::time::Duration::from_secs(5)),
+        });
+
+        rx.recv()
+            .map_err(|_| GpuError::DeviceLost("readback channel closed".to_string()))?
+            .map_err(|e| GpuError::DeviceLost(format!("buffer map failed: {e}")))?;
+
+        // Copy the data, stripping row padding
+        let mapped = buffer_slice.get_mapped_range();
+        let mut result = Vec::with_capacity((unpadded_bytes_per_row * height) as usize);
+        for row in 0..height {
+            let start = (row * padded_bytes_per_row) as usize;
+            let end = start + unpadded_bytes_per_row as usize;
+            let row_data = &mapped[start..end];
+
+            // Convert BGRA → RGBA if needed
+            if self.texture_format == wgpu::TextureFormat::Bgra8Unorm {
+                for pixel in row_data.chunks_exact(4) {
+                    result.push(pixel[2]); // R
+                    result.push(pixel[1]); // G
+                    result.push(pixel[0]); // B
+                    result.push(pixel[3]); // A
+                }
+            } else {
+                result.extend_from_slice(row_data);
+            }
+        }
+
+        drop(mapped);
+        staging_buffer.unmap();
+
+        Ok(result)
+    }
+
     pub fn render_texture_to_surface(
         &self,
         texture: &wgpu::Texture,

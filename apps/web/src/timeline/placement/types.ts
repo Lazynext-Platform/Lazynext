@@ -35,6 +35,6 @@ export type PlacementResult =
 	| {
 			kind: "newTrack";
 			insertIndex: number;
-			insertPosition: "above" | "below" | null;
+			insertPosition?: "above" | "below";
 			trackType: TrackType;
 	  };

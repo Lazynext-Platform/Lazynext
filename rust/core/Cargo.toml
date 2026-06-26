@@ -11,6 +11,8 @@ lazynext_plugin_api = { path = "../plugin-api" }
 lazynext_provenance = { path = "../provenance" }
 state = { path = "../crates/state" }
 tokio = { version = "1.0", features = ["sync", "time"] }
+gpu = { path = "../crates/gpu" }
+compositor = { path = "../crates/compositor" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 reqwest = { version = "0.13", features = ["json"] }

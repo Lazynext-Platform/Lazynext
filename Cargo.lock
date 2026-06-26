@@ -2219,6 +2219,7 @@ dependencies = [
  "getrandom 0.4.3",
  "gpu",
  "js-sys",
+ "lazynext_core",
  "masks",
  "neural_engine",
  "num-traits",
@@ -2242,12 +2243,15 @@ dependencies = [
  "base64",
  "chrono",
  "dotenvy",
+ "hex",
+ "hmac",
  "jsonwebtoken",
  "lazynext_core",
  "neural_engine",
  "reqwest",
  "serde",
  "serde_json",
+ "sha2 0.11.0",
  "sqlx",
  "tokio",
  "tracing",
@@ -2269,6 +2273,8 @@ dependencies = [
 name = "lazynext_core"
 version = "0.1.0"
 dependencies = [
+ "compositor",
+ "gpu",
  "lazynext_plugin_api",
  "lazynext_provenance",
  "reqwest",

@@ -11,16 +11,12 @@ import {
 	getBookmarkAtTime,
 	getFrameTime,
 	isBookmarkAtTime,
+	toggleBookmarkInArray,
+	removeBookmarkFromArray,
+	updateBookmarkInArray,
+	moveBookmarkInArray,
 } from "@/timeline/bookmarks/index";
-import {
-	CreateSceneCommand,
-	DeleteSceneCommand,
-	MoveBookmarkCommand,
-	RemoveBookmarkCommand,
-	RenameSceneCommand,
-	ToggleBookmarkCommand,
-	UpdateBookmarkCommand,
-} from "@/commands/scene";
+import { buildEntityInsertOp, buildEntityDeleteOp, buildPropertyUpdateOp } from "@/collaboration/crdt-builders";
 import type { MediaTime } from "@/wasm";
 
 export class ScenesManager {
@@ -41,9 +37,20 @@ export class ScenesManager {
 			throw new Error("No active project");
 		}
 
-		const command = new CreateSceneCommand({ name, isMain });
-		this.editor.command.execute({ command });
-		return command.getSceneId();
+		const newSceneId = crypto.randomUUID();
+		const scene: TScene = {
+			id: newSceneId,
+			name,
+			isMain,
+			createdAt: new Date() as any,
+			updatedAt: new Date() as any,
+			tracks: { overlay: [], main: null as any, audio: [] },
+			bookmarks: [],
+		};
+
+		const op = buildEntityInsertOp(newSceneId, "scene", scene);
+		this.editor.engine.applyOperation(op);
+		return newSceneId;
 	}
 
 	async deleteScene({ sceneId }: { sceneId: string }): Promise<void> {
@@ -62,8 +69,8 @@ export class ScenesManager {
 			throw new Error("No active project");
 		}
 
-		const command = new DeleteSceneCommand(sceneId);
-		this.editor.command.execute({ command });
+		const op = buildEntityDeleteOp(sceneId, "scene", sceneToDelete);
+		this.editor.engine.applyOperation(op);
 	}
 
 	async renameScene({
@@ -77,11 +84,8 @@ export class ScenesManager {
 			throw new Error("No active project");
 		}
 
-		const command = new RenameSceneCommand({
-			sceneId,
-			newName: name,
-		});
-		this.editor.command.execute({ command });
+		const op = buildPropertyUpdateOp(sceneId, "name", undefined, name);
+		this.editor.engine.applyOperation(op);
 	}
 
 	async switchToScene({ sceneId }: { sceneId: string }): Promise<void> {
@@ -111,8 +115,22 @@ export class ScenesManager {
 	}
 
 	async toggleBookmark({ time }: { time: MediaTime }): Promise<void> {
-		const command = new ToggleBookmarkCommand(time);
-		this.editor.command.execute({ command });
+		const activeScene = this.getActiveSceneOrNull();
+		const activeProject = this.editor.project.getActive();
+		if (!activeScene || !activeProject) return;
+
+		const frameTime = getFrameTime({
+			time,
+			fps: activeProject.settings.fps,
+		});
+
+		const updatedBookmarks = toggleBookmarkInArray({
+			bookmarks: activeScene.bookmarks,
+			frameTime,
+		});
+
+		const op = buildPropertyUpdateOp(activeScene.id, "bookmarks", activeScene.bookmarks, updatedBookmarks);
+		this.editor.engine.applyOperation(op);
 	}
 
 	isBookmarked({ time }: { time: MediaTime }): boolean {
@@ -130,8 +148,22 @@ export class ScenesManager {
 	}
 
 	async removeBookmark({ time }: { time: MediaTime }): Promise<void> {
-		const command = new RemoveBookmarkCommand(time);
-		this.editor.command.execute({ command });
+		const activeScene = this.getActiveSceneOrNull();
+		const activeProject = this.editor.project.getActive();
+		if (!activeScene || !activeProject) return;
+
+		const frameTime = getFrameTime({
+			time,
+			fps: activeProject.settings.fps,
+		});
+
+		const updatedBookmarks = removeBookmarkFromArray({
+			bookmarks: activeScene.bookmarks,
+			frameTime,
+		});
+
+		const op = buildPropertyUpdateOp(activeScene.id, "bookmarks", activeScene.bookmarks, updatedBookmarks);
+		this.editor.engine.applyOperation(op);
 	}
 
 	async updateBookmark({
@@ -141,8 +173,23 @@ export class ScenesManager {
 		time: MediaTime;
 		updates: Partial<Omit<Bookmark, "time">>;
 	}): Promise<void> {
-		const command = new UpdateBookmarkCommand({ time, updates });
-		this.editor.command.execute({ command });
+		const activeScene = this.getActiveSceneOrNull();
+		const activeProject = this.editor.project.getActive();
+		if (!activeScene || !activeProject) return;
+
+		const frameTime = getFrameTime({
+			time,
+			fps: activeProject.settings.fps,
+		});
+
+		const updatedBookmarks = updateBookmarkInArray({
+			bookmarks: activeScene.bookmarks,
+			frameTime,
+			updates,
+		});
+
+		const op = buildPropertyUpdateOp(activeScene.id, "bookmarks", activeScene.bookmarks, updatedBookmarks);
+		this.editor.engine.applyOperation(op);
 	}
 
 	async moveBookmark({
@@ -152,8 +199,28 @@ export class ScenesManager {
 		fromTime: MediaTime;
 		toTime: MediaTime;
 	}): Promise<void> {
-		const command = new MoveBookmarkCommand({ fromTime, toTime });
-		this.editor.command.execute({ command });
+		const activeScene = this.getActiveSceneOrNull();
+		const activeProject = this.editor.project.getActive();
+		if (!activeScene || !activeProject) return;
+
+		const fromFrameTime = getFrameTime({
+			time: fromTime,
+			fps: activeProject.settings.fps,
+		});
+
+		const toFrameTime = getFrameTime({
+			time: toTime,
+			fps: activeProject.settings.fps,
+		});
+
+		const updatedBookmarks = moveBookmarkInArray({
+			bookmarks: activeScene.bookmarks,
+			fromTime: fromFrameTime,
+			toTime: toFrameTime,
+		});
+
+		const op = buildPropertyUpdateOp(activeScene.id, "bookmarks", activeScene.bookmarks, updatedBookmarks);
+		this.editor.engine.applyOperation(op);
 	}
 
 	getBookmarkAtTime({ time }: { time: MediaTime }) {
@@ -296,29 +363,7 @@ export class ScenesManager {
 	updateSceneTracks({ tracks }: { tracks: SceneTracks }): void {
 		if (!this.active) return;
 
-		const updatedScene: TScene = {
-			...this.active,
-			tracks,
-			updatedAt: new Date(),
-		};
-
-		this.list = this.list.map((s) =>
-			s.id === this.active?.id ? updatedScene : s,
-		);
-		this.active = updatedScene;
-		this.notify();
-
-		const activeProject = this.editor.project.getActive();
-		if (activeProject) {
-			const updatedProject = {
-				...activeProject,
-				scenes: this.list,
-				metadata: {
-					...activeProject.metadata,
-					updatedAt: new Date(),
-				},
-			};
-			this.editor.project.setActiveProject({ project: updatedProject });
-		}
+		const op = buildPropertyUpdateOp(this.active.id, "tracks", this.active.tracks, tracks);
+		this.editor.engine.applyOperation(op);
 	}
 }

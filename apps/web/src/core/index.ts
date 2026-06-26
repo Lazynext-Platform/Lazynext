@@ -4,6 +4,7 @@ import { ScenesManager } from "./managers/scenes-manager";
 import { ProjectManager } from "./managers/project-manager";
 import { MediaManager } from "./managers/media-manager";
 import { RendererManager } from "./managers/renderer-manager";
+import { EngineManager } from "./managers/engine-manager";
 import { CommandManager } from "./managers/commands";
 import { SaveManager } from "./managers/save-manager";
 import { AudioManager } from "./managers/audio-manager";
@@ -18,6 +19,7 @@ export class EditorCore {
 	private static instance: EditorCore | null = null;
 	public readonly timeline: TimelineManager;
 	public readonly command: CommandManager;
+	public readonly engine: EngineManager;
 	public readonly playback: PlaybackManager;
 	public readonly scenes: ScenesManager;
 	public readonly project: ProjectManager;
@@ -68,6 +70,7 @@ export class EditorCore {
 		registerDefaultEffects();
 		registerDefaultMasks();
 		this.command = new CommandManager(this);
+		this.engine = new EngineManager(this);
 		this.timeline = new TimelineManager(this);
 		this.playback = new PlaybackManager(this);
 		this.scenes = new ScenesManager(this);
@@ -100,6 +103,8 @@ export class EditorCore {
 				this.timeline.updateTracks(prunedTracks);
 			}
 		});
+		// Engine subscriptions can go here if needed.
+		// For now, syncTimelineFromEngine calls editor.scenes.setScenes directly.
 		this.save.start();
 	}
 

@@ -263,7 +263,7 @@ async def overdub_audio(req: OverdubRequest):
                 }
                 voice_id = "cloned_user_voice"
                 payload = {
-                    "text": req.text_to_speak,
+                    "text": req.text,
                     "model_id": "eleven_multilingual_v2",
                     "voice_settings": {
                         "stability": 0.7,

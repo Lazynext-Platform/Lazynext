@@ -25,11 +25,11 @@ COPY --from=builder /app/src ./src
 USER nodejs
 
 ENV NODE_ENV=production
-ENV PORT=8005
+ENV PORT=8006
 
-EXPOSE 8005
+EXPOSE 8006
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8005/health || exit 1
+    CMD wget -qO- http://localhost:8006/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

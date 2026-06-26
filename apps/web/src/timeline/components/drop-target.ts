@@ -94,7 +94,7 @@ function fallbackNewTrackDropTarget({
 	return {
 		trackIndex: 0,
 		isNewTrack: true,
-		insertPosition: null,
+		insertPosition: undefined,
 		xPosition,
 		targetElement: EMPTY_TARGET_ELEMENT,
 	};
@@ -211,7 +211,7 @@ export function computeDropTarget({
 			return {
 				trackIndex,
 				isNewTrack: false,
-				insertPosition: null,
+				insertPosition: undefined,
 				xPosition,
 				targetElement,
 			};
@@ -245,7 +245,7 @@ export function computeDropTarget({
 		return {
 			trackIndex: placementResult.trackIndex,
 			isNewTrack: false,
-			insertPosition: null,
+			insertPosition: undefined,
 			xPosition: adjustedXPosition,
 			targetElement: EMPTY_TARGET_ELEMENT,
 		};

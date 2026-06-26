@@ -39,14 +39,7 @@ async fn main() {
 
     println!("🚀 Lazynext Headless CLI v{}", env!("CARGO_PKG_VERSION"));
 
-    // Set LLM provider from CLI arg before any async work begins.
-    // SAFETY: set_var is unsafe in Rust 2024 because concurrent access
-    // to the environment is UB. We call it at the top of main(), before
-    // any other threads are spawned by the tokio runtime or otherwise,
-    // so there is no concurrent access.
-    unsafe {
-        std::env::set_var("LLM_PROVIDER", &args.llm_provider);
-    }
+    // We pass the LLM provider explicitly to the intent instead of using set_var.
 
     if let Some(prompt) = args.prompt {
         println!("🤖 AI Intent: {}", prompt);
@@ -56,6 +49,7 @@ async fn main() {
             prompt,
             require_plan_approval: true,
             source_files: vec![],
+            llm_provider: Some(args.llm_provider),
         };
 
         let mut engine = NLEState::new(

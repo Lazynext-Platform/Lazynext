@@ -376,7 +376,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "graphic",
 			insertIndex: 0,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 	});
 
@@ -517,7 +517,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "text",
 			insertIndex: 0,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 	});
 
@@ -538,7 +538,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "audio",
 			insertIndex: 1,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 
 		expect(
@@ -552,7 +552,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "audio",
 			insertIndex: 2,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 	});
 
@@ -584,7 +584,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "audio",
 			insertIndex: 1,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 	});
 
@@ -621,7 +621,7 @@ describe("resolveTrackPlacement", () => {
 			kind: "newTrack",
 			trackType: "audio",
 			insertIndex: 2,
-			insertPosition: null,
+			insertPosition: undefined,
 		});
 	});
 

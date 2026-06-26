@@ -7,23 +7,38 @@ use tokio::sync::Mutex;
 /// or a WebGL/WGPU context for hardware-accelerated frame rendering.
 pub struct CoreEngine {
     project: Arc<Mutex<NLEState>>,
+    gpu_ctx: Arc<gpu::GpuContext>,
+    compositor: Arc<tokio::sync::Mutex<compositor::Compositor>>,
     is_hardware_accelerated: bool,
 }
 
 impl CoreEngine {
-    pub fn new(project: Arc<Mutex<NLEState>>) -> Self {
+    pub async fn init(project: Arc<Mutex<NLEState>>) -> Result<Self, String> {
+        println!("[CoreEngine] Initializing GPU Context...");
+        
+        // GpuContext::new() returns Result<GpuContext, GpuError>
+        let gpu_ctx = gpu::GpuContext::new()
+            .await
+            .map_err(|e| format!("Failed to initialize GPU context: {}", e))?;
+            
+        let gpu_ctx = Arc::new(gpu_ctx);
+        let comp = compositor::Compositor::new(&gpu_ctx);
+        
         println!("[CoreEngine] Initialized. Awaiting frame commands.");
-        Self {
+        Ok(Self {
             project,
+            gpu_ctx,
+            compositor: Arc::new(tokio::sync::Mutex::new(comp)),
             is_hardware_accelerated: true,
-        }
+        })
     }
 
     /// Renders a single frame from the CRDT timeline state via the GPU compositor.
     ///
-    /// When the compositor is available (desktop / WASM-with-WebGPU), this
-    /// delegates to `compositor::Compositor::render_frame`.  Falls back to a
-    /// software mock when no GPU context is active (e.g. headless CLI).
+    /// Builds a `FrameDescriptor` from the current timeline state by mapping
+    /// clips that are visible at the given frame index to `LayerDescriptor`
+    /// items, then delegates to the compositor for GPU rendering. The resulting
+    /// texture is read back to CPU memory as RGBA bytes.
     pub async fn render_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
         let state = self.project.lock().await;
 
@@ -42,28 +57,81 @@ impl CoreEngine {
             ));
         }
 
-        // ── Compositor path (real GPU rendering) ──────────────────────────
-        //
-        // TODO Phase 4: wire the lazynext_compositor crate.
-        //
-        //   let compositor = compositor::Compositor::get_or_init(&gpu_ctx)?;
-        //   let frame_desc = build_frame_descriptor(&state, frame_idx)?;
-        //   let rgba = compositor.render_to_buffer(&frame_desc)?;
-        //   return Ok(rgba);
-        //
-        // For now, return a mock buffer indicating the stub status.
+        let pd = state.get_project_data();
+        let width = pd.width;
+        let height = pd.height;
 
-        println!(
-            "[CoreEngine] Rendering frame {} (mock compositor path)",
-            frame_idx
-        );
+        // ── Build FrameDescriptor from timeline state ─────────────────────
+        let mut items: Vec<compositor::FrameItemDescriptor> = Vec::new();
 
-        let width = state.get_project_data().width;
-        let height = state.get_project_data().height;
-        let mut mock_buffer = vec![0u8; (width * height * 4) as usize];
-        mock_buffer[0] = 255; // Red pixel top-left — identifies mock frames
+        for track in &pd.tracks {
+            for clip in &track.clips {
+                // Only include clips visible at this frame
+                if frame_idx >= clip.start && frame_idx < clip.end {
+                    // Evaluate animated properties at this frame
+                    let opacity = clip.get_animated_value("opacity", frame_idx, 1.0) as f32;
+                    let center_x = clip.get_animated_value("position_x", frame_idx, width as f64 / 2.0) as f32;
+                    let center_y = clip.get_animated_value("position_y", frame_idx, height as f64 / 2.0) as f32;
+                    let scale_x = clip.get_animated_value("scale_x", frame_idx, 1.0) as f32;
+                    let scale_y = clip.get_animated_value("scale_y", frame_idx, 1.0) as f32;
+                    let rotation = clip.get_animated_value("rotation", frame_idx, 0.0) as f32;
 
-        Ok(mock_buffer)
+                    let layer = compositor::LayerDescriptor {
+                        texture_id: clip.id.clone(),
+                        transform: compositor::QuadTransformDescriptor {
+                            center_x,
+                            center_y,
+                            width: width as f32 * scale_x,
+                            height: height as f32 * scale_y,
+                            rotation_degrees: rotation,
+                            flip_x: false,
+                            flip_y: false,
+                        },
+                        opacity,
+                        blend_mode: compositor::BlendMode::Normal,
+                        effect_pass_groups: Vec::new(),
+                        mask: None,
+                        color_grading: None,
+                        crop: None,
+                        border_radius: None,
+                        shadow: None,
+                    };
+                    items.push(compositor::FrameItemDescriptor::Layer(layer));
+                }
+            }
+        }
+
+        let frame_desc = compositor::FrameDescriptor {
+            width,
+            height,
+            clear: compositor::CanvasClearDescriptor {
+                color: pd.bg_color,
+            },
+            items,
+        };
+
+        // ── Render via GPU compositor ─────────────────────────────────────
+        let mut comp = self.compositor.lock().await;
+        let texture = comp
+            .render_frame_to_texture(&self.gpu_ctx, &frame_desc)
+            .map_err(|e| format!("Compositor error: {e}"))?;
+
+        // ── Read texture back to CPU ──────────────────────────────────────
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            let rgba_bytes = self
+                .gpu_ctx
+                .read_texture_to_cpu(&texture, width, height)
+                .map_err(|e| format!("GPU readback error: {e}"))?;
+            Ok(rgba_bytes)
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            // On WASM, textures are rendered to canvas directly — return
+            // an empty vec as a sentinel (the real pixels are on the canvas).
+            Ok(Vec::new())
+        }
     }
 
     /// Dispatches an asynchronous export job to FFmpeg using the current CRDT state.

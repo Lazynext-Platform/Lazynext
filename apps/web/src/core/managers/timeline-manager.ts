@@ -8,9 +8,11 @@ import type {
 	TimelineElement,
 	RetimeConfig,
 } from "@/timeline";
-import { calculateTotalDuration } from "@/timeline";
+import { calculateTotalDuration, updateElementInSceneTracks } from "@/timeline";
 import { TimelineDragSource } from "@/timeline/drag-source";
 import { findTrackInSceneTracks } from "@/timeline/track-element-update";
+import { applyElementUpdate } from "@/timeline/update-pipeline";
+import { buildEntityDeleteOp, buildPropertyUpdateOp } from "@/collaboration/crdt-builders";
 import { lastFrameMediaTime, type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 import {
 	canElementBeHidden,
@@ -35,9 +37,7 @@ import {
 	ToggleTrackMuteCommand,
 	ToggleTrackVisibilityCommand,
 	InsertElementCommand,
-	DeleteElementsCommand,
 	DuplicateElementsCommand,
-	UpdateElementsCommand,
 	SplitElementsCommand,
 	MoveElementCommand,
 	TracksSnapshotCommand,
@@ -254,8 +254,31 @@ export class TimelineManager {
 	}: {
 		elements: { trackId: string; elementId: string }[];
 	}): void {
-		const command = new DeleteElementsCommand({ elements });
-		this.editor.command.execute({ command });
+		const activeScene = this.editor.scenes.getActiveSceneOrNull();
+		if (!activeScene) return;
+
+		// 1. Delete the entities
+		elements.forEach(({ elementId }) => {
+			const op = buildEntityDeleteOp(elementId, "element", null);
+			this.editor.engine.applyOperation(op);
+		});
+
+		// 2. Remove them from tracks property
+		const removeTrackElements = <T extends TimelineTrack>(track: T) => ({
+			...track,
+			elements: track.elements.filter(
+				(element) => !elements.some((target) => target.trackId === track.id && target.elementId === element.id)
+			),
+		} as T);
+
+		const updatedTracks: SceneTracks = {
+			overlay: activeScene.tracks.overlay.map(removeTrackElements),
+			main: removeTrackElements(activeScene.tracks.main),
+			audio: activeScene.tracks.audio.map(removeTrackElements),
+		};
+
+		const op = buildPropertyUpdateOp(activeScene.id, "tracks", activeScene.tracks, updatedTracks);
+		this.editor.engine.applyOperation(op);
 	}
 
 	toggleSourceAudioSeparation({
@@ -283,18 +306,55 @@ export class TimelineManager {
 		}>;
 		pushHistory?: boolean;
 	}): void {
-		if (updates.length === 0) {
-			return;
+		if (updates.length === 0) return;
+
+		const activeScene = this.editor.scenes.getActiveSceneOrNull();
+		if (!activeScene) return;
+
+		let updatedTracks = activeScene.tracks;
+		
+		for (const updateEntry of updates) {
+			const currentTrack = findTrackInSceneTracks({
+				tracks: updatedTracks,
+				trackId: updateEntry.trackId,
+			});
+			const currentElement = currentTrack?.elements.find(
+				(element) => element.id === updateEntry.elementId,
+			);
+			if (!currentTrack || !currentElement) continue;
+
+			const nextElement = applyElementUpdate({
+				element: currentElement,
+				patch: updateEntry.patch,
+				context: {
+					tracks: updatedTracks,
+					trackId: updateEntry.trackId,
+				},
+			});
+
+			updatedTracks = updateElementInSceneTracks({
+				tracks: updatedTracks,
+				trackId: updateEntry.trackId,
+				elementId: updateEntry.elementId,
+				update: () => nextElement,
+			});
+			
+			Object.keys(nextElement).forEach((key) => {
+				const typedKey = key as keyof TimelineElement;
+				if (nextElement[typedKey] !== currentElement[typedKey]) {
+					const op = buildPropertyUpdateOp(
+						updateEntry.elementId,
+						typedKey,
+						currentElement[typedKey],
+						nextElement[typedKey],
+					);
+					this.editor.engine.applyOperation(op);
+				}
+			});
 		}
 
-		const command = new UpdateElementsCommand({
-			updates,
-		});
-		if (pushHistory) {
-			this.editor.command.execute({ command });
-		} else {
-			command.execute();
-		}
+		const trackOp = buildPropertyUpdateOp(activeScene.id, "tracks", activeScene.tracks, updatedTracks);
+		this.editor.engine.applyOperation(trackOp);
 	}
 
 	addClipEffect({

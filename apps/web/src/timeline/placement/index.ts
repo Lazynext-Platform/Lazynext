@@ -1,4 +1,4 @@
-export { applyPlacement } from "./apply";
+export { applyPlacement, resolveTrackPlacement, placeElementsOnTimeline } from "./wasm-wrappers";
 export {
 	canElementGoOnTrack,
 	validateElementTrackCompatibility,
@@ -12,7 +12,7 @@ export {
 	enforceMainTrackStart,
 	getEarliestMainTrackElement,
 } from "./main-track";
-export { resolveTrackPlacement } from "./resolve";
+
 export { buildEmptyTrack } from "./track-factory";
 export type {
 	PlacementResult,

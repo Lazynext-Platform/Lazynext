@@ -62,7 +62,67 @@ pub enum CrdtOperation {
         target_id: String,
         property: String,
         value: serde_json::Value,
+        old_value: Option<serde_json::Value>,
     },
+    EntityInsert {
+        entity_id: String,
+        entity_type: String,
+        data: serde_json::Value,
+    },
+    EntityDelete {
+        entity_id: String,
+    },
+}
+
+impl CrdtOperation {
+    /// Generates a compensating operation to undo this operation, if possible.
+    pub fn inverse(&self) -> Option<Self> {
+        match self {
+            CrdtOperation::ClipInsert { clip_id, track_id, position: _, clip: _ } => {
+                Some(CrdtOperation::ClipDelete {
+                    clip_id: clip_id.clone(),
+                    track_id: track_id.clone(),
+                })
+            }
+            CrdtOperation::ClipDelete { .. } => {
+                // Cannot easily undo a delete without knowing the full clip payload,
+                // which should ideally be stored in the UndoRecord or Tombstone map.
+                // For a proper undo stack, we either need a thick operation (which stores old state)
+                // or we restore it from the CRDT tombstones.
+                None
+            }
+            CrdtOperation::ClipMove { clip_id, from_track, to_track, new_position } => {
+                Some(CrdtOperation::ClipMove {
+                    clip_id: clip_id.clone(),
+                    from_track: to_track.clone(),
+                    to_track: from_track.clone(),
+                    new_position: *new_position, // Needs actual old position
+                })
+            }
+            CrdtOperation::ClipTrim { .. } => None, // Needs old bounds
+            CrdtOperation::ClipSplit { .. } => None,
+            CrdtOperation::TrackInsert { track_id, .. } => {
+                Some(CrdtOperation::TrackDelete {
+                    track_id: track_id.clone(),
+                })
+            }
+            CrdtOperation::TrackDelete { .. } => None,
+            CrdtOperation::PropertyUpdate { target_id, property, value: _, old_value } => {
+                old_value.as_ref().map(|old| CrdtOperation::PropertyUpdate {
+                    target_id: target_id.clone(),
+                    property: property.clone(),
+                    value: old.clone(),
+                    old_value: None,
+                })
+            }
+            CrdtOperation::EntityInsert { entity_id, .. } => {
+                Some(CrdtOperation::EntityDelete {
+                    entity_id: entity_id.clone(),
+                })
+            }
+            CrdtOperation::EntityDelete { .. } => None, // Needs old data
+        }
+    }
 }
 
 /// A monotonic Lamport clock for partial ordering of operations.

@@ -64,18 +64,42 @@ struct ApplyPolygonMaskOptions {
     mask: wgpu::web_sys::OffscreenCanvas,
     width: u32,
     height: u32,
-    points_x: Vec<f32>,
-    points_y: Vec<f32>,
+    points_x: Vec<f64>,
+    points_y: Vec<f64>,
 }
 
 #[wasm_bindgen(js_name = applyPolygonMask)]
 pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
-    // Scaffold for Polygon Masking
-    let _apply_polygon_mask_options = parse_apply_polygon_mask_options(options)?;
+    let opts = parse_apply_polygon_mask_options(options)?;
+    
+    // Create an output canvas
+    let canvas = wgpu::web_sys::OffscreenCanvas::new(opts.width, opts.height).unwrap();
+    
+    let context = canvas
+        .get_context("2d")?
+        .ok_or_else(|| JsValue::from_str("Failed to get 2d context"))?
+        .dyn_into::<wgpu::web_sys::OffscreenCanvasRenderingContext2d>()?;
+        
+    // Draw original mask if any
+    context.draw_image_with_offscreen_canvas(&opts.mask, 0.0, 0.0)?;
+    
+    // Fill the polygon
+    context.set_fill_style(&JsValue::from_str("white"));
+    
+    // Setup path
+    context.begin_path();
+    if !opts.points_x.is_empty() {
+        context.move_to(opts.points_x[0], opts.points_y[0]);
+        for i in 1..opts.points_x.len() {
+            context.line_to(opts.points_x[i], opts.points_y[i]);
+        }
+        context.close_path();
+    }
+    
+    // We want to intersect the mask. So we use "destination-in" or just draw if mask is empty.
+    context.set_global_composite_operation("destination-in")?;
+    context.fill();
 
-    // In a full implementation, we would pass these vertices to a WebGPU stencil buffer
-    // For now, we return a blank canvas to satisfy the WebAssembly signature
-    let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();
     Ok(canvas)
 }
 
@@ -84,11 +108,25 @@ fn parse_apply_polygon_mask_options(value: JsValue) -> Result<ApplyPolygonMaskOp
         .dyn_into()
         .map_err(|_| JsValue::from_str("applyPolygonMask expects an options object"))?;
 
+    let points_x_val = js_sys::Reflect::get(&object, &JsValue::from_str("points_x"))?;
+    let points_y_val = js_sys::Reflect::get(&object, &JsValue::from_str("points_y"))?;
+    
+    let points_x_arr = js_sys::Array::from(&points_x_val);
+    let points_y_arr = js_sys::Array::from(&points_y_val);
+    
+    let mut points_x = Vec::new();
+    let mut points_y = Vec::new();
+    
+    for i in 0..points_x_arr.length() {
+        points_x.push(points_x_arr.get(i).as_f64().unwrap_or(0.0));
+        points_y.push(points_y_arr.get(i).as_f64().unwrap_or(0.0));
+    }
+
     Ok(ApplyPolygonMaskOptions {
         mask: read_offscreen_canvas_property(&object, "mask")?,
         width: read_u32_property(&object, "width")?,
         height: read_u32_property(&object, "height")?,
-        points_x: vec![], // Scaffold
-        points_y: vec![], // Scaffold
+        points_x,
+        points_y,
     })
 }

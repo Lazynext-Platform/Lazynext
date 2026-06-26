@@ -65,3 +65,13 @@ pub use export_wasm::*;
 mod webcodecs;
 #[cfg(target_arch = "wasm32")]
 pub use webcodecs::*;
+
+#[cfg(target_arch = "wasm32")]
+mod animation_wasm;
+#[cfg(target_arch = "wasm32")]
+pub use animation_wasm::*;
+
+#[cfg(target_arch = "wasm32")]
+mod timeline_wasm;
+#[cfg(target_arch = "wasm32")]
+pub use timeline_wasm::*;
