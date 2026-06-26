@@ -33,12 +33,12 @@ pub fn evaluate_scalar_channel(channel_json: JsValue, time_ticks: f64, default_v
     let Ok(js_c) = js_channel else {
         return default_value;
     };
-    
+
     let mut rust_channel = ScalarAnimationChannel::new();
     for i in 0..js_c.keys.len() {
         let key = &js_c.keys[i];
         let frame = key.time as u32;
-        
+
         let easing = match key.segment_to_next.as_str() {
             "step" => Easing::Step,
             "bezier" => {
@@ -47,10 +47,10 @@ pub fn evaluate_scalar_channel(channel_json: JsValue, time_ticks: f64, default_v
                 // For a proper mapping, we'll just use a generic ease if missing,
                 // or we could calculate the normalized cubic points.
                 Easing::EaseInOut // Simplification for now until full cubic conversion is needed
-            },
+            }
             _ => Easing::Linear,
         };
-        
+
         rust_channel.add_keyframe(frame, key.value, easing);
     }
 

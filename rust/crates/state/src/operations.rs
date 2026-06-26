@@ -78,12 +78,15 @@ impl CrdtOperation {
     /// Generates a compensating operation to undo this operation, if possible.
     pub fn inverse(&self) -> Option<Self> {
         match self {
-            CrdtOperation::ClipInsert { clip_id, track_id, position: _, clip: _ } => {
-                Some(CrdtOperation::ClipDelete {
-                    clip_id: clip_id.clone(),
-                    track_id: track_id.clone(),
-                })
-            }
+            CrdtOperation::ClipInsert {
+                clip_id,
+                track_id,
+                position: _,
+                clip: _,
+            } => Some(CrdtOperation::ClipDelete {
+                clip_id: clip_id.clone(),
+                track_id: track_id.clone(),
+            }),
             CrdtOperation::ClipDelete { .. } => {
                 // Cannot easily undo a delete without knowing the full clip payload,
                 // which should ideally be stored in the UndoRecord or Tombstone map.
@@ -91,7 +94,12 @@ impl CrdtOperation {
                 // or we restore it from the CRDT tombstones.
                 None
             }
-            CrdtOperation::ClipMove { clip_id, from_track, to_track, new_position } => {
+            CrdtOperation::ClipMove {
+                clip_id,
+                from_track,
+                to_track,
+                new_position,
+            } => {
                 Some(CrdtOperation::ClipMove {
                     clip_id: clip_id.clone(),
                     from_track: to_track.clone(),
@@ -101,25 +109,24 @@ impl CrdtOperation {
             }
             CrdtOperation::ClipTrim { .. } => None, // Needs old bounds
             CrdtOperation::ClipSplit { .. } => None,
-            CrdtOperation::TrackInsert { track_id, .. } => {
-                Some(CrdtOperation::TrackDelete {
-                    track_id: track_id.clone(),
-                })
-            }
+            CrdtOperation::TrackInsert { track_id, .. } => Some(CrdtOperation::TrackDelete {
+                track_id: track_id.clone(),
+            }),
             CrdtOperation::TrackDelete { .. } => None,
-            CrdtOperation::PropertyUpdate { target_id, property, value: _, old_value } => {
-                old_value.as_ref().map(|old| CrdtOperation::PropertyUpdate {
-                    target_id: target_id.clone(),
-                    property: property.clone(),
-                    value: old.clone(),
-                    old_value: None,
-                })
-            }
-            CrdtOperation::EntityInsert { entity_id, .. } => {
-                Some(CrdtOperation::EntityDelete {
-                    entity_id: entity_id.clone(),
-                })
-            }
+            CrdtOperation::PropertyUpdate {
+                target_id,
+                property,
+                value: _,
+                old_value,
+            } => old_value.as_ref().map(|old| CrdtOperation::PropertyUpdate {
+                target_id: target_id.clone(),
+                property: property.clone(),
+                value: old.clone(),
+                old_value: None,
+            }),
+            CrdtOperation::EntityInsert { entity_id, .. } => Some(CrdtOperation::EntityDelete {
+                entity_id: entity_id.clone(),
+            }),
             CrdtOperation::EntityDelete { .. } => None, // Needs old data
         }
     }

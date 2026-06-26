@@ -326,7 +326,10 @@ async fn handle_stripe_webhook(
         }
     };
 
-    let sig_header = match headers.get("stripe-signature").and_then(|v| v.to_str().ok()) {
+    let sig_header = match headers
+        .get("stripe-signature")
+        .and_then(|v| v.to_str().ok())
+    {
         Some(h) => h.to_string(),
         None => {
             tracing::warn!("Missing Stripe-Signature header");

@@ -71,21 +71,21 @@ struct ApplyPolygonMaskOptions {
 #[wasm_bindgen(js_name = applyPolygonMask)]
 pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let opts = parse_apply_polygon_mask_options(options)?;
-    
+
     // Create an output canvas
     let canvas = wgpu::web_sys::OffscreenCanvas::new(opts.width, opts.height).unwrap();
-    
+
     let context = canvas
         .get_context("2d")?
         .ok_or_else(|| JsValue::from_str("Failed to get 2d context"))?
         .dyn_into::<wgpu::web_sys::OffscreenCanvasRenderingContext2d>()?;
-        
+
     // Draw original mask if any
     context.draw_image_with_offscreen_canvas(&opts.mask, 0.0, 0.0)?;
-    
+
     // Fill the polygon
     context.set_fill_style(&JsValue::from_str("white"));
-    
+
     // Setup path
     context.begin_path();
     if !opts.points_x.is_empty() {
@@ -95,7 +95,7 @@ pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCa
         }
         context.close_path();
     }
-    
+
     // We want to intersect the mask. So we use "destination-in" or just draw if mask is empty.
     context.set_global_composite_operation("destination-in")?;
     context.fill();
@@ -110,13 +110,13 @@ fn parse_apply_polygon_mask_options(value: JsValue) -> Result<ApplyPolygonMaskOp
 
     let points_x_val = js_sys::Reflect::get(&object, &JsValue::from_str("points_x"))?;
     let points_y_val = js_sys::Reflect::get(&object, &JsValue::from_str("points_y"))?;
-    
+
     let points_x_arr = js_sys::Array::from(&points_x_val);
     let points_y_arr = js_sys::Array::from(&points_y_val);
-    
+
     let mut points_x = Vec::new();
     let mut points_y = Vec::new();
-    
+
     for i in 0..points_x_arr.length() {
         points_x.push(points_x_arr.get(i).as_f64().unwrap_or(0.0));
         points_y.push(points_y_arr.get(i).as_f64().unwrap_or(0.0));

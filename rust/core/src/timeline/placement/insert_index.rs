@@ -32,7 +32,7 @@ pub fn resolve_preferred_new_track_placement(
     direction: &str, // "above" | "below"
 ) -> PreferredNewTrackPlacement {
     let track_count = tracks.overlay.len() + 1 + tracks.audio.len();
-    
+
     if track_count == 0 {
         return PreferredNewTrackPlacement {
             insert_index: 0,

@@ -361,7 +361,7 @@ impl NLEState {
             {
                 // In WASM, we could use wasm_bindgen_futures::spawn_local
                 // For now, if we don't have it in dependencies, we can just drop the event or execute it if sync,
-                // but since tx_clone.send is async we need a spawn. We'll ignore the event for now in WASM 
+                // but since tx_clone.send is async we need a spawn. We'll ignore the event for now in WASM
                 // if we don't strictly need it, or we can assume it will be implemented via JS callbacks.
             }
         }

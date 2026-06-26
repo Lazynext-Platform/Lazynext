@@ -15,15 +15,15 @@ pub struct CoreEngine {
 impl CoreEngine {
     pub async fn init(project: Arc<Mutex<NLEState>>) -> Result<Self, String> {
         println!("[CoreEngine] Initializing GPU Context...");
-        
+
         // GpuContext::new() returns Result<GpuContext, GpuError>
         let gpu_ctx = gpu::GpuContext::new()
             .await
             .map_err(|e| format!("Failed to initialize GPU context: {}", e))?;
-            
+
         let gpu_ctx = Arc::new(gpu_ctx);
         let comp = compositor::Compositor::new(&gpu_ctx);
-        
+
         println!("[CoreEngine] Initialized. Awaiting frame commands.");
         Ok(Self {
             project,
@@ -70,8 +70,11 @@ impl CoreEngine {
                 if frame_idx >= clip.start && frame_idx < clip.end {
                     // Evaluate animated properties at this frame
                     let opacity = clip.get_animated_value("opacity", frame_idx, 1.0) as f32;
-                    let center_x = clip.get_animated_value("position_x", frame_idx, width as f64 / 2.0) as f32;
-                    let center_y = clip.get_animated_value("position_y", frame_idx, height as f64 / 2.0) as f32;
+                    let center_x =
+                        clip.get_animated_value("position_x", frame_idx, width as f64 / 2.0) as f32;
+                    let center_y =
+                        clip.get_animated_value("position_y", frame_idx, height as f64 / 2.0)
+                            as f32;
                     let scale_x = clip.get_animated_value("scale_x", frame_idx, 1.0) as f32;
                     let scale_y = clip.get_animated_value("scale_y", frame_idx, 1.0) as f32;
                     let rotation = clip.get_animated_value("rotation", frame_idx, 0.0) as f32;
@@ -104,9 +107,7 @@ impl CoreEngine {
         let frame_desc = compositor::FrameDescriptor {
             width,
             height,
-            clear: compositor::CanvasClearDescriptor {
-                color: pd.bg_color,
-            },
+            clear: compositor::CanvasClearDescriptor { color: pd.bg_color },
             items,
         };
 

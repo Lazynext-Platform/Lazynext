@@ -71,9 +71,10 @@ impl AutonomousEditor {
         println!("🧠 [AI Engine] Reasoning about intent: {}", intent.prompt);
 
         // 1. Read provider settings
-        let provider = intent.llm_provider.clone().unwrap_or_else(|| {
-            env::var("LLM_PROVIDER").unwrap_or_else(|_| "ollama".to_string())
-        });
+        let provider = intent
+            .llm_provider
+            .clone()
+            .unwrap_or_else(|| env::var("LLM_PROVIDER").unwrap_or_else(|_| "ollama".to_string()));
         let (api_url, api_key, model) = match provider.as_str() {
             "openai" => (
                 "https://api.openai.com/v1/chat/completions".to_string(),

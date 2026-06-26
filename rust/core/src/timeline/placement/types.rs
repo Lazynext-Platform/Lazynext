@@ -37,7 +37,9 @@ pub enum PlacementStrategy {
         #[serde(rename = "sourceTrackIndex")]
         source_track_index: usize,
     },
-    AlwaysNew { position: String }, // "highest" | "default"
+    AlwaysNew {
+        position: String,
+    }, // "highest" | "default"
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]

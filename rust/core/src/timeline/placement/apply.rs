@@ -32,7 +32,7 @@ pub fn apply_placement(
             let target_track_id = target_track.id.clone();
 
             let mut updated_tracks = tracks.clone();
-            
+
             // updateTrackInSceneTracks equivalent
             let mut updated = false;
             for t in &mut updated_tracks.overlay {
@@ -43,7 +43,10 @@ pub fn apply_placement(
                 }
             }
             if !updated && updated_tracks.main.id == target_track_id {
-                updated_tracks.main.elements.extend(elements.iter().cloned());
+                updated_tracks
+                    .main
+                    .elements
+                    .extend(elements.iter().cloned());
                 updated = true;
             }
             if !updated {
@@ -60,22 +63,29 @@ pub fn apply_placement(
                 target_track_id,
             })
         }
-        PlacementResult::NewTrack { track_type, insert_index, .. } => {
+        PlacementResult::NewTrack {
+            track_type,
+            insert_index,
+            ..
+        } => {
             let new_track_id = Uuid::new_v4().to_string();
             let actual_insert_index = new_track_insert_index_override.unwrap_or(*insert_index);
-            
+
             let mut new_track = build_empty_track(new_track_id.clone(), track_type, None);
             new_track.elements.extend(elements.iter().cloned());
 
             let mut updated_tracks = tracks.clone();
 
             if track_type == "audio" {
-                let audio_insert_index = actual_insert_index.saturating_sub(tracks.overlay.len() + 1);
+                let audio_insert_index =
+                    actual_insert_index.saturating_sub(tracks.overlay.len() + 1);
                 let audio_insert_index = audio_insert_index.min(updated_tracks.audio.len());
                 updated_tracks.audio.insert(audio_insert_index, new_track);
             } else {
                 let overlay_insert_index = actual_insert_index.min(updated_tracks.overlay.len());
-                updated_tracks.overlay.insert(overlay_insert_index, new_track);
+                updated_tracks
+                    .overlay
+                    .insert(overlay_insert_index, new_track);
             }
 
             Some(ApplyPlacementResult {

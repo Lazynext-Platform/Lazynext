@@ -1,10 +1,12 @@
-use wasm_bindgen::prelude::*;
 use lazynext_core::timeline::models::{SceneTracks, TimelineElement};
-use lazynext_core::timeline::placement::types::{PlacementStrategy, PlacementSubject, PlacementTimeSpan};
+use lazynext_core::timeline::placement::apply::{ApplyPlacementResult, apply_placement};
 use lazynext_core::timeline::placement::resolve::resolve_track_placement;
 use lazynext_core::timeline::placement::types::PlacementResult;
-use lazynext_core::timeline::placement::apply::{apply_placement, ApplyPlacementResult};
+use lazynext_core::timeline::placement::types::{
+    PlacementStrategy, PlacementSubject, PlacementTimeSpan,
+};
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct WasmApplyPlacementResult {
@@ -90,6 +92,6 @@ pub fn place_elements_on_timeline(
             return Ok(serde_wasm_bindgen::to_value(&result)?);
         }
     }
-    
+
     Ok(JsValue::NULL)
 }

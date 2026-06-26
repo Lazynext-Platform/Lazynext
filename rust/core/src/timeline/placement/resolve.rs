@@ -22,12 +22,8 @@ fn build_existing_track_result(
     let requested_start_time = first_span.map(|s| s.start_time).unwrap_or(ZERO_MEDIA_TIME);
     let exclude_element_id = first_span.and_then(|s| s.exclude_element_id.as_deref());
 
-    let adjusted_start_time = enforce_main_track_start(
-        tracks,
-        &track.id,
-        requested_start_time,
-        exclude_element_id,
-    );
+    let adjusted_start_time =
+        enforce_main_track_start(tracks, &track.id, requested_start_time, exclude_element_id);
 
     let adjusted_start_time = if (adjusted_start_time - requested_start_time).abs() > f64::EPSILON {
         Some(adjusted_start_time)
@@ -158,7 +154,10 @@ pub fn resolve_track_placement(
 
             let can_use_existing_track = !create_new_track_only
                 && is_preferred_track_compatible
-                && can_place_time_spans_on_track(&preferred_track_opt.unwrap().elements, time_spans);
+                && can_place_time_spans_on_track(
+                    &preferred_track_opt.unwrap().elements,
+                    time_spans,
+                );
 
             if can_use_existing_track {
                 return Some(build_existing_track_result(
@@ -178,12 +177,8 @@ pub fn resolve_track_placement(
                 },
             );
 
-            let preferred_new_track = resolve_preferred_new_track_placement(
-                tracks,
-                &track_type,
-                *track_index,
-                direction,
-            );
+            let preferred_new_track =
+                resolve_preferred_new_track_placement(tracks, &track_type, *track_index, direction);
 
             Some(build_new_track_result(
                 track_type.clone(),
@@ -220,7 +215,11 @@ pub fn resolve_track_placement(
             }
 
             let insert_index = get_highest_insert_index_for_track(tracks, &track_type);
-            Some(build_new_track_result(track_type.clone(), insert_index, None))
+            Some(build_new_track_result(
+                track_type.clone(),
+                insert_index,
+                None,
+            ))
         }
         PlacementStrategy::AlwaysNew { position } => {
             Some(resolve_always_new_track(tracks, &track_type, position))
