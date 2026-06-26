@@ -58,7 +58,7 @@ All services communicate via REST over the `lazynext-network` Docker bridge.
 
 - **CI/CD**: GitHub Actions (`.github/workflows/ci.yml` and `.github/workflows/production.yml`)
 - **Deployment**: Azure Container Apps (5 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
-- **Terraform**: Azure infrastructure-as-code in `terraform/azure/` (GCP config archived at `terraform/gcp-archive/`)
+- **Terraform**: Azure infrastructure-as-code in `terraform/azure/`
 - **Kubernetes**: Optional K8s manifests in `k8s/`
 - **Database**: PostgreSQL via Drizzle ORM (schema: `apps/web/src/db/schema.ts`, migrations: `apps/web/src/drizzle/`)
 - **Auth**: better-auth library with Upstash Redis rate limiting
@@ -193,7 +193,7 @@ See `.env.example` for the full list. Key ones:
 |----------|---------|
 | `DATABASE_URL` | PostgreSQL connection string (required) |
 | `BETTER_AUTH_SECRET` | Auth secret (required, 64 chars) |
-| `STORAGE_PROVIDER` | `local`, `gcs`, or `s3` |
+| `STORAGE_PROVIDER` | `local` or `azure` |
 | `LLM_PROVIDER` | `openai`, `anthropic`, `gemini`, or `ollama` |
 | `NEXT_PUBLIC_*_URL` | Microservice URLs (default localhost) |
 

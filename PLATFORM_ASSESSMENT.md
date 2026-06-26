@@ -27,7 +27,7 @@ Supporting these are **6 microservices** (pre-processing ~30%, generative-studio
 
 The audit found a ~40% real-to-stub ratio across all code. The platform has a solid architectural skeleton and the Rust core crates (state, compositor, effects, time) are genuinely well-implemented — but the apps (except web) are barely started, 70% of microservice endpoints return mock data, the core engine's `render_frame()` returns a single red pixel, and critical business logic is duplicated between JavaScript and Rust.
 
-The infrastructure (Docker, K8s, Terraform GCP, monitoring) is paradoxically the most complete part at ~80%, meaning the platform *could* be deployed, but it would serve mostly mock responses and stub UIs.
+The infrastructure (Docker, K8s, Terraform Azure, monitoring) is paradoxically the most complete part at ~80%, meaning the platform *could* be deployed, but it would serve mostly mock responses and stub UIs.
 
 ---
 
@@ -314,7 +314,7 @@ The platform is in **early alpha**. The architectural vision is solid and the Ru
 1. **GPU compositor** (`rust/crates/compositor/`) — 1070-line, 17 blend modes, MSDF text, stereoscopic 3D — genuinely impressive
 2. **K8s manifests** — Production-grade with NetworkPolicies, HPAs, PDBs, ExternalSecrets, CronJobs, GPU support
 3. **Monitoring stack** — Full Grafana/Prometheus/Loki/Tempo/Alloy with pre-built dashboards and SLOs
-4. **Multi-cloud Terraform** — GCP (primary), AWS, Azure all configured with GPU node pools
+4. **Azure Terraform** — Full Azure infrastructure with GPU node pool support
 5. **CRDT foundation** — LWW-Register, vector clocks, tombstones, operation-based CRDTs — correct primitives
 6. **CLAUDE.md** — Excellent developer documentation, comprehensive and accurate
 7. **Web app scope** — 1000+ files covering editor, canvas, timeline, effects, masks, collaboration, storage migrations
