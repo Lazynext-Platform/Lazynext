@@ -12,7 +12,7 @@ pub fn default_track_name(track_type: &str) -> &str {
 }
 
 pub fn build_empty_track(id: String, track_type: &str, name: Option<String>) -> TimelineTrack {
-    let track_name = name.unwrap_or_else(|| default_track_name(track_type).to_string());
+    let _track_name = name.unwrap_or_else(|| default_track_name(track_type).to_string());
 
     TimelineTrack {
         id,

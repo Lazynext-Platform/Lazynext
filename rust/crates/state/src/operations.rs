@@ -259,6 +259,7 @@ mod tests {
                 target_id: format!("c{}", i),
                 property: "opacity".into(),
                 value: serde_json::Value::Number(serde_json::Number::from_f64(0.5).unwrap()),
+                old_value: None,
             });
         }
         let tail = log.since(2);

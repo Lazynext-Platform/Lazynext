@@ -189,17 +189,16 @@ pub fn resolve_track_placement(
         PlacementStrategy::AboveSource { source_track_index } => {
             if *source_track_index > 0 {
                 let above_track_index = source_track_index - 1;
-                if let Some(above_track) = ordered_tracks.get(above_track_index) {
-                    if above_track.r#type == track_type
-                        && can_place_time_spans_on_track(&above_track.elements, time_spans)
-                    {
-                        return Some(build_existing_track_result(
-                            above_track,
-                            above_track_index,
-                            tracks,
-                            time_spans,
-                        ));
-                    }
+                if let Some(above_track) = ordered_tracks.get(above_track_index)
+                    && above_track.r#type == track_type
+                    && can_place_time_spans_on_track(&above_track.elements, time_spans)
+                {
+                    return Some(build_existing_track_result(
+                        above_track,
+                        above_track_index,
+                        tracks,
+                        time_spans,
+                    ));
                 }
             }
 

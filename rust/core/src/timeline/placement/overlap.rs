@@ -8,10 +8,10 @@ pub fn would_element_overlap(
     exclude_element_id: Option<&str>,
 ) -> bool {
     elements.iter().any(|element| {
-        if let Some(exclude_id) = exclude_element_id {
-            if element.id == exclude_id {
-                return false;
-            }
+        if let Some(exclude_id) = exclude_element_id
+            && element.id == exclude_id
+        {
+            return false;
         }
         let element_end = element.start_time + element.duration;
         start_time < element_end && end_time > element.start_time

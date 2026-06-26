@@ -1,5 +1,3 @@
-use crate::timeline::models::TimelineTrack;
-
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PlacementTimeSpan {

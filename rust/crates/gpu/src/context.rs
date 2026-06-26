@@ -387,7 +387,7 @@ impl GpuContext {
         let unpadded_bytes_per_row = width * bytes_per_pixel;
         // wgpu requires rows to be aligned to COPY_BYTES_PER_ROW_ALIGNMENT (256)
         let align = wgpu::COPY_BYTES_PER_ROW_ALIGNMENT;
-        let padded_bytes_per_row = (unpadded_bytes_per_row + align - 1) / align * align;
+        let padded_bytes_per_row = unpadded_bytes_per_row.div_ceil(align) * align;
         let buffer_size = (padded_bytes_per_row * height) as u64;
 
         let staging_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
