@@ -112,6 +112,34 @@ resource "azurerm_container_app" "web" {
         name        = "BETTER_AUTH_SECRET"
         secret_name = "better-auth-secret"
       }
+      env {
+        name  = "BETTER_AUTH_URL"
+        value = "https://${local.web_fqdn}"
+      }
+      env {
+        name  = "LLM_PROVIDER"
+        value = var.llm_provider
+      }
+      env {
+        name  = "NEXT_PUBLIC_SITE_URL"
+        value = "https://${local.web_fqdn}"
+      }
+      env {
+        name  = "NEXT_PUBLIC_PREPROCESSING_URL"
+        value = "https://${local.pre_processing_fqdn}"
+      }
+      env {
+        name  = "NEXT_PUBLIC_GENERATIVE_STUDIO_URL"
+        value = "https://${local.generative_studio_fqdn}"
+      }
+      env {
+        name  = "NEXT_PUBLIC_AI_AGENTS_URL"
+        value = "https://${local.ai_agents_fqdn}"
+      }
+      env {
+        name  = "NEXT_PUBLIC_RENDER_SERVICE_URL"
+        value = "https://${local.render_service_fqdn}"
+      }
     }
 
     min_replicas = local.container_apps["web"].min

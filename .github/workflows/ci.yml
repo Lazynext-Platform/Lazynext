@@ -224,6 +224,28 @@ jobs:
           name: wasm-pkg
           path: rust/wasm/pkg/
 
+      - name: Resolve Service FQDNs
+        run: |
+          RG="lazynext-rg-dev"
+          WEB_FQDN=$(az containerapp show -n lazynext-web-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+          AI_FQDN=$(az containerapp show -n lazynext-ai-agents-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+          RENDER_FQDN=$(az containerapp show -n lazynext-render-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+          PREPROC_FQDN=$(az containerapp show -n lazynext-pre-processing-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+          GEN_FQDN=$(az containerapp show -n lazynext-gen-studio-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+
+          echo "NEXT_PUBLIC_SITE_URL=https://${WEB_FQDN}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_PREPROCESSING_URL=https://${PREPROC_FQDN}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_GENERATIVE_STUDIO_URL=https://${GEN_FQDN}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_AI_AGENTS_URL=https://${AI_FQDN}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_RENDER_SERVICE_URL=https://${RENDER_FQDN}" >> $GITHUB_ENV
+
+          echo "Resolved FQDNs:"
+          echo "  Web:        https://${WEB_FQDN}"
+          echo "  AI Agents:  https://${AI_FQDN}"
+          echo "  Render:     https://${RENDER_FQDN}"
+          echo "  Pre-Proc:   https://${PREPROC_FQDN}"
+          echo "  Gen Studio: https://${GEN_FQDN}"
+
       - name: Build and Push Web App
         uses: docker/build-push-action@v7
         with:
@@ -231,6 +253,12 @@ jobs:
           file: apps/web/Dockerfile
           push: true
           tags: lazynextacrdevlmblwn.azurecr.io/lazynext-web:latest
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ env.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_PREPROCESSING_URL=${{ env.NEXT_PUBLIC_PREPROCESSING_URL }}
+            NEXT_PUBLIC_GENERATIVE_STUDIO_URL=${{ env.NEXT_PUBLIC_GENERATIVE_STUDIO_URL }}
+            NEXT_PUBLIC_AI_AGENTS_URL=${{ env.NEXT_PUBLIC_AI_AGENTS_URL }}
+            NEXT_PUBLIC_RENDER_SERVICE_URL=${{ env.NEXT_PUBLIC_RENDER_SERVICE_URL }}
 
       - name: Build and Push AI Agents
         continue-on-error: true
