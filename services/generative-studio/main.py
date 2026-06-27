@@ -391,9 +391,20 @@ async def split_stems(req: StemSplitRequest):
 
     await asyncio.sleep(1.0 if stems_output else 3.0)
 
-    # Fallback: mock URLs
+    # Fallback: mock URLs for all requested stems
     if not stems_output:
-        stems_output = {"vocals": f"/mock/stems/{req.audio_id}_vocals.wav"}
+        if req.stems >= 4:
+            stems_output = {
+                "vocals": f"/mock/stems/{req.audio_id}_vocals.wav",
+                "drums": f"/mock/stems/{req.audio_id}_drums.wav",
+                "bass": f"/mock/stems/{req.audio_id}_bass.wav",
+                "other": f"/mock/stems/{req.audio_id}_other.wav",
+            }
+        else:
+            stems_output = {
+                "vocals": f"/mock/stems/{req.audio_id}_vocals.wav",
+                "accompaniment": f"/mock/stems/{req.audio_id}_accomp.wav",
+            }
 
     return {
         "success": True,
