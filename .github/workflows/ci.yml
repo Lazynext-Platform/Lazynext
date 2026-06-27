@@ -235,6 +235,10 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          driver-opts: |
+            network=host
+        timeout-minutes: 5
 
       - name: Download WASM Package (for Docker)
         uses: actions/download-artifact@v8
