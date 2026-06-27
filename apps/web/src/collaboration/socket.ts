@@ -152,6 +152,42 @@ export class CollaborationSocket {
 		}
 	}
 
+	/** Send WebRTC offer to a peer (P2P signaling). */
+	sendWebRtcOffer(targetPeer: string, sdp: string): void {
+		if (this.ws?.readyState === WebSocket.OPEN) {
+			this.ws.send(JSON.stringify({
+				type: "web_rtc_offer",
+				project_id: this.roomId,
+				target_peer: targetPeer,
+				sdp,
+			}));
+		}
+	}
+
+	/** Send WebRTC answer to a peer (P2P signaling). */
+	sendWebRtcAnswer(targetPeer: string, sdp: string): void {
+		if (this.ws?.readyState === WebSocket.OPEN) {
+			this.ws.send(JSON.stringify({
+				type: "web_rtc_answer",
+				project_id: this.roomId,
+				target_peer: targetPeer,
+				sdp,
+			}));
+		}
+	}
+
+	/** Send WebRTC ICE candidate to a peer (P2P signaling). */
+	sendWebRtcIce(targetPeer: string, candidate: string): void {
+		if (this.ws?.readyState === WebSocket.OPEN) {
+			this.ws.send(JSON.stringify({
+				type: "web_rtc_ice",
+				project_id: this.roomId,
+				target_peer: targetPeer,
+				candidate,
+			}));
+		}
+	}
+
 	/** Register a handler for incoming CRDT deltas. */
 	onDelta(fn: CrdtDeltaHandler): () => void {
 		this.deltaListeners.push(fn);

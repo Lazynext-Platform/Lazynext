@@ -14,7 +14,8 @@ async function getAuthToken(): Promise<string | null> {
     const session = await auth.api.getSession({
       headers: await headers(),
     });
-    return session?.token ?? null;
+    // Better Auth stores the token in session.session.token
+    return (session as any)?.session?.token ?? null;
   } catch {
     return null;
   }
