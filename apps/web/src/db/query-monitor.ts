@@ -124,7 +124,8 @@ function getTracer(): OtelTracer | null {
 	if (otelTracer) return otelTracer;
 	try {
 		// Dynamic import so we don't crash if OTEL is not configured
-		const otel = require("@opentelemetry/api") as {
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+			const otel = require("@opentelemetry/api") as {
 			trace: { getTracer(name: string, version: string): OtelTracer };
 		};
 		otelTracer = otel.trace.getTracer("lazynext-db", "1.0.0");
