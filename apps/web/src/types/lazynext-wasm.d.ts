@@ -69,27 +69,27 @@ declare module "lazynext-wasm" {
   export class NLEState {
     constructor(...args: unknown[]);
     addTrack(id: string, kind: string): void;
-    getProjectData(): unknown;
+    getProjectData(): any;
     loadProjectData(data: unknown): void;
     play(): void;
     pause(): void;
     setFrame(frame: number): void;
     getFrame(): number;
     getIsPlaying(): boolean;
-    updateClip(...args: unknown[]): void;
-    splitClip(...args: unknown[]): void;
-    trimClip(...args: unknown[]): void;
+    updateClip(...args: unknown[]): any;
+    splitClip(...args: unknown[]): any;
+    trimClip(...args: unknown[]): any;
   }
 
   // ── GPU & Compositor ────────────────────────────────────────────────
   export function initializeGpu(): boolean;
-  export function initCompositor(width: number, height: number): boolean;
-  export function resizeCompositor(width: number, height: number): void;
+  export function initCompositor(...args: unknown[]): boolean;
+  export function resizeCompositor(...args: unknown[]): void;
   export function getCompositorCanvas(): HTMLCanvasElement | null;
-  export function uploadTexture(id: string, texture: unknown): void;
+  export function uploadTexture(...args: unknown[]): void;
   export function releaseTexture(id: string): void;
-  export function renderFrame(descriptor: unknown): unknown;
-  export function renderProjectFrame(config: unknown): unknown;
+  export function renderFrame(...args: unknown[]): unknown;
+  export function renderProjectFrame(...args: unknown[]): unknown;
 
   export function applyEffectPasses(...args: unknown[]): OffscreenCanvas;
   export function applyMaskFeatherWasm(...args: unknown[]): OffscreenCanvas;
