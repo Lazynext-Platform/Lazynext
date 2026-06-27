@@ -211,6 +211,9 @@ mod tests {
         let cam = StereoscopicCamera::new("L", "R");
         let left = cam.eye_offset(false);
         let right = cam.eye_offset(true);
-        assert!((left + right).abs() < 0.01, "Eye offsets should be symmetric");
+        assert!(
+            (left + right).abs() < 0.01,
+            "Eye offsets should be symmetric"
+        );
     }
 }

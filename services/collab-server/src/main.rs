@@ -7,10 +7,10 @@
 //!   - In-memory state via DashMap (production: PostgreSQL-backed)
 
 use axum::{
+    Extension, Router,
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
     response::IntoResponse,
     routing::get,
-    Extension, Router,
 };
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
@@ -21,23 +21,62 @@ use tracing::info;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 enum ClientMessage {
-    Join { project_id: String, token: String },
-    CrdtDelta { project_id: String, delta: serde_json::Value },
-    WebRtcOffer { project_id: String, target_peer: String, sdp: String },
-    WebRtcAnswer { project_id: String, target_peer: String, sdp: String },
-    WebRtcIce { project_id: String, target_peer: String, candidate: String },
+    Join {
+        project_id: String,
+        token: String,
+    },
+    CrdtDelta {
+        project_id: String,
+        delta: serde_json::Value,
+    },
+    WebRtcOffer {
+        project_id: String,
+        target_peer: String,
+        sdp: String,
+    },
+    WebRtcAnswer {
+        project_id: String,
+        target_peer: String,
+        sdp: String,
+    },
+    WebRtcIce {
+        project_id: String,
+        target_peer: String,
+        candidate: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 enum ServerMessage {
-    CrdtDelta { project_id: String, sender_peer: String, delta: serde_json::Value },
-    PeerJoined { project_id: String, peer_id: String },
-    PeerLeft { project_id: String, peer_id: String },
-    WebRtcOffer { sender_peer: String, sdp: String },
-    WebRtcAnswer { sender_peer: String, sdp: String },
-    WebRtcIce { sender_peer: String, candidate: String },
-    Error { message: String },
+    CrdtDelta {
+        project_id: String,
+        sender_peer: String,
+        delta: serde_json::Value,
+    },
+    PeerJoined {
+        project_id: String,
+        peer_id: String,
+    },
+    PeerLeft {
+        project_id: String,
+        peer_id: String,
+    },
+    WebRtcOffer {
+        sender_peer: String,
+        sdp: String,
+    },
+    WebRtcAnswer {
+        sender_peer: String,
+        sdp: String,
+    },
+    WebRtcIce {
+        sender_peer: String,
+        candidate: String,
+    },
+    Error {
+        message: String,
+    },
 }
 
 struct AppState {
@@ -48,14 +87,19 @@ struct AppState {
 fn verify_token(token: &str) -> Result<String, String> {
     let secret = std::env::var("BETTER_AUTH_SECRET")
         .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-32".to_string());
-    use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+    use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
     let mut validation = Validation::new(Algorithm::HS256);
     validation.validate_exp = true;
     validation.set_required_spec_claims(&["exp", "sub"]);
     let key = DecodingKey::from_secret(secret.as_bytes());
     let data = decode::<serde_json::Value>(token, &key, &validation)
         .map_err(|e| format!("JWT verification failed: {}", e))?;
-    Ok(data.claims.get("sub").and_then(|v| v.as_str()).unwrap_or("anonymous").to_string())
+    Ok(data
+        .claims
+        .get("sub")
+        .and_then(|v| v.as_str())
+        .unwrap_or("anonymous")
+        .to_string())
 }
 
 fn send_msg(msg: &ServerMessage) -> String {
@@ -76,19 +120,31 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
         let cm: ClientMessage = match serde_json::from_str(&text) {
             Ok(m) => m,
             Err(e) => {
-                let _ = socket.send(Message::Text(send_msg(&ServerMessage::Error {
-                    message: format!("Invalid message: {}", e),
-                }).into())).await;
+                let _ = socket
+                    .send(Message::Text(
+                        send_msg(&ServerMessage::Error {
+                            message: format!("Invalid message: {}", e),
+                        })
+                        .into(),
+                    ))
+                    .await;
                 continue;
             }
         };
 
         match cm {
-            ClientMessage::Join { project_id: pid, token } => {
+            ClientMessage::Join {
+                project_id: pid,
+                token,
+            } => {
                 let sub = match verify_token(&token) {
                     Ok(s) => s,
                     Err(e) => {
-                        let _ = socket.send(Message::Text(send_msg(&ServerMessage::Error { message: e }).into())).await;
+                        let _ = socket
+                            .send(Message::Text(
+                                send_msg(&ServerMessage::Error { message: e }).into(),
+                            ))
+                            .await;
                         continue;
                     }
                 };
@@ -96,56 +152,86 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
                     state.peer_rooms.remove(&peer_id);
                     if let Some(tx) = state.rooms.get(&project_id) {
                         let _ = tx.send(send_msg(&ServerMessage::PeerLeft {
-                            project_id: project_id.clone(), peer_id: peer_id.clone(),
+                            project_id: project_id.clone(),
+                            peer_id: peer_id.clone(),
                         }));
                     }
                 }
-                peer_id = format!("{}-{}", sub, uuid::Uuid::new_v4().to_string().split('-').next().unwrap_or("x"));
+                peer_id = format!(
+                    "{}-{}",
+                    sub,
+                    uuid::Uuid::new_v4()
+                        .to_string()
+                        .split('-')
+                        .next()
+                        .unwrap_or("x")
+                );
                 project_id = pid.clone();
-                let tx = state.rooms.entry(project_id.clone()).or_insert_with(|| {
-                    let (tx, _) = tokio::sync::broadcast::channel(256);
-                    tx
-                }).clone();
+                let tx = state
+                    .rooms
+                    .entry(project_id.clone())
+                    .or_insert_with(|| {
+                        let (tx, _) = tokio::sync::broadcast::channel(256);
+                        tx
+                    })
+                    .clone();
                 state.peer_rooms.insert(peer_id.clone(), project_id.clone());
                 let _ = tx.send(send_msg(&ServerMessage::PeerJoined {
-                    project_id: project_id.clone(), peer_id: peer_id.clone(),
+                    project_id: project_id.clone(),
+                    peer_id: peer_id.clone(),
                 }));
                 info!(%peer_id, %project_id, "Peer joined room");
             }
 
-            ClientMessage::CrdtDelta { project_id: pid, delta } => {
+            ClientMessage::CrdtDelta {
+                project_id: pid,
+                delta,
+            } => {
                 if let Some(tx) = state.rooms.get(&pid) {
                     let _ = tx.send(send_msg(&ServerMessage::CrdtDelta {
-                        project_id: pid, sender_peer: peer_id.clone(), delta,
+                        project_id: pid,
+                        sender_peer: peer_id.clone(),
+                        delta,
                     }));
                 }
             }
 
-            ClientMessage::WebRtcOffer { target_peer, sdp, .. } => {
+            ClientMessage::WebRtcOffer {
+                target_peer, sdp, ..
+            } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer) {
                     if let Some(tx) = state.rooms.get(rid.value()) {
                         let _ = tx.send(send_msg(&ServerMessage::WebRtcOffer {
-                            sender_peer: peer_id.clone(), sdp,
+                            sender_peer: peer_id.clone(),
+                            sdp,
                         }));
                     }
                 }
             }
 
-            ClientMessage::WebRtcAnswer { target_peer, sdp, .. } => {
+            ClientMessage::WebRtcAnswer {
+                target_peer, sdp, ..
+            } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer) {
                     if let Some(tx) = state.rooms.get(rid.value()) {
                         let _ = tx.send(send_msg(&ServerMessage::WebRtcAnswer {
-                            sender_peer: peer_id.clone(), sdp,
+                            sender_peer: peer_id.clone(),
+                            sdp,
                         }));
                     }
                 }
             }
 
-            ClientMessage::WebRtcIce { target_peer, candidate, .. } => {
+            ClientMessage::WebRtcIce {
+                target_peer,
+                candidate,
+                ..
+            } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer) {
                     if let Some(tx) = state.rooms.get(rid.value()) {
                         let _ = tx.send(send_msg(&ServerMessage::WebRtcIce {
-                            sender_peer: peer_id.clone(), candidate,
+                            sender_peer: peer_id.clone(),
+                            candidate,
                         }));
                     }
                 }
@@ -157,14 +243,18 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
         state.peer_rooms.remove(&peer_id);
         if let Some(tx) = state.rooms.get(&project_id) {
             let _ = tx.send(send_msg(&ServerMessage::PeerLeft {
-                project_id: project_id.clone(), peer_id: peer_id.clone(),
+                project_id: project_id.clone(),
+                peer_id: peer_id.clone(),
             }));
         }
         info!(%peer_id, %project_id, "Peer disconnected");
     }
 }
 
-async fn ws_handler(ws: WebSocketUpgrade, Extension(state): Extension<Arc<AppState>>) -> impl IntoResponse {
+async fn ws_handler(
+    ws: WebSocketUpgrade,
+    Extension(state): Extension<Arc<AppState>>,
+) -> impl IntoResponse {
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
@@ -181,11 +271,22 @@ async fn main() {
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .route("/health", get(|| async { "OK" }))
-        .route("/api/save", axum::routing::post(|| async { axum::Json(serde_json::json!({"saved": true})) }))
-        .route("/api/load/:project_id", axum::routing::get(|| async { axum::Json(serde_json::json!({"state": {}, "loaded": true})) }))
+        .route(
+            "/api/save",
+            axum::routing::post(|| async { axum::Json(serde_json::json!({"saved": true})) }),
+        )
+        .route(
+            "/api/load/:project_id",
+            axum::routing::get(|| async {
+                axum::Json(serde_json::json!({"state": {}, "loaded": true}))
+            }),
+        )
         .layer(Extension(state));
 
-    let port: u16 = std::env::var("COLLAB_PORT").unwrap_or_else(|_| "8004".to_string()).parse().unwrap_or(8004);
+    let port: u16 = std::env::var("COLLAB_PORT")
+        .unwrap_or_else(|_| "8004".to_string())
+        .parse()
+        .unwrap_or(8004);
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     info!("📡 Collab WebSocket server on ws://{}", addr);
 

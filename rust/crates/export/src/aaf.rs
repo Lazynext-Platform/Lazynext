@@ -13,11 +13,15 @@ use std::io::Write;
 pub struct AAFExporter;
 
 impl Default for AAFExporter {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AAFExporter {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 
     /// Generate a structured AAF XML manifest compatible with Avid/Premiere.
     pub fn generate_aaf(&self, project: &ProjectData, output_path: &str) -> Result<(), String> {
@@ -26,18 +30,26 @@ impl AAFExporter {
         let total_clips: usize = project.tracks.iter().map(|t| t.clips.len()).sum();
 
         let mut aaf = String::new();
-        aaf.push_str(r#"<?xml version="1.0" encoding="UTF-8"?>
+        aaf.push_str(
+            r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE AAF SYSTEM "http://aaf.sourceforge.net/aaf.dtd">
 <AAF Version="1.1" GeneratedBy="Lazynext" xmlns="http://aaf.sourceforge.net/1.0">
   <Header>
-    <GenerationUID>urn:uuid:"#);
+    <GenerationUID>urn:uuid:"#,
+        );
         aaf.push_str(&uid.to_string());
         aaf.push_str("</GenerationUID>\n");
-        aaf.push_str(&format!("    <ProjectName>{}</ProjectName>\n", xml_escape(&project.name)));
+        aaf.push_str(&format!(
+            "    <ProjectName>{}</ProjectName>\n",
+            xml_escape(&project.name)
+        ));
         aaf.push_str(&format!("    <Framerate>{}</Framerate>\n", project.fps));
         aaf.push_str(&format!("    <Width>{}</Width>\n", project.width));
         aaf.push_str(&format!("    <Height>{}</Height>\n", project.height));
-        aaf.push_str(&format!("    <TrackCount>{}</TrackCount>\n", project.tracks.len()));
+        aaf.push_str(&format!(
+            "    <TrackCount>{}</TrackCount>\n",
+            project.tracks.len()
+        ));
         aaf.push_str(&format!("    <ClipCount>{}</ClipCount>\n", total_clips));
         aaf.push_str("  </Header>\n  <Composition>\n");
 
@@ -91,8 +103,8 @@ impl AAFExporter {
         aaf.push_str("\n    <!-- Source media references go here -->");
         aaf.push_str("\n  </EssenceData>\n</AAF>\n");
 
-        let mut file = File::create(output_path)
-            .map_err(|e| format!("Failed to create AAF file: {e}"))?;
+        let mut file =
+            File::create(output_path).map_err(|e| format!("Failed to create AAF file: {e}"))?;
         file.write_all(aaf.as_bytes())
             .map_err(|e| format!("Failed to write AAF: {e}"))?;
 

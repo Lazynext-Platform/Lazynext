@@ -257,8 +257,7 @@ mod tests {
             output: "out".to_string(),
         };
 
-        let mut scale_f =
-            Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
+        let mut scale_f = Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
         scale_f.inputs.push("0:v".to_string());
 
         let mut fps_f = Filter::fps(fps_label, FrameRate::Fps60);
@@ -291,8 +290,7 @@ mod tests {
             output: "out".to_string(),
         };
 
-        let mut scale_f =
-            Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
+        let mut scale_f = Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
         scale_f.inputs.push("0:v".to_string());
 
         let mut hue_f = Filter::hue(hue_label, 10.0, 1.3);

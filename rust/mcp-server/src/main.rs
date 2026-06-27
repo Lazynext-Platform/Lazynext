@@ -281,7 +281,9 @@ async fn main() {
                     }
 
                     "add_track" => {
-                        let kind = req["params"]["arguments"]["kind"].as_str().unwrap_or("video");
+                        let kind = req["params"]["arguments"]["kind"]
+                            .as_str()
+                            .unwrap_or("video");
                         let track_id = req["params"]["arguments"]["id"]
                             .as_str()
                             .map(|s| s.to_string())
@@ -298,14 +300,21 @@ async fn main() {
                     }
 
                     "add_clip" => {
-                        let track_idx = req["params"]["arguments"]["track_idx"].as_u64().unwrap_or(0) as usize;
+                        let track_idx = req["params"]["arguments"]["track_idx"]
+                            .as_u64()
+                            .unwrap_or(0) as usize;
                         let clip_id = req["params"]["arguments"]["id"]
                             .as_str()
                             .map(|s| s.to_string())
                             .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
-                        let clip_type = req["params"]["arguments"]["clip_type"].as_str().unwrap_or("video");
-                        let name = req["params"]["arguments"]["name"].as_str().unwrap_or("Untitled Clip");
-                        let start = req["params"]["arguments"]["start"].as_u64().unwrap_or(0) as u32;
+                        let clip_type = req["params"]["arguments"]["clip_type"]
+                            .as_str()
+                            .unwrap_or("video");
+                        let name = req["params"]["arguments"]["name"]
+                            .as_str()
+                            .unwrap_or("Untitled Clip");
+                        let start =
+                            req["params"]["arguments"]["start"].as_u64().unwrap_or(0) as u32;
                         let end = req["params"]["arguments"]["end"].as_u64().unwrap_or(300) as u32;
                         nle.add_clip_to_track(
                             track_idx,
@@ -326,12 +335,19 @@ async fn main() {
                     }
 
                     "set_keyframe" => {
-                        let track_idx = req["params"]["arguments"]["track_idx"].as_u64().unwrap_or(0) as usize;
+                        let track_idx = req["params"]["arguments"]["track_idx"]
+                            .as_u64()
+                            .unwrap_or(0) as usize;
                         let clip_id = req["params"]["arguments"]["clip_id"].as_str().unwrap_or("");
-                        let property = req["params"]["arguments"]["property"].as_str().unwrap_or("opacity");
-                        let frame = req["params"]["arguments"]["frame"].as_u64().unwrap_or(0) as u32;
+                        let property = req["params"]["arguments"]["property"]
+                            .as_str()
+                            .unwrap_or("opacity");
+                        let frame =
+                            req["params"]["arguments"]["frame"].as_u64().unwrap_or(0) as u32;
                         let value = req["params"]["arguments"]["value"].as_f64().unwrap_or(0.0);
-                        let easing_str = req["params"]["arguments"]["easing"].as_str().unwrap_or("linear");
+                        let easing_str = req["params"]["arguments"]["easing"]
+                            .as_str()
+                            .unwrap_or("linear");
                         let easing = match easing_str {
                             "step" => state::keyframe::Easing::Step,
                             "ease_in" => state::keyframe::Easing::EaseIn,
@@ -339,7 +355,8 @@ async fn main() {
                             "ease_in_out" => state::keyframe::Easing::EaseInOut,
                             _ => state::keyframe::Easing::Linear,
                         };
-                        let ok = nle.set_clip_keyframe(track_idx, clip_id, property, frame, value, easing);
+                        let ok = nle
+                            .set_clip_keyframe(track_idx, clip_id, property, frame, value, easing);
                         json!({
                             "jsonrpc": "2.0",
                             "id": id,
@@ -355,11 +372,20 @@ async fn main() {
                     }
 
                     "export_project" => {
-                        let format = req["params"]["arguments"]["format"].as_str().unwrap_or("mp4");
-                        let output_path = req["params"]["arguments"]["output_path"].as_str().unwrap_or("./out/export.mp4");
-                        let width = req["params"]["arguments"]["width"].as_u64().unwrap_or(1920) as u32;
-                        let height = req["params"]["arguments"]["height"].as_u64().unwrap_or(1080) as u32;
-                        let framerate = req["params"]["arguments"]["framerate"].as_u64().unwrap_or(30) as u32;
+                        let format = req["params"]["arguments"]["format"]
+                            .as_str()
+                            .unwrap_or("mp4");
+                        let output_path = req["params"]["arguments"]["output_path"]
+                            .as_str()
+                            .unwrap_or("./out/export.mp4");
+                        let width =
+                            req["params"]["arguments"]["width"].as_u64().unwrap_or(1920) as u32;
+                        let height = req["params"]["arguments"]["height"]
+                            .as_u64()
+                            .unwrap_or(1080) as u32;
+                        let framerate = req["params"]["arguments"]["framerate"]
+                            .as_u64()
+                            .unwrap_or(30) as u32;
                         let total_frames = framerate * 10;
 
                         let config = lazynext_export::ExportConfig {
@@ -379,9 +405,12 @@ async fn main() {
 
                         let pipeline = lazynext_export::ExportPipeline::new(config);
                         // Generate a test pattern for export (GPU compositor not available in MCP stdio context)
-                        match pipeline.export(|frame_idx| {
-                            generate_test_pattern(frame_idx, total_frames, width, height)
-                        }).await {
+                        match pipeline
+                            .export(|frame_idx| {
+                                generate_test_pattern(frame_idx, total_frames, width, height)
+                            })
+                            .await
+                        {
                             Ok(()) => json!({
                                 "jsonrpc": "2.0",
                                 "id": id,
@@ -402,7 +431,9 @@ async fn main() {
                     }
 
                     "analyze_media" => {
-                        let file_path = req["params"]["arguments"]["file_path"].as_str().unwrap_or("");
+                        let file_path = req["params"]["arguments"]["file_path"]
+                            .as_str()
+                            .unwrap_or("");
                         if file_path.is_empty() {
                             json!({
                                 "jsonrpc": "2.0",
@@ -417,11 +448,18 @@ async fn main() {
                             // In production: decode the audio file, pass samples to extract_silence
                             let mock_samples = vec![0.0f64; 44100]; // 1 sec silence
                             let analysis = editor_core::processing::extract_silence(
-                                &mock_samples, 44100, -40.0, 500
+                                &mock_samples,
+                                44100,
+                                -40.0,
+                                500,
                             );
 
                             // Also run scene detection if we had frame data
-                            let cuts_count = if analysis.is_empty() { 0 } else { analysis.len() };
+                            let cuts_count = if analysis.is_empty() {
+                                0
+                            } else {
+                                analysis.len()
+                            };
                             let result_text = format!(
                                 "Media analysis for '{}':\n\
                                  Silence segments detected: {}\n\
@@ -541,7 +579,8 @@ async fn main() {
                             "height": pd.height,
                             "track_count": pd.tracks.len(),
                             "clip_count": total_clips
-                        })).unwrap_or_default()
+                        }))
+                        .unwrap_or_default()
                     }
                     "lazynext://timeline/tracks" => {
                         let pd = nle.get_project_data();
@@ -551,7 +590,7 @@ async fn main() {
                         let ops: Vec<_> = nle.op_log.iter().collect();
                         serde_json::to_string_pretty(&ops).unwrap_or_default()
                     }
-                    _ => format!("Resource not found: {}", uri)
+                    _ => format!("Resource not found: {}", uri),
                 };
                 json!({
                     "jsonrpc": "2.0",
@@ -572,24 +611,39 @@ async fn main() {
                 let (description, text) = match prompt_name {
                     "edit_video" => {
                         let intent = args["intent"].as_str().unwrap_or("cut silence");
-                        ("Edit a video via natural language",
-                         format!("Use the autonomous_edit tool with prompt: \"{}\" to process the current timeline. Then use get_timeline_state to verify the changes.", intent))
+                        (
+                            "Edit a video via natural language",
+                            format!(
+                                "Use the autonomous_edit tool with prompt: \"{}\" to process the current timeline. Then use get_timeline_state to verify the changes.",
+                                intent
+                            ),
+                        )
                     }
                     "create_project" => {
                         let name = args["name"].as_str().unwrap_or("New Project");
                         let width = args["width"].as_u64().unwrap_or(1920);
                         let height = args["height"].as_u64().unwrap_or(1080);
                         let framerate = args["framerate"].as_u64().unwrap_or(24);
-                        ("Create a new video project",
-                         format!("Create a new project named \"{}\" at {}x{} @ {}fps. Use add_track to add video and audio tracks.", name, width, height, framerate))
+                        (
+                            "Create a new video project",
+                            format!(
+                                "Create a new project named \"{}\" at {}x{} @ {}fps. Use add_track to add video and audio tracks.",
+                                name, width, height, framerate
+                            ),
+                        )
                     }
                     "export_timeline" => {
                         let format = args["format"].as_str().unwrap_or("mp4");
                         let path = args["output_path"].as_str().unwrap_or("./out/export.mp4");
-                        ("Export the timeline",
-                         format!("Use the export_project tool with format=\"{}\" and output_path=\"{}\" to render the final video.", format, path))
+                        (
+                            "Export the timeline",
+                            format!(
+                                "Use the export_project tool with format=\"{}\" and output_path=\"{}\" to render the final video.",
+                                format, path
+                            ),
+                        )
                     }
-                    _ => ("Unknown prompt", "Prompt not found.".to_string())
+                    _ => ("Unknown prompt", "Prompt not found.".to_string()),
                 };
                 json!({
                     "jsonrpc": "2.0",

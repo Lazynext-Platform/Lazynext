@@ -103,9 +103,14 @@ impl OpticalFlowEngine {
                     }
 
                     let best = self.block_match(
-                        frame_a, frame_b,
-                        width, height, stride,
-                        x0, y0, bs,
+                        frame_a,
+                        frame_b,
+                        width,
+                        height,
+                        stride,
+                        x0,
+                        y0,
+                        bs,
                         sr / scale,
                     );
 
@@ -147,9 +152,13 @@ impl OpticalFlowEngine {
         for dy in (-sr..=sr).step_by(step as usize) {
             for dx in (-sr..=sr).step_by(step as usize) {
                 let sad = self.compute_sad(
-                    frame_a, frame_b,
-                    width, height, stride,
-                    x0, y0,
+                    frame_a,
+                    frame_b,
+                    width,
+                    height,
+                    stride,
+                    x0,
+                    y0,
                     (x0 as i32 + dx).max(0) as u32,
                     (y0 as i32 + dy).max(0) as u32,
                     bs,
@@ -173,9 +182,13 @@ impl OpticalFlowEngine {
                     continue;
                 }
                 let sad = self.compute_sad(
-                    frame_a, frame_b,
-                    width, height, stride,
-                    x0, y0,
+                    frame_a,
+                    frame_b,
+                    width,
+                    height,
+                    stride,
+                    x0,
+                    y0,
                     (x0 as i32 + dx).max(0) as u32,
                     (y0 as i32 + dy).max(0) as u32,
                     bs,
@@ -228,7 +241,8 @@ impl OpticalFlowEngine {
 
                 if a_idx + 2 < frame_a.len() && b_idx + 2 < frame_b.len() {
                     for c in 0..3 {
-                        let diff = (frame_a[a_idx + c] as i16 - frame_b[b_idx + c] as i16).abs() as u64;
+                        let diff =
+                            (frame_a[a_idx + c] as i16 - frame_b[b_idx + c] as i16).abs() as u64;
                         sad += diff;
                     }
                 }
@@ -241,12 +255,7 @@ impl OpticalFlowEngine {
     ///
     /// Generates an intermediate frame at position `blend_factor` (0.0 = frame A, 1.0 = frame B)
     /// using optical flow to warp pixels along motion trajectories.
-    pub fn interpolate_frames(
-        &self,
-        frame_a: &[u8],
-        frame_b: &[u8],
-        blend_factor: f32,
-    ) -> Vec<u8> {
+    pub fn interpolate_frames(&self, frame_a: &[u8], frame_b: &[u8], blend_factor: f32) -> Vec<u8> {
         if frame_a.len() != frame_b.len() {
             return frame_a.to_vec();
         }
@@ -303,8 +312,24 @@ impl OpticalFlowEngine {
                 let by = y as f32 - fwd_dy * (1.0 - blend_factor);
 
                 for c in 0..3 {
-                    let a_val = sample_bilinear(frame_a, width as usize, height as usize, stride, ax, ay, c);
-                    let b_val = sample_bilinear(frame_b, width as usize, height as usize, stride, bx, by, c);
+                    let a_val = sample_bilinear(
+                        frame_a,
+                        width as usize,
+                        height as usize,
+                        stride,
+                        ax,
+                        ay,
+                        c,
+                    );
+                    let b_val = sample_bilinear(
+                        frame_b,
+                        width as usize,
+                        height as usize,
+                        stride,
+                        bx,
+                        by,
+                        c,
+                    );
 
                     result[idx + c] = (a_val + (b_val - a_val) * blend_factor) as u8;
                 }
@@ -362,11 +387,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
     ///
     /// Example: speed_ramp(frames, 0.5) doubles the number of frames (50% speed)
     /// by interpolating between each pair of input frames.
-    pub fn speed_ramp(
-        &self,
-        frames: &[Vec<u8>],
-        speed_multiplier: f32,
-    ) -> Vec<Vec<u8>> {
+    pub fn speed_ramp(&self, frames: &[Vec<u8>], speed_multiplier: f32) -> Vec<Vec<u8>> {
         if frames.len() < 2 || speed_multiplier >= 1.0 {
             return frames.to_vec();
         }
@@ -466,8 +487,12 @@ mod tests {
         let flow = engine.compute_flow(&frame, &frame, 32, 32);
         // Identical frames should have near-zero flow
         for v in &flow {
-            assert!(v.dx.abs() < 20.0 && v.dy.abs() < 20.0,
-                "Flow should be near zero for identical frames, got dx={} dy={}", v.dx, v.dy);
+            assert!(
+                v.dx.abs() < 20.0 && v.dy.abs() < 20.0,
+                "Flow should be near zero for identical frames, got dx={} dy={}",
+                v.dx,
+                v.dy
+            );
         }
     }
 
@@ -499,6 +524,10 @@ mod tests {
         }
         // Center (1.5, 1.5) should be around 128
         let val = sample_bilinear(&data, width, height, 4, 1.5, 1.5, 0);
-        assert!(val >= 0.0 && val <= 255.0, "Value should be in range, got {}", val);
+        assert!(
+            val >= 0.0 && val <= 255.0,
+            "Value should be in range, got {}",
+            val
+        );
     }
 }

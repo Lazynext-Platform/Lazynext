@@ -57,40 +57,38 @@ impl AcesColorPipeline {
         match self.input_transform {
             // ARRI LogC4 → ACES AP0 (from ARRI_LogC4_to_ACES2065-1.csv)
             InputDeviceTransform::ArriLogC4 => [
-                [ 1.5394, -0.5514,  0.0120],
-                [-0.0260,  1.2753, -0.2493],
-                [-0.0109, -0.1559,  1.1668],
+                [1.5394, -0.5514, 0.0120],
+                [-0.0260, 1.2753, -0.2493],
+                [-0.0109, -0.1559, 1.1668],
             ],
             // RED Log3G10 → ACES AP0 (from REDWideGamutRGB_Log3G10_to_ACES2065-1.csv)
             InputDeviceTransform::RedLogFilm => [
-                [ 1.6175, -0.5374, -0.0801],
-                [-0.0706,  1.3344, -0.2638],
-                [-0.0199, -0.3094,  1.3293],
+                [1.6175, -0.5374, -0.0801],
+                [-0.0706, 1.3344, -0.2638],
+                [-0.0199, -0.3094, 1.3293],
             ],
             // Sony S-Log3 / S-Gamut3.cine → ACES AP0
             InputDeviceTransform::SonySLog3 => [
-                [ 1.5070, -0.4738, -0.0332],
-                [-0.0855,  1.4017, -0.3162],
-                [-0.0138, -0.2730,  1.2868],
+                [1.5070, -0.4738, -0.0332],
+                [-0.0855, 1.4017, -0.3162],
+                [-0.0138, -0.2730, 1.2868],
             ],
             // Blackmagic Design Film Gen 5 → ACES AP0
             InputDeviceTransform::BlackmagicFilmGen5 => [
-                [ 1.3576, -0.3466, -0.0110],
-                [-0.0396,  1.2625, -0.2229],
-                [-0.0065, -0.2124,  1.2189],
+                [1.3576, -0.3466, -0.0110],
+                [-0.0396, 1.2625, -0.2229],
+                [-0.0065, -0.2124, 1.2189],
             ],
             // Canon Log 3 / Cinema Gamut → ACES AP0
             InputDeviceTransform::CanonLog3 => [
-                [ 1.4514, -0.4015, -0.0499],
-                [-0.0534,  1.2727, -0.2193],
-                [-0.0076, -0.2188,  1.2264],
+                [1.4514, -0.4015, -0.0499],
+                [-0.0534, 1.2727, -0.2193],
+                [-0.0076, -0.2188, 1.2264],
             ],
             // Rec.709 / sRGB → ACES AP0 (identity for already-linear data)
-            InputDeviceTransform::Rec709 | InputDeviceTransform::SRGB => [
-                [1.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 1.0],
-            ],
+            InputDeviceTransform::Rec709 | InputDeviceTransform::SRGB => {
+                [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+            }
         }
     }
 
@@ -100,33 +98,33 @@ impl AcesColorPipeline {
         match self.output_transform {
             // ACES AP0 → Rec.709 (standard SDR)
             OutputDeviceTransform::Rec709 => [
-                [ 1.0498, -0.0196, -0.0302],
-                [-0.0112,  1.0493, -0.0381],
-                [-0.0018, -0.0464,  1.0482],
+                [1.0498, -0.0196, -0.0302],
+                [-0.0112, 1.0493, -0.0381],
+                [-0.0018, -0.0464, 1.0482],
             ],
             // ACES AP0 → Rec.2020 (HDR)
             OutputDeviceTransform::Rec2020Hdr => [
-                [ 1.1681, -0.1594, -0.0087],
-                [-0.0045,  1.0862, -0.0817],
-                [ 0.0010, -0.0764,  1.0754],
+                [1.1681, -0.1594, -0.0087],
+                [-0.0045, 1.0862, -0.0817],
+                [0.0010, -0.0764, 1.0754],
             ],
             // ACES AP0 → DCI-P3 (theatrical)
             OutputDeviceTransform::DciP3 => [
-                [ 1.0975, -0.0816, -0.0159],
-                [-0.0144,  1.0754, -0.0610],
-                [-0.0011, -0.0541,  1.0552],
+                [1.0975, -0.0816, -0.0159],
+                [-0.0144, 1.0754, -0.0610],
+                [-0.0011, -0.0541, 1.0552],
             ],
             // ACES AP0 → sRGB (computer displays)
             OutputDeviceTransform::SRGB => [
-                [ 1.0498, -0.0196, -0.0302],
-                [-0.0112,  1.0493, -0.0381],
-                [-0.0018, -0.0464,  1.0482],
+                [1.0498, -0.0196, -0.0302],
+                [-0.0112, 1.0493, -0.0381],
+                [-0.0018, -0.0464, 1.0482],
             ],
             // ACES AP0 → Display P3 (Apple devices)
             OutputDeviceTransform::DisplayP3 => [
-                [ 1.0975, -0.0816, -0.0159],
-                [-0.0144,  1.0754, -0.0610],
-                [-0.0011, -0.0541,  1.0552],
+                [1.0975, -0.0816, -0.0159],
+                [-0.0144, 1.0754, -0.0610],
+                [-0.0011, -0.0541, 1.0552],
             ],
         }
     }
@@ -233,7 +231,10 @@ mod tests {
     fn test_black_remaps_to_near_black() {
         let pipe = AcesColorPipeline::new();
         let (r, g, b) = pipe.apply_pipeline(0.0, 0.0, 0.0);
-        assert!(r < 0.1 && g < 0.1 && b < 0.1, "Black should stay near black");
+        assert!(
+            r < 0.1 && g < 0.1 && b < 0.1,
+            "Black should stay near black"
+        );
     }
 
     #[test]

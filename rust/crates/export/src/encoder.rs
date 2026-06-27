@@ -23,7 +23,10 @@ pub enum ExportFormat {
 impl ExportFormat {
     /// Guess the export format from the output file extension.
     pub fn from_path(path: &str) -> Option<Self> {
-        let ext = std::path::Path::new(path).extension().and_then(|e| e.to_str()).unwrap_or("");
+        let ext = std::path::Path::new(path)
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("");
         match ext.to_lowercase().as_str() {
             "mp4" => Some(ExportFormat::Mp4),
             "mov" => Some(ExportFormat::Mov),

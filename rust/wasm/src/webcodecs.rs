@@ -67,7 +67,8 @@ impl VideoDecoderWrapper {
             output: on_frame.as_ref().unchecked_ref(),
             error: Closure::wrap(Box::new(move |e: JsValue| {
                 web_sys::console::error_1(&JsValue::from_str(&format!(
-                    "WebCodecs decode error: {:?}", e
+                    "WebCodecs decode error: {:?}",
+                    e
                 )));
             }) as Box<dyn FnMut(JsValue)>)
             .as_ref()
@@ -113,11 +114,8 @@ impl VideoDecoderWrapper {
             web_sys::EncodedVideoChunkType::Delta
         };
 
-        let mut chunk_init = web_sys::EncodedVideoChunkInit::new(
-            &chunk_data.buffer(),
-            timestamp,
-            chunk_type,
-        );
+        let mut chunk_init =
+            web_sys::EncodedVideoChunkInit::new(&chunk_data.buffer(), timestamp, chunk_type);
 
         if let Some(dur) = duration {
             chunk_init.duration(dur);

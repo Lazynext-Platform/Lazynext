@@ -46,7 +46,11 @@ fn test_token_bucket_refills_over_time() {
     tokens = (tokens + elapsed * refill_rate).min(capacity as f64);
 
     // Should have refilled ~10 tokens in 100ms at 100 tokens/sec
-    assert!(tokens >= 9.0, "Should have refilled at least 9 tokens, got {}", tokens);
+    assert!(
+        tokens >= 9.0,
+        "Should have refilled at least 9 tokens, got {}",
+        tokens
+    );
 }
 
 // ── Workspace Role Tests ───────────────────────────────────────────────────

@@ -107,7 +107,7 @@ mod tests {
         // contrast=2.0 should make dark pixels darker and light pixels lighter
         let processor = ColorGradingProcessor::new(2.0, 0.0, 1.0);
         let mut pixels = vec![
-            64, 64, 64, 255,   // darker than mid-gray
+            64, 64, 64, 255, // darker than mid-gray
             192, 192, 192, 255, // lighter than mid-gray
         ];
         processor.apply_grading(&mut pixels);
@@ -182,7 +182,7 @@ mod tests {
         // Mid-gray (128) stays anchored near 128 while extremes diverge.
         let processor = ColorGradingProcessor::new(2.0, 0.0, 1.0);
         let mut pixels = vec![
-            30, 30, 30, 255,    // well below mid-gray
+            30, 30, 30, 255, // well below mid-gray
             128, 128, 128, 255, // exactly at mid-gray
             220, 220, 220, 255, // well above mid-gray
         ];
@@ -227,19 +227,12 @@ mod tests {
         // value, so (channel - luma) is zero — saturation has no effect.
         // Only saturation varies; contrast=1.0 and brightness=0.0.
         let processor = ColorGradingProcessor::new(1.0, 0.0, 4.0);
-        let original = vec![
-            64u8, 64, 64, 255,
-            128, 128, 128, 200,
-            200, 200, 200, 128,
-        ];
+        let original = vec![64u8, 64, 64, 255, 128, 128, 128, 200, 200, 200, 200, 128];
         let mut pixels = original.clone();
         processor.apply_grading(&mut pixels);
         for i in 0..original.len() {
             let diff = (pixels[i] as i16 - original[i] as i16).unsigned_abs();
-            assert!(
-                diff <= 1,
-                "grayscale pixel at index {i} changed by {diff}"
-            );
+            assert!(diff <= 1, "grayscale pixel at index {i} changed by {diff}");
         }
     }
 
@@ -249,10 +242,7 @@ mod tests {
         // or arithmetic panics (NaN, overflow before clamping).
         let processor = ColorGradingProcessor::new(10.0, 2.0, 20.0);
         let mut pixels = vec![
-            0u8, 0, 0, 0,
-            255, 255, 255, 255,
-            128, 128, 128, 128,
-            10, 200, 50, 75,
+            0u8, 0, 0, 0, 255, 255, 255, 255, 128, 128, 128, 128, 10, 200, 50, 75,
         ];
         processor.apply_grading(&mut pixels);
         // Alpha channel is always preserved verbatim

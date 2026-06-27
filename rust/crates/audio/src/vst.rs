@@ -302,7 +302,8 @@ mod tests {
     #[test]
     fn test_load_unload() {
         let mut host = VstHost::new();
-        host.load_plugin("/Library/Audio/Plug-Ins/VST3/Test.vst3").ok();
+        host.load_plugin("/Library/Audio/Plug-Ins/VST3/Test.vst3")
+            .ok();
         assert!(host.is_loaded());
         host.unload();
         assert!(!host.is_loaded());
@@ -317,7 +318,10 @@ mod tests {
         let output = host.process_audio(input.clone());
         // Bypassed: output should equal input
         for (i, o) in input.iter().zip(output.iter()) {
-            assert!((i - o).abs() < 0.01, "Bypass should pass through unmodified");
+            assert!(
+                (i - o).abs() < 0.01,
+                "Bypass should pass through unmodified"
+            );
         }
     }
 
@@ -347,14 +351,23 @@ mod tests {
         // Stereo: 4 samples = 2 frames of L,R
         let input = vec![0.5, -0.5, 0.3, -0.3];
         let output = host.process_stereo(input);
-        assert_eq!(output.len(), 4, "Stereo output should preserve channel count");
+        assert_eq!(
+            output.len(),
+            4,
+            "Stereo output should preserve channel count"
+        );
     }
 
     #[test]
     fn test_midi_cleared_after_process() {
         let mut host = VstHost::new();
         host.load_plugin("test.vst3").ok();
-        host.send_midi(MidiEvent { delta_frames: 0, status: 0x90, data1: 60, data2: 100 });
+        host.send_midi(MidiEvent {
+            delta_frames: 0,
+            status: 0x90,
+            data1: 60,
+            data2: 100,
+        });
         host.process_audio(vec![0.0; 64]);
         // MIDI events should be cleared after processing
         assert!(host.midi_events.is_empty());

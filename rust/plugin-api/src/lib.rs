@@ -229,14 +229,18 @@ mod tests {
     #[test]
     fn test_wasm_runtime_list() {
         let mut runtime = WasmPluginRuntime::new();
-        runtime.load_plugin(&[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]).unwrap();
+        runtime
+            .load_plugin(&[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00])
+            .unwrap();
         assert_eq!(runtime.list_plugins().len(), 1);
     }
 
     #[test]
     fn test_wasm_runtime_unload() {
         let mut runtime = WasmPluginRuntime::new();
-        let id = runtime.load_plugin(&[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]).unwrap();
+        let id = runtime
+            .load_plugin(&[0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00])
+            .unwrap();
         runtime.unload_plugin(&id);
         assert!(!runtime.has_plugin(&id));
     }

@@ -63,7 +63,10 @@ impl P2PNetwork {
     /// Falls back to scanning common local addresses when UDP broadcast
     /// is unavailable (e.g. in restricted network environments).
     pub async fn discover(&mut self) -> Vec<Peer> {
-        info!("🕸️  [P2P] Starting LAN peer discovery on port {}...", self.local_port);
+        info!(
+            "🕸️  [P2P] Starting LAN peer discovery on port {}...",
+            self.local_port
+        );
 
         // Attempt real UDP broadcast discovery
         if let Ok(socket) = tokio::net::UdpSocket::bind("0.0.0.0:0").await {
@@ -78,7 +81,12 @@ impl P2PNetwork {
             });
 
             // Broadcast to common local subnets
-            for subnet in &["192.168.1.255", "192.168.0.255", "10.0.0.255", "255.255.255.255"] {
+            for subnet in &[
+                "192.168.1.255",
+                "192.168.0.255",
+                "10.0.0.255",
+                "255.255.255.255",
+            ] {
                 if let Ok(addr) = format!("{}:9001", subnet).parse::<SocketAddr>() {
                     if let Ok(data) = serde_json::to_vec(&discovery_msg) {
                         let _ = socket.send_to(&data, addr).await;
@@ -138,7 +146,9 @@ impl P2PNetwork {
         // If no peers discovered via broadcast, start a TCP listener for
         // direct connections and scan common LAN addresses
         if self.peers.is_empty() {
-            info!("   No peers found via broadcast — starting TCP listener for direct connections.");
+            info!(
+                "   No peers found via broadcast — starting TCP listener for direct connections."
+            );
             spawn_tcp_listener(self.local_port, self.peer_id.clone());
         }
 
@@ -252,7 +262,10 @@ fn spawn_tcp_listener(port: u16, _peer_id: String) {
             }
         };
 
-        info!("📡 [P2P] TCP listener ready on {} for peer connections.", addr);
+        info!(
+            "📡 [P2P] TCP listener ready on {} for peer connections.",
+            addr
+        );
 
         loop {
             match listener.accept().await {

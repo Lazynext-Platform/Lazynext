@@ -17,11 +17,15 @@ use uuid::Uuid;
 pub struct DCPGenerator;
 
 impl Default for DCPGenerator {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DCPGenerator {
-    pub fn new() -> Self { Self }
+    pub fn new() -> Self {
+        Self
+    }
 
     /// Generate the full DCP metadata package for a project.
     ///
@@ -48,27 +52,38 @@ impl DCPGenerator {
 
         // ── Composition Playlist (CPL) ─────────────────────────────
         let cpl = self.generate_cpl(
-            project, &cpl_id, &picture_asset_id, &audio_asset_id, total_frames,
+            project,
+            &cpl_id,
+            &picture_asset_id,
+            &audio_asset_id,
+            total_frames,
         );
-        let cpl_path = format!("{}/cpl_{}.xml", output_dir, hex::encode(&cpl_id.as_bytes()[..4]));
-        let mut f = File::create(&cpl_path)
-            .map_err(|e| format!("Failed to create CPL: {e}"))?;
+        let cpl_path = format!(
+            "{}/cpl_{}.xml",
+            output_dir,
+            hex::encode(&cpl_id.as_bytes()[..4])
+        );
+        let mut f = File::create(&cpl_path).map_err(|e| format!("Failed to create CPL: {e}"))?;
         f.write_all(cpl.as_bytes())
             .map_err(|e| format!("Failed to write CPL: {e}"))?;
 
         // ── Packing List (PKL) ────────────────────────────────────
         let pkl = self.generate_pkl(&pkl_id, &[&cpl_id, &picture_asset_id, &audio_asset_id]);
-        let pkl_path = format!("{}/pkl_{}.xml", output_dir, hex::encode(&pkl_id.as_bytes()[..4]));
-        let mut f = File::create(&pkl_path)
-            .map_err(|e| format!("Failed to create PKL: {e}"))?;
+        let pkl_path = format!(
+            "{}/pkl_{}.xml",
+            output_dir,
+            hex::encode(&pkl_id.as_bytes()[..4])
+        );
+        let mut f = File::create(&pkl_path).map_err(|e| format!("Failed to create PKL: {e}"))?;
         f.write_all(pkl.as_bytes())
             .map_err(|e| format!("Failed to write PKL: {e}"))?;
 
         // ── Asset Map ─────────────────────────────────────────────
-        let asset_map = self.generate_asset_map(&[(cpl_path.clone(), cpl_id), (pkl_path.clone(), pkl_id)]);
+        let asset_map =
+            self.generate_asset_map(&[(cpl_path.clone(), cpl_id), (pkl_path.clone(), pkl_id)]);
         let asset_path = format!("{}/ASSETMAP", output_dir);
-        let mut f = File::create(&asset_path)
-            .map_err(|e| format!("Failed to create ASSETMAP: {e}"))?;
+        let mut f =
+            File::create(&asset_path).map_err(|e| format!("Failed to create ASSETMAP: {e}"))?;
         f.write_all(asset_map.as_bytes())
             .map_err(|e| format!("Failed to write ASSETMAP: {e}"))?;
 
@@ -234,7 +249,8 @@ mod tests {
             width: 2048,
             height: 858,
             bg_color: [0.0, 0.0, 0.0, 1.0],
-            duration_frames: 2400, tracks: vec![],
+            duration_frames: 2400,
+            tracks: vec![],
         };
 
         let generator = DCPGenerator::new();

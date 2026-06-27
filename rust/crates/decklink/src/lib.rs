@@ -45,8 +45,12 @@ impl SdiVideoMode {
     pub fn width(&self) -> u32 {
         match self {
             Self::HD720p50 | Self::HD720p5994 | Self::HD720p60 => 1280,
-            Self::HD1080i50 | Self::HD1080i5994 | Self::HD1080p2398
-            | Self::HD1080p24 | Self::HD1080p25 | Self::HD1080p2997
+            Self::HD1080i50
+            | Self::HD1080i5994
+            | Self::HD1080p2398
+            | Self::HD1080p24
+            | Self::HD1080p25
+            | Self::HD1080p2997
             | Self::HD1080p30 => 1920,
             _ => 3840,
         }
@@ -133,9 +137,7 @@ impl DecklinkEngine {
     /// Returns the number of devices found.
     pub fn detect_devices(&self) -> usize {
         // In production: iterate IDeckLinkIterator
-        println!(
-            "[DeckLink] Scanning for devices... (simulated: 0 devices found)"
-        );
+        println!("[DeckLink] Scanning for devices... (simulated: 0 devices found)");
         0
     }
 

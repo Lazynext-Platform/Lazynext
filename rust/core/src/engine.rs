@@ -192,9 +192,8 @@ impl CoreEngine {
         let mut rendered = 0u32;
         pipeline
             .export(|frame_idx| {
-                let rgba = tokio::runtime::Handle::current().block_on(async {
-                    engine_ref.render_frame(frame_idx).await
-                });
+                let rgba = tokio::runtime::Handle::current()
+                    .block_on(async { engine_ref.render_frame(frame_idx).await });
                 rendered += 1;
                 if rendered % 30 == 0 {
                     println!("[CoreEngine] Rendered frame {}/{}", rendered, total_frames);

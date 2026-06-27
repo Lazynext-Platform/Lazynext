@@ -138,10 +138,7 @@ async fn main() {
 }
 
 /// Render a single project to the specified output format.
-async fn render_single(
-    project: &str,
-    args: &Args,
-) -> Result<String, String> {
+async fn render_single(project: &str, args: &Args) -> Result<String, String> {
     println!("📂 Loading project: {}", project);
 
     let mut engine = NLEState::new(
@@ -217,7 +214,9 @@ async fn render_single(
             if rgba.len() != frame_size {
                 eprintln!(
                     "⚠️  Frame {} size mismatch: expected {}, got {}",
-                    frame_idx, frame_size, rgba.len()
+                    frame_idx,
+                    frame_size,
+                    rgba.len()
                 );
             }
 
@@ -250,7 +249,11 @@ async fn render_single(
         "⏱️  Rendered {} frames in {:.1}s ({:.1} fps avg)",
         total_frames,
         elapsed,
-        if elapsed > 0.0 { total_frames as f64 / elapsed } else { 0.0 }
+        if elapsed > 0.0 {
+            total_frames as f64 / elapsed
+        } else {
+            0.0
+        }
     );
 
     Ok(out_path)

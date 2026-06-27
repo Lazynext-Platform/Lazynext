@@ -51,8 +51,7 @@ async fn main() {
         .with_max_level(Level::INFO)
         .with_target(false)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to set tracing subscriber");
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
 
     info!("Initializing Lazynext API Gateway...");
 
@@ -648,7 +647,10 @@ async fn handle_add_clip(
 
     // Find or create the target track
     let track_idx = if let Some(ref track_id) = payload.track_id {
-        pd.tracks.iter().position(|t| t.id == *track_id).unwrap_or(0)
+        pd.tracks
+            .iter()
+            .position(|t| t.id == *track_id)
+            .unwrap_or(0)
     } else if track_count == 0 {
         // Create a default track if none exist
         let kind = payload.track_kind.unwrap_or_else(|| "video".to_string());
@@ -658,7 +660,9 @@ async fn handle_add_clip(
         0
     };
 
-    let clip_id = payload.clip_id.unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
+    let clip_id = payload
+        .clip_id
+        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
     let clip_type = payload.clip_type.unwrap_or_else(|| "video".to_string());
     let name = payload.name.unwrap_or_else(|| "Untitled Clip".to_string());
     let start = payload.start.unwrap_or(0);
@@ -694,8 +698,8 @@ async fn handle_ai_ingest(
         return Json(json!({ "success": false, "error": "Insufficient permissions" }));
     }
 
-    let pre_processing_url = std::env::var("PRE_PROCESSING_URL")
-        .unwrap_or_else(|_| "http://localhost:8000".to_string());
+    let pre_processing_url =
+        std::env::var("PRE_PROCESSING_URL").unwrap_or_else(|_| "http://localhost:8000".to_string());
 
     let ingest_url = payload.url.unwrap_or_default();
     let source = payload.source.unwrap_or_else(|| "upload".to_string());
@@ -771,10 +775,7 @@ async fn handle_integration_connect(
             "https://api.instagram.com/oauth/authorize",
             "INSTAGRAM_APP_ID",
         ),
-        "vimeo" => (
-            "https://api.vimeo.com/oauth/authorize",
-            "VIMEO_CLIENT_ID",
-        ),
+        "vimeo" => ("https://api.vimeo.com/oauth/authorize", "VIMEO_CLIENT_ID"),
         _ => {
             return Json(json!({
                 "success": false,
@@ -787,7 +788,10 @@ async fn handle_integration_connect(
 
     if let Some(ref _code) = payload.code {
         // Exchange authorization code for access token
-        info!("[API Gateway] Exchanging code for {} OAuth token...", payload.platform);
+        info!(
+            "[API Gateway] Exchanging code for {} OAuth token...",
+            payload.platform
+        );
         // In production: POST to platform's token endpoint, store refresh token
         // For now: return a success with a placeholder token
         Json(json!({

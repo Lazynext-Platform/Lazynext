@@ -3,9 +3,9 @@
 //! Built on wgpu for rendering and winit for windowing.
 //! The Rust NLE engine (lazynext_core) drives all editing logic.
 
+use lazynext_core::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use lazynext_core::NLEState;
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -29,7 +29,11 @@ struct DesktopApp {
 
 impl DesktopApp {
     fn new(nle: Arc<Mutex<NLEState>>) -> Self {
-        Self { nle, window: None, gpu: None }
+        Self {
+            nle,
+            window: None,
+            gpu: None,
+        }
     }
 
     fn init_gpu(window: &Arc<Window>) -> GpuState {
@@ -40,7 +44,9 @@ impl DesktopApp {
             ..Default::default()
         });
 
-        let surface = instance.create_surface(window.clone()).expect("Failed to create wgpu surface");
+        let surface = instance
+            .create_surface(window.clone())
+            .expect("Failed to create wgpu surface");
 
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
@@ -82,19 +88,31 @@ impl DesktopApp {
         surface.configure(&device, &config);
         log::info!(
             "GPU initialized: {:?} — {}x{} ({:?})",
-            adapter.get_info(), size.width, size.height, surface_format
+            adapter.get_info(),
+            size.width,
+            size.height,
+            surface_format
         );
 
-        GpuState { surface, device, queue, config }
+        GpuState {
+            surface,
+            device,
+            queue,
+            config,
+        }
     }
 
     fn render(gpu: &GpuState) -> Result<(), wgpu::SurfaceError> {
         let output = gpu.surface.get_current_texture()?;
-        let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
 
-        let mut encoder = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("lazynext-frame-encoder"),
-        });
+        let mut encoder = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("lazynext-frame-encoder"),
+            });
 
         {
             let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -104,7 +122,10 @@ impl DesktopApp {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.02, g: 0.02, b: 0.02, a: 1.0,
+                            r: 0.02,
+                            g: 0.02,
+                            b: 0.02,
+                            a: 1.0,
                         }),
                         store: wgpu::StoreOp::Store,
                     },
@@ -141,7 +162,11 @@ impl ApplicationHandler for DesktopApp {
             .with_title("Lazynext Desktop — AI Video Editor")
             .with_inner_size(winit::dpi::LogicalSize::new(1920.0, 1080.0));
 
-        let window = Arc::new(event_loop.create_window(window_attrs).expect("Failed to create window"));
+        let window = Arc::new(
+            event_loop
+                .create_window(window_attrs)
+                .expect("Failed to create window"),
+        );
         log::info!("Window created: 1920x1080");
 
         let gpu = Self::init_gpu(&window);
@@ -150,7 +175,12 @@ impl ApplicationHandler for DesktopApp {
         window.request_redraw();
     }
 
-    fn window_event(&mut self, event_loop: &ActiveEventLoop, _window_id: winit::window::WindowId, event: WindowEvent) {
+    fn window_event(
+        &mut self,
+        event_loop: &ActiveEventLoop,
+        _window_id: winit::window::WindowId,
+        event: WindowEvent,
+    ) {
         match event {
             WindowEvent::CloseRequested => {
                 log::info!("Shutting down.");
@@ -190,14 +220,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     log::info!("🎬 Lazynext Desktop starting...");
 
     let nle = Arc::new(Mutex::new(NLEState::new(
-        "desktop_session_1".to_string(), "Desktop Project".to_string(), 24,
+        "desktop_session_1".to_string(),
+        "Desktop Project".to_string(),
+        24,
     )));
 
     {
         let mut state = nle.lock().await;
         state.add_track("V1".to_string(), "video".to_string());
         state.add_track("A1".to_string(), "audio".to_string());
-        log::info!("NLE engine ready: {} tracks", state.get_project_data().tracks.len());
+        log::info!(
+            "NLE engine ready: {} tracks",
+            state.get_project_data().tracks.len()
+        );
     }
 
     let event_loop = EventLoop::new()?;

@@ -30,7 +30,10 @@ pub struct RateLimitConfig {
 
 impl RateLimitConfig {
     pub const fn new(capacity: u32, refill_per_second: f64) -> Self {
-        Self { capacity, refill_rate: refill_per_second }
+        Self {
+            capacity,
+            refill_rate: refill_per_second,
+        }
     }
 }
 
@@ -57,7 +60,10 @@ struct TokenBucket {
 
 impl TokenBucket {
     fn new(capacity: u32) -> Self {
-        Self { tokens: capacity as f64, last_refill: Instant::now() }
+        Self {
+            tokens: capacity as f64,
+            last_refill: Instant::now(),
+        }
     }
 
     /// Attempt to consume one token. Returns `true` if allowed.
@@ -86,7 +92,10 @@ pub struct RateLimiter {
 
 impl RateLimiter {
     pub fn new(config: RateLimitConfig) -> Self {
-        Self { buckets: Mutex::new(HashMap::new()), config }
+        Self {
+            buckets: Mutex::new(HashMap::new()),
+            config,
+        }
     }
 
     /// Check if a request from the given key is allowed.
@@ -96,9 +105,9 @@ impl RateLimiter {
         if buckets.len() > 10_000 {
             buckets.retain(|_, b| b.last_refill.elapsed() < Duration::from_secs(300));
         }
-        let bucket = buckets.entry(key.to_string()).or_insert_with(|| {
-            TokenBucket::new(self.config.capacity)
-        });
+        let bucket = buckets
+            .entry(key.to_string())
+            .or_insert_with(|| TokenBucket::new(self.config.capacity));
         bucket.try_consume(&self.config)
     }
 }
@@ -162,10 +171,8 @@ pub async fn rate_limit(req: Request, next: Next) -> Result<Response, StatusCode
         }))
         .into_response();
         *resp.status_mut() = StatusCode::TOO_MANY_REQUESTS;
-        resp.headers_mut().insert(
-            "Retry-After",
-            "1".parse().unwrap(),
-        );
+        resp.headers_mut()
+            .insert("Retry-After", "1".parse().unwrap());
         Ok(resp)
     }
 }
@@ -176,7 +183,9 @@ fn get_limiter(config: &RateLimitConfig, key: &str) -> &'static RateLimiter {
     static LIMITERS: OnceLock<Mutex<HashMap<String, RateLimiter>>> = OnceLock::new();
     let map = LIMITERS.get_or_init(|| Mutex::new(HashMap::new()));
     let mut guard = map.lock().unwrap();
-    guard.entry(key.to_string()).or_insert_with(|| RateLimiter::new(config.clone()));
+    guard
+        .entry(key.to_string())
+        .or_insert_with(|| RateLimiter::new(config.clone()));
     // Leak the reference to keep it alive for the static lifetime
     // This is safe because rate limiters live for the duration of the process
     unsafe {
@@ -196,7 +205,10 @@ mod tests {
         for _ in 0..5 {
             assert!(bucket.try_consume(&config), "Should allow up to capacity");
         }
-        assert!(!bucket.try_consume(&config), "Should deny after capacity exhausted");
+        assert!(
+            !bucket.try_consume(&config),
+            "Should deny after capacity exhausted"
+        );
     }
 
     #[test]
@@ -211,6 +223,9 @@ mod tests {
         // Advance time artificially
         bucket.last_refill = Instant::now() - Duration::from_millis(100);
         // Should have refilled ~10 tokens
-        assert!(bucket.try_consume(&config), "Should refill after time passes");
+        assert!(
+            bucket.try_consume(&config),
+            "Should refill after time passes"
+        );
     }
 }

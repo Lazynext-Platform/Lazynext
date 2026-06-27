@@ -112,8 +112,8 @@ impl C2PASigner {
         editing_operations: &[C2PAOperation],
     ) -> Result<C2PAManifest, String> {
         // Read the output file and compute its SHA-256 hash
-        let file_bytes = std::fs::read(output_path)
-            .map_err(|e| format!("Failed to read output file: {e}"))?;
+        let file_bytes =
+            std::fs::read(output_path).map_err(|e| format!("Failed to read output file: {e}"))?;
 
         let content_hash = {
             use sha2::{Digest, Sha256};
@@ -130,19 +130,24 @@ impl C2PASigner {
             content_hash: content_hash.clone(),
             hash_algorithm: "sha256".to_string(),
             operations: editing_operations.to_vec(),
-            cert_issuer: self.config.cert_path.as_ref().map(|_| {
-                self.config.organization.clone() + " CA"
-            }),
+            cert_issuer: self
+                .config
+                .cert_path
+                .as_ref()
+                .map(|_| self.config.organization.clone() + " CA"),
             signature: self.sign_manifest(&content_hash).ok(),
             signature_algorithm: "ES256".to_string(),
         };
 
         // Write the sidecar manifest file
         let sidecar_path = output_path.replace(
-            &format!(".{}", std::path::Path::new(output_path)
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("mp4")),
+            &format!(
+                ".{}",
+                std::path::Path::new(output_path)
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("mp4")
+            ),
             ".c2pa.json",
         );
 
@@ -177,10 +182,7 @@ impl C2PASigner {
                 //   let signing_key = p256::SecretKey::from_pem(&key_pem)?;
                 //   let signature = signing_key.sign(content_hash.as_bytes());
                 //   Ok(base64::encode(signature.to_der()))
-                println!(
-                    "[C2PA] Signing with certificate: {}",
-                    cert
-                );
+                println!("[C2PA] Signing with certificate: {}", cert);
                 // Placeholder: HMAC-based dev signature
                 use hmac::{Hmac, Mac, digest::KeyInit};
                 use sha2::Sha256;
@@ -237,14 +239,12 @@ mod tests {
             created_at: "2026-06-27T00:00:00Z".to_string(),
             content_hash: "abcdef1234567890".to_string(),
             hash_algorithm: "sha256".to_string(),
-            operations: vec![
-                C2PAOperation {
-                    action: "c2pa.edited".to_string(),
-                    when: "2026-06-27T00:00:01Z".to_string(),
-                    description: "Applied color grade".to_string(),
-                    parameters: Some(serde_json::json!({"preset": "cinematic"})),
-                }
-            ],
+            operations: vec![C2PAOperation {
+                action: "c2pa.edited".to_string(),
+                when: "2026-06-27T00:00:01Z".to_string(),
+                description: "Applied color grade".to_string(),
+                parameters: Some(serde_json::json!({"preset": "cinematic"})),
+            }],
             cert_issuer: Some("Test CA".to_string()),
             signature: Some("sig123".to_string()),
             signature_algorithm: "ES256".to_string(),
