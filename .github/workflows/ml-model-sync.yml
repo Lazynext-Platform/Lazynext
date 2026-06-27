@@ -1,0 +1,686 @@
+# ==============================================================================
+# ML Model Sync — TensorFlow Serving Model Management
+#
+# This workflow manages the lifecycle of ML models deployed to TensorFlow
+# Serving, including:
+#   1. Model versioning and checksum verification on push to model dirs
+#   2. Model warmup trigger on deployment (Azure Container Apps revision)
+#   3. Model performance benchmark on PRs touching model configs
+#
+# Trigger conditions:
+#   - Push to main touching model directories or model_config.conf
+#   - PR opened/synced touching model directories
+#   - Manual dispatch with optional model name filter
+#   - Scheduled nightly model freshness check
+# ==============================================================================
+
+name: ML Model Sync
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "services/pre-processing/tf_models/**"
+      - "services/pre-processing/model_config.conf"
+      - "services/pre-processing/tf_serving/**"
+      - "services/pre-processing/tf_models/model_registry.yaml"
+      - "services/pre-processing/Dockerfile.tensorflow"
+      - "docker-compose.tensorflow.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "services/pre-processing/tf_models/**"
+      - "services/pre-processing/model_config.conf"
+      - "services/pre-processing/tf_serving/**"
+      - "services/pre-processing/tf_models/model_registry.yaml"
+      - "services/pre-processing/Dockerfile.tensorflow"
+      - "docker-compose.tensorflow.yml"
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Specific model to sync (whisper|sam2|realesrgan|mobilenet_v2|all)"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - whisper
+          - sam2
+          - realesrgan
+          - mobilenet_v2
+      force_redownload:
+        description: "Force re-download even if checksums match"
+        required: false
+        default: false
+        type: boolean
+      trigger_warmup:
+        description: "Trigger model warmup after sync"
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    # Nightly check for model updates (upstream HuggingFace releases)
+    - cron: "17 3 * * *"  # 3:17 AM UTC daily
+
+concurrency:
+  group: ml-model-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MODEL_BASE_PATH: /models
+  HF_HOME: ${{ github.workspace }}/.cache/huggingface
+  MODEL_REGISTRY: services/pre-processing/tf_models/model_registry.yaml
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Model Checksum Verification
+  # Validates that model files on disk match the registry checksums.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  verify-checksums:
+    name: Verify Model Checksums
+    runs-on: ubuntu-latest
+    outputs:
+      checksums_valid: ${{ steps.verify.outputs.valid }}
+      changed_models: ${{ steps.verify.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install YAML parser
+        run: pip install pyyaml
+
+      - name: Verify Model Registry Checksums
+        id: verify
+        run: |
+          import yaml, hashlib, json, os, sys
+
+          registry_path = "${{ env.MODEL_REGISTRY }}"
+          if not os.path.exists(registry_path):
+              print("::warning::No model_registry.yaml found — skipping checksum verification")
+              with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                  f.write("valid=true\n")
+                  f.write("changed=[]\n")
+              sys.exit(0)
+
+          with open(registry_path) as f:
+              registry = yaml.safe_load(f)
+
+          results = {"valid": True, "changed": [], "missing": []}
+
+          for model in registry.get("models", []):
+              name = model["name"]
+              expected_sha = model.get("checksum_sha256", "")
+
+              if not expected_sha:
+                  print(f"::warning::{name}: no checksum in registry — skipping")
+                  continue
+
+              model_dir = os.path.join(
+                  "${{ env.MODEL_BASE_PATH }}", name, str(model.get("version", 1))
+              )
+
+              if not os.path.isdir(model_dir):
+                  print(f"::warning::{name}: model directory not found — {model_dir}")
+                  results["missing"].append(name)
+                  results["valid"] = False
+                  continue
+
+              # Compute SHA-256 over all files in the SavedModel directory
+              sha = hashlib.sha256()
+              for root, _, files in sorted(os.walk(model_dir)):
+                  for fname in sorted(files):
+                      fpath = os.path.join(root, fname)
+                      with open(fpath, "rb") as fh:
+                          while True:
+                              chunk = fh.read(65536)
+                              if not chunk:
+                                  break
+                              sha.update(chunk)
+
+              computed = sha.hexdigest()
+              if computed != expected_sha:
+                  print(f"::error::{name}: checksum MISMATCH!")
+                  print(f"  Expected: {expected_sha}")
+                  print(f"  Computed: {computed}")
+                  results["changed"].append(name)
+                  results["valid"] = False
+              else:
+                  print(f"  [OK] {name}: {expected_sha[:16]}...")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"valid={'true' if results['valid'] else 'false'}\n")
+              f.write(f"changed={json.dumps(results['changed'])}\n")
+
+          if results["missing"]:
+              print(f"::warning::Missing models: {results['missing']}")
+          if not results["valid"]:
+              sys.exit(1)
+        shell: python
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Download & Validate Models
+  # Downloads model artifacts and verifies their integrity.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  download-models:
+    name: Download & Validate Models
+    runs-on: ubuntu-latest
+    needs: [verify-checksums]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      (github.event_name == 'push' && needs.verify-checksums.outputs.checksums_valid == 'false')
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Cache HuggingFace Models
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.HF_HOME }}
+          key: hf-models-${{ runner.os }}-${{ hashFiles(env.MODEL_REGISTRY) }}
+          restore-keys: |
+            hf-models-${{ runner.os }}-
+
+      - name: Download Models
+        id: download
+        env:
+          MODEL_FILTER: ${{ github.event.inputs.model || 'all' }}
+          FORCE: ${{ github.event.inputs.force_redownload || 'false' }}
+        run: |
+          chmod +x scripts/tf-model-download.sh
+          MODEL_DIR="${{ env.MODEL_BASE_PATH }}" \
+          HF_CACHE="${{ env.HF_HOME }}" \
+            bash scripts/tf-model-download.sh \
+            --filter "${MODEL_FILTER}" \
+            $([[ "${FORCE}" == "true" ]] && echo "--force" || echo "")
+
+      - name: Generate Checksums Manifest
+        run: |
+          echo "# Model Checksums — $(date -u +%Y-%m-%dT%H:%M:%SZ)" > /tmp/checksums.txt
+          echo "" >> /tmp/checksums.txt
+          for model in whisper sam2 realesrgan mobilenet_v2; do
+            dir="${{ env.MODEL_BASE_PATH }}/${model}/1"
+            if [[ -d "${dir}" ]]; then
+              checksum=$(find "${dir}" -type f -print0 | sort -z | xargs -0 cat | sha256sum | awk '{print $1}')
+              echo "  ${model}: sha256:${checksum}" >> /tmp/checksums.txt
+            fi
+          done
+          cat /tmp/checksums.txt
+
+      - name: Upload Model Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-models-${{ github.sha }}
+          path: ${{ env.MODEL_BASE_PATH }}/
+          retention-days: 7
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Model Performance Benchmark
+  # Runs standardized benchmark against TF Serving to measure throughput/p99.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  benchmark:
+    name: Model Performance Benchmark
+    runs-on: ubuntu-latest
+    needs: [download-models]
+    if: |
+      always() &&
+      (needs.download-models.result == 'success' || needs.download-models.result == 'skipped') &&
+      github.event_name == 'pull_request'
+    services:
+      tensorflow-serving:
+        image: tensorflow/serving:2.18.0
+        ports:
+          - 8500:8500
+          - 8501:8501
+        env:
+          MODEL_NAME: lazynext_models
+          MODEL_BASE_PATH: /models
+        volumes:
+          - ${{ github.workspace }}/models:/models
+        options: >-
+          --health-cmd "curl -sf http://localhost:8501/v1/models/whisper || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 60s
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Wait for TF Serving
+        run: |
+          echo "Waiting for TF Serving to become healthy..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8501/v1/models/whisper > /dev/null 2>&1; then
+              echo "TF Serving is ready after ${i} attempts"
+              exit 0
+            fi
+            echo "  Attempt ${i}/30 — still waiting..."
+            sleep 5
+          done
+          echo "::error::TF Serving did not become healthy in time"
+          exit 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install benchmark dependencies
+        run: pip install numpy requests pyyaml
+
+      - name: Run Benchmark Suite
+        id: benchmark
+        run: |
+          import time, json, os, sys
+          import numpy as np
+          import requests
+
+          TF_SERVING_URL = "http://localhost:8501"
+          MODELS = ["mobilenet_v2", "realesrgan", "whisper", "sam2"]
+          WARMUP_REQUESTS = 10
+          BENCHMARK_REQUESTS = 50
+
+          results = {}
+
+          for model_name in MODELS:
+              model_url = f"{TF_SERVING_URL}/v1/models/{model_name}:predict"
+              print(f"\n{'='*60}")
+              print(f"Benchmarking: {model_name}")
+              print(f"{'='*60}")
+
+              # Build input payload matching model signature
+              payload = build_payload(model_name)
+
+              # Check model availability
+              try:
+                  meta = requests.get(
+                      f"{TF_SERVING_URL}/v1/models/{model_name}",
+                      timeout=5
+                  )
+                  if meta.status_code != 200:
+                      print(f"  [SKIP] Model {model_name} not available (HTTP {meta.status_code})")
+                      results[model_name] = {"status": "unavailable"}
+                      continue
+              except Exception as e:
+                  print(f"  [SKIP] Cannot reach model: {e}")
+                  results[model_name] = {"status": "unreachable"}
+                  continue
+
+              # Warmup
+              print(f"  Warming up ({WARMUP_REQUESTS} requests)...")
+              for i in range(WARMUP_REQUESTS):
+                  try:
+                      requests.post(model_url, json=payload, timeout=30)
+                  except Exception:
+                      pass
+
+              # Benchmark
+              latencies = []
+              errors = 0
+              print(f"  Benchmarking ({BENCHMARK_REQUESTS} requests)...")
+              for i in range(BENCHMARK_REQUESTS):
+                  start = time.perf_counter()
+                  try:
+                      resp = requests.post(model_url, json=payload, timeout=30)
+                      elapsed = time.perf_counter() - start
+                      if resp.status_code == 200:
+                          latencies.append(elapsed)
+                      else:
+                          errors += 1
+                  except Exception as e:
+                      errors += 1
+
+              if latencies:
+                  arr = np.array(latencies) * 1000  # convert to ms
+                  results[model_name] = {
+                      "status": "ok",
+                      "count": len(latencies),
+                      "errors": errors,
+                      "mean_ms": round(float(np.mean(arr)), 2),
+                      "median_ms": round(float(np.median(arr)), 2),
+                      "p90_ms": round(float(np.percentile(arr, 90)), 2),
+                      "p95_ms": round(float(np.percentile(arr, 95)), 2),
+                      "p99_ms": round(float(np.percentile(arr, 99)), 2),
+                      "min_ms": round(float(np.min(arr)), 2),
+                      "max_ms": round(float(np.max(arr)), 2),
+                      "throughput_rps": round(len(latencies) / sum(latencies) * 1000, 2) if latencies else 0,
+                  }
+
+                  print(f"    Mean: {results[model_name]['mean_ms']:.1f} ms")
+                  print(f"    P90:  {results[model_name]['p90_ms']:.1f} ms")
+                  print(f"    P99:  {results[model_name]['p99_ms']:.1f} ms")
+                  print(f"    RPS:  {results[model_name]['throughput_rps']:.1f}")
+                  print(f"    Errors: {errors}/{BENCHMARK_REQUESTS}")
+              else:
+                  results[model_name] = {"status": "all_failed", "errors": errors}
+
+          # Output benchmark results as JSON
+          with open("benchmark-results.json", "w") as f:
+              json.dump(results, f, indent=2)
+
+          # Set summary
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("## Model Benchmark Results\n\n")
+              f.write("| Model | Mean (ms) | P90 (ms) | P99 (ms) | RPS | Errors |\n")
+              f.write("|-------|-----------|----------|----------|-----|--------|\n")
+              for name, r in results.items():
+                  if r.get("status") == "ok":
+                      f.write(f"| {name} | {r['mean_ms']:.1f} | {r['p90_ms']:.1f} | {r['p99_ms']:.1f} | {r['throughput_rps']:.1f} | {r['errors']} |\n")
+                  else:
+                      f.write(f"| {name} | — | — | — | — | {r.get('status', '?')} |\n")
+
+          # Fail if all models errored
+          all_failed = all(
+              r.get("status") not in ("ok", "unavailable", "unreachable")
+              for r in results.values()
+          )
+          if all_failed:
+              print("::error::All model benchmarks failed!")
+              sys.exit(1)
+
+          # Warn if p99 exceeds thresholds
+          thresholds = {
+              "mobilenet_v2": 50,
+              "realesrgan": 2000,
+              "whisper": 30000,
+              "sam2": 30000,
+          }
+          for name, r in results.items():
+              if r.get("status") == "ok" and name in thresholds:
+                  if r["p99_ms"] > thresholds[name]:
+                      print(f"::warning::{name}: P99 ({r['p99_ms']:.1f}ms) exceeds threshold ({thresholds[name]}ms)")
+
+          print("::notice::Benchmark results saved to benchmark-results.json")
+
+        shell: python
+
+      - name: Upload Benchmark Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.sha }}
+          path: benchmark-results.json
+          retention-days: 14
+
+      - name: Comment Benchmark on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('benchmark-results.json', 'utf8'));
+
+            let body = '## Model Performance Benchmark\n\n';
+            body += '| Model | Mean | P90 | P99 | Throughput |\n';
+            body += '|-------|------|-----|-----|------------|\n';
+
+            for (const [name, r] of Object.entries(results)) {
+              if (r.status === 'ok') {
+                body += `| ${name} | ${r.mean_ms.toFixed(1)} ms | ${r.p90_ms.toFixed(1)} ms | ${r.p99_ms.toFixed(1)} ms | ${r.throughput_rps.toFixed(1)} rps |\n`;
+              } else {
+                body += `| ${name} | — | — | — | ${r.status} |\n`;
+              }
+            }
+
+            body += '\nFull results: check the benchmark-results artifact.';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Model Warmup Trigger
+  # Sends warmup requests to the deployed TF Serving instance to pre-load
+  # models into GPU memory, avoiding cold-start latency on first request.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  trigger-warmup:
+    name: Trigger Model Warmup
+    runs-on: ubuntu-latest
+    needs: [download-models]
+    if: |
+      always() &&
+      (needs.download-models.result == 'success') &&
+      github.event_name == 'push' &&
+      (github.event.inputs.trigger_warmup != 'false')
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install requests pyyaml
+
+      - name: Send Warmup Requests
+        env:
+          TF_SERVING_URL: ${{ secrets.TF_SERVING_URL }}
+          TF_SERVING_API_KEY: ${{ secrets.TF_SERVING_API_KEY }}
+        run: |
+          import requests, sys, os, time, json
+
+          TF_SERVING_URL = os.environ.get("TF_SERVING_URL", os.environ.get("NEXT_PUBLIC_TF_SERVING_URL", ""))
+          if not TF_SERVING_URL:
+              print("::warning::TF_SERVING_URL not set — checking Azure Container Apps...")
+              # Try to discover from Azure Container Apps
+              import subprocess
+              try:
+                  result = subprocess.run(
+                      ["az", "containerapp", "show", "--name", "tf-serving", "--resource-group", "lazynext-prod",
+                       "--query", "properties.configuration.ingress.fqdn", "-o", "tsv"],
+                      capture_output=True, text=True
+                  )
+                  if result.returncode == 0 and result.stdout.strip():
+                      TF_SERVING_URL = f"https://{result.stdout.strip()}"
+                      print(f"  Discovered: {TF_SERVING_URL}")
+              except Exception:
+                  pass
+
+          if not TF_SERVING_URL:
+              # Fallback: local Docker compose
+              TF_SERVING_URL = "http://localhost:8501"
+              print(f"  Using local fallback: {TF_SERVING_URL}")
+
+          API_KEY = os.environ.get("TF_SERVING_API_KEY", "")
+          headers = {"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
+
+          MODELS = ["whisper", "sam2", "realesrgan", "mobilenet_v2"]
+          PAYLOADS = build_all_payloads()
+
+          warmup_results = {}
+          all_ok = True
+
+          for model_name in MODELS:
+              print(f"\n  Warming up: {model_name}")
+              model_url = f"{TF_SERVING_URL}/v1/models/{model_name}:predict"
+              payload = PAYLOADS.get(model_name, {})
+
+              success = True
+              for attempt in range(1, 4):
+                  try:
+                      resp = requests.post(
+                          model_url,
+                          json=payload,
+                          headers=headers,
+                          timeout=30
+                      )
+                      if resp.status_code == 200:
+                          print(f"    [OK] Warmup successful (attempt {attempt})")
+                          warmup_results[model_name] = {"status": "warm", "attempts": attempt}
+                          break
+                      else:
+                          print(f"    [WARN] HTTP {resp.status_code} (attempt {attempt}): {resp.text[:200]}")
+                          success = False
+                  except requests.exceptions.ConnectionError:
+                      print(f"    [WARN] Connection refused (attempt {attempt})")
+                      success = False
+                  except requests.exceptions.Timeout:
+                      print(f"    [WARN] Timeout (attempt {attempt})")
+                      success = False
+
+                  if attempt < 3:
+                      time.sleep(5 * attempt)
+
+              if not success:
+                  print(f"  ::error::Failed to warm up {model_name} after 3 attempts")
+                  warmup_results[model_name] = {"status": "failed"}
+                  all_ok = False
+
+          # Write warmup summary
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("## Model Warmup Results\n\n")
+              f.write("| Model | Status |\n")
+              f.write("|-------|--------|\n")
+              for name, r in warmup_results.items():
+                  emoji = "[OK]" if r["status"] == "warm" else "[FAIL]"
+                  f.write(f"| {name} | {emoji} {r['status']} (attempts: {r.get('attempts', 'N/A')}) |\n")
+
+          if not all_ok:
+              print("::warning::Some models failed to warm up — check TF Serving logs")
+          else:
+              print("\n  All models warmed up successfully!")
+
+        shell: python
+
+      - name: Notify on Warmup Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {"type": "plain_text", "text": "TF Serving Model Warmup Failed"}
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Workflow:* ${{ github.workflow }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n\nModel warmup failed — check <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|action run> for details."
+                  }
+                }
+              ]
+            }
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Model Freshness Check (nightly only)
+  # Compares local registry versions against upstream HuggingFace releases.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  check-freshness:
+    name: Check Model Freshness
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: pip install pyyaml requests
+
+      - name: Check Upstream Model Versions
+        run: |
+          import yaml, requests, os, sys
+
+          registry_path = "${{ env.MODEL_REGISTRY }}"
+          if not os.path.exists(registry_path):
+              print("::warning::model_registry.yaml not found")
+              sys.exit(0)
+
+          with open(registry_path) as f:
+              registry = yaml.safe_load(f)
+
+          stale_models = []
+
+          for model in registry.get("models", []):
+              hf_id = model.get("huggingface_id", "")
+              current_version = str(model.get("version", 1))
+
+              if not hf_id:
+                  continue
+
+              print(f"\n  Checking {model['name']} ({hf_id})...")
+
+              # Query HuggingFace Hub API for latest version info
+              try:
+                  resp = requests.get(
+                      f"https://huggingface.co/api/models/{hf_id}",
+                      timeout=15,
+                      headers={"Accept": "application/json"}
+                  )
+                  if resp.status_code == 200:
+                      data = resp.json()
+                      last_modified = data.get("lastModified", "unknown")
+                      sha = data.get("sha", "unknown")[:12]
+                      print(f"    Upstream last modified: {last_modified}")
+                      print(f"    Upstream SHA: {sha}")
+                      print(f"    Local version: {current_version}")
+
+                      if sha != model.get("checksum_sha256", "")[:12]:
+                          print(f"    ::warning::Model may be outdated — upstream SHA differs from registry")
+                          stale_models.append({
+                              "name": model["name"],
+                              "local_version": current_version,
+                              "upstream_sha": sha,
+                          })
+                  else:
+                      print(f"    ::warning::Could not fetch upstream info (HTTP {resp.status_code})")
+              except Exception as e:
+                  print(f"    ::warning::API check failed: {e}")
+
+          if stale_models:
+              print(f"\n::warning::{len(stale_models)} model(s) may be outdated:")
+              for m in stale_models:
+                  print(f"    - {m['name']}: local v{m['local_version']} vs upstream sha {m['upstream_sha']}")
+
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+                  f.write("## Stale Model Warnings\n\n")
+                  f.write("| Model | Local Version | Upstream SHA |\n")
+                  f.write("|-------|---------------|---------------|\n")
+                  for m in stale_models:
+                      f.write(f"| {m['name']} | v{m['local_version']} | {m['upstream_sha']} |\n")
+                  f.write("\nConsider running `tf-model-download.sh --force` to update these models.\n")
+          else:
+              print("\n  All models up to date!")
+
+        shell: python
+
+      - name: Create Issue for Stale Models
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'ML Models may be outdated — upstream HuggingFace update detected',
+              body: 'The nightly model freshness check detected that one or more models may have been updated upstream.\n\n' +
+                    'Check the [action run](' + context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ') for details.\n\n' +
+                    'Run `scripts/tf-model-download.sh --force` to update the models.',
+              labels: ['ml-models', 'automated']
+            });

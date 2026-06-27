@@ -1,0 +1,150 @@
+# ── Traefik Dynamic Configuration ─────────────────────────────────
+# Mounted at /etc/traefik/dynamic.yml
+# Contains all middleware definitions used by router labels.
+
+# ── TLS Options ────────────────────────────────────────────────────
+tls:
+  options:
+    modern:
+      minVersion: VersionTLS12
+      sniStrict: true
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      curvePreferences:
+        - CurveP521
+        - CurveP384
+        - CurveP256
+        - X25519
+
+# ── HTTP Middlewares ──────────────────────────────────────────────
+http:
+  middlewares:
+    # ── Rate Limiting ───────────────────────────────────────────
+    web-rate-limit:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 200
+        sourceCriterion:
+          ipStrategy:
+            depth: 2
+            excludedIPs:
+              - "10.0.0.0/8"
+              - "172.16.0.0/12"
+              - "192.168.0.0/16"
+
+    api-rate-limit:
+      rateLimit:
+        average: 30
+        period: 1s
+        burst: 60
+        sourceCriterion:
+          ipStrategy:
+            depth: 2
+            excludedIPs:
+              - "10.0.0.0/8"
+              - "172.16.0.0/12"
+
+    # ── Circuit Breakers ────────────────────────────────────────
+    web-circuit-breaker:
+      circuitBreaker:
+        expression: "NetworkErrorRatio() > 0.10 || ResponseCodeRatio(500, 600, 0, 600) > 0.25"
+        checkPeriod: 30s
+        fallbackDuration: 60s
+
+    api-circuit-breaker:
+      circuitBreaker:
+        expression: "NetworkErrorRatio() > 0.20 || ResponseCodeRatio(500, 600, 0, 600) > 0.30"
+        checkPeriod: 15s
+        fallbackDuration: 45s
+
+    # ── Security Headers ────────────────────────────────────────
+    secure-headers:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 63072000
+        customFrameOptionsValue: "SAMEORIGIN"
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Content-Type-Options: "nosniff"
+          X-Permitted-Cross-Domain-Policies: "none"
+          Permissions-Policy: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()"
+        contentSecurityPolicy: |
+          default-src 'self';
+          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: https: blob:;
+          media-src 'self' blob:;
+          connect-src 'self' https://api.lazynext.com wss://api.lazynext.com https://js.stripe.com;
+          font-src 'self';
+          frame-src 'self' https://js.stripe.com;
+          object-src 'none';
+          base-uri 'self';
+          form-action 'self';
+          upgrade-insecure-requests;
+
+    # ── Compression ─────────────────────────────────────────────
+    compress:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
+        minResponseBodyBytes: 1024
+
+    # ── Dashboard Auth (basic auth for internal dashboard) ──────
+    auth-dashboard:
+      basicAuth:
+        users:
+          - "${TRAEFIK_DASHBOARD_USER:-admin}:${TRAEFIK_DASHBOARD_PASSWORD_HASH:-$$2y$$10$$placeholder}"
+
+    # ── Allowlist: only internal/VPN IPs can reach the dashboard
+    internal-ip:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "172.16.0.0/12"
+          - "192.168.0.0/16"
+          # Tailscale / WireGuard VPN ranges
+          - "100.64.0.0/10"
+
+    # ── Retry with Exponential Backoff ──────────────────────────
+    retry:
+      retry:
+        attempts: 3
+        initialInterval: 100ms
+
+    # ── Error Page Fallback ─────────────────────────────────────
+    error-pages:
+      errors:
+        status:
+          - "500-599"
+        service: error-pages@docker
+        query: "/{status}.html"
+
+  # ── Routers ─────────────────────────────────────────────────────
+  routers:
+    # Health-check-only router (no TLS) for internal monitoring
+    health-internal:
+      entryPoints:
+        - "web"
+      rule: "Host(`health.lazynext.internal`)"
+      service: "noop@internal"
+      middlewares:
+        - "secure-headers"
+
+  # ── Services ────────────────────────────────────────────────────
+  services:
+    # No-op service used by internal health router
+    noop:
+      loadBalancer:
+        servers: []

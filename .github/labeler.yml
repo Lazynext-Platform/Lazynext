@@ -1,0 +1,127 @@
+# Auto-label PRs based on changed files
+
+# ── Core Engine ──────────────────────────────────────────────────────
+"area:rust":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "rust/**/*"
+        - "Cargo.toml"
+        - "Cargo.lock"
+        - ".cargo/**/*"
+
+"area:wasm":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "rust/wasm/**/*"
+
+"area:web":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "apps/web/**/*"
+
+"area:desktop":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "apps/desktop/**/*"
+
+"area:mobile":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "apps/mobile/**/*"
+
+"area:browser-extension":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "apps/browser-extension/**/*"
+
+# ── Services ─────────────────────────────────────────────────────────
+"area:ai-agents":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/ai-agents/**/*"
+
+"area:render-service":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/render-service/**/*"
+
+"area:pre-processing":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/pre-processing/**/*"
+
+"area:generative-studio":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/generative-studio/**/*"
+
+"area:analytics":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/analytics-service/**/*"
+
+"area:collab":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "services/collab-server/**/*"
+
+# ── Infrastructure ───────────────────────────────────────────────────
+"area:ci":
+  - changed-files:
+      - any-glob-to-any-file:
+        - ".github/workflows/**/*"
+        - ".github/dependabot.yml"
+        - ".github/labeler.yml"
+
+"area:docker":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "**/Dockerfile"
+        - "Dockerfile.migrate"
+        - "**.dockerignore"
+        - "docker-compose.yml"
+
+"area:kubernetes":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "k8s/**/*"
+
+"area:terraform":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "terraform/**/*"
+
+"area:database":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "apps/web/src/db/**/*"
+        - "apps/web/src/drizzle/**/*"
+        - "apps/web/drizzle.config.ts"
+
+# ── Type ─────────────────────────────────────────────────────────────
+"type:docs":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "**/*.md"
+        - "docs/**/*"
+        - "LICENSE"
+
+"type:tests":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "**/*.test.*"
+        - "**/*.spec.*"
+        - "**/tests/**/*"
+        - "**/e2e/**/*"
+        - "**/__tests__/**/*"
+
+"type:dependencies":
+  - changed-files:
+      - any-glob-to-any-file:
+        - "bun.lock"
+        - "**/package-lock.json"
+        - "**/yarn.lock"
+        - "**/pnpm-lock.yaml"
+        - "**/requirements.txt"
+        - "**/Pipfile.lock"
+        - "**/Cargo.lock"

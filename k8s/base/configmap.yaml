@@ -14,7 +14,8 @@ data:
   RENDER_SERVICE_URL: "http://lazynext-render:8003"
   PRE_PROCESSING_URL: "http://lazynext-pre-processing:8000"
   GENERATIVE_STUDIO_URL: "http://lazynext-generative-studio:8001"
-  ANALYTICS_SERVICE_URL: "http://lazynext-analytics-service:8005"
+  COLLAB_SERVER_URL: "http://collab-server:8004"
+  ANALYTICS_SERVICE_URL: "http://lazynext-analytics-service:8006"
   MCP_SERVER_URL: "http://lazynext-mcp:5173"
   # API_GATEWAY_URL: "http://lazynext-api-gateway:8005"  # Rust API gateway not yet deployed in K8s
 

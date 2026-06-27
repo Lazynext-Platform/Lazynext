@@ -91,8 +91,8 @@ Lazynext targets **7 delivery surfaces**, each at a different stage of completio
 
 ### Prerequisites
 
-- **Rust** (stable, 1.80+) with `wasm-pack`
-- **Bun** (1.3.12+)
+- **Rust** (stable, 1.96+) with `wasm-pack`
+- **Bun** (1.3.14+)
 - **Docker** (for full-platform deployment)
 - **PostgreSQL** 16 (or use the Docker compose stack)
 
@@ -102,17 +102,19 @@ Lazynext targets **7 delivery surfaces**, each at a different stage of completio
 git clone https://github.com/Lazynext-Platform/Lazynext.git
 cd Lazynext
 
-# Start all services — web, sync, render, AI, PostgreSQL
+# Start all 8 services — web, AI agents, render, collab, analytics, pre-processing, generative studio, PostgreSQL
 docker compose up --build -d
 ```
 
 | Service | URL | Purpose |
 |---------|-----|---------|
 | Web App | `http://localhost:3000` | Editor + API |
-| Sync Server | `ws://localhost:8002` | CRDT WebSocket + WebRTC signaling |
+| AI Agents | `http://localhost:8002` | Chronos Copilot LLM + WebSocket CRDT sync |
 | Render Farm | `http://localhost:8003` | FFMPEG export with SSE progress |
+| Collab Server | `http://localhost:8004` | Native Rust CRDT sync + WebRTC signaling |
 | Generative Studio | `http://localhost:8001` | AI video/audio generation |
 | Pre-Processing | `http://localhost:8000` | Whisper, SAM2, NeRF |
+| Analytics Service | `http://localhost:8006` | Data ingestion + LTV engine |
 | PostgreSQL | `localhost:5434` | User data, projects, AI credits |
 
 ### Local Development Setup
@@ -139,7 +141,7 @@ bun run dev                    # → http://localhost:3000
 ### Bootstrap Everything
 
 ```bash
-./start-platform.sh            # Kills stale processes, starts all 6 services
+./start-platform.sh            # Kills stale processes, starts all 8 services
 ```
 
 ---
@@ -343,7 +345,9 @@ lazynext/
 │   ├── pre-processing/         # Python FastAPI (:8000)
 │   ├── generative-studio/      # Python FastAPI (:8001)
 │   ├── ai-agents/              # Node.js Chronos + CRDT sync (:8002)
-│   └── render-service/         # Node.js FFMPEG farm (:8003)
+│   ├── render-service/         # Node.js FFMPEG farm (:8003)
+│   ├── collab-server/          # Rust CRDT sync + WebRTC signaling (:8004)
+│   └── analytics-service/      # Node.js data ingestion + LTV (:8006)
 ├── terraform/azure/            # Azure infrastructure as code
 ├── k8s/                        # Kubernetes manifests (optional AKS)
 ├── .github/workflows/          # CI/CD (ci.yml, production.yml)
@@ -374,7 +378,7 @@ lazynext/
 ## Infrastructure
 
 - **CI/CD**: GitHub Actions — Rust test/lint, web test/typecheck/lint, Docker build/push, Azure Container Apps deploy.
-- **Deployment**: Azure Container Apps (5 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
+- **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
 - **Infrastructure as Code**: Terraform in `terraform/azure/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
 - **Database**: PostgreSQL 16 via Drizzle ORM. Migrations in `apps/web/src/drizzle/`. Schema in `apps/web/src/db/schema.ts`.
 

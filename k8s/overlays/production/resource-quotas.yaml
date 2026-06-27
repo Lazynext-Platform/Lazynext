@@ -1,0 +1,476 @@
+# ───────────────────────────────────────────────────────────────────
+# Production Resource Quotas — Lazynext Platform
+# ───────────────────────────────────────────────────────────────────
+#
+# This file OVERRIDES the base quotas in security-policies.yaml with
+# higher limits suitable for production workloads. The base uses
+# conservative limits for dev/staging; production needs significantly
+# more headroom for traffic spikes, render farms, and ML inference.
+#
+# Applied via Kustomization patch in kustomization.yaml.
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# 1. ResourceQuota — production-grade limits
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: lazynext-quota
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: resource-quota
+    environment: production
+    quota-tier: production
+  annotations:
+    quota.lazynext.ai/description: "Production resource quota — 3x base limits"
+    quota.lazynext.ai/review-date: "2026-09-28"  # Quarterly review
+    quota.lazynext.ai/estimated-monthly-cost: "See Azure Cost Management"
+spec:
+  hard:
+    # ── Compute ─────────────────────────────────────────────────────
+    # Production: 3x base limits. At peak, the cluster runs:
+    #   - 10 web pods (20 CPU, 40 Gi)
+    #   - 8 sync pods (16 CPU, 16 Gi)
+    #   - 15 render pods (120 CPU, 120 Gi)
+    #   - 8 pre-processing (16 CPU, 32 Gi)
+    #   - 8 generative-studio (32 CPU, 64 Gi)
+    #   - + GPU workloads (see nvidia.com/gpu quota)
+    #   Headroom: ~50% for spikes
+    requests.cpu: "120"
+    requests.memory: "256Gi"
+    limits.cpu: "300"
+    limits.memory: "512Gi"
+
+    # ── GPU ─────────────────────────────────────────────────────────
+    # Four NVIDIA A100 or A10 GPUs for ML inference and video encoding.
+    # Allocation:
+    #   - 2 GPUs: generative-studio (Stable Video Diffusion, Demucs)
+    #   - 1 GPU: pre-processing (SAM2 rotoscoping, NeRF extraction)
+    #   - 1 GPU: render-service (hardware-accelerated FFMPEG encoding)
+    # Note: These are shared; KEDA scales based on work-queue depth.
+    requests.nvidia.com/gpu: "4"
+    limits.nvidia.com/gpu: "4"
+
+    # ── Storage ─────────────────────────────────────────────────────
+    # 30 PVCs for databases, backups, model caches, render outputs.
+    # 2 TiB total requested storage across all PVCs.
+    persistentvolumeclaims: "30"
+    requests.storage: "2Ti"
+
+    # ── Object Counts ───────────────────────────────────────────────
+    # Higher limits to accommodate production scale (more services,
+    # canary deployments, A/B test environments, feature flags)
+    count/deployments.apps: "40"
+    count/services: "40"
+    count/jobs.batch: "30"
+    count/cronjobs.batch: "15"
+    count/secrets: "60"
+    count/configmaps: "40"
+
+    # ── Ephemeral Storage ───────────────────────────────────────────
+    # Per-namespace ephemeral storage limit (scratch space for render jobs,
+    # model downloads, temp files)
+    requests.ephemeral-storage: "500Gi"
+    limits.ephemeral-storage: "1Ti"
+
+    # ── Services ────────────────────────────────────────────────────
+    # LoadBalancer: up to 2 (web + api ingress)
+    count/services.loadbalancers: "2"
+    # NodePort: 0 (use ClusterIP + Ingress only)
+    count/services.nodeports: "0"
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. LimitRange — Production default/max resource limits
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: lazynext-limits
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: limit-range
+    environment: production
+  annotations:
+    limitrange.lazynext.ai/description: "Production LimitRange — generous defaults for production workloads"
+spec:
+  limits:
+    # ── Container-level defaults ─────────────────────────────────────
+    - type: Container
+      # Default limits (applied if not specified in the Deployment)
+      default:
+        cpu: "1"
+        memory: "1Gi"
+      # Default requests (applied if not specified in the Deployment)
+      defaultRequest:
+        cpu: "250m"
+        memory: "256Mi"
+      # Maximum a single container can request
+      max:
+        cpu: "16"
+        memory: "64Gi"
+      # Minimum a single container must request
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+      # Max limit-to-request ratio: prevents unbounded overhead
+      # Example: if request=250m cpu, limit can be at most 4x = 1 CPU
+      maxLimitRequestRatio:
+        cpu: "8"
+        memory: "4"
+
+    # ── Pod-level limits ────────────────────────────────────────────
+    - type: Pod
+      max:
+        cpu: "32"       # Sum of all containers in a pod
+        memory: "128Gi"  # Sum of all containers in a pod
+
+    # ── PVC limits ──────────────────────────────────────────────────
+    - type: PersistentVolumeClaim
+      min:
+        storage: "1Gi"
+      max:
+        storage: "2Ti"
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. NetworkPolicy — Production-specific rules
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Allow ingress from Azure Front Door / CDN IP ranges to ingress controller
+# This ensures media.lazynext.ai traffic is allowed ONLY from our CDN.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-azure-frontdoor
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: networking
+    environment: production
+    policy-type: cdn-ingress
+  annotations:
+    networkpolicy.lazynext.ai/description: "Allow Azure Front Door health probes and traffic"
+    networkpolicy.lazynext.ai/source: "Azure Front Door backend IP ranges"
+spec:
+  podSelector:
+    matchLabels:
+      app: lazynext-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            # Azure Front Door IP ranges (global).
+            # Update periodically from:
+            # https://www.microsoft.com/en-us/download/details.aspx?id=56519
+            # Current as of: June 2026
+            cidr: 147.243.0.0/16
+      ports:
+        - port: 80
+          protocol: TCP
+        - port: 443
+          protocol: TCP
+    # Allow Azure Front Door health probe agent
+    - from:
+        - ipBlock:
+            cidr: 191.233.0.0/17
+      ports:
+        - port: 80
+          protocol: TCP
+
+---
+# Block direct egress to metadata service (IMDS)
+# Prevent SSRF attacks — pods should use Workload Identity, not IMDS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-imds-access
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: networking
+    environment: production
+    security-tier: critical
+  annotations:
+    networkpolicy.lazynext.ai/description: "Block access to Azure Instance Metadata Service to prevent IMDS-based SSRF"
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # Deny 169.254.169.254 (Azure IMDS endpoint)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32
+    # But allow DNS and K8s API
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. PodDisruptionBudget — Production overrides
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Web: ensure at least 2 pods are always available during voluntary disruptions
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-web-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-web
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: availability
+    environment: production
+  annotations:
+    pdb.lazynext.ai/description: "Ensure minimum 2 web pods during node drains and upgrades"
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: lazynext-web
+  # Unhealthy pod eviction policy: always allow eviction of unhealthy pods
+  # (prevents PDB from blocking node maintenance when pods are crash-looping)
+  unhealthyPodEvictionPolicy: AlwaysAllow
+
+---
+# Sync: ensure at least 1 sync pod for CRDT/WebSocket availability
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-sync-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-sync
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: availability
+    environment: production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-sync
+  unhealthyPodEvictionPolicy: AlwaysAllow
+
+---
+# Render: ensure at least 1 render pod for in-flight export jobs
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-render-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: availability
+    environment: production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-render
+  unhealthyPodEvictionPolicy: AlwaysAllow
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. GPU Workload Quota — Dedicated GPU namespace resources
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Separate ResourceQuota scoped to GPU workloads.
+# This prevents non-GPU pods from consuming GPU resources.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: lazynext-gpu-quota
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: resource-quota
+    workload-type: gpu
+    environment: production
+  annotations:
+    quota.lazynext.ai/description: "GPU resource quota — scoped to GPU workloads only"
+    quota.lazynext.ai/gpu-type: "NVIDIA A100-80GB or A10-24GB"
+spec:
+  hard:
+    # GPU limits for this namespace (4 GPUs total)
+    requests.nvidia.com/gpu: "4"
+    limits.nvidia.com/gpu: "4"
+    # Memory scoped to GPU pods only
+    requests.memory: "128Gi"
+    limits.memory: "256Gi"
+    # CPU scoped to GPU pods only
+    requests.cpu: "32"
+    limits.cpu: "64"
+  # Scope: only applies to pods with the "gpu" priority class
+  scopeSelector:
+    matchExpressions:
+      - operator: In
+        scopeName: PriorityClass
+        values:
+          - lazynext-high
+          - lazynext-low
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. RuntimeClass for GPU workloads (duplicated from base for clarity)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: nvidia-gpu
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: runtime-class
+    environment: production
+  annotations:
+    runtimeclass.lazynext.ai/description: "NVIDIA GPU runtime for CUDA workloads"
+    runtimeclass.lazynext.ai/driver-version: ">=545"
+    runtimeclass.lazynext.ai/cuda-version: "12.5"
+handler: nvidia
+# Scheduling: pods using this RuntimeClass are scheduled only on GPU nodes
+scheduling:
+  nodeSelector:
+    accelerator: nvidia
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+# ═══════════════════════════════════════════════════════════════════
+# 7. PriorityClass — Production scheduling tiers
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Override: Increase critical priority value for production
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-critical
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    environment: production
+value: 1000000000  # 1 billion — highest non-system priority
+globalDefault: false
+description: "CRITICAL: Web app, database, sync server. Must not be preempted."
+# PreemptionPolicy: PreemptLowerPriority = can evict lower-priority pods to schedule
+preemptionPolicy: PreemptLowerPriority
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-high
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    environment: production
+value: 100000000  # 100 million
+globalDefault: false
+description: "HIGH: Render service, AI agents, ML inference"
+preemptionPolicy: PreemptLowerPriority
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: lazynext-low
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    environment: production
+value: 10000000  # 10 million
+globalDefault: true
+description: "LOW: Batch jobs, analytics, non-critical background tasks"
+preemptionPolicy: Never
+
+# ═══════════════════════════════════════════════════════════════════
+# 8. TopologySpreadConstraints — Production scheduling
+# ═══════════════════════════════════════════════════════════════════
+#
+# These should be added to each Deployment in production to ensure
+# pods are spread across availability zones for resilience.
+# Copy the relevant block into your Deployment spec in services.yaml.
+#
+# Example for lazynext-web (add under spec.template.spec):
+#
+# topologySpreadConstraints:
+#   - maxSkew: 1
+#     topologyKey: topology.kubernetes.io/zone
+#     whenUnsatisfiable: ScheduleAnyway
+#     labelSelector:
+#       matchLabels:
+#         app: lazynext-web
+#   - maxSkew: 1
+#     topologyKey: kubernetes.io/hostname
+#     whenUnsatisfiable: ScheduleAnyway
+#     labelSelector:
+#       matchLabels:
+#         app: lazynext-web
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# 9. VerticalPodAutoscaler (VPA) recommendations
+# ───────────────────────────────────────────────────────────────────
+# VPA requires: helm install vpa fairwinds/vpa --namespace vpa
+#
+# Uncomment and apply after VPA is installed to get automatic resource
+# recommendations. VPA runs in "Off" mode (recommendation only) by
+# default — it does NOT evict pods in production.
+#
+# ---
+# apiVersion: autoscaling.k8s.io/v1
+# kind: VerticalPodAutoscaler
+# metadata:
+#   name: lazynext-web-vpa
+#   namespace: lazynext
+#   labels:
+#     app.kubernetes.io/part-of: lazynext
+#     app.kubernetes.io/component: autoscaling
+#     environment: production
+# spec:
+#   targetRef:
+#     apiVersion: apps/v1
+#     kind: Deployment
+#     name: lazynext-web
+#   updatePolicy:
+#     updateMode: "Off"  # Recommendations only — change to "Auto" after review
+#   resourcePolicy:
+#     containerPolicies:
+#       - containerName: lazynext-web
+#         minAllowed:
+#           cpu: "250m"
+#           memory: "256Mi"
+#         maxAllowed:
+#           cpu: "8"
+#           memory: "16Gi"
+#         controlledResources: ["cpu", "memory"]
+# ───────────────────────────────────────────────────────────────────

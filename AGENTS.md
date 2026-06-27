@@ -14,6 +14,8 @@ Each app is a frontend that calls into Rust. Logic is never duplicated between a
 
 - `web/` — Next.js
 - `desktop/` — GPUI
+- `mobile/` — React Native + UniFFI
+- `browser-extension/` — Chrome MV3
 
 ## Web
 

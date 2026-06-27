@@ -1,0 +1,374 @@
+# ───────────────────────────────────────────────────────────────────
+# Velero Backup Configuration for Lazynext
+# ───────────────────────────────────────────────────────────────────
+#
+# Velero backs up your Kubernetes resources and persistent volumes to
+# Azure Blob Storage. It provides disaster recovery, cluster migration,
+# and point-in-time snapshots.
+#
+# Prerequisites:
+#   1. Install Velero CLI:
+#        wget https://github.com/vmware-tanzu/velero/releases/latest/download/velero-linux-amd64.tar.gz
+#        tar -xzf velero-linux-amd64.tar.gz && sudo mv velero /usr/local/bin/
+#
+#   2. Create Azure Storage Account and Container for backups:
+#        az storage account create --name lazynextbackups --resource-group lazynext-prod-rg
+#        az storage container create --name velero --account-name lazynextbackups
+#
+#   3. Create service principal or use Workload Identity:
+#        az identity create --name lazynext-velero-identity --resource-group lazynext-prod-rg
+#        # Assign "Storage Blob Data Contributor" role on the storage account
+#
+#   4. Install Velero with Azure plugin:
+#        velero install \
+#          --provider azure \
+#          --plugins velero/velero-plugin-for-microsoft-azure:v1.9.0 \
+#          --bucket velero \
+#          --secret-file ./credentials-velero \
+#          --backup-location-config resourceGroup=lazynext-prod-rg,storageAccount=lazynextbackups \
+#          --snapshot-location-config apiTimeout=5m,resourceGroup=lazynext-prod-rg \
+#          --use-volume-snapshots=true \
+#          --default-volumes-to-fs-backup=true \
+#          --use-node-agent \
+#          --namespace velero
+#
+#   5. After install, apply this file:
+#        kubectl apply -f k8s/base/velero.yaml
+#
+# Backup lifecycle:
+#   - Daily backups (2 AM): retained 30 days
+#   - Weekly backups (3 AM Sunday): retained 90 days
+#   - Velero automatically deletes expired backups.
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# 1. BackupStorageLocation — Azure Blob Storage
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: azure-backup-storage
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: backup
+    velero.io/storage-location: primary
+  annotations:
+    velero.io/description: "Primary backup storage in Azure Blob (lazynextbackups/velero)"
+spec:
+  # Azure provider (installed via velero-plugin-for-microsoft-azure)
+  provider: azure
+  # Object storage configuration
+  objectStorage:
+    # Azure Blob Storage container named "velero" in storage account "lazynextbackups"
+    bucket: velero
+    # Prefix within the bucket — separates Lazynext backups from other projects
+    prefix: lazynext
+    # Passed to the Azure plugin
+    config:
+      # Azure resource group containing the storage account
+      resourceGroup: lazynext-prod-rg
+      # Storage account name
+      storageAccount: lazynextbackups
+      # Use TLS (always)
+      storageAccountKeyEnvVar: AZURE_STORAGE_KEY
+      # Blob public access off
+      publicAccess: "false"
+      # Compression: gzip backups to reduce storage costs (~60% compression for YAML/JSON)
+      # Enable after installing with --backup-location-config compression=gzip
+      # compression: gzip
+  # Access mode: ReadWrite so backups can be created and restored
+  accessMode: ReadWrite
+  # Backup tarballs are stored as tarballs; using a directory prefix keeps things organized
+  # Default is fine — each backup gets its own subdirectory based on timestamp
+  # Credential to use (installs into the velero namespace as a Secret)
+  credential:
+    name: velero-azure-credentials
+    key: cloud
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. VolumeSnapshotLocation — Azure Managed Disks
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: velero.io/v1
+kind: VolumeSnapshotLocation
+metadata:
+  name: azure-snapshot-location
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: backup
+    velero.io/snapshot-location: primary
+  annotations:
+    velero.io/description: "Azure Managed Disk snapshots for persistent volumes (PostgreSQL, Redis, etc.)"
+spec:
+  provider: azure
+  config:
+    # Azure resource group where snapshots will be stored
+    resourceGroup: lazynext-prod-rg
+    # API call timeout for snapshot operations (Azure can be slow)
+    apiTimeout: 5m
+    # Incremental snapshots for Managed Disks (cost-efficient)
+    incremental: "true"
+    # Tags applied to all snapshots created by Velero
+    tags: "velero=backup,lazynext=production,managed-by=velero"
+    # Optionally specify a separate subscription for snapshots
+    # subscriptionId: <azure-subscription-id>
+    # Optionally specify a snapshot resource group different from the cluster
+    # snapshotResourceGroup: lazynext-prod-snapshots-rg
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. Schedule — Daily backup at 2 AM, retained 30 days
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: lazynext-daily-backup
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: backup
+    velero.io/schedule: daily
+    velero.io/retention: 30d
+  annotations:
+    velero.io/description: "Daily backup at 2 AM UTC — full cluster backup retained for 30 days"
+spec:
+  # Cron expression: every day at 2 AM UTC (0 2 * * *)
+  schedule: "0 2 * * *"
+  # Pause the schedule (set to false to start backing up)
+  paused: false
+  # How many days before deleting old backups
+  # Velero computes expiry = backup timestamp + TTL, then garbage-collects
+  ttl: 720h  # 30 days
+  # Allow parallel backups? No — daily runs shouldn't overlap.
+  useOwnerReferencesInBackup: true
+  # Template for each backup created by this schedule
+  template:
+    # Metadata applied to each Backup object
+    metadata:
+      labels:
+        velero.io/schedule: daily
+        velero.io/schedule-name: lazynext-daily-backup
+        app.kubernetes.io/part-of: lazynext
+        app.kubernetes.io/component: backup
+        backup-type: scheduled
+        retention: 30d
+      annotations:
+        velero.io/schedule-description: "Automated daily backup created by Schedule lazynext-daily-backup"
+    # Include all namespaces EXCEPT system namespaces (kube-system, velero itself, etc.)
+    includedNamespaces:
+      - lazynext
+      - monitoring
+      - cert-manager
+      - ingress-nginx
+    excludedNamespaces:
+      - kube-system
+      - kube-public
+      - kube-node-lease
+      - velero
+      - keda
+      - istio-system
+    # Include ALL resources in the selected namespaces
+    includedClusterScopedResources: []
+    excludedClusterScopedResources:
+      # Exclude large cluster-scoped resources that are recreated by operators
+      - nodes
+      - events
+      - events.events.k8s.io
+      - backups.velero.io
+      - restores.velero.io
+      - deletebackuprequests.velero.io
+      - downloadrequests.velero.io
+      - podvolumebackups.velero.io
+      - podvolumerestores.velero.io
+      - serverstatusrequests.velero.io
+    # Include all cluster-scoped resources EXCEPT those in the excluded list above
+    includeClusterResources: true
+    # Take volume snapshots (Azure Managed Disk snapshots)
+    snapshotVolumes: true
+    # Backup storage location (defined above)
+    storageLocation: azure-backup-storage
+    # Snapshot volumes via the location defined above
+    volumeSnapshotLocations:
+      - azure-snapshot-location
+    # TTL for individual backups (overrides schedule-level TTL if set)
+    ttl: 720h
+    # Backup hooks: run pre/post commands for consistent DB backups
+    # Velero can run commands inside pods before/after snapshotting
+    hooks:
+      resources:
+        # Pre-snapshot hook: run pg_dump in the Postgres pod for logical consistency
+        - name: postgres-backup-hook
+          includedNamespaces:
+            - lazynext
+          includedResources:
+            - pods
+          labelSelector:
+            matchLabels:
+              app: postgres-db
+          pre:
+            - exec:
+                container: postgres
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    # Checkpoint and flush WAL for consistent snapshot
+                    pg_isready -U lazynext && \
+                    psql -U lazynext -c "CHECKPOINT;"
+                timeout: 30s
+          post:
+            - exec:
+                container: postgres
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    echo "Snapshot complete at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                timeout: 10s
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. Schedule — Weekly backup at 3 AM Sunday, retained 90 days
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: lazynext-weekly-backup
+  namespace: velero
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: backup
+    velero.io/schedule: weekly
+    velero.io/retention: 90d
+  annotations:
+    velero.io/description: "Weekly backup at 3 AM Sunday UTC — full cluster backup retained for 90 days"
+spec:
+  # Cron expression: every Sunday at 3 AM UTC (0 3 * * 0)
+  schedule: "0 3 * * 0"
+  paused: false
+  ttl: 2160h  # 90 days
+  useOwnerReferencesInBackup: true
+  template:
+    metadata:
+      labels:
+        velero.io/schedule: weekly
+        velero.io/schedule-name: lazynext-weekly-backup
+        app.kubernetes.io/part-of: lazynext
+        app.kubernetes.io/component: backup
+        backup-type: scheduled
+        retention: 90d
+      annotations:
+        velero.io/schedule-description: "Automated weekly backup created by Schedule lazynext-weekly-backup"
+    includedNamespaces:
+      - lazynext
+      - monitoring
+      - cert-manager
+      - ingress-nginx
+    excludedNamespaces:
+      - kube-system
+      - kube-public
+      - kube-node-lease
+      - velero
+      - keda
+      - istio-system
+    includedClusterScopedResources: []
+    excludedClusterScopedResources:
+      - nodes
+      - events
+      - events.events.k8s.io
+      - backups.velero.io
+      - restores.velero.io
+      - deletebackuprequests.velero.io
+      - downloadrequests.velero.io
+      - podvolumebackups.velero.io
+      - podvolumerestores.velero.io
+      - serverstatusrequests.velero.io
+    includeClusterResources: true
+    snapshotVolumes: true
+    storageLocation: azure-backup-storage
+    volumeSnapshotLocations:
+      - azure-snapshot-location
+    ttl: 2160h
+    # Weekly backups include extra object-storage verification
+    hooks:
+      resources:
+        - name: postgres-weekly-backup-hook
+          includedNamespaces:
+            - lazynext
+          includedResources:
+            - pods
+          labelSelector:
+            matchLabels:
+              app: postgres-db
+          pre:
+            - exec:
+                container: postgres
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    pg_isready -U lazynext && \
+                    psql -U lazynext -c "CHECKPOINT;"
+                timeout: 30s
+        # Weekly: also snapshot Redis RDB for completeness
+        - name: redis-backup-hook
+          includedNamespaces:
+            - lazynext
+          includedResources:
+            - pods
+          labelSelector:
+            matchLabels:
+              app: redis-db
+          pre:
+            - exec:
+                container: redis
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    redis-cli BGSAVE && \
+                    echo "Redis BGSAVE triggered for Velero snapshot"
+                timeout: 30s
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. Restore (example / documentation — not scheduled)
+# ═══════════════════════════════════════════════════════════════════
+#
+# To restore from a backup:
+#   # List available backups
+#   velero backup get
+#
+#   # Dry-run a restore to see what would be restored
+#   velero restore create --from-backup <backup-name> --dry-run
+#
+#   # Restore into the same cluster (namespace preserved)
+#   velero restore create --from-backup <backup-name>
+#
+#   # Restore into a different cluster (namespace preserved, or remapped)
+#   velero restore create --from-backup <backup-name> \
+#     --namespace-mappings lazynext:lazynext-restored
+#
+#   # Restore only specific resources
+#   velero restore create --from-backup <backup-name> \
+#     --include-resources persistentvolumeclaims,deployments,secrets
+#
+# Disaster recovery test procedure (run quarterly):
+#   1. Create a test namespace: kubectl create ns lazynext-dr-test
+#   2. Restore latest daily backup into test namespace:
+#        velero restore create --from-backup lazynext-daily-backup-<timestamp> \
+#          --namespace-mappings lazynext:lazynext-dr-test
+#   3. Verify the app is functional in the test namespace.
+#   4. Clean up: kubectl delete ns lazynext-dr-test
+#        velero restore delete <restore-name>
+# ───────────────────────────────────────────────────────────────────

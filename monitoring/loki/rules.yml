@@ -1,0 +1,244 @@
+# ── Loki Alerting Rules ───────────────────────────────────────────
+# Log-based alert rules evaluated by Loki's ruler component.
+# Mounted at /loki/rules/fake/ (tenant "fake" for single-tenant mode).
+#
+# These rules require Loki's ruler to be configured with:
+#   ruler:
+#     alertmanager_url: http://alertmanager:9093
+#     storage:
+#       local:
+#         directory: /loki/rules
+#     rule_path: /loki/rules-temp
+#     ring:
+#       kvstore:
+#         store: inmemory
+#
+# Rule expression syntax: LogQL with metric queries.
+# All rules use rate() or count_over_time() over log stream selectors.
+
+groups:
+  # ── Error Rate Alerts ───────────────────────────────────────────
+  - name: loki-error-rates
+    rules:
+      - alert: HighErrorLogRate
+        expr: |
+          sum(rate(
+            {job=~"lazynext-web|pre-processing|generative-studio|ai-agents|render-service|analytics-service"}
+            |~ "ERROR"
+            [5m]
+          )) > 50
+        for: 5m
+        labels:
+          severity: warning
+          category: logs
+        annotations:
+          summary: "High ERROR log rate across services: {{ $value }} lines/min"
+          description: |
+            Total ERROR-level log rate has exceeded 50 lines/minute for 5 minutes.
+            Check Loki explore for error patterns:
+            {job=~".+"} |= "ERROR"
+            Services affected: lazynext-web, pre-processing, generative-studio,
+            ai-agents, render-service, analytics-service
+
+      - alert: CriticalErrorDetected
+        expr: |
+          sum(rate(
+            {job=~"lazynext-web|pre-processing|generative-studio|ai-agents|render-service"}
+            |~ "FATAL|CRITICAL|panic|unrecoverable"
+            [5m]
+          )) > 0
+        for: 1m
+        labels:
+          severity: critical
+          category: logs
+        annotations:
+          summary: "CRITICAL/FATAL log entries detected"
+          description: |
+            Fatal or critical log lines have been detected in the last 5 minutes.
+            This typically indicates a crash, panic, or unrecoverable error state.
+            Immediate investigation required.
+            Query: {job=~".+"} |~ "FATAL|CRITICAL|panic"
+
+  # ── Service-Specific Log Alerts ─────────────────────────────────
+  - name: loki-service-specific
+    rules:
+      - alert: HighFfmpegFailureRate
+        expr: |
+          sum(rate(
+            {job="render-service"}
+            |~ "ffmpeg.*(error|failed|signal|cannot|invalid)"
+            [10m]
+          )) > 5
+        for: 10m
+        labels:
+          severity: warning
+          category: logs
+          service: render
+        annotations:
+          summary: "FFmpeg failures exceeding 5/minute in render-service"
+          description: |
+            FFmpeg-related errors in render-service logs have exceeded
+            5 lines per minute over 10 minutes.
+            Common causes: corrupted input media, codec misconfigurations,
+            disk space exhaustion, or output path permission issues.
+            Query: {job="render-service"} |~ "ffmpeg.*error"
+
+      - alert: AuthFailureSpike
+        expr: |
+          sum(rate(
+            {job="lazynext-web"}
+            |~ "401|403|unauthorized|forbidden|auth.*fail"
+            [5m]
+          )) > 20
+        for: 5m
+        labels:
+          severity: warning
+          category: logs
+          service: auth
+        annotations:
+          summary: "Authentication failure spike: {{ $value }} lines/min"
+          description: |
+            Auth-related failures (401/403/unauthorized) in web app logs
+            have spiked to {{ $value }} per minute over the last 5 minutes.
+            This may indicate a brute-force attack, expired tokens, or
+            misconfigured better-auth secrets.
+            Query: {job="lazynext-web"} |~ "401|403|unauthorized"
+
+      - alert: DatabaseConnectionFailure
+        expr: |
+          sum(rate(
+            {job=~"lazynext-web|ai-agents|render-service"}
+            |~ "database.*(connection.*refused|timeout|pool.*exhausted|unavailable|ECONNREFUSED)"
+            [5m]
+          )) > 5
+        for: 5m
+        labels:
+          severity: critical
+          category: logs
+          service: database
+        annotations:
+          summary: "Database connection failures detected"
+          description: |
+            Multiple services are logging database connection failures
+            at a rate of {{ $value }} per minute.
+            Check PostgreSQL server health, connection pool settings,
+            and network connectivity.
+            Query: {job=~".+"} |~ "database.*connection"
+
+      - alert: CRDTConflictSpike
+        expr: |
+          sum(rate(
+            {job=~"ai-agents|lazynext-web"}
+            |~ "CRDT.*(conflict|merge.*fail|state.*diverge|tombstone.*overflow)"
+            [5m]
+          )) > 20
+        for: 5m
+        labels:
+          severity: warning
+          category: logs
+          service: collaboration
+        annotations:
+          summary: "CRDT conflict log spike: {{ $value }} lines/min"
+          description: |
+            CRDT-related conflict/merge errors in logs have exceeded
+            20 lines per minute. This may indicate sync state corruption,
+            high concurrent editing contention, or vector clock divergence.
+            Query: {job=~"ai-agents|lazynext-web"} |= "CRDT"
+
+      - alert: HighMemoryUsageWarning
+        expr: |
+          sum(rate(
+            {job=~"pre-processing|generative-studio"}
+            |~ "(OOM|OutOfMemory|CUDA.*out.*of.*memory|allocation.*failed)"
+            [5m]
+          )) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: logs
+          service: ml
+        annotations:
+          summary: "GPU OOM or memory exhaustion in ML services"
+          description: |
+            Out-of-memory events detected in ML service logs.
+            This may require adjusting batch sizes, clearing GPU memory,
+            or scaling to larger GPU instances.
+            Query: {job=~"pre-processing|generative-studio"} |~ "OOM|OutOfMemory|CUDA.*memory"
+
+  # ── Infrastructure Log Alerts ───────────────────────────────────
+  - name: loki-infrastructure
+    rules:
+      - alert: DockerContainerRepeatedRestart
+        expr: |
+          sum(rate(
+            {job=~"docker|container"}
+            |~ "(restarting|restart loop|oom_kill|health.*check.*failed)"
+            [10m]
+          )) > 3
+        for: 10m
+        labels:
+          severity: warning
+          category: logs
+        annotations:
+          summary: "Docker containers restarting repeatedly"
+          description: |
+            Docker containers are showing restart loop patterns
+            at {{ $value }} occurrences per minute.
+            Query: {job=~"docker|container"} |~ "restarting|oom_kill"
+
+      - alert: KubernetesPodRepeatedRestart
+        expr: |
+          sum(rate(
+            {namespace=~".+"}
+            |~ "(BackOff|CrashLoopBackOff|Liveness probe failed|Readiness probe failed)"
+            [10m]
+          )) > 3
+        for: 10m
+        labels:
+          severity: warning
+          category: logs
+          service: kubernetes
+        annotations:
+          summary: "Kubernetes pods in restart loop"
+          description: |
+            Kubernetes pod restart loop patterns detected.
+            Query: {namespace=~".+"} |~ "BackOff|CrashLoopBackOff"
+
+  # ── Security Log Alerts ─────────────────────────────────────────
+  - name: loki-security
+    rules:
+      - alert: SuspiciousAuthActivity
+        expr: |
+          sum(rate(
+            {job="lazynext-web"}
+            |~ "(brute.*force|rate.*limit.*exceeded|suspicious|blocked.*IP|CSRF|XSS|SQL.*injection)"
+            [5m]
+          )) > 10
+        for: 5m
+        labels:
+          severity: warning
+          category: security
+        annotations:
+          summary: "Suspicious authentication or security activity detected"
+          description: |
+            Potential security events detected in web app logs at
+            {{ $value }} lines per minute.
+            Query: {job="lazynext-web"} |~ "brute|suspicious|blocked|CSRF"
+
+      - alert: PaymentAnomalyLog
+        expr: |
+          sum(rate(
+            {job="lazynext-web"}
+            |~ "(stripe.*error|payment.*fraud|chargeback|refund.*suspicious)"
+            [5m]
+          )) > 0
+        for: 2m
+        labels:
+          severity: critical
+          category: security
+          service: payments
+        annotations:
+          summary: "Payment anomaly detected in logs"
+          description: |
+            Stripe error or suspicious payment activity detected.
+            Query: {job="lazynext-web"} |~ "stripe.*error|payment.*fraud|chargeback"

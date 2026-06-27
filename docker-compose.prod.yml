@@ -1,0 +1,750 @@
+# ── Lazynext Production Docker Compose Override ───────────────────
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Hardens every service for production:
+#   • Resource limits with CPU/memory reservations
+#   • Multi-replica deploy configs (web:3, sync:2, render:2)
+#   • Rolling update config (rollback, parallelism)
+#   • JSON-file logging with size+count rotation
+#   • Restart policy: unless-stopped with max_attempts
+#   • Tighter healthcheck intervals for faster pod cycling
+#   • Secrets from Docker secrets (not env vars) whereever possible
+#   • Read-only rootfs, tmpfs for /tmp with noexec
+#   • Drop ALL capabilities, add only NET_BIND_SERVICE
+#   • init: true so zombie child processes are reaped
+#
+# Secrets expected under /run/secrets/:
+#   lazynext_postgres_password
+#   lazynext_better_auth_secret
+#   lazynext_stripe_secret_key
+#   lazynext_stripe_webhook_secret
+#   lazynext_resend_api_key
+#   lazynext_openai_api_key
+#   lazynext_anthropic_api_key
+#   lazynext_gemini_api_key
+#   lazynext_elevenlabs_api_key
+#   lazynext_replicate_api_token
+#   lazynext_upstash_redis_token
+#   lazynext_grafana_admin_password
+#   lazynext_freesound_client_id
+#   lazynext_freesound_api_key
+#   lazynext_marble_workspace_key
+
+x-logging: &logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+    compress: "true"
+
+x-deploy-defaults: &deploy-defaults
+  mode: replicated
+  replicas: 1
+  update_config:
+    parallelism: 1
+    delay: 10s
+    failure_action: rollback
+    monitor: 30s
+    max_failure_ratio: 0.3
+    order: start-first
+  rollback_config:
+    parallelism: 1
+    delay: 5s
+    failure_action: pause
+    monitor: 30s
+
+x-restart: &restart-prod
+  restart_policy:
+    condition: unless-stopped
+    delay: 10s
+    max_attempts: 5
+    window: 120s
+
+x-security: &security
+  cap_drop: [ALL]
+  cap_add: [NET_BIND_SERVICE]
+  read_only: true
+  init: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128M
+
+x-security-writable: &security-writable
+  cap_drop: [ALL]
+  cap_add: [NET_BIND_SERVICE]
+  init: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128M
+
+services:
+  # ── Database ─────────────────────────────────────────────────────
+  db:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lazynext -d lazynext"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
+    secrets:
+      - source: lazynext_postgres_password
+        target: postgres_password
+    environment:
+      POSTGRES_USER: lazynext
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: lazynext
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    read_only: false
+
+  # ── Redis ────────────────────────────────────────────────────────
+  redis:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    volumes:
+      - /data/redis:/data
+    cap_drop: [ALL]
+    cap_add: [SETGID, SETUID]
+    read_only: false
+    command: >-
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --lazyfree-lazy-eviction yes
+      --lazyfree-lazy-expire yes
+      --rename-command CONFIG ""
+      --rename-command DEBUG ""
+      --rename-command FLUSHDB ""
+      --rename-command FLUSHALL ""
+
+  # ── Redis HTTP Proxy ─────────────────────────────────────────────
+  redis-proxy:
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    secrets:
+      - source: lazynext_upstash_redis_token
+        target: upstash_token
+    environment:
+      SRH_MODE: env
+      SRH_CONNECTION_STRING: redis://redis:6379
+      SRH_TOKEN_FILE: /run/secrets/upstash_token
+
+  # ── Web App (Next.js Frontend + API) ─────────────────────────────
+  web:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 15s
+        failure_action: rollback
+        monitor: 60s
+        max_failure_ratio: 0.2
+        order: start-first
+      rollback_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: pause
+        monitor: 60s
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    secrets:
+      - source: lazynext_better_auth_secret
+        target: better_auth_secret
+      - source: lazynext_stripe_secret_key
+        target: stripe_secret_key
+      - source: lazynext_stripe_webhook_secret
+        target: stripe_webhook_secret
+      - source: lazynext_resend_api_key
+        target: resend_api_key
+      - source: lazynext_freesound_client_id
+        target: freesound_client_id
+      - source: lazynext_freesound_api_key
+        target: freesound_api_key
+      - source: lazynext_marble_workspace_key
+        target: marble_workspace_key
+      - source: lazynext_postgres_password
+        target: postgres_password
+    environment:
+      - NODE_ENV=production
+      - STORAGE_PROVIDER=azure
+      - DATABASE_URL=postgresql://lazynext:$(cat /run/secrets/postgres_password)@db:5432/lazynext
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
+      - BETTER_AUTH_URL=https://lazynext.com
+      - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
+      - UPSTASH_REDIS_REST_TOKEN_FILE=/run/secrets/upstash_token
+      - RENDER_SERVICE_URL=http://render-service:8003
+      - GENERATIVE_STUDIO_URL=http://generative-studio:8001
+      - PRE_PROCESSING_URL=http://pre-processing:8000
+      - AI_AGENTS_URL=http://ai-agents:8002
+      - NEXT_PUBLIC_SITE_URL=https://lazynext.com
+      - NEXT_PUBLIC_PREPROCESSING_URL=https://api.lazynext.com/preprocessing
+      - NEXT_PUBLIC_GENERATIVE_STUDIO_URL=https://api.lazynext.com/generative
+      - NEXT_PUBLIC_AI_AGENTS_URL=https://api.lazynext.com/ai
+      - NEXT_PUBLIC_RENDER_SERVICE_URL=https://api.lazynext.com/render
+      - NEXT_PUBLIC_POSTHOG_KEY=phc_prod
+      - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+      - STRIPE_SECRET_KEY_FILE=/run/secrets/stripe_secret_key
+      - STRIPE_WEBHOOK_SECRET_FILE=/run/secrets/stripe_webhook_secret
+      - RESEND_API_KEY_FILE=/run/secrets/resend_api_key
+      - FREESOUND_CLIENT_ID_FILE=/run/secrets/freesound_client_id
+      - FREESOUND_API_KEY_FILE=/run/secrets/freesound_api_key
+      - MARBLE_WORKSPACE_KEY_FILE=/run/secrets/marble_workspace_key
+      - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
+      - NODE_OPTIONS=--max-old-space-size=896
+      - NEXT_TELEMETRY_DISABLED=1
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256M
+      - /app/apps/web/.next/cache:rw,noexec,nosuid,size=512M
+    volumes:
+      - /data/web-cache:/app/apps/web/.next/cache
+
+  # ── AI Agents ────────────────────────────────────────────────────
+  ai-agents:
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    secrets:
+      - source: lazynext_openai_api_key
+        target: openai_api_key
+      - source: lazynext_anthropic_api_key
+        target: anthropic_api_key
+      - source: lazynext_gemini_api_key
+        target: gemini_api_key
+      - source: lazynext_postgres_password
+        target: postgres_password
+    environment:
+      - NODE_ENV=production
+      - PORT=8002
+      - DATABASE_URL=postgresql://lazynext:$(cat /run/secrets/postgres_password)@db:5432/lazynext
+      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
+      - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
+      - GEMINI_API_KEY_FILE=/run/secrets/gemini_api_key
+      - LLM_PROVIDER=anthropic
+    volume:
+      - /data/ai-agents-cache:/app/cache
+
+  # ── Render Service (FFmpeg Render Farm) ──────────────────────────
+  render-service:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 45s
+        max_failure_ratio: 0.3
+        order: start-first
+      resources:
+        limits:
+          cpus: "4"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 1G
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=512M
+    volumes:
+      - /data/render-jobs:/app/jobs:rw
+    environment:
+      - NODE_ENV=production
+      - PORT=8003
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - MEDIA_BUCKET=lazynext-media-prod
+      - STORAGE_PROVIDER=azure
+      - RENDER_PARALLELISM=2
+
+  # ── Collab Server (Native Rust CRDT Sync) ────────────────────────
+  collab-server:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 30s
+        max_failure_ratio: 0.3
+        order: start-first
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8004/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    secrets:
+      - source: lazynext_better_auth_secret
+        target: better_auth_secret
+    environment:
+      - COLLAB_PORT=8004
+      - RUST_LOG=info
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
+
+  # ── Pre-Processing (Python: Whisper, SAM2, NeRF) ─────────────────
+  pre-processing:
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "4"
+          memory: 6G
+        reservations:
+          cpus: "1"
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    secrets:
+      - source: lazynext_openai_api_key
+        target: openai_api_key
+      - source: lazynext_replicate_api_token
+        target: replicate_api_token
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
+      - REPLICATE_API_TOKEN_FILE=/run/secrets/replicate_api_token
+      - MEDIA_BUCKET=lazynext-media-prod
+      - OMP_NUM_THREADS=2
+      - MKL_NUM_THREADS=2
+    volumes:
+      - /data/models:/models:ro
+
+  # ── Generative Studio (Diffusion, Dubbing, Upscale) ──────────────
+  generative-studio:
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "4"
+          memory: 10G
+        reservations:
+          cpus: "1"
+          memory: 6G
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    secrets:
+      - source: lazynext_elevenlabs_api_key
+        target: elevenlabs_api_key
+      - source: lazynext_replicate_api_token
+        target: replicate_api_token
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REPLICATE_API_TOKEN_FILE=/run/secrets/replicate_api_token
+      - ELEVENLABS_API_KEY_FILE=/run/secrets/elevenlabs_api_key
+      - HF_HOME=/tmp/huggingface
+      - TRANSFORMERS_CACHE=/tmp/huggingface
+    volumes:
+      - /data/models:/models:ro
+
+  # ── Analytics Service ────────────────────────────────────────────
+  analytics-service:
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8006/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    environment:
+      - NODE_ENV=production
+      - PORT=8006
+
+  # ── Observability ────────────────────────────────────────────────
+  prometheus:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - /data/prometheus:/prometheus:rw
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.retention.size=50GB
+      - --web.enable-lifecycle
+      - --web.enable-admin-api
+
+  grafana:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: warn
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ALERTING_ENABLED: "true"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - /data/grafana:/var/lib/grafana:rw
+
+  loki:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - /data/loki:/loki:rw
+    command: -config.file=/etc/loki/local-config.yaml
+
+  alertmanager:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml:ro
+      - /data/alertmanager:/alertmanager:rw
+
+  tempo:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+      - /data/tempo:/tmp/tempo:rw
+    command: -config.file=/etc/tempo/tempo-config.yaml
+
+  alloy:
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12345/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+
+  # ── Database Exporter ────────────────────────────────────────────
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.0
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    environment:
+      DATA_SOURCE_URI: "db:5432/lazynext?sslmode=disable"
+      DATA_SOURCE_USER: lazynext
+      DATA_SOURCE_PASS_FILE: /run/secrets/postgres_password
+    secrets:
+      - source: lazynext_postgres_password
+        target: postgres_password
+
+  # ── Redis Exporter ───────────────────────────────────────────────
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.80.0
+    <<: [*logging, *restart-prod, *security]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_EXPORTER_LOG_FORMAT: json
+
+  # ── Node Exporter (host metrics) ─────────────────────────────────
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.1
+    <<: [*logging, *restart-prod]
+    deploy:
+      <<: *deploy-defaults
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9100/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32M
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|run)($$|/)
+      - --collector.filesystem.fs-types-exclude="^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$"
+
+secrets:
+  lazynext_postgres_password:
+    external: true
+  lazynext_better_auth_secret:
+    external: true
+  lazynext_stripe_secret_key:
+    external: true
+  lazynext_stripe_webhook_secret:
+    external: true
+  lazynext_resend_api_key:
+    external: true
+  lazynext_openai_api_key:
+    external: true
+  lazynext_anthropic_api_key:
+    external: true
+  lazynext_gemini_api_key:
+    external: true
+  lazynext_elevenlabs_api_key:
+    external: true
+  lazynext_replicate_api_token:
+    external: true
+  lazynext_upstash_redis_token:
+    external: true
+  lazynext_freesound_client_id:
+    external: true
+  lazynext_freesound_api_key:
+    external: true
+  lazynext_marble_workspace_key:
+    external: true

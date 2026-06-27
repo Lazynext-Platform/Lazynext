@@ -1,0 +1,173 @@
+# ── Prometheus Alert Rules ─────────────────────────────────────────
+# Managed by Ansible — do not edit by hand.
+
+groups:
+  - name: lazynext-infrastructure
+    rules:
+      # ── Node / System ───────────────────────────────────────────
+      - alert: InstanceDown
+        expr: up{job="node_exporter"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.hostname }} is down"
+          description: "{{ $labels.hostname }} has been unreachable for 5 minutes."
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (hostname) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.hostname }}"
+          description: "CPU usage on {{ $labels.hostname }} has been above 85% for 10 minutes (current: {{ $value | humanize }}%)."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.hostname }}"
+          description: "Memory usage on {{ $labels.hostname }} has exceeded 90% (current: {{ $value | humanize }}%)."
+
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low disk space on {{ $labels.hostname }}"
+          description: "Filesystem {{ $labels.mountpoint }} on {{ $labels.hostname }} has less than 15% free space ({{ $value | humanize }}% free)."
+
+      - alert: DiskSpaceCritical
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 5
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical disk space on {{ $labels.hostname }}"
+          description: "Filesystem {{ $labels.mountpoint }} on {{ $labels.hostname }} has less than 5% free space."
+
+      # ── PostgreSQL ──────────────────────────────────────────────
+      - alert: PostgresqlDown
+        expr: pg_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL instance {{ $labels.instance }} is down"
+          description: "PostgreSQL has been down for more than 2 minutes."
+
+      - alert: PostgresqlTooManyConnections
+        expr: sum by (instance) (pg_stat_database_numbackends) > (pg_settings_max_connections * 0.85)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL {{ $labels.instance }} nearing connection limit"
+          description: "PostgreSQL is using {{ $value }} of max connections."
+
+      - alert: PostgresqlHighReplicationLag
+        expr: pg_stat_replication_replay_lag_seconds > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL replication lag on {{ $labels.instance }}"
+          description: "Replication lag is {{ $value }}s (threshold: 30s)."
+
+      - alert: PostgresqlSlowQueries
+        expr: rate(pg_stat_statements_seconds_total[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow PostgreSQL queries detected"
+          description: "PostgreSQL slow query rate is elevated."
+
+      # ── Redis ───────────────────────────────────────────────────
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis instance {{ $labels.instance }} is down"
+          description: "Redis has been down for more than 2 minutes."
+
+      - alert: RedisOutOfMemory
+        expr: redis_memory_used_bytes / redis_maxmemory_bytes > 0.90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis {{ $labels.instance }} near max memory"
+          description: "Redis memory usage at {{ $value | humanize }} of max."
+
+      - alert: RedisRejectedConnections
+        expr: rate(redis_rejected_connections_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis {{ $labels.instance }} rejecting connections"
+          description: "Redis is rejecting connections — may be at maxclients limit."
+
+      # ── Kubernetes ──────────────────────────────────────────────
+      - alert: KubeNodeNotReady
+        expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kubernetes node {{ $labels.node }} is NotReady"
+          description: "Node {{ $labels.node }} has been NotReady for 5 minutes."
+
+      - alert: KubePodCrashLooping
+        expr: increase(kube_pod_container_status_restarts_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash-looping"
+          description: "Container in pod {{ $labels.pod }} has restarted {{ $value }} times in the last hour."
+
+      - alert: KubeDeploymentReplicasMismatch
+        expr: kube_deployment_spec_replicas != kube_deployment_status_replicas_available
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Deployment {{ $labels.deployment }} replica mismatch"
+          description: "Expected {{ $labels.deployment_spec_replicas }} replicas but {{ $labels.deployment_status_replicas_available }} are available."
+
+      # ── GPU ─────────────────────────────────────────────────────
+      - alert: GPUHighTemperature
+        expr: DCGM_FI_DEV_GPU_TEMP > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU {{ $labels.Hostname }} temperature high"
+          description: "GPU temperature is {{ $value }}°C (threshold: 85°C)."
+
+      - alert: GPUHighMemoryUsage
+        expr: (DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU {{ $labels.Hostname }} memory near capacity"
+          description: "GPU framebuffer at {{ $value | humanize }}%."
+
+      # ── Docker / Container ──────────────────────────────────────
+      - alert: ContainerExited
+        expr: time() - container_last_seen{name=~"prometheus|grafana|alertmanager|loki|promtail|alloy"} > 300
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} may have exited"
+          description: "Container {{ $labels.name }} has not been seen for 5 minutes."

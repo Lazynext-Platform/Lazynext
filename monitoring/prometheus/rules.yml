@@ -42,6 +42,24 @@ groups:
         annotations:
           summary: "Render service is down"
 
+      - alert: CollabServerDown
+        expr: up{job="collab-server"} == 0
+        for: 3m
+        labels:
+          severity: warning
+          service: collab
+        annotations:
+          summary: "Collab server is down"
+
+      - alert: AnalyticsServiceDown
+        expr: up{job="analytics-service"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: analytics
+        annotations:
+          summary: "Analytics service is down"
+
   - name: slo-web-availability
     rules:
       - alert: SLOBurnRateCritical

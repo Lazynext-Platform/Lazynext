@@ -1,0 +1,109 @@
+# ── Grafana Datasource Provisioning ────────────────────────────────
+# Managed by Ansible — do not edit by hand.
+
+apiVersion: 1
+
+datasources:
+  # ── Prometheus (metrics) ────────────────────────────────────────
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    uid: prometheus
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.45.0
+      cacheLevel: "Medium"
+      disableRecordingRules: false
+      incrementalQueryOverlapWindow: "10m"
+      exemplarTraceIdDestinations:
+        - name: traceID
+          datasourceUid: tempo
+      alertmanagerUid: alertmanager
+      implementation: prometheus
+
+  # ── Loki (logs) ─────────────────────────────────────────────────
+  - name: Loki
+    type: loki
+    access: proxy
+    uid: loki
+    url: http://loki:3100
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - name: traceID
+          matcherRegex: "traceID=(\\w+)"
+          datasourceUid: tempo
+      httpHeaderName1: "X-Scope-OrgID"
+      alertmanagerUid: alertmanager
+
+  # ── Alertmanager ────────────────────────────────────────────────
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    uid: alertmanager
+    url: http://alertmanager:9093
+    editable: false
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: true
+
+  # ── PostgreSQL ──────────────────────────────────────────────────
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    uid: postgresql
+    url: "{{ hostvars[groups['masters'][0]].ansible_host | default(groups['masters'][0]) }}:5432"
+    user: postgres_exporter
+    database: lazynext
+    editable: true
+    secureJsonData:
+      password: "{{ vault_postgres_exporter_password | default('Exp0rter!123') }}"
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1700
+      timescaledb: false
+      enableSecureSocksProxy: false
+
+  # ── Redis ───────────────────────────────────────────────────────
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    uid: redis
+    url: "{{ hostvars[groups['masters'][0]].ansible_host | default(groups['masters'][0]) }}:6379"
+    editable: true
+    jsonData:
+      client: standalone
+      poolSize: 5
+      timeout: 10
+      pingInterval: 30
+      pipelineWindow: 0
+    secureJsonData:
+      password: "{{ redis_password }}"
+
+  # ── CloudWatch / Azure Monitor (optional) ───────────────────────
+  - name: Azure Monitor
+    type: grafana-azure-monitor-datasource
+    access: proxy
+    uid: azure-monitor
+    editable: true
+    jsonData:
+      cloudName: azuremonitor
+      subscriptionId: "{{ vault_azure_subscription_id | default('00000000-0000-0000-0000-000000000000') }}"
+    secureJsonData:
+      clientSecret: "{{ vault_azure_client_secret | default('') }}"
+
+deleteDatasources:
+  - name: Prometheus
+  - name: Loki
+  - name: Alertmanager
+  - name: PostgreSQL
+  - name: Redis
+  - name: Azure Monitor

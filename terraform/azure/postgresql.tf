@@ -9,8 +9,8 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   sku_name   = var.db_sku_name
   storage_mb = var.environment == "production" ? 131072 : 32768 # 128GB / 32GB (Azure minimum: 32GB)
 
-  delegated_subnet_id   = azurerm_subnet.postgres.id
-  private_dns_zone_id   = azurerm_private_dns_zone.postgres.id
+  delegated_subnet_id = azurerm_subnet.postgres.id
+  private_dns_zone_id = azurerm_private_dns_zone.postgres.id
 
   # Only allow private network access (no public endpoint)
   public_network_access_enabled = false

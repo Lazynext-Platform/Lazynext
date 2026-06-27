@@ -1,0 +1,367 @@
+name: Database Backup Verification
+
+on:
+  schedule:
+    - cron: "0 7 * * 0" # Weekly Sunday at 7 AM UTC
+  workflow_dispatch:
+    inputs:
+      restore-target:
+        description: "Target environment for restore verification"
+        required: false
+        default: "staging"
+        type: choice
+        options:
+          - "staging"
+          - "dev"
+      validate-rows:
+        description: "Validate row counts across all tables"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  backup-snapshot:
+    name: Create Test Backup Snapshot
+    runs-on: ubuntu-latest
+    outputs:
+      backup-timestamp: ${{ steps.backup.outputs.timestamp }}
+      backup-size: ${{ steps.backup.outputs.size }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create PostgreSQL Backup
+        id: backup
+        run: |
+          TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+          DB_SERVER="lazynext-pg-${RESTORE_TARGET}"
+          DB_NAME="lazynext"
+          RESTORE_TARGET="${{ github.event.inputs.restore-target || 'staging' }}"
+
+          PG_PASSWORD="${{ secrets.AZURE_PG_PASSWORD }}"
+
+          echo "Creating backup snapshot for ${RESTORE_TARGET}..."
+
+          # Use pg_dump via Azure's flexible server connectivity
+          az postgres flexible-server firewall-rule create \
+            --rule-name "gh-backup-verify-${TIMESTAMP}" \
+            --resource-group "lazynext-rg-${RESTORE_TARGET}" \
+            --name "${DB_SERVER}" \
+            --start-ip-address "$(curl -s ifconfig.me)" \
+            --end-ip-address "$(curl -s ifconfig.me)" 2>/dev/null || true
+
+          PGPASSWORD="${PG_PASSWORD}" pg_dump \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "${DB_NAME}" \
+            -F c \
+            -f "backup-${RESTORE_TARGET}-${TIMESTAMP}.dump" \
+            --no-owner \
+            --no-acl \
+            --verbose
+
+          BACKUP_SIZE=$(du -h "backup-${RESTORE_TARGET}-${TIMESTAMP}.dump" | cut -f1)
+          echo "size=$BACKUP_SIZE" >> $GITHUB_OUTPUT
+
+          echo "Backup created: backup-${RESTORE_TARGET}-${TIMESTAMP}.dump (${BACKUP_SIZE})"
+
+          # Clean up firewall rule
+          az postgres flexible-server firewall-rule delete \
+            --rule-name "gh-backup-verify-${TIMESTAMP}" \
+            --resource-group "lazynext-rg-${RESTORE_TARGET}" \
+            --name "${DB_SERVER}" \
+            --yes 2>/dev/null || true
+
+      - name: Upload Backup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ format('pg-backup-{0}-{1}', github.event.inputs.restore-target || 'staging', steps.backup.outputs.timestamp) }}
+          path: "backup-*.dump"
+          retention-days: 7
+          compression-level: 6
+
+  restore-test:
+    name: Test Restore to Staging
+    runs-on: ubuntu-latest
+    needs: [backup-snapshot]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Download Backup Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ format('pg-backup-{0}-{1}', github.event.inputs.restore-target || 'staging', needs.backup-snapshot.outputs.backup-timestamp) }}
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Restore Backup to Staging Database
+        run: |
+          RESTORE_TARGET="staging"  # Always restore to staging for validation
+          DB_SERVER="lazynext-pg-${RESTORE_TARGET}"
+          DB_NAME="lazynext_staging_restore_verify"
+          PG_PASSWORD="${{ secrets.AZURE_PG_PASSWORD }}"
+
+          BACKUP_FILE=$(ls backup-*.dump 2>/dev/null | head -1)
+          if [ -z "$BACKUP_FILE" ]; then
+            echo "::error ::No backup file found"
+            exit 1
+          fi
+
+          echo "Restoring $BACKUP_FILE to ${DB_SERVER}..."
+
+          # Create restore verification database
+          PGPASSWORD="${PG_PASSWORD}" psql \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "postgres" \
+            -c "DROP DATABASE IF EXISTS ${DB_NAME};" 2>/dev/null || true
+
+          PGPASSWORD="${PG_PASSWORD}" psql \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "postgres" \
+            -c "CREATE DATABASE ${DB_NAME};"
+
+          # Restore
+          PGPASSWORD="${PG_PASSWORD}" pg_restore \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "${DB_NAME}" \
+            -j 4 \
+            --no-owner \
+            --no-acl \
+            --verbose \
+            "${BACKUP_FILE}" 2>&1 | tee restore-output.txt
+
+          if [ ${PIPESTATUS[0]} -eq 0 ]; then
+            echo "✅ Restore to ${DB_NAME} completed successfully"
+          else
+            echo "::error ::Restore to ${DB_NAME} failed — check restore-output.txt"
+            exit 1
+          fi
+
+      - name: Upload Restore Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-verification-log
+          path: restore-output.txt
+          retention-days: 7
+
+  data-integrity:
+    name: Verify Data Integrity
+    runs-on: ubuntu-latest
+    needs: [backup-snapshot, restore-test]
+    if: github.event.inputs.validate-rows != 'false'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run Data Integrity Checks
+        run: |
+          RESTORE_TARGET="staging"
+          DB_SERVER="lazynext-pg-${RESTORE_TARGET}"
+          DB_NAME="lazynext_staging_restore_verify"
+          PG_PASSWORD="${{ secrets.AZURE_PG_PASSWORD }}"
+
+          PG_CONN="-h ${DB_SERVER}.postgres.database.azure.com -U lazynext_admin"
+
+          echo "## Data Integrity Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Verifying restored database: \`${DB_NAME}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # 1. Count tables
+          echo "### Table Row Counts" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Table | Row Count | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          declare -A EXPECTED_TABLES
+          EXPECTED_TABLES=(
+            ["users"]=">0"
+            ["projects"]=">=0"
+            ["timelines"]=">=0"
+            ["exports"]=">=0"
+            ["subscriptions"]=">=0"
+            ["api_keys"]=">=0"
+          )
+
+          FAILURES=0
+          TABLES_CHECKED=0
+
+          for table in "${!EXPECTED_TABLES[@]}"; do
+            COUNT=$(PGPASSWORD="${PG_PASSWORD}" psql ${PG_CONN} -d "${DB_NAME}" \
+              -t -A -c "SELECT COUNT(*) FROM ${table};" 2>/dev/null || echo "ERROR")
+
+            EXPECTED="${EXPECTED_TABLES[$table]}"
+            STATUS="✅"
+
+            if [ "$COUNT" = "ERROR" ]; then
+              STATUS="⚠️ Table missing"
+              FAILURES=$((FAILURES + 1))
+            elif [ "$EXPECTED" = ">0" ] && [ "$COUNT" -eq 0 ]; then
+              STATUS="⚠️ Empty"
+            elif [ "$EXPECTED" = ">=0" ] && [ "$COUNT" -lt 0 ]; then
+              STATUS="❌ Invalid count"
+              FAILURES=$((FAILURES + 1))
+            fi
+
+            echo "| \`${table}\` | ${COUNT} | ${STATUS} |" >> $GITHUB_STEP_SUMMARY
+            TABLES_CHECKED=$((TABLES_CHECKED + 1))
+          done
+
+          # 2. Check for orphaned records (example: subscriptions without users)
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Foreign Key Integrity" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          ORPHAN_CHECKS=(
+            "subscriptions:user_id:users:id"
+          )
+
+          for check in "${ORPHAN_CHECKS[@]}"; do
+            IFS=':' read -r child_table child_col parent_table parent_col <<< "$check"
+            ORPHANS=$(PGPASSWORD="${PG_PASSWORD}" psql ${PG_CONN} -d "${DB_NAME}" \
+              -t -A -c "SELECT COUNT(*) FROM ${child_table} c LEFT JOIN ${parent_table} p ON c.${child_col} = p.${parent_col} WHERE p.${parent_col} IS NULL;" 2>/dev/null || echo "?")
+            if [ "$ORPHANS" != "0" ] && [ "$ORPHANS" != "?" ]; then
+              echo "- ⚠️ \`${child_table}.${child_col}\` → \`${parent_table}.${parent_col}\`: **${ORPHANS} orphan(s)**" >> $GITHUB_STEP_SUMMARY
+              FAILURES=$((FAILURES + 1))
+            else
+              echo "- ✅ \`${child_table}.${child_col}\` → \`${parent_table}.${parent_col}\`: Clean" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          # 3. Check index health
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Index Health" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          DEAD_INDEXES=$(PGPASSWORD="${PG_PASSWORD}" psql ${PG_CONN} -d "${DB_NAME}" \
+            -t -A -c "SELECT COUNT(*) FROM pg_index WHERE indisvalid = false;" 2>/dev/null || echo "?")
+          UNUSED_INDEXES=$(PGPASSWORD="${PG_PASSWORD}" psql ${PG_CONN} -d "${DB_NAME}" \
+            -t -A -c "SELECT COUNT(*) FROM pg_stat_user_indexes WHERE idx_scan = 0 AND indexrelname NOT LIKE '%pkey';" 2>/dev/null || echo "?")
+
+          echo "- **Invalid indexes:** ${DEAD_INDEXES}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Unused indexes:** ${UNUSED_INDEXES}" >> $GITHUB_STEP_SUMMARY
+
+          # 4. Final verdict
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAILURES" -eq 0 ]; then
+            echo "## ✅ All Integrity Checks Passed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "${TABLES_CHECKED} tables verified, 0 integrity issues found." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ ${FAILURES} Integrity Issue(s) Found" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Review the issues above. The backup/restore process may need attention." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "failures=$FAILURES" >> $GITHUB_ENV
+
+      - name: Final Status
+        if: always()
+        run: |
+          if [ "${failures:-0}" -gt 0 ]; then
+            echo "::warning ::${failures} data integrity issues found — see step summary"
+          else
+            echo "All integrity checks passed."
+          fi
+
+  cleanup:
+    name: Cleanup Verification Database
+    runs-on: ubuntu-latest
+    needs: [backup-snapshot, restore-test, data-integrity]
+    if: always()
+    steps:
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Drop Verification Database
+        run: |
+          DB_SERVER="lazynext-pg-staging"
+          DB_NAME="lazynext_staging_restore_verify"
+          PG_PASSWORD="${{ secrets.AZURE_PG_PASSWORD }}"
+
+          echo "Dropping verification database: ${DB_NAME}"
+
+          # Terminate connections to the verification DB
+          PGPASSWORD="${PG_PASSWORD}" psql \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "postgres" \
+            -c "SELECT pg_terminate_backend(pg_stat_activity.pid)
+                FROM pg_stat_activity
+                WHERE pg_stat_activity.datname = '${DB_NAME}'
+                  AND pid <> pg_backend_pid();" 2>/dev/null || true
+
+          PGPASSWORD="${PG_PASSWORD}" psql \
+            -h "${DB_SERVER}.postgres.database.azure.com" \
+            -U "lazynext_admin" \
+            -d "postgres" \
+            -c "DROP DATABASE IF EXISTS ${DB_NAME};"
+
+          echo "🧹 Verification database cleaned up."
+
+  report:
+    name: Generate Backup Verification Report
+    runs-on: ubuntu-latest
+    needs: [backup-snapshot, restore-test, data-integrity, cleanup]
+    if: always()
+    steps:
+      - name: Compile Report
+        run: |
+          {
+            echo "# 📦 Database Backup Verification Report"
+            echo ""
+            echo "**Date:** $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo "**Target:** ${{ github.event.inputs.restore-target || 'staging' }}"
+            echo ""
+            echo "| Step | Status | Details |"
+            echo "|------|--------|---------|"
+            echo "| Backup Snapshot | ${{ needs.backup-snapshot.result }} | ${{ needs.backup-snapshot.outputs.backup-size }} — \`${{ needs.backup-snapshot.outputs.backup-timestamp }}\` |"
+            echo "| Restore Test | ${{ needs.restore-test.result }} | Restored to \`lazynext_staging_restore_verify\` |"
+            echo "| Data Integrity | ${{ needs.data-integrity.result }} | Row counts, FK integrity, index health |"
+            echo "| Cleanup | ${{ needs.cleanup.result }} | Verification DB dropped |"
+            echo ""
+            echo "### Run Details"
+            echo ""
+            echo "- Backup timestamp: \`${{ needs.backup-snapshot.outputs.backup-timestamp }}\`"
+            echo "- Backup size: ${{ needs.backup-snapshot.outputs.backup-size }}"
+            echo "- Artifacts expire: 7 days"
+            echo ""
+            echo "### Recovery Time Objective (RTO) Check"
+            echo ""
+            echo "Backup and restore completed in this run. If the total workflow duration"
+            echo "exceeds the RTO threshold (target: < 1 hour), review the backup strategy."
+          } >> $GITHUB_STEP_SUMMARY

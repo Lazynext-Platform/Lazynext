@@ -1,0 +1,39 @@
+# ── Redis Sentinel configuration ───────────────────────────────────
+# Managed by Ansible — do not edit by hand.
+
+# Sentinel monitor: <master-name> <ip> <port> <quorum>
+sentinel monitor lazynext-master {{ redis_master_host }} {{ redis_port }} {{ redis_sentinel_quorum }}
+
+# Authentication
+sentinel auth-pass lazynext-master "{{ redis_password }}"
+
+# Master is considered down after this many milliseconds
+sentinel down-after-milliseconds lazynext-master {{ redis_sentinel_down_after_ms }}
+
+# Failover timeout — maximum time to wait for failover to complete
+sentinel failover-timeout lazynext-master {{ redis_sentinel_failover_timeout }}
+
+# Number of replicas to reconfigure in parallel during failover
+sentinel parallel-syncs lazynext-master {{ redis_sentinel_parallel_syncs }}
+
+# Sentinel port
+port {{ redis_sentinel_port }}
+
+# Bind to private network
+bind 0.0.0.0
+
+# Logging
+logfile /var/log/redis/sentinel.log
+loglevel notice
+
+# Working directory
+dir /var/lib/redis
+
+# Runtime reconfiguration
+sentinel deny-scripts-reconfig yes
+SENTINEL resolve-hostnames no
+SENTINEL announce-hostnames no
+
+# Safety — only failover if at least one replica is reachable
+sentinel replica-priority lazynext-master 100
+sentinel election-replica-count 1

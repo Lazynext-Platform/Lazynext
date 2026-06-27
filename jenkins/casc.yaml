@@ -1,0 +1,534 @@
+# jenkins/casc.yaml — Jenkins Configuration-as-Code (JCasC)
+# Complete Jenkins controller configuration for Lazynext platform CI/CD.
+#
+# Applied via: jenkins-plugin-manager --plugin-file plugins.txt && jenkins -Dcasc.jenkins.config=$(pwd)/jenkins/casc.yaml
+# Or set: CASC_JENKINS_CONFIG=jenkins/casc.yaml in jenkins.service
+#
+# References: https://github.com/jenkinsci/configuration-as-code-plugin
+
+jenkins:
+  # ── System ──────────────────────────────────────────────────────
+  systemMessage: |
+    Lazynext Platform CI/CD — automated by Jenkins Configuration-as-Code.
+    Contact platform-eng@lazynext.com for pipeline issues.
+
+  numExecutors: 0                        # Controller does not execute builds
+  mode: NORMAL
+  quietPeriod: 5
+  scmCheckoutRetryCount: 3
+
+  # ── Jenkins URL ─────────────────────────────────────────────────
+  # Set via env: JENKINS_URL=https://jenkins.lazynext.com
+  disableRememberMe: false
+
+  # ── Admin monitor ignore list ───────────────────────────────────
+  disabledAdministrativeMonitors:
+    - "hudson.model.UpdateCenter$CoreUpdateMonitor"
+    - "jenkins.diagnostics.ControllerExecutorsNoAgents"
+
+  # ── Label assignments ───────────────────────────────────────────
+  labelString: "lazynext-controller"
+
+  # ── Agent port ──────────────────────────────────────────────────
+  slaveAgentPort: 50000
+
+  # ── Quiet period before triggering downstream jobs ──────────────
+  quietPeriod: 3
+
+  # ── Views ───────────────────────────────────────────────────────
+  views:
+    - all:
+        name: "All"
+    - list:
+        name: "Lazynext Pipelines"
+        description: "All Lazynext CI/CD pipeline jobs"
+        includeRegex: "lazynext.*"
+        recurse: true
+    - list:
+        name: "Nightly Reports"
+        description: "Nightly regression pipeline results"
+        includeRegex: "lazynext-nightly.*"
+        recurse: true
+
+  # ── Security Realm (local users + GitHub OAuth) ─────────────────
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "admin"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+        - id: "platform-bot"
+          password: "${JENKINS_BOT_PASSWORD}"
+    # Uncomment for GitHub SSO:
+    # github:
+    #   clientID: "${GITHUB_OAUTH_CLIENT_ID}"
+    #   clientSecret: "${GITHUB_OAUTH_CLIENT_SECRET}"
+    #   githubApiUri: "https://api.github.com"
+    #   githubWebUri: "https://github.com"
+
+  # ── Authorization ───────────────────────────────────────────────
+  authorizationStrategy:
+    roleBased:
+      roles:
+        global:
+          - name: "admin"
+            description: "Full administrative access"
+            permissions:
+              - "Overall/Administer"
+            entries:
+              - user: "admin"
+          - name: "platform-engineer"
+            description: "Platform engineering team — manage jobs and agents"
+            permissions:
+              - "Overall/Read"
+              - "Job/Build"
+              - "Job/Cancel"
+              - "Job/Configure"
+              - "Job/Create"
+              - "Job/Delete"
+              - "Job/Discover"
+              - "Job/Move"
+              - "Job/Read"
+              - "Job/Workspace"
+              - "Run/Replay"
+              - "Run/Update"
+              - "View/Configure"
+              - "View/Create"
+              - "View/Delete"
+              - "View/Read"
+              - "SCM/Tag"
+              - "Agent/Build"
+              - "Agent/Configure"
+              - "Agent/Connect"
+              - "Agent/Create"
+              - "Agent/Delete"
+              - "Agent/Disconnect"
+              - "Agent/Provision"
+              - "Credentials/View"
+              - "Credentials/Create"
+              - "Credentials/Update"
+              - "Credentials/Delete"
+              - "Credentials/ManageDomains"
+              - "ManageOwnCredentials/ManageOwnCredentials"
+            entries:
+              - group: "platform-eng"
+          - name: "developer"
+            description: "Developer team — view and trigger builds"
+            permissions:
+              - "Overall/Read"
+              - "Job/Build"
+              - "Job/Cancel"
+              - "Job/Discover"
+              - "Job/Read"
+              - "Job/Workspace"
+              - "View/Read"
+              - "SCM/Tag"
+              - "ManageOwnCredentials/ManageOwnCredentials"
+            entries:
+              - group: "developers"
+          - name: "anonymous"
+            description: "Read-only access for anonymous users"
+            permissions:
+              - "Overall/Read"
+              - "Job/Discover"
+              - "Job/Read"
+              - "View/Read"
+            entries:
+              - group: "anonymous"
+
+  # ── Credentials ─────────────────────────────────────────────────
+  credentials:
+    system:
+      domainCredentials:
+        - domain:
+            name: "lazynext"
+            description: "Lazynext platform credentials"
+            credentials:
+              # Azure service principal (JSON file)
+              - file:
+                  scope: GLOBAL
+                  id: "azure-credentials"
+                  description: "Azure service principal for Container Apps, ACR, AKS"
+                  filename: "azure-sp.json"
+                  secretBytes: "${AZURE_SP_JSON_BASE64}"
+
+              # Azure Container Registry
+              - usernamePassword:
+                  scope: GLOBAL
+                  id: "acr-credentials"
+                  description: "Azure Container Registry login"
+                  username: "${ACR_SERVICE_PRINCIPAL_ID}"
+                  password: "${ACR_SERVICE_PRINCIPAL_PASSWORD}"
+
+              # GitHub deploy key / token
+              - string:
+                  scope: GLOBAL
+                  id: "github-lazynext"
+                  description: "GitHub token for SCM checkout"
+                  secret: "${GITHUB_TOKEN}"
+
+              # better-auth secret
+              - string:
+                  scope: GLOBAL
+                  id: "better-auth-secret"
+                  description: "Auth secret (64-char) for Next.js builds"
+                  secret: "${BETTER_AUTH_SECRET}"
+
+              # API keys bundle (as a secret file)
+              - file:
+                  scope: GLOBAL
+                  id: "api-keys"
+                  description: "API keys for external services (OpenAI, Anthropic, Stripe, Resend, etc.)"
+                  filename: "api-keys.env"
+                  secretBytes: "${API_KEYS_ENV_BASE64}"
+
+              # Slack webhook URL
+              - string:
+                  scope: GLOBAL
+                  id: "slack-webhook-url"
+                  description: "Slack incoming webhook for pipeline notifications"
+                  secret: "${SLACK_WEBHOOK_URL}"
+
+              # Docker Hub (fallback)
+              - usernamePassword:
+                  scope: GLOBAL
+                  id: "docker-hub-credentials"
+                  description: "Docker Hub login (fallback for base image pulls)"
+                  username: "${DOCKER_HUB_USERNAME}"
+                  password: "${DOCKER_HUB_TOKEN}"
+
+  # ── Clouds / Agent Templates ────────────────────────────────────
+  clouds:
+    - docker:
+        name: "docker-cloud"
+        dockerApi:
+          dockerHost:
+            uri: "unix:///var/run/docker.sock"
+        templates:
+          # Standard Linux agent
+          - name: "lazynext-builder"
+            labelString: "lazynext-builder docker"
+            remoteFs: "/home/jenkins/agent"
+            connector:
+              attach:
+                user: "jenkins"
+            instanceCapStr: "10"
+            pullStrategy: PULL_LATEST
+            dockerTemplateBase:
+              image: "lazynext-jenkins-agent:latest"
+              pullCredentialsId: "acr-credentials"
+            # Resource allocation per agent
+            memory: "8Gi"
+            cpu: "4"
+
+          # Lightweight agent for quick checks (lint, typecheck only)
+          - name: "lazynext-lite"
+            labelString: "lazynext-lite docker"
+            remoteFs: "/home/jenkins/agent"
+            connector:
+              attach:
+                user: "jenkins"
+            instanceCapStr: "20"
+            pullStrategy: PULL_LATEST
+            dockerTemplateBase:
+              image: "lazynext-jenkins-agent:latest"
+            memory: "2Gi"
+            cpu: "1"
+
+    - kubernetes:
+        name: "kubernetes-cloud"
+        serverUrl: "${KUBERNETES_SERVER_URL}"
+        serverCertificate: "${KUBERNETES_SERVER_CERTIFICATE}"
+        skipTlsVerify: false
+        namespace: "jenkins-agents"
+        jenkinsUrl: "http://jenkins-controller.jenkins.svc.cluster.local:8080"
+        templates:
+          # K8s pod agent — full builder
+          - name: "lazynext-k8s-builder"
+            label: "lazynext-k8s k8s-builder"
+            nodeUsageMode: NORMAL
+            yaml: |
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                labels:
+                  app: jenkins-agent
+                  workload: lazynext-build
+              spec:
+                serviceAccountName: jenkins-agent
+                containers:
+                  - name: jnlp
+                    image: jenkins/inbound-agent:latest-jdk21
+                    args: ["$(JENKINS_SECRET)", "$(JENKINS_NAME)"]
+                    resources:
+                      requests:
+                        memory: "256Mi"
+                        cpu: "100m"
+                      limits:
+                        memory: "512Mi"
+                        cpu: "500m"
+                  - name: builder
+                    image: lazynext-jenkins-agent:latest
+                    imagePullPolicy: Always
+                    command: ["sleep"]
+                    args: ["infinity"]
+                    resources:
+                      requests:
+                        memory: "6Gi"
+                        cpu: "2"
+                      limits:
+                        memory: "12Gi"
+                        cpu: "4"
+                    volumeMounts:
+                      - name: docker-sock
+                        mountPath: /var/run/docker.sock
+                      - name: cache-volume
+                        mountPath: /cache
+                volumes:
+                  - name: docker-sock
+                    hostPath:
+                      path: /var/run/docker.sock
+                  - name: cache-volume
+                    persistentVolumeClaim:
+                      claimName: jenkins-cache-pvc
+                restartPolicy: Never
+
+  # ── Tool Installations ──────────────────────────────────────────
+  tools:
+    # Bun (JavaScript runtime + package manager)
+    bun:
+      installations:
+        - name: "bun-latest"
+          home: "/usr/local/bin"
+          properties:
+            - installSource:
+                installers:
+                  - command:
+                      command: "curl -fsSL https://bun.sh/install | bash -s -- bun-v1.3.14"
+
+    # Node.js (for tools that require Node, e.g. Playwright)
+    nodejs:
+      installations:
+        - name: "node-22"
+          home: "/usr/local/lib/nodejs/node-v22-linux-x64"
+          properties:
+            - installSource:
+                installers:
+                  - nodeInstaller:
+                      id: "22.12.0"
+
+    # Python
+    python:
+      installations:
+        - name: "python-3.13"
+          home: "/usr/local"
+          properties:
+            - installSource:
+                installers:
+                  - command:
+                      command: "python3.13 --version"
+
+    # JDK (for Jenkins agent JNLP)
+    jdk:
+      installations:
+        - name: "jdk-21"
+          home: "/usr/lib/jvm/java-21-openjdk-amd64"
+
+    # Maven (for any legacy Java tools)
+    maven:
+      installations:
+        - name: "maven-3"
+          home: "/usr/share/maven"
+
+  # ── Global Environment Variables ────────────────────────────────
+  globalNodeProperties:
+    - envVars:
+        env:
+          - key: "DOCKER_BUILDKIT"
+            value: "1"
+          - key: "BUILDKIT_PROGRESS"
+            value: "plain"
+          - key: "COMPOSE_DOCKER_CLI_BUILD"
+            value: "1"
+          - key: "CARGO_NET_GIT_FETCH_WITH_CLI"
+            value: "true"
+          - key: "PYTHONDONTWRITEBYTECODE"
+            value: "1"
+
+  # ── Shell executable ────────────────────────────────────────────
+  shell:
+    shell: "/bin/bash"
+
+# ── Security ────────────────────────────────────────────────────
+security:
+  # Global job DSL / pipeline script security
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+    approvedSignatures:
+      - "method java.lang.String replaceAll java.lang.String java.lang.String"
+      - "method java.util.List add java.lang.Object"
+      - "new java.io.File java.lang.String"
+      - "staticMethod java.nio.file.Files createDirectories java.nio.file.Path [java.nio.file.attribute.FileAttribute]"
+      - "staticMethod java.nio.file.Paths get java.lang.String [java.lang.String]"
+  # Queue item authentication
+  queueItemAuthenticator:
+    authenticators:
+      - global:
+          strategy: "triggeringUsersAuthorizationStrategy"
+
+# ── Multibranch Pipelines ───────────────────────────────────────
+# Scans GitHub org for repos with a Jenkinsfile
+unclassified:
+  # GitHub organization folders
+  organizationFolder:
+    items:
+      - owner:
+          url: "https://github.com/lazynext"
+          repoPattern: "Lazynext"
+          credentialsId: "github-lazynext"
+          traits:
+            - gitHubBranchDiscovery:
+                strategyId: 1           # All branches
+            - gitHubPullRequestDiscovery:
+                strategyId: 2           # Merged PR + origin PR
+            - gitHubForkDiscovery:
+                strategyId: 2           # Trust contributors
+                trust: "gitHubTrustPermissions"
+            - headWildcardFilter:
+                includes: "main feature/* fix/* release/*"
+                excludes: "wip/* experimental/*"
+            - gitHubTagDiscovery: {}
+        # Scan interval: every 2 hours
+        interval: "120"
+
+# ── Notifications ───────────────────────────────────────────────
+# Slack
+slack:
+  teamDomain: "lazynext"
+  baseUrl: "https://lazynext.slack.com/services/hooks/jenkins-ci/"
+  botUser: true
+  room: "#platform-alerts"
+  sendAsText: true
+  notifyCommitters: true
+  notifyFailure: true
+  notifySuccess: false
+  notifyUnstable: false
+  notifyAborted: false
+  notifyBackToNormal: true
+  notifyRepeatedFailure: true
+  commitInfoChoice: "AUTHORS_AND_TITLES"
+  customMessage: |
+    Lazynext CI/CD — ${params.DEPLOY_ENV}
+    Status: ${currentBuild.result}
+    <${env.BUILD_URL}|View Build>
+
+# Email (SMTP)
+mailer:
+  smtpHost: "smtp.resend.com"
+  smtpPort: "587"
+  useSsl: false
+  useTls: true
+  authentication:
+    username: "jenkins@lazynext.com"
+    password: "${SMTP_API_KEY}"
+  defaultSuffix: "@lazynext.com"
+  replyToAddress: "platform-eng@lazynext.com"
+  adminAddress: "platform-eng@lazynext.com"
+
+# ── Extended E-mail ─────────────────────────────────────────────
+extendedEmail:
+  smtpHost: "smtp.resend.com"
+  smtpPort: "587"
+  defaultContentType: "text/html"
+  defaultSubject: "$PROJECT_NAME - Build #$BUILD_NUMBER - $BUILD_STATUS!"
+  defaultBody: |
+    <h2>Lazynext Build Report</h2>
+    <table>
+      <tr><td><strong>Project:</strong></td><td>${PROJECT_NAME}</td></tr>
+      <tr><td><strong>Build:</strong></td><td>#${BUILD_NUMBER}</td></tr>
+      <tr><td><strong>Status:</strong></td><td>${BUILD_STATUS}</td></tr>
+      <tr><td><strong>Branch:</strong></td><td>${BRANCH_NAME}</td></tr>
+      <tr><td><strong>Duration:</strong></td><td>${BUILD_DURATION}</td></tr>
+      <tr><td><strong>URL:</strong></td><td><a href="${BUILD_URL}">${BUILD_URL}</a></td></tr>
+    </table>
+    <h3>Changes</h3>
+    <pre>${CHANGES, showPaths=true}</pre>
+    <h3>Console Output (tail)</h3>
+    <pre>${BUILD_LOG, maxLines=100}</pre>
+  replyToList: "platform-eng@lazynext.com"
+
+# ── Timestamper ─────────────────────────────────────────────────
+timestamper:
+  elapsedTimeFormat: "'['yyyy-MM-dd HH:mm:ss.SSS'] '"
+  systemTimeFormat: "'['HH:mm:ss'] '"
+
+# ── Job Configuration History ───────────────────────────────────
+jobConfigHistory:
+  maxHistoryEntries: 50
+  skipDuplicateHistory: true
+  saveModule: "org.jenkinsci.plugins.jobconfighistory.CustomHistoryManager"
+  historyRootDir: "/var/jenkins_home/jobConfigHistory"
+
+# ── Build Discarder Defaults ────────────────────────────────────
+buildDiscarders:
+  configuredBuildDiscarders:
+    - simpleBuildDiscarder:
+        discarder:
+          logRotator:
+            daysToKeepStr: "30"
+            numToKeepStr: "50"
+            artifactDaysToKeepStr: "14"
+            artifactNumToKeepStr: "20"
+
+# ── Global Libraries ────────────────────────────────────────────
+globalLibraries:
+  libraries:
+    - name: "lazynext-pipeline-library"
+      defaultVersion: "main"
+      implicit: true
+      allowVersionOverride: true
+      includeInChangesets: false
+      retriever:
+        modernSCM:
+          scm:
+            git:
+              remote: "https://github.com/lazynext/pipeline-library.git"
+              credentialsId: "github-lazynext"
+              traits:
+                - gitBranchDiscovery: {}
+
+# ── Appearance ──────────────────────────────────────────────────
+appearance:
+  themeManager:
+    theme: "dark"
+  prism:
+    theme: "PRISM_THEME_DARK"
+
+# ── Project Naming Strategy ─────────────────────────────────────
+projectNamingStrategy:
+  roleBased:
+    forceExistingJobs: false
+    pattern: "lazynext-.*"
+
+# ── Lockable Resources ──────────────────────────────────────────
+lockableResources:
+  resources:
+    - name: "azure-dev-deploy-lock"
+      description: "Serializes Azure dev environment deploys"
+      labels: "azure dev deploy"
+    - name: "azure-production-deploy-lock"
+      description: "Serializes Azure production deploys"
+      labels: "azure production deploy"
+    - name: "playwright-browsers"
+      description: "Ensures only one Playwright install at a time"
+      labels: "playwright install"
+
+# ── Docker ──────────────────────────────────────────────────────
+# Docker plugin registry configuration (for docker.withRegistry)
+unclassified:
+  dockerRegistry:
+    registries:
+      - credentialsId: "acr-credentials"
+        url: "https://lazynextacrproduction.azurecr.io"
+      - credentialsId: "acr-credentials"
+        url: "https://lazynextacrdevlmblwn.azurecr.io"

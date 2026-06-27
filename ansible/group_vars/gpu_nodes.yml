@@ -1,0 +1,75 @@
+---
+# ── Lazynext Ansible Group Vars: gpu_nodes ────────────────────────
+# Variables specific to GPU-accelerated nodes (ML inference).
+
+# ── System Resources (typical GPU SKU: 4-8 vCPU, 56-112 GB RAM) ──
+node_role: gpu-worker
+node_labels:
+  role: gpu-inference
+  tier: accelerator
+  nvidia.com/gpu.present: "true"
+
+# ── NVIDIA Driver & CUDA ──────────────────────────────────────────
+nvidia_driver_version: "550"
+nvidia_driver_package: "nvidia-driver-{{ nvidia_driver_version }}"
+nvidia_cuda_version: "12.4"
+nvidia_cuda_package: "cuda-toolkit-{{ nvidia_cuda_version | replace('.', '-') }}"
+nvidia_container_runtime_version: "1.17.0"
+nvidia_gpu_device_plugin_version: "v0.15.0"
+
+# ── GPU Resource Reservations ─────────────────────────────────────
+gpu_limits:
+  nvidia.com/gpu: 1
+  memory: 48Gi
+  cpu: 8
+gpu_mig_strategy: mixed       # none | single | mixed
+gpu_time_slicing_replicas: 4  # Time-slicing for sharing GPUs
+
+# ── Kubernetes ────────────────────────────────────────────────────
+kubelet_extra_args:
+  max-pods: 50
+  system-reserved: "cpu=1,memory=4Gi,pid=1000"
+  kube-reserved: "cpu=500m,memory=2Gi"
+  eviction-hard: "memory.available<2Gi,nodefs.available<10%,nodefs.inodesFree<10%"
+
+# ── Docker daemon options for GPU hosts ───────────────────────────
+docker_daemon_options_override:
+  default-runtime: nvidia
+  runtimes:
+    nvidia:
+      path: nvidia-container-runtime
+      runtimeArgs: []
+
+# ── NVIDIA GPU Operator Helm values ───────────────────────────────
+gpu_operator_helm_values:
+  driver:
+    enabled: true
+    version: "{{ nvidia_driver_version }}"
+  toolkit:
+    enabled: true
+    version: "{{ nvidia_container_runtime_version }}"
+  devicePlugin:
+    enabled: true
+    version: "{{ nvidia_gpu_device_plugin_version }}"
+  mig:
+    strategy: "{{ gpu_mig_strategy }}"
+  gfd:
+    enabled: true
+  dcgmExporter:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+# ── ML Service Affinity ───────────────────────────────────────────
+ml_services:
+  - pre-processing      # Whisper, SAM2, NeRF
+  - generative-studio   # SVD, ElevenLabs, Demucs
+  - whisper-worker
+  - sam2-worker
+
+# ── Node exporter overrides ───────────────────────────────────────
+node_exporter_filesystem_ignores: "^/(dev|proc|sys|run|snap|var/lib/docker/.+|var/lib/containerd/.+)($|/)"
+
+# ── DCGM exporter for GPU telemetry ───────────────────────────────
+dcgm_exporter_enabled: true
+dcgm_exporter_port: 9400

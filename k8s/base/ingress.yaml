@@ -18,10 +18,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
-    # Long timeouts for render jobs and ML inference
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "900"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "900"
-    # WebSocket support for sync service
+    # Long timeouts for render jobs, ML inference, and WebSocket
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/websocket-services: "lazynext-sync"

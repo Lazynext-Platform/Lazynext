@@ -1,0 +1,327 @@
+// ── Grafana Alloy Configuration ──────────────────────────────────
+// Managed by Ansible — do not edit by hand.
+//
+// Alloy is the collector/agent that replaces Grafana Agent. It
+// collects telemetry from the host and forwards it to Prometheus
+// and Loki in the monitoring namespace.
+
+// ── Logging ──────────────────────────────────────────────────────
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+// ── Discovery ────────────────────────────────────────────────────
+// Dynamic discovery of targets for scraping
+
+discovery.relabel "integrations_node_exporter" {
+  targets = []
+
+  rule {
+    target_label = "instance"
+    replacement  = "{{ ansible_hostname }}"
+  }
+
+  rule {
+    target_label = "job"
+    replacement  = "integrations/node_exporter"
+  }
+
+  rule {
+    target_label = "cluster"
+    replacement  = "{{ prometheus_external_labels.cluster }}"
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = "{{ prometheus_external_labels.env }}"
+  }
+}
+
+// ── Node Exporter Integration ────────────────────────────────────
+// Built-in node_exporter integration that mirrors the standalone
+// node_exporter but runs in-process within Alloy.
+
+prometheus.exporter.unix "node" {
+  disable_collectors = ["ipvs", "btrfs", "infiniband", "xfs", "zfs"]
+  filesystem {
+    fs_types_exclude = "^(devpts|devtmpfs|fusectl|nsfs|overlay|proc|securityfs|selinuxfs|squashfs|sysfs|tmpfs|cgroup)$"
+  }
+  netclass {
+    ignored_devices = "^(veth.*|cali.*|flannel.*|tunl.*|docker.*)$"
+  }
+  netdev {
+    device_exclude = "^(veth.*|cali.*|flannel.*|tunl.*|docker.*)$"
+  }
+}
+
+prometheus.scrape "integrations_node" {
+  targets    = discovery.relabel.integrations_node_exporter.output
+  forward_to = [prometheus.relabel.integrations_node_exporter.receiver]
+  job_name   = "integrations/node"
+
+  scrape_interval = "30s"
+  scrape_timeout  = "10s"
+
+  wal {
+    enabled           = true
+    truncate_frequency = "1h"
+    min_frequency      = "5m"
+    max_frequency      = "1h"
+  }
+}
+
+prometheus.relabel "integrations_node_exporter" {
+  forward_to = []
+
+  rule {
+    source_labels = ["__name__"]
+    regex         = "node_scrape_collector_success"
+    action        = "drop"
+  }
+}
+
+// ── Docker Host Metrics ──────────────────────────────────────────
+// If Docker socket is available, collect container metrics.
+
+discovery.docker "containers" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "30s"
+}
+
+prometheus.scrape "docker_containers" {
+  targets    = discovery.docker.containers.targets
+  forward_to = []
+  job_name   = "docker/containers"
+
+  scrape_interval = "30s"
+
+  wal {
+    enabled           = true
+    truncate_frequency = "30m"
+    min_frequency      = "5m"
+    max_frequency      = "30m"
+  }
+}
+
+// ── Process Metrics ──────────────────────────────────────────────
+prometheus.exporter.process "system" {
+  process_discovery {
+    discover_every = "1m"
+  }
+}
+
+prometheus.scrape "process_metrics" {
+  targets    = prometheus.exporter.process.system.targets
+  forward_to = []
+  job_name   = "processes"
+
+  scrape_interval = "30s"
+
+  wal {
+    enabled           = true
+    truncate_frequency = "30m"
+    min_frequency      = "5m"
+    max_frequency      = "30m"
+  }
+}
+
+// ── Log Collection (Promtail replacement) ────────────────────────
+local.file_match "host_logs" {
+  path_patterns = [
+    "/var/log/syslog*",
+    "/var/log/auth.log*",
+    "/var/log/kern.log*",
+    "/var/log/dpkg.log*",
+    "/var/log/unattended-upgrades/*.log",
+  ]
+
+  ignore_older = "24h"
+}
+
+local.file_match "postgresql_logs" {
+  path_patterns = [
+    "/var/log/postgresql/*.log",
+    "/var/log/postgresql/*.csv",
+  ]
+
+  ignore_older = "24h"
+}
+
+local.file_match "docker_logs" {
+  path_patterns = [
+    "/var/lib/docker/containers/*/*.log",
+  ]
+
+  ignore_older = "24h"
+}
+
+// ── Loki source for syslog/journal files ─────────────────────────
+loki.source.file "host_logs" {
+  targets = local.file_match.host_logs.targets
+
+  forward_to = [loki.process.host_logs.receiver]
+
+  file_watch {
+    min_poll_frequency = "10s"
+    max_poll_frequency = "5m"
+  }
+}
+
+loki.process "host_logs" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.match {
+    selector = "{job=\"system\"}"
+
+    stage.static_labels {
+      values = {
+        hostname = "{{ ansible_hostname }}",
+        env      = "{{ prometheus_external_labels.env }}",
+      }
+    }
+  }
+}
+
+loki.source.file "postgresql_logs" {
+  targets = local.file_match.postgresql_logs.targets
+
+  forward_to = [loki.process.postgresql_logs.receiver]
+
+  file_watch {
+    min_poll_frequency = "10s"
+    max_poll_frequency = "5m"
+  }
+}
+
+loki.process "postgresql_logs" {
+  forward_to = [loki.write.default.receiver]
+
+  stage.static_labels {
+    values = {
+      job      = "postgresql",
+      hostname = "{{ ansible_hostname }}",
+    }
+  }
+}
+
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  labels     = ["com.lazynext.component"]
+  relabel_rules = discovery.relabel.docker_logs.rules
+}
+
+discovery.relabel "docker_logs" {
+  targets = loki.source.docker.docker_logs.targets
+
+  rule {
+    source_labels = ["com.lazynext.component"]
+    target_label  = "job"
+  }
+
+  rule {
+    target_label = "env"
+    replacement  = "{{ prometheus_external_labels.env }}"
+  }
+}
+
+loki.process "docker_logs" {
+  forward_to = [loki.write.default.receiver]
+}
+
+// ── Write to Loki (remote write) ─────────────────────────────────
+loki.write "default" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+
+    batch_size  = "512KB"
+    batch_wait  = "5s"
+
+    min_backoff_period = "500ms"
+    max_backoff_period = "5m"
+
+    max_backoff_retries = 10
+
+    tenant_id = "{{ prometheus_external_labels.cluster }}"
+
+    // Since this is an internal network connection, we can disable TLS
+    tls_config {
+      insecure_skip_verify = true
+    }
+  }
+
+  // WAL provides durability against restarts
+  wal {
+    enabled             = true
+    max_segment_age     = "1h"
+    min_read_frequency  = "250ms"
+    max_read_frequency  = "1s"
+    truncate_frequency  = "15m"
+  }
+
+  external_labels = {
+    hostname = "{{ ansible_hostname }}",
+    env      = "{{ prometheus_external_labels.env }}",
+    cluster  = "{{ prometheus_external_labels.cluster }}",
+  }
+}
+
+// ── Remote Write to Prometheus ───────────────────────────────────
+prometheus.remote_write "default" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
+
+    queue_config {
+      capacity          = 10000
+      max_shards        = 20
+      min_shards        = 1
+      max_samples_per_send = 2000
+      batch_send_deadline  = "5s"
+      min_backoff       = "30ms"
+      max_backoff       = "5s"
+      retry_on_http_429 = true
+    }
+
+    metadata_config {
+      send              = false
+      send_interval     = "1m"
+      max_samples_per_send = 2000
+    }
+
+    write_timeout = "30s"
+
+    tls_config {
+      insecure_skip_verify = true
+    }
+  }
+
+  wal {
+    enabled             = true
+    max_segment_age     = "1h"
+    min_read_frequency  = "250ms"
+    max_read_frequency  = "1s"
+    truncate_frequency  = "15m"
+  }
+
+  external_labels = {
+    hostname = "{{ ansible_hostname }}",
+    env      = "{{ prometheus_external_labels.env }}",
+    cluster  = "{{ prometheus_external_labels.cluster }}",
+  }
+}
+
+// ── Self-monitoring ──────────────────────────────────────────────
+prometheus.scrape "alloy_self" {
+  targets    = [{ __address__ = "127.0.0.1:12345" }]
+  forward_to = [prometheus.remote_write.default.receiver]
+  job_name   = "alloy/self"
+}
+
+discovery.relabel "alloy_self" {
+  targets = []
+
+  rule {
+    target_label = "hostname"
+    replacement  = "{{ ansible_hostname }}"
+  }
+}

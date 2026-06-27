@@ -1,0 +1,150 @@
+name: Stale Issue & PR Hygiene
+
+on:
+  schedule:
+    - cron: "37 6 * * *" # Daily at 6:37 AM UTC (off-peak)
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run — do not close anything"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      days-before-stale:
+        description: "Override days-before-stale"
+        required: false
+        default: "60"
+      days-before-close:
+        description: "Override days-before-close"
+        required: false
+        default: "7"
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  stale:
+    name: Mark Stale & Close
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # ── Timing ───────────────────────────────────────────────────
+          days-before-issue-stale: ${{ github.event.inputs.days-before-stale || 60 }}
+          days-before-issue-close: ${{ github.event.inputs.days-before-close || 7 }}
+          days-before-pr-stale: ${{ github.event.inputs.days-before-stale || 45 }}
+          days-before-pr-close: ${{ github.event.inputs.days-before-close || 7 }}
+
+          # ── Dry Run ───────────────────────────────────────────────────
+          dry-run: ${{ github.event.inputs.dry-run || false }}
+
+          # ── Labels ────────────────────────────────────────────────────
+          stale-issue-label: "stale"
+          close-issue-label: "auto-closed"
+          stale-pr-label: "stale"
+          close-pr-label: "auto-closed"
+
+          # ── Stale message ─────────────────────────────────────────────
+          stale-issue-message: |
+            ## ⏳ This issue has gone stale
+
+            This issue has been inactive for **${{ github.event.inputs.days-before-stale || 60 }} days**.
+
+            It will be closed automatically in **${{ github.event.inputs.days-before-close || 7 }} days** unless there is new activity.
+
+            Maintainers: if this is still relevant, please:
+            - Add a comment with an update
+            - Remove the `stale` label
+            - Add the `pinned` label if this is a long-term tracking issue
+
+          stale-pr-message: |
+            ## ⏳ This PR has gone stale
+
+            This pull request has been inactive for **${{ github.event.inputs.days-before-stale || 45 }} days**.
+
+            It will be closed automatically in **${{ github.event.inputs.days-before-close || 7 }} days** unless there is new activity.
+
+            Author: please update this PR with the latest changes or close it if no longer needed.
+
+          close-issue-message: |
+            ## 🔒 Issue Closed
+
+            This issue was automatically closed due to **${{ github.event.inputs.days-before-stale || 60 }} days** of inactivity (+ ${{ github.event.inputs.days-before-close || 7 }} day grace period).
+
+            If this is still relevant, feel free to open a new issue referencing this one. A maintainer can also reopen this issue if appropriate.
+
+          close-pr-message: |
+            ## 🔒 PR Closed
+
+            This pull request was automatically closed due to **${{ github.event.inputs.days-before-stale || 45 }} days** of inactivity (+ ${{ github.event.inputs.days-before-close || 7 }} day grace period).
+
+            Author: if you'd like to continue working on this, feel free to reopen or submit a new PR.
+
+          # ── Exemptions ────────────────────────────────────────────────
+          exempt-all-milestones: true
+          exempt-all-assignees: false
+
+          exempt-issue-labels: >
+            security,
+            pinned,
+            keep,
+            epic,
+            roadmap,
+            on-deck,
+            in-progress,
+            blocked
+
+          exempt-pr-labels: >
+            security,
+            pinned,
+            keep,
+            in-progress,
+            blocked,
+            on-deck,
+            benchmark
+
+          exempt-draft-pr: true
+
+          # ── Issue/PR state to process ──────────────────────────────────
+          any-of-labels: ""
+          only-labels: ""
+          include-only-assigned: false
+
+          # ── Operations ──────────────────────────────────────────────────
+          operations-per-run: 100
+          remove-stale-when-updated: true
+          delete-branch: true
+          ascending: true
+          enable-statistics: true
+
+      - name: Post Stale Summary
+        if: always()
+        run: |
+          {
+            echo "## Stale Issue & PR Hygiene"
+            echo ""
+            echo "### Configuration"
+            echo ""
+            echo "| Setting | Value |"
+            echo "|---------|-------|"
+            echo "| Issues stale after | ${{ github.event.inputs.days-before-stale || 60 }} days |"
+            echo "| Issues close after | ${{ github.event.inputs.days-before-close || 7 }} days |"
+            echo "| PRs stale after | ${{ github.event.inputs.days-before-stale || 45 }} days |"
+            echo "| PRs close after | ${{ github.event.inputs.days-before-close || 7 }} days |"
+            echo "| Dry run | ${{ github.event.inputs.dry-run || 'false' }} |"
+            echo ""
+            echo "### Exemptions"
+            echo ""
+            echo "Issues and PRs with these labels are never marked stale:"
+            echo "- \`security\`, \`pinned\`, \`keep\`, \`epic\`, \`roadmap\`"
+            echo "- \`on-deck\`, \`in-progress\`, \`blocked\`"
+            echo ""
+            echo "Issues with milestones and draft PRs are also exempt."
+            echo ""
+            echo "Last run: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          } >> $GITHUB_STEP_SUMMARY

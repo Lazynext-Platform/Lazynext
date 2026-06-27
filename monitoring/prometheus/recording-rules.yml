@@ -1,0 +1,176 @@
+# ── Prometheus Recording Rules ────────────────────────────────────
+# Pre-compute expensive or frequently-used queries so dashboards and
+# alerts can consume cheap, pre-aggregated metrics.
+#
+# Naming convention: level:metric:operation:window
+#   level      — aggregation level (job, instance, path, etc.)
+#   metric     — base metric name
+#   operation  — reduction applied (avg, p95, p99, rate, etc.)
+#   window     — lookback window (5m, 1h, 30d, etc.)
+#
+# Load: rule_files → "- /etc/prometheus/recording-rules.yml"
+
+groups:
+  # ── HTTP Latency Pre-Aggregations ────────────────────────────────
+  - name: recording-http-latency
+    interval: 30s
+    rules:
+      # Per-job p95 request duration (5-minute window) — used by SLO dashboards
+      - record: job:http_request_duration_seconds:p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)
+          )
+
+      # Per-job p99 request duration (5-minute window) — used for tail latency analysis
+      - record: job:http_request_duration_seconds:p99:5m
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)
+          )
+
+      # Per-job p50 request duration (5-minute window) — median baseline
+      - record: job:http_request_duration_seconds:p50:5m
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)
+          )
+
+      # Per-job request rate (5-minute window)
+      - record: job:http_request_rate:5m
+        expr: |
+          sum(rate(http_requests_total[5m])) by (job)
+
+      # Per-job error rate (5-minute window)
+      - record: job:http_error_rate:5m
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (job)
+          /
+          sum(rate(http_requests_total[5m])) by (job)
+
+  # ── Infrastructure Pre-Aggregations ──────────────────────────────
+  - name: recording-infrastructure
+    interval: 30s
+    rules:
+      # Per-instance CPU utilization average (5-minute window)
+      - record: instance:node_cpu_utilization:avg:5m
+        expr: |
+          100 - (
+            avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance) * 100
+          )
+
+      # Per-instance memory utilization average (5-minute window)
+      # (free + buffers + cached) / total → 1 - available_ratio
+      - record: instance:node_memory_utilization:avg:5m
+        expr: |
+          (1 - (
+            avg(node_memory_MemAvailable_bytes) by (instance)
+            /
+            avg(node_memory_MemTotal_bytes) by (instance)
+          )) * 100
+
+      # Per-instance disk utilization average (5-minute window)
+      - record: instance:node_disk_utilization:avg:5m
+        expr: |
+          (1 - (
+            avg(node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"})
+              by (instance, device, mountpoint)
+            /
+            avg(node_filesystem_size_bytes{mountpoint="/",fstype!="tmpfs"})
+              by (instance, device, mountpoint)
+          )) * 100
+
+      # Per-instance network throughput (5-minute window)
+      - record: instance:node_network_bytes:rate:5m
+        expr: |
+          sum(rate(node_network_transmit_bytes_total[5m])) by (instance)
+          +
+          sum(rate(node_network_receive_bytes_total[5m])) by (instance)
+
+  # ── Application-Level Pre-Aggregations ───────────────────────────
+  - name: recording-application
+    interval: 30s
+    rules:
+      # Render queue size average (5-minute window)
+      - record: job:render_queue_size:avg:5m
+        expr: |
+          avg_over_time(render_queue_size[5m])
+
+      # Render job throughput (5-minute rate)
+      - record: job:render_throughput:rate:5m
+        expr: |
+          sum(rate(render_jobs_completed_total[5m])) by (job)
+
+      # AI orchestration rate — requests hitting ai-agents (5-minute rate)
+      - record: job:ai_orchestration_rate:5m
+        expr: |
+          sum(rate(http_requests_total{job="ai-agents"}[5m]))
+
+      # ML inference error rate (5-minute window)
+      - record: job:ml_inference_error_rate:5m
+        expr: |
+          sum(rate(http_requests_total{job=~"pre-processing|generative-studio",status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total{job=~"pre-processing|generative-studio"}[5m]))
+
+      # Active WebSocket connections gauge
+      - record: instance:websocket_connections:avg:5m
+        expr: |
+          avg_over_time(websocket_connections_active[5m])
+
+  # ── Predictive and Forecasting Rules ────────────────────────────
+  - name: recording-predictive
+    interval: 60s
+    rules:
+      # Disk space utilization — 1-hour linear prediction
+      # Projects when disk will fill up based on 1h of data
+      - record: instance:disk_space_utilization:predict_linear:1h
+        expr: |
+          predict_linear(
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}[1h],
+            3600
+          ) < 0
+
+      # Forecast: estimated hours until disk exhaustion
+      - record: instance:disk_space_hours_remaining:estimate:1h
+        expr: |
+          deriv(
+            node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}[1h]
+          ) * 3600
+
+  # ── SLO / Error Budget Pre-Aggregations ─────────────────────────
+  - name: recording-slo-budget
+    interval: 60s
+    rules:
+      # Error budget remaining (30-day rolling window) for web service
+      # Budget = 0.1% allowed errors (99.9% SLO). Negative = budget exhausted.
+      - record: job:error_budget_remaining:30d
+        expr: |
+          0.001 - (
+            sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[30d]))
+              /
+            sum(rate(http_requests_total{service="lazynext-web"}[30d]))
+          )
+
+      # Error budget consumed percentage
+      - record: job:error_budget_consumed_percent:30d
+        expr: |
+          (
+            sum(rate(http_requests_total{service="lazynext-web",status_code=~"5.."}[30d]))
+              /
+            sum(rate(http_requests_total{service="lazynext-web"}[30d]))
+          ) / 0.001 * 100
+
+      # Render SLO compliance — p95 latency over 30d
+      - record: job:render_latency_p95:30d
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(render_duration_seconds_bucket[30d])) by (le)
+          )
+
+      # ML inference SLO compliance — p95 latency over 30d
+      - record: job:ml_latency_p95:30d
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{job=~"pre-processing|generative-studio"}[30d])) by (le)
+          )

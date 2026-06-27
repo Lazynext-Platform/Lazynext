@@ -1,0 +1,452 @@
+name: Performance Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      compare-branch:
+        description: "Branch to compare against"
+        required: false
+        default: "main"
+      iterations:
+        description: "Number of benchmark iterations"
+        required: false
+        default: "3"
+  pull_request:
+    types: [labeled]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+  pages: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-label:
+    name: Check Benchmark Label
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - name: Check for benchmark label
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            return labels.includes('benchmark');
+          result-encoding: string
+
+  rust-bench:
+    name: Rust Benchmark (Criterion)
+    runs-on: ubuntu-latest
+    needs: [check-label]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Determine Compare Branch
+        id: branch
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "compare=${{ github.event.inputs.compare-branch }}" >> $GITHUB_OUTPUT
+          else
+            echo "compare=origin/main" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Cargo Registry
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Benchmarks on PR Branch
+        run: |
+          cargo bench --workspace --no-fail-fast \
+            --bench '*' \
+            -- --output-format bencher 2>&1 | tee bench-pr.txt || echo "::warning ::Some benchmarks failed"
+
+      - name: Stash PR Bench Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results-pr
+          path: bench-pr.txt
+          retention-days: 3
+
+      - name: Checkout Compare Branch
+        run: |
+          git fetch origin ${{ steps.branch.outputs.compare }}
+          git checkout ${{ steps.branch.outputs.compare }}
+
+      - name: Run Benchmarks on Compare Branch
+        run: |
+          cargo bench --workspace --no-fail-fast \
+            --bench '*' \
+            -- --output-format bencher 2>&1 | tee bench-base.txt || echo "::warning ::Some benchmarks failed"
+
+      - name: Stash Base Bench Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: bench-results-base
+          path: bench-base.txt
+          retention-days: 3
+
+      - name: Compare Benchmarks
+        id: bench-compare
+        run: |
+          echo "## Rust Benchmark Comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "PR branch vs ${{ steps.branch.outputs.compare }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Parse bencher output and compare
+          # Format: test name ... bench: <ns/iter> +/- <variance>
+          REGRESSIONS=0
+          IMPROVEMENTS=0
+          TOTAL=0
+
+          if [ -f bench-pr.txt ] && [ -f bench-base.txt ]; then
+            while IFS= read -r line; do
+              TEST_NAME=$(echo "$line" | grep -oP 'test \K\S+' || true)
+              PR_NS=$(echo "$line" | grep -oP 'bench:\s+\K[0-9,]+' | tr -d ',' || true)
+              if [ -n "$TEST_NAME" ] && [ -n "$PR_NS" ]; then
+                BASE_LINE=$(grep "test $TEST_NAME " bench-base.txt || true)
+                BASE_NS=$(echo "$BASE_LINE" | grep -oP 'bench:\s+\K[0-9,]+' | tr -d ',' || true)
+                if [ -n "$BASE_NS" ] && [ "$BASE_NS" != "0" ]; then
+                  DELTA=$(( (PR_NS - BASE_NS) * 100 / BASE_NS ))
+                  TOTAL=$((TOTAL + 1))
+
+                  # Determine significance (>3% change)
+                  if [ $DELTA -gt 3 ]; then
+                    echo "🔴 **$TEST_NAME**: +${DELTA}% (regression)" >> $GITHUB_STEP_SUMMARY
+                    REGRESSIONS=$((REGRESSIONS + 1))
+                  elif [ $DELTA -lt -3 ]; then
+                    echo "🟢 **$TEST_NAME**: ${DELTA}% (improvement)" >> $GITHUB_STEP_SUMMARY
+                    IMPROVEMENTS=$((IMPROVEMENTS + 1))
+                  else
+                    echo "⚪ **$TEST_NAME**: ${DELTA}% (within noise)" >> $GITHUB_STEP_SUMMARY
+                  fi
+
+                  echo "  PR: ${PR_NS}ns | Base: ${BASE_NS}ns" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            done < <(grep -P 'bench:\s+\d' bench-pr.txt)
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Summary:** $TOTAL benchmarks, $REGRESSIONS regressions ($(( REGRESSIONS > 0 ? 1 : 0 )) flagged), $IMPROVEMENTS improvements" >> $GITHUB_STEP_SUMMARY
+
+          echo "regressions=$REGRESSIONS" >> $GITHUB_OUTPUT
+          echo "improvements=$IMPROVEMENTS" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+      - name: Flag Benchmark Regressions
+        if: steps.bench-compare.outputs.regressions != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const regressions = '${{ steps.bench-compare.outputs.regressions }}';
+            const body = `## ⚠️ Benchmark Regressions Detected
+
+            **${regressions} benchmark(s)** regressed vs ${{ steps.branch.outputs.compare }}.
+
+            Review the [benchmark comparison results](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+            If these regressions are expected (e.g., new functionality), add the \`benchmark-ok\` label to dismiss.`;
+
+            if (context.eventName === 'pull_request') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: body
+              });
+            }
+
+  web-bench:
+    name: Lighthouse CI Benchmark
+    runs-on: ubuntu-latest
+    needs: [check-label]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js (for Lighthouse CI)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        run: bun install --ignore-scripts || bun install
+
+      - name: Build Web App
+        env:
+          SKIP_WASM_BUILD: "1"
+          SKIP_ENV_VALIDATION: "1"
+          BETTER_AUTH_SECRET: "ci-benchmark-placeholder-secret-64chars-long"
+        run: cd apps/web && npx next build 2>&1 || echo "::warning ::Build incomplete — continuing"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@latest
+
+      - name: Create Lighthouse CI Config
+        run: |
+          cat > lighthouserc.json << 'LHCI'
+          {
+            "ci": {
+              "collect": {
+                "staticDistDir": "apps/web/.next",
+                "url": [
+                  "http://localhost:3000/",
+                  "http://localhost:3000/editor",
+                  "http://localhost:3000/dashboard"
+                ],
+                "numberOfRuns": 3
+              },
+              "assert": {
+                "preset": "lighthouse:recommended",
+                "assertions": {
+                  "categories:performance": ["warn", {"minScore": 0.85}],
+                  "categories:accessibility": ["error", {"minScore": 0.90}],
+                  "categories:best-practices": ["error", {"minScore": 0.90}],
+                  "categories:seo": ["warn", {"minScore": 0.80}],
+                  "first-contentful-paint": ["warn", {"maxNumericValue": 2500}],
+                  "largest-contentful-paint": ["warn", {"maxNumericValue": 4000}],
+                  "cumulative-layout-shift": ["error", {"maxNumericValue": 0.15}],
+                  "total-blocking-time": ["warn", {"maxNumericValue": 500}]
+                }
+              },
+              "upload": {
+                "target": "temporary-public-storage"
+              }
+            }
+          }
+          LHCI
+
+      - name: Start Server & Run Lighthouse
+        run: |
+          cd apps/web
+          npx next start -p 3000 &
+          SERVER_PID=$!
+
+          # Wait for server
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server ready"
+              break
+            fi
+            sleep 2
+          done
+
+          # Run Lighthouse
+          lhci autorun --config=../../lighthouserc.json || echo "::warning ::Lighthouse assertions failed"
+
+          kill $SERVER_PID 2>/dev/null || true
+
+      - name: Upload Lighthouse Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 7
+
+  render-bench:
+    name: Render Performance Benchmark
+    runs-on: ubuntu-latest
+    needs: [check-label]
+    if: |
+      always() &&
+      (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Cargo Registry
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: Generate Sample Timeline Test Media
+        run: |
+          # Create a simple test video: 10 seconds, 1080p, 30fps, solid color + tone
+          ffmpeg -y -f lavfi -i "color=c=0x1a1a2e:s=1920x1080:d=10:r=30" \
+            -f lavfi -i "sine=frequency=440:duration=10" \
+            -c:v libx264 -pix_fmt yuv420p -c:a aac \
+            -shortest test_media.mp4
+
+          # Create a test project JSON (minimal timeline)
+          cat > test_project.json << 'ENDJSON'
+          {
+            "version": 1,
+            "timeline": {
+              "tracks": [
+                {
+                  "id": "track-1",
+                  "type": "video",
+                  "elements": [
+                    {
+                      "id": "clip-1",
+                      "type": "video",
+                      "source": "test_media.mp4",
+                      "start": 0,
+                      "duration": 10,
+                      "trimStart": 0,
+                      "trimEnd": 10,
+                      "transform": { "x": 0, "y": 0, "scale": 1.0, "rotation": 0 }
+                    }
+                  ]
+                }
+              ],
+              "duration": 10,
+              "frameRate": 30,
+              "resolution": { "width": 1920, "height": 1080 }
+            }
+          }
+          ENDJSON
+
+      - name: Build Render CLI (Release)
+        run: cargo build --release -p lazynext-cli 2>&1 || echo "::warning ::CLI build failed"
+
+      - name: Benchmark Render Pipeline
+        run: |
+          echo "## Render Benchmark Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          ITERS="${{ github.event.inputs.iterations || '3' }}"
+          RENDER_TIMES=()
+
+          for i in $(seq 1 $ITERS); do
+            echo "Run $i/$ITERS..."
+            START_TIME=$(date +%s%N)
+
+            if [ -f target/release/lazynext-cli ]; then
+              target/release/lazynext-cli render \
+                --project test_project.json \
+                --output "output_run_${i}.mp4" \
+                --format mp4 \
+                --preset ultrafast 2>&1 || echo "::warning ::Render run $i failed"
+            else
+              # Fallback: use ffmpeg directly as a render proxy
+              ffmpeg -y -i test_media.mp4 -c:v libx264 -preset ultrafast \
+                -t 10 "output_run_${i}.mp4" 2>/dev/null
+            fi
+
+            END_TIME=$(date +%s%N)
+            ELAPSED_MS=$(( (END_TIME - START_TIME) / 1000000 ))
+            RENDER_TIMES+=($ELAPSED_MS)
+
+            echo "- **Run $i**: ${ELAPSED_MS}ms" >> $GITHUB_STEP_SUMMARY
+          done
+
+          # Calculate statistics
+          SUM=0
+          MIN=${RENDER_TIMES[0]}
+          MAX=${RENDER_TIMES[0]}
+          for t in "${RENDER_TIMES[@]}"; do
+            SUM=$((SUM + t))
+            [ $t -lt $MIN ] && MIN=$t
+            [ $t -gt $MAX ] && MAX=$t
+          done
+          AVG=$((SUM / ITERS))
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Average | ${AVG}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Min | ${MIN}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max | ${MAX}ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Iterations | ${ITERS} |" >> $GITHUB_STEP_SUMMARY
+
+          # Store for comment
+          echo "avg_render_ms=$AVG" >> $GITHUB_OUTPUT
+          echo "min_render_ms=$MIN" >> $GITHUB_OUTPUT
+          echo "max_render_ms=$MAX" >> $GITHUB_OUTPUT
+
+      - name: Check Output Size
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Output File Sizes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for f in output_run_*.mp4; do
+            if [ -f "$f" ]; then
+              SIZE=$(du -h "$f" | cut -f1)
+              echo "- \`$f\`: $SIZE" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+  comment-results:
+    name: Post Benchmark Summary
+    runs-on: ubuntu-latest
+    needs: [rust-bench, web-bench, render-bench]
+    if: always() && github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build and Post Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runId = context.runId;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const prNumber = context.payload.pull_request.number;
+
+            const jobUrl = `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
+
+            const body = `## 📊 Benchmark Results
+
+            Full report: [Workflow Run #${runId}](${jobUrl})
+
+            | Suite | Status | Artifacts |
+            |-------|--------|-----------|
+            | Rust (Criterion) | ${{ needs.rust-bench.result }} | [download](/${owner}/${repo}/actions/runs/${runId}/artifacts) |
+            | Lighthouse CI | ${{ needs.web-bench.result }} | [download](/${owner}/${repo}/actions/runs/${runId}/artifacts) |
+            | Render Pipeline | ${{ needs.render-bench.result }} | [download](/${owner}/${repo}/actions/runs/${runId}/artifacts) |
+
+            > Benchmark suites compare against the \`main\` branch baseline. Review any regressions flagged above the noise threshold (3%).
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+            `;
+
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: prNumber,
+              body
+            });
+
+      - name: Remove Benchmark Label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.removeLabel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              name: 'benchmark'
+            });

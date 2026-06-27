@@ -53,11 +53,13 @@ All services communicate via REST over the `lazynext-network` Docker bridge.
 | `generative-studio` | Python FastAPI | 8001 | Stable Video Diffusion, ElevenLabs dubbing, Demucs stem separation |
 | `ai-agents` | Node.js (Bun) | 8002 | Chronos Copilot LLM orchestration + CRDT WebSocket sync server |
 | `render-service` | Node.js (Bun) | 8003 | FFMPEG render farm with SSE progress streaming |
+| `collab-server` | Rust (Axum) | 8004 | Native CRDT sync server + WebRTC signaling |
+| `analytics-service` | Node.js (Bun) | 8006 | High-velocity data ingestion and LTV calculation engine |
 
 ### Infrastructure
 
 - **CI/CD**: GitHub Actions (`.github/workflows/ci.yml` and `.github/workflows/production.yml`)
-- **Deployment**: Azure Container Apps (5 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
+- **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
 - **Terraform**: Azure infrastructure-as-code in `terraform/azure/`
 - **Kubernetes**: Optional K8s manifests in `k8s/`
 - **Database**: PostgreSQL via Drizzle ORM (schema: `apps/web/src/db/schema.ts`, migrations: `apps/web/src/drizzle/`)
@@ -124,20 +126,28 @@ uvicorn main:app --reload --port 8001
 
 ```bash
 # Each runs with Bun
-cd services/ai-agents && bun run start    # :8002
-cd services/render-service && bun run start # :8003
+cd services/ai-agents && bun run start       # :8002
+cd services/render-service && bun run start   # :8003
+cd services/analytics-service && bun run start # :8006
+```
+
+### Rust Microservices
+
+```bash
+# Collab server (native CRDT sync)
+cd services/collab-server && cargo run         # :8004
 ```
 
 ### Docker (Full Platform)
 
 ```bash
-docker compose up --build -d     # Start all 6 services
+docker compose up --build -d     # Start all 8 services
 ```
 
 ### Bootstrap Everything Locally
 
 ```bash
-./start-platform.sh              # Kills stale processes, starts all services
+./start-platform.sh              # Kills stale processes, starts all 8 services
 ```
 
 ## Key Patterns
@@ -176,7 +186,7 @@ The preview canvas (`apps/web/src/preview/`) renders the composition using Fabri
 
 ## Code Style
 
-- **Package manager**: Bun with workspaces (`bun@1.3.12`). Never use npm/yarn commands.
+- **Package manager**: Bun with workspaces (`bun@1.3.14`). Never use npm/yarn commands.
 - **Formatting**: Biome (`biome.json`) — tabs, double quotes, 80 char line width.
 - **Linting**: ESLint (`eslint.config.mjs`) with TypeScript strict, React hooks, accessibility rules.
 - **TypeScript**: Strict mode, no enums, no `any`, prefer `as const`, use `import type` / `export type`.

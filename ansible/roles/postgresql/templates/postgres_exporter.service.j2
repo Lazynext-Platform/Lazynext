@@ -1,0 +1,24 @@
+[Unit]
+Description=Prometheus PostgreSQL Exporter
+After=network.target postgresql@{{ postgresql_version }}-main.service
+Requires=postgresql@{{ postgresql_version }}-main.service
+
+[Service]
+Type=simple
+User=postgres
+Group=postgres
+EnvironmentFile=/etc/default/postgres_exporter
+ExecStart=/usr/local/bin/postgres_exporter \
+  --web.listen-address=:9187 \
+  --web.telemetry-path=/metrics \
+  --disable-settings-metrics
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/run/postgresql
+
+[Install]
+WantedBy=multi-user.target

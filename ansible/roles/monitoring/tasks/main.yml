@@ -1,0 +1,335 @@
+---
+# ── Lazynext Ansible Role: monitoring ─────────────────────────────
+# Deploys the full monitoring stack: Prometheus, Grafana, Loki,
+# Promtail, Alertmanager, Grafana Alloy, and node_exporter.
+
+- name: Install Docker SDK for Python
+  ansible.builtin.pip:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker
+    - requests
+
+- name: Create monitoring directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ prometheus_config_dir }}"
+    - "{{ prometheus_config_dir }}/rules"
+    - "{{ prometheus_data_dir }}"
+    - "{{ alertmanager_config_dir }}"
+    - "{{ loki_config_dir }}"
+    - "{{ loki_data_dir }}"
+    - "{{ alloy_config_dir }}"
+    - /etc/grafana
+    - /etc/grafana/provisioning/datasources
+    - /etc/grafana/provisioning/dashboards
+    - /var/lib/grafana
+    - /var/lib/grafana/dashboards
+
+# ──────────────────────────────────────────────────────────────────
+# Docker network for monitoring stack
+# ──────────────────────────────────────────────────────────────────
+
+- name: Create monitoring Docker network
+  community.docker.docker_network:
+    name: monitoring
+    driver: bridge
+    ipam_config:
+      - subnet: 172.28.0.0/16
+    internal: false
+
+# ──────────────────────────────────────────────────────────────────
+# Prometheus
+# ──────────────────────────────────────────────────────────────────
+
+- name: Deploy Prometheus config
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_config_dir }}/prometheus.yml"
+    owner: "65534"
+    group: "65534"
+    mode: "0644"
+  notify: restart prometheus
+
+- name: Deploy Prometheus alert rules
+  ansible.builtin.template:
+    src: prometheus-alerts.yml.j2
+    dest: "{{ prometheus_config_dir }}/rules/alerts.yml"
+    owner: "65534"
+    group: "65534"
+    mode: "0644"
+  notify: restart prometheus
+
+- name: Run Prometheus container
+  community.docker.docker_container:
+    name: prometheus
+    image: "prom/prometheus:{{ monitoring_version_tags.prometheus }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    ports:
+      - "9090:9090"
+    volumes:
+      - "{{ prometheus_config_dir }}:/etc/prometheus:ro"
+      - "{{ prometheus_data_dir }}:/prometheus:rw"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time={{ prometheus_retention }}"
+      - "--storage.tsdb.retention.size={{ prometheus_storage_size }}"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--query.max-concurrency=40"
+      - "--query.max-samples=20000000"
+    labels:
+      com.lazynext.component: prometheus
+      com.lazynext.managed-by: ansible
+    memory: "2g"
+    memory_swap: "3g"
+
+# ──────────────────────────────────────────────────────────────────
+# Grafana
+# ──────────────────────────────────────────────────────────────────
+
+- name: Deploy Grafana datasources provisioning
+  ansible.builtin.template:
+    src: grafana-datasources.yml.j2
+    dest: /etc/grafana/provisioning/datasources/datasources.yml
+    mode: "0644"
+  notify: restart grafana
+
+- name: Deploy Grafana dashboard provisioning
+  ansible.builtin.copy:
+    dest: /etc/grafana/provisioning/dashboards/default.yml
+    content: |
+      apiVersion: 1
+      providers:
+        - name: default
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: true
+          updateIntervalSeconds: 60
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards
+    mode: "0644"
+  notify: restart grafana
+
+- name: Run Grafana container
+  community.docker.docker_container:
+    name: grafana
+    image: "grafana/grafana-enterprise:{{ monitoring_version_tags.grafana }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    ports:
+      - "{{ grafana_port }}:3000"
+    volumes:
+      - "/etc/grafana/provisioning:/etc/grafana/provisioning:ro"
+      - "/var/lib/grafana:/var/lib/grafana:rw"
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)d/"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_AUTH_BASIC_ENABLED: "true"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ALERTING_ENABLED: "true"
+      GF_UNIFIED_ALERTING_ENABLED: "true"
+      GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS: ""
+    labels:
+      com.lazynext.component: grafana
+      com.lazynext.managed-by: ansible
+    memory: "1g"
+
+# ──────────────────────────────────────────────────────────────────
+# Loki + Promtail (log aggregation)
+# ──────────────────────────────────────────────────────────────────
+
+- name: Deploy Loki config
+  ansible.builtin.template:
+    src: loki-config.yml.j2
+    dest: "{{ loki_config_dir }}/loki-config.yml"
+    mode: "0644"
+  notify: restart loki
+
+- name: Run Loki container
+  community.docker.docker_container:
+    name: loki
+    image: "grafana/loki:{{ monitoring_version_tags.loki }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    ports:
+      - "3100:3100"
+    volumes:
+      - "{{ loki_config_dir }}:/etc/loki:ro"
+      - "{{ loki_data_dir }}:/loki:rw"
+    command:
+      - "-config.file=/etc/loki/loki-config.yml"
+      - "-config.expand-env=true"
+    user: "0:0"
+    labels:
+      com.lazynext.component: loki
+      com.lazynext.managed-by: ansible
+    memory: "512m"
+
+- name: Deploy Promtail config
+  ansible.builtin.template:
+    src: promtail-config.yml.j2
+    dest: /etc/promtail/config.yml
+    mode: "0644"
+  notify: restart promtail
+
+- name: Run Promtail container
+  community.docker.docker_container:
+    name: promtail
+    image: "grafana/promtail:{{ monitoring_version_tags.promtail }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    volumes:
+      - "/etc/promtail/config.yml:/etc/promtail/config.yml:ro"
+      - "/var/log:/var/log:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/run/systemd/journal:/run/systemd/journal:ro"
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+      - "-config.expand-env=true"
+    user: "0:0"
+    labels:
+      com.lazynext.component: promtail
+      com.lazynext.managed-by: ansible
+    memory: "256m"
+
+# ──────────────────────────────────────────────────────────────────
+# Alertmanager
+# ──────────────────────────────────────────────────────────────────
+
+- name: Deploy Alertmanager config
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: "{{ alertmanager_config_dir }}/alertmanager.yml"
+    mode: "0644"
+  notify: restart alertmanager
+
+- name: Run Alertmanager container
+  community.docker.docker_container:
+    name: alertmanager
+    image: "prom/alertmanager:{{ monitoring_version_tags.alertmanager }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    ports:
+      - "9093:9093"
+    volumes:
+      - "{{ alertmanager_config_dir }}:/etc/alertmanager:ro"
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.listen-address=:9093"
+      - "--cluster.advertise-address=:9094"
+      - "--web.external-url=http://localhost:9093/"
+    labels:
+      com.lazynext.component: alertmanager
+      com.lazynext.managed-by: ansible
+    memory: "256m"
+
+# ──────────────────────────────────────────────────────────────────
+# Grafana Alloy agent
+# ──────────────────────────────────────────────────────────────────
+
+- name: Deploy Grafana Alloy config
+  ansible.builtin.template:
+    src: alloy-config.alloy.j2
+    dest: "{{ alloy_config_dir }}/config.alloy"
+    mode: "0644"
+  notify: restart alloy
+
+- name: Run Grafana Alloy container
+  community.docker.docker_container:
+    name: alloy
+    image: "grafana/alloy:{{ monitoring_version_tags.alloy }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: monitoring
+    ports:
+      - "12345:12345"
+    volumes:
+      - "{{ alloy_config_dir }}/config.alloy:/etc/alloy/config.alloy:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/var/log:/var/log:ro"
+    env:
+      HOSTNAME: "{{ ansible_hostname }}"
+    labels:
+      com.lazynext.component: alloy
+      com.lazynext.managed-by: ansible
+    memory: "512m"
+
+# ──────────────────────────────────────────────────────────────────
+# Node Exporter (native binary on every host)
+# ──────────────────────────────────────────────────────────────────
+
+- name: Download node_exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/{{ monitoring_version_tags.node_exporter }}/node_exporter-{{ monitoring_version_tags.node_exporter }}.linux-amd64.tar.gz"
+    dest: /tmp/node_exporter.tar.gz
+    mode: "0644"
+
+- name: Extract node_exporter
+  ansible.builtin.unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+    creates: "/tmp/node_exporter-{{ monitoring_version_tags.node_exporter }}.linux-amd64/node_exporter"
+
+- name: Install node_exporter binary
+  ansible.builtin.copy:
+    src: "/tmp/node_exporter-{{ monitoring_version_tags.node_exporter }}.linux-amd64/node_exporter"
+    dest: /usr/local/bin/node_exporter
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+
+- name: Install node_exporter systemd unit
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    mode: "0644"
+  notify: restart node_exporter
+
+- name: Start and enable node_exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Cleanup
+# ──────────────────────────────────────────────────────────────────
+
+- name: Remove exporter archives
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/node_exporter.tar.gz
+    - "/tmp/node_exporter-{{ monitoring_version_tags.node_exporter }}.linux-amd64"

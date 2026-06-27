@@ -1,0 +1,160 @@
+# ── Promtail Configuration ────────────────────────────────────────
+# Managed by Ansible — do not edit by hand.
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+  log_level: info
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+  sync_period: 10s
+
+# ── Clients (Loki instances to push logs to) ──────────────────────
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 1048576
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+    tenant_id: "{{ prometheus_external_labels.cluster }}"
+    external_labels:
+      cluster: "{{ prometheus_external_labels.cluster }}"
+      env: "{{ prometheus_external_labels.env }}"
+
+# ── Scrape configurations ─────────────────────────────────────────
+scrape_configs:
+  # ── System journal ──────────────────────────────────────────────
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+        job: systemd-journal
+    relabel_configs:
+      - source_labels: ["__journal__systemd_unit"]
+        target_label: unit
+      - source_labels: ["__journal__hostname"]
+        target_label: hostname
+      - source_labels: ["__journal_syslog_identifier"]
+        target_label: syslog_identifier
+    pipeline_stages:
+      - match:
+          selector: '{job="systemd-journal"}'
+          stages:
+            - static_labels:
+                hostname: "{{ ansible_hostname }}"
+
+  # ── System log files ────────────────────────────────────────────
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/syslog
+
+  - job_name: auth
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: auth
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/auth.log
+
+  - job_name: kernel
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: kernel
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/kern.log
+
+  # ── Docker container logs ───────────────────────────────────────
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        target_label: container
+      - source_labels: ["__meta_docker_container_label_com_lazynext_component"]
+        target_label: component
+        action: replace
+      - source_labels: ["__meta_docker_container_label_com_lazynext_managed_by"]
+        target_label: managed_by
+      - source_labels: ["__meta_docker_container_id"]
+        target_label: container_id
+    pipeline_stages:
+      - docker: {}
+      - match:
+          selector: '{job="docker"}'
+          stages:
+            - static_labels:
+                hostname: "{{ ansible_hostname }}"
+            - labeldrop:
+                - filename
+                - stream
+
+  # ── PostgreSQL logs ─────────────────────────────────────────────
+  - job_name: postgresql
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: postgresql
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/postgresql/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="postgresql"}'
+          stages:
+            - static_labels:
+                service: postgresql
+            - regex:
+                expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} \w{3}) \[(?P<pid>\d+)\] (?P<level>\w+): (?P<message>.*)$'
+
+  # ── Redis logs ──────────────────────────────────────────────────
+  - job_name: redis
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: redis
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/redis/redis-server.log
+
+  # ── Ansible logs ────────────────────────────────────────────────
+  - job_name: ansible
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: ansible
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/ansible.log
+
+  # ── Nginx (if running on host) ──────────────────────────────────
+  - job_name: nginx
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/nginx/*.log
+
+  # ── Unattended upgrades ─────────────────────────────────────────
+  - job_name: apt
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: apt
+          hostname: "{{ ansible_hostname }}"
+          __path__: /var/log/unattended-upgrades/*.log

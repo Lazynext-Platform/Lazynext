@@ -1,0 +1,115 @@
+# ==============================================================================
+# SAM2 — TensorFlow Serving Model Configuration
+#
+# Model:  facebook/sam2-hiera-large  (exported via scripts/export-model.sh)
+# Task:   Segment Anything — vision encoder for image embeddings
+# Input:  pixel_values  float32[batch, 3, 1024, 1024]
+# Output: image_embeddings  float32[batch, 256, 64, 64]
+# ==============================================================================
+
+name: "sam2"
+platform: "tensorflow"
+
+# ── Versioning ───────────────────────────────────────────────────────────────
+model_version_policy {
+  specific {
+    versions: 1
+  }
+}
+
+# ── Batching Parameters ─────────────────────────────────────────────────────
+# SAM2's vision encoder processes 1024×1024 images through a Hiera
+# transformer. Each image requires ~6 GB of GPU memory at full resolution.
+# Batch size 2 is the practical maximum on 24 GB GPUs.
+#
+#   max_batch_size = 2
+#   timeout        = 500,000 microseconds (500 ms)
+#
+# A 500ms timeout is generous because SAM2 requests are typically
+# single-image bursts (one per video frame) rather than parallel streams.
+# The higher timeout allows the server to coalesce occasional simultaneous
+# frame requests without blowing out latency SLAs.
+
+batching_parameters {
+  max_batch_size {
+    value: 2
+  }
+  batch_timeout_micros {
+    value: 500000
+  }
+  max_enqueued_batches {
+    value: 16
+  }
+  num_batch_threads {
+    value: 2
+  }
+  thread_pool_size {
+    value: 4
+  }
+  allowed_batch_sizes {
+    value: 1
+  }
+  allowed_batch_sizes {
+    value: 2
+  }
+}
+
+# ── GPU Configuration ───────────────────────────────────────────────────────
+gpu_config {
+  gpu_memory_fraction: 0.30
+  allow_growth: false
+  per_process_gpu_memory_fraction: 0.30
+}
+
+# ── Input / Output Signature ─────────────────────────────────────────────────
+#
+# SAM2 vision encoder SavedModel signature:
+#
+#   signature_def['serving_default']:
+#     inputs {
+#       key: "pixel_values"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: 3 } dim { size: 1024 } dim { size: 1024 } } }
+#     }
+#     outputs {
+#       key: "image_embeddings"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: 256 } dim { size: 64 } dim { size: 64 } } }
+#     }
+# ==============================================================================
+
+# ── Model warmup — pre-load vision encoder at startup ────────────────────────
+model_warmup {
+  name: "sam2_warmup"
+  batch_size: 1
+  inputs {
+    key: "pixel_values"
+    value {
+      dtype: DT_FLOAT
+      tensor_shape {
+        dim { size: 1 }
+        dim { size: 3 }
+        dim { size: 1024 }
+        dim { size: 1024 }
+      }
+      float_val: 0.0
+    }
+  }
+}
+
+# ── Inference configuration ─────────────────────────────────────────────────
+session_config {
+  allow_soft_placement: true
+  log_device_placement: false
+  gpu_options {
+    allow_growth: false
+    per_process_gpu_memory_fraction: 0.30
+  }
+  graph_options {
+    optimizer_options {
+      opt_level: L1
+      do_common_subexpression_elimination: true
+      do_constant_folding: true
+    }
+  }
+  intra_op_parallelism_threads: 4
+  inter_op_parallelism_threads: 2
+}

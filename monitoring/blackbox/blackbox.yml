@@ -1,0 +1,94 @@
+# ── Blackbox Exporter Configuration ───────────────────────────────
+# Synthetic probes for HTTP/HTTPS, DNS, TCP, and ICMP endpoints.
+# Scraped by Prometheus via the blackbox job in prometheus.yml.
+
+modules:
+  # HTTP/2 probe with TLS validation and status assertion
+  http_2xx:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/2"]
+      valid_status_codes: [200, 201, 204]
+      method: GET
+      fail_if_ssl: true
+      fail_if_not_ssl: false
+      tls_config:
+        insecure_skip_verify: false
+      headers:
+        Host: lazynext.com
+        User-Agent: Blackbox-Exporter/1.0
+
+  # HTTP probe — tolerates both HTTP/1.1 and HTTP/2
+  http_2xx_generic:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200, 201, 204, 301, 302, 307, 308]
+      method: GET
+      headers:
+        User-Agent: Blackbox-Exporter/1.0
+
+  # Health-check probe — expects 200, tight 5s timeout
+  http_health:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      fail_if_body_not_matches_regexp:
+        - '"ok"|"healthy"|"UP"'
+
+  # API endpoint probe — expects 2xx, includes POST
+  http_api:
+    prober: http
+    timeout: 15s
+    http:
+      valid_status_codes: [200, 201, 204, 401, 403]
+      method: GET
+      fail_if_ssl: true
+      tls_config:
+        insecure_skip_verify: false
+
+  # TCP connectivity check
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      tls: false
+
+  # TLS-encrypted TCP connection
+  tcp_tls:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      tls: true
+      tls_config:
+        insecure_skip_verify: false
+
+  # DNS resolution probe
+  dns_soa:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: lazynext.com
+      query_type: SOA
+      validate_answer:
+        fail_if_not_matches_regexp:
+          - ".+"
+
+  # DNS with custom resolver
+  dns_resolve:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: lazynext.com
+      query_type: A
+      transport_protocol: udp
+
+  # ICMP ping check
+  icmp:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: ip4

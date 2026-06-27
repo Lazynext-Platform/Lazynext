@@ -1,0 +1,67 @@
+#!/bin/bash
+# ── Lazynext PostgreSQL Backup Script ──────────────────────────────
+# Performs pg_dump of the lazynext database with WAL archive
+# rotation. Managed by Ansible — do not edit by hand.
+
+set -euo pipefail
+
+BACKUP_DIR="{{ postgresql_backup_dir }}"
+DAILY_DIR="${BACKUP_DIR}/daily"
+WEEKLY_DIR="${BACKUP_DIR}/weekly"
+RETENTION_DAYS={{ postgresql_backup_retention_days }}
+DB_NAME="lazynext"
+PGPASSWORD="{{ postgresql_admin_password }}"
+export PGPASSWORD
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+DAY_OF_WEEK=$(date +%u)
+
+# ── Daily pg_dump (custom format, compressed) ─────────────────────
+DAILY_FILE="${DAILY_DIR}/${DB_NAME}_${TIMESTAMP}.dump"
+pg_dump \
+  -h localhost \
+  -p {{ postgresql_port }} \
+  -U {{ postgresql_admin_user }} \
+  -Fc \
+  -Z 9 \
+  -v \
+  --no-owner \
+  --no-acl \
+  -f "${DAILY_FILE}" \
+  "${DB_NAME}"
+
+# ── Weekly full dump (plain SQL for portability) ──────────────────
+if [ "${DAY_OF_WEEK}" -eq 7 ]; then
+  WEEKLY_FILE="${WEEKLY_DIR}/${DB_NAME}_${TIMESTAMP}.sql.gz"
+  pg_dump \
+    -h localhost \
+    -p {{ postgresql_port }} \
+    -U {{ postgresql_admin_user }} \
+    --no-owner \
+    --no-acl \
+    --create \
+    --clean \
+    --if-exists \
+    "${DB_NAME}" \
+    | gzip > "${WEEKLY_FILE}"
+fi
+
+# ── Global objects backup (roles, tablespaces) ────────────────────
+GLOBALS_FILE="${DAILY_DIR}/globals_${TIMESTAMP}.sql"
+pg_dumpall \
+  -h localhost \
+  -p {{ postgresql_port }} \
+  -U {{ postgresql_admin_user }} \
+  --globals-only \
+  --no-role-passwords \
+  -f "${GLOBALS_FILE}"
+
+# ── Rotate old backups ────────────────────────────────────────────
+find "${DAILY_DIR}" -type f -mtime "+${RETENTION_DAYS}" -delete 2>/dev/null || true
+find "${WEEKLY_DIR}" -type f -mtime "+$((RETENTION_DAYS * 3))" -delete 2>/dev/null || true
+
+# ── WAL archive rotation ──────────────────────────────────────────
+find "{{ postgresql_wal_archive_dir }}" -type f -mtime "+7" -delete 2>/dev/null || true
+
+unset PGPASSWORD
+echo "Backup completed: ${DAILY_FILE}"

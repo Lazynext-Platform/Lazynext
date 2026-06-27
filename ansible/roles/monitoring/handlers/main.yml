@@ -1,0 +1,37 @@
+---
+# ── Lazynext Monitoring handlers ──────────────────────────────────
+
+- name: restart prometheus
+  community.docker.docker_container:
+    name: prometheus
+    state: restarted
+
+- name: restart grafana
+  community.docker.docker_container:
+    name: grafana
+    state: restarted
+
+- name: restart loki
+  community.docker.docker_container:
+    name: loki
+    state: restarted
+
+- name: restart promtail
+  community.docker.docker_container:
+    name: promtail
+    state: restarted
+
+- name: restart alertmanager
+  community.docker.docker_container:
+    name: alertmanager
+    state: restarted
+
+- name: restart alloy
+  community.docker.docker_container:
+    name: alloy
+    state: restarted
+
+- name: restart node_exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: restarted

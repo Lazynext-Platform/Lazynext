@@ -1,0 +1,69 @@
+# ==============================================================================
+# TensorFlow Serving — Prometheus Monitoring Configuration
+#
+# Mounted at: /models/tf_serving/monitoring_config.txt
+# Loaded by tensorflow_model_server via --monitoring_config_file
+# Docs: https://github.com/tensorflow/serving/blob/master/tensorflow_serving/model_servers/monitoring_config.proto
+# ==============================================================================
+
+prometheus_config {
+  enable: true
+  path: "/monitoring/prometheus/metrics"
+}
+
+# ── Custom latency buckets (seconds) ────────────────────────────────────────
+#
+# Model-type–specific buckets so Prometheus histograms are tuned for
+# the expected latency profile of each class of model.
+#
+#   Whisper / SAM2   — heavy models,     500ms – 30s   range
+#   RealESRGAN        — medium upscaler,  200ms – 10s   range
+#   MobileNetV2       — light classifier, 10ms  – 2s    range
+#
+# TF Serving does not support per-model bucket overrides natively, so we
+# define a single histogram with buckets covering all model families.
+# Downstream dashboards split by model_name label.
+# ==============================================================================
+
+# The `metric_specs` block configures which metrics are collected.
+# All standard TF Serving metrics are enabled by default; this block
+# only exists to configure model-loaded–scoped metrics.
+
+metric_specs {
+  # Track model load/unload events
+  model_load_instrumentation: true
+  # Track per-request latency and count
+  request_logging_config {
+    sample_rate: 0.10   # Sample 10% of requests to limit overhead
+  }
+}
+
+# ── Explicit latency histogram bucket boundaries ────────────────────────────
+#
+# These buckets provide coverage for:
+#   - MobileNetV2: 10ms, 20ms, 50ms, 100ms
+#   - RealESRGAN:  100ms, 200ms, 500ms, 1s, 2s, 5s
+#   - Whisper/SAM2: 500ms, 1s, 2s, 5s, 10s, 20s, 30s
+#
+# TF Serving's built-in Prometheus metrics use the default bucket
+# boundaries defined in the monitoring config proto. To override them,
+# we rely on a sidecar histogram helper that re-aggregates on the
+# /monitoring/prometheus/metrics scrape path (see tf-bridge.conf).
+#
+# The following are the RECOMMENDED bucket boundaries for downstream
+# Prometheus recording rules or Grafana dashboards:
+#
+#   le_inf = "+Inf"
+#   le_30  = "30"
+#   le_20  = "20"
+#   le_10  = "10"
+#   le_5   = "5"
+#   le_2   = "2"
+#   le_1   = "1"
+#   le_0_5 = "0.5"
+#   le_0_2 = "0.2"
+#   le_0_1 = "0.1"
+#   le_0_05 = "0.05"
+#   le_0_02 = "0.02"
+#   le_0_01 = "0.01"
+# ==============================================================================

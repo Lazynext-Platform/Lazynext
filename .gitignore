@@ -35,6 +35,7 @@ playwright-report/
 blob-report/
 playwright/.cache/
 *.log
+*.tsbuildinfo
 
 # Python
 __pycache__/
@@ -54,10 +55,11 @@ terraform/**/terraform.tfvars
 services/render-service/outputs/**/.terraform/
 .terraform/
 
-# Sensitive config files
-env.yaml
-web.json
-db.json
+# Sensitive config files — do NOT commit real secrets
+# Template files env.yaml, web.json, db.json are safe to track
+# (they contain REPLACE_ placeholders, not real credentials)
+*.production.yaml
+*.production.json
 
 # Claude Code
 .claude/

@@ -1,0 +1,17 @@
+---
+# ── Lazynext Redis handlers ───────────────────────────────────────
+
+- name: restart redis
+  ansible.builtin.systemd:
+    name: redis-server
+    state: restarted
+
+- name: restart redis-sentinel
+  ansible.builtin.systemd:
+    name: redis-sentinel
+    state: restarted
+
+- name: restart redis_exporter
+  ansible.builtin.systemd:
+    name: redis_exporter
+    state: restarted

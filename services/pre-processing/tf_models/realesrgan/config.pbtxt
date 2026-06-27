@@ -1,0 +1,126 @@
+# ==============================================================================
+# RealESRGAN — TensorFlow Serving Model Configuration
+#
+# Model:  ai-forever/Real-ESRGAN  (exported via scripts/export-model.sh)
+# Task:   Blind super-resolution / image enhancement
+# Input:  lr_image  float32[batch, height, width, 3]  (any resolution)
+# Output: sr_image  float32[batch, height*4, width*4, 3]
+# ==============================================================================
+
+name: "realesrgan"
+platform: "tensorflow"
+
+# ── Versioning ───────────────────────────────────────────────────────────────
+model_version_policy {
+  specific {
+    versions: 1
+  }
+}
+
+# ── Batching Parameters ─────────────────────────────────────────────────────
+# RealESRGAN processes variable-resolution inputs. With typical 480p–1080p
+# frames upscaled 4x, batch size 8 yields optimal GPU throughput on 16–24 GB
+# VRAM while staying under memory pressure.
+#
+#   max_batch_size = 8
+#   timeout        = 50,000 microseconds (50 ms)
+#
+# A 50ms timeout is chosen because upscale requests are typically part of
+# real-time preview rendering in the editor — low latency is critical.
+
+batching_parameters {
+  max_batch_size {
+    value: 8
+  }
+  batch_timeout_micros {
+    value: 50000
+  }
+  max_enqueued_batches {
+    value: 32
+  }
+  num_batch_threads {
+    value: 2
+  }
+  thread_pool_size {
+    value: 4
+  }
+  allowed_batch_sizes {
+    value: 1
+  }
+  allowed_batch_sizes {
+    value: 2
+  }
+  allowed_batch_sizes {
+    value: 4
+  }
+  allowed_batch_sizes {
+    value: 8
+  }
+}
+
+# ── GPU Configuration ───────────────────────────────────────────────────────
+gpu_config {
+  gpu_memory_fraction: 0.20
+  allow_growth: false
+  per_process_gpu_memory_fraction: 0.20
+}
+
+# ── Input / Output Signature ─────────────────────────────────────────────────
+#
+# RealESRGAN SavedModel signature:
+#
+#   signature_def['serving_default']:
+#     inputs {
+#       key: "lr_image"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: -1 } dim { size: -1 } dim { size: 3 } } }
+#     }
+#     outputs {
+#       key: "sr_image"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: -1 } dim { size: -1 } dim { size: 3 } } }
+#     }
+#
+# Because input dimensions are fully dynamic, TF Serving handles any resolution
+# at runtime. For best throughput, upstream clients should pad inputs to
+# multiples of 4 to avoid padding overhead in the ESRGAN architecture.
+# ==============================================================================
+
+# ── Model warmup — pre-load upscaler at startup ─────────────────────────────
+# Warmup with a small 64×64 image to avoid excessive startup memory.
+model_warmup {
+  name: "realesrgan_warmup"
+  batch_size: 1
+  inputs {
+    key: "lr_image"
+    value {
+      dtype: DT_FLOAT
+      tensor_shape {
+        dim { size: 1 }
+        dim { size: 64 }
+        dim { size: 64 }
+        dim { size: 3 }
+      }
+      float_val: 0.0
+    }
+  }
+}
+
+# ── Inference configuration ─────────────────────────────────────────────────
+session_config {
+  allow_soft_placement: true
+  log_device_placement: false
+  gpu_options {
+    allow_growth: false
+    per_process_gpu_memory_fraction: 0.20
+  }
+  graph_options {
+    optimizer_options {
+      opt_level: L2   # Moderate optimization — ESRGAN benefits from kernel fusion
+      do_common_subexpression_elimination: true
+      do_constant_folding: true
+    }
+    # RealESRGAN performs best with NCHW (channel-first) memory layout on GPU.
+    # TF Serving automatically converts NHWC ↔ NCHW as needed.
+  }
+  intra_op_parallelism_threads: 4
+  inter_op_parallelism_threads: 2
+}

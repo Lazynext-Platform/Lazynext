@@ -1,0 +1,23 @@
+[Unit]
+Description=Prometheus Redis Exporter
+After=network.target redis-server.service
+Requires=redis-server.service
+
+[Service]
+Type=simple
+User=redis
+Group=redis
+EnvironmentFile=/etc/default/redis_exporter
+ExecStart=/usr/local/bin/redis_exporter \
+  --web.listen-address=:9121 \
+  --web.telemetry-path=/metrics
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/run/redis
+
+[Install]
+WantedBy=multi-user.target

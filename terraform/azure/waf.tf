@@ -1,0 +1,536 @@
+# ── Application Gateway v2 Subnet ──────────────────────────────────────────
+
+resource "azurerm_subnet" "app_gateway" {
+  name                 = "lazynext-agw-subnet-${var.environment}"
+  resource_group_name  = azurerm_resource_group.rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = var.app_gateway_subnet_prefix
+}
+
+# ── Public IP for Application Gateway ───────────────────────────────────────
+
+resource "azurerm_public_ip" "app_gateway" {
+  name                = "lazynext-agw-pip-${var.environment}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  domain_name_label   = "lazynext-agw-${var.environment}"
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+    ManagedBy   = "terraform"
+  }
+}
+
+# ── User-Assigned Identity for Application Gateway (Key Vault SSL certs) ────
+
+resource "azurerm_user_assigned_identity" "app_gateway" {
+  name                = "lazynext-agw-mi-${var.environment}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+  }
+}
+
+# Grant App Gateway managed identity access to Key Vault for SSL certificates
+resource "azurerm_key_vault_access_policy" "app_gateway" {
+  key_vault_id = azurerm_key_vault.secrets.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_user_assigned_identity.app_gateway.principal_id
+
+  secret_permissions = [
+    "Get",
+    "List",
+  ]
+}
+
+# ── WAF Policy ──────────────────────────────────────────────────────────────
+
+resource "azurerm_web_application_firewall_policy" "main" {
+  name                = "lazynext-waf-policy-${var.environment}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  policy_settings {
+    enabled                     = true
+    mode                        = var.environment == "production" ? "Prevention" : "Detection"
+    request_body_check          = true
+    max_request_body_size_in_kb = 128
+    file_upload_limit_in_mb     = 100
+  }
+
+  # ── Managed Ruleset: OWASP 3.2 ────────────────────────────────────────
+
+  managed_rules {
+    managed_rule_set {
+      type    = "OWASP"
+      version = "3.2"
+    }
+  }
+
+  # ── Custom Rule 1: Rate Limiting (100 req/sec per IP) ─────────────────
+
+
+  custom_rules {
+    name      = "RateLimitPerIP"
+    priority  = 10
+    rule_type = "RateLimitRule"
+    action    = "Block"
+    enabled   = true
+
+    rate_limit_duration  = "OneMin"
+    rate_limit_threshold = 6000 # 100 req/sec * 60 sec
+
+    match_conditions {
+      match_variables {
+        variable_name = "RemoteAddr"
+      }
+      operator           = "IPMatch"
+      negation_condition = false
+      match_values       = ["0.0.0.0/0", "::/0"]
+    }
+  }
+
+  # ── Custom Rule 2: Geo-Filter (allow US, CA, EU only) ────────────────
+
+  custom_rules {
+    name      = "GeoFilterAllowList"
+    priority  = 20
+    rule_type = "MatchRule"
+    action    = "Block"
+    enabled   = true
+
+    match_conditions {
+      match_variables {
+        variable_name = "RemoteAddr"
+      }
+      operator           = "GeoMatch"
+      negation_condition = true
+      match_values = [
+        "US", "CA",
+        "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
+        "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
+        "PL", "PT", "RO", "SK", "SI", "ES", "SE",
+        "IS", "LI", "NO", "CH", "GB",
+      ]
+    }
+  }
+
+  # ── Custom Rule 3: Block Known Scrapers / Attack Tools ────────────────
+
+  custom_rules {
+    name      = "BlockScrapers"
+    priority  = 25
+    rule_type = "MatchRule"
+    action    = "Block"
+    enabled   = true
+
+    match_conditions {
+      match_variables {
+        variable_name = "RequestHeaders"
+        selector      = "User-Agent"
+      }
+      operator           = "Contains"
+      negation_condition = false
+      match_values = [
+        "zgrab", "masscan", "nmap", "gobuster", "sqlmap",
+        "nikto", "burpsuite", "dirbuster", "wfuzz",
+      ]
+    }
+  }
+
+  # ── Custom Rule 4: Protect Admin / Internal Paths ─────────────────────
+
+  custom_rules {
+    name      = "ProtectAdminPaths"
+    priority  = 30
+    rule_type = "MatchRule"
+    action    = "Block"
+    enabled   = true
+
+    match_conditions {
+      match_variables {
+        variable_name = "RequestUri"
+      }
+      operator           = "Contains"
+      negation_condition = false
+      match_values = [
+        "/api/admin",
+        "/api/internal",
+        "/wp-admin",
+        "/.env",
+        "/.git",
+        "/phpmyadmin",
+      ]
+    }
+  }
+
+  # ── Custom Rule 5: Enforce Lazynext API Content Types ─────────────────
+
+  custom_rules {
+    name      = "EnforceAPIContentType"
+    priority  = 35
+    rule_type = "MatchRule"
+    action    = "Block"
+    enabled   = true
+
+    match_conditions {
+      match_variables {
+        variable_name = "RequestUri"
+      }
+      operator           = "BeginsWith"
+      negation_condition = false
+      match_values       = ["/api/"]
+    }
+
+    match_conditions {
+      match_variables {
+        variable_name = "RequestHeaders"
+        selector      = "Content-Type"
+      }
+      operator           = "Contains"
+      negation_condition = true
+      match_values = [
+        "application/json",
+        "multipart/form-data",
+        "application/x-www-form-urlencoded",
+        "application/octet-stream",
+      ]
+    }
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+    ManagedBy   = "terraform"
+  }
+}
+
+# ── Application Gateway v2 ──────────────────────────────────────────────────
+
+resource "azurerm_application_gateway" "main" {
+  name                = "lazynext-agw-${var.environment}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.app_gateway.id]
+  }
+
+  sku {
+    name     = var.app_gateway_sku_tier
+    tier     = var.app_gateway_sku_tier
+    capacity = var.app_gateway_capacity
+  }
+
+  autoscale_configuration {
+    min_capacity = var.app_gateway_capacity
+    max_capacity = var.environment == "production" ? 10 : 3
+  }
+
+  # Link to WAF policy (separate resource, above)
+  firewall_policy_id = azurerm_web_application_firewall_policy.main.id
+
+  # ── Gateway IP Configuration ──────────────────────────────────────────
+
+  gateway_ip_configuration {
+    name      = "lazynext-agw-ipcfg-${var.environment}"
+    subnet_id = azurerm_subnet.app_gateway.id
+  }
+
+  # ── Frontend IP Configuration (Public) ────────────────────────────────
+
+  frontend_ip_configuration {
+    name                 = "lazynext-agw-feip-public-${var.environment}"
+    public_ip_address_id = azurerm_public_ip.app_gateway.id
+  }
+
+  # ── Frontend Ports ────────────────────────────────────────────────────
+
+  frontend_port {
+    name = "port-http"
+    port = 80
+  }
+
+  frontend_port {
+    name = "port-https"
+    port = 443
+  }
+
+  # ── Backend Address Pools (one per service) ───────────────────────────
+
+  backend_address_pool {
+    name = "pool-web"
+    fqdns = [
+      azurerm_container_app.web.latest_revision_fqdn,
+    ]
+  }
+
+  backend_address_pool {
+    name = "pool-ai-agents"
+    fqdns = [
+      azurerm_container_app.ai_agents.latest_revision_fqdn,
+    ]
+  }
+
+  backend_address_pool {
+    name = "pool-render-service"
+    fqdns = [
+      azurerm_container_app.render_service.latest_revision_fqdn,
+    ]
+  }
+
+  backend_address_pool {
+    name = "pool-pre-processing"
+    fqdns = [
+      azurerm_container_app.pre_processing.latest_revision_fqdn,
+    ]
+  }
+
+  backend_address_pool {
+    name = "pool-generative-studio"
+    fqdns = [
+      azurerm_container_app.generative_studio.latest_revision_fqdn,
+    ]
+  }
+
+  # ── Backend HTTP Settings ─────────────────────────────────────────────
+
+  backend_http_settings {
+    name                  = "http-settings-web"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 60
+    probe_name            = "probe-web"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
+  backend_http_settings {
+    name                  = "http-settings-ai-agents"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 120
+    probe_name            = "probe-ai-agents"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
+  backend_http_settings {
+    name                  = "http-settings-render-service"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 300
+    probe_name            = "probe-render-service"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
+  backend_http_settings {
+    name                  = "http-settings-pre-processing"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 600
+    probe_name            = "probe-pre-processing"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
+  backend_http_settings {
+    name                  = "http-settings-generative-studio"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 600
+    probe_name            = "probe-generative-studio"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
+  # ── Health Probes ─────────────────────────────────────────────────────
+
+  probe {
+    name                = "probe-web"
+    protocol            = "Https"
+    path                = "/"
+    host                = azurerm_container_app.web.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  probe {
+    name                = "probe-ai-agents"
+    protocol            = "Https"
+    path                = "/health"
+    host                = azurerm_container_app.ai_agents.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  probe {
+    name                = "probe-render-service"
+    protocol            = "Https"
+    path                = "/health"
+    host                = azurerm_container_app.render_service.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  probe {
+    name                = "probe-pre-processing"
+    protocol            = "Https"
+    path                = "/health"
+    host                = azurerm_container_app.pre_processing.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  probe {
+    name                = "probe-generative-studio"
+    protocol            = "Https"
+    path                = "/health"
+    host                = azurerm_container_app.generative_studio.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
+  # ── HTTP Listeners ────────────────────────────────────────────────────
+
+  # Port 80 listeners (HTTP)
+  http_listener {
+    name                           = "listener-web-http"
+    frontend_ip_configuration_name = "lazynext-agw-feip-public-${var.environment}"
+    frontend_port_name             = "port-http"
+    protocol                       = "Http"
+    host_name                      = var.app_domain
+  }
+
+  # Port 443 listeners (HTTPS — requires SSL certificate; see notes below)
+  #
+  # Production: after uploading an SSL certificate to the gateway (via
+  # Portal or CLI), uncomment the HTTPS listeners and routing rules below
+  # and set ssl_certificate_name on each listener.
+  #
+  # Alternatively, use Key Vault integration:
+  #   1. Upload a certificate to Key Vault:
+  #      az keyvault certificate import --vault-name lazynext-kv-{env} \
+  #        --name lazynext-tls --file lazynext.pfx
+  #   2. Add an ssl_certificate block referencing the KV secret ID:
+  #      ssl_certificate {
+  #        name                = "ssl-lazynext"
+  #        key_vault_secret_id = "<secret-id>"
+  #      }
+
+  # ── Request Routing Rules ─────────────────────────────────────────────
+
+  # Web App (HTTP — for dev/staging; add HTTPS rule for production)
+  request_routing_rule {
+    name                       = "rule-web"
+    rule_type                  = "Basic"
+    priority                   = 100
+    http_listener_name         = "listener-web-http"
+    backend_address_pool_name  = "pool-web"
+    backend_http_settings_name = "http-settings-web"
+  }
+
+  # ── Lifecycle ─────────────────────────────────────────────────────────
+
+  lifecycle {
+    ignore_changes = [
+      # SSL certificates are managed outside Terraform
+      ssl_certificate,
+      # Allow Azure Policy to update tags
+      tags,
+    ]
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+    ManagedBy   = "terraform"
+  }
+}
+
+# ── Diagnostic Settings: Application Gateway → Log Analytics ────────────────
+
+resource "azurerm_monitor_diagnostic_setting" "app_gateway" {
+  name                       = "lazynext-diag-agw-${var.environment}"
+  target_resource_id         = azurerm_application_gateway.main.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
+
+  enabled_log {
+    category = "ApplicationGatewayAccessLog"
+  }
+
+  enabled_log {
+    category = "ApplicationGatewayPerformanceLog"
+  }
+
+  enabled_log {
+    category = "ApplicationGatewayFirewallLog"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
+}

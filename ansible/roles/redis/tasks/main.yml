@@ -1,0 +1,225 @@
+---
+# ── Lazynext Ansible Role: redis ──────────────────────────────────
+# Redis 8 installation, AOF persistence, LRU eviction, Sentinel HA,
+# and monitoring with redis_exporter.
+
+- name: Install required system packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg2
+      - ca-certificates
+      - lsb-release
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+# ──────────────────────────────────────────────────────────────────
+# Redis 8 from official repository
+# ──────────────────────────────────────────────────────────────────
+
+- name: Add Redis GPG key
+  ansible.builtin.get_url:
+    url: https://packages.redis.io/gpg
+    dest: /etc/apt/keyrings/redis.asc
+    mode: "0644"
+
+- name: Add Redis repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/redis.asc]
+      https://packages.redis.io/deb
+      {{ ansible_distribution_release }} main
+    state: present
+    update_cache: yes
+    filename: redis
+
+- name: Install Redis server
+  ansible.builtin.apt:
+    name:
+      - redis-server
+      - redis-tools
+      - redis-sentinel
+    state: present
+
+# ──────────────────────────────────────────────────────────────────
+# Redis kernel tuning
+# ──────────────────────────────────────────────────────────────────
+
+- name: Set vm.overcommit_memory for Redis
+  ansible.posix.sysctl:
+    name: vm.overcommit_memory
+    value: "1"
+    state: present
+    reload: yes
+
+- name: Disable transparent huge pages via systemd
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/disable-thp.service
+    content: |
+      [Unit]
+      Description=Disable Transparent Huge Pages (required for Redis)
+      Before=redis-server.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/sh -c "echo never > /sys/kernel/mm/transparent_hugepage/enabled && echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: "0644"
+
+- name: Enable disable-thp service
+  ansible.builtin.systemd:
+    name: disable-thp
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+- name: Increase somaxconn for Redis
+  ansible.posix.sysctl:
+    name: net.core.somaxconn
+    value: "1024"
+    state: present
+    reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Redis configuration
+# ──────────────────────────────────────────────────────────────────
+
+- name: Configure Redis
+  ansible.builtin.template:
+    src: redis.conf.j2
+    dest: /etc/redis/redis.conf
+    owner: redis
+    group: redis
+    mode: "0640"
+  notify: restart redis
+
+- name: Ensure Redis data directory exists
+  ansible.builtin.file:
+    path: /var/lib/redis
+    state: directory
+    owner: redis
+    group: redis
+    mode: "0750"
+
+- name: Ensure Redis log directory exists
+  ansible.builtin.file:
+    path: /var/log/redis
+    state: directory
+    owner: redis
+    group: redis
+    mode: "0750"
+
+- name: Start and enable Redis
+  ansible.builtin.systemd:
+    name: redis-server
+    state: started
+    enabled: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Redis Sentinel — High Availability (3-node minimum)
+# ──────────────────────────────────────────────────────────────────
+
+- name: Determine sentinel master host
+  ansible.builtin.set_fact:
+    redis_master_host: >-
+      {{ hostvars[groups['masters'][0]].ansible_host
+         | default(hostvars[groups['masters'][0]]['ansible_default_ipv4']['address'])
+         | default(groups['masters'][0]) }}
+
+- name: Configure Redis Sentinel
+  ansible.builtin.template:
+    src: sentinel.conf.j2
+    dest: /etc/redis/sentinel.conf
+    owner: redis
+    group: redis
+    mode: "0640"
+  notify: restart redis-sentinel
+
+- name: Start and enable Redis Sentinel
+  ansible.builtin.systemd:
+    name: redis-sentinel
+    state: started
+    enabled: yes
+
+- name: Verify Sentinel master detection
+  ansible.builtin.command: "redis-cli -p {{ redis_sentinel_port }} -a '{{ redis_password }}' SENTINEL MASTER lazynext-master"
+  register: sentinel_master
+  changed_when: false
+  retries: 5
+  delay: 3
+  until: sentinel_master.rc == 0
+  no_log: true
+
+- name: Display Sentinel master status
+  ansible.builtin.debug:
+    var: sentinel_master.stdout_lines
+  when: sentinel_master.stdout_lines is defined
+
+# ──────────────────────────────────────────────────────────────────
+# Redis exporter for Prometheus
+# ──────────────────────────────────────────────────────────────────
+
+- name: Download redis_exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/oliver006/redis_exporter/releases/download/{{ monitoring_version_tags.redis_exporter }}/redis_exporter-{{ monitoring_version_tags.redis_exporter }}.linux-amd64.tar.gz"
+    dest: /tmp/redis_exporter.tar.gz
+    mode: "0644"
+
+- name: Extract redis_exporter
+  ansible.builtin.unarchive:
+    src: /tmp/redis_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+    creates: "/tmp/redis_exporter-{{ monitoring_version_tags.redis_exporter }}.linux-amd64/redis_exporter"
+
+- name: Install redis_exporter binary
+  ansible.builtin.copy:
+    src: "/tmp/redis_exporter-{{ monitoring_version_tags.redis_exporter }}.linux-amd64/redis_exporter"
+    dest: /usr/local/bin/redis_exporter
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+
+- name: Create redis_exporter environment file
+  ansible.builtin.copy:
+    dest: /etc/default/redis_exporter
+    content: |
+      REDIS_ADDR=redis://:{{ redis_password }}@localhost:{{ redis_port }}
+      REDIS_ALIAS=lazynext-redis
+      REDIS_EXPORTER_LOG_FORMAT=txt
+    owner: root
+    group: redis
+    mode: "0640"
+  no_log: true
+  notify: restart redis_exporter
+
+- name: Install redis_exporter systemd unit
+  ansible.builtin.template:
+    src: redis_exporter.service.j2
+    dest: /etc/systemd/system/redis_exporter.service
+    mode: "0644"
+  notify: restart redis_exporter
+
+- name: Start redis_exporter
+  ansible.builtin.systemd:
+    name: redis_exporter
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Cleanup
+# ──────────────────────────────────────────────────────────────────
+
+- name: Remove redis_exporter archive
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/redis_exporter.tar.gz
+    - "/tmp/redis_exporter-{{ monitoring_version_tags.redis_exporter }}.linux-amd64"

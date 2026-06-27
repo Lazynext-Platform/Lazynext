@@ -1,0 +1,70 @@
+[Unit]
+Description=Prometheus Node Exporter
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+ExecStart=/usr/local/bin/node_exporter \
+  --web.listen-address=:9100 \
+  --web.telemetry-path=/metrics \
+  --collector.disable-defaults \
+  --collector.cpu \
+  --collector.cpufreq \
+  --collector.diskstats \
+  --collector.filesystem \
+  --collector.loadavg \
+  --collector.meminfo \
+  --collector.netdev \
+  --collector.netstat \
+  --collector.pressure \
+  --collector.stat \
+  --collector.time \
+  --collector.uname \
+  --collector.systemd \
+  --collector.processes \
+  --collector.textfile.directory=/var/lib/node_exporter/textfile_collector \
+  --no-collector.bcache \
+  --no-collector.bonding \
+  --no-collector.conntrack \
+  --no-collector.dmi \
+  --no-collector.edac \
+  --no-collector.entropy \
+  --no-collector.filefd \
+  --no-collector.hwmon \
+  --no-collector.infiniband \
+  --no-collector.interrupts \
+  --no-collector.ipvs \
+  --no-collector.ksmd \
+  --no-collector.lnstat \
+  --no-collector.logind \
+  --no-collector.mdadm \
+  --no-collector.meminfo_numa \
+  --no-collector.mountstats \
+  --no-collector.netclass \
+  --no-collector.nfs \
+  --no-collector.nfsd \
+  --no-collector.os \
+  --no-collector.powersupplyclass \
+  --no-collector.qdisc \
+  --no-collector.rapl \
+  --no-collector.schedstat \
+  --no-collector.softnet \
+  --no-collector.tapestats \
+  --no-collector.thermal_zone \
+  --no-collector.udp_queues \
+  --no-collector.wifi \
+  --no-collector.xfs \
+  --no-collector.zfs
+Restart=always
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/node_exporter
+CapabilityBoundingSet=CAP_DAC_OVERRIDE
+
+[Install]
+WantedBy=multi-user.target

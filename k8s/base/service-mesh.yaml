@@ -1,0 +1,943 @@
+# ───────────────────────────────────────────────────────────────────
+# Istio Service Mesh Configuration for Lazynext
+# ───────────────────────────────────────────────────────────────────
+# Prerequisites:
+#   istioctl install --set profile=default -y
+#   kubectl label namespace lazynext istio-injection=enabled
+#
+# PeerAuthentication enforces strict mTLS across the mesh.
+# DestinationRules configure per-service traffic policies.
+# VirtualService handles canary/circuit-breaking routing.
+# Gateway bridges external traffic into the mesh.
+# RequestAuthentication validates JWTs from better-auth.
+# AuthorizationPolicy implements zero-trust allow/deny rules.
+# EnvoyFilter handles WebSocket upgrades for sync service.
+# Telemetry controls tracing/Datadog sampling.
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# 1. PeerAuthentication — Strict mTLS for all workloads
+# ═══════════════════════════════════════════════════════════════════
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: lazynext-strict-mtls
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    security.istio.io/tls-mode: strict
+spec:
+  # Mesh-wide strict mTLS: every pod-to-pod connection is TLS-encrypted
+  # with SPIFFE identities derived from Kubernetes service accounts.
+  mtls:
+    mode: STRICT
+  # Port-level exemption: health-check probes and metrics from Prometheus
+  # arrive over plain HTTP (no sidecar in kubelet). Permit these ports
+  # without mTLS so liveness/readiness probes and scraping still work.
+  portLevelMtls:
+    3000:  # web app health on /api/health
+      mode: PERMISSIVE
+    8000:  # pre-processing health
+      mode: PERMISSIVE
+    8001:  # generative-studio health
+      mode: PERMISSIVE
+    8002:  # sync health
+      mode: PERMISSIVE
+    8003:  # render health
+      mode: PERMISSIVE
+    8005:  # analytics health
+      mode: PERMISSIVE
+    9187:  # postgres-exporter metrics
+      mode: PERMISSIVE
+    9121:  # redis-exporter metrics
+      mode: PERMISSIVE
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. DestinationRules — Traffic policies for all services
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-web
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-web.lazynext.svc.cluster.local
+  # Least-request load balancing to spread work evenly across pods
+  # (Next.js SSR is CPU-bound, so connection-count LB would starve fast pods)
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+      localityLbSetting:
+        enabled: true
+        distribute:
+          - from: us-east
+            to:
+              us-east: 80
+              us-west: 20
+    connectionPool:
+      tcp:
+        maxConnections: 500
+        connectTimeout: 3s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 9
+      http:
+        http1MaxPendingRequests: 256
+        http2MaxRequests: 1024
+        maxRequestsPerConnection: 256
+        maxRetries: 3
+        idleTimeout: 300s
+    # Outlier detection: evict pods that repeatedly return 5xx
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50
+      minHealthPercent: 80
+    # TLS settings — ISTIO_MUTUAL uses SPIFFE certs from the mesh CA
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-sync
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-sync.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+      localityLbSetting:
+        enabled: true
+    connectionPool:
+      tcp:
+        maxConnections: 1024
+        connectTimeout: 5s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 9
+      http:
+        http1MaxPendingRequests: 512
+        http2MaxRequests: 2048
+        maxRequestsPerConnection: 512
+        maxRetries: 2
+        idleTimeout: 600s  # Long idle for persistent WebSocket connections
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 20s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 33
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-render
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-render.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 256
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 9
+      http:
+        http1MaxPendingRequests: 128
+        http2MaxRequests: 512
+        maxRequestsPerConnection: 64
+        maxRetries: 1
+        idleTimeout: 900s  # Long timeout for render jobs
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 33
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-pre-processing
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-pre-processing.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 128
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 9
+      http:
+        http1MaxPendingRequests: 64
+        http2MaxRequests: 256
+        maxRequestsPerConnection: 32
+        maxRetries: 2
+        idleTimeout: 900s  # ML inference can take minutes
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 60s
+      baseEjectionTime: 120s
+      maxEjectionPercent: 33
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-generative-studio
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-generative-studio.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 128
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 9
+      http:
+        http1MaxPendingRequests: 64
+        http2MaxRequests: 256
+        maxRequestsPerConnection: 32
+        maxRetries: 1
+        idleTimeout: 900s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 60s
+      baseEjectionTime: 120s
+      maxEjectionPercent: 33
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-mcp
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-mcp.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 64
+        connectTimeout: 3s
+      http:
+        http1MaxPendingRequests: 32
+        http2MaxRequests: 128
+        maxRequestsPerConnection: 64
+        maxRetries: 2
+        idleTimeout: 300s
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-analytics-service
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-analytics-service.lazynext.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      tcp:
+        maxConnections: 128
+        connectTimeout: 3s
+      http:
+        http1MaxPendingRequests: 64
+        http2MaxRequests: 256
+        maxRequestsPerConnection: 128
+        idleTimeout: 300s
+    tls:
+      mode: ISTIO_MUTUAL
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. VirtualService — Canary deployment routing
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: lazynext-web-canary
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    canary.lazynext.ai/enabled: "false"  # Toggle to "true" when running canary
+spec:
+  hosts:
+    - lazynext-web.lazynext.svc.cluster.local
+  http:
+    # Default route: all internal traffic goes to the stable deployment
+    # To activate canary:
+    #   kubectl label vs lazynext-web-canary canary.lazynext.ai/enabled=true
+    #   Then adjust weights below via: kubectl edit vs lazynext-web-canary
+    - match:
+        - headers:
+            x-canary:
+              exact: "v2"
+      route:
+        - destination:
+            host: lazynext-web.lazynext.svc.cluster.local
+            subset: canary
+            port:
+              number: 3000
+      retries:
+        attempts: 2
+        perTryTimeout: 10s
+        retryOn: "5xx,connect-failure,refused-stream"
+    - route:
+        - destination:
+            host: lazynext-web.lazynext.svc.cluster.local
+            subset: stable
+            port:
+              number: 3000
+          weight: 100
+        - destination:
+            host: lazynext-web.lazynext.svc.cluster.local
+            subset: canary
+            port:
+              number: 3000
+          weight: 0
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: lazynext-sync-canary
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - lazynext-sync.lazynext.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: lazynext-sync.lazynext.svc.cluster.local
+            subset: stable
+            port:
+              number: 8002
+          weight: 100
+        - destination:
+            host: lazynext-sync.lazynext.svc.cluster.local
+            subset: canary
+            port:
+              number: 8002
+          weight: 0
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. Gateway — Ingress Gateway bridging external → mesh
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: lazynext-gateway
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Attach to the istio-ingressgateway (default profile) in istio-system
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  servers:
+    # HTTPS for lazynext.ai and www.lazynext.ai
+    - port:
+        number: 443
+        name: https-lazynext
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: lazynext-tls  # cert-manager creates this TLS secret
+        minProtocolVersion: TLSV1_2
+        cipherSuites:
+          - ECDHE-ECDSA-AES256-GCM-SHA384
+          - ECDHE-RSA-AES256-GCM-SHA384
+          - ECDHE-ECDSA-CHACHA20-POLY1305
+          - ECDHE-RSA-CHACHA20-POLY1305
+      hosts:
+        - lazynext.ai
+        - www.lazynext.ai
+    # HTTPS for api.lazynext.ai
+    - port:
+        number: 443
+        name: https-api
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: lazynext-api-tls
+        minProtocolVersion: TLSV1_2
+        cipherSuites:
+          - ECDHE-ECDSA-AES256-GCM-SHA384
+          - ECDHE-RSA-AES256-GCM-SHA384
+          - ECDHE-ECDSA-CHACHA20-POLY1305
+          - ECDHE-RSA-CHACHA20-POLY1305
+      hosts:
+        - api.lazynext.ai
+    # HTTPS for media.lazynext.ai
+    - port:
+        number: 443
+        name: https-media
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: lazynext-media-tls
+        minProtocolVersion: TLSV1_2
+      hosts:
+        - media.lazynext.ai
+    # HTTPS for monitoring.lazynext.ai
+    - port:
+        number: 443
+        name: https-monitoring
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: lazynext-monitoring-tls
+        minProtocolVersion: TLSV1_2
+      hosts:
+        - monitoring.lazynext.ai
+    # HTTP→HTTPS redirect (port 80)
+    - port:
+        number: 80
+        name: http-redirect
+        protocol: HTTP
+      hosts:
+        - lazynext.ai
+        - www.lazynext.ai
+        - api.lazynext.ai
+        - media.lazynext.ai
+        - monitoring.lazynext.ai
+      tls:
+        httpsRedirect: true
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. RequestAuthentication — JWT verification via better-auth
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  name: lazynext-jwt-auth
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Apply to all workloads with a selector that matches all app pods
+  # We scope to the services that serve API traffic (exclude DB/Redis/MCP)
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: lazynext
+  jwtRules:
+    # Primary issuer: better-auth (self-hosted auth service)
+    # The JWKS URI is served by the web app at /.well-known/jwks.json
+    - issuer: "https://lazynext.ai"
+      jwksUri: "http://lazynext-web.lazynext.svc.cluster.local/.well-known/jwks.json"
+      audiences:
+        - "lazynext-api"
+      fromHeaders:
+        - name: Authorization
+          prefix: "Bearer "
+      forwardOriginalToken: true
+      outputPayloadToHeader: "x-jwt-payload"
+      # 15-minute clock skew tolerance for distributed clocks
+      jwks: ""  # Will be fetched from jwksUri; empty string means fetch dynamically
+    # Secondary issuer: API key authentication for service accounts
+    # These JWTs are minted by better-auth for CI/M2M access
+    - issuer: "https://lazynext.ai/api-keys"
+      jwksUri: "http://lazynext-web.lazynext.svc.cluster.local/.well-known/jwks.json"
+      audiences:
+        - "lazynext-service-accounts"
+      fromHeaders:
+        - name: X-API-Key
+      forwardOriginalToken: true
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. AuthorizationPolicy — Zero-trust access control
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Deny access to explicitly blocked paths (admin endpoints, internal debug)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-sensitive-paths
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: lazynext
+  action: DENY
+  rules:
+    # Block access to administrative / debug endpoints
+    - to:
+        - operation:
+            paths:
+              - "/.env"
+              - "/phpmyadmin"
+              - "/wp-admin"
+              - "/adminer"
+              - "/actuator"
+              - "/_debug/*"
+              - "/api/debug/*"
+              - "/internal/*"
+              - "/.git/*"
+              - "/.svn/*"
+              - "/server-status"
+              - "/server-info"
+            methods:
+              - "GET"
+              - "POST"
+              - "PUT"
+              - "DELETE"
+              - "PATCH"
+              - "HEAD"
+              - "OPTIONS"
+    # Block direct database access paths
+    - to:
+        - operation:
+            paths:
+              - "/pgadmin*"
+              - "/db/*"
+              - "/sql/*"
+
+---
+# Allow all intra-mesh traffic by default (permissive within the mesh)
+# Individual services lock down further with their own policies.
+# External (non-mesh) traffic is denied by the default-deny-ingress NetworkPolicy.
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-intra-mesh
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: lazynext
+  action: ALLOW
+  rules:
+    # Allow requests from within the mesh (SPIFFE identity)
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/lazynext/sa/*"
+    # Allow requests from ingress gateway
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+    # Allow health probes from kubelet (no mTLS — handled by PERMISSIVE in PeerAuthentication)
+    - from:
+        - source:
+            notPrincipals:
+              - "cluster.local/*"
+
+---
+# Require JWT for write operations (POST/PUT/PATCH/DELETE)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: require-jwt-for-writes
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: lazynext
+  action: DENY
+  rules:
+    - from:
+        - source:
+            notRequestPrincipals:
+              - "*"  # Deny requests with no JWT principal
+      to:
+        - operation:
+            methods:
+              - "POST"
+              - "PUT"
+              - "PATCH"
+              - "DELETE"
+          notPaths:
+            # Allow unauthenticated access to public routes
+            - "/api/auth/*"
+            - "/api/health"
+            - "/api/public/*"
+            - "/_next/*"
+            - "/static/*"
+            - "/favicon.ico"
+            - "/manifest.json"
+            - "/robots.txt"
+            - "/sitemap.xml"
+
+# ═══════════════════════════════════════════════════════════════════
+# 7. EnvoyFilter — WebSocket upgrade for sync service
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: websocket-upgrade-sync
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  workloadSelector:
+    labels:
+      app: lazynext-sync
+  configPatches:
+    # Patch the sidecar inbound listener to add WebSocket timeouts
+    - applyTo: NETWORK_FILTER
+      match:
+        context: SIDECAR_INBOUND
+        listener:
+          portNumber: 8002
+          filterChain:
+            filter:
+              name: "envoy.filters.network.http_connection_manager"
+      patch:
+        operation: MERGE
+        value:
+          typed_config:
+            "@type": "type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager"
+            # 24-hour stream timeout for long-lived WebSocket connections
+            stream_idle_timeout: 86400s
+            # WebSocket upgrade configuration
+            upgrade_configs:
+              - upgrade_type: "websocket"
+                enabled: true
+    # Patch the gateway for WebSocket support on the /sync path
+    - applyTo: HTTP_ROUTE
+      match:
+        context: GATEWAY
+        routeConfiguration:
+          vhost:
+            name: "api.lazynext.ai:443"
+      patch:
+        operation: MERGE
+        value:
+          route:
+            # Add a special route for /sync that supports WebSocket
+            name: "sync-websocket-route"
+            match:
+              prefix: "/sync"
+            route:
+              cluster: "outbound|8002||lazynext-sync.lazynext.svc.cluster.local"
+              timeout: 86400s
+              idle_timeout: 86400s
+              upgrade_configs:
+                - upgrade_type: "websocket"
+                  enabled: true
+
+# ═══════════════════════════════════════════════════════════════════
+# 8. Telemetry — Tracing configuration with 10% sampling rate
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: lazynext-telemetry
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Apply to all workloads in the lazynext namespace
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: lazynext
+  tracing:
+    - providers:
+        - name: otel
+      # 10% sampling rate — balances observability cost with coverage.
+      # Production traffic at peak generates ~50K spans/sec;
+      # 10% sampling gives 5K spans → ~200 MB / day in tracing backend.
+      randomSamplingPercentage: 10.0
+      customTags:
+        environment:
+          literal:
+            value: production
+        service:
+          header:
+            name: x-service-name
+            defaultValue: unknown
+        build_commit:
+          header:
+            name: x-build-commit
+            defaultValue: unknown
+  # Access logging disabled for performance; enable temporarily via:
+  #   kubectl edit telemetry lazynext-telemetry
+  # and set accessLogging[].providers[0].name
+  accessLogging: []
+
+# ═══════════════════════════════════════════════════════════════════
+# 9. DestinationRule Subset Definitions (for canary routing)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# DestinationRule with subsets for lazynext-web (stable vs canary)
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-web-subsets
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-web.lazynext.svc.cluster.local
+  subsets:
+    - name: stable
+      labels:
+        deployment-version: stable
+    - name: canary
+      labels:
+        deployment-version: canary
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+# DestinationRule with subsets for lazynext-sync (stable vs canary)
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: lazynext-sync-subsets
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  host: lazynext-sync.lazynext.svc.cluster.local
+  subsets:
+    - name: stable
+      labels:
+        deployment-version: stable
+    - name: canary
+      labels:
+        deployment-version: canary
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+
+# ═══════════════════════════════════════════════════════════════════
+# 10. ServiceEntry — Allow egress to external APIs
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Allow mesh workloads to reach Stripe API for payment processing
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: stripe-api
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - api.stripe.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow mesh workloads to reach Replicate API for ML inference
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: replicate-api
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - api.replicate.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow mesh workloads to reach OpenAI / Anthropic / Gemini LLM APIs
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: llm-apis
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - api.openai.com
+    - api.anthropic.com
+    - generativelanguage.googleapis.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow mesh workloads to reach ElevenLabs for voice synthesis
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: elevenlabs-api
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - api.elevenlabs.io
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow outbound to Azure services (Blob Storage, Key Vault, ACR)
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: azure-services
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - "*.blob.core.windows.net"
+    - "*.vault.azure.net"
+    - "*.azurecr.io"
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow outbound to Resend (email) and PostHog (analytics)
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: saas-apis
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - api.resend.com
+    - app.posthog.com
+    - us.i.posthog.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# Allow outbound to GitHub Container Registry (GHCR) for image pulls
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: ghcr-registry
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  hosts:
+    - ghcr.io
+    - pkg-containers.githubusercontent.com
+  ports:
+    - number: 443
+      name: https
+      protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS

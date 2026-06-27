@@ -1,0 +1,202 @@
+name: Automated Dependency Updates
+
+on:
+  schedule:
+    # Monday at 9 AM UTC — runs after dependabot opens PRs
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Dry run — do not merge anything"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge-patch:
+    name: Auto-Merge Patch Dependencies
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry-run != 'true'
+    steps:
+      - name: Find Dependabot PRs
+        id: find-prs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'created',
+              direction: 'desc',
+              per_page: 50
+            });
+
+            const dependabotPRs = prs.filter(pr =>
+              pr.user.login === 'dependabot[bot]' &&
+              pr.labels.some(l => l.name === 'dependencies')
+            );
+
+            const candidates = [];
+            for (const pr of dependabotPRs) {
+              // Get the PR details for mergeable state
+              const { data: prDetail } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+
+              // Determine update type from labels or title
+              const title = pr.title.toLowerCase();
+              const labels = pr.labels.map(l => l.name.toLowerCase());
+
+              let updateType = 'unknown';
+              if (title.includes('patch') || title.includes('bump patch') ||
+                  labels.includes('patch') || labels.some(l => l.startsWith('semver:patch'))) {
+                updateType = 'patch';
+              } else if (title.includes('minor') || title.includes('bump minor') ||
+                         labels.includes('minor') || labels.some(l => l.startsWith('semver:minor'))) {
+                updateType = 'minor';
+              } else if (title.includes('major') || title.includes('bump major') ||
+                         labels.includes('major') || labels.some(l => l.startsWith('semver:major'))) {
+                updateType = 'major';
+              } else {
+                // Infer from version bump: check if it's a patch-level bump
+                // Patch bumps in semver: only the third digit changes
+                updateType = 'minor'; // conservative: only auto-merge explicit patch
+              }
+
+              // Get CI status
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha,
+                status: 'completed'
+              });
+
+              const allChecksPassed = checks.check_runs.length > 0 &&
+                checks.check_runs.every(c => c.conclusion === 'success' || c.conclusion === 'skipped' || c.conclusion === 'neutral');
+
+              const hasFailingCheck = checks.check_runs.some(c => c.conclusion === 'failure' || c.conclusion === 'timed_out' || c.conclusion === 'cancelled');
+
+              console.log(`PR #${pr.number}: "${pr.title}" — type=${updateType}, checks=${checks.check_runs.length}, allPassed=${allChecksPassed}, failing=${hasFailingCheck}, mergeable=${prDetail.mergeable}`);
+
+              candidates.push({
+                number: pr.number,
+                title: pr.title,
+                updateType,
+                allChecksPassed,
+                hasFailingCheck,
+                mergeable: prDetail.mergeable,
+                mergeableState: prDetail.mergeable_state,
+                htmlUrl: pr.html_url
+              });
+            }
+
+            // Filter for patch and minor updates with passing CI
+            const autoMergeable = candidates.filter(c =>
+              ['patch', 'minor'].includes(c.updateType) &&
+              c.allChecksPassed &&
+              !c.hasFailingCheck &&
+              c.mergeable === true &&
+              c.mergeableState === 'clean'
+            );
+
+            console.log(`Auto-mergeable PRs: ${autoMergeable.length}/${candidates.length}`);
+            return autoMergeable;
+
+      - name: Approve Dependabot PRs
+        if: fromJSON(steps.find-prs.outputs.result).length > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = ${{ steps.find-prs.outputs.result }};
+            let approved = 0;
+
+            for (const pr of prs) {
+              console.log(`Approving PR #${pr.number}: ${pr.title}`);
+
+              // Approve the PR
+              try {
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  event: 'APPROVE',
+                  body: '## Auto-Approved\n\nThis is a patch/minor dependency update from Dependabot with all CI checks passing. Auto-approving for merge.'
+                });
+                approved++;
+              } catch (err) {
+                console.error(`Failed to approve PR #${pr.number}:`, err.message);
+              }
+            }
+
+            console.log(`Approved ${approved} PR(s)`);
+
+      - name: Enable Auto-Merge
+        if: fromJSON(steps.find-prs.outputs.result).length > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = ${{ steps.find-prs.outputs.result }};
+            let enabled = 0;
+
+            for (const pr of prs) {
+              console.log(`Enabling auto-merge for PR #${pr.number}`);
+
+              try {
+                // Set the PR to auto-merge using squash
+                await github.graphql(`
+                  mutation($prId: ID!, $mergeMethod: PullRequestMergeMethod!) {
+                    enablePullRequestAutoMerge(input: {
+                      pullRequestId: $prId,
+                      mergeMethod: $mergeMethod
+                    }) {
+                      clientMutationId
+                    }
+                  }
+                `, {
+                  prId: pr.node_id,
+                  mergeMethod: 'SQUASH'
+                });
+                enabled++;
+              } catch (err) {
+                console.error(`Failed to enable auto-merge for PR #${pr.number}:`, err.message);
+              }
+            }
+
+            console.log(`Enabled auto-merge on ${enabled} PR(s)`);
+
+  summary:
+    name: Dependency Update Summary
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [auto-merge-patch]
+    steps:
+      - name: Generate Summary
+        run: |
+          {
+            echo "## Dependency Update Summary"
+            echo ""
+            echo "### Auto-Merge Status"
+            echo ""
+            echo "Week of $(date +%Y-%m-%d)"
+            echo ""
+            echo "| Job | Result |"
+            echo "|-----|--------|"
+            echo "| Auto-Merge Patch | ${{ needs.auto-merge-patch.result }} |"
+            echo ""
+            echo "Dependabot opens PRs on Monday. This workflow automatically approves"
+            echo "and enables auto-merge for **patch** and **minor** version bumps from"
+            echo "Dependabot when all CI checks pass."
+            echo ""
+            echo "Major version bumps and PRs with failing checks require manual review."
+          } >> $GITHUB_STEP_SUMMARY

@@ -18,7 +18,8 @@ Because each platform has distinct constraints and ideal frameworks, the UI is i
 
 - `apps/web/`: A Next.js (React) application serving the browser ecosystem.
 - `apps/desktop/`: A native desktop application built using the GPUI (Zed) framework in Rust.
-- `apps/mobile/`: A mobile entry point (potentially React Native or similar) serving iOS and Android users.
+- `apps/mobile/`: A mobile entry point (React Native) serving iOS and Android users.
+- `apps/browser-extension/`: A Chrome MV3 extension for capturing web video into the timeline.
 
 **Design Rule for UI Components:**
 
@@ -27,21 +28,33 @@ Because each platform has distinct constraints and ideal frameworks, the UI is i
 
 ## 3. Microservices & Plugins
 
-- **`services/`**: Auxiliary backend features and microservices (e.g., `ai-agents`, `render-service`) operate alongside the core application to offload specialized async tasks like AI orchestration or heavy media rendering.
+- **`services/`**: Six backend microservices operate alongside the core application to offload specialized async tasks:
+  - `pre-processing` (Python, :8000) — Whisper, SAM2, NeRF
+  - `generative-studio` (Python, :8001) — AI video/audio generation
+  - `ai-agents` (Node.js, :8002) — LLM orchestration + CRDT sync
+  - `render-service` (Node.js, :8003) — FFMPEG render farm
+  - `collab-server` (Rust, :8004) — Native CRDT sync + WebRTC signaling
+  - `analytics-service` (Node.js, :8006) — Data ingestion + LTV engine
 - **`plugins/`**: System extension points that interact with the core structure.
 
 ## 4. Directory Overview
 
 ```text
 Lazynext/
-├── apps/               # UI Shells (Next.js, GPUI Desktop, Mobile)
-├── docs/               # System documentation, design docs, references
+├── apps/               # UI Shells (Next.js, GPUI Desktop, Mobile, Extension)
+├── docs/               # System documentation, design docs, ADRs, runbooks
 ├── rust/               # The single source of truth for all business logic
-├── services/           # Microservices (e.g., ai-agents, render-service)
+├── services/           # 6 microservices (Python, Node.js, Rust)
+├── packages/           # Shared packages (e.g., api-client)
+├── plugins/            # System extensions + plugin SDK
+├── terraform/azure/    # Azure infrastructure as code
+├── k8s/                # Kubernetes deployment configurations
+├── ansible/            # Bare-metal provisioning playbooks
+├── monitoring/         # Prometheus, Grafana, Loki, Tempo, Alertmanager
 ├── scripts/            # Infrastructure and build automation scripts
-├── eslint/             # Unified styling and linting configurations
-├── plugins/            # System extensions
-└── k8s/                # Kubernetes deployment configurations
+├── config/             # Traefik ingress configuration
+├── .github/workflows/  # CI/CD pipelines (13 workflows)
+└── jenkins/            # Jenkins pipeline configuration
 ```
 
 ## 5. Development Strategy

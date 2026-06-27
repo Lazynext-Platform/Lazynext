@@ -36,6 +36,11 @@ scrape_configs:
       - targets: ["analytics-service:8006"]
     metrics_path: /health
 
+  - job_name: "collab-server"
+    static_configs:
+      - targets: ["collab-server:8004"]
+    metrics_path: /health
+
   - job_name: "mcp-server"
     static_configs:
       - targets: ["mcp-server:5173"]

@@ -93,6 +93,8 @@ services:
       - NEXT_PUBLIC_MARBLE_API_URL=${NEXT_PUBLIC_MARBLE_API_URL:-https://api.marblecms.com}
       - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID:-}
       - FREESOUND_API_KEY=${FREESOUND_API_KEY:-}
+      - MARBLE_WORKSPACE_KEY=${MARBLE_WORKSPACE_KEY:-mock_marble_key}
+      - AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT:-lazynextmediadev}
     depends_on:
       db:
         condition: service_healthy

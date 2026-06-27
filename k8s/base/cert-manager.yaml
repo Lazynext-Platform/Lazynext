@@ -1,0 +1,423 @@
+# ───────────────────────────────────────────────────────────────────
+# Cert-Manager Configuration for Lazynext
+# ───────────────────────────────────────────────────────────────────
+#
+# Prerequisites:
+#   helm repo add jetstack https://charts.jetstack.io
+#   helm install cert-manager jetstack/cert-manager \
+#     --namespace cert-manager --create-namespace \
+#     --set installCRDs=true \
+#     --set ingressShim.defaultIssuerName=letsencrypt-production \
+#     --set ingressShim.defaultIssuerKind=ClusterIssuer
+#
+# How Let's Encrypt works with cert-manager:
+#   1. ClusterIssuer creates an ACME account with Let's Encrypt.
+#   2. Certificates reference the ClusterIssuer.
+#   3. cert-manager solves HTTP-01 challenges by creating temporary
+#      Ingress resources to prove domain ownership.
+#   4. On success, the TLS key/cert is stored in the named Secret.
+#   5. cert-manager automatically renews 30 days before expiry.
+#
+# Let's Encrypt rate limits (production):
+#   - 50 certificates per domain per week
+#   - 5 duplicate certificates per domain per week
+#   - USE STAGING FOR TESTING FIRST
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# 1. ClusterIssuer — Let's Encrypt Staging (safe for testing)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+    environment: staging
+  annotations:
+    cert-manager.io/issue-temporary-certificate: "true"
+    cert-manager.io/description: "Let's Encrypt staging — for testing. Certs are NOT trusted by browsers."
+spec:
+  acme:
+    # Let's Encrypt staging endpoint (no rate limits, but untrusted certs)
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    # Email for expiry notifications and account recovery
+    email: devops@lazynext.ai
+    # cert-manager creates a Secret in this namespace with the ACME account key
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    # HTTP-01 challenge: cert-manager creates a temporary Ingress with a
+    # well-known path to prove control of the domain.
+    solvers:
+      - http01:
+          ingress:
+            # Use the nginx ingress class defined in networking.yaml
+            class: nginx
+            # Optional: specify which Ingress template to use
+            ingressTemplate:
+              metadata:
+                annotations:
+                  # Tell the ingress controller this is a challenge endpoint
+                  nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0,::/0"
+        # Pod template for the solver (runs temporarily during challenges)
+        podTemplate:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1001
+              seccompProfile:
+                type: RuntimeDefault
+            nodeSelector:
+              kubernetes.io/os: linux
+
+# ═══════════════════════════════════════════════════════════════════
+# 2. ClusterIssuer — Let's Encrypt Production (trusted certificates)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+    environment: production
+  annotations:
+    cert-manager.io/description: "Let's Encrypt production — real trusted certificates. Respect rate limits."
+spec:
+  acme:
+    # Let's Encrypt production endpoint (real certs, subject to rate limits)
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: devops@lazynext.ai
+    privateKeySecretRef:
+      name: letsencrypt-production-account-key
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+            ingressTemplate:
+              metadata:
+                annotations:
+                  nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0,::/0"
+        podTemplate:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 1001
+              seccompProfile:
+                type: RuntimeDefault
+            nodeSelector:
+              kubernetes.io/os: linux
+      # DNS-01 solver as backup (for wildcard certificates or when HTTP is blocked)
+      # Uncomment and configure if you want to use Azure DNS for challenges:
+      # - dns01:
+      #     azureDNS:
+      #       clientID: <managed-identity-client-id>
+      #       subscriptionID: <azure-subscription-id>
+      #       resourceGroupName: <dns-zone-resource-group>
+      #       hostedZoneName: lazynext.ai
+      #       environment: AzurePublicCloud
+      #       managedIdentity:
+      #         clientID: <user-assigned-managed-identity-client-id>
+
+# ═══════════════════════════════════════════════════════════════════
+# 3. Certificate — lazynext.ai and wildcard (*.lazynext.ai)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-wildcard-tls
+  namespace: lazynext
+  labels:
+    app: lazynext
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+  annotations:
+    cert-manager.io/description: "Primary wildcard certificate covering all *.lazynext.ai subdomains"
+spec:
+  # Secret where the TLS key/cert will be stored
+  secretName: lazynext-wildcard-tls
+  # Secret template adds labels for discovery
+  secretTemplate:
+    labels:
+      app.kubernetes.io/part-of: lazynext
+      app.kubernetes.io/component: tls
+      cert-manager.io/certificate-name: lazynext-wildcard-tls
+  # Renew 30 days before expiry (Let's Encrypt certs are valid 90 days)
+  duration: 2160h       # 90 days
+  renewBefore: 720h     # 30 days before expiry
+  # Subject information for the certificate
+  subject:
+    organizations:
+      - Lazynext Inc.
+    countries:
+      - US
+    localities:
+      - San Francisco
+    provinces:
+      - California
+  # The issuer to use
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  # Common name and SANs
+  commonName: lazynext.ai
+  dnsNames:
+    - lazynext.ai
+    - "*.lazynext.ai"
+  # Use PKCS#8 for RSA key (more interoperable)
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    encoding: PKCS8
+    rotationPolicy: Always
+  # Allow a small key reuse period during rotation
+  revisionHistoryLimit: 3
+  # USAGES: server auth (most common), client auth (mTLS)
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+
+# ═══════════════════════════════════════════════════════════════════
+# 4. Certificate — api.lazynext.ai
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-api-tls
+  namespace: lazynext
+  labels:
+    app: lazynext
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+  annotations:
+    cert-manager.io/description: "API endpoint certificate for backend service ingress"
+spec:
+  secretName: lazynext-api-tls
+  secretTemplate:
+    labels:
+      app.kubernetes.io/part-of: lazynext
+      app.kubernetes.io/component: tls
+      cert-manager.io/certificate-name: lazynext-api-tls
+  duration: 2160h
+  renewBefore: 720h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: api.lazynext.ai
+  dnsNames:
+    - api.lazynext.ai
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    encoding: PKCS8
+    rotationPolicy: Always
+  revisionHistoryLimit: 3
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+    - client auth
+
+# ═══════════════════════════════════════════════════════════════════
+# 5. Certificate — media.lazynext.ai
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-media-tls
+  namespace: lazynext
+  labels:
+    app: lazynext
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+  annotations:
+    cert-manager.io/description: "Media CDN origin certificate for user-uploaded content"
+spec:
+  secretName: lazynext-media-tls
+  secretTemplate:
+    labels:
+      app.kubernetes.io/part-of: lazynext
+      app.kubernetes.io/component: tls
+      cert-manager.io/certificate-name: lazynext-media-tls
+  duration: 2160h
+  renewBefore: 720h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: media.lazynext.ai
+  dnsNames:
+    - media.lazynext.ai
+  # ADDITIONAL SANs for Azure CDN / Front Door origin verification
+  # When using Azure Front Door with custom domain, also include:
+  # - media-prod.lazynext.ai   (Azure CDN origin)
+  # - media.azureedge.net      (if using Azure CDN managed TLS)
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    encoding: PKCS8
+    rotationPolicy: Always
+  revisionHistoryLimit: 3
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+
+# ═══════════════════════════════════════════════════════════════════
+# 6. Certificate — monitoring.lazynext.ai
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-monitoring-tls
+  namespace: lazynext
+  labels:
+    app: lazynext
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+  annotations:
+    cert-manager.io/description: "Monitoring stack certificate (Grafana, Prometheus, Alertmanager)"
+spec:
+  secretName: lazynext-monitoring-tls
+  secretTemplate:
+    labels:
+      app.kubernetes.io/part-of: lazynext
+      app.kubernetes.io/component: tls
+      cert-manager.io/certificate-name: lazynext-monitoring-tls
+  duration: 2160h
+  renewBefore: 720h
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: monitoring.lazynext.ai
+  dnsNames:
+    - monitoring.lazynext.ai
+  privateKey:
+    algorithm: RSA
+    size: 4096
+    encoding: PKCS8
+    rotationPolicy: Always
+  revisionHistoryLimit: 3
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+
+# ═══════════════════════════════════════════════════════════════════
+# 7. Certificate — staging variants (testing with let's encrypt staging)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: lazynext-tls-staging
+  namespace: lazynext
+  labels:
+    app: lazynext
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+    environment: staging
+  annotations:
+    cert-manager.io/description: "Staging certificate for CI/CD and pre-production testing"
+    # This certificate is supplementary to the production one; it is safe to
+    # create alongside lazynext-tls because they target different secrets.
+spec:
+  secretName: lazynext-tls-staging
+  secretTemplate:
+    labels:
+      app.kubernetes.io/part-of: lazynext
+      app.kubernetes.io/component: tls
+      environment: staging
+  duration: 2160h
+  renewBefore: 720h
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+    group: cert-manager.io
+  commonName: lazynext.ai
+  dnsNames:
+    - lazynext.ai
+    - www.lazynext.ai
+  privateKey:
+    algorithm: RSA
+    size: 2048  # Smaller key for staging — faster issuance
+    encoding: PKCS8
+    rotationPolicy: Always
+  revisionHistoryLimit: 2
+  usages:
+    - digital signature
+    - key encipherment
+    - server auth
+
+# ═══════════════════════════════════════════════════════════════════
+# 8. CertificateRequest policy (optional — automated validation)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# This CertificateRequest policy enforces minimum key size and approved
+# issuers for all Certificate resources in the namespace.
+# Available in cert-manager 1.14+ via the --feature-gates=Approved=true flag.
+apiVersion: policy.cert-manager.io/v1alpha1
+kind: CertificateRequestPolicy
+metadata:
+  name: lazynext-cert-policy
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: certificates
+spec:
+  allowed:
+    commonName:
+      value: "*.lazynext.ai"
+      required: false
+    dnsNames:
+      values:
+        - "*.lazynext.ai"
+      required: false
+    # Only allow Let's Encrypt issuers (no self-signed in production)
+    issuerRef:
+      names:
+        - letsencrypt-production
+        - letsencrypt-staging
+      kinds:
+        - ClusterIssuer
+      groups:
+        - cert-manager.io
+  # Constraints on the certificate request
+  constraints:
+    minDuration: 1h
+    maxDuration: 2160h
+    privateKey:
+      algorithm: RSA
+      minSize: 2048
+      maxSize: 4096
+    # Prevent wildcard in both CommonName and DNSNames simultaneously
+    # (some CAs reject this)
+  # Plugin configuration for additional validation
+  # e.g., integrate with OPA/Gatekeeper for advanced policy checks

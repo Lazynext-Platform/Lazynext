@@ -1,0 +1,430 @@
+# ── Application-Level Alert Rules ─────────────────────────────────
+# Covers lazynext-specific application metrics: render jobs, ML
+# inference, WebSocket connections, payments, database migrations,
+# media processing, and CRDT collaboration.
+#
+# These rules layer on top of the recording rules in recording-rules.yml
+# and assume the following metric names emitted by lazynext services:
+#   render_jobs_total, render_jobs_failed_total, render_duration_seconds
+#   ml_inference_requests_total, ml_inference_errors_total
+#   whisper_inference_duration_seconds, sam2_inference_duration_seconds
+#   websocket_connections_active, websocket_disconnects_total
+#   stripe_webhook_total, stripe_webhook_errors_total
+#   db_migration_status, media_processing_queue_size
+#   crdt_conflicts_total
+
+groups:
+  # ── Render Service ──────────────────────────────────────────────
+  - name: lazynext-render
+    rules:
+      - alert: HighRenderFailureRate
+        expr: |
+          (
+            sum(rate(render_jobs_failed_total[15m]))
+            /
+            sum(rate(render_jobs_total[15m]))
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          service: render
+        annotations:
+          summary: "Render failure rate above 5%"
+          description: |
+            Render job failure rate is {{ $value | humanizePercentage }}
+            over the last 15 minutes (threshold: 5%).
+            Total jobs: {{ query "sum(rate(render_jobs_total[15m]))" | first | value }}
+            Failed jobs: {{ query "sum(rate(render_jobs_failed_total[15m]))" | first | value }}
+            Check render-service logs for FFmpeg/encoder errors.
+
+      - alert: RenderQueueBacklog
+        expr: |
+          avg_over_time(render_queue_size[15m]) > 50
+        for: 15m
+        labels:
+          severity: warning
+          service: render
+        annotations:
+          summary: "Render queue has more than 50 jobs for 15 minutes"
+          description: |
+            Render queue size is {{ $value }} jobs. Throughput may be insufficient.
+            Consider scaling render-service replicas or enabling burst mode.
+
+      - alert: RenderQueueCriticalBacklog
+        expr: |
+          avg_over_time(render_queue_size[15m]) > 100
+        for: 10m
+        labels:
+          severity: critical
+          service: render
+        annotations:
+          summary: "Render queue critically large: {{ $value }} jobs pending"
+          description: |
+            Render queue has exceeded 100 jobs. Users are likely experiencing
+            extended wait times. Immediate scale-out recommended.
+
+      - alert: ZeroRenderWorkers
+        expr: |
+          sum(render_workers_active) == 0
+        for: 5m
+        labels:
+          severity: critical
+          service: render
+        annotations:
+          summary: "No active render workers"
+          description: |
+            Zero render workers are active. No render jobs can be processed.
+            Check render-service health and worker pool configuration.
+
+  # ── ML Inference ────────────────────────────────────────────────
+  - name: lazynext-ml-inference
+    rules:
+      - alert: HighMLInferenceErrorRate
+        expr: |
+          (
+            sum(rate(ml_inference_errors_total{status_code=~"5.."}[10m]))
+            /
+            sum(rate(ml_inference_requests_total[10m]))
+          ) > 0.02
+        for: 10m
+        labels:
+          severity: critical
+          service: ml
+        annotations:
+          summary: "ML inference 5xx error rate above 2%"
+          description: |
+            ML inference error rate is {{ $value | humanizePercentage }}
+            over the last 10 minutes (threshold: 2%).
+            Affected endpoints: {{ $labels.endpoint }}
+            Check pre-processing and generative-studio service health.
+
+      - alert: SlowMLInferenceLatency
+        expr: |
+          (
+            histogram_quantile(0.95,
+              rate(whisper_inference_duration_seconds_bucket[10m])
+            ) > 60
+          )
+          or
+          (
+            histogram_quantile(0.95,
+              rate(sam2_inference_duration_seconds_bucket[10m])
+            ) > 120
+          )
+        for: 10m
+        labels:
+          severity: warning
+          service: ml
+        annotations:
+          summary: "ML inference latency exceeding thresholds"
+          description: |
+            ML inference p95 latency is too high:
+            Whisper p95: {{ query "histogram_quantile(0.95, rate(whisper_inference_duration_seconds_bucket[10m]))" | first | value }}s (threshold: 60s)
+            SAM2 p95:    {{ query "histogram_quantile(0.95, rate(sam2_inference_duration_seconds_bucket[10m]))" | first | value }}s (threshold: 120s)
+            Check GPU utilization and model warmup status.
+
+      - alert: MLInferenceLatencyCritical
+        expr: |
+          (
+            histogram_quantile(0.95,
+              rate(whisper_inference_duration_seconds_bucket[10m])
+            ) > 120
+          )
+          or
+          (
+            histogram_quantile(0.95,
+              rate(sam2_inference_duration_seconds_bucket[10m])
+            ) > 300
+          )
+        for: 5m
+        labels:
+          severity: critical
+          service: ml
+        annotations:
+          summary: "ML inference latency critically high"
+          description: |
+            ML inference latency is critically degraded. Users may be facing timeouts.
+            Whisper p95 > 120s or SAM2 p95 > 300s.
+            Immediate investigation required — check GPU availability and model serving.
+
+      - alert: MLModelNotWarm
+        expr: |
+          ml_model_warmup_status == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: ml
+        annotations:
+          summary: "ML model {{ $labels.model }} is not warmed up"
+          description: |
+            Model {{ $labels.model }} on {{ $labels.instance }}
+            has warmup_status=0. First inference requests will be slow.
+
+      - alert: MLGPUOutOfMemory
+        expr: |
+          ml_gpu_memory_used_bytes / ml_gpu_memory_total_bytes > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          service: ml
+        annotations:
+          summary: "GPU memory > 95% on {{ $labels.instance }}"
+          description: |
+            GPU {{ $labels.gpu_device }} on {{ $labels.instance }}
+            is at {{ $value | humanizePercentage }} memory utilization.
+            Inference requests may fail with OOM.
+
+  # ── WebSocket / Real-Time Collaboration ─────────────────────────
+  - name: lazynext-websocket
+    rules:
+      - alert: HighWebSocketDisconnectRate
+        expr: |
+          sum(rate(websocket_disconnects_total[10m])) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: websocket
+        annotations:
+          summary: "WebSocket disconnect rate above 10/minute"
+          description: |
+            WebSocket disconnects are occurring at {{ $value }} per minute.
+            This may indicate network instability, CRDT sync server issues,
+            or client-side problems. Check ai-agents service and network.
+
+      - alert: WebSocketConnectionDrop
+        expr: |
+          (websocket_connections_active / websocket_connections_active offset 15m) < 0.5
+        for: 5m
+        labels:
+          severity: critical
+          service: websocket
+        annotations:
+          summary: "WebSocket connections dropped by > 50% in 15 minutes"
+          description: |
+            Active WebSocket connections dropped from
+            {{ query "websocket_connections_active offset 15m" | first | value }}
+            to {{ query "websocket_connections_active" | first | value }}
+            in the last 15 minutes. CRDT sync may be disrupted.
+
+  # ── Payments ────────────────────────────────────────────────────
+  - name: lazynext-payments
+    rules:
+      - alert: PaymentProcessingFailure
+        expr: |
+          (
+            sum(rate(stripe_webhook_errors_total[15m]))
+            /
+            sum(rate(stripe_webhook_total[15m]))
+          ) > 0
+          or
+          sum(rate(http_requests_total{job="lazynext-web",path=~"/api/payments.*",status_code=~"5.."}[10m])) > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: payments
+        annotations:
+          summary: "Payment processing failure detected"
+          description: |
+            Stripe payment webhooks or payment API endpoints are returning errors.
+            Revenue may be impacted. Check Stripe dashboard for outages and
+            verify webhook secret configuration.
+
+      - alert: StripeWebhookMissing
+        expr: |
+          rate(stripe_webhook_total[1h]) == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: payments
+        annotations:
+          summary: "No Stripe webhooks received in the last hour"
+          description: |
+            Zero Stripe webhooks received in the last hour during active hours.
+            This may indicate a webhook delivery failure or configuration issue.
+            Check Stripe Dashboard → Webhooks → Events.
+
+  # ── Database ────────────────────────────────────────────────────
+  - name: lazynext-database
+    rules:
+      - alert: DatabaseMigrationFailure
+        expr: |
+          db_migration_status{status="failed"} > 0
+        for: 5m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Database migration failed"
+          description: |
+            Migration {{ $labels.migration_name }} has status "failed".
+            Database schema may be in an inconsistent state.
+            Check migration logs and revert if necessary.
+            Run: bun run db:migrate -- --status
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          pg_stat_database_numbackends{datname="lazynext"}
+          / on() pg_settings_max_connections > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database connection pool > 85%"
+          description: |
+            Database has {{ $value | humanizePercentage }} of max connections in use.
+            New connections may be refused. Consider increasing max_connections
+            or investigating connection leaks.
+
+      - alert: DatabaseReplicationLag
+        expr: |
+          pg_stat_replication_flush_lag_bytes > 104857600   # 100 MB
+        for: 10m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Database replication lag > 100 MB"
+          description: |
+            Replication lag is {{ $value | humanize }} bytes.
+            Read replicas may serve stale data. Check replica health.
+
+  # ── Media Processing ────────────────────────────────────────────
+  - name: lazynext-media-processing
+    rules:
+      - alert: MediaProcessingBacklog
+        expr: |
+          media_processing_queue_size > 100
+        for: 15m
+        labels:
+          severity: warning
+          service: media
+        annotations:
+          summary: "Media processing backlog: {{ $value }} files queued"
+          description: |
+            {{ $value }} media files are waiting for processing
+            (transcription, rotoscoping, scene detection).
+            This indicates the pre-processing service cannot keep up.
+            Consider scaling pre-processing replicas or GPU instances.
+
+      - alert: MediaProcessingCriticalBacklog
+        expr: |
+          media_processing_queue_size > 500
+        for: 10m
+        labels:
+          severity: critical
+          service: media
+        annotations:
+          summary: "Media processing backlog critical: {{ $value }} files"
+          description: |
+            {{ $value }} files are queued for processing.
+            Users will experience significant delays. Immediate scale-out needed.
+
+      - alert: MediaProcessingStalled
+        expr: |
+          rate(media_files_processed_total[30m]) == 0
+          and
+          media_processing_queue_size > 0
+        for: 15m
+        labels:
+          severity: critical
+          service: media
+        annotations:
+          summary: "Media processing has stalled"
+          description: |
+            No media files have been processed in 30 minutes despite
+            {{ query "media_processing_queue_size" | first | value }} items in queue.
+            Check pre-processing service health and worker status.
+
+  # ── CRDT / Collaboration ────────────────────────────────────────
+  - name: lazynext-crdt
+    rules:
+      - alert: HighCRDTConflictRate
+        expr: |
+          sum(rate(crdt_conflicts_total[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+          service: collaboration
+        annotations:
+          summary: "CRDT conflict rate above 5/minute"
+          description: |
+            CRDT conflicts are occurring at {{ $value }} per minute.
+            This suggests high concurrent editing activity or sync issues.
+            While CRDTs handle conflicts automatically, excessive conflicts
+            may degrade the editing experience.
+
+      - alert: CRDTSyncLag
+        expr: |
+          crdt_sync_lag_seconds > 30
+        for: 10m
+        labels:
+          severity: warning
+          service: collaboration
+        annotations:
+          summary: "CRDT sync lag > 30 seconds"
+          description: |
+            CRDT sync lag is {{ $value }}s. Real-time collaboration
+            may appear out of sync for users on {{ $labels.instance }}.
+
+  # ── External API Dependencies ───────────────────────────────────
+  - name: lazynext-external-dependencies
+    rules:
+      - alert: ExternalAPIDependencyDown
+        expr: |
+          up{job=~"pre-processing|generative-studio"}
+          or
+          external_api_status{service=~"replicate|elevenlabs|openai"} == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: external
+        annotations:
+          summary: "External API dependency {{ $labels.service }} may be down"
+          description: |
+            External service {{ $labels.service }} is unreachable or returning errors.
+            Features relying on this API will be degraded.
+            Check external service status pages.
+
+      - alert: ExternalAPIRateLimit
+        expr: |
+          rate(external_api_rate_limit_hits_total[10m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: external
+        annotations:
+          summary: "External API rate limit hit: {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} is returning rate-limit responses.
+            Requests may be throttled. Check API quota in provider dashboard.
+
+  # ── Authentication ──────────────────────────────────────────────
+  - name: lazynext-auth
+    rules:
+      - alert: AuthFailureSpike
+        expr: |
+          sum(rate(http_requests_total{path=~"/api/auth.*",status_code=~"401|403"}[10m])) > 20
+        for: 10m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "Authentication failure spike detected"
+          description: |
+            {{ $value }} authentication failures per second over the last 10 minutes.
+            This may indicate a credential brute-force attack or a misconfigured auth provider.
+            Check auth service logs and Upstash Redis rate limiting.
+
+      - alert: AuthServiceDown
+        expr: |
+          rate(http_requests_total{path="/api/auth/session"}[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "No auth session requests in 10 minutes"
+          description: |
+            The auth service may be down or unreachable.
+            New users cannot sign in or sign up.

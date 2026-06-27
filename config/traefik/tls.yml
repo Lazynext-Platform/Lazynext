@@ -1,0 +1,20 @@
+# ── Traefik TLS Configuration ──────────────────────────────────────
+# Mounted at /etc/traefik/tls.yml
+# Referenced via --entrypoints.websecure.http.tls.options=modern@file
+
+tls:
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /etc/traefik/certs/lazynext.com.crt
+        keyFile: /etc/traefik/certs/lazynext.com.key
+
+  certificates:
+    # Wildcard cert resolved via Cloudflare DNS-01 challenge;
+    # stored in /letsencrypt/acme.json by the cloudflare cert resolver.
+    # This section only defines fallback / self-signed certs for
+    # internal development — in production the ACME resolver is used.
+    - certFile: /etc/traefik/certs/lazynext.com.crt
+      keyFile: /etc/traefik/certs/lazynext.com.key
+      stores:
+        - default

@@ -3,13 +3,13 @@
 # Bootstraps and starts all Lazynext services
 
 echo "Cleaning up any old background processes..."
-lsof -ti:3000,8000,8001,8002,8003 | xargs kill -9 2>/dev/null || true
+lsof -ti:3000,8000,8001,8002,8003,8004,8006 | xargs kill -9 2>/dev/null || true
 sleep 1
 
 echo "Starting Lazynext Platform..."
 
 echo "Booting up required infrastructure (Redis & Postgres)..."
-if ! docker-compose up -d redis db redis-proxy; then
+if ! docker compose up -d redis db redis-proxy; then
     echo "❌ ERROR: Failed to start infrastructure. Is Docker Desktop running?"
     exit 1
 fi

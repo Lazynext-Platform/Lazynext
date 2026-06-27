@@ -32,7 +32,7 @@ variable "app_domain" {
 variable "kubernetes_version" {
   description = "Kubernetes version for AKS"
   type        = string
-  default     = "1.30"
+  default     = "1.32"
 }
 
 variable "node_count" {
@@ -142,4 +142,124 @@ variable "llm_provider" {
     condition     = contains(["openai", "anthropic", "gemini", "ollama"], var.llm_provider)
     error_message = "LLM provider must be one of: openai, anthropic, gemini, ollama."
   }
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Redis Cache
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "redis_sku_name" {
+  description = "Azure Cache for Redis Enterprise SKU name"
+  type        = string
+  default     = "Enterprise_E10" # 12 GB per shard
+
+  validation {
+    condition = contains([
+      "Enterprise_E10", "Enterprise_E20", "Enterprise_E50", "Enterprise_E100",
+      "EnterpriseFlash_F300", "EnterpriseFlash_F700", "EnterpriseFlash_F1500",
+    ], var.redis_sku_name)
+    error_message = "Redis SKU must be a valid Enterprise tier SKU."
+  }
+}
+
+variable "redis_capacity" {
+  description = "Number of Redis Enterprise shards (capacity units)"
+  type        = number
+  default     = 1
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CDN / Front Door
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "cdn_sku_name" {
+  description = "Azure Front Door SKU name"
+  type        = string
+  default     = "Standard_AzureFrontDoor"
+
+  validation {
+    condition = contains([
+      "Standard_AzureFrontDoor", "Premium_AzureFrontDoor",
+    ], var.cdn_sku_name)
+    error_message = "CDN SKU must be Standard_AzureFrontDoor or Premium_AzureFrontDoor."
+  }
+}
+
+variable "media_custom_domain" {
+  description = "Custom domain for the media CDN endpoint"
+  type        = string
+  default     = "media.lazynext.ai"
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Monitoring / Alerts
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "cdn_dns_zone_id" {
+  description = "Azure DNS Zone resource ID for custom domain validation (leave empty to manage DNS manually)"
+  type        = string
+  default     = ""
+}
+
+variable "alert_email_address" {
+  description = "Primary email address for Azure Monitor alert notifications"
+  type        = string
+  default     = "alerts@lazynext.ai"
+}
+
+variable "alert_slack_webhook_url" {
+  description = "Slack incoming webhook URL for alert notifications (leave empty to disable)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "alert_pagerduty_integration_key" {
+  description = "PagerDuty Events API v2 integration key (leave empty to disable)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Application Gateway / WAF
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "app_gateway_sku_tier" {
+  description = "Application Gateway SKU tier"
+  type        = string
+  default     = "WAF_v2"
+
+  validation {
+    condition     = contains(["WAF_v2", "Standard_v2"], var.app_gateway_sku_tier)
+    error_message = "Application Gateway tier must be WAF_v2 or Standard_v2."
+  }
+}
+
+variable "app_gateway_capacity" {
+  description = "Application Gateway instance count (capacity units for v2 SKU)"
+  type        = number
+  default     = 2
+}
+
+variable "app_gateway_subnet_prefix" {
+  description = "Address prefix for the Application Gateway subnet"
+  type        = list(string)
+  default     = ["10.0.1.0/24"]
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Backup
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "backup_retention_days" {
+  description = "Number of days to retain Recovery Services Vault backups"
+  type        = number
+  default     = 30
+}
+
+variable "backup_policy_time" {
+  description = "Daily backup schedule time (UTC, 24h format)"
+  type        = string
+  default     = "02:00"
 }

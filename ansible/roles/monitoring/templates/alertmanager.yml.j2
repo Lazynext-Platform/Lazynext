@@ -1,0 +1,169 @@
+# ── Alertmanager configuration ────────────────────────────────────
+# Managed by Ansible — do not edit by hand.
+
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: "{{ vault_alertmanager_smtp_smarthost | default('smtp.mailgun.org:587') }}"
+  smtp_from: "{{ vault_alertmanager_smtp_from | default('alerts@lazynext.io') }}"
+  smtp_auth_username: "{{ vault_alertmanager_smtp_auth_username | default('alerts@lazynext.io') }}"
+  smtp_auth_password: "{{ vault_alertmanager_smtp_auth_password | default('CHANGEME') }}"
+  smtp_require_tls: true
+  slack_api_url: "{{ alertmanager_slack_webhook_url }}"
+
+# ── Templates ─────────────────────────────────────────────────────
+templates:
+  - "/etc/alertmanager/templates/*.tmpl"
+
+# ── Routing ───────────────────────────────────────────────────────
+route:
+  group_by:
+    - "alertname"
+    - "cluster"
+    - "severity"
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 4h
+  receiver: slack-critical
+
+  routes:
+    # ── Critical alerts → Slack + PagerDuty ──────────────────────
+    - match:
+        severity: critical
+      group_wait: 5s
+      group_interval: 10s
+      repeat_interval: 1h
+      receiver: critical-alerts
+      continue: true
+
+    # ── Warning alerts → Slack only ───────────────────────────────
+    - match:
+        severity: warning
+      group_interval: 1m
+      repeat_interval: 6h
+      receiver: slack-warnings
+
+    # ── Database alerts ───────────────────────────────────────────
+    - match_re:
+        alertname: "^(Postgresql|Redis).*"
+      group_interval: 30s
+      receiver: database-alerts
+      continue: true
+
+    # ── Infrastructure alerts (disk, memory, CPU) ─────────────────
+    - match_re:
+        alertname: "^(InstanceDown|HighCPU|HighMemory|DiskSpace).*"
+      group_interval: 30s
+      receiver: infra-alerts
+
+    # ── Kubernetes alerts ─────────────────────────────────────────
+    - match_re:
+        alertname: "^Kube.*"
+      group_interval: 30s
+      receiver: k8s-alerts
+
+# ── Inhibitions ───────────────────────────────────────────────────
+inhibit_rules:
+  - source_match:
+      severity: critical
+    target_match:
+      severity: warning
+    equal:
+      - alertname
+      - instance
+
+  # Instance down suppresses all other alerts for that instance
+  - source_match:
+      alertname: InstanceDown
+    target_match_re:
+      alertname: "^(HighCPU|HighMemory|DiskSpace).*"
+    equal:
+      - hostname
+
+# ── Receivers ─────────────────────────────────────────────────────
+receivers:
+  # ── Default Slack critical channel ──────────────────────────────
+  - name: slack-critical
+    slack_configs:
+      - channel: "#alerts-critical"
+        send_resolved: true
+        title: "{{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: >-
+          *Severity:* {{ '{{' }} .CommonLabels.severity {{ '}}' }}
+          *Summary:* {{ '{{' }} .CommonAnnotations.summary {{ '}}' }}
+          *Description:* {{ '{{' }} .CommonAnnotations.description {{ '}}' }}
+          *Runbook:* {{ '{{' }} .CommonAnnotations.runbook_url {{ '}}' }}
+        color: "{{ '{{' }} if eq .CommonLabels.severity \"critical\" {{ '}}' }}danger{{ '{{' }} else {{ '}}' }}warning{{ '{{' }} end {{ '}}' }}"
+        actions:
+          - type: button
+            text: "Silence (1h)"
+            url: "{{ '{{' }} .ExternalURL {{ '}}' }}/#/silences/new?filter=%7B{{ '{{' }} range .CommonLabels.SortedPairs {{ '}}' }}{{ '{{' }} .Name {{ '}}' }}%3D%22{{ '{{' }} .Value {{ '}}' }}%22%2C{{ '{{' }} end {{ '}}' }}{{ '}}' "
+          - type: button
+            text: "Runbook"
+            url: "{{ '{{' }} .CommonAnnotations.runbook_url {{ '}}' }}"
+
+  # ── Critical: Slack + PagerDuty ─────────────────────────────────
+  - name: critical-alerts
+    slack_configs:
+      - channel: "#alerts-critical"
+        send_resolved: true
+        title: "[CRITICAL] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        color: danger
+    pagerduty_configs:
+      - routing_key: "{{ alertmanager_pagerduty_routing_key }}"
+        severity: critical
+        description: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        client: "Lazynext Alertmanager"
+        client_url: "{{ '{{' }} .ExternalURL {{ '}}' }}"
+        component: "{{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        group: "{{ '{{' }} .CommonLabels.cluster {{ '}}' }}"
+        class: "infrastructure"
+        links:
+          - href: "{{ '{{' }} .GeneratorURL {{ '}}' }}"
+            text: "Prometheus query"
+
+  # ── Warnings: Slack only ────────────────────────────────────────
+  - name: slack-warnings
+    slack_configs:
+      - channel: "#alerts-warnings"
+        send_resolved: true
+        title: "[WARN] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        color: warning
+
+  # ── Database: Slack + Email ─────────────────────────────────────
+  - name: database-alerts
+    slack_configs:
+      - channel: "#alerts-database"
+        send_resolved: true
+        title: "[DB] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        color: "{{ '{{' }} if eq .CommonLabels.severity \"critical\" {{ '}}' }}danger{{ '{{' }} else {{ '}}' }}warning{{ '{{' }} end {{ '}}' }}"
+    email_configs:
+      - to: "dba@lazynext.io"
+        send_resolved: true
+        headers:
+          Subject: "[Lazynext DB Alert] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        html: |
+          <h2>{{ '{{' }} .CommonLabels.alertname {{ '}}' }}</h2>
+          <p><strong>Severity:</strong> {{ '{{' }} .CommonLabels.severity {{ '}}' }}</p>
+          <p><strong>Description:</strong> {{ '{{' }} .CommonAnnotations.description {{ '}}' }}</p>
+          <p><a href="{{ '{{' }} .GeneratorURL {{ '}}' }}">View in Prometheus</a></p>
+
+  # ── Infrastructure ──────────────────────────────────────────────
+  - name: infra-alerts
+    slack_configs:
+      - channel: "#alerts-infra"
+        send_resolved: true
+        title: "[INFRA] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        color: "{{ '{{' }} if eq .CommonLabels.severity \"critical\" {{ '}}' }}danger{{ '{{' }} else {{ '}}' }}warning{{ '{{' }} end {{ '}}' }}"
+
+  # ── Kubernetes ──────────────────────────────────────────────────
+  - name: k8s-alerts
+    slack_configs:
+      - channel: "#alerts-k8s"
+        send_resolved: true
+        title: "[K8S] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: "{{ '{{' }} .CommonAnnotations.description {{ '}}' }}"
+        color: warning

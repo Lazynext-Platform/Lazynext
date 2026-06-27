@@ -1,0 +1,212 @@
+# ==============================================================================
+# Model Registry Manifest — Lazynext ML Pipeline
+#
+# This file is the SINGLE SOURCE OF TRUTH for all TensorFlow Serving models.
+# Every model served by the `tensorflow_model_server` must have an entry here.
+#
+# Consumed by:
+#   - scripts/tf-model-download.sh          (download & verification)
+#   - .github/workflows/ml-model-sync.yml   (CI checksum & freshness check)
+#   - services/pre-processing/model_config.conf  (model server config)
+#   - docker-compose.tensorflow.yml         (volume mounts)
+#
+# Schema:
+#   models:
+#     - name: <string>               # Model name (matches model_config.conf)
+#       version: <int>               # Serving version (matches config.pbtxt)
+#       description: <string>        # Human-readable purpose
+#       task: <string>               # ML task (asr, segmentation, super_resolution, classification)
+#       framework: <string>          # Export framework (tensorflow, pytorch->onnx->tf)
+#       huggingface_id: <string>     # Upstream HuggingFace model ID
+#       download_url: <string>       # Direct URL to SavedModel artifact (.tar.gz)
+#       checksum_sha256: <string>    # SHA-256 of all files in the SavedModel directory
+#       input_shape: <list[int]>     # Expected input tensor shape (batch dim as -1)
+#       output_shape: <list[int]>    # Expected output tensor shape (batch dim as -1)
+#       dtype: <string>              # Data type (float32, float16, int32)
+#       min_gpu_memory_mb: <int>     # Minimum GPU VRAM required
+#       min_ram_mb: <int>            # Minimum system RAM for CPU fallback
+#       expected_latency_p50_ms: <int>   # Expected p50 latency on A10G GPU
+#       expected_latency_p99_ms: <int>   # Expected p99 latency on A10G GPU
+#       expected_throughput_rps: <int>   # Expected throughput (requests/sec) on A10G
+#       serving_signature: <string>  # TF Serving signature name
+#       notes: <string>              # Additional notes
+#       warmup_priority: <int>       # Warmup order (1 = highest priority)
+# ==============================================================================
+
+registry_version: "1.0.0"
+last_updated: "2026-06-28"
+maintainer: "ml-team@lazynext.io"
+
+models:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # Whisper — Automatic Speech Recognition
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: "whisper"
+    version: 1
+    description: "OpenAI Whisper Large-v3 for transcription and translation"
+    task: "automatic_speech_recognition"
+    framework: "pytorch"
+    huggingface_id: "openai/whisper-large-v3"
+    download_url: "huggingface://openai/whisper-large-v3"
+    checksum_sha256: ""   # Fill after initial download with `scripts/tf-model-download.sh`
+    input_shape: [-1, 80, 3000]
+    output_shape: [-1, -1, 51865]
+    dtype: "float32"
+    min_gpu_memory_mb: 10240   # ~10 GB for large-v3 with batch=4
+    min_ram_mb: 16384          # 16 GB for CPU fallback
+    expected_latency_p50_ms: 2500
+    expected_latency_p99_ms: 15000
+    expected_throughput_rps: 0.4
+    serving_signature: "serving_default"
+    notes: >
+      Whisper large-v3 is the heaviest model in the fleet. Configured for
+      batch=4 max to stay within 24 GB GPU budgets. For lower-resource
+      deployments, consider switching to whisper-medium or whisper-small
+      and updating model_config.conf accordingly. The input mel spectrogram
+      is pre-computed by the pre-processing service before inference.
+    warmup_priority: 1   # Load first — longest cold-start
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SAM2 — Segment Anything Model v2
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: "sam2"
+    version: 1
+    description: "Meta SAM2 Hiera-Large vision encoder for rotoscoping masks"
+    task: "image_segmentation"
+    framework: "pytorch"
+    huggingface_id: "facebook/sam2-hiera-large"
+    download_url: "huggingface://facebook/sam2-hiera-large"
+    checksum_sha256: ""   # Fill after initial download
+    input_shape: [-1, 3, 1024, 1024]
+    output_shape: [-1, 256, 64, 64]
+    dtype: "float32"
+    min_gpu_memory_mb: 7680    # ~7.5 GB for the vision encoder
+    min_ram_mb: 12288          # 12 GB CPU fallback
+    expected_latency_p50_ms: 1800
+    expected_latency_p99_ms: 8000
+    expected_throughput_rps: 0.6
+    serving_signature: "serving_default"
+    notes: >
+      This entry serves only the SAM2 vision encoder. The prompt encoder
+      and mask decoder run client-side (in the pre-processing Python service)
+      to minimize GPU memory pressure on the TF Serving instance.
+      Input images must be preprocessed to 1024×1024 (SAM2 native resolution).
+      For video rotoscoping, the pre-processing service batches frames
+      and sends them to this model endpoint in groups of 1-2.
+    warmup_priority: 2
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # RealESRGAN — Blind Super-Resolution
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: "realesrgan"
+    version: 1
+    description: "Real-ESRGAN 4x upscaler for video enhancement and proxy generation"
+    task: "super_resolution"
+    framework: "pytorch"
+    huggingface_id: "ai-forever/Real-ESRGAN"
+    download_url: "huggingface://ai-forever/Real-ESRGAN"
+    checksum_sha256: ""   # Fill after initial download
+    input_shape: [-1, -1, -1, 3]
+    output_shape: [-1, -1, -1, 3]
+    dtype: "float32"
+    min_gpu_memory_mb: 5120    # ~5 GB
+    min_ram_mb: 8192           # 8 GB
+    expected_latency_p50_ms: 800
+    expected_latency_p99_ms: 5000
+    expected_throughput_rps: 1.2
+    serving_signature: "serving_default"
+    notes: >
+      Variable input resolution — serves any image size. For optimal
+      throughput, upstream clients should pad inputs to multiples of 4
+      to avoid the ESRGAN architecture's internal padding overhead.
+      Used by both pre-processing (proxy generation, enhancement) and
+      generative-studio (upscale before diffusion).
+    warmup_priority: 3
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # MobileNetV2 — Lightweight Image Classifier
+  # ═══════════════════════════════════════════════════════════════════════════
+  - name: "mobilenet_v2"
+    version: 1
+    description: "MobileNetV2 1.0-224 for scene classification and clip tagging"
+    task: "image_classification"
+    framework: "tensorflow"
+    huggingface_id: "google/mobilenet_v2_1.0_224"
+    download_url: ""   # Use TF Hub or HuggingFace
+    checksum_sha256: ""   # Fill after initial download
+    input_shape: [-1, 224, 224, 3]
+    output_shape: [-1, 1001]
+    dtype: "float32"
+    min_gpu_memory_mb: 512     # Very lightweight — < 1 GB
+    min_ram_mb: 1024           # 1 GB
+    expected_latency_p50_ms: 15
+    expected_latency_p99_ms: 50
+    expected_throughput_rps: 60
+    serving_signature: "serving_default"
+    notes: >
+      Powers the neural engine's smart binning (rust/crates/neural_engine).
+      Classifies every frame of imported clips to auto-tag and organize the
+      media library. Runs with batch=16 for maximum throughput. At 60 RPS
+      on a single A10G, it can classify ~3.6 million frames per day.
+      This model is so lightweight that it can be served from CPU with
+      minimal latency impact.
+    warmup_priority: 4   # Load last — fastest cold-start
+
+# ── Global Configuration ─────────────────────────────────────────────────────
+
+global:
+  # Model server configuration
+  tensorflow_serving_version: "2.18.0"
+  tensorflow_serving_image: "tensorflow/serving:2.18.0-gpu"
+
+  # Default batch parameters (overridden per-model in config.pbtxt)
+  default_batching:
+    max_batch_size: 8
+    batch_timeout_micros: 50000
+    max_enqueued_batches: 64
+    num_batch_threads: 4
+
+  # Monitoring
+  monitoring:
+    prometheus_enabled: true
+    prometheus_path: "/monitoring/prometheus/metrics"
+    request_logging_sample_rate: 0.10
+
+  # GPU defaults
+  gpu_defaults:
+    allow_growth: false
+    memory_fraction_total: 0.90   # Sum of all model fractions must be <= this
+
+  # Health check
+  health_check:
+    endpoint: "/v1/models/whisper"
+    interval_seconds: 30
+    timeout_seconds: 5
+    start_period_seconds: 60
+    retries: 5
+
+  # Storage
+  storage:
+    model_base_path: "/models"
+    artifact_retention_days: 7
+    max_model_versions: 3   # Keep last 3 versions on disk
+
+  # Network
+  network:
+    rest_port: 8501
+    grpc_port: 8500
+    bridge_port: 8502        # nginx tf-bridge
+
+  # Azure Container Apps deployment
+  azure:
+    resource_group: "lazynext-prod"
+    container_app_name: "tf-serving"
+    cpu: "4.0"
+    memory: "32Gi"
+    gpu_type: "A10G"
+    gpu_count: 1
+    min_replicas: 1
+    max_replicas: 3
+    scale_rule:
+      metric: "gpu_utilization"
+      threshold: 70

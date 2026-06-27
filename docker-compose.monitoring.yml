@@ -1,0 +1,248 @@
+# ── Lazynext Monitoring Compose Override ──────────────────────────
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.monitoring.yml up -d
+#
+# Adds monitoring-specific configuration on top of the base observability
+# stack already defined in docker-compose.yml:
+#   • Traefik routes for Prometheus, Grafana, Alertmanager web UIs
+#   • SMTP relay container (Resend / Postmark compatible) for email alerts
+#   • Prometheus rule file volume mounts with live reload
+#   • Grafana dashboard provisioning with folder structure
+#   • Alertmanager template overrides
+#   • Database exporters (PostgreSQL, Redis) with proper scrape targets
+#   • Blackbox exporter for synthetic endpoint monitoring
+#
+# Prerequisites:
+#   docker-compose.ingress.yml already applied for Traefik routing.
+
+services:
+  # ── Prometheus ───────────────────────────────────────────────────
+  prometheus:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/prometheus`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.middlewares=auth-dashboard@file,strip-prom-prefix@file,internal-ip@file"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.http.services.prometheus.loadbalancer.healthcheck.path=/-/healthy"
+      - "traefik.http.services.prometheus.loadbalancer.healthcheck.interval=15s"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      - ./monitoring/prometheus/slos.yaml:/etc/prometheus/slos.yaml:ro
+      - /data/prometheus:/prometheus:rw
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.retention.size=50GB
+      - --web.enable-lifecycle
+      - --web.enable-admin-api
+      - --web.external-url=/prometheus
+      - --web.route-prefix=/
+
+  # ── Grafana ──────────────────────────────────────────────────────
+  grafana:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/grafana`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.middlewares=auth-dashboard@file,internal-ip@file"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.services.grafana.loadbalancer.healthcheck.path=/api/health"
+      - "traefik.http.services.grafana.loadbalancer.healthcheck.interval=15s"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: "https://monitoring.lazynext.internal/grafana"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: warn
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ALERTING_ENABLED: "true"
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: "smtp-relay:1025"
+      GF_SMTP_FROM_ADDRESS: "grafana@lazynext.ai"
+      GF_SMTP_FROM_NAME: "Lazynext Grafana"
+      GF_SMTP_SKIP_VERIFY: "true"
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - /data/grafana:/var/lib/grafana:rw
+
+  # ── Alertmanager ─────────────────────────────────────────────────
+  alertmanager:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alertmanager.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/alertmanager`)"
+      - "traefik.http.routers.alertmanager.entrypoints=websecure"
+      - "traefik.http.routers.alertmanager.tls=true"
+      - "traefik.http.routers.alertmanager.middlewares=auth-dashboard@file,internal-ip@file"
+      - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+      - "traefik.http.services.alertmanager.loadbalancer.healthcheck.path=/-/healthy"
+      - "traefik.http.services.alertmanager.loadbalancer.healthcheck.interval=15s"
+    volumes:
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml:ro
+      - /data/alertmanager:/alertmanager:rw
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+      - --storage.path=/alertmanager
+      - --cluster.listen-address=
+      - --web.external-url=/alertmanager
+
+  # ── SMTP Relay (Mailpit — local SMTP for development / alerts) ──
+  smtp-relay:
+    image: axllent/mailpit:v1.23.0
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lazynext-network
+    environment:
+      MP_MAX_MESSAGES: 10000
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_DATABASE: /data/mailpit.db
+      MP_VERBOSE: "false"
+    volumes:
+      - /data/mailpit:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8025/api/v1/info"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.mailpit.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/mailpit`)"
+      - "traefik.http.routers.mailpit.entrypoints=websecure"
+      - "traefik.http.routers.mailpit.tls=true"
+      - "traefik.http.routers.mailpit.middlewares=auth-dashboard@file,internal-ip@file"
+      - "traefik.http.services.mailpit.loadbalancer.server.port=8025"
+
+  # ── PostgreSQL Exporter ──────────────────────────────────────────
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.0
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lazynext-network
+    environment:
+      DATA_SOURCE_URI: "db:5432/lazynext?sslmode=disable"
+      DATA_SOURCE_USER: lazynext
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD:-password123}
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yml
+      PG_EXPORTER_LOG_FORMAT: json
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Redis Exporter ───────────────────────────────────────────────
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.80.0
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lazynext-network
+    environment:
+      REDIS_ADDR: redis://redis:6379
+      REDIS_EXPORTER_LOG_FORMAT: json
+      REDIS_EXPORTER_CHECK_KEYS: "lazynext:*"
+      REDIS_EXPORTER_CHECK_SINGLE_KEYS: "db:keys"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+        reservations:
+          cpus: "0.05"
+          memory: 16M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ── Blackbox Exporter (synthetic endpoint probing) ───────────────
+  blackbox-exporter:
+    image: quay.io/prometheus/blackbox-exporter:v0.26.0
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - lazynext-network
+    ports:
+      - "9115:9115"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9115/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    command:
+      - --config.file=/etc/blackbox/blackbox.yml
+    volumes:
+      - ./monitoring/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+
+  # ── Tempo (Tracing Backend) ──────────────────────────────────────
+  tempo:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tempo.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/tempo`)"
+      - "traefik.http.routers.tempo.entrypoints=websecure"
+      - "traefik.http.routers.tempo.tls=true"
+      - "traefik.http.routers.tempo.middlewares=auth-dashboard@file,internal-ip@file"
+      - "traefik.http.services.tempo.loadbalancer.server.port=3200"
+    volumes:
+      - ./monitoring/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+      - /data/tempo:/tmp/tempo:rw
+
+  # ── Loki ─────────────────────────────────────────────────────────
+  loki:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.loki.rule=Host(`monitoring.lazynext.internal`) && PathPrefix(`/loki`)"
+      - "traefik.http.routers.loki.entrypoints=websecure"
+      - "traefik.http.routers.loki.tls=true"
+      - "traefik.http.routers.loki.middlewares=auth-dashboard@file,internal-ip@file"
+      - "traefik.http.services.loki.loadbalancer.server.port=3100"

@@ -17,20 +17,20 @@ resource "azurerm_user_assigned_identity" "github_actions" {
 
 # Federated credential for the main branch
 resource "azurerm_federated_identity_credential" "github_main" {
-  name                = "lazynext-gha-main-${var.environment}"
-  user_assigned_identity_id           = azurerm_user_assigned_identity.github_actions.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:Lazynext-Platform/Lazynext:ref:refs/heads/main"
+  name                      = "lazynext-gha-main-${var.environment}"
+  user_assigned_identity_id = azurerm_user_assigned_identity.github_actions.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:Lazynext-Platform/Lazynext:ref:refs/heads/main"
 }
 
 # Federated credential for PRs
 resource "azurerm_federated_identity_credential" "github_pr" {
-  name                = "lazynext-gha-pr-${var.environment}"
-  user_assigned_identity_id           = azurerm_user_assigned_identity.github_actions.id
-  audience            = ["api://AzureADTokenExchange"]
-  issuer              = "https://token.actions.githubusercontent.com"
-  subject             = "repo:Lazynext-Platform/Lazynext:pull_request"
+  name                      = "lazynext-gha-pr-${var.environment}"
+  user_assigned_identity_id = azurerm_user_assigned_identity.github_actions.id
+  audience                  = ["api://AzureADTokenExchange"]
+  issuer                    = "https://token.actions.githubusercontent.com"
+  subject                   = "repo:Lazynext-Platform/Lazynext:pull_request"
 }
 
 # Grant ACR push/pull to GitHub Actions

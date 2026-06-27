@@ -1,0 +1,493 @@
+# ───────────────────────────────────────────────────────────────────
+# KEDA — Kubernetes Event-Driven Autoscaling
+# ───────────────────────────────────────────────────────────────────
+#
+# KEDA extends the Kubernetes HorizontalPodAutoscaler with event-driven
+# scaling based on external metrics (queue length, Kafka lag, Redis lists).
+# This is complementary to the standard HPA in autoscaling.yaml — the
+# HPA handles CPU/memory, KEDA handles work-queue depth.
+#
+# Prerequisites:
+#   helm repo add kedacore https://kedacore.github.io/charts
+#   helm install keda kedacore/keda \
+#     --namespace keda --create-namespace \
+#     --set prometheus.metricServer.enabled=true
+#
+# Each ScaledObject below defines:
+#   1. A scale target (the Deployment to scale)
+#   2. Min/max replicas (overrides HPA min/max when active)
+#   3. Triggers (what external events cause scaling)
+#
+# When a ScaledObject is active, KEDA manages the HPA. When all triggers
+# return 0, KEDA scales to minReplicas (or idleReplicaCount if set).
+# ───────────────────────────────────────────────────────────────────
+
+# ═══════════════════════════════════════════════════════════════════
+# TriggerAuthentication — Credentials for external scalers
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# Azure Queue Storage authentication (Pod Identity / Workload Identity)
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: azure-queue-auth
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+spec:
+  # Uses Azure Workload Identity (no secrets needed).
+  # The service account must be federated with Azure AD:
+  #   az identity federated-credential create \
+  #     --identity-name lazynext-keda-identity \
+  #     --name keda-fic \
+  #     --issuer "${AKS_OIDC_ISSUER}" \
+  #     --subject "system:serviceaccount:lazynext:keda-sa"
+  podIdentity:
+    provider: azure-workload
+
+---
+# Kafka authentication — SASL/SSL credentials for consumer lag monitoring
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: kafka-auth
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+spec:
+  secretTargetRef:
+    # Kafka broker connection string (bootstrap servers + credentials)
+    - parameter: sasl
+      name: lazynext-sealed-secrets
+      key: KAFKA_SASL_CONFIG
+    - parameter: username
+      name: lazynext-sealed-secrets
+      key: KAFKA_USERNAME
+    - parameter: password
+      name: lazynext-sealed-secrets
+      key: KAFKA_PASSWORD
+
+---
+# Redis authentication — connection string for list-length monitoring
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: redis-auth
+  namespace: lazynext
+  labels:
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+spec:
+  secretTargetRef:
+    - parameter: password
+      name: lazynext-sealed-secrets
+      key: UPSTASH_REDIS_REST_TOKEN
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledObject: render-service — Scale on Azure Queue length
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: render-service-queue-scaler
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+    keda.sh/trigger: azure-queue
+spec:
+  # Target the render-service Deployment
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-render
+
+  # Scale range: 1 pod at idle, up to 20 during peak render backlogs.
+  # This overrides the HPA (autoscaling.yaml) which sets 2-15.
+  # KEDA's max takes precedence when active.
+  minReplicaCount: 1
+  maxReplicaCount: 20
+
+  # Polling interval: check queue depth every 15 seconds
+  pollingInterval: 15
+  # Cooldown: after queue is empty, wait 5 minutes before scaling down
+  # This prevents thrashing when jobs arrive in bursts.
+  cooldownPeriod: 300
+
+  # Fallback: if Azure Queue is unreachable for 60s, fall back to HPA
+  fallback:
+    failureThreshold: 4
+    replicas: 3
+
+  triggers:
+    # Azure Storage Queue trigger — each render job is a queue message.
+    # Target: 5 messages per pod. If 50 messages are queued → scale to 10 pods.
+    - type: azure-queue
+      metadata:
+        # Azure Storage Account where render jobs are queued
+        accountName: lazynextmediasa
+        # Queue name holding pending render jobs
+        queueName: render-jobs
+        # Target queue length per pod
+        # Formula: desiredReplicas = ceil(queueLength / queueLengthTarget)
+        queueLength: "5"
+        # Connection string is NOT needed — we use Workload Identity above
+      authenticationRef:
+        name: azure-queue-auth
+
+    # Secondary trigger: CPU (backstop). If CPU spikes before queue builds up,
+    # scale anyway. This handles CPU-bound decryption/decompression phases.
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "70"
+        containerName: lazynext-render
+
+  # Advanced: scale to zero during idle periods to save cost
+  # idleReplicaCount: 0
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledObject: ai-agents — Scale on Kafka consumer lag
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: sync-service-kafka-scaler
+  namespace: lazynext
+  labels:
+    app: lazynext-sync
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+    keda.sh/trigger: kafka
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-sync
+
+  minReplicaCount: 2
+  maxReplicaCount: 15
+
+  pollingInterval: 15
+  cooldownPeriod: 180
+
+  fallback:
+    failureThreshold: 4
+    replicas: 3
+
+  triggers:
+    # Kafka consumer group lag trigger.
+    # The sync service consumes from "lazynext-events" topic via CRDT sync.
+    # When consumer lag exceeds 10 messages per partition, scale up.
+    - type: kafka
+      metadata:
+        # Bootstrap servers (Azure Event Hubs Kafka endpoint or Confluent Cloud)
+        bootstrapServers: "lazynext-eventhub.servicebus.windows.net:9093"
+        # Consumer group managing CRDT event consumption
+        consumerGroup: lazynext-sync-group
+        # Topic for CRDT operations and real-time sync events
+        topic: lazynext-events
+        # Lag threshold per partition — when average lag exceeds this, scale
+        lagThreshold: "10"
+        # Offset reset policy
+        offsetResetPolicy: latest
+        # Allow scaling from/to zero if no messages
+        scaleToZeroOnLagThreshold: "false"
+        # TLS required for Azure Event Hubs
+        tls: enable
+        sasl: plaintext
+      authenticationRef:
+        name: kafka-auth
+
+    # Secondary: WebSocket connections. Each sync pod handles ~1000 connections.
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.monitoring.svc.cluster.local:9090
+        metricName: websocket_connections_active
+        query: |
+          sum(rate(websocket_connections_active{app="lazynext-sync"}[2m]))
+        threshold: "800"
+        activationThreshold: "400"
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledObject: pre-processing — Scale on Redis list length
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: pre-processing-redis-scaler
+  namespace: lazynext
+  labels:
+    app: lazynext-pre-processing
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+    keda.sh/trigger: redis
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-pre-processing
+
+  minReplicaCount: 1
+  maxReplicaCount: 8
+
+  pollingInterval: 20
+  cooldownPeriod: 300  # ML models take time to load; don't scale down too fast
+
+  fallback:
+    failureThreshold: 3
+    replicas: 2
+
+  triggers:
+    # Redis list length trigger.
+    # Pre-processing tasks (Whisper, SAM2, NeRF) are queued in Redis lists.
+    # Each key represents a task type; we aggregate across all task types.
+    - type: redis
+      metadata:
+        # Address of the Redis instance (use internal K8s service name)
+        address: "redis-db.lazynext.svc.cluster.local:6379"
+        # Redis list keys holding queued pre-processing tasks
+        # These are aggregated: listLength = sum of lengths of all matching keys
+        listName: "preprocessing:tasks:*"
+        # Pattern matching enabled — scales across all task-type queues
+        enableTLS: "false"
+        # Target: 3 tasks per pod before scaling up
+        listLength: "3"
+        # Lookup type: list length (LLEN)
+        databaseIndex: "0"
+      authenticationRef:
+        name: redis-auth
+
+    # Secondary: CPU backstop for in-progress tasks
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+        containerName: lazynext-pre-processing
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledObject: generative-studio — Scale on Redis list length
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: generative-studio-redis-scaler
+  namespace: lazynext
+  labels:
+    app: lazynext-generative-studio
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+    keda.sh/trigger: redis
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-generative-studio
+
+  minReplicaCount: 1
+  maxReplicaCount: 8
+
+  pollingInterval: 20
+  cooldownPeriod: 300
+
+  fallback:
+    failureThreshold: 3
+    replicas: 2
+
+  triggers:
+    - type: redis
+      metadata:
+        address: "redis-db.lazynext.svc.cluster.local:6379"
+        listName: "generation:tasks:*"
+        enableTLS: "false"
+        listLength: "2"  # Fewer tasks per pod due to GPU memory constraints
+        databaseIndex: "0"
+      authenticationRef:
+        name: redis-auth
+
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "80"
+        containerName: lazynext-generative-studio
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledObject: web — Scale on HTTP request rate (Prometheus)
+# ═══════════════════════════════════════════════════════════════════
+
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: web-http-scaler
+  namespace: lazynext
+  labels:
+    app: lazynext-web
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+    keda.sh/trigger: prometheus
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-web
+
+  minReplicaCount: 2
+  maxReplicaCount: 20
+
+  pollingInterval: 15
+  cooldownPeriod: 180
+
+  fallback:
+    failureThreshold: 3
+    replicas: 4
+
+  triggers:
+    # Scale on HTTP request rate (requests per second)
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.monitoring.svc.cluster.local:9090
+        metricName: http_requests_per_second
+        query: |
+          sum(rate(nginx_ingress_controller_requests{
+            exported_service="lazynext-web",
+            status!~"5.."
+          }[2m]))
+        # Target: 200 RPS per pod (Next.js SSR capacity)
+        threshold: "200"
+        activationThreshold: "50"
+
+    # Secondary: p99 latency trigger. If latency degrades, scale up preemptively.
+    # This handles traffic spikes before the HPA catches CPU.
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.monitoring.svc.cluster.local:9090
+        metricName: http_latency_p99_seconds
+        query: |
+          histogram_quantile(0.99,
+            sum(rate(nginx_ingress_controller_request_duration_seconds_bucket{
+              exported_service="lazynext-web"
+            }[2m])) by (le)
+          )
+        # Scale if p99 latency exceeds 2 seconds
+        threshold: "2"
+        activationThreshold: "1"
+
+# ═══════════════════════════════════════════════════════════════════
+# ScaledJob — Cron-triggered render batch processing
+# ═══════════════════════════════════════════════════════════════════
+
+---
+# KEDA ScaledJob for on-demand render workloads.
+# Unlike a ScaledObject (which scales a Deployment), a ScaledJob creates
+# one Kubernetes Job per trigger event and scales concurrency.
+# This is ideal for video exports: each export is an independent Job.
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: render-export-job
+  namespace: lazynext
+  labels:
+    app: lazynext-render
+    app.kubernetes.io/part-of: lazynext
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/component: autoscaling
+spec:
+  jobTargetRef:
+    # This template defines the Job spec that KEDA creates per event.
+    parallelism: 1
+    completions: 1
+    backoffLimit: 2
+    ttlSecondsAfterFinished: 600
+    template:
+      metadata:
+        labels:
+          app: lazynext-render-job
+      spec:
+        restartPolicy: Never
+        containers:
+          - name: render-worker
+            image: ghcr.io/lazynext-platform/lazynext-render-service:latest
+            imagePullPolicy: IfNotPresent
+            command:
+              - bun
+              - run
+              - services/render-service/src/worker.ts
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+              runAsNonRoot: true
+              runAsUser: 1001
+              seccompProfile:
+                type: RuntimeDefault
+            resources:
+              requests:
+                cpu: "1"
+                memory: "2Gi"
+              limits:
+                cpu: "4"
+                memory: "8Gi"
+            env:
+              - name: NODE_ENV
+                value: "production"
+              - name: RENDER_JOB_ID
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: DATABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: lazynext-sealed-secrets
+                    key: DATABASE_URL
+              - name: MEDIA_BUCKET
+                valueFrom:
+                  configMapKeyRef:
+                    name: lazynext-config
+                    key: MEDIA_BUCKET
+            volumeMounts:
+              - name: export-output
+                mountPath: /exports
+        volumes:
+          - name: export-output
+            emptyDir:
+              sizeLimit: 20Gi
+
+  # Maximum number of concurrent Jobs
+  maxReplicaCount: 10
+
+  pollingInterval: 30
+  successfulJobsHistoryLimit: 100
+  failedJobsHistoryLimit: 50
+
+  triggers:
+    # Each export job is a Redis list entry
+    - type: redis
+      metadata:
+        address: "redis-db.lazynext.svc.cluster.local:6379"
+        listName: "render:export:queue"
+        enableTLS: "false"
+        listLength: "1"  # One job per message
+        databaseIndex: "1"
+      authenticationRef:
+        name: redis-auth

@@ -1,0 +1,219 @@
+name: Weekly Security Scan
+
+on:
+  schedule:
+    - cron: "0 3 * * 0" # Sunday 3 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  id-token: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  trivy-fs-scan:
+    name: Trivy Filesystem Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Trivy — Misconfigurations + Secrets
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          scanners: "vuln,misconfig,secret"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          severity: "HIGH,CRITICAL"
+          exit-code: "0"
+          timeout: "10m"
+
+      - name: Upload Trivy SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy"
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: "critical"
+          comment-summary-in-pr: "on-failure"
+          retry-on-snapshot-warnings: true
+          retry-on-snapshot-warnings-timeout: 120
+          vulnerability-check: true
+          license-check: false
+          allow-dependencies-licenses: "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense"
+
+  codeql:
+    name: CodeQL (Rust + Actions)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript", "python", "actions"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          config: |
+            paths-ignore:
+              - "**/target/**"
+              - "**/node_modules/**"
+              - "**/dist/**"
+              - "**/outputs/**"
+
+      - name: Install Dependencies (JS/TS)
+        if: matrix.language == 'javascript-typescript'
+        run: bun install --frozen-lockfile || bun install
+
+      - name: Install Dependencies (Python)
+        if: matrix.language == 'python'
+        run: |
+          pip install -r services/pre-processing/requirements.txt 2>/dev/null || true
+          pip install -r services/generative-studio/requirements.txt 2>/dev/null || true
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  tfsec:
+    name: Terraform Security Scan
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-pr-commenter-action@v1
+        with:
+          tfsec_args: "--concise-output"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Run tfsec (SARIF)
+        uses: aquasecurity/tfsec-sarif-action@v0
+        with:
+          sarif_file: "tfsec.sarif"
+        continue-on-error: true
+
+      - name: Upload tfsec SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: "tfsec.sarif"
+          category: "tfsec"
+
+  kubesec:
+    name: Kubernetes Manifest Security
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run kubesec on Base Manifests
+        run: |
+          set +e
+          FAILURES=0
+          for f in k8s/base/*.yaml; do
+            if [ -f "$f" ]; then
+              echo "::group::Scanning $f"
+              RESULT=$(curl -sf --data-binary @"$f" https://v2.kubesec.io/scan 2>/dev/null || echo '[]')
+              SCORE=$(echo "$RESULT" | jq -r '.[0].score // 0')
+              echo "Score: $SCORE"
+              if [ "$(echo "$SCORE < 3" | bc 2>/dev/null)" = "1" ] || [ "$SCORE" = "0" ]; then
+                echo "::warning ::$f scored $SCORE — review recommended"
+                FAILURES=$((FAILURES + 1))
+              fi
+              echo "::endgroup::"
+            fi
+          done
+          echo "kubesec_failures=$FAILURES" >> $GITHUB_ENV
+
+      - name: Run kubesec on Overlay Manifests
+        run: |
+          for dir in k8s/overlays/*/; do
+            for f in "$dir"*.yaml; do
+              if [ -f "$f" ] && [ "$(basename "$f")" != "kustomization.yaml" ]; then
+                echo "::group::Scanning $f"
+                RESULT=$(curl -sf --data-binary @"$f" https://v2.kubesec.io/scan 2>/dev/null || echo '[]')
+                SCORE=$(echo "$RESULT" | jq -r '.[0].score // 0')
+                echo "Score: $SCORE"
+                if [ "$(echo "$SCORE < 3" | bc 2>/dev/null)" = "1" ] || [ "$SCORE" = "0" ]; then
+                  echo "::warning ::$f scored $SCORE — review recommended"
+                fi
+                echo "::endgroup::"
+              fi
+            done
+          done
+
+      - name: Summary
+        run: |
+          {
+            echo "## Kubesec Security Scan Results"
+            echo ""
+            echo "Scanned all K8s manifests in \`k8s/base/\` and \`k8s/overlays/\`."
+            echo "Any manifest scoring below 3 triggers a warning."
+            echo "Review manifests with low scores for security hardening."
+          } >> $GITHUB_STEP_SUMMARY
+
+  secret-scan:
+    name: Secret & Credential Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: TruffleHog — Scan Full History
+        uses: trufflesecurity/trufflehog-action@v2
+        with:
+          path: "."
+          base: "main"
+          head: "HEAD"
+          extra_args: "--only-verified --results=verified"
+        continue-on-error: true
+
+      - name: Gitleaks — Detect Committed Secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: "--config .github/gitleaks.toml --verbose --redact 2>/dev/null || true"
+        continue-on-error: true
+
+      - name: Check for .env Files
+        run: |
+          if git ls-files | grep -qiE '\.env(?!\.example$)|credentials|\.pem$|\.key$|id_rsa'; then
+            echo "## Secret Scan — Potential Exposure" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The following files were found in the repository:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            git ls-files | grep -iE '\.env(?!\.example$)|credentials|\.pem$|\.key$|id_rsa' | tee -a $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ These should never be committed. Add them to .gitignore immediately." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No exposed environment files or credentials detected in tracked files."
+          fi

@@ -1,0 +1,10 @@
+{
+  "_comment": "Cloud Run / Container Apps service definition template.",
+  "service": "lazynext-web",
+  "region": "REPLACE_WITH_REGION",
+  "cpu": 2,
+  "memory_gb": 4,
+  "min_instances": 1,
+  "max_instances": 10,
+  "concurrency": 80
+}

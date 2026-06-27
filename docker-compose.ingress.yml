@@ -1,0 +1,226 @@
+# ── Lazynext Reverse Proxy / Ingress Compose ──────────────────────
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.ingress.yml up -d
+#
+# Runs Traefik v3 as the entry-point reverse proxy with:
+#   • Automatic Let's Encrypt TLS via Cloudflare DNS-01 challenge
+#   • Rate-limiting middleware (per-service and per-IP)
+#   • Circuit-breaker middleware for backend resilience
+#   • Dashboard on port 8080 (internal / VPN only in production)
+#   • Health check routing for all services
+#   • HTTP→HTTPS redirect
+#   • Modern TLS config (TLS 1.2+, HSTS)
+#
+# Prerequisites:
+#   Cloudflare API token with Zone:DNS:Edit permission exported as:
+#     CLOUDFLARE_API_TOKEN_FILE=/run/secrets/cloudflare_api_token
+#     CF_API_EMAIL=ops@lazynext.ai
+#
+# Secrets: cloudflare_api_token (Docker secret)
+
+services:
+  # ── Traefik v3 Reverse Proxy ─────────────────────────────────────
+  traefik:
+    image: traefik:v3.3.5
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    networks:
+      - lazynext-network
+      - traefik-public
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 30s
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    secrets:
+      - source: cloudflare_api_token
+        target: cloudflare_api_token
+    environment:
+      CF_API_EMAIL: ${CF_API_EMAIL:-ops@lazynext.ai}
+      CF_DNS_API_TOKEN_FILE: /run/secrets/cloudflare_api_token
+      TRAEFIK_LOG_LEVEL: "${TRAEFIK_LOG_LEVEL:-INFO}"
+      TRAEFIK_ACCESSLOG: "true"
+      TRAEFIK_ACCESSLOG_FORMAT: json
+    command:
+      # ── Entry Points ──────────────────────────────────────────
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certresolver=cloudflare
+      - --entrypoints.websecure.http.tls.domains[0].main=lazynext.com
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.lazynext.com
+      - --entrypoints.websecure.http.tls.options=modern@file
+      - --entrypoints.traefik.address=:8080
+
+      # ── Providers ─────────────────────────────────────────────
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=lazynext-network
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+
+      # ── Let's Encrypt (Cloudflare DNS-01 Challenge) ───────────
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --certificatesresolvers.cloudflare.acme.email=${ACME_EMAIL:-ops@lazynext.ai}
+      - --certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.cloudflare.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+
+      # ── Dashboard (internal only) ─────────────────────────────
+      - --api.dashboard=true
+      - --api.insecure=false
+
+      # ── Observability ─────────────────────────────────────────
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entrypoint=traefik
+      - --metrics.prometheus.addrouterslabels=true
+      - --metrics.prometheus.addserviceslabels=true
+      - --tracing.otlp=true
+      - --tracing.otlp.grpc.endpoint=tempo:4317
+      - --tracing.otlp.grpc.insecure=true
+
+    volumes:
+      - /data/traefik:/letsencrypt
+      - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./config/traefik/tls.yml:/etc/traefik/tls.yml:ro
+
+  # ── Web App Route ────────────────────────────────────────────────
+  web:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`lazynext.com`) || Host(`www.lazynext.com`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=cloudflare"
+      - "traefik.http.routers.web.middlewares=web-rate-limit@file,web-circuit-breaker@file,secure-headers@file,compress@file"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+      - "traefik.http.services.web.loadbalancer.healthcheck.path=/api/health"
+      - "traefik.http.services.web.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.web.loadbalancer.healthcheck.timeout=3s"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.name=lazynext_sid"
+
+  # ── API Gateway Route (all microservices behind /api/*) ──────────
+  ai-agents:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ai-agents.rule=Host(`api.lazynext.com`) && (PathPrefix(`/ai`) || PathPrefix(`/ws`))"
+      - "traefik.http.routers.ai-agents.entrypoints=websecure"
+      - "traefik.http.routers.ai-agents.tls=true"
+      - "traefik.http.routers.ai-agents.tls.certresolver=cloudflare"
+      - "traefik.http.routers.ai-agents.middlewares=api-rate-limit@file,api-circuit-breaker@file,secure-headers@file"
+      - "traefik.http.services.ai-agents.loadbalancer.server.port=8002"
+
+  render-service:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.render.rule=Host(`api.lazynext.com`) && PathPrefix(`/render`)"
+      - "traefik.http.routers.render.entrypoints=websecure"
+      - "traefik.http.routers.render.tls=true"
+      - "traefik.http.routers.render.tls.certresolver=cloudflare"
+      - "traefik.http.routers.render.middlewares=api-rate-limit@file,api-circuit-breaker@file,secure-headers@file"
+      - "traefik.http.services.render.loadbalancer.server.port=8003"
+      - "traefik.http.services.render.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.render.loadbalancer.healthcheck.interval=15s"
+
+  pre-processing:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.preprocessing.rule=Host(`api.lazynext.com`) && PathPrefix(`/preprocessing`)"
+      - "traefik.http.routers.preprocessing.entrypoints=websecure"
+      - "traefik.http.routers.preprocessing.tls=true"
+      - "traefik.http.routers.preprocessing.tls.certresolver=cloudflare"
+      - "traefik.http.routers.preprocessing.middlewares=api-rate-limit@file,api-circuit-breaker@file,secure-headers@file"
+      - "traefik.http.services.preprocessing.loadbalancer.server.port=8000"
+
+  generative-studio:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.generative.rule=Host(`api.lazynext.com`) && PathPrefix(`/generative`)"
+      - "traefik.http.routers.generative.entrypoints=websecure"
+      - "traefik.http.routers.generative.tls=true"
+      - "traefik.http.routers.generative.tls.certresolver=cloudflare"
+      - "traefik.http.routers.generative.middlewares=api-rate-limit@file,api-circuit-breaker@file,secure-headers@file"
+      - "traefik.http.services.generative.loadbalancer.server.port=8001"
+
+  collab-server:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.collab.rule=Host(`api.lazynext.com`) && PathPrefix(`/collab`)"
+      - "traefik.http.routers.collab.entrypoints=websecure"
+      - "traefik.http.routers.collab.tls=true"
+      - "traefik.http.routers.collab.tls.certresolver=cloudflare"
+      - "traefik.http.routers.collab.middlewares=api-rate-limit@file,api-circuit-breaker@file,secure-headers@file"
+      - "traefik.http.services.collab.loadbalancer.server.port=8004"
+      - "traefik.http.services.collab.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.collab.loadbalancer.healthcheck.interval=10s"
+
+  analytics-service:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.analytics.rule=Host(`api.lazynext.com`) && PathPrefix(`/analytics`)"
+      - "traefik.http.routers.analytics.entrypoints=websecure"
+      - "traefik.http.routers.analytics.tls=true"
+      - "traefik.http.routers.analytics.tls.certresolver=cloudflare"
+      - "traefik.http.routers.analytics.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.analytics.loadbalancer.server.port=8006"
+
+  # ── Traefik Dashboard (internal VPN only, no public label) ───────
+  traefik:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lazynext.internal`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth-dashboard@file,internal-ip@file"
+
+networks:
+  traefik-public:
+    driver: bridge
+    internal: false
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+secrets:
+  cloudflare_api_token:
+    external: true

@@ -1,0 +1,28 @@
+# ── PostgreSQL Client Authentication ───────────────────────────────
+# Managed by Ansible — do not edit by hand.
+#
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+# "local" is for Unix domain socket connections only
+local   all             all                                     scram-sha-256
+
+# IPv4 local connections (password for local loopback)
+host    all             all             127.0.0.1/32            scram-sha-256
+
+# IPv6 local connections
+host    all             all             ::1/128                 scram-sha-256
+
+# Private network — application tier
+host    all             lazynext        {{ private_network_cidr }}   scram-sha-256
+
+# Private network — admin user (pg_dump, migrations)
+host    all             {{ postgresql_admin_user }}   {{ private_network_cidr }}   scram-sha-256
+
+# Replication from standby nodes
+host    replication     {{ postgresql_replication_user }}  {{ private_network_cidr }}   scram-sha-256
+
+# Monitoring user
+host    lazynext        postgres_exporter   {{ private_network_cidr }}   scram-sha-256
+
+# Allow local replication for base backups
+local   replication     {{ postgresql_replication_user }}              scram-sha-256

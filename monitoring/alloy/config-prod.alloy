@@ -1,0 +1,585 @@
+// ── Grafana Alloy — Production Configuration ───────────────────────
+// Collects, processes, and ships telemetry for the Lazynext platform
+// in Kubernetes production environments.
+//
+// Responsibilities:
+//   - Prometheus scrape with K8s service discovery + relabeling
+//   - PodMonitor / ServiceMonitor CRD discovery via operator
+//   - Kubernetes container log collection → Loki
+//   - OTLP trace ingestion (from Tempo SDKs and OpenTelemetry collectors)
+//   - Remote Write to Prometheus with WAL + retry
+//   - Loki push with backpressure handling
+//
+// Deployment: DaemonSet (for logs + node-level metrics) +
+//             Deployment (for cluster-level scraping, HA)
+
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+// ── Tell Alloy where to write its own metrics ────────────────────
+// (Expose Alloy's own health/metrics on :12345 for Prometheus to scrape)
+prometheus.exporter.self "alloy_self" {
+  // Alloy exposes its own metrics by default — no extra config needed
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 1. PROMETHEUS SCRAPE — Kubernetes Service Discovery
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Discovery: Kubernetes Pods ───────────────────────────────────
+discovery.kubernetes "pods" {
+  role = "pod"
+  // Restrict to namespaces this platform owns
+  namespaces {
+    names = ["lazynext", "monitoring", "ingress-nginx", "cert-manager"]
+  }
+}
+
+discovery.kubernetes "services" {
+  role = "service"
+  namespaces {
+    names = ["lazynext", "monitoring", "ingress-nginx", "cert-manager"]
+  }
+}
+
+discovery.kubernetes "endpoints" {
+  role = "endpoints"
+  namespaces {
+    names = ["lazynext", "monitoring", "ingress-nginx", "cert-manager"]
+  }
+}
+
+discovery.kubernetes "nodes" {
+  role = "node"
+}
+
+// ── Scrape: Annotated Pods (prometheus.io/scrape: "true") ────────
+prometheus.scrape "kubernetes_pods" {
+  targets    = discovery.kubernetes.pods.targets
+  forward_to = [prometheus.relabel.kubernetes_pods.receiver]
+
+  // Scrape pods that opt-in via annotations
+  job_name   = "kubernetes-pods"
+
+  // K8s bearer token auth (mounted via service account)
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  tls_config {
+    ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    insecure_skip_verify = false
+  }
+
+  // Honour pod-level scrape interval override
+  honor_timestamps = true
+  scrape_interval  = "30s"
+  scrape_timeout   = "25s"
+}
+
+prometheus.relabel "kubernetes_pods" {
+  forward_to = [prometheus.remote_write.prod.receiver]
+
+  // ── Keep only pods annotated with prometheus.io/scrape=true ──
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scrape"]
+    action        = "keep"
+    regex         = "true"
+  }
+
+  // ── Use annotation for metrics path, falling back to /metrics ──
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_path"]
+    target_label  = "__metrics_path__"
+    regex         = "(.+)"
+    replacement   = "$1"
+  }
+
+  // ── Use annotation for scheme (http/https) ──────────────────
+  rule {
+    source_labels = ["__meta_kubernetes_pod_annotation_prometheus_io_scheme"]
+    target_label  = "__scheme__"
+    regex         = "(.+)"
+    replacement   = "$1"
+  }
+
+  // ── Use annotation for port ──────────────────────────────────
+  rule {
+    source_labels = ["__address__", "__meta_kubernetes_pod_annotation_prometheus_io_port"]
+    action        = "replace"
+    regex         = "([^:]+)(?::\\d+)?;(\\d+)"
+    replacement   = "$1:$2"
+    target_label  = "__address__"
+  }
+
+  // ── Add cluster label (overridable via env or CLI flag) ──────
+  rule {
+    target_label = "cluster"
+    replacement  = sys.env("ALLOY_CLUSTER_NAME") != "" ? sys.env("ALLOY_CLUSTER_NAME") : "lazynext-prod",
+  }
+
+  // ── Extract namespace, pod, container, node ──────────────────
+  rule {
+    source_labels = ["__meta_kubernetes_namespace"]
+    target_label  = "namespace"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_node_name"]
+    target_label  = "node"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_uid"]
+    target_label  = "__pod_uid"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app"]
+    target_label  = "app"
+    action        = "replace"
+    regex         = ";(.+)"
+    replacement   = "$1"
+  }
+
+  // ── Sanitize label values (replace unsupported chars) ────────
+  rule {
+    source_labels = ["namespace"]
+    target_label  = "namespace"
+    regex         = "(.+)"
+    replacement   = "$1"
+  }
+
+  // ── Drop pod IP / container ID labels (cardinality control) ──
+  rule {
+    regex  = "__meta_kubernetes_pod_ip|__meta_kubernetes_pod_container_id|__meta_kubernetes_pod_container_port_name"
+    action = "labeldrop"
+  }
+}
+
+// ── Scrape: Node Exporters (via DaemonSet endpoints) ─────────────
+prometheus.scrape "kubernetes_nodes" {
+  targets    = discovery.kubernetes.nodes.targets
+  forward_to = [prometheus.remote_write.prod.receiver]
+  job_name   = "kubernetes-nodes"
+
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  tls_config {
+    ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    insecure_skip_verify = false
+  }
+
+  scrape_interval = "30s"
+  scrape_timeout  = "25s"
+}
+
+// ── Scrape: cAdvisor (kubelet) ───────────────────────────────────
+prometheus.scrape "cadvisor" {
+  targets    = discovery.kubernetes.nodes.targets
+  forward_to = [prometheus.remote_write.prod.receiver]
+  job_name   = "cadvisor"
+
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  tls_config {
+    ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    insecure_skip_verify = false
+  }
+
+  // cAdvisor is available on kubelet at /metrics/cadvisor
+  metrics_path = "/metrics/cadvisor"
+
+  // Port mapping: kubelet runs on 10250
+  relabel_rules {
+    rule {
+      source_labels = ["__address__"]
+      regex         = "([^:]+):.*"
+      replacement   = "$1:10250"
+      target_label  = "__address__"
+    }
+  }
+
+  scrape_interval = "30s"
+  scrape_timeout  = "25s"
+}
+
+// ── Scrape: Kubelet health probes ────────────────────────────────
+prometheus.scrape "kubelet" {
+  targets    = discovery.kubernetes.nodes.targets
+  forward_to = [prometheus.remote_write.prod.receiver]
+  job_name   = "kubelet"
+
+  bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  tls_config {
+    ca_file              = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    insecure_skip_verify = false
+  }
+
+  metrics_path = "/metrics"
+
+  relabel_rules {
+    rule {
+      source_labels = ["__address__"]
+      regex         = "([^:]+):.*"
+      replacement   = "$1:10250"
+      target_label  = "__address__"
+    }
+  }
+
+  scrape_interval = "30s"
+  scrape_timeout  = "25s"
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 2. PROMETHEUS OPERATOR — ServiceMonitor / PodMonitor Discovery
+// ═══════════════════════════════════════════════════════════════════
+
+prometheus.operator.servicemonitors "lazynext" {
+  forward_to = [prometheus.remote_write.prod.receiver]
+
+  // Watch namespaces for ServiceMonitor CRDs
+  namespaces {
+    own_namespace = true
+    names         = ["lazynext", "monitoring", "ingress-nginx"]
+  }
+
+  // K8s client configuration
+  client {
+    bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  }
+}
+
+prometheus.operator.podmonitors "lazynext" {
+  forward_to = [prometheus.remote_write.prod.receiver]
+
+  namespaces {
+    own_namespace = true
+    names         = ["lazynext", "monitoring"]
+  }
+
+  client {
+    bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 3. PROMETHEUS REMOTE WRITE — with WAL + Retry
+// ═══════════════════════════════════════════════════════════════════
+
+prometheus.remote_write "prod" {
+  endpoint {
+    url = "http://prometheus-operated.monitoring.svc.cluster.local:9090/api/v1/write"
+
+    // ── Retry / backpressure configuration ─────────────────────
+    remote_timeout  = "30s"
+    retry_on_http_429 = true
+
+    // Queue configuration — WAL-backed for durability
+    queue_config {
+      capacity          = 10000          // Max samples queued before backpressure
+      max_shards        = 200            // Max parallel shards (auto-scale)
+      min_shards        = 4              // Min parallel shards
+      max_samples_per_send = 2000        // Batch size
+      batch_send_deadline  = "10s"       // Flush batch after this time
+      min_backoff       = "200ms"        // Initial retry backoff
+      max_backoff       = "10s"          // Max retry backoff
+      retry_on_http_429 = true
+    }
+
+    // ── WAL (Write-Ahead Log) for durability across restarts ───
+    wal {
+      // Directory for WAL storage — use persistent volume in production
+      // truncate_frequency controls how often the WAL is truncated
+    }
+
+    // ── Metadata configuration ─────────────────────────────────
+    metadata_config {
+      send         = true
+      send_interval = "60s"
+      max_samples_per_send = 500
+    }
+  }
+
+  // ── External labels for all series ───────────────────────────
+  external_labels = {
+    cluster      = sys.env("ALLOY_CLUSTER_NAME") != "" ? sys.env("ALLOY_CLUSTER_NAME") : "lazynext-prod",
+    environment  = sys.env("ALLOY_ENVIRONMENT") != "" ? sys.env("ALLOY_ENVIRONMENT") : "production",
+    region       = sys.env("ALLOY_REGION") != "" ? sys.env("ALLOY_REGION") : "eastus",
+    alloy_version = "1.0",
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 4. LOKI SOURCE — Kubernetes Container Logs
+// ═══════════════════════════════════════════════════════════════════
+
+// ── Discovery: Kubernetes Pods for logs ──────────────────────────
+discovery.relabel "kubernetes_logs" {
+  targets = discovery.kubernetes.pods.targets
+
+  // Keep only pods with actual container logs (skip init containers, ephemeral)
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_init"]
+    action        = "drop"
+    regex         = "true"
+  }
+  rule {
+    source_labels = ["__meta_kubernetes_pod_phase"]
+    action        = "keep"
+    regex         = "Running"
+  }
+}
+
+loki.source.kubernetes "container_logs" {
+  targets    = discovery.relabel.kubernetes_logs.output
+  forward_to = [loki.process.container_logs.receiver]
+
+  // ── K8s client config ────────────────────────────────────────
+  client {
+    bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+    ca_file           = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+  }
+
+  // ── Use pod logs (not container runtime logs) ────────────────
+  // This uses the Kubernetes API directly for log streaming
+}
+
+// ── Log Processing Pipeline ──────────────────────────────────────
+
+loki.process "container_logs" {
+  forward_to = [loki.write.prod.receiver]
+
+  // ── Stage 1: Parse CRI / Docker log format ───────────────────
+  stage.cri {}
+
+  // ── Stage 2: Extract timestamp from log line if present ──────
+  stage.timestamp {
+    source = "timestamp"
+    format = "RFC3339"
+    // Fallback to log ingestion time if no timestamp in line
+    action_on_failure = "skip"
+  }
+
+  // ── Stage 3: Multiline — merge stack traces and multi-line logs
+  stage.multiline {
+    firstline = "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}"  // ISO 8601 start
+    // Alternatives: "^\\[\\d{4}-\\d{2}-\\d{2}" (logfmt), "^[A-Z]+\\[" (log level bracket)
+    max_lines  = 500
+    max_wait_time = "3s"
+  }
+
+  // ── Stage 4: Extract log level from line ─────────────────────
+  stage.regex {
+    expression = "(?i)\\b(?P<level>TRACE|DEBUG|INFO|WARN(?:ING)?|ERROR|FATAL|CRITICAL|PANIC)\\b"
+  }
+  stage.labels {
+    values = {
+      level = "",
+    }
+  }
+
+  // ── Stage 5: Drop noisy/debug lines in production ────────────
+  // Keep only WARN and above + explicitly tagged lines
+  stage.match {
+    selector = "{level=~\"INFO|DEBUG|TRACE\"}"
+    // Only drop if span duration < 1ms — keep all ERROR/WARN
+    stage.drop {
+      source              = "level"
+      expression          = "INFO|DEBUG|TRACE"
+      drop_counter_reason = "noisy_production_log"
+      older_than          = "24h"
+    }
+  }
+
+  // ── Stage 6: Set namespace/service labels from K8s metadata ──
+  stage.labels {
+    values = {
+      namespace = "",
+      pod       = "",
+      container = "",
+      node      = "",
+      job       = "",  // Derived from container name or pod label
+    }
+  }
+
+  // ── Stage 7: Replace / clean labels for cardinality ──────────
+  stage.label_drop {
+    values = [
+      // Drop high-cardinality fields that explode label space
+      "pod_ip",
+      "pod_uid",
+      "container_id",
+      "stream",
+      "__meta_kubernetes_pod_container_id",
+      "__meta_kubernetes_pod_uid",
+    ]
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 5. LOKI WRITE — with Backpressure
+// ═══════════════════════════════════════════════════════════════════
+
+loki.write "prod" {
+  endpoint {
+    url = "http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push"
+
+    // ── Backpressure / retry ───────────────────────────────────
+    batch_size      = 1048576 // 1 MB
+    batch_wait      = "1s"
+    max_retries     = 10
+    min_backoff     = "500ms"
+    max_backoff     = "5m"
+    retry_on_http_429 = true
+
+    // ── Tenant ID (single-tenant: "fake") ──────────────────────
+    tenant_id = "fake"
+
+    // ── External labels ────────────────────────────────────────
+    external_labels = {
+      cluster     = sys.env("ALLOY_CLUSTER_NAME") != "" ? sys.env("ALLOY_CLUSTER_NAME") : "lazynext-prod",
+      environment = sys.env("ALLOY_ENVIRONMENT") != "" ? sys.env("ALLOY_ENVIRONMENT") : "production",
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 6. OTLP TRACE RECEIVER — OpenTelemetry Protocol
+// ═══════════════════════════════════════════════════════════════════
+
+otelcol.receiver.otlp "default" {
+  // ── gRPC endpoint ────────────────────────────────────────────
+  grpc {
+    endpoint = "0.0.0.0:4317"
+  }
+
+  // ── HTTP endpoint ────────────────────────────────────────────
+  http {
+    endpoint = "0.0.0.0:4318"
+  }
+
+  output {
+    traces  = [otelcol.processor.batch_traces.input]
+    metrics = [otelcol.processor.batch_metrics.input]
+    logs    = [otelcol.processor.batch_logs.input]
+  }
+}
+
+// ── Batch Processor: Aggregate spans before export ────────────────
+otelcol.processor.batch "batch_traces" {
+  timeout          = "5s"
+  send_batch_size  = 512
+  send_batch_max_size = 1024
+
+  output {
+    traces = [otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+otelcol.processor.batch "batch_metrics" {
+  timeout          = "10s"
+  send_batch_size  = 1024
+
+  output {
+    metrics = [prometheus.remote_write.prod.receiver]
+  }
+}
+
+otelcol.processor.batch "batch_logs" {
+  timeout         = "5s"
+  send_batch_size = 512
+
+  output {
+    logs = [loki.process.container_logs.receiver]
+  }
+}
+
+// ── Memory Limiter: Prevent OOM from trace bursts ─────────────────
+otelcol.processor.memory_limiter "default" {
+  check_interval         = "1s"
+  limit_mib              = 512
+  spike_limit_mib        = 128
+  ballast_size_mib       = 64
+
+  output {
+    traces  = [otelcol.receiver.otlp.default.output]
+    metrics = [otelcol.receiver.otlp.default.output]
+    logs    = [otelcol.receiver.otlp.default.output]
+  }
+}
+
+// ── Attribute / Resource Processor: Enrich spans ──────────────────
+otelcol.processor.attributes "enrich" {
+  // Insert platform-specific attributes
+  enrich {
+    key    = "service.namespace"
+    value  = "lazynext"
+    action = "upsert"
+  }
+  enrich {
+    key    = "deployment.environment"
+    value  = sys.env("ALLOY_ENVIRONMENT") != "" ? sys.env("ALLOY_ENVIRONMENT") : "production"
+    action = "upsert"
+  }
+
+  output {
+    traces  = [otelcol.processor.batch_traces.input]
+    metrics = [otelcol.processor.batch_metrics.input]
+    logs    = [otelcol.processor.batch_logs.input]
+  }
+}
+
+// ── OTLP Exporter → Tempo ────────────────────────────────────────
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "http://tempo.monitoring.svc.cluster.local:4317"
+    tls {
+      insecure = true
+    }
+    compression = "gzip"
+    timeout     = "10s"
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// 7. OPTIONAL: Recorder rules writer — pushes recording rules results
+// ═══════════════════════════════════════════════════════════════════
+//
+// The prometheus.remote_write block above already handles the WAL
+// and retry for all scraped + recorded metrics. If you need to
+// pre-aggregate metrics in Alloy itself (server-side recording rules),
+// uncomment the block below. For now, recording rules live in
+// Prometheus (recording-rules.yml) to avoid duplicating computation.
+
+/*
+prometheus.recording_rules "lazynext_recording" {
+  rule {
+    record = "job:http_request_duration_seconds:p95:5m"
+    expr   = "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job))"
+  }
+  rule {
+    record = "instance:node_cpu_utilization:avg:5m"
+    expr   = "100 - avg(rate(node_cpu_seconds_total{mode='idle'}[5m])) by (instance) * 100"
+  }
+  rule {
+    record = "job:error_budget_remaining:30d"
+    expr   = "0.001 - (sum(rate(http_requests_total{service='lazynext-web',status_code=~'5..'}[30d])) / sum(rate(http_requests_total{service='lazynext-web'}[30d])))"
+  }
+
+  forward_to = [prometheus.remote_write.prod.receiver]
+}
+*/
+
+// ═══════════════════════════════════════════════════════════════════
+// 8. SELF-SCRAPE — Expose Alloy's own metrics
+// ═══════════════════════════════════════════════════════════════════
+
+prometheus.scrape "alloy_self_scrape" {
+  targets = [{"__address__" = "localhost:12345"}]
+  forward_to = [prometheus.remote_write.prod.receiver]
+  job_name   = "alloy"
+  scrape_interval = "15s"
+}

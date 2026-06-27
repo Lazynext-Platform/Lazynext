@@ -1,0 +1,380 @@
+---
+# ── Lazynext Ansible Role: postgresql ─────────────────────────────
+# PostgreSQL 17 installation, configuration, streaming replication,
+# PgBouncer connection pooling, automated backups, and monitoring.
+
+- name: Install required system packages
+  ansible.builtin.apt:
+    name:
+      - gnupg2
+      - wget
+      - curl
+      - acl
+      - python3-psycopg2
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+# ──────────────────────────────────────────────────────────────────
+# PostgreSQL APT repository
+# ──────────────────────────────────────────────────────────────────
+
+- name: Add PostgreSQL GPG key
+  ansible.builtin.get_url:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    dest: /etc/apt/keyrings/postgresql.asc
+    mode: "0644"
+
+- name: Add PostgreSQL repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/postgresql.asc]
+      https://apt.postgresql.org/pub/repos/apt
+      {{ ansible_distribution_release }}-pgdg main
+    state: present
+    update_cache: yes
+    filename: pgdg
+
+- name: Install PostgreSQL {{ postgresql_version }}
+  ansible.builtin.apt:
+    name:
+      - "postgresql-{{ postgresql_version }}"
+      - "postgresql-client-{{ postgresql_version }}"
+      - "postgresql-contrib"
+      - "postgresql-{{ postgresql_version }}-pgvector"
+      - libpq-dev
+    state: present
+
+- name: Ensure PostgreSQL data directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_data_dir }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0700"
+
+- name: Ensure PostgreSQL config directory exists
+  ansible.builtin.file:
+    path: "{{ postgresql_conf_dir }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0755"
+
+# ──────────────────────────────────────────────────────────────────
+# PostgreSQL configuration
+# ──────────────────────────────────────────────────────────────────
+
+- name: Configure postgresql.conf
+  ansible.builtin.template:
+    src: postgresql.conf.j2
+    dest: "{{ postgresql_conf_dir }}/postgresql.conf"
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  notify: restart postgresql
+
+- name: Configure pg_hba.conf for private network access
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgresql_conf_dir }}/pg_hba.conf"
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  notify: reload postgresql
+
+- name: Ensure PostgreSQL is running and enabled
+  ansible.builtin.systemd:
+    name: "postgresql@{{ postgresql_version }}-main"
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# PostgreSQL administrative users and databases
+# ──────────────────────────────────────────────────────────────────
+
+- name: Set admin user password
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_admin_user }}"
+    password: "{{ postgresql_admin_password }}"
+    encrypted: yes
+    state: present
+  no_log: true
+
+- name: Create replication user
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_replication_user }}"
+    password: "{{ postgresql_replication_password }}"
+    replication: yes
+    encrypted: yes
+    state: present
+  no_log: true
+
+- name: Create application database
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: lazynext
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    owner: "{{ postgresql_admin_user }}"
+    state: present
+
+- name: Enable pg_stat_statements extension
+  become_user: postgres
+  community.postgresql.postgresql_ext:
+    name: pg_stat_statements
+    db: lazynext
+    state: present
+
+- name: Enable pgvector extension
+  become_user: postgres
+  community.postgresql.postgresql_ext:
+    name: vector
+    db: lazynext
+    state: present
+
+# ──────────────────────────────────────────────────────────────────
+# Streaming replication — primary configuration
+# ──────────────────────────────────────────────────────────────────
+
+- name: Create replication slot on primary
+  become_user: postgres
+  community.postgresql.postgresql_slot:
+    slot_name: lazynext_standby_slot
+    state: present
+  when: "'masters' in group_names"
+
+- name: Allow replication connections in pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: "{{ postgresql_conf_dir }}/pg_hba.conf"
+    line: "host replication {{ postgresql_replication_user }} {{ private_network_cidr }} scram-sha-256"
+    state: present
+  notify: reload postgresql
+
+# ──────────────────────────────────────────────────────────────────
+# Streaming replication — standby configuration
+# ──────────────────────────────────────────────────────────────────
+
+- name: Stop PostgreSQL on standby before initial sync
+  ansible.builtin.systemd:
+    name: "postgresql@{{ postgresql_version }}-main"
+    state: stopped
+  when: "'workers' in group_names and postgresql_standby_sync | default(false) | bool"
+
+- name: Run pg_basebackup from primary to standby
+  become_user: postgres
+  ansible.builtin.command: >-
+    pg_basebackup
+    -h {{ hostvars[groups['masters'][0]].ansible_host | default(groups['masters'][0]) }}
+    -D {{ postgresql_data_dir }}
+    -U {{ postgresql_replication_user }}
+    -P -v -R -X stream -C -S lazynext_standby_slot
+  environment:
+    PGPASSWORD: "{{ postgresql_replication_password }}"
+  when: "'workers' in group_names and postgresql_standby_sync | default(false) | bool"
+  no_log: true
+
+- name: Start PostgreSQL on standby after sync
+  ansible.builtin.systemd:
+    name: "postgresql@{{ postgresql_version }}-main"
+    state: started
+  when: "'workers' in group_names and postgresql_standby_sync | default(false) | bool"
+
+- name: Verify replication status on primary
+  become_user: postgres
+  community.postgresql.postgresql_query:
+    query: "SELECT usename, application_name, client_addr, state, sync_state FROM pg_stat_replication"
+  when: "'masters' in group_names"
+  register: replication_status
+  changed_when: false
+
+- name: Print replication status
+  ansible.builtin.debug:
+    var: replication_status.query_result
+  when: "'masters' in group_names"
+
+# ──────────────────────────────────────────────────────────────────
+# PgBouncer connection pooler
+# ──────────────────────────────────────────────────────────────────
+
+- name: Install PgBouncer
+  ansible.builtin.apt:
+    name: "pgbouncer={{ pgbouncer_version }}*"
+    state: present
+    update_cache: yes
+
+- name: Configure PgBouncer
+  ansible.builtin.template:
+    src: pgbouncer.ini.j2
+    dest: /etc/pgbouncer/pgbouncer.ini
+    owner: postgres
+    group: postgres
+    mode: "0640"
+  notify: restart pgbouncer
+
+- name: Configure PgBouncer userlist
+  ansible.builtin.template:
+    src: pgbouncer_userlist.txt.j2
+    dest: /etc/pgbouncer/userlist.txt
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  notify: restart pgbouncer
+  no_log: true
+
+- name: Enable and start PgBouncer
+  ansible.builtin.systemd:
+    name: pgbouncer
+    state: started
+    enabled: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Automated backups — pg_dump
+# ──────────────────────────────────────────────────────────────────
+
+- name: Create backup directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0750"
+  loop:
+    - "{{ postgresql_backup_dir }}"
+    - "{{ postgresql_backup_dir }}/daily"
+    - "{{ postgresql_backup_dir }}/weekly"
+    - "{{ postgresql_wal_archive_dir }}"
+
+- name: Install pg_dump backup script
+  ansible.builtin.template:
+    src: postgresql-backup.sh.j2
+    dest: /usr/local/bin/pg_backup.sh
+    owner: postgres
+    group: postgres
+    mode: "0750"
+
+- name: Schedule nightly pg_dump via systemd timer
+  ansible.builtin.template:
+    src: pg-backup.service.j2
+    dest: /etc/systemd/system/pg-backup.service
+    mode: "0644"
+  notify: reload systemd
+
+- name: Schedule nightly pg_dump timer
+  ansible.builtin.template:
+    src: pg-backup.timer.j2
+    dest: /etc/systemd/system/pg-backup.timer
+    mode: "0644"
+  notify: reload systemd
+
+- name: Enable pg_dump backup timer
+  ansible.builtin.systemd:
+    name: pg-backup.timer
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# WAL Archiving for PITR
+# ──────────────────────────────────────────────────────────────────
+
+- name: Create WAL archive script
+  ansible.builtin.copy:
+    dest: /usr/local/bin/wal_archive.sh
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+      WALFILE="$1"
+      DEST="{{ postgresql_wal_archive_dir }}/$(basename "$WALFILE")"
+      test -f "$WALFILE" && cp "$WALFILE" "$DEST" && exit 0
+      exit 1
+    owner: postgres
+    group: postgres
+    mode: "0750"
+
+# ──────────────────────────────────────────────────────────────────
+# Prometheus postgres_exporter
+# ──────────────────────────────────────────────────────────────────
+
+- name: Create postgres_exporter user for monitoring
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: postgres_exporter
+    password: "{{ vault_postgres_exporter_password | default('Exp0rter!123') }}"
+    encrypted: yes
+    state: present
+  no_log: true
+
+- name: Grant monitor role to postgres_exporter
+  become_user: postgres
+  community.postgresql.postgresql_query:
+    query: |
+      GRANT pg_monitor TO postgres_exporter;
+      GRANT CONNECT ON DATABASE lazynext TO postgres_exporter;
+      GRANT USAGE ON SCHEMA public TO postgres_exporter;
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO postgres_exporter;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO postgres_exporter;
+
+- name: Download postgres_exporter
+  ansible.builtin.get_url:
+    url: "https://github.com/prometheus-community/postgres_exporter/releases/download/{{ monitoring_version_tags.postgres_exporter }}/postgres_exporter-{{ monitoring_version_tags.postgres_exporter }}.linux-amd64.tar.gz"
+    dest: /tmp/postgres_exporter.tar.gz
+    mode: "0644"
+
+- name: Extract postgres_exporter
+  ansible.builtin.unarchive:
+    src: /tmp/postgres_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+    creates: "/tmp/postgres_exporter-{{ monitoring_version_tags.postgres_exporter }}.linux-amd64/postgres_exporter"
+
+- name: Install postgres_exporter binary
+  ansible.builtin.copy:
+    src: "/tmp/postgres_exporter-{{ monitoring_version_tags.postgres_exporter }}.linux-amd64/postgres_exporter"
+    dest: /usr/local/bin/postgres_exporter
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+
+- name: Create postgres_exporter environment file
+  ansible.builtin.copy:
+    dest: /etc/default/postgres_exporter
+    content: |
+      DATA_SOURCE_NAME="postgresql://postgres_exporter:{{ vault_postgres_exporter_password | default('Exp0rter!123') }}@localhost:{{ postgresql_port }}/lazynext?sslmode=disable"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+  notify: restart postgres_exporter
+
+- name: Install postgres_exporter systemd unit
+  ansible.builtin.template:
+    src: postgres_exporter.service.j2
+    dest: /etc/systemd/system/postgres_exporter.service
+    mode: "0644"
+  notify: restart postgres_exporter
+
+- name: Start postgres_exporter
+  ansible.builtin.systemd:
+    name: postgres_exporter
+    state: started
+    enabled: yes
+    daemon_reload: yes
+
+# ──────────────────────────────────────────────────────────────────
+# Cleanup
+# ──────────────────────────────────────────────────────────────────
+
+- name: Remove postgres_exporter archive
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/postgres_exporter.tar.gz
+    - "/tmp/postgres_exporter-{{ monitoring_version_tags.postgres_exporter }}.linux-amd64"

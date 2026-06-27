@@ -1,0 +1,143 @@
+# ── Lazynext Unified Rust Builder ──────────────────────────────────
+# Multi-stage Dockerfile that compiles ALL Rust artifacts in one pass:
+#   1. WASM package (lazynext-wasm) via wasm-pack
+#   2. CLI binary (lazynext_cli) statically linked with musl
+#   3. MCP server binary (lazynext_mcp_server) statically linked with musl
+#   4. API Gateway binary (lazynext_api_gateway) statically linked with musl
+#
+# Build from repo root:
+#   docker build -f Dockerfile.rust-builder -t lazynext-rust-builder .
+#
+# Extract artifacts:
+#   docker cp $(docker create lazynext-rust-builder):/out/wasm ./rust/wasm/pkg
+#   docker cp $(docker create lazynext-rust-builder):/out/bin/lazynext-cli .
+#   docker cp $(docker create lazynext-rust-builder):/out/bin/lazynext-mcp-server .
+#   docker cp $(docker create lazynext-rust-builder):/out/bin/lazynext-api-gateway .
+#
+# Multi-arch: pass --platform linux/amd64,linux/arm64 for cross-arch builds.
+
+# ── Stage 0: Cargo Chef Plan ────────────────────────────────
+FROM rust:1.96-slim AS chef
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    pkg-config \
+    libssl-dev \
+    binaryen \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN cargo install cargo-chef --version 0.1.68
+RUN cargo install sccache --version 0.9.2
+
+# mold: fast linker (x86_64 only; fallback to lld on aarch64)
+RUN set -eux; \
+    arch="$(uname -m)"; \
+    if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then \
+        curl -fsSL https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-$(uname -m)-linux.tar.gz \
+            | tar -xz -C /usr/local --strip-components=1; \
+    fi
+
+# musl target for static linking of CLI/MCP server
+RUN rustup target add wasm32-unknown-unknown x86_64-unknown-linux-musl aarch64-unknown-linux-musl
+
+ENV RUSTC_WRAPPER=sccache
+ENV SCCACHE_CACHE_SIZE=2G
+ENV CARGO_INCREMENTAL=0
+
+WORKDIR /build
+
+# Copy only dependency manifests for caching
+COPY rust/ rust/
+
+# Run cargo-chef on the entire workspace to compute a dependency plan
+RUN cargo chef prepare --recipe-path recipe.json
+
+# ── Stage 1: Build Dependencies (cached layer) ───────────────
+FROM chef AS builder-deps
+
+WORKDIR /build
+COPY --from=chef /build/recipe.json recipe.json
+
+# Build all dependencies; this is the heavy cached layer
+RUN cargo chef cook --release --recipe-path recipe.json \
+    --target wasm32-unknown-unknown \
+    --target x86_64-unknown-linux-musl
+
+# ── Stage 2: WASM Build ─────────────────────────────────────
+FROM builder-deps AS wasm-builder
+
+# Install wasm-pack
+RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+WORKDIR /build
+
+# Copy full source (deps already built in previous stage)
+COPY rust/ rust/
+
+# Build WASM package
+RUN cd rust/wasm && \
+    wasm-pack build --target web --out-dir pkg --release
+
+# Stage WASM output
+RUN mkdir -p /out/wasm && \
+    cp -r /build/rust/wasm/pkg/* /out/wasm/
+
+# ── Stage 3: Native Binary Build (CLI + MCP) ────────────────
+FROM builder-deps AS native-builder
+
+WORKDIR /build
+
+COPY rust/ rust/
+
+# Set mold as linker for speed; fallback to lld on aarch64
+ENV CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER=mold
+ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=mold
+ENV RUSTFLAGS="-C target-feature=+crt-static"
+
+# Build CLI binary (musl, statically linked)
+RUN cargo build \
+    --release \
+    --target x86_64-unknown-linux-musl \
+    --bin lazynext_cli \
+    -p lazynext_cli
+
+# Build MCP server binary (musl, statically linked)
+RUN cargo build \
+    --release \
+    --target x86_64-unknown-linux-musl \
+    --bin lazynext_mcp_server \
+    -p lazynext_mcp_server
+
+# Build API Gateway binary (musl, statically linked)
+RUN cargo build \
+    --release \
+    --target x86_64-unknown-linux-musl \
+    --bin lazynext_api_gateway \
+    -p lazynext_api_gateway
+
+# Strip and stage binaries
+RUN mkdir -p /out/bin && \
+    cp /build/target/x86_64-unknown-linux-musl/release/lazynext_cli /out/bin/lazynext-cli && \
+    cp /build/target/x86_64-unknown-linux-musl/release/lazynext_mcp_server /out/bin/lazynext-mcp-server && \
+    cp /build/target/x86_64-unknown-linux-musl/release/lazynext_api_gateway /out/bin/lazynext-api-gateway && \
+    strip /out/bin/lazynext-cli /out/bin/lazynext-mcp-server /out/bin/lazynext-api-gateway
+
+# ── Stage 4: Testing (optional — run with --target test) ────
+FROM builder-deps AS tester
+
+WORKDIR /build
+COPY rust/ rust/
+
+# Run workspace tests with all features
+RUN cargo test --workspace --release -- --test-threads=$(nproc)
+
+# Clippy lint check
+RUN cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+# ── Stage 5: Final Artifact Assembly ────────────────────────
+FROM scratch AS artifacts
+
+COPY --from=wasm-builder /out/wasm /out/wasm
+COPY --from=native-builder /out/bin /out/bin

@@ -1,0 +1,90 @@
+# ==============================================================================
+# TensorFlow Serving — Per-Model Batching Configuration
+#
+# Mounted at: /models/tf_serving/batching_config.txt
+# Loaded by tensorflow_model_server via --batching_parameters_file
+# Docs: https://github.com/tensorflow/serving/blob/master/tensorflow_serving/batching/batching_parameters.proto
+#
+# Batching strategy by model:
+#
+#   Model        | Max Batch | Timeout  | Rationale
+#   -------------|-----------|----------|-------------------------------------
+#   MobileNetV2  | 16        | 25 ms    | Lightweight; high throughput needed
+#   Whisper      | 4         | 100 ms   | Heavy encoder-decoder; batch >4 OOMs
+#   SAM2         | 2         | 500 ms   | Vision transformer; extreme memory
+#   RealESRGAN   | 8         | 50 ms    | Medium GPU; batch=8 optimum tput
+#
+# General settings apply to all models unless overridden per-model in the
+# config.pbtxt file of each model directory.
+# ==============================================================================
+
+# ── Global defaults ─────────────────────────────────────────────────────────
+# Applied to any model that does NOT define its own batching_parameters in
+# its config.pbtxt.
+
+batching_parameters {
+  # Maximum number of requests to accumulate into one batch.
+  # Chosen as a safe default for the lightest models (MobileNetV2).
+  max_batch_size {
+    value: 16
+  }
+
+  # Maximum wall-clock time (microseconds) to wait before
+  # processing an incomplete batch.
+  batch_timeout_micros {
+    value: 25000
+  }
+
+  # Maximum number of enqueued batches permitted.
+  # Additional requests return UNAVAILABLE (503) with a retry-after header.
+  max_enqueued_batches {
+    value: 64
+  }
+
+  # Number of background threads dedicated to splitting submitted
+  # requests into batches.
+  num_batch_threads {
+    value: 4
+  }
+
+  # Thread pool size for processing batches (per model).
+  # Matches the DEFAULT_CPUS env var in Dockerfile.tensorflow (OMP_NUM_THREADS=4).
+  thread_pool_size {
+    value: 4
+  }
+
+  # Maximum batch size for padding — fill incomplete batches up to this
+  # count with empty (zero) tensors. 0 disables padding.
+  pad_variable_length_inputs: false
+
+  # Minimum number of allowed enqueued batches before the queue is
+  # considered "full" and back-pressure is applied.
+  allowed_batch_sizes {
+    value: 1
+  }
+  allowed_batch_sizes {
+    value: 2
+  }
+  allowed_batch_sizes {
+    value: 4
+  }
+  allowed_batch_sizes {
+    value: 8
+  }
+  allowed_batch_sizes {
+    value: 16
+  }
+}
+
+# ── Per-model overrides ─────────────────────────────────────────────────────
+# NOTE: TF Serving batching_parameters_file currently applies a single
+# configuration globally. Per-model batching overrides are defined in
+# each model's config.pbtxt using the `batching_parameters` field.
+#
+# Global default effective parameters by model:
+#
+#   MobileNetV2:  max=16 timeout=25ms  (matches default)
+#   RealESRGAN:   max=8  timeout=50ms  (override in config.pbtxt)
+#   Whisper:      max=4  timeout=100ms (override in config.pbtxt)
+#   SAM2:         max=2  timeout=500ms (override in config.pbtxt)
+# ==============================================================================

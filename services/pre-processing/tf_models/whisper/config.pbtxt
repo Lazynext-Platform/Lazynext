@@ -1,0 +1,130 @@
+# ==============================================================================
+# Whisper — TensorFlow Serving Model Configuration
+#
+# Model:  openai/whisper-large-v3  (exported via scripts/export-model.sh)
+# Task:   Automatic Speech Recognition (ASR)
+# Input:  mel_spectrogram  float32[batch, 80, time]
+# Output: logits           float32[batch, sequence, vocab_size]
+# ==============================================================================
+
+name: "whisper"
+platform: "tensorflow"
+
+# ── Versioning ───────────────────────────────────────────────────────────────
+# Pin to version 1. If rolling updates are needed, add additional versions
+# here and they will be served alongside, with traffic split by version_policy.
+
+model_version_policy {
+  specific {
+    versions: 1
+  }
+}
+
+# ── Batching Parameters ─────────────────────────────────────────────────────
+# Whisper is a large encoder-decoder transformer — batch sizes above 4
+# typically exhaust GPU memory on 24 GB cards.
+#
+#   max_batch_size = 4
+#   timeout        = 100,000 microseconds (100 ms)
+#
+# A 100ms timeout balances latency vs. throughput for conversational workloads
+# where requests arrive in bursts (e.g., after a user hits "transcribe").
+
+batching_parameters {
+  max_batch_size {
+    value: 4
+  }
+  batch_timeout_micros {
+    value: 100000
+  }
+  max_enqueued_batches {
+    value: 32
+  }
+  num_batch_threads {
+    value: 2
+  }
+  thread_pool_size {
+    value: 4
+  }
+  allowed_batch_sizes {
+    value: 1
+  }
+  allowed_batch_sizes {
+    value: 2
+  }
+  allowed_batch_sizes {
+    value: 4
+  }
+}
+
+# ── GPU Configuration ───────────────────────────────────────────────────────
+# Whisper benefits heavily from GPU. Configure TF Serving to allocate
+# all available GPU memory (use_per_process_gpu_memory=true).
+# The fraction is set via TF_PER_PROCESS_GPU_MEMORY_FRACTION env var.
+
+gpu_config {
+  gpu_memory_fraction: 0.45  # Whisper takes ~45% of GPU memory
+  allow_growth: false
+  per_process_gpu_memory_fraction: 0.45
+}
+
+# ── Input / Output Signature ─────────────────────────────────────────────────
+#
+# Whisper SavedModel signature (as exported by scripts/export-model.sh):
+#
+#   signature_def['serving_default']:
+#     inputs {
+#       key: "mel_spectrogram"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: 80 } dim { size: -1 } } }
+#     }
+#     outputs {
+#       key: "logits"
+#       value { dtype: DT_FLOAT  tensor_shape { dim { size: -1 } dim { size: -1 } dim { size: 51865 } } }
+#     }
+#
+# Additional decode outputs (optional — depends on export script version):
+#   - "encoder_hidden_states": float32[batch, seq, d_model]
+#   - "language_logits": float32[batch, num_languages]
+# ==============================================================================
+
+# ── Model warmup — pre-loads model into memory at startup ───────────────────
+model_warmup {
+  name: "whisper_warmup"
+  batch_size: 1
+  inputs {
+    key: "mel_spectrogram"
+    value {
+      dtype: DT_FLOAT
+      tensor_shape {
+        dim { size: 1 }
+        dim { size: 80 }
+        dim { size: 3000 }
+      }
+      # Zero-filled warmup — real inference will overwrite
+      float_val: 0.0
+    }
+  }
+}
+
+# ── Inference configuration ─────────────────────────────────────────────────
+# Optimize for latency on GPU — prefer NCHW layouts and fused ops.
+# (Whisper is audio, not image, so layout optimization is N/A; this is a
+#  placeholder for TF Serving's session config.)
+
+session_config {
+  allow_soft_placement: true
+  log_device_placement: false
+  gpu_options {
+    allow_growth: false
+    per_process_gpu_memory_fraction: 0.45
+  }
+  graph_options {
+    optimizer_options {
+      opt_level: L1   # Light graph optimization — avoids OOM during large model JIT
+      do_common_subexpression_elimination: true
+      do_constant_folding: true
+    }
+  }
+  intra_op_parallelism_threads: 4
+  inter_op_parallelism_threads: 2
+}

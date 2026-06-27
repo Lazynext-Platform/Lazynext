@@ -1,0 +1,504 @@
+---
+# ── Lazynext Backup Playbook ──────────────────────────────────────
+# Performs automated backups of all stateful services: PostgreSQL
+# databases, Redis RDB/AOF, and uploads to Azure Blob Storage.
+# Verifies backup integrity and cleans up old backups.
+#
+# Usage:
+#   ansible-playbook -i inventory.ini playbooks/backup.yml
+#   ansible-playbook -i inventory.ini playbooks/backup.yml \
+#     -e 'backup_type=full' \
+#     -e 'upload_to_azure=true' \
+#     -e 'retention_days=30'
+
+- name: Lazynext Automated Backups
+  hosts: masters,workers
+  gather_facts: yes
+  vars:
+    backup_type: "{{ backup_type | default('full') }}"          # full | incremental
+    upload_to_azure: "{{ upload_to_azure | default(true) }}"
+    retention_days: "{{ retention_days | default(30) }}"
+    backup_timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+    backup_base_dir: "/var/backups/lazynext"
+    backup_work_dir: "{{ backup_base_dir }}/{{ backup_timestamp }}"
+    backup_manifest_file: "{{ backup_work_dir }}/backup-manifest.json"
+    azure_storage_account: "{{ vault_azure_storage_account | default('lazynextbackups') }}"
+    azure_container: "{{ vault_azure_storage_container | default('lazynext-backups') }}"
+    azcopy_version: "10.23.0"
+    backup_checksum_algorithm: sha256
+
+  pre_tasks:
+    # ──────────────────────────────────────────────────────────────
+    # Pre-flight checks
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Verify PostgreSQL is running
+      ansible.builtin.systemd:
+        name: "postgresql@{{ postgresql_version }}-main"
+      register: pg_status
+      changed_when: false
+      when: "'masters' in group_names"
+
+    - name: Verify Redis is running
+      ansible.builtin.systemd:
+        name: redis-server
+      register: redis_status
+      changed_when: false
+      when: "'masters' in group_names"
+
+    - name: Check available disk space for backups
+      ansible.builtin.shell: |
+        df -BG {{ backup_base_dir | dirname }} | awk 'NR==2{print $4}' | tr -d 'G'
+      register: available_disk_gb
+      changed_when: false
+
+    - name: Warn if disk space is low
+      ansible.builtin.debug:
+        msg: "WARNING: Only {{ available_disk_gb.stdout }} GB available. Backups may fail."
+      when: (available_disk_gb.stdout | int) < 10
+
+    # ──────────────────────────────────────────────────────────────
+    # Install azcopy if needed
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Check if azcopy is installed
+      ansible.builtin.command: azcopy --version
+      register: azcopy_check
+      changed_when: false
+      failed_when: false
+      when: upload_to_azure | bool
+
+    - name: Install azcopy
+      ansible.builtin.shell: |
+        set -euo pipefail
+        curl -sL -o /tmp/azcopy.tar.gz \
+          "https://aka.ms/downloadazcopy-v10-linux"
+        tar xzf /tmp/azcopy.tar.gz -C /tmp
+        cp /tmp/azcopy_linux_amd64_{{ azcopy_version }}/azcopy /usr/local/bin/azcopy
+        chmod +x /usr/local/bin/azcopy
+        rm -rf /tmp/azcopy.tar.gz /tmp/azcopy_linux_amd64_{{ azcopy_version }}
+      args:
+        creates: /usr/local/bin/azcopy
+      when:
+        - upload_to_azure | bool
+        - azcopy_check.rc | default(127) != 0
+
+  tasks:
+    # ──────────────────────────────────────────────────────────────
+    # Create backup directory structure
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Create backup working directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0750"
+      loop:
+        - "{{ backup_base_dir }}"
+        - "{{ backup_work_dir }}"
+        - "{{ backup_work_dir }}/postgresql"
+        - "{{ backup_work_dir }}/redis"
+        - "{{ backup_work_dir }}/checksums"
+
+    # ──────────────────────────────────────────────────────────────
+    # PostgreSQL backups
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Trigger WAL switch before backup
+      become_user: postgres
+      community.postgresql.postgresql_query:
+        query: SELECT pg_switch_wal();
+      when: "'masters' in group_names"
+      failed_when: false
+
+    - name: Dump all PostgreSQL databases
+      become_user: postgres
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export PGPASSWORD="{{ postgresql_admin_password }}"
+
+        # List all non-template databases
+        psql -h localhost -p {{ postgresql_port }} -U {{ postgresql_admin_user }} \
+          -tAc "SELECT datname FROM pg_database WHERE datistemplate = false AND datname != 'postgres'" \
+          | while read -r db; do
+            echo "Backing up database: $db"
+            pg_dump \
+              -h localhost \
+              -p {{ postgresql_port }} \
+              -U {{ postgresql_admin_user }} \
+              -Fc -Z 9 -v \
+              --no-owner --no-acl \
+              -f "{{ backup_work_dir }}/postgresql/${db}_${backup_timestamp}.dump" \
+              "$db"
+          done
+      register: pg_dump_result
+      changed_when: true
+      when: "'masters' in group_names"
+      no_log: true
+
+    - name: Dump global objects (roles, tablespaces)
+      become_user: postgres
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export PGPASSWORD="{{ postgresql_admin_password }}"
+        pg_dumpall \
+          -h localhost \
+          -p {{ postgresql_port }} \
+          -U {{ postgresql_admin_user }} \
+          --globals-only \
+          --no-role-passwords \
+          -f "{{ backup_work_dir }}/postgresql/globals_${backup_timestamp}.sql"
+      register: pg_globals_result
+      changed_when: true
+      when: "'masters' in group_names"
+      no_log: true
+
+    - name: Copy postgresql.conf and pg_hba.conf
+      ansible.builtin.copy:
+        src: "{{ postgresql_conf_dir }}/{{ item }}"
+        dest: "{{ backup_work_dir }}/postgresql/{{ item }}.{{ backup_timestamp }}"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "0640"
+      loop:
+        - postgresql.conf
+        - pg_hba.conf
+      when: "'masters' in group_names"
+
+    - name: Collect PostgreSQL backup sizes
+      ansible.builtin.shell: |
+        du -sh {{ backup_work_dir }}/postgresql/*.dump | awk '{print $2, $1}'
+      register: pg_backup_sizes
+      changed_when: false
+      when: "'masters' in group_names"
+
+    # ──────────────────────────────────────────────────────────────
+    # Redis backup
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Trigger Redis BGSAVE
+      ansible.builtin.command: "redis-cli -a '{{ redis_password }}' --no-auth-warning BGSAVE"
+      register: redis_bgsave
+      changed_when: false
+      when: "'masters' in group_names"
+      no_log: true
+
+    - name: Wait for Redis BGSAVE to complete
+      ansible.builtin.shell: |
+        for i in $(seq 1 60); do
+          state=$(redis-cli -a '{{ redis_password }}' --no-auth-warning INFO persistence 2>/dev/null | grep rdb_bgsave_in_progress | cut -d: -f2 | tr -d '\r')
+          if [ "$state" = "0" ]; then
+            echo "BGSAVE completed"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "BGSAVE timeout"
+        exit 1
+      register: redis_bgsave_wait
+      changed_when: false
+      when: "'masters' in group_names"
+      no_log: true
+
+    - name: Copy Redis RDB dump
+      ansible.builtin.copy:
+        src: "/var/lib/redis/dump.rdb"
+        dest: "{{ backup_work_dir }}/redis/dump_{{ backup_timestamp }}.rdb"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "0640"
+      when: "'masters' in group_names"
+
+    - name: Copy Redis AOF file
+      ansible.builtin.copy:
+        src: "/var/lib/redis/appendonly.aof"
+        dest: "{{ backup_work_dir }}/redis/appendonly_{{ backup_timestamp }}.aof"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "0640"
+      when:
+        - "'masters' in group_names"
+        - redis_appendonly | default('yes') == 'yes'
+
+    - name: Backup Redis configuration
+      ansible.builtin.copy:
+        src: "/etc/redis/redis.conf"
+        dest: "{{ backup_work_dir }}/redis/redis.conf.{{ backup_timestamp }}"
+        remote_src: yes
+        owner: root
+        group: root
+        mode: "0640"
+      when: "'masters' in group_names"
+
+    - name: Collect Redis backup sizes
+      ansible.builtin.shell: |
+        du -sh {{ backup_work_dir }}/redis/* | awk '{print $2, $1}'
+      register: redis_backup_sizes
+      changed_when: false
+      when: "'masters' in group_names"
+
+    # ──────────────────────────────────────────────────────────────
+    # Generate checksums for integrity verification
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Generate SHA256 checksums for all backup files
+      ansible.builtin.shell: |
+        cd {{ backup_work_dir }}
+        find postgresql/ redis/ -type f \
+          -exec sha256sum {} \; \
+          > {{ backup_work_dir }}/checksums/{{ backup_timestamp }}.sha256
+      when: "'masters' in group_names"
+
+    - name: Verify generated checksums
+      ansible.builtin.shell: |
+        cd {{ backup_work_dir }}
+        sha256sum -c checksums/{{ backup_timestamp }}.sha256
+      register: checksum_verify
+      changed_when: false
+      when: "'masters' in group_names"
+
+    - name: Fail if checksum verification failed
+      ansible.builtin.fail:
+        msg: "Backup integrity check FAILED. Checksums did not verify."
+      when:
+        - "'masters' in group_names"
+        - checksum_verify.rc | default(0) != 0
+
+    # ──────────────────────────────────────────────────────────────
+    # Create backup manifest
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Create backup manifest
+      ansible.builtin.copy:
+        dest: "{{ backup_manifest_file }}"
+        content: |
+          {
+            "backup_id": "{{ backup_timestamp }}",
+            "backup_type": "{{ backup_type }}",
+            "created_at": "{{ ansible_date_time.iso8601 }}",
+            "hostname": "{{ ansible_hostname }}",
+            "postgresql_version": "{{ postgresql_version }}",
+            "redis_version": "{{ redis_version }}",
+            "checksum_algorithm": "{{ backup_checksum_algorithm }}",
+            "postgresql": {
+              "backup_size_bytes": {{ pg_backup_sizes.stdout | default('0') | trim }},
+              "databases": {{ pg_dump_result.stdout_lines | default([]) | to_json }}
+            },
+            "redis": {
+              "backup_size_bytes": {{ redis_backup_sizes.stdout | default('0') | trim }},
+              "rdb_file": "dump_{{ backup_timestamp }}.rdb",
+              "aof_file": "appendonly_{{ backup_timestamp }}.aof"
+            },
+            "checksums": "checksums/{{ backup_timestamp }}.sha256"
+          }
+        owner: root
+        group: root
+        mode: "0640"
+      when: "'masters' in group_names"
+
+    # ──────────────────────────────────────────────────────────────
+    # Compress backup archive
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Create compressed backup archive
+      ansible.builtin.archive:
+        path: "{{ backup_work_dir }}"
+        dest: "{{ backup_base_dir }}/lazynext-backup-{{ backup_timestamp }}.tar.gz"
+        format: gz
+        owner: root
+        group: root
+        mode: "0640"
+      when: "'masters' in group_names"
+      register: backup_archive
+
+    - name: Display archive size
+      ansible.builtin.debug:
+        msg: "Backup archive: lazynext-backup-{{ backup_timestamp }}.tar.gz ({{ backup_archive.dest }})"
+      when: "'masters' in group_names"
+
+    # ──────────────────────────────────────────────────────────────
+    # Upload to Azure Blob Storage
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Upload backup to Azure Blob Storage
+      ansible.builtin.shell: |
+        set -euo pipefail
+        azcopy copy \
+          "{{ backup_base_dir }}/lazynext-backup-{{ backup_timestamp }}.tar.gz" \
+          "https://{{ azure_storage_account }}.blob.core.windows.net/{{ azure_container }}/{{ backup_timestamp }}/lazynext-backup-{{ backup_timestamp }}.tar.gz" \
+          --put-md5
+      environment:
+        AZCOPY_AUTO_LOGIN_TYPE: "AZCLI"
+      register: azcopy_upload
+      changed_when: false
+      when:
+        - "'masters' in group_names"
+        - upload_to_azure | bool
+      failed_when: false
+
+    - name: Upload backup manifest to Azure
+      ansible.builtin.shell: |
+        set -euo pipefail
+        azcopy copy \
+          "{{ backup_manifest_file }}" \
+          "https://{{ azure_storage_account }}.blob.core.windows.net/{{ azure_container }}/{{ backup_timestamp }}/{{ backup_manifest_file | basename }}" \
+          --put-md5
+      environment:
+        AZCOPY_AUTO_LOGIN_TYPE: "AZCLI"
+      register: azcopy_manifest_upload
+      changed_when: false
+      when:
+        - "'masters' in group_names"
+        - upload_to_azure | bool
+      failed_when: false
+
+    - name: Upload checksums to Azure
+      ansible.builtin.shell: |
+        set -euo pipefail
+        azcopy copy \
+          "{{ backup_work_dir }}/checksums/{{ backup_timestamp }}.sha256" \
+          "https://{{ azure_storage_account }}.blob.core.windows.net/{{ azure_container }}/{{ backup_timestamp }}/checksums.sha256" \
+          --put-md5
+      environment:
+        AZCOPY_AUTO_LOGIN_TYPE: "AZCLI"
+      register: azcopy_checksum_upload
+      changed_when: false
+      when:
+        - "'masters' in group_names"
+        - upload_to_azure | bool
+      failed_when: false
+
+    - name: Report upload status
+      ansible.builtin.debug:
+        msg:
+          - "Azure upload status:"
+          - "  Backup archive: {{ 'OK' if azcopy_upload.rc | default(1) == 0 else 'FAILED' }}"
+          - "  Manifest:       {{ 'OK' if azcopy_manifest_upload.rc | default(1) == 0 else 'FAILED' }}"
+          - "  Checksums:      {{ 'OK' if azcopy_checksum_upload.rc | default(1) == 0 else 'FAILED' }}"
+      when: "'masters' in group_names and upload_to_azure | bool"
+
+    # ──────────────────────────────────────────────────────────────
+    # Verify backup integrity
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Verify backup archive integrity with gzip
+      ansible.builtin.command: "gzip -t {{ backup_base_dir }}/lazynext-backup-{{ backup_timestamp }}.tar.gz"
+      register: gzip_test
+      changed_when: false
+      when: "'masters' in group_names"
+
+    - name: Fail if archive is corrupted
+      ansible.builtin.fail:
+        msg: "Backup archive integrity check FAILED. The gzip archive is corrupted."
+      when:
+        - "'masters' in group_names"
+        - gzip_test.rc | default(0) != 0
+
+    - name: Test archive contents listing
+      ansible.builtin.command: "tar tzf {{ backup_base_dir }}/lazynext-backup-{{ backup_timestamp }}.tar.gz"
+      register: archive_contents
+      changed_when: false
+      when: "'masters' in group_names"
+
+    - name: Verify archive contains expected paths
+      ansible.builtin.assert:
+        that:
+          - "'postgresql/' in archive_contents.stdout"
+          - "'redis/' in archive_contents.stdout"
+          - "'checksums/' in archive_contents.stdout"
+        fail_msg: "Backup archive is missing expected content directories."
+        success_msg: "Backup archive content verification passed."
+      when: "'masters' in group_names"
+
+    # ──────────────────────────────────────────────────────────────
+    # Cleanup old backups
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Find backups older than retention period
+      ansible.builtin.shell: |
+        find {{ backup_base_dir }} -maxdepth 1 \
+          -name 'lazynext-backup-*.tar.gz' \
+          -mtime "+{{ retention_days }}" \
+          -type f
+      register: old_backups
+      changed_when: false
+
+    - name: Remove old local backups
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ old_backups.stdout_lines }}"
+      when:
+        - old_backups.stdout_lines | length > 0
+
+    - name: Find old backup working directories
+      ansible.builtin.shell: |
+        find {{ backup_base_dir }} -maxdepth 1 \
+          -type d -name '20*' \
+          -mtime "+{{ retention_days }}"
+      register: old_workdirs
+      changed_when: false
+
+    - name: Remove old backup work directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop: "{{ old_workdirs.stdout_lines }}"
+      when:
+        - old_workdirs.stdout_lines | length > 0
+
+    - name: Remove old backups from Azure (if uploaded)
+      ansible.builtin.shell: |
+        set -euo pipefail
+        cutoff_date=$(date -d "-{{ retention_days }} days" +%Y%m%d)
+        azcopy list "https://{{ azure_storage_account }}.blob.core.windows.net/{{ azure_container }}/" \
+          --output-type text 2>/dev/null \
+          | awk '{print $5}' | while read -r dir; do
+            dir_clean=$(echo "$dir" | tr -d ';/')
+            if [ "${dir_clean}" \< "${cutoff_date}" ]; then
+              echo "Removing Azure backup: ${dir_clean}"
+              azcopy remove "https://{{ azure_storage_account }}.blob.core.windows.net/{{ azure_container }}/${dir_clean}/" \
+                --recursive
+            fi
+          done
+      environment:
+        AZCOPY_AUTO_LOGIN_TYPE: "AZCLI"
+      register: azure_cleanup
+      changed_when: false
+      failed_when: false
+      when:
+        - "'masters' in group_names"
+        - upload_to_azure | bool
+
+    - name: Display cleanup summary
+      ansible.builtin.debug:
+        msg:
+          - "Local backups removed: {{ old_backups.stdout_lines | length }}"
+          - "Local workdirs removed: {{ old_workdirs.stdout_lines | length }}"
+          - "Retention policy: {{ retention_days }} days"
+      when: "'masters' in group_names"
+
+  post_tasks:
+    # ──────────────────────────────────────────────────────────────
+    # Backup summary
+    # ──────────────────────────────────────────────────────────────
+
+    - name: Display backup completion summary
+      ansible.builtin.debug:
+        msg:
+          - "=============================================="
+          - "  Lazynext Backup Complete"
+          - "=============================================="
+          - "Backup ID:       {{ backup_timestamp }}"
+          - "Type:            {{ backup_type }}"
+          - "Host:            {{ ansible_hostname }}"
+          - "Local path:      {{ backup_base_dir }}/lazynext-backup-{{ backup_timestamp }}.tar.gz"
+          - "Azure container: {{ azure_container }}/{{ backup_timestamp }}/"
+          - "Integrity:       VERIFIED (SHA256)"
+          - "=============================================="
+      when: "'masters' in group_names"

@@ -103,11 +103,11 @@ locals {
   ]
 
   # Service FQDNs for cross-service communication
-  web_fqdn                = "lazynext-web-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
-  ai_agents_fqdn          = "lazynext-ai-agents-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
-  render_service_fqdn     = "lazynext-render-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
-  pre_processing_fqdn     = "lazynext-pre-processing-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
-  generative_studio_fqdn  = "lazynext-gen-studio-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  web_fqdn               = "lazynext-web-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  ai_agents_fqdn         = "lazynext-ai-agents-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  render_service_fqdn    = "lazynext-render-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  pre_processing_fqdn    = "lazynext-pre-processing-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  generative_studio_fqdn = "lazynext-gen-studio-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
 
   secret_names = [
     "better-auth-secret",

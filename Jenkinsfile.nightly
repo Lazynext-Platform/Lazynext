@@ -1,0 +1,705 @@
+// Jenkinsfile.nightly — Lazynext Nightly Pipeline
+// Scheduled full-regression pipeline: E2E tests, security scanning, performance benchmarks,
+// database backup verification, model warmup checks.
+//
+// Triggers: Cron schedule (3:00 AM UTC daily) + manual trigger supported.
+
+pipeline {
+    agent {
+        docker {
+            image 'lazynext-jenkins-agent:latest'
+            label 'lazynext-nightly'
+            args '''
+                -v /var/run/docker.sock:/var/run/docker.sock
+                -v /tmp/lazynext-cache:/cache
+                --group-add $(stat -c '%g' /var/run/docker.sock)
+                --network host
+            '''
+        }
+    }
+
+    // ── Triggers ────────────────────────────────────────────────────
+    triggers {
+        cron('H 3 * * *')   // Daily at 3:00 AM UTC (off-peak)
+    }
+
+    // ── Global timeout (longer for full regression) ─────────────────
+    options {
+        timeout(time: 180, unit: 'MINUTES')   // 3 hours for full nightly
+        timestamps()
+        ansiColor('xterm')
+        disableConcurrentBuilds()
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '60',           // Keep 2 months of nightlies
+                artifactNumToKeepStr: '30'
+            )
+        )
+    }
+
+    // ── Parameters ──────────────────────────────────────────────────
+    parameters {
+        string(
+            name: 'BRANCH_NAME',
+            defaultValue: 'main',
+            description: 'Branch to run nightly against'
+        )
+        booleanParam(
+            name: 'SKIP_E2E',
+            defaultValue: false,
+            description: 'Skip Playwright end-to-end tests'
+        )
+        booleanParam(
+            name: 'SKIP_SECURITY',
+            defaultValue: false,
+            description: 'Skip Trivy and dependency audit scans'
+        )
+        booleanParam(
+            name: 'SKIP_BENCHMARKS',
+            defaultValue: false,
+            description: 'Skip performance benchmarks'
+        )
+        choice(
+            name: 'NOTIFY_ON',
+            choices: ['always', 'failure_only', 'never'],
+            description: 'When to send notifications'
+        )
+    }
+
+    // ── Environment ─────────────────────────────────────────────────
+    environment {
+        // Rust
+        CARGO_TERM_COLOR       = 'always'
+        CARGO_HOME             = '/cache/cargo'
+        RUSTUP_HOME            = '/cache/rustup'
+        RUSTFLAGS              = '--cfg getrandom_backend="wasm_js"'
+
+        // Bun
+        BUN_INSTALL            = '/cache/bun'
+        npm_config_ignore_scripts = 'true'
+
+        // Python
+        PYTHONUNBUFFERED       = '1'
+        PIP_CACHE_DIR          = '/cache/pip'
+
+        // Build
+        SKIP_ENV_VALIDATION    = '1'
+        SKIP_WASM_BUILD        = '1'
+
+        // Nightly-specific
+        NIGHTLY_BUILD          = 'true'
+        NIGHTLY_DATE           = ''
+        REPORT_DIR             = 'nightly-reports'
+
+        // Container Registry
+        ACR_REGISTRY_DEV       = 'lazynextacrdevlmblwn.azurecr.io'
+    }
+
+    stages {
+
+        // ============================================================
+        // Stage 1: Checkout & Setup
+        // ============================================================
+        stage('Nightly Checkout & Setup') {
+            steps {
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "refs/heads/${params.BRANCH_NAME}"]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/lazynext/Lazynext.git',
+                            credentialsId: 'github-lazynext'
+                        ]],
+                        extensions: [
+                            [$class: 'CleanCheckout'],
+                            [$class: 'CloneOption', depth: 1, noTags: false, reference: '', shallow: false]
+                        ]
+                    ])
+
+                    env.NIGHTLY_DATE = sh(
+                        script: "date -u +'%Y-%m-%d'",
+                        returnStdout: true
+                    ).trim()
+
+                    env.REPORT_DIR = "nightly-reports/${env.NIGHTLY_DATE}"
+
+                    currentBuild.displayName = "Nightly #${env.BUILD_NUMBER} — ${env.NIGHTLY_DATE}"
+                    currentBuild.description = "Full regression suite for ${params.BRANCH_NAME}"
+
+                    sh "mkdir -p ${env.REPORT_DIR}"
+                }
+
+                sh '''
+                    echo "=== [Nightly] Installing workspace dependencies ==="
+                    bun install --ignore-scripts 2>&1 || {
+                        bun install --ignore-scripts --no-optional 2>&1 || {
+                            echo "[ERROR] Install failed"
+                            exit 1
+                        }
+                    }
+
+                    echo "=== [Nightly] Installing wasm-pack ==="
+                    curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+                    echo "=== [Nightly] Adding WASM target ==="
+                    rustup target add wasm32-unknown-unknown
+
+                    echo "=== [Nightly] Installing Python test deps ==="
+                    pip install pytest pytest-asyncio pytest-cov pytest-xdist pytest-benchmark
+                '''
+            }
+        }
+
+        // ============================================================
+        // Stage 2: Full Rust Checks (fmt, clippy, test, WASM)
+        // ============================================================
+        stage('Rust — Full Check') {
+            steps {
+                sh '''
+                    echo "=== [Nightly] cargo fmt --all --check ==="
+                    cargo fmt --all --check
+
+                    echo "=== [Nightly] cargo clippy — workspace ==="
+                    cargo clippy --workspace \\
+                        --exclude lazynext_desktop \\
+                        --all-targets \\
+                        -- -D warnings
+
+                    echo "=== [Nightly] cargo test — workspace (full) ==="
+                    cargo test --workspace \\
+                        --exclude lazynext_desktop \\
+                        --verbose \\
+                        -- -Z unstable-options --format json 2>/dev/null || \\
+                        cargo test --workspace --exclude lazynext_desktop --verbose
+                '''
+            }
+            post {
+                always {
+                    junit 'rust/**/target/junit-reports/*.xml'
+                    recordIssues(
+                        enabledForFailure: true,
+                        tools: [clippy(pattern: 'rust/**/clippy.json')]
+                    )
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 3: WASM Build & Verify
+        // ============================================================
+        stage('WASM — Build & Verify') {
+            steps {
+                sh '''
+                    echo "=== [Nightly] Building WASM (release) ==="
+                    cd rust/wasm
+                    RUSTFLAGS='--cfg getrandom_backend="wasm_js"' \\
+                        wasm-pack build --target web --release -- --locked 2>/dev/null || \\
+                        wasm-pack build --target web --release
+
+                    echo "=== [Nightly] WASM package metadata ==="
+                    ls -la pkg/
+
+                    echo "=== [Nightly] WASM size report ==="
+                    du -sh pkg/*.wasm pkg/*.js 2>/dev/null | tee ../../${REPORT_DIR}/wasm-size.txt
+
+                    echo "=== [Nightly] Running wasm-opt if available ==="
+                    if command -v wasm-opt &>/dev/null; then
+                        wasm-opt -Oz pkg/lazynext_wasm_bg.wasm -o pkg/lazynext_wasm_bg.opt.wasm 2>/dev/null || true
+                        du -sh pkg/lazynext_wasm_bg.opt.wasm 2>/dev/null || true
+                    else
+                        echo "[INFO] wasm-opt not installed — skipping size optimization check"
+                    fi
+                '''
+                stash(
+                    name: 'wasm-pkg-nightly',
+                    includes: 'rust/wasm/pkg/**',
+                    allowEmpty: false
+                )
+            }
+        }
+
+        // ============================================================
+        // Stage 4: Python Full Test Suite
+        // ============================================================
+        stage('Python — Full Test Suite') {
+            steps {
+                sh '''
+                    echo "=== [Nightly] Pre-Processing — full test ==="
+                    cd services/pre-processing
+                    pip install -r requirements.txt
+                    python -m pytest tests/ \\
+                        -v --tb=long \\
+                        --cov=. --cov-report=xml:coverage-pre-processing.xml \\
+                        --cov-report=html:htmlcov-pre-processing \\
+                        --junitxml=junit-pre-processing-nightly.xml \\
+                        --benchmark-skip \\
+                        -n auto \\
+                        2>&1 | tee ../../${REPORT_DIR}/pre-processing-test.log
+
+                    cd ../..
+
+                    echo "=== [Nightly] Generative Studio — full test ==="
+                    cd services/generative-studio
+                    pip install -r requirements.txt
+                    python -m pytest tests/ \\
+                        -v --tb=long \\
+                        --cov=. --cov-report=xml:coverage-generative-studio.xml \\
+                        --cov-report=html:htmlcov-generative-studio \\
+                        --junitxml=junit-generative-studio-nightly.xml \\
+                        --benchmark-skip \\
+                        -n auto \\
+                        2>&1 | tee ../../${REPORT_DIR}/generative-studio-test.log
+                '''
+            }
+            post {
+                always {
+                    junit 'services/pre-processing/junit-*-nightly.xml,services/generative-studio/junit-*-nightly.xml'
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'services/pre-processing/htmlcov-pre-processing',
+                        reportFiles: 'index.html',
+                        reportName: 'Pre-Processing Coverage (Nightly)'
+                    ])
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'services/generative-studio/htmlcov-generative-studio',
+                        reportFiles: 'index.html',
+                        reportName: 'Generative Studio Coverage (Nightly)'
+                    ])
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 5: Web App — Full Build + Playwright E2E
+        // ============================================================
+        stage('Web — Full Build & E2E') {
+            when {
+                expression { return !params.SKIP_E2E }
+            }
+            steps {
+                unstash 'wasm-pkg-nightly'
+
+                sh '''
+                    echo "=== [Nightly] Linking WASM ==="
+                    if [ -d "rust/wasm/pkg" ] && [ "$(ls -A rust/wasm/pkg/ 2>/dev/null)" ]; then
+                        mkdir -p apps/web/node_modules/lazynext-wasm
+                        cp -r rust/wasm/pkg/* apps/web/node_modules/lazynext-wasm/
+                        echo "WASM package linked"
+                    else
+                        echo "[WARN] WASM package not available for E2E"
+                    fi
+
+                    echo "=== [Nightly] Lint + Typecheck ==="
+                    cd apps/web
+                    bun run lint
+                    SKIP_ENV_VALIDATION=1 bun run typecheck
+
+                    echo "=== [Nightly] Unit Tests ==="
+                    bun run test 2>&1 | tee ../../${REPORT_DIR}/web-unit-tests.log
+
+                    echo "=== [Nightly] Installing Playwright browsers ==="
+                    bunx playwright install --with-deps chromium
+
+                    echo "=== [Nightly] Building Next.js ==="
+                    SKIP_WASM_BUILD=1 \\
+                    SKIP_ENV_VALIDATION=1 \\
+                    BETTER_AUTH_SECRET="nightly-ci-placeholder-secret-64chars-long" \\
+                        npx next build
+                '''
+
+                // ── Playwright E2E ──
+                sh '''
+                    echo "=== [Nightly] Starting dev server for E2E ==="
+                    cd apps/web
+                    bun run dev &
+                    DEV_PID=$!
+                    echo "Dev server PID: $DEV_PID"
+
+                    # Wait for server
+                    for i in $(seq 1 45); do
+                        if curl -sf http://localhost:3000/api/health > /dev/null 2>&1; then
+                            echo "[OK] Dev server ready after ${i}s"
+                            break
+                        fi
+                        if [ $i -eq 45 ]; then
+                            echo "[ERROR] Dev server failed to start"
+                            kill $DEV_PID 2>/dev/null || true
+                            exit 1
+                        fi
+                        sleep 1
+                    done
+
+                    echo "=== [Nightly] Running Playwright E2E tests ==="
+                    bun run test:e2e 2>&1 | tee ../../${REPORT_DIR}/e2e-tests.log
+                    E2E_EXIT=$?
+
+                    # Cleanup
+                    kill $DEV_PID 2>/dev/null || true
+
+                    exit $E2E_EXIT
+                '''
+            }
+            post {
+                always {
+                    junit 'apps/web/e2e-results/*.xml,apps/web/test-results/*.xml'
+                    archiveArtifacts(
+                        artifacts: 'apps/web/playwright-report/**,apps/web/test-results/**',
+                        allowEmptyArchive: true,
+                        fingerprint: true
+                    )
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'apps/web/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E Report (Nightly)'
+                    ])
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 6: Node Services — Full Test Suite
+        // ============================================================
+        stage('Node Services — Full Test Suite') {
+            steps {
+                sh '''
+                    for svc in ai-agents render-service analytics-service collab-server; do
+                        echo "=== [Nightly] Testing ${svc} ==="
+                        cd services/${svc}
+                        bun install --ignore-scripts || true
+                        bun test 2>&1 | tee ../../${REPORT_DIR}/${svc}-test.log || {
+                            echo "[WARN] ${svc} tests had failures — continuing"
+                        }
+                        cd ../..
+                    done
+                '''
+            }
+            post {
+                always {
+                    junit 'services/*/junit*.xml'
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 7: Security Scanning
+        // ============================================================
+        stage('Security Scanning') {
+            when {
+                expression { return !params.SKIP_SECURITY }
+            }
+            parallel {
+
+                // ── 7a. Trivy — Docker image scanning ───────────────
+                stage('Trivy — Image Scanning') {
+                    steps {
+                        script {
+                            def images = [
+                                'web', 'ai-agents', 'render-service',
+                                'pre-processing', 'generative-studio',
+                                'analytics-service', 'collab-server'
+                            ]
+
+                            images.each { img ->
+                                sh """
+                                    echo "=== [Nightly] Trivy scan: lazynext-${img} ==="
+                                    if command -v trivy &>/dev/null; then
+                                        trivy image \\
+                                            --severity HIGH,CRITICAL \\
+                                            --format json \\
+                                            --output ${env.REPORT_DIR}/trivy-${img}.json \\
+                                            --ignore-unfixed \\
+                                            lazynext-${img}:latest 2>&1 | tee ${env.REPORT_DIR}/trivy-${img}.log || true
+                                    else
+                                        echo "[INFO] Trivy not installed — run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh"
+                                    fi
+                                """
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            archiveArtifacts(
+                                artifacts: "${env.REPORT_DIR}/trivy-*.json,${env.REPORT_DIR}/trivy-*.log",
+                                allowEmptyArchive: true,
+                                fingerprint: true
+                            )
+                        }
+                    }
+                }
+
+                // ── 7b. Dependency Audit ───────────────────────────
+                stage('Dependency Audit') {
+                    steps {
+                        sh '''
+                            echo "=== [Nightly] npm/bun audit — web app ==="
+                            cd apps/web
+                            bun audit 2>&1 | tee ../../${REPORT_DIR}/npm-audit-web.log || echo "[WARN] Audit issues found"
+
+                            cd ../..
+
+                            echo "=== [Nightly] cargo audit — Rust workspace ==="
+                            if command -v cargo-audit &>/dev/null; then
+                                cargo audit --json > ${REPORT_DIR}/cargo-audit.json 2>&1 || echo "[WARN] Rust audit issues found"
+                            else
+                                echo "[INFO] cargo-audit not installed — run: cargo install cargo-audit"
+                            fi
+
+                            echo "=== [Nightly] pip-audit — Python services ==="
+                            if command -v pip-audit &>/dev/null; then
+                                pip-audit --format json > ${REPORT_DIR}/pip-audit.json 2>&1 || echo "[WARN] Python audit issues found"
+                            else
+                                echo "[INFO] pip-audit not installed — run: pip install pip-audit"
+                            fi
+                        '''
+                    }
+                    post {
+                        always {
+                            archiveArtifacts(
+                                artifacts: "${env.REPORT_DIR}/npm-audit-*.log,${env.REPORT_DIR}/cargo-audit.json,${env.REPORT_DIR}/pip-audit.json",
+                                allowEmptyArchive: true
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 8: Performance Benchmarks
+        // ============================================================
+        stage('Performance Benchmarks') {
+            when {
+                expression { return !params.SKIP_BENCHMARKS }
+            }
+            steps {
+                sh '''
+                    echo "=== [Nightly] Rust benchmarks ==="
+                    cargo bench --workspace --exclude lazynext_desktop \\
+                        2>&1 | tee ${REPORT_DIR}/rust-bench.log || {
+                        echo "[INFO] Cargo bench may need nightly toolchain: rustup install nightly"
+                    }
+
+                    echo "=== [Nightly] Python benchmarks (pytest-benchmark) ==="
+                    cd services/pre-processing
+                    python -m pytest tests/ \\
+                        --benchmark-only \\
+                        --benchmark-json=../../${REPORT_DIR}/python-bench-pre-processing.json \\
+                        2>&1 | tee ../../${REPORT_DIR}/python-bench-pre-processing.log || true
+                    cd ../..
+
+                    cd services/generative-studio
+                    python -m pytest tests/ \\
+                        --benchmark-only \\
+                        --benchmark-json=../../${REPORT_DIR}/python-bench-generative-studio.json \\
+                        2>&1 | tee ../../${REPORT_DIR}/python-bench-generative-studio.log || true
+                    cd ../..
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: "${env.REPORT_DIR}/rust-bench.log,${env.REPORT_DIR}/python-bench-*.json,${env.REPORT_DIR}/python-bench-*.log",
+                        allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 9: Model Warmup Verification
+        // ============================================================
+        stage('Model Warmup Verification') {
+            steps {
+                sh '''
+                    echo "=== [Nightly] Model warmup check — pre-processing ==="
+                    curl -sf http://localhost:8000/health 2>/dev/null && {
+                        echo "[OK] Pre-processing service is healthy"
+                        curl -s -X POST http://localhost:8000/api/warmup \\
+                            -H "Content-Type: application/json" \\
+                            -d '{"models": ["whisper", "sam2"]}' \\
+                            2>&1 | tee ${REPORT_DIR}/model-warmup.log || echo "[WARN] Warmup endpoint check failed"
+                    } || echo "[INFO] Pre-processing service not running — skipping warmup check"
+
+                    echo "=== [Nightly] Model warmup check — generative-studio ==="
+                    curl -sf http://localhost:8001/health 2>/dev/null && {
+                        echo "[OK] Generative Studio service is healthy"
+                        curl -s -X POST http://localhost:8001/api/warmup \\
+                            -H "Content-Type: application/json" \\
+                            -d '{"models": ["svd", "demucs"]}' \\
+                            2>&1 | tee -a ${REPORT_DIR}/model-warmup.log || echo "[WARN] Warmup endpoint check failed"
+                    } || echo "[INFO] Generative Studio service not running — skipping warmup check"
+                '''
+            }
+        }
+
+        // ============================================================
+        // Stage 10: Database Backup Verification
+        // ============================================================
+        stage('Database Backup Verification') {
+            steps {
+                script {
+                    withCredentials([
+                        file(credentialsId: 'azure-credentials', variable: 'AZURE_AUTH_FILE')
+                    ]) {
+                        sh '''
+                            echo "=== [Nightly] Azure Login for DB backup verification ==="
+                            az login --service-principal \\
+                                --username "$(jq -r .clientId $AZURE_AUTH_FILE)" \\
+                                --password "$(jq -r .clientSecret $AZURE_AUTH_FILE)" \\
+                                --tenant "$(jq -r .tenantId $AZURE_AUTH_FILE)"
+
+                            echo "=== [Nightly] Checking PostgreSQL backups ==="
+                            az postgres flexible-server backup list \\
+                                --resource-group lazynext-rg-production \\
+                                --name lazynext-postgres-production \\
+                                --query "[?backupStartTime >= '${env.NIGHTLY_DATE}']" \\
+                                -o table 2>&1 | tee ${env.REPORT_DIR}/db-backup-verification.log || {
+                                echo "[WARN] Backup check via az failed — check in Azure Portal"
+                                echo "Backup verification requires Azure PostgreSQL Flexible Server access"
+                            }
+
+                            echo "=== [Nightly] Checking backup retention ==="
+                            az postgres flexible-server show \\
+                                --resource-group lazynext-rg-production \\
+                                --name lazynext-postgres-production \\
+                                --query "{retention: backup.backupRetentionDays, geoRedundant: backup.geoRedundantBackup}" \\
+                                -o table 2>&1 || echo "[WARN] Could not read backup retention config"
+                        '''
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts(
+                        artifacts: "${env.REPORT_DIR}/db-backup-verification.log",
+                        allowEmptyArchive: true
+                    )
+                }
+            }
+        }
+
+        // ============================================================
+        // Stage 11: Publish Nightly Report
+        // ============================================================
+        stage('Publish Nightly Report') {
+            steps {
+                script {
+                    def reportPath = env.REPORT_DIR
+
+                    // ── Generate summary markdown ──
+                    sh """
+                        cat > ${reportPath}/NIGHTLY-SUMMARY.md << 'SUMMARY_EOF'
+                        # Lazynext Nightly Report — ${env.NIGHTLY_DATE}
+
+                        | Field | Value |
+                        |-------|-------|
+                        | **Build Number** | ${env.BUILD_NUMBER} |
+                        | **Branch** | ${params.BRANCH_NAME} |
+                        | **Git SHA** | ${env.GIT_SHA} |
+                        | **Duration** | ${currentBuild.durationString} |
+                        | **Status** | ${currentBuild.result ?: 'RUNNING'} |
+
+                        ## Reports
+                        - [WASM Size](wasm-size.txt)
+                        - [E2E Tests](e2e-tests.log)
+                        - [Rust Benchmarks](rust-bench.log)
+                        - [Trivy Scans](trivy-web.log)
+                        - [DB Backup](db-backup-verification.log)
+
+                        > Generated by Jenkins Nightly Pipeline — see [full logs](${env.BUILD_URL})
+                        SUMMARY_EOF
+
+                        echo "Nightly report generated at ${reportPath}/NIGHTLY-SUMMARY.md"
+                    """
+
+                    archiveArtifacts(
+                        artifacts: "${reportPath}/**",
+                        fingerprint: true
+                    )
+                }
+            }
+        }
+    }
+
+    // ── Post Actions ──────────────────────────────────────────────
+    post {
+        always {
+            script {
+                // ── Clean old nightly reports beyond 60 days ──
+                sh '''
+                    echo "=== Cleaning old nightly reports ==="
+                    find nightly-reports/ -maxdepth 1 -type d -mtime +60 -exec rm -rf {} + 2>/dev/null || true
+                '''
+            }
+
+            cleanWs(
+                cleanWhenAborted: true,
+                cleanWhenFailure: false,
+                cleanWhenNotBuilt: true,
+                cleanWhenSuccess: true,
+                cleanWhenUnstable: false,
+                deleteDirs: true,
+                notFailBuild: true
+            )
+        }
+
+        success {
+            echo "[Nightly] All checks passed — ${env.NIGHTLY_DATE}"
+            script {
+                if (params.NOTIFY_ON != 'never') {
+                    slackSend(
+                        color: 'good',
+                        message: "Nightly #${env.BUILD_NUMBER} (${env.NIGHTLY_DATE}) passed — all ${currentBuild.durationString} of checks green. <${env.BUILD_URL}|View Report>"
+                    )
+                }
+            }
+        }
+
+        failure {
+            echo "[Nightly] FAILURES detected — ${env.NIGHTLY_DATE}"
+            script {
+                if (params.NOTIFY_ON in ['always', 'failure_only']) {
+                    slackSend(
+                        color: 'danger',
+                        message: "Nightly #${env.BUILD_NUMBER} (${env.NIGHTLY_DATE}) FAILED — <${env.BUILD_URL}|Check Logs>"
+                    )
+                }
+            }
+            emailext(
+                subject: "[NIGHTLY FAILURE] Lazynext Nightly #${env.BUILD_NUMBER} — ${env.NIGHTLY_DATE}",
+                body: """
+                    Nightly pipeline #${env.BUILD_NUMBER} for ${env.NIGHTLY_DATE} failed.
+
+                    Branch: ${params.BRANCH_NAME}
+                    Duration: ${currentBuild.durationString}
+
+                    Full logs: ${env.BUILD_URL}
+
+                    Please investigate and fix before the next nightly run.
+                """.stripIndent(),
+                to: 'platform-eng@lazynext.com',
+                recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']]
+            )
+        }
+
+        unstable {
+            echo "[Nightly] Unstable (warnings) — ${env.NIGHTLY_DATE}"
+            script {
+                if (params.NOTIFY_ON == 'always') {
+                    slackSend(
+                        color: 'warning',
+                        message: "Nightly #${env.BUILD_NUMBER} (${env.NIGHTLY_DATE}) unstable — some checks had warnings. <${env.BUILD_URL}|View Report>"
+                    )
+                }
+            }
+        }
+    }
+}

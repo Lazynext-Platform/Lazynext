@@ -1,0 +1,815 @@
+{
+  "dashboard": {
+    "uid": "lazynext-business",
+    "title": "Lazynext — Business Metrics",
+    "tags": ["lazynext", "business", "revenue", "analytics", "production"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "5m",
+    "time": {
+      "from": "now-30d",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "DAU (Daily Active Users)",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"daily\"}[24h]))",
+            "legendFormat": "DAU",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 100, "color": "yellow"},
+                {"value": 1000, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 2,
+        "title": "WAU (Weekly Active Users)",
+        "type": "stat",
+        "gridPos": {"x": 4, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"weekly\"}[7d]))",
+            "legendFormat": "WAU",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1000, "color": "yellow"},
+                {"value": 5000, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 3,
+        "title": "MAU (Monthly Active Users)",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"monthly\"}[30d]))",
+            "legendFormat": "MAU",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 5000, "color": "yellow"},
+                {"value": 20000, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 4,
+        "title": "DAU / MAU Ratio (Stickiness)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"daily\"}[24h])) / sum(increase(analytics_active_users_total{period=\"monthly\"}[30d])) * 100",
+            "legendFormat": "Stickiness",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 10, "color": "yellow"},
+                {"value": 20, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 5,
+        "title": "MRR (Monthly Recurring Revenue)",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(analytics_mrr_dollars)",
+            "legendFormat": "MRR",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1000, "color": "yellow"},
+                {"value": 10000, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 6,
+        "title": "ARR (Annual Run Rate)",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 0, "w": 4, "h": 5},
+        "targets": [
+          {
+            "expr": "sum(analytics_mrr_dollars) * 12",
+            "legendFormat": "ARR",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 12000, "color": "yellow"},
+                {"value": 120000, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Active Users Over Time",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 5, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"daily\"}[24h]))",
+            "legendFormat": "DAU",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"weekly\"}[7d])) / 7",
+            "legendFormat": "WAU/day avg",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"monthly\"}[30d])) / 30",
+            "legendFormat": "MAU/day avg",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["mean", "lastNotNull"]
+          },
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 8,
+        "title": "New Signups",
+        "type": "barchart",
+        "gridPos": {"x": 12, "y": 5, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_signups_total[1d]))",
+            "legendFormat": "Signups",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "continuous-GrYlRd"}
+          }
+        },
+        "options": {
+          "orientation": "vertical"
+        }
+      },
+      {
+        "id": 9,
+        "title": "Signup → Active Conversion Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 18, "y": 5, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_active_users_total{period=\"daily\"}[24h])) / sum(increase(analytics_signups_total[1d])) * 100",
+            "legendFormat": "Conversion %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 20, "color": "yellow"},
+                {"value": 50, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 10,
+        "title": "Project Creation Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 13, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_projects_created_total[1h])) * 3600",
+            "legendFormat": "Projects/hour",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 60
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 11,
+        "title": "Active Timelines",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 13, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "avg_over_time(analytics_active_timelines[5m])",
+            "legendFormat": "Active Timelines",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 12,
+        "title": "Timeline Operations per Hour",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 13, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_timeline_operations_total[1h])) by (operation_type) * 3600",
+            "legendFormat": "{{operation_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["sum"]
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "Export / Render Jobs by Format",
+        "type": "barchart",
+        "gridPos": {"x": 0, "y": 20, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_completed_total[7d])) by (format)",
+            "legendFormat": "{{format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "table", "placement": "right"}
+        }
+      },
+      {
+        "id": 14,
+        "title": "Export Volume Trend",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 20, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_completed_total[1d])) by (format)",
+            "legendFormat": "{{format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 70,
+              "stacking": {"mode": "normal"}
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 15,
+        "title": "Social Media Exports by Platform",
+        "type": "piechart",
+        "gridPos": {"x": 16, "y": 20, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(render_social_publish_total[7d])) by (platform)",
+            "legendFormat": "{{platform}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "displayLabels": ["name", "percent"],
+          "legend": {"displayMode": "table", "placement": "right"},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 16,
+        "title": "MRR Over Time",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 27, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(analytics_mrr_dollars) by (plan_tier)",
+            "legendFormat": "{{plan_tier}}",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(analytics_mrr_dollars)",
+            "legendFormat": "Total MRR",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 0,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Total MRR"},
+              "properties": [
+                {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [8, 4]}},
+                {"id": "custom.lineWidth", "value": 3}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 17,
+        "title": "Revenue by Plan Tier (7d)",
+        "type": "barchart",
+        "gridPos": {"x": 8, "y": 27, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_revenue_dollars[7d])) by (plan_tier)",
+            "legendFormat": "{{plan_tier}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 0,
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "vertical",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 18,
+        "title": "Customer Churn Rate (30d rolling)",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 27, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_churned_customers_total[30d])) / sum(rate(analytics_active_subscriptions_total[30d])) * 100",
+            "legendFormat": "Churn %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 5, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 19,
+        "title": "AI Feature Adoption",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 34, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_ai_feature_usage_total[7d])) by (feature) / sum(rate(analytics_active_users_total{period=\"weekly\"}[7d])) * 100",
+            "legendFormat": "{{feature}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 10, "color": "yellow"},
+                {"value": 30, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["mean"]},
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true,
+          "orientation": "auto"
+        }
+      },
+      {
+        "id": 20,
+        "title": "AI Feature Usage by Feature",
+        "type": "timeseries",
+        "gridPos": {"x": 6, "y": 34, "w": 10, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_ai_feature_usage_total[1h])) by (feature) * 3600",
+            "legendFormat": "{{feature}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cph",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["mean", "max"]
+          }
+        }
+      },
+      {
+        "id": 21,
+        "title": "AI vs Manual Editing Split",
+        "type": "piechart",
+        "gridPos": {"x": 16, "y": 34, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(increase(analytics_timeline_operations_total[7d])) by (source)",
+            "legendFormat": "{{source}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "displayLabels": ["name", "percent", "value"],
+          "legend": {"displayMode": "table", "placement": "right"},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 22,
+        "title": "Session Duration Distribution",
+        "type": "histogram",
+        "gridPos": {"x": 0, "y": 40, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(analytics_session_duration_seconds_bucket[7d])) by (le)",
+            "legendFormat": "{{le}}s",
+            "refId": "A",
+            "format": "heatmap"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 23,
+        "title": "Avg Session Duration Trend",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 40, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(analytics_session_duration_seconds_bucket[1d])) by (le))",
+            "legendFormat": "Median",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(analytics_session_duration_seconds_bucket[1d])) by (le))",
+            "legendFormat": "p95",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom"},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 24,
+        "title": "Top Active Projects (by operations)",
+        "type": "table",
+        "gridPos": {"x": 0, "y": 48, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "topk(10, sum(rate(analytics_timeline_operations_total[1d])) by (project_id))",
+            "format": "table",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "Value"},
+              "properties": [
+                {"id": "custom.displayMode", "value": "color-background-solid"},
+                {"id": "color", "value": {"mode": "continuous-BlYlRd"}}
+              ]
+            }
+          ]
+        },
+        "options": {
+          "showHeader": true,
+          "sortBy": [{"displayName": "Value", "desc": true}]
+        },
+        "transformations": [
+          {"id": "organize", "options": {"renameByName": {"Value": "Ops/day"}}}
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Subscription Distribution",
+        "type": "barchart",
+        "gridPos": {"x": 12, "y": 48, "w": 6, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(analytics_active_subscriptions_total) by (plan_tier)",
+            "legendFormat": "{{plan_tier}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 26,
+        "title": "Net Revenue Retention (NRR)",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 48, "w": 6, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(analytics_expansion_mrr_dollars) / sum(analytics_churned_mrr_dollars) * 100",
+            "legendFormat": "NRR",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 100, "color": "yellow"},
+                {"value": 120, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "background",
+          "textMode": "value_and_name"
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "label": "Environment",
+          "query": "label_values(up, environment)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        },
+        {
+          "name": "plan_tier",
+          "type": "query",
+          "label": "Plan Tier",
+          "query": "label_values(analytics_active_subscriptions_total, plan_tier)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        }
+      ]
+    }
+  }
+}

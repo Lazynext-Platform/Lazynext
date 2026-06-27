@@ -18,11 +18,11 @@ Install these tools before anything else. Versions listed are minimums; newer pa
 
 | Tool | Version | Why |
 |------|---------|-----|
-| **Rust** (rustup) | 1.82+ | All business logic lives in `rust/`. Install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh`. |
-| **Bun** | 1.3.12+ | Package manager and JS runtime for the monorepo. Install via `curl -fsSL https://bun.sh/install \| bash`. |
+| **Rust** (rustup) | 1.96+ | All business logic lives in `rust/`. Install via `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh`. |
+| **Bun** | 1.3.14+ | Package manager and JS runtime for the monorepo. Install via `curl -fsSL https://bun.sh/install \| bash`. |
 | **wasm-pack** | latest | Compiles Rust crates to WebAssembly for the web app. Install via `cargo install wasm-pack`. |
 | **Docker** + Docker Compose | 24+ | Runs PostgreSQL, Redis, and optional full-platform deploys. Install from docker.com. |
-| **Python** | 3.11+ | Required for the pre-processing and generative-studio microservices. |
+| **Python** | 3.13+ | Required for the pre-processing and generative-studio microservices. |
 | **Node.js** | 22+ | Required by some tooling; Bun covers most JS needs, but `npx` and `node` are sometimes used directly. |
 | **Git** | 2.40+ | Version control. |
 
@@ -266,7 +266,7 @@ bun run build                  # Build all apps for production
 bun run lint                   # Lint all packages
 bun run typecheck              # TypeScript check entire workspace
 bun run test                   # Run tests across workspace
-bun run docker:up              # docker compose up --build -d (all 6 services)
+bun run docker:up              # docker compose up --build -d (all 8 services)
 bun run docker:down            # docker compose down
 ```
 

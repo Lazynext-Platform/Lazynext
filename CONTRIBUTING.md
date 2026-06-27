@@ -25,7 +25,7 @@ Welcome! Lazynext is an autonomous, real-time collaborative NLE built on Rust + 
 ## Getting Started
 
 ```bash
-# Prerequisites: Rust 1.96+, Bun 1.3+, Python 3.13+
+# Prerequisites: Rust 1.96+, Bun 1.3.14+, Python 3.13+
 bun install
 ./build-wasm.sh
 bun run dev         # Starts the web app on :3000

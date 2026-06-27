@@ -1,0 +1,128 @@
+---
+# ── Lazynext Ansible Group Vars: all ──────────────────────────────
+# Common variables inherited by every host in the inventory.
+
+# ── Connection ────────────────────────────────────────────────────
+ansible_user: ubuntu
+ansible_python_interpreter: /usr/bin/python3
+
+# ── System ────────────────────────────────────────────────────────
+timezone: UTC
+ntp_servers:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org
+  - 2.pool.ntp.org
+  - 3.pool.ntp.org
+configure_firewall: true
+
+# ── Docker ────────────────────────────────────────────────────────
+docker_users:
+  - ubuntu
+docker_daemon_options:
+  log-driver: json-file
+  log-opts:
+    max-size: "10m"
+    max-file: "3"
+  storage-driver: overlay2
+  metrics-addr: "0.0.0.0:9323"
+  experimental: false
+  live-restore: true
+
+# ── Kubernetes ────────────────────────────────────────────────────
+kubernetes_version: "1.32"
+cni_plugin: cilium
+k8s_pod_network_cidr: "10.244.0.0/16"
+k8s_service_cidr: "10.96.0.0/12"
+k8s_api_server_port: 6443
+kubeconfig_path: "/home/{{ ansible_user }}/.kube/config"
+helm_version: "3.17.0"
+
+# ── PostgreSQL ────────────────────────────────────────────────────
+postgresql_version: "17"
+postgresql_data_dir: "/var/lib/postgresql/{{ postgresql_version }}/main"
+postgresql_conf_dir: "/etc/postgresql/{{ postgresql_version }}/main"
+postgresql_shared_buffers: "256MB"
+postgresql_effective_cache_size: "1GB"
+postgresql_wal_level: replica
+postgresql_max_wal_senders: 3
+postgresql_wal_keep_size: "1GB"
+postgresql_max_connections: 200
+postgresql_listen_addresses: "*"
+postgresql_port: 5432
+postgresql_replication_user: replicator
+postgresql_replication_password: "{{ vault_postgresql_replication_password | default('ChangeMeRepl!123') }}"
+postgresql_admin_user: postgres
+postgresql_admin_password: "{{ vault_postgresql_admin_password | default('ChangeMeAdmin!123') }}"
+
+# PgBouncer
+pgbouncer_version: "1.23"
+pgbouncer_listen_port: 6432
+pgbouncer_max_client_conn: 500
+pgbouncer_default_pool_size: 50
+pgbouncer_reserve_pool_size: 10
+pgbouncer_pool_mode: transaction
+
+# Backups
+postgresql_backup_dir: "/var/backups/postgresql"
+postgresql_backup_retention_days: 30
+postgresql_wal_archive_dir: "/var/backups/postgresql/wal"
+azure_storage_account: "{{ vault_azure_storage_account | default('lazynextbackups') }}"
+azure_storage_container: "{{ vault_azure_storage_container | default('postgres-backups') }}"
+
+# ── Redis ─────────────────────────────────────────────────────────
+redis_version: "8"
+redis_port: 6379
+redis_sentinel_port: 26379
+redis_maxmemory: "2gb"
+redis_maxmemory_policy: allkeys-lru
+redis_save_schedule:
+  - "900 1"
+  - "300 10"
+  - "60 10000"
+redis_appendonly: "yes"
+redis_appendfsync: everysec
+redis_sentinel_quorum: 2
+redis_sentinel_down_after_ms: 5000
+redis_sentinel_failover_timeout: 15000
+redis_sentinel_parallel_syncs: 1
+redis_password: "{{ vault_redis_password | default('ChangeMeRedis!123') }}"
+
+# ── Monitoring ────────────────────────────────────────────────────
+monitoring_namespace: monitoring
+monitoring_version_tags:
+  prometheus: "v3.3.1"
+  alertmanager: "v0.28.1"
+  node_exporter: "v1.9.1"
+  postgres_exporter: "v0.17.0"
+  redis_exporter: "v1.80.0"
+  grafana: "11.5.1"
+  loki: "3.7.2"
+  promtail: "3.7.2"
+  alloy: "v1.17.0"
+
+prometheus_config_dir: /etc/prometheus
+prometheus_data_dir: /var/lib/prometheus
+prometheus_retention: 30d
+prometheus_storage_size: 100GB
+prometheus_external_labels:
+  cluster: lazynext-prod
+  env: production
+
+grafana_admin_user: admin
+grafana_admin_password: "{{ vault_grafana_admin_password | default('ChangeMeGraf!123') }}"
+grafana_port: 3000
+
+alertmanager_config_dir: /etc/alertmanager
+alertmanager_slack_webhook_url: "{{ vault_alertmanager_slack_webhook_url | default('https://hooks.slack.com/services/CHANGEME') }}"
+alertmanager_pagerduty_routing_key: "{{ vault_alertmanager_pagerduty_routing_key | default('CHANGEME') }}"
+
+loki_config_dir: /etc/loki
+loki_data_dir: /var/lib/loki
+loki_retention: 30d
+
+alloy_config_dir: /etc/alloy
+
+# ── Networking ────────────────────────────────────────────────────
+private_network_cidr: "10.0.0.0/16"
+vnet_name: lazynext-vnet
+subnet_name: lazynext-subnet

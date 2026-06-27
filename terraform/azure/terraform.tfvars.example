@@ -7,7 +7,7 @@ environment  = "dev"                 # dev | staging | production
 app_domain   = "lazynext.ai"
 
 # ── AKS ──────────────────────────────────────────────────────────────────
-kubernetes_version = "1.30"
+kubernetes_version = "1.32"
 node_count         = 2
 
 # ── Database ─────────────────────────────────────────────────────────────
@@ -31,3 +31,36 @@ resend_api_key        = "re_..."
 
 # ── LLM ──────────────────────────────────────────────────────────────────
 llm_provider = "anthropic"   # openai | anthropic | gemini | ollama
+
+# ── Redis Cache ──────────────────────────────────────────────────────────
+# Enterprise_E10  = 12 GB per shard (minimum for production)
+# Enterprise_E20  = 25 GB per shard
+# Enterprise_E50  = 50 GB per shard
+# Enterprise_E100 = 100 GB per shard
+redis_sku_name  = "Enterprise_E10"
+redis_capacity  = 1                # Number of shards
+
+# ── CDN / Front Door ─────────────────────────────────────────────────────
+# Standard_AzureFrontDoor = global anycast, basic WAF, no private link
+# Premium_AzureFrontDoor  = adds private link, advanced WAF, bot protection
+cdn_sku_name            = "Standard_AzureFrontDoor"
+media_custom_domain     = "media.lazynext.ai"
+# Azure DNS Zone resource ID (for automatic custom domain validation).
+# Leave empty to manage DNS CNAME record manually.
+cdn_dns_zone_id         = ""
+
+# ── Monitoring / Alerts ──────────────────────────────────────────────────
+alert_email_address           = "alerts@lazynext.ai"
+alert_slack_webhook_url       = ""  # https://hooks.slack.com/services/...
+alert_pagerduty_integration_key = ""  # PagerDuty Events API v2 key
+
+# ── Application Gateway / WAF ────────────────────────────────────────────
+# WAF_v2      = Web Application Firewall (OWASP rules) with auto-scaling
+# Standard_v2 = Standard Application Gateway with auto-scaling (no WAF)
+app_gateway_sku_tier   = "WAF_v2"
+app_gateway_capacity   = 2              # Initial instance count (min)
+app_gateway_subnet_prefix = ["10.0.1.0/24"]
+
+# ── Backup ───────────────────────────────────────────────────────────────
+backup_retention_days  = 30             # Retain daily backups for 30 days
+backup_policy_time     = "02:00"        # Daily backup at 2:00 AM UTC

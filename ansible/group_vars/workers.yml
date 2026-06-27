@@ -1,0 +1,34 @@
+---
+# ── Lazynext Ansible Group Vars: workers ──────────────────────────
+# Variables specific to general compute worker nodes.
+
+# ── System Resources (typical 8-16 vCPU, 32-64 GB RAM nodes) ─────
+node_role: worker
+node_labels:
+  role: general-compute
+  tier: application
+
+# ── Kubernetes ────────────────────────────────────────────────────
+kubelet_extra_args:
+  max-pods: 110
+  system-reserved: "cpu=500m,memory=1Gi"
+  kube-reserved: "cpu=250m,memory=512Mi"
+  eviction-hard: "memory.available<500Mi,nodefs.available<5%,nodefs.inodesFree<5%"
+
+# ── Docker daemon resource limits on workers ──────────────────────
+docker_daemon_options_override:
+  log-opts:
+    max-size: "50m"
+    max-file: "5"
+
+# ── Node exporter filesystem ignores ──────────────────────────────
+node_exporter_filesystem_ignores: "^/(dev|proc|sys|run|snap|var/lib/docker/.+)($|/)"
+
+# ── PostgreSQL connection pooling (workers run app svcs) ──────────
+pgbouncer_enabled: true
+pgbouncer_max_client_conn: 800
+pgbouncer_default_pool_size: 100
+
+# ── Redis client config (workers run app services) ────────────────
+redis_client_timeout: 5
+redis_client_reconnect_attempts: 10
