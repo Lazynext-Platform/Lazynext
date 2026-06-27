@@ -536,7 +536,7 @@ mod tests {
         // Center (1.5, 1.5) should be around 128
         let val = sample_bilinear(&data, width, height, 4, 1.5, 1.5, 0);
         assert!(
-            val >= 0.0 && val <= 255.0,
+            (0.0..=255.0).contains(&val),
             "Value should be in range, got {}",
             val
         );

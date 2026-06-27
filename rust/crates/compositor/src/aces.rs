@@ -224,7 +224,7 @@ mod tests {
         let pipe = AcesColorPipeline::new();
         let (r, g, b) = pipe.apply_pipeline(0.5, 0.5, 0.5);
         assert!(!r.is_nan() && !g.is_nan() && !b.is_nan());
-        assert!(r >= 0.0 && r <= 1.0, "Output should be in [0,1]");
+        assert!((0.0..=1.0).contains(&r), "Output should be in [0,1]");
     }
 
     #[test]

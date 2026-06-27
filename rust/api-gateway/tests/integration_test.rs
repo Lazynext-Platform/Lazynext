@@ -201,15 +201,15 @@ fn test_export_format_mapping() {
 #[test]
 fn test_csrf_token_length() {
     // CSRF tokens should be 32 hex characters (128 bits)
-    let token = hex::encode(&[0xABu8; 16]);
+    let token = hex::encode([0xABu8; 16]);
     assert_eq!(token.len(), 32);
     assert!(token.chars().all(|c| c.is_ascii_hexdigit()));
 }
 
 #[test]
 fn test_csrf_tokens_differ() {
-    let token1 = hex::encode(&[1u8; 16]);
-    let token2 = hex::encode(&[2u8; 16]);
+    let token1 = hex::encode([1u8; 16]);
+    let token2 = hex::encode([2u8; 16]);
     assert_ne!(token1, token2);
 }
 
