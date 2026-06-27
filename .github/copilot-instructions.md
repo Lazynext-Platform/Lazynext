@@ -256,7 +256,7 @@ Strict type safety, accessibility standards, and consistent code quality for Jav
 - Don't compare against -0.
 - Don't use labeled statements that aren't loops.
 - Don't use void type outside of generic or return types.
-- Don't use console.
+- Don't use console. Use structured logging instead (tracing crate for Rust, pino/winston for Node services).
 - Don't use control characters and escape sequences that match control characters in regular expression literals.
 - Don't use debugger.
 - Don't assign directly to document.cookie.
@@ -326,21 +326,31 @@ Strict type safety, accessibility standards, and consistent code quality for Jav
 ## Example: Error Handling
 
 ```typescript
-// ✅ Good: Comprehensive error handling with proper logging
+// ❌ Bad: Using console.log/console.error — violates "Don't use console" rule
+try {
+	const result = await fetchData();
+	return result;
+} catch (error) {
+	console.error("Fetch failed:", error);
+	// Error logged to console but caller never knows — no throw, no return
+}
+
+// ✅ Good: Use structured logging and throw — caller can handle the error
 try {
 	const result = await fetchData();
 	return { success: true, data: result };
 } catch (error) {
-	// Use structured logging (tracing in Rust, pino/winston in Node)
+	// Use structured logging (tracing crate for Rust, pino/winston for Node services)
 	logger.error({ err: error }, "API call failed");
 	throw new ServiceError("Failed to fetch data", { cause: error });
 }
 
-// ❌ Bad: Swallowing errors silently
+// ✅ Good: Return an error result instead of throwing (prefer when errors are expected)
 try {
-	return await fetchData();
-} catch {
-	// Error silently ignored — caller gets undefined
-	return undefined;
+	const result = await fetchData();
+	return { success: true, data: result };
+} catch (error) {
+	logger.warn({ err: error }, "API call failed, returning error result");
+	return { success: false, error: new ServiceError("Failed to fetch data", { cause: error }) };
 }
 ```

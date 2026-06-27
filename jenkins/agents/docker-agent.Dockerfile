@@ -105,9 +105,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && npm --version \
     # Install common global tools
     && npm install -g \
-        pnpm@latest \
-        tsx@latest \
-        typescript@latest \
+        pnpm@11.9.0 \
+        tsx@4.22.4 \
+        typescript@6.0.3 \
     && npm cache clean --force
 
 # ============================================================================
@@ -184,8 +184,8 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- \
 # ============================================================================
 FROM rust-install AS docker-install
 
-ENV DOCKER_VERSION=27.3.1 \
-    DOCKER_BUILDX_VERSION=0.18.0
+ENV DOCKER_VERSION=29.0.0 \
+    DOCKER_BUILDX_VERSION=0.20.0
 
 # Install Docker CLI (no daemon — uses mounted docker.sock)
 RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" \
@@ -206,8 +206,8 @@ RUN curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${
 # ============================================================================
 FROM docker-install AS kubectl-install
 
-ENV KUBECTL_VERSION=1.31.4 \
-    HELM_VERSION=3.16.3
+ENV KUBECTL_VERSION=1.32.0 \
+    HELM_VERSION=3.17.0
 
 # ── kubectl ──
 RUN curl -fsSL "https://dl.k8s.io/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl" \
@@ -242,7 +242,7 @@ RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
     && az extension add --name aks-preview --yes 2>/dev/null || true
 
 # ── Trivy (security scanner) ──
-RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.57.0 \
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.60.0 \
     && trivy --version
 
 # ── FFmpeg 7 (static build for render service testing) ──

@@ -161,6 +161,7 @@ variables:
 
 # ── Azure: CLI auth (service principal) ────────────────────────────────────
 .azure-auth:
+  image: mcr.microsoft.com/azure-cli:latest
   before_script:
     - az login --service-principal
         -u "$AZURE_CLIENT_ID"
@@ -216,10 +217,7 @@ rust:test:
   stage: build
   extends: .rust-cache
   script:
-    - cargo test --workspace
-        --exclude lazynext_desktop
-        --verbose
-        -- -Z unstable-options --format json --report-time
+    - cargo test --workspace --exclude lazynext_desktop --verbose
   artifacts:
     reports:
       coverage_report:
@@ -546,7 +544,7 @@ security:sast:
 
 security:secret-detection:
   stage: security
-  image: registry.gitlab.com/security-products/secrets:6
+  image: registry.gitlab.com/security-products/secrets:7
   script:
     - /analyzer run
   artifacts:
@@ -589,7 +587,7 @@ security:dependency-scanning:
 
 security:container-scanning:
   stage: security
-  image: registry.gitlab.com/security-products/container-scanning:6
+  image: registry.gitlab.com/security-products/container-scanning:7
   variables:
     CS_DOCKERFILE_PATH: Dockerfile
     CS_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
