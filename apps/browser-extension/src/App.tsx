@@ -1,5 +1,23 @@
 import { useState, useEffect } from "react";
 
+async function getApiGatewayUrl(): Promise<string> {
+  const stored = (await chrome.storage.local.get("apiGatewayUrl")) as {
+    apiGatewayUrl?: string;
+  };
+  return stored.apiGatewayUrl || "http://localhost:8005";
+}
+
+function safeDisplayName(src: string): string {
+  try {
+    return new URL(src).pathname.split("/").pop() || src.substring(0, 30);
+  } catch {
+    // blob:, relative, or empty URLs
+    if (src.startsWith("blob:")) return "(blob media)";
+    if (!src) return "(embedded)";
+    return src.substring(0, 30);
+  }
+}
+
 function App() {
   const [detectedVideos, setDetectedVideos] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
@@ -79,11 +97,47 @@ function App() {
       } | null;
 
       if (capture) {
-        // In production: send to Lazynext web app via REST API or postMessage
-        // POST /api/projects/{projectId}/import with the captured metadata
-        setStatus(
-          `✓ Captured ${capture.width}×${capture.height} frame. Open Lazynext to import.`,
-        );
+        // Send to Lazynext web app / api-gateway for ingestion
+        const apiUrl = await getApiGatewayUrl();
+        try {
+          const resp = await fetch(`${apiUrl}/api/v1/ai/ingest`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: capture.source,
+              source: "browser-extension",
+              thumbnail: capture.thumbnailUrl,
+              duration: capture.duration,
+              width: capture.width,
+              height: capture.height,
+            }),
+          });
+          if (resp.ok) {
+            setStatus(
+              `✓ Imported ${capture.width}×${capture.height} frame to Lazynext timeline.`,
+            );
+          } else {
+            setStatus(`⚠️ Lazynext API returned ${resp.status}. Retry when connected.`);
+          }
+        } catch {
+          // Fallback: store locally in extension storage for later import
+          const stored = (await chrome.storage.local.get("pendingImports")) as {
+            pendingImports?: unknown[];
+          };
+          const pending = (stored.pendingImports || []) as unknown[];
+          pending.push({
+            source: capture.source,
+            thumbnail: capture.thumbnailUrl,
+            duration: capture.duration,
+            width: capture.width,
+            height: capture.height,
+            capturedAt: Date.now(),
+          });
+          await chrome.storage.local.set({ pendingImports: pending });
+          setStatus(
+            `✓ Captured ${capture.width}×${capture.height} frame (queued for import). Open Lazynext to sync.`,
+          );
+        }
       } else {
         setStatus("Could not capture — video may be DRM-protected.");
       }
@@ -153,13 +207,7 @@ function App() {
                 }}
                 title={src}
               >
-                {(() => {
-                  try {
-                    return new URL(src).pathname.split("/").pop() || src.substring(0, 30);
-                  } catch {
-                    return src ? src.substring(0, 30) : "(unknown)";
-                  }
-                })()}
+                {safeDisplayName(src)}
               </span>
               <button
                 onClick={() => handleImport(src)}

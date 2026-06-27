@@ -1,0 +1,52 @@
+---
+title: "Why Open Source Matters for Creative Tools"
+description: "The case for MIT-licensed video editing software in a world of walled gardens"
+date: "2026-06-05"
+author: "Lazynext Team"
+slug: "open-source-creative-tools"
+---
+
+## The Walled Garden Problem
+
+Creative professionals live inside ecosystems they do not control. Adobe Creative Cloud costs $55 per seat per month — every month, forever. Final Cut Pro locks you to Apple hardware. DaVinci Resolve has a generous free tier, but collaboration features, the advanced neural engine, and multi-user database access sit behind a paid Studio license. These are not just pricing complaints; they are structural constraints on how creative work gets done.
+
+The real cost of proprietary lock-in is portability. A production studio that has spent five years building workflows around Premiere Pro's project format cannot easily migrate to a competitor. A freelancer who built a plug-in pipeline around After Effects cannot take those investments elsewhere. The software you choose today becomes the default you live with for a decade — not because it is the best tool, but because the switching cost is too high.
+
+## Why MIT License
+
+Lazynext is MIT licensed. The MIT license is the most permissive open-source license in common use, and we chose it deliberately. It grants everyone — individuals, studios, enterprises — the irrevocable right to use, modify, distribute, and sublicense the code, with essentially no restrictions beyond preserving the copyright notice.
+
+This means four concrete freedoms for users:
+1. **Forkability.** If Lazynext ever takes a direction you disagree with, you can fork the repository and maintain your own variant. The MIT license does not require you to contribute changes back or publish your fork.
+2. **Embeddability.** A CMS platform can integrate Lazynext's rendering engine directly into their product. A social media scheduler can bundle the timeline engine. No licensing negotiation, no per-seat fees, no approval needed.
+3. **Auditability.** Every line of Rust, every CRDT operation, every AI prompt template is visible. You can verify that we are not sending your footage anywhere you haven't approved, not training on your content, and not inserting watermarks you didn't ask for.
+4. **Community ownership.** The project belongs to its contributors, not to a corporation that might get acquired, change strategy, or sunset the product. Even if the original maintainers step away, the code lives on.
+
+## The Economics of Open Source
+
+Open source is not a charity model. It is a distribution and trust strategy. Our sustainability plan has multiple revenue streams that do not conflict with the MIT freedom:
+- **Managed cloud hosting** at lazynext.ai for teams that don't want to run their own infrastructure
+- **Enterprise support contracts** with SLAs for studios and broadcasters
+- **Custom feature development** funded by organizations with specific needs
+- **AI compute credits** for users who want cloud GPU acceleration instead of running models locally
+
+The core engine remains free and will remain free. You can run Lazynext entirely offline, on a machine with no internet connection, using Ollama for local AI inference and your own GPU for rendering. No telemetry, no phone-home, no account required.
+
+## Open Standards, Not Open-Washing
+
+Some companies ship an "open source" core and then lock critical functionality — collaboration, export codecs, GPU acceleration — behind a proprietary enterprise tier. That is not our model.
+
+Lazynext is built on genuinely open industry standards from the ground up:
+- **SMPTE ST 429** for DCP theatrical delivery
+- **AMWA AAF** for NLE project interchange with Avid, Premiere, and Resolve
+- **C2PA 2.1** for content provenance and authenticity verification
+- **CRDTs** for conflict-free real-time collaboration (no proprietary sync protocol)
+- **Standard codecs** — H.264, H.265, ProRes, VP9, AV1 — all through open FFMPEG libraries
+
+Your project files are portable JSON with a documented schema. Your exports use industry-standard formats. Your data is yours.
+
+## Building in Public, Building Together
+
+The most exciting part of open-source development is the community. We have already seen contributors add Blackmagic DeckLink SDI output support, improve the WASM timeline rendering performance by 40%, and port the audio DSP pipeline to a new VST host architecture. These were not features on our roadmap — they came from developers who needed them and had the skill to build them.
+
+If you are a Rust developer interested in real-time graphics, a TypeScript developer who wants to improve the web UI, a video editor with strong opinions about workflow design, or a studio evaluating tools for your next production pipeline — the repository is open. Issues are triaged. Pull requests are reviewed. The roadmap is public. Lazynext is not a product you buy; it is a project you join.

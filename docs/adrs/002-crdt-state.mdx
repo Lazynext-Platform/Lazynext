@@ -1,0 +1,32 @@
+---
+title: "ADR 002: CRDTs for Collaborative Editing State"
+status: accepted
+date: 2026-02-01
+---
+
+## Context
+
+Multiple editors must be able to work on the same timeline simultaneously without merge conflicts. Traditional approaches (operational transforms, locking) have known failure modes.
+
+## Decision
+
+All editor state uses Conflict-free Replicated Data Types:
+- LWW-Register for scalar values (clip opacity, effect params)
+- Operation-based CRDTs for structural changes (add/delete tracks)
+- Vector clocks for causal ordering
+- Tombstone map for safe deletion
+
+Implementation: `rust/crates/state/src/crdt.rs`, `operations.rs`, `vector_clock.rs`, `tombstone.rs`
+
+## Consequences
+
+- **Positive**: Zero merge conflicts. Deterministic convergence.
+- **Positive**: Same CRDT logic runs on all platforms via WASM/native.
+- **Positive**: AI agents are just another peer in the CRDT mesh.
+- **Negative**: Operation log grows unboundedly. Mitigated by periodic snapshotting.
+- **Negative**: Tombstone map memory usage. Mitigated by GC after peer acknowledgment.
+
+## Alternatives Considered
+
+1. **Operational Transforms (OT)**: Rejected due to complexity and known corner cases.
+2. **Yjs CRDT library**: Considered but rejected in favor of native Rust implementation for WASM size and control.

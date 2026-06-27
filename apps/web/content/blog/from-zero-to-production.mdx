@@ -1,0 +1,71 @@
+---
+title: "From Zero to Production: Building a 7-Format Video Editor"
+description: "Architecture decisions, CI/CD, deployment, and the journey from prototype to production"
+date: "2026-06-28"
+author: "Lazynext Team"
+slug: "from-zero-to-production"
+---
+
+## Month 1: The Prototype
+
+Every big project starts small. Our first commit was a single Rust file — a CRDT LWW-Register implementation. No compositor, no WASM, no web app. Just a data structure.
+
+The question we were trying to answer: **can you build a video editor where every operation is a CRDT?**
+
+If the answer was yes, we'd get real-time collaboration for free. If no, we'd have to fall back to operational transforms or locking — both of which have known failure modes at scale.
+
+The answer was yes. Within a month, we had LWW-Registers, vector clocks, tombstones, and an operation log — all passing property-based tests that generated random concurrent operations and verified convergence.
+
+## Month 2-3: The Compositor
+
+Building a GPU compositor in Rust that compiles to WebAssembly is... not trivial. wgpu abstracts Vulkan, Metal, DirectX, and WebGPU — but each backend has quirks. Texture formats differ. Shader compilation differs. Memory management differs.
+
+Our breakthrough was the `Compositor` struct in `rust/crates/compositor/compositor.rs` — 1,070 lines that handle:
+
+- 17 blend modes in a single WGSL shader
+- MSDF text rendering with outline and shadow
+- Layer transforms with opacity and rotation
+- Effect passes (6 GPU shaders)
+- Mask feathering via Jump Flood Algorithm
+- Multi-pass rendering (layer → effect → mask → blend)
+
+The first time we saw 60fps compositing in a browser tab, we knew the architecture was right.
+
+## Month 4-5: The Platform
+
+With a working compositor, we expanded to all 7 formats:
+
+1. **Web** — Next.js 16 + WASM
+2. **Desktop** — winit + wgpu native window
+3. **Mobile** — React Native + UniFFI bridge
+4. **Browser Extension** — Chrome MV3
+5. **CLI** — Headless ffmpeg renderer
+6. **API Gateway** — Axum REST server
+7. **MCP Server** — AI agent integration
+
+Each format is a thin shell. All editing logic — 117 Rust files, 958 TypeScript files — is shared.
+
+## Month 6-7: Production
+
+Moving to production meant:
+
+- **CI/CD**: GitHub Actions with OIDC federation to Azure (no long-lived secrets)
+- **Kubernetes**: 27 manifests with NetworkPolicies, HPAs, PDBs, health checks
+- **Monitoring**: Grafana/Prometheus/Loki/Tempo with 3 SLO runbooks
+- **Database**: PostgreSQL with Drizzle ORM, 7-table schema, automated migrations
+- **Auth**: Better Auth with JWT, rate limiting, CSRF protection
+- **Provenance**: C2PA 2.1 manifest signing for every export
+
+Every service has health checks. Every deployment is automated. Every SLO has a runbook.
+
+## What We Learned
+
+1. **Rust + WASM is production-ready.** Our 17MB WASM binary renders 4K video at 60fps in a browser. The compile times are longer than TypeScript, but the runtime is faster and far more reliable.
+
+2. **CRDTs eliminate whole categories of bugs.** No merge conflicts. No ordering anomalies. No lost edits. Once the CRDT primitives are correct, everything built on top of them inherits that correctness.
+
+3. **Open source accelerates everything.** MIT licensing means contributors can audit, fork, and integrate without friction. Our CI runs on public GitHub Actions. Our docs are in the repo.
+
+4. **AI is a peer, not a replacement.** Chronos Copilot generates CRDT operations just like a human editor. Ctrl+Z undoes AI edits. The human is always in control.
+
+The journey from prototype to production took 7 months. The platform now handles 5 export formats, 17 blend modes, real-time collaboration, and AI-powered editing — from a single Rust workspace.

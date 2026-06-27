@@ -1,3 +1,5 @@
+pub mod c2pa;
+
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 

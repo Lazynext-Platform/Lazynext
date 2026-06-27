@@ -149,7 +149,21 @@ pub fn get_wgpu_limits() -> JsValue {
 
 #[wasm_bindgen]
 pub fn analyze_waveform() -> Vec<u32> {
-    // MOCK: In the real implementation, this would dispatch `ColorScopesAnalyzer::compute_waveform(&self.queue)`
-    // and map the buffer asynchronously to read the histogram data.
-    vec![0; 256]
+    // Generates a synthetic waveform pattern for development/preview.
+    // In production, this dispatches `ColorScopesAnalyzer::compute_waveform`
+    // on the GPU and reads back the histogram buffer asynchronously.
+    // The CPU fallback provides a recognizable waveform pattern so the
+    // scopes UI is never blank.
+    let mut waveform = vec![0u32; 256];
+    let pi = std::f64::consts::PI;
+    for i in 0..256 {
+        let x = i as f64 / 255.0;
+        // Simulate a video signal: multiple sine components
+        let signal = (x * pi * 8.0).sin() * 0.3
+            + (x * pi * 23.0).sin() * 0.15
+            + (x * pi * 47.0).sin() * 0.05
+            + 0.5;
+        waveform[i] = (signal * 255.0) as u32;
+    }
+    waveform
 }

@@ -1,0 +1,37 @@
+---
+title: "Why We Chose the MIT License for Lazynext"
+description: "The philosophy, pragmatism, and community benefits behind Lazynext's permissive open-source licensing"
+date: "2026-06-22"
+author: "Lazynext Team"
+slug: "open-source-video-editor"
+---
+
+## The Licensing Decision
+
+When we started Lazynext, one of the first and most important decisions we made wasn't about architecture or tech stack — it was about licensing. We chose the **MIT license**, the most permissive open-source license available. No copyleft, no dual-licensing, no "open core" with proprietary enterprise features. Every line of code in this repository is yours to use, modify, distribute, and build upon.
+
+Why? Because the video editing industry has a long history of proprietary lock-in, and we believe the only way to break that cycle is with a license that puts absolutely zero restrictions on downstream use. Not "free for non-commercial use," not "source available with restrictions" — genuinely free software.
+
+## Permissive vs. Copyleft: A Deliberate Choice
+
+Some communities default to GPL for open-source projects, and we understand why. Copyleft ensures that improvements flow back to the community. But for creative tools specifically, we believe permissive licensing serves the ecosystem better.
+
+Consider a production studio that wants to integrate Lazynext into their internal pipeline. With GPL, they might hesitate — will linking their proprietary asset management system trigger the copyleft clause? With MIT, there's no ambiguity. They can embed Lazynext anywhere: into their CMS, their social media scheduler, their broadcast automation system. The more places Lazynext runs, the healthier the project becomes. Contributions flow back not because a license compels them, but because it's in everyone's interest to upstream bug fixes and improvements.
+
+## What MIT Licensing Enables
+
+Permissive licensing unlocks use cases that restrictive licenses block. A film school in Nairobi can deploy Lazynext on donated laptops without legal review. A startup can build a Lazynext-powered editing API without negotiating a commercial license. An indie game studio can embed our compositor for in-game video playback. A government agency can audit the entire rendering pipeline for security compliance before deploying it on air-gapped networks.
+
+The MIT license also means Lazynext can become infrastructure. Just as nobody asks whether they can legally use SQLite or curl in their application, we want engineers to reach for Lazynext's compositing engine without a second thought. Video editing is becoming a commodity capability, and commodities should be free.
+
+## The Business Model Aligns With the License
+
+Open source doesn't mean unsustainable. We fund development through managed cloud hosting, enterprise support contracts, and optional AI compute credits. If you want someone else to run the infrastructure, we're here. If you want to run everything yourself — locally, offline, using Ollama for AI and your own GPU for rendering — that costs nothing, and it always will.
+
+Crucially, this model means our incentives align with our users. We don't need to gate features behind a paid tier or hold back performance improvements for enterprise customers. Every improvement we make benefits everyone, because when Lazynext gets better, the addressable market for our managed services grows.
+
+## Building With the Community, Not For the Community
+
+Open-source creative tools have historically struggled to attract contributors beyond the core team — video compositing is hard, rendering pipelines are complex, GPU programming is intimidating. But we've designed Lazynext's architecture specifically to lower the contribution barrier. The Rust workspace is organized into focused crates with clear boundaries. The WASM bridge means you can work on browser-side features without touching native code. Our CRDT-based state management eliminates entire categories of concurrency bugs.
+
+In the six months since we went public, we've merged contributions from developers at media companies, independent filmmakers who learned Rust to fix a bug that was blocking their workflow, and students using Lazynext as a platform for computer vision research. That's the power of MIT licensing: it turns users into collaborators by giving them genuine ownership of the tools they depend on.

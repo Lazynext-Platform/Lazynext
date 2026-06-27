@@ -27,6 +27,8 @@ group "default" {
     "pre-processing",
     "generative-studio",
     "db-migrate",
+    "collab-server",
+    "analytics-service",
   ]
 }
 
@@ -93,6 +95,24 @@ target "db-migrate" {
   tags       = ["${REGISTRY}/lazynext-db-migrate:${TAG}"]
   cache-from = ["type=registry,ref=${REGISTRY}/lazynext-db-migrate:buildcache"]
   cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-db-migrate:buildcache,mode=max"]
+}
+
+target "collab-server" {
+  context    = "./services/collab-server"
+  dockerfile = "Dockerfile"
+  platforms  = split(",", PLATFORMS)
+  tags       = ["${REGISTRY}/lazynext-collab-server:${TAG}"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-collab-server:buildcache"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-collab-server:buildcache,mode=max"]
+}
+
+target "analytics-service" {
+  context    = "./services/analytics-service"
+  dockerfile = "Dockerfile"
+  platforms  = split(",", PLATFORMS)
+  tags       = ["${REGISTRY}/lazynext-analytics-service:${TAG}"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache,mode=max"]
 }
 
 // ── GPU Images ─────────────────────────────────────────────────

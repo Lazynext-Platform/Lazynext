@@ -1,15 +1,25 @@
-# ── Docker Compose GPU Profile ───────────────────────────────────
+# Lazynext GPU-Accelerated Docker Compose Profile
+#
 # Usage: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
 #
-# Overrides pre-processing and generative-studio to use GPU images.
-# Requires: nvidia-container-toolkit + docker compose --profile gpu
+# Enables NVIDIA GPU acceleration for:
+#   - pre-processing (SAM2, Whisper, NeRF)
+#   - generative-studio (Stable Diffusion, RealESRGAN)
+#   - render-service (NVENC encoding)
+#
+# Prerequisites:
+#   - NVIDIA Container Toolkit: https://docs.nvidia.com/datacenter/cloud-native/
+#   - nvidia-container-runtime
+#   - CUDA 12.4+ drivers
+
+version: "3.8"
 
 services:
+  # ── GPU-Accelerated Pre-Processing ─────────────────────────────────
   pre-processing:
     build:
-      context: ./services/pre-processing
+      context: services/pre-processing
       dockerfile: Dockerfile.gpu
-    profiles: ["gpu"]
     deploy:
       resources:
         reservations:
@@ -19,111 +29,87 @@ services:
               capabilities: [gpu, compute, utility]
     environment:
       - CUDA_VISIBLE_DEVICES=0
-      - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-    ports:
-      - "8000:8000"
+      - ONNX_PROVIDER=CUDAExecutionProvider
+      - TORCH_DEVICE=cuda
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - model-cache:/models  # Shared model cache
 
+  # ── GPU-Accelerated Generative Studio ──────────────────────────────
   generative-studio:
     build:
-      context: ./services/generative-studio
+      context: services/generative-studio
       dockerfile: Dockerfile.gpu
-    profiles: ["gpu"]
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu, compute, utility]
+              capabilities: [gpu, compute]
     environment:
       - CUDA_VISIBLE_DEVICES=0
+      - DIFFUSERS_DEVICE=cuda
       - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
-    ports:
-      - "8001:8001"
+    volumes:
+      - model-cache:/models
 
-  tensorflow-serving:
-    build:
-      context: ./services/pre-processing
-      dockerfile: Dockerfile.tensorflow
-    profiles: ["tf"]  # Only start with --profile tf (separate from GPU PyTorch services)
+  # ── NVENC-Accelerated Render Service ───────────────────────────────
+  render-service:
+    environment:
+      - FFMPEG_HWACCEL=nvenc
+      - FFMPEG_ENCODER=h264_nvenc
+      - NVIDIA_VISIBLE_DEVICES=all
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
-    ports:
-      - "8500:8500"
-      - "8501:8501"
+              capabilities: [gpu, compute, video]
+
+  # ── Shared Model Cache Volume ──────────────────────────────────────
+  model-warmup:
+    image: alpine:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Model cache ready. Pre-download models with:"
+        echo "  docker compose -f docker-compose.gpu.yml run model-downloader"
     volumes:
-      - models_data:/models
-      - ./services/pre-processing/model_config.conf:/models/model_config.conf:ro
-    healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/whisper"]
-      interval: 30s
-      timeout: 5s
-      start_period: 60s
-      retries: 3
-    networks:
-      - lazynext-network
+      - model-cache:/models
 
-  # Non-GPU services with resource limits for fairness
-  web:
-    profiles: []  # Always on (no profile)
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: "2G"
-        reservations:
-          cpus: "0.5"
-          memory: "512M"
-
-  ai-agents:
-    profiles: []
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: "1G"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
-
-  render-service:
-    profiles: []
-    deploy:
-      resources:
-        limits:
-          cpus: "4"
-          memory: "4G"
-        reservations:
-          cpus: "0.5"
-          memory: "1G"
-
-  db:
-    profiles: []
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: "2G"
-        reservations:
-          cpus: "0.25"
-          memory: "256M"
-
-  redis:
-    profiles: []
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: "1G"
-        reservations:
-          cpus: "0.1"
-          memory: "128M"
+  # ── Model Downloader CronJob (one-shot) ────────────────────────────
+  model-downloader:
+    image: appropriate/curl:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        MODELS_DIR=/models
+        mkdir -p $MODELS_DIR
+        
+        echo "Downloading SAM2..."
+        curl -L -o $MODELS_DIR/sam2_hiera_large.onnx \
+          https://dl.fbaipublicfiles.com/segment_anything_2/sam2_hiera_large.onnx
+        
+        echo "Downloading RealESRGAN..."
+        curl -L -o $MODELS_DIR/RealESRGAN_x4plus.pth \
+          https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+        
+        echo "Downloading Whisper large-v3..."
+        curl -L -o $MODELS_DIR/whisper-large-v3.pt \
+          https://huggingface.co/openai/whisper-large-v3/resolve/main/pytorch_model.bin
+        
+        echo "All models downloaded."
+    volumes:
+      - model-cache:/models
+    profiles:
+      - download-models
 
 volumes:
-  models_data:
+  model-cache:
     driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOME}/.cache/lazynext/models

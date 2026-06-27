@@ -86,6 +86,13 @@ services:
       - NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
       - NEXT_PUBLIC_POSTHOG_KEY=phc_dev
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+      - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}
+      - NEXT_PUBLIC_MARBLE_API_URL=${NEXT_PUBLIC_MARBLE_API_URL:-https://api.marblecms.com}
+      - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID:-}
+      - FREESOUND_API_KEY=${FREESOUND_API_KEY:-}
     depends_on:
       db:
         condition: service_healthy
@@ -161,6 +168,30 @@ services:
       retries: 3
       start_period: 20s
 
+  # ── Collab Server (Native Rust CRDT Sync + WebRTC Signaling) ───
+  collab-server:
+    build:
+      context: ./services/collab-server
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - COLLAB_PORT=8004
+      - RUST_LOG=info
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-local-dev-secret-change-in-production-64chars}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lazynext-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8004/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # ── Pre-Processing (Python: Whisper, SAM2, NeRF) ──────────────
   pre-processing:
     build:
@@ -227,6 +258,12 @@ services:
     networks:
       - lazynext-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8006/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # ── Observability (Prometheus, Grafana, Loki, Alloy) ──────────
   prometheus:

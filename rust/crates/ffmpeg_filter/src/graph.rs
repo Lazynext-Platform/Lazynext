@@ -230,4 +230,89 @@ mod tests {
         let parts: Vec<&str> = result.split(';').collect();
         assert_eq!(parts.len(), 2);
     }
+
+    #[test]
+    fn test_single_filter_produces_correct_output() {
+        let label = PadLabels {
+            input: "v".to_string(),
+            output: "out".to_string(),
+        };
+        let mut f = Filter::scale(label, Resolution::HD720, ScaleAlgorithm::Lanczos);
+        f.inputs.push("0:v".to_string());
+        let graph = FilterGraph::new()
+            .add_input(0, "v")
+            .add_filter(f.as_output());
+        let result = graph.build();
+        assert_eq!(result, "[0:v]scale=1280:720:flags=lanczos[out]");
+    }
+
+    #[test]
+    fn test_chained_filters_produce_correct_complex_string() {
+        let scale_label = PadLabels {
+            input: "v".to_string(),
+            output: "scaled".to_string(),
+        };
+        let fps_label = PadLabels {
+            input: "v".to_string(),
+            output: "out".to_string(),
+        };
+
+        let mut scale_f =
+            Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
+        scale_f.inputs.push("0:v".to_string());
+
+        let mut fps_f = Filter::fps(fps_label, FrameRate::Fps60);
+        fps_f.inputs.push("scaled".to_string());
+
+        let graph = FilterGraph::new()
+            .add_input(0, "v")
+            .add_filter(scale_f)
+            .add_filter(fps_f.as_output());
+
+        let result = graph.build();
+        assert_eq!(
+            result,
+            "[0:v]scale=1920:1080:flags=lanczos[scaled];[scaled]fps=60[out]"
+        );
+    }
+
+    #[test]
+    fn test_three_filter_chain_scale_hue_fps() {
+        let scale_label = PadLabels {
+            input: "v".to_string(),
+            output: "scaled".to_string(),
+        };
+        let hue_label = PadLabels {
+            input: "v".to_string(),
+            output: "graded".to_string(),
+        };
+        let fps_label = PadLabels {
+            input: "v".to_string(),
+            output: "out".to_string(),
+        };
+
+        let mut scale_f =
+            Filter::scale(scale_label, Resolution::HD1080, ScaleAlgorithm::Lanczos);
+        scale_f.inputs.push("0:v".to_string());
+
+        let mut hue_f = Filter::hue(hue_label, 10.0, 1.3);
+        hue_f.inputs.push("scaled".to_string());
+
+        let mut fps_f = Filter::fps(fps_label, FrameRate::Fps30);
+        fps_f.inputs.push("graded".to_string());
+
+        let graph = FilterGraph::new()
+            .add_input(0, "v")
+            .add_filter(scale_f)
+            .add_filter(hue_f)
+            .add_filter(fps_f.as_output());
+
+        let result = graph.build();
+        let expected = concat!(
+            "[0:v]scale=1920:1080:flags=lanczos[scaled];",
+            "[scaled]hue=h=10:s=1.3[graded];",
+            "[graded]fps=30[out]"
+        );
+        assert_eq!(result, expected);
+    }
 }

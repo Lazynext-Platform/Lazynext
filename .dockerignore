@@ -16,7 +16,13 @@
 
 # Environment
 .env*
+.env.*
 !.env.example
+env.yaml
+db.json
+web.json
+.env.local
+.env.production
 
 # IDE / Editor
 .cursor

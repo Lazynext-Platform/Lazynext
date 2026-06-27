@@ -23,6 +23,9 @@ resources:
   - model-warmup.yaml
   - gpu.yaml
   - ingress.yaml
+  - collab-server-deployment.yaml
+  - collab-server-networkpolicy.yaml
+  - analytics-service-networkpolicy.yaml
 
 labels:
   - pairs:

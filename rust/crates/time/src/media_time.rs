@@ -364,7 +364,10 @@ pub fn media_time_clamp(
 mod tests {
     use crate::frame_rate::FrameRate;
 
-    use super::{MediaTime, TICKS_PER_SECOND};
+    use super::{
+        MediaTime, MediaTimeFromSecondsOptions, MediaTimeToSecondsOptions, TICKS_PER_SECOND,
+        media_time_from_seconds, media_time_to_seconds,
+    };
 
     #[test]
     fn converts_between_seconds_and_ticks() {
@@ -424,5 +427,185 @@ mod tests {
                 .snapped_seek_time(duration, rate),
             Some(MediaTime::from_seconds_f64(10.0).unwrap()),
         );
+    }
+
+    #[test]
+    fn media_time_from_seconds_roundtrip_via_free_functions() {
+        // Test the exported free functions roundtrip
+        let test_values = [0.0, 0.5, 1.0, 2.75, 60.0, 3600.0, 0.001, 0.008333333];
+        for &secs in &test_values {
+            let time = media_time_from_seconds(MediaTimeFromSecondsOptions { seconds: secs })
+                .expect("valid seconds should produce a MediaTime");
+            let roundtrip = media_time_to_seconds(MediaTimeToSecondsOptions { time });
+            let diff = (roundtrip - secs).abs();
+            assert!(
+                diff < 1.0 / TICKS_PER_SECOND as f64,
+                "Roundtrip failed for {secs}: got {roundtrip}, diff {diff}"
+            );
+        }
+    }
+
+    #[test]
+    fn media_time_from_seconds_zero_is_exact() {
+        let time = media_time_from_seconds(MediaTimeFromSecondsOptions { seconds: 0.0 })
+            .expect("zero seconds should produce a MediaTime");
+        assert_eq!(time, MediaTime::ZERO);
+        assert_eq!(time.as_ticks(), 0);
+        let roundtrip = media_time_to_seconds(MediaTimeToSecondsOptions { time });
+        assert_eq!(roundtrip, 0.0);
+    }
+
+    #[test]
+    fn media_time_from_seconds_sub_tick_precision() {
+        // Values smaller than one tick should round to the nearest tick
+        let one_tick_seconds = 1.0 / TICKS_PER_SECOND as f64; // ~0.000008333 seconds
+        let tiny = one_tick_seconds * 0.4;
+        let time_tiny = media_time_from_seconds(MediaTimeFromSecondsOptions { seconds: tiny })
+            .expect("tiny seconds should produce a MediaTime");
+        // Should round to 0 ticks
+        assert_eq!(time_tiny.as_ticks(), 0);
+
+        let half_tick = one_tick_seconds * 0.6;
+        let time_half = media_time_from_seconds(MediaTimeFromSecondsOptions { seconds: half_tick })
+            .expect("half tick seconds should produce a MediaTime");
+        // Should round to 1 tick (nearest integer after scaling)
+        assert_eq!(time_half.as_ticks(), 1);
+
+        // Verify roundtrip for exactly one tick
+        let one_tick = media_time_from_seconds(MediaTimeFromSecondsOptions {
+            seconds: one_tick_seconds,
+        })
+        .expect("one tick seconds should produce a MediaTime");
+        assert_eq!(one_tick.as_ticks(), 1);
+        let roundtrip = media_time_to_seconds(MediaTimeToSecondsOptions { time: one_tick });
+        let diff = (roundtrip - one_tick_seconds).abs();
+        assert!(diff < 1e-10);
+    }
+
+    #[test]
+    fn test_add_media_times() {
+        let a = MediaTime::from_seconds_f64(5.0).unwrap();
+        let b = MediaTime::from_seconds_f64(3.0).unwrap();
+        let sum = a + b;
+        assert!((sum.to_seconds_f64() - 8.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_sub_media_times() {
+        let a = MediaTime::from_seconds_f64(10.0).unwrap();
+        let b = MediaTime::from_seconds_f64(3.0).unwrap();
+        let diff = a - b;
+        assert!((diff.to_seconds_f64() - 7.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_clamp_media_time() {
+        let min = MediaTime::from_seconds_f64(0.0).unwrap();
+        let max = MediaTime::from_seconds_f64(10.0).unwrap();
+        let inside = MediaTime::from_seconds_f64(5.0).unwrap();
+        let below = MediaTime::from_seconds_f64(-1.0).unwrap();
+        let above = MediaTime::from_seconds_f64(20.0).unwrap();
+
+        assert_eq!(inside.clamp(min, max).to_seconds_f64(), 5.0);
+        assert_eq!(below.clamp(min, max).to_seconds_f64(), 0.0);
+        assert_eq!(above.clamp(min, max).to_seconds_f64(), 10.0);
+    }
+
+    #[test]
+    fn test_is_frame_aligned() {
+        let rate = FrameRate::FPS_30;
+        let aligned = MediaTime::from_frame(30, rate).unwrap();
+        assert!(aligned.is_frame_aligned(rate).unwrap());
+        // A non-aligned time should return false
+        let misaligned = MediaTime::from_ticks(1);
+        assert!(!misaligned.is_frame_aligned(rate).unwrap());
+    }
+
+    #[test]
+    fn media_time_from_seconds_roundtrip_struct_method() {
+        let test_values = [0.0, 0.5, 1.0, 2.75, 60.0, 3600.0, 0.001, 0.008333333];
+        for &secs in &test_values {
+            let time = MediaTime::from_seconds_f64(secs)
+                .expect("valid seconds should produce a MediaTime");
+            let roundtrip = time.to_seconds_f64();
+            let diff = (roundtrip - secs).abs();
+            assert!(
+                diff < 1.0 / TICKS_PER_SECOND as f64,
+                "Roundtrip failed for {secs}: got {roundtrip}, diff {diff}"
+            );
+        }
+    }
+
+    #[test]
+    fn media_time_from_frame_roundtrip() {
+        let rate = FrameRate::FPS_30;
+        for frame in [0, 1, 42, 100, 999] {
+            let time =
+                MediaTime::from_frame(frame, rate).expect("valid frame should produce a MediaTime");
+            let roundtrip = time
+                .to_frame_round(rate)
+                .expect("valid time should round to frame");
+            assert_eq!(roundtrip, frame, "Frame roundtrip failed for frame {frame}");
+        }
+    }
+
+    #[test]
+    fn snapped_seek_time_snaps_to_frame_boundaries() {
+        let rate = FrameRate::FPS_30;
+        let duration = MediaTime::from_seconds_f64(10.0).unwrap();
+        // A time between frames should snap to the nearest frame
+        let between_frames = MediaTime::from_seconds_f64(1.267).unwrap();
+        let snapped = between_frames.snapped_seek_time(duration, rate).unwrap();
+        assert!(
+            snapped.is_frame_aligned(rate).unwrap(),
+            "snapped_seek_time should produce a frame-aligned time, got ticks {}",
+            snapped.as_ticks()
+        );
+        // snapped should be clamped within [ZERO, duration]
+        assert!(snapped >= MediaTime::ZERO);
+        assert!(snapped <= duration);
+    }
+
+    #[test]
+    fn snapped_seek_time_clamps_below_zero() {
+        let rate = FrameRate::FPS_30;
+        let duration = MediaTime::from_seconds_f64(5.0).unwrap();
+        let negative = MediaTime::from_seconds_f64(-1.0).unwrap();
+        let snapped = negative.snapped_seek_time(duration, rate).unwrap();
+        assert_eq!(snapped, MediaTime::ZERO);
+    }
+
+    #[test]
+    fn snapped_seek_time_exact_frame_stays_unchanged() {
+        let rate = FrameRate::FPS_30;
+        let duration = MediaTime::from_seconds_f64(30.0).unwrap();
+        // An exact frame time should remain unchanged after snapping
+        let exact = MediaTime::from_frame(45, rate).unwrap();
+        let snapped = exact.snapped_seek_time(duration, rate).unwrap();
+        assert_eq!(snapped, exact);
+    }
+
+    #[test]
+    fn arithmetic_add_sub() {
+        let a = MediaTime::from_seconds_f64(1.0).unwrap();
+        let b = MediaTime::from_seconds_f64(2.5).unwrap();
+        let sum = a + b;
+        assert_eq!(sum.to_seconds_f64(), 3.5);
+        let diff = b - a;
+        assert_eq!(diff.to_seconds_f64(), 1.5);
+        let neg = -a;
+        assert_eq!(neg.to_seconds_f64(), -1.0);
+        let scaled = a * 3;
+        assert_eq!(scaled.to_seconds_f64(), 3.0);
+        let divided = b / 5;
+        assert_eq!(divided.to_seconds_f64(), 0.5);
+    }
+
+    #[test]
+    fn arithmetic_add_sub_identity() {
+        let x = MediaTime::from_seconds_f64(42.0).unwrap();
+        assert_eq!(x + MediaTime::ZERO, x);
+        assert_eq!(x - MediaTime::ZERO, x);
+        assert_eq!(x - x, MediaTime::ZERO);
     }
 }

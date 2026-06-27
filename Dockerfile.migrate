@@ -4,17 +4,36 @@
 #
 # Build from repo root:
 #   docker build -f Dockerfile.migrate -t lazynext-db-migrate .
+#
+# Run:
+#   docker run --rm -e DATABASE_URL=postgresql://... lazynext-db-migrate
 
 FROM oven/bun:1.3-alpine
 
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY apps/web/package.json apps/web/
+COPY apps/web/drizzle.config.ts apps/web/
 COPY apps/web/drizzle/ apps/web/drizzle/
 COPY apps/web/src/db/ apps/web/src/db/
 
 RUN bun install --frozen-lockfile
 
-# Run the migration script.  The DATABASE_URL env var must point to
-# the target PostgreSQL instance (provided by K8s secrets / Container Apps).
-CMD ["sh", "-c", "cd apps/web && bun run db:migrate"]
+# Verify DATABASE_URL is set before running migrations.
+# Exit code 0 on success (even if no pending migrations).
+# Exit code 1 on failure with error message to stderr.
+CMD ["sh", "-c", "\
+  if [ -z \"$DATABASE_URL\" ]; then \
+    echo 'ERROR: DATABASE_URL environment variable is required' >&2; \
+    exit 1; \
+  fi; \
+  echo 'Running database migrations...'; \
+  cd apps/web && bun run db:migrate 2>&1; \
+  EXIT_CODE=$?; \
+  if [ $EXIT_CODE -eq 0 ]; then \
+    echo 'Migrations completed successfully.'; \
+  else \
+    echo 'Migration failed with exit code '$EXIT_CODE >&2; \
+  fi; \
+  exit $EXIT_CODE \
+"]

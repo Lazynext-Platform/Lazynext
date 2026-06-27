@@ -1,0 +1,41 @@
+---
+title: "Introducing Lazynext — The AI-Native Video Editor"
+description: "Built with Rust, CRDTs, and WebGPU — a video editor for the AI era"
+date: "2026-06-01"
+author: "Lazynext Team"
+slug: "introducing-lazynext"
+---
+
+## Why Another Video Editor?
+
+Video editing tools haven't fundamentally changed in 20 years. Premiere Pro, DaVinci Resolve, and After Effects are powerful but arcane — they expose every knob and dial, expecting you to know what "lift, gamma, gain" means before you can make your footage look good.
+
+Lazynext takes a different approach. Instead of asking you to learn color wheels and node graphs, it asks: **"What do you want this video to look like?"**
+
+Type "make this look like The Matrix" and our Chronos Copilot AI decomposes that intent into concrete editing operations — color grading, effects, cuts, audio processing — and applies them to your timeline.
+
+## Built on Rust
+
+Under the hood, Lazynext is a Rust-powered video compositing engine. Every editing operation is a **CRDT** (Conflict-free Replicated Data Type), meaning:
+
+- Real-time collaboration works natively — no "merge conflicts" between editors
+- Every operation is deterministic and replayable
+- The same code runs on web (via WASM), desktop (native), and mobile (via UniFFI)
+
+Our GPU compositor supports 17 blend modes, real-time MSDF text rendering, stereoscopic 3D output, and ACES color science — all running at 60fps in a browser tab.
+
+## The 7-Format Platform
+
+Lazynext isn't just a web app. The same Rust core powers:
+
+1. **Web** — Next.js 16 + WASM, works in any modern browser
+2. **Desktop** — Native wgpu rendering with Blackmagic DeckLink SDI output
+3. **Mobile** — React Native with UniFFI-generated native bindings
+4. **Browser Extension** — Capture videos from any webpage into your timeline
+5. **CLI** — Headless rendering for CI/CD pipelines
+6. **API Gateway** — REST API for automation and integrations
+7. **MCP Server** — AI agent integration via the Model Context Protocol
+
+## What's Next
+
+We're in active development. Follow along at [lazynext.ai](https://lazynext.ai).

@@ -1,0 +1,78 @@
+// UniFFI Interface Definition Language (UDL) for Lazynext Mobile Bridge
+//
+// Generates Kotlin (Android) and Swift (iOS) bindings for the Rust core.
+// Run: uniffi-bindgen generate rust/core/uniffi/lazynext.udl --language kotlin --out-dir apps/mobile/android
+//      uniffi-bindgen generate rust/core/uniffi/lazynext.udl --language swift --out-dir apps/mobile/ios
+
+namespace lazynext_mobile {
+  // Initialize the NLE engine
+  string init_engine(string session_id, string project_name, u32 framerate);
+
+  // Get current project info
+  string get_project_info();
+
+  // Add a track
+  string add_track(string kind);
+
+  // Add a clip to a track
+  string add_clip(u32 track_index, string clip_type, string name, u32 start, u32 end);
+
+  // Process an AI editing intent
+  string process_intent(string prompt, boolean require_approval);
+
+  // Get the timeline state as JSON
+  string get_timeline_state();
+
+  // Undo the last operation
+  boolean undo();
+
+  // Redo the last undone operation
+  boolean redo();
+
+  // Get engine status
+  string get_status();
+
+  // Get the mobile bridge version
+  string version();
+};
+
+dictionary ProjectInfo {
+  string name;
+  string id;
+  u32 framerate;
+  u32 width;
+  u32 height;
+  u32 track_count;
+  u32 clip_count;
+};
+
+dictionary ClipData {
+  string id;
+  string clip_type;
+  string name;
+  u32 start;
+  u32 end;
+};
+
+dictionary TrackData {
+  string id;
+  string kind;
+  sequence<ClipData> clips;
+};
+
+dictionary TimelineState {
+  string id;
+  string name;
+  u32 framerate;
+  u32 width;
+  u32 height;
+  sequence<TrackData> tracks;
+};
+
+dictionary EngineStatus {
+  boolean initialized;
+  boolean processing;
+  string current_project;
+  u32 operation_count;
+  string peer_id;
+};

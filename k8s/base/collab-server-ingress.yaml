@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: collab-server-ws
+  namespace: lazynext
+  annotations:
+    nginx.ingress.kubernetes.io/websocket-services: collab-server
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/upgrade: "websocket"
+    nginx.ingress.kubernetes.io/connection-proxy-header: "upgrade"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.lazynext.ai
+      secretName: api-lazynext-ai-tls
+  rules:
+    - host: api.lazynext.ai
+      http:
+        paths:
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: collab-server
+                port:
+                  number: 8004
+          - path: /collab/health
+            pathType: Exact
+            backend:
+              service:
+                name: collab-server
+                port:
+                  number: 8004

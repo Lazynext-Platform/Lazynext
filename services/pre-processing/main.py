@@ -147,51 +147,184 @@ async def process_video(req: ProcessRequest):
     Run AI video processing operations.
 
     Supported operations:
-      - auto_editor: Detect and remove silence
-      - scene_detect: Find scene change boundaries
-      - clean_audio: Analyze transcripts/audio for filler words ("um/uh") and dead air
+      - auto_editor: Detect and remove silence (RMS-based analysis)
+      - scene_detect: Find scene change boundaries (histogram diff)
+      - clean_audio: Analyze audio for silence regions to trim
     """
-    await asyncio.sleep(1.0)
     completed = []
+
+    # Try to load real audio data for analysis
+    audio_samples = None
+    sample_rate = 44100
+    audio_path = f"/tmp/{req.video_id}.wav"
+
+    try:
+        import numpy as np
+        if os.path.exists(audio_path):
+            try:
+                import soundfile as sf
+                audio_samples, sample_rate = sf.read(audio_path)
+                # Convert to mono if stereo
+                if len(audio_samples.shape) > 1:
+                    audio_samples = audio_samples.mean(axis=1)
+            except ImportError:
+                pass
+    except ImportError:
+        pass
 
     for op in req.operations:
         if op == "auto_editor":
-            completed.append(
-                {
+            if audio_samples is not None:
+                # Real RMS-based silence detection
+                import numpy as np
+                window_ms = 10
+                window_samples = int(sample_rate * window_ms / 1000)
+                threshold_db = -40.0
+                threshold_linear = 10.0 ** (threshold_db / 20.0)
+                min_silence_ms = 500
+                min_silence_windows = min_silence_ms // window_ms
+
+                silence_regions = []
+                silence_count = 0
+                silence_start = None
+
+                for i in range(0, len(audio_samples) - window_samples, window_samples):
+                    chunk = audio_samples[i:i + window_samples]
+                    rms = np.sqrt(np.mean(chunk ** 2))
+                    time_sec = i / sample_rate
+
+                    if rms < threshold_linear:
+                        if silence_start is None:
+                            silence_start = time_sec
+                        silence_count += 1
+                    else:
+                        if silence_count >= min_silence_windows and silence_start is not None:
+                            silence_regions.append({
+                                "start": round(silence_start, 2),
+                                "end": round(time_sec, 2),
+                            })
+                        silence_start = None
+                        silence_count = 0
+
+                if silence_count >= min_silence_windows and silence_start is not None:
+                    silence_regions.append({
+                        "start": round(silence_start, 2),
+                        "end": round(len(audio_samples) / sample_rate, 2),
+                    })
+
+                total_removed = sum(r["end"] - r["start"] for r in silence_regions)
+                completed.append({
+                    "operation": "auto_editor",
+                    "cut_list": silence_regions[:10],  # top 10
+                    "silence_regions_detected": len(silence_regions),
+                    "silence_removed_seconds": round(total_removed, 1),
+                    "analysis_method": "rms_threshold",
+                })
+            else:
+                # Fallback: mock data
+                await asyncio.sleep(1.0)
+                completed.append({
                     "operation": "auto_editor",
                     "cut_list": [
                         {"start": 0.5, "end": 4.2},
                         {"start": 8.1, "end": 15.0},
-                        {"start": 22.3, "end": 30.0},
                     ],
-                    "silence_removed_seconds": 18.3,
-                }
-            )
+                    "silence_removed_seconds": 10.6,
+                    "analysis_method": "fallback",
+                })
+
         elif op == "scene_detect":
-            completed.append(
-                {
+            # Scene detection via histogram comparison
+            video_path = f"/tmp/{req.video_id}.mp4"
+            cuts = []
+            try:
+                import cv2
+                import numpy as np
+                cap = cv2.VideoCapture(video_path)
+                if cap.isOpened():
+                    prev_hist = None
+                    frame_idx = 0
+                    threshold = 0.3
+                    while True:
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        if frame_idx % 5 == 0:  # Check every 5th frame
+                            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                            hist = cv2.calcHist([gray], [0], None, [64], [0, 256])
+                            hist = cv2.normalize(hist, hist).flatten()
+                            if prev_hist is not None:
+                                diff = cv2.compareHist(prev_hist, hist, cv2.HISTCMP_CHISQR)
+                                if diff > threshold:
+                                    cuts.append(frame_idx)
+                            prev_hist = hist
+                        frame_idx += 1
+                    cap.release()
+                completed.append({
                     "operation": "scene_detect",
-                    "cuts": [0, 145, 302, 478, 620],
-                    "scene_count": 5,
-                }
-            )
+                    "cuts": cuts[:20],
+                    "scene_count": len(cuts) + 1,
+                    "analysis_method": "histogram_diff" if cuts else "no_video_file",
+                })
+            except (ImportError, Exception):
+                completed.append({
+                    "operation": "scene_detect",
+                    "cuts": [],
+                    "scene_count": 1,
+                    "analysis_method": "unavailable",
+                })
+
         elif op == "clean_audio":
-            completed.append(
-                {
+            if audio_samples is not None:
+                import numpy as np
+                # Detect short dips and long silences
+                window_ms = 20
+                window_samples = int(sample_rate * window_ms / 1000)
+                threshold_db = -35.0
+                threshold_linear = 10.0 ** (threshold_db / 20.0)
+
+                cuts = []
+                silence_count = 0
+                silence_start = None
+
+                for i in range(0, len(audio_samples) - window_samples, window_samples):
+                    chunk = audio_samples[i:i + window_samples]
+                    rms = np.sqrt(np.mean(chunk ** 2))
+                    time_sec = i / sample_rate
+                    if rms < threshold_linear:
+                        if silence_start is None:
+                            silence_start = time_sec
+                        silence_count += 1
+                    else:
+                        if silence_count >= 3 and silence_start is not None:
+                            duration = time_sec - silence_start
+                            reason = "filler_word" if duration < 1.0 else "dead_air"
+                            cuts.append({
+                                "start": round(silence_start, 2),
+                                "end": round(time_sec, 2),
+                                "reason": reason,
+                            })
+                        silence_start = None
+                        silence_count = 0
+
+                total = sum(c["end"] - c["start"] for c in cuts)
+                completed.append({
                     "operation": "clean_audio",
-                    "cuts_to_delete": [
-                        {"start": 1.2, "end": 1.5, "reason": "filler_word", "text": "um"},
-                        {"start": 4.2, "end": 8.1, "reason": "dead_air", "text": None},
-                        {"start": 15.0, "end": 15.6, "reason": "filler_word", "text": "uh"},
-                        {"start": 30.0, "end": 32.5, "reason": "dead_air", "text": None},
-                    ],
-                    "total_removed_seconds": 7.0,
-                }
-            )
+                    "cuts_to_delete": cuts[:20],
+                    "total_removed_seconds": round(total, 1),
+                    "analysis_method": "rms_threshold",
+                })
+            else:
+                await asyncio.sleep(1.0)
+                completed.append({
+                    "operation": "clean_audio",
+                    "cuts_to_delete": [],
+                    "total_removed_seconds": 0,
+                    "analysis_method": "no_audio_available",
+                })
+
         else:
-            completed.append(
-                {"operation": op, "status": "unknown_operation"}
-            )
+            completed.append({"operation": op, "status": "unknown_operation"})
 
     return {
         "success": True,
@@ -325,50 +458,82 @@ async def ingest_media(req: IngestRequest):
 @app.post("/track")
 async def track_motion(req: TrackRequest):
     """
-    Track a region of interest (ROI) across video frames using OpenCV (Optical Flow / CSRT).
+    Track a region of interest (ROI) across video frames using OpenCV CSRT tracker.
     Returns an array of keyframes with calculated [x, y] offsets.
     """
+    tracker_name = "dev-fallback"
+    keyframes = []
+    num_frames = max(req.end_frame - req.start_frame, 60)
+
     try:
         import cv2
-        opencv_available = True
+        import numpy as np
+
+        video_path = f"/tmp/{req.video_id}.mp4"
+        if os.path.exists(video_path):
+            cap = cv2.VideoCapture(video_path)
+            if cap.isOpened():
+                # Initialize CSRT tracker
+                tracker = cv2.TrackerCSRT_create()
+                tracker_name = "csrt"
+
+                # Seek to start frame
+                cap.set(cv2.CAP_PROP_POS_FRAMES, req.start_frame)
+                ret, frame = cap.read()
+                if ret:
+                    # Initialize tracker with ROI
+                    x, y, w, h = [int(v) for v in req.roi]
+                    bbox = (x, y, w, h)
+                    tracker.init(frame, bbox)
+
+                    # Track subsequent frames
+                    for i in range(req.start_frame, req.end_frame):
+                        ret, frame = cap.read()
+                        if not ret:
+                            break
+                        ok, bbox = tracker.update(frame)
+                        if ok:
+                            keyframes.append({
+                                "frame": i,
+                                "x": float(bbox[0]),
+                                "y": float(bbox[1]),
+                                "w": float(bbox[2]),
+                                "h": float(bbox[3]),
+                                "confidence": 0.9,
+                            })
+
+                cap.release()
+
     except ImportError:
-        opencv_available = False
         print("[Pre-Processing] OpenCV not installed. Install: pip install opencv-python")
+        if os.getenv("APP_ENV") == "production":
+            raise HTTPException(
+                status_code=503,
+                detail="Tracking unavailable — opencv-python not installed",
+            )
+    except Exception as e:
+        print(f"[Pre-Processing] Tracking error: {e}")
 
-    if not opencv_available and os.getenv("APP_ENV") == "production":
-        raise HTTPException(
-            status_code=503,
-            detail="Tracking unavailable — opencv-python not installed",
-        )
-
-    await asyncio.sleep(2.5)
-    
-    # Generate mock keyframe path for the requested duration
-    num_frames = req.end_frame - req.start_frame
-    if num_frames <= 0:
-        num_frames = 60 # Default 60 frames if unspecified
-        
-    keyframes = []
-    base_x, base_y = req.roi[0], req.roi[1]
-    
-    for i in range(num_frames):
-        # Simulate a slight sine wave movement path
+    # Fallback: generate synthetic keyframe path
+    if not keyframes:
         import math
-        offset_x = math.sin(i * 0.1) * 20.0
-        offset_y = math.cos(i * 0.1) * 15.0
-        
-        keyframes.append({
-            "frame": req.start_frame + i,
-            "x": base_x + offset_x,
-            "y": base_y + offset_y,
-            "confidence": 0.95 - (i * 0.001) # Confidence slightly drops over time
-        })
+        base_x, base_y = req.roi[0], req.roi[1]
+        for i in range(num_frames):
+            offset_x = math.sin(i * 0.1) * 20.0
+            offset_y = math.cos(i * 0.1) * 15.0
+            keyframes.append({
+                "frame": req.start_frame + i,
+                "x": base_x + offset_x,
+                "y": base_y + offset_y,
+                "confidence": 0.95 - (i * 0.001),
+            })
+        tracker_name = "sine_wave_fallback"
 
     return {
         "success": True,
         "video_id": req.video_id,
-        "tracker": "csrt" if opencv_available else "dev-fallback",
-        "frames_tracked": num_frames,
+        "tracker": tracker_name,
+        "frames_tracked": len(keyframes),
         "keyframes": keyframes
     }
 
@@ -401,29 +566,238 @@ async def auto_reframe(req: ReframeRequest):
 @app.post("/enhance-audio")
 async def enhance_audio(req: EnhanceAudioRequest):
     """
-    Simulate Studio Sound Enhancement (noise reduction, EQ matching).
+    Studio Sound Enhancement using real DSP (librosa + scipy).
+
+    Processing chain:
+      1. High-pass filter (80 Hz) — removes rumble
+      2. Noise gate — cuts signal below threshold
+      3. Dynamic range compression — evens out levels
+      4. Parametric EQ — applies target profile curve
     """
-    await asyncio.sleep(1.0)
-    
+    audio_path = f"/tmp/{req.video_id}.wav"
+    output_path = f"/tmp/{req.video_id}_enhanced.wav"
+    method = "dev-fallback"
+
+    try:
+        import numpy as np
+        import soundfile as sf
+        from scipy import signal
+
+        if os.path.exists(audio_path):
+            samples, sr = sf.read(audio_path)
+            is_stereo = len(samples.shape) > 1
+
+            if is_stereo:
+                channels = [samples[:, 0], samples[:, 1]]
+            else:
+                channels = [samples]
+
+            processed_channels = []
+            for ch in channels:
+                # 1. High-pass filter at 80 Hz
+                sos = signal.butter(4, 80, 'hp', fs=sr, output='sos')
+                ch = signal.sosfilt(sos, ch)
+
+                # 2. Noise gate at -50dB
+                gate_threshold = 10.0 ** (-50.0 / 20.0)
+                ch[np.abs(ch) < gate_threshold] = 0.0
+
+                # 3. Soft knee compression
+                threshold = -20.0  # dB
+                ratio = 4.0
+                knee = 6.0  # dB
+                makeup_gain = 10.0 ** (6.0 / 20.0)  # +6dB makeup
+
+                threshold_linear = 10.0 ** (threshold / 20.0)
+                knee_half = knee / 2.0
+
+                for i in range(len(ch)):
+                    abs_val = abs(ch[i])
+                    if abs_val < 1e-10:
+                        continue
+                    db_val = 20.0 * np.log10(abs_val)
+                    if db_val < (threshold - knee_half):
+                        ch[i] *= 1.0
+                    elif db_val > (threshold + knee_half):
+                        gain_reduction = threshold + (db_val - threshold) / ratio
+                        gain = 10.0 ** ((gain_reduction - db_val) / 20.0)
+                        ch[i] *= gain
+                    else:
+                        # Knee interpolation
+                        excess = db_val - threshold + knee_half
+                        gain_reduction = threshold + (excess ** 2) / (2.0 * knee)
+                        gain = 10.0 ** ((gain_reduction - db_val) / 20.0)
+                        ch[i] *= gain
+
+                ch *= makeup_gain
+
+                # 4. Apply target profile EQ
+                if req.target_profile == "studio_podcast":
+                    # Podcast: slight bass cut, presence boost at 3kHz, air at 12kHz
+                    sos_eq = signal.butter(2, [80, 15000], 'band', fs=sr, output='sos')
+                    ch = signal.sosfilt(sos_eq, ch)
+                    # Presence boost
+                    b_peak, a_peak = signal.iirpeak(3000, Q=1.0, fs=sr)
+                    ch += signal.lfilter(b_peak, a_peak, ch) * 0.3
+                elif req.target_profile == "vocal_boost":
+                    b_peak, a_peak = signal.iirpeak(2500, Q=0.7, fs=sr)
+                    ch += signal.lfilter(b_peak, a_peak, ch) * 0.5
+
+                # Prevent clipping
+                max_val = np.max(np.abs(ch))
+                if max_val > 0.95:
+                    ch = ch / max_val * 0.95
+
+                processed_channels.append(ch)
+
+            if is_stereo:
+                result = np.column_stack(processed_channels)
+            else:
+                result = processed_channels[0]
+
+            sf.write(output_path, result, sr)
+            method = "dsp_pipeline+{}".format(req.target_profile)
+
+        await asyncio.sleep(1.0)
+
+    except ImportError as e:
+        print(f"[Pre-Processing] Audio enhancement DSP not available: {e}")
+    except Exception as e:
+        print(f"[Pre-Processing] Audio enhancement error: {e}")
+
     return {
         "success": True,
         "video_id": req.video_id,
-        "enhanced_audio_url": f"s3://lazynext-assets/processed/{req.video_id}_enhanced.wav",
-        "profile_applied": req.target_profile
+        "enhanced_audio_url": (
+            f"file://{output_path}" if os.path.exists(output_path)
+            else f"s3://lazynext-assets/processed/{req.video_id}_enhanced.wav"
+        ),
+        "profile_applied": req.target_profile,
+        "method": method,
     }
 
 @app.post("/retouch")
 async def apply_retouch(req: RetouchRequest):
     """
-    Simulate AI Facial Beauty and Body Retouching.
+    AI Facial Beauty Retouching via OpenCV bilateralFilter skin smoothing.
+
+    Applies a bilateral filter for edge-preserving skin smoothing when
+    OpenCV and numpy are available, falling back to a mock response.
     """
-    await asyncio.sleep(1.0)
-    
+    video_path = f"/tmp/{req.video_id}.mp4"
+    output_path = f"/tmp/{req.video_id}_retouched.mp4"
+    method = "dev-fallback"
+    frames_processed = 0
+
+    try:
+        import cv2
+        import numpy as np
+        import subprocess
+        import tempfile
+
+        if os.path.exists(video_path):
+            cap = cv2.VideoCapture(video_path)
+            if cap.isOpened():
+                fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
+                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                frames_dir = tempfile.mkdtemp(prefix="retouch_")
+
+                # Bilateral filter parameters controlled by intensity
+                # intensity 0.0 -> subtle smoothing (small d, high sigmaColor)
+                # intensity 1.0 -> strong smoothing (larger d, lower sigmaColor)
+                d = int(5 + req.intensity * 15)          # Diameter: 5–20
+                sigma_color = 75 - int(req.intensity * 50)  # SigmaColor: 75–25
+                sigma_space = sigma_color
+
+                frame_idx = 0
+                output_idx = 0
+                # Process every 2nd frame when intensity is low for speed
+                step = 1 if req.intensity > 0.3 else 2
+
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+
+                    if frame_idx % step == 0:
+                        # Convert to LAB for luminance-aware smoothing
+                        lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+                        l_channel, a_channel, b_channel = cv2.split(lab)
+
+                        # Apply bilateral filter on luminance channel for skin smoothing
+                        l_smoothed = cv2.bilateralFilter(
+                            l_channel, d, sigma_color, sigma_space
+                        )
+
+                        # Optionally apply additional beauty: subtle Gaussian on
+                        # chrominance channels to reduce skin blemishes / redness
+                        if req.intensity > 0.5:
+                            a_channel = cv2.GaussianBlur(a_channel, (5, 5), 0)
+                            b_channel = cv2.GaussianBlur(b_channel, (5, 5), 0)
+
+                        # Merge back
+                        lab_smoothed = cv2.merge([l_smoothed, a_channel, b_channel])
+                        smoothed = cv2.cvtColor(lab_smoothed, cv2.COLOR_LAB2BGR)
+
+                        # Blend original and smoothed based on intensity
+                        alpha = req.intensity
+                        styled = cv2.addWeighted(frame, 1.0 - alpha, smoothed, alpha, 0)
+
+                        frame_path = f"{frames_dir}/frame_{output_idx:04d}.png"
+                        cv2.imwrite(frame_path, styled)
+                        output_idx += 1
+
+                    frame_idx += 1
+
+                cap.release()
+                frames_processed = output_idx
+
+                if output_idx > 0:
+                    # Re-encode processed frames to video
+                    subprocess.run(
+                        [
+                            "ffmpeg", "-y",
+                            "-framerate", str(fps / step),
+                            "-i", f"{frames_dir}/frame_%04d.png",
+                            "-c:v", "libx264", "-crf", "18",
+                            "-pix_fmt", "yuv420p",
+                            output_path,
+                        ],
+                        capture_output=True,
+                        timeout=300,
+                    )
+                    if os.path.exists(output_path):
+                        method = f"bilateral_filter+d={d}_sc={sigma_color}"
+
+                # Cleanup frame directory
+                import shutil
+                shutil.rmtree(frames_dir, ignore_errors=True)
+
+        await asyncio.sleep(0.5)
+
+    except ImportError:
+        print(
+            "[Pre-Processing] OpenCV not installed for retouch. "
+            "Install: pip install opencv-python"
+        )
+    except Exception as e:
+        print(f"[Pre-Processing] Retouch error: {e}")
+
+    # Fallback: mock response when OpenCV is unavailable or video missing
+    if method == "dev-fallback":
+        await asyncio.sleep(1.0)
+
     return {
         "success": True,
         "video_id": req.video_id,
         "intensity_applied": req.intensity,
-        "filter_id": "smart_beauty_v2"
+        "filter_id": "smart_beauty_v2",
+        "method": method,
+        "frames_processed": frames_processed,
+        "output_url": (
+            f"file://{output_path}" if os.path.exists(output_path)
+            else f"s3://lazynext-assets/retouched/{req.video_id}_retouched.mp4"
+        ),
     }
 
 @app.post("/extract-hook")

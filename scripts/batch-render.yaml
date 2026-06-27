@@ -1,0 +1,64 @@
+# Lazynext CLI Batch Render Manifest
+#
+# Defines multiple projects to render in one command.
+# Usage: lazynext-cli --batch manifest scripts/batch-render.yaml
+#
+# Each project can override global defaults for format, resolution,
+# framerate, duration, and bitrate.
+
+global:
+  format: mp4
+  width: 1920
+  height: 1080
+  framerate: 24
+  duration: 10
+  bitrate_kbps: 8000
+  output_dir: ./out
+
+projects:
+  - id: "social_media_cut"
+    name: "Social Media Cut"
+    format: mp4
+    width: 1080
+    height: 1920
+    framerate: 30
+    duration: 15
+
+  - id: "theatrical_trailer"
+    name: "Theatrical Trailer"
+    format: prores
+    width: 4096
+    height: 1716
+    framerate: 24
+    duration: 120
+    output_dir: ./out/dcp
+
+  - id: "web_export"
+    name: "Web Export"
+    format: mp4
+    width: 1920
+    height: 1080
+    framerate: 30
+    duration: 30
+
+  - id: "archival_master"
+    name: "Archival Master"
+    format: dcp
+    width: 2048
+    height: 1080
+    framerate: 24
+    duration: 90
+    output_dir: ./out/archive
+
+  - id: "preview_proxy"
+    name: "Preview Proxy"
+    format: mov
+    width: 640
+    height: 360
+    framerate: 24
+    duration: 120
+    bitrate_kbps: 2000
+
+notify:
+  on_complete: "webhook"
+  webhook_url: "${LAZYNEXT_WEBHOOK_URL}"

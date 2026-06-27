@@ -264,6 +264,37 @@ mod tests {
     }
 
     #[test]
+    fn formats_mm_ss_correctly() {
+        // 65 seconds = 1:05
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(65.0).unwrap(),
+                format: Some(TimeCodeFormat::MmSs),
+                rate: None,
+            }),
+            Some("01:05".to_string()),
+        );
+        // 3723 seconds = 1h 2m 3s → MM:SS shows minutes component within the hour
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(3723.0).unwrap(),
+                format: Some(TimeCodeFormat::MmSs),
+                rate: None,
+            }),
+            Some("02:03".to_string()),
+        );
+        // 0 seconds = 00:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(0.0).unwrap(),
+                format: Some(TimeCodeFormat::MmSs),
+                rate: None,
+            }),
+            Some("00:00".to_string()),
+        );
+    }
+
+    #[test]
     fn guesses_timecode_formats() {
         assert_eq!(
             guess_timecode_format(GuessTimecodeFormatOptions {
@@ -282,6 +313,103 @@ mod tests {
                 time_code: "00:00:01:15".to_string(),
             }),
             Some(TimeCodeFormat::HhMmSsFf),
+        );
+    }
+
+    #[test]
+    fn format_timecode_mm_ss() {
+        // 65 seconds => 01:05
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(65.0).unwrap(),
+                format: Some(TimeCodeFormat::MmSs),
+                rate: None,
+            }),
+            Some("01:05".to_string()),
+        );
+        // 0 seconds => 00:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(0.0).unwrap(),
+                format: Some(TimeCodeFormat::MmSs),
+                rate: None,
+            }),
+            Some("00:00".to_string()),
+        );
+    }
+
+    #[test]
+    fn format_timecode_hh_mm_ss() {
+        // 1h 2m 3s => 01:02:03
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(3723.0).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSs),
+                rate: None,
+            }),
+            Some("01:02:03".to_string()),
+        );
+        // 0 seconds => 00:00:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(0.0).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSs),
+                rate: None,
+            }),
+            Some("00:00:00".to_string()),
+        );
+    }
+
+    #[test]
+    fn format_timecode_hh_mm_ss_cs() {
+        // 3723.45 seconds => 01:02:03:45
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(3723.45).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSsCs),
+                rate: None,
+            }),
+            Some("01:02:03:45".to_string()),
+        );
+        // 0 seconds => 00:00:00:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(0.0).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSsCs),
+                rate: None,
+            }),
+            Some("00:00:00:00".to_string()),
+        );
+    }
+
+    #[test]
+    fn format_timecode_hh_mm_ss_ff() {
+        // 1.5 seconds at 30 fps => 00:00:01:15 (15 frames)
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(1.5).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSsFf),
+                rate: Some(FrameRate::FPS_30),
+            }),
+            Some("00:00:01:15".to_string()),
+        );
+        // 1 second at 24 fps => 00:00:01:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(1.0).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSsFf),
+                rate: Some(FrameRate::FPS_24),
+            }),
+            Some("00:00:01:00".to_string()),
+        );
+        // 0 seconds at 60 fps => 00:00:00:00
+        assert_eq!(
+            format_timecode(FormatTimecodeOptions {
+                time: MediaTime::from_seconds_f64(0.0).unwrap(),
+                format: Some(TimeCodeFormat::HhMmSsFf),
+                rate: Some(FrameRate::FPS_60),
+            }),
+            Some("00:00:00:00".to_string()),
         );
     }
 }

@@ -1,0 +1,68 @@
+---
+title: "From Studio to Cloud: The 7-Format Video Editor"
+description: "How a single Rust codebase powers web, desktop, mobile, and more"
+date: "2026-06-18"
+author: "Lazynext Engineering"
+slug: "from-studio-to-cloud-7-format"
+---
+
+## Write Once, Run Everywhere
+
+Most video editing platforms choose one target — desktop (Premiere), web (Canva), or mobile (CapCut) — and build everything around that choice. Adding a second platform means rewriting the entire editing engine.
+
+Lazynext takes the opposite approach. Our editing engine is a single Rust crate (`lazynext_core`) that compiles to seven different targets:
+
+| Format | Technology | How It Runs |
+|--------|-----------|-------------|
+| Web | Rust → WASM + WebGPU | Browser tab |
+| Desktop | Rust native + wgpu | macOS/Windows/Linux |
+| Mobile | Rust → UniFFI → Kotlin/Swift | Android/iOS |
+| Browser Extension | Chrome MV3 + WASM | Browser toolbar |
+| CLI | Rust binary | Terminal/CI |
+| API Gateway | Axum HTTP server | Cloud/on-prem |
+| MCP Server | JSON-RPC over stdio | AI agent integration |
+
+## One Compositor, Every Platform
+
+The GPU compositor (`rust/crates/compositor`) is the heart of the engine. It handles:
+
+- 17 blend modes (normal through luminosity)
+- 6 GPU effect shaders (blur, chroma key, glitch, color grade, fire, portal)
+- MSDF text rendering with outline and shadow
+- ACES 1.3 color science pipeline
+- Stereoscopic 3D output (anaglyph, side-by-side, over-under)
+- Mask feathering via Jump Flood Algorithm
+
+All 1,070 lines of compositor code compile to WebAssembly (for browsers), native wgpu (for desktop), and mobile GPU backends — with zero platform-specific branches.
+
+## The UniFFI Bridge
+
+For mobile, we use Mozilla's UniFFI (Universal Foreign Function Interface). A single UDL file (`rust/core/uniffi/lazynext.udl`) defines the interface between Rust and the mobile OS:
+
+```udl
+namespace lazynext_mobile {
+  string init_engine(string session_id, string project_name, u32 framerate);
+  string process_intent(string prompt, boolean require_approval);
+  string get_timeline_state();
+  boolean undo();
+  boolean redo();
+}
+```
+
+UniFFI generates Kotlin bindings for Android and Swift bindings for iOS — type-safe, idiomatic, and zero-overhead.
+
+## The MCP Server: AI-Native Editing
+
+Our most unusual format is the MCP (Model Context Protocol) server. It exposes the entire editing engine as a set of tools that AI agents can call directly:
+
+```
+Tool: autonomous_edit → "Cut silence and add color grading"
+Tool: get_timeline_state → Current project as JSON
+Tool: export_project → Render to MP4/ProRes/DCP
+```
+
+This means Claude, ChatGPT, or any MCP-compatible agent can edit video in Lazynext — not through a screen reader or simulated clicks, but through the same CRDT interface human editors use.
+
+## One Codebase, No Duplication
+
+The key metric: **0 lines of duplicated business logic across platforms.** Every editing operation, every CRDT merge, every GPU effect — written once in Rust, running everywhere.

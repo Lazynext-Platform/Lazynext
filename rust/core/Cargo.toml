@@ -9,8 +9,9 @@ license = "MIT"
 [dependencies]
 lazynext_plugin_api = { path = "../plugin-api" }
 lazynext_provenance = { path = "../provenance" }
+lazynext-export = { path = "../crates/export" }
 state = { path = "../crates/state" }
-tokio = { version = "1.0", features = ["sync", "time"] }
+tokio = { version = "1.0", features = ["sync", "time", "rt"] }
 gpu = { path = "../crates/gpu" }
 compositor = { path = "../crates/compositor" }
 serde = { version = "1.0", features = ["derive"] }

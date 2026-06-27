@@ -1,0 +1,66 @@
+---
+title: "WebGPU: The Browser Is Now a Video Workstation"
+description: "How WebGPU enables 60fps video compositing with 17 blend modes and ACES color science"
+date: "2026-06-08"
+author: "Lazynext Engineering"
+slug: "webgpu-browser-video-workstation"
+---
+
+## From WebGL to WebGPU
+
+For a decade, WebGL was the only way to do GPU computing in the browser. It worked — but it was designed for 3D games from 2011, not modern video compositing. WebGL lacked compute shaders, had limited texture formats, and couldn't efficiently share GPU resources between rendering passes.
+
+WebGPU changes everything. Designed by the same teams that built Vulkan, Metal, and DirectX 12, WebGPU exposes the full capabilities of modern GPUs to web applications:
+
+- **Compute shaders** — Run arbitrary parallel computations on the GPU, not just rendering
+- **Multiple render passes** — Render to textures and reuse them without expensive copies
+- **Explicit memory management** — Control over GPU memory allocation and texture lifetimes
+- **Bind groups** — Pre-bind resources for efficient batched rendering
+
+## 17 Blend Modes at 60fps
+
+Our compositor (`rust/crates/compositor/compositor.rs`) renders every frame through a multi-pass GPU pipeline:
+
+1. **Layer pass** — Each clip is rendered to a texture with transforms, opacity, and color grading
+2. **Effect pass** — GPU shaders apply real-time effects (blur, chroma key, glitch, fire, color grade)
+3. **Mask pass** — Jump Flood Algorithm computes signed distance fields for feathered masks
+4. **Blend pass** — The final composite combines all layers with configurable blend modes
+
+All 17 blend modes — from Normal and Multiply to Luminosity and Hard Light — are computed in a single WGSL shader, dispatched 60 times per second.
+
+## ACES Color Science in the Browser
+
+Professional color grading requires the Academy Color Encoding System (ACES). Our pipeline applies:
+
+1. **Input Device Transform (IDT)** — Converts camera log footage (ARRI LogC4, RED Log3G10, Sony S-Log3) to ACES AP0 linear
+2. **Reference Rendering Transform (RRT)** — Film-like S-curve tone mapping
+3. **Output Device Transform (ODT)** — Converts to display space (Rec.709, Rec.2020 HDR, DCI-P3, sRGB)
+
+All computed in WGSL shaders, with ACES 1.3 reference matrices.
+
+## Stereoscopic 3D
+
+The compositor supports three stereo output modes:
+
+- **Anaglyph** — Red/cyan for cheap 3D glasses
+- **Side-by-Side** — For VR headsets and 3D TVs
+- **Over-Under** — For 3D Blu-ray and broadcast
+
+Each mode is a WGSL shader that composites left and right eye views with proper parallax and convergence.
+
+## The Numbers
+
+| Metric | Value |
+|--------|-------|
+| Compositor render time | < 2ms per frame at 1080p |
+| GPU shaders | 13 WGSL files |
+| Blend modes | 17 |
+| Effect shaders | 6 (blur, chroma key, glitch, fire, color grade, portal) |
+| Target framerate | 60fps |
+| Fallback | Canvas 2D CPU rendering |
+
+## Browser Support
+
+WebGPU is available in Chrome 113+, Edge 113+, and Opera 99+. Firefox support is in development. When WebGPU isn't available, the compositor gracefully falls back to Canvas 2D CPU rendering — slower, but functional everywhere.
+
+The browser is no longer just a document viewer. It's a video workstation.

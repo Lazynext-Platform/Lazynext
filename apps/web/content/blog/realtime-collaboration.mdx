@@ -1,0 +1,46 @@
+---
+title: "Real-Time Video Collaboration Is Here"
+description: "How CRDTs, vector clocks, and WebRTC enable multiple editors on the same timeline"
+date: "2026-06-22"
+author: "Lazynext Engineering"
+slug: "realtime-collaboration-crdt-webrtc"
+---
+
+## The Dream: Google Docs for Video
+
+Every editor knows the pain: "Can you send me the project file?" "Wait, which version are you on?" "I already made those cuts!"
+
+Real-time collaboration transformed documents (Google Docs), design (Figma), and code (VS Code Live Share). But video editing has remained stubbornly single-user. The reason: video projects are far more complex than documents — they're hierarchical structures of tracks, clips, keyframes, effects, and audio parameters.
+
+## Enter CRDTs
+
+Conflict-free Replicated Data Types solve the fundamental problem: how do multiple editors modify the same timeline simultaneously without creating conflicts?
+
+Lazynext uses three complementary CRDT strategies:
+
+1. **LWW-Registers** for scalar values (opacity, effect parameters). The last write wins deterministically.
+2. **Operation-based CRDTs** for structural changes (adding tracks, splitting clips). An append-only operation log replays identically on every peer.
+3. **Tombstone Maps** for safe deletion. Objects are soft-deleted but never removed from the causal history.
+
+The result: 8 simultaneous editors can work on the same timeline — one placing clips, another adjusting color, a third adding captions — and never step on each other's toes.
+
+## WebRTC for Peer-to-Peer Sync
+
+For real-time collaboration, latency matters. Our CRDT operations flow through two paths:
+
+- **WebSocket relay** (via the collab server): Reliable, works through firewalls, ~50ms round-trip
+- **WebRTC data channels** (P2P): Sub-10ms latency between peers on the same network, with STUN/TURN for NAT traversal
+
+The system automatically upgrades from WebSocket to WebRTC when peers can establish a direct connection, dramatically reducing latency for LAN-based editing suites.
+
+## Vector Clocks Keep Time
+
+Every operation carries a vector clock tracking which peer has seen which updates. This enables **happens-before** comparisons that prevent ordering anomalies — a cut made after a color grade always appears after it, regardless of network latency.
+
+The math is elegant: when Peer A has seen updates [A:5, B:3] and Peer B has seen [A:4, B:6], the system knows exactly which operations need to be exchanged. No operational transforms, no last-write-wins guesswork.
+
+## The AI Peer
+
+Our Chronos Copilot AI is just another peer in the CRDT mesh. When you type "cut the silence and add cinematic color grading," the AI generates CRDT operations and pushes them into the same collaborative session. Human editors see AI edits in real-time, can undo any AI operation with Ctrl+Z, and can build on top of AI-generated foundations.
+
+The future of video editing isn't solo or AI — it's collaborative AI, where human and machine editors work side by side on the same timeline.

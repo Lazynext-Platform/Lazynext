@@ -1,0 +1,44 @@
+---
+title: "How CRDTs Make Real-Time Video Collaboration Possible"
+description: "The distributed systems magic behind conflict-free video editing"
+date: "2026-06-15"
+author: "Lazynext Engineering"
+slug: "crdt-real-time-collaboration"
+---
+
+## The Problem: Video Projects Are Complex
+
+A video project isn't just a document. It's a hierarchical structure of tracks, clips, keyframes, effects, masks, and audio parameters — all changing simultaneously as multiple editors work. Traditional approaches (operational transforms, locking) either lose edits or create frustrating merge conflicts.
+
+## CRDTs: Merge Without Conflict
+
+Lazynext uses **Conflict-free Replicated Data Types** (CRDTs) for every piece of timeline state. Our implementation combines three complementary approaches:
+
+### 1. LWW-Register (Last-Writer-Wins)
+For scalar values like clip opacity or effect parameters, we use LWW-Registers with hybrid logical clocks. The most recent write wins deterministically — no merge conflicts, ever.
+
+### 2. Operation-Based CRDTs
+For structural changes (adding/deleting tracks, splitting clips), we use an append-only operation log with Lamport clocks. Each peer replays the log locally to converge to the same state.
+
+### 3. Tombstone Map
+Deletions are marked with tombstones — objects that are soft-deleted but never removed from the causal history. This prevents the classic "deleted-then-resurrected" bug that plagues many collaborative editors.
+
+## Vector Clocks for Causality
+
+Every operation carries a vector clock that tracks which peer has seen which updates. When a peer receives an operation, it merges the remote vector clock with its local one — enabling **happens-before** comparisons that prevent ordering anomalies.
+
+## WASM: The Secret Weapon
+
+All CRDT logic compiles to WebAssembly, meaning:
+- The same Rust code runs in the browser, on desktop, and on the server
+- Operations are validated client-side before broadcast
+- No "thin client" problem — every peer is a full editor
+
+## Numbers That Matter
+
+- **0 conflicts** — CRDTs converge deterministically, always
+- **< 50ms** — Operation round-trip time over WebSocket
+- **17 MB** — WASM binary size (the full video compositing engine)
+- **∞** — Number of simultaneous editors (theoretically; practically tested with 8)
+
+The result: multiple editors can work on the same timeline — one placing clips, another adjusting color, a third adding captions — and never step on each other's toes.

@@ -1,0 +1,29 @@
+---
+title: "ADR 003: WebGPU/Native wgpu Compositor"
+status: accepted
+date: 2026-03-01
+---
+
+## Context
+
+Real-time video compositing requires GPU acceleration. We need a single compositor that works on web (WebGPU), desktop (wgpu/Vulkan/Metal), and mobile (wgpu).
+
+## Decision
+
+Use `wgpu` crate as the GPU abstraction layer. Write all compositing logic as WGSL shaders. Compile to both WebGPU (browser) and native (desktop/mobile) backends.
+
+Implementation: `rust/crates/compositor/src/compositor.rs` (1070 lines), 13 WGSL shaders.
+
+## Consequences
+
+- **Positive**: Single shader codebase for all platforms.
+- **Positive**: WebGPU provides near-native performance in the browser.
+- **Positive**: 17 blend modes, MSDF text, stereoscopic 3D all in one pipeline.
+- **Negative**: WebGPU browser support (Chrome 113+, Edge 113+, Opera 99+). Falls back to CPU canvas.
+- **Negative**: WGSL shader debugging is still maturing.
+
+## Alternatives Considered
+
+1. **Platform-specific GPU APIs (Metal/Vulkan/DirectX)**: Rejected due to 3x implementation cost.
+2. **WebGL-only**: Rejected due to performance ceiling and lack of compute shaders.
+3. **CPU-only compositing**: Rejected due to performance (4K 60fps impossible on CPU).

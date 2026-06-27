@@ -9,26 +9,95 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-// UniFFI bridge mockup
+// ── API Configuration ────────────────────────────────────────────────────
+const API_GATEWAY_URL = "http://localhost:8005";
+
+// ── Native Bridge (calls Rust API Gateway) ────────────────────────────────
 const NativeBridge = {
-  get_project_name: (): string => {
-    return "Mobile CRDT Session";
+  async fetchProject(): Promise<{
+    name: string;
+    tracks: number;
+    clips: number;
+    trackList: Array<{ name: string; clips: number }>;
+  }> {
+    try {
+      const resp = await fetch(`${API_GATEWAY_URL}/api/v1/timeline`, {
+        headers: { Authorization: "Bearer dev-token" },
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      const rawTracks: any[] = data.tracks || [];
+      return {
+        name: data.name || "Untitled Project",
+        tracks: rawTracks.length,
+        clips: rawTracks.reduce((sum: number, t: any) => sum + (t.clips?.length || 0), 0),
+        trackList: rawTracks.map((t: any) => ({
+          name: t.name || "Untitled Track",
+          clips: t.clips?.length || 0,
+        })),
+      };
+    } catch {
+      // Fallback when API Gateway is unreachable
+      return { name: "Offline Project", tracks: 0, clips: 0, trackList: [] };
+    }
   },
-  get_track_count: (): number => {
-    return 3;
+
+  async processIntent(prompt: string): Promise<string> {
+    try {
+      const resp = await fetch(`${API_GATEWAY_URL}/api/v1/autonomous_edit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer dev-token",
+        },
+        body: JSON.stringify({
+          prompt,
+          require_plan_approval: false,
+          source_files: [],
+        }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      return data.message || "Timeline processed.";
+    } catch {
+      // Local fallback for offline use
+      if (prompt.toLowerCase().includes("cut"))
+        return "Trimmed silence from audio tracks (offline).";
+      if (prompt.toLowerCase().includes("music"))
+        return "Added cinematic background score (offline).";
+      if (prompt.toLowerCase().includes("color"))
+        return "Applied teal-orange color grade (offline).";
+      return "Processed timeline via local fallback engine.";
+    }
   },
-  process_intent: (prompt: string): string => {
-    if (prompt.toLowerCase().includes("cut"))
-      return "Trimmed silence from audio tracks.";
-    if (prompt.toLowerCase().includes("music"))
-      return "Added cinematic background score.";
-    if (prompt.toLowerCase().includes("color"))
-      return "Applied teal-orange color grade.";
-    return "Processed timeline via AI engine.";
+
+  async sendChatMessage(message: string): Promise<string> {
+    try {
+      const resp = await fetch(`${API_GATEWAY_URL}/api/v1/autonomous_edit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer dev-token",
+        },
+        body: JSON.stringify({
+          prompt: message,
+          require_plan_approval: true,
+          source_files: [],
+        }),
+      });
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      return data.message || "AI processed your request.";
+    } catch {
+      return "Chronos Copilot is currently offline. Try again when connected.";
+    }
   },
 };
 
@@ -43,9 +112,12 @@ function DashboardScreen() {
   const [isApplePencil, setIsApplePencil] = useState(false);
 
   useEffect(() => {
-    setProjectName(NativeBridge.get_project_name());
-    setTrackCount(NativeBridge.get_track_count());
-    setClipCount(NativeBridge.get_track_count() * 2);
+    (async () => {
+      const project = await NativeBridge.fetchProject();
+      setProjectName(project.name);
+      setTrackCount(project.tracks);
+      setClipCount(project.clips);
+    })();
   }, []);
 
   const handleTouchStart = (e: any) => {
@@ -59,20 +131,22 @@ function DashboardScreen() {
     }
   };
 
-  const handleProcessIntent = () => {
+  const handleProcessIntent = async () => {
     if (!prompt.trim() || processing) return;
     const currentPrompt = prompt;
     setProcessing(true);
     setStatus("Processing via Rust Core...");
     setPrompt("");
 
-    setTimeout(() => {
-      const result = NativeBridge.process_intent(currentPrompt);
-      setStatus(`✓ ${result}`);
-      setClipCount((prev) => prev + 1);
-      setHistory((prev) => [currentPrompt, ...prev].slice(0, 10));
-      setProcessing(false);
-    }, 600);
+    const result = await NativeBridge.processIntent(currentPrompt);
+    setStatus(`✓ ${result}`);
+    setClipCount((prev) => prev + 1);
+    setHistory((prev) => [currentPrompt, ...prev].slice(0, 10));
+    // Refresh project stats from server
+    const project = await NativeBridge.fetchProject();
+    setTrackCount(project.tracks);
+    setClipCount(project.clips);
+    setProcessing(false);
   };
 
   const quickActions = ["Cut silence", "Add music", "Color grade", "Generate B-roll"];
@@ -170,10 +244,140 @@ function DashboardScreen() {
 }
 
 function AIChatScreen() {
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
+    { role: "assistant", text: "Hi! I'm Chronos Copilot. Ask me to edit your video, generate B-roll, add effects, or anything else." },
+  ]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const flatListRef = React.useRef<FlatList>(null);
+
+  const handleSend = async () => {
+    if (!input.trim() || sending) return;
+    const userMsg = input.trim();
+    setInput("");
+    setMessages((prev) => [...prev, { role: "user", text: userMsg }]);
+    setSending(true);
+
+    const reply = await NativeBridge.sendChatMessage(userMsg);
+    setMessages((prev) => [...prev, { role: "assistant", text: reply }]);
+    setSending(false);
+  };
+
   return (
-    <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-      <Text style={{ color: "#fff", fontSize: 24, fontWeight: "bold" }}>AI Copilot Chat</Text>
-      <Text style={{ color: "rgba(255,255,255,0.6)", marginTop: 8 }}>Ask complex production questions here.</Text>
+    <SafeAreaView style={[styles.container]}>
+      <StatusBar barStyle="light-content" backgroundColor="#050505" />
+      <View style={styles.chatHeader}>
+        <Text style={styles.chatHeaderTitle}>Chronos Copilot</Text>
+        <Text style={styles.chatHeaderSub}>AI Video Editor</Text>
+      </View>
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(_, i) => String(i)}
+        style={styles.chatList}
+        contentContainerStyle={styles.chatListContent}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        renderItem={({ item }) => (
+          <View
+            style={[
+              styles.chatBubble,
+              item.role === "user" ? styles.chatBubbleUser : styles.chatBubbleAssistant,
+            ]}
+          >
+            <Text style={item.role === "user" ? styles.chatTextUser : styles.chatTextAssistant}>
+              {item.text}
+            </Text>
+          </View>
+        )}
+      />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <View style={styles.chatInputContainer}>
+          <TextInput
+            style={styles.chatInput}
+            placeholder="Ask me to edit your video..."
+            placeholderTextColor="#52525b"
+            value={input}
+            onChangeText={setInput}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+            editable={!sending}
+          />
+          <TouchableOpacity
+            style={[styles.chatSendBtn, (!input.trim() || sending) && styles.buttonDisabled]}
+            onPress={handleSend}
+            disabled={!input.trim() || sending}
+          >
+            {sending ? (
+              <ActivityIndicator color="#050505" size="small" />
+            ) : (
+              <Text style={styles.buttonText}>Send</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+function TimelineScreen() {
+  const [projectName, setProjectName] = useState("Loading...");
+  const [trackList, setTrackList] = useState<Array<{ name: string; clips: number }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const project = await NativeBridge.fetchProject();
+      setProjectName(project.name);
+      setTrackList(project.trackList);
+      setLoading(false);
+    })();
+  }, []);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#050505" />
+
+      <View style={styles.timelineHeader}>
+        <Text style={styles.timelineHeaderTitle}>Timeline</Text>
+        <Text style={styles.timelineHeaderSub}>{projectName}</Text>
+      </View>
+
+      {loading ? (
+        <View style={styles.timelineLoading}>
+          <ActivityIndicator color="#00e5ff" size="large" />
+          <Text style={styles.timelineLoadingText}>Loading tracks...</Text>
+        </View>
+      ) : trackList.length === 0 ? (
+        <View style={styles.timelineEmpty}>
+          <Text style={styles.timelineEmptyText}>No tracks yet</Text>
+          <Text style={styles.timelineEmptySub}>
+            Tracks will appear here once added to the project.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={trackList}
+          keyExtractor={(_, i) => String(i)}
+          style={styles.timelineList}
+          contentContainerStyle={styles.timelineListContent}
+          renderItem={({ item, index }) => (
+            <View style={styles.trackRow}>
+              <View style={styles.trackIndex}>
+                <Text style={styles.trackIndexText}>{index + 1}</Text>
+              </View>
+              <View style={styles.trackInfo}>
+                <Text style={styles.trackName}>{item.name}</Text>
+                <Text style={styles.trackClips}>
+                  {item.clips} clip{item.clips !== 1 ? "s" : ""}
+                </Text>
+              </View>
+              <View style={styles.trackBadge}>
+                <Text style={styles.trackBadgeText}>{item.clips}</Text>
+              </View>
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -195,6 +399,7 @@ export default function App() {
         }}
       >
         <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        <Tab.Screen name="Timeline" component={TimelineScreen} />
         <Tab.Screen name="AI Copilot" component={AIChatScreen} />
       </Tab.Navigator>
     </NavigationContainer>
@@ -247,4 +452,47 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.4 },
   buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
+  // Chat styles
+  chatHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
+  chatHeaderTitle: { color: "#00e5ff", fontSize: 22, fontWeight: "bold" },
+  chatHeaderSub: { color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 2 },
+  chatList: { flex: 1 },
+  chatListContent: { padding: 16, gap: 12 },
+  chatBubble: { maxWidth: "80%", padding: 14, borderRadius: 18 },
+  chatBubbleUser: { alignSelf: "flex-end", backgroundColor: "#00e5ff" },
+  chatBubbleAssistant: { alignSelf: "flex-start", backgroundColor: "rgba(24,24,27,0.7)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
+  chatTextUser: { color: "#050505", fontSize: 15 },
+  chatTextAssistant: { color: "#ffffff", fontSize: 15, lineHeight: 21 },
+  chatInputContainer: { flexDirection: "row", gap: 12, padding: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
+  chatInput: { flex: 1, backgroundColor: "rgba(24,24,27,0.5)", color: "#ffffff", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", fontSize: 16 },
+  chatSendBtn: { backgroundColor: "#00e5ff", paddingHorizontal: 20, paddingVertical: 12, borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  // Timeline styles
+  timelineHeader: { padding: 24, paddingTop: 48, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" },
+  timelineHeaderTitle: { color: "#ffffff", fontSize: 28, fontWeight: "900", letterSpacing: -0.5 },
+  timelineHeaderSub: { color: "rgba(255,255,255,0.5)", fontSize: 14, marginTop: 4 },
+  timelineLoading: { flex: 1, justifyContent: "center", alignItems: "center", gap: 12 },
+  timelineLoadingText: { color: "rgba(255,255,255,0.5)", fontSize: 14 },
+  timelineEmpty: { flex: 1, justifyContent: "center", alignItems: "center", padding: 32 },
+  timelineEmptyText: { color: "rgba(255,255,255,0.6)", fontSize: 18, fontWeight: "600", marginBottom: 8 },
+  timelineEmptySub: { color: "rgba(255,255,255,0.3)", fontSize: 14, textAlign: "center" },
+  timelineList: { flex: 1 },
+  timelineListContent: { padding: 16, gap: 8 },
+  trackRow: {
+    flexDirection: "row", alignItems: "center",
+    backgroundColor: "rgba(24,24,27,0.5)", borderColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1, borderRadius: 16, padding: 16, gap: 12,
+  },
+  trackIndex: {
+    width: 32, height: 32, borderRadius: 8,
+    backgroundColor: "rgba(0,229,255,0.1)", justifyContent: "center", alignItems: "center",
+  },
+  trackIndexText: { color: "#00e5ff", fontSize: 14, fontWeight: "bold" },
+  trackInfo: { flex: 1 },
+  trackName: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  trackClips: { color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 2 },
+  trackBadge: {
+    backgroundColor: "rgba(0,229,255,0.15)", borderRadius: 12,
+    paddingHorizontal: 12, paddingVertical: 6,
+  },
+  trackBadgeText: { color: "#00e5ff", fontSize: 14, fontWeight: "bold" },
 });

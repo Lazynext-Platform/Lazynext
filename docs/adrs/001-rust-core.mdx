@@ -1,0 +1,30 @@
+---
+title: "ADR 001: Rust as Single Source of Truth"
+status: accepted
+date: 2026-01-15
+---
+
+## Context
+
+Lazynext targets 7 platforms (web, desktop, mobile, browser extension, CLI, API, MCP). Traditional video editors duplicate editing logic across platforms, leading to divergent behavior and maintenance burden.
+
+## Decision
+
+All business logic lives in Rust crates under `rust/`. Every app under `apps/` is a dumb rendering shell that calls into Rust:
+- Web: via WASM (`rust/wasm/`)
+- Desktop: native linking (`rust/core/`)
+- Mobile: UniFFI-generated bindings (`rust/core/src/mobile_bridge.rs`)
+- CLI/API/MCP: direct Rust calls
+
+## Consequences
+
+- **Positive**: Single codebase for all editing logic. Bug fixes apply everywhere. CRDT sync is identical across platforms.
+- **Positive**: Type safety across the entire stack. No JS/Python duplicate implementations.
+- **Negative**: WASM binary size (~17MB). Acceptable given the functionality.
+- **Negative**: Steeper onboarding for web developers unfamiliar with Rust.
+
+## Alternatives Considered
+
+1. **TypeScript core + platform adapters**: Rejected due to lack of native mobile/desktop performance and no CRDT library in TS.
+2. **Python core**: Rejected due to packaging complexity and mobile support.
+3. **Per-platform implementations**: Rejected due to maintenance cost.

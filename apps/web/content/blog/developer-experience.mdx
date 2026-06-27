@@ -1,0 +1,76 @@
+---
+title: "The Developer Experience Behind Lazynext"
+description: "Rust/WASM workflow, hot reload, testing, and CI/CD in a 7-format codebase"
+date: "2026-06-12"
+author: "Lazynext Engineering"
+slug: "developer-experience-behind-lazynext"
+---
+
+## One Codebase, Seven Targets
+
+Developing for seven platforms sounds like a nightmare. But because all business logic lives in a single Rust workspace, the development experience is surprisingly unified:
+
+```bash
+# Make a change to the compositor
+vim rust/crates/compositor/src/compositor.rs
+
+# Test it across all platforms
+cargo test --workspace       # Native + WASM tests
+cd apps/web && bun run dev   # Web app with hot reload
+cargo run -p lazynext_cli -- --render-project test --format mp4  # CLI
+```
+
+The same code change propagates to web (via WASM), desktop (native), mobile (UniFFI), CLI, API, and MCP server — all from a single `cargo test`.
+
+## The Rust + WASM Loop
+
+The inner development loop for the web app is:
+
+1. **Edit Rust** — Change compositor logic, add an effect, fix a CRDT edge case
+2. **`./build-wasm.sh`** — Compiles Rust to WASM in ~15 seconds
+3. **`bun run dev`** — Next.js hot-reloads the WASM module in the browser
+4. **Test changes** — Refresh the browser, see the result immediately
+
+The `build-wasm.sh` script runs `wasm-pack build --target web rust/wasm` which produces a single `lazynext_wasm.js` + `lazynext_wasm_bg.wasm` pair. The Next.js prebuild step calls this automatically, so `bun run dev` always serves the latest WASM.
+
+## Testing Strategy
+
+We test at every layer:
+
+| Layer | Tool | Command |
+|-------|------|---------|
+| Rust unit | cargo test | `cargo test --workspace` |
+| Rust integration | cargo test | `cargo test -p lazynext_api_gateway` |
+| WASM bridge | wasm-bindgen test | `wasm-pack test --node` |
+| Web app unit | Bun test | `bun run test` |
+| Web app E2E | Playwright | `bun run test:e2e` |
+| Python services | pytest | `pytest services/pre-processing/` |
+| Full pipeline | E2E suite | `bun run test tests/e2e-pipeline.test.ts` |
+
+17 active test suites run on every push. The CI pipeline (GitHub Actions) runs Rust fmt + clippy + test, Python tests, Node tests, and Docker builds — all in parallel.
+
+## CI/CD Pipeline
+
+Our GitHub Actions workflow:
+
+1. **Rust Core** (fmt → clippy → test → WASM build) — 3 minutes
+2. **Python Services** (pip install → pytest) — 2 minutes
+3. **Web App** (bun install → lint → typecheck → build → unit test → E2E) — 8 minutes
+4. **Node Services** (bun install → test) — 2 minutes
+5. **Docker Deploy** (build → push → deploy to Azure) — 12 minutes
+
+Total pipeline: ~25 minutes from push to production. OIDC federation with Azure means no long-lived secrets — each run gets a short-lived token.
+
+## Getting Started in 5 Minutes
+
+```bash
+git clone https://github.com/lazynext/lazynext
+cd lazynext
+./start-platform.sh  # Kills stale processes, starts all 6 services
+```
+
+The script boots PostgreSQL, Redis, the Rust API Gateway, all 4 Python/Node microservices, and the Next.js web app — all configured for local development with hot reload on every service.
+
+## Why This Matters
+
+A great developer experience isn't a luxury — it's what enables a small team to maintain a 7-format platform. When every edit-compile-test cycle is under 30 seconds, and every change propagates to all platforms automatically, a team of 4-6 engineers can do what would otherwise require 20+.

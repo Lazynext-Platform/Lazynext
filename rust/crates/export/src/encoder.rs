@@ -11,7 +11,7 @@ pub struct ExportConfig {
     pub output_path: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ExportFormat {
     Mp4,
     ProRes,
@@ -21,6 +21,18 @@ pub enum ExportFormat {
 }
 
 impl ExportFormat {
+    /// Guess the export format from the output file extension.
+    pub fn from_path(path: &str) -> Option<Self> {
+        let ext = std::path::Path::new(path).extension().and_then(|e| e.to_str()).unwrap_or("");
+        match ext.to_lowercase().as_str() {
+            "mp4" => Some(ExportFormat::Mp4),
+            "mov" => Some(ExportFormat::Mov),
+            "mxf" => Some(ExportFormat::Dcp),
+            "aaf" => Some(ExportFormat::Aaf),
+            _ => None,
+        }
+    }
+
     pub fn extension(&self) -> &str {
         match self {
             ExportFormat::Mp4 => "mp4",
@@ -158,5 +170,88 @@ mod tests {
         let args = ExportEncoder::build_ffmpeg_args(&config);
         assert!(args.contains(&"jpeg2000".to_string()));
         assert!(args.contains(&"xyz12le".to_string()));
+    }
+
+    #[test]
+    fn test_mov_args() {
+        let config = ExportConfig {
+            format: ExportFormat::Mov,
+            width: 1920,
+            height: 1080,
+            framerate: 30,
+            bitrate_kbps: 12000,
+            output_path: "/tmp/test.mov".into(),
+        };
+        let args = ExportEncoder::build_ffmpeg_args(&config);
+        assert!(args.contains(&"-c:v".to_string()));
+        assert!(args.contains(&"libx264".to_string()));
+        assert!(args.contains(&"yuv420p".to_string()));
+        assert!(args.contains(&"-preset".to_string()));
+        assert!(args.contains(&"-crf".to_string()));
+        // Output path must be the last argument
+        assert_eq!(args.last().unwrap(), "/tmp/test.mov");
+    }
+
+    #[test]
+    fn test_aaf_args() {
+        let config = ExportConfig {
+            format: ExportFormat::Aaf,
+            width: 1920,
+            height: 1080,
+            framerate: 24,
+            bitrate_kbps: 0,
+            output_path: "/tmp/test.aaf".into(),
+        };
+        let args = ExportEncoder::build_ffmpeg_args(&config);
+        assert!(args.contains(&"dnxhd".to_string()));
+        assert!(args.contains(&"yuv422p".to_string()));
+        // AAF should not include crf or preset flags
+        assert!(!args.contains(&"-crf".to_string()));
+        assert!(!args.contains(&"-preset".to_string()));
+    }
+
+    #[test]
+    fn test_export_format_from_path_all_formats() {
+        assert_eq!(
+            ExportFormat::from_path("video.mp4"),
+            Some(ExportFormat::Mp4)
+        );
+        assert_eq!(
+            ExportFormat::from_path("video.mov"),
+            Some(ExportFormat::Mov)
+        );
+        assert_eq!(
+            ExportFormat::from_path("video.mxf"),
+            Some(ExportFormat::Dcp)
+        );
+        assert_eq!(
+            ExportFormat::from_path("video.aaf"),
+            Some(ExportFormat::Aaf)
+        );
+        // Unknown extension returns None
+        assert_eq!(ExportFormat::from_path("video.xyz"), None);
+    }
+
+    #[test]
+    fn test_export_format_codec_extension_consistency() {
+        let formats = [
+            ExportFormat::Mp4,
+            ExportFormat::ProRes,
+            ExportFormat::Dcp,
+            ExportFormat::Aaf,
+            ExportFormat::Mov,
+        ];
+        for fmt in &formats {
+            assert!(
+                !fmt.codec().is_empty(),
+                "codec must not be empty for {:?}",
+                fmt
+            );
+            assert!(
+                !fmt.extension().is_empty(),
+                "extension must not be empty for {:?}",
+                fmt
+            );
+        }
     }
 }

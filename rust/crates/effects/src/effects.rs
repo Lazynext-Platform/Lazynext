@@ -1,4 +1,5 @@
 pub mod film_physics;
+pub mod optical_flow;
 mod pipeline;
 mod types;
 

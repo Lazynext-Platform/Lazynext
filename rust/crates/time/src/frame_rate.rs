@@ -113,6 +113,70 @@ mod tests {
     }
 
     #[test]
+    fn ticks_per_frame_23_976() {
+        assert_eq!(FrameRate::FPS_23_976.ticks_per_frame(), Some(5_005));
+    }
+
+    #[test]
+    fn ticks_per_frame_24() {
+        assert_eq!(FrameRate::FPS_24.ticks_per_frame(), Some(5_000));
+    }
+
+    #[test]
+    fn ticks_per_frame_25() {
+        assert_eq!(FrameRate::FPS_25.ticks_per_frame(), Some(4_800));
+    }
+
+    #[test]
+    fn ticks_per_frame_29_97() {
+        assert_eq!(FrameRate::FPS_29_97.ticks_per_frame(), Some(4_004));
+    }
+
+    #[test]
+    fn ticks_per_frame_30() {
+        assert_eq!(FrameRate::FPS_30.ticks_per_frame(), Some(4_000));
+    }
+
+    #[test]
+    fn ticks_per_frame_48() {
+        assert_eq!(FrameRate::FPS_48.ticks_per_frame(), Some(2_500));
+    }
+
+    #[test]
+    fn ticks_per_frame_50() {
+        assert_eq!(FrameRate::FPS_50.ticks_per_frame(), Some(2_400));
+    }
+
+    #[test]
+    fn ticks_per_frame_59_94() {
+        assert_eq!(FrameRate::FPS_59_94.ticks_per_frame(), Some(2_002));
+    }
+
+    #[test]
+    fn ticks_per_frame_60() {
+        assert_eq!(FrameRate::FPS_60.ticks_per_frame(), Some(2_000));
+    }
+
+    #[test]
+    fn ticks_per_frame_120() {
+        assert_eq!(FrameRate::FPS_120.ticks_per_frame(), Some(1_000));
+    }
+
+    #[test]
+    fn standard_frame_rates_return_correct_f64() {
+        assert!((FrameRate::FPS_23_976.as_f64().unwrap() - 23.976).abs() < 0.001);
+        assert!((FrameRate::FPS_24.as_f64().unwrap() - 24.0).abs() < 0.001);
+        assert!((FrameRate::FPS_25.as_f64().unwrap() - 25.0).abs() < 0.001);
+        assert!((FrameRate::FPS_29_97.as_f64().unwrap() - 29.97).abs() < 0.001);
+        assert!((FrameRate::FPS_30.as_f64().unwrap() - 30.0).abs() < 0.001);
+        assert!((FrameRate::FPS_48.as_f64().unwrap() - 48.0).abs() < 0.001);
+        assert!((FrameRate::FPS_50.as_f64().unwrap() - 50.0).abs() < 0.001);
+        assert!((FrameRate::FPS_59_94.as_f64().unwrap() - 59.94).abs() < 0.001);
+        assert!((FrameRate::FPS_60.as_f64().unwrap() - 60.0).abs() < 0.001);
+        assert!((FrameRate::FPS_120.as_f64().unwrap() - 120.0).abs() < 0.001);
+    }
+
+    #[test]
     fn rejects_invalid_or_unsupported_rates() {
         assert_eq!(FrameRate::new(0, 1).ticks_per_frame(), None);
         assert_eq!(FrameRate::new(1, 0).ticks_per_frame(), None);
