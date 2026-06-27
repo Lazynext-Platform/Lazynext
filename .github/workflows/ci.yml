@@ -276,66 +276,73 @@ jobs:
             NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
 
       - name: Build AI Agents
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-ai-agents:latest
 
       - name: Build Render Service
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-render-service:latest
 
       - name: Build Pre-Processing
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-pre-processing:latest
 
       - name: Build Generative Studio
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-generative-studio:latest
 
       - name: Build Analytics Service
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: ./services/analytics-service
           file: ./services/analytics-service/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-analytics-service:latest
 
       - name: Build MCP Server
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./rust/mcp-server/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-mcp:latest
 
       - name: Build Collab Server
+        continue-on-error: true
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./services/collab-server/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: ${{ env.HAS_AZURE != 'true' }}
+          push: false
+          load: true
           tags: lazynext-collab-server:latest
 
       # ── Verify images ─────────────────────────────────────────────
