@@ -195,7 +195,7 @@ impl CoreEngine {
                 let rgba = tokio::runtime::Handle::current()
                     .block_on(async { engine_ref.render_frame(frame_idx).await });
                 rendered += 1;
-                if rendered % 30 == 0 {
+                if rendered.is_multiple_of(30) {
                     println!("[CoreEngine] Rendered frame {}/{}", rendered, total_frames);
                 }
                 let frame_size = (engine_ref.width * engine_ref.height * 4) as usize;

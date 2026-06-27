@@ -64,7 +64,7 @@ pub async fn csrf_protection(req: Request, next: Next) -> Result<Response, Statu
             cookies.split(';').find_map(|cookie| {
                 let cookie = cookie.trim();
                 if cookie.starts_with("csrf_token=") {
-                    Some(cookie["csrf_token=".len()..].to_string())
+                    cookie.strip_prefix("csrf_token=").map(|s| s.to_string())
                 } else {
                     None
                 }

@@ -48,7 +48,7 @@ impl DCPGenerator {
             .iter()
             .flat_map(|t| t.clips.iter().map(|c| c.duration_frames))
             .max()
-            .unwrap_or(1) as i32;
+            .unwrap_or(1);
 
         // ── Composition Playlist (CPL) ─────────────────────────────
         let cpl = self.generate_cpl(

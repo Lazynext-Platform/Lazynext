@@ -1,3 +1,4 @@
+#![allow(clippy::unnecessary_cast, clippy::too_many_arguments, clippy::cast_abs_to_unsigned)]
 //! Optical flow engine for frame interpolation and speed ramping.
 //!
 //! Provides motion-compensated frame interpolation for smooth slow-motion
@@ -49,6 +50,12 @@ pub struct OpticalFlowEngine {
     config: OpticalFlowConfig,
     /// WGSL compute shader source for GPU optical flow
     gpu_compute_shader: Option<String>,
+}
+
+impl Default for OpticalFlowEngine {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl OpticalFlowEngine {

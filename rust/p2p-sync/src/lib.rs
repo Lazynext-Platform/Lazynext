@@ -1,3 +1,4 @@
+#![allow(clippy::while_let_loop)]
 use lazynext_core::NLEEvent;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
@@ -87,11 +88,10 @@ impl P2PNetwork {
                 "10.0.0.255",
                 "255.255.255.255",
             ] {
-                if let Ok(addr) = format!("{}:9001", subnet).parse::<SocketAddr>() {
-                    if let Ok(data) = serde_json::to_vec(&discovery_msg) {
+                if let Ok(addr) = format!("{}:9001", subnet).parse::<SocketAddr>()
+                    && let Ok(data) = serde_json::to_vec(&discovery_msg) {
                         let _ = socket.send_to(&data, addr).await;
                     }
-                }
             }
 
             // Listen for responses for a short window
@@ -106,8 +106,7 @@ impl P2PNetwork {
                     Ok(Ok((len, src_addr))) => {
                         if let Ok(response) =
                             serde_json::from_slice::<serde_json::Value>(&buf[..len])
-                        {
-                            if response["type"] == "lazynext_discovery_response" {
+                            && response["type"] == "lazynext_discovery_response" {
                                 let peer = Peer {
                                     addr: src_addr,
                                     display_name: response["display_name"]
@@ -128,7 +127,6 @@ impl P2PNetwork {
                                     self.peers.push(peer.clone());
                                 }
                             }
-                        }
                     }
                     Ok(Err(e)) => {
                         debug!("Discovery recv error: {}", e);
