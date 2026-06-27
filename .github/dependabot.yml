@@ -51,6 +51,16 @@ updates:
       - "dependencies"
       - "rust"
 
+  - package-ecosystem: "cargo"
+    directory: "/services/collab-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "rust"
+
   - package-ecosystem: "pip"
     directory: "/services/pre-processing"
     schedule:

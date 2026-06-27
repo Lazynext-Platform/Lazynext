@@ -8,7 +8,6 @@ metadata:
   labels:
     app: lazynext
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-production"
     nginx.ingress.kubernetes.io/proxy-body-size: "500m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
@@ -18,6 +17,7 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/from-to-www-redirect: "true"
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - lazynext.ai
@@ -204,7 +204,7 @@ spec:
             matchLabels:
               app: lazynext-analytics-service
       ports:
-        - port: 8005
+        - port: 8006
           protocol: TCP
 ---
 # Allow ingress to GPU pre-processing from web
@@ -375,7 +375,7 @@ spec:
           protocol: TCP
         - port: 8003
           protocol: TCP
-        - port: 8005
+        - port: 8006
           protocol: TCP
         - port: 9187
           protocol: TCP

@@ -86,7 +86,7 @@ FROM base AS bun-install
 
 ENV BUN_INSTALL=/usr/local
 
-RUN curl -fsSL https://bun.sh/install | bash -s -- bun-v1.3.12 \
+RUN curl -fsSL https://bun.sh/install | bash -s -- bun-v1.3.14 \
     && chmod +x /usr/local/bin/bun \
     && bun --version
 

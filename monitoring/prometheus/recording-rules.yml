@@ -132,13 +132,28 @@ groups:
           ) < 0
 
       # Forecast: estimated hours until disk exhaustion
+      #   avail_bytes / (rate_of_decrease_bytes_per_second * 3600)
+      #   deriv(...)[1h] returns bytes per second; negate because a
+      #   negative derivative (shrinking free space) should yield a
+      #   positive hours-remaining value. Multiply by 3600 to convert
+      #   seconds → hours, then divide available bytes by that rate.
       - record: instance:disk_space_hours_remaining:estimate:1h
         expr: |
-          deriv(
+          node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}
+          /
+          (deriv(
             node_filesystem_avail_bytes{mountpoint="/",fstype!="tmpfs"}[1h]
-          ) * 3600
+          ) * -1 * 3600)
 
   # ── SLO / Error Budget Pre-Aggregations ─────────────────────────
+  #
+  # NOTE: Rules using [30d] range vectors cause high memory pressure.
+  # Each 30d rate() evaluation must hold every raw sample for 30 days
+  # in the Prometheus TSDB head block. With a 15s scrape interval,
+  # that is ~172,800 samples per series. Consider reducing to [7d] or
+  # using recording rules with shorter windows that feed into a
+  # separate long-term aggregation pipeline (e.g. Thanos/Cortex).
+  #
   - name: recording-slo-budget
     interval: 60s
     rules:

@@ -33,7 +33,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: web
+              app: lazynext-web
       ports:
         - protocol: TCP
           port: 8004
@@ -41,7 +41,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: ai-agents
+              app: lazynext-sync
       ports:
         - protocol: TCP
           port: 8004

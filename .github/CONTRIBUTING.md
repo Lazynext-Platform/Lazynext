@@ -16,11 +16,11 @@ Thank you for your interest in contributing to Lazynext! This document provides 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/en/) (v18 or later)
+- [Node.js](https://nodejs.org/en/) (v22 or later)
 - [Bun](https://bun.sh/docs/installation)
   (for `npm` alternative)
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
-- Rust toolchain (only needed for `apps/desktop`)
+- Rust toolchain (only needed for `apps/desktop` and `services/collab-server`)
 
 > **Note:** Docker is optional, but it's essential for running the local database and Redis services. If you're planning to contribute to frontend features, you can skip the Docker setup. If you have followed the steps below in [Setup](#setup), you're all set to go!
 
@@ -176,7 +176,7 @@ Working on `apps/desktop`? The desktop app uses GPUI (the Zed editor framework) 
 
 ## Code Style
 
-- We use ESLint for linting and Prettier for formatting
+- We use ESLint for linting and Biome for formatting
 - Run `bun run format` from the `apps/web` directory to format code
 - Run `bun run lint` from the `apps/web` directory to check for linting issues
 - Follow the existing code patterns

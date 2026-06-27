@@ -53,8 +53,9 @@ data:
   # NOTE: Passwords must be injected from a Secret in production;
   # the placeholder values below must be updated via ExternalSecret or similar.
   userlist.txt: |
-    "lazynext" "CHANGE_ME_PASSWORD"
-    "lazynext_admin" "CHANGE_ME_ADMIN_PASSWORD"
+    # Passwords must be injected via ExternalSecret or SealedSecret
+    # "lazynext" "<set via ExternalSecret>"
+    # "lazynext_admin" "<set via ExternalSecret>"
 
 ---
 apiVersion: apps/v1

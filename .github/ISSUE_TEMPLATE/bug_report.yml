@@ -8,7 +8,7 @@ body:
     attributes:
       label: Platform
       description: Please enter the platform on which you encountered the bug.
-      placeholder: e.g. Windows 11, Ubuntu 14.04
+      placeholder: e.g. Windows 11, Ubuntu 26.04
     validations:
       required: true
   - type: input
@@ -16,7 +16,7 @@ body:
     attributes:
       label: Browser
       description: Please enter the browser on which you encountered the bug.
-      placeholder: e.g. Chrome 137, Firefox 137, Safari 17
+      placeholder: e.g. Chrome 149, Firefox 152, Safari 26
     validations:
       required: true
   - type: textarea

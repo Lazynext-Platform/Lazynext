@@ -317,26 +317,30 @@ Strict type safety, accessibility standards, and consistent code quality for Jav
 
 ## Common Tasks
 
-- `npx ultracite init` - Initialize Ultracite in your project
-- `npx ultracite format` - Format and fix code automatically
-- `npx ultracite lint` - Check for issues without fixing
+- `bun run lint` - Check for ESLint issues
+- `bun run format` - Format code with Biome
+- `bun run typecheck` - Run TypeScript type checking
+- `cargo fmt --all --check` - Check Rust formatting
+- `cargo clippy --workspace --all-targets -- -D warnings` - Lint Rust code
 
 ## Example: Error Handling
 
 ```typescript
-// ✅ Good: Comprehensive error handling
+// ✅ Good: Comprehensive error handling with proper logging
 try {
 	const result = await fetchData();
 	return { success: true, data: result };
 } catch (error) {
-	console.error("API call failed:", error);
-	return { success: false, error: error.message };
+	// Use structured logging (tracing in Rust, pino/winston in Node)
+	logger.error({ err: error }, "API call failed");
+	throw new ServiceError("Failed to fetch data", { cause: error });
 }
 
-// ❌ Bad: Swallowing errors
+// ❌ Bad: Swallowing errors silently
 try {
 	return await fetchData();
-} catch (e) {
-	console.log(e);
+} catch {
+	// Error silently ignored — caller gets undefined
+	return undefined;
 }
 ```

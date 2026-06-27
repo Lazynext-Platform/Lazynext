@@ -147,9 +147,9 @@ variables:
 
 # ── Docker: DinD + registry auth ───────────────────────────────────────────
 .docker-auth:
-  image: docker:27-dind
+  image: docker:29-dind
   services:
-    - docker:27-dind
+    - docker:29-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
@@ -614,9 +614,9 @@ security:container-scanning:
 # ── Build all 8 Docker images in parallel matrix ───────────────────────────
 docker:build:
   stage: package
-  image: docker:27-dind
+  image: docker:29-dind
   services:
-    - docker:27-dind
+    - docker:29-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375
@@ -710,9 +710,9 @@ docker:build:
 # ── Push all images to Azure Container Registry ─────────────────────────────
 docker:push:
   stage: package
-  image: docker:27-dind
+  image: docker:29-dind
   services:
-    - docker:27-dind
+    - docker:29-dind
   variables:
     DOCKER_TLS_CERTDIR: ""
     DOCKER_HOST: tcp://docker:2375

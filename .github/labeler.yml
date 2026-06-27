@@ -79,7 +79,7 @@
         - "**/Dockerfile"
         - "Dockerfile.migrate"
         - "**.dockerignore"
-        - "docker-compose.yml"
+        - "docker-compose*.yml"
 
 "area:kubernetes":
   - changed-files:
@@ -125,3 +125,4 @@
         - "**/requirements.txt"
         - "**/Pipfile.lock"
         - "**/Cargo.lock"
+        - "services/collab-server/Cargo.toml"

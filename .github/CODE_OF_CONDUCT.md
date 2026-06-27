@@ -82,8 +82,8 @@ behavior was inappropriate. A public apology may be requested.
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 2.1, available at
-[https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
+version 3.0, available at
+[https://www.contributor-covenant.org/version/3/0/code_of_conduct.html][v3.0].
 
 [homepage]: https://www.contributor-covenant.org
-[v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
+[v3.0]: https://www.contributor-covenant.org/version/3/0/code_of_conduct.html

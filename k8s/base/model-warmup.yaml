@@ -30,7 +30,7 @@ spec:
                 - sh
                 - -c
                 - |
-                  pip install --quiet huggingface_hub
+                  pip install --quiet huggingface-hub
                   echo "📥 Downloading Whisper model..."
                   python3 -c "
                   from huggingface_hub import snapshot_download
@@ -86,7 +86,7 @@ spec:
             - sh
             - -c
             - |
-              pip install --quiet huggingface_hub
+              pip install --quiet huggingface-hub
 
               MODELS="openai/whisper-large-v3 facebook/sam2-hiera-large ai-forever/Real-ESRGAN google/t5-v1_1-large sentence-transformers/all-MiniLM-L6-v2"
 

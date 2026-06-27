@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: analytics-service
+      app: lazynext-analytics-service
   policyTypes:
     - Ingress
   ingress:
@@ -14,7 +14,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app: web
+              app: lazynext-web
       ports:
         - protocol: TCP
           port: 8006

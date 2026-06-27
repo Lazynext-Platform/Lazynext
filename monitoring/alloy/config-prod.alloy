@@ -275,7 +275,6 @@ prometheus.remote_write "prod" {
 
     // ── Retry / backpressure configuration ─────────────────────
     remote_timeout  = "30s"
-    retry_on_http_429 = true
 
     // Queue configuration — WAL-backed for durability
     queue_config {
@@ -308,6 +307,7 @@ prometheus.remote_write "prod" {
     cluster      = sys.env("ALLOY_CLUSTER_NAME") != "" ? sys.env("ALLOY_CLUSTER_NAME") : "lazynext-prod",
     environment  = sys.env("ALLOY_ENVIRONMENT") != "" ? sys.env("ALLOY_ENVIRONMENT") : "production",
     region       = sys.env("ALLOY_REGION") != "" ? sys.env("ALLOY_REGION") : "eastus",
+    // NOTE: alloy_version = "1.0" is a stale placeholder; update to actual deployed version
     alloy_version = "1.0",
   }
 }
@@ -462,9 +462,9 @@ otelcol.receiver.otlp "default" {
   }
 
   output {
-    traces  = [otelcol.processor.batch_traces.input]
-    metrics = [otelcol.processor.batch_metrics.input]
-    logs    = [otelcol.processor.batch_logs.input]
+    traces  = [otelcol.processor.memory_limiter.default.input]
+    metrics = [otelcol.processor.memory_limiter.default.input]
+    logs    = [otelcol.processor.memory_limiter.default.input]
   }
 }
 
@@ -502,12 +502,10 @@ otelcol.processor.memory_limiter "default" {
   check_interval         = "1s"
   limit_mib              = 512
   spike_limit_mib        = 128
-  ballast_size_mib       = 64
-
   output {
-    traces  = [otelcol.receiver.otlp.default.output]
-    metrics = [otelcol.receiver.otlp.default.output]
-    logs    = [otelcol.receiver.otlp.default.output]
+    traces  = [otelcol.processor.attributes.enrich.input]
+    metrics = [otelcol.processor.attributes.enrich.input]
+    logs    = [otelcol.processor.attributes.enrich.input]
   }
 }
 

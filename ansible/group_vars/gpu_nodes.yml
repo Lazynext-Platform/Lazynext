@@ -10,12 +10,12 @@ node_labels:
   nvidia.com/gpu.present: "true"
 
 # ── NVIDIA Driver & CUDA ──────────────────────────────────────────
-nvidia_driver_version: "550"
+nvidia_driver_version: "570"
 nvidia_driver_package: "nvidia-driver-{{ nvidia_driver_version }}"
-nvidia_cuda_version: "12.4"
+nvidia_cuda_version: "12.8"
 nvidia_cuda_package: "cuda-toolkit-{{ nvidia_cuda_version | replace('.', '-') }}"
 nvidia_container_runtime_version: "1.17.0"
-nvidia_gpu_device_plugin_version: "v0.15.0"
+nvidia_gpu_device_plugin_version: "v0.17.0"
 
 # ── GPU Resource Reservations ─────────────────────────────────────
 gpu_limits:

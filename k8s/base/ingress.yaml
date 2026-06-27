@@ -13,7 +13,6 @@ metadata:
   name: lazynext-api-ingress
   namespace: lazynext
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-production"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
@@ -23,6 +22,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/websocket-services: "lazynext-sync"
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - api.lazynext.ai

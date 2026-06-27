@@ -16,7 +16,6 @@ modules:
       tls_config:
         insecure_skip_verify: false
       headers:
-        Host: lazynext.com
         User-Agent: Blackbox-Exporter/1.0
 
   # HTTP probe — tolerates both HTTP/1.1 and HTTP/2

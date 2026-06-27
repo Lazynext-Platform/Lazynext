@@ -31,7 +31,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: better-auth-secret
+                  key: BETTER_AUTH_SECRET
             - name: COLLAB_PORT
               value: "8004"
             - name: RUST_LOG

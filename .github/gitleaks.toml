@@ -27,19 +27,3 @@ useDefault = true
     '''terraform\.tfvars\.example$''',
     '''playwright\.config\..*''',
   ]
-  stopwords = [
-    "mock",
-    "example",
-    "placeholder",
-    "ci-build",
-    "change_me",
-    "changeme",
-    "YourKeyHere",
-    "YourKey",
-    "sk_test_",
-    "re_",
-    "sk-ant-",
-    "r8_",
-    "phc_",
-    "whsec_",
-  ]

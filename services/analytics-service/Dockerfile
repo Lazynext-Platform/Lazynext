@@ -1,5 +1,5 @@
 # ── Stage 1: Build ──
-FROM oven/bun:1.3-alpine AS builder
+FROM oven/bun:1.3.14-alpine AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src/ src/
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
 # ── Stage 2: Runtime ──
-FROM oven/bun:1.3-alpine AS runner
+FROM oven/bun:1.3.14-alpine AS runner
 
 WORKDIR /app
 
@@ -29,7 +29,8 @@ ENV PORT=8006
 
 EXPOSE 8006
 
+# oven/bun:alpine ships with curl, not wget
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8006/health || exit 1
+    CMD curl -sf http://localhost:8006/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

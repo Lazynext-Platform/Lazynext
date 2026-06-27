@@ -41,9 +41,12 @@ scrape_configs:
       - targets: ["collab-server:8004"]
     metrics_path: /health
 
-  - job_name: "mcp-server"
-    static_configs:
-      - targets: ["mcp-server:5173"]
+  # MCP (Model Context Protocol) communicates over stdio, not HTTP —
+  # there is no HTTP endpoint to scrape. MCP metrics are exposed via
+  # the mcp-server's own logging/metrics channel, not Prometheus.
+  # - job_name: "mcp-server"
+  #   static_configs:
+  #     - targets: ["mcp-server:5173"]
 
   - job_name: "pre-processing"
     static_configs:

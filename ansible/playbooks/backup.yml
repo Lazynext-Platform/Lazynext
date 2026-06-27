@@ -24,7 +24,7 @@
     backup_manifest_file: "{{ backup_work_dir }}/backup-manifest.json"
     azure_storage_account: "{{ vault_azure_storage_account | default('lazynextbackups') }}"
     azure_container: "{{ vault_azure_storage_container | default('lazynext-backups') }}"
-    azcopy_version: "10.23.0"
+    azcopy_version: "10.27.0"
     backup_checksum_algorithm: sha256
 
   pre_tasks:
