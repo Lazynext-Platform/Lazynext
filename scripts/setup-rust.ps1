@@ -21,3 +21,7 @@ if (-not (Test-Path $rustupExe)) {
 
 $env:PATH = "$cargoHome\bin;$env:PATH"
 Write-Output "Rust installed: $(& rustc --version)"
+
+Write-Output "Installing wasm-pack..."
+cargo install wasm-pack
+Write-Output "wasm-pack installed."

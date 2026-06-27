@@ -25,6 +25,9 @@ const eventBuffer: Array<{
 }> = [];
 
 // ── Kafka Producer (real when brokers are configured) ───────────────────
+// TODO: Wire this stub to the real Kafka producer implementation in kafka.ts,
+//       which provides proper batching, retries, idempotent producers, and
+//       idempotency-key-based deduplication.
 const kafkaProducer = {
   connect: async () => {
     if (KAFKA_BROKERS.length === 0) return;
@@ -61,7 +64,7 @@ const kafkaProducer = {
 };
 
 // ── ClickHouse Client (used for dashboards and LTV queries) ────────────
-const clickhouseAvailable = false;
+let clickhouseAvailable = false;
 
 async function queryClickHouse(_query: string): Promise<any[]> {
   if (process.env.CLICKHOUSE_URL) {
@@ -165,7 +168,7 @@ app.post("/api/v1/events", async (req: Request, res: Response) => {
 
     // Push to Kafka if available
     if (kafkaAvailable) {
-      await kafkaProducer.send("user_telemetry_events", [
+      await kafkaProducer.send("lazynext.user.events", [
         {
           key: userId,
           value: JSON.stringify({ userId, eventType, metadata, timestamp: ts, sessionId: sid }),

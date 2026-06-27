@@ -90,7 +90,11 @@ async function getBlobClient(): Promise<any> {
 	try {
 		const { BlobServiceClient } = await import("@azure/storage-blob");
 		const { DefaultAzureCredential } = await import("@azure/identity");
-		const account = process.env.AZURE_STORAGE_ACCOUNT || "lazynextmediadev";
+		// Dev default "lazynextmediadev" is for local development only.
+		if (!process.env.AZURE_STORAGE_ACCOUNT) {
+			throw new Error("AZURE_STORAGE_ACCOUNT is required when STORAGE_PROVIDER=azure");
+		}
+		const account = process.env.AZURE_STORAGE_ACCOUNT;
 		const credential = new DefaultAzureCredential();
 		blobClient = new BlobServiceClient(
 			`https://${account}.blob.core.windows.net`,
@@ -559,6 +563,7 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 	// Simulate API upload delay
 	await new Promise(r => setTimeout(r, 2500));
 
+	// TODO: Wire to real social-publish module
 	res.status(200).json({
 		success: true,
 		platform,

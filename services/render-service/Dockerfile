@@ -14,7 +14,7 @@ COPY src/ src/
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
 # ── Stage 2: Runtime ──
-FROM debian:bookworm-slim AS runner
+FROM debian:trixie-slim AS runner
 
 WORKDIR /app
 

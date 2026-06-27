@@ -50,9 +50,9 @@ postgresql_max_connections: 200
 postgresql_listen_addresses: "*"
 postgresql_port: 5432
 postgresql_replication_user: replicator
-postgresql_replication_password: "{{ vault_postgresql_replication_password | default('ChangeMeRepl!123') }}"
+postgresql_replication_password: "{{ vault_postgresql_replication_password | default(omit) }}"
 postgresql_admin_user: postgres
-postgresql_admin_password: "{{ vault_postgresql_admin_password | default('ChangeMeAdmin!123') }}"
+postgresql_admin_password: "{{ vault_postgresql_admin_password | default(omit) }}"
 
 # PgBouncer
 pgbouncer_version: "1.23"
@@ -85,7 +85,7 @@ redis_sentinel_quorum: 2
 redis_sentinel_down_after_ms: 5000
 redis_sentinel_failover_timeout: 15000
 redis_sentinel_parallel_syncs: 1
-redis_password: "{{ vault_redis_password | default('ChangeMeRedis!123') }}"
+redis_password: "{{ vault_redis_password | default(omit) }}"
 
 # ── Monitoring ────────────────────────────────────────────────────
 monitoring_namespace: monitoring
@@ -109,7 +109,7 @@ prometheus_external_labels:
   env: production
 
 grafana_admin_user: admin
-grafana_admin_password: "{{ vault_grafana_admin_password | default('ChangeMeGraf!123') }}"
+grafana_admin_password: "{{ vault_grafana_admin_password | default(omit) }}"
 grafana_port: 3000
 
 alertmanager_config_dir: /etc/alertmanager

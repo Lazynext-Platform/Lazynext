@@ -169,7 +169,6 @@ Respond ONLY with a JSON object:
   const timeoutId = setTimeout(() => controller.abort(), 30_000);
   
   try {
-    clearTimeout(timeoutId);
 
     if (provider === "anthropic") {
       // Use the native Anthropic Messages API
@@ -181,7 +180,7 @@ Respond ONLY with a JSON object:
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-6",
+          model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
           max_tokens: 4096,
           system: systemPrompt,
           messages: [{ role: "user", content: prompt }],
@@ -207,6 +206,7 @@ Respond ONLY with a JSON object:
         steps: OrchestrationStep[];
       };
 
+      clearTimeout(timeoutId);
       return {
         steps: parsed.steps || [],
         reasoning: parsed.reasoning || "No reasoning provided",
@@ -215,11 +215,11 @@ Respond ONLY with a JSON object:
 
     // OpenAI-compatible path (OpenAI, Ollama)
     let endpoint = "https://api.openai.com/v1/chat/completions";
-    let modelName = "gpt-4o";
+    let modelName = process.env.OPENAI_MODEL || "gpt-4o";
 
     if (provider === "ollama") {
-      endpoint = "http://localhost:11434/v1/chat/completions";
-      modelName = "llama3";
+      endpoint = `${process.env.OLLAMA_HOST || "http://localhost:11434"}/v1/chat/completions`;
+      modelName = process.env.OLLAMA_MODEL || "llama3";
     }
 
     const response = await fetch(endpoint, {
@@ -251,6 +251,7 @@ Respond ONLY with a JSON object:
       steps: OrchestrationStep[];
     };
 
+    clearTimeout(timeoutId);
     return {
       steps: parsed.steps || [],
       reasoning: parsed.reasoning || "No reasoning provided",

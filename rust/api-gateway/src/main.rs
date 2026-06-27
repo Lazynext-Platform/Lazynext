@@ -56,10 +56,8 @@ async fn main() {
     info!("Initializing Lazynext API Gateway...");
 
     // ── Database ───────────────────────────────────────────────────────
-    let database_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
-        tracing::warn!("DATABASE_URL not set — falling back to local dev");
-        "postgresql://lazynext:password123@localhost:5432/lazynext".to_string()
-    });
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL environment variable is required");
     let db_store = DbStore::new(&database_url)
         .await
         .expect("Failed to connect to PostgreSQL database");
@@ -150,21 +148,24 @@ async fn main() {
     info!("📡 API Gateway listening on http://{}", addr);
 
     // Trigger a demo render after 5 seconds (dev convenience)
-    let nle_for_demo = nle_state.clone();
-    tokio::spawn(async move {
-        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-        let mut nle = nle_for_demo.lock().await;
-        nle.add_track("V1".to_string(), "video".to_string());
-        nle.add_clip_to_track(
-            0,
-            "demo_clip".to_string(),
-            "video".to_string(),
-            "demo.mp4".to_string(),
-            0,
-            100,
-        );
-        nle.trigger_render_complete();
-    });
+    //[cfg(feature = "dev")]
+    {
+        let nle_for_demo = nle_state.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+            let mut nle = nle_for_demo.lock().await;
+            nle.add_track("V1".to_string(), "video".to_string());
+            nle.add_clip_to_track(
+                0,
+                "demo_clip".to_string(),
+                "video".to_string(),
+                "demo.mp4".to_string(),
+                0,
+                100,
+            );
+            nle.trigger_render_complete();
+        });
+    }
 
     axum::serve(listener, app).await.unwrap();
 }

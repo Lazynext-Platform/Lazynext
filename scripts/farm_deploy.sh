@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Lazynext Headless Render Farm Deployment Script
 

@@ -77,6 +77,8 @@ http:
         customResponseHeaders:
           X-Content-Type-Options: "nosniff"
           X-Permitted-Cross-Domain-Policies: "none"
+        # TODO: 'unsafe-inline' and 'unsafe-eval' should be migrated to CSP nonces/hashes
+        # TODO: api.lazynext.com hardcoded in CSP should be configurable via environment variable
         contentSecurityPolicy: |
           default-src 'self';
           script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com;
@@ -86,6 +88,7 @@ http:
           connect-src 'self' https://api.lazynext.com wss://api.lazynext.com https://js.stripe.com;
           font-src 'self';
           frame-src 'self' https://js.stripe.com;
+          frame-ancestors 'self';
           object-src 'none';
           base-uri 'self';
           form-action 'self';

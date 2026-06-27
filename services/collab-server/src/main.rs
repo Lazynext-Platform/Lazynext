@@ -86,7 +86,7 @@ struct AppState {
 
 fn verify_token(token: &str) -> Result<String, String> {
     let secret = std::env::var("BETTER_AUTH_SECRET")
-        .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-32".to_string());
+        .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-64-chars-here".to_string());
     use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
     let mut validation = Validation::new(Algorithm::HS256);
     validation.validate_exp = true;
@@ -273,10 +273,12 @@ async fn main() {
         .route("/health", get(|| async { "OK" }))
         .route(
             "/api/save",
+            // TODO: Implement PostgreSQL-backed persistence
             axum::routing::post(|| async { axum::Json(serde_json::json!({"saved": true})) }),
         )
         .route(
             "/api/load/:project_id",
+            // TODO: Implement PostgreSQL-backed persistence
             axum::routing::get(|| async {
                 axum::Json(serde_json::json!({"state": {}, "loaded": true}))
             }),

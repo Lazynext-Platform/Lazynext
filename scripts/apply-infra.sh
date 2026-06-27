@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Apply Azure infrastructure — run this if the CLI classifier blocks terraform apply
 set -e
-cd /Users/avaspatel/Lazynext/terraform/azure
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR/../terraform/azure"
 terraform apply -auto-approve
 echo ""
 echo "=== Infrastructure Outputs ==="
