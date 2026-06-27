@@ -126,6 +126,7 @@ jobs:
 
       - name: Build (Next.js)
         env:
+          SKIP_WASM_BUILD: "1"
           SKIP_ENV_VALIDATION: "1"
           MARBLE_WORKSPACE_KEY: "ci-placeholder"
           FREESOUND_CLIENT_ID: "ci-placeholder"

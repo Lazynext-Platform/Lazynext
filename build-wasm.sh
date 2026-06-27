@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 # build-wasm.sh
 # Builds the Rust WASM module for the Next.js web application.
+# In CI, the WASM package is pre-built and downloaded as an artifact
+# — set SKIP_WASM_BUILD=1 to skip the build step.
 
 set -e
 
 echo "Building Rust WASM Core Engine..."
+
+# Skip if WASM package is already present (e.g., downloaded from CI artifact)
+if [ "${SKIP_WASM_BUILD:-}" = "1" ] || [ -f "rust/wasm/pkg/lazynext_wasm.js" ]; then
+    if [ -f "rust/wasm/pkg/lazynext_wasm.js" ]; then
+        echo "WASM package already exists — skipping build."
+    else
+        echo "SKIP_WASM_BUILD=1 set — skipping WASM build."
+    fi
+    exit 0
+fi
 
 # Ensure rustc and cargo are installed
 if ! command -v cargo &> /dev/null; then
