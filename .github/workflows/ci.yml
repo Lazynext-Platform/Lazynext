@@ -250,8 +250,20 @@ jobs:
       # ── Build all 8 Docker images ────────────────────────────────
       - name: Check WASM Package
         run: |
+          echo "=== Listing WASM artifact paths ==="
+          find rust/wasm/pkg -type f 2>/dev/null || echo "(no pkg directory)"
+          find . -name "lazynext_wasm.js" -type f 2>/dev/null || echo "(lazynext_wasm.js not found anywhere)"
+          echo "=== End listing ==="
           if [ -f "rust/wasm/pkg/lazynext_wasm.js" ]; then
-            echo "WASM package found — web Docker build available."
+            echo "✅ WASM package found at rust/wasm/pkg/lazynext_wasm.js"
+            echo "WASM_READY=true" >> $GITHUB_ENV
+          elif [ -f "rust/wasm/pkg/pkg/lazynext_wasm.js" ]; then
+            echo "✅ WASM package found at rust/wasm/pkg/pkg/lazynext_wasm.js (nested pkg)"
+            mkdir -p rust/wasm/pkg
+            cp rust/wasm/pkg/pkg/* rust/wasm/pkg/
+            echo "WASM_READY=true" >> $GITHUB_ENV
+          elif ls rust/wasm/pkg/lazynext_wasm*.js 2>/dev/null; then
+            echo "✅ WASM package found (wildcard match)"
             echo "WASM_READY=true" >> $GITHUB_ENV
           else
             echo "::warning ::WASM package not found — skipping web Docker build."
