@@ -10,8 +10,7 @@ COPY build-wasm.sh /wasm/
 
 RUN if [ "$SKIP_WASM_BUILD" = "1" ]; then \
       mkdir -p /wasm/rust/wasm/pkg && \
-      echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > /wasm/rust/wasm/pkg/package.json && \
-      echo "Skipping WASM build — using pre-built artifact."; \
+      echo "Skipping WASM build — using pre-built artifact from CI."; \
     else \
       apt-get update && apt-get install -y --no-install-recommends curl build-essential ca-certificates && \
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal && \
@@ -20,10 +19,15 @@ RUN if [ "$SKIP_WASM_BUILD" = "1" ]; then \
       rm -rf /var/lib/apt/lists/*; \
     fi
 
+# Copy WASM package (pre-built when SKIP_WASM_BUILD=1, or to be built)
 COPY rust/ /wasm/rust/
 
 RUN if [ "$SKIP_WASM_BUILD" != "1" ]; then \
       cd /wasm && ./build-wasm.sh; \
+    else \
+      echo "Verifying pre-built WASM package..."; \
+      ls -la /wasm/rust/wasm/pkg/ 2>/dev/null || echo "WARNING: No pre-built WASM files found"; \
+      [ -f /wasm/rust/wasm/pkg/package.json ] || echo '{"name":"lazynext-wasm","version":"0.0.0","private":true,"main":"lazynext_wasm.js","types":"lazynext_wasm.d.ts"}' > /wasm/rust/wasm/pkg/package.json; \
     fi
 
 # ── Stage 2: Build Next.js app ──
