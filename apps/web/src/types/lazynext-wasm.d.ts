@@ -27,13 +27,8 @@ declare module "lazynext-wasm" {
   }
 
   // ── MediaTime ───────────────────────────────────────────────────────
-  // MediaTime is a branded number type (opaque wrapper around i64)
-  export type MediaTime = number & { readonly __mediaTime: unique symbol };
-  export const MediaTime: {
-    fromTicks(ticks: number): MediaTime;
-    fromSeconds(seconds: number): MediaTime | null;
-    fromFrame(frame: number, rate: FrameRate): MediaTime | null;
-  };
+  // MediaTime is a branded number type compatible with local wasm/media-time.ts
+  export type MediaTime = number;
 
   // FrameRate is used as both a WASM class and a plain {numerator, denominator} object
   export interface FrameRate {
@@ -96,9 +91,9 @@ declare module "lazynext-wasm" {
   export function renderFrame(descriptor: unknown): unknown;
   export function renderProjectFrame(config: unknown): unknown;
 
-  export function applyEffectPasses(...args: unknown[]): unknown;
-  export function applyMaskFeatherWasm(...args: unknown[]): unknown;
-  export function applyMaskFeather(...args: unknown[]): unknown;
+  export function applyEffectPasses(...args: unknown[]): OffscreenCanvas;
+  export function applyMaskFeatherWasm(...args: unknown[]): OffscreenCanvas;
+  export function applyMaskFeather(...args: unknown[]): OffscreenCanvas;
   export function applyPolygonMask(...args: unknown[]): unknown;
   export function apply3DLut(...args: unknown[]): unknown;
   export function applyChromaKey(...args: unknown[]): unknown;
