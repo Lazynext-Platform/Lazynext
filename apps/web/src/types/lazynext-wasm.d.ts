@@ -47,7 +47,7 @@ declare module "lazynext-wasm" {
   export const TimeCodeFormat: Record<string, string>;
 
   // ── Media/Time functions ────────────────────────────────────────────
-  export function mediaTimeFromSeconds(opts: { seconds: number }): MediaTime | null;
+  export function mediaTimeFromSeconds(opts: { seconds: number }): MediaTime;
   export function mediaTimeToSeconds(opts: { time: MediaTime }): number;
   export function mediaTimeFromFrame(opts: { frame: number; rate: FrameRate }): MediaTime | null;
   export function mediaTimeToFrame(opts: { time: MediaTime; rate: FrameRate }): number | null;
@@ -113,13 +113,13 @@ declare module "lazynext-wasm" {
   export function buildDcpCpl(opts: Record<string, unknown>): string;
 
   // ── Audio ───────────────────────────────────────────────────────────
-  export function processAudioBuffer(buffer: Float32Array): Float32Array;
+  export function processAudioBuffer(...args: unknown[]): Float32Array;
   export function applyParametricEq(...args: unknown[]): unknown;
   export function applyCompressor(...args: unknown[]): unknown;
 
   // ── Neural ──────────────────────────────────────────────────────────
   export function initNeuralEngine(): void;
-  export function detectFaces(frame: Uint8Array, width: number, height: number): unknown;
+  export function detectFaces(frame: Uint8Array, width: number, height: number): any[];
 
   // ── WASM Init ───────────────────────────────────────────────────────
   export function initSync(module: WebAssembly.Module | unknown): void;
