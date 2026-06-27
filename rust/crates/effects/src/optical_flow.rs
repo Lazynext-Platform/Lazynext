@@ -1,4 +1,8 @@
-#![allow(clippy::unnecessary_cast, clippy::too_many_arguments, clippy::cast_abs_to_unsigned)]
+#![allow(
+    clippy::unnecessary_cast,
+    clippy::too_many_arguments,
+    clippy::cast_abs_to_unsigned
+)]
 //! Optical flow engine for frame interpolation and speed ramping.
 //!
 //! Provides motion-compensated frame interpolation for smooth slow-motion

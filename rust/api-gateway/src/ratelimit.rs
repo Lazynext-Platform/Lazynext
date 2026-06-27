@@ -116,17 +116,19 @@ impl RateLimiter {
 fn client_ip(req: &Request) -> String {
     // Check X-Forwarded-For header first (reverse proxy)
     if let Some(fwd) = req.headers().get("x-forwarded-for")
-        && let Ok(val) = fwd.to_str() {
-            // Take the leftmost IP (the original client)
-            if let Some(ip) = val.split(',').next() {
-                return ip.trim().to_string();
-            }
+        && let Ok(val) = fwd.to_str()
+    {
+        // Take the leftmost IP (the original client)
+        if let Some(ip) = val.split(',').next() {
+            return ip.trim().to_string();
         }
+    }
     // Fall back to X-Real-IP
     if let Some(real_ip) = req.headers().get("x-real-ip")
-        && let Ok(val) = real_ip.to_str() {
-            return val.trim().to_string();
-        }
+        && let Ok(val) = real_ip.to_str()
+    {
+        return val.trim().to_string();
+    }
     // Fall back to direct peer address
     if let Some(connect_info) = req.extensions().get::<ConnectInfo<SocketAddr>>() {
         return connect_info.0.ip().to_string();

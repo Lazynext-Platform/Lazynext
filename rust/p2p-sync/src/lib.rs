@@ -89,9 +89,10 @@ impl P2PNetwork {
                 "255.255.255.255",
             ] {
                 if let Ok(addr) = format!("{}:9001", subnet).parse::<SocketAddr>()
-                    && let Ok(data) = serde_json::to_vec(&discovery_msg) {
-                        let _ = socket.send_to(&data, addr).await;
-                    }
+                    && let Ok(data) = serde_json::to_vec(&discovery_msg)
+                {
+                    let _ = socket.send_to(&data, addr).await;
+                }
             }
 
             // Listen for responses for a short window
@@ -106,27 +107,28 @@ impl P2PNetwork {
                     Ok(Ok((len, src_addr))) => {
                         if let Ok(response) =
                             serde_json::from_slice::<serde_json::Value>(&buf[..len])
-                            && response["type"] == "lazynext_discovery_response" {
-                                let peer = Peer {
-                                    addr: src_addr,
-                                    display_name: response["display_name"]
-                                        .as_str()
-                                        .unwrap_or("Unknown")
-                                        .to_string(),
-                                    capabilities: response["capabilities"]
-                                        .as_array()
-                                        .map(|a| {
-                                            a.iter()
-                                                .filter_map(|v| v.as_str().map(String::from))
-                                                .collect()
-                                        })
-                                        .unwrap_or_default(),
-                                };
-                                if self.discovered.insert(peer.addr) {
-                                    info!("   ✓ Discovered: {} ({})", peer.display_name, peer.addr);
-                                    self.peers.push(peer.clone());
-                                }
+                            && response["type"] == "lazynext_discovery_response"
+                        {
+                            let peer = Peer {
+                                addr: src_addr,
+                                display_name: response["display_name"]
+                                    .as_str()
+                                    .unwrap_or("Unknown")
+                                    .to_string(),
+                                capabilities: response["capabilities"]
+                                    .as_array()
+                                    .map(|a| {
+                                        a.iter()
+                                            .filter_map(|v| v.as_str().map(String::from))
+                                            .collect()
+                                    })
+                                    .unwrap_or_default(),
+                            };
+                            if self.discovered.insert(peer.addr) {
+                                info!("   ✓ Discovered: {} ({})", peer.display_name, peer.addr);
+                                self.peers.push(peer.clone());
                             }
+                        }
                     }
                     Ok(Err(e)) => {
                         debug!("Discovery recv error: {}", e);

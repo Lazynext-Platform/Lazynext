@@ -1,4 +1,8 @@
-#![allow(clippy::unnecessary_cast, clippy::too_many_arguments, clippy::cast_abs_to_unsigned)]
+#![allow(
+    clippy::unnecessary_cast,
+    clippy::too_many_arguments,
+    clippy::cast_abs_to_unsigned
+)]
 
 pub mod film_physics;
 pub mod optical_flow;

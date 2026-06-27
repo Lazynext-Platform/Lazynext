@@ -200,24 +200,26 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
                 target_peer, sdp, ..
             } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value()) {
-                        let _ = tx.send(send_msg(&ServerMessage::WebRtcOffer {
-                            sender_peer: peer_id.clone(),
-                            sdp,
-                        }));
-                    }
+                    && let Some(tx) = state.rooms.get(rid.value())
+                {
+                    let _ = tx.send(send_msg(&ServerMessage::WebRtcOffer {
+                        sender_peer: peer_id.clone(),
+                        sdp,
+                    }));
+                }
             }
 
             ClientMessage::WebRtcAnswer {
                 target_peer, sdp, ..
             } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value()) {
-                        let _ = tx.send(send_msg(&ServerMessage::WebRtcAnswer {
-                            sender_peer: peer_id.clone(),
-                            sdp,
-                        }));
-                    }
+                    && let Some(tx) = state.rooms.get(rid.value())
+                {
+                    let _ = tx.send(send_msg(&ServerMessage::WebRtcAnswer {
+                        sender_peer: peer_id.clone(),
+                        sdp,
+                    }));
+                }
             }
 
             ClientMessage::WebRtcIce {
@@ -226,12 +228,13 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
                 ..
             } => {
                 if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value()) {
-                        let _ = tx.send(send_msg(&ServerMessage::WebRtcIce {
-                            sender_peer: peer_id.clone(),
-                            candidate,
-                        }));
-                    }
+                    && let Some(tx) = state.rooms.get(rid.value())
+                {
+                    let _ = tx.send(send_msg(&ServerMessage::WebRtcIce {
+                        sender_peer: peer_id.clone(),
+                        candidate,
+                    }));
+                }
             }
         }
     }
