@@ -56,8 +56,8 @@ async fn main() {
     info!("Initializing Lazynext API Gateway...");
 
     // ── Database ───────────────────────────────────────────────────────
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL environment variable is required");
+    let database_url =
+        std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable is required");
     let db_store = DbStore::new(&database_url)
         .await
         .expect("Failed to connect to PostgreSQL database");
