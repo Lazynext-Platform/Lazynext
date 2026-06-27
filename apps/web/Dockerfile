@@ -1,25 +1,37 @@
 # ── Stage 1: Build WASM (Rust toolchain) ──
+# Skipped when SKIP_WASM_BUILD=1 (CI provides pre-built artifact)
 FROM oven/bun:1.3 AS wasm-builder
 
 WORKDIR /wasm
 
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH
-RUN apt-get update && apt-get install -y --no-install-recommends curl build-essential ca-certificates \
-    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal \
-    && rm -rf /var/lib/apt/lists/*
-RUN cargo install wasm-pack
+ARG SKIP_WASM_BUILD=0
 
-COPY rust/ /wasm/rust/
 COPY build-wasm.sh /wasm/
 
-RUN cd /wasm && ./build-wasm.sh
+RUN if [ "$SKIP_WASM_BUILD" = "1" ]; then \
+      mkdir -p /wasm/rust/wasm/pkg && \
+      echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > /wasm/rust/wasm/pkg/package.json && \
+      echo "Skipping WASM build — using pre-built artifact."; \
+    else \
+      apt-get update && apt-get install -y --no-install-recommends curl build-essential ca-certificates && \
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal && \
+      . $HOME/.cargo/env && \
+      cargo install wasm-pack && \
+      rm -rf /var/lib/apt/lists/*; \
+    fi
+
+COPY rust/ /wasm/rust/
+
+RUN if [ "$SKIP_WASM_BUILD" != "1" ]; then \
+      cd /wasm && ./build-wasm.sh; \
+    fi
 
 # ── Stage 2: Build Next.js app ──
 FROM oven/bun:1.3 AS builder
 
 WORKDIR /app
+
+ARG SKIP_WASM_BUILD=0
 
 # Install deps first for layer caching
 COPY package.json bun.lock bunfig.toml ./
