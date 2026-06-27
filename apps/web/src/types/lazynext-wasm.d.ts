@@ -27,10 +27,13 @@ declare module "lazynext-wasm" {
   }
 
   // ── MediaTime ───────────────────────────────────────────────────────
-  export interface MediaTime {
-    asTicks(): number;
-    toSecondsF64(): number;
-  }
+  // MediaTime is a branded number type (opaque wrapper around i64)
+  export type MediaTime = number & { readonly __mediaTime: unique symbol };
+  export const MediaTime: {
+    fromTicks(ticks: number): MediaTime;
+    fromSeconds(seconds: number): MediaTime | null;
+    fromFrame(frame: number, rate: FrameRate): MediaTime | null;
+  };
 
   // FrameRate is used as both a WASM class and a plain {numerator, denominator} object
   export interface FrameRate {
@@ -95,11 +98,16 @@ declare module "lazynext-wasm" {
 
   export function applyEffectPasses(...args: unknown[]): unknown;
   export function applyMaskFeatherWasm(...args: unknown[]): unknown;
+  export function applyMaskFeather(...args: unknown[]): unknown;
+  export function applyPolygonMask(...args: unknown[]): unknown;
+  export function apply3DLut(...args: unknown[]): unknown;
+  export function applyChromaKey(...args: unknown[]): unknown;
+  export function getLastFrameProfile(): Array<{ name: string; durationMs: number }>;
 
   // ── Timeline ────────────────────────────────────────────────────────
-  export function resolveTrackPlacement(opts: Record<string, unknown>): unknown;
-  export function applyPlacement(opts: Record<string, unknown>): unknown;
-  export function placeElementsOnTimeline(opts: Record<string, unknown>): unknown;
+  export function resolveTrackPlacement(...args: unknown[]): unknown;
+  export function applyPlacement(...args: unknown[]): unknown;
+  export function placeElementsOnTimeline(...args: unknown[]): unknown;
 
   // ── Animation ───────────────────────────────────────────────────────
   export function evaluateScalarChannel(...args: unknown[]): number;
