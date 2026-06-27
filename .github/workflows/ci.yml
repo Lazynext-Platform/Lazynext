@@ -107,6 +107,12 @@ jobs:
           name: wasm-pkg
           path: rust/wasm/pkg/
 
+      - name: Link WASM Package for Next.js
+        run: |
+          mkdir -p apps/web/node_modules/lazynext-wasm
+          cp -r rust/wasm/pkg/* apps/web/node_modules/lazynext-wasm/
+          echo "WASM package linked to apps/web/node_modules/lazynext-wasm/"
+
       - name: Install Dependencies
         env:
           npm_config_ignore_scripts: "true"
