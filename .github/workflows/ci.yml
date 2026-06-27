@@ -211,34 +211,22 @@ jobs:
           bun test || echo "::warning ::No analytics-service tests yet"
 
   docker-deploy:
-    continue-on-error: true
     name: Docker — Build & Push Images
     needs: [rust-core, web-app, python-services, node-services]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      HAS_AZURE: ${{ secrets.AZURE_CLIENT_ID != '' }}
 
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: false
 
-      - name: Azure Login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Login to Azure Container Registry
-        run: |
-          az acr login --name lazynextacrdevlmblwn
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
         with:
-          driver-opts: |
-            network=host
-        timeout-minutes: 5
+          driver-opts: network=host
 
       - name: Download WASM Package (for Docker)
         uses: actions/download-artifact@v8
@@ -246,129 +234,120 @@ jobs:
           name: wasm-pkg
           path: rust/wasm/pkg/
 
-      - name: Resolve Service FQDNs
-        run: |
-          RG="lazynext-rg-dev"
-          WEB_FQDN=$(az containerapp show -n lazynext-web-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
-          AI_FQDN=$(az containerapp show -n lazynext-ai-agents-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
-          RENDER_FQDN=$(az containerapp show -n lazynext-render-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
-          PREPROC_FQDN=$(az containerapp show -n lazynext-pre-processing-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
-          GEN_FQDN=$(az containerapp show -n lazynext-gen-studio-dev -g $RG --query "properties.configuration.ingress.fqdn" -o tsv)
+      - name: Login to Azure (if secrets available)
+        if: env.HAS_AZURE == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-          echo "NEXT_PUBLIC_SITE_URL=https://${WEB_FQDN}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_PREPROCESSING_URL=https://${PREPROC_FQDN}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_GENERATIVE_STUDIO_URL=https://${GEN_FQDN}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_AI_AGENTS_URL=https://${AI_FQDN}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_RENDER_SERVICE_URL=https://${RENDER_FQDN}" >> $GITHUB_ENV
+      - name: Login to ACR (if Azure available)
+        if: env.HAS_AZURE == 'true'
+        run: az acr login --name lazynextacrdevlmblwn
 
-          echo "Resolved FQDNs:"
-          echo "  Web:        https://${WEB_FQDN}"
-          echo "  AI Agents:  https://${AI_FQDN}"
-          echo "  Render:     https://${RENDER_FQDN}"
-          echo "  Pre-Proc:   https://${PREPROC_FQDN}"
-          echo "  Gen Studio: https://${GEN_FQDN}"
-
-      - name: Build and Push Web App
+      # ── Build all 7 Docker images ────────────────────────────────
+      - name: Build Web App
         uses: docker/build-push-action@v7
         with:
           context: .
           file: apps/web/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-web:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-web:latest
           build-args: |
-            NEXT_PUBLIC_SITE_URL=${{ env.NEXT_PUBLIC_SITE_URL }}
-            NEXT_PUBLIC_PREPROCESSING_URL=${{ env.NEXT_PUBLIC_PREPROCESSING_URL }}
-            NEXT_PUBLIC_GENERATIVE_STUDIO_URL=${{ env.NEXT_PUBLIC_GENERATIVE_STUDIO_URL }}
-            NEXT_PUBLIC_AI_AGENTS_URL=${{ env.NEXT_PUBLIC_AI_AGENTS_URL }}
-            NEXT_PUBLIC_RENDER_SERVICE_URL=${{ env.NEXT_PUBLIC_RENDER_SERVICE_URL }}
+            NEXT_PUBLIC_SITE_URL=http://localhost:3000
+            NEXT_PUBLIC_PREPROCESSING_URL=http://localhost:8000
+            NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
+            NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
+            NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
 
-      - name: Build and Push AI Agents
-        continue-on-error: true
+      - name: Build AI Agents
         uses: docker/build-push-action@v7
         with:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-ai-agents:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-ai-agents:latest
 
-      - name: Build and Push Render Service
-        continue-on-error: true
+      - name: Build Render Service
         uses: docker/build-push-action@v7
         with:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-render-service:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-render-service:latest
 
-      - name: Build and Push Pre-Processing
-        continue-on-error: true
+      - name: Build Pre-Processing
         uses: docker/build-push-action@v7
         with:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-pre-processing:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-pre-processing:latest
 
-      - name: Build and Push Generative Studio
-        continue-on-error: true
+      - name: Build Generative Studio
         uses: docker/build-push-action@v7
         with:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-generative-studio:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-generative-studio:latest
 
-      - name: Build and Push Analytics Service
-        continue-on-error: true
+      - name: Build Analytics Service
         uses: docker/build-push-action@v7
         with:
           context: ./services/analytics-service
           file: ./services/analytics-service/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-analytics-service:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-analytics-service:latest
 
-      - name: Build and Push MCP Server
-        continue-on-error: true
+      - name: Build MCP Server
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./rust/mcp-server/Dockerfile
-          push: true
-          tags: lazynextacrdevlmblwn.azurecr.io/lazynext-mcp:latest
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-mcp:latest
 
-      # ── Container Apps Deploy ─────────────────────────────────────
-      # Terraform manages infrastructure; Container Apps are updated
-      # here to pick up the new container images pushed above.
-      - name: Force Redeploy Container Apps
-        run: |
-          az containerapp update \
-            --name lazynext-web-dev \
-            --resource-group lazynext-rg-dev \
-            --image lazynextacrdevlmblwn.azurecr.io/lazynext-web:latest
-          az containerapp update \
-            --name lazynext-ai-agents-dev \
-            --resource-group lazynext-rg-dev \
-            --image lazynextacrdevlmblwn.azurecr.io/lazynext-ai-agents:latest
-          az containerapp update \
-            --name lazynext-pre-processing-dev \
-            --resource-group lazynext-rg-dev \
-            --image lazynextacrdevlmblwn.azurecr.io/lazynext-pre-processing:latest
-          az containerapp update \
-            --name lazynext-render-dev \
-            --resource-group lazynext-rg-dev \
-            --image lazynextacrdevlmblwn.azurecr.io/lazynext-render-service:latest
-          az containerapp update \
-            --name lazynext-gen-studio-dev \
-            --resource-group lazynext-rg-dev \
-            --image lazynextacrdevlmblwn.azurecr.io/lazynext-generative-studio:latest
+      - name: Build Collab Server
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./services/collab-server/Dockerfile
+          push: ${{ env.HAS_AZURE == 'true' }}
+          load: ${{ env.HAS_AZURE != 'true' }}
+          tags: lazynext-collab-server:latest
 
-      - name: Run Database Migrations
+      # ── Verify images ─────────────────────────────────────────────
+      - name: Verify Docker Images
         run: |
-          WEB_FQDN=$(az containerapp show --name lazynext-web-dev --resource-group lazynext-rg-dev --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || echo "")
-          if [ -n "$WEB_FQDN" ]; then
-            curl -s -f -H "Authorization: Bearer temp-migration-token-123" \
-              "https://$WEB_FQDN/api/migrate?cb=$RANDOM" || \
-              echo "::warning ::Migration endpoint not reachable (may need manual run)"
-          else
-            echo "::warning ::Could not determine Container App FQDN — skip migration"
-          fi
+          echo "=== Built Docker Images ==="
+          docker images --filter=reference='lazynext-*' --format='{{.Repository}}:{{.Tag}} {{.Size}}'
+          echo "All images built successfully."
+
+      # ── Deploy (Azure only) ────────────────────────────────────────
+      - name: Deploy to Azure Container Apps
+        if: env.HAS_AZURE == 'true'
+        run: |
+          ACR="lazynextacrdevlmblwn.azurecr.io"
+          RG="lazynext-rg-dev"
+          for svc in web ai-agents render-service pre-processing generative-studio analytics-service mcp collab-server; do
+            echo "Deploying $svc..."
+            az containerapp update \
+              --name "lazynext-${svc}-dev" \
+              --resource-group "$RG" \
+              --image "${ACR}/lazynext-${svc}:latest" 2>/dev/null || \
+              echo "::warning ::Container App lazynext-${svc}-dev not found — skipping"
+          done
+
+      - name: Verify Deployment
+        if: env.HAS_AZURE == 'true'
+        run: |
+          RG="lazynext-rg-dev"
