@@ -50,12 +50,14 @@ jobs:
         run: cargo test --workspace --exclude lazynext_desktop --verbose
 
       - name: Build WASM Package
+        continue-on-error: true
         run: |
           rustup target add wasm32-unknown-unknown
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --target web rust/wasm || echo "::warning ::WASM build failed — web app may need local build"
+          RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --target web rust/wasm 2>&1 || echo "::warning ::WASM build failed — mio/tokio networking unsupported on wasm32 target. Web Docker build will be skipped."
 
       - name: Upload WASM Package
+        if: hashFiles('rust/wasm/pkg/lazynext_wasm.js') != ''
         uses: actions/upload-artifact@v4
         with:
           name: wasm-pkg
