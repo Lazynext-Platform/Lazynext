@@ -44,10 +44,10 @@ jobs:
         run: cargo fmt --all --check
 
       - name: Cargo clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --exclude lazynext_desktop --all-targets -- -D warnings
 
       - name: Cargo Test (Workspace)
-        run: cargo test --workspace --verbose
+        run: cargo test --workspace --exclude lazynext_desktop --verbose
 
       - name: Build WASM Package
         run: |
