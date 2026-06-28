@@ -1,37 +1,27 @@
-# Global owners — these people own everything
-* @avaspatel
+# CODEOWNERS for Lazynext
 
-# CI/CD pipeline owners
-/.github/ @avaspatel
-/.github/workflows/ @avaspatel
+# Global owners
+*       @avaspatel
 
-# Rust code owners
-/rust/ @avaspatel
-/Cargo.toml @avaspatel
-/Cargo.lock @avaspatel
+# Platform specific
+/apps/web/               @web-team
+/apps/mobile/            @mobile-team
+/apps/desktop/           @desktop-team
+/apps/browser-extension/ @extension-team
 
-# Web app owners
-/apps/web/ @avaspatel
+# Core engine (Rust)
+/rust/core/              @rust-engineers
+/rust/crates/gpu/        @graphics-team
+/rust/crates/audio/      @audio-team
 
-# Infrastructure owners
-/terraform/ @avaspatel
-/k8s/ @avaspatel
-/ansible/ @avaspatel
+# Infrastructure & CI/CD
+/infra/                  @devops-team
+/terraform/              @devops-team
+/ansible/                @devops-team
+/k8s/                    @devops-team
+/.github/                @devops-team
+Jenkinsfile              @devops-team
+.gitlab-ci.yml           @devops-team
 
-# Monitoring owners
-/monitoring/ @avaspatel
-
-# Database schema owners
-/apps/web/src/db/ @avaspatel
-/apps/web/src/drizzle/ @avaspatel
-/scripts/db-setup.sql @avaspatel
-
-# Docker owners
-/docker-compose.yml @avaspatel
-/docker-compose.*.yml @avaspatel
-/docker-bake.hcl @avaspatel
-/.dockerignore @avaspatel
-
-# Security-sensitive config
-/**/*.tfvars @avaspatel
-/**/*.env.example @avaspatel
+# Observability
+/monitoring/             @sre-team

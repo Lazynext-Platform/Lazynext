@@ -1,0 +1,51 @@
+image: rust:latest
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  CARGO_HOME: $CI_PROJECT_DIR/.cargo
+  APT_CACHE_DIR: $CI_PROJECT_DIR/.apt
+
+cache:
+  paths:
+    - .cargo/
+    - target/
+    - .apt/
+
+before_script:
+  - rustc --version && cargo --version
+  - apt-get update && apt-get install -y ffmpeg libavcodec-dev libavformat-dev libavutil-dev libavdevice-dev
+
+lint:
+  stage: lint
+  script:
+    - cargo clippy --workspace -- -D warnings
+    - cargo fmt --all -- --check
+
+test:
+  stage: test
+  script:
+    - cargo test --workspace
+
+build_wasm:
+  stage: build
+  script:
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+    - cd rust/core && wasm-pack build --target web --out-dir ../../apps/web/pkg
+  artifacts:
+    paths:
+      - apps/web/pkg/
+
+deploy_azure:
+  stage: deploy
+  image: hashicorp/terraform:latest
+  only:
+    - main
+  script:
+    - cd infra/terraform
+    - terraform init
+    - terraform apply -auto-approve

@@ -3,33 +3,28 @@ logging {
   format = "logfmt"
 }
 
-prometheus.scrape "docker_services" {
+prometheus.scrape "lazynext_metrics" {
   targets = [
-    {"__address__" = "web:3000",           "job" = "lazynext-web",            "metrics_path" = "/api/health"},
-    {"__address__" = "pre-processing:8000", "job" = "pre-processing",         "metrics_path" = "/"},
-    {"__address__" = "generative-studio:8001", "job" = "generative-studio",   "metrics_path" = "/"},
-    {"__address__" = "ai-agents:8002",      "job" = "ai-agents",              "metrics_path" = "/health"},
-    {"__address__" = "render-service:8003", "job" = "render-service",         "metrics_path" = "/health"},
-    {"__address__" = "analytics-service:8006", "job" = "analytics-service",   "metrics_path" = "/health"},
+    {"__address__" = "api-gateway:3000"},
   ]
-  forward_to = [prometheus.remote_write.default.receiver]
+  forward_to = [prometheus.remote_write.local.receiver]
 }
 
-prometheus.remote_write "default" {
+prometheus.remote_write "local" {
   endpoint {
     url = "http://prometheus:9090/api/v1/write"
   }
 }
 
-loki.source.docker "default" {
+loki.source.docker "lazynext_logs" {
   host = "unix:///var/run/docker.sock"
   targets = [
     {"__address__" = "localhost"},
   ]
-  forward_to = [loki.write.default.receiver]
+  forward_to = [loki.write.local.receiver]
 }
 
-loki.write "default" {
+loki.write "local" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }
