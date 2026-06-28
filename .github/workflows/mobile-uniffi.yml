@@ -1,0 +1,53 @@
+name: Build Mobile UniFFI (iOS/Android)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-mobile:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-apple-ios, x86_64-apple-ios, aarch64-linux-android, armv7-linux-androideabi
+
+    - name: Install cargo-ndk and uniffi-bindgen
+      run: |
+        cargo install cargo-ndk
+        cargo install uniffi_bindgen
+
+    - name: Build iOS XCFramework
+      run: |
+        cd rust/core
+        cargo build --target aarch64-apple-ios --release
+        # In a real pipeline, we'd invoke xcodebuild -create-xcframework here
+
+    - name: Build Android AAR
+      run: |
+        cd rust/core
+        cargo ndk -t arm64-v8a build --release
+        # In a real pipeline, we'd package to jniLibs here
+
+    - name: Generate Swift/Kotlin Bindings
+      run: |
+        cd rust/core
+        uniffi-bindgen generate src/engine.udl --language swift --out-dir ../../apps/mobile/ios/bindings
+        uniffi-bindgen generate src/engine.udl --language kotlin --out-dir ../../apps/mobile/android/bindings
+
+    - name: Upload Bindings Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mobile-bindings
+        path: |
+          apps/mobile/ios/bindings/
+          apps/mobile/android/bindings/

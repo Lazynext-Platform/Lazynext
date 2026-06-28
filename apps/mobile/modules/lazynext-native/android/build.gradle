@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.mymodule'
+version = '0.1.0'
+
+android {
+  namespace "expo.modules.mymodule"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+  }
+  sourceSets {
+    main {
+      jniLibs.srcDirs = ['../../../../../rust/target/aarch64-linux-android/release'] // Placeholder for Rust build output
+    }
+  }
+  lintOptions {
+    abortOnError false
+  }
+}

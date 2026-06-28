@@ -1,0 +1,14 @@
+default_platform(:android)
+
+platform :android do
+  desc "Push a new beta build to Google Play"
+  lane :beta do
+    gradle(task: "clean bundleRelease")
+    
+    upload_to_play_store(
+      track: "beta",
+      json_key: ENV["GOOGLE_PLAY_JSON_KEY_PATH"],
+      package_name: "com.lazynext.app"
+    )
+  end
+end

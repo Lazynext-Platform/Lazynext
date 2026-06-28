@@ -79,3 +79,6 @@ services/render-service/outputs/**/.terraform/
 
 # Ansible
 *.retry
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.backup
+infra/terraform/.terraform.lock.hcl

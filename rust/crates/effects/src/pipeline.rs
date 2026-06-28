@@ -25,6 +25,12 @@ const FIRE_SHADER_SOURCE: &str = include_str!("shaders/fire.wgsl");
 const PORTAL_SHADER_ID: &str = "portal";
 const PORTAL_SHADER_SOURCE: &str = include_str!("shaders/portal.wgsl");
 
+const VHS_SHADER_ID: &str = "vhs";
+const VHS_SHADER_SOURCE: &str = include_str!("shaders/vhs.wgsl");
+
+const CRT_SHADER_ID: &str = "crt";
+const CRT_SHADER_SOURCE: &str = include_str!("shaders/crt.wgsl");
+
 const LUT_3D_SHADER_SOURCE: &str = include_str!("shaders/lut_3d.wgsl");
 
 pub struct ApplyEffectsOptions<'a> {
@@ -187,6 +193,20 @@ impl EffectPipeline {
                 .create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("effects-portal-shader"),
                     source: wgpu::ShaderSource::Wgsl(PORTAL_SHADER_SOURCE.into()),
+                });
+        let vhs_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-vhs-shader"),
+                    source: wgpu::ShaderSource::Wgsl(VHS_SHADER_SOURCE.into()),
+                });
+        let crt_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-crt-shader"),
+                    source: wgpu::ShaderSource::Wgsl(CRT_SHADER_SOURCE.into()),
                 });
 
         let lut3d_shader_module =
@@ -419,6 +439,80 @@ impl EffectPipeline {
                     cache: None,
                 });
 
+        let vhs_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-vhs-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &vhs_shader_module,
+                        entry_point: Some("fs_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
+        let crt_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-crt-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &crt_shader_module,
+                        entry_point: Some("fs_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
         let pipelines = HashMap::from([
             (GAUSSIAN_BLUR_SHADER_ID.to_string(), gaussian_blur_pipeline),
             (CHROMA_KEY_SHADER_ID.to_string(), chroma_key_pipeline),
@@ -426,6 +520,8 @@ impl EffectPipeline {
             (COLOR_GRADE_SHADER_ID.to_string(), color_grade_pipeline),
             (FIRE_SHADER_ID.to_string(), fire_pipeline),
             (PORTAL_SHADER_ID.to_string(), portal_pipeline),
+            (VHS_SHADER_ID.to_string(), vhs_pipeline),
+            (CRT_SHADER_ID.to_string(), crt_pipeline),
         ]);
         
         let lut3d_pipeline =
@@ -732,6 +828,12 @@ fn pack_effect_uniforms(
         scalars[1] = read_number_uniform_with_default(pass, "u_intensity", 1.0)?;
         scalars[2] = read_number_uniform_with_default(pass, "u_radius", 0.3)?;
         scalars[3] = read_number_uniform_with_default(pass, "u_swirl_speed", 2.0)?;
+    } else if shader == VHS_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_intensity", 1.0)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_time", 0.0)?;
+    } else if shader == CRT_SHADER_ID {
+        scalars[0] = read_number_uniform_with_default(pass, "u_intensity", 1.0)?;
+        scalars[1] = read_number_uniform_with_default(pass, "u_time", 0.0)?;
     }
 
     Ok(EffectUniformBuffer {

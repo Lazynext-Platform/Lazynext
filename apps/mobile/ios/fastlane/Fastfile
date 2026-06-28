@@ -1,0 +1,27 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    # Requires App Store Connect API Key stored in fastlane/.env.default
+    # ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_FILEPATH
+    
+    app_store_connect_api_key(
+      key_id: ENV["ASC_KEY_ID"],
+      issuer_id: ENV["ASC_ISSUER_ID"],
+      key_filepath: ENV["ASC_KEY_FILEPATH"],
+      in_house: false
+    )
+
+    increment_build_number(xcodeproj: "Lazynext.xcodeproj")
+    
+    build_app(
+      workspace: "Lazynext.xcworkspace",
+      scheme: "Lazynext"
+    )
+    
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true
+    )
+  end
+end

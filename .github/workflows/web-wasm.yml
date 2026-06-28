@@ -1,0 +1,36 @@
+name: Build Web WASM
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-unknown-unknown
+
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+    - name: Build lazynext_core for Web
+      run: |
+        cd rust/core
+        wasm-pack build --target web --out-dir ../../apps/web/pkg
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: wasm-pkg
+        path: apps/web/pkg/
