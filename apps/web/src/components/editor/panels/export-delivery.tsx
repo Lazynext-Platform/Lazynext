@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Download, Film, AudioWaveform, MonitorUp } from "lucide-react";
 import { toast } from "sonner";
 import { usePostHog } from "posthog-js/react";
+import { dispatchExport } from "../../../export/dispatch";
+import { downloadBuffer } from "../../../export/index";
 
 export function ExportDelivery({
 	projectData,
@@ -23,65 +25,87 @@ export function ExportDelivery({
 		setRenderStatus("queued");
 
 		try {
-			// Dispatch to Render Farm Microservice
-			const res = await fetch("http://localhost:8003/api/v1/jobs", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ projectId: projectData.id, format }),
-			});
-
-			if (!res.ok) throw new Error("Failed to queue job");
-
-			const data = await res.json();
-
-			// Track telemetry
-			posthog?.capture("export_queued", {
-				format: format,
-				preset: preset,
-				projectId: projectData.id,
-			});
-
-			if (onQueueRender && data.jobId) {
-				onQueueRender(format, data.jobId);
-			}
-
-			toast.success(
-				`Successfully queued project as ${format.toUpperCase()} on Render Farm!`,
-			);
-
-			// Subscribe to SSE for real-time render progress
-			const eventSource = new EventSource(
-				`http://localhost:8003/api/v1/jobs/${data.jobId}/stream`,
-			);
-
-			eventSource.onmessage = (event) => {
-				try {
-					const job = JSON.parse(event.data);
-					setRenderProgress(job.progress);
-					setRenderStatus(job.status);
-
-					if (job.status === "completed") {
-						eventSource.close();
-						setIsExporting(false);
-						toast.success("Render complete! Your video is ready.");
-					} else if (job.status === "failed") {
-						eventSource.close();
-						setIsExporting(false);
-						toast.error("Render job failed.");
-					}
-				} catch (e) {
-					console.error("SSE parse error:", e);
-				}
-			};
-
-			eventSource.onerror = () => {
-				eventSource.close();
+			if (format === "mp4" || format === "webm") {
+				// Local WASM Render
+				const durationFrames = (projectData.duration || 10) * (projectData.framerate || 60);
+				const fps = projectData.framerate || 60;
+				const width = 1920; // TODO: Pull from settings
+				const height = 1080;
+				
+				const blob = await dispatchExport(width, height, durationFrames, fps, (progress) => {
+					setRenderProgress(progress * 100);
+				});
+				
+				setRenderStatus("completed");
 				setIsExporting(false);
-			};
+				toast.success("Render complete! Your video is ready.");
+				
+				// Trigger download
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				a.download = `export_${projectData.id}.${format === 'webm' ? 'webm' : 'mp4'}`;
+				a.click();
+				URL.revokeObjectURL(url);
+			} else {
+				// Dispatch to Render Farm Microservice for AAF, XML, DCP, ProRes
+				const res = await fetch("http://localhost:8003/api/v1/jobs", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ projectId: projectData.id, format }),
+				});
+
+				if (!res.ok) throw new Error("Failed to queue job");
+
+				const data = await res.json();
+
+				posthog?.capture("export_queued", {
+					format: format,
+					preset: preset,
+					projectId: projectData.id,
+				});
+
+				if (onQueueRender && data.jobId) {
+					onQueueRender(format, data.jobId);
+				}
+
+				toast.success(
+					`Successfully queued project as ${format.toUpperCase()} on Render Farm!`,
+				);
+
+				const eventSource = new EventSource(
+					`http://localhost:8003/api/v1/jobs/${data.jobId}/stream`,
+				);
+
+				eventSource.onmessage = (event) => {
+					try {
+						const job = JSON.parse(event.data);
+						setRenderProgress(job.progress);
+						setRenderStatus(job.status);
+
+						if (job.status === "completed") {
+							eventSource.close();
+							setIsExporting(false);
+							toast.success("Render complete! Your video is ready.");
+						} else if (job.status === "failed") {
+							eventSource.close();
+							setIsExporting(false);
+							toast.error("Render job failed.");
+						}
+					} catch (e) {
+						console.error("SSE parse error:", e);
+					}
+				};
+
+				eventSource.onerror = () => {
+					eventSource.close();
+					setIsExporting(false);
+				};
+			}
 		} catch (err) {
 			console.error(err);
 			toast.error(
-				"Failed to communicate with Render Farm service. Make sure it is running.",
+				"Failed to export video. Check console for details.",
 			);
 			setIsExporting(false);
 			setRenderProgress(null);

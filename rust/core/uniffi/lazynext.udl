@@ -17,6 +17,9 @@ namespace lazynext_mobile {
   // Add a clip to a track
   string add_clip(u32 track_index, string clip_type, string name, u32 start, u32 end);
 
+  // Move a clip (syncs with CRDT engine)
+  string move_clip(string clip_id, u32 new_start);
+
   // Process an AI editing intent
   string process_intent(string prompt, boolean require_approval);
 
@@ -36,43 +39,4 @@ namespace lazynext_mobile {
   string version();
 };
 
-dictionary ProjectInfo {
-  string name;
-  string id;
-  u32 framerate;
-  u32 width;
-  u32 height;
-  u32 track_count;
-  u32 clip_count;
-};
 
-dictionary ClipData {
-  string id;
-  string clip_type;
-  string name;
-  u32 start;
-  u32 end;
-};
-
-dictionary TrackData {
-  string id;
-  string kind;
-  sequence<ClipData> clips;
-};
-
-dictionary TimelineState {
-  string id;
-  string name;
-  u32 framerate;
-  u32 width;
-  u32 height;
-  sequence<TrackData> tracks;
-};
-
-dictionary EngineStatus {
-  boolean initialized;
-  boolean processing;
-  string current_project;
-  u32 operation_count;
-  string peer_id;
-};

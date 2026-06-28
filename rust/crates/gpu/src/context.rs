@@ -332,6 +332,39 @@ impl GpuContext {
         &self.queue
     }
 
+    pub fn create_texture_from_rgba(&self, rgba: &[u8], width: u32, height: u32) -> Result<wgpu::Texture, String> {
+        let texture = self.create_render_texture(width, height, "uploaded-texture");
+        
+        let mut pixels = rgba.to_vec();
+        // Convert RGBA to BGRA if necessary based on texture format
+        if self.texture_format == wgpu::TextureFormat::Bgra8Unorm {
+            for chunk in pixels.chunks_exact_mut(4) {
+                chunk.swap(0, 2);
+            }
+        }
+        
+        self.queue.write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &pixels,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(4 * width),
+                rows_per_image: Some(height),
+            },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+        );
+        Ok(texture)
+    }
+
     pub fn texture_format(&self) -> wgpu::TextureFormat {
         self.texture_format
     }
@@ -639,7 +672,7 @@ impl GpuContext {
                 .expect("Failed to get 2d context for texture import")
                 .unchecked_into();
             let image_data = ctx
-                .get_image_data(0.0, 0.0, width as f64, height as f64)
+                .get_image_data(0, 0, width as i32, height as i32)
                 .expect("Failed to read pixel data from canvas");
             let rgba_bytes = image_data.data();
 

@@ -28,11 +28,11 @@ pub struct VideoDecoderWrapper {
 #[wasm_bindgen]
 impl VideoDecoderWrapper {
     #[wasm_bindgen(constructor)]
-    pub fn new(codec: String) -> Self {
+    pub fn new(codec: String, on_frame_cb: Option<js_sys::Function>) -> Self {
         Self {
             codec,
             decoder: None,
-            on_frame: None,
+            on_frame: on_frame_cb,
             frame_count: 0,
         }
     }
@@ -51,29 +51,36 @@ impl VideoDecoderWrapper {
             // Allow buffered decoding for smoother playback
             let desc_buffer = js_sys::ArrayBuffer::new(desc.length());
             let desc_view = Uint8Array::new(&desc_buffer);
-            desc_view.copy_from(&desc);
-            config.description(&desc_buffer);
+            desc_view.set(&desc, 0);
+            config.set_description(&desc_buffer);
         }
 
-        // Create the decoder with an output callback
+        let on_frame_cb = self.on_frame.clone();
         let on_frame = Closure::wrap(Box::new(move |frame: web_sys::VideoFrame| {
-            // In production: push frame to a render queue for the compositor
-            // For now: log and close the frame to prevent memory leaks
-            let _ = frame.timestamp();
-            frame.close();
+            if let Some(ref cb) = on_frame_cb {
+                // Pass the frame to JS (e.g. for createImageBitmap and wgpu upload)
+                let _ = cb.call1(&JsValue::NULL, &frame);
+            } else {
+                let _ = frame.timestamp();
+                frame.close();
+            }
         }) as Box<dyn FnMut(web_sys::VideoFrame)>);
 
-        let decoder = web_sys::VideoDecoder::new(&web_sys::VideoDecoderInit {
-            output: on_frame.as_ref().unchecked_ref(),
-            error: Closure::wrap(Box::new(move |e: JsValue| {
-                web_sys::console::error_1(&JsValue::from_str(&format!(
-                    "WebCodecs decode error: {:?}",
-                    e
-                )));
-            }) as Box<dyn FnMut(JsValue)>)
-            .as_ref()
-            .unchecked_ref(),
-        })?;
+        let error_cb = Closure::wrap(Box::new(move |e: JsValue| {
+            web_sys::console::error_1(&JsValue::from_str(&format!(
+                "WebCodecs decode error: {:?}",
+                e
+            )));
+        }) as Box<dyn FnMut(JsValue)>);
+
+        let decoder = web_sys::VideoDecoder::new(&web_sys::VideoDecoderInit::new(
+            error_cb.as_ref().unchecked_ref(),
+            on_frame.as_ref().unchecked_ref(),
+        ))?;
+        
+        // Prevent closures from being dropped while decoder is alive
+        error_cb.forget();
+        on_frame.forget();
 
         decoder.configure(&config)?;
 
@@ -115,10 +122,10 @@ impl VideoDecoderWrapper {
         };
 
         let mut chunk_init =
-            web_sys::EncodedVideoChunkInit::new(&chunk_data.buffer(), timestamp, chunk_type);
+            web_sys::EncodedVideoChunkInit::new(&chunk_data.buffer(), timestamp as i32, chunk_type);
 
         if let Some(dur) = duration {
-            chunk_init.duration(dur);
+            chunk_init.set_duration(dur as u32);
         }
 
         let chunk = web_sys::EncodedVideoChunk::new(&chunk_init)?;

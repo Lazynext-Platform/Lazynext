@@ -81,7 +81,9 @@ struct LayerUniformBuffer {
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct BlendUniformBuffer {
     blend_mode: u32,
-    _padding: [u32; 3],
+    luma_key_threshold: f32,
+    luma_key_tolerance: f32,
+    _padding: [u32; 1],
 }
 
 #[repr(C)]
@@ -342,6 +344,8 @@ impl Compositor {
                         &scene,
                         &layer_texture,
                         layer.blend_mode,
+                        layer.luma_key_threshold.unwrap_or(0.0),
+                        layer.luma_key_tolerance.unwrap_or(0.05),
                         frame.width,
                         frame.height,
                     )?;
@@ -434,6 +438,8 @@ impl Compositor {
                         &scene,
                         &layer_texture,
                         layer.blend_mode,
+                        layer.luma_key_threshold.unwrap_or(0.0),
+                        layer.luma_key_tolerance.unwrap_or(0.05),
                         frame.width,
                         frame.height,
                     )?;
@@ -525,6 +531,8 @@ impl Compositor {
             crop: None,
             border_radius: None,
             shadow: None,
+            luma_key_threshold: None,
+            luma_key_tolerance: None,
         };
 
         let layer_texture = self.render_layer(context, encoder, frame, &layer_desc)?;
@@ -534,6 +542,8 @@ impl Compositor {
             scene,
             &layer_texture,
             BlendMode::Normal,
+            0.0,
+            0.0,
             frame.width,
             frame.height,
         )?;
@@ -947,6 +957,8 @@ impl Compositor {
         base: &wgpu::Texture,
         layer: &wgpu::Texture,
         blend_mode: BlendMode,
+        luma_key_threshold: f32,
+        luma_key_tolerance: f32,
         width: u32,
         height: u32,
     ) -> Result<wgpu::Texture, CompositorError> {
@@ -995,7 +1007,9 @@ impl Compositor {
                     label: Some("compositor-blend-uniform-buffer"),
                     contents: bytemuck::bytes_of(&BlendUniformBuffer {
                         blend_mode: blend_mode.shader_code(),
-                        _padding: [0; 3],
+                        luma_key_threshold,
+                        luma_key_tolerance,
+                        _padding: [0; 1],
                     }),
                     usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
                 });

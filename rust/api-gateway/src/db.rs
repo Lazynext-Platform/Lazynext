@@ -177,6 +177,17 @@ impl DbStore {
         Ok(())
     }
 
+    pub async fn update_project_data(&self, project_id: &str, data: &serde_json::Value) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            "UPDATE projects SET data = $1, updated_at = NOW() WHERE id = $2"
+        )
+        .bind(data)
+        .bind(project_id)
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
     /// Deduct AI credits from a user. Returns the new balance.
     pub async fn deduct_credits(&self, user_id: &str, amount: i32) -> Result<i32, sqlx::Error> {
         let row: (i32,) = sqlx::query_as(

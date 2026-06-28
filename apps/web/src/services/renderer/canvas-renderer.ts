@@ -1,14 +1,5 @@
+import { wasmBridge } from "@/core/wasm-bridge";
 import type { FrameRate } from "lazynext-wasm";
-import type { AnyBaseNode } from "./nodes/base-node";
-import { createCanvasSurface } from "./canvas-utils";
-import { buildFrameDescriptor } from "./compositor/frame-descriptor";
-import { wasmCompositor } from "./compositor/wasm-compositor";
-import { resolveRenderTree } from "./resolve";
-import {
-	measureSpanAsync,
-	measureSpanSync,
-	onRenderPerfFrameComplete,
-} from "@/diagnostics/render-perf";
 
 export type CanvasRendererParams = {
 	width: number;
@@ -17,60 +8,41 @@ export type CanvasRendererParams = {
 };
 
 export class CanvasRenderer {
-	canvas: OffscreenCanvas;
-	context: OffscreenCanvasRenderingContext2D;
 	width: number;
 	height: number;
 	fps: FrameRate;
+    
+    // We keep a dummy canvas to satisfy getOutputCanvas for now
+    dummyCanvas: HTMLCanvasElement;
 
 	constructor({ width, height, fps }: CanvasRendererParams) {
 		this.width = width;
 		this.height = height;
 		this.fps = fps;
-
-		const surface = createCanvasSurface({ width, height });
-		this.canvas = surface.canvas;
-		this.context = surface.context;
+        this.dummyCanvas = document.createElement("canvas");
+        this.dummyCanvas.width = width;
+        this.dummyCanvas.height = height;
+        
+        // Add test clip for now (Phase 1 validation)
+        wasmBridge.initialize().then(() => {
+            wasmBridge.getEngine().add_test_clip();
+        });
 	}
 
 	getOutputCanvas(): HTMLCanvasElement {
-		wasmCompositor.ensureInitialized({
-			width: this.width,
-			height: this.height,
-		});
-		return wasmCompositor.getCanvas();
+        return this.dummyCanvas;
 	}
 
 	setSize({ width, height }: { width: number; height: number }) {
 		this.width = width;
 		this.height = height;
-
-		const surface = createCanvasSurface({ width, height });
-		this.canvas = surface.canvas;
-		this.context = surface.context;
+        this.dummyCanvas.width = width;
+        this.dummyCanvas.height = height;
 	}
 
-	async render({ node, time }: { node: AnyBaseNode; time: number }) {
-		await measureSpanAsync({
-			name: "resolve",
-			fn: () => resolveRenderTree({ node, renderer: this, time }),
-		});
-		const { frame, textures } = await measureSpanAsync({
-			name: "buildFrame",
-			fn: () => buildFrameDescriptor({ node, renderer: this }),
-		});
-		wasmCompositor.ensureInitialized({
-			width: this.width,
-			height: this.height,
-		});
-		measureSpanSync({
-			name: "syncTextures",
-			fn: () => wasmCompositor.syncTextures(textures),
-		});
-		measureSpanSync({
-			name: "renderFrame",
-			fn: () => wasmCompositor.render(frame),
-		});
+	async render({ node, time }: { node: any; time: number }) {
+        // Render to dummy canvas
+		await wasmBridge.renderToCanvas(this.dummyCanvas, Math.floor(time));
 	}
 
 	async renderToCanvas({
@@ -78,28 +50,11 @@ export class CanvasRenderer {
 		time,
 		targetCanvas,
 	}: {
-		node: AnyBaseNode;
+		node: any;
 		time: number;
 		targetCanvas: HTMLCanvasElement;
 	}) {
-		await this.render({ node, time });
-
-		const ctx = targetCanvas.getContext("2d");
-		if (!ctx) {
-			throw new Error("Failed to get target canvas context");
-		}
-
-		measureSpanSync({
-			name: "drawImage",
-			fn: () =>
-				ctx.drawImage(
-					wasmCompositor.getCanvas(),
-					0,
-					0,
-					targetCanvas.width,
-					targetCanvas.height,
-				),
-		});
-		onRenderPerfFrameComplete();
+        // Direct render via WasmEngine
+		await wasmBridge.renderToCanvas(targetCanvas, Math.floor(time));
 	}
 }

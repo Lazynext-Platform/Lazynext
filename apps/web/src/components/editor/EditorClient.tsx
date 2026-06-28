@@ -9,6 +9,7 @@ import {
 	initNeuralEngine,
 } from "lazynext-wasm";
 import { useEditorState } from "./useEditorState";
+import { wasmBridge } from "@/core/wasm-bridge";
 import { ensureWasmInitialized } from "@/wasm/init";
 import { RenderFarmModal } from "./RenderFarmModal";
 import { BezierEditorModal } from "./BezierEditorModal";
@@ -3130,6 +3131,20 @@ export default function EditorClient({ project }: { project: Project }) {
 			}
 		}
 
+		try {
+			(wasmBridge.getEngine() as any).addMedia(
+				newAsset.id,
+				newAsset.name,
+				newAsset.url,
+				newAsset.type,
+				newAsset.duration_frames / 60.0,
+				1920,
+				1080
+			);
+		} catch (e) {
+			console.error("WASM addMedia error:", e);
+		}
+		
 		setAssets((prev) => [...prev, newAsset]);
 	};
 

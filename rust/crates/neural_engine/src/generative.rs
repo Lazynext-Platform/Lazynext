@@ -86,20 +86,74 @@ impl GenerativeModel {
             .await
             .map_err(|e| format!("Failed to parse JSON: {}", e))?;
 
-        // In a full implementation, we would poll the "urls.get" endpoint until "status" == "succeeded"
-        // Here we just extract the ID to simulate successful submission.
-        let prediction_id = body["id"].as_str().unwrap_or("unknown_id");
-        println!(
-            "[NeuralEngine] Replicate prediction started with ID: {}",
-            prediction_id
-        );
+        let get_url = body["urls"]["get"].as_str().unwrap_or("");
+        if get_url.is_empty() {
+            return Err("Replicate API response missing urls.get".to_string());
+        }
 
-        let output_filename = format!(
-            "generated_{}_{}.mp4",
-            options.prompt.replace(" ", "_").to_lowercase(),
-            prediction_id
-        );
-        Ok(output_filename)
+        println!("[NeuralEngine] Replicate prediction started. Polling status...");
+
+        loop {
+            tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+            
+            let poll_res = client
+                .get(get_url)
+                .header("Authorization", format!("Token {}", api_key))
+                .send()
+                .await
+                .map_err(|e| format!("Poll request failed: {}", e))?;
+                
+            let poll_body: serde_json::Value = poll_res
+                .json()
+                .await
+                .map_err(|e| format!("Failed to parse poll JSON: {}", e))?;
+                
+            let status = poll_body["status"].as_str().unwrap_or("unknown");
+            
+            if status == "succeeded" {
+                let output = &poll_body["output"];
+                let output_url = if output.is_array() {
+                    output[0].as_str().unwrap_or("")
+                } else if output.is_string() {
+                    output.as_str().unwrap_or("")
+                } else {
+                    return Err("Failed to parse output URL from Replicate response".to_string());
+                };
+                
+                if output_url.is_empty() {
+                    return Err("Empty output URL returned".to_string());
+                }
+                
+                println!("[NeuralEngine] Video generation succeeded. Downloading from {}...", output_url);
+                
+                let video_res = client
+                    .get(output_url)
+                    .send()
+                    .await
+                    .map_err(|e| format!("Failed to download generated video: {}", e))?;
+                    
+                let video_bytes = video_res
+                    .bytes()
+                    .await
+                    .map_err(|e| format!("Failed to read video bytes: {}", e))?;
+                    
+                let prediction_id = poll_body["id"].as_str().unwrap_or("unknown_id");
+                let output_filename = format!(
+                    "/tmp/generated_{}_{}.mp4",
+                    options.prompt.replace(" ", "_").to_lowercase(),
+                    prediction_id
+                );
+                
+                std::fs::write(&output_filename, &video_bytes)
+                    .map_err(|e| format!("Failed to write video to disk: {}", e))?;
+                    
+                return Ok(output_filename);
+            } else if status == "failed" || status == "canceled" {
+                return Err(format!("Prediction {}: {}", status, poll_body["error"].as_str().unwrap_or("unknown error")));
+            }
+            
+            println!("[NeuralEngine] Prediction status: {}", status);
+        }
     }
 
     /// Generates text-to-speech using an external API.
@@ -146,8 +200,12 @@ impl GenerativeModel {
             return Err(format!("TTS API returned error: {}", res.status()));
         }
 
-        // Normally we'd write `res.bytes().await` to a file.
-        let output_filename = format!("tts_output_{}.wav", voice_id);
+        let audio_bytes = res.bytes().await.map_err(|e| format!("Failed to read audio bytes: {}", e))?;
+        
+        let output_filename = format!("/tmp/tts_output_{}.wav", voice_id);
+        std::fs::write(&output_filename, &audio_bytes)
+            .map_err(|e| format!("Failed to write audio to disk: {}", e))?;
+            
         Ok(output_filename)
     }
 }

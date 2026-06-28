@@ -9,5 +9,5 @@ pub mod optical_flow;
 mod pipeline;
 mod types;
 
-pub use pipeline::{ApplyEffectsOptions, EffectPipeline, EffectsError};
+pub use pipeline::{ApplyEffectsOptions, EffectPipeline, EffectsError, ApplyLutOptions};
 pub use types::{EffectPass, UniformValue};

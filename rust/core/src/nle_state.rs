@@ -19,9 +19,21 @@ pub enum NLEEvent {
 // ── Core domain types ──
 
 #[derive(Clone, Serialize, Deserialize)]
+pub struct MediaAsset {
+    pub id: String,
+    pub name: String,
+    pub path_or_url: String,
+    pub asset_type: String, // "video", "audio", "image"
+    pub duration: f64,
+    pub width: u32,
+    pub height: u32,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub id: String,
     pub clip_type: String,
+    pub media_id: Option<String>,
     pub name: String,
     pub start: u32,
     pub end: u32,
@@ -77,6 +89,8 @@ pub struct ProjectData {
     pub height: u32,
     pub bg_color: [f32; 4],
     pub tracks: Vec<Track>,
+    #[serde(default, skip_serializing_if = "HashMap::is_empty")]
+    pub media_pool: HashMap<String, MediaAsset>,
 }
 
 // ── NLE State (the engine) ──
@@ -100,16 +114,17 @@ pub struct NLEState {
 }
 
 impl NLEState {
-    pub fn new(id: String, name: String, framerate: u32) -> Self {
+    pub fn new(project_id: String, name: String, framerate: u32) -> Self {
         NLEState {
             data: ProjectData {
-                id,
+                id: project_id,
                 name,
                 framerate,
                 width: 1920,
                 height: 1080,
                 bg_color: [0.0, 0.0, 0.0, 1.0],
                 tracks: Vec::new(),
+                media_pool: HashMap::new(),
             },
             dispatcher: None,
             op_log: CrdtOperationLog::new(),
@@ -141,6 +156,24 @@ impl NLEState {
         &self.data
     }
 
+    pub fn get_project_data_mut(&mut self) -> &mut ProjectData {
+        &mut self.data
+    }
+
+    pub fn set_dimensions(&mut self, width: u32, height: u32) {
+        self.data.width = width;
+        self.data.height = height;
+    }
+
+    /// Replace the entire project data (e.g. when loading from a file).
+    /// This clears undo/redo history since the state is fully replaced.
+    pub fn load_project_data(&mut self, pd: ProjectData) {
+        self.data = pd;
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.op_log = CrdtOperationLog::default();
+    }
+
     pub fn framerate(&self) -> u32 {
         self.data.framerate
     }
@@ -160,6 +193,20 @@ impl NLEState {
             clips: Vec::new(),
         });
         self.apply_and_record(op, snapshot);
+    }
+
+    pub fn remove_track(&mut self, track_idx: usize) -> bool {
+        let snapshot = self.data.clone();
+        if track_idx < self.data.tracks.len() {
+            let track = self.data.tracks.remove(track_idx);
+            let op = CrdtOperation::TrackDelete {
+                track_id: track.id,
+            };
+            self.apply_and_record(op, snapshot);
+            true
+        } else {
+            false
+        }
     }
 
     // ── Clip operations ──
@@ -190,6 +237,7 @@ impl NLEState {
             track.clips.push(Clip {
                 id,
                 clip_type,
+                media_id: None,
                 name,
                 start,
                 end,
@@ -198,6 +246,23 @@ impl NLEState {
             // Drop track borrow before calling apply_and_record
             self.apply_and_record(op, snapshot);
         }
+    }
+
+    pub fn remove_clip_from_track(&mut self, track_idx: usize, clip_id: &str) -> bool {
+        let snapshot = self.data.clone();
+        if let Some(track) = self.data.tracks.get_mut(track_idx) {
+            let initial_len = track.clips.len();
+            track.clips.retain(|c| c.id != clip_id);
+            if track.clips.len() < initial_len {
+                let op = CrdtOperation::ClipDelete {
+                    track_id: track.id.clone(),
+                    clip_id: clip_id.to_string(),
+                };
+                self.apply_and_record(op, snapshot);
+                return true;
+            }
+        }
+        false
     }
 
     /// Set a keyframe on a specific clip's property.
@@ -284,6 +349,43 @@ impl NLEState {
         };
         if let Some(op) = op {
             self.apply_and_record(op, snapshot);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Update a generic numeric property of a clip.
+    pub fn update_clip_property(&mut self, clip_id: &str, property: &str, value: f32) -> bool {
+        let snapshot = self.data.clone();
+        let mut op = None;
+        for track in self.data.tracks.iter_mut() {
+            if let Some(clip) = track.clips.iter_mut().find(|c| c.id == clip_id) {
+                if property == "start" {
+                    let dur = clip.end.saturating_sub(clip.start);
+                    clip.start = value as u32;
+                    clip.end = clip.start + dur;
+                    op = Some(CrdtOperation::ClipTrim {
+                        clip_id: clip_id.to_string(),
+                        new_start: clip.start,
+                        new_end: clip.end,
+                    });
+                } else {
+                    // Update animation property
+                    // For now this just logs or does nothing
+                    op = Some(CrdtOperation::PropertyUpdate {
+                        target_id: clip_id.to_string(),
+                        property: property.to_string(),
+                        old_value: None,
+                        value: serde_json::json!(value),
+                    });
+                }
+                break;
+            }
+        }
+
+        if let Some(o) = op {
+            self.apply_and_record(o, snapshot);
             true
         } else {
             false
@@ -378,19 +480,21 @@ impl NLEState {
             // that the autonomous agent calls; the actual DSP happens there.
             track.clips.clear();
             track.clips.push(Clip {
-                id: "clip_interview_1_pt1".to_string(),
-                clip_type: "audio".to_string(),
-                name: "interview_pt1".to_string(),
+                id: "1".to_string(),
+                clip_type: "video".to_string(),
+                media_id: None,
+                name: "Clip 1".to_string(),
                 start: 0,
-                end: 300,
+                end: 100,
                 animations: HashMap::new(),
             });
             track.clips.push(Clip {
-                id: "clip_interview_1_pt2".to_string(),
-                clip_type: "audio".to_string(),
-                name: "interview_pt2".to_string(),
-                start: 450,
-                end: 1000,
+                id: "clip-2".to_string(),
+                clip_type: "video".to_string(),
+                media_id: None,
+                name: "Clip 2".to_string(),
+                start: 60,
+                end: 120,
                 animations: HashMap::new(),
             });
         }
@@ -403,5 +507,13 @@ impl NLEState {
         self.op_log.push(op.clone());
         self.undo_stack.push((op, pre_snapshot));
         self.redo_stack.clear(); // new action invalidates redo
+    }
+
+    /// Apply an incoming CRDT operation from a remote peer.
+    pub fn apply_operation(&mut self, op: CrdtOperation) {
+        // TODO: Full CRDT conflict resolution logic.
+        // For now, just record the operation in the log.
+        self.clock.tick();
+        self.op_log.push(op);
     }
 }

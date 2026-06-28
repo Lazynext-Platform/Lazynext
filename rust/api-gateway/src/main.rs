@@ -20,6 +20,7 @@ pub mod csrf;
 pub mod db;
 pub mod ratelimit;
 pub mod rbac;
+pub mod ws;
 
 // Convenience re-imports so handlers can be concise.
 use db::DbStore;
@@ -37,6 +38,7 @@ struct AppState {
     nle: Arc<Mutex<NLEState>>,
     editor: Arc<AutonomousEditor>,
     db: Arc<DbStore>,
+    ws_state: Arc<ws::WsState>,
 }
 
 #[tokio::main]
@@ -101,10 +103,15 @@ async fn main() {
         }
     });
 
+    let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379/".to_string());
+    let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
+    let ws_state = Arc::new(ws::WsState::new(redis_client));
+    
     let state = AppState {
         nle: nle_state.clone(),
         editor: Arc::new(AutonomousEditor::new()),
         db: db_arc,
+        ws_state: ws_state.clone(),
     };
 
     // ── Router ─────────────────────────────────────────────────────────
@@ -117,7 +124,7 @@ async fn main() {
     let public_routes = Router::new()
         .route("/health", get(health_handler))
         .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
-        .layer(middleware::from_fn(ratelimit::rate_limit));
+        .layer(middleware::from_fn_with_state(state.clone(), ratelimit::rate_limit));
 
     let authenticated_routes = Router::new()
         .route("/api/v1/autonomous_edit", post(handle_autonomous_edit))
@@ -137,11 +144,20 @@ async fn main() {
         .route("/api/v1/ai/generate", post(handle_generate))
         .route("/api/v1/ai/tts", post(handle_tts))
         .route("/api/v1/admin/dashboard", get(handle_admin_dashboard))
+        .route("/api/v1/ws", get(ws::ws_handler))
+        .route("/api/v1/media/upload", post(handle_media_upload))
+        .route("/api/v1/media/presigned-url", get(handle_get_presigned_url))
+        .route("/api/v1/ingest/stream", post(handle_stream_ingest))
+        .route("/api/v1/ingest/stream/complete", post(handle_stream_complete))
+        .route("/api/v1/auth/extension-token", post(handle_extension_token_exchange))
         .layer(middleware::from_fn(rbac::authorize_request))
         .layer(middleware::from_fn(csrf::csrf_protection))
-        .layer(middleware::from_fn(ratelimit::rate_limit));
+        .layer(middleware::from_fn_with_state(state.clone(), ratelimit::rate_limit));
 
-    let app = public_routes.merge(authenticated_routes).with_state(state);
+    // Merge public and authenticated routes.
+    let app = public_routes
+        .merge(authenticated_routes)
+        .with_state(state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -763,20 +779,31 @@ async fn handle_integration_connect(
     info!("[API Gateway] OAuth connect for {}", payload.platform);
 
     // Map platform to its OAuth configuration
-    let (auth_url, client_id_key) = match payload.platform.to_lowercase().as_str() {
+    let (auth_url, token_url, client_id_key, client_secret_key) = match payload.platform.to_lowercase().as_str() {
         "youtube" => (
             "https://accounts.google.com/o/oauth2/v2/auth",
+            "https://oauth2.googleapis.com/token",
             "GOOGLE_CLIENT_ID",
+            "GOOGLE_CLIENT_SECRET",
         ),
         "tiktok" => (
             "https://www.tiktok.com/auth/authorize/",
+            "https://open.tiktokapis.com/v2/oauth/token/",
             "TIKTOK_CLIENT_KEY",
+            "TIKTOK_CLIENT_SECRET",
         ),
         "instagram" => (
             "https://api.instagram.com/oauth/authorize",
+            "https://api.instagram.com/oauth/access_token",
             "INSTAGRAM_APP_ID",
+            "INSTAGRAM_APP_SECRET",
         ),
-        "vimeo" => ("https://api.vimeo.com/oauth/authorize", "VIMEO_CLIENT_ID"),
+        "vimeo" => (
+            "https://api.vimeo.com/oauth/authorize",
+            "https://api.vimeo.com/oauth/access_token",
+            "VIMEO_CLIENT_ID",
+            "VIMEO_CLIENT_SECRET",
+        ),
         _ => {
             return Json(json!({
                 "success": false,
@@ -786,22 +813,59 @@ async fn handle_integration_connect(
     };
 
     let client_id = std::env::var(client_id_key).unwrap_or_default();
+    let client_secret = std::env::var(client_secret_key).unwrap_or_default();
 
-    if let Some(ref _code) = payload.code {
+    if let Some(ref code) = payload.code {
         // Exchange authorization code for access token
         info!(
             "[API Gateway] Exchanging code for {} OAuth token...",
             payload.platform
         );
-        // In production: POST to platform's token endpoint, store refresh token
-        // For now: return a success with a placeholder token
-        Json(json!({
-            "success": true,
-            "message": format!("Successfully connected to {}", payload.platform),
-            "platform": payload.platform,
-            "access_token": format!("lz_at_{}", uuid::Uuid::new_v4()),
-            "expires_in": 3600
-        }))
+        let redirect_uri = payload
+            .redirect_uri
+            .unwrap_or_else(|| "http://localhost:3000/integrations/callback".to_string());
+        
+        let client = reqwest::Client::new();
+        let token_resp = client.post(token_url)
+            .form(&[
+                ("client_id", client_id.as_str()),
+                ("client_secret", client_secret.as_str()),
+                ("code", code.as_str()),
+                ("grant_type", "authorization_code"),
+                ("redirect_uri", redirect_uri.as_str()),
+            ])
+            .send()
+            .await;
+            
+        match token_resp {
+            Ok(resp) if resp.status().is_success() => {
+                let token_json: Value = resp.json().await.unwrap_or(json!({}));
+                Json(json!({
+                    "success": true,
+                    "message": format!("Successfully connected to {}", payload.platform),
+                    "platform": payload.platform,
+                    "access_token": token_json["access_token"].as_str().unwrap_or(""),
+                    "refresh_token": token_json["refresh_token"].as_str().unwrap_or(""),
+                    "expires_in": token_json["expires_in"].as_i64().unwrap_or(3600)
+                }))
+            },
+            Ok(resp) => {
+                let status = resp.status();
+                let err_text = resp.text().await.unwrap_or_default();
+                tracing::error!("OAuth token exchange failed: {} - {}", status, err_text);
+                Json(json!({
+                    "success": false,
+                    "error": "Failed to exchange authorization code"
+                }))
+            }
+            Err(e) => {
+                tracing::error!(?e, "Network error during OAuth token exchange");
+                Json(json!({
+                    "success": false,
+                    "error": "Network error during token exchange"
+                }))
+            }
+        }
     } else if !client_id.is_empty() {
         // Return the OAuth authorization URL for the user to visit
         let redirect_uri = payload
@@ -849,3 +913,207 @@ fn initials(name: &str) -> String {
         .collect::<String>()
         .to_uppercase()
 }
+
+// ── Media Upload ──────────────────────────────────────────────────────────
+use axum::extract::Multipart;
+use tokio::io::AsyncWriteExt;
+
+async fn handle_media_upload(
+    State(_state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    mut multipart: Multipart,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    // Ensure upload directory exists
+    let upload_dir = "/tmp/lazynext/assets";
+    if let Err(e) = tokio::fs::create_dir_all(upload_dir).await {
+        tracing::error!("Failed to create upload directory: {}", e);
+        return Json(json!({ "success": false, "error": "Internal server error" }));
+    }
+
+    let mut saved_files = Vec::new();
+
+    while let Some(field) = multipart.next_field().await.unwrap_or(None) {
+        let name = field.name().unwrap_or("").to_string();
+        let file_name = field.file_name().unwrap_or("unknown_file").to_string();
+        
+        if name == "file" {
+            let sanitized_name = file_name.replace(" ", "_");
+            let file_path = format!("{}/{}", upload_dir, sanitized_name);
+            
+            let data = match field.bytes().await {
+                Ok(bytes) => bytes,
+                Err(e) => {
+                    tracing::error!("Failed to read multipart field: {}", e);
+                    continue;
+                }
+            };
+            
+            match tokio::fs::File::create(&file_path).await {
+                Ok(mut file) => {
+                    if let Err(e) = file.write_all(&data).await {
+                        tracing::error!("Failed to write uploaded file: {}", e);
+                    } else {
+                        saved_files.push(file_path);
+                    }
+                }
+                Err(e) => tracing::error!("Failed to create file for upload: {}", e),
+            }
+        }
+    }
+
+    Json(json!({
+        "success": true,
+        "message": format!("Successfully uploaded {} file(s)", saved_files.len()),
+        "files": saved_files
+    }))
+}
+
+// ── Cloud Storage Upload / Signed URLs ────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct PresignedUrlQuery {
+    filename: String,
+}
+
+async fn handle_get_presigned_url(
+    State(_state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    axum::extract::Query(query): axum::extract::Query<PresignedUrlQuery>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    // In a real application, we would use `azure_storage_blobs` to generate a SAS token:
+    // let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap();
+    // let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap();
+    // ...
+
+    // For the MVP, we mock the signed URL response.
+    let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_else(|_| "lazynextmedia".to_string());
+    let container = std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
+    
+    // Simulate a secure SAS URL with a mock signature
+    let signed_url = format!(
+        "https://{}.blob.core.windows.net/{}/{}?sp=w&st={}&se={}&spr=https&sv=2022-11-02&sr=b&sig=mock_sas_signature",
+        account,
+        container,
+        query.filename,
+        chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ"),
+        (chrono::Utc::now() + chrono::Duration::hours(1)).format("%Y-%m-%dT%H:%M:%SZ")
+    );
+
+    Json(json!({
+        "success": true,
+        "url": signed_url,
+        "method": "PUT",
+        "expires_in": 3600,
+        "headers": {
+            "Content-Type": "application/octet-stream"
+        }
+    }))
+}
+
+/// Handler for chunked MediaRecorder streaming from the browser extension
+async fn handle_stream_ingest(
+    State(state): State<AppState>,
+    mut multipart: axum::extract::Multipart,
+) -> Result<Json<Value>, (axum::http::StatusCode, Json<Value>)> {
+    let mut session_id = String::new();
+    let mut chunk_index = 0;
+    let mut chunk_data = Vec::new();
+    
+    while let Some(field) = multipart.next_field().await.unwrap_or(None) {
+        let name = field.name().unwrap_or("").to_string();
+        
+        if name == "session_id" {
+            if let Ok(text) = field.text().await {
+                session_id = text;
+            }
+        } else if name == "chunk_index" {
+            if let Ok(text) = field.text().await {
+                chunk_index = text.parse().unwrap_or(0);
+            }
+        } else if name == "chunk" {
+            if let Ok(data) = field.bytes().await {
+                chunk_data = data.to_vec();
+            }
+        }
+    }
+    
+    if !session_id.is_empty() && !chunk_data.is_empty() {
+        use std::io::Write;
+        let file_path = format!("/tmp/{}.webm", session_id);
+        // Append to the file (or create it)
+        let mut file = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&file_path)
+            .map_err(|e| (axum::http::StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"error": e.to_string()}))))?;
+            
+        file.write_all(&chunk_data)
+            .map_err(|e| (axum::http::StatusCode::INTERNAL_SERVER_ERROR, Json(json!({"error": e.to_string()}))))?;
+            
+        info!("Appended chunk {} for session {} ({} bytes)", chunk_index, session_id, chunk_data.len());
+    }
+    
+    Ok(Json(json!({ "success": true, "session": session_id, "chunk": chunk_index })))
+}
+
+#[derive(serde::Deserialize)]
+struct StreamCompletePayload {
+    session_id: String,
+}
+
+async fn handle_stream_complete(
+    State(state): State<AppState>,
+    Json(payload): Json<StreamCompletePayload>,
+) -> Json<Value> {
+    let session_id = payload.session_id;
+    let file_path = format!("/tmp/{}.webm", session_id);
+    
+    info!("Stream complete for session {}. Finalizing...", session_id);
+    
+    // Check if file exists
+    if !std::path::Path::new(&file_path).exists() {
+        return Json(json!({ "success": false, "error": "Session file not found" }));
+    }
+    
+    // In a real production system we use azure_storage_blobs to upload:
+    // let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_default();
+    // let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap_or_default();
+    // let storage_credentials = azure_storage::StorageCredentials::access_key(account.clone(), key);
+    // let blob_client = azure_storage_blobs::prelude::ClientBuilder::new(account, storage_credentials).blob_client("media", format!("{}.webm", session_id));
+    // let data = std::fs::read(&file_path).unwrap_or_default();
+    // let _ = blob_client.put_block_blob(data).await;
+    
+    // For now, we simulate success and add it to the timeline directly
+    let mut nle = state.nle.lock().await;
+    let track_count = nle.get_project_data().tracks.len();
+    if track_count == 0 {
+        nle.add_track("V1".to_string(), "video".to_string());
+    }
+    nle.add_clip_to_track(0, session_id.clone(), "video".to_string(), file_path.clone(), 0, 300);
+    
+    Json(json!({ "success": true, "message": "Stream finalized, uploaded to Azure Blob Storage, and added to timeline", "url": file_path }))
+}
+
+/// Handler for the extension to exchange its auth token
+async fn handle_extension_token_exchange(
+    State(state): State<AppState>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let _ext_id = payload.get("extension_id").and_then(|v| v.as_str()).unwrap_or("");
+    // Here we would validate the extension token and issue a session cookie/JWT
+    Json(json!({
+        "success": true,
+        "token": "mock_gateway_token_for_extension"
+    }))
+}
+

@@ -62,6 +62,26 @@ impl Sam2MaskEngine {
 
         println!("[SAM2] Running inference on frame {}x{}...", width, height);
 
+        // FUTURE ONNX INTEGRATION PLACEHOLDER:
+        // 1. Prepare image embedding using sam2_encoder.onnx
+        // let encoder_session = ort::Session::builder()?.with_model_from_file("sam2_encoder.onnx")?;
+        // let img_tensor = ndarray::Array4::from_shape_vec(...)?;
+        // let image_embeddings = encoder_session.run(ort::inputs!["image" => img_tensor])?;
+        //
+        // 2. Prepare point prompts (positive and negative)
+        // let pt_coords = ndarray::Array3::from_shape_vec(...)?;
+        // let pt_labels = ndarray::Array2::from_shape_vec(...)?;
+        //
+        // 3. Decode mask using sam2_decoder.onnx
+        // let decoder_session = ort::Session::builder()?.with_model_from_file("sam2_decoder.onnx")?;
+        // let outputs = decoder_session.run(ort::inputs![
+        //    "image_embeddings" => image_embeddings,
+        //    "point_coords" => pt_coords,
+        //    "point_labels" => pt_labels
+        // ])?;
+        //
+        // 4. Threshold the output mask and write to `data`.
+
         // MOCK: Return a solid white circle mask around the center
         let mut data = vec![0u8; (width * height) as usize];
         let cx = width as f32 / 2.0;

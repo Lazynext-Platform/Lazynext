@@ -44,6 +44,8 @@ pub struct LayerDescriptor {
     pub crop: Option<CropDescriptor>,
     pub border_radius: Option<f32>,
     pub shadow: Option<ShadowDescriptor>,
+    pub luma_key_threshold: Option<f32>,
+    pub luma_key_tolerance: Option<f32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

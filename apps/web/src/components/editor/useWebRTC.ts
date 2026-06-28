@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Socket } from "socket.io-client";
 
 interface UseWebRTCOptions {
-	socket: Socket | null;
+	socket: WebSocket | null;
 	projectId: string;
 }
 
@@ -48,11 +47,14 @@ export function useWebRTC({ socket, projectId }: UseWebRTCOptions) {
 			});
 
 			pc.onicecandidate = (event) => {
-				if (event.candidate) {
-					socket.emit("webrtc-ice-candidate", {
-						target: targetSocketId,
-						candidate: event.candidate,
-					});
+				if (event.candidate && socket && socket.readyState === WebSocket.OPEN) {
+					socket.send(JSON.stringify({
+						type: "webrtc-ice-candidate",
+						payload: {
+							target: targetSocketId,
+							candidate: event.candidate,
+						}
+					}));
 				}
 			};
 
@@ -71,60 +73,72 @@ export function useWebRTC({ socket, projectId }: UseWebRTCOptions) {
 			return pc;
 		};
 
-		socket.on("peer-joined", async (peerId: string) => {
-			console.log("Peer joined, creating offer:", peerId);
-			const pc = createPeerConnection(peerId);
-			const offer = await pc.createOffer();
-			await pc.setLocalDescription(offer);
-			socket.emit("webrtc-offer", { target: peerId, offer });
-		});
-
-		socket.on("webrtc-offer", async ({ caller, offer }) => {
-			console.log("Received offer from:", caller);
-			const pc = createPeerConnection(caller);
-			await pc.setRemoteDescription(new RTCSessionDescription(offer));
-			const answer = await pc.createAnswer();
-			await pc.setLocalDescription(answer);
-			socket.emit("webrtc-answer", { target: caller, answer });
-		});
-
-		socket.on("webrtc-answer", async ({ caller, answer }) => {
-			console.log("Received answer from:", caller);
-			const pc = peerConnections.current[caller];
-			if (pc) {
-				await pc.setRemoteDescription(new RTCSessionDescription(answer));
-			}
-		});
-
-		socket.on("webrtc-ice-candidate", async ({ caller, candidate }) => {
-			const pc = peerConnections.current[caller];
-			if (pc) {
-				try {
-					await pc.addIceCandidate(new RTCIceCandidate(candidate));
-				} catch (e) {
-					console.error("Error adding received ice candidate", e);
+		const handleMessage = async (event: MessageEvent) => {
+			try {
+				const data = JSON.parse(event.data);
+				if (data.type === "peer-joined") {
+					const peerId = data.payload.peerId;
+					console.log("Peer joined, creating offer:", peerId);
+					const pc = createPeerConnection(peerId);
+					const offer = await pc.createOffer();
+					await pc.setLocalDescription(offer);
+					if (socket && socket.readyState === WebSocket.OPEN) {
+						socket.send(JSON.stringify({
+							type: "webrtc-offer",
+							payload: { target: peerId, offer }
+						}));
+					}
+				} else if (data.type === "webrtc-offer") {
+					const { caller, offer } = data.payload;
+					console.log("Received offer from:", caller);
+					const pc = createPeerConnection(caller);
+					await pc.setRemoteDescription(new RTCSessionDescription(offer));
+					const answer = await pc.createAnswer();
+					await pc.setLocalDescription(answer);
+					if (socket && socket.readyState === WebSocket.OPEN) {
+						socket.send(JSON.stringify({
+							type: "webrtc-answer",
+							payload: { target: caller, answer }
+						}));
+					}
+				} else if (data.type === "webrtc-answer") {
+					const { caller, answer } = data.payload;
+					console.log("Received answer from:", caller);
+					const pc = peerConnections.current[caller];
+					if (pc) {
+						await pc.setRemoteDescription(new RTCSessionDescription(answer));
+					}
+				} else if (data.type === "webrtc-ice-candidate") {
+					const { caller, candidate } = data.payload;
+					const pc = peerConnections.current[caller];
+					if (pc) {
+						try {
+							await pc.addIceCandidate(new RTCIceCandidate(candidate));
+						} catch (e) {
+							console.error("Error adding received ice candidate", e);
+						}
+					}
+				} else if (data.type === "peer-left") {
+					const peerId = data.payload.peerId;
+					if (peerConnections.current[peerId]) {
+						peerConnections.current[peerId].close();
+						delete peerConnections.current[peerId];
+					}
+					setPeers((prev) => {
+						const newPeers = { ...prev };
+						delete newPeers[peerId];
+						return newPeers;
+					});
 				}
+			} catch (err) {
+				// not a JSON message or parse error
 			}
-		});
+		};
 
-		socket.on("peer-left", (peerId: string) => {
-			if (peerConnections.current[peerId]) {
-				peerConnections.current[peerId].close();
-				delete peerConnections.current[peerId];
-			}
-			setPeers((prev) => {
-				const newPeers = { ...prev };
-				delete newPeers[peerId];
-				return newPeers;
-			});
-		});
+		socket.addEventListener("message", handleMessage);
 
 		return () => {
-			socket.off("peer-joined");
-			socket.off("webrtc-offer");
-			socket.off("webrtc-answer");
-			socket.off("webrtc-ice-candidate");
-			socket.off("peer-left");
+			socket.removeEventListener("message", handleMessage);
 		};
 	}, [socket, localStream]);
 

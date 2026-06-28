@@ -74,6 +74,12 @@ export function useWasm() {
 			stateRef.current?.deleteCutFromScript(s, e),
 		trigger_live_cut: (a: number, f: number) =>
 			stateRef.current?.triggerLiveCut(a, f),
+		getProjectData: () => stateRef.current?.getProjectData(),
+		addTrack: (name: string, trackType: string) => stateRef.current?.addTrack(name, trackType),
+		addClip: (trackIdx: number, id: string, clipType: string, name: string, startFrame: number, durationFrames: number) => 
+			stateRef.current?.addClip(trackIdx, id, clipType, name, startFrame, durationFrames),
+		trimClip: (id: string, newStart: number, newDuration: number) =>
+			stateRef.current?.trimClip(id, newStart, newDuration),
 		get isPlaying() {
 			return stateRef.current?.getIsPlaying() || false;
 		},
@@ -83,5 +89,6 @@ export function useWasm() {
 		isReady,
 		time,
 		frame,
+		projectData: isReady ? time.getProjectData() : null,
 	};
 }

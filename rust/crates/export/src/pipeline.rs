@@ -19,9 +19,10 @@ impl ExportPipeline {
     ///
     /// Currently the compositor frame rendering is handled by the caller;
     /// this pipeline handles the encoding side.
-    pub async fn export<F>(&self, mut render_frame: F) -> Result<()>
+    pub async fn export<F, Fut>(&self, mut render_frame: F) -> Result<()>
     where
-        F: FnMut(u32) -> Vec<u8>,
+        F: FnMut(u32) -> Fut,
+        Fut: std::future::Future<Output = Vec<u8>>,
     {
         use std::process::Stdio;
         use tokio::io::AsyncWriteExt;
@@ -44,7 +45,7 @@ impl ExportPipeline {
         let frame_size = (self.config.width * self.config.height * 4) as usize;
 
         for frame_idx in 0..total_frames {
-            let rgba = render_frame(frame_idx);
+            let rgba = render_frame(frame_idx).await;
 
             if rgba.len() != frame_size {
                 return Err(anyhow::anyhow!(

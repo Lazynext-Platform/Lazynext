@@ -39,6 +39,25 @@ impl CrdtEngine {
         let op: CrdtOperation = from_value(op_json)
             .map_err(|e| JsValue::from_str(&format!("Invalid operation: {}", e)))?;
 
+        match &op {
+            CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+                if let Ok(value_str) = serde_json::to_string(value) {
+                    self.entity_graph.set_entity(target_id, &value_str);
+                }
+            }
+            CrdtOperation::EntityInsert { entity_id, data, .. } => {
+                if let Ok(value_str) = serde_json::to_string(data) {
+                    self.entity_graph.set_entity(entity_id, &value_str);
+                }
+            }
+            CrdtOperation::EntityDelete { entity_id } => {
+                // For now, we don't fully delete from graph to allow tombstones, 
+                // but we could if needed. 
+                self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+            }
+            _ => {}
+        }
+
         self.clock.increment(&self.peer_id.clone());
         self.undo_stack.push(op.clone());
         self.redo_stack.clear(); // Clear redo stack on new operation
@@ -52,6 +71,23 @@ impl CrdtEngine {
     pub fn undo(&mut self) -> Result<bool, JsValue> {
         if let Some(op) = self.undo_stack.pop() {
             if let Some(inverse) = op.inverse() {
+                match &inverse {
+                    CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+                        if let Ok(value_str) = serde_json::to_string(value) {
+                            self.entity_graph.set_entity(target_id, &value_str);
+                        }
+                    }
+                    CrdtOperation::EntityInsert { entity_id, data, .. } => {
+                        if let Ok(value_str) = serde_json::to_string(data) {
+                            self.entity_graph.set_entity(entity_id, &value_str);
+                        }
+                    }
+                    CrdtOperation::EntityDelete { entity_id } => {
+                        self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+                    }
+                    _ => {}
+                }
+
                 self.clock.increment(&self.peer_id.clone());
                 self.log.push(inverse.clone());
                 self.redo_stack.push(op); // Push original to redo stack
@@ -65,6 +101,23 @@ impl CrdtEngine {
     #[wasm_bindgen]
     pub fn redo(&mut self) -> Result<bool, JsValue> {
         if let Some(op) = self.redo_stack.pop() {
+            match &op {
+                CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+                    if let Ok(value_str) = serde_json::to_string(value) {
+                        self.entity_graph.set_entity(target_id, &value_str);
+                    }
+                }
+                CrdtOperation::EntityInsert { entity_id, data, .. } => {
+                    if let Ok(value_str) = serde_json::to_string(data) {
+                        self.entity_graph.set_entity(entity_id, &value_str);
+                    }
+                }
+                CrdtOperation::EntityDelete { entity_id } => {
+                    self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+                }
+                _ => {}
+            }
+
             self.clock.increment(&self.peer_id.clone());
             self.log.push(op.clone());
             self.undo_stack.push(op);

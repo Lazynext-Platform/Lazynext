@@ -253,9 +253,33 @@ function App() {
         </p>
       )}
 
+      <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <button
+          onClick={async () => {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab?.id) {
+              chrome.tabs.sendMessage(tab.id, { type: "INJECT_OVERLAY" });
+              window.close(); // Close the popup after launching
+            }
+          }}
+          style={{
+            background: "rgba(0, 229, 255, 0.1)",
+            color: "#00e5ff",
+            border: "1px solid rgba(0, 229, 255, 0.3)",
+            padding: "10px",
+            borderRadius: "8px",
+            fontWeight: 700,
+            cursor: "pointer",
+            width: "100%",
+          }}
+        >
+          Launch Timeline Editor (Overlay)
+        </button>
+      </div>
+
       <div
         style={{
-          marginTop: "auto",
+          marginTop: "16px",
           fontSize: "11px",
           color: "rgba(255,255,255,0.3)",
           textAlign: "center",

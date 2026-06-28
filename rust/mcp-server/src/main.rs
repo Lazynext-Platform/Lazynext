@@ -28,6 +28,10 @@ async fn main() {
         60,
     );
 
+    // Basic API Key auth (expected in environment for testing)
+    let expected_api_key = std::env::var("LAZYNEXT_MCP_API_KEY").unwrap_or_else(|_| "default_test_key".to_string());
+
+
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
         let req_str = match line {
@@ -50,6 +54,25 @@ async fn main() {
                 continue;
             }
         };
+
+        // Authentication check (expecting params._api_key if the protocol allows it, or a custom method)
+        // Since MCP runs over stdio, passing auth in headers isn't possible.
+        // We'll require it to be passed in params._api_key on initialization, or just for demonstration:
+        let method = req["method"].as_str().unwrap_or("");
+        
+        if method != "initialize" {
+            let provided_key = req["params"].get("_api_key").and_then(|k| k.as_str());
+            if provided_key != Some(&expected_api_key) {
+                let err_resp = json!({
+                    "jsonrpc": "2.0",
+                    "id": req.get("id").cloned().unwrap_or(Value::Null),
+                    "error": {"code": -32000, "message": "Unauthorized. Invalid or missing _api_key in params."}
+                });
+                println!("{}", err_resp);
+                continue;
+            }
+        }
+
 
         let id = req.get("id").cloned().unwrap_or(Value::Null);
         let method = req["method"].as_str().unwrap_or("");
@@ -125,6 +148,29 @@ async fn main() {
                                     "end": {"type": "integer", "description": "End frame"}
                                 },
                                 "required": ["track_idx", "clip_type", "start", "end"]
+                            }
+                        },
+                        {
+                            "name": "remove_track",
+                            "description": "Remove a track by its index",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "track_idx": {"type": "integer", "description": "Track index to remove"}
+                                },
+                                "required": ["track_idx"]
+                            }
+                        },
+                        {
+                            "name": "remove_clip",
+                            "description": "Remove a clip from a specific track",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "track_idx": {"type": "integer", "description": "Track index (0-based)"},
+                                    "clip_id": {"type": "string", "description": "Clip ID to remove"}
+                                },
+                                "required": ["track_idx", "clip_id"]
                             }
                         },
                         {
@@ -334,6 +380,39 @@ async fn main() {
                         })
                     }
 
+                    "remove_track" => {
+                        let track_idx = req["params"]["arguments"]["track_idx"]
+                            .as_u64()
+                            .unwrap_or(0) as usize;
+                        let ok = nle.remove_track(track_idx);
+                        json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": if ok { format!("Track {} removed.", track_idx) } else { "Failed to remove track.".to_string() }}],
+                                "isError": !ok
+                            }
+                        })
+                    }
+
+                    "remove_clip" => {
+                        let track_idx = req["params"]["arguments"]["track_idx"]
+                            .as_u64()
+                            .unwrap_or(0) as usize;
+                        let clip_id = req["params"]["arguments"]["clip_id"]
+                            .as_str()
+                            .unwrap_or("");
+                        let ok = nle.remove_clip_from_track(track_idx, clip_id);
+                        json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": if ok { format!("Clip '{}' removed from track {}.", clip_id, track_idx) } else { "Failed to remove clip.".to_string() }}],
+                                "isError": !ok
+                            }
+                        })
+                    }
+
                     "set_keyframe" => {
                         let track_idx = req["params"]["arguments"]["track_idx"]
                             .as_u64()
@@ -406,7 +485,7 @@ async fn main() {
                         let pipeline = lazynext_export::ExportPipeline::new(config);
                         // Generate a test pattern for export (GPU compositor not available in MCP stdio context)
                         match pipeline
-                            .export(|frame_idx| {
+                            .export(|frame_idx| async move {
                                 generate_test_pattern(frame_idx, total_frames, width, height)
                             })
                             .await
@@ -444,30 +523,54 @@ async fn main() {
                                 }
                             })
                         } else {
-                            // Run silence detection on a mock audio buffer
-                            // In production: decode the audio file, pass samples to extract_silence
-                            let mock_samples = vec![0.0f64; 44100]; // 1 sec silence
-                            let analysis = editor_core::processing::extract_silence(
-                                &mock_samples,
-                                44100,
-                                -40.0,
-                                500,
-                            );
-
-                            // Also run scene detection if we had frame data
-                            let cuts_count = if analysis.is_empty() {
-                                0
-                            } else {
-                                analysis.len()
+                            // Extract audio to raw f32le using ffmpeg
+                            let sample_rate = 44100;
+                            let output = std::process::Command::new("ffmpeg")
+                                .arg("-i")
+                                .arg(file_path)
+                                .arg("-f")
+                                .arg("f32le")
+                                .arg("-ac")
+                                .arg("1") // mono
+                                .arg("-ar")
+                                .arg(sample_rate.to_string())
+                                .arg("-") // output to stdout
+                                .stderr(std::process::Stdio::null())
+                                .stdout(std::process::Stdio::piped())
+                                .output();
+                            
+                            let (cuts_count, dur_secs) = match output {
+                                Ok(out) if out.status.success() => {
+                                    // convert bytes to f32 to f64
+                                    let mut samples = Vec::with_capacity(out.stdout.len() / 4);
+                                    let mut chunks = out.stdout.chunks_exact(4);
+                                    for chunk in &mut chunks {
+                                        let mut bytes = [0u8; 4];
+                                        bytes.copy_from_slice(chunk);
+                                        let sample = f32::from_le_bytes(bytes) as f64;
+                                        samples.push(sample);
+                                    }
+                                    let analysis = editor_core::processing::extract_silence(
+                                        &samples,
+                                        sample_rate,
+                                        -40.0,
+                                        500,
+                                    );
+                                    let duration = samples.len() as f64 / sample_rate as f64;
+                                    (analysis.len(), duration)
+                                }
+                                _ => (0, 0.0), // Fallback if ffmpeg fails
                             };
+
                             let result_text = format!(
                                 "Media analysis for '{}':\n\
+                                 Duration: {:.1} seconds\n\
                                  Silence segments detected: {}\n\
                                  Recommended actions:\n\
                                  - Use 'autonomous_edit' with prompt 'cut silence' to auto-trim\n\
                                  - Use 'autonomous_edit' with prompt 'color grade cinematic' for look\n\
                                  - Use 'autonomous_edit' with prompt 'add music' for score",
-                                file_path, cuts_count
+                                file_path, dur_secs, cuts_count
                             );
                             json!({
                                 "jsonrpc": "2.0",

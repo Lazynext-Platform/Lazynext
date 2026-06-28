@@ -104,7 +104,7 @@ fn jwt_validation() -> &'static Validation {
 ///    forwards to the next layer / handler.
 /// 4. On failure: returns 401 with a JSON error body.
 pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response, StatusCode> {
-    let token = extract_bearer_token(req.headers()).ok_or(StatusCode::UNAUTHORIZED)?;
+    let token = extract_bearer_token(&req).ok_or(StatusCode::UNAUTHORIZED)?;
 
     let claims = decode::<AuthClaims>(&token, jwt_decoding_key(), jwt_validation())
         .map(|data| data.claims)
@@ -126,10 +126,40 @@ pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response,
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
-/// Pull a `Bearer <token>` value from the Authorization header.
-fn extract_bearer_token(headers: &axum::http::HeaderMap) -> Option<String> {
-    let raw = headers.get(header::AUTHORIZATION)?.to_str().ok()?;
-    raw.strip_prefix("Bearer ").map(|t| t.trim().to_string())
+/// Pull a `Bearer <token>` value from the Authorization header,
+/// or from the `token` query parameter (useful for WebSockets).
+fn extract_bearer_token(req: &Request) -> Option<String> {
+    // 1. Try Authorization header
+    if let Some(raw) = req.headers().get(header::AUTHORIZATION).and_then(|h| h.to_str().ok()) {
+        if let Some(token) = raw.strip_prefix("Bearer ") {
+            return Some(token.trim().to_string());
+        }
+    }
+    
+    // 2. Try query parameter (e.g., ?token=...)
+    if let Some(query) = req.uri().query() {
+        for pair in query.split('&') {
+            let mut parts = pair.split('=');
+            if let Some(key) = parts.next() {
+                if key == "token" {
+                    if let Some(val) = parts.next() {
+                        return Some(val.to_string());
+                    }
+                }
+            }
+        }
+    }
+    
+    // 3. Try Sec-WebSocket-Protocol header (common for WS auth)
+    if let Some(raw) = req.headers().get("sec-websocket-protocol").and_then(|h| h.to_str().ok()) {
+        // usually format is "auth_token_value, other_protocol"
+        let parts: Vec<&str> = raw.split(',').collect();
+        if !parts.is_empty() {
+            return Some(parts[0].trim().to_string());
+        }
+    }
+
+    None
 }
 
 /// Convenience: extract [`AuthClaims`] from request extensions.

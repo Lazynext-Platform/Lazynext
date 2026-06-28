@@ -50,7 +50,7 @@ impl ProxyGenerator {
             if let Ok(mut processing) = is_processing.lock() {
                 *processing = true;
             }
-            let msg = js_sys::JsString::from(js_str);
+            let msg = js_sys::JsString::from(js_str.clone());
             resolve.call1(&JsValue::NULL, &msg).unwrap();
         });
 

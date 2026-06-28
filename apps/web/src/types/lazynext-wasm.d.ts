@@ -26,6 +26,13 @@ declare module "lazynext-wasm" {
     getEntityGraph(): unknown;
   }
 
+  export class WasmEngine {
+    constructor(projectId: string, projectName: string, framerate: number);
+    static new(projectId: string, projectName: string, framerate: number): Promise<WasmEngine>;
+    render_to_canvas(canvas: HTMLCanvasElement, frame_idx: number): Promise<void>;
+    add_test_clip(): Promise<void>;
+  }
+
   // ── MediaTime ───────────────────────────────────────────────────────
   // MediaTime is a branded number type compatible with local wasm/media-time.ts
   export type MediaTime = number;

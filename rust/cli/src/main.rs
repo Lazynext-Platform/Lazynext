@@ -141,21 +141,56 @@ async fn main() {
 async fn render_single(project: &str, args: &Args) -> Result<String, String> {
     println!("📂 Loading project: {}", project);
 
-    let mut engine = NLEState::new(
-        project.to_string(),
-        format!("Headless Render: {}", project),
-        args.framerate,
-    );
+    // Try to load project from disk if it exists
+    let mut engine = if std::path::Path::new(project).exists() {
+        println!("📂 Loading project from file: {}", project);
+        let content = std::fs::read_to_string(project)
+            .map_err(|e| format!("Failed to read project file: {}", e))?;
+        let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content)
+            .map_err(|e| format!("Failed to parse project JSON: {}", e))?;
+        
+        // Reconstruct engine from project data
+        let mut eng = NLEState::new(
+            project_data.id.clone(),
+            project_data.name.clone(),
+            project_data.framerate,
+        );
+        // HACK: For now we just load the ProjectData by executing a private setter or re-creating it.
+        // Wait, there is no set_project_data. Let's just create a new engine and manually add tracks/clips from the data.
+        for track in project_data.tracks {
+            eng.add_track(track.id.clone(), track.kind.clone());
+            let track_idx = eng.get_project_data().tracks.len() - 1;
+            for clip in track.clips {
+                eng.add_clip_to_track(
+                    track_idx,
+                    clip.id.clone(),
+                    clip.clip_type.clone(),
+                    clip.name.clone(),
+                    clip.start,
+                    clip.end - clip.start, // duration
+                );
+            }
+        }
+        eng
+    } else {
+        println!("⚠️  Project file '{}' not found. Using default test pattern.", project);
+        let mut eng = NLEState::new(
+            project.to_string(),
+            format!("Headless Render: {}", project),
+            args.framerate,
+        );
 
-    engine.add_track("V1".to_string(), "video".to_string());
-    engine.add_clip_to_track(
-        0,
-        "clip_1".to_string(),
-        "video".to_string(),
-        "source_footage.mp4".to_string(),
-        0,
-        args.framerate * args.duration,
-    );
+        eng.add_track("V1".to_string(), "video".to_string());
+        eng.add_clip_to_track(
+            0,
+            "clip_1".to_string(),
+            "video".to_string(),
+            "source_footage.mp4".to_string(),
+            0,
+            args.framerate * args.duration,
+        );
+        eng
+    };
 
     println!(
         "📊 {} track(s) loaded.",
@@ -182,22 +217,11 @@ async fn render_single(project: &str, args: &Args) -> Result<String, String> {
         "mov" => lazynext_export::ExportFormat::Mov,
         _ => lazynext_export::ExportFormat::Mp4,
     };
-
-    let config = lazynext_export::ExportConfig {
-        format,
-        width: args.width,
-        height: args.height,
-        framerate: args.framerate,
-        bitrate_kbps: match format {
-            lazynext_export::ExportFormat::Dcp => 250_000,
-            lazynext_export::ExportFormat::ProRes => 0, // bitrate not used for ProRes
-            _ => 8000,
-        },
-        output_path: out_path.clone(),
-    };
+    
+    // Update the engine state's project data to match the CLI arguments
+    engine.set_dimensions(args.width, args.height);
 
     let total_frames = args.framerate * args.duration;
-    let frame_size = (args.width * args.height * 4) as usize;
 
     println!(
         "🎬 Rendering {}x{} @ {}fps ({}s, {} frames, {:?}) → {}",
@@ -205,44 +229,45 @@ async fn render_single(project: &str, args: &Args) -> Result<String, String> {
     );
 
     let start = std::time::Instant::now();
-    let pipeline = lazynext_export::ExportPipeline::new(config);
-
-    pipeline
-        .export(|frame_idx| {
-            let rgba = generate_test_frame(frame_idx, total_frames, args.width, args.height);
-
-            if rgba.len() != frame_size {
-                eprintln!(
-                    "⚠️  Frame {} size mismatch: expected {}, got {}",
-                    frame_idx,
-                    frame_size,
-                    rgba.len()
-                );
-            }
-
-            // Progress reporting
-            if frame_idx % 30 == 0 || frame_idx == total_frames - 1 {
-                let elapsed = start.elapsed().as_secs_f64();
-                let percent = frame_idx as f64 / total_frames as f64 * 100.0;
-                let fps = if elapsed > 0.0 {
-                    frame_idx as f64 / elapsed
-                } else {
-                    0.0
-                };
-                let eta = if fps > 0.0 {
-                    (total_frames - frame_idx) as f64 / fps
-                } else {
-                    0.0
-                };
-                println!(
-                    "  [{:5.1}%] Frame {}/{} | {:.1} fps | ETA {:.0}s",
-                    percent, frame_idx, total_frames, fps, eta
-                );
-            }
-            rgba
-        })
+    
+    let engine_ptr = std::sync::Arc::new(tokio::sync::Mutex::new(engine));
+    let core_engine = lazynext_core::engine::CoreEngine::init(engine_ptr)
         .await
-        .map_err(|e| format!("Export failed: {e}"))?;
+        .map_err(|e| format!("CoreEngine init failed: {}", e))?;
+
+    // Load test pattern and upload as clip_1
+    let img = image::open("tests/assets/test_pattern.png")
+        .map_err(|e| format!("Failed to open test pattern: {}", e))?
+        .to_rgba8();
+    let (img_w, img_h) = img.dimensions();
+    core_engine.upload_texture("clip_1", img.as_raw(), img_w, img_h)
+        .await
+        .map_err(|e| format!("Failed to upload texture: {}", e))?;
+
+    let progress_tx = if args.progress {
+        let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
+        let pb = indicatif::ProgressBar::new(total_frames as u64);
+        pb.set_style(
+            indicatif::ProgressStyle::default_bar()
+                .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} frames ({eta})")
+                .unwrap()
+                .progress_chars("#>-"),
+        );
+        tokio::spawn(async move {
+            while let Some(frame) = rx.recv().await {
+                pb.set_position(frame as u64);
+            }
+            pb.finish_with_message("Render complete!");
+        });
+        Some(tx)
+    } else {
+        None
+    };
+
+    core_engine
+        .dispatch_export(&out_path, progress_tx)
+        .await
+        .map_err(|e| format!("CoreEngine export failed: {}", e))?;
 
     let elapsed = start.elapsed().as_secs_f64();
     println!(
@@ -257,28 +282,4 @@ async fn render_single(project: &str, args: &Args) -> Result<String, String> {
     );
 
     Ok(out_path)
-}
-
-/// Generates a test pattern frame (smooth gradient) for visualization
-/// when the full compositor pipeline isn't available (e.g., CLI headless mode).
-fn generate_test_frame(frame_idx: u32, total_frames: u32, width: u32, height: u32) -> Vec<u8> {
-    let size = (width * height * 4) as usize;
-    let mut pixels = vec![0u8; size];
-
-    let t = frame_idx as f64 / total_frames as f64;
-    // Smooth gradient with a sweeping wave effect
-    for y in 0..height {
-        for x in 0..width {
-            let px = x as f64 / width as f64;
-            let py = y as f64 / height as f64;
-            let wave = ((px * 10.0 + t * 5.0).sin() * 0.5 + 0.5) as f32;
-            let idx = ((y * width + x) * 4) as usize;
-            pixels[idx] = (wave * 255.0) as u8; // R
-            pixels[idx + 1] = ((1.0 - py as f32) * 200.0) as u8; // G
-            pixels[idx + 2] = ((px as f32) * 255.0) as u8; // B
-            pixels[idx + 3] = 255; // A
-        }
-    }
-
-    pixels
 }

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Lazynext Browser Extension",
   "version": "0.1.0",
-  "description": "Capture video from any webpage into your Lazynext timeline.",
+  "description": "Capture videos from any webpage into your Lazynext timeline.",
   "permissions": [
     "activeTab",
     "contextMenus",
@@ -13,28 +13,35 @@
     "http://localhost:3000/*",
     "http://localhost:8005/*"
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["overlay.html", "assets/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Lazynext",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "src/background/service-worker.ts",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["src/content/content-script.ts"],
       "run_at": "document_idle"
     }
   ],
-  "action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "16": "/icons/icon16.png",
-      "48": "/icons/icon48.png",
-      "128": "/icons/icon128.png"
-    }
-  },
   "icons": {
-    "16": "/icons/icon16.png",
-    "48": "/icons/icon48.png",
-    "128": "/icons/icon128.png"
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }

@@ -136,10 +136,11 @@ fn client_ip(req: &Request) -> String {
     "unknown".to_string()
 }
 
-/// Axum middleware: rate limit requests based on client IP.
-///
-/// Returns 429 Too Many Requests when the limit is exceeded.
-pub async fn rate_limit(req: Request, next: Next) -> Result<Response, StatusCode> {
+pub async fn rate_limit(
+    axum::extract::State(state): axum::extract::State<crate::AppState>,
+    req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
     // Skip rate limiting if explicitly disabled
     if std::env::var("DISABLE_RATE_LIMITING").is_ok() {
         return Ok(next.run(req).await);
@@ -156,24 +157,41 @@ pub async fn rate_limit(req: Request, next: Next) -> Result<Response, StatusCode
         profiles::PUBLIC
     };
 
-    // Use a lazily-initialized global rate limiter per config
-    // In production, this would be backed by Redis for distributed rate limiting
-    let key = format!("{}:{}", config.capacity, config.refill_rate);
-    let limiter = get_limiter(&config, &key);
+    let key = format!("ratelimit:{}:{}:{}", req.uri().path(), config.capacity, ip);
+    let mut con = match state.ws_state.redis_client.get_async_connection().await {
+        Ok(c) => c,
+        Err(_) => return Ok(next.run(req).await), // fallback bypass if Redis fails
+    };
 
-    if limiter.check(&ip) {
-        Ok(next.run(req).await)
-    } else {
+    // Simple Redis counter for rate limiting (reqs per minute)
+    let current: i64 = redis::cmd("INCR")
+        .arg(&key)
+        .query_async(&mut con)
+        .await
+        .unwrap_or(0);
+
+    if current == 1 {
+        let _ : () = redis::cmd("EXPIRE")
+            .arg(&key)
+            .arg(60)
+            .query_async(&mut con)
+            .await
+            .unwrap_or(());
+    }
+
+    if current > config.capacity as i64 {
         let mut resp = axum::Json(serde_json::json!({
             "error": "rate_limit_exceeded",
             "message": "Too many requests. Please slow down.",
-            "retry_after_seconds": 1
+            "retry_after_seconds": 60
         }))
         .into_response();
         *resp.status_mut() = StatusCode::TOO_MANY_REQUESTS;
         resp.headers_mut()
-            .insert("Retry-After", "1".parse().unwrap());
+            .insert("Retry-After", "60".parse().unwrap());
         Ok(resp)
+    } else {
+        Ok(next.run(req).await)
     }
 }
 

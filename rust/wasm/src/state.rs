@@ -32,6 +32,22 @@ impl NLEState {
         self.project.add_track(track);
     }
 
+    #[wasm_bindgen(js_name = "addClip")]
+    pub fn add_clip(&mut self, track_idx: usize, id: String, clip_type: String, name: String, start_frame: i32, duration_frames: i32) {
+        use state::Clip;
+        if track_idx < self.project.tracks.len() {
+            let clip = Clip {
+                id,
+                name,
+                media_id: "".to_string(),
+                start_frame,
+                duration_frames,
+                is_disabled: false,
+            };
+            self.project.tracks[track_idx].clips.push(clip);
+        }
+    }
+
     #[wasm_bindgen(js_name = "getProjectData")]
     pub fn get_project_data(&self) -> JsValue {
         to_value(&self.project).unwrap_or(JsValue::NULL)

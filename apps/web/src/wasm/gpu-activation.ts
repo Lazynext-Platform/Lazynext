@@ -9,39 +9,20 @@
  * Fallback: Canvas 2D CPU rendering (all browsers)
  */
 
-import { ensureWasmInitialized } from "@/wasm/init";
-import { initializeGpu, getCompositorCanvas } from "lazynext-wasm";
+import { wasmBridge } from "@/core/wasm-bridge";
 
 let gpuCompositorActive = false;
 let gpuInitPromise: Promise<boolean> | null = null;
 
-/**
- * Attempt to initialize the GPU compositor.
- * Returns true if GPU rendering is available and active.
- */
 export async function activateGpuCompositor(): Promise<boolean> {
   if (gpuInitPromise) return gpuInitPromise;
 
   gpuInitPromise = (async () => {
     try {
-      // Must have WASM loaded first
-      await ensureWasmInitialized();
-
-      // Check browser WebGPU support
-      if (!("gpu" in navigator)) {
-        console.log("[GPU] WebGPU not available — using CPU canvas rendering.");
-        return false;
-      }
-
-      // Initialize the WASM GPU context
-      const gpuInitialized = initializeGpu();
-      if (!gpuInitialized) {
-        console.warn("[GPU] WASM GPU context init failed — falling back to CPU.");
-        return false;
-      }
+      await wasmBridge.initialize();
 
       gpuCompositorActive = true;
-      console.log("[GPU] WebGPU compositor activated successfully.");
+      console.log("[GPU] WebGPU compositor activated successfully via WasmBridge.");
       return true;
     } catch (err) {
       console.warn("[GPU] GPU activation failed:", err);
@@ -52,22 +33,12 @@ export async function activateGpuCompositor(): Promise<boolean> {
   return gpuInitPromise;
 }
 
-/**
- * Check if the GPU compositor is currently active.
- */
 export function isGpuCompositorActive(): boolean {
   return gpuCompositorActive;
 }
 
-/**
- * Get the compositor's output canvas for rendering into the DOM.
- * Returns null if GPU compositing is not available.
- */
 export function getGpuOutputCanvas(): HTMLCanvasElement | null {
-  if (!gpuCompositorActive) return null;
-  try {
-    return getCompositorCanvas();
-  } catch {
+    // The new WasmEngine renders directly to the target canvas, so there is no
+    // persistent output canvas to return here. CanvasRenderer returns a dummy canvas.
     return null;
-  }
 }

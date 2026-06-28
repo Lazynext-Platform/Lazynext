@@ -75,3 +75,8 @@ pub use animation_wasm::*;
 mod timeline_wasm;
 #[cfg(target_arch = "wasm32")]
 pub use timeline_wasm::*;
+
+#[cfg(target_arch = "wasm32")]
+mod engine_wasm;
+#[cfg(target_arch = "wasm32")]
+pub use engine_wasm::*;

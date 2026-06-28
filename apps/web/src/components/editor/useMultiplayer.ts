@@ -1,5 +1,4 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { io, Socket } from "socket.io-client";
 
 interface MultiplayerHookArgs {
 	projectId: string;
@@ -12,53 +11,57 @@ export function useMultiplayer({
 	clientId,
 	onDeltaReceived,
 }: MultiplayerHookArgs) {
-	const socketRef = useRef<Socket | null>(null);
-
-	const [socket, setSocket] = useState<Socket | null>(null);
+	const wsRef = useRef<WebSocket | null>(null);
+	const [connected, setConnected] = useState(false);
 
 	useEffect(() => {
-		// Connect to the AI-Agents / Sync server
-		const socketUrl =
-			process.env.NEXT_PUBLIC_AI_AGENTS_URL || "http://localhost:8002";
+		// Connect to the API Gateway WebSocket
+		const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/ws";
+		const ws = new WebSocket(wsUrl);
+		wsRef.current = ws;
 
-		socketRef.current = io(socketUrl);
-		setSocket(socketRef.current);
+		ws.onopen = () => {
+			console.log(`[Multiplayer] Connected to API Gateway sync server`);
+			setConnected(true);
+		};
 
-		socketRef.current.on("connect", () => {
-			console.log(
-				`[Multiplayer] Connected to sync server as ${socketRef.current?.id}`,
-			);
-			socketRef.current?.emit("join_project", projectId);
-		});
-
-		socketRef.current.on(
-			"crdt_delta",
-			(data: { projectId: string; delta: any; clientId: string }) => {
-				if (data.clientId !== clientId) {
-					onDeltaReceived(data.delta);
+		ws.onmessage = (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				if (data.type === "CrdtOperation") {
+					// We would ideally filter by clientId here if we sent it in the payload
+					onDeltaReceived(data.payload);
 				}
-			},
-		);
+			} catch (err) {
+				console.error("[Multiplayer] Failed to parse incoming message", err);
+			}
+		};
+
+		ws.onclose = () => {
+			console.log(`[Multiplayer] Disconnected from API Gateway`);
+			setConnected(false);
+		};
 
 		return () => {
-			socketRef.current?.disconnect();
-			socketRef.current = null;
-			setSocket(null);
+			ws.close();
+			wsRef.current = null;
+			setConnected(false);
 		};
 	}, [projectId, clientId, onDeltaReceived]);
 
 	const broadcastDelta = useCallback(
 		(delta: any) => {
-			if (socketRef.current && socketRef.current.connected) {
-				socketRef.current.emit("crdt_delta", {
-					projectId,
-					clientId,
-					delta,
-				});
+			if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+				wsRef.current.send(
+					JSON.stringify({
+						type: "CrdtOperation",
+						payload: delta,
+					})
+				);
 			}
 		},
-		[projectId, clientId],
+		[]
 	);
 
-	return { broadcastDelta, socket, connected: !!socket, peerCount: 1 };
+	return { broadcastDelta, socket: wsRef.current, connected, peerCount: 1 };
 }

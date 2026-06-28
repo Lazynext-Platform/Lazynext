@@ -21,7 +21,7 @@ export interface PresenceUpdate {
 }
 
 const SYNC_SERVER_URL =
-	process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:8002";
+	process.env.NEXT_PUBLIC_SYNC_SERVER_URL || "ws://localhost:8005/api/v1/ws";
 
 export class CollaborationSocket {
 	private ws: WebSocket | null = null;

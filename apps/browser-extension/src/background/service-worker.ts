@@ -4,8 +4,8 @@ let API_GATEWAY = "http://localhost:8005";
 
 // Restore the configured gateway URL from extension storage, falling
 // back to the localhost default for development.
-chrome.storage.local.get("apiGatewayUrl", (items) => {
-	if (items.apiGatewayUrl) {
+chrome.storage.local.get("apiGatewayUrl", (items: { [key: string]: any }) => {
+	if (items.apiGatewayUrl && typeof items.apiGatewayUrl === "string") {
 		API_GATEWAY = items.apiGatewayUrl;
 	}
 });
@@ -20,7 +20,7 @@ chrome.runtime.onInstalled.addListener(() => {
 	});
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 	if (info.menuItemId === "send-to-lazynext") {
 		const mediaUrl = info.srcUrl || info.linkUrl;
 		if (!mediaUrl) return;

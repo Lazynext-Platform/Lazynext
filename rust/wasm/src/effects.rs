@@ -100,8 +100,10 @@ fn parse_apply_effect_passes_options(value: JsValue) -> Result<ApplyEffectPasses
     })
 }
 
+use effects::ApplyLutOptions;
+
 #[allow(dead_code)]
-struct ApplyLutOptions {
+struct ApplyLutOptionsJs {
     source: wgpu::web_sys::OffscreenCanvas,
     width: u32,
     height: u32,
@@ -111,26 +113,85 @@ struct ApplyLutOptions {
 
 #[wasm_bindgen(js_name = apply3DLut)]
 pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
-    // Scaffold for 3D LUT application
-    let _apply_lut_options = parse_apply_lut_options(options)?;
+    let options = parse_apply_lut_options(options)?;
 
-    // In a full implementation, this passes the 3D texture to WebGPU for color interpolation.
-    // Returning a blank canvas for scaffolding signature.
-    let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();
-    Ok(canvas)
+    with_gpu_runtime(|runtime| {
+        let source_texture = import_canvas_texture(
+            &runtime.context,
+            &options.source,
+            options.width,
+            options.height,
+            "lut3d-input-texture",
+        );
+
+        // Convert the LUT data (f32) into a 3D WebGPU texture
+        let lut_size = options.lut_size;
+        let lut_texture = runtime.context.device().create_texture(&wgpu::TextureDescriptor {
+            label: Some("lut3d-texture"),
+            size: wgpu::Extent3d {
+                width: lut_size,
+                height: lut_size,
+                depth_or_array_layers: lut_size,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D3,
+            format: wgpu::TextureFormat::Rgba32Float,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+
+        // Write the lut_data into the texture
+        runtime.context.queue().write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture: &lut_texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            bytemuck::cast_slice(&options.lut_data),
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(lut_size * 16),
+                rows_per_image: Some(lut_size),
+            },
+            wgpu::Extent3d {
+                width: lut_size,
+                height: lut_size,
+                depth_or_array_layers: lut_size,
+            },
+        );
+
+        let result_texture = runtime
+            .effects
+            .apply_lut(
+                &runtime.context,
+                ApplyLutOptions {
+                    source: &source_texture,
+                    width: options.width,
+                    height: options.height,
+                    lut_texture: &lut_texture,
+                },
+            )
+            .map_err(|error| JsValue::from_str(&error.to_string()))?;
+            
+        render_texture_to_canvas(&runtime.context, &result_texture, options.width, options.height)
+    })
 }
 
-fn parse_apply_lut_options(value: JsValue) -> Result<ApplyLutOptions, JsValue> {
+fn parse_apply_lut_options(value: JsValue) -> Result<ApplyLutOptionsJs, JsValue> {
     let object: Object = value
         .dyn_into()
         .map_err(|_| JsValue::from_str("apply3DLut expects an options object"))?;
 
-    Ok(ApplyLutOptions {
+    let lut_data = read_serde_property::<Vec<f32>>(&object, "lutData").unwrap_or_else(|_| vec![]);
+
+    Ok(ApplyLutOptionsJs {
         source: read_offscreen_canvas_property(&object, "source")?,
         width: read_u32_property(&object, "width")?,
         height: read_u32_property(&object, "height")?,
-        lut_data: vec![], // Scaffold
-        lut_size: 32,     // Common 33x33x33 LUT scaffold
+        lut_data,
+        lut_size: read_u32_property(&object, "lutSize").unwrap_or(32),
     })
 }
 
@@ -145,12 +206,38 @@ struct ApplyChromaKeyOptions {
 
 #[wasm_bindgen(js_name = applyChromaKey)]
 pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
-    let _options = parse_apply_chroma_key_options(options)?;
+    let options = parse_apply_chroma_key_options(options)?;
 
-    // Scaffold for WebGPU chroma key shader application.
-    // Calculates YUV distance from key_color and alpha masks pixels.
-    let canvas = wgpu::web_sys::OffscreenCanvas::new(1920, 1080).unwrap();
-    Ok(canvas)
+    with_gpu_runtime(|runtime| {
+        let source_texture = import_canvas_texture(
+            &runtime.context,
+            &options.source,
+            options.width,
+            options.height,
+            "chroma-key-input-texture",
+        );
+        let passes = vec![EffectPass {
+            shader: "chroma-key".to_string(),
+            uniforms: std::collections::HashMap::from([
+                ("u_target_color".to_string(), UniformValue::Vector(options.key_color)),
+                ("u_similarity".to_string(), UniformValue::Number(options.similarity)),
+                ("u_smoothness".to_string(), UniformValue::Number(options.smoothness)),
+            ]),
+        }];
+        let result_texture = runtime
+            .effects
+            .apply(
+                &runtime.context,
+                ApplyEffectsOptions {
+                    source: &source_texture,
+                    width: options.width,
+                    height: options.height,
+                    passes: &passes,
+                },
+            )
+            .map_err(|error| JsValue::from_str(&error.to_string()))?;
+        render_texture_to_canvas(&runtime.context, &result_texture, options.width, options.height)
+    })
 }
 
 fn parse_apply_chroma_key_options(value: JsValue) -> Result<ApplyChromaKeyOptions, JsValue> {
@@ -158,12 +245,16 @@ fn parse_apply_chroma_key_options(value: JsValue) -> Result<ApplyChromaKeyOption
         .dyn_into()
         .map_err(|_| JsValue::from_str("applyChromaKey expects an options object"))?;
 
+    let key_color = read_serde_property::<Vec<f32>>(&object, "keyColor").unwrap_or_else(|_| vec![0.0, 1.0, 0.0]);
+    let similarity = crate::gpu::read_f32_property(&object, "similarity").unwrap_or(0.4);
+    let smoothness = crate::gpu::read_f32_property(&object, "smoothness").unwrap_or(0.1);
+
     Ok(ApplyChromaKeyOptions {
         source: read_offscreen_canvas_property(&object, "source")?,
         width: read_u32_property(&object, "width")?,
         height: read_u32_property(&object, "height")?,
-        key_color: vec![0.0, 1.0, 0.0], // default green
-        similarity: 0.4,
-        smoothness: 0.1,
+        key_color,
+        similarity,
+        smoothness,
     })
 }

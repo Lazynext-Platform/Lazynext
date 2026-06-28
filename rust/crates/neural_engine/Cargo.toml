@@ -17,4 +17,8 @@ tokio = { version = "1.0", features = ["full"] }
 
 [features]
 default = []
-onnx = []
+onnx = ["dep:ort"]
+
+[dependencies.ort]
+version = "2.0.0-rc.12"
+optional = true

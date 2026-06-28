@@ -1,9 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useWasm } from "@/hooks/use-wasm";
+import { wasmBridge } from "@/core/wasm-bridge";
 
 export function MulticamGrid() {
 	const [activeAngle, setActiveAngle] = useState(0);
-	const { time, frame } = useWasm();
+	const { time, frame, isReady } = useWasm();
+	const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+
+	// Render WGPU output to the active camera angle
+	useEffect(() => {
+		if (isReady && canvasRefs.current[activeAngle]) {
+			wasmBridge.renderToCanvas(canvasRefs.current[activeAngle]!, frame).catch(console.error);
+		}
+	}, [isReady, frame, activeAngle]);
 
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,11 +51,19 @@ export function MulticamGrid() {
 					}`}
 				>
 					<span className="text-muted font-mono text-sm">{label}</span>
-					<div className="absolute top-2 left-2 bg-background bg-opacity-70 px-2 py-1 rounded text-xs text-foreground font-bold">
+					<canvas
+						ref={(el) => {
+							canvasRefs.current[idx] = el;
+						}}
+						width={640}
+						height={360}
+						className={`absolute inset-0 w-full h-full object-contain ${activeAngle !== idx ? "opacity-30 grayscale" : "opacity-100"}`}
+					/>
+					<div className="absolute top-2 left-2 bg-background bg-opacity-70 px-2 py-1 rounded text-xs text-foreground font-bold z-10">
 						{idx + 1}
 					</div>
 					{activeAngle === idx && (
-						<div className="absolute top-2 right-2 bg-[#00e5ff] px-2 py-1 rounded text-xs text-black font-bold animate-pulse">
+						<div className="absolute top-2 right-2 bg-[#00e5ff] px-2 py-1 rounded text-xs text-black font-bold animate-pulse z-10">
 							REC
 						</div>
 					)}
