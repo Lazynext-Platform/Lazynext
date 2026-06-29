@@ -494,7 +494,7 @@ DOMAIN_MAX 1.0 1.0 1.0
             LutPreset::film_emulation().lut,
             LutPreset::noir().lut,
         ] {
-            assert!(preset.data.len() > 0, "Preset should have data");
+            assert!(!preset.data.is_empty(), "Preset should have data");
             assert_eq!(preset.size, 17);
         }
     }

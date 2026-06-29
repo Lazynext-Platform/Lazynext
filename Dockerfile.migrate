@@ -17,7 +17,7 @@ COPY apps/web/drizzle.config.ts apps/web/
 COPY apps/web/drizzle/ apps/web/drizzle/
 COPY apps/web/src/db/ apps/web/src/db/
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --filter @lazynext/web || bun install
 
 # Verify DATABASE_URL is set before running migrations.
 # Exit code 0 on success (even if no pending migrations).

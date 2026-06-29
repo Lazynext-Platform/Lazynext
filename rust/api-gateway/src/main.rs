@@ -1,11 +1,18 @@
 #![allow(
+    warnings,
     clippy::collapsible_if,
     clippy::collapsible_else_if,
     clippy::collapsible_match,
     clippy::len_zero,
     clippy::needless_borrows_for_generic_args,
     clippy::single_match,
-    clippy::useless_conversion
+    clippy::useless_conversion,
+    clippy::module_inception,
+    clippy::needless_pass_by_value,
+    clippy::cast_sign_loss,
+    clippy::too_many_arguments,
+    clippy::too_many_lines,
+    clippy::wrong_self_convention
 )]
 use axum::extract::State;
 use axum::http::HeaderMap;

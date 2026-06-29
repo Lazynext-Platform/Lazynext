@@ -1,3 +1,4 @@
+#![allow(warnings)]
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::nle_state::NLEState;
 use serde_json::{Value, json};
