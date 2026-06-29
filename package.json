@@ -9,11 +9,11 @@
 		"rust/wasm/pkg"
 	],
 	"scripts": {
-		"dev": "bun run --filter \"@lazynext/*\" dev",
-		"build": "bun run --filter \"@lazynext/*\" build",
-		"lint": "bun run --filter \"@lazynext/*\" lint",
-		"typecheck": "bun run --filter \"@lazynext/*\" typecheck",
-		"test": "bun run --filter \"@lazynext/*\" test",
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"lint": "turbo run lint",
+		"typecheck": "turbo run typecheck",
+		"test": "turbo run test",
 		"docker:up": "docker compose up --build -d",
 		"docker:down": "docker compose down"
 	},
@@ -31,5 +31,8 @@
 		"prettier": "^3.9.1",
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.62.0"
+	},
+	"dependencies": {
+		"turbo": "^2.10.0"
 	}
 }

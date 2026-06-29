@@ -273,7 +273,7 @@ function App() {
             width: "100%",
           }}
         >
-          Launch Timeline Editor (Overlay)
+          Launch AI Copilot (Overlay)
         </button>
       </div>
 

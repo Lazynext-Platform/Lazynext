@@ -19,9 +19,6 @@ import { GestureHandlerRootView, GestureDetector, Gesture } from "react-native-g
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 
 import { NativeBridge } from "./src/NativeBridge";
-import { TimelineScreen } from "./src/Timeline";
-
-
 function DashboardScreen() {
   const [projectName, setProjectName] = useState("Loading...");
   const [trackCount, setTrackCount] = useState(0);
@@ -258,7 +255,6 @@ export default function App() {
           }}
         >
           <Tab.Screen name="Dashboard" component={DashboardScreen} />
-          <Tab.Screen name="Timeline" component={TimelineScreen} />
           <Tab.Screen name="AI Copilot" component={AIChatScreen} />
         </Tab.Navigator>
       </NavigationContainer>

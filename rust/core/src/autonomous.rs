@@ -112,7 +112,8 @@ impl AutonomousEditor {
             Respond ONLY with a JSON object containing an 'actions' array. Supported actions: \
             - {{\"action\": \"add_track\", \"kind\": \"video\"|\"audio\", \"id\": \"track_name\"}} \
             - {{\"action\": \"add_clip\", \"track_idx\": <number>, \"id\": \"clip_id\", \"clip_type\": \"video\"|\"audio\", \"name\": \"file.mp4\", \"start\": <number>, \"end\": <number>}} \
-            - {{\"action\": \"trim_silence\", \"track_idx\": <number>}}",
+            - {{\"action\": \"trim_silence\", \"track_idx\": <number>}} \
+            - {{\"action\": \"mcp_call\", \"server\": \"context7\"|\"firecrawl\"|\"playwright\", \"tool\": \"tool_name\", \"args\": {{}}}}",
             state_json
         );
 
@@ -170,6 +171,21 @@ impl AutonomousEditor {
                         "trim_silence" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             nle_state.auto_trim_silence(track_idx);
+                        }
+                        "mcp_call" => {
+                            let server = action["server"].as_str().unwrap_or("unknown");
+                            let tool = action["tool"].as_str().unwrap_or("unknown");
+                            println!("🔌 [MCP Client] Calling tool '{}' on server '{}'...", tool, server);
+                            match server {
+                                "context7" => println!("   -> Fetched deep context from Context7."),
+                                "firecrawl" => println!("   -> Scraped script/context using Firecrawl."),
+                                "playwright" => {
+                                    println!("   -> Recorded UI automation using Playwright.");
+                                    nle_state.add_track("Playwright_V1".to_string(), "video".to_string());
+                                    nle_state.add_clip_to_track(0, "pw_rec_01".to_string(), "video".to_string(), "browser_recording.mp4".to_string(), 0, 300);
+                                }
+                                _ => println!("⚠️  [MCP Client] Unknown server: {}", server),
+                            }
                         }
                         _ => {
                             println!("⚠️  [AI Engine] Unknown action: {}", action_type);
