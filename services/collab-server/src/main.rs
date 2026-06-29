@@ -9,7 +9,7 @@
 use axum::{
     Extension, Json, Router,
     extract::{
-        Path, State,
+        Path,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     response::IntoResponse,
