@@ -8,7 +8,7 @@ All notable changes to the Lazynext project are documented in this file.
 
 - **Rust NLE engine**: Non-linear video editing engine implemented entirely in Rust, serving as the single source of truth for all business logic.
 - **CRDT state management**: Conflict-free Replicated Data Types (LWW-Register + operation-based) with vector clocks, keyframes, and tombstone-based deletion for real-time collaboration without conflicts.
-- **WebGPU compositor**: GPU-accelerated compositor with 18 blend modes (normal, dissolve, darken, multiply, color-burn, linear-burn, darker-color, lighten, screen, color-dodge, linear-dodge, lighter-color, overlay, soft-light, hard-light, vivid-light, difference) and 6 GPU effect shaders.
+- **WebGPU compositor**: GPU-accelerated compositor with 17 blend modes (normal, darken, multiply, color-burn, lighten, screen, color-dodge, plus-lighter, overlay, soft-light, hard-light, difference, exclusion, hue, saturation, color, luminosity) and 11 GPU effect shaders (gaussian-blur, chroma-key, glitch, color-grade, fire, portal, vhs, crt, glow, vignette, lut-3d).
 - **Command pattern**: Undo/redo system with visitor-pattern serialization for all state mutations.
 
 ### Web Application (`apps/web`)
@@ -42,7 +42,7 @@ All notable changes to the Lazynext project are documented in this file.
 ### Developer Tools
 
 - **CLI**: Headless command-line renderer for CI/CD and batch processing.
-- **MCP server**: Model Context Protocol server with 9 tools enabling AI agent integration for timeline manipulation, export, and project management.
+- **MCP server**: Model Context Protocol server with 14 tools, 4 resources, and 4 prompts enabling AI agent integration for timeline manipulation, export, analysis, and project management (both Rust/stdio and Node.js implementations).
 
 ### Content Integrity
 
@@ -56,7 +56,7 @@ All notable changes to the Lazynext project are documented in this file.
 - **Render Service** (Node.js/Bun, port 8003): FFMPEG render farm with SSE progress streaming.
 - **API Gateway** (Rust/Axum, port 8005): Centralized REST gateway for all microservices.
 - **Collab Server** (Rust/Axum, port 8004): Native CRDT sync server with WebRTC signaling for real-time collaboration.
-- **Analytics Service** (Node.js/Bun, port 8006): High-velocity data ingestion and LTV calculation engine with Kafka.
+- **Analytics Service** (Node.js/Bun, port 8006): High-velocity data ingestion and LTV calculation engine.
 
 ### Networking & Infrastructure
 

@@ -689,7 +689,7 @@ async fn handle_tts(
     }
 }
 
-// ── Lightweight Stubs ─────────────────────────────────────────────────────
+// ── Timeline / Media Handlers ─────────────────────────────────────────
 
 #[derive(serde::Deserialize)]
 struct AddClipPayload {
@@ -1160,14 +1160,74 @@ async fn handle_stream_complete(
 
 /// Handler for the extension to exchange its auth token
 async fn handle_extension_token_exchange(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     Json(payload): Json<Value>,
 ) -> Json<Value> {
-    let _ext_id = payload.get("extension_id").and_then(|v| v.as_str()).unwrap_or("");
-    // Here we would validate the extension token and issue a session cookie/JWT
-    Json(json!({
-        "success": true,
-        "token": "mock_gateway_token_for_extension"
-    }))
+    use jsonwebtoken::{EncodingKey, Header, Algorithm};
+    use std::sync::LazyLock;
+
+    let ext_token = payload.get("token").and_then(|v| v.as_str()).unwrap_or("");
+    let ext_id = payload.get("extension_id").and_then(|v| v.as_str()).unwrap_or("");
+
+    // Validate the provided token against the same BETTER_AUTH_SECRET
+    // the gateway uses for all authenticated routes.
+    let claims = if !ext_token.is_empty() {
+        let key = rbac::jwt_decoding_key();
+        let validation = rbac::jwt_validation();
+        match jsonwebtoken::decode::<rbac::AuthClaims>(ext_token, key, validation) {
+            Ok(data) => Some(data.claims),
+            Err(e) => {
+                tracing::warn!(?e, "Extension token validation failed");
+                return Json(json!({ "success": false, "error": "invalid token" }));
+            }
+        }
+    } else {
+        // No token provided — return a limited anonymous session
+        None
+    };
+
+    // Generate a fresh gateway JWT scoped to the extension session
+    let now = chrono::Utc::now().timestamp() as u64;
+    let gateway_claims = if let Some(ref c) = claims {
+        serde_json::json!({
+            "sub": c.sub,
+            "email": c.email,
+            "name": c.name,
+            "role": c.role,
+            "source": "extension",
+            "ext_id": ext_id.to_string(),
+            "iat": now,
+            "exp": now + 3600, // 1-hour extension session
+        })
+    } else {
+        serde_json::json!({
+            "sub": format!("ext_anon_{}", uuid::Uuid::new_v4()),
+            "email": "anonymous@lazynext.dev",
+            "name": format!("Extension User {}", &ext_id[..8usize.min(ext_id.len())]),
+            "role": "user",
+            "source": "extension",
+            "ext_id": ext_id.to_string(),
+            "iat": now,
+            "exp": now + 3600,
+        })
+    };
+
+    static ENCODING_KEY: LazyLock<EncodingKey> = LazyLock::new(|| {
+        let secret = std::env::var("BETTER_AUTH_SECRET")
+            .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-32".to_string());
+        EncodingKey::from_secret(secret.as_bytes())
+    });
+
+    match jsonwebtoken::encode(&Header::new(Algorithm::HS256), &gateway_claims, &ENCODING_KEY) {
+        Ok(token) => Json(json!({
+            "success": true,
+            "token": token,
+            "expires_in": 3600,
+        })),
+        Err(e) => {
+            tracing::error!(?e, "Failed to encode extension JWT");
+            Json(json!({ "success": false, "error": "token generation failed" }))
+        }
+    }
 }
 

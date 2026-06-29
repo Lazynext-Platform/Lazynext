@@ -3,7 +3,7 @@
 import { MarketingNavbar } from "@/components/marketing/navbar";
 import { MarketingFooter } from "@/components/marketing/footer";
 import Link from "next/link";
-import { Sparkles, Zap, Users, Cpu, ArrowRight } from "lucide-react";
+import { Sparkles, Zap, Users, Cpu, ArrowRight, PlayCircle } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
@@ -29,7 +29,7 @@ export default function Home() {
 		},
 	};
 
-	const itemVariants = {
+	const itemVariants: any = {
 		hidden: { opacity: 0, y: 40 },
 		visible: {
 			opacity: 1,
@@ -62,7 +62,7 @@ export default function Home() {
 						initial="hidden"
 						animate="visible"
 					>
-						<motion.div variants={itemVariants} className="inline-flex items-center justify-center mb-8">
+						<motion.div variants={itemVariants as any} className="inline-flex items-center justify-center mb-8">
 							<div className="relative group cursor-pointer">
 								<div className="absolute -inset-0.5 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
 								<div className="relative inline-flex items-center gap-2 px-5 py-2 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 text-[#00e5ff] font-medium text-sm">
@@ -72,7 +72,7 @@ export default function Home() {
 							</div>
 						</motion.div>
 
-						<motion.h1 variants={itemVariants} className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter mb-8 leading-[1.1]">
+						<motion.h1 variants={itemVariants as any} className="text-6xl md:text-8xl lg:text-9xl font-extrabold tracking-tighter mb-8 leading-[1.1]">
 							The{" "}
 							<span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5ff] via-blue-400 to-[#0033ff]">
 								Autonomous
@@ -80,28 +80,22 @@ export default function Home() {
 							<br/>Video Editor.
 						</motion.h1>
 
-						<motion.p variants={itemVariants} className="text-xl md:text-3xl text-neutral-400 max-w-4xl mx-auto mb-12 font-light tracking-wide leading-relaxed">
-							Say goodbye to manual timelines. Just type or speak in simple
-							language, and our Agentic AI will orchestrate the perfect cut.
+						<motion.p variants={itemVariants as any} className="text-xl md:text-2xl text-white/60 mb-12 max-w-3xl mx-auto leading-relaxed">
+							Just type or speak in plain language. Lazynext handles the cutting, grading, masking, and motion graphics automatically. 
 						</motion.p>
 
-						<motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center gap-6">
-							<Link
-								href="/editor"
-								className="group relative inline-flex items-center justify-center px-8 py-5 bg-white text-black font-semibold rounded-2xl overflow-hidden transition-transform active:scale-95"
-							>
-								<div className="absolute inset-0 bg-gradient-to-r from-cyan-300 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-								<span className="relative flex items-center gap-2 text-lg">
-									Start Editing with AI
-									<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-								</span>
+						<motion.div variants={itemVariants as any} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+							<Link href="/dashboard" className="w-full sm:w-auto relative group overflow-hidden rounded-full p-[1px]">
+								<span className="absolute inset-0 bg-gradient-to-r from-[#00e5ff] to-[#0033ff] opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+								<div className="relative px-8 py-4 bg-black rounded-full flex items-center justify-center gap-2 group-hover:bg-opacity-0 transition duration-300">
+									<span className="font-semibold text-white tracking-wide">Enter Studio</span>
+									<ArrowRight className="w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
+								</div>
 							</Link>
-							<Link
-								href="/billing"
-								className="group px-8 py-5 bg-white/5 backdrop-blur-xl border border-white/10 text-white font-semibold rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all duration-300 text-lg"
-							>
-								View Pro Plans
-							</Link>
+							<button className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 font-semibold transition-all duration-300 backdrop-blur-md flex items-center justify-center gap-2">
+								<PlayCircle className="w-5 h-5 text-[#00e5ff]" />
+								Watch Demo
+							</button>
 						</motion.div>
 					</motion.div>
 				</section>

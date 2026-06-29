@@ -12,9 +12,9 @@ use lru::LruCache;
 use std::num::NonZeroUsize;
 
 struct DecodeStream {
-    media_path: String,
-    width: u32,
-    height: u32,
+    _media_path: String,
+    _width: u32,
+    _height: u32,
     current_frame: Arc<AtomicU32>,
     /// Frame cache for the recent frames pulled from this stream
     recent_frames: Arc<Mutex<LruCache<u32, Vec<u8>>>>,
@@ -99,9 +99,9 @@ impl DecodeStream {
         });
 
         Self {
-            media_path,
-            width,
-            height,
+            _media_path: media_path,
+            _width: width,
+            _height: height,
             current_frame,
             recent_frames,
             seek_tx,

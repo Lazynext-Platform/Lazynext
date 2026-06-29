@@ -15,6 +15,7 @@ pub use frame::{
 };
 pub mod aces;
 pub mod keyframe;
+pub mod lut;
 pub mod msdf;
 pub mod stereoscopic;
 pub mod transforms3d;

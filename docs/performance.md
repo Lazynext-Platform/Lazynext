@@ -11,7 +11,7 @@ Performance targets and measurement methodology for the Lazynext platform. All b
 **Measurement Methodology**:
 
 1. Set up a 1080p timeline with 4 video tracks, each containing a 1920x1080 clip, with two tracks using blend modes (e.g., Screen and Overlay).
-2. Use `wgpu-profiler` (`rust/crates/gpu/`) scoped timing annotations around the compositor render pass in `rust/crates/compositor/src/render_pass.rs`.
+2. Use `wgpu-profiler` (`rust/crates/gpu/`) scoped timing annotations around the compositor render pass in `rust/crates/compositor/src/compositor.rs`.
 3. Record frame timings over 1,000 consecutive frames using `tracy` profiler integration.
 4. Discard the first 60 frames (GPU warm-up / pipeline compilation). Compute p50, p95, and p99 over the remaining 940 frames.
 5. Assert that p50 < 2.0 ms.

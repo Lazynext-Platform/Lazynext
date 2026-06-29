@@ -47,7 +47,7 @@ services:
     environment:
       SRH_MODE: env
       SRH_CONNECTION_STRING: redis://redis:6379
-      SRH_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-mock_upstash_token}
+      SRH_TOKEN: ${UPSTASH_REDIS_REST_TOKEN}
     networks:
       - lazynext-network
     depends_on:
@@ -68,7 +68,7 @@ services:
     ports:
       - "8005:8005"
     environment:
-      - DATABASE_URL=postgresql://lazynext:password123@db:5432/lazynext
+      - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-local-dev-secret-change-in-production-64chars}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       - REDIS_URL=redis://redis:6379/
@@ -99,11 +99,11 @@ services:
     environment:
       - NODE_ENV=production
       - STORAGE_PROVIDER=local
-      - DATABASE_URL=postgresql://lazynext:password123@db:5432/lazynext
+      - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-local-dev-secret-change-in-production-64chars}
       - BETTER_AUTH_URL=http://localhost:3000
       - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
-      - UPSTASH_REDIS_REST_TOKEN=mock_upstash_token
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
       - RENDER_SERVICE_URL=http://render-service:8003
       - GENERATIVE_STUDIO_URL=http://generative-studio:8001
       - PRE_PROCESSING_URL=http://pre-processing:8000
@@ -157,7 +157,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8002
-      - DATABASE_URL=postgresql://lazynext:password123@db:5432/lazynext
+      - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}

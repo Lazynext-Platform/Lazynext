@@ -113,6 +113,7 @@ declare module "lazynext-wasm" {
 
   // ── Animation ───────────────────────────────────────────────────────
   export function evaluateScalarChannel(...args: unknown[]): number;
+  export function evaluateDiscreteChannel(...args: unknown[]): string;
 
   // ── Export ──────────────────────────────────────────────────────────
   export function prepareExportManifest(opts: Record<string, unknown>): string;

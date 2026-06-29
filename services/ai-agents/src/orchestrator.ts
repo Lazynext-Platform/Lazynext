@@ -1,3 +1,5 @@
+import { getAllMcpTools, callMcpTool } from "./mcp";
+
 /**
  * Multi-step AI agent orchestrator for Chronos Copilot.
  *
@@ -73,17 +75,18 @@ export async function decomposeIntent(
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   console.log(`[Orchestrator] Intelligent router selected provider: ${provider}`);
+  const mcpTools = await getAllMcpTools();
 
   try {
     if (provider === "openai" && openaiKey) {
-      return await decomposeWithLLM(prompt, openaiKey, "openai");
+      return await decomposeWithLLM(prompt, openaiKey, "openai", mcpTools);
     } else if (provider === "anthropic" && anthropicKey) {
       // In a full implementation, this would call Anthropic's Claude API.
       // For now, we reuse the OpenAI-compatible logic if Claude exposes a compatible endpoint or fallback.
-      return await decomposeWithLLM(prompt, anthropicKey, "anthropic");
+      return await decomposeWithLLM(prompt, anthropicKey, "anthropic", mcpTools);
     } else if (provider === "ollama") {
       // Local ollama integration
-      return await decomposeWithLLM(prompt, "ollama-local", "ollama");
+      return await decomposeWithLLM(prompt, "ollama-local", "ollama", mcpTools);
     }
   } catch (err) {
     console.warn(
@@ -100,11 +103,17 @@ export async function decomposeIntent(
 async function decomposeWithLLM(
   prompt: string,
   apiKey: string,
-  provider: string = "openai"
+  provider: string = "openai",
+  mcpTools: any[] = []
 ): Promise<OrchestrationPlan> {
+  let mcpToolsText = mcpTools.length > 0 
+    ? mcpTools.map(t => `- mcp__${t.server}__${t.name}: ${t.description || 'No description'}`).join("\\n")
+    : "";
+
   const systemPrompt = `You are the Lazynext AI Orchestrator. You decompose video editing intents into tool calls.
 
 Available tools:
+${mcpToolsText}
 - fetch_assets: Search stock footage libraries (Pexels, Pixabay)
 - generate_dub: Create AI dubbing in a target language via generative-studio
 - transcribe: Transcribe audio via Whisper (pre-processing)
@@ -733,6 +742,18 @@ async function executeToolCall(
   tool: string,
   args: Record<string, unknown>,
 ): Promise<unknown> {
+  if (tool.startsWith("mcp__")) {
+    const parts = tool.split("__");
+    const serverName = parts[1];
+    const toolName = parts[2];
+    try {
+      const result = await callMcpTool(serverName, toolName, args);
+      return { success: true, result };
+    } catch (err) {
+      return { success: false, error: String(err) };
+    }
+  }
+
   switch (tool) {
     case "fetch_assets":
       return fetchStockFootage(args.query as string);
@@ -770,7 +791,7 @@ async function executeToolCall(
       return callService(
         `${GENERATIVE_STUDIO_URL}/generate-video`,
         "POST",
-        { prompt: args.prompt },
+        { prompt: args.prompt || "cinematic B-roll footage, 4k quality" },
       );
 
     case "transcribe":

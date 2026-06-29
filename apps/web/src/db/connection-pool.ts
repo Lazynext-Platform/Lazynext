@@ -490,9 +490,10 @@ let _poolManager: PoolManager | null = null;
 export function getPoolManager(): PoolManager {
 	if (_poolManager) return _poolManager;
 
-	const databaseUrl =
-		process.env.DATABASE_URL ??
-		"postgresql://lazynext:password123@localhost:5434/lazynext";
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) {
+		throw new Error("DATABASE_URL environment variable is required for pool manager");
+	}
 
 	const readerUrl =
 		process.env.DATABASE_READER_URL ?? databaseUrl; // fall back to writer

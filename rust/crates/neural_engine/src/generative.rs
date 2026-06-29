@@ -94,6 +94,7 @@ impl GenerativeModel {
         println!("[NeuralEngine] Replicate prediction started. Polling status...");
 
         loop {
+            #[cfg(not(target_arch = "wasm32"))]
             tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
             
             let poll_res = client

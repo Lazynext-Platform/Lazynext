@@ -11,7 +11,7 @@ import {
 	Delete02Icon,
 	PlusSignIcon,
 } from "@hugeicons/core-free-icons";
-import { getBezierPoint } from "@/animation/bezier";
+
 import type { NormalizedCubicBezier } from "@/animation/types";
 import type { GraphEditorComponentOption } from "./session";
 import {
@@ -245,6 +245,28 @@ function ExpandableGrid({
 				</div>
 			)}
 		</div>
+	);
+}
+
+function getBezierPoint({
+	progress,
+	p0,
+	p1,
+	p2,
+	p3,
+}: {
+	progress: number;
+	p0: number;
+	p1: number;
+	p2: number;
+	p3: number;
+}) {
+	const mt = 1 - progress;
+	return (
+		mt * mt * mt * p0 +
+		3 * mt * mt * progress * p1 +
+		3 * mt * progress * progress * p2 +
+		progress * progress * progress * p3
 	);
 }
 

@@ -17,6 +17,12 @@ pub enum Easing {
         x2: f64,
         y2: f64,
     },
+    Bezier {
+        right_dt: f64,
+        right_dv: f64,
+        left_dt: f64,
+        left_dv: f64,
+    },
 }
 
 /// A single keyframe with a frame position and typed value.
@@ -98,21 +104,51 @@ impl ScalarAnimationChannel {
                     return k1.value;
                 }
 
-                let mut t = (frame - k1.frame) as f64 / range;
+                let t = (frame - k1.frame) as f64 / range;
 
                 // Apply easing
-                t = match &k1.easing {
-                    Easing::Linear => t,
-                    Easing::Step => 0.0,
-                    Easing::EaseIn => solve_cubic_bezier(t, 0.42, 0.0, 1.0, 1.0),
-                    Easing::EaseOut => solve_cubic_bezier(t, 0.0, 0.0, 0.58, 1.0),
-                    Easing::EaseInOut => solve_cubic_bezier(t, 0.42, 0.0, 0.58, 1.0),
-                    Easing::CubicBezier { x1, y1, x2, y2 } => {
-                        solve_cubic_bezier(t, *x1, *y1, *x2, *y2)
+                match &k1.easing {
+                    Easing::Linear => {
+                        return k1.value + (k2.value - k1.value) * t;
                     }
-                };
-
-                return k1.value + (k2.value - k1.value) * t;
+                    Easing::Step => {
+                        return k1.value;
+                    }
+                    Easing::EaseIn => {
+                        let t = solve_cubic_bezier(t, 0.42, 0.0, 1.0, 1.0);
+                        return k1.value + (k2.value - k1.value) * t;
+                    }
+                    Easing::EaseOut => {
+                        let t = solve_cubic_bezier(t, 0.0, 0.0, 0.58, 1.0);
+                        return k1.value + (k2.value - k1.value) * t;
+                    }
+                    Easing::EaseInOut => {
+                        let t = solve_cubic_bezier(t, 0.42, 0.0, 0.58, 1.0);
+                        return k1.value + (k2.value - k1.value) * t;
+                    }
+                    Easing::CubicBezier { x1, y1, x2, y2 } => {
+                        let t = solve_cubic_bezier(t, *x1, *y1, *x2, *y2);
+                        return k1.value + (k2.value - k1.value) * t;
+                    }
+                    Easing::Bezier {
+                        right_dt,
+                        right_dv,
+                        left_dt,
+                        left_dv,
+                    } => {
+                        return solve_absolute_cubic_bezier(
+                            frame as f64,
+                            k1.frame as f64,
+                            k1.value,
+                            k1.frame as f64 + *right_dt,
+                            k1.value + *right_dv,
+                            k2.frame as f64 + *left_dt,
+                            k2.value + *left_dv,
+                            k2.frame as f64,
+                            k2.value,
+                        );
+                    }
+                }
             }
         }
 
@@ -185,6 +221,50 @@ fn cubic_bezier_x(t: f64, x1: f64, x2: f64) -> f64 {
 fn cubic_bezier_y(t: f64, y1: f64, y2: f64) -> f64 {
     let u = 1.0 - t;
     3.0 * u * u * t * y1 + 3.0 * u * t * t * y2 + t * t * t
+}
+
+/// Evaluates a 2D cubic bezier given an absolute target x (time) and 4 control points.
+fn solve_absolute_cubic_bezier(
+    target_x: f64,
+    x0: f64,
+    y0: f64,
+    x1: f64,
+    y1: f64,
+    x2: f64,
+    y2: f64,
+    x3: f64,
+    y3: f64,
+) -> f64 {
+    // Binary search over `t` since absolute handles can exceed monotonic bounds temporarily,
+    // and Newton-Raphson on non-normalized curves can be unstable if not careful.
+    let mut lower = 0.0;
+    let mut upper = 1.0;
+    
+    for _ in 0..20 {
+        let mid = (lower + upper) / 2.0;
+        let u = 1.0 - mid;
+        
+        // Evaluate bezier X at t = mid
+        let estimate_x = u * u * u * x0
+            + 3.0 * u * u * mid * x1
+            + 3.0 * u * mid * mid * x2
+            + mid * mid * mid * x3;
+            
+        if estimate_x < target_x {
+            lower = mid;
+        } else {
+            upper = mid;
+        }
+    }
+    
+    let t = (lower + upper) / 2.0;
+    let u = 1.0 - t;
+    
+    // Evaluate bezier Y at t
+    u * u * u * y0
+        + 3.0 * u * u * t * y1
+        + 3.0 * u * t * t * y2
+        + t * t * t * y3
 }
 
 /// Derivative of x with respect to t for Newton-Raphson.

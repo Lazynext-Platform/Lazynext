@@ -52,9 +52,9 @@ Before writing anything in an app, ask: "Does this belong in `rust/`?"
 | `services/pre-processing` | Python FastAPI on port 8000: Whisper transcription, SAM2 rotoscoping, NeRF extraction |
 | `services/generative-studio` | Python FastAPI on port 8001: Stable Video Diffusion, ElevenLabs dubbing, Demucs stem separation |
 | `services/ai-agents` | Node.js (Bun) on port 8002: Chronos Copilot LLM orchestration + CRDT WebSocket sync |
-| `services/render-service` | Node.js (Bun) on port 8003: FFMPEG render farm with BullMQ + SSE progress streaming |
+| `services/render-service` | Node.js (Bun) on port 8003: FFMPEG render farm with SSE progress streaming |
 | `services/collab-server` | Rust (Axum) on port 8004: CRDT WebSocket sync + WebRTC signaling relay |
-| `services/analytics-service` | Node.js (Bun) on port 8006: Kafka/ClickHouse telemetry pipeline |
+| `services/analytics-service` | Node.js (Bun) on port 8006: High-velocity data ingestion and LTV calculation engine |
 | `terraform/` | Azure infrastructure as code |
 | `k8s/` | Kubernetes manifests (optional, for AKS GPU workloads) |
 | `monitoring/` | Prometheus, Grafana, Loki, Tempo configurations |
@@ -409,7 +409,7 @@ Third-party dependency additions require license compatibility review. All depen
 2. Add it to `docker-compose.yml`, `docker-compose.dev.yml`, and `docker-compose.gpu.yml` as appropriate
 3. Add health check endpoint (`GET /health` returning JSON with `status: "ok"`)
 4. Register in `start-platform.sh`
-5. Add Terraform configuration in `terraform/azure/` for Azure Container Apps deployment
+5. Add Terraform configuration in `terraform/` for Azure Container Apps deployment
 6. Update `.env.example` with any new environment variables
 7. Document in `CLAUDE.md` services table and `docs/api-reference.md`
 

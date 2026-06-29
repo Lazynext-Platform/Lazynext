@@ -158,6 +158,55 @@ function OverlayEditor() {
             {status}
           </div>
         )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
+          <label style={{ fontSize: "14px", fontWeight: "600", color: "#00e5ff" }}>AI Copilot</label>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <input 
+              type="text" 
+              id="ai-prompt"
+              placeholder="e.g. 'Extract all videos'" 
+              style={{
+                flex: 1, padding: "10px", backgroundColor: "#252525", color: "#fff", 
+                border: "1px solid #00e5ff", borderRadius: "6px", fontSize: "14px", outline: "none"
+              }}
+            />
+            <button 
+              onClick={async () => {
+                const prompt = (document.getElementById("ai-prompt") as HTMLInputElement).value;
+                if (!prompt) return;
+                
+                setStatus("Processing AI command...");
+                try {
+                  const gatewayUrl = await chrome.storage.local.get("apiGatewayUrl")
+                    .then(r => r.apiGatewayUrl || "http://localhost:8005");
+                  const resp = await fetch(`${gatewayUrl}/api/v1/autonomous_edit`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt, require_plan_approval: false }),
+                  });
+                  const data = await resp.json();
+                  setStatus(`AI Command Processed: ${data.message || data.error || "OK"}`);
+                  
+                  if (ws && ws.readyState === WebSocket.OPEN && selectedProjectId) {
+                    ws.send(JSON.stringify({
+                      type: "CRDT_SYNC",
+                      projectId: selectedProjectId,
+                      payload: data
+                    }));
+                  }
+                } catch (e) {
+                  setStatus(`Error: ${e}`);
+                }
+              }}
+              style={{ 
+                padding: "10px 16px", background: "#00e5ff", color: "#000", 
+                border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "bold"
+              }}>
+              Apply
+            </button>
+          </div>
+        </div>
       </div>
       <style>{`
         @keyframes pulse {

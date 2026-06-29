@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -19,6 +19,7 @@ import { GestureHandlerRootView, GestureDetector, Gesture } from "react-native-g
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 
 import { NativeBridge } from "./src/NativeBridge";
+import { TimelineScreen } from "./src/Timeline";
 function DashboardScreen() {
   const [projectName, setProjectName] = useState("Loading...");
   const [trackCount, setTrackCount] = useState(0);
@@ -28,6 +29,7 @@ function DashboardScreen() {
   const [processing, setProcessing] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [isApplePencil, setIsApplePencil] = useState(false);
+  const pencilTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -39,13 +41,10 @@ function DashboardScreen() {
   }, []);
 
   const handleTouchStart = (e: any) => {
-    // Detect pressure-sensitive input (Apple Pencil or 3D Touch).
-    // Clear the flag when no force is present (e.g. finger touch).
     if (e.nativeEvent?.touches?.[0]?.force !== undefined && e.nativeEvent.touches[0].force > 0) {
       setIsApplePencil(true);
-      // Reset after 3s so the indicator doesn't stay forever
-      const timer = setTimeout(() => setIsApplePencil(false), 3000);
-      return () => clearTimeout(timer);
+      if (pencilTimerRef.current) clearTimeout(pencilTimerRef.current);
+      pencilTimerRef.current = setTimeout(() => setIsApplePencil(false), 3000);
     }
   };
 
@@ -255,6 +254,7 @@ export default function App() {
           }}
         >
           <Tab.Screen name="Dashboard" component={DashboardScreen} />
+          <Tab.Screen name="Editor" component={TimelineScreen} />
           <Tab.Screen name="AI Copilot" component={AIChatScreen} />
         </Tab.Navigator>
       </NavigationContainer>

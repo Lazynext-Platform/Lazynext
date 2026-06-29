@@ -3,7 +3,10 @@ import os
 import httpx
 from fastapi import HTTPException
 from src.models import DubRequest, OverdubRequest, StemSplitRequest
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from demucs_pipeline import DemucsPipeline, DemucsConfig
 async def dub_video_service(req: DubRequest):
     api_key = os.getenv("ELEVENLABS_API_KEY")
 

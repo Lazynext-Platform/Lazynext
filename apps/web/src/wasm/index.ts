@@ -1,2 +1,2 @@
 export * from "./media-time";
-export { evaluateScalarChannel } from "lazynext-wasm";
+export { evaluateScalarChannel, evaluateDiscreteChannel } from "lazynext-wasm";

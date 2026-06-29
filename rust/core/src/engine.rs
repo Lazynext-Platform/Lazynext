@@ -27,7 +27,7 @@ pub trait AssetLoader: Send + Sync {
 pub struct PlaybackLoop {
     is_playing: bool,
     current_frame: u32,
-    framerate: u32,
+    _framerate: u32,
     audio: Option<audio::playback::AudioPlayback>,
     #[cfg(not(target_arch = "wasm32"))]
     decklink: Option<decklink::DecklinkEngine>,
@@ -47,7 +47,7 @@ impl PlaybackLoop {
         Self {
             is_playing: false,
             current_frame: 0,
-            framerate,
+            _framerate: framerate,
             audio,
             #[cfg(not(target_arch = "wasm32"))]
             decklink,

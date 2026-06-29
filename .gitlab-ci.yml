@@ -1,3 +1,7 @@
+# DEPRECATED 2026-06-30: Primary CI runs on GitHub Actions (.github/workflows/).
+# This GitLab CI config is retained as a fallback/reference. The wasm-pack output
+# path below references the old build layout, and infra/terraform no longer exists.
+# See ci.yml and main.yml for the active pipeline definitions.
 image: rust:latest
 
 stages:

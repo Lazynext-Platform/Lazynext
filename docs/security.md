@@ -61,8 +61,8 @@ openssl rand -hex 32
 ### Token Verification (API Gateway)
 
 ```rust
-// rust/api-gateway/src/auth.rs
-pub async fn verify_token(token: &str, secret: &[u8]) -> Result<Claims, AuthError> {
+// rust/api-gateway/src/rbac.rs
+pub async fn authorize_request(req: Request, next: Next) -> Result<Response, StatusCode> {
     let validation = Validation::new(Algorithm::HS256);
     let token_data = jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(secret), &validation)?;
     if is_blacklisted(&token_data.claims.jti).await {
@@ -96,11 +96,8 @@ The token is served by the server on initial page load and validated on every `P
 
 ### Origin Header Validation
 
-The API Gateway validates the `Origin` and `Referer` headers against an allowlist:
+The API Gateway validates the `Origin` and `Referer` headers against an allowlist as part of CSRF protection in `rust/api-gateway/src/csrf.rs`:
 
-```typescript
-// apps/web/src/middleware.ts
-const allowedOrigins = [
   process.env.NEXT_PUBLIC_APP_URL,
   'http://localhost:3000',
 ];
@@ -108,7 +105,7 @@ const allowedOrigins = [
 
 ### Implementation
 
-CSRF protection is implemented as Next.js middleware (`apps/web/src/middleware.ts`) and as an Axum middleware layer (`rust/api-gateway/src/middleware/csrf.rs`). Requests that fail CSRF validation receive a 403 response with no additional detail.
+CSRF protection is implemented as an Axum middleware layer (`rust/api-gateway/src/csrf.rs`). Requests that fail CSRF validation receive a 403 response with no additional detail.
 
 ---
 
@@ -152,8 +149,8 @@ X-RateLimit-Reset: 1719445260
 
 Additional rate limiting at the Next.js edge:
 
-```typescript
-// apps/web/src/middleware.ts
+```rust
+// rust/api-gateway/src/csrf.rs
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
@@ -173,7 +170,7 @@ Stripe webhooks are verified using HMAC-SHA256 signature validation. The raw req
 ### Implementation
 
 ```typescript
-// apps/web/src/app/api/webhooks/stripe/route.ts
+// apps/web/src/app/api/stripe/webhook/route.ts
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -221,9 +218,8 @@ Export Pipeline:
   Raw Frames → Encode → C2PA Manifest Injection → Signed Output
                               ↑
                     rust/provenance/src/
-                    - manifest_builder.rs
-                    - signer.rs
-                    - validator.rs
+                    - c2pa.rs
+                    - lib.rs
 ```
 
 ### Manifest Contents

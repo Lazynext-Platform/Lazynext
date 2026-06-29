@@ -4,6 +4,7 @@ import { useWasm } from "@/hooks/use-wasm";
 export function TranscriptEditor() {
 	const { time } = useWasm();
 
+	// TODO: Wire to real transcript data (backend: Whisper transcription in pre-processing service)
 	const [mockScript, setMockScript] = useState([
 		{ id: "sentence_1", text: "INT. SPACESHIP - DAY", startMs: 0, endMs: 2000, deleted: false },
 		{

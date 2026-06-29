@@ -31,6 +31,12 @@ const VHS_SHADER_SOURCE: &str = include_str!("shaders/vhs.wgsl");
 const CRT_SHADER_ID: &str = "crt";
 const CRT_SHADER_SOURCE: &str = include_str!("shaders/crt.wgsl");
 
+const GLOW_SHADER_ID: &str = "glow";
+const GLOW_SHADER_SOURCE: &str = include_str!("shaders/glow.wgsl");
+
+const VIGNETTE_SHADER_ID: &str = "vignette";
+const VIGNETTE_SHADER_SOURCE: &str = include_str!("shaders/vignette.wgsl");
+
 const LUT_3D_SHADER_SOURCE: &str = include_str!("shaders/lut_3d.wgsl");
 
 pub struct ApplyEffectsOptions<'a> {
@@ -207,6 +213,20 @@ impl EffectPipeline {
                 .create_shader_module(wgpu::ShaderModuleDescriptor {
                     label: Some("effects-crt-shader"),
                     source: wgpu::ShaderSource::Wgsl(CRT_SHADER_SOURCE.into()),
+                });
+        let glow_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-glow-shader"),
+                    source: wgpu::ShaderSource::Wgsl(GLOW_SHADER_SOURCE.into()),
+                });
+        let vignette_shader_module =
+            context
+                .device()
+                .create_shader_module(wgpu::ShaderModuleDescriptor {
+                    label: Some("effects-vignette-shader"),
+                    source: wgpu::ShaderSource::Wgsl(VIGNETTE_SHADER_SOURCE.into()),
                 });
 
         let lut3d_shader_module =
@@ -513,6 +533,80 @@ impl EffectPipeline {
                     cache: None,
                 });
 
+        let glow_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-glow-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &glow_shader_module,
+                        entry_point: Some("fragment_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
+        let vignette_pipeline =
+            context
+                .device()
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: Some("effects-vignette-pipeline"),
+                    layout: Some(&pipeline_layout),
+                    vertex: wgpu::VertexState {
+                        module: &vertex_shader_module,
+                        entry_point: Some("vertex_main"),
+                        buffers: &[wgpu::VertexBufferLayout {
+                            array_stride: std::mem::size_of::<[f32; 2]>() as u64,
+                            step_mode: wgpu::VertexStepMode::Vertex,
+                            attributes: &[wgpu::VertexAttribute {
+                                format: wgpu::VertexFormat::Float32x2,
+                                offset: 0,
+                                shader_location: 0,
+                            }],
+                        }],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    },
+                    fragment: Some(wgpu::FragmentState {
+                        module: &vignette_shader_module,
+                        entry_point: Some("fragment_main"),
+                        targets: &[Some(wgpu::ColorTargetState {
+                            format: context.texture_format(),
+                            blend: None,
+                            write_mask: wgpu::ColorWrites::ALL,
+                        })],
+                        compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    }),
+                    primitive: wgpu::PrimitiveState::default(),
+                    depth_stencil: None,
+                    multisample: wgpu::MultisampleState::default(),
+                    multiview_mask: None,
+                    cache: None,
+                });
+
         let pipelines = HashMap::from([
             (GAUSSIAN_BLUR_SHADER_ID.to_string(), gaussian_blur_pipeline),
             (CHROMA_KEY_SHADER_ID.to_string(), chroma_key_pipeline),
@@ -522,6 +616,8 @@ impl EffectPipeline {
             (PORTAL_SHADER_ID.to_string(), portal_pipeline),
             (VHS_SHADER_ID.to_string(), vhs_pipeline),
             (CRT_SHADER_ID.to_string(), crt_pipeline),
+            (GLOW_SHADER_ID.to_string(), glow_pipeline),
+            (VIGNETTE_SHADER_ID.to_string(), vignette_pipeline),
         ]);
         
         let lut3d_pipeline =

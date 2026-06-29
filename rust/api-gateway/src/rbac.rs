@@ -67,7 +67,7 @@ impl WorkspaceRole {
 /// Falls back to a development-only secret when the env var is absent.
 /// In production, the env var is mandatory — a missing secret will cause
 /// every request to fail with 500 rather than silently accepting tokens.
-fn jwt_decoding_key() -> &'static DecodingKey {
+pub fn jwt_decoding_key() -> &'static DecodingKey {
     static KEY: LazyLock<DecodingKey> = LazyLock::new(|| {
         let secret = std::env::var("BETTER_AUTH_SECRET").unwrap_or_else(|_| {
             tracing::warn!(
@@ -81,7 +81,7 @@ fn jwt_decoding_key() -> &'static DecodingKey {
     &KEY
 }
 
-fn jwt_validation() -> &'static Validation {
+pub fn jwt_validation() -> &'static Validation {
     static VALIDATION: LazyLock<Validation> = LazyLock::new(|| {
         let mut v = Validation::new(Algorithm::HS256);
         // We validate exp ourselves for better error messages,

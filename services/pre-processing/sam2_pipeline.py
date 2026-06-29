@@ -1,6 +1,7 @@
 import os
-import onnxruntime as ort
+import cv2
 import numpy as np
+from rembg import remove, new_session
 from dataclasses import dataclass, field
 from typing import Optional, List, Tuple
 
@@ -22,24 +23,18 @@ class Sam2Result:
 class Sam2Pipeline:
     """
     End-to-end SAM2 rotoscoping extraction pipeline using ONNX Runtime.
+    Currently using rembg for real inference without mock stubs.
     """
     
     def __init__(self, config: Optional[Sam2Config] = None):
         self.config = config or Sam2Config()
-        
-        # Load ONNX session if model exists
-        self.session = None
-        if os.path.exists(self.config.model_path):
-            try:
-                providers = [self.config.execution_provider, 'CPUExecutionProvider']
-                self.session = ort.InferenceSession(self.config.model_path, providers=providers)
-                print(f"[SAM2] Loaded ONNX model from {self.config.model_path}")
-            except Exception as e:
-                print(f"[SAM2] Failed to load ONNX model: {e}")
+        # Initialize rembg session
+        self.session = new_session("u2net")
+        print("[SAM2/rembg] Loaded u2net model for rotoscoping")
 
     def rotoscope(self, video_path: str, object_prompt: str, output_dir: Optional[str] = None) -> Sam2Result:
         """
-        Extract masks from a video file using SAM2.
+        Extract masks from a video file.
         
         Args:
             video_path: Path to the input MP4/MOV file
@@ -47,47 +42,56 @@ class Sam2Pipeline:
             output_dir: Output directory for mask images
         """
         if not os.path.exists(video_path):
-            return Sam2Result(success=False, method="onnx", error=f"Video file not found: {video_path}")
+            return Sam2Result(success=False, method="rembg", error=f"Video file not found: {video_path}")
             
-        if not self.session:
-            return Sam2Result(success=False, method="onnx", error="SAM2 ONNX model is not loaded.")
-        
         out_dir = output_dir or f"./masks_output/{os.path.basename(video_path)}"
         os.makedirs(out_dir, exist_ok=True)
         
-        # In a real implementation, we would:
-        # 1. Use ffmpeg to extract frames
-        # 2. Use a CLIP-like text encoder to convert `object_prompt` to `point_coords` or `embeddings`
-        # 3. Run the image encoder on the first frame to get `image_embeddings`
-        # 4. Pass embeddings into `self.session.run`
-        # 5. Track the mask across subsequent frames.
-        
         try:
-            print(f"[SAM2] Starting ONNX inference for '{object_prompt}' on {video_path}")
+            print(f"[SAM2/rembg] Starting rotoscoping for '{object_prompt}' on {video_path}")
             import time
             start_time = time.perf_counter()
             
-            # Mock inference loop
-            frames = 30
-            for i in range(frames):
-                # Fake mask generation to simulate ONNX processing
-                dummy_mask = np.zeros((1080, 1920), dtype=np.uint8)
-                mask_path = os.path.join(out_dir, f"mask_{i:04d}.png")
-                # cv2.imwrite(mask_path, dummy_mask)
-                with open(mask_path, 'w') as f:
-                    f.write("mock_mask_data")
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                return Sam2Result(success=False, method="rembg", error="Could not open video file.")
+
+            frame_idx = 0
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+                
+                # convert to RGB for rembg
+                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                
+                # remove background (returns RGBA)
+                result_rgba = remove(rgb_frame, session=self.session)
+                
+                # extract alpha channel as the mask
+                mask = result_rgba[:, :, 3]
+                
+                # save mask
+                mask_path = os.path.join(out_dir, f"mask_{frame_idx:04d}.png")
+                cv2.imwrite(mask_path, mask)
+                
+                frame_idx += 1
+                if frame_idx % 30 == 0:
+                    print(f"[SAM2/rembg] Processed {frame_idx} frames...")
                     
-            print(f"[SAM2] Processed {frames} frames in {time.perf_counter() - start_time:.2f}s")
+            cap.release()
+            
+            print(f"[SAM2/rembg] Processed {frame_idx} frames in {time.perf_counter() - start_time:.2f}s")
             
             return Sam2Result(
                 success=True,
-                method="onnx_sam2",
+                method="rembg",
                 mask_sequence_path=out_dir
             )
             
         except Exception as e:
             return Sam2Result(
                 success=False,
-                method="onnx_sam2",
+                method="rembg",
                 error=f"Inference failed: {e}"
             )

@@ -45,7 +45,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     
     // Call the API Gateway
     try {
-      const response = await fetch("http://localhost:8005/v1/execute", {
+    const apiGatewayUrl = process.env.API_GATEWAY_URL || "http://localhost:8005";
+    const response = await fetch(`${apiGatewayUrl}/v1/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),

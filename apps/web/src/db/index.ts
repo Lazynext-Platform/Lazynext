@@ -2,9 +2,10 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-const databaseUrl =
-  process.env.DATABASE_URL ||
-  "postgresql://lazynext:password123@localhost:5434/lazynext";
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
 
 // PostgreSQL client with connection pooling via postgres.js
 const queryClient = postgres(databaseUrl, {

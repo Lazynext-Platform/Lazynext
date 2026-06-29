@@ -8,8 +8,16 @@ import Link from "next/link";
 import { Header } from "@/components/header";
 import { Check, Zap, Server } from "lucide-react";
 
-// Mock Data Type
-import type { Organization } from "@/lib/mock-db";
+// Organization type (until real DB integration is wired)
+type Organization = {
+	id: string;
+	name: string;
+	memberCount: number;
+	maxMembers: number;
+	renderHoursUsed: number;
+	aiCreditsUsed: number;
+	members: any[];
+};
 
 const PLANS = [
 	{
@@ -34,7 +42,7 @@ const PLANS = [
 			"50GB Cloud storage",
 		],
 		cta: "Upgrade to Pro",
-		priceId: "price_pro_placeholder_123", // Replace with real Stripe Price ID
+		priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "",
 		highlight: true,
 	},
 	{
@@ -49,7 +57,7 @@ const PLANS = [
 			"Dedicated Render Node",
 		],
 		cta: "Upgrade to Studio",
-		priceId: "price_studio_placeholder_123", // Replace with real Stripe Price ID
+		priceId: process.env.NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID || "",
 		highlight: false,
 	},
 ];
@@ -72,10 +80,10 @@ export function BillingPageClient() {
 			})
 			.catch(console.error);
 
-		// Fetch org data for usage stats
-		fetch("/api/mock-db?org=org_acme_123")
+		// Fetch org usage data — falls back to placeholder until real DB integration
+		fetch("/api/org/usage")
 			.then((res) => res.json())
-			.then((data) => setOrg(data.org))
+			.then((data) => data.org && setOrg(data.org))
 			.catch(() => {
 				setOrg({
 					id: "org_acme_123",

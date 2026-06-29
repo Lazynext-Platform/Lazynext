@@ -56,7 +56,7 @@ export default function WasmPlayer({
 				console.log("Compositor Initialized");
 
 				try {
-					await initializeGpu("lazynext-canvas");
+					await initializeGpu();
 					console.log("WebGPU Initialized Successfully!");
 				} catch (gpuErr) {
 					console.warn("Failed to init WebGPU, fallback might be needed:", gpuErr);

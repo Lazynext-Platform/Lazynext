@@ -14,9 +14,9 @@ The single source of truth for all non-UI code. No components, no hooks, no fram
 |---------|---------|
 | `rust/core` | NLE engine: state management, autonomous editor, timeline logic |
 | `rust/crates/state` | CRDT (LWW-Register + operation-based), keyframes, vector clocks, tombstones |
-| `rust/crates/compositor` | GPU compositor with 18 blend modes |
+| `rust/crates/compositor` | GPU compositor with 17 blend modes |
 | `rust/crates/editor_core` | Silence detection, scene detection |
-| `rust/crates/effects` | 6 GPU effect shaders |
+| `rust/crates/effects` | 11 GPU effect shaders |
 | `rust/crates/audio` | DSP: EQ, compressor, VST host |
 | `rust/crates/export` | FFMPEG encoding pipeline (MP4, ProRes, DCP, AAF) |
 | `rust/crates/ffmpeg_filter` | Type-safe FFMPEG filter graph builder |
@@ -34,7 +34,8 @@ The single source of truth for all non-UI code. No components, no hooks, no fram
 | `rust/p2p-sync` | libp2p mesh networking for peer-to-peer collaboration |
 | `rust/provenance` | Content provenance and authenticity tracking |
 | `rust/temporal-versioning` | Timeline versioning and branching |
-| `rust/plugin-api` | Third-party plugin SDK |
+| `rust/plugin-api` | Third-party plugin SDK (API surface definitions) |
+| `rust/crates/plugin` | Plugin host runtime (actual implementation) |
 
 ### Apps (UI Shells)
 
@@ -42,6 +43,8 @@ The single source of truth for all non-UI code. No components, no hooks, no fram
 - **`apps/desktop`** — GPUI (Zed framework) calling Rust natively with wgpu rendering.
 - **`apps/mobile`** — React Native with UniFFI-generated native bindings.
 - **`apps/browser-extension`** — Chrome extension for capturing video into the timeline.
+- **`apps/cli`** — JS/TS CLI application for scripted workflows.
+- **`apps/extension`** — Additional Chrome extension variant.
 
 ### Backend Microservices (`services/`)
 
@@ -54,13 +57,14 @@ All services communicate via REST over the `lazynext-network` Docker bridge.
 | `ai-agents` | Node.js (Bun) | 8002 | Chronos Copilot LLM orchestration + CRDT WebSocket sync server |
 | `render-service` | Node.js (Bun) | 8003 | FFMPEG render farm with SSE progress streaming |
 | `collab-server` | Rust (Axum) | 8004 | Native CRDT sync server + WebRTC signaling |
+| `mcp-server` | Node.js (Bun) | stdio | Node.js MCP protocol server |
 | `analytics-service` | Node.js (Bun) | 8006 | High-velocity data ingestion and LTV calculation engine |
 
 ### Infrastructure
 
 - **CI/CD**: GitHub Actions (`.github/workflows/ci.yml` and `.github/workflows/production.yml`)
 - **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
-- **Terraform**: Azure infrastructure-as-code in `terraform/azure/`
+- **Terraform**: Azure infrastructure-as-code in `terraform/`
 - **Kubernetes**: Optional K8s manifests in `k8s/`
 - **Database**: PostgreSQL via Drizzle ORM (schema: `apps/web/src/db/schema.ts`, migrations: `apps/web/src/drizzle/`)
 - **Auth**: better-auth library with Upstash Redis rate limiting

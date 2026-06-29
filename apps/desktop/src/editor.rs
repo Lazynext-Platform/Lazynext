@@ -208,6 +208,26 @@ impl Render for EditorShell {
                                     .child(div().text_sm().text_color(rgb(0x888888)).child("Opacity"))
                                     .child(div().p_2().bg(rgb(0x1a1a1a)).border_1().border_color(rgb(0x333333)).rounded_md().child("100%"))
                             )
+                            // --- NEW AI PROMPT BAR ---
+                            .child(
+                                div().mt_8().flex().flex_col().gap_2()
+                                    .child(div().text_sm().font_weight(FontWeight::BOLD).text_color(accent_color).child("AI Copilot"))
+                                    .child(
+                                        div().p_3().bg(rgb(0x0a0a0a)).border_1().border_color(accent_color).rounded_md()
+                                            .child(div().text_sm().text_color(rgb(0xcccccc)).child("Type a command (e.g. 'cut silences')"))
+                                    )
+                                    .child(
+                                        div().p_2().bg(accent_color).text_color(rgb(0x000000)).rounded_md().cursor_pointer().flex().justify_center()
+                                            .hover(|s| s.bg(rgb(0x00b4bf)))
+                                            .child("Run Command")
+                                            .on_mouse_down(gpui::MouseButton::Left, |_, _, _cx| {
+                                                log::info!("AI Command triggered from Desktop UI!");
+                                                // In a full implementation, we'd take self.prompt and call:
+                                                // lazynext_core::parser::parse_intent(...)
+                                            })
+                                    )
+                            )
+                            // -------------------------
                     )
             )
     }

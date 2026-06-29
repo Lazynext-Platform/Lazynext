@@ -5,171 +5,10 @@ import type {
 	DiscreteAnimationChannel,
 	DiscreteValue,
 	ScalarAnimationChannel,
-	ScalarAnimationKey,
 	ScalarSegmentType,
 } from "@/animation/types";
 import type { ParamValue } from "@/params";
-import { mediaTime, evaluateScalarChannel } from "@/wasm";
-import {
-	getBezierPoint,
-	getDefaultLeftHandle,
-	getDefaultRightHandle,
-	solveBezierProgressForTime,
-} from "./bezier";
-import { clamp } from "@/utils/math";
-
-function byTimeAscending({
-	leftTime,
-	rightTime,
-}: {
-	leftTime: number;
-	rightTime: number;
-}): number {
-	return leftTime - rightTime;
-}
-
-function isWithinTimePair({
-	time,
-	leftTime,
-	rightTime,
-}: {
-	time: number;
-	leftTime: number;
-	rightTime: number;
-}): boolean {
-	return time >= leftTime && time <= rightTime;
-}
-
-function lerpNumber({
-	leftValue,
-	rightValue,
-	progress,
-}: {
-	leftValue: number;
-	rightValue: number;
-	progress: number;
-}): number {
-	return leftValue + (rightValue - leftValue) * progress;
-}
-
-function normalizeRightHandle({
-	handle,
-	leftKey,
-	rightKey,
-}: {
-	handle: ScalarAnimationKey["rightHandle"];
-	leftKey: ScalarAnimationKey;
-	rightKey: ScalarAnimationKey;
-}) {
-	if (!handle) {
-		return undefined;
-	}
-
-	const span = mediaTime({
-		ticks: Math.max(1, rightKey.time - leftKey.time),
-	});
-	return {
-		dt: mediaTime({
-			ticks: Math.min(span, Math.max(0, handle.dt)),
-		}),
-		dv: handle.dv,
-	};
-}
-
-function normalizeLeftHandle({
-	handle,
-	leftKey,
-	rightKey,
-}: {
-	handle: ScalarAnimationKey["leftHandle"];
-	leftKey: ScalarAnimationKey;
-	rightKey: ScalarAnimationKey;
-}) {
-	if (!handle) {
-		return undefined;
-	}
-
-	const span = mediaTime({
-		ticks: Math.max(1, rightKey.time - leftKey.time),
-	});
-	return {
-		dt: mediaTime({
-			ticks: Math.max(-span, Math.min(0, handle.dt)),
-		}),
-		dv: handle.dv,
-	};
-}
-
-function normalizeScalarKey({
-	key,
-}: {
-	key: ScalarAnimationKey;
-}): ScalarAnimationKey {
-	return {
-		...key,
-		tangentMode: key.tangentMode ?? "flat",
-		segmentToNext: key.segmentToNext ?? "linear",
-	};
-}
-
-export function normalizeScalarChannel({
-	channel,
-}: {
-	channel: ScalarAnimationChannel;
-}): ScalarAnimationChannel {
-	const sortedKeys = [...channel.keys]
-		.map((key) => normalizeScalarKey({ key }))
-		.sort((leftKey, rightKey) =>
-			byTimeAscending({
-				leftTime: leftKey.time,
-				rightTime: rightKey.time,
-			}),
-		);
-	const nextKeys = sortedKeys.map((key, index) => {
-		const previousKey = sortedKeys[index - 1];
-		const nextKey = sortedKeys[index + 1];
-		return {
-			...key,
-			leftHandle:
-				previousKey != null
-					? normalizeLeftHandle({
-							handle: key.leftHandle,
-							leftKey: previousKey,
-							rightKey: key,
-						})
-					: undefined,
-			rightHandle:
-				nextKey != null
-					? normalizeRightHandle({
-							handle: key.rightHandle,
-							leftKey: key,
-							rightKey: nextKey,
-						})
-					: undefined,
-		};
-	});
-
-	return {
-		...channel,
-		keys: nextKeys,
-	};
-}
-
-export function normalizeDiscreteChannel({
-	channel,
-}: {
-	channel: DiscreteAnimationChannel;
-}): DiscreteAnimationChannel {
-	return {
-		...channel,
-		keys: [...channel.keys].sort((leftKeyframe, rightKeyframe) =>
-			byTimeAscending({
-				leftTime: leftKeyframe.time,
-				rightTime: rightKeyframe.time,
-			}),
-		),
-	};
-}
+import { evaluateScalarChannel, evaluateDiscreteChannel } from "@/wasm";
 
 export function isScalarChannel(
 	channel: AnimationChannel,
@@ -180,6 +19,8 @@ export function isScalarChannel(
 	);
 }
 
+// Retained for any components that expect to call normalizeChannel before passing to WASM,
+// though WASM now handles normalization internally. We return the channel as-is to avoid breaking signatures.
 export function normalizeChannel({
 	channel,
 }: {
@@ -200,35 +41,7 @@ export function normalizeChannel({
 }: {
 	channel: AnimationChannel;
 }): AnimationChannel {
-	return isScalarChannel(channel)
-		? normalizeScalarChannel({ channel })
-		: normalizeDiscreteChannel({ channel });
-}
-
-function extrapolateScalarEdge({
-	mode,
-	edgeKey,
-	neighborKey,
-	time,
-}: {
-	mode: "hold" | "linear";
-	edgeKey: ScalarAnimationKey;
-	neighborKey: ScalarAnimationKey | undefined;
-	time: number;
-}) {
-	if (mode === "hold" || !neighborKey) {
-		return edgeKey.value;
-	}
-
-	const span = neighborKey.time - edgeKey.time;
-	if (span === 0) {
-		return edgeKey.value;
-	}
-
-	return (
-		edgeKey.value +
-		((time - edgeKey.time) / span) * (neighborKey.value - edgeKey.value)
-	);
+	return channel;
 }
 
 export function getScalarSegmentInterpolation({
@@ -259,7 +72,6 @@ export function getScalarChannelValueAtTime({
 	return evaluateScalarChannel(channel, time, fallbackValue);
 }
 
-
 export function getDiscreteChannelValueAtTime({
 	channel,
 	time,
@@ -273,15 +85,10 @@ export function getDiscreteChannelValueAtTime({
 		return fallbackValue;
 	}
 
-	const normalizedChannel = normalizeDiscreteChannel({ channel });
-	let currentValue = fallbackValue;
-	for (const key of normalizedChannel.keys) {
-		if (time < key.time) {
-			break;
-		}
-		currentValue = key.value;
-	}
-	return currentValue;
+	// wasm-bindgen requires strings or numbers. 
+	// Our discrete values are primarily strings, so we pass string representation.
+	const result = evaluateDiscreteChannel(channel, time, fallbackValue as string);
+	return result as DiscreteValue;
 }
 
 export function getChannelValueAtTime({
@@ -332,6 +139,6 @@ export function getChannelValueAtTime({
 	return getDiscreteChannelValueAtTime({
 		channel: isScalarChannel(channel) ? undefined : channel,
 		time,
-		fallbackValue,
+		fallbackValue: fallbackValue as DiscreteValue,
 	});
 }

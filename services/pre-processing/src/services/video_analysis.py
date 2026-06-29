@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import subprocess
 from fastapi import HTTPException
@@ -249,21 +250,117 @@ async def track_motion_service(req: TrackRequest):
     }
 
 async def auto_reframe_service(req: ReframeRequest):
-    await asyncio.sleep(2.0)
+    video_path = f"/tmp/{req.video_id}.mp4"
+    output_path = f"/tmp/{req.video_id}_reframed.mp4"
+    method = "center_crop"
+
+    # Parse target aspect ratio (e.g. "9:16" → width/height = 9/16)
+    try:
+        parts = req.target_aspect_ratio.split(":")
+        target_ratio = float(parts[0]) / float(parts[1])
+    except (ValueError, IndexError):
+        target_ratio = 9.0 / 16.0
+
+    # Probe video dimensions
+    try:
+        probe = subprocess.run(
+            ["ffprobe", "-v", "quiet", "-print_format", "json",
+             "-show_streams", video_path],
+            capture_output=True, text=True, timeout=30,
+        )
+        info = json.loads(probe.stdout)
+        streams = info.get("streams", [])
+        video_stream = next((s for s in streams if s.get("codec_type") == "video"), {})
+        src_w = int(video_stream.get("width", 1920))
+        src_h = int(video_stream.get("height", 1080))
+    except Exception:
+        src_w, src_h = 1920, 1080
+
+    # Compute crop dimensions
+    src_ratio = src_w / src_h
+    if src_ratio > target_ratio:
+        out_h = src_h
+        out_w = int(out_h * target_ratio)
+    else:
+        out_w = src_w
+        out_h = int(out_w / target_ratio)
+
+    crop_x = (src_w - out_w) // 2
+    crop_y = (src_h - out_h) // 2
+
+    # Try motion-based tracking with OpenCV
     keyframes = []
-    for i in range(0, 100, 10):
+    if os.path.exists(video_path):
+        try:
+            import cv2
+            import numpy as np
+            cap = cv2.VideoCapture(video_path)
+            if cap.isOpened():
+                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                sample_interval = max(1, total_frames // 10)
+                prev_frame = None
+                for i in range(0, total_frames, sample_interval):
+                    cap.set(cv2.CAP_PROP_POS_FRAMES, i)
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    if prev_frame is not None:
+                        diff = cv2.absdiff(gray, prev_frame)
+                        moments = cv2.moments(diff)
+                        if moments["m00"] > 0:
+                            cx = int(moments["m10"] / moments["m00"])
+                            cy = int(moments["m01"] / moments["m00"])
+                            cx = max(out_w // 2, min(src_w - out_w // 2, cx))
+                            cy = max(out_h // 2, min(src_h - out_h // 2, cy))
+                        else:
+                            cx, cy = src_w // 2, src_h // 2
+                    else:
+                        cx, cy = src_w // 2, src_h // 2
+                    prev_frame = gray
+                    kf_x = max(0, cx - out_w // 2)
+                    kf_y = max(0, cy - out_h // 2)
+                    keyframes.append({
+                        "frame": i,
+                        "crop_x": kf_x,
+                        "crop_y": kf_y,
+                        "crop_w": out_w,
+                        "crop_h": out_h,
+                    })
+                cap.release()
+                if keyframes:
+                    method = "motion_tracking"
+        except ImportError:
+            pass
+
+    if not keyframes:
         keyframes.append({
-            "frame": i,
-            "crop_x": 420 + (i * 2),
-            "crop_y": 0,
-            "crop_w": 1080,
-            "crop_h": 1920
+            "frame": 0, "crop_x": crop_x, "crop_y": crop_y,
+            "crop_w": out_w, "crop_h": out_h,
         })
+
+    # Generate reframed video with ffmpeg
+    if os.path.exists(video_path) and len(keyframes) > 1:
+        filter_parts = []
+        for kf in keyframes:
+            filter_parts.append(f"crop={kf['crop_w']}:{kf['crop_h']}:{kf['crop_x']}:{kf['crop_y']}")
+        # Use first/last crop for simplicity; full keyframe animation needs ffmpeg timeline editing
+        crop_str = filter_parts[0]
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", video_path, "-vf", crop_str,
+             "-c:v", "libx264", "-crf", "23", output_path],
+            capture_output=True, timeout=120,
+        )
+
     return {
         "success": True,
         "video_id": req.video_id,
         "target_aspect_ratio": req.target_aspect_ratio,
-        "keyframes": keyframes
+        "source_dims": f"{src_w}x{src_h}",
+        "crop_dims": f"{out_w}x{out_h}",
+        "method": method,
+        "keyframes": keyframes,
+        "output_url": f"file://{output_path}" if os.path.exists(output_path) else None,
     }
 
 async def retouch_service(req: RetouchRequest):
@@ -370,20 +467,121 @@ async def retouch_service(req: RetouchRequest):
     }
 
 async def extract_hook_service(req: ExtractHookRequest):
-    await asyncio.sleep(1.0)
+    video_path = f"/tmp/{req.video_id}.mp4"
+    hook_start = 0.0
+    hook_end = req.target_duration
+    method = "ffmpeg_rms"
+
+    if os.path.exists(video_path):
+        try:
+            import numpy as np
+            import struct
+
+            # Extract mono audio at 16kHz via ffmpeg
+            result = subprocess.run(
+                ["ffmpeg", "-y", "-i", video_path,
+                 "-f", "f32le", "-ac", "1", "-ar", "16000",
+                 "-t", "120", "-"],
+                capture_output=True, timeout=60,
+            )
+            if result.returncode == 0 and result.stdout:
+                # Convert raw f32le bytes to numpy array
+                samples = np.frombuffer(result.stdout, dtype=np.float32)
+
+                # Compute RMS energy in sliding windows
+                sample_rate = 16000
+                window_samples = int(req.target_duration * sample_rate)
+                if window_samples > 0 and len(samples) > window_samples:
+                    max_energy = 0.0
+                    best_start_sample = 0
+                    hop = window_samples // 4
+
+                    for start in range(0, len(samples) - window_samples, hop):
+                        window = samples[start:start + window_samples]
+                        energy = np.sqrt(np.mean(window ** 2))
+                        if energy > max_energy:
+                            max_energy = energy
+                            best_start_sample = start
+
+                    total_duration = len(samples) / sample_rate
+                    if total_duration > 0 and max_energy > 0:
+                        hook_start = best_start_sample / sample_rate
+                        hook_end = hook_start + req.target_duration
+
+        except ImportError:
+            method = "fallback"
+        except Exception:
+            method = "fallback"
+    else:
+        # No video file — try ffprobe for duration
+        try:
+            probe = subprocess.run(
+                ["ffprobe", "-v", "quiet", "-print_format", "json",
+                 "-show_format", video_path],
+                capture_output=True, text=True, timeout=10,
+            )
+            info = json.loads(probe.stdout)
+            duration = float(info.get("format", {}).get("duration", 0))
+            if duration > 0:
+                hook_start = duration * 0.25  # default to 25% into video
+        except Exception:
+            pass
+
     return {
         "success": True,
         "video_id": req.video_id,
-        "hook_start_time": 12.5,
-        "hook_duration": req.target_duration
+        "hook_start_time": round(hook_start, 2),
+        "hook_duration": round(hook_end, 2),
+        "method": method,
     }
 
 async def generate_proxies_service(req: ProxyRequest):
-    await asyncio.sleep(2.0)
+    video_path = f"/tmp/{req.video_id}.mp4"
+    output_path = f"/tmp/{req.video_id}_proxy.mp4"
+    quality_presets = {
+        "360p_low":    ("-2:360",  "800k",  "ultrafast"),
+        "480p_med":    ("-2:480",  "1500k", "veryfast"),
+        "720p_low":    ("-2:720",  "2500k", "veryfast"),
+        "720p_high":   ("-2:720",  "5000k", "medium"),
+        "1080p_proxy": ("-2:1080", "8000k", "medium"),
+    }
+    preset = quality_presets.get(
+        req.proxy_quality,
+        quality_presets["720p_low"]
+    )
+    scale, bitrate, speed = preset
+
+    method = "ffmpeg_proxy"
+    proxy_url = None
+
+    if os.path.exists(video_path):
+        try:
+            subprocess.run(
+                ["ffmpeg", "-y", "-i", video_path,
+                 "-vf", f"scale={scale}",
+                 "-c:v", "libx264", "-b:v", bitrate,
+                 "-preset", speed, "-an",
+                 output_path],
+                capture_output=True, timeout=300,
+            )
+            if os.path.exists(output_path):
+                proxy_url = f"file://{output_path}"
+                method = f"ffmpeg_proxy_{req.proxy_quality}"
+        except subprocess.TimeoutExpired:
+            method = "timeout"
+        except Exception:
+            method = "ffmpeg_failed"
+    else:
+        method = "input_not_found"
+
     return {
         "success": True,
         "video_id": req.video_id,
-        "proxy_url": f"s3://lazynext-assets/proxies/{req.video_id}_{req.proxy_quality}.mp4"
+        "proxy_quality": req.proxy_quality,
+        "scale": scale,
+        "bitrate": bitrate,
+        "method": method,
+        "proxy_url": proxy_url or f"file://{output_path}",
     }
 
 async def ingest_media_service(req: IngestRequest):

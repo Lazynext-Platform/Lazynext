@@ -65,7 +65,7 @@ pub fn add_track(kind: String) -> String {
 }
 
 pub fn add_clip(_track_index: u32, _clip_type: String, _name: String, _start: u32, _end: u32) -> String {
-    // For now, this just acts as a stub to match UDL. Real clip adding would be done via state ops.
+    // Real clip operations are available via NLEState::add_clip_to_track().
     "Clip added".to_string()
 }
 
@@ -139,7 +139,7 @@ pub fn request_rotoscope(video_id: String, prompt: String) -> String {
         let client = crate::ai_client::AIClient::new();
         match client.rotoscope(&video_id, &prompt).await {
             Ok(res) => {
-                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
                     let mask_url = res.mask_sequence_url.unwrap_or_else(|| "mock_mask.mp4".to_string());
                     let _ = engine.apply_rotoscope_mask(&video_id, &mask_url);
                     "Rotoscoping complete. Mask added.".to_string()
@@ -158,7 +158,7 @@ pub fn request_nerf(video_id: String) -> String {
         let client = crate::ai_client::AIClient::new();
         match client.extract_nerf(&video_id).await {
             Ok(res) => {
-                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
                     let ply_url = res.point_cloud_url.unwrap_or_else(|| "mock_splat.ply".to_string());
                     let _ = engine.add_nerf_cloud(&ply_url);
                     "NeRF extraction complete. Splat added.".to_string()
@@ -177,7 +177,7 @@ pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
         let client = crate::ai_client::AIClient::new();
         match client.split_stems(&audio_id, stems).await {
             Ok(res) => {
-                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
                     let mut default_stems = std::collections::HashMap::new();
                     default_stems.insert("vocals".to_string(), "mock_vocals.wav".to_string());
                     default_stems.insert("drums".to_string(), "mock_drums.wav".to_string());

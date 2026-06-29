@@ -1,10 +1,12 @@
 # Keyframe System
 
-Keyframes allow element properties to change over time. The system is split into three layers: the **data model** (how keyframes are stored), the **registry** (which properties support keyframes and how to read/write them), and the **UI** (hooks and components that wire it all together).
+Keyframes allow element properties to change over time. The system is split across Rust (single source of truth) and TypeScript (UI integration). The Rust implementation at `rust/crates/state/src/keyframe.rs` provides `ScalarAnimationChannel`, `Keyframe<T>`, and `Easing` (Linear, Step, EaseIn, EaseOut, EaseInOut, CubicBezier, Bezier with absolute handles). The TypeScript layer at `apps/web/src/animation/` delegates evaluation to Rust via WASM (`evaluateScalarChannel`, `evaluateDiscreteChannel`).
 
 ## How It Works
 
-### Data model
+### Data model (Rust)
+
+The Rust `keyframe.rs` (356 lines) is the primary engine:
 
 Every `BaseTimelineElement` has an optional `animations?: ElementAnimations` field:
 

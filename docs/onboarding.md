@@ -148,9 +148,9 @@ services/* (AI, rendering, transcription)
 | Crate | Directory | Responsibility |
 |-------|-----------|----------------|
 | `state` | `rust/crates/state` | CRDT types: LWW-Register, ops, vector clocks, tombstones, keyframes |
-| `compositor` | `rust/crates/compositor` | GPU compositor with 18 blend modes, ACES tonemapping, SDF rendering |
+| `compositor` | `rust/crates/compositor` | GPU compositor with 17 blend modes, ACES tonemapping, SDF rendering |
 | `editor_core` | `rust/crates/editor_core` | Silence detection, scene detection algorithms |
-| `effects` | `rust/crates/effects` | 6 GPU effect shaders (film emulation, optical flow, etc.) |
+| `effects` | `rust/crates/effects` | 11 GPU effect shaders (gaussian blur, chroma key, glitch, color grade, fire, portal, vhs, crt, glow, vignette, lut 3d) |
 | `audio` | `rust/crates/audio` | DSP pipeline: EQ, compressor, VST host |
 | `export` | `rust/crates/export` | FFMPEG encoding: MP4, ProRes, DCP, AAF |
 | `ffmpeg_filter` | `rust/crates/ffmpeg_filter` | Type-safe FFMPEG filter graph builder |
@@ -361,9 +361,9 @@ Lazynext/
 │   ├── plugin-api/             # 3rd-party plugin SDK
 │   └── crates/
 │       ├── state/              # CRDT, keyframes, vector clocks, tombstones
-│       ├── compositor/         # GPU compositor (18 blend modes, ACES)
+│       ├── compositor/         # GPU compositor (17 blend modes, ACES)
 │       ├── editor_core/        # Silence detection, scene detection
-│       ├── effects/            # 6 GPU effect shaders
+│       ├── effects/            # 11 GPU effect shaders
 │       ├── audio/              # DSP: EQ, compressor, VST host
 │       ├── export/             # FFMPEG encoding pipeline
 │       ├── ffmpeg_filter/      # Type-safe FFMPEG filter graph builder
@@ -388,7 +388,7 @@ Lazynext/
 │
 ├── scripts/                    # Infrastructure / build / deploy / DB scripts
 ├── plugins/                    # System extension points
-├── terraform/azure/            # Infrastructure-as-code for Azure deployment
+├── terraform/                 # Infrastructure-as-code for Azure deployment
 ├── k8s/                        # Kubernetes manifests (optional)
 ├── ansible/                    # Configuration management
 ├── monitoring/                 # Prometheus / Grafana configs
@@ -715,7 +715,7 @@ The CI pipeline (`.github/workflows/ci.yml`) runs on every PR:
 | Missing features / roadmap | `docs/missing_features.md` |
 | CI/CD documentation | `docs/actions.md` |
 | Infrastructure scripts | `scripts/` |
-| Terraform (Azure) | `terraform/azure/` |
+| Terraform (Azure) | `terraform/` |
 | Kubernetes manifests | `k8s/` |
 | Monitoring configs | `monitoring/` |
 

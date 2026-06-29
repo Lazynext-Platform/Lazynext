@@ -26,14 +26,12 @@ import {
 	getDefaultLeftHandle,
 	getDefaultRightHandle,
 	solveBezierProgressForTime,
-} from "./bezier";
+} from "./curve-bridge";
 import {
 	getChannelValueAtTime,
 	getScalarSegmentInterpolation,
 	isScalarChannel,
 	normalizeChannel,
-	normalizeDiscreteChannel,
-	normalizeScalarChannel,
 } from "./interpolation";
 import {
 	type MediaTime,
@@ -335,7 +333,7 @@ function upsertDiscreteChannelKey({
 	value: string | boolean;
 	keyframeId?: string;
 }): DiscreteAnimationChannel {
-	const normalizedChannel = normalizeDiscreteChannel({
+	const normalizedChannel = normalizeChannel({
 		channel: channel ?? { keys: [] },
 	});
 	const keys = [...normalizedChannel.keys];
@@ -347,7 +345,7 @@ function upsertDiscreteChannelKey({
 				time,
 				value,
 			});
-			return normalizeDiscreteChannel({
+			return normalizeChannel({
 				channel: { keys },
 			});
 		}
@@ -362,7 +360,7 @@ function upsertDiscreteChannelKey({
 			time: keys[existingAtTimeIndex].time,
 			value,
 		});
-		return normalizeDiscreteChannel({
+		return normalizeChannel({
 			channel: { keys },
 		});
 	}
@@ -374,7 +372,7 @@ function upsertDiscreteChannelKey({
 			value,
 		}),
 	);
-	return normalizeDiscreteChannel({
+	return normalizeChannel({
 		channel: { keys },
 	});
 }
@@ -394,7 +392,7 @@ function upsertScalarChannelKey({
 	defaultInterpolation?: AnimationInterpolation;
 	keyframeId?: string;
 }): ScalarAnimationChannel {
-	const normalizedChannel = normalizeScalarChannel({
+	const normalizedChannel = normalizeChannel({
 		channel: channel ?? { keys: [] },
 	});
 	const keys = [...normalizedChannel.keys];
@@ -414,7 +412,7 @@ function upsertScalarChannelKey({
 							}
 						: keys[existingIndex],
 			});
-			return normalizeScalarChannel({
+			return normalizeChannel({
 				channel: {
 					keys,
 					extrapolation: normalizedChannel.extrapolation,
@@ -440,7 +438,7 @@ function upsertScalarChannelKey({
 						}
 					: keys[existingAtTimeIndex],
 		});
-		return normalizeScalarChannel({
+		return normalizeChannel({
 			channel: {
 				keys,
 				extrapolation: normalizedChannel.extrapolation,
@@ -456,7 +454,7 @@ function upsertScalarChannelKey({
 			interpolation: interpolation ?? defaultInterpolation,
 		}),
 	);
-	return normalizeScalarChannel({
+	return normalizeChannel({
 		channel: {
 			keys,
 			extrapolation: normalizedChannel.extrapolation,
@@ -640,7 +638,7 @@ export function removeKeyframe({
 			return undefined;
 		}
 
-		return normalizeScalarChannel({
+		return normalizeChannel({
 			channel: {
 				...channel,
 				keys: nextKeys,
@@ -656,7 +654,7 @@ export function removeKeyframe({
 		return undefined;
 	}
 
-	return normalizeDiscreteChannel({
+	return normalizeChannel({
 		channel: {
 			...channel,
 			keys: nextKeys,
@@ -691,7 +689,7 @@ export function retimeKeyframe({
 			time,
 		};
 
-		return normalizeScalarChannel({
+		return normalizeChannel({
 			channel: {
 				...channel,
 				keys: nextKeys,
@@ -712,7 +710,7 @@ export function retimeKeyframe({
 		time,
 	};
 
-	return normalizeDiscreteChannel({
+	return normalizeChannel({
 		channel: {
 			...channel,
 			keys: nextKeys,
@@ -826,7 +824,7 @@ function cloneChannelWithKeyIds({
 	keyIdMap: Map<string, string>;
 }): AnimationChannel {
 	return isScalarChannel(channel)
-		? normalizeScalarChannel({
+		? normalizeChannel({
 				channel: {
 					...channel,
 					keys: channel.keys.map((key) => ({
@@ -835,7 +833,7 @@ function cloneChannelWithKeyIds({
 					})),
 				},
 			})
-		: normalizeDiscreteChannel({
+		: normalizeChannel({
 				channel: {
 					...channel,
 					keys: channel.keys.map((key) => ({

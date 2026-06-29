@@ -3,7 +3,7 @@
 import { useRef, useState, type PointerEvent } from "react";
 import { useShiftKey } from "@/hooks/use-shift-key";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
-import { getBezierPoint } from "@/animation/bezier";
+
 import type { NormalizedCubicBezier } from "@/animation/types";
 import { cn } from "@/utils/ui";
 
@@ -56,6 +56,28 @@ function fromSvgY({ svgY }: { svgY: number }) {
 	return Math.max(
 		Y_CLAMP_MIN,
 		Math.min(Y_CLAMP_MAX, 1 - (svgY - GRAPH_PADDING) / GRAPH_HEIGHT),
+	);
+}
+
+function getBezierPoint({
+	progress,
+	p0,
+	p1,
+	p2,
+	p3,
+}: {
+	progress: number;
+	p0: number;
+	p1: number;
+	p2: number;
+	p3: number;
+}) {
+	const mt = 1 - progress;
+	return (
+		mt * mt * mt * p0 +
+		3 * mt * mt * progress * p1 +
+		3 * mt * progress * progress * p2 +
+		progress * progress * progress * p3
 	);
 }
 

@@ -1,7 +1,7 @@
 /**
  * Keyframe interpolation utilities extracted from EditorClient.
- * TODO: Add proper types after defining the Clip/Keyframe data structures.
- * TODO: Migrate to animation/interpolation.ts ScalarAnimationChannel API.
+ * Types: See timeline/types.ts for Clip/Keyframe data structures.
+ * WASM migration: animation/interpolation.ts delegates to Rust via @/wasm.
  */
 import { solveCubicBezier } from "@/utils/math";
 

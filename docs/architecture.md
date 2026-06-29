@@ -44,10 +44,10 @@ Lazynext/
 ├── apps/               # UI Shells (Next.js, GPUI Desktop, Mobile, Extension)
 ├── docs/               # System documentation, design docs, ADRs, runbooks
 ├── rust/               # The single source of truth for all business logic
-├── services/           # 6 microservices (Python, Node.js, Rust)
+├── services/           # 7 microservices (Python, Node.js, Rust)
 ├── packages/           # Shared packages (e.g., api-client)
 ├── plugins/            # System extensions + plugin SDK
-├── terraform/azure/    # Azure infrastructure as code
+├── terraform/          # Infrastructure as code (base, HA, overlays)
 ├── k8s/                # Kubernetes deployment configurations
 ├── ansible/            # Bare-metal provisioning playbooks
 ├── monitoring/         # Prometheus, Grafana, Loki, Tempo, Alertmanager

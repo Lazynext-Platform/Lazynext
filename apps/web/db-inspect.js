@@ -1,7 +1,11 @@
 // Quick database inspection script
 const { Pool } = require("pg");
 
-const connectionString = process.env.DATABASE_URL || "postgresql://lazynext:password123@localhost:5432/lazynext_db";
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  console.error("DATABASE_URL environment variable is required");
+  process.exit(1);
+}
 const isUnixSocket = connectionString.includes("%2Fcloudsql");
 const pool = new Pool({
   connectionString,

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 export function SmartBinsPanel() {
-	// MOCK data returned from the NeuralEngineService
+	// TODO: Wire to NeuralEngineService (rust/crates/neural_engine) for real face detection + clip tagging
 	const [smartBins, setSmartBins] = useState([
 		{ actorName: "Tom Cruise", clips: ["MI_Take1.mp4", "MI_Take3.mp4"] },
 		{ actorName: "Henry Cavill", clips: ["MI_Take2.mp4", "MI_Take3.mp4"] },

@@ -24,6 +24,7 @@ interface RenderJob {
 
 import { Queue, Worker, Job } from "bullmq";
 import Redis from "ioredis";
+import { publish } from "./social-publish";
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.replace("http", "redis") || "redis://localhost:6379";
 
 // ── Lazy Redis / BullMQ initialisation ────────────────────────────────
@@ -336,28 +337,25 @@ function buildFfmpegArgs(
 		let inputIdx = 0;
 
 		// Background canvas as first input
-		inputs.push(
-			`color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`,
+		args.push(
+			"-f", "lavfi",
+			"-i", `color=c=0x0a0a0a:s=${opts.width}x${opts.height}:d=${opts.duration}:r=${opts.framerate}`
 		);
-		const bgLabel = `[bg${inputIdx}]`;
-		inputIdx++;
+		const bgLabel = `[0:v]`;
+		inputIdx++; // this is 1
 
 		// Add each video clip as an input, positioned at its start time
 		const overlayChains: string[] = [];
 		for (const clip of videoClips) {
 			const clipDuration = clip.end - clip.start;
-			inputs.push(`-ss`, "0", "-t", String(clipDuration), "-i", clip.url!);
-			const clipLabel = `[v${inputIdx}]`;
+			args.push("-ss", "0", "-t", String(clipDuration), "-i", clip.url!);
+			
+			const clipLabel = `[${inputIdx}:v]`;
 			const startSec = clip.start;
 			overlayChains.push(
 				`${clipLabel}setpts=PTS+${startSec}/TB[ov${inputIdx}]`,
 			);
 			inputIdx++;
-		}
-
-		// For each input, add it
-		for (const input of inputs) {
-			args.push("-f", "lavfi", "-i", input);
 		}
 
 		// Build filter complex: overlay each clip onto the background
@@ -555,22 +553,59 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 });
 
 app.post("/api/v1/publish", async (req: Request, res: Response) => {
-	const { video_url, platform = "tiktok", description } = req.body;
+	const { video_url, platform = "tiktok", description, title, tags } = req.body;
 
 	if (!video_url) {
 		return res.status(400).json({ error: "Missing video_url" });
 	}
 
-	// Simulate API upload delay
-	await new Promise(r => setTimeout(r, 2500));
+	try {
+		// Download video if it's a URL, otherwise use local path
+		let videoPath = video_url;
+		if (video_url.startsWith("http://") || video_url.startsWith("https://")) {
+			const downloadResp = await fetch(video_url);
+			if (!downloadResp.ok) throw new Error(`Download failed: ${downloadResp.status}`);
+			const tmpDir = "/tmp/lazynext/render";
+			await fs.promises.mkdir(tmpDir, { recursive: true });
+			const ext = path.extname(new URL(video_url).pathname) || ".mp4";
+			videoPath = path.join(tmpDir, `${uuidv4()}${ext}`);
+			const buf = await downloadResp.arrayBuffer();
+			await fs.promises.writeFile(videoPath, Buffer.from(buf));
+		}
 
-	// TODO: Wire to real social-publish module
-	res.status(200).json({
-		success: true,
-		platform,
-		post_url: `https://www.${platform}.com/video/${Date.now()}`,
-		status: "published"
-	});
+		const platforms = Array.isArray(platform)
+			? platform
+			: [platform];
+
+		const results = await publish(videoPath, platforms, {
+			caption: description,
+			title,
+			tags,
+		});
+
+		const succeeded = results.filter(r => r.success);
+		const failed = results.filter(r => !r.success);
+
+		res.status(200).json({
+			success: true,
+			platform,
+			results: succeeded.map(r => ({
+				platform: r.platform,
+				post_url: r.postUrl,
+				status: "published",
+			})),
+			errors: failed.map(r => ({
+				platform: r.platform,
+				error: r.error,
+			})),
+		});
+	} catch (err: any) {
+		console.error("[Social] Publish failed:", err.message);
+		res.status(500).json({
+			success: false,
+			error: err.message,
+		});
+	}
 });
 
 /**

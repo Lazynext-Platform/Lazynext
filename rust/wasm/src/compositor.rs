@@ -858,6 +858,8 @@ pub fn render_project_frame(project_json: &str, frame_idx: u32) -> Result<(), Js
 
                             items.push(FrameItemDescriptor::Layer(LayerDescriptor {
                                 texture_id,
+                                luma_key_threshold: Some(0.0),
+                                luma_key_tolerance: Some(0.0),
                                 transform: QuadTransformDescriptor {
                                     center_x: cx,
                                     center_y: cy,

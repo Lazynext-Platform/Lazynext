@@ -66,13 +66,13 @@ Lazynext targets **7 delivery surfaces**, each at a different stage of completio
 
 | # | Format | Layer | Runtime | Completion | Status |
 |---|--------|-------|---------|------------|--------|
-| 1 | **Web App** | `apps/web` | Next.js + WASM | ████████░░ 85% | Active development |
-| 2 | **Desktop App** | `apps/desktop` | GPUI + native Rust | ██████░░░░ 60% | Alpha |
-| 3 | **Mobile App** | `apps/mobile` | React Native + UniFFI | ████░░░░░░ 40% | Early |
-| 4 | **Browser Extension** | `apps/browser-extension` | Chrome MV3 | █████░░░░░ 50% | Alpha |
-| 5 | **CLI Renderer** | `rust/cli` | Pure Rust binary | ███████░░░ 70% | Beta |
+| 1 | **Web App** | `apps/web` | Next.js + WASM | █████████░ 85% | Active development |
+| 2 | **Desktop App** | `apps/desktop` | GPUI + native Rust | █████░░░░░ 55% | Alpha |
+| 3 | **Mobile App** | `apps/mobile` | React Native + UniFFI | █████░░░░░ 55% | Alpha |
+| 4 | **Browser Extension** | `apps/browser-extension` | Chrome MV3 | █████░░░░░ 55% | Alpha |
+| 5 | **CLI Renderer** | `rust/cli` | Pure Rust binary | ███████░░░ 75% | Beta |
 | 6 | **REST API Gateway** | `rust/api-gateway` | Axum :8005 | ████████░░ 80% | Active development |
-| 7 | **MCP Server** | `rust/mcp-server` | MCP protocol | ██████░░░░ 65% | Beta |
+| 7 | **MCP Server** | `rust/mcp-server` | MCP protocol | ███████░░░ 75% | Beta |
 
 **Export format support**:
 
@@ -200,8 +200,8 @@ Operation-based CRDTs (CmRDT) with vector clocks and tombstones enable massive m
 
 The Rust compositor (`rust/crates/compositor`) is a full GPU-accelerated rendering engine:
 
-- **18 blend modes** — Screen, multiply, overlay, hard-light, and 14 more.
-- **6 GPU effect shaders** — Custom wgpu shaders for real-time effects.
+- **17 blend modes** — Screen, multiply, overlay, hard-light, and 13 more.
+- **11 GPU effect shaders** — Custom wgpu shaders for real-time effects.
 - **JFA signed distance field masking** — Fast, resolution-independent masks (`rust/crates/masks`).
 - **DeckLink I/O** — Blackmagic hardware output for broadcast monitoring (`rust/crates/decklink`).
 
@@ -321,10 +321,10 @@ lazynext/
 │   ├── crates/
 │   │   ├── audio/              # DSP: EQ, compressor, VST host
 │   │   ├── bridge/             # Inter-crate communication
-│   │   ├── compositor/         # GPU compositor (18 blend modes)
+│   │   ├── compositor/         # GPU compositor (17 blend modes)
 │   │   ├── decklink/           # Blackmagic DeckLink I/O
 │   │   ├── editor_core/        # Silence detection, scene detection
-│   │   ├── effects/            # 6 GPU effect shaders
+│   │   ├── effects/            # 11 GPU effect shaders
 │   │   ├── export/             # FFMPEG encoding (MP4, ProRes, DCP, AAF)
 │   │   ├── ffmpeg_filter/      # Type-safe filter graph builder
 │   │   ├── gpu/                # wgpu context + scopes analyzer
@@ -348,7 +348,7 @@ lazynext/
 │   ├── render-service/         # Node.js FFMPEG farm (:8003)
 │   ├── collab-server/          # Rust CRDT sync + WebRTC signaling (:8004)
 │   └── analytics-service/      # Node.js data ingestion + LTV (:8006)
-├── terraform/azure/            # Azure infrastructure as code
+├── terraform/                  # Infrastructure as code
 ├── k8s/                        # Kubernetes manifests (optional AKS)
 ├── .github/workflows/          # CI/CD (ci.yml, production.yml)
 └── docs/                       # Architecture, ADRs, runbooks, API reference
@@ -379,7 +379,7 @@ lazynext/
 
 - **CI/CD**: GitHub Actions — Rust test/lint, web test/typecheck/lint, Docker build/push, Azure Container Apps deploy.
 - **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
-- **Infrastructure as Code**: Terraform in `terraform/azure/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
+- **Infrastructure as Code**: Terraform in `terraform/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
 - **Database**: PostgreSQL 16 via Drizzle ORM. Migrations in `apps/web/src/drizzle/`. Schema in `apps/web/src/db/schema.ts`.
 
 ---

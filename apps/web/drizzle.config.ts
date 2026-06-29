@@ -11,6 +11,6 @@ export default defineConfig({
 	dbCredentials: {
 		url:
 			process.env.DATABASE_URL ||
-			"postgresql://lazynext:password123@localhost:5434/lazynext",
+			(() => { throw new Error("DATABASE_URL is required for drizzle-kit"); })(),
 	},
 });

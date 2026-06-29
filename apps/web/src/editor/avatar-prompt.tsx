@@ -9,8 +9,7 @@ export function AvatarPrompt() {
 	const handleGenerate = async () => {
 		setIsGenerating(true);
 		console.log("Requesting AI Avatar generation...");
-		// MOCK: const videoUrl = await avatarGenerator.generateAvatar(script, "voice-123");
-		// add_clip_to_timeline(videoUrl);
+		// TODO: Wire to generative-studio /generate-avatar endpoint (backend exists)
 
 		setTimeout(() => {
 			setIsGenerating(false);

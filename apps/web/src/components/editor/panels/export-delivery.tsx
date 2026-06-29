@@ -29,7 +29,7 @@ export function ExportDelivery({
 				// Local WASM Render
 				const durationFrames = (projectData.duration || 10) * (projectData.framerate || 60);
 				const fps = projectData.framerate || 60;
-				const width = 1920; // TODO: Pull from settings
+				const width = projectData.width || 1920;
 				const height = 1080;
 				
 				const blob = await dispatchExport(width, height, durationFrames, fps, (progress) => {

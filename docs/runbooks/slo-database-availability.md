@@ -254,5 +254,5 @@ FROM pg_stat_replication;
 ## References
 - Azure PostgreSQL Flexible Server documentation: `https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/`
 - Prometheus PostgreSQL exporter: `https://github.com/prometheus-community/postgres_exporter`
-- Lazynext Infrastructure Terraform: `/Users/avaspatel/Lazynext/terraform/azure/`
+- Lazynext Infrastructure Terraform: `terraform/`
 - Multi-burn-rate alert methodology: `https://sre.google/workbook/alerting-on-slos/`

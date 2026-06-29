@@ -4,45 +4,63 @@ use lazynext_core::NLEState;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum Commands {
     /// Natural language prompt for AI-powered editing
-    #[arg(short, long)]
-    prompt: Option<String>,
+    Edit {
+        /// The intent to process
+        prompt: String,
 
-    /// The ID of the project to render
-    #[arg(short = 'r', long)]
-    render_project: Option<String>,
+        /// Optional project file to load and save to
+        #[arg(short, long)]
+        file: Option<String>,
 
-    /// Output format (mp4, mov, prores, dcp, aaf)
-    #[arg(short, long, default_value = "mp4")]
-    format: String,
+        /// Provider for LLM (openai, anthropic, gemini, ollama)
+        #[arg(long, default_value = "ollama")]
+        llm_provider: String,
+    },
+    /// Render a project
+    Render {
+        /// The ID of the project to render
+        project: String,
 
-    /// Output resolution width
-    #[arg(long, default_value_t = 1920)]
-    width: u32,
+        /// Output format (mp4, mov, prores, dcp, aaf)
+        #[arg(short, long, default_value = "mp4")]
+        format: String,
 
-    /// Output resolution height
-    #[arg(long, default_value_t = 1080)]
-    height: u32,
+        /// Output resolution width
+        #[arg(long, default_value_t = 1920)]
+        width: u32,
 
-    /// Framerate for export
-    #[arg(long, default_value_t = 24)]
-    framerate: u32,
+        /// Output resolution height
+        #[arg(long, default_value_t = 1080)]
+        height: u32,
 
-    /// Provider for LLM (openai, anthropic, gemini, ollama)
-    #[arg(long, default_value = "ollama")]
-    llm_provider: String,
+        /// Framerate for export
+        #[arg(long, default_value_t = 24)]
+        framerate: u32,
 
-    /// Export duration in seconds (default 10)
-    #[arg(long, default_value_t = 10)]
-    duration: u32,
+        /// Export duration in seconds (default 10)
+        #[arg(long, default_value_t = 10)]
+        duration: u32,
 
-    /// Enable progress bar (requires indicatif crate feature)
-    #[arg(long, default_value_t = false)]
-    progress: bool,
-
-    /// Batch render: comma-separated project IDs
-    #[arg(short, long)]
-    batch: Option<String>,
+        /// Enable progress bar
+        #[arg(long, default_value_t = false)]
+        progress: bool,
+    },
+    /// Batch render multiple projects
+    BatchRender {
+        /// Comma-separated project IDs
+        projects: String,
+        
+        /// Output format
+        #[arg(short, long, default_value = "mp4")]
+        format: String,
+    },
 }
 
 #[tokio::main]
@@ -51,94 +69,150 @@ async fn main() {
 
     println!("🚀 Lazynext Headless CLI v{}", env!("CARGO_PKG_VERSION"));
 
-    // We pass the LLM provider explicitly to the intent instead of using set_var.
+    match &args.command {
+        Commands::Edit { prompt, file, llm_provider } => {
+            println!("🤖 AI Intent: {}", prompt);
 
-    if let Some(prompt) = args.prompt {
-        println!("🤖 AI Intent: {}", prompt);
+            let editor = lazynext_core::autonomous::AutonomousEditor::new();
+            let intent = lazynext_core::autonomous::VideoIntent {
+                prompt: prompt.clone(),
+                require_plan_approval: true,
+                source_files: vec![],
+                llm_provider: Some(llm_provider.clone()),
+            };
 
-        let editor = lazynext_core::autonomous::AutonomousEditor::new();
-        let intent = lazynext_core::autonomous::VideoIntent {
-            prompt,
-            require_plan_approval: true,
-            source_files: vec![],
-            llm_provider: Some(args.llm_provider),
-        };
-
-        let mut engine = NLEState::new(
-            "cli_session".to_string(),
-            "CLI AI Edit".to_string(),
-            args.framerate,
-        );
-
-        match editor.process_intent_with_llm(&mut engine, &intent).await {
-            Ok(msg) => {
-                println!("✅ {}", msg);
-                println!(
-                    "📊 Result: {} tracks",
-                    engine.get_project_data().tracks.len()
-                );
-                for track in &engine.get_project_data().tracks {
-                    println!(
-                        "   Track '{}' ({}) — {} clips",
-                        track.id,
-                        track.kind,
-                        track.clips.len()
+            let mut engine = if let Some(path) = file {
+                if std::path::Path::new(path).exists() {
+                    println!("📂 Loading project from file: {}", path);
+                    let content = std::fs::read_to_string(path).expect("Failed to read project file");
+                    let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content).expect("Failed to parse project JSON");
+                    
+                    let mut eng = NLEState::new(
+                        project_data.id.clone(),
+                        project_data.name.clone(),
+                        project_data.framerate,
                     );
+                    for track in project_data.tracks {
+                        eng.add_track(track.id.clone(), track.kind.clone());
+                        let track_idx = eng.get_project_data().tracks.len() - 1;
+                        for clip in track.clips {
+                            eng.add_clip_to_track(
+                                track_idx,
+                                clip.id.clone(),
+                                clip.clip_type.clone(),
+                                clip.name.clone(),
+                                clip.start,
+                                clip.end - clip.start, // duration
+                            );
+                        }
+                    }
+                    eng
+                } else {
+                    NLEState::new(
+                        "cli_session".to_string(),
+                        "CLI AI Edit".to_string(),
+                        24,
+                    )
+                }
+            } else {
+                NLEState::new(
+                    "cli_session".to_string(),
+                    "CLI AI Edit".to_string(),
+                    24,
+                )
+            };
+
+            match editor.process_intent_with_llm(&mut engine, &intent).await {
+                Ok(msg) => {
+                    println!("✅ {}", msg);
+                    println!(
+                        "📊 Result: {} tracks",
+                        engine.get_project_data().tracks.len()
+                    );
+                    for track in &engine.get_project_data().tracks {
+                        println!(
+                            "   Track '{}' ({}) — {} clips",
+                            track.id,
+                            track.kind,
+                            track.clips.len()
+                        );
+                    }
+                    
+                    if let Some(path) = file {
+                        println!("💾 Saving project back to file: {}", path);
+                        let project_json = serde_json::to_string_pretty(engine.get_project_data()).expect("Failed to serialize project");
+                        std::fs::write(path, project_json).expect("Failed to write project file");
+                    }
+                }
+                Err(e) => eprintln!("❌ Failed: {}", e),
+            }
+        }
+        Commands::BatchRender { projects: batch, format } => {
+            let projects: Vec<&str> = batch.split(',').map(|s| s.trim()).collect();
+            println!("🎬 Batch rendering {} projects...", projects.len());
+            let mut success = 0;
+            let mut failed = 0;
+            let start = std::time::Instant::now();
+
+            for (i, project) in projects.iter().enumerate() {
+                println!("\n📂 [{}/{}] Rendering: {}", i + 1, projects.len(), project);
+                // We fake the args struct here for the existing render_single fn
+                let mock_args = RenderArgs {
+                    format: format.clone(),
+                    width: 1920,
+                    height: 1080,
+                    framerate: 24,
+                    duration: 10,
+                    progress: false,
+                };
+                match render_single(project, &mock_args).await {
+                    Ok(path) => {
+                        println!("✅ Completed: {}", path);
+                        success += 1;
+                    }
+                    Err(e) => {
+                        eprintln!("❌ Failed: {}", e);
+                        failed += 1;
+                    }
                 }
             }
-            Err(e) => eprintln!("❌ Failed: {}", e),
+
+            let elapsed = start.elapsed();
+            println!(
+                "\n🏁 Batch complete in {:.1}s: {} succeeded, {} failed",
+                elapsed.as_secs_f64(),
+                success,
+                failed
+            );
         }
-        return;
-    }
-
-    // ── Batch render mode ──────────────────────────────────────────
-    if let Some(ref batch) = args.batch {
-        let projects: Vec<&str> = batch.split(',').map(|s| s.trim()).collect();
-        println!("🎬 Batch rendering {} projects...", projects.len());
-        let mut success = 0;
-        let mut failed = 0;
-        let start = std::time::Instant::now();
-
-        for (i, project) in projects.iter().enumerate() {
-            println!("\n📂 [{}/{}] Rendering: {}", i + 1, projects.len(), project);
-            match render_single(project, &args).await {
-                Ok(path) => {
-                    println!("✅ Completed: {}", path);
-                    success += 1;
-                }
-                Err(e) => {
-                    eprintln!("❌ Failed: {}", e);
-                    failed += 1;
-                }
+        Commands::Render { project, format, width, height, framerate, duration, progress } => {
+            let mock_args = RenderArgs {
+                format: format.clone(),
+                width: *width,
+                height: *height,
+                framerate: *framerate,
+                duration: *duration,
+                progress: *progress,
+            };
+            match render_single(project, &mock_args).await {
+                Ok(path) => println!("✅ Export complete: {}", path),
+                Err(e) => eprintln!("❌ Export failed: {}", e),
             }
         }
-
-        let elapsed = start.elapsed();
-        println!(
-            "\n🏁 Batch complete in {:.1}s: {} succeeded, {} failed",
-            elapsed.as_secs_f64(),
-            success,
-            failed
-        );
-        return;
-    }
-
-    if let Some(ref project) = args.render_project {
-        match render_single(project, &args).await {
-            Ok(path) => println!("✅ Export complete: {}", path),
-            Err(e) => eprintln!("❌ Export failed: {}", e),
-        }
-        return;
-    }
-
-    {
-        println!("Usage: lazynext-cli --prompt \"Make a 30s promo\"");
-        println!("       lazynext-cli --render-project my_project --format mp4");
     }
 }
 
+struct RenderArgs {
+    format: String,
+    width: u32,
+    height: u32,
+    framerate: u32,
+    duration: u32,
+    progress: bool,
+}
+
 /// Render a single project to the specified output format.
-async fn render_single(project: &str, args: &Args) -> Result<String, String> {
+async fn render_single(project: &str, args: &RenderArgs) -> Result<String, String> {
     println!("📂 Loading project: {}", project);
 
     // Try to load project from disk if it exists
@@ -155,8 +229,8 @@ async fn render_single(project: &str, args: &Args) -> Result<String, String> {
             project_data.name.clone(),
             project_data.framerate,
         );
-        // HACK: For now we just load the ProjectData by executing a private setter or re-creating it.
-        // Wait, there is no set_project_data. Let's just create a new engine and manually add tracks/clips from the data.
+        // Reconstruct engine from project data by iterating tracks and clips.
+        // Note: there is no set_project_data — we rebuild via public API.
         for track in project_data.tracks {
             eng.add_track(track.id.clone(), track.kind.clone());
             let track_idx = eng.get_project_data().tracks.len() - 1;

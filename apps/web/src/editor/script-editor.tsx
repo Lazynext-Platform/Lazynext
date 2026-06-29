@@ -5,6 +5,7 @@ export function ScriptEditor() {
 	const { time } = useWasm();
 	const [selectedText, setSelectedText] = useState("");
 
+	// TODO: Wire to project transcript data (backend: pre-processing /transcribe, ai-agents orchestrator)
 	const mockScript = [
 		{ id: "sentence_1", text: "INT. SPACESHIP - DAY" },
 		{

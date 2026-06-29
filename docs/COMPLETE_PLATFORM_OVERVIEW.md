@@ -1,5 +1,7 @@
-# Lazynext: The Ultimate AI-Native Video Editor
-### Feature Parity Overview
+# Lazynext: AI-Native Video Editor — Feature Roadmap
+### Aspirational Feature Overview
+
+> **Status (2026-06-30):** This document describes the product vision. Not all features listed are fully implemented — many are in development or planned. See `docs/missing_features.md` for current missing feature list and `PLATFORM_ASSESSMENT.md` for verified completion percentages (~70% platform-wide).
 
 This document serves as the **master list** of everything Lazynext is now capable of doing via the AI Copilot. By mapping traditional manual workflows into AI-native text and voice commands, Lazynext effectively replaces Premiere Pro, After Effects, DaVinci Resolve, CapCut, Descript, and more.
 

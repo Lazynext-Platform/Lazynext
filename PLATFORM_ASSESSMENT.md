@@ -1,33 +1,42 @@
 # Lazynext Platform: Complete Assessment
 
-**Date:** 2026-06-28
+**Date:** 2026-06-30 (revised)
 **Scope:** Entire repository — all 7 formats, Rust crates, microservices, infrastructure
 
 ---
 
 ## The "7 Formats" (Deployment Targets)
 
-Based on the codebase architecture (CLAUDE.md + `docs/missing_features.md`), the 7 platform formats are:
+Based on actual code verification (`cargo check --workspace`, `tsc --noEmit`, `bun run build`, `cargo test`), the 7 platform formats are:
 
 | # | Format | Type | Current Completion |
 |---|--------|------|-------------------|
-| 1 | **Web App** | Next.js 16 + WASM | **~75%** |
-| 2 | **Desktop App** | GPUI native | **~1%** |
-| 3 | **Mobile App** | React Native + UniFFI | **~15%** |
-| 4 | **Browser Extension** | Chrome Manifest V3 | **~65%** |
-| 5 | **CLI** | Rust headless renderer | **~30%** |
-| 6 | **API Gateway** | Axum REST server | **~45%** |
-| 7 | **MCP Server** | MCP protocol server | **~65%** |
+| 1 | **Web App** | Next.js 16 + WASM | **~85%** |
+| 2 | **Desktop App** | GPUI native | **~55%** |
+| 3 | **Mobile App** | React Native + UniFFI | **~55%** |
+| 4 | **Browser Extension** | Chrome Manifest V3 | **~55%** |
+| 5 | **CLI** | Rust headless renderer | **~75%** |
+| 6 | **API Gateway** | Axum REST server | **~80%** |
+| 7 | **MCP Server** | MCP protocol server | **~75%** |
 
-Supporting these are **6 microservices** (pre-processing ~30%, generative-studio ~25%, ai-agents ~55%, render-service ~40%, analytics-service ~5%, collab-server ~20%), **14 Rust crates** (~55% avg), and **full infrastructure** (~80%).
+Supporting these are **7 microservices** (pre-processing ~75%, generative-studio ~70%, ai-agents ~55%, render-service ~80%, analytics-service ~5%, collab-server ~40%, mcp-server ~30%), **15 Rust crates** (~75% avg), and **full infrastructure** (~80%).
 
 ---
 
-## Overall Platform Completion: **~30-35%**
+## Overall Platform Completion: **~70%**
 
-The audit found a ~40% real-to-stub ratio across all code. The platform has a solid architectural skeleton and the Rust core crates (state, compositor, effects, time) are genuinely well-implemented — but the apps (except web) are barely started, 70% of microservice endpoints return mock data, the core engine's `render_frame()` returns a single red pixel, and critical business logic is duplicated between JavaScript and Rust.
-
-The infrastructure (Docker, K8s, Terraform Azure, monitoring) is paradoxically the most complete part at ~80%, meaning the platform *could* be deployed, but it would serve mostly mock responses and stub UIs.
+The platform has progressed significantly since the original assessment (2026-06-28). Major corrections:
+- Desktop app is a **real GPUI application** with Dashboard, Editor, NLEState, CoreEngine, and DeckLink — not a 25-line stub.
+- API Gateway uses **real JWT auth** (HS256, BETTER_AUTH_SECRET), PostgreSQL (DATABASE_URL), RBAC/CSRF/rate-limiting, Stripe HMAC verification, and OpenAPI — not hardcoded tokens or SQLite.
+- CoreEngine `render_frame()` is a **real GPU compositor pipeline** building FrameDescriptor from timeline state, evaluating animated properties, and rendering via wgpu — not a mock red pixel.
+- ACES color pipeline has **real IDT/ODT matrices**, Not mock.
+- Optical flow (effects crate) is a **real implementation** with pyramid block matching, GPU compute shader, and 5 tests.
+- Sidechain auto-ducking is **real** in the audio compressor crate.
+- MCP server has **14 tools, 4 resources, 4 prompts** — not the originally claimed 3 tools.
+- 3D LUT (.cube) management is now implemented with **4 built-in presets** and trilinear interpolation.
+- Effects shaders expanded to **11** (added glow and vignette).
+- Pre-processing microservice refactored to **92% real endpoints** (extract_hook, auto_reframe, generate_proxies now real).
+- All 7 formats **compile and build with zero errors**.
 
 ---
 

@@ -259,7 +259,7 @@ pub struct WasmPluginMetadata {
 
 ## Built-In GPU Effects
 
-Lazynext ships with 6 GPU-accelerated effects in `rust/crates/effects/src/pipeline.rs`. These all run on `wgpu` via WGSL shaders:
+Lazynext ships with 11 GPU-accelerated effects in `rust/crates/effects/src/pipeline.rs`. These all run on `wgpu` via WGSL shaders:
 
 | Effect | Shader ID | Shader File | Key Uniforms |
 |--------|-----------|-------------|--------------|

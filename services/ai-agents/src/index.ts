@@ -1,9 +1,10 @@
 import "./tracing";
 import express from "express";
 import { createServer } from "http";
-import { setupSyncServer } from "./sync";
+import { setupSyncServer, broadcastCrdtPatch } from "./sync";
 import { decomposeIntent, executePlan } from "./orchestrator";
 import { generateBroll, generateDub } from "./generative";
+import { setupMcpServers } from "./mcp";
 
 const app = express();
 const port = process.env.PORT || 8002;
@@ -29,13 +30,13 @@ app.post("/generative/dub", generateDub);
  * otherwise falls back to rule-based planning.
  */
 app.post("/orchestrate", async (req, res) => {
-  const { prompt } = req.body as { prompt?: string };
+  const { prompt, projectId } = req.body as { prompt?: string; projectId?: string };
 
   if (!prompt) {
     return res.status(400).json({ error: "Missing prompt" });
   }
 
-  console.log(`[AI-Agents] Orchestrating: "${prompt}"`);
+  console.log(`[AI-Agents] Orchestrating: "${prompt}" for project: ${projectId || "unknown"}`);
 
   try {
     const plan = await decomposeIntent(prompt);
@@ -44,6 +45,16 @@ app.post("/orchestrate", async (req, res) => {
     );
 
     const result = await executePlan(plan);
+
+    // Apply the CRDT patches autonomously via WebSocket to the connected clients
+    if (projectId) {
+      for (const res of result.results) {
+        if (res.crdt_patches && res.crdt_patches.length > 0) {
+          // Push autonomous AI edits directly to the timeline room
+          broadcastCrdtPatch(projectId, res.crdt_patches);
+        }
+      }
+    }
 
     res.json({
       success: result.success,
@@ -87,6 +98,8 @@ app.get("/health", (_req, res) => {
 
 const httpServer = createServer(app);
 setupSyncServer(httpServer);
+
+await setupMcpServers();
 
 httpServer.listen(port, () => {
   console.log(

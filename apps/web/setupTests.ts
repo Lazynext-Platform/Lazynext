@@ -20,11 +20,9 @@ globalThis.indexedDB = {
 	},
 } as any;
 
-// We need to require it dynamically or use import, but since we are in a mock factory:
+// Initialize the real WASM instance so CPU logic works in tests
 import * as originalWasm from "lazynext-wasm";
 import { readFileSync } from "fs";
-
-// Initialize the real WASM instance so CPU logic works in tests
 try {
 	const wasmPath = import.meta.resolveSync("lazynext-wasm/lazynext_wasm_bg.wasm").replace("file://", "");
 	originalWasm.initSync({ module: readFileSync(wasmPath) });

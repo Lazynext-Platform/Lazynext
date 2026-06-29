@@ -64,11 +64,13 @@ TypeScript resolves `EffectPass[]` from effect definitions. Each pass contains:
 - `shader` — a stable identifier such as `"gaussian-blur"`
 - `uniforms` — resolved numeric values for that pass
 
-Rust maps the shader identifier to a precompiled WGSL pipeline in `rust/crates/gpu/src/shader_registry.rs`. Non-linear GPU work such as signed-distance-field generation and mask feathering lives in dedicated Rust pipeline modules, not in TypeScript orchestration.
+Rust maps the shader identifier to a precompiled WGSL pipeline in `rust/crates/effects/src/pipeline.rs`. Non-linear GPU work such as signed-distance-field generation and mask feathering lives in dedicated Rust pipeline modules, not in TypeScript orchestration.
 
 ## Writing shaders
 
-Effect-specific WGSL shaders live in `rust/crates/gpu/src/shaders/`. Add the shader file there, then register its identifier in `rust/crates/gpu/src/shader_registry.rs`.
+Effect-specific WGSL shaders live in `rust/crates/effects/src/shaders/`. Add the shader file there, then register its identifier in `rust/crates/effects/src/pipeline.rs`.
+
+Current shaders (11 total): `gaussian_blur.wgsl`, `chroma_key.wgsl`, `glitch.wgsl`, `color_grade.wgsl`, `fire.wgsl`, `portal.wgsl`, `vhs.wgsl`, `crt.wgsl`, `lut_3d.wgsl`, `glow.wgsl`, `vignette.wgsl`. Infrastructure shaders (blit, compositor, fullscreen, scopes) live in `rust/crates/gpu/src/shaders/`.
 
 Available uniforms (automatically injected, no need to pass them manually):
 

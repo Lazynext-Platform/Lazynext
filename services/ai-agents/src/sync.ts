@@ -48,8 +48,10 @@ function verifyToken(token: string): { sub: string; email: string; role: string 
   }
 }
 
+let ioInstance: SocketIOServer | null = null;
+
 export function setupSyncServer(httpServer: HttpServer) {
-  const io = new SocketIOServer(httpServer, {
+  ioInstance = new SocketIOServer(httpServer, {
     cors: {
       origin:
         process.env.NODE_ENV === "production"
@@ -70,7 +72,7 @@ export function setupSyncServer(httpServer: HttpServer) {
   });
 
   // Auth middleware — validate the token sent in the handshake `auth` field
-  io.use((socket, next) => {
+  ioInstance.use((socket, next) => {
     const token = socket.handshake.auth?.token as string | undefined;
     if (!token) {
       console.warn(`[Sync] Rejected connection: no auth token (${socket.id})`);
@@ -89,7 +91,7 @@ export function setupSyncServer(httpServer: HttpServer) {
     next();
   });
 
-  io.on("connection", (socket) => {
+  ioInstance.on("connection", (socket) => {
     const user = (socket as any).__user as { sub: string; email: string; role: string };
     console.log(`[Sync] Editor connected: ${socket.id} (${user.email})`);
 
@@ -147,4 +149,15 @@ export function setupSyncServer(httpServer: HttpServer) {
   });
 
   console.log("[Sync] WebSocket CRDT Server initialized (auth required).");
+}
+
+export function broadcastCrdtPatch(projectId: string, patch: any) {
+  if (ioInstance) {
+    console.log(`[Sync] Broadcasting autonomous AI CRDT patch to project ${projectId}`);
+    ioInstance.to(projectId).emit("crdt_delta", {
+      projectId,
+      delta: JSON.stringify(patch),
+      sender: "AI_AGENT",
+    });
+  }
 }

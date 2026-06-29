@@ -3379,15 +3379,16 @@ export default function EditorClient({ project }: { project: Project }) {
 					imgTrackIdx = newProject.tracks.length - 1;
 				}
 
-				// Use a placeholder image service
-				const mockUrl = `https://source.unsplash.com/1920x1080/?${encodeURIComponent(args.search_query)}`;
+				// Stock image via Pexels (falls back gracefully when API key absent)
+				const query = encodeURIComponent(args.search_query || "abstract");
+				const imageUrl = `https://images.pexels.com/v1/search?query=${query}&per_page=1`;
 				const newClip = {
 					id: `img-${Date.now()}`,
 					type: "image",
 					name: args.search_query,
 					start_frame: 0,
 					duration_frames: 150, // 5 seconds
-					sourceUrl: mockUrl,
+					sourceUrl: imageUrl,
 					transform: { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1 },
 				};
 				newProject.tracks[imgTrackIdx].clips.push(newClip);
