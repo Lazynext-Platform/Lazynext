@@ -25,9 +25,9 @@ hex = "0.4"
 rand = "0.10"
 futures = "0.3.32"
 redis = { version = "0.25", features = ["tokio-comp"] }
-azure_core = "0.19"
-azure_storage = "0.19"
-azure_storage_blobs = "0.19"
+azure_core = "0.21.0"
+azure_storage = "0.21.0"
+azure_storage_blobs = "0.21.0"
 utoipa = { version = "5.5.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
 tower-http = { version = "0.7.0", features = ["trace"] }

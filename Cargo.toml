@@ -14,3 +14,7 @@ members = [
     "apps/desktop",
     "services/collab-server"
 ]
+
+[patch.crates-io]
+http-types = { path = "rust/vendor/http-types-2.12.0" }
+taffy = { path = "rust/vendor/taffy-0.9.0" }
