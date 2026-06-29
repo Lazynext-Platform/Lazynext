@@ -24,7 +24,7 @@ jobs:
     name: Rust Core — Test & Build WASM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           submodules: false
 
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload WASM Package
         if: hashFiles('rust/wasm/pkg/lazynext_wasm.js') != ''
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: wasm-pkg
           path: rust/wasm/pkg/
@@ -68,7 +68,7 @@ jobs:
     name: Python Microservices — Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -94,7 +94,7 @@ jobs:
     needs: rust-core
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           submodules: false
 
@@ -104,7 +104,7 @@ jobs:
           bun-version: latest
 
       - name: Download WASM Package
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: wasm-pkg
           path: rust/wasm/pkg/
@@ -186,7 +186,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -222,7 +222,7 @@ jobs:
       HAS_AZURE: ${{ secrets.AZURE_CLIENT_ID != '' }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           submodules: false
 
@@ -232,7 +232,7 @@ jobs:
           driver-opts: network=host
 
       - name: Download WASM Package (for Docker)
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: wasm-pkg
           path: rust/wasm/pkg/

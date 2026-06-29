@@ -34,7 +34,7 @@ jobs:
       backup-timestamp: ${{ steps.backup.outputs.timestamp }}
       backup-size: ${{ steps.backup.outputs.size }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -88,7 +88,7 @@ jobs:
             --yes 2>/dev/null || true
 
       - name: Upload Backup Artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ format('pg-backup-{0}-{1}', github.event.inputs.restore-target || 'staging', steps.backup.outputs.timestamp) }}
           path: "backup-*.dump"
@@ -100,10 +100,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: [backup-snapshot]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Download Backup Artifact
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v4
         with:
           name: ${{ format('pg-backup-{0}-{1}', github.event.inputs.restore-target || 'staging', needs.backup-snapshot.outputs.backup-timestamp) }}
 
@@ -162,7 +162,7 @@ jobs:
 
       - name: Upload Restore Log
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: restore-verification-log
           path: restore-output.txt
@@ -174,7 +174,7 @@ jobs:
     needs: [backup-snapshot, restore-test]
     if: github.event.inputs.validate-rows != 'false'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2

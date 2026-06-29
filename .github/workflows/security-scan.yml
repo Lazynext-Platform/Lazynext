@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Run Trivy — Misconfigurations + Secrets
         uses: aquasecurity/trivy-action@master
@@ -45,7 +45,7 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v5
@@ -70,7 +70,7 @@ jobs:
       matrix:
         language: ["javascript-typescript", "python", "actions"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Run tfsec
         uses: aquasecurity/tfsec-pr-commenter-action@v1
@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Run kubesec on Base Manifests
         run: |
@@ -182,7 +182,7 @@ jobs:
     name: Secret & Credential Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

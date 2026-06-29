@@ -49,7 +49,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -77,7 +77,7 @@ jobs:
             -- --output-format bencher 2>&1 | tee bench-pr.txt || echo "::warning ::Some benchmarks failed"
 
       - name: Stash PR Bench Results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: bench-results-pr
           path: bench-pr.txt
@@ -95,7 +95,7 @@ jobs:
             -- --output-format bencher 2>&1 | tee bench-base.txt || echo "::warning ::Some benchmarks failed"
 
       - name: Stash Base Bench Results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: bench-results-base
           path: bench-base.txt
@@ -181,7 +181,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -262,7 +262,7 @@ jobs:
 
       - name: Upload Lighthouse Report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: lighthouse-report
           path: .lighthouseci/
@@ -276,7 +276,7 @@ jobs:
       always() &&
       (github.event_name == 'workflow_dispatch' || needs.check-label.outputs.should-run == 'true')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Install Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -405,7 +405,7 @@ jobs:
     needs: [rust-bench, web-bench, render-bench]
     if: always() && github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Build and Post Comment
         uses: actions/github-script@v7

@@ -89,7 +89,7 @@ jobs:
       checksums_valid: ${{ steps.verify.outputs.valid }}
       changed_models: ${{ steps.verify.outputs.changed }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -181,10 +181,10 @@ jobs:
       github.event_name == 'schedule' ||
       (github.event_name == 'push' && needs.verify-checksums.outputs.checksums_valid == 'false')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Cache HuggingFace Models
-        uses: actions/cache@v6
+        uses: actions/cache@v4
         with:
           path: ${{ env.HF_HOME }}
           key: hf-models-${{ runner.os }}-${{ hashFiles(env.MODEL_REGISTRY) }}
@@ -218,7 +218,7 @@ jobs:
           cat /tmp/checksums.txt
 
       - name: Upload Model Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: tf-models-${{ github.sha }}
           path: ${{ env.MODEL_BASE_PATH }}/
@@ -256,7 +256,7 @@ jobs:
           --health-start-period 60s
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Wait for TF Serving
         run: |
@@ -407,7 +407,7 @@ jobs:
         shell: python
 
       - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-results-${{ github.sha }}
           path: benchmark-results.json
@@ -460,7 +460,7 @@ jobs:
     environment:
       name: production
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -593,7 +593,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5

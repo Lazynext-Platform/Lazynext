@@ -14,7 +14,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
@@ -45,7 +45,7 @@ jobs:
         uniffi-bindgen generate src/engine.udl --language kotlin --out-dir ../../apps/mobile/android/bindings
 
     - name: Upload Bindings Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mobile-bindings
         path: |
