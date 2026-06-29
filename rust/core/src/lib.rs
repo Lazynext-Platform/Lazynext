@@ -1,3 +1,8 @@
+#![allow(
+    clippy::needless_borrows_for_generic_args,
+    clippy::type_complexity,
+    clippy::collapsible_if
+)]
 pub mod ai_client;
 pub mod autonomous;
 pub mod engine;

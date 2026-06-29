@@ -224,6 +224,7 @@ fn cubic_bezier_y(t: f64, y1: f64, y2: f64) -> f64 {
 }
 
 /// Evaluates a 2D cubic bezier given an absolute target x (time) and 4 control points.
+#[allow(clippy::too_many_arguments)]
 fn solve_absolute_cubic_bezier(
     target_x: f64,
     x0: f64,

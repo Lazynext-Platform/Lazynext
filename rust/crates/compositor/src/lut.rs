@@ -357,7 +357,7 @@ impl Lut3D {
 
         // Trilinear interpolation across the 8 corners
         let mut result = [0.0f32; 3];
-        for c in 0..3 {
+        for (c, item) in result.iter_mut().enumerate() {
             let c000 = sample(r0, g0, b0, c);
             let c100 = sample(r1, g0, b0, c);
             let c010 = sample(r0, g1, b0, c);
@@ -375,7 +375,7 @@ impl Lut3D {
             let c0 = lerp(c00, c10, gf_frac);
             let c1 = lerp(c01, c11, gf_frac);
 
-            result[c] = lerp(c0, c1, bf_frac);
+            *item = lerp(c0, c1, bf_frac);
         }
 
         (result[0], result[1], result[2])
