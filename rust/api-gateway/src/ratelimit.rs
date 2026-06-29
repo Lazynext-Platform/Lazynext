@@ -158,7 +158,7 @@ pub async fn rate_limit(
     };
 
     let key = format!("ratelimit:{}:{}:{}", req.uri().path(), config.capacity, ip);
-    let mut con = match state.ws_state.redis_client.get_async_connection().await {
+    let mut con = match state.ws_state.redis_client.get_multiplexed_async_connection().await {
         Ok(c) => c,
         Err(_) => return Ok(next.run(req).await), // fallback bypass if Redis fails
     };
