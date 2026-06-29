@@ -9,7 +9,7 @@
 
 global:
   resolve_timeout: 5m
-  slack_api_url: "https://hooks.slack.com/services/REPLACE_WITH_SLACK_WEBHOOK"
+  slack_api_url: "${SLACK_WEBHOOK_URL}"
   pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
 
 # ── Route Tree ───────────────────────────────────────────────────
@@ -76,7 +76,7 @@ receivers:
 
   - name: "pagerduty-critical"
     pagerduty_configs:
-      - routing_key: "REPLACE_WITH_PAGERDUTY_INTEGRATION_KEY"
+      - routing_key: "${PAGERDUTY_INTEGRATION_KEY}"
         severity: "critical"
         description: "{{ .CommonAnnotations.description }}"
         client: "Lazynext Monitoring"
@@ -88,7 +88,7 @@ receivers:
         from: "alerts@lazynext.ai"
         smarthost: "smtp.resend.com:587"
         auth_username: "resend"
-        auth_password: "REPLACE_WITH_RESEND_API_KEY"
+        auth_password: "${RESEND_API_KEY}"
         headers:
           Subject: "[Lazynext DB] {{ .GroupLabels.alertname }}"
 

@@ -11,16 +11,12 @@ def test_read_root():
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "service": "pre-processing"}
 
-def test_transcribe_audio_dev_fallback(monkeypatch):
+def test_transcribe_audio_missing_file(monkeypatch):
     monkeypatch.setenv("APP_ENV", "development")
+    monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
-    assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is True
-    assert data["video_id"] == "test_video_123"
-    assert data["source"] == "dev-fallback"
-    assert "subtitles" in data
-    assert len(data["subtitles"]) > 0
+    assert response.status_code == 404
+    assert "Video file not found" in response.json()["detail"]
 
 def test_transcribe_audio_production_no_key(monkeypatch):
     monkeypatch.setenv("APP_ENV", "production")
@@ -50,31 +46,22 @@ def test_process_video():
     assert "unknown" in ops
     assert ops["unknown"]["status"] == "unknown_operation"
 
-def test_rotoscope_video_fallback(monkeypatch):
+def test_rotoscope_video_unavailable(monkeypatch):
     monkeypatch.setenv("APP_ENV", "development")
     response = client.post("/rotoscope", json={
         "video_id": "vid_789",
         "object_prompt": "car"
     })
-    assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is True
-    assert data["video_id"] == "vid_789"
-    assert data["object_prompt"] == "car"
-    assert data["model"] in ["sam2", "dev-fallback"]
-    assert "mask_url" in data
+    # Will be 503 because TF serving is unreachable and local SAM2 fails
+    assert response.status_code == 503
+    assert "Rotoscoping unavailable" in response.json()["detail"]
 
-def test_nerf_extract_fallback(monkeypatch):
+def test_nerf_extract_unavailable(monkeypatch):
     monkeypatch.setenv("APP_ENV", "development")
     response = client.post("/nerf-extract", json={
         "video_id": "vid_nerf",
         "method": "instant-ngp"
     })
-    assert response.status_code == 200
-    data = response.json()
-    assert data["success"] is True
-    assert data["video_id"] == "vid_nerf"
-    assert data["method"] == "instant-ngp"
-    assert data["model"] in ["nerfacto", "dev-fallback"]
-    assert "model_url" in data
-    assert "preview_url" in data
+    # Will be 503 because nerfstudio is not installed
+    assert response.status_code == 503
+    assert "NeRF extraction unavailable" in response.json()["detail"]

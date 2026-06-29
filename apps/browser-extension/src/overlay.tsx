@@ -12,6 +12,8 @@ function OverlayEditor() {
   const [isRecording, setIsRecording] = useState(false);
   const [status, setStatus] = useState<string>("");
 
+  const [ws, setWs] = useState<WebSocket | null>(null);
+
   useEffect(() => {
     // Mock project fetching for extension
     // In production, this would fetch from the API gateway using an extension auth token
@@ -23,6 +25,28 @@ function OverlayEditor() {
       ]);
       setSelectedProjectId("proj_1");
     }, 500);
+
+    // Connect WebSocket to Desktop / API Gateway
+    const socket = new WebSocket("ws://localhost:8005/ws/extension");
+    socket.onopen = () => {
+      console.log("[Extension] Connected to Lazynext WebSocket");
+    };
+    socket.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "SYNC_STATUS") {
+          setStatus("Synced with Desktop.");
+        }
+      } catch(e) {}
+    };
+    socket.onerror = () => {
+      console.warn("[Extension] WebSocket connection failed. Using fallback REST APIs.");
+    };
+    setWs(socket);
+
+    return () => {
+      socket.close();
+    };
   }, []);
 
   const handleRecord = () => {
@@ -37,12 +61,28 @@ function OverlayEditor() {
     setTimeout(() => {
       setIsRecording(false);
       setStatus("Recording saved to project!");
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+          type: "ADD_CLIP",
+          projectId: selectedProjectId,
+          payload: { type: "video", source: "extension-record", duration: 10 }
+        }));
+      }
     }, 10000);
   };
 
   const handleExtract = () => {
     window.parent.postMessage({ type: "EXTRACT_VIDEO" }, "*");
     setStatus("Extracting video assets from page...");
+    
+    // Simulate sending an edit intent over WebSocket
+    if (ws && ws.readyState === WebSocket.OPEN && selectedProjectId) {
+      ws.send(JSON.stringify({
+        type: "AUTONOMOUS_EDIT",
+        projectId: selectedProjectId,
+        prompt: "Extract videos from current page and add to timeline"
+      }));
+    }
   };
 
   return (

@@ -6,6 +6,10 @@
 		"start": "bun run src/index.ts"
 	},
 	"dependencies": {
+		"@opentelemetry/api": "^1.9.1",
+		"@opentelemetry/auto-instrumentations-node": "^0.77.0",
+		"@opentelemetry/exporter-trace-otlp-grpc": "^0.219.0",
+		"@opentelemetry/sdk-node": "^0.219.0",
 		"cors": "^2.8.6",
 		"express": "^5.2.1",
 		"socket.io": "^4.8.3"

@@ -13,6 +13,8 @@ pub struct CoreEngine {
     pub is_hardware_accelerated: bool,
     pub width: u32,
     pub height: u32,
+    #[cfg(not(target_arch = "wasm32"))]
+    pub decklink: tokio::sync::Mutex<Option<decklink::DecklinkEngine>>,
 }
 
 /// Abstract trait for loading raw video frames for the compositor.
@@ -27,16 +29,28 @@ pub struct PlaybackLoop {
     current_frame: u32,
     framerate: u32,
     audio: Option<audio::playback::AudioPlayback>,
+    #[cfg(not(target_arch = "wasm32"))]
+    decklink: Option<decklink::DecklinkEngine>,
 }
 
 impl PlaybackLoop {
     pub fn new(framerate: u32) -> Self {
         let audio = audio::playback::AudioPlayback::new().ok();
+        #[cfg(not(target_arch = "wasm32"))]
+        let mut decklink = Some(decklink::DecklinkEngine::new());
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(dl) = &mut decklink {
+            // Hardcode to 1080p24 for now, since that's our default project framerate
+            dl.configure(decklink::SdiVideoMode::HD1080p24, decklink::PixelFormat::Bgra8Bit);
+        }
+
         Self {
             is_playing: false,
             current_frame: 0,
             framerate,
             audio,
+            #[cfg(not(target_arch = "wasm32"))]
+            decklink,
         }
     }
 
@@ -45,12 +59,20 @@ impl PlaybackLoop {
         if let Some(audio) = &self.audio {
             audio.resume();
         }
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(dl) = &mut self.decklink {
+            let _ = dl.start_output();
+        }
     }
 
     pub fn pause(&mut self) {
         self.is_playing = false;
         if let Some(audio) = &self.audio {
             audio.pause();
+        }
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(dl) = &mut self.decklink {
+            dl.stop_output();
         }
     }
 
@@ -104,12 +126,26 @@ impl CoreEngine {
             is_hardware_accelerated: true,
             width,
             height,
+            #[cfg(not(target_arch = "wasm32"))]
+            decklink: tokio::sync::Mutex::new(None),
         })
     }
 
     /// Sets the asset loader used to fetch media frames dynamically.
     pub fn set_asset_loader(&mut self, loader: Arc<dyn AssetLoader>) {
         self.asset_loader = Some(loader);
+    }
+    
+    #[cfg(not(target_arch = "wasm32"))]
+    pub async fn enable_decklink(&self) {
+        let mut dl_guard = self.decklink.lock().await;
+        if dl_guard.is_none() {
+            let mut dl = decklink::DecklinkEngine::new();
+            dl.configure(decklink::SdiVideoMode::HD1080p24, decklink::PixelFormat::Bgra8Bit);
+            let _ = dl.start_output();
+            *dl_guard = Some(dl);
+            println!("[CoreEngine] Decklink SDI output enabled.");
+        }
     }
 
     /// Uploads a texture to the GPU compositor for use by clips.
@@ -228,6 +264,13 @@ impl CoreEngine {
                 .gpu_ctx
                 .read_texture_to_cpu(&texture, width, height)
                 .map_err(|e| format!("GPU readback error: {e}"))?;
+                
+            // Pump to Decklink if active
+            let mut dl_guard = self.decklink.lock().await;
+            if let Some(dl) = dl_guard.as_mut() {
+                let _ = dl.pump_frame_to_sdi(&rgba_bytes, width, height);
+            }
+                
             Ok(rgba_bytes)
         }
 

@@ -6,12 +6,19 @@
 #
 # The server listens on port 8004 for WebSocket connections.
 
-# ── Build Stage ────────────────────────────────────────────────────────
-FROM rust:1.96-slim AS builder
-
+FROM rust:1.96-slim AS chef
+RUN cargo install cargo-chef
 WORKDIR /build
-COPY Cargo.toml ./
-COPY src/ src/
+
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# ── Build Stage ────────────────────────────────────────────────────────
+FROM chef AS builder
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+COPY . .
 RUN cargo build --release
 
 # ── Runtime Stage ──────────────────────────────────────────────────────

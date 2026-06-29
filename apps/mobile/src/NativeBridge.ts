@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
-
-const API_BASE = Platform.OS === 'android' ? 'http://10.0.2.2:8005/api/v1' : 'http://localhost:8005/api/v1';
-const MOCK_TOKEN = 'mock_jwt_token_for_mobile'; // Should be replaced with actual auth token
+// @ts-ignore
+import MyModule from '../modules/lazynext-native/src/MyModule';
 
 export const NativeBridge = {
   async fetchProject(): Promise<{
@@ -9,62 +8,44 @@ export const NativeBridge = {
     tracks: Array<{ id: string; name: string; trackType: string; clips: Array<{ id: string; name: string; start: number; duration: number }> }>;
   }> {
     try {
-      const res = await fetch(`${API_BASE}/timeline`, {
-        headers: { 'Authorization': `Bearer ${MOCK_TOKEN}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch project');
-      const data = await res.json();
+      const dataStr = await MyModule.getProjectInfo();
+      const data = JSON.parse(dataStr);
       
       return {
         name: data.name || "Lazynext Project",
         tracks: data.tracks || [],
       };
     } catch (e) {
-      console.warn("API fetch error, falling back:", e);
+      console.warn("NativeModule fetch error, falling back:", e);
       return { name: "Offline Project", tracks: [] };
     }
   },
 
   async processIntent(prompt: string): Promise<string> {
     try {
-      const res = await fetch(`${API_BASE}/autonomous_edit`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${MOCK_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt, require_plan_approval: false })
-      });
-      if (!res.ok) throw new Error('Failed to process intent');
-      const data = await res.json();
-      return data.message || "Edit applied successfully via Cloud.";
+      const result = await MyModule.processIntent(prompt, false);
+      return result || "Edit applied successfully.";
     } catch (e) {
-      console.warn("API autonomous_edit error:", e);
-      return "Processed timeline via local fallback engine.";
+      console.warn("NativeModule processIntent error:", e);
+      return "Error processing intent via Native Engine.";
     }
   },
 
   async sendChatMessage(message: string): Promise<string> {
     try {
-      const res = await fetch(`${API_BASE}/ai/generate`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${MOCK_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ prompt: message })
-      });
-      if (!res.ok) throw new Error('Failed to generate response');
-      const data = await res.json();
-      return data.text || "I've processed your request.";
+      const result = await MyModule.processIntent(message, true);
+      return result || "I've processed your request.";
     } catch (e) {
-      console.warn("API chat error:", e);
-      return "Chronos Copilot is currently offline. Try again when connected.";
+      console.warn("NativeModule chat error:", e);
+      return "Chronos Copilot is currently offline.";
     }
   },
 
   async moveClip(clipId: string, newStart: number): Promise<void> {
-    // Implement API call for crdt operation if needed
-    console.log(`Moving clip ${clipId} to ${newStart}`);
+    try {
+      await MyModule.moveClip(clipId, newStart);
+    } catch (e) {
+      console.warn("NativeModule moveClip error:", e);
+    }
   },
 };

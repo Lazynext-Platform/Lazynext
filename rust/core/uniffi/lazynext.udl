@@ -37,6 +37,13 @@ namespace lazynext_mobile {
 
   // Get the mobile bridge version
   string version();
+
+  // Request SAM2 rotoscoping
+  string request_rotoscope(string video_id, string prompt);
+
+  // Request NeRF extraction
+  string request_nerf(string video_id);
+
+  // Request Demucs stem separation
+  string request_stem_separation(string audio_id, u32 stems);
 };
-
-

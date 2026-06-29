@@ -180,6 +180,128 @@ impl NLEState {
 
     // ── Track operations ──
 
+    // ── AI Model Integrations ──
+
+    pub fn apply_rotoscope_mask(&mut self, video_clip_id: &str, mask_sequence_url: &str) -> Result<String, String> {
+        // Create a new mask track and clip
+        let mask_track_id = format!("track_mask_{}", uuid::Uuid::new_v4());
+        self.add_track(mask_track_id.clone(), "mask".to_string());
+
+        let mask_clip_id = format!("clip_mask_{}", uuid::Uuid::new_v4());
+        let mask_media_id = format!("media_mask_{}", uuid::Uuid::new_v4());
+
+        // Add media asset
+        self.data.media_pool.insert(
+            mask_media_id.clone(),
+            MediaAsset {
+                id: mask_media_id.clone(),
+                name: "Rotoscope Mask Sequence".to_string(),
+                path_or_url: mask_sequence_url.to_string(),
+                asset_type: "mask_sequence".to_string(),
+                duration: 10.0, // Should inherit from video clip
+                width: self.data.width,
+                height: self.data.height,
+            }
+        );
+
+        // Add mask clip
+        let clip = Clip {
+            id: mask_clip_id.clone(),
+            clip_type: "mask".to_string(),
+            media_id: Some(mask_media_id),
+            name: "Rotoscope Mask".to_string(),
+            start: 0, // Should match video clip start
+            end: 100, // Should match video clip end
+            animations: HashMap::new(),
+        };
+
+        self.add_clip_struct(&mask_track_id, clip)?;
+        Ok(mask_clip_id)
+    }
+
+    pub fn add_nerf_cloud(&mut self, ply_url: &str) -> Result<String, String> {
+        // Create a new 3D track and clip
+        let nerf_track_id = format!("track_3d_{}", uuid::Uuid::new_v4());
+        self.add_track(nerf_track_id.clone(), "3d".to_string());
+
+        let nerf_clip_id = format!("clip_3d_{}", uuid::Uuid::new_v4());
+        let nerf_media_id = format!("media_3d_{}", uuid::Uuid::new_v4());
+
+        self.data.media_pool.insert(
+            nerf_media_id.clone(),
+            MediaAsset {
+                id: nerf_media_id.clone(),
+                name: "Gaussian Splat Cloud".to_string(),
+                path_or_url: ply_url.to_string(),
+                asset_type: "gaussian_splat".to_string(),
+                duration: 0.0, 
+                width: 0,
+                height: 0,
+            }
+        );
+
+        let clip = Clip {
+            id: nerf_clip_id.clone(),
+            clip_type: "3d".to_string(),
+            media_id: Some(nerf_media_id),
+            name: "NeRF Cloud".to_string(),
+            start: 0,
+            end: 300,
+            animations: HashMap::new(),
+        };
+
+        self.add_clip_struct(&nerf_track_id, clip)?;
+        Ok(nerf_clip_id)
+    }
+
+    pub fn separate_audio_stems(&mut self, original_clip_id: &str, stems: std::collections::HashMap<String, String>) -> Result<(), String> {
+        // Usually we would mute the original clip and add N new tracks for the stems
+        
+        for (stem_name, stem_url) in stems {
+            let stem_track_id = format!("track_audio_{}", uuid::Uuid::new_v4());
+            self.add_track(stem_track_id.clone(), "audio".to_string());
+
+            let stem_clip_id = format!("clip_stem_{}_{}", stem_name, uuid::Uuid::new_v4());
+            let stem_media_id = format!("media_stem_{}_{}", stem_name, uuid::Uuid::new_v4());
+
+            self.data.media_pool.insert(
+                stem_media_id.clone(),
+                MediaAsset {
+                    id: stem_media_id.clone(),
+                    name: format!("Stem: {}", stem_name),
+                    path_or_url: stem_url,
+                    asset_type: "audio".to_string(),
+                    duration: 10.0,
+                    width: 0,
+                    height: 0,
+                }
+            );
+
+            let clip = Clip {
+                id: stem_clip_id,
+                clip_type: "audio".to_string(),
+                media_id: Some(stem_media_id),
+                name: format!("Stem: {}", stem_name),
+                start: 0,
+                end: 300,
+                animations: HashMap::new(),
+            };
+
+            self.add_clip_struct(&stem_track_id, clip)?;
+        }
+        
+        Ok(())
+    }
+
+    fn add_clip_struct(&mut self, track_id: &str, clip: Clip) -> Result<(), String> {
+        if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == track_id) {
+            track.clips.push(clip);
+            Ok(())
+        } else {
+            Err("Track not found".to_string())
+        }
+    }
+
     pub fn add_track(&mut self, id: String, kind: String) {
         let snapshot = self.data.clone();
         let op = CrdtOperation::TrackInsert {

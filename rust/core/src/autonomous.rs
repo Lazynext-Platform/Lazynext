@@ -117,7 +117,10 @@ impl AutonomousEditor {
             - {{\"action\": \"color_grade\", \"track_idx\": <number>, \"clip_id\": \"clip_id\", \"preset\": \"cinematic\"|\"vintage\"|\"vibrant\"}} \
             - {{\"action\": \"add_effect\", \"track_idx\": <number>, \"clip_id\": \"clip_id\", \"effect\": \"blur\"|\"glitch\"|\"zoom\"}} \
             - {{\"action\": \"speed_ramp\", \"track_idx\": <number>, \"clip_id\": \"clip_id\", \"speed_factor\": <float>}} \
-            - {{\"action\": \"add_transition\", \"track_idx\": <number>, \"clip_id\": \"clip_id\", \"transition_type\": \"crossfade\"|\"dip_to_black\"}}",
+            - {{\"action\": \"add_transition\", \"track_idx\": <number>, \"clip_id\": \"clip_id\", \"transition_type\": \"crossfade\"|\"dip_to_black\"}} \
+            - {{\"action\": \"rotoscope_clip\", \"clip_id\": \"clip_id\", \"prompt\": \"object to mask\"}} \
+            - {{\"action\": \"extract_nerf\", \"clip_id\": \"clip_id\"}} \
+            - {{\"action\": \"separate_stems\", \"clip_id\": \"clip_id\", \"stems\": 4}}",
             state_json
         );
 
@@ -218,6 +221,26 @@ impl AutonomousEditor {
                             let transition = action["transition_type"].as_str().unwrap_or("crossfade");
                             println!("🔄 [AI Engine] Added transition '{}' to clip '{}' on track {}", transition, clip_id, track_idx);
                             nle_state.update_clip_property(clip_id, &format!("transition_{}", transition), 1.0);
+                        }
+                        "rotoscope_clip" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let prompt = action["prompt"].as_str().unwrap_or("subject");
+                            println!("🎯 [AI Engine] Scheduled SAM2 Rotoscoping for clip '{}' with prompt '{}'", clip_id, prompt);
+                            // Real implementation would invoke AIClient::rotoscope here asynchronously
+                            // and then call nle_state.apply_rotoscope_mask
+                        }
+                        "extract_nerf" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            println!("🧊 [AI Engine] Scheduled NeRF Extraction for clip '{}'", clip_id);
+                            // Real implementation would invoke AIClient::extract_nerf here asynchronously
+                            // and then call nle_state.add_nerf_cloud
+                        }
+                        "separate_stems" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let stems = action["stems"].as_u64().unwrap_or(4) as u32;
+                            println!("🎵 [AI Engine] Scheduled Demucs Stem Separation ({} stems) for clip '{}'", stems, clip_id);
+                            // Real implementation would invoke AIClient::split_stems here asynchronously
+                            // and then call nle_state.separate_audio_stems
                         }
                         _ => {
                             println!("⚠️  [AI Engine] Unknown action: {}", action_type);

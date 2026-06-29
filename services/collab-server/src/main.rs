@@ -7,16 +7,22 @@
 //!   - In-memory state via DashMap (production: PostgreSQL-backed)
 
 use axum::{
-    Extension, Router,
-    extract::ws::{Message, WebSocket, WebSocketUpgrade},
+    Extension, Router, Json,
+    extract::{ws::{Message, WebSocket, WebSocketUpgrade}, Path, State},
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
 };
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tracing::info;
+use tracing::{info, error};
+use opentelemetry_sdk::trace::TracerProvider as SdkTracerProvider;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use opentelemetry_otlp::WithExportConfig;
+
+mod db;
+use db::DbStore;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -82,6 +88,7 @@ enum ServerMessage {
 struct AppState {
     rooms: DashMap<String, tokio::sync::broadcast::Sender<String>>,
     peer_rooms: DashMap<String, String>,
+    db: Arc<DbStore>,
 }
 
 fn verify_token(token: &str) -> Result<String, String> {
@@ -258,31 +265,97 @@ async fn ws_handler(
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
+#[derive(Deserialize)]
+struct SaveRequest {
+    project_id: String,
+    state: serde_json::Value,
+}
+
+async fn save_state(
+    Extension(state): Extension<Arc<AppState>>,
+    Json(payload): Json<SaveRequest>,
+) -> impl IntoResponse {
+    match state.db.save_state(&payload.project_id, &payload.state).await {
+        Ok(_) => Json(serde_json::json!({"saved": true})),
+        Err(e) => {
+            error!("Failed to save state: {}", e);
+            Json(serde_json::json!({"error": e.to_string()}))
+        }
+    }
+}
+
+async fn load_state(
+    Extension(state): Extension<Arc<AppState>>,
+    Path(project_id): Path<String>,
+) -> impl IntoResponse {
+    match state.db.load_state(&project_id).await {
+        Ok(Some(s)) => Json(serde_json::json!({"state": s, "loaded": true})),
+        Ok(None) => Json(serde_json::json!({"error": "not found"})),
+        Err(e) => {
+            error!("Failed to load state: {}", e);
+            Json(serde_json::json!({"error": e.to_string()}))
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt::init();
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    let fmt_layer = tracing_subscriber::fmt::layer().with_target(false);
+
+    // Setup tracing and OpenTelemetry
+    if let Ok(endpoint) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
+        let exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_http()
+            .with_endpoint(endpoint)
+            .build()
+            .expect("Failed to create OTLP exporter");
+
+        let tracer_provider = SdkTracerProvider::builder()
+            .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+            .build();
+
+        opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+        use opentelemetry::trace::TracerProvider;
+        let tracer = tracer_provider.tracer("collab-server");
+        let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .with(telemetry)
+            .init();
+    } else {
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .init();
+    }
+    
     info!("🚀 Lazynext Collab Server starting...");
+    dotenvy::dotenv().ok();
+
+    let db = match DbStore::new().await {
+        Ok(db) => Arc::new(db),
+        Err(e) => {
+            error!("Failed to connect to db: {}", e);
+            std::process::exit(1);
+        }
+    };
+
 
     let state = Arc::new(AppState {
         rooms: DashMap::new(),
         peer_rooms: DashMap::new(),
+        db,
     });
 
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .route("/health", get(|| async { "OK" }))
-        .route(
-            "/api/save",
-            // TODO: Implement PostgreSQL-backed persistence
-            axum::routing::post(|| async { axum::Json(serde_json::json!({"saved": true})) }),
-        )
-        .route(
-            "/api/load/:project_id",
-            // TODO: Implement PostgreSQL-backed persistence
-            axum::routing::get(|| async {
-                axum::Json(serde_json::json!({"state": {}, "loaded": true}))
-            }),
-        )
+        .route("/api/save", post(save_state))
+        .route("/api/load/:project_id", get(load_state))
         .layer(Extension(state));
 
     let port: u16 = std::env::var("COLLAB_PORT")

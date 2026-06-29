@@ -1,19 +1,26 @@
-FROM rust:1.80-slim-bookworm AS builder
-
-# Install build dependencies
-RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
-
+FROM rust:1.96-slim AS chef
+# Install cargo-chef
+RUN cargo install cargo-chef
 WORKDIR /app
 
+FROM chef AS planner
 # Copy the entire workspace since we depend on other crates (core, neural_engine)
 # NOTE: This Dockerfile expects to be built with `rust/` as the build context.
 # e.g., docker build -f api-gateway/Dockerfile .
 COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Build the api-gateway binary
+FROM chef AS builder
+# Install build dependencies
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json
+# Build application
+COPY . .
 RUN cargo build -p lazynext_api_gateway --release
 
-FROM debian:bookworm-slim
+FROM debian:trixie-slim
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*

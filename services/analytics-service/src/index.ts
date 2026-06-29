@@ -1,5 +1,7 @@
+import "./tracing";
 import express, { Request, Response } from "express";
 import crypto from "crypto";
+import { connectKafka, sendToKafka } from "./kafka";
 
 const app = express();
 app.use(express.json());
@@ -25,41 +27,13 @@ const eventBuffer: Array<{
 }> = [];
 
 // ── Kafka Producer (real when brokers are configured) ───────────────────
-// TODO: Wire this stub to the real Kafka producer implementation in kafka.ts,
-//       which provides proper batching, retries, idempotent producers, and
-//       idempotency-key-based deduplication.
 const kafkaProducer = {
   connect: async () => {
-    if (KAFKA_BROKERS.length === 0) return;
-    try {
-      const { Kafka } = await import("kafkajs");
-      const kafka = new Kafka({
-        clientId: "lazynext-analytics",
-        brokers: KAFKA_BROKERS,
-      });
-      const producer = kafka.producer();
-      await producer.connect();
-      kafkaAvailable = true;
-      console.log(
-        `[Analytics] Kafka connected: ${KAFKA_BROKERS.join(", ")}`,
-      );
-      return producer;
-    } catch (e) {
-      console.warn(
-        `[Analytics] Kafka unavailable (${e}) — using in-memory buffer.`,
-      );
-    }
+    return await connectKafka();
   },
 
-  send: async (topic: string, messages: Array<{ key: string; value: string }>) => {
-    if (!kafkaAvailable) return false;
-    try {
-      const { Kafka } = await import("kafkajs");
-      // Re-use singleton producer in production
-      return true;
-    } catch {
-      return false;
-    }
+  send: async (topic: string, messages: Array<{ key: string; value: any }>) => {
+    return await sendToKafka(topic, messages);
   },
 };
 

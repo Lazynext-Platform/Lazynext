@@ -10,6 +10,7 @@ pub mod mobile_bridge;
 pub mod nle_state;
 pub mod plugin_manager;
 pub mod timeline;
+pub mod ai_client;
 
 pub use autonomous::*;
 pub use engine::*;

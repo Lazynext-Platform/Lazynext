@@ -54,7 +54,7 @@ class UpscaleResult:
     output_path: Optional[str] = None
     frames_processed: int = 0
     processing_time_seconds: float = 0.0
-    method: str = "dev-fallback"
+    method: str = "unknown"
     error: Optional[str] = None
 
 

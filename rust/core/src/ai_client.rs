@@ -1,0 +1,124 @@
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize)]
+pub struct RotoscopeRequest {
+    pub video_id: String,
+    pub object_prompt: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct RotoscopeResponse {
+    pub success: bool,
+    pub mask_sequence_url: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct NeRFRequest {
+    pub video_id: String,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct NeRFResponse {
+    pub success: bool,
+    pub mesh_url: Option<String>,
+    pub point_cloud_url: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct StemSplitRequest {
+    pub audio_id: String,
+    pub stems: u32,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct StemSplitResponse {
+    pub success: bool,
+    pub stems: std::collections::HashMap<String, String>,
+}
+
+pub struct AIClient {
+    client: Client,
+    pre_processing_url: String,
+    generative_studio_url: String,
+}
+
+impl Default for AIClient {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl AIClient {
+    pub fn new() -> Self {
+        Self {
+            client: Client::new(),
+            pre_processing_url: "http://localhost:8000".to_string(),
+            generative_studio_url: "http://localhost:8001".to_string(),
+        }
+    }
+
+    pub async fn rotoscope(&self, video_id: &str, prompt: &str) -> Result<RotoscopeResponse, String> {
+        let req = RotoscopeRequest {
+            video_id: video_id.to_string(),
+            object_prompt: prompt.to_string(),
+        };
+        let res = self.client
+            .post(&format!("{}/api/v1/cv/rotoscope", self.pre_processing_url))
+            .json(&req)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        res.json::<RotoscopeResponse>().await.map_err(|e| e.to_string())
+    }
+
+    pub async fn extract_nerf(&self, video_id: &str) -> Result<NeRFResponse, String> {
+        let req = NeRFRequest {
+            video_id: video_id.to_string(),
+        };
+        let res = self.client
+            .post(&format!("{}/api/v1/cv/nerf-extract", self.pre_processing_url))
+            .json(&req)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        res.json::<NeRFResponse>().await.map_err(|e| e.to_string())
+    }
+
+    pub async fn split_stems(&self, audio_id: &str, stems: u32) -> Result<StemSplitResponse, String> {
+        let req = StemSplitRequest {
+            audio_id: audio_id.to_string(),
+            stems,
+        };
+        let res = self.client
+            .post(&format!("{}/split-stems", self.generative_studio_url))
+            .json(&req)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        res.json::<StemSplitResponse>().await.map_err(|e| e.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ai_client_structs() {
+        let req = RotoscopeRequest {
+            video_id: "vid_1".to_string(),
+            object_prompt: "dog".to_string(),
+        };
+        assert_eq!(req.video_id, "vid_1");
+        assert_eq!(req.object_prompt, "dog");
+        
+        // This won't actually call the python server if we don't invoke the method
+        // but it tests compilation of the client.
+        let client = AIClient::new();
+        assert_eq!(client.pre_processing_url, "http://localhost:8000");
+    }
+}

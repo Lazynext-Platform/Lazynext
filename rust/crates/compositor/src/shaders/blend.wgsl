@@ -130,7 +130,7 @@ fn blend_rgb(base: vec3f, layer: vec3f, mode: u32) -> vec3f {
 @fragment
 fn fragment_main(input: VertexOutput) -> @location(0) vec4f {
     let base = textureSample(base_texture, base_sampler, input.tex_coord);
-    let mut layer = textureSample(layer_texture, layer_sampler, input.tex_coord);
+    var layer = textureSample(layer_texture, layer_sampler, input.tex_coord);
 
     if (uniforms.luma_key_threshold > 0.0) {
         let luma = lum(layer.rgb);

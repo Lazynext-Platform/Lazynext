@@ -13,6 +13,7 @@ crate-type = ["cdylib", "rlib"]
 ffmpeg-next = { version = "7.0.3", optional = true }
 lazynext-export = { path = "../crates/export" }
 uniffi = { version = "0.31.2", features = ["cli"] }
+decklink = { path = "../crates/decklink" }
 
 [features]
 default = []

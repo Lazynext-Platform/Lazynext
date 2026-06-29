@@ -1,8 +1,8 @@
-use crate::AppState;
+use crate::{AppState, rbac::AuthClaims};
 use axum::{
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
-        State,
+        State, Query, Extension,
     },
     response::IntoResponse,
 };
@@ -10,7 +10,13 @@ use futures::{sink::SinkExt, stream::StreamExt};
 use lazynext_core::nle_state::CrdtOperation;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
+
+#[derive(Deserialize)]
+pub struct WsQuery {
+    pub project_id: String,
+    // The token is handled by the rbac middleware.
+}
 
 // Message structure for WebSocket payload
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,16 +40,20 @@ impl WsState {
 
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
+    Query(query): Query<WsQuery>,
+    Extension(claims): Extension<AuthClaims>,
     State(state): State<AppState>,
 ) -> impl IntoResponse {
     let ws_state = state.ws_state.clone();
-    ws.on_upgrade(|socket| handle_socket(socket, state, ws_state))
+    
+    info!("WebSocket connection upgraded for user {} on project {}", claims.sub, query.project_id);
+    
+    ws.on_upgrade(move |socket| handle_socket(socket, state, ws_state, query.project_id, claims))
 }
 
-async fn handle_socket(socket: WebSocket, state: AppState, ws_state: Arc<WsState>) {
+async fn handle_socket(socket: WebSocket, state: AppState, ws_state: Arc<WsState>, project_id: String, claims: AuthClaims) {
     let (mut sender, mut receiver) = socket.split();
     let client = ws_state.redis_client.clone();
-    let project_id = "default_project".to_string(); // In a real app, extract from URL/auth
     let room = format!("lazynext_room_{}", project_id);
 
     let room_sub = room.clone();

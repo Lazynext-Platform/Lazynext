@@ -49,15 +49,41 @@ struct AppState {
 async fn main() {
     dotenvy::dotenv().ok();
 
-    // Initialize structured tracing.
-    // To enable OpenTelemetry OTLP export to Tempo/Jaeger, set:
-    //   OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-    // and add `tracing-opentelemetry` + `opentelemetry-otlp` crates.
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
-        .with_max_level(Level::INFO)
-        .with_target(false)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("Failed to set tracing subscriber");
+    use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+    use opentelemetry_otlp::WithExportConfig;
+
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    let fmt_layer = tracing_subscriber::fmt::layer().with_target(false);
+
+    if let Ok(endpoint) = std::env::var("OTEL_EXPORTER_OTLP_ENDPOINT") {
+        let exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_http()
+            .with_endpoint(endpoint)
+            .build()
+            .expect("Failed to create OTLP exporter");
+
+        let tracer_provider = opentelemetry_sdk::trace::SdkTracerProvider::builder()
+            .with_batch_exporter(exporter)
+            .build();
+
+        opentelemetry::global::set_tracer_provider(tracer_provider.clone());
+        use opentelemetry::trace::TracerProvider;
+        let tracer = tracer_provider.tracer("api-gateway");
+        let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
+
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .with(telemetry)
+            .init();
+        tracing::info!("OpenTelemetry tracing enabled");
+    } else {
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .init();
+    }
 
     info!("Initializing Lazynext API Gateway...");
 

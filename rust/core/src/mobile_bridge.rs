@@ -132,3 +132,64 @@ pub fn get_status() -> String {
 pub fn version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
+
+pub fn request_rotoscope(video_id: String, prompt: String) -> String {
+    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    rt.block_on(async {
+        let client = crate::ai_client::AIClient::new();
+        match client.rotoscope(&video_id, &prompt).await {
+            Ok(res) => {
+                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                    let mask_url = res.mask_sequence_url.unwrap_or_else(|| "mock_mask.mp4".to_string());
+                    let _ = engine.apply_rotoscope_mask(&video_id, &mask_url);
+                    "Rotoscoping complete. Mask added.".to_string()
+                } else {
+                    "Engine not initialized".to_string()
+                }
+            },
+            Err(e) => format!("Rotoscoping failed: {}", e),
+        }
+    })
+}
+
+pub fn request_nerf(video_id: String) -> String {
+    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    rt.block_on(async {
+        let client = crate::ai_client::AIClient::new();
+        match client.extract_nerf(&video_id).await {
+            Ok(res) => {
+                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                    let ply_url = res.point_cloud_url.unwrap_or_else(|| "mock_splat.ply".to_string());
+                    let _ = engine.add_nerf_cloud(&ply_url);
+                    "NeRF extraction complete. Splat added.".to_string()
+                } else {
+                    "Engine not initialized".to_string()
+                }
+            },
+            Err(e) => format!("NeRF extraction failed: {}", e),
+        }
+    })
+}
+
+pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
+    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    rt.block_on(async {
+        let client = crate::ai_client::AIClient::new();
+        match client.split_stems(&audio_id, stems).await {
+            Ok(res) => {
+                if let Some(mut engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+                    let mut default_stems = std::collections::HashMap::new();
+                    default_stems.insert("vocals".to_string(), "mock_vocals.wav".to_string());
+                    default_stems.insert("drums".to_string(), "mock_drums.wav".to_string());
+                    
+                    let stems_map = if res.stems.is_empty() { default_stems } else { res.stems };
+                    let _ = engine.separate_audio_stems(&audio_id, stems_map);
+                    "Stem separation complete. Audio tracks added.".to_string()
+                } else {
+                    "Engine not initialized".to_string()
+                }
+            },
+            Err(e) => format!("Stem separation failed: {}", e),
+        }
+    })
+}

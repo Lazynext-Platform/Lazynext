@@ -19,3 +19,7 @@ jinja2>=3.1.6
 filelock>=3.20.3
 idna>=3.15
 pillow>=12.2.0
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation-fastapi
+opentelemetry-exporter-otlp-proto-grpc
