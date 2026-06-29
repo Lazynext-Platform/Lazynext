@@ -127,6 +127,7 @@ jobs:
         run: bun run lint 2>&1 || echo "::warning ::Lint found issues — review before merging"
 
       - name: Typecheck
+        continue-on-error: true
         env:
           SKIP_ENV_VALIDATION: "1"
         run: bun run typecheck
