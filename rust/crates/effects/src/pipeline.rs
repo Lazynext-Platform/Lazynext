@@ -883,6 +883,7 @@ impl EffectPipeline {
     }
 }
 
+#[allow(clippy::if_same_then_else)]
 fn pack_effect_uniforms(
     pass: &EffectPass,
     width: u32,
