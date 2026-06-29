@@ -218,7 +218,7 @@ jobs:
           cat /tmp/checksums.txt
 
       - name: Upload Model Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: tf-models-${{ github.sha }}
           path: ${{ env.MODEL_BASE_PATH }}/
@@ -407,7 +407,7 @@ jobs:
         shell: python
 
       - name: Upload Benchmark Results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: benchmark-results-${{ github.sha }}
           path: benchmark-results.json

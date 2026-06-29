@@ -162,7 +162,7 @@ jobs:
 
       - name: Upload Playwright Report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.browser }}
           path: |
@@ -173,7 +173,7 @@ jobs:
 
       - name: Upload Test Traces
         if: steps.e2e.outputs.exit_code != '0' && steps.e2e.outputs.exit_code != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-traces-${{ matrix.browser }}
           path: apps/web/test-results/**/trace.zip
@@ -182,7 +182,7 @@ jobs:
 
       - name: Upload Test Output (Debug)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-output-${{ matrix.browser }}
           path: apps/web/playwright-output-${{ matrix.browser }}.txt
