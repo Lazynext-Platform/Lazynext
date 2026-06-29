@@ -182,14 +182,29 @@ impl AutonomousEditor {
                         "mcp_call" => {
                             let server = action["server"].as_str().unwrap_or("unknown");
                             let tool = action["tool"].as_str().unwrap_or("unknown");
-                            println!("🔌 [MCP Client] Calling tool '{}' on server '{}'...", tool, server);
+                            println!(
+                                "🔌 [MCP Client] Calling tool '{}' on server '{}'...",
+                                tool, server
+                            );
                             match server {
                                 "context7" => println!("   -> Fetched deep context from Context7."),
-                                "firecrawl" => println!("   -> Scraped script/context using Firecrawl."),
+                                "firecrawl" => {
+                                    println!("   -> Scraped script/context using Firecrawl.")
+                                }
                                 "playwright" => {
                                     println!("   -> Recorded UI automation using Playwright.");
-                                    nle_state.add_track("Playwright_V1".to_string(), "video".to_string());
-                                    nle_state.add_clip_to_track(0, "pw_rec_01".to_string(), "video".to_string(), "browser_recording.mp4".to_string(), 0, 300);
+                                    nle_state.add_track(
+                                        "Playwright_V1".to_string(),
+                                        "video".to_string(),
+                                    );
+                                    nle_state.add_clip_to_track(
+                                        0,
+                                        "pw_rec_01".to_string(),
+                                        "video".to_string(),
+                                        "browser_recording.mp4".to_string(),
+                                        0,
+                                        300,
+                                    );
                                 }
                                 _ => println!("⚠️  [MCP Client] Unknown server: {}", server),
                             }
@@ -198,47 +213,77 @@ impl AutonomousEditor {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
                             let preset = action["preset"].as_str().unwrap_or("cinematic");
-                            println!("🎨 [AI Engine] Applied color grade '{}' to clip '{}' on track {}", preset, clip_id, track_idx);
+                            println!(
+                                "🎨 [AI Engine] Applied color grade '{}' to clip '{}' on track {}",
+                                preset, clip_id, track_idx
+                            );
                             nle_state.update_clip_property(clip_id, "color_grade", 1.0); // Simple proxy property
                         }
                         "add_effect" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
                             let effect = action["effect"].as_str().unwrap_or("blur");
-                            println!("✨ [AI Engine] Added effect '{}' to clip '{}' on track {}", effect, clip_id, track_idx);
-                            nle_state.update_clip_property(clip_id, &format!("effect_{}", effect), 1.0);
+                            println!(
+                                "✨ [AI Engine] Added effect '{}' to clip '{}' on track {}",
+                                effect, clip_id, track_idx
+                            );
+                            nle_state.update_clip_property(
+                                clip_id,
+                                &format!("effect_{}", effect),
+                                1.0,
+                            );
                         }
                         "speed_ramp" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
                             let speed = action["speed_factor"].as_f64().unwrap_or(1.0);
-                            println!("⏩ [AI Engine] Applied speed ramp ({}x) to clip '{}' on track {}", speed, clip_id, track_idx);
+                            println!(
+                                "⏩ [AI Engine] Applied speed ramp ({}x) to clip '{}' on track {}",
+                                speed, clip_id, track_idx
+                            );
                             nle_state.update_clip_property(clip_id, "speed", speed as f32);
                         }
                         "add_transition" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let transition = action["transition_type"].as_str().unwrap_or("crossfade");
-                            println!("🔄 [AI Engine] Added transition '{}' to clip '{}' on track {}", transition, clip_id, track_idx);
-                            nle_state.update_clip_property(clip_id, &format!("transition_{}", transition), 1.0);
+                            let transition =
+                                action["transition_type"].as_str().unwrap_or("crossfade");
+                            println!(
+                                "🔄 [AI Engine] Added transition '{}' to clip '{}' on track {}",
+                                transition, clip_id, track_idx
+                            );
+                            nle_state.update_clip_property(
+                                clip_id,
+                                &format!("transition_{}", transition),
+                                1.0,
+                            );
                         }
                         "rotoscope_clip" => {
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
                             let prompt = action["prompt"].as_str().unwrap_or("subject");
-                            println!("🎯 [AI Engine] Scheduled SAM2 Rotoscoping for clip '{}' with prompt '{}'", clip_id, prompt);
+                            println!(
+                                "🎯 [AI Engine] Scheduled SAM2 Rotoscoping for clip '{}' with prompt '{}'",
+                                clip_id, prompt
+                            );
                             // Real implementation would invoke AIClient::rotoscope here asynchronously
                             // and then call nle_state.apply_rotoscope_mask
                         }
                         "extract_nerf" => {
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            println!("🧊 [AI Engine] Scheduled NeRF Extraction for clip '{}'", clip_id);
+                            println!(
+                                "🧊 [AI Engine] Scheduled NeRF Extraction for clip '{}'",
+                                clip_id
+                            );
                             // Real implementation would invoke AIClient::extract_nerf here asynchronously
                             // and then call nle_state.add_nerf_cloud
                         }
                         "separate_stems" => {
                             let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
                             let stems = action["stems"].as_u64().unwrap_or(4) as u32;
-                            println!("🎵 [AI Engine] Scheduled Demucs Stem Separation ({} stems) for clip '{}'", stems, clip_id);
+                            println!(
+                                "🎵 [AI Engine] Scheduled Demucs Stem Separation ({} stems) for clip '{}'",
+                                stems, clip_id
+                            );
                             // Real implementation would invoke AIClient::split_stems here asynchronously
                             // and then call nle_state.separate_audio_stems
                         }

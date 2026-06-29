@@ -195,8 +195,8 @@ impl Lut3D {
     /// ...
     /// ```
     pub fn from_cube_file(path: &Path) -> Result<Self, String> {
-        let contents = fs::read_to_string(path)
-            .map_err(|e| format!("Failed to read LUT file: {}", e))?;
+        let contents =
+            fs::read_to_string(path).map_err(|e| format!("Failed to read LUT file: {}", e))?;
         Self::parse_cube(&contents)
     }
 
@@ -227,10 +227,7 @@ impl Lut3D {
                 "TITLE" => {
                     // Everything after TITLE is the title
                     if parts.len() > 1 {
-                        title = parts[1..]
-                            .join(" ")
-                            .trim_matches('"')
-                            .to_string();
+                        title = parts[1..].join(" ").trim_matches('"').to_string();
                     }
                 }
                 "LUT_3D_SIZE" => {
@@ -245,18 +242,18 @@ impl Lut3D {
                 "DOMAIN_MIN" => {
                     if parts.len() >= 4 {
                         for i in 0..3 {
-                            domain_min[i] = parts[i + 1]
-                                .parse::<f32>()
-                                .map_err(|_| format!("Invalid DOMAIN_MIN value: {}", parts[i + 1]))?;
+                            domain_min[i] = parts[i + 1].parse::<f32>().map_err(|_| {
+                                format!("Invalid DOMAIN_MIN value: {}", parts[i + 1])
+                            })?;
                         }
                     }
                 }
                 "DOMAIN_MAX" => {
                     if parts.len() >= 4 {
                         for i in 0..3 {
-                            domain_max[i] = parts[i + 1]
-                                .parse::<f32>()
-                                .map_err(|_| format!("Invalid DOMAIN_MAX value: {}", parts[i + 1]))?;
+                            domain_max[i] = parts[i + 1].parse::<f32>().map_err(|_| {
+                                format!("Invalid DOMAIN_MAX value: {}", parts[i + 1])
+                            })?;
                         }
                     }
                 }
@@ -464,7 +461,10 @@ DOMAIN_MAX 1.0 1.0 1.0
         };
 
         let (r, g, b) = lut.apply_to_rgb(0.5, 0.5, 0.5);
-        assert!((r - 0.5).abs() < 0.01, "Identity LUT should preserve mid-gray");
+        assert!(
+            (r - 0.5).abs() < 0.01,
+            "Identity LUT should preserve mid-gray"
+        );
         assert!((g - 0.5).abs() < 0.01);
         assert!((b - 0.5).abs() < 0.01);
     }

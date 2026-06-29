@@ -1,8 +1,8 @@
 use crate::engine::AssetLoader;
 use std::future::Future;
+use std::io::Read;
 use std::pin::Pin;
 use std::process::{Command, Stdio};
-use std::io::Read;
 
 /// An `AssetLoader` that fetches video frames by calling the `ffmpeg` CLI binary.
 pub struct CliFfmpegLoader {
@@ -33,14 +33,21 @@ impl AssetLoader for CliFfmpegLoader {
             let result = tokio::task::spawn_blocking(move || {
                 let mut child = Command::new("ffmpeg")
                     .args([
-                        "-ss", &timestamp_str,
-                        "-i", &media_path,
-                        "-frames:v", "1",
-                        "-f", "rawvideo",
-                        "-pix_fmt", "rgba",
-                        "-s", &format!("{}x{}", width, height),
-                        "-loglevel", "error",
-                        "-" 
+                        "-ss",
+                        &timestamp_str,
+                        "-i",
+                        &media_path,
+                        "-frames:v",
+                        "1",
+                        "-f",
+                        "rawvideo",
+                        "-pix_fmt",
+                        "rgba",
+                        "-s",
+                        &format!("{}x{}", width, height),
+                        "-loglevel",
+                        "error",
+                        "-",
                     ])
                     .stdout(Stdio::piped())
                     .stderr(Stdio::null())
@@ -50,10 +57,12 @@ impl AssetLoader for CliFfmpegLoader {
                 let mut stdout = child.stdout.take().expect("Failed to open stdout");
                 let expected_size = (width * height * 4) as usize;
                 let mut buffer = vec![0u8; expected_size];
-                
-                stdout.read_exact(&mut buffer).map_err(|e| format!("Failed to read frame bytes: {}", e))?;
+
+                stdout
+                    .read_exact(&mut buffer)
+                    .map_err(|e| format!("Failed to read frame bytes: {}", e))?;
                 let _ = child.wait();
-                
+
                 Ok::<Vec<u8>, String>(buffer)
             })
             .await;

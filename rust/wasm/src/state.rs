@@ -33,7 +33,15 @@ impl NLEState {
     }
 
     #[wasm_bindgen(js_name = "addClip")]
-    pub fn add_clip(&mut self, track_idx: usize, id: String, clip_type: String, name: String, start_frame: i32, duration_frames: i32) {
+    pub fn add_clip(
+        &mut self,
+        track_idx: usize,
+        id: String,
+        clip_type: String,
+        name: String,
+        start_frame: i32,
+        duration_frames: i32,
+    ) {
         use state::Clip;
         if track_idx < self.project.tracks.len() {
             let clip = Clip {

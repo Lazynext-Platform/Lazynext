@@ -130,12 +130,16 @@ pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response,
 /// or from the `token` query parameter (useful for WebSockets).
 fn extract_bearer_token(req: &Request) -> Option<String> {
     // 1. Try Authorization header
-    if let Some(raw) = req.headers().get(header::AUTHORIZATION).and_then(|h| h.to_str().ok()) {
+    if let Some(raw) = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .and_then(|h| h.to_str().ok())
+    {
         if let Some(token) = raw.strip_prefix("Bearer ") {
             return Some(token.trim().to_string());
         }
     }
-    
+
     // 2. Try query parameter (e.g., ?token=...)
     if let Some(query) = req.uri().query() {
         for pair in query.split('&') {
@@ -149,9 +153,13 @@ fn extract_bearer_token(req: &Request) -> Option<String> {
             }
         }
     }
-    
+
     // 3. Try Sec-WebSocket-Protocol header (common for WS auth)
-    if let Some(raw) = req.headers().get("sec-websocket-protocol").and_then(|h| h.to_str().ok()) {
+    if let Some(raw) = req
+        .headers()
+        .get("sec-websocket-protocol")
+        .and_then(|h| h.to_str().ok())
+    {
         // usually format is "auth_token_value, other_protocol"
         let parts: Vec<&str> = raw.split(',').collect();
         if !parts.is_empty() {

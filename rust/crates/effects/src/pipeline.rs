@@ -103,7 +103,7 @@ impl EffectPipeline {
                         count: None,
                     }],
                 });
-        
+
         let lut3d_bind_group_layout =
             context
                 .device()
@@ -153,7 +153,7 @@ impl EffectPipeline {
                     ],
                     immediate_size: 0,
                 });
-                
+
         let lut3d_pipeline_layout =
             context
                 .device()
@@ -619,7 +619,7 @@ impl EffectPipeline {
             (GLOW_SHADER_ID.to_string(), glow_pipeline),
             (VIGNETTE_SHADER_ID.to_string(), vignette_pipeline),
         ]);
-        
+
         let lut3d_pipeline =
             context
                 .device()
@@ -690,7 +690,7 @@ impl EffectPipeline {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("effects-lut-command-encoder"),
                 });
-        
+
         let output_texture = context.create_render_texture(width, height, "effects-lut-output");
         let source_view = source.create_view(&wgpu::TextureViewDescriptor::default());
         let output_view = output_texture.create_view(&wgpu::TextureViewDescriptor::default());
@@ -699,41 +699,39 @@ impl EffectPipeline {
             ..Default::default()
         });
 
-        let texture_bind_group =
-            context
-                .device()
-                .create_bind_group(&wgpu::BindGroupDescriptor {
-                    label: Some("effects-lut-texture-bind-group"),
-                    layout: context.texture_sampler_bind_group_layout(),
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: wgpu::BindingResource::TextureView(&source_view),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 1,
-                            resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
-                        },
-                    ],
-                });
+        let texture_bind_group = context
+            .device()
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("effects-lut-texture-bind-group"),
+                layout: context.texture_sampler_bind_group_layout(),
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(&source_view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
+                    },
+                ],
+            });
 
-        let lut3d_bind_group =
-            context
-                .device()
-                .create_bind_group(&wgpu::BindGroupDescriptor {
-                    label: Some("effects-lut3d-bind-group"),
-                    layout: &self.lut3d_bind_group_layout,
-                    entries: &[
-                        wgpu::BindGroupEntry {
-                            binding: 0,
-                            resource: wgpu::BindingResource::TextureView(&lut_view),
-                        },
-                        wgpu::BindGroupEntry {
-                            binding: 1,
-                            resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
-                        },
-                    ],
-                });
+        let lut3d_bind_group = context
+            .device()
+            .create_bind_group(&wgpu::BindGroupDescriptor {
+                label: Some("effects-lut3d-bind-group"),
+                layout: &self.lut3d_bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::TextureView(&lut_view),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
+                    },
+                ],
+            });
 
         {
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {

@@ -1,4 +1,4 @@
-use rodio::{OutputStream, OutputStreamHandle, Sink, Decoder};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
@@ -15,7 +15,7 @@ impl Mixer {
             .map_err(|e| format!("Failed to get default audio output stream: {}", e))?;
         let sink = Sink::try_new(&_stream_handle)
             .map_err(|e| format!("Failed to create audio sink: {}", e))?;
-            
+
         Ok(Self {
             _stream,
             _stream_handle,
@@ -27,7 +27,7 @@ impl Mixer {
         let file = File::open(path).map_err(|e| format!("Failed to open audio file: {}", e))?;
         let reader = BufReader::new(file);
         let decoder = Decoder::new(reader).map_err(|e| format!("Failed to decode audio: {}", e))?;
-        
+
         self.sink.append(decoder);
         Ok(())
     }

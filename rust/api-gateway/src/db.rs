@@ -183,14 +183,16 @@ impl DbStore {
         Ok(())
     }
 
-    pub async fn update_project_data(&self, project_id: &str, data: &serde_json::Value) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            "UPDATE projects SET data = $1, updated_at = NOW() WHERE id = $2"
-        )
-        .bind(data)
-        .bind(project_id)
-        .execute(&self.pool)
-        .await?;
+    pub async fn update_project_data(
+        &self,
+        project_id: &str,
+        data: &serde_json::Value,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE projects SET data = $1, updated_at = NOW() WHERE id = $2")
+            .bind(data)
+            .bind(project_id)
+            .execute(&self.pool)
+            .await?;
         Ok(())
     }
 

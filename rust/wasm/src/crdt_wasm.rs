@@ -40,20 +40,25 @@ impl CrdtEngine {
             .map_err(|e| JsValue::from_str(&format!("Invalid operation: {}", e)))?;
 
         match &op {
-            CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+            CrdtOperation::PropertyUpdate {
+                target_id, value, ..
+            } => {
                 if let Ok(value_str) = serde_json::to_string(value) {
                     self.entity_graph.set_entity(target_id, &value_str);
                 }
             }
-            CrdtOperation::EntityInsert { entity_id, data, .. } => {
+            CrdtOperation::EntityInsert {
+                entity_id, data, ..
+            } => {
                 if let Ok(value_str) = serde_json::to_string(data) {
                     self.entity_graph.set_entity(entity_id, &value_str);
                 }
             }
             CrdtOperation::EntityDelete { entity_id } => {
-                // For now, we don't fully delete from graph to allow tombstones, 
-                // but we could if needed. 
-                self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+                // For now, we don't fully delete from graph to allow tombstones,
+                // but we could if needed.
+                self.tombstones
+                    .mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
             }
             _ => {}
         }
@@ -72,18 +77,26 @@ impl CrdtEngine {
         if let Some(op) = self.undo_stack.pop() {
             if let Some(inverse) = op.inverse() {
                 match &inverse {
-                    CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+                    CrdtOperation::PropertyUpdate {
+                        target_id, value, ..
+                    } => {
                         if let Ok(value_str) = serde_json::to_string(value) {
                             self.entity_graph.set_entity(target_id, &value_str);
                         }
                     }
-                    CrdtOperation::EntityInsert { entity_id, data, .. } => {
+                    CrdtOperation::EntityInsert {
+                        entity_id, data, ..
+                    } => {
                         if let Ok(value_str) = serde_json::to_string(data) {
                             self.entity_graph.set_entity(entity_id, &value_str);
                         }
                     }
                     CrdtOperation::EntityDelete { entity_id } => {
-                        self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+                        self.tombstones.mark(
+                            entity_id.clone(),
+                            self.clock.clone(),
+                            self.peer_id.clone(),
+                        );
                     }
                     _ => {}
                 }
@@ -102,18 +115,26 @@ impl CrdtEngine {
     pub fn redo(&mut self) -> Result<bool, JsValue> {
         if let Some(op) = self.redo_stack.pop() {
             match &op {
-                CrdtOperation::PropertyUpdate { target_id, value, .. } => {
+                CrdtOperation::PropertyUpdate {
+                    target_id, value, ..
+                } => {
                     if let Ok(value_str) = serde_json::to_string(value) {
                         self.entity_graph.set_entity(target_id, &value_str);
                     }
                 }
-                CrdtOperation::EntityInsert { entity_id, data, .. } => {
+                CrdtOperation::EntityInsert {
+                    entity_id, data, ..
+                } => {
                     if let Ok(value_str) = serde_json::to_string(data) {
                         self.entity_graph.set_entity(entity_id, &value_str);
                     }
                 }
                 CrdtOperation::EntityDelete { entity_id } => {
-                    self.tombstones.mark(entity_id.clone(), self.clock.clone(), self.peer_id.clone());
+                    self.tombstones.mark(
+                        entity_id.clone(),
+                        self.clock.clone(),
+                        self.peer_id.clone(),
+                    );
                 }
                 _ => {}
             }

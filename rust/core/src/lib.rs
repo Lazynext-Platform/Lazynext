@@ -1,16 +1,16 @@
+pub mod ai_client;
 pub mod autonomous;
 pub mod engine;
-pub mod frame_cache;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ffmpeg_loader;
-#[cfg(not(target_arch = "wasm32"))]
-pub mod ring_buffer_decoder;
+pub mod frame_cache;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod mobile_bridge;
 pub mod nle_state;
 pub mod plugin_manager;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod ring_buffer_decoder;
 pub mod timeline;
-pub mod ai_client;
 
 pub use autonomous::*;
 pub use engine::*;

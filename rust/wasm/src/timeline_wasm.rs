@@ -105,15 +105,14 @@ pub fn place_elements_on_timeline(
 }
 
 #[wasm_bindgen(js_name = deleteElements)]
-pub fn wasm_delete_elements(
-    tracks_js: JsValue,
-    elements_js: JsValue,
-) -> Result<JsValue, JsValue> {
+pub fn wasm_delete_elements(tracks_js: JsValue, elements_js: JsValue) -> Result<JsValue, JsValue> {
     let mut tracks: SceneTracks = serde_wasm_bindgen::from_value(tracks_js)?;
     let targets: Vec<TargetElement> = serde_wasm_bindgen::from_value(elements_js)?;
 
     let target_contains = |track_id: &str, element_id: &str| -> bool {
-        targets.iter().any(|t| t.track_id == track_id && t.element_id == element_id)
+        targets
+            .iter()
+            .any(|t| t.track_id == track_id && t.element_id == element_id)
     };
 
     for track in tracks.overlay.iter_mut() {
@@ -123,7 +122,10 @@ pub fn wasm_delete_elements(
 
     {
         let tid = tracks.main.id.clone();
-        tracks.main.elements.retain(|e| !target_contains(&tid, &e.id));
+        tracks
+            .main
+            .elements
+            .retain(|e| !target_contains(&tid, &e.id));
     }
 
     for track in tracks.audio.iter_mut() {

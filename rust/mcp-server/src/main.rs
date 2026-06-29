@@ -32,7 +32,9 @@ async fn main() {
     }
 
     eprintln!("🤖 Lazynext MCP Server started.");
-    eprintln!("   Tools: run_lazynext_command, get_timeline_state, apply_crdt_operation, import_media, apply_effect, manage_tracks");
+    eprintln!(
+        "   Tools: run_lazynext_command, get_timeline_state, apply_crdt_operation, import_media, apply_effect, manage_tracks"
+    );
 
     let editor = AutonomousEditor::new();
     let mut nle = NLEState::new(
@@ -42,8 +44,8 @@ async fn main() {
     );
 
     // Basic API Key auth (expected in environment for testing)
-    let expected_api_key = std::env::var("LAZYNEXT_MCP_API_KEY").unwrap_or_else(|_| "default_test_key".to_string());
-
+    let expected_api_key =
+        std::env::var("LAZYNEXT_MCP_API_KEY").unwrap_or_else(|_| "default_test_key".to_string());
 
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
@@ -72,7 +74,7 @@ async fn main() {
         // Since MCP runs over stdio, passing auth in headers isn't possible.
         // We'll require it to be passed in params._api_key on initialization, or just for demonstration:
         let method = req["method"].as_str().unwrap_or("");
-        
+
         if method != "initialize" {
             let provided_key = req["params"].get("_api_key").and_then(|k| k.as_str());
             if provided_key != Some(&expected_api_key) {
@@ -85,7 +87,6 @@ async fn main() {
                 continue;
             }
         }
-
 
         let id = req.get("id").cloned().unwrap_or(Value::Null);
         let method = req["method"].as_str().unwrap_or("");
@@ -457,9 +458,7 @@ async fn main() {
                         let track_idx = req["params"]["arguments"]["track_idx"]
                             .as_u64()
                             .unwrap_or(0) as usize;
-                        let clip_id = req["params"]["arguments"]["clip_id"]
-                            .as_str()
-                            .unwrap_or("");
+                        let clip_id = req["params"]["arguments"]["clip_id"].as_str().unwrap_or("");
                         let ok = nle.remove_clip_from_track(track_idx, clip_id);
                         json!({
                             "jsonrpc": "2.0",
@@ -596,7 +595,7 @@ async fn main() {
                                 .stderr(std::process::Stdio::null())
                                 .stdout(std::process::Stdio::piped())
                                 .output();
-                            
+
                             let (cuts_count, dur_secs) = match output {
                                 Ok(out) if out.status.success() => {
                                     // convert bytes to f32 to f64
@@ -642,10 +641,16 @@ async fn main() {
                     }
 
                     "manage_tracks" => {
-                        let op = req["params"]["arguments"]["operation"].as_str().unwrap_or("");
+                        let op = req["params"]["arguments"]["operation"]
+                            .as_str()
+                            .unwrap_or("");
                         let track_indices: Vec<usize> = req["params"]["arguments"]["track_indices"]
                             .as_array()
-                            .map(|a| a.iter().filter_map(|v| v.as_u64().map(|n| n as usize)).collect())
+                            .map(|a| {
+                                a.iter()
+                                    .filter_map(|v| v.as_u64().map(|n| n as usize))
+                                    .collect()
+                            })
                             .unwrap_or_default();
 
                         if track_indices.is_empty() {
@@ -668,14 +673,19 @@ async fn main() {
                                     if track_indices.len() == track_count {
                                         // Validate all indices are in range
                                         if track_indices.iter().all(|&i| i < track_count) {
-                                            for (new_pos, &old_idx) in track_indices.iter().enumerate() {
+                                            for (new_pos, &old_idx) in
+                                                track_indices.iter().enumerate()
+                                            {
                                                 if new_pos != old_idx {
                                                     nle.set_track_position(old_idx, new_pos);
                                                 }
                                             }
-                                            results.push(format!("Reordered {} tracks.", track_count));
+                                            results
+                                                .push(format!("Reordered {} tracks.", track_count));
                                         } else {
-                                            results.push("Invalid track indices for reorder.".to_string());
+                                            results.push(
+                                                "Invalid track indices for reorder.".to_string(),
+                                            );
                                         }
                                     } else {
                                         results.push(format!(
@@ -784,14 +794,20 @@ async fn main() {
                                         width,
                                         height,
                                     });
-                                    imported.push(format!("{} ({}: {}x{} {}s)", name, asset_type, width, height, duration));
+                                    imported.push(format!(
+                                        "{} ({}: {}x{} {}s)",
+                                        name, asset_type, width, height, duration
+                                    ));
                                 } else {
                                     failed.push(path.to_string());
                                 }
                             }
                         }
 
-                        let mut text = format!("Imported {} file(s) into project media pool.\n", imported.len());
+                        let mut text = format!(
+                            "Imported {} file(s) into project media pool.\n",
+                            imported.len()
+                        );
                         for entry in &imported {
                             text.push_str(&format!("  ✓ {}\n", entry));
                         }
@@ -810,8 +826,12 @@ async fn main() {
                     }
 
                     "apply_effect" => {
-                        let effect_name = req["params"]["arguments"]["effect_name"].as_str().unwrap_or("");
-                        let track_idx = req["params"]["arguments"]["track_idx"].as_u64().unwrap_or(0) as usize;
+                        let effect_name = req["params"]["arguments"]["effect_name"]
+                            .as_str()
+                            .unwrap_or("");
+                        let track_idx = req["params"]["arguments"]["track_idx"]
+                            .as_u64()
+                            .unwrap_or(0) as usize;
                         let clip_id = req["params"]["arguments"]["clip_id"].as_str().unwrap_or("");
                         let parameters = &req["params"]["arguments"]["parameters"];
 
@@ -851,7 +871,11 @@ async fn main() {
 
                             if applied.is_empty() {
                                 // No specific params — record the effect presence
-                                nle.update_clip_property(clip_id, &format!("effect:{}", effect_name), 1.0);
+                                nle.update_clip_property(
+                                    clip_id,
+                                    &format!("effect:{}", effect_name),
+                                    1.0,
+                                );
                             }
 
                             json!({
@@ -873,7 +897,7 @@ async fn main() {
                         "jsonrpc": "2.0",
                         "id": id,
                         "error": {"code": -32601, "message": format!("Method not found: tools/call {}", tool_name)}
-                    })
+                    }),
                 }
             }
 
@@ -1104,8 +1128,10 @@ fn generate_test_pattern(frame_idx: u32, total_frames: u32, width: u32, height: 
 /// Falls back to sensible defaults if ffprobe is not available.
 fn probe_media(path: &str) -> (f64, u32, u32, String) {
     let output = std::process::Command::new("ffprobe")
-        .arg("-v").arg("quiet")
-        .arg("-print_format").arg("json")
+        .arg("-v")
+        .arg("quiet")
+        .arg("-print_format")
+        .arg("json")
         .arg("-show_format")
         .arg("-show_streams")
         .arg(path)
@@ -1142,8 +1168,12 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
                     }
                 }
 
-                if width == 0 { width = 1920; }
-                if height == 0 { height = 1080; }
+                if width == 0 {
+                    width = 1920;
+                }
+                if height == 0 {
+                    height = 1080;
+                }
 
                 (duration, width, height, asset_type)
             } else {

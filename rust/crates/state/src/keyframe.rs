@@ -239,32 +239,29 @@ fn solve_absolute_cubic_bezier(
     // and Newton-Raphson on non-normalized curves can be unstable if not careful.
     let mut lower = 0.0;
     let mut upper = 1.0;
-    
+
     for _ in 0..20 {
         let mid = (lower + upper) / 2.0;
         let u = 1.0 - mid;
-        
+
         // Evaluate bezier X at t = mid
         let estimate_x = u * u * u * x0
             + 3.0 * u * u * mid * x1
             + 3.0 * u * mid * mid * x2
             + mid * mid * mid * x3;
-            
+
         if estimate_x < target_x {
             lower = mid;
         } else {
             upper = mid;
         }
     }
-    
+
     let t = (lower + upper) / 2.0;
     let u = 1.0 - t;
-    
+
     // Evaluate bezier Y at t
-    u * u * u * y0
-        + 3.0 * u * u * t * y1
-        + 3.0 * u * t * t * y2
-        + t * t * t * y3
+    u * u * u * y0 + 3.0 * u * u * t * y1 + 3.0 * u * t * t * y2 + t * t * t * y3
 }
 
 /// Derivative of x with respect to t for Newton-Raphson.

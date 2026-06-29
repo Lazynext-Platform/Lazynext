@@ -1,9 +1,9 @@
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::too_many_arguments)]
+pub mod mixer;
+pub mod playback;
 pub mod spatial;
 pub mod vst;
-pub mod playback;
-pub mod mixer;
 
 pub mod compressor;
 pub mod eq;

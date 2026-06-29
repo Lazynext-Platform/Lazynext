@@ -1,8 +1,8 @@
 use crate::{AppState, rbac::AuthClaims};
 use axum::{
     extract::{
+        Extension, Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
-        State, Query, Extension,
     },
     response::IntoResponse,
 };
@@ -45,13 +45,22 @@ pub async fn ws_handler(
     State(state): State<AppState>,
 ) -> impl IntoResponse {
     let ws_state = state.ws_state.clone();
-    
-    info!("WebSocket connection upgraded for user {} on project {}", claims.sub, query.project_id);
-    
+
+    info!(
+        "WebSocket connection upgraded for user {} on project {}",
+        claims.sub, query.project_id
+    );
+
     ws.on_upgrade(move |socket| handle_socket(socket, state, ws_state, query.project_id, claims))
 }
 
-async fn handle_socket(socket: WebSocket, state: AppState, ws_state: Arc<WsState>, project_id: String, claims: AuthClaims) {
+async fn handle_socket(
+    socket: WebSocket,
+    state: AppState,
+    ws_state: Arc<WsState>,
+    project_id: String,
+    claims: AuthClaims,
+) {
     let (mut sender, mut receiver) = socket.split();
     let client = ws_state.redis_client.clone();
     let room = format!("lazynext_room_{}", project_id);
@@ -89,36 +98,65 @@ async fn handle_socket(socket: WebSocket, state: AppState, ws_state: Arc<WsState
                         let pd = nle.get_project_data();
                         let response = WsMessage::SyncResponse(serde_json::to_value(pd).unwrap());
                         let response_text = serde_json::to_string(&response).unwrap();
-                        let mut conn = match ws_state.redis_client.get_multiplexed_async_connection().await {
+                        let mut conn = match ws_state
+                            .redis_client
+                            .get_multiplexed_async_connection()
+                            .await
+                        {
                             Ok(c) => c,
                             Err(_) => continue,
                         };
-                        let _: () = redis::cmd("PUBLISH").arg(&room_pub).arg(response_text).query_async(&mut conn).await.unwrap_or(());
+                        let _: () = redis::cmd("PUBLISH")
+                            .arg(&room_pub)
+                            .arg(response_text)
+                            .query_async(&mut conn)
+                            .await
+                            .unwrap_or(());
                     }
                     WsMessage::CrdtOperation(op) => {
                         debug!("Received CRDT op: {:?}", op);
-                        let broadcast_msg = serde_json::to_string(&WsMessage::CrdtOperation(op.clone())).unwrap();
-                        let mut conn = match ws_state.redis_client.get_multiplexed_async_connection().await {
+                        let broadcast_msg =
+                            serde_json::to_string(&WsMessage::CrdtOperation(op.clone())).unwrap();
+                        let mut conn = match ws_state
+                            .redis_client
+                            .get_multiplexed_async_connection()
+                            .await
+                        {
                             Ok(c) => c,
                             Err(_) => continue,
                         };
-                        let _: () = redis::cmd("PUBLISH").arg(&room_pub).arg(broadcast_msg).query_async(&mut conn).await.unwrap_or(());
+                        let _: () = redis::cmd("PUBLISH")
+                            .arg(&room_pub)
+                            .arg(broadcast_msg)
+                            .query_async(&mut conn)
+                            .await
+                            .unwrap_or(());
 
                         // Persist to Postgres
                         let mut nle = state.nle.lock().await;
                         nle.apply_operation(op);
                         let project_data = nle.get_project_data();
-                        let value = serde_json::to_value(&project_data).unwrap_or(serde_json::Value::Null);
+                        let value =
+                            serde_json::to_value(&project_data).unwrap_or(serde_json::Value::Null);
                         if let Err(e) = state.db.update_project_data(&project_id, &value).await {
                             error!("Failed to persist CRDT op to Postgres: {}", e);
                         }
                     }
                     WsMessage::CursorMove { .. } => {
-                        let mut conn = match ws_state.redis_client.get_multiplexed_async_connection().await {
+                        let mut conn = match ws_state
+                            .redis_client
+                            .get_multiplexed_async_connection()
+                            .await
+                        {
                             Ok(c) => c,
                             Err(_) => continue,
                         };
-                        let _: () = redis::cmd("PUBLISH").arg(&room_pub).arg(text.to_string()).query_async(&mut conn).await.unwrap_or(());
+                        let _: () = redis::cmd("PUBLISH")
+                            .arg(&room_pub)
+                            .arg(text.to_string())
+                            .query_async(&mut conn)
+                            .await
+                            .unwrap_or(());
                     }
                     WsMessage::SyncResponse(_) => {}
                 }

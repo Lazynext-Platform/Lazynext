@@ -332,9 +332,14 @@ impl GpuContext {
         &self.queue
     }
 
-    pub fn create_texture_from_rgba(&self, rgba: &[u8], width: u32, height: u32) -> Result<wgpu::Texture, String> {
+    pub fn create_texture_from_rgba(
+        &self,
+        rgba: &[u8],
+        width: u32,
+        height: u32,
+    ) -> Result<wgpu::Texture, String> {
         let texture = self.create_render_texture(width, height, "uploaded-texture");
-        
+
         let mut pixels = rgba.to_vec();
         // Convert RGBA to BGRA if necessary based on texture format
         if self.texture_format == wgpu::TextureFormat::Bgra8Unorm {
@@ -342,7 +347,7 @@ impl GpuContext {
                 chunk.swap(0, 2);
             }
         }
-        
+
         self.queue.write_texture(
             wgpu::TexelCopyTextureInfo {
                 texture: &texture,

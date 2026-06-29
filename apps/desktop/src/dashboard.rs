@@ -1,9 +1,9 @@
+use crate::editor::EditorShell;
 use gpui::*;
-use std::sync::Arc;
-use tokio::sync::Mutex;
 use lazynext_core::NLEState;
 use lazynext_core::engine::CoreEngine;
-use crate::editor::EditorShell;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 pub struct Dashboard {
     pub version: String,
@@ -31,7 +31,7 @@ impl Render for Dashboard {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let bg = rgb(0x1a1a1a);
         let accent = rgb(0x00d4df);
-        
+
         div()
             .flex()
             .flex_col()
@@ -45,14 +45,14 @@ impl Render for Dashboard {
                     .text_xl()
                     .font_weight(FontWeight::BOLD)
                     .text_color(rgb(0xffffff))
-                    .child("Lazynext Dashboard")
+                    .child("Lazynext Dashboard"),
             )
             .child(
                 div()
                     .mt_4()
                     .text_sm()
                     .text_color(rgb(0xaaaaaa))
-                    .child(format!("Version {}", self.version))
+                    .child(format!("Version {}", self.version)),
             )
             .child(
                 div()
@@ -75,7 +75,7 @@ impl Render for Dashboard {
                                 move |_, window, cx| {
                                     let bounds = Bounds {
                                         origin: point(px(0.0), px(0.0)),
-                                        size: size(px(1280.0), px(720.0))
+                                        size: size(px(1280.0), px(720.0)),
                                     };
                                     cx.open_window(
                                         WindowOptions {
@@ -95,13 +95,14 @@ impl Render for Dashboard {
                                                 last_frame_data: None,
                                                 current_frame: 0,
                                             })
-                                        }
-                                    ).unwrap();
-                                    
+                                        },
+                                    )
+                                    .unwrap();
+
                                     // Optional: close the dashboard window
                                     // window.remove_window(); // not available easily here, usually we just leave it open or handle properly
                                 }
-                            })
+                            }),
                     )
                     .child(
                         div()
@@ -123,19 +124,26 @@ impl Render for Dashboard {
                                         .add_filter("Lazynext Project", &["lazynext"]);
                                     if let Some(path) = dialog.pick_file() {
                                         if let Ok(json) = std::fs::read_to_string(&path) {
-                                            if let Ok(pd) = serde_json::from_str::<lazynext_core::nle_state::ProjectData>(&json) {
+                                            if let Ok(pd) = serde_json::from_str::<
+                                                lazynext_core::nle_state::ProjectData,
+                                            >(
+                                                &json
+                                            ) {
                                                 rt_handle.block_on(async {
                                                     let mut state = nle.lock().await;
                                                     state.load_project_data(pd);
                                                 });
-                                                log::info!("Project loaded from {}", path.display());
+                                                log::info!(
+                                                    "Project loaded from {}",
+                                                    path.display()
+                                                );
                                             }
                                         }
                                     }
-                                    
+
                                     let bounds = Bounds {
                                         origin: point(px(0.0), px(0.0)),
-                                        size: size(px(1280.0), px(720.0))
+                                        size: size(px(1280.0), px(720.0)),
                                     };
                                     cx.open_window(
                                         WindowOptions {
@@ -155,11 +163,12 @@ impl Render for Dashboard {
                                                 last_frame_data: None,
                                                 current_frame: 0,
                                             })
-                                        }
-                                    ).unwrap();
+                                        },
+                                    )
+                                    .unwrap();
                                 }
-                            })
-                    )
+                            }),
+                    ),
             )
     }
 }
@@ -179,10 +188,10 @@ mod tests {
             "Test Project".to_string(),
             24,
         )));
-        
+
         let rt_handle = tokio::runtime::Handle::current();
         let engine = Arc::new(Mutex::new(CoreEngine::init(nle.clone()).await.unwrap()));
-        
+
         let dashboard = Dashboard::new(nle, engine, rt_handle);
         assert_eq!(dashboard.version, "0.1.0");
     }

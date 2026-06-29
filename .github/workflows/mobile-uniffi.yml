@@ -24,7 +24,7 @@ jobs:
     - name: Install cargo-ndk and uniffi-bindgen
       run: |
         cargo install cargo-ndk
-        cargo install uniffi-bindgen
+        cargo install uniffi_bindgen --version 0.28.3
 
     - name: Build iOS XCFramework
       run: |

@@ -7,19 +7,22 @@
 //!   - In-memory state via DashMap (production: PostgreSQL-backed)
 
 use axum::{
-    Extension, Router, Json,
-    extract::{ws::{Message, WebSocket, WebSocketUpgrade}, Path, State},
+    Extension, Json, Router,
+    extract::{
+        Path, State,
+        ws::{Message, WebSocket, WebSocketUpgrade},
+    },
     response::IntoResponse,
     routing::{get, post},
 };
 use dashmap::DashMap;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::trace::TracerProvider as SdkTracerProvider;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tracing::{info, error};
-use opentelemetry_sdk::trace::TracerProvider as SdkTracerProvider;
+use tracing::{error, info};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use opentelemetry_otlp::WithExportConfig;
 
 mod db;
 use db::DbStore;
@@ -275,7 +278,11 @@ async fn save_state(
     Extension(state): Extension<Arc<AppState>>,
     Json(payload): Json<SaveRequest>,
 ) -> impl IntoResponse {
-    match state.db.save_state(&payload.project_id, &payload.state).await {
+    match state
+        .db
+        .save_state(&payload.project_id, &payload.state)
+        .await
+    {
         Ok(_) => Json(serde_json::json!({"saved": true})),
         Err(e) => {
             error!("Failed to save state: {}", e);
@@ -332,7 +339,7 @@ async fn main() {
             .with(fmt_layer)
             .init();
     }
-    
+
     info!("🚀 Lazynext Collab Server starting...");
     dotenvy::dotenv().ok();
 
@@ -343,7 +350,6 @@ async fn main() {
             std::process::exit(1);
         }
     };
-
 
     let state = Arc::new(AppState {
         rooms: DashMap::new(),

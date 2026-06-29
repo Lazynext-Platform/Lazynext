@@ -188,7 +188,11 @@ impl NLEState {
 
     // ── AI Model Integrations ──
 
-    pub fn apply_rotoscope_mask(&mut self, _video_clip_id: &str, mask_sequence_url: &str) -> Result<String, String> {
+    pub fn apply_rotoscope_mask(
+        &mut self,
+        _video_clip_id: &str,
+        mask_sequence_url: &str,
+    ) -> Result<String, String> {
         // Create a new mask track and clip
         let mask_track_id = format!("track_mask_{}", uuid::Uuid::new_v4());
         self.add_track(mask_track_id.clone(), "mask".to_string());
@@ -207,7 +211,7 @@ impl NLEState {
                 duration: 10.0, // Should inherit from video clip
                 width: self.data.width,
                 height: self.data.height,
-            }
+            },
         );
 
         // Add mask clip
@@ -240,10 +244,10 @@ impl NLEState {
                 name: "Gaussian Splat Cloud".to_string(),
                 path_or_url: ply_url.to_string(),
                 asset_type: "gaussian_splat".to_string(),
-                duration: 0.0, 
+                duration: 0.0,
                 width: 0,
                 height: 0,
-            }
+            },
         );
 
         let clip = Clip {
@@ -260,9 +264,13 @@ impl NLEState {
         Ok(nerf_clip_id)
     }
 
-    pub fn separate_audio_stems(&mut self, _original_clip_id: &str, stems: std::collections::HashMap<String, String>) -> Result<(), String> {
+    pub fn separate_audio_stems(
+        &mut self,
+        _original_clip_id: &str,
+        stems: std::collections::HashMap<String, String>,
+    ) -> Result<(), String> {
         // Usually we would mute the original clip and add N new tracks for the stems
-        
+
         for (stem_name, stem_url) in stems {
             let stem_track_id = format!("track_audio_{}", uuid::Uuid::new_v4());
             self.add_track(stem_track_id.clone(), "audio".to_string());
@@ -280,7 +288,7 @@ impl NLEState {
                     duration: 10.0,
                     width: 0,
                     height: 0,
-                }
+                },
             );
 
             let clip = Clip {
@@ -295,7 +303,7 @@ impl NLEState {
 
             self.add_clip_struct(&stem_track_id, clip)?;
         }
-        
+
         Ok(())
     }
 
@@ -330,9 +338,7 @@ impl NLEState {
         let snapshot = self.data.clone();
         if track_idx < self.data.tracks.len() {
             let track = self.data.tracks.remove(track_idx);
-            let op = CrdtOperation::TrackDelete {
-                track_id: track.id,
-            };
+            let op = CrdtOperation::TrackDelete { track_id: track.id };
             self.apply_and_record(op, snapshot);
             true
         } else {
@@ -414,7 +420,13 @@ impl NLEState {
             target_id: format!("track_order_{}", self.data.id),
             property: "track_order".to_string(),
             old_value: None,
-            value: serde_json::json!(self.data.tracks.iter().map(|t| t.id.clone()).collect::<Vec<_>>()),
+            value: serde_json::json!(
+                self.data
+                    .tracks
+                    .iter()
+                    .map(|t| t.id.clone())
+                    .collect::<Vec<_>>()
+            ),
         };
         self.apply_and_record(op, snapshot);
         true

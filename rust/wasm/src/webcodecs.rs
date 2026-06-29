@@ -77,7 +77,7 @@ impl VideoDecoderWrapper {
             error_cb.as_ref().unchecked_ref(),
             on_frame.as_ref().unchecked_ref(),
         ))?;
-        
+
         // Prevent closures from being dropped while decoder is alive
         error_cb.forget();
         on_frame.forget();

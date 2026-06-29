@@ -58,27 +58,38 @@ impl AIClient {
         }
     }
 
-    pub async fn rotoscope(&self, video_id: &str, prompt: &str) -> Result<RotoscopeResponse, String> {
+    pub async fn rotoscope(
+        &self,
+        video_id: &str,
+        prompt: &str,
+    ) -> Result<RotoscopeResponse, String> {
         let req = RotoscopeRequest {
             video_id: video_id.to_string(),
             object_prompt: prompt.to_string(),
         };
-        let res = self.client
+        let res = self
+            .client
             .post(&format!("{}/api/v1/cv/rotoscope", self.pre_processing_url))
             .json(&req)
             .send()
             .await
             .map_err(|e| e.to_string())?;
 
-        res.json::<RotoscopeResponse>().await.map_err(|e| e.to_string())
+        res.json::<RotoscopeResponse>()
+            .await
+            .map_err(|e| e.to_string())
     }
 
     pub async fn extract_nerf(&self, video_id: &str) -> Result<NeRFResponse, String> {
         let req = NeRFRequest {
             video_id: video_id.to_string(),
         };
-        let res = self.client
-            .post(&format!("{}/api/v1/cv/nerf-extract", self.pre_processing_url))
+        let res = self
+            .client
+            .post(&format!(
+                "{}/api/v1/cv/nerf-extract",
+                self.pre_processing_url
+            ))
             .json(&req)
             .send()
             .await
@@ -87,19 +98,26 @@ impl AIClient {
         res.json::<NeRFResponse>().await.map_err(|e| e.to_string())
     }
 
-    pub async fn split_stems(&self, audio_id: &str, stems: u32) -> Result<StemSplitResponse, String> {
+    pub async fn split_stems(
+        &self,
+        audio_id: &str,
+        stems: u32,
+    ) -> Result<StemSplitResponse, String> {
         let req = StemSplitRequest {
             audio_id: audio_id.to_string(),
             stems,
         };
-        let res = self.client
+        let res = self
+            .client
             .post(&format!("{}/split-stems", self.generative_studio_url))
             .json(&req)
             .send()
             .await
             .map_err(|e| e.to_string())?;
 
-        res.json::<StemSplitResponse>().await.map_err(|e| e.to_string())
+        res.json::<StemSplitResponse>()
+            .await
+            .map_err(|e| e.to_string())
     }
 }
 
@@ -115,7 +133,7 @@ mod tests {
         };
         assert_eq!(req.video_id, "vid_1");
         assert_eq!(req.object_prompt, "dog");
-        
+
         // This won't actually call the python server if we don't invoke the method
         // but it tests compilation of the client.
         let client = AIClient::new();

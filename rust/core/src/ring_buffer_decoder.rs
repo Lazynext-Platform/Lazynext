@@ -1,15 +1,15 @@
 use crate::engine::AssetLoader;
+use lru::LruCache;
 use std::collections::HashMap;
 use std::future::Future;
+use std::io::Read;
+use std::num::NonZeroUsize;
 use std::pin::Pin;
 use std::process::{Command, Stdio};
 use std::sync::Arc;
-use tokio::sync::Mutex;
-use std::io::Read;
 use std::sync::atomic::{AtomicU32, Ordering};
+use tokio::sync::Mutex;
 use tokio::sync::mpsc;
-use lru::LruCache;
-use std::num::NonZeroUsize;
 
 struct DecodeStream {
     _media_path: String,
@@ -54,18 +54,24 @@ impl DecodeStream {
 
                     let child = Command::new("ffmpeg")
                         .args([
-                            "-ss", &timestamp_str,
-                            "-i", &stream_path,
-                            "-f", "rawvideo",
-                            "-pix_fmt", "rgba",
-                            "-s", &format!("{}x{}", width, height),
-                            "-loglevel", "error",
-                            "-"
+                            "-ss",
+                            &timestamp_str,
+                            "-i",
+                            &stream_path,
+                            "-f",
+                            "rawvideo",
+                            "-pix_fmt",
+                            "rgba",
+                            "-s",
+                            &format!("{}x{}", width, height),
+                            "-loglevel",
+                            "error",
+                            "-",
                         ])
                         .stdout(Stdio::piped())
                         .stderr(Stdio::null())
                         .spawn();
-                    
+
                     if let Ok(c) = child {
                         ffmpeg_child = Some(c);
                         cur_frame_ref.store(start_frame, Ordering::SeqCst);
@@ -80,12 +86,12 @@ impl DecodeStream {
                         let mut buffer = vec![0u8; expected_size];
                         if stdout.read_exact(&mut buffer).is_ok() {
                             let frame_idx = cur_frame_ref.load(Ordering::SeqCst);
-                            
+
                             // Insert into ring buffer / LRU
                             let mut cache = frames_ref.blocking_lock();
                             cache.put(frame_idx, buffer);
                             drop(cache);
-                            
+
                             cur_frame_ref.fetch_add(1, Ordering::SeqCst);
                         } else {
                             // EOF or error, wait for next seek
@@ -118,7 +124,7 @@ impl DecodeStream {
         }
 
         let current = self.current_frame.load(Ordering::SeqCst);
-        
+
         // If the requested frame is too far behind or too far ahead, trigger a seek
         if frame_idx < current || frame_idx > current + 60 {
             let _ = self.seek_tx.send(frame_idx).await;
@@ -194,25 +200,30 @@ pub struct NativeFfmpegDecoder {
 impl NativeFfmpegDecoder {
     pub fn new(media_path: String, width: u32, height: u32) -> Self {
         ffmpeg_next::init().unwrap_or_else(|e| eprintln!("FFmpeg init failed: {}", e));
-        Self { media_path, width, height }
+        Self {
+            media_path,
+            width,
+            height,
+        }
     }
-    
+
     pub fn decode_frame(&self, frame_idx: u32) -> Option<Vec<u8>> {
         let mut ictx = ffmpeg_next::format::input(&self.media_path).ok()?;
         let input = ictx.streams().best(ffmpeg_next::media::Type::Video)?;
         let stream_index = input.index();
-        let context_decoder = ffmpeg_next::codec::context::Context::from_parameters(input.parameters()).ok()?;
+        let context_decoder =
+            ffmpeg_next::codec::context::Context::from_parameters(input.parameters()).ok()?;
         let mut decoder = context_decoder.decoder().video().ok()?;
-        
+
         let time_base = input.time_base();
         let fps = input.rate();
-        
+
         // Approximate seek timestamp
         let seek_time = (frame_idx as f64) / f64::from(fps.0) * f64::from(fps.1);
         let timestamp = (seek_time * f64::from(time_base.1) / f64::from(time_base.0)) as i64;
-        
+
         let _ = ictx.seek(timestamp, ..timestamp);
-        
+
         let mut scaler = ffmpeg_next::software::scaling::Context::get(
             decoder.format(),
             decoder.width(),
@@ -221,7 +232,8 @@ impl NativeFfmpegDecoder {
             self.width,
             self.height,
             ffmpeg_next::software::scaling::flag::Flags::BILINEAR,
-        ).ok()?;
+        )
+        .ok()?;
 
         let mut receive_and_process_decoded_frames =
             |decoder: &mut ffmpeg_next::decoder::Video| -> Option<Vec<u8>> {
@@ -229,7 +241,7 @@ impl NativeFfmpegDecoder {
                 while decoder.receive_frame(&mut decoded).is_ok() {
                     let mut rgb_frame = ffmpeg_next::frame::Video::empty();
                     let _ = scaler.run(&decoded, &mut rgb_frame);
-                    
+
                     let data = rgb_frame.data(0);
                     let len = (self.width * self.height * 4) as usize;
                     if data.len() >= len {
@@ -247,7 +259,7 @@ impl NativeFfmpegDecoder {
                 }
             }
         }
-        
+
         let _ = decoder.send_eof();
         receive_and_process_decoded_frames(&mut decoder)
     }

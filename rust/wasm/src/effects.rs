@@ -126,20 +126,23 @@ pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, 
 
         // Convert the LUT data (f32) into a 3D WebGPU texture
         let lut_size = options.lut_size;
-        let lut_texture = runtime.context.device().create_texture(&wgpu::TextureDescriptor {
-            label: Some("lut3d-texture"),
-            size: wgpu::Extent3d {
-                width: lut_size,
-                height: lut_size,
-                depth_or_array_layers: lut_size,
-            },
-            mip_level_count: 1,
-            sample_count: 1,
-            dimension: wgpu::TextureDimension::D3,
-            format: wgpu::TextureFormat::Rgba32Float,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
-            view_formats: &[],
-        });
+        let lut_texture = runtime
+            .context
+            .device()
+            .create_texture(&wgpu::TextureDescriptor {
+                label: Some("lut3d-texture"),
+                size: wgpu::Extent3d {
+                    width: lut_size,
+                    height: lut_size,
+                    depth_or_array_layers: lut_size,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D3,
+                format: wgpu::TextureFormat::Rgba32Float,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                view_formats: &[],
+            });
 
         // Write the lut_data into the texture
         runtime.context.queue().write_texture(
@@ -174,8 +177,13 @@ pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, 
                 },
             )
             .map_err(|error| JsValue::from_str(&error.to_string()))?;
-            
-        render_texture_to_canvas(&runtime.context, &result_texture, options.width, options.height)
+
+        render_texture_to_canvas(
+            &runtime.context,
+            &result_texture,
+            options.width,
+            options.height,
+        )
     })
 }
 
@@ -219,9 +227,18 @@ pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanv
         let passes = vec![EffectPass {
             shader: "chroma-key".to_string(),
             uniforms: std::collections::HashMap::from([
-                ("u_target_color".to_string(), UniformValue::Vector(options.key_color)),
-                ("u_similarity".to_string(), UniformValue::Number(options.similarity)),
-                ("u_smoothness".to_string(), UniformValue::Number(options.smoothness)),
+                (
+                    "u_target_color".to_string(),
+                    UniformValue::Vector(options.key_color),
+                ),
+                (
+                    "u_similarity".to_string(),
+                    UniformValue::Number(options.similarity),
+                ),
+                (
+                    "u_smoothness".to_string(),
+                    UniformValue::Number(options.smoothness),
+                ),
             ]),
         }];
         let result_texture = runtime
@@ -236,7 +253,12 @@ pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanv
                 },
             )
             .map_err(|error| JsValue::from_str(&error.to_string()))?;
-        render_texture_to_canvas(&runtime.context, &result_texture, options.width, options.height)
+        render_texture_to_canvas(
+            &runtime.context,
+            &result_texture,
+            options.width,
+            options.height,
+        )
     })
 }
 
@@ -245,7 +267,8 @@ fn parse_apply_chroma_key_options(value: JsValue) -> Result<ApplyChromaKeyOption
         .dyn_into()
         .map_err(|_| JsValue::from_str("applyChromaKey expects an options object"))?;
 
-    let key_color = read_serde_property::<Vec<f32>>(&object, "keyColor").unwrap_or_else(|_| vec![0.0, 1.0, 0.0]);
+    let key_color = read_serde_property::<Vec<f32>>(&object, "keyColor")
+        .unwrap_or_else(|_| vec![0.0, 1.0, 0.0]);
     let similarity = crate::gpu::read_f32_property(&object, "similarity").unwrap_or(0.4);
     let smoothness = crate::gpu::read_f32_property(&object, "smoothness").unwrap_or(0.1);
 

@@ -56,7 +56,7 @@ enum Commands {
     BatchRender {
         /// Comma-separated project IDs
         projects: String,
-        
+
         /// Output format
         #[arg(short, long, default_value = "mp4")]
         format: String,
@@ -70,7 +70,11 @@ async fn main() {
     println!("🚀 Lazynext Headless CLI v{}", env!("CARGO_PKG_VERSION"));
 
     match &args.command {
-        Commands::Edit { prompt, file, llm_provider } => {
+        Commands::Edit {
+            prompt,
+            file,
+            llm_provider,
+        } => {
             println!("🤖 AI Intent: {}", prompt);
 
             let editor = lazynext_core::autonomous::AutonomousEditor::new();
@@ -84,9 +88,11 @@ async fn main() {
             let mut engine = if let Some(path) = file {
                 if std::path::Path::new(path).exists() {
                     println!("📂 Loading project from file: {}", path);
-                    let content = std::fs::read_to_string(path).expect("Failed to read project file");
-                    let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content).expect("Failed to parse project JSON");
-                    
+                    let content =
+                        std::fs::read_to_string(path).expect("Failed to read project file");
+                    let project_data: lazynext_core::nle_state::ProjectData =
+                        serde_json::from_str(&content).expect("Failed to parse project JSON");
+
                     let mut eng = NLEState::new(
                         project_data.id.clone(),
                         project_data.name.clone(),
@@ -108,18 +114,10 @@ async fn main() {
                     }
                     eng
                 } else {
-                    NLEState::new(
-                        "cli_session".to_string(),
-                        "CLI AI Edit".to_string(),
-                        24,
-                    )
+                    NLEState::new("cli_session".to_string(), "CLI AI Edit".to_string(), 24)
                 }
             } else {
-                NLEState::new(
-                    "cli_session".to_string(),
-                    "CLI AI Edit".to_string(),
-                    24,
-                )
+                NLEState::new("cli_session".to_string(), "CLI AI Edit".to_string(), 24)
             };
 
             match editor.process_intent_with_llm(&mut engine, &intent).await {
@@ -137,17 +135,21 @@ async fn main() {
                             track.clips.len()
                         );
                     }
-                    
+
                     if let Some(path) = file {
                         println!("💾 Saving project back to file: {}", path);
-                        let project_json = serde_json::to_string_pretty(engine.get_project_data()).expect("Failed to serialize project");
+                        let project_json = serde_json::to_string_pretty(engine.get_project_data())
+                            .expect("Failed to serialize project");
                         std::fs::write(path, project_json).expect("Failed to write project file");
                     }
                 }
                 Err(e) => eprintln!("❌ Failed: {}", e),
             }
         }
-        Commands::BatchRender { projects: batch, format } => {
+        Commands::BatchRender {
+            projects: batch,
+            format,
+        } => {
             let projects: Vec<&str> = batch.split(',').map(|s| s.trim()).collect();
             println!("🎬 Batch rendering {} projects...", projects.len());
             let mut success = 0;
@@ -185,7 +187,15 @@ async fn main() {
                 failed
             );
         }
-        Commands::Render { project, format, width, height, framerate, duration, progress } => {
+        Commands::Render {
+            project,
+            format,
+            width,
+            height,
+            framerate,
+            duration,
+            progress,
+        } => {
             let mock_args = RenderArgs {
                 format: format.clone(),
                 width: *width,
@@ -222,7 +232,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
             .map_err(|e| format!("Failed to read project file: {}", e))?;
         let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content)
             .map_err(|e| format!("Failed to parse project JSON: {}", e))?;
-        
+
         // Reconstruct engine from project data
         let mut eng = NLEState::new(
             project_data.id.clone(),
@@ -247,7 +257,10 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         }
         eng
     } else {
-        println!("⚠️  Project file '{}' not found. Using default test pattern.", project);
+        println!(
+            "⚠️  Project file '{}' not found. Using default test pattern.",
+            project
+        );
         let mut eng = NLEState::new(
             project.to_string(),
             format!("Headless Render: {}", project),
@@ -291,7 +304,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         "mov" => lazynext_export::ExportFormat::Mov,
         _ => lazynext_export::ExportFormat::Mp4,
     };
-    
+
     // Update the engine state's project data to match the CLI arguments
     engine.set_dimensions(args.width, args.height);
 
@@ -303,7 +316,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
     );
 
     let start = std::time::Instant::now();
-    
+
     let engine_ptr = std::sync::Arc::new(tokio::sync::Mutex::new(engine));
     let core_engine = lazynext_core::engine::CoreEngine::init(engine_ptr)
         .await
@@ -314,7 +327,8 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         .map_err(|e| format!("Failed to open test pattern: {}", e))?
         .to_rgba8();
     let (img_w, img_h) = img.dimensions();
-    core_engine.upload_texture("clip_1", img.as_raw(), img_w, img_h)
+    core_engine
+        .upload_texture("clip_1", img.as_raw(), img_w, img_h)
         .await
         .map_err(|e| format!("Failed to upload texture: {}", e))?;
 

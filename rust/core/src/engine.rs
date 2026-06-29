@@ -20,7 +20,11 @@ pub struct CoreEngine {
 /// Abstract trait for loading raw video frames for the compositor.
 pub trait AssetLoader: Send + Sync {
     /// Loads a frame for the given media asset at the given local frame index.
-    fn load_frame(&self, media_id: &str, frame_idx: u32) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<u8>, String>> + Send>>;
+    fn load_frame(
+        &self,
+        media_id: &str,
+        frame_idx: u32,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<u8>, String>> + Send>>;
 }
 
 /// Real-time loop that increments the playhead and dispatches render events.
@@ -41,7 +45,10 @@ impl PlaybackLoop {
         #[cfg(not(target_arch = "wasm32"))]
         if let Some(dl) = &mut decklink {
             // Hardcode to 1080p24 for now, since that's our default project framerate
-            dl.configure(decklink::SdiVideoMode::HD1080p24, decklink::PixelFormat::Bgra8Bit);
+            dl.configure(
+                decklink::SdiVideoMode::HD1080p24,
+                decklink::PixelFormat::Bgra8Bit,
+            );
         }
 
         Self {
@@ -110,8 +117,10 @@ impl CoreEngine {
 
         println!("[CoreEngine] Initialized. Awaiting frame commands.");
         #[cfg(not(target_arch = "wasm32"))]
-        let loader = Arc::new(crate::ring_buffer_decoder::RingBufferDecoder::new(width, height));
-        
+        let loader = Arc::new(crate::ring_buffer_decoder::RingBufferDecoder::new(
+            width, height,
+        ));
+
         #[cfg(not(target_arch = "wasm32"))]
         let asset_loader: Option<Arc<dyn AssetLoader>> = Some(loader);
 
@@ -135,13 +144,16 @@ impl CoreEngine {
     pub fn set_asset_loader(&mut self, loader: Arc<dyn AssetLoader>) {
         self.asset_loader = Some(loader);
     }
-    
+
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn enable_decklink(&self) {
         let mut dl_guard = self.decklink.lock().await;
         if dl_guard.is_none() {
             let mut dl = decklink::DecklinkEngine::new();
-            dl.configure(decklink::SdiVideoMode::HD1080p24, decklink::PixelFormat::Bgra8Bit);
+            dl.configure(
+                decklink::SdiVideoMode::HD1080p24,
+                decklink::PixelFormat::Bgra8Bit,
+            );
             let _ = dl.start_output();
             *dl_guard = Some(dl);
             println!("[CoreEngine] Decklink SDI output enabled.");
@@ -149,8 +161,16 @@ impl CoreEngine {
     }
 
     /// Uploads a texture to the GPU compositor for use by clips.
-    pub async fn upload_texture(&self, id: &str, rgba: &[u8], width: u32, height: u32) -> Result<(), String> {
-        let texture = self.gpu_ctx.create_texture_from_rgba(rgba, width, height)
+    pub async fn upload_texture(
+        &self,
+        id: &str,
+        rgba: &[u8],
+        width: u32,
+        height: u32,
+    ) -> Result<(), String> {
+        let texture = self
+            .gpu_ctx
+            .create_texture_from_rgba(rgba, width, height)
             .map_err(|e| format!("Failed to create texture: {e}"))?;
         let mut comp = self.compositor.lock().await;
         comp.upsert_texture(id.to_string(), texture);
@@ -193,7 +213,7 @@ impl CoreEngine {
                 // Only include clips visible at this frame
                 if frame_idx >= clip.start && frame_idx < clip.end {
                     let local_frame = frame_idx - clip.start;
-                    
+
                     // Fetch frame data if asset_loader is present
                     if let Some(loader) = &self.asset_loader {
                         match loader.load_frame(&clip.id, local_frame).await {
@@ -202,7 +222,10 @@ impl CoreEngine {
                                 let _ = self.upload_texture(&clip.id, &rgba, width, height).await;
                             }
                             Err(e) => {
-                                eprintln!("[CoreEngine] Failed to load frame {} for clip {}: {}", local_frame, clip.id, e);
+                                eprintln!(
+                                    "[CoreEngine] Failed to load frame {} for clip {}: {}",
+                                    local_frame, clip.id, e
+                                );
                             }
                         }
                     }
@@ -264,13 +287,13 @@ impl CoreEngine {
                 .gpu_ctx
                 .read_texture_to_cpu(&texture, width, height)
                 .map_err(|e| format!("GPU readback error: {e}"))?;
-                
+
             // Pump to Decklink if active
             let mut dl_guard = self.decklink.lock().await;
             if let Some(dl) = dl_guard.as_mut() {
                 let _ = dl.pump_frame_to_sdi(&rgba_bytes, width, height);
             }
-                
+
             Ok(rgba_bytes)
         }
 
@@ -283,7 +306,11 @@ impl CoreEngine {
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub async fn render_frame_to_target(&self, frame_idx: u32, canvas: &web_sys::HtmlCanvasElement) -> Result<(), String> {
+    pub async fn render_frame_to_target(
+        &self,
+        frame_idx: u32,
+        canvas: &web_sys::HtmlCanvasElement,
+    ) -> Result<(), String> {
         let state = self.project.lock().await;
 
         // Frame index bounds check against the longest track
@@ -364,7 +391,8 @@ impl CoreEngine {
             .map_err(|e| format!("Compositor error: {e}"))?;
 
         // Render directly to the user-provided canvas
-        self.gpu_ctx.render_texture_via_gl_canvas(&texture, canvas, width, height)
+        self.gpu_ctx
+            .render_texture_via_gl_canvas(&texture, canvas, width, height)
             .map_err(|e| format!("WebGL render error: {e}"))?;
 
         Ok(())
@@ -420,7 +448,7 @@ impl CoreEngine {
         let engine_ref = self;
 
         let progress_tx_clone = progress_tx.clone();
-        
+
         pipeline
             .export(move |frame_idx| {
                 let tx_for_frame = progress_tx_clone.clone();
@@ -432,17 +460,17 @@ impl CoreEngine {
                         println!("[CoreEngine] Rendered frame {}/{}", frame_idx, total_frames);
                     }
                     let frame_size = (engine_ref.width * engine_ref.height * 4) as usize;
-                match rgba {
-                    Ok(bytes) => bytes,
-                    Err(e) => {
-                        eprintln!("[CoreEngine] Frame {} render error: {}", frame_idx, e);
-                        vec![0u8; frame_size]
+                    match rgba {
+                        Ok(bytes) => bytes,
+                        Err(e) => {
+                            eprintln!("[CoreEngine] Frame {} render error: {}", frame_idx, e);
+                            vec![0u8; frame_size]
+                        }
                     }
-                }
-            } // close async block
-        }) // close export closure
-        .await
-        .map_err(|e| format!("Export failed: {e}"))?;
+                } // close async block
+            }) // close export closure
+            .await
+            .map_err(|e| format!("Export failed: {e}"))?;
 
         println!("[CoreEngine] Export complete!");
         Ok(())

@@ -1,5 +1,5 @@
-use gpui::*;
 use gpui::prelude::*;
+use gpui::*;
 use lazynext_core::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -34,21 +34,23 @@ fn main() {
     });
 
     let engine = Arc::new(Mutex::new(rt.block_on(async {
-        let e = lazynext_core::engine::CoreEngine::init(nle.clone()).await.unwrap();
+        let e = lazynext_core::engine::CoreEngine::init(nle.clone())
+            .await
+            .unwrap();
         e.enable_decklink().await;
         e
     })));
 
     log::info!("Entering native event loop...");
-    
+
     let nle_clone = nle.clone();
     let engine_clone = engine.clone();
     let rt_handle = rt.handle().clone();
-    
+
     Application::new().run(move |cx: &mut App| {
         let bounds = Bounds {
             origin: point(px(0.0), px(0.0)),
-            size: size(px(800.0), px(600.0))
+            size: size(px(800.0), px(600.0)),
         };
         cx.open_window(
             WindowOptions {
@@ -60,9 +62,7 @@ fn main() {
                 }),
                 ..Default::default()
             },
-            |_, cx| {
-                cx.new(|_cx| Dashboard::new(nle_clone, engine_clone, rt_handle))
-            }
+            |_, cx| cx.new(|_cx| Dashboard::new(nle_clone, engine_clone, rt_handle)),
         );
     });
 }

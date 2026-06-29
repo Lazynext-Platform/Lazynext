@@ -20,7 +20,7 @@ pub fn get_project_info() -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_ref() {
         let pd = engine.get_project_data();
         let total_clips: usize = pd.tracks.iter().map(|t| t.clips.len()).sum();
-        
+
         let tracks: Vec<serde_json::Value> = pd.tracks.iter().map(|t| {
             let clips: Vec<serde_json::Value> = t.clips.iter().map(|c| {
                 serde_json::json!({
@@ -64,7 +64,13 @@ pub fn add_track(kind: String) -> String {
     }
 }
 
-pub fn add_clip(_track_index: u32, _clip_type: String, _name: String, _start: u32, _end: u32) -> String {
+pub fn add_clip(
+    _track_index: u32,
+    _clip_type: String,
+    _name: String,
+    _start: u32,
+    _end: u32,
+) -> String {
     // Real clip operations are available via NLEState::add_clip_to_track().
     "Clip added".to_string()
 }
@@ -134,45 +140,58 @@ pub fn version() -> String {
 }
 
 pub fn request_rotoscope(video_id: String, prompt: String) -> String {
-    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
     rt.block_on(async {
         let client = crate::ai_client::AIClient::new();
         match client.rotoscope(&video_id, &prompt).await {
             Ok(res) => {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
-                    let mask_url = res.mask_sequence_url.unwrap_or_else(|| "mock_mask.mp4".to_string());
+                    let mask_url = res
+                        .mask_sequence_url
+                        .unwrap_or_else(|| "mock_mask.mp4".to_string());
                     let _ = engine.apply_rotoscope_mask(&video_id, &mask_url);
                     "Rotoscoping complete. Mask added.".to_string()
                 } else {
                     "Engine not initialized".to_string()
                 }
-            },
+            }
             Err(e) => format!("Rotoscoping failed: {}", e),
         }
     })
 }
 
 pub fn request_nerf(video_id: String) -> String {
-    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
     rt.block_on(async {
         let client = crate::ai_client::AIClient::new();
         match client.extract_nerf(&video_id).await {
             Ok(res) => {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
-                    let ply_url = res.point_cloud_url.unwrap_or_else(|| "mock_splat.ply".to_string());
+                    let ply_url = res
+                        .point_cloud_url
+                        .unwrap_or_else(|| "mock_splat.ply".to_string());
                     let _ = engine.add_nerf_cloud(&ply_url);
                     "NeRF extraction complete. Splat added.".to_string()
                 } else {
                     "Engine not initialized".to_string()
                 }
-            },
+            }
             Err(e) => format!("NeRF extraction failed: {}", e),
         }
     })
 }
 
 pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
-    let rt = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap();
+    let rt = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
     rt.block_on(async {
         let client = crate::ai_client::AIClient::new();
         match client.split_stems(&audio_id, stems).await {
@@ -181,14 +200,18 @@ pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
                     let mut default_stems = std::collections::HashMap::new();
                     default_stems.insert("vocals".to_string(), "mock_vocals.wav".to_string());
                     default_stems.insert("drums".to_string(), "mock_drums.wav".to_string());
-                    
-                    let stems_map = if res.stems.is_empty() { default_stems } else { res.stems };
+
+                    let stems_map = if res.stems.is_empty() {
+                        default_stems
+                    } else {
+                        res.stems
+                    };
                     let _ = engine.separate_audio_stems(&audio_id, stems_map);
                     "Stem separation complete. Audio tracks added.".to_string()
                 } else {
                     "Engine not initialized".to_string()
                 }
-            },
+            }
             Err(e) => format!("Stem separation failed: {}", e),
         }
     })

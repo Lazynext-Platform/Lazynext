@@ -154,7 +154,7 @@ impl FacialRecognitionModel {
     #[cfg(feature = "onnx")]
     fn detect_faces_onnx(&self, frame_data: &[u8], width: u32, height: u32) -> Vec<FaceDetection> {
         println!("[NeuralEngine] Running hardware-accelerated ONNX facial detection...");
-        
+
         // Attempt to load the model and run inference
         let result: Result<Vec<FaceDetection>, Box<dyn std::error::Error>> = (|| {
             // Load the ONNX model using ort
@@ -164,7 +164,7 @@ impl FacialRecognitionModel {
             }
 
             let model = ort::Session::builder()?.commit_from_file(model_path)?;
-            
+
             // Preprocess RGBA frame to RGB float32 tensor
             let w = width as usize;
             let h = height as usize;
@@ -175,19 +175,19 @@ impl FacialRecognitionModel {
                     let dst_r = y * w + x;
                     let dst_g = w * h + y * w + x;
                     let dst_b = 2 * w * h + y * w + x;
-                    
+
                     rgb_data[dst_r] = frame_data[src_idx] as f32 / 255.0;
                     rgb_data[dst_g] = frame_data[src_idx + 1] as f32 / 255.0;
                     rgb_data[dst_b] = frame_data[src_idx + 2] as f32 / 255.0;
                 }
             }
-            
+
             let tensor = ndarray::Array4::from_shape_vec((1, 3, h, w), rgb_data)?;
             let inputs = ort::inputs!["input.1" => tensor]?;
-            
+
             // Run inference
             let outputs = model.run(inputs)?;
-            
+
             // Post-process dummy parsing (since SCRFD output depends on multiple scales)
             // We'll simulate reading the bounding box output tensor if it returns something
             let mut detections = Vec::new();
@@ -197,17 +197,24 @@ impl FacialRecognitionModel {
                 detections.push(FaceDetection {
                     actor_id: "Actor_ONNX".into(),
                     confidence: 0.95,
-                    bounding_box: BoundingBox { x: 0.3, y: 0.3, width: 0.4, height: 0.4 }
+                    bounding_box: BoundingBox {
+                        x: 0.3,
+                        y: 0.3,
+                        width: 0.4,
+                        height: 0.4,
+                    },
                 });
             }
-            
+
             Ok(detections)
         })();
 
         match result {
             Ok(faces) if !faces.is_empty() => faces,
             _ => {
-                println!("[NeuralEngine] ONNX inference failed or returned 0 faces, falling back to heuristic...");
+                println!(
+                    "[NeuralEngine] ONNX inference failed or returned 0 faces, falling back to heuristic..."
+                );
                 self.detect_faces_heuristic(frame_data, width, height)
             }
         }
