@@ -30,7 +30,7 @@ pub fn get_project_info() -> String {
                     "duration": c.end.saturating_sub(c.start)
                 })
             }).collect();
-            
+
             serde_json::json!({
                 "id": t.id,
                 "name": format!("{} Track {}", if t.kind == "video" { "V" } else { "A" }, t.id.chars().take(4).collect::<String>()),

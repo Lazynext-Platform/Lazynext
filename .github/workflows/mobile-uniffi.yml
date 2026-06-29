@@ -19,7 +19,7 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
       with:
-        targets: aarch64-apple-ios, x86_64-apple-ios, aarch64-linux-android, armv7-linux-androideabi
+        targets: aarch64-apple-ios,x86_64-apple-ios,aarch64-linux-android,armv7-linux-androideabi
 
     - name: Install cargo-ndk and uniffi-bindgen
       run: |
