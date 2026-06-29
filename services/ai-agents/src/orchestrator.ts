@@ -180,7 +180,7 @@ Respond ONLY with a JSON object:
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6",
+          model: process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-20240620",
           max_tokens: 4096,
           system: systemPrompt,
           messages: [{ role: "user", content: prompt }],
@@ -748,7 +748,7 @@ async function executeToolCall(
       const odResult: any = await callService(
         `${GENERATIVE_STUDIO_URL}/overdub`,
         "POST",
-        { clip_id: args.clip_id || "main", voice_sample_url: "user_voice.wav", text_to_speak: args.text }
+        { clip_id: args.clip_id || "main", voice_id: "default_voice", text: args.text }
       );
       if (!odResult || !odResult.success) {
           return { success: false, error: "Failed to generate overdub" };

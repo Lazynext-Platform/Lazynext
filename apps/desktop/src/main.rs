@@ -1,4 +1,5 @@
 use gpui::*;
+use gpui::prelude::*;
 use lazynext_core::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -246,16 +247,52 @@ impl Render for EditorShell {
                                             .border_color(border_color)
                                             .rounded_lg()
                                             .flex()
-                                            .items_center()
                                             .justify_center()
-                                            .text_color(rgb(0x555555))
+                                            .children(self.last_frame_data.as_ref().map(|src| {
+                                                img(src.clone()).w_full().h_full().object_fit(gpui::ObjectFit::Contain)
+                                            }))
                                             .child(
-                                                if let Some(ref image_source) = self.last_frame_data {
-                                                    img(image_source.clone()).w_full().h_full().object_fit(ObjectFit::Contain).into_any_element()
-                                                } else {
-                                                    div().child("WebGPU Render Target Placeholder").into_any_element()
-                                                }
+                                                // Fallback text if no frame is rendered
+                                                div().text_sm().text_color(rgb(0x555555)).child("WebGPU Render Target Placeholder").when(self.last_frame_data.is_none(), |s| s.visible())
                                             )
+                                    )
+                            )
+                            // AI Prompt Input Area
+                            .child(
+                                div()
+                                    .h(px(56.0))
+                                    .bg(rgb(0x1a1a1a))
+                                    .border_t_1()
+                                    .border_b_1()
+                                    .border_color(border_color)
+                                    .flex()
+                                    .items_center()
+                                    .px_4()
+                                    .gap_4()
+                                    .child(
+                                        div()
+                                            .flex_1()
+                                            .h(px(36.0))
+                                            .bg(rgb(0x0f0f0f))
+                                            .border_1()
+                                            .border_color(rgb(0x333333))
+                                            .rounded_lg()
+                                            .px_3()
+                                            .flex()
+                                            .items_center()
+                                            .text_sm()
+                                            .text_color(rgb(0x888888))
+                                            .child("Ask AI to edit... (e.g. 'remove silence', 'add cinematic LUT')")
+                                    )
+                                    .child(
+                                        div()
+                                            .px_4()
+                                            .py_1_5()
+                                            .bg(accent_color)
+                                            .text_color(rgb(0x000000))
+                                            .rounded_md()
+                                            .cursor_pointer()
+                                            .child("Generate")
                                     )
                             )
                             // Timeline
@@ -273,27 +310,6 @@ impl Render for EditorShell {
                                             .child(div().w(px(200.0)).p_2().border_r_1().border_color(border_color).child("Sequence 01"))
                                             .child(
                                                 div().flex_1().relative().h(px(32.0))
-                                                    // Add playhead scrubber interaction area
-                                                    .on_mouse_down(gpui::MouseButton::Left, |e, cx| {
-                                                        // Calculate scrub frame from X coordinate (approx 2px per frame)
-                                                        let x = e.position.x.0 - cx.bounds().origin.x.0;
-                                                        let new_frame = (x / 2.0).max(0.0) as u32;
-                                                        cx.update_local_model(|shell: &mut EditorShell, _cx| {
-                                                            shell.current_frame = new_frame;
-                                                        });
-                                                        cx.notify();
-                                                    })
-                                                    .on_mouse_move(|e, cx| {
-                                                        // If mouse is down, scrub
-                                                        if cx.is_mouse_down(gpui::MouseButton::Left) {
-                                                            let x = e.position.x.0 - cx.bounds().origin.x.0;
-                                                            let new_frame = (x / 2.0).max(0.0) as u32;
-                                                            cx.update_local_model(|shell: &mut EditorShell, _cx| {
-                                                                shell.current_frame = new_frame;
-                                                            });
-                                                            cx.notify();
-                                                        }
-                                                    })
                                                     // Time markings
                                                     .children((0..10).map(|i| {
                                                         div().absolute().top_0().bottom_0().w(px(1.0)).bg(rgb(0x333333))
@@ -319,27 +335,11 @@ impl Render for EditorShell {
                                                     .child(
                                                         div().flex_1().h_full().bg(rgb(0x111111)).relative()
                                                             .children(track.clips.iter().map(|clip| {
-                                                                let clip_id = clip.id.clone();
-                                                                let nle_clone = self.nle.clone();
-                                                                let rt_clone = self.rt_handle.clone();
-
                                                                 div().absolute().top(px(4.0)).bottom(px(4.0))
                                                                     .left(px((clip.start as f32) * 2.0))
                                                                     .w(px(((clip.end - clip.start) as f32) * 2.0))
                                                                     .bg(track_color)
-                                                                    .hover(|s| s.bg(rgb(0x0099aa)))
-                                                                    .cursor_pointer()
                                                                     .border_1().border_color(track_border).rounded_md().p_1().overflow_hidden()
-                                                                    .on_mouse_down(gpui::MouseButton::Left, move |e, cx| {
-                                                                        // Mock CRDT move operation by nudging right by 30 frames
-                                                                        // Real implementation would track drag state across mouse move events
-                                                                        rt_clone.block_on(async {
-                                                                            let mut state = nle_clone.lock().await;
-                                                                            let start = state.get_project_data().tracks.iter().flat_map(|t| t.clips.iter()).find(|c| c.id == clip_id).map(|c| c.start).unwrap_or(0);
-                                                                            state.update_clip_property(&clip_id, "start", (start + 30) as f32);
-                                                                        });
-                                                                        cx.notify();
-                                                                    })
                                                                     .child(div().text_xs().text_color(rgb(0xffffff)).child(clip.name.clone()))
                                                             }))
                                                     )

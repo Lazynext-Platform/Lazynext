@@ -22,11 +22,15 @@ pub mod ratelimit;
 pub mod rbac;
 pub mod ws;
 
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+use tower_http::trace::TraceLayer;
+
 // Convenience re-imports so handlers can be concise.
 use db::DbStore;
 use rbac::{AuthClaims, WorkspaceRole};
 
-#[derive(Serialize)]
+#[derive(Serialize, utoipa::ToSchema)]
 struct WebhookPayload {
     event_type: String,
     project_id: String,
@@ -114,6 +118,20 @@ async fn main() {
         ws_state: ws_state.clone(),
     };
 
+    #[derive(OpenApi)]
+    #[openapi(
+        paths(
+            health_handler,
+        ),
+        components(
+            schemas(WebhookPayload, StreamCompletePayload)
+        ),
+        tags(
+            (name = "lazynext", description = "Lazynext API Gateway")
+        )
+    )]
+    struct ApiDoc;
+
     // ── Router ─────────────────────────────────────────────────────────
     //
     // Route groups:
@@ -122,6 +140,7 @@ async fn main() {
     //   /api/v1/admin/... → admin-only
     //   /api/v1/stripe/...→ public (Stripe signs its own webhooks)
     let public_routes = Router::new()
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
         .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
         .layer(middleware::from_fn_with_state(state.clone(), ratelimit::rate_limit));
@@ -157,7 +176,8 @@ async fn main() {
     // Merge public and authenticated routes.
     let app = public_routes
         .merge(authenticated_routes)
-        .with_state(state);
+        .with_state(state)
+        .layer(TraceLayer::new_for_http());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 8005));
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -186,10 +206,18 @@ async fn main() {
     axum::serve(listener, app).await.unwrap();
 }
 
-// ── Public Handlers ───────────────────────────────────────────────────────
+// ── Public Handlers ────────────────────────────────────────────────────────
 
-async fn health_handler() -> Json<Value> {
-    Json(json!({"status": "ok", "service": "api-gateway"}))
+#[utoipa::path(
+    get,
+    path = "/health",
+    responses(
+        (status = 200, description = "Service is healthy")
+    )
+)]
+async fn health_handler(State(state): State<AppState>) -> Json<Value> {
+    let db_status = if state.db.health_check().await.is_ok() { "ok" } else { "degraded" };
+    Json(json!({"status": "ok", "service": "api-gateway", "database": db_status}))
 }
 
 // ── Authenticated Handlers ─────────────────────────────────────────────────
@@ -1066,7 +1094,7 @@ async fn handle_stream_ingest(
     Ok(Json(json!({ "success": true, "session": session_id, "chunk": chunk_index })))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, utoipa::ToSchema)]
 struct StreamCompletePayload {
     session_id: String,
 }

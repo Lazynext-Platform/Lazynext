@@ -74,7 +74,13 @@ impl DbStore {
         Ok(Self { pool })
     }
 
-    /// Fetch a user by ID. Returns `None` if the user doesn't exist.
+    /// Perform a lightweight query to verify DB connection is healthy.
+    pub async fn health_check(&self) -> Result<(), sqlx::Error> {
+        sqlx::query("SELECT 1").execute(&self.pool).await?;
+        Ok(())
+    }
+
+    /// Retrieve a user by their ID. Returns `None` if the user doesn't exist.
     pub async fn get_user(&self, user_id: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
             .bind(user_id)

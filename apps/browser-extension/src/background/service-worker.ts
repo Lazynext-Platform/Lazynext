@@ -1,12 +1,16 @@
 // Service Worker (Background Script)
 
 let API_GATEWAY = "http://localhost:8005";
+let AUTH_TOKEN = "";
 
-// Restore the configured gateway URL from extension storage, falling
+// Restore the configured gateway URL and token from extension storage, falling
 // back to the localhost default for development.
-chrome.storage.local.get("apiGatewayUrl", (items: { [key: string]: any }) => {
+chrome.storage.local.get(["apiGatewayUrl", "authToken"], (items: { [key: string]: any }) => {
 	if (items.apiGatewayUrl && typeof items.apiGatewayUrl === "string") {
 		API_GATEWAY = items.apiGatewayUrl;
+	}
+	if (items.authToken && typeof items.authToken === "string") {
+		AUTH_TOKEN = items.authToken;
 	}
 });
 
@@ -28,11 +32,15 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 		console.log(`Sending media to Lazynext: ${mediaUrl}`);
 
 		try {
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (AUTH_TOKEN) {
+				headers["Authorization"] = `Bearer ${AUTH_TOKEN}`;
+			}
 			const response = await fetch(
 				`${API_GATEWAY}/api/v1/ai/ingest`,
 				{
 					method: "POST",
-					headers: { "Content-Type": "application/json" },
+					headers,
 					body: JSON.stringify({
 						url: mediaUrl,
 						crdtAction: "APPEND_TRACK",

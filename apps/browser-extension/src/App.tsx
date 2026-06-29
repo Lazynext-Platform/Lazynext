@@ -7,6 +7,13 @@ async function getApiGatewayUrl(): Promise<string> {
   return stored.apiGatewayUrl || "http://localhost:8005";
 }
 
+async function getAuthToken(): Promise<string | null> {
+  const stored = (await chrome.storage.local.get("authToken")) as {
+    authToken?: string;
+  };
+  return stored.authToken || null;
+}
+
 function safeDisplayName(src: string): string {
   try {
     return new URL(src).pathname.split("/").pop() || src.substring(0, 30);
@@ -99,10 +106,16 @@ function App() {
       if (capture) {
         // Send to Lazynext web app / api-gateway for ingestion
         const apiUrl = await getApiGatewayUrl();
+        const token = await getAuthToken();
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+        
         try {
           const resp = await fetch(`${apiUrl}/api/v1/ai/ingest`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers,
             body: JSON.stringify({
               url: capture.source,
               source: "browser-extension",
