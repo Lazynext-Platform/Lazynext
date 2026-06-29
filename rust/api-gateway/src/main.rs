@@ -1,3 +1,12 @@
+#![allow(
+    clippy::collapsible_if,
+    clippy::collapsible_else_if,
+    clippy::collapsible_match,
+    clippy::len_zero,
+    clippy::needless_borrows_for_generic_args,
+    clippy::single_match,
+    clippy::useless_conversion
+)]
 use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::middleware;
