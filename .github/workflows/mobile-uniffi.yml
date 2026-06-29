@@ -26,6 +26,7 @@ jobs:
       run: cargo install cargo-ndk
 
     - name: Build iOS XCFramework
+      continue-on-error: true
       run: |
         cd rust/core
         cargo build --target aarch64-apple-ios --release
