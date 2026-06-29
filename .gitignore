@@ -82,3 +82,6 @@ services/render-service/outputs/**/.terraform/
 infra/terraform/**/*.tfstate
 infra/terraform/**/*.tfstate.backup
 infra/terraform/.terraform.lock.hcl
+
+**/.DS_Store
+**/.gradle/
