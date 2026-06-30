@@ -200,10 +200,17 @@ impl AutonomousEditor {
                                     .await;
                                 match resp {
                                     Ok(r) if r.status().is_success() => {
-                                        println!("✅ Silence analysis dispatched for track {}", track_idx);
+                                        println!(
+                                            "✅ Silence analysis dispatched for track {}",
+                                            track_idx
+                                        );
                                     }
-                                    Ok(r) => eprintln!("❌ Silence analysis failed: HTTP {}", r.status()),
-                                    Err(e) => eprintln!("❌ Silence analysis request failed: {}", e),
+                                    Ok(r) => {
+                                        eprintln!("❌ Silence analysis failed: HTTP {}", r.status())
+                                    }
+                                    Err(e) => {
+                                        eprintln!("❌ Silence analysis request failed: {}", e)
+                                    }
                                 }
                             });
                         }
@@ -287,7 +294,8 @@ impl AutonomousEditor {
                             );
                         }
                         "rotoscope_clip" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                            let clip_id =
+                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
                             let prompt = action["prompt"].as_str().unwrap_or("subject").to_string();
                             println!(
                                 "🎯 [AI Engine] Dispatching SAM2 Rotoscoping for clip '{}' with prompt '{}'",
@@ -308,7 +316,10 @@ impl AutonomousEditor {
                                         if resp.status().is_success() {
                                             println!("✅ Rotoscoping completed for clip");
                                         } else {
-                                            eprintln!("❌ Rotoscoping failed: HTTP {}", resp.status());
+                                            eprintln!(
+                                                "❌ Rotoscoping failed: HTTP {}",
+                                                resp.status()
+                                            );
                                         }
                                     }
                                     Err(e) => eprintln!("❌ Rotoscoping request failed: {}", e),
@@ -316,8 +327,12 @@ impl AutonomousEditor {
                             });
                         }
                         "extract_nerf" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
-                            let method = action["method"].as_str().unwrap_or("gaussian-splatting").to_string();
+                            let clip_id =
+                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                            let method = action["method"]
+                                .as_str()
+                                .unwrap_or("gaussian-splatting")
+                                .to_string();
                             println!(
                                 "🧊 [AI Engine] Dispatching NeRF Extraction for clip '{}' (method: {})",
                                 clip_id, method
@@ -337,7 +352,10 @@ impl AutonomousEditor {
                                         if resp.status().is_success() {
                                             println!("✅ NeRF extraction completed for clip");
                                         } else {
-                                            eprintln!("❌ NeRF extraction failed: HTTP {}", resp.status());
+                                            eprintln!(
+                                                "❌ NeRF extraction failed: HTTP {}",
+                                                resp.status()
+                                            );
                                         }
                                     }
                                     Err(e) => eprintln!("❌ NeRF extraction request failed: {}", e),
@@ -345,7 +363,8 @@ impl AutonomousEditor {
                             });
                         }
                         "separate_stems" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                            let clip_id =
+                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
                             let stems = action["stems"].as_u64().unwrap_or(4) as u32;
                             println!(
                                 "🎵 [AI Engine] Dispatching Demucs Stem Separation ({} stems) for clip '{}'",
@@ -366,7 +385,10 @@ impl AutonomousEditor {
                                         if resp.status().is_success() {
                                             println!("✅ Stem separation completed for clip");
                                         } else {
-                                            eprintln!("❌ Stem separation failed: HTTP {}", resp.status());
+                                            eprintln!(
+                                                "❌ Stem separation failed: HTTP {}",
+                                                resp.status()
+                                            );
                                         }
                                     }
                                     Err(e) => eprintln!("❌ Stem separation request failed: {}", e),

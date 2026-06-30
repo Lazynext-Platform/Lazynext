@@ -740,15 +740,17 @@ impl NLEState {
             let end_frames = (*end_sec * self.data.framerate as f64) as u32;
 
             // Remove clips that fall entirely within silence regions
-            track.clips.retain(|clip| {
-                !(clip.start >= start_frames && clip.end <= end_frames)
-            });
+            track
+                .clips
+                .retain(|clip| !(clip.start >= start_frames && clip.end <= end_frames));
         }
 
         let removed = clips_before - track.clips.len();
         println!(
             "🔇 [NLE] Trimmed {} silence regions from track {} — removed {} clip(s)",
-            silence_regions.len(), track_idx, removed
+            silence_regions.len(),
+            track_idx,
+            removed
         );
     }
 

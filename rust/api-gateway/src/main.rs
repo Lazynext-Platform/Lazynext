@@ -1195,7 +1195,8 @@ async fn handle_stream_complete(
     let azure_uploaded = {
         let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_default();
         let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap_or_default();
-        let container = std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
+        let container =
+            std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
 
         if !account.is_empty() && !key.is_empty() {
             match std::fs::read(&file_path) {
@@ -1210,22 +1211,34 @@ async fn handle_stream_complete(
                     .await
                     {
                         Ok(_) => {
-                            info!("Uploaded stream {} to Azure Blob Storage ({}/{})", session_id, container, blob_name);
+                            info!(
+                                "Uploaded stream {} to Azure Blob Storage ({}/{})",
+                                session_id, container, blob_name
+                            );
                             true
                         }
                         Err(e) => {
-                            error!("Azure Blob Storage upload failed: {}. Falling back to local file.", e);
+                            error!(
+                                "Azure Blob Storage upload failed: {}. Falling back to local file.",
+                                e
+                            );
                             false
                         }
                     }
                 }
                 Err(e) => {
-                    error!("Failed to read local file {} for Azure upload: {}", file_path, e);
+                    error!(
+                        "Failed to read local file {} for Azure upload: {}",
+                        file_path, e
+                    );
                     false
                 }
             }
         } else {
-            info!("Azure Storage credentials not configured — keeping local file for session {}", session_id);
+            info!(
+                "Azure Storage credentials not configured — keeping local file for session {}",
+                session_id
+            );
             false
         }
     };
@@ -1248,7 +1261,9 @@ async fn handle_stream_complete(
     } else {
         "Stream finalized (local storage) and added to timeline"
     };
-    Json(json!({ "success": true, "message": msg, "url": file_path, "azure_uploaded": azure_uploaded }))
+    Json(
+        json!({ "success": true, "message": msg, "url": file_path, "azure_uploaded": azure_uploaded }),
+    )
 }
 
 /// Handler for the extension to exchange its auth token

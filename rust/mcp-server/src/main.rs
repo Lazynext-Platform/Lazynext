@@ -1,4 +1,9 @@
-#![allow(dead_code, unused_assignments, clippy::collapsible_if, clippy::collapsible_match)]
+#![allow(
+    dead_code,
+    unused_assignments,
+    clippy::collapsible_if,
+    clippy::collapsible_match
+)]
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::nle_state::NLEState;
 use serde_json::{Value, json};
@@ -574,7 +579,12 @@ async fn main() {
                                 let pipeline = lazynext_export::ExportPipeline::new(config);
                                 match pipeline
                                     .export(total_frames, |frame_idx| async move {
-                                        generate_test_pattern(frame_idx, total_frames, width, height)
+                                        generate_test_pattern(
+                                            frame_idx,
+                                            total_frames,
+                                            width,
+                                            height,
+                                        )
                                     })
                                     .await
                                 {
