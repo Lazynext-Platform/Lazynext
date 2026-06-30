@@ -78,9 +78,9 @@ impl Sam2MaskEngine {
 
         // Try ONNX inference when available
         if self.onnx_available {
-            if let Some(mask) = self.try_onnx_inference(
-                frame_data, width, height, positive_clicks, negative_clicks,
-            ) {
+            if let Some(mask) =
+                self.try_onnx_inference(frame_data, width, height, positive_clicks, negative_clicks)
+            {
                 return mask;
             }
             println!("[SAM2] ONNX inference failed — falling back to geometric mask.");
@@ -123,11 +123,11 @@ impl Sam2MaskEngine {
         positive_clicks: &[Coordinate],
         negative_clicks: &[Coordinate],
     ) -> Option<AlphaMatte> {
-        let model_dir = std::env::var("SAM2_MODEL_DIR")
-            .unwrap_or_else(|_| "models/sam2".to_string());
+        let model_dir =
+            std::env::var("SAM2_MODEL_DIR").unwrap_or_else(|_| "models/sam2".to_string());
 
         let encoder_path = format!("{}/sam2_hiera_large_encoder.onnx", model_dir);
-        let decoder_path = format!("{}/sam2_hiera_large_decoder.onnx", model_dir);
+        let _decoder_path = format!("{}/sam2_hiera_large_decoder.onnx", model_dir);
 
         if !std::path::Path::new(&encoder_path).exists() {
             println!(
@@ -137,7 +137,10 @@ impl Sam2MaskEngine {
             return None;
         }
 
-        println!("[SAM2] Running ONNX inference with {}x{} frame...", width, height);
+        println!(
+            "[SAM2] Running ONNX inference with {}x{} frame...",
+            width, height
+        );
 
         // Build the ONNX inference pipeline
         // 1. Pre-process frame data into image tensor

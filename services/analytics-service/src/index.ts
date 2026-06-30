@@ -267,7 +267,7 @@ async function start() {
   });
 }
 
-if (import.meta.main) {
+if ((import.meta as unknown as { main?: boolean }).main) {
   start();
 }
 

@@ -6,15 +6,26 @@
 
 ---
 
-## [Unreleased]
+## [Unreleased] — 2026-06-30 (Post-#09 hardening pass)
 
 ### Added
+- **Feature #10 — Rust Core Hardening**: completed CRDT conflict-resolution TODO in `nle_state.rs` (+130 lines), fixed `temporal-versioning` merge bug (clips no longer silently land on track 0), added first-time tests for gpu/masks/temporal-versioning/mcp/cli/wasm, wired SAM2 ONNX inference path, VST3 `libloading` host, and C2PA manifest signing.
+- **Feature #11 — Microservices Hardening**: fixed critical bugs across 4 services, wired real video-generation path in generative-studio, render-service OpenTelemetry tracing.
+- **Feature #12 — Desktop App Hardening**: wired AI Copilot "Run Command" path in the GPUI editor.
+- **Feature #13 — Mobile App Hardening**: added Android Kotlin native module (`MyModule.kt`, +113) and a real web bridge (`MyModule.web.ts`, +77) replacing the JS mock.
+- **Feature #14 — Browser Extension Completion**: replaced mock project list with real API fetch; hardened capture overlay against non-URL `src` crashes.
+- **Feature #15 — AI Editor Real API**: wired web editor AI chat to the real API; added desktop AI path, MCP protocol tests, and mobile tests.
+- **Feature #16 — Final Gaps (SDK / External Deps)**: wired UniFFI bindings, SAM2 ONNX runtime, VST3 `libloading`, and E2E integration tests (`rust/tests/e2e_integration_tests.rs`).
+- **Feature #17 — Platform-wide Mock Removal + Audit Fixes**: removed all remaining mock/stub/placeholder blocks from production paths; comprehensive CI/CD, infrastructure, and monitoring audit fixes.
 
 ### Changed
+- Roadmap statuses brought in sync with `main` — features 10-14 flipped from 🔴 Not Started → 🟢 Complete; 15-17 added.
 
 ### Fixed
+- Zero `mock`/`stub`/`placeholder` references remain in production code paths (verified by workspace search; only 3 explanatory code comments remain in `compositor/transforms3d.rs` and `plugin/wasm_sandbox.rs`).
 
 ### Removed
+- All remaining mock data blocks, broken routes, and dead `mock_args` naming (renamed to `render_args` in the CLI).
 
 ---
 

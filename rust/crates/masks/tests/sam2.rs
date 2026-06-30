@@ -1,4 +1,4 @@
-use masks::{Coordinate, Sam2MaskEngine, AlphaMatte, BoundingBox};
+use masks::{BoundingBox, Coordinate, Sam2MaskEngine};
 
 #[test]
 fn test_sam2_engine_initializes() {
@@ -26,7 +26,10 @@ fn test_generate_mask_from_points_returns_valid_dimensions() {
     assert_eq!(mask.data.len(), (width * height) as usize);
     // Mask should have some non-zero values (the circle)
     let has_content = mask.data.iter().any(|&v| v > 0);
-    assert!(has_content, "Mask should have non-zero pixels for positive click");
+    assert!(
+        has_content,
+        "Mask should have non-zero pixels for positive click"
+    );
 }
 
 #[test]
@@ -36,13 +39,7 @@ fn test_generate_mask_empty_clicks_returns_mask() {
     let height = 80u32;
     let frame_data = vec![0u8; (width * height * 4) as usize];
 
-    let mask = engine.generate_mask_from_points(
-        &frame_data,
-        width,
-        height,
-        &[],
-        &[],
-    );
+    let mask = engine.generate_mask_from_points(&frame_data, width, height, &[], &[]);
 
     assert_eq!(mask.width, width);
     assert_eq!(mask.height, height);

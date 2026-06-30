@@ -96,6 +96,7 @@ export default [
 			"no-useless-assignment": "warn",
 			"react-hooks/immutability": "warn",
 			"react-hooks/set-state-in-effect": "warn",
+			"react-hooks/refs": "warn",
 			"preserve-caught-error": "warn",
 			"jsx-a11y/no-noninteractive-element-interactions": "warn",
 
@@ -115,6 +116,7 @@ export default [
 			"no-useless-assignment": "warn",
 			"react-hooks/immutability": "warn",
 			"react-hooks/set-state-in-effect": "warn",
+			"react-hooks/refs": "warn",
 			"preserve-caught-error": "warn",
 			"jsx-a11y/no-noninteractive-element-interactions": "warn",
 			"no-empty": "warn",

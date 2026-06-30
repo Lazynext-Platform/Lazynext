@@ -8,7 +8,6 @@ mod dashboard;
 use dashboard::Dashboard;
 
 mod editor;
-use editor::EditorShell;
 
 // GPUI takes over the main thread, so we run a standard main function.
 fn main() {
@@ -52,7 +51,7 @@ fn main() {
             origin: point(px(0.0), px(0.0)),
             size: size(px(800.0), px(600.0)),
         };
-        cx.open_window(
+        let _ = cx.open_window(
             WindowOptions {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 titlebar: Some(TitlebarOptions {

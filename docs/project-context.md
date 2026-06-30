@@ -196,7 +196,7 @@ bun run dev
 ### Out of Scope (v1.0)
 
 - Desktop app full implementation (GPUI scaffold only)
-- Mobile app full implementation (React Native shell, UniFFI not wired)
+- Mobile app full editor implementation (UniFFI wired in #16 + Android native module in #13; full editor UI/screens pending)
 - 3D camera tracking and advanced VFX compositing
 - Direct social media publishing APIs
 - Real Kafka analytics pipeline (stub)
@@ -207,7 +207,7 @@ bun run dev
 - WASM bridge limits Rust-JS throughput for high-res real-time preview
 - wgpu maturity on mobile browsers is limited
 - GPUI (Zed framework) is not a stable 1.0 dependency
-- ~60-65% of AI microservice endpoints are stubs or mocks
+- Production code contains no mock/stub/placeholder blocks (removed in Features #16/#17); remaining gaps are depth work (full desktop/mobile editors, real Kafka analytics, P2P mesh), not stubs
 - Platform is in early alpha — substantial implementation debt
 
 ## Team & Roles

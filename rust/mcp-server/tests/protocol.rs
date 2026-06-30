@@ -1,7 +1,6 @@
 /// Tests for the MCP server's JSON-RPC 2.0 protocol handling.
 /// The MCP server communicates over stdio using JSON-RPC 2.0.
-
-use serde_json::{Value, json};
+use serde_json::json;
 
 /// Verify initialize response follows MCP protocol.
 #[test]
@@ -75,6 +74,9 @@ fn test_prompts_structure() {
 
     for (name, description) in prompts {
         assert!(!name.is_empty(), "Prompt names must not be empty");
-        assert!(!description.is_empty(), "Prompt descriptions must not be empty");
+        assert!(
+            !description.is_empty(),
+            "Prompt descriptions must not be empty"
+        );
     }
 }

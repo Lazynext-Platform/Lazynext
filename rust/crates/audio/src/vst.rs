@@ -118,7 +118,9 @@ impl VstHost {
                             self._library = Some(library);
                         }
                         Err(e) => {
-                            println!("[VST3 Host] Not a valid VST3 plugin (missing GetPluginFactory): {e}");
+                            println!(
+                                "[VST3 Host] Not a valid VST3 plugin (missing GetPluginFactory): {e}"
+                            );
                             println!("[VST3 Host] Using default parameters for '{name}'");
                             // Library loaded but no factory — keep it anyway
                             self._library = Some(library);
