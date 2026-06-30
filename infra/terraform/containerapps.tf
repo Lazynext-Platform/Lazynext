@@ -534,3 +534,239 @@ resource "azurerm_container_app" "generative_studio" {
     Project     = "lazynext"
   }
 }
+
+# API Gateway (Axum)
+resource "azurerm_container_app" "api_gateway" {
+  name                         = "lazynext-api-gateway-${var.environment}"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.rg.name
+  revision_mode                = "Single"
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
+  }
+
+  template {
+    container {
+      name   = "api-gateway"
+      image  = "${azurerm_container_registry.acr.login_server}/lazynext-api-gateway:latest"
+      cpu    = local.container_apps["api_gateway"].cpu
+      memory = local.container_apps["api_gateway"].memory
+
+      env {
+        name  = "RUST_LOG"
+        value = "info"
+      }
+      env {
+        name        = "DATABASE_URL"
+        secret_name = "database-url"
+      }
+      env {
+        name        = "BETTER_AUTH_SECRET"
+        secret_name = "better-auth-secret"
+      }
+      env {
+        name        = "STRIPE_WEBHOOK_SECRET"
+        secret_name = "stripe-webhook-secret"
+      }
+    }
+
+    min_replicas = local.container_apps["api_gateway"].min
+    max_replicas = local.container_apps["api_gateway"].max
+  }
+
+  ingress {
+    allow_insecure_connections = false
+    external_enabled           = true
+    target_port                = 8005
+    transport                  = "http"
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  secret {
+    name  = "database-url"
+    value = "postgresql://lazynext_app:${var.db_password}@${azurerm_postgresql_flexible_server.postgres.fqdn}:5432/lazynext?sslmode=require"
+  }
+  secret {
+    name  = "better-auth-secret"
+    value = var.better_auth_secret
+  }
+
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image,
+      secret,
+    ]
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+  }
+}
+
+# Collab Server (CRDT sync + WebRTC)
+resource "azurerm_container_app" "collab_server" {
+  name                         = "lazynext-collab-server-${var.environment}"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.rg.name
+  revision_mode                = "Single"
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
+  }
+
+  template {
+    container {
+      name   = "collab-server"
+      image  = "${azurerm_container_registry.acr.login_server}/lazynext-collab-server:latest"
+      cpu    = local.container_apps["collab_server"].cpu
+      memory = local.container_apps["collab_server"].memory
+
+      env {
+        name  = "RUST_LOG"
+        value = "info"
+      }
+      env {
+        name        = "DATABASE_URL"
+        secret_name = "database-url"
+      }
+      env {
+        name        = "BETTER_AUTH_SECRET"
+        secret_name = "better-auth-secret"
+      }
+    }
+
+    min_replicas = local.container_apps["collab_server"].min
+    max_replicas = local.container_apps["collab_server"].max
+  }
+
+  ingress {
+    allow_insecure_connections = false
+    external_enabled           = true
+    target_port                = 8004
+    transport                  = "http"
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  secret {
+    name  = "database-url"
+    value = "postgresql://lazynext_app:${var.db_password}@${azurerm_postgresql_flexible_server.postgres.fqdn}:5432/lazynext?sslmode=require"
+  }
+  secret {
+    name  = "better-auth-secret"
+    value = var.better_auth_secret
+  }
+
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image,
+      secret,
+    ]
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+  }
+}
+
+# Analytics Service
+resource "azurerm_container_app" "analytics_service" {
+  name                         = "lazynext-analytics-service-${var.environment}"
+  container_app_environment_id = azurerm_container_app_environment.main.id
+  resource_group_name          = azurerm_resource_group.rg.name
+  revision_mode                = "Single"
+
+  identity {
+    type         = "UserAssigned"
+    identity_ids = [azurerm_user_assigned_identity.container_apps.id]
+  }
+
+  registry {
+    server               = azurerm_container_registry.acr.login_server
+    username             = azurerm_container_registry.acr.admin_username
+    password_secret_name = "acr-password"
+  }
+
+  template {
+    container {
+      name   = "analytics-service"
+      image  = "${azurerm_container_registry.acr.login_server}/lazynext-analytics-service:latest"
+      cpu    = local.container_apps["analytics_service"].cpu
+      memory = local.container_apps["analytics_service"].memory
+
+      env {
+        name  = "NODE_ENV"
+        value = "production"
+      }
+      env {
+        name  = "KAFKA_BROKERS"
+        value = ""
+      }
+    }
+
+    min_replicas = local.container_apps["analytics_service"].min
+    max_replicas = local.container_apps["analytics_service"].max
+  }
+
+  ingress {
+    allow_insecure_connections = false
+    external_enabled           = true
+    target_port                = 8006
+    transport                  = "http"
+
+    traffic_weight {
+      percentage      = 100
+      latest_revision = true
+    }
+  }
+
+  secret {
+    name  = "acr-password"
+    value = azurerm_container_registry.acr.admin_password
+  }
+
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image,
+    ]
+  }
+
+  tags = {
+    Environment = var.environment
+    Project     = "lazynext"
+  }
+}

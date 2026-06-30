@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.6"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
   }
 
   backend "azurerm" {
@@ -89,6 +93,27 @@ locals {
       min    = 0
       max    = var.environment == "production" ? 4 : 1
     }
+    api_gateway = {
+      cpu    = 1.0
+      memory = "2Gi"
+      port   = 8005
+      min    = var.environment == "production" ? 1 : 0
+      max    = var.environment == "production" ? 4 : 1
+    }
+    collab_server = {
+      cpu    = 2.0
+      memory = "4Gi"
+      port   = 8004
+      min    = var.environment == "production" ? 1 : 0
+      max    = var.environment == "production" ? 8 : 2
+    }
+    analytics_service = {
+      cpu    = 2.0
+      memory = "4Gi"
+      port   = 8006
+      min    = var.environment == "production" ? 1 : 0
+      max    = var.environment == "production" ? 6 : 1
+    }
   }
 
   acr_repos = [
@@ -98,7 +123,8 @@ locals {
     "lazynext-pre-processing",
     "lazynext-generative-studio",
     "lazynext-analytics-service",
-    "lazynext-mcp",
+    "lazynext-api-gateway",
+    "lazynext-collab-server",
   ]
 
   # Service FQDNs for cross-service communication
@@ -107,6 +133,9 @@ locals {
   render_service_fqdn    = "lazynext-render-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
   pre_processing_fqdn    = "lazynext-pre-processing-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
   generative_studio_fqdn = "lazynext-gen-studio-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  api_gateway_fqdn       = "lazynext-api-gateway-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  collab_server_fqdn     = "lazynext-collab-server-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
+  analytics_service_fqdn = "lazynext-analytics-service-${var.environment}.${azurerm_container_app_environment.main.default_domain}"
 
   secret_names = [
     "better-auth-secret",

@@ -79,3 +79,31 @@ resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
   resource_group_name   = azurerm_resource_group.rg.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
 }
+
+# ── Application Database User ────────────────────────────────────────────────
+# Creates the `lazynext_app` role used by all Container Apps for database
+# connections. The admin user `lazynext_admin` owns the server; this role
+# gets full privileges on the `lazynext` database.
+
+resource "null_resource" "create_app_user" {
+  depends_on = [azurerm_postgresql_flexible_server_database.lazynext]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      PGPASSWORD='${urlencode(var.db_password)}' psql \
+        -h '${azurerm_postgresql_flexible_server.postgres.fqdn}' \
+        -U lazynext_admin \
+        -d lazynext \
+        -c "DO \$\$ BEGIN CREATE ROLE lazynext_app WITH LOGIN PASSWORD '${replace(var.db_password, "'", "''")}'; EXCEPTION WHEN duplicate_object THEN RAISE NOTICE 'role exists'; END \$\$;" \
+        -c "GRANT ALL PRIVILEGES ON DATABASE lazynext TO lazynext_app;" \
+        -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO lazynext_app;" \
+        -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO lazynext_app;" \
+        -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO lazynext_app;" \
+        -c "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO lazynext_app;"
+    EOT
+
+    environment = {
+      PGPASSWORD = var.db_password
+    }
+  }
+}
