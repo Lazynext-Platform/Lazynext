@@ -1,27 +1,15 @@
 # CODEOWNERS for Lazynext
+# All paths owned by the project maintainer.
 
-# Global owners
-*       @avaspatel
-
-# Platform specific
-/apps/web/               @web-team
-/apps/mobile/            @mobile-team
-/apps/desktop/           @desktop-team
-/apps/browser-extension/ @extension-team
-
-# Core engine (Rust)
-/rust/core/              @rust-engineers
-/rust/crates/gpu/        @graphics-team
-/rust/crates/audio/      @audio-team
-
-# Infrastructure & CI/CD
-/infra/                  @devops-team
-/terraform/              @devops-team
-/ansible/                @devops-team
-/k8s/                    @devops-team
-/.github/                @devops-team
-Jenkinsfile              @devops-team
-.gitlab-ci.yml           @devops-team
-
-# Observability
-/monitoring/             @sre-team
+*                        @avaspatel
+/apps/web/               @avaspatel
+/apps/mobile/            @avaspatel
+/apps/desktop/           @avaspatel
+/apps/browser-extension/ @avaspatel
+/rust/                   @avaspatel
+/services/               @avaspatel
+/infra/                  @avaspatel
+/k8s/                    @avaspatel
+/ansible/                @avaspatel
+/monitoring/             @avaspatel
+/.github/                @avaspatel

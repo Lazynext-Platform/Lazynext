@@ -15,20 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
         run: bun install --no-optional || bun install
       - name: Run Tests
         run: bun test || echo "::warning ::Tests failed"
 
-  build:
-    name: Build Projects
+
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    needs: test
     steps:
       - uses: actions/checkout@v4
       - name: Install Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
         run: bun install --no-optional || bun install
       - name: Run Build

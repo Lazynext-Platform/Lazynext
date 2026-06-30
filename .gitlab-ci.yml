@@ -1,55 +1,14 @@
-# DEPRECATED 2026-06-30: Primary CI runs on GitHub Actions (.github/workflows/).
-# This GitLab CI config is retained as a fallback/reference. The wasm-pack output
-# path below references the old build layout, and infra/terraform no longer exists.
-# See ci.yml and main.yml for the active pipeline definitions.
-image: rust:latest
+# DEPRECATED — 2026-06-30
+# Lazynext primary CI runs on GitHub Actions (.github/workflows/ci.yml).
+# This GitLab CI file is retained for archival reference only.
+#
+# For current CI configuration, see: .github/workflows/
 
 stages:
-  - lint
-  - test
-  - build
-  - deploy
+  - message
 
-variables:
-  CARGO_HOME: $CI_PROJECT_DIR/.cargo
-  APT_CACHE_DIR: $CI_PROJECT_DIR/.apt
-
-cache:
-  paths:
-    - .cargo/
-    - target/
-    - .apt/
-
-before_script:
-  - rustc --version && cargo --version
-  - apt-get update && apt-get install -y ffmpeg libavcodec-dev libavformat-dev libavutil-dev libavdevice-dev
-
-lint:
-  stage: lint
+deprecated-notice:
+  stage: message
   script:
-    - cargo clippy --workspace -- -D warnings
-    - cargo fmt --all -- --check
-
-test:
-  stage: test
-  script:
-    - cargo test --workspace
-
-build_wasm:
-  stage: build
-  script:
-    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-    - cd rust/core && wasm-pack build --target web --out-dir ../../apps/web/pkg
-  artifacts:
-    paths:
-      - apps/web/pkg/
-
-deploy_azure:
-  stage: deploy
-  image: hashicorp/terraform:latest
-  only:
-    - main
-  script:
-    - cd infra/terraform
-    - terraform init
-    - terraform apply -auto-approve
+    - echo "This GitLab CI file is deprecated. Use GitHub Actions for CI/CD."
+    - echo "See: .github/workflows/ci.yml"

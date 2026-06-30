@@ -3,16 +3,62 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
+  # Self-monitoring
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
 
-  - job_name: 'lazynext-api'
+  # Lazynext microservices
+  - job_name: 'lazynext-api-gateway'
     static_configs:
       - targets: ['api-gateway:8005']
-    metrics_path: '/metrics'
 
+  - job_name: 'lazynext-web'
+    static_configs:
+      - targets: ['web:3000']
+
+  - job_name: 'lazynext-ai-agents'
+    static_configs:
+      - targets: ['ai-agents:8002']
+
+  - job_name: 'lazynext-render-service'
+    static_configs:
+      - targets: ['render-service:8003']
+
+  - job_name: 'lazynext-collab-server'
+    static_configs:
+      - targets: ['collab-server:8004']
+
+  - job_name: 'lazynext-pre-processing'
+    static_configs:
+      - targets: ['pre-processing:8000']
+
+  - job_name: 'lazynext-generative-studio'
+    static_configs:
+      - targets: ['generative-studio:8001']
+
+  - job_name: 'lazynext-analytics'
+    static_configs:
+      - targets: ['analytics-service:8006']
+
+  # Infrastructure exporters
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  - job_name: 'blackbox-exporter'
+    static_configs:
+      - targets: ['blackbox-exporter:9115']
+
+  # External services
   - job_name: 'tensorflow-serving'
     static_configs:
       - targets: ['tensorflow-serving:8501']
-    metrics_path: '/metrics'

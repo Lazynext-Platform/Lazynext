@@ -36,9 +36,8 @@ jobs:
     needs: [node-checks]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    continue-on-error: true  # Requires Azure secrets — non-blocking for forks
-    # Do NOT continue on error — if deployment fails, we want the pipeline
-    # to fail so the team is notified and can roll back.
+  # If deployment fails, fail the pipeline so the team is notified
+  # and can roll back. Do NOT use continue-on-error for production deploys.
     steps:
       - uses: actions/checkout@v4
 

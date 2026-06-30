@@ -281,7 +281,7 @@ jobs:
       - name: Build Web App
         if: env.WASM_READY == 'true'
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: apps/web/Dockerfile
@@ -298,7 +298,7 @@ jobs:
 
       - name: Build AI Agents
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: ./services/ai-agents
           file: ./services/ai-agents/Dockerfile
@@ -308,7 +308,7 @@ jobs:
 
       - name: Build Render Service
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: ./services/render-service
           file: ./services/render-service/Dockerfile
@@ -318,7 +318,7 @@ jobs:
 
       - name: Build Pre-Processing
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: ./services/pre-processing
           file: ./services/pre-processing/Dockerfile
@@ -328,7 +328,7 @@ jobs:
 
       - name: Build Generative Studio
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: ./services/generative-studio
           file: ./services/generative-studio/Dockerfile
@@ -338,7 +338,7 @@ jobs:
 
       - name: Build Analytics Service
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: ./services/analytics-service
           file: ./services/analytics-service/Dockerfile
@@ -348,7 +348,7 @@ jobs:
 
       - name: Build MCP Server
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./rust/mcp-server/Dockerfile
@@ -358,7 +358,7 @@ jobs:
 
       - name: Build Collab Server
         continue-on-error: true
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./services/collab-server/Dockerfile

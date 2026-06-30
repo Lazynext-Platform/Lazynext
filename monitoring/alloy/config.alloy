@@ -5,7 +5,7 @@ logging {
 
 prometheus.scrape "lazynext_metrics" {
   targets = [
-    {"__address__" = "api-gateway:3000"},
+    {"__address__" = "api-gateway:8005"},
   ]
   forward_to = [prometheus.remote_write.local.receiver]
 }

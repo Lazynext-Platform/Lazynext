@@ -1,3 +1,18 @@
+# Tempo distributed tracing backend.
+# For production, enable Azure Blob Storage backend:
+#   storage:
+#     trace:
+#       backend: azure
+#       azure:
+#         container_name: tempo-traces
+#         storage_account_name: ${AZURE_STORAGE_ACCOUNT}
+#         storage_account_key: ${AZURE_STORAGE_ACCESS_KEY}
+#   compactor:
+#     compaction:
+#       block_retention: 720h  # 30 days
+#
+# Current config uses local storage (development only).
+
 server:
   http_listen_port: 3200
 

@@ -1,6 +1,16 @@
 # ── Service Level Objectives (SLOs) ──────────────────────────────
 # Defined as PrometheusRule for automated burn-rate alerting.
 # SLO threshold: 99.9% availability (43m 50s max downtime/month)
+#
+# FORMAT: Kubernetes PrometheusRule CRD (monitoring.coreos.com/v1).
+# For standalone Prometheus (Docker Compose), convert to recording rules
+# format in prometheus.yml or use slos-standalone.yml.
+#
+# Services covered:
+#   - Web availability (99.9%)
+#   - Render latency (p95 < 30 minutes)
+#   - ML inference latency (p95 < 5 minutes)
+#   - Database availability (99.95%)
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:

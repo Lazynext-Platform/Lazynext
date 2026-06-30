@@ -1,10 +1,11 @@
-name: Build Web WASM
+name: Build Web WASM (DEPRECATED)
+
+# DEPRECATED: The WASM build is now handled by ci.yml (rust-core job).
+# This workflow is retained for reference. Remove after confirming ci.yml works.
+# The correct WASM build path is: rust/wasm → pkg (not rust/core → ../../apps/web/pkg)
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:  # Manual trigger only
 
 env:
   CARGO_TERM_COLOR: always
