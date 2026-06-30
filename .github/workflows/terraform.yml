@@ -1,0 +1,65 @@
+name: Terraform — Infrastructure Provisioning
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy (dev or production)'
+        required: true
+        type: choice
+        options:
+          - dev
+          - production
+        default: 'production'
+      action:
+        description: 'Terraform action'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+        default: 'plan'
+
+env:
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  terraform:
+    name: Terraform ${{ inputs.action }} — ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10"
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init
+
+      - name: Terraform Workspace
+        working-directory: infra/terraform
+        run: |
+          terraform workspace select "${{ inputs.environment }}" 2>/dev/null || \
+            terraform workspace new "${{ inputs.environment }}"
+
+      - name: Terraform Plan
+        working-directory: infra/terraform
+        run: |
+          terraform plan \
+            -var="environment=${{ inputs.environment }}" \
+            -var="db_password=${{ secrets.TF_DB_PASSWORD || 'TEMP_CHANGE_ME' }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply'
+        working-directory: infra/terraform
+        run: terraform apply tfplan
