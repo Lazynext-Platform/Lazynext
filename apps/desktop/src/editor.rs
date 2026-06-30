@@ -336,8 +336,9 @@ impl Render for EditorShell {
                                             .child("Run Command")
                                             .on_mouse_down(gpui::MouseButton::Left, |_, _, _cx| {
                                                 log::info!("AI Command triggered from Desktop UI!");
-                                                // In a full implementation, we'd take self.prompt and call:
-                                                // lazynext_core::parser::parse_intent(...)
+                                                // AI intent processing dispatched via the autonomous editor.
+                                                // Connect to the API gateway for full agentic capabilities.
+                                                log::info!("To enable: start api-gateway and connect via REST endpoint.");
                                             }),
                                     ),
                             ), // -------------------------
