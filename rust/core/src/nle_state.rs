@@ -700,10 +700,56 @@ impl NLEState {
     // ── AI Agent logic ──
 
     pub fn auto_trim_silence(&mut self, track_idx: usize) {
-        // Uses the real extract_silence() in editor_core::processing for DSP.
-        // Analysis runs externally via MCP server's analyze_media tool.
-        // This method is the structural trigger for the autonomous agent.
-        let _ = track_idx;
+        if track_idx >= self.data.tracks.len() {
+            return;
+        }
+
+        let clip_count = self.data.tracks[track_idx].clips.len();
+        if clip_count == 0 {
+            return;
+        }
+
+        let clip_ids: Vec<String> = self.data.tracks[track_idx]
+            .clips
+            .iter()
+            .map(|c| c.id.clone())
+            .collect();
+
+        // Mark this track for silence processing — the autonomous editor
+        // dispatches the actual audio analysis to the pre-processing service.
+        let silence_marker = "lazynext_silence_processing";
+        for clip_id in &clip_ids {
+            self.update_clip_property(clip_id, silence_marker, 1.0);
+        }
+        println!(
+            "🔇 [NLE] Marked {} clips on track {} for silence trimming — pre-processing service will analyze audio",
+            clip_count, track_idx
+        );
+    }
+
+    pub fn apply_silence_trims(&mut self, track_idx: usize, silence_regions: &[(f64, f64)]) {
+        if track_idx >= self.data.tracks.len() {
+            return;
+        }
+
+        let track = &mut self.data.tracks[track_idx];
+        let clips_before = track.clips.len();
+
+        for (start_sec, end_sec) in silence_regions {
+            let start_frames = (*start_sec * self.data.framerate as f64) as u32;
+            let end_frames = (*end_sec * self.data.framerate as f64) as u32;
+
+            // Remove clips that fall entirely within silence regions
+            track.clips.retain(|clip| {
+                !(clip.start >= start_frames && clip.end <= end_frames)
+            });
+        }
+
+        let removed = clips_before - track.clips.len();
+        println!(
+            "🔇 [NLE] Trimmed {} silence regions from track {} — removed {} clip(s)",
+            silence_regions.len(), track_idx, removed
+        );
     }
 
     // ── Internal ──

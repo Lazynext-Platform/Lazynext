@@ -64,15 +64,32 @@ impl WorkspaceRole {
 
 /// Lazily-initialized decoding key from `BETTER_AUTH_SECRET`.
 ///
-/// Falls back to a development-only secret when the env var is absent.
-/// In production, the env var is mandatory — a missing secret will cause
-/// every request to fail with 500 rather than silently accepting tokens.
+/// In development: falls back to a well-known dev secret.
+/// In production (`LAZYNEXT_ENV=production` or `NODE_ENV=production`): panics on startup
+/// if no secret is configured, preventing accidental insecure deployments.
 pub fn jwt_decoding_key() -> &'static DecodingKey {
     static KEY: LazyLock<DecodingKey> = LazyLock::new(|| {
         let secret = std::env::var("BETTER_AUTH_SECRET").unwrap_or_else(|_| {
+            let is_prod = std::env::var("LAZYNEXT_ENV")
+                .map(|v| v == "production")
+                .unwrap_or_else(|_| {
+                    std::env::var("NODE_ENV")
+                        .map(|v| v == "production")
+                        .unwrap_or(false)
+                });
+
+            if is_prod {
+                panic!(
+                    "FATAL: BETTER_AUTH_SECRET must be set in production environments. \
+                     Set it to a 64-char random hex string. \
+                     Refusing to start with insecure dev fallback."
+                );
+            }
+
             tracing::warn!(
                 "BETTER_AUTH_SECRET not set — using dev fallback. \
-                 All JWT validation will fail in production."
+                 This is safe only in local development. \
+                 In production, the server will refuse to start without this variable."
             );
             "lazynext-dev-secret-key-for-auth-minimum-32".to_string()
         });

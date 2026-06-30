@@ -526,46 +526,91 @@ async fn main() {
                             .unwrap_or(30) as u32;
                         let total_frames = framerate * 10;
 
-                        let config = lazynext_export::ExportConfig {
-                            format: match format {
-                                "prores" => lazynext_export::ExportFormat::ProRes,
-                                "dcp" => lazynext_export::ExportFormat::Dcp,
-                                "aaf" => lazynext_export::ExportFormat::Aaf,
-                                "mov" => lazynext_export::ExportFormat::Mov,
-                                _ => lazynext_export::ExportFormat::Mp4,
-                            },
-                            width,
-                            height,
-                            framerate,
-                            bitrate_kbps: 8000,
-                            output_path: output_path.to_string(),
-                        };
+                        let mut export_result: Option<Value> = None;
 
-                        let pipeline = lazynext_export::ExportPipeline::new(config);
-                        // Generate a test pattern for export (GPU compositor not available in MCP stdio context)
-                        match pipeline
-                            .export(total_frames, |frame_idx| async move {
-                                generate_test_pattern(frame_idx, total_frames, width, height)
-                            })
+                        // Try API Gateway for real GPU-composited export first
+                        let api_gw_url = std::env::var("LAZYNEXT_API_GATEWAY_URL")
+                            .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                        let client = reqwest::Client::new();
+                        match client
+                            .post(format!("{}/api/v1/export", api_gw_url))
+                            .json(&json!({
+                                "format": format,
+                                "output_path": output_path,
+                                "width": width,
+                                "height": height,
+                                "framerate": framerate,
+                            }))
+                            .timeout(std::time::Duration::from_secs(300))
+                            .send()
                             .await
                         {
-                            Ok(()) => json!({
-                                "jsonrpc": "2.0",
-                                "id": id,
-                                "result": {
-                                    "content": [{"type": "text", "text": format!("Export complete: {} ({}x{} @ {}fps)", output_path, width, height, framerate)}],
-                                    "isError": false
+                            Ok(resp) if resp.status().is_success() => {
+                                let body: Value = resp.json().await.unwrap_or_default();
+                                export_result = Some(json!({
+                                    "jsonrpc": "2.0",
+                                    "id": id,
+                                    "result": {
+                                        "content": [{"type": "text", "text": body["message"].as_str().unwrap_or("Export complete via GPU compositor")}],
+                                        "isError": false
+                                    }
+                                }));
+                            }
+                            _ => {
+                                // Fall back to test-pattern export on local ffmpeg
+                                let config = lazynext_export::ExportConfig {
+                                    format: match format {
+                                        "prores" => lazynext_export::ExportFormat::ProRes,
+                                        "dcp" => lazynext_export::ExportFormat::Dcp,
+                                        "aaf" => lazynext_export::ExportFormat::Aaf,
+                                        "mov" => lazynext_export::ExportFormat::Mov,
+                                        _ => lazynext_export::ExportFormat::Mp4,
+                                    },
+                                    width,
+                                    height,
+                                    framerate,
+                                    bitrate_kbps: 8000,
+                                    output_path: output_path.to_string(),
+                                };
+                                let pipeline = lazynext_export::ExportPipeline::new(config);
+                                match pipeline
+                                    .export(total_frames, |frame_idx| async move {
+                                        generate_test_pattern(frame_idx, total_frames, width, height)
+                                    })
+                                    .await
+                                {
+                                    Ok(()) => {
+                                        export_result = Some(json!({
+                                            "jsonrpc": "2.0",
+                                            "id": id,
+                                            "result": {
+                                                "content": [{"type": "text", "text": format!("Export complete (test pattern — API Gateway GPU unavailable). Output: {} ({}x{} @ {}fps)", output_path, width, height, framerate)}],
+                                                "isError": false
+                                            }
+                                        }));
+                                    }
+                                    Err(e) => {
+                                        export_result = Some(json!({
+                                            "jsonrpc": "2.0",
+                                            "id": id,
+                                            "result": {
+                                                "content": [{"type": "text", "text": format!("Export failed: {}", e)}],
+                                                "isError": true
+                                            }
+                                        }));
+                                    }
                                 }
-                            }),
-                            Err(e) => json!({
-                                "jsonrpc": "2.0",
-                                "id": id,
-                                "result": {
-                                    "content": [{"type": "text", "text": format!("Export failed: {}", e)}],
-                                    "isError": true
-                                }
-                            }),
+                            }
                         }
+
+                        export_result.unwrap_or_else(|| json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": "Export could not be completed"}],
+                                "isError": true
+                            }
+                        }))
                     }
 
                     "analyze_media" => {
