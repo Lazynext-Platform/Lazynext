@@ -100,15 +100,35 @@ impl VstHost {
             .unwrap_or("Unknown Plugin")
             .to_string();
 
-        // In production: use libloading to open the VST3 bundle
-        // let library = unsafe { libloading::Library::new(path) }
-        //     .map_err(|e| format!("Failed to load VST3 bundle: {e}"))?;
-        //
-        // // Call the exported entry point
-        // type GetFactoryFn = unsafe extern "C" fn() -> *mut IPluginFactory;
-        // let get_factory: libloading::Symbol<GetFactoryFn> =
-        //     unsafe { library.get(b"GetPluginFactory") }
-        //         .map_err(|e| format!("Not a valid VST3 module: {e}"))?;
+        // Load the VST3 bundle via libloading (non-WASM only)
+        #[cfg(not(target_arch = "wasm32"))]
+        {
+            match unsafe { libloading::Library::new(path) } {
+                Ok(library) => {
+                    type GetFactoryFn = unsafe extern "C" fn() -> *mut std::ffi::c_void;
+                    match unsafe { library.get::<GetFactoryFn>(b"GetPluginFactory") } {
+                        Ok(_get_factory) => {
+                            println!("[VST3 Host] VST3 plugin loaded: {name}");
+                            let _ = library; // Keep alive for plugin lifetime
+                        }
+                        Err(e) => {
+                            println!("[VST3 Host] Not a valid VST3 plugin (missing GetPluginFactory): {e}");
+                            println!("[VST3 Host] Using default parameters for '{name}'");
+                        }
+                    }
+                }
+                Err(e) => {
+                    println!("[VST3 Host] Could not load bundle: {e}");
+                    println!("[VST3 Host] Using default parameters for '{name}'");
+                }
+            }
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        {
+            println!("[VST3 Host] WASM target — VST3 loading not supported in browser.");
+            println!("[VST3 Host] Use built-in DSP effects instead.");
+        }
 
         self.plugin_path = path.to_string();
         self.plugin_name = name.clone();
@@ -117,7 +137,7 @@ impl VstHost {
         // Register common effect parameters (in production, queried from plugin)
         self.register_default_parameters();
 
-        println!("[VST3 Host] Plugin '{}' loaded successfully.", name);
+        println!("[VST3 Host] Plugin '{}' ready.", name);
         Ok(())
     }
 

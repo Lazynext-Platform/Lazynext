@@ -595,6 +595,7 @@ name = "audio"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "libloading",
  "rodio",
  "rustfft",
  "time 0.1.0",
@@ -5099,6 +5100,7 @@ version = "0.1.0"
 dependencies = [
  "bytemuck",
  "gpu",
+ "neural_engine",
  "wgpu",
 ]
 
