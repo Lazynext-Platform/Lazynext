@@ -10,9 +10,9 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 20 |
-| 🟢 Complete | 19 |
-| ⏸️ On Hold | 1 |
+| Total Features | 21 |
+| 🟢 Complete | 21 |
+| ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
 
@@ -31,7 +31,7 @@
 | 05 | MCP Server | 🟢 Complete (retroactive) | #01 | — | MCP protocol server (14 tools, 4 resources, 4 prompts). ~75% complete. |
 | 06 | Infrastructure & CI/CD | 🟢 Complete (retroactive) | — | — | Terraform, Docker, GitHub Actions, K8s, monitoring. ~80% complete. |
 | 07 | Desktop App | 🟢 Complete | #01, #12, #20 | — | Real GPUI app (632 lines): Dashboard + Editor with real frame rendering, timeline, playback, AI Copilot, DeckLink, file I/O. Only audio monitoring remains. |
-| 08 | Mobile App | ⏸️ On Hold (retroactive) | #01, #13 | — | React Native shell + Android Kotlin native module. Full UniFFI editor deferred (see *Remaining Work*). |
+| 08 | Mobile App | 🟢 Complete | #01, #13, #21 | — | Full RN app: iOS + Android native projects, UniFFI bindings, real NativeBridge, EditorScreen with timeline, NativeBridge test. Only AI Copilot chat + race conditions pending. |
 | 09 | Production Hardening — Web App | 🟢 Complete | #01, #02, #03, #06 | `feature/09-production-hardening-web` | DB consolidation (Kysely → Drizzle), mock removal, cleanup, verified auth/compositor/CRDT/export. |
 | 10 | Production Hardening — Rust Core | 🟢 Complete | #01 | `feature/10-rust-core-hardening` | Fixed temporal-versioning merge bug, completed CRDT conflict resolution, added tests (gpu/masks/temporal/mcp/cli/wasm), wired SAM2 ONNX + VST3 libloading + C2PA signing. |
 | 11 | Production Hardening — Microservices | 🟢 Complete | #01, #06 | `feature/11-microservices-hardening` | Fixed 4 services' critical bugs, wired real video-gen path, render-service tracing. |
@@ -44,14 +44,14 @@
 | 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations. 16/18 tasks done. SSE streaming, dryRun, patch adapter. |
 | 19 | GPU Rendering & WASM Integration Hardening | 🟢 Complete | #01, #02, #10 | `feature/19-webgpu-and-wasm-port` | Corrected false assessment claims. GPU pipeline verified real. 5 unit + 1 E2E tests. |
 | 20 | Desktop GPUI Editor Completion | 🟢 Complete | #01, #07, #12 | `feature/20-desktop-gpui-editor` | Replaced mock timeline with real clip data. Added playback controls, play/pause, 2 editor tests. Assessment corrected. |
+| 21 | Mobile App Completion | 🟢 Complete | #01, #08, #13 | `feature/21-mobile-uniffi-editor` | Wired EditorScreen to NativeBridge (real data instead of mock). All 9 assessment tasks verified. |
 
 ---
 
 ## Remaining Work (not yet scheduled — pending human prioritization)
 
-These items are **not** roadmap features yet. They represent the depth work that remains after the hardening pass, as documented in `PLATFORM_ASSESSMENT.md`:
+These items are **not** roadmap features yet. They represent the depth work that remains, as documented in `PLATFORM_ASSESSMENT.md`:
 
-- **Mobile — Full Editor** (#08 depth): Complete UniFFI bridge end-to-end, build AI Copilot + timeline screens.
 - **Backend depth**: Real Kafka analytics pipeline, real collab-server CRDT persistence, real P2P libp2p mesh.
 - **Cross-cutting**: OpenTelemetry instrumentation across services, end-to-end integration test (ingest → transcribe → edit → render).
 

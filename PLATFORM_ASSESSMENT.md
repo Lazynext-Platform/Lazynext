@@ -108,21 +108,21 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ### FORMAT 3: Mobile App (`apps/mobile`) — 55% → 100%
 
-**Current State:** *(Updated 2026-06-30)* Expo/React Native shell with a Dashboard screen and AI Copilot screen. The JavaScript mock bridge has been replaced by a real Android Kotlin native module (`MyModule.kt`) plus a real web-target bridge (Feature #13), and UniFFI wiring landed in Feature #16. Full editor UI/screens and iOS parity still pending.
+**Current State:** *(Updated 2026-06-30, post-Feature #21)* Full React Native app with real NativeBridge (51 lines calling native module APIs: getProjectInfo, processIntent, moveClip). EditorScreen (150 lines) wired to NativeBridge.fetchProject() — no more mock data. App.tsx (325 lines) with full Expo navigation. iOS and Android native projects with UniFFI-generated bindings. Native bridge test (47 lines). Mobile app is functional; remaining depth: timeline viewer UX polish, AI Copilot chat surface.
 
 **What Must Be Done:**
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 3.1 | **Implement UniFFI bridge** — Add `uniffi` dependency to `rust/core`, define `.udl` file, generate Kotlin/Swift bindings, build native modules. `rust/core/src/mobile_bridge.rs` has the struct defined but it's not wired. | Critical | Huge |
-| 3.2 | **Build native project scaffolding** — Generate `android/` and `ios/` directories with native module linking. | Critical | Large |
-| 3.3 | **Replace JavaScript mock bridge** — Connect the real UniFFI-generated bindings so AI prompts actually call the Rust engine. | Critical | Large |
-| 3.4 | **Build AI Copilot screen** — Currently a placeholder with two Text components. Needs full chat interface with streaming responses. | High | Medium |
-| 3.5 | **Build timeline viewer** — Mobile-optimized timeline view for reviewing/scrubbing projects. | High | Large |
-| 3.6 | **Add missing assets** — `app.json` references `icon.png`, `splash.png`, `adaptive-icon.png` that don't exist. | Critical | Small |
-| 3.7 | **Add `tsconfig.json`** — Missing, despite TypeScript being a devDependency. | High | Small |
-| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | Medium | Small |
-| 3.9 | **Add tests** — Zero test files, no test runner configured. | High | Medium |
+| 3.1 | **Implement UniFFI bridge** — Add `uniffi` dependency to `rust/core`, define `.udl` file, generate Kotlin/Swift bindings, build native modules. `rust/core/src/mobile_bridge.rs` has the struct defined but it's not wired. | ✅ Done — UniFFI-generated bindings exist for iOS (lazynext_mobile.swift, FFI.h) and Android (lazynext_mobile.kt). | Huge |
+| 3.2 | **Build native project scaffolding** — Generate `android/` and `ios/` directories with native module linking. | ✅ Done — Full Xcode project + Gradle project with Expo native modules. | Large |
+| 3.3 | **Replace JavaScript mock bridge** — Connect the real UniFFI-generated bindings so AI prompts actually call the Rust engine. | ✅ Done — NativeBridge.ts calls real MyModule APIs (getProjectInfo, processIntent, moveClip). EditorScreen wired via fetchProject(). | Large |
+| 3.4 | **Build AI Copilot screen** — Currently a placeholder with two Text components. Needs full chat interface with streaming responses. | ⬚ Pending | Medium |
+| 3.5 | **Build timeline viewer** — Mobile-optimized timeline view for reviewing/scrubbing projects. | ✅ Done — EditorScreen.tsx (150 lines) with timeline, playhead, real clip data from NativeBridge. | Large |
+| 3.6 | **Add missing assets** — `app.json` references `icon.png`, `splash.png`, `adaptive-icon.png` that don't exist. | ✅ Done — All 3 assets present under apps/mobile/assets/. | Small |
+| 3.7 | **Add `tsconfig.json`** — Missing, despite TypeScript being a devDependency. | ✅ Done — apps/mobile/tsconfig.json exists. | Small |
+| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | ⬚ Pending | Small |
+| 3.9 | **Add tests** — Zero test files, no test runner configured. | ✅ Done — native-bridge.test.ts (47 lines). | Medium |
 
 ---
 

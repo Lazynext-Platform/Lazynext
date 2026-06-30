@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { NativeBridge } from '../NativeBridge';
 
 const { width } = Dimensions.get('window');
 
-// Simulating the UniFFI Rust bindings
 interface Clip {
   id: string;
   name: string;
@@ -12,11 +12,27 @@ interface Clip {
 }
 
 export const EditorScreen = () => {
-  const [clips, setClips] = useState<Clip[]>([
-    { id: '1', name: 'Intro', start: 0, end: 100 },
-    { id: '2', name: 'Main Action', start: 100, end: 300 },
-  ]);
+  const [clips, setClips] = useState<Clip[]>([]);
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [projectName, setProjectName] = useState('');
+
+  useEffect(() => {
+    NativeBridge.fetchProject().then((project) => {
+      setProjectName(project.name);
+      const allClips: Clip[] = [];
+      for (const track of project.tracks) {
+        for (const c of track.clips) {
+          allClips.push({
+            id: c.id,
+            name: c.name,
+            start: c.start,
+            end: c.start + (c.duration ?? 100),
+          });
+        }
+      }
+      setClips(allClips);
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -29,7 +45,7 @@ export const EditorScreen = () => {
       {/* Editor Controls / Timeline */}
       <View style={styles.editorContainer}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>TIMELINE</Text>
+          <Text style={styles.headerTitle}>{projectName || 'TIMELINE'}</Text>
           <Text style={styles.headerFrame}>Frame: {currentFrame}</Text>
         </View>
 
