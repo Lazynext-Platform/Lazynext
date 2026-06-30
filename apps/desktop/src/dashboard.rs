@@ -94,6 +94,7 @@ impl Render for Dashboard {
                                                 rt_handle: rt_handle.clone(),
                                                 last_frame_data: None,
                                                 current_frame: 0,
+                                                is_playing: false,
                                             })
                                         },
                                     )
@@ -157,6 +158,7 @@ impl Render for Dashboard {
                                                 rt_handle: rt_handle.clone(),
                                                 last_frame_data: None,
                                                 current_frame: 0,
+                                                is_playing: false,
                                             })
                                         },
                                     )
