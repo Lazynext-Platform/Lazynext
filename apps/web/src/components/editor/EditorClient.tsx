@@ -343,8 +343,29 @@ export default function EditorClient({ project }: { project: Project }) {
 		},
 	]);
 
+	// Saved project snapshot for undoing the last AI operation
+	const [aiSnapshot, setAiSnapshot] = useState<any>(null);
+
+	const handleUndoAi = () => {
+		if (!aiSnapshot) return;
+		setProjectData(aiSnapshot);
+		setAiSnapshot(null);
+		setCopilotHistory((prev) => [
+			...prev,
+			{
+				id: `sys_undo_${Date.now()}`,
+				role: "system",
+				content: "⏪ Reverted the last AI operation.",
+			},
+		]);
+		toast.success("Reverted last AI operation.");
+	};
+
 	const handleCopilotSubmit = async () => {
 		if (!copilotPrompt.trim()) return;
+
+		// Save snapshot before mutating — allows undoing the AI operation
+		const snapshot = JSON.parse(JSON.stringify(projectData));
 
 		// Add user message
 		const userMsg: CopilotMessage = {
@@ -366,15 +387,51 @@ export default function EditorClient({ project }: { project: Project }) {
 			});
 
 			if (!res.ok) {
-				throw new Error(`API returned ${res.status}`);
+				const errBody = await res.text();
+				let errDetail = `HTTP ${res.status}`;
+				try {
+					const errJson = JSON.parse(errBody);
+					errDetail = errJson.error || errJson.message || errDetail;
+				} catch {}
+				throw new Error(errDetail);
 			}
 
 			const data = await res.json();
 
+			// Propagate any top-level error from the AI response
+			if (data.error || (data.success === false)) {
+				const errMsg = data.error || "The AI could not complete this operation.";
+				const errAiMsg: CopilotMessage = {
+					id: `ai_err_${Date.now()}`,
+					role: "ai",
+					content: `❌ ${errMsg}`,
+				};
+				setCopilotHistory((prev) => [...prev, errAiMsg]);
+				setIsCopilotThinking(false);
+				toast.error(errMsg);
+				return;
+			}
+
+			// Collect per-tool errors for display
+			const toolErrors: string[] = [];
+			if (data.toolCalls && Array.isArray(data.toolCalls)) {
+				for (const call of data.toolCalls) {
+					if (call.error) {
+						toolErrors.push(`${call.name}: ${call.error}`);
+					}
+				}
+			}
+
+			let responseText = data.response || "I processed your request.";
+
+			if (toolErrors.length > 0) {
+				responseText += `\n\n⚠️ Some tools failed:\n${toolErrors.map((e) => `- ${e}`).join("\n")}`;
+			}
+
 			const aiMsg: CopilotMessage = {
 				id: `ai_${Date.now()}`,
 				role: "ai",
-				content: data.response || "I processed your request.",
+				content: responseText,
 				tools: [],
 			};
 
@@ -383,6 +440,8 @@ export default function EditorClient({ project }: { project: Project }) {
 					const toolArgs = Object.entries(call.input || {})
 						.map(([k, v]) => `${k}=${v}`)
 						.join(" ");
+
+					if (call.error) continue; // failed tools already shown in text
 
 					aiMsg.tools?.push({ name: call.name, args: toolArgs });
 
@@ -413,6 +472,9 @@ export default function EditorClient({ project }: { project: Project }) {
 					// Expand with other mutations as needed...
 				}
 			}
+
+			setCopilotHistory((prev) => [...prev, aiMsg]);
+			setAiSnapshot(snapshot); // save for undo
 
 			// Apply direct CRDT timeline patches from the AI orchestrator
 			if (data.crdt_patches && Array.isArray(data.crdt_patches)) {
@@ -452,13 +514,14 @@ export default function EditorClient({ project }: { project: Project }) {
 			setCopilotHistory((prev) => [...prev, aiMsg]);
 		} catch (err) {
 			console.error("Copilot Error:", err);
-			toast.error("Chronos AI encountered an error.");
+			const errMsg = err instanceof Error ? err.message : "Chronos AI encountered an error.";
+			toast.error(errMsg);
 			setCopilotHistory((prev) => [
 				...prev,
 				{
 					id: `ai_err_${Date.now()}`,
 					role: "ai",
-					content: "I encountered an error trying to process that request.",
+					content: `❌ ${errMsg}`,
 				},
 			]);
 		} finally {
@@ -12259,6 +12322,17 @@ export default function EditorClient({ project }: { project: Project }) {
 							<Send className="w-4 h-4" />
 						</button>
 					</div>
+					{aiSnapshot && (
+						<div className="mt-2 flex justify-end">
+							<button
+								onClick={handleUndoAi}
+								className="text-xs flex items-center gap-1 text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
+							>
+								<Undo className="w-3 h-3" />
+								Undo last AI edit
+							</button>
+						</div>
+					)}
 				</div>
 			</div>
 
