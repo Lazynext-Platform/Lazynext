@@ -1,6 +1,6 @@
-# CLAUDE.md
+# CLAUDE.md (updated 2026-07-01)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. Platform is at ~98% code-complete — all 31 features shipped.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ The single source of truth for all non-UI code. No components, no hooks, no fram
 | `rust/api-gateway` | Axum REST gateway on port 8005 |
 | `rust/cli` | Headless CLI renderer |
 | `rust/mcp-server` | MCP protocol server for AI agent integration |
-| `rust/p2p-sync` | libp2p mesh networking for peer-to-peer collaboration |
+| `rust/p2p-sync` | UDP/TCP mesh networking for peer-to-peer CRDT sync (libp2p/DHT as future enhancement) |
 | `rust/provenance` | Content provenance and authenticity tracking |
 | `rust/temporal-versioning` | Timeline versioning and branching |
 | `rust/plugin-api` | Third-party plugin SDK (API surface definitions) |

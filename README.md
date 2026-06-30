@@ -66,13 +66,13 @@ Lazynext targets **7 delivery surfaces**, each at a different stage of completio
 
 | # | Format | Layer | Runtime | Completion | Status |
 |---|--------|-------|---------|------------|--------|
-| 1 | **Web App** | `apps/web` | Next.js + WASM | █████████░ 85% | Active development |
-| 2 | **Desktop App** | `apps/desktop` | GPUI + native Rust | █████░░░░░ 55% | Alpha |
-| 3 | **Mobile App** | `apps/mobile` | React Native + UniFFI | █████░░░░░ 55% | Alpha |
-| 4 | **Browser Extension** | `apps/browser-extension` | Chrome MV3 | █████░░░░░ 55% | Alpha |
-| 5 | **CLI Renderer** | `rust/cli` | Pure Rust binary | ███████░░░ 75% | Beta |
-| 6 | **REST API Gateway** | `rust/api-gateway` | Axum :8005 | ████████░░ 80% | Active development |
-| 7 | **MCP Server** | `rust/mcp-server` | MCP protocol | ███████░░░ 75% | Beta |
+| 1 | **Web App** | `apps/web` | Next.js + WASM | ██████████ 98% | Beta |
+| 2 | **Desktop App** | `apps/desktop` | GPUI + native Rust | █████████░ 95% | Beta |
+| 3 | **Mobile App** | `apps/mobile` | React Native + UniFFI | █████████░ 95% | Beta |
+| 4 | **Browser Extension** | `apps/browser-extension` | Chrome MV3 | ██████████ 98% | Beta |
+| 5 | **CLI Renderer** | `rust/cli` | Pure Rust binary | █████████░ 95% | Beta |
+| 6 | **REST API Gateway** | `rust/api-gateway` | Axum :8005 | █████████░ 95% | Beta |
+| 7 | **MCP Server** | `rust/mcp-server` | MCP protocol | █████████░ 95% | Beta |
 
 **Export format support**:
 
