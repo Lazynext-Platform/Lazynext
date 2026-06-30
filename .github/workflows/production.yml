@@ -58,17 +58,24 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Login to Azure Container Registry (create if missing)
+      - name: Provision missing Azure infrastructure
         run: |
-          ACR_NAME="lazynextacrproduction"
           RG="lazynext-rg-production"
+          ACR_NAME="lazynextacrproduction"
+          CAPP_ENV="lazynext-capps-env-prod"
+          LOCATION="southeastasia"
 
-          # Ensure the resource group exists
-          az group create --name "$RG" --location southeastasia --only-show-errors || true
+          echo "Ensuring resource group exists..."
+          az group create --name "$RG" --location "$LOCATION" --only-show-errors || true
 
-          # Create ACR if it doesn't exist
-          az acr show --name "$ACR_NAME" --resource-group "$RG" >/dev/null 2>&1 || \
-            az acr create --name "$ACR_NAME" --resource-group "$RG" --sku Basic --admin-enabled true
+          echo "Creating ACR if missing..."
+          az acr show --name "$ACR_NAME" --resource-group "$RG" --only-show-errors 2>/dev/null || \
+            az acr create --name "$ACR_NAME" --resource-group "$RG" --sku Basic --admin-enabled true --only-show-errors
+
+          echo "Creating Container Apps environment if missing..."
+          az containerapp env show --name "$CAPP_ENV" --resource-group "$RG" --only-show-errors 2>/dev/null || \
+            az containerapp env create --name "$CAPP_ENV" --resource-group "$RG" --location "$LOCATION" --only-show-errors || \
+            echo "::warning ::Could not create Container Apps environment — deploy will use az containerapp create instead"
 
           az acr login --name "$ACR_NAME"
 
@@ -119,18 +126,22 @@ jobs:
             --command "bun run db:migrate" || \
             echo "::warning ::Migration job creation failed — migrations may need manual execution"
 
-      - name: Deploy to AKS
-        run: |
-          az aks get-credentials --name lazynext-aks-production --resource-group lazynext-rg-production
-          kubectl apply -k k8s/overlays/production
-
-      - name: Force Redeploy Container Apps
+      - name: Deploy to Azure Container Apps
         run: |
           for app in web ai-agents render-service pre-processing generative-studio analytics-service; do
             echo "Deploying $app..."
             az containerapp update \
-              --name "lazynext-${app}-production" \
+              --name "lazynext-${app}-prod" \
               --resource-group lazynext-rg-production \
-              --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" || \
-              echo "::warning ::Container App ${app} deploy failed"
+              --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" 2>/dev/null || \
+            az containerapp create \
+              --name "lazynext-${app}-prod" \
+              --resource-group lazynext-rg-production \
+              --environment lazynext-capps-env-prod \
+              --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" \
+              --target-port "${TARGET_PORT:-3000}" \
+              --ingress external \
+              --min-replicas 1 --max-replicas 3 \
+              --cpu 0.5 --memory 1.0Gi 2>/dev/null || \
+              echo "::warning ::Container App ${app} deploy skipped — env may not exist"
           done
