@@ -22,11 +22,11 @@ export function WaveformScope() {
 			// const histogram = gpu.analyze_waveform();
 			// Draw the histogram bars based on the GPU atomic counters
 
-			// Mock visualization
-			ctx.fillStyle = "rgba(0, 255, 0, 0.7)";
-			for (let i = 0; i < 256; i++) {
-				const height = Math.random() * 100;
-				ctx.fillRect(i * 2, canvas.height - height, 1, height);
+			// Waveform visualization — draw grid + axes until real GPU data is available
+			ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+			for (let i = 0; i < 16; i++) {
+				const y = (canvas.height / 16) * i;
+				ctx.fillRect(0, y, canvas.width, 1);
 			}
 
 			animationFrame = requestAnimationFrame(renderLoop);

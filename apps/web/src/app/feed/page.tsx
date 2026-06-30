@@ -5,7 +5,7 @@ import { VideoPlayer } from "@/components/feed/VideoPlayer";
 import Link from "next/link";
 import { ArrowLeft, Compass, Video as VideoIcon, Sparkles } from "lucide-react";
 
-// Mock database of published videos
+// Sample published videos for the community feed
 const FEED_DATA = [
 	{
 		id: "vid_1",

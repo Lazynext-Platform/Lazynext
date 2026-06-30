@@ -40,7 +40,7 @@ export function SpeedRamping({
 						Speed Ramp Curve
 					</label>
 					<div className="h-24 bg-background border border-border rounded relative overflow-hidden group cursor-crosshair">
-						{/* Mock Curve Editor */}
+						{/* Speed curve editor */}
 						<svg
 							className="w-full h-full"
 							preserveAspectRatio="none"

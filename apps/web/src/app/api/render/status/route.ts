@@ -52,53 +52,25 @@ export async function GET(request: Request) {
 			// Render service unreachable — use local tracking for fallback jobs
 		}
 
-		// Local fallback: track progress for jobs created without render-service
+		// Local fallback: job was created without render-service running.
+		// Return "offline" status — no simulated progress.
 		let localJob = localJobs.get(jobId);
 		if (!localJob) {
 			localJob = {
 				progress: 0,
-				status: "queued",
+				status: "offline",
 				createdAt: Date.now(),
 			};
 			localJobs.set(jobId, localJob);
 		}
 
-		// Simulate realistic progress for local jobs
-		const elapsed = Date.now() - localJob.createdAt;
-		const estimatedDuration = 30000; // 30s estimated render time
-		const progress = Math.min(
-			100,
-			Math.floor((elapsed / estimatedDuration) * 100),
-		);
-
-		if (localJob.status === "queued" && progress > 0) {
-			localJob.status = "rendering";
-		}
-		if (progress >= 100) {
-			localJob.status = "completed";
-		}
-
-		localJob.progress = progress;
-		localJobs.set(jobId, localJob);
-
 		return NextResponse.json({
 			success: true,
 			jobId,
-			status: localJob.status,
-			progress: localJob.progress,
-			downloadUrl:
-				localJob.status === "completed"
-					? `/api/assets/exports/${jobId}.mp4`
-					: null,
-			source: "local-fallback",
+			progress: 0,
+			status: "offline",
+			message: "Render service is offline. Start render-service on port 8003 to process exports.",
 		});
-
-		// Clean up old completed jobs (> 1 hour)
-		for (const [id, job] of localJobs) {
-			if (job.status === "completed" && Date.now() - job.createdAt > 3600000) {
-				localJobs.delete(id);
-			}
-		}
 	} catch (error: unknown) {
 		console.error("Render Status API Error:", error);
 		return NextResponse.json(

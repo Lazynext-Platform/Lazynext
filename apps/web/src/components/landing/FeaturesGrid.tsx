@@ -63,7 +63,7 @@ export function FeaturesGrid() {
 								(OpenAI, Anthropic, Gemini, DeepSeek) based on task complexity.
 							</p>
 
-							{/* Mock Code Block */}
+							{/* Example prompt */}
 							<div className="mt-auto rounded-xl bg-zinc-100 dark:bg-background/50 p-4 border border-zinc-200 dark:border-border font-mono text-xs text-zinc-600 dark:text-muted shadow-inner overflow-hidden">
 								<div className="flex gap-2 mb-2">
 									<div className="size-2.5 rounded-full bg-red-400 dark:bg-red-500/50" />

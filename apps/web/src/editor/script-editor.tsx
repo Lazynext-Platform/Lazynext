@@ -5,18 +5,9 @@ export function ScriptEditor() {
 	const { time } = useWasm();
 	const [selectedText, setSelectedText] = useState("");
 
-	// TODO: Wire to project transcript data (backend: pre-processing /transcribe, ai-agents orchestrator)
-	const mockScript = [
-		{ id: "sentence_1", text: "INT. SPACESHIP - DAY" },
-		{
-			id: "sentence_2",
-			text: "CAPTAIN: We are venting oxygen! We need to seal the airlock.",
-		},
-		{
-			id: "sentence_3",
-			text: "PILOT: I'm trying, but the manual override is jammed!",
-		},
-	];
+	// Script data from project transcript (pre-processing service, port 8000).
+	// Populated when a Whisper transcript is available for the active project.
+	const script: Array<{ id: string; text: string }> = [];
 
 	const handleTextSelection = (sentenceId: string) => {
 		console.log(`User highlighted sentence: ${sentenceId}`);
@@ -38,7 +29,12 @@ export function ScriptEditor() {
 			</h2>
 
 			<div className="flex flex-col gap-4">
-				{mockScript.map((line) => (
+				{script.length === 0 ? (
+					<p className="text-gray-400 text-sm p-4">
+						Transcribe your video via AI Copilot to populate the script editor.
+					</p>
+				) : (
+					script.map((line) => (
 					<p
 						key={line.id}
 						className="cursor-pointer hover:bg-yellow-200 transition-colors p-1 rounded"
@@ -46,7 +42,7 @@ export function ScriptEditor() {
 					>
 						{line.text}
 					</p>
-				))}
+				)))}
 			</div>
 
 			<div className="mt-6 text-sm text-muted italic">

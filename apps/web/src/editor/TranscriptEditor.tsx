@@ -4,31 +4,11 @@ import { useWasm } from "@/hooks/use-wasm";
 export function TranscriptEditor() {
 	const { time } = useWasm();
 
-	// TODO: Wire to real transcript data (backend: Whisper transcription in pre-processing service)
-	const [mockScript, setMockScript] = useState([
-		{ id: "sentence_1", text: "INT. SPACESHIP - DAY", startMs: 0, endMs: 2000, deleted: false },
-		{
-			id: "sentence_2",
-			text: "CAPTAIN: We are venting oxygen! We need to seal the airlock.",
-            startMs: 2000,
-            endMs: 6500,
-            deleted: false
-		},
-		{
-			id: "sentence_3",
-			text: "PILOT: I'm trying, but the manual override is jammed!",
-            startMs: 6500,
-            endMs: 9000,
-            deleted: false
-		},
-        {
-			id: "sentence_4",
-			text: "(uh) Wait, I got it!",
-            startMs: 9000,
-            endMs: 11000,
-            deleted: false
-		},
-	]);
+	// Transcription data comes from the pre-processing service (Whisper on port 8000).
+	// Once a transcript is generated, it populates this state via the editor context.
+	const [script, setScript] = useState<Array<{
+		id: string; text: string; startMs: number; endMs: number; deleted: boolean;
+	}>>([]);
 
 	const handleTextSelection = (startMs: number, endMs: number) => {
 		// Just highlight/seek
@@ -38,7 +18,7 @@ export function TranscriptEditor() {
     const handleDelete = (id: string, startMs: number, endMs: number) => {
         // Map text deletion to timeline razor/trim
         time.delete_cut_from_script(startMs, endMs);
-        setMockScript(prev => prev.map(s => s.id === id ? { ...s, deleted: true } : s));
+        setScript(prev => prev.map(s => s.id === id ? { ...s, deleted: true } : s));
     };
 
 	return (
@@ -48,7 +28,12 @@ export function TranscriptEditor() {
 			</h2>
 
 			<div className="flex flex-col gap-4">
-				{mockScript.map((line) => (
+				{script.length === 0 ? (
+					<p className="text-gray-400 text-sm">
+						No transcript loaded. Use the AI Copilot to generate a transcript from your video.
+					</p>
+				) : (
+					script.map((line) => (
 					<div
 						key={line.id}
 						className={`flex items-start justify-between p-2 rounded transition-colors ${line.deleted ? 'opacity-30 line-through bg-gray-100' : 'hover:bg-blue-50'}`}
@@ -71,8 +56,9 @@ export function TranscriptEditor() {
                             </button>
                         )}
 					</div>
-				))}
-			</div>
+					))
+				)
+			}</div>
 
 			<div className="mt-6 text-sm text-gray-500 italic">
 				Click text to seek timeline. Delete text to razor and disable the corresponding video clip.
