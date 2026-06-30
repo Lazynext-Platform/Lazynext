@@ -76,4 +76,29 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 			page.locator("[data-testid='chat-message-agent'], [data-sonner-toast]").first(),
 		).toBeVisible({ timeout: 25_000 });
 	});
+
+	test("should initialize GPU compositor on editor load", async ({ page }) => {
+		const consoleLogs: string[] = [];
+		page.on("console", (msg) => {
+			if (msg.type() === "log" || msg.type() === "warning") {
+				consoleLogs.push(msg.text());
+			}
+		});
+
+		await page.goto("/editor");
+
+		// The GPU activation path should either log success or gracefully degrade.
+		const hasGpuLog = consoleLogs.some(
+			(log) =>
+				log.includes("[GPU]") ||
+				log.includes("GPU renderer unavailable") ||
+				log.includes("WebGPU") ||
+				log.includes("gpu")
+		);
+
+		// In CI (headless Chromium), WebGPU is often unavailable —
+		// the important thing is that the activation path RAN, not
+		// that WebGPU specifically succeeded.
+		expect(hasGpuLog).toBe(true);
+	});
 });

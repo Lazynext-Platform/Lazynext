@@ -10,8 +10,8 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 18 |
-| 🟢 Complete | 15 |
+| Total Features | 19 |
+| 🟢 Complete | 16 |
 | ⏸️ On Hold | 2 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 1 |
@@ -41,7 +41,8 @@
 | 15 | AI Editor — Real API Wiring | 🟢 Complete | #02, #10 | `feature/15-ai-editor-real-api` | Wired web editor AI chat to real API + desktop AI + MCP tests + mobile tests. |
 | 16 | Final Gaps — SDK / External Deps | 🟢 Complete | #10, #11 | `feature/16-final-gaps` | Wired UniFFI, SAM2 ONNX, VST3 libloading, E2E integration tests. |
 | 17 | Platform-wide Mock Removal + Audit Fixes | 🟢 Complete | #15, #16 | (squash merges on main) | Zero mocks in production code; comprehensive CI/CD, infra, and monitoring audit fixes. |
-| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟡 In Progress | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations end-to-end. Audit the 50+ orchestrator tools for reality. |
+| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations end-to-end. Audit the 50+ orchestrator tools for reality. |
+| 19 | GPU Rendering & WASM Integration Hardening | 🟡 In Progress | #01, #02, #10 | `feature/19-webgpu-and-wasm-port` | Verify + test the already-real GPU pipeline (assessment falsely claimed it was a stub). Document for future accuracy. |
 
 ---
 
@@ -51,7 +52,6 @@ These items are **not** roadmap features yet. They represent the depth work that
 
 - **Desktop — Full Editor** (#07 depth): Complete GPUI Dashboard + Editor windows, wire native compositor + DeckLink I/O.
 - **Mobile — Full Editor** (#08 depth): Complete UniFFI bridge end-to-end, build AI Copilot + timeline screens.
-- **Web — Logic port to Rust**: Port animation (15 files), command pattern (30+ files), and mask (17 files) JS implementations to WASM calls. (CRDT sync bridge `syncTimelineFromEngine()` already wired: reads WASM entity graph, hydrates scenes, updates React via `EditorCore`.)
 - **Backend depth**: Real Kafka analytics pipeline, real collab-server CRDT persistence, real P2P libp2p mesh.
 - **Cross-cutting**: OpenTelemetry instrumentation across services, end-to-end integration test (ingest → transcribe → edit → render).
 
