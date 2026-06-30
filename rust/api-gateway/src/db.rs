@@ -234,12 +234,7 @@ pub async fn generate_blob_sas_url(
 
         let string_to_sign = format!(
             "w\n{}\n{}\n/{}/{}/{}\n\n\n\n{}\n\n\n\n\n\n\n",
-            st,
-            se,
-            account,
-            container,
-            blob_name,
-            "2022-11-02",
+            st, se, account, container, blob_name, "2022-11-02",
         );
 
         use base64::{Engine as _, engine::general_purpose};

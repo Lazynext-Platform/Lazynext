@@ -1,5 +1,5 @@
-use lazynext_core::{NLEState, ProjectData};
-use state::operations::{CrdtOperation, ClipPayload};
+use lazynext_core::NLEState;
+use state::operations::{ClipPayload, CrdtOperation};
 
 fn new_state() -> NLEState {
     NLEState::new("test-project".to_string(), "Test Project".to_string(), 30)
@@ -40,7 +40,14 @@ fn test_apply_remote_clip_insert() {
 fn test_apply_remote_clip_delete() {
     let mut state = new_state();
     state.add_track("V1".to_string(), "video".to_string());
-    state.add_clip_to_track(0, "c1".to_string(), "video".to_string(), "a.mp4".to_string(), 0, 100);
+    state.add_clip_to_track(
+        0,
+        "c1".to_string(),
+        "video".to_string(),
+        "a.mp4".to_string(),
+        0,
+        100,
+    );
 
     let delete_op = CrdtOperation::ClipDelete {
         clip_id: "c1".to_string(),

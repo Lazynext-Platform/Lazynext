@@ -47,7 +47,10 @@ impl GenerativeModel {
             );
             #[cfg(not(target_arch = "wasm32"))]
             tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-            return Err("REPLICATE_API_TOKEN not set. Configure an API key to enable AI video generation.".to_string());
+            return Err(
+                "REPLICATE_API_TOKEN not set. Configure an API key to enable AI video generation."
+                    .to_string(),
+            );
         };
 
         println!(

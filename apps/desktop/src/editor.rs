@@ -13,7 +13,7 @@ pub struct EditorShell {
 }
 
 impl Render for EditorShell {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let bg_color = rgb(0x121212); // Deep dark gray/black background
         let panel_bg = rgb(0x1e1e1e);
         let border_color = rgb(0x2a2a2a);
@@ -24,7 +24,7 @@ impl Render for EditorShell {
             let nle_guard = self.nle.lock().await;
             let pd = nle_guard.get_project_data().clone();
 
-            let mut engine = self.engine.lock().await;
+            let engine = self.engine.lock().await;
             let frame = engine.render_frame(self.current_frame).await;
             (pd, frame.ok())
         });

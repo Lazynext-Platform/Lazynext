@@ -72,7 +72,7 @@ impl Render for Dashboard {
                                 let nle = self.nle.clone();
                                 let engine = self.engine.clone();
                                 let rt_handle = self.rt_handle.clone();
-                                move |_, window, cx| {
+                                move |_, _window, cx| {
                                     let bounds = Bounds {
                                         origin: point(px(0.0), px(0.0)),
                                         size: size(px(1280.0), px(720.0)),
@@ -117,28 +117,23 @@ impl Render for Dashboard {
                                 let nle = self.nle.clone();
                                 let engine = self.engine.clone();
                                 let rt_handle = self.rt_handle.clone();
-                                move |_, window, cx| {
+                                move |_, _window, cx| {
                                     // Normally we would use rfd::AsyncFileDialog here
                                     let dialog = rfd::FileDialog::new()
                                         .set_title("Open Lazynext Project")
                                         .add_filter("Lazynext Project", &["lazynext"]);
-                                    if let Some(path) = dialog.pick_file() {
-                                        if let Ok(json) = std::fs::read_to_string(&path) {
-                                            if let Ok(pd) = serde_json::from_str::<
+                                    if let Some(path) = dialog.pick_file()
+                                        && let Ok(json) = std::fs::read_to_string(&path)
+                                        && let Ok(pd) =
+                                            serde_json::from_str::<
                                                 lazynext_core::nle_state::ProjectData,
-                                            >(
-                                                &json
-                                            ) {
-                                                rt_handle.block_on(async {
-                                                    let mut state = nle.lock().await;
-                                                    state.load_project_data(pd);
-                                                });
-                                                log::info!(
-                                                    "Project loaded from {}",
-                                                    path.display()
-                                                );
-                                            }
-                                        }
+                                            >(&json)
+                                    {
+                                        rt_handle.block_on(async {
+                                            let mut state = nle.lock().await;
+                                            state.load_project_data(pd);
+                                        });
+                                        log::info!("Project loaded from {}", path.display());
                                     }
 
                                     let bounds = Bounds {

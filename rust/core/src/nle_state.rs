@@ -733,11 +733,8 @@ impl NLEState {
                 }
             }
             CrdtOperation::TrackDelete { track_id } => {
-                self.tombstones.mark(
-                    track_id.clone(),
-                    self.clock_for_op(),
-                    self.peer_id.clone(),
-                );
+                self.tombstones
+                    .mark(track_id.clone(), self.clock_for_op(), self.peer_id.clone());
             }
             CrdtOperation::ClipInsert {
                 clip_id,
@@ -764,16 +761,13 @@ impl NLEState {
                 }
             }
             CrdtOperation::ClipDelete { clip_id, .. } => {
-                self.tombstones.mark(
-                    clip_id.clone(),
-                    self.clock_for_op(),
-                    self.peer_id.clone(),
-                );
+                self.tombstones
+                    .mark(clip_id.clone(), self.clock_for_op(), self.peer_id.clone());
             }
             CrdtOperation::ClipMove {
                 clip_id,
                 to_track,
-                new_position,
+                new_position: _,
                 ..
             } => {
                 if !self.tombstones.is_deleted(clip_id) {

@@ -149,9 +149,7 @@ pub fn request_rotoscope(video_id: String, prompt: String) -> String {
         match client.rotoscope(&video_id, &prompt).await {
             Ok(res) => {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
-                    let mask_url = res
-                        .mask_sequence_url
-                        .unwrap_or_default();
+                    let mask_url = res.mask_sequence_url.unwrap_or_default();
                     let _ = engine.apply_rotoscope_mask(&video_id, &mask_url);
                     "Rotoscoping complete. Mask added.".to_string()
                 } else {
@@ -173,9 +171,7 @@ pub fn request_nerf(video_id: String) -> String {
         match client.extract_nerf(&video_id).await {
             Ok(res) => {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
-                    let ply_url = res
-                        .point_cloud_url
-                        .unwrap_or_default();
+                    let ply_url = res.point_cloud_url.unwrap_or_default();
                     let _ = engine.add_nerf_cloud(&ply_url);
                     "NeRF extraction complete. Splat added.".to_string()
                 } else {
