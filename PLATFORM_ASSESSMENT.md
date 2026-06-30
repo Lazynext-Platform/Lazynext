@@ -296,25 +296,29 @@ These underpin all 7 formats:
 
 ## Summary Table
 
+> Updated 2026-06-30 to match the revised figures above and the post-hardening reality (Features #09–#17 merged to `main`, all production mocks removed).
+
 | Area | Current | Target | Gap |
 |------|---------|--------|-----|
-| **Web App** | 75% | 100% | 25% |
-| **Desktop App** | 1% | 100% | 99% |
-| **Mobile App** | 15% | 100% | 85% |
-| **Browser Extension** | 65% | 100% | 35% |
-| **CLI** | 30% | 100% | 70% |
-| **API Gateway** | 45% | 100% | 55% |
-| **MCP Server** | 65% | 100% | 35% |
-| **Rust Core/Crates** | 55% | 100% | 45% |
-| **Microservices** | 30% | 100% | 70% |
+| **Web App** | 85% | 100% | 15% |
+| **Desktop App** | 55% | 100% | 45% |
+| **Mobile App** | 55% | 100% | 45% |
+| **Browser Extension** | 55% | 100% | 45% |
+| **CLI** | 75% | 100% | 25% |
+| **API Gateway** | 80% | 100% | 20% |
+| **MCP Server** | 75% | 100% | 25% |
+| **Rust Core/Crates** | 75% | 100% | 25% |
+| **Microservices** | 70% | 100% | 30% |
 | **Infrastructure** | 80% | 100% | 20% |
-| **Overall Platform** | **~35%** | **100%** | **~65%** |
+| **Overall Platform** | **~70%** | **100%** | **~30%** |
 
 ---
 
 ## Bottom Line
 
-The platform is in **early alpha**. The architectural vision is solid and the Rust foundation (CRDT state, GPU compositor, effects shaders, time types, filter graph DSL) is genuinely impressive. But the surface area far exceeds the implementation depth. Roughly **60-65% of advertised functionality is stubbed or mocked**. The web app is the only format with real implementation. Getting to a completely working platform across all 7 formats would require approximately **9-14 months for a team of 4-6 engineers** working full-time.
+The platform has moved out of "early alpha with mostly stubs" into **mid-alpha with real implementation**. After the Feature #09–#17 hardening pass, **production code contains zero mock/stub/placeholder blocks** (verified by workspace search). The architectural vision is sound and the Rust foundation — CRDT state, GPU compositor, effects shaders, time types, filter-graph DSL, SAM2/VST3/C2PA wiring — is genuinely implemented rather than mocked.
+
+The remaining ~30% is **depth work, not stub-removal**: completing the desktop GPUI editor, the mobile UniFFI editor, real Kafka analytics, real collab CRDT persistence, real P2P libp2p mesh, and porting the web's JS animation/command/mask logic to WASM. These are tracked under *Remaining Work* in `docs/project-roadmap.md`.
 
 ---
 
