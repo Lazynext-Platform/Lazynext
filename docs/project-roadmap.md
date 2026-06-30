@@ -54,7 +54,7 @@
 
 | Future # | Feature | Closes Gap | Format(s) | Effort | Depends On |
 |---|---|---|---|---|---|
-| **22** | Real Export Pipeline — route web export through GPU compositor frames (not ffmpeg overlay); fix duration/format passthrough; embed C2PA | 1.6, M7 (partial) | Web, render-service, Rust export | Large | #01, #02, #19 |
+| **22** | Real Export Pipeline — route web export through GPU compositor frames (not ffmpeg overlay); fix duration/format passthrough; embed C2PA | 1.6, M7 (partial) | Web, render-service, Rust export | Large | #01, #02, #19 | ✅ **Complete (2026-06-30)** — built + verified on `feature/22-real-export-pipeline`; merged to main. |
 | **23** | Port remaining JS editing logic to WASM — finish animation/command/mask delegation to Rust (state owns logic, apps are shells) | 1.1–1.4 | Web, Rust core | Large | #01, #19 |
 | **24** | Browser Extension — real timeline import (push media via REST/IndexedDB), manifest/icon consistency, tests | 4.1–4.9 | Browser Extension | Medium | #02, #03 |
 | **25** | CLI — real frame render pipe to ffmpeg, remove unsafe `set_var`, add ProRes/DCP/AAF/MOV, batch mode, integration tests | 5.1–5.6 | CLI | Medium | #22 |
