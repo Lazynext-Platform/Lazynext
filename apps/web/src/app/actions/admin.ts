@@ -28,7 +28,24 @@ export async function getDashboardMetrics() {
 	return data.metrics;
 }
 
-export async function getRecentUsers(): Promise<any[]> {
-	// Stubbed since we migrated metrics, add actual rust route if needed
-	return [];
+export async function getRecentUsers(limit = 10): Promise<any[]> {
+  await requireAuth();
+
+  try {
+    const res = await fetch(
+      `${RUST_API_GATEWAY_URL}/api/v1/admin/users?limit=${limit}`,
+      { cache: "no-store" }
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch users: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data.users ?? [];
+  } catch (error) {
+    console.error("[admin] Failed to fetch recent users:", error);
+    // Graceful degradation — return empty array on fetch failure
+    return [];
+  }
 }

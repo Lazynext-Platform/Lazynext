@@ -67,7 +67,7 @@ const nextConfig: NextConfig = {
 		// TypeScript errors fail the build — fix them, don't bypass
 		ignoreBuildErrors: false,
 	},
-	serverExternalPackages: ["kysely", "@better-auth/kysely-adapter"],
+	serverExternalPackages: [],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,

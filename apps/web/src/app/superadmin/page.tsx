@@ -9,11 +9,12 @@ import {
 	ShieldAlert,
 } from "lucide-react";
 
-import { mockDb } from "@/lib/mock-db";
+import { adminData } from "@/lib/admin-data";
 
 export default async function SuperAdminDashboard() {
-	const telemetry = await mockDb.getGlobalTelemetry();
-	const aiMetrics = await mockDb.getAIProviderMetrics();
+	const metrics = await adminData.getAdminMetrics();
+	const systemStatus = await adminData.getSystemStatus();
+	const aiMetrics = await adminData.getAIProviderMetrics();
 
 	return (
 		<div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)]">
@@ -88,39 +89,34 @@ export default async function SuperAdminDashboard() {
 					<div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
 						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
-								Active Rust Nodes
+								Total Users
 							</h3>
 							<p className="text-4xl font-black mt-2 text-[var(--accent-primary)]">
-								34
-							</p>
-							<div className="w-full bg-[var(--bg-main)] h-1.5 mt-4 rounded-full overflow-hidden">
-								<div className="bg-[var(--accent-primary)] h-full w-[85%]"></div>
-							</div>
-						</div>
-						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
-							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
-								FFmpeg Export Queue
-							</h3>
-							<p className="text-4xl font-black mt-2 text-amber-400">142</p>
-							<p className="text-[10px] text-[var(--text-muted)] mt-2 flex items-center gap-1">
-								<AlertTriangle className="w-3 h-3 text-amber-400" /> Scaling
-								required soon
+								{metrics.totalUsers.toLocaleString()}
 							</p>
 						</div>
 						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
-								Total Active Users
+								Paid Subscribers
 							</h3>
-							<p className="text-4xl font-black mt-2 text-foreground">8,492</p>
-							<p className="text-[10px] text-green-400 mt-2">+12% this hour</p>
+							<p className="text-4xl font-black mt-2 text-amber-400">
+								{metrics.activeSubscriptions}
+							</p>
 						</div>
 						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
 							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
-								Total MRR
+								Total Projects
 							</h3>
-							<p className="text-4xl font-black mt-2 text-emerald-400">$42K</p>
-							<p className="text-[10px] text-emerald-400/80 mt-2">
-								Stripe Sync Active
+							<p className="text-4xl font-black mt-2 text-foreground">
+								{metrics.totalProjects.toLocaleString()}
+							</p>
+						</div>
+						<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] p-5 rounded-xl flex flex-col justify-between">
+							<h3 className="text-[var(--text-muted)] text-xs font-semibold uppercase tracking-wider">
+								Est. MRR
+							</h3>
+							<p className="text-4xl font-black mt-2 text-emerald-400">
+								${(metrics.monthlyRecurringRevenue / 1000).toFixed(0)}K
 							</p>
 						</div>
 					</div>
@@ -128,7 +124,7 @@ export default async function SuperAdminDashboard() {
 					{/* AI Matrix */}
 					<h2 className="text-xl font-bold mt-6 flex items-center gap-2">
 						<Cpu className="w-5 h-5 text-[var(--accent-primary)]" />
-						18-Model AI Provider Matrix
+						AI Provider Status
 					</h2>
 					<div className="bg-[var(--bg-panel)] border border-[var(--border-glass)] rounded-xl overflow-hidden">
 						<table className="w-full text-sm text-left">
@@ -141,88 +137,62 @@ export default async function SuperAdminDashboard() {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-[var(--border-glass)]">
-								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-										<div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></div>
-										Anthropic Claude 3.5 Sonnet
-									</td>
-									<td className="px-6 py-4">1,402</td>
-									<td className="px-6 py-4 text-green-400">420ms</td>
-									<td className="px-6 py-4">
-										<span className="px-2 py-1 text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 rounded">
-											Operational
-										</span>
-									</td>
-								</tr>
-								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-										<div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
-										OpenAI GPT-4o
-									</td>
-									<td className="px-6 py-4">940</td>
-									<td className="px-6 py-4 text-green-400">510ms</td>
-									<td className="px-6 py-4">
-										<span className="px-2 py-1 text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 rounded">
-											Operational
-										</span>
-									</td>
-								</tr>
-								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-										<div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></div>
-										Google Gemini 1.5 Pro
-									</td>
-									<td className="px-6 py-4">420</td>
-									<td className="px-6 py-4 text-amber-400">1200ms</td>
-									<td className="px-6 py-4">
-										<span className="px-2 py-1 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded">
-											Degraded
-										</span>
-									</td>
-								</tr>
-								<tr className="hover:bg-[var(--bg-hover)] transition-colors">
-									<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
-										<div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></div>
-										Local Ollama (Llama 3)
-									</td>
-									<td className="px-6 py-4">89</td>
-									<td className="px-6 py-4 text-green-400">150ms</td>
-									<td className="px-6 py-4">
-										<span className="px-2 py-1 text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 rounded">
-											Local Fast
-										</span>
-									</td>
-								</tr>
+								{aiMetrics.map((provider) => (
+									<tr key={provider.name} className="hover:bg-[var(--bg-hover)] transition-colors">
+										<td className="px-6 py-4 font-medium text-foreground flex items-center gap-2">
+											<div
+												className="w-2 h-2 rounded-full"
+												style={{ backgroundColor: provider.colorHex }}
+											></div>
+											{provider.name}
+										</td>
+										<td className="px-6 py-4">
+											{provider.requestsPerMin?.toLocaleString() ?? "—"}
+										</td>
+										<td className="px-6 py-4">
+											{provider.avgLatencyMs != null ? `${provider.avgLatencyMs}ms` : "—"}
+										</td>
+										<td className="px-6 py-4">
+											<span className={`px-2 py-1 text-[10px] border rounded ${
+												provider.status === "Operational" || provider.status === "Local Fast"
+													? "bg-green-500/10 text-green-400 border-green-500/20"
+													: provider.status === "Degraded"
+													? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+													: provider.status === "Failing"
+													? "bg-red-500/10 text-red-400 border-red-500/20"
+													: "bg-gray-500/10 text-gray-400 border-gray-500/20"
+											}`}>
+												{provider.status}
+											</span>
+										</td>
+									</tr>
+								))}
 							</tbody>
 						</table>
 					</div>
 
-					{/* Terminal Console */}
+					{/* Monitoring Section */}
 					<div className="mt-4 bg-background border border-border rounded-xl overflow-hidden font-mono text-xs">
 						<div className="bg-background px-4 py-2 border-b border-border flex items-center gap-2 text-muted">
 							<TerminalSquare className="w-4 h-4" />
-							Live Platform Logs
+							System Status
 						</div>
-						<div className="p-4 h-48 overflow-y-auto space-y-1 text-foreground">
+						<div className="p-4 space-y-1 text-foreground">
 							<p>
-								<span className="text-green-500">[INFO]</span> New user sign-up:
-								vaspatel@gmail.com
+								<span className="text-[var(--accent-primary)]">[INFO]</span>{" "}
+								Runtime metrics (Rust nodes, FFmpeg queue) available via{" "}
+								<a
+									href="http://localhost:3001"
+									className="text-[var(--accent-secondary)] underline"
+								>
+									Grafana Dashboard
+								</a>
 							</p>
 							<p>
-								<span className="text-[var(--accent-primary)]">[SYSTEM]</span>{" "}
-								Spawning 3 new Rust compositor instances...
-							</p>
-							<p>
-								<span className="text-amber-500">[WARN]</span> FFmpeg worker #42
-								timeout parsing 8K H.265
-							</p>
-							<p>
-								<span className="text-green-500">[INFO]</span> Processed 12 tool
-								calls from Claude 3.5 Agent
-							</p>
-							<p>
-								<span className="text-blue-400">[STRIPE]</span> Webhook
-								received: invoice.payment_succeeded for $19.00
+								<span className="text-green-500">[DB]</span> Total users:{" "}
+								{metrics.totalUsers} • Paid subscriptions:{" "}
+								{metrics.activeSubscriptions} • Projects:{" "}
+								{metrics.totalProjects}
 							</p>
 						</div>
 					</div>

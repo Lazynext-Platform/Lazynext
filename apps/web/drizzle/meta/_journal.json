@@ -15,6 +15,13 @@
       "when": 1781608808296,
       "tag": "0001_chemical_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782780445696,
+      "tag": "0002_tiresome_trauma",
+      "breakpoints": true
     }
   ]
 }

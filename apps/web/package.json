@@ -55,7 +55,6 @@
 		"fabric": "^7.4.0",
 		"feed": "^5.2.1",
 		"framer-motion": "^12.41.0",
-		"kysely": "0.29.2",
 		"lazynext-wasm": "file:../../rust/wasm/pkg",
 		"lucide-react": "^1.21.0",
 		"mediabunny": "^1.49.0",
@@ -123,7 +122,5 @@
 		"typescript": "^6.0.3",
 		"wrangler": "^4.104.0"
 	},
-	"resolutions": {
-		"kysely": "0.29.2"
-	}
+	"resolutions": {}
 }

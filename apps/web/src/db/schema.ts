@@ -96,6 +96,9 @@ export const projects = pgTable("projects", {
   height: integer("height").notNull().default(1080),
   durationFrames: integer("duration_frames").notNull().default(1000),
   data: jsonb("data"),
+  timelineData: text("timeline_data"),
+  renderStatus: text("render_status").default("idle"),
+  renderJobId: text("render_job_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [
@@ -163,3 +166,16 @@ export const feedback = pgTable("feedback", {
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const assets = pgTable("assets", {
+  id: text("id").primaryKey(),
+  projectId: text("project_id")
+    .notNull()
+    .references(() => projects.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // "video" | "audio" | "image" | "3d_model" | "mask"
+  url: text("url").notNull(),
+  metadata: text("metadata"), // JSON string
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("assets_project_id_idx").on(table.projectId),
+]);
