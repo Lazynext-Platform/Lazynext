@@ -20,6 +20,9 @@
 
 ### Changed
 - Roadmap statuses brought in sync with `main` — features 10-14 flipped from 🔴 Not Started → 🟢 Complete; 15-17 added.
+- Documentation reconciliation pass: `PLATFORM_ASSESSMENT.md` body (which still used the pre-hardening 75%/1%/15%/45% figures and contradicted its own revised top section) brought in line with the Summary Table — added a snapshot notice, corrected all 10 per-format headers, and rewrote the 4 stale "Current State" paragraphs (desktop, mobile, browser, API gateway).
+- `project-context.md` desktop scope line corrected to match the reconciled assessment (real GPUI app + AI Copilot wiring; full editor pending).
+- Created `docs/features/17-platform-mock-removal/summary.md` (was referenced by the roadmap but had no backing folder); removed the empty `fix-all-remaining-gaps` cruft folder.
 
 ### Fixed
 - Zero `mock`/`stub`/`placeholder` references remain in production code paths (verified by workspace search; only 3 explanatory code comments remain in `compositor/transforms3d.rs` and `plugin/wasm_sandbox.rs`).

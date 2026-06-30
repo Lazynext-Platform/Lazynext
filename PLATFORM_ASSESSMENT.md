@@ -42,7 +42,21 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ## Complete Gap Analysis: What Needs to Be Done
 
-### FORMAT 1: Web App (`apps/web`) — 75% → 100%
+> ⚠️ **SNAPSHOT NOTICE (2026-06-30):** The per-format tables below are the
+> **pre-hardening baseline** (2026-06-28). Much of this was resolved by the
+> Feature #09–#17 hardening pass. Treat the **Summary Table** (below) and the
+> *Remaining Work* section of `docs/project-roadmap.md` as the authoritative
+> current status. Items verified resolved since this snapshot: compositor
+> `render_frame` is real (C1), SAM2 ONNX path wired (C5), VST3 `libloading`
+> host active (C6), ACES matrices real (C7), all production mock/stub blocks
+> removed (1.7), Kysely dropped in favour of Drizzle (1.8), browser overlay
+> non-URL crash fixed (4.4), API Gateway uses real JWT + PostgreSQL
+> (FORMAT 6), desktop is a real GPUI app (FORMAT 2), mobile has a real
+> Android native module (FORMAT 3). The percentages in each header below have
+> been updated to match the Summary Table; the task rows remain as the
+> historical pre-hardening reference.
+
+### FORMAT 1: Web App (`apps/web`) — 85% → 100%
 
 **What's Already Working:**
 - Full Next.js 16 app with 37 pages, auth (better-auth), Stripe payments, Resend email
@@ -71,9 +85,9 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 2: Desktop App (`apps/desktop`) — 1% → 100%
+### FORMAT 2: Desktop App (`apps/desktop`) — 55% → 100%
 
-**Current State:** A 25-line `main.rs` that prints "I'm a stub." All GPUI code is commented out. No rendering, no window, nothing.
+**Current State:** *(Updated 2026-06-30)* A real GPUI application with Dashboard, Editor, NLEState, CoreEngine, and DeckLink wiring — no longer the 25-line stub described in the original audit. AI Copilot "Run Command" path wired (Feature #12). Full editor windows + native compositor surface still pending.
 
 **What Must Be Done:**
 
@@ -90,9 +104,9 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 3: Mobile App (`apps/mobile`) — 15% → 100%
+### FORMAT 3: Mobile App (`apps/mobile`) — 55% → 100%
 
-**Current State:** An Expo/React Native shell with a polished Dashboard screen and a stub AI Copilot screen. The `NativeBridge` is entirely a JavaScript mock returning hardcoded strings. No UniFFI-generated bindings exist. No native `android/` or `ios/` directories.
+**Current State:** *(Updated 2026-06-30)* Expo/React Native shell with a Dashboard screen and AI Copilot screen. The JavaScript mock bridge has been replaced by a real Android Kotlin native module (`MyModule.kt`) plus a real web-target bridge (Feature #13), and UniFFI wiring landed in Feature #16. Full editor UI/screens and iOS parity still pending.
 
 **What Must Be Done:**
 
@@ -110,9 +124,9 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 4: Browser Extension (`apps/browser-extension`) — 65% → 100%
+### FORMAT 4: Browser Extension (`apps/browser-extension`) — 55% → 100%
 
-**Current State:** Video detection and frame capture work. Can find `<video>` elements on any page and grab thumbnails. The "send to timeline" path is mostly mocked.
+**Current State:** *(Updated 2026-06-30)* Video detection and frame capture work. The project list now fetches from the real API gateway (Feature #14) and the capture overlay no longer crashes on blob/relative/empty `src` URLs. The "send to timeline" path, manifest/icon consistency, and tests remain.
 
 **What Must Be Done:**
 
@@ -130,7 +144,7 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 5: CLI (`rust/cli`) — 30% → 100%
+### FORMAT 5: CLI (`rust/cli`) — 75% → 100%
 
 **Current State:** Clap-based CLI that parses `--prompt`, `--render-project`, `--format`, `--width/height/framerate` flags. The render path prints the ffmpeg command but doesn't actually render frames. Has an `unsafe { std::env::set_var }` call that's unnecessary and dangerous.
 
@@ -147,9 +161,9 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 6: API Gateway (`rust/api-gateway`) — 45% → 100%
+### FORMAT 6: API Gateway (`rust/api-gateway`) — 80% → 100%
 
-**Current State:** Axum server with 14 routes, JWT middleware, basic DB operations. But: uses SQLite in-memory (not PostgreSQL), has 3 hardcoded mock auth tokens, Stripe webhook doesn't verify signatures, uses hardcoded `"mock_user_id"`.
+**Current State:** *(Updated 2026-06-30)* Axum server with 14 routes, **real JWT auth (HS256, BETTER_AUTH_SECRET)**, **PostgreSQL (DATABASE_URL)**, RBAC/CSRF/rate-limiting, Stripe HMAC signature verification, and OpenAPI — the SQLite-in-memory / hardcoded-token / `"mock_user_id"` claims from the original audit no longer apply. Remaining: deeper integration tests + API docs.
 
 **What Must Be Done:**
 
@@ -167,7 +181,7 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### FORMAT 7: MCP Server (`rust/mcp-server`) — 65% → 100%
+### FORMAT 7: MCP Server (`rust/mcp-server`) — 75% → 100%
 
 **Current State:** Functional JSON-RPC 2.0 over stdio MCP protocol server with 3 tools (autonomous_edit, get_timeline_state, apply_crdt_operation). Dockerfile has port mismatch (exposes TCP 5173 but MCP is stdio-based).
 
@@ -184,7 +198,7 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ---
 
-### CROSS-CUTTING: Rust Core/Crates — ~55% → 100%
+### CROSS-CUTTING: Rust Core/Crates — ~75% → 100%
 
 These underpin all 7 formats:
 
@@ -205,7 +219,7 @@ These underpin all 7 formats:
 
 ---
 
-### CROSS-CUTTING: Microservices — ~30% → 100%
+### CROSS-CUTTING: Microservices — ~70% → 100%
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|

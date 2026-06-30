@@ -195,7 +195,7 @@ bun run dev
 
 ### Out of Scope (v1.0)
 
-- Desktop app full implementation (GPUI scaffold only)
+- Desktop app full editor implementation (real GPUI app + AI Copilot wiring in #12; full Dashboard/Editor windows + native compositor pending)
 - Mobile app full editor implementation (UniFFI wired in #16 + Android native module in #13; full editor UI/screens pending)
 - 3D camera tracking and advanced VFX compositing
 - Direct social media publishing APIs
