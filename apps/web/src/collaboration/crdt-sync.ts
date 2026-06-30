@@ -27,11 +27,20 @@ export function setupCrdtSync(
 	// Listen for incoming deltas from peers
 	const unsub = socket.onDelta((delta) => {
 		try {
-			const opJson = JSON.parse(new TextDecoder().decode(delta));
-			const applied = engine.applyOperation(opJson);
-			if (applied) {
-				// Update the local timeline to reflect the remote change
-				syncTimelineFromEngine(engine);
+			const raw = JSON.parse(new TextDecoder().decode(delta));
+
+			// Orchestrator patches arrive as an array of {op, path, value} objects;
+			// normal CRDT operations arrive as a single serde-tagged CrdtOperation object.
+			if (Array.isArray(raw) && raw.length > 0 && typeof raw[0].op === "string") {
+				// AI orchestrator patches — normalise before applying
+				const patches = raw as OrchestratorPatch[];
+				applyOrchestrationPatches(engine, patches);
+			} else if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+				// Standard CRDT operation from a peer
+				const applied = engine.applyOperation(raw);
+				if (applied) {
+					syncTimelineFromEngine(engine);
+				}
 			}
 		} catch (err) {
 			console.warn("[CRDT-Sync] Failed to process remote delta:", err);
@@ -77,6 +86,99 @@ export function syncTimelineFromEngine(_engine: CrdtEngine): void {
 	} catch (e) {
 		console.error("[CRDT-Sync] Failed to sync timeline from engine:", e);
 	}
+}
+
+/**
+ * An orchestrator-generated CRDT patch in JSON-pointer style.
+ * The ai-agents orchestrator produces these; the WASM engine expects
+ * the serde-tagged CrdtOperation format (EntityInsert / EntityDelete /
+ * PropertyUpdate), so we translate before applying.
+ */
+export interface OrchestratorPatch {
+	op: "add" | "remove" | "replace";
+	path: string;
+	value?: Record<string, unknown>;
+}
+
+/**
+ * Convert orchestrator JSON-pointer patches into the serde CrdtOperation
+ * format that the WASM CRDT engine actually deserializes and applies.
+ *
+ * Path convention: "/tracks/<track>/clips/<clip>/..." maps to
+ * entity-id "<track>/<clip>".
+ */
+export function normalizeOrchestratorPatches(
+	patches: OrchestratorPatch[],
+): Record<string, unknown>[] {
+	return patches.map((p) => {
+		const segments = p.path.split("/").filter(Boolean);
+		// "/tracks/caption_track/clips/caption_1" → "caption_track/caption_1"
+		const entityId =
+			segments.length >= 4 ? `${segments[1]}/${segments[3]}` : p.path.replace(/\//g, "/");
+		const entityType = segments.length >= 4 ? segments[2] : "generic";
+
+		switch (p.op) {
+			case "add":
+				return {
+					EntityInsert: {
+						entity_id: entityId,
+						entity_type: entityType,
+						data: p.value ?? {},
+					},
+				};
+			case "remove":
+				return {
+					EntityDelete: {
+						entity_id: entityId,
+					},
+				};
+			case "replace":
+				return {
+					PropertyUpdate: {
+						target_id: entityId,
+						property: segments.length >= 4 ? segments.slice(4).join("/") : "value",
+						value: p.value ?? {},
+					},
+				};
+			default:
+				console.warn("[CRDT-Sync] Unknown patch op:", p.op, "— treating as add");
+				return {
+					EntityInsert: {
+						entity_id: entityId,
+						entity_type: entityType,
+						data: p,
+					},
+				};
+		}
+	});
+}
+
+/**
+ * Apply a batch of orchestrator patches to the WASM engine and sync
+ * the React timeline. Returns true if all patches were applied.
+ */
+export function applyOrchestrationPatches(
+	engine: CrdtEngine,
+	patches: OrchestratorPatch[],
+): boolean {
+	const ops = normalizeOrchestratorPatches(patches);
+	let allApplied = true;
+
+	for (const op of ops) {
+		try {
+			const applied = engine.applyOperation(op);
+			if (!applied) allApplied = false;
+		} catch (e) {
+			console.error("[CRDT-Sync] Failed to apply orchestrator patch:", e);
+			allApplied = false;
+		}
+	}
+
+	if (ops.length > 0) {
+		syncTimelineFromEngine(engine);
+	}
+
+	return allApplied;
 }
 
 /**

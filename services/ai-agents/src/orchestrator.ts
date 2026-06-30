@@ -1159,6 +1159,44 @@ async function executeToolCall(
           ]
       };
 
+    case "apply_color_grade":
+      // Falls back to a local preset if pre-processing is unavailable
+      try {
+        const gradeResult: any = await callService(
+          `${PRE_PROCESSING_URL}/color-grade`,
+          "POST",
+          { clip_id: args.clip_id || args.video_id || "input_video", preset: args.preset || "cinematic" }
+        );
+        if (gradeResult && gradeResult.success) {
+          return {
+            success: true,
+            crdt_patches: gradeResult.crdt_patches || [
+              {
+                op: "add",
+                path: `/tracks/main/clips/${args.clip_id || "input_video"}/effects/-`,
+                value: { type: "ColorGrade", preset: args.preset || "cinematic" }
+              }
+            ]
+          };
+        }
+      } catch {
+        console.warn("[Orchestrator] color-grade microservice unavailable — using local preset");
+      }
+      return {
+        success: true,
+        crdt_patches: [
+          {
+            op: "add",
+            path: `/tracks/main/clips/${args.clip_id || args.video_id || "input_video"}/effects/-`,
+            value: {
+              type: "ColorGrade",
+              preset: args.preset || "cinematic",
+              intensity: args.intensity || 1.0
+            }
+          }
+        ]
+      };
+
     case "adjust_hdr_color":
       return {
           success: true,
