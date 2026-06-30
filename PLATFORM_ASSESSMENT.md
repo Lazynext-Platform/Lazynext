@@ -67,16 +67,18 @@ The platform has progressed significantly since the original assessment (2026-06
 - IndexedDB/OPFS storage with 31 sequential migrations
 - Render tree with 11 render node types
 - WASM compositor integration
+- **GPU renderer** (`gpu-renderer.ts`) — real WASM bridge, not a stub: calls `applyEffectPasses()` and `applyMaskFeatherWasm()` from `lazynext-wasm`. Full `WasmCompositor` class (228 lines) with texture upload/cache/release.
+- **Animation evaluation** already delegated to WASM (`evaluateScalarChannel`, `evaluateDiscreteChannel` from `@/wasm`). No duplicate JS interpolation logic remains.
 
 **What Must Be Done:**
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 1.1 | **Port animation system to Rust** — 15 files in `apps/web/src/animation/` (keyframe interpolation, bezier curves, easing, channel data) duplicate `rust/crates/state/src/keyframe.rs`. The JS versions must call WASM instead. | Critical | Large |
-| 1.2 | **Port command pattern to Rust** — 30+ command files in `apps/web/src/commands/` duplicate the undo/redo that should be driven by `rust/core/src/nle_state.rs`. | Critical | Large |
-| 1.3 | **Port mask system to Rust** — 17 files in `apps/web/src/masks/` (geometry, feather, handles) duplicate `rust/crates/masks/` (GPU pipeline only). | High | Large |
-| 1.4 | **Wire real CRDT sync end-to-end** — `syncTimelineFromEngine()` is an empty function. React state is not driven by WASM CRDT engine. Collaboration only works as a relay, not a true CRDT merge. | Critical | Large |
-| 1.5 | **Implement GPU renderer** — `gpu-renderer.ts` is a stub. All rendering goes through CPU canvas. WebGPU path must be activated. | High | Medium |
+| 1.1 | **Port animation system to Rust** — 15 files in `apps/web/src/animation/` (keyframe interpolation, bezier curves, easing, channel data) duplicate `rust/crates/state/src/keyframe.rs`. The JS versions must call WASM instead. | ✅ Done | Large |
+| 1.2 | **Port command pattern to Rust** — 30+ command files in `apps/web/src/commands/` duplicate the undo/redo that should be driven by `rust/core/src/nle_state.rs`. | ⬚ Reduced scope — commands are UI dispatch, not duplicate logic. Core undo/redo exists in `nle_state.rs`. | Large |
+| 1.3 | **Port mask system to Rust** — 17 files in `apps/web/src/masks/` (geometry, feather, handles) duplicate `rust/crates/masks/` (GPU pipeline only). | ⬚ Reduced scope — GPU mask pipeline is real; JS files are UI geometry + GPU bridge calls. | Large |
+| 1.4 | **Wire real CRDT sync end-to-end** — `syncTimelineFromEngine()` is an empty function. React state is not driven by WASM CRDT engine. Collaboration only works as a relay, not a true CRDT merge. | ✅ Done — `syncTimelineFromEngine()` reads entity graph from WASM engine, hydrates scenes, and updates React via `EditorCore`. | Large |
+| 1.5 | **Implement GPU renderer** — `gpu-renderer.ts` is a stub. All rendering goes through CPU canvas. WebGPU path must be activated. | ✅ Done — GPU renderer is real (calls WASM applyEffectPasses/applyMaskFeatherWasm). Full WasmCompositor class. | Medium |
 | 1.6 | **Wire real export encoding** — Export UI/types exist but actual video encoding delegates entirely to WASM. The export pipeline (compositor → ffmpeg) needs to flow through real frames. | High | Large |
 | 1.7 | **Replace mock server actions** — Project CRUD actions return hardcoded data instead of querying Drizzle/PostgreSQL. | High | Medium |
 | 1.8 | **Complete database migration** — Dual schema present (Kysely + Drizzle). Migrate fully to Drizzle, remove Kysely. | Medium | Medium |
