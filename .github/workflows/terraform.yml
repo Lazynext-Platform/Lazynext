@@ -43,7 +43,7 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra/terraform
-        run: terraform init -upgrade -reconfigure
+        run: terraform init -reconfigure
 
       - name: Terraform Workspace
         working-directory: infra/terraform
