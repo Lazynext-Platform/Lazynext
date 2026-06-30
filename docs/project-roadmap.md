@@ -10,11 +10,11 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 17 |
+| Total Features | 18 |
 | 🟢 Complete | 15 |
 | ⏸️ On Hold | 2 |
 | 🔴 Not Started | 0 |
-| 🟡 In Progress | 0 |
+| 🟡 In Progress | 1 |
 
 **Overall Progress**: ███████░░░ ~70-75% (all planned hardening features shipped; remaining work is depth/full-implementation, see *Remaining Work* below)
 
@@ -41,6 +41,7 @@
 | 15 | AI Editor — Real API Wiring | 🟢 Complete | #02, #10 | `feature/15-ai-editor-real-api` | Wired web editor AI chat to real API + desktop AI + MCP tests + mobile tests. |
 | 16 | Final Gaps — SDK / External Deps | 🟢 Complete | #10, #11 | `feature/16-final-gaps` | Wired UniFFI, SAM2 ONNX, VST3 libloading, E2E integration tests. |
 | 17 | Platform-wide Mock Removal + Audit Fixes | 🟢 Complete | #15, #16 | (squash merges on main) | Zero mocks in production code; comprehensive CI/CD, infra, and monitoring audit fixes. |
+| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟡 In Progress | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations end-to-end. Audit the 50+ orchestrator tools for reality. |
 
 ---
 
@@ -50,11 +51,20 @@ These items are **not** roadmap features yet. They represent the depth work that
 
 - **Desktop — Full Editor** (#07 depth): Complete GPUI Dashboard + Editor windows, wire native compositor + DeckLink I/O.
 - **Mobile — Full Editor** (#08 depth): Complete UniFFI bridge end-to-end, build AI Copilot + timeline screens.
-- **Web — Logic port to Rust**: Port animation (15 files), command pattern (30+ files), and mask (17 files) JS implementations to WASM calls; wire real CRDT sync end-to-end (React ← WASM engine).
+- **Web — Logic port to Rust**: Port animation (15 files), command pattern (30+ files), and mask (17 files) JS implementations to WASM calls. (CRDT sync bridge `syncTimelineFromEngine()` already wired: reads WASM entity graph, hydrates scenes, updates React via `EditorCore`.)
 - **Backend depth**: Real Kafka analytics pipeline, real collab-server CRDT persistence, real P2P libp2p mesh.
 - **Cross-cutting**: OpenTelemetry instrumentation across services, end-to-end integration test (ingest → transcribe → edit → render).
 
 ---
+
+## Session Note — 2026-06-30 (Feature #18 kickoff)
+
+- **Who**: AI Agent (opencode)
+- **Worked On**: Opened Feature #18 — AI-Driven Editing: End-to-End Chronos Pipeline. Created discussion.md (Mastery Stage 1).
+- **Key finding during exploration**: `syncTimelineFromEngine()` in `crdt-sync.ts` is ALREADY implemented (not empty as PLATFORM_ASSESSMENT claimed) — it reads the WASM entity graph, hydrates scenes, and updates React via `EditorCore`. The orchestrator has 50+ named tools. The real gap is auditing which are real vs. LLM-described stubs.
+- **Stopped At**: Stage 1 (Discuss) — discussion.md marked COMPLETE. Next: Stage 2 (Architecture), starting with the per-tool reality audit.
+- **Blockers**: None. Stage 4 (Approve) will need human signoff before any build.
+- **Next Steps**: Read the 1593-line orchestrator + all microservice routes to map each tool → implementation status → `architecture.md`.`[]`
 
 ## Session Note — 2026-06-30 (Roadmap sync)
 
