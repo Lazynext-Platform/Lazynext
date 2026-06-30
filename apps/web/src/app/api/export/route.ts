@@ -1,94 +1,119 @@
 import { NextResponse } from "next/server";
 import { getProject } from "@/actions/project";
-import { StorageService } from "@/lib/storage";
-import path from "path";
 
 const RENDER_SERVICE_URL =
 	process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
+/**
+ * Creates an export job on the render-service in `awaiting_frames` state.
+ * The browser then streams compositor-rendered RGBA frames to
+ * `/api/v1/export/:jobId/frames` (see EditorClient.startExport).
+ *
+ * This route does NOT send timeline data for render-service to reconstruct —
+ * rendering happens in the browser via the same WASM GPU compositor used for
+ * preview (WYSIWYG). render-service only encodes the frames it receives.
+ */
 export async function POST(request: Request) {
 	try {
-		const { projectId } = await request.json();
+		const {
+			projectId,
+			format = "mp4",
+			bitrate_kbps = 8000,
+		} = await request.json();
 		if (!projectId) {
-			return NextResponse.json({ error: "Missing projectId" }, { status: 400 });
+			return NextResponse.json(
+				{ error: "Missing projectId" },
+				{ status: 400 },
+			);
 		}
 
-		// 1. Fetch project data from database
+		// 1. Fetch project data to derive export dimensions / duration
 		const project = await getProject(projectId);
 		if (!project) {
-			return NextResponse.json({ error: "Project not found" }, { status: 404 });
+			return NextResponse.json(
+				{ error: "Project not found" },
+				{ status: 404 },
+			);
 		}
 
-		// 2. Build project config for export
 		const tracks = project.tracks || project.timeline?.tracks || [];
+		const width = project.timeline?.width || 1920;
+		const height = project.timeline?.height || 1080;
+		const framerate = project.timeline?.framerate || 60;
+
+		// Derive total frame count from the longest track
 		const maxClipEnd = tracks.reduce(
 			(
 				max: number,
 				track: {
-					clips?: Array<{ start_frame?: number; duration_frames?: number }>;
+					clips?: Array<{
+						start_frame?: number;
+						duration_frames?: number;
+					}>;
 				},
 			) => {
 				for (const clip of track.clips || []) {
-					const end = (clip.start_frame || 0) + (clip.duration_frames || 0);
+					const end =
+						(clip.start_frame || 0) + (clip.duration_frames || 0);
 					if (end > max) max = end;
 				}
 				return max;
 			},
 			0,
 		);
+		const totalFrames = maxClipEnd || framerate * 5; // fallback 5s
 
-		const projectConfig = {
-			width: project.timeline?.width || 1920,
-			height: project.timeline?.height || 1080,
-			fps: project.timeline?.framerate || 60,
-			duration_frames: maxClipEnd || 120,
-			bg_color: [0.09, 0.09, 0.11, 1.0],
-			tracks,
-		};
-
-		// 3. Save project config to temp file
-		const tempDir = path.join(process.cwd(), ".tmp");
-		await StorageService.ensureDirectory(tempDir);
-
-		const projectJsonPath = path.join(tempDir, `project_${projectId}.json`);
-		await StorageService.writeFile(
-			projectJsonPath,
-			JSON.stringify(projectConfig, null, 2),
-		);
-
-		// 4. Dispatch to render-service
+		// 2. Create an awaiting-frames job on the render-service
 		try {
-			const response = await fetch(`${RENDER_SERVICE_URL}/api/v1/jobs`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					projectId,
-					format: "mp4",
-				}),
-			});
+			const response = await fetch(
+				`${RENDER_SERVICE_URL}/api/v1/export`,
+				{
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						projectId,
+						format,
+						bitrate_kbps,
+						width,
+						height,
+						framerate,
+						totalFrames,
+					}),
+				},
+			);
 
 			if (response.ok) {
 				const data = (await response.json()) as { jobId: string };
 				return NextResponse.json({
 					success: true,
-					message: "Export job dispatched to render farm",
 					jobId: data.jobId,
+					width,
+					height,
+					framerate,
+					totalFrames,
+					// Browser streams RGBA frames here:
+					frameEndpoint: `${RENDER_SERVICE_URL}/api/v1/export/${data.jobId}/frames`,
+					endEndpoint: `${RENDER_SERVICE_URL}/api/v1/export/${data.jobId}/frames/end`,
 					statusEndpoint: `/api/render/status?jobId=${data.jobId}`,
 				});
 			}
 		} catch (err) {
 			console.warn(
-				`[Export] Render service unreachable: ${err}. Using dev fallback.`,
+				`[Export] Render service unreachable: ${err}. Browser will use WebCodecs fallback.`,
 			);
 		}
 
-		// Dev fallback (production should always have render-service)
+		// Render-service offline → browser falls back to local WebCodecs encode
 		return NextResponse.json({
 			success: true,
+			jobId: null,
+			width,
+			height,
+			framerate,
+			totalFrames,
+			fallback: "webcodecs",
 			message:
-				"Export manifest prepared (render service offline — job will process when service is available)",
-			projectId,
-			manifestPath: projectJsonPath,
+				"Render service offline — browser will encode locally via WebCodecs.",
 		});
 	} catch (err: unknown) {
 		console.error("Export API Error:", err);

@@ -2520,8 +2520,92 @@ export default function EditorClient({ project }: { project: Project }) {
 	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const startExport = (exportOptions: any) => {
+	const startExport = async (exportOptions: any) => {
 		setShowDeliverPage(false);
+		if (!canvasRef.current) return;
+
+		const format: string = exportOptions?.format || "mp4";
+		const bitrate_kbps: number = exportOptions?.bitrate_kbps || 8000;
+
+		// ── Try the compositor → render-service path first ──────────────
+		// The browser renders each frame via the SAME WASM GPU compositor used
+		// for preview (WYSIWYG), then streams RGBA to render-service, which
+		// encodes via ffmpeg to the chosen format.
+		try {
+			const createRes = await fetch("/api/export", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ projectId: projectData.id || "default", format, bitrate_kbps }),
+			});
+			if (createRes.ok) {
+				const job = (await createRes.json()) as {
+					jobId: string | null;
+					width: number;
+					height: number;
+					framerate: number;
+					totalFrames: number;
+					frameEndpoint?: string;
+					endEndpoint?: string;
+					fallback?: string;
+				};
+
+				if (job.jobId && job.frameEndpoint && job.endEndpoint) {
+					setIsExporting(true);
+					setExportProgress(0);
+
+					const { streamFramesToRenderService } = await import(
+						"@/services/export/frame-stream-export"
+					);
+
+					// Capture frame `index` by advancing the playhead and reading the
+					// compositor canvas pixels after the browser has painted.
+					const captureFrame = async (index: number): Promise<Uint8Array> => {
+						setFrame(index);
+						await new Promise<void>((resolve) => {
+							requestAnimationFrame(() =>
+								requestAnimationFrame(() => resolve()),
+							);
+						});
+						const canvas = canvasRef.current;
+						if (!canvas) throw new Error("Export canvas lost");
+						const ctx = canvas.getContext("2d");
+						if (!ctx) throw new Error("Export canvas has no 2D context");
+						const { width, height } = canvas;
+						const data = ctx.getImageData(0, 0, width, height).data;
+						return new Uint8Array(data);
+					};
+
+					try {
+						await streamFramesToRenderService({
+							frameEndpoint: job.frameEndpoint,
+							endEndpoint: job.endEndpoint,
+							totalFrames: job.totalFrames,
+							width: job.width,
+							height: job.height,
+							captureFrame,
+							onProgress: ({ fraction }) =>
+								setExportProgress(fraction),
+						});
+						setIsExporting(false);
+						setFrame(0);
+						return;
+					} catch (err) {
+						console.error(
+							"[Export] Frame stream failed, falling back to MediaRecorder:",
+							err,
+						);
+						setIsExporting(false);
+					}
+				}
+			}
+		} catch (err) {
+			console.warn(
+				"[Export] render-service path unavailable, using local capture:",
+				err,
+			);
+		}
+
+		// ── Fallback: real-time MediaRecorder capture (render-service offline)
 		if (!canvasRef.current) return;
 
 		// Initialize audio context and destination if they don't exist

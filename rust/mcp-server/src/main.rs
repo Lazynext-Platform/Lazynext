@@ -544,7 +544,7 @@ async fn main() {
                         let pipeline = lazynext_export::ExportPipeline::new(config);
                         // Generate a test pattern for export (GPU compositor not available in MCP stdio context)
                         match pipeline
-                            .export(|frame_idx| async move {
+                            .export(total_frames, |frame_idx| async move {
                                 generate_test_pattern(frame_idx, total_frames, width, height)
                             })
                             .await

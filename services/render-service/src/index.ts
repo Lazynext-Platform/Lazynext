@@ -25,6 +25,14 @@ interface RenderJob {
 import { Queue, Worker, Job } from "bullmq";
 import Redis from "ioredis";
 import { publish } from "./social-publish";
+import {
+	appendFrame,
+	createFrameJob,
+	deleteFrameJob,
+	finalizeFrameJob,
+	getFrameJob,
+	type ExportFormatId,
+} from "./frame-export";
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.replace("http", "redis") || "redis://localhost:6379";
 
 // ── Lazy Redis / BullMQ initialisation ────────────────────────────────
@@ -139,10 +147,47 @@ app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 });
 
 app.post("/api/v1/export", async (req: Request, res: Response) => {
-	const { projectId, format = "mp4", timelineData } = req.body;
+	const {
+		projectId,
+		format = "mp4",
+		bitrate_kbps = 8000,
+		width,
+		height,
+		framerate = 30,
+		totalFrames,
+		timelineData,
+	} = req.body;
 
-	if (!projectId || !timelineData) {
-		return res.status(400).json({ error: "Missing projectId or timelineData" });
+	if (!projectId) {
+		return res.status(400).json({ error: "Missing projectId" });
+	}
+
+	// ── Frame-stream mode (browser compositor → render-service encode) ──
+	// No timelineData: the browser will stream RGBA frames to /frames. The job
+	// lives in-memory here; encoding runs on /frames/end.
+	if (!timelineData && width && height && totalFrames) {
+		const jobId = uuidv4();
+		createFrameJob({
+			jobId,
+			projectId,
+			format: (format as ExportFormatId) || "mp4",
+			bitrateKbps: Number(bitrate_kbps) || 8000,
+			width: Number(width),
+			height: Number(height),
+			framerate: Number(framerate),
+			totalFrames: Number(totalFrames),
+		});
+		console.log(
+			`[Frame Export] Created awaiting-frames job ${jobId} (${width}x${height}@${framerate}fps, ${totalFrames} frames, ${format})`,
+		);
+		return res.status(202).json({ success: true, jobId });
+	}
+
+	// ── Legacy timeline mode (render-service builds ffmpeg overlay graph) ──
+	if (!timelineData) {
+		return res
+			.status(400)
+			.json({ error: "Missing timelineData or frame-stream dimensions" });
 	}
 
 	if (!(await ensureRedis())) {
@@ -165,6 +210,96 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 
 	console.log(`[BullMQ] Queued timeline compiler job ${jobId} for project ${projectId}`);
 	res.status(202).json({ success: true, jobId });
+});
+
+// ── Frame-stream endpoints ────────────────────────────────────────────
+
+const MAX_FRAME_BUFFER_BYTES = parseInt(
+	process.env.EXPORT_FRAME_STREAM_MAX_BYTES || String(64 * 1024 * 1024),
+	10,
+);
+
+app.post(
+	"/api/v1/export/:jobId/frames",
+	express.raw({ type: "application/octet-stream", limit: "200mb" }),
+	async (req: Request, res: Response) => {
+		const jobId = req.params.jobId as string;
+		const seq = Number(req.headers["x-frame-seq"] as string);
+		const job = getFrameJob(jobId);
+		if (!job) return res.status(404).json({ error: "Job not found" });
+
+		const expectedFrameBytes = job.width * job.height * 4;
+		const body = req.body as Buffer;
+
+		const result = appendFrame(
+			jobId,
+			seq,
+			Buffer.isBuffer(body) ? body : Buffer.from(body as Uint8Array),
+			expectedFrameBytes,
+			MAX_FRAME_BUFFER_BYTES,
+		);
+		if (!result.ok) {
+			return res.status(result.status).json({ error: result.error });
+		}
+		res.status(200).json({ ok: true, received: job.nextSeq });
+	},
+);
+
+app.post(
+	"/api/v1/export/:jobId/frames/end",
+	async (req: Request, res: Response) => {
+		const jobId = req.params.jobId as string;
+		const job = getFrameJob(jobId);
+		if (!job) return res.status(404).json({ error: "Job not found" });
+
+		try {
+			const outputPath = await finalizeFrameJob(
+				jobId,
+				RENDER_TIMEOUT_MS,
+			);
+			console.log(`[Frame Export] Encoded ${jobId} → ${outputPath}`);
+
+			// C2PA provenance (sidecar in dev, embedded in prod — see signWithC2PA)
+			try {
+				await signWithC2PA(outputPath, null);
+			} catch (e) {
+				console.error(`[Frame Export] C2PA signing failed:`, e);
+			}
+
+			// Upload to Azure Blob if configured
+			try {
+				const azureBlob = await getBlobClient();
+				if (azureBlob) {
+					const containerName = process.env.MEDIA_BUCKET || "media";
+					const containerClient =
+						azureBlob.getContainerClient(containerName);
+					const blockBlobClient = containerClient.getBlockBlobClient(
+						`renders/${path.basename(outputPath)}`,
+					);
+					const fileStream = fs.createReadStream(outputPath);
+					await blockBlobClient.uploadStream(fileStream);
+					console.log(
+						`[Frame Export] Uploaded ${jobId} to Azure Blob.`,
+					);
+				}
+			} catch (e) {
+				console.error(`[Frame Export] Azure upload failed:`, e);
+			}
+
+			res.status(200).json({ success: true, jobId, output: outputPath });
+		} catch (e: any) {
+			console.error(`[Frame Export] finalize failed:`, e.message);
+			res.status(500).json({ error: e.message });
+		}
+	},
+);
+
+app.delete("/api/v1/export/:jobId", async (req: Request, res: Response) => {
+	const jobId = req.params.jobId as string;
+	const cancelled = deleteFrameJob(jobId);
+	if (!cancelled) return res.status(404).json({ error: "Job not found" });
+	console.log(`[Frame Export] Cancelled ${jobId}`);
+	res.status(200).json({ success: true, jobId, status: "cancelled" });
 });
 
 app.get("/api/v1/jobs/:jobId", async (req: Request, res: Response) => {
