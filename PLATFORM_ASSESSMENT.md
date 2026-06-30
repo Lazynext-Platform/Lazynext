@@ -38,19 +38,12 @@ The platform has completed all 31 features — all 21 original roadmap features 
 
 ## Complete Gap Analysis: What Needs to Be Done
 
-> ⚠️ **SNAPSHOT NOTICE (2026-06-30):** The per-format tables below are the
-> **pre-hardening baseline** (2026-06-28). Much of this was resolved by the
-> Feature #09–#17 hardening pass. Treat the **Summary Table** (below) and the
-> *Remaining Work* section of `docs/project-roadmap.md` as the authoritative
-> current status. Items verified resolved since this snapshot: compositor
-> `render_frame` is real (C1), SAM2 ONNX path wired (C5), VST3 `libloading`
-> host active (C6), ACES matrices real (C7), all production mock/stub blocks
-> removed (1.7), Kysely dropped in favour of Drizzle (1.8), browser overlay
-> non-URL crash fixed (4.4), API Gateway uses real JWT + PostgreSQL
-> (FORMAT 6), desktop is a real GPUI app (FORMAT 2), mobile has a real
-> Android native module (FORMAT 3). The percentages in each header below have
-> been updated to match the Summary Table; the task rows remain as the
-> historical pre-hardening reference.
+> ⚠️ **SNAPSHOT NOTICE (2026-07-01):** The per-format tables below are the
+> **pre-hardening baseline** (2026-06-28). **ALL items are now resolved** via
+> Features #09–#31. The authoritative current status is in the **Summary Table**
+> (above) and `docs/project-roadmap.md` (all 31 features 🟢 Complete). The
+> "Current State" paragraphs and task rows below are retained as historical
+> reference of what was resolved.
 
 ### FORMAT 1: Web App (`apps/web`) — 85% → 100%
 
@@ -85,7 +78,7 @@ The platform has completed all 31 features — all 21 original roadmap features 
 
 ### FORMAT 2: Desktop App (`apps/desktop`) — 55% → 100%
 
-**Current State:** *(Updated 2026-06-30, post-Feature #20)* Full GPUI application (632 lines): Dashboard (193 lines, New/Open Project with rfd FileDialog), Editor (439 lines, left toolbar, media bin, canvas with real `engine.render_frame()` → RGBA → GPUI preview, timeline with real clip rendering from track data, playhead, Inspector panel, AI Copilot "Run Command"). Playback transport bar with Play/Pause. 2 unit tests (dashboard + editor). DeckLink I/O wired. Native file system access via rfd. Remaining: native audio I/O monitoring.
+**Current State:** *(Updated 2026-07-01)* Full GPUI application (632 lines): Dashboard + Editor with real frame rendering, timeline with real clip data, playback controls, AI Copilot. Native audio I/O via rodio/cpal (CoreAudio/WASAPI). DeckLink I/O wired. Native file system access via rfd. 2 unit tests.
 
 **What Must Be Done:**
 
@@ -97,7 +90,7 @@ The platform has completed all 31 features — all 21 original roadmap features 
 | 2.4 | **Wire native compositor** — The GPU compositor (`rust/crates/compositor/`) renders directly to native surfaces via wgpu, no WASM bridge needed. | ✅ Done — compositor + wgpu in Cargo.toml; engine.render_frame() renders to GPUI canvas. | Large |
 | 2.5 | **Wire DeckLink I/O** — The `rust/crates/decklink/` crate exists as a CXX scaffold. Finish it with real Blackmagic SDK integration for SDI monitoring. | ✅ Done — engine.enable_decklink() in main.rs; DeckLink crate wired. | Large |
 | 2.6 | **Native file system access** — Direct filesystem I/O for media import/export, project files. | ✅ Done — rfd::FileDialog for .lazynext project files; serde deserialization. | Medium |
-| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | ⬚ Remaining | Medium |
+| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | ✅ Done — rodio/cpal provides native audio I/O. | Medium |
 | 2.8 | **Add tests** — Currently zero tests. | ✅ Done — 2 tests (dashboard creation + editor playback toggle). | Medium |
 
 ---
@@ -144,7 +137,7 @@ The platform has completed all 31 features — all 21 original roadmap features 
 
 ### FORMAT 5: CLI (`rust/cli`) — 75% → 100%
 
-**Current State:** Clap-based CLI that parses `--prompt`, `--render-project`, `--format`, `--width/height/framerate` flags. The render path prints the ffmpeg command but doesn't actually render frames. Has an `unsafe { std::env::set_var }` call that's unnecessary and dangerous.
+**Current State:** *(Updated 2026-07-01)* Clap-based CLI that renders frames via `CoreEngine::dispatch_export` (GPU compositor → ffmpeg). Supports all formats (MP4, ProRes, DCP, AAF, MOV) with configurable bitrate. Batch mode. ffmpeg integration test (ffprobe-validated). No unsafe code.
 
 **What Must Be Done:**
 
@@ -181,7 +174,7 @@ The platform has completed all 31 features — all 21 original roadmap features 
 
 ### FORMAT 7: MCP Server (`rust/mcp-server`) — 75% → 100%
 
-**Current State:** Functional JSON-RPC 2.0 over stdio MCP protocol server with 3 tools (autonomous_edit, get_timeline_state, apply_crdt_operation). Dockerfile has port mismatch (exposes TCP 5173 but MCP is stdio-based).
+**Current State:** *(Updated 2026-07-01)* Functional JSON-RPC 2.0 over stdio MCP protocol server with 17 tools, 4 resources, 4 prompts. API key auth via `LAZYNEXT_MCP_API_KEY`. Dockerfile correctly states "stdio, no port." 4 protocol tests (green).
 
 **What Must Be Done:**
 
