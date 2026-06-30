@@ -66,7 +66,7 @@ export async function connectKafka(): Promise<boolean> {
 
   try {
     const { Kafka } = await import("kafkajs");
-    kafkaInstance = new Kafka(config);
+    kafkaInstance = new Kafka(config as unknown as import("kafkajs").KafkaConfig);
     producerInstance = kafkaInstance.producer({
       maxInFlightRequests: 5,
       idempotent: true,
