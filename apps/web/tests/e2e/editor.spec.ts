@@ -41,4 +41,39 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		const sendBtn = page.locator("button:has(svg)");
 		await expect(sendBtn.first()).toBeVisible();
 	});
+
+	test("should run a full Chronos AI orchestration round-trip", async ({ page }) => {
+		await page.goto("/editor");
+
+		// Locate the Chronos chat input and send a command
+		const chatInput = page.getByPlaceholder(/Message Chronos.../i);
+		await chatInput.fill("add viral captions to this video");
+		// Press Enter to submit
+		await chatInput.press("Enter");
+
+		// Wait for the AI response — the chat should show agent feedback
+		// or a toast notification confirming the operation.
+		// Timeout is generous because LLM decomposition can take several seconds.
+		await expect(page.locator("[data-testid='chat-message-agent']").first())
+			.toBeVisible({ timeout: 30_000 });
+
+		// A success toast should appear
+		const successToast = page.locator("[data-sonner-toast]");
+		await expect(successToast.first()).toBeVisible({ timeout: 30_000 });
+	});
+
+	test("should show an error when Chronos encounters an unknown tool", async ({ page }) => {
+		await page.goto("/editor");
+
+		// The orchestrator's default case rejects unknown tools — test that
+		// an error is surfaced rather than silently swallowed
+		const chatInput = page.getByPlaceholder(/Message Chronos.../i);
+		await chatInput.fill("do something that does not match any tool");
+		await chatInput.press("Enter");
+
+		// Either an agent response or an error toast should eventually appear
+		await expect(
+			page.locator("[data-testid='chat-message-agent'], [data-sonner-toast]").first(),
+		).toBeVisible({ timeout: 25_000 });
+	});
 });

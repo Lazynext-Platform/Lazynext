@@ -59,11 +59,83 @@ export class EditorCore {
 					})),
 				];
 			}
+
+			return data;
 		} catch (err) {
 			console.error("Agent orchestration failed:", err);
+			return null;
 		} finally {
 			this.isAgentThinking = false;
 		}
+	}
+
+	/**
+	 * Stream an AI orchestration plan's execution progress via SSE.
+	 * 
+	 * Connects to GET /orchestrate/stream and calls onProgress with each
+	 * event (plan, step:start, step:result, step:error, done).
+	 * CRDT patches are broadcast separately via WebSocket.
+	 * 
+	 * Returns an AbortController so the caller can cancel mid-stream.
+	 */
+	public sendIntentStreaming(
+		prompt: string,
+		onProgress: (event: { type: string; data: any }) => void,
+	): AbortController {
+		this.isAgentThinking = true;
+		const controller = new AbortController();
+
+		const aiAgentsUrl =
+			process.env.NEXT_PUBLIC_AI_AGENTS_URL || "http://localhost:8002";
+		const url = new URL(`${aiAgentsUrl}/orchestrate/stream`);
+		url.searchParams.set("prompt", prompt);
+
+		fetch(url.toString(), { signal: controller.signal })
+			.then(async (res) => {
+				if (!res.ok || !res.body) {
+					onProgress({ type: "error", data: { error: `HTTP ${res.status}` } });
+					this.isAgentThinking = false;
+					return;
+				}
+
+				const reader = res.body.getReader();
+				const decoder = new TextDecoder();
+				let buffer = "";
+
+				while (true) {
+					const { done, value } = await reader.read();
+					if (done) break;
+
+					buffer += decoder.decode(value, { stream: true });
+					const lines = buffer.split("\n");
+					buffer = lines.pop() ?? "";
+
+					let currentType = "";
+					for (const line of lines) {
+						if (line.startsWith("event: ")) {
+							currentType = line.slice(7);
+						} else if (line.startsWith("data: ") && currentType) {
+							try {
+								onProgress({ type: currentType, data: JSON.parse(line.slice(6)) });
+							} catch {
+								onProgress({ type: currentType, data: {} });
+							}
+							currentType = "";
+						}
+					}
+				}
+
+				this.isAgentThinking = false;
+			})
+			.catch((err) => {
+				if (err.name !== "AbortError") {
+					console.error("Agent streaming failed:", err);
+					onProgress({ type: "error", data: { error: String(err) } });
+				}
+				this.isAgentThinking = false;
+			});
+
+		return controller;
 	}
 
 	private constructor() {
