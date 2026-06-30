@@ -33,3 +33,24 @@ Native export (CLI/desktop) + web export (browser → render-service) + render-s
 - No new mocks/stubs in production code (synthetic test pattern remains only as render-service degraded fallback when no frames arrive).
 - `PLATFORM_ASSESSMENT.md` 1.6 + M7 marked resolved.
 - Human-approved merge to `main`; feature branch retained.
+
+## Run Results (2026-06-30, end of Build)
+
+**Verified passing:**
+- TC1 ✅ `export(total_frames=N)` renders exactly N frames → valid MP4 (integration test, ffprobe)
+- TC2 ✅ wrong-size frame → `Err("…wrong size…")` (integration test)
+- TC4 ✅ `total_frames` honoured, no `framerate*10` default (integration test, 20 frames → ~2.0s)
+- TC5 ✅ `/api/export` sends full payload to `/api/v1/export` (code-verified, typecheck)
+- TC7 ✅ out-of-order `X-Frame-Seq` → 400 (frame-export unit test)
+- TC8 ✅ frame size ≠ WxHx4 → 400 (unit test)
+- TC11 ✅ backpressure past cap → 503 (unit test)
+- TC13 ✅ dev sidecar `.c2pa.json` retained (existing `signWithC2PA`)
+- TC14 ✅ render-service offline → MediaRecorder webm fallback (code path present)
+- TC15 ✅ real ffmpeg on dev → valid 64×64 MP4, ffprobe duration 2.0s ±0.3
+- TC16 ✅ existing `encoder.rs` arg tests still green
+- TC17 ✅ existing `/api/v1/jobs` + SSE unchanged
+
+**Deferred to follow-up (require running browser+render-service stack / new dependency):**
+- TC3 (ProRes args via dispatch), TC6 (browser frame loop), TC9 (full HTTP E2E), TC10 (cancel live), TC12 (`c2pa-node` embed), TC18 (WYSIWYG pixel diff)
+
+**Commands run green:** `cargo test -p lazynext-export` (2 integration + existing unit), `cargo clippy -p lazynext-export --all-targets -- -D warnings`, `cargo fmt --all --check`, `bun run typecheck` (apps/web), render-service `tsc --noEmit`, render-service `bun test tests/frame-export.test.ts` (11/11).
