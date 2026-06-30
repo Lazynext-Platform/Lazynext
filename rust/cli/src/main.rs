@@ -196,7 +196,7 @@ async fn main() {
             duration,
             progress,
         } => {
-            let mock_args = RenderArgs {
+            let render_args = RenderArgs {
                 format: format.clone(),
                 width: *width,
                 height: *height,
@@ -204,7 +204,7 @@ async fn main() {
                 duration: *duration,
                 progress: *progress,
             };
-            match render_single(project, &mock_args).await {
+            match render_single(project, &render_args).await {
                 Ok(path) => println!("✅ Export complete: {}", path),
                 Err(e) => eprintln!("❌ Export failed: {}", e),
             }
