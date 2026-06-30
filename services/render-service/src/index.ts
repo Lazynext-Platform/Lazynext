@@ -448,7 +448,7 @@ async function signWithC2PA(
   const fileBuffer = fs.readFileSync(outputPath);
   const outputHash = crypto.createHash("sha256").update(fileBuffer).digest("hex");
 
-  const manifest = {
+  const manifestContent = {
     // C2PA Assertion
     "c2pa.assertions": {
       "stds.schema-org.CreativeWork": {
@@ -491,16 +491,24 @@ async function signWithC2PA(
         when: new Date().toISOString(),
       },
     ],
-    // Manifest signature (self-signed in dev, CA-signed in production)
-    "c2pa.signature": {
-      algorithm: "ES256",
-      value: crypto
-        .createHmac("sha256", process.env.BETTER_AUTH_SECRET || "lazynext-dev")
-        .update(JSON.stringify(manifest))
-        .digest("base64"),
-      issuer:
-        process.env.C2PA_SIGNING_CERT_ISSUER || "Lazynext Development CA",
-    },
+    // Manifest signature is computed AFTER this object (see below).
+  };
+
+  // Manifest signature (self-signed in dev, CA-signed in production).
+  // Computed over the manifest content so the signature covers the assertions,
+  // hash, and actions, then attached to produce the final manifest.
+  const signature = {
+    algorithm: "ES256",
+    value: crypto
+      .createHmac("sha256", process.env.BETTER_AUTH_SECRET || "lazynext-dev")
+      .update(JSON.stringify(manifestContent))
+      .digest("base64"),
+    issuer: process.env.C2PA_SIGNING_CERT_ISSUER || "Lazynext Development CA",
+  };
+
+  const manifest = {
+    ...manifestContent,
+    "c2pa.signature": signature,
   };
 
   // Write the C2PA manifest as a sidecar file
