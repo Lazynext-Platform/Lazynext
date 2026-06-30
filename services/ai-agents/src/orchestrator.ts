@@ -735,6 +735,95 @@ export async function executePlan(
   };
 }
 
+/** Event emitted by the streaming version of executePlan. */
+export interface StreamEvent {
+  type: "plan" | "step:start" | "step:result" | "step:error" | "done" | "error";
+  data: Record<string, unknown>;
+}
+
+/**
+ * Execute a plan, emitting progress events via callback for SSE streaming.
+ * Otherwise identical to executePlan().
+ */
+export async function executePlanStreaming(
+  plan: OrchestrationPlan,
+  onProgress: (event: StreamEvent) => void,
+): Promise<OrchestrationResult> {
+  const results: OrchestrationResult["results"] = [];
+
+  onProgress({
+    type: "plan",
+    data: {
+      steps: plan.steps.map((s) => ({
+        tool: s.tool,
+        description: s.description,
+        args: s.args,
+      })),
+      reasoning: plan.reasoning,
+    },
+  });
+
+  for (const step of plan.steps) {
+    let attempts = 0;
+    const maxRetries = 2;
+    let success = false;
+    let result: any = null;
+
+    onProgress({
+      type: "step:start",
+      data: { tool: step.tool, description: step.description, args: step.args },
+    });
+
+    while (attempts <= maxRetries && !success) {
+      result = await executeToolCall(step.tool, step.args);
+
+      if (result.success) {
+        success = true;
+      } else {
+        attempts++;
+        console.warn(
+          `[Agentic Repair Loop] Step ${step.tool} failed. Retry ${attempts}/${maxRetries}...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    results.push({
+      tool: step.tool,
+      success,
+      output: result,
+      crdt_patches: result?.crdt_patches ?? step.crdt_patches,
+    });
+
+    onProgress({
+      type: success ? "step:result" : "step:error",
+      data: {
+        tool: step.tool,
+        success,
+        error: success ? undefined : result?.error ?? "Unknown error",
+        crdt_patches: result?.crdt_patches ?? step.crdt_patches,
+      },
+    });
+
+    if (!success) {
+      onProgress({
+        type: "error",
+        data: { error: `Step ${step.tool} failed after ${maxRetries} retries` },
+      });
+      break;
+    }
+  }
+
+  const overall = results.every((r) => r.success);
+  onProgress({ type: "done", data: { success: overall } });
+
+  return {
+    success: overall,
+    plan: plan.steps,
+    results,
+  };
+}
+
 /**
  * Execute a single tool call against the appropriate microservice.
  */
@@ -1157,6 +1246,44 @@ async function executeToolCall(
                   }
               }
           ]
+      };
+
+    case "apply_color_grade":
+      // Falls back to a local preset if pre-processing is unavailable
+      try {
+        const gradeResult: any = await callService(
+          `${PRE_PROCESSING_URL}/color-grade`,
+          "POST",
+          { clip_id: args.clip_id || args.video_id || "input_video", preset: args.preset || "cinematic" }
+        );
+        if (gradeResult && gradeResult.success) {
+          return {
+            success: true,
+            crdt_patches: gradeResult.crdt_patches || [
+              {
+                op: "add",
+                path: `/tracks/main/clips/${args.clip_id || "input_video"}/effects/-`,
+                value: { type: "ColorGrade", preset: args.preset || "cinematic" }
+              }
+            ]
+          };
+        }
+      } catch {
+        console.warn("[Orchestrator] color-grade microservice unavailable — using local preset");
+      }
+      return {
+        success: true,
+        crdt_patches: [
+          {
+            op: "add",
+            path: `/tracks/main/clips/${args.clip_id || args.video_id || "input_video"}/effects/-`,
+            value: {
+              type: "ColorGrade",
+              preset: args.preset || "cinematic",
+              intensity: args.intensity || 1.0
+            }
+          }
+        ]
       };
 
     case "adjust_hdr_color":

@@ -2,7 +2,7 @@ import "./tracing";
 import express from "express";
 import { createServer } from "http";
 import { setupSyncServer, broadcastCrdtPatch } from "./sync";
-import { decomposeIntent, executePlan } from "./orchestrator";
+import { decomposeIntent, executePlan, executePlanStreaming } from "./orchestrator";
 import { generateBroll, generateDub } from "./generative";
 import { setupMcpServers } from "./mcp";
 
@@ -71,6 +71,63 @@ app.post("/orchestrate", async (req, res) => {
       success: false,
       error: String(err),
     });
+  }
+});
+
+/**
+ * Stream an AI orchestration plan's execution progress via SSE.
+ *
+ * GET /orchestrate/stream?prompt=...&projectId=...
+ *
+ * Emits events: plan, step:start, step:result, step:error, done, error.
+ * The client connects via EventSource / fetch-with-stream and processes
+ * events as they arrive.
+ */
+app.get("/orchestrate/stream", async (req, res) => {
+  const prompt = (req.query.prompt as string) || "";
+  const projectId = (req.query.projectId as string) || "";
+  const dryRun = req.query.dryRun === "1" || req.query.dryRun === "true";
+
+  if (!prompt) {
+    res.status(400).json({ error: "Missing prompt query parameter" });
+    return;
+  }
+
+  // SSE headers
+  res.writeHead(200, {
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+
+  const sendEvent = (event: string, data: unknown) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    console.log(
+      `[AI-Agents] Streaming orchestration: "${prompt}" for project: ${projectId || "unknown"}`,
+    );
+
+    const plan = await decomposeIntent(prompt);
+    const result = await executePlanStreaming(plan, (event) => {
+      if ((event.type === "done" || event.type === "error") && !dryRun) {
+        if (projectId) {
+          for (const r of result.results) {
+            if (r.crdt_patches && r.crdt_patches.length > 0) {
+              broadcastCrdtPatch(projectId, r.crdt_patches);
+            }
+          }
+        }
+      }
+      sendEvent(event.type, event.data);
+    });
+
+    res.end();
+  } catch (err) {
+    console.error(`[AI-Agents] Streaming orchestration failed:`, err);
+    sendEvent("error", { error: String(err) });
+    res.end();
   }
 });
 
