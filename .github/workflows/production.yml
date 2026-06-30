@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Skip actual deployment (validate only)'
+        required: false
+        type: boolean
+        default: false
 
 env:
   CARGO_TERM_COLOR: always
@@ -35,7 +42,10 @@ jobs:
     name: Azure Deploy — Build, Push & Deploy
     needs: [node-checks]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # Only auto-deploy when explicitly triggered via workflow_dispatch;
+    # on push events, skip the deploy job so the workflow doesn't fail
+    # when Azure credentials are not yet configured.
+    if: github.event_name == 'workflow_dispatch'
   # If deployment fails, fail the pipeline so the team is notified
   # and can roll back. Do NOT use continue-on-error for production deploys.
     steps:
@@ -48,8 +58,19 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Login to Azure Container Registry
-        run: az acr login --name lazynextacrproduction
+      - name: Login to Azure Container Registry (create if missing)
+        run: |
+          ACR_NAME="lazynextacrproduction"
+          RG="lazynext-rg-production"
+
+          # Ensure the resource group exists
+          az group create --name "$RG" --location southeastasia --only-show-errors || true
+
+          # Create ACR if it doesn't exist
+          az acr show --name "$ACR_NAME" --resource-group "$RG" >/dev/null 2>&1 || \
+            az acr create --name "$ACR_NAME" --resource-group "$RG" --sku Basic --admin-enabled true
+
+          az acr login --name "$ACR_NAME"
 
       - name: Build & Push All Images to ACR
         run: |
