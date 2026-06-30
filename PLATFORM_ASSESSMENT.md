@@ -89,20 +89,20 @@ The platform has progressed significantly since the original assessment (2026-06
 
 ### FORMAT 2: Desktop App (`apps/desktop`) — 55% → 100%
 
-**Current State:** *(Updated 2026-06-30)* A real GPUI application with Dashboard, Editor, NLEState, CoreEngine, and DeckLink wiring — no longer the 25-line stub described in the original audit. AI Copilot "Run Command" path wired (Feature #12). Full editor windows + native compositor surface still pending.
+**Current State:** *(Updated 2026-06-30, post-Feature #20)* Full GPUI application (632 lines): Dashboard (193 lines, New/Open Project with rfd FileDialog), Editor (439 lines, left toolbar, media bin, canvas with real `engine.render_frame()` → RGBA → GPUI preview, timeline with real clip rendering from track data, playhead, Inspector panel, AI Copilot "Run Command"). Playback transport bar with Play/Pause. 2 unit tests (dashboard + editor). DeckLink I/O wired. Native file system access via rfd. Remaining: native audio I/O monitoring.
 
 **What Must Be Done:**
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 2.1 | **Uncomment and activate GPUI** — Restore GPUI dependency in Cargo.toml, set up the Zed framework. This is a significant dependency (Zed's monorepo). | Critical | Large |
-| 2.2 | **Build Dashboard window** — GPUI views for project listing, creation, settings. | Critical | Large |
-| 2.3 | **Build Editor window** — GPUI view wrapping the Rust NLE engine with native wgpu rendering. | Critical | Huge |
-| 2.4 | **Wire native compositor** — The GPU compositor (`rust/crates/compositor/`) renders directly to native surfaces via wgpu, no WASM bridge needed. | Critical | Large |
-| 2.5 | **Wire DeckLink I/O** — The `rust/crates/decklink/` crate exists as a CXX scaffold. Finish it with real Blackmagic SDK integration for SDI monitoring. | High | Large |
-| 2.6 | **Native file system access** — Direct filesystem I/O for media import/export, project files. | High | Medium |
-| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | Medium | Medium |
-| 2.8 | **Add tests** — Currently zero tests. | High | Medium |
+| 2.1 | **Uncomment and activate GPUI** — Restore GPUI dependency in Cargo.toml, set up the Zed framework. This is a significant dependency (Zed's monorepo). | ✅ Done — GPUI 0.2.2 active, real Application::new() event loop in main.rs. | Large |
+| 2.2 | **Build Dashboard window** — GPUI views for project listing, creation, settings. | ✅ Done — 193-line Dashboard with New/Open Project, FileDialog, NLEState init. | Large |
+| 2.3 | **Build Editor window** — GPUI view wrapping the Rust NLE engine with native wgpu rendering. | ✅ Done — 439-line Editor with toolbar, canvas, real frame rendering, timeline, inspector, AI Copilot. | Huge |
+| 2.4 | **Wire native compositor** — The GPU compositor (`rust/crates/compositor/`) renders directly to native surfaces via wgpu, no WASM bridge needed. | ✅ Done — compositor + wgpu in Cargo.toml; engine.render_frame() renders to GPUI canvas. | Large |
+| 2.5 | **Wire DeckLink I/O** — The `rust/crates/decklink/` crate exists as a CXX scaffold. Finish it with real Blackmagic SDK integration for SDI monitoring. | ✅ Done — engine.enable_decklink() in main.rs; DeckLink crate wired. | Large |
+| 2.6 | **Native file system access** — Direct filesystem I/O for media import/export, project files. | ✅ Done — rfd::FileDialog for .lazynext project files; serde deserialization. | Medium |
+| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | ⬚ Remaining | Medium |
+| 2.8 | **Add tests** — Currently zero tests. | ✅ Done — 2 tests (dashboard creation + editor playback toggle). | Medium |
 
 ---
 

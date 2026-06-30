@@ -10,6 +10,17 @@ pub struct EditorShell {
     pub rt_handle: tokio::runtime::Handle,
     pub last_frame_data: Option<gpui::ImageSource>,
     pub current_frame: u32,
+    pub is_playing: bool,
+}
+
+impl EditorShell {
+    fn toggle_playback(&mut self) {
+        self.is_playing = !self.is_playing;
+    }
+
+    /// Timeline constants — zoomed so the visible range covers ~10 seconds at 24 fps.
+    const TIMELINE_PX_PER_FRAME: f32 = 1.5;
+    const TIMELINE_LEFT_MARGIN: f32 = 100.0; // account for track label column
 }
 
 impl Render for EditorShell {
@@ -137,6 +148,42 @@ impl Render for EditorShell {
                             ),
                     )
                     .child(
+                        // Playback Transport Bar
+                        div()
+                            .h(px(36.0))
+                            .flex()
+                            .items_center()
+                            .gap_2()
+                            .px_3()
+                            .bg(rgb(0x1a1a1a))
+                            .border_b_1()
+                            .border_color(border_color)
+                            .child(
+                                div()
+                                    .w(px(32.0))
+                                    .h(px(28.0))
+                                    .flex()
+                                    .justify_center()
+                                    .items_center()
+                                    .rounded_sm()
+                                    .bg(if self.is_playing { accent_color } else { rgb(0x333333) })
+                                    .cursor_pointer()
+                                    .hover(|s| s.bg(if self.is_playing { rgb(0x00b4bf) } else { rgb(0x444444) }))
+                                    .child(if self.is_playing { "⏸" } else { "▶" })
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        move |_, _, _cx| {
+                                            log::info!("Play/Pause toggled in desktop editor");
+                                        }
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .text_sm()
+                                    .text_color(rgb(0x888888))
+                                    .child(format!("Frame {}", self.current_frame)),
+                            ),
+                    )
+                    .child(
                         // Timeline Area (Bottom)
                         div()
                             .h(px(300.0))
@@ -183,22 +230,29 @@ impl Render for EditorShell {
                                                     .bg(rgb(0x2a2a2a))
                                                     .rounded_md()
                                                     .relative()
-                                                    // Render mock clips based on track index
-                                                    .child(
-                                                        div()
-                                                            .absolute()
-                                                            .top_0()
-                                                            .bottom_0()
-                                                            .left(px(50.0 + (i as f32) * 100.0))
-                                                            .w(px(200.0))
-                                                            .bg(accent_color)
-                                                            .rounded_md()
-                                                            .opacity(0.8)
-                                                            .flex()
-                                                            .items_center()
-                                                            .justify_center()
-                                                            .text_color(rgb(0x000000))
-                                                            .child("Clip"),
+                                                    .children(
+                                                        track.clips.iter().map(|clip| {
+                                                            let left_px =
+                                                                clip.start as f32 * Self::TIMELINE_PX_PER_FRAME;
+                                                            let width_px =
+                                                                (clip.end.saturating_sub(clip.start)) as f32
+                                                                    * Self::TIMELINE_PX_PER_FRAME;
+                                                            div()
+                                                                .absolute()
+                                                                .top_0()
+                                                                .bottom_0()
+                                                                .left(px(left_px))
+                                                                .w(px(width_px.max(8.0)))
+                                                                .bg(accent_color)
+                                                                .rounded_md()
+                                                                .opacity(0.8)
+                                                                .flex()
+                                                                .items_center()
+                                                                .justify_center()
+                                                                .text_color(rgb(0x000000))
+                                                                .text_sm()
+                                                                .child(clip.name.clone())
+                                                        }),
                                                     ),
                                             )
                                     }))
@@ -209,7 +263,7 @@ impl Render for EditorShell {
                                             .bottom_0()
                                             .w(px(2.0))
                                             .bg(rgb(0xff0044))
-                                            .left(px(200.0 + (self.current_frame as f32) * 2.0))
+                                            .left(px(self.current_frame as f32 * Self::TIMELINE_PX_PER_FRAME))
                                             // Playhead triangle
                                             .child(
                                                 div()
@@ -368,5 +422,66 @@ impl Render for EditorShell {
                             ), // -------------------------
                     ),
             )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use lazynext_core::NLEState;
+    use lazynext_core::engine::CoreEngine;
+    use std::sync::Arc;
+    use tokio::sync::Mutex;
+
+    #[tokio::test]
+    async fn test_editor_shell_creation() {
+        let nle = Arc::new(Mutex::new(NLEState::new(
+            "test_editor".to_string(),
+            "Test".to_string(),
+            24,
+        )));
+
+        let rt_handle = tokio::runtime::Handle::current();
+        let engine = Arc::new(Mutex::new(CoreEngine::init(nle.clone()).await.unwrap()));
+
+        let editor = EditorShell {
+            nle,
+            engine,
+            rt_handle,
+            last_frame_data: None,
+            current_frame: 0,
+            is_playing: false,
+        };
+
+        assert!(!editor.is_playing);
+        assert_eq!(editor.current_frame, 0);
+        assert!(editor.last_frame_data.is_none());
+    }
+
+    #[tokio::test]
+    async fn test_editor_playback_toggle() {
+        let nle = Arc::new(Mutex::new(NLEState::new(
+            "test_play".to_string(),
+            "Test Play".to_string(),
+            24,
+        )));
+
+        let rt_handle = tokio::runtime::Handle::current();
+        let engine = Arc::new(Mutex::new(CoreEngine::init(nle.clone()).await.unwrap()));
+
+        let mut editor = EditorShell {
+            nle,
+            engine,
+            rt_handle,
+            last_frame_data: None,
+            current_frame: 0,
+            is_playing: false,
+        };
+
+        assert!(!editor.is_playing);
+        editor.toggle_playback();
+        assert!(editor.is_playing);
+        editor.toggle_playback();
+        assert!(!editor.is_playing);
     }
 }
