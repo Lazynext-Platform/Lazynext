@@ -641,49 +641,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
 
-  # ── Database Exporter ────────────────────────────────────────────
-  postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.0
-    <<: [*logging, *restart-prod, *security]
-    deploy:
-      <<: *deploy-defaults
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 128M
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    environment:
-      DATA_SOURCE_URI: "db:5432/lazynext?sslmode=disable"
-      DATA_SOURCE_USER: lazynext
-      DATA_SOURCE_PASS_FILE: /run/secrets/postgres_password
-    secrets:
-      - source: lazynext_postgres_password
-        target: postgres_password
-
-  # ── Redis Exporter ───────────────────────────────────────────────
-  redis-exporter:
-    image: oliver006/redis_exporter:v1.80.0
-    <<: [*logging, *restart-prod, *security]
-    deploy:
-      <<: *deploy-defaults
-      resources:
-        limits:
-          cpus: "0.1"
-          memory: 64M
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 5s
-    environment:
-      REDIS_ADDR: redis://redis:6379
-      REDIS_EXPORTER_LOG_FORMAT: json
+  # ── Database & Redis exporters — see docker-compose.monitoring.yml ──
+  # The exporters are consolidated in the monitoring compose file to avoid
+  # duplicate definitions and conflicting configuration approaches between
+  # Swarm-mode deploy blocks and the standalone monitoring stack.
+  # Include monitoring.yml alongside this file: docker compose -f docker-compose.prod.yml -f docker-compose.monitoring.yml up
 
   # ── Node Exporter (host metrics) ─────────────────────────────────
   node-exporter:

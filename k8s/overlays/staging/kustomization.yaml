@@ -6,8 +6,6 @@ namespace: lazynext-staging
 resources:
   - ../../base
 
-namePrefix: staging-
-
 labels:
   - pairs:
       environment: staging
@@ -23,6 +21,26 @@ patches:
     target:
       kind: Deployment
       name: lazynext-web
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-sync
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: lazynext-sync
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: lazynext-render
+      spec:
+        replicas: 1
+    target:
+      kind: Deployment
+      name: lazynext-render
   - patch: |
       apiVersion: autoscaling/v2
       kind: HorizontalPodAutoscaler
@@ -45,4 +63,8 @@ images:
   - name: ghcr.io/lazynext-platform/lazynext-pre-processing
     newTag: staging
   - name: ghcr.io/lazynext-platform/lazynext-generative-studio
+    newTag: staging
+  - name: ghcr.io/lazynext-platform/lazynext-mcp
+    newTag: staging
+  - name: ghcr.io/lazynext-platform/lazynext-analytics-service
     newTag: staging

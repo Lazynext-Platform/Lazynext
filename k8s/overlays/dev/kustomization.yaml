@@ -66,3 +66,7 @@ images:
     newTag: dev
   - name: ghcr.io/lazynext-platform/lazynext-generative-studio
     newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-mcp
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-analytics-service
+    newTag: dev
