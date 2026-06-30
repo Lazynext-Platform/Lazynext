@@ -78,7 +78,7 @@ resource "azurerm_application_insights" "service" {
 resource "azurerm_key_vault_secret" "appinsights_connection_string" {
   for_each = local.container_apps
 
-  name         = "APPINSIGHTS--CONNECTION--STRING--${replace(upper(each.key), "-", "--")}"
+  name         = "APPINSIGHTS-CONNECTION-STRING-${replace(upper(each.key), "-", "-")}"
   value        = azurerm_application_insights.service[each.key].connection_string
   key_vault_id = azurerm_key_vault.secrets.id
   content_type = "text/plain"

@@ -151,12 +151,11 @@ variable "llm_provider" {
 variable "redis_sku_name" {
   description = "Azure Cache for Redis Enterprise SKU name"
   type        = string
-  default     = "Enterprise_E10" # 12 GB per shard
+  default     = "E10"
 
   validation {
     condition = contains([
-      "Enterprise_E10", "Enterprise_E20", "Enterprise_E50", "Enterprise_E100",
-      "EnterpriseFlash_F300", "EnterpriseFlash_F700", "EnterpriseFlash_F1500",
+      "E10", "E20", "E50", "E100",
     ], var.redis_sku_name)
     error_message = "Redis SKU must be a valid Enterprise tier SKU."
   }
