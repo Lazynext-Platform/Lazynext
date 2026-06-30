@@ -29,6 +29,7 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 		const mediaUrl = info.srcUrl || info.linkUrl;
 		if (!mediaUrl) return;
 
+		const sourceName = new URL(mediaUrl).pathname.split("/").pop() || mediaUrl;
 		console.log(`Sending media to Lazynext: ${mediaUrl}`);
 
 		try {
@@ -50,12 +51,30 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 
 			if (!response.ok) {
 				console.error(`Gateway returned ${response.status}`);
+				void chrome.notifications.create(`lazynext-err-${Date.now()}`, {
+					type: "basic",
+					iconUrl: "icons/icon48.png",
+					title: "Lazynext — Import Failed",
+					message: `API Gateway returned ${response.status}. Check your connection.`,
+				});
 				return;
 			}
 			const data = await response.json();
 			console.log("Success:", data);
+			void chrome.notifications.create(`lazynext-ok-${Date.now()}`, {
+				type: "basic",
+				iconUrl: "icons/icon48.png",
+				title: "Sent to Lazynext",
+				message: `"${sourceName}" added to your timeline.`,
+			});
 		} catch (error) {
 			console.error("Failed to reach Lazynext API Gateway:", error);
+			void chrome.notifications.create(`lazynext-err-${Date.now()}`, {
+				type: "basic",
+				iconUrl: "icons/icon48.png",
+				title: "Lazynext — Offline",
+				message: "Could not reach the API Gateway. Open the web app and retry.",
+			});
 		}
 	}
 });
