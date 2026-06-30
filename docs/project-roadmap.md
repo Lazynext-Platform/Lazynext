@@ -48,12 +48,26 @@
 
 ---
 
-## Remaining Work (not yet scheduled — pending human prioritization)
+## Remaining Work — Proposed Path to 100% (pending human prioritization/approval)
 
-These items are **not** roadmap features yet. They represent the depth work that remains, as documented in `PLATFORM_ASSESSMENT.md`:
+> Added 2026-06-30 as a proposed dependency-ordered sequence to close the documented ~30% gap. Each item becomes a Mastery feature (Discussion → Architecture → Plan → **human Approve** → Build). Reordering or scheduling requires human approval per the Mastery autonomy table.
 
-- **Backend depth**: Real Kafka analytics pipeline, real collab-server CRDT persistence, real P2P libp2p mesh.
-- **Cross-cutting**: OpenTelemetry instrumentation across services, end-to-end integration test (ingest → transcribe → edit → render).
+| Future # | Feature | Closes Gap | Format(s) | Effort | Depends On |
+|---|---|---|---|---|---|
+| **22** | Real Export Pipeline — route web export through GPU compositor frames (not ffmpeg overlay); fix duration/format passthrough; embed C2PA | 1.6, M7 (partial) | Web, render-service, Rust export | Large | #01, #02, #19 |
+| **23** | Port remaining JS editing logic to WASM — finish animation/command/mask delegation to Rust (state owns logic, apps are shells) | 1.1–1.4 | Web, Rust core | Large | #01, #19 |
+| **24** | Browser Extension — real timeline import (push media via REST/IndexedDB), manifest/icon consistency, tests | 4.1–4.9 | Browser Extension | Medium | #02, #03 |
+| **25** | CLI — real frame render pipe to ffmpeg, remove unsafe `set_var`, add ProRes/DCP/AAF/MOV, batch mode, integration tests | 5.1–5.6 | CLI | Medium | #22 |
+| **26** | MCP Server — expand tools/resources/prompts, add auth (API key/JWT), fix Dockerfile (stdio vs port), protocol tests | 7.1–7.6 | MCP Server | Medium | #01 |
+| **27** | API Gateway — integration tests (auth→DB→response), OpenAPI spec, CSRF/rate-limit verification | 6.8–6.9 | API Gateway | Medium | #03 |
+| **28** | Desktop — native audio I/O (CoreAudio/WASAPI) monitoring, editor UX polish | 2.7 | Desktop | Medium | #20 |
+| **29** | Mobile — AI Copilot chat surface (streaming), fix race conditions (setTimeout/Pencil), tests | 3.4, 3.8 | Mobile | Medium | #21 |
+| **30** | Backend depth — real Kafka/ClickHouse analytics, real collab-server CRDT persistence, real P2P libp2p mesh | M8, M9, C3 | Microservices | Huge | #11 |
+| **31** | Observability + E2E — OpenTelemetry across services; one full ingest→transcribe→edit→render integration test | I6, I8 | Infrastructure | Large | #22, #30 |
+
+**Sequencing rationale**: #22 first because a video editor's core value is producing real video output, and it unblocks #25 (CLI) and #31 (E2E). #23 enforces the "Rust owns all logic" invariant. Format completions (#24–#29) can partially parallelize. Backend depth (#30) and observability (#31) land last as they depend on stable surfaces upstream.
+
+**Honest scope note**: This backlog is ~12–18 months of work for a team of 4–6. It is not completable in a single agent session. It is tracked here so progress toward 100% is visible, incremental, and reviewable.
 
 ---
 
