@@ -140,24 +140,25 @@ impl MultiverseManager {
                     ..
                 } => {
                     if !target_state.tombstones.is_deleted(clip_id) {
-                        // Find the matching track by ID, fall back to the
-                        // first track if the referenced track doesn't exist
-                        // (e.g. it was deleted on the target branch).
+                        // Find the matching track by ID. If it doesn't exist
+                        // on the target branch (e.g. it was deleted there),
+                        // skip the clip — don't silently insert into track 0.
                         let track_idx = target_state
                             .get_project_data()
                             .tracks
                             .iter()
-                            .position(|t| t.id == *track_id)
-                            .unwrap_or(0);
-                        target_state.add_clip_to_track(
-                            track_idx,
-                            clip_id.clone(),
-                            clip.clip_type.clone(),
-                            clip.name.clone(),
-                            clip.start,
-                            clip.end,
-                        );
-                        applied += 1;
+                            .position(|t| t.id == *track_id);
+                        if let Some(idx) = track_idx {
+                            target_state.add_clip_to_track(
+                                idx,
+                                clip_id.clone(),
+                                clip.clip_type.clone(),
+                                clip.name.clone(),
+                                clip.start,
+                                clip.end,
+                            );
+                            applied += 1;
+                        }
                     }
                 }
                 state::operations::CrdtOperation::ClipDelete {
