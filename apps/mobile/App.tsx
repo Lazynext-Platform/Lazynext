@@ -40,6 +40,14 @@ function DashboardScreen() {
     })();
   }, []);
 
+  // Clear the Apple-Pencil detection timer on unmount to avoid a leak / stale
+  // state update after the screen is gone.
+  useEffect(() => {
+    return () => {
+      if (pencilTimerRef.current) clearTimeout(pencilTimerRef.current);
+    };
+  }, []);
+
   const handleTouchStart = (e: any) => {
     if (e.nativeEvent?.touches?.[0]?.force !== undefined && e.nativeEvent.touches[0].force > 0) {
       setIsApplePencil(true);
@@ -48,9 +56,13 @@ function DashboardScreen() {
     }
   };
 
-  const handleProcessIntent = async () => {
-    if (!prompt.trim() || processing) return;
-    const currentPrompt = prompt;
+  // Accepts an optional override so quick-action buttons can pass their label
+  // directly — otherwise the async setPrompt hadn't flushed yet and we'd read
+  // the stale `prompt` (the original race condition / silent no-op).
+  const handleProcessIntent = async (overridePrompt?: string) => {
+    const text = (overridePrompt ?? prompt).trim();
+    if (!text || processing) return;
+    const currentPrompt = text;
     setProcessing(true);
     setStatus("Processing via Rust Core...");
     setPrompt("");
@@ -115,10 +127,7 @@ function DashboardScreen() {
             <TouchableOpacity
               key={action}
               style={styles.quickActionBtn}
-              onPress={() => {
-                setPrompt(action);
-                handleProcessIntent();
-              }}
+              onPress={() => handleProcessIntent(action)}
             >
               <Text style={styles.quickActionText}>{action}</Text>
             </TouchableOpacity>
@@ -144,12 +153,12 @@ function DashboardScreen() {
           placeholderTextColor="#52525b"
           value={prompt}
           onChangeText={setPrompt}
-          onSubmitEditing={handleProcessIntent}
+          onSubmitEditing={() => handleProcessIntent()}
           returnKeyType="send"
         />
         <TouchableOpacity
           style={[styles.button, !prompt.trim() && styles.buttonDisabled]}
-          onPress={handleProcessIntent}
+          onPress={() => handleProcessIntent()}
           disabled={!prompt.trim() || processing}
         >
           <Text style={styles.buttonText}>Edit</Text>
