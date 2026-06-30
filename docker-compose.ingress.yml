@@ -117,6 +117,13 @@ services:
       - --tracing.otlp.grpc.endpoint=tempo:4317
       - --tracing.otlp.grpc.insecure=true
 
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.lazynext.internal`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth-dashboard@file,internal-ip@file"
     volumes:
       - /data/traefik:/letsencrypt
       - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
@@ -202,16 +209,6 @@ services:
       - "traefik.http.routers.analytics.tls.certresolver=cloudflare"
       - "traefik.http.routers.analytics.middlewares=api-rate-limit@file,secure-headers@file"
       - "traefik.http.services.analytics.loadbalancer.server.port=8006"
-
-  # ── Traefik Dashboard (internal VPN only, no public label) ───────
-  traefik:
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.lazynext.internal`)"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.middlewares=auth-dashboard@file,internal-ip@file"
 
 networks:
   traefik-public:

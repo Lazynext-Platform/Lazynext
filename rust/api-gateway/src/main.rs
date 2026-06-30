@@ -1,5 +1,6 @@
 #![allow(
-    warnings,
+    dead_code,
+    unused_variables,
     clippy::collapsible_if,
     clippy::collapsible_else_if,
     clippy::collapsible_match,
@@ -30,7 +31,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
-use tracing::{Level, error, info};
+use tracing::{error, info};
 
 pub mod csrf;
 pub mod db;
@@ -54,7 +55,7 @@ struct WebhookPayload {
 }
 
 #[derive(Clone)]
-struct AppState {
+pub struct AppState {
     nle: Arc<Mutex<NLEState>>,
     editor: Arc<AutonomousEditor>,
     db: Arc<DbStore>,

@@ -1,4 +1,4 @@
-#![allow(warnings)]
+#![allow(dead_code, unused_assignments, clippy::collapsible_if, clippy::collapsible_match)]
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::nle_state::NLEState;
 use serde_json::{Value, json};
@@ -91,7 +91,6 @@ async fn main() {
         }
 
         let id = req.get("id").cloned().unwrap_or(Value::Null);
-        let method = req["method"].as_str().unwrap_or("");
 
         let response = match method {
             "tools/list" => json!({
@@ -526,7 +525,7 @@ async fn main() {
                             .unwrap_or(30) as u32;
                         let total_frames = framerate * 10;
 
-                        let mut export_result: Option<Value> = None;
+                        let export_result: Option<Value>;
 
                         // Try API Gateway for real GPU-composited export first
                         let api_gw_url = std::env::var("LAZYNEXT_API_GATEWAY_URL")

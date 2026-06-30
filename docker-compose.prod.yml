@@ -31,34 +31,34 @@
 #   lazynext_marble_workspace_key
 
 x-logging: &logging
-  driver: "json-file"
-  options:
-    max-size: "10m"
-    max-file: "3"
-    compress: "true"
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+      compress: "true"
 
 x-deploy-defaults: &deploy-defaults
-  mode: replicated
-  replicas: 1
-  update_config:
-    parallelism: 1
-    delay: 10s
-    failure_action: rollback
-    monitor: 30s
-    max_failure_ratio: 0.3
-    order: start-first
-  rollback_config:
-    parallelism: 1
-    delay: 5s
-    failure_action: pause
-    monitor: 30s
-
-x-restart: &restart-prod
-  restart_policy:
-    condition: unless-stopped
-    delay: 10s
-    max_attempts: 5
-    window: 120s
+  deploy:
+    mode: replicated
+    replicas: 1
+    update_config:
+      parallelism: 1
+      delay: 10s
+      failure_action: rollback
+      monitor: 30s
+      max_failure_ratio: 0.3
+      order: start-first
+    rollback_config:
+      parallelism: 1
+      delay: 5s
+      failure_action: pause
+      monitor: 30s
+    restart_policy:
+      condition: unless-stopped
+      delay: 10s
+      max_attempts: 5
+      window: 120s
 
 x-security: &security
   cap_drop: [ALL]
@@ -78,9 +78,8 @@ x-security-writable: &security-writable
 services:
   # ── Database ─────────────────────────────────────────────────────
   db:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "2"
@@ -109,9 +108,8 @@ services:
 
   # ── Redis ────────────────────────────────────────────────────────
   redis:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "1"
@@ -146,9 +144,8 @@ services:
 
   # ── Redis HTTP Proxy ─────────────────────────────────────────────
   redis-proxy:
-    <<: [*logging, *restart-prod, *security]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "0.5"
@@ -172,9 +169,8 @@ services:
 
   # ── Web App (Next.js Frontend + API) ─────────────────────────────
   web:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       replicas: 3
       update_config:
         parallelism: 1
@@ -258,9 +254,8 @@ services:
 
   # ── AI Agents ────────────────────────────────────────────────────
   ai-agents:
-    <<: [*logging, *restart-prod, *security]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "2"
@@ -296,9 +291,8 @@ services:
 
   # ── Render Service (FFmpeg Render Farm) ──────────────────────────
   render-service:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       replicas: 2
       update_config:
         parallelism: 1
@@ -339,9 +333,8 @@ services:
 
   # ── Collab Server (Native Rust CRDT Sync) ────────────────────────
   collab-server:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       replicas: 2
       update_config:
         parallelism: 1
@@ -379,9 +372,8 @@ services:
 
   # ── Pre-Processing (Python: Whisper, SAM2, NeRF) ─────────────────
   pre-processing:
-    <<: [*logging, *restart-prod, *security]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "4"
@@ -412,9 +404,8 @@ services:
 
   # ── Generative Studio (Diffusion, Dubbing, Upscale) ──────────────
   generative-studio:
-    <<: [*logging, *restart-prod, *security]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "4"
@@ -444,9 +435,8 @@ services:
 
   # ── Analytics Service ────────────────────────────────────────────
   analytics-service:
-    <<: [*logging, *restart-prod, *security]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "1"
@@ -466,9 +456,8 @@ services:
 
   # ── Observability ────────────────────────────────────────────────
   prometheus:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "1"
@@ -500,9 +489,8 @@ services:
       - --web.enable-admin-api
 
   grafana:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "0.5"
@@ -535,9 +523,8 @@ services:
       - /data/grafana:/var/lib/grafana:rw
 
   loki:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "1"
@@ -562,9 +549,8 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
 
   alertmanager:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "0.25"
@@ -588,9 +574,8 @@ services:
       - /data/alertmanager:/alertmanager:rw
 
   tempo:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "1"
@@ -615,9 +600,8 @@ services:
     command: -config.file=/etc/tempo/tempo-config.yaml
 
   alloy:
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "0.5"
@@ -650,9 +634,8 @@ services:
   # ── Node Exporter (host metrics) ─────────────────────────────────
   node-exporter:
     image: quay.io/prometheus/node-exporter:v1.9.1
-    <<: [*logging, *restart-prod]
+    <<: [*logging, *deploy-defaults, *security]
     deploy:
-      <<: *deploy-defaults
       resources:
         limits:
           cpus: "0.25"

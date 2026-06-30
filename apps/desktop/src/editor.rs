@@ -212,7 +212,7 @@ impl Render for EditorShell {
                                     .flex()
                                     .flex_col()
                                     .gap_2()
-                                    .children(pd.tracks.iter().enumerate().map(|(_i, track)| {
+                                    .children(pd.tracks.iter().map(|track| {
                                         div()
                                             .flex()
                                             .w_full()

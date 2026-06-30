@@ -94,7 +94,7 @@ lazynext/
 │   └── analytics-service/   # Node.js (:8006) — Data ingestion
 ├── packages/                # Shared packages (api-client)
 ├── plugins/                 # Plugin SDK and examples
-├── terraform/               # Azure infrastructure as code
+├── infra/terraform/         # Azure infrastructure as code
 ├── k8s/                     # Kubernetes manifests (optional AKS)
 ├── monitoring/              # Prometheus, Grafana, Loki, Tempo
 ├── scripts/                 # Build and automation scripts

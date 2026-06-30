@@ -12,8 +12,6 @@
 #   - nvidia-container-runtime
 #   - CUDA 12.4+ drivers
 
-version: "3.8"
-
 services:
   # ── GPU-Accelerated Pre-Processing ─────────────────────────────────
   pre-processing:
