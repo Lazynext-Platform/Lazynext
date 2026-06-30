@@ -14,13 +14,14 @@ pub struct EditorShell {
 }
 
 impl EditorShell {
+    #[allow(dead_code)] // wired when full GPUI playback loop is implemented
     fn toggle_playback(&mut self) {
         self.is_playing = !self.is_playing;
     }
 
     /// Timeline constants — zoomed so the visible range covers ~10 seconds at 24 fps.
     const TIMELINE_PX_PER_FRAME: f32 = 1.5;
-    const TIMELINE_LEFT_MARGIN: f32 = 100.0; // account for track label column
+    const _TIMELINE_LEFT_MARGIN: f32 = 100.0; // reserved for future ruler
 }
 
 impl Render for EditorShell {
@@ -211,7 +212,7 @@ impl Render for EditorShell {
                                     .flex()
                                     .flex_col()
                                     .gap_2()
-                                    .children(pd.tracks.iter().enumerate().map(|(i, track)| {
+                                    .children(pd.tracks.iter().enumerate().map(|(_i, track)| {
                                         div()
                                             .flex()
                                             .w_full()
