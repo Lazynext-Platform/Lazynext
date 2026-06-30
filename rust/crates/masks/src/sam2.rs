@@ -24,7 +24,7 @@ pub struct AlphaMatte {
 }
 
 pub struct Sam2MaskEngine {
-    is_model_loaded: bool,
+    pub is_model_loaded: bool,
 }
 
 impl Default for Sam2MaskEngine {
