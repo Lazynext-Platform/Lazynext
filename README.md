@@ -5,7 +5,7 @@
   <p>
     <a href="https://github.com/Lazynext-Platform/Lazynext/actions"><img src="https://img.shields.io/github/actions/workflow/status/Lazynext-Platform/Lazynext/ci.yml?branch=main&label=CI" alt="CI"></a>
     <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
-    <a href="docs/contributing.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="Contributions"></a>
+    <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="Contributions"></a>
   </p>
 </div>
 
@@ -358,20 +358,27 @@ lazynext/
 
 ## Documentation
 
+### Project & process (current)
+
 | Document | Description |
 |----------|-------------|
-| [Architecture](docs/architecture.md) | System design, data flow, crate dependency graph |
-| [Contributing](docs/contributing.md) | Development workflow, code style, PR process |
-| [API Reference](docs/api-reference.md) | REST and WebSocket API documentation |
-| [Security](docs/security.md) | Auth model, threat model, responsible disclosure |
-| [ADRs](docs/adrs/) | Architecture Decision Records |
-| [Runbooks](docs/runbooks/) | Operational runbooks for production incidents |
-| [OpenAPI Spec](docs/openapi.yaml) | Machine-readable API specification |
-| [Performance](docs/performance.md) | Benchmarks, profiling guides, optimization notes |
-| [Effects Renderer](docs/effects-renderer.md) | GPU shader pipeline documentation |
-| [Keyframes](docs/keyframes.md) | Keyframe interpolation and easing specification |
-| [Plugin Guide](docs/plugin-api/plugin-guide.md) | Third-party plugin development |
-| [Onboarding](docs/onboarding.md) | New developer setup guide |
+| [Project Context](docs/project-context.md) | What Lazynext is — identity, tech stack, scope, constraints |
+| [Project Roadmap](docs/project-roadmap.md) | Feature priorities, progress, and remaining work |
+| [Project Changelog](docs/project-changelog.md) | Shipped features log |
+| [Project Motto](docs/project-motto.md) | DO/DON'T guardrails for contributors and AI agents |
+| [Mastery Framework](docs/mastery.md) | The full development-process framework (rules + templates) |
+| [Platform Assessment](PLATFORM_ASSESSMENT.md) | Current per-format completion % and gap analysis |
+| [Contributing](CONTRIBUTING.md) | Development workflow, code style, PR process |
+| [AGENTS.md](AGENTS.md) | AI agent orientation |
+| [CLAUDE.md](CLAUDE.md) | Developer / agent quick-reference |
+
+### Per-feature docs
+
+Each shipped feature has a folder under [`docs/features/`](docs/features/) (e.g. `09-production-hardening-web/`) containing its discussion, architecture, tasks, testplan, changelog, and review.
+
+### Pre-Mastery reference archive
+
+The earlier technical docs (architecture, API reference, security model, OpenAPI spec, performance, effects renderer, keyframes, plugin guide, onboarding, ADRs, runbooks) are preserved under [`docs/_archive/`](docs/_archive/) for historical reference and are superseded by the current docs above.
 
 ---
 
