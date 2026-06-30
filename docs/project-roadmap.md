@@ -11,12 +11,12 @@
 | Metric | Count |
 |---|---|
 | Total Features | 19 |
-| 🟢 Complete | 16 |
+| 🟢 Complete | 17 |
 | ⏸️ On Hold | 2 |
 | 🔴 Not Started | 0 |
-| 🟡 In Progress | 1 |
+| 🟡 In Progress | 0 |
 
-**Overall Progress**: ███████░░░ ~70-75% (all planned hardening features shipped; remaining work is depth/full-implementation, see *Remaining Work* below)
+**Overall Progress**: ████████░ ~78-80% (19 roadmap features defined; 17 complete. Remaining depth work: desktop/mobile full editors + backend depth.)
 
 ---
 
@@ -41,8 +41,8 @@
 | 15 | AI Editor — Real API Wiring | 🟢 Complete | #02, #10 | `feature/15-ai-editor-real-api` | Wired web editor AI chat to real API + desktop AI + MCP tests + mobile tests. |
 | 16 | Final Gaps — SDK / External Deps | 🟢 Complete | #10, #11 | `feature/16-final-gaps` | Wired UniFFI, SAM2 ONNX, VST3 libloading, E2E integration tests. |
 | 17 | Platform-wide Mock Removal + Audit Fixes | 🟢 Complete | #15, #16 | (squash merges on main) | Zero mocks in production code; comprehensive CI/CD, infra, and monitoring audit fixes. |
-| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations end-to-end. Audit the 50+ orchestrator tools for reality. |
-| 19 | GPU Rendering & WASM Integration Hardening | 🟡 In Progress | #01, #02, #10 | `feature/19-webgpu-and-wasm-port` | Verify + test the already-real GPU pipeline (assessment falsely claimed it was a stub). Document for future accuracy. |
+| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations. 16/18 tasks done. SSE streaming, dryRun, patch adapter. |
+| 19 | GPU Rendering & WASM Integration Hardening | 🟢 Complete | #01, #02, #10 | `feature/19-webgpu-and-wasm-port` | Corrected false assessment claims. GPU pipeline verified real. 5 unit + 1 E2E tests. |
 
 ---
 
