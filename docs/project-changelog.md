@@ -17,6 +17,7 @@
 - **Feature #15 — AI Editor Real API**: wired web editor AI chat to the real API; added desktop AI path, MCP protocol tests, and mobile tests.
 - **Feature #16 — Final Gaps (SDK / External Deps)**: wired UniFFI bindings, SAM2 ONNX runtime, VST3 `libloading`, and E2E integration tests (`rust/tests/e2e_integration_tests.rs`).
 - **Feature #17 — Platform-wide Mock Removal + Audit Fixes**: removed all remaining mock/stub/placeholder blocks from production paths; comprehensive CI/CD, infrastructure, and monitoring audit fixes.
+- **Feature #18 — AI-Driven Editing (End-to-End Chronos Pipeline)**: initial build shipped (12/18 tasks). CRDT patch adapter fixes silent no-op where all AI orchestrator patches were rejected; `apply_color_grade` handler wired; SSE streaming endpoint with per-step progress; `dryRun` preview mode; frontend streaming client; 4 Rust round-trip + 2 Playwright E2E tests. Full Mastery lifecycle docs. 6 UI/docs tasks remain.
 
 ### Changed
 - Roadmap statuses brought in sync with `main` — features 10-14 flipped from 🔴 Not Started → 🟢 Complete; 15-17 added.
