@@ -16,7 +16,7 @@ base64 = "0.22"
 uuid = { version = "1.0", features = ["v4"] }
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-native-tls", "uuid", "json", "macros"] }
 dotenvy = "0.15"
-opentelemetry = { version = "0.27", features = ["trace"] }
-opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"] }
-opentelemetry-otlp = { version = "0.27", features = ["http-proto", "reqwest-client"] }
-tracing-opentelemetry = "0.28"
+opentelemetry = "0.32.0"
+opentelemetry_sdk = { version = "0.32.1", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.32.0", features = ["reqwest-client", "http-proto"] }
+tracing-opentelemetry = "0.33.0"

@@ -17,7 +17,7 @@ use axum::{
 };
 use dashmap::DashMap;
 use opentelemetry_otlp::WithExportConfig;
-use opentelemetry_sdk::trace::TracerProvider as SdkTracerProvider;
+use opentelemetry_sdk::trace::SdkTracerProvider;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -320,7 +320,7 @@ async fn main() {
             .expect("Failed to create OTLP exporter");
 
         let tracer_provider = SdkTracerProvider::builder()
-            .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+            .with_batch_exporter(exporter)
             .build();
 
         opentelemetry::global::set_tracer_provider(tracer_provider.clone());
