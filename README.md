@@ -348,7 +348,7 @@ lazynext/
 │   ├── render-service/         # Node.js FFMPEG farm (:8003)
 │   ├── collab-server/          # Rust CRDT sync + WebRTC signaling (:8004)
 │   └── analytics-service/      # Node.js data ingestion + LTV (:8006)
-├── terraform/                  # Infrastructure as code
+├── infra/terraform/            # Infrastructure as code
 ├── k8s/                        # Kubernetes manifests (optional AKS)
 ├── .github/workflows/          # CI/CD (ci.yml, production.yml)
 └── docs/                       # Architecture, ADRs, runbooks, API reference
@@ -386,7 +386,7 @@ The earlier technical docs (architecture, API reference, security model, OpenAPI
 
 - **CI/CD**: GitHub Actions — Rust test/lint, web test/typecheck/lint, Docker build/push, Azure Container Apps deploy.
 - **Deployment**: Azure Container Apps (8 services) + Azure PostgreSQL Flexible Server with private VNet. Optional AKS for GPU workloads.
-- **Infrastructure as Code**: Terraform in `terraform/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
+- **Infrastructure as Code**: Terraform in `infra/terraform/` — VNet, delegated subnets, Blob Storage backend, Key Vault.
 - **Database**: PostgreSQL 16 via Drizzle ORM. Migrations in `apps/web/src/drizzle/`. Schema in `apps/web/src/db/schema.ts`.
 
 ---

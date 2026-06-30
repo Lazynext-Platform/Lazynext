@@ -2,10 +2,10 @@
 # Routes alerts to Slack, email, and PagerDuty based on severity.
 # Apply: kubectl create secret generic alertmanager-config --from-file=config.yml -n monitoring
 #
-# IMPORTANT: Before production deployment, Slack/PagerDuty/Resend credentials
-# (webhook URLs, routing keys, API keys, SMTP passwords) must be provided
-# via vault or Kubernetes secrets. Replace all REPLACE_WITH_* placeholders
-# below with secret references or injected values — never commit real credentials.
+# IMPORTANT: Before production deployment, Slack webhook, PagerDuty integration
+# key, and Resend API key must be set as environment variables (SLACK_WEBHOOK_URL,
+# PAGERDUTY_INTEGRATION_KEY, RESEND_API_KEY) via Kubernetes secrets or Vault.
+# All receiver credentials below reference env vars — never commit hardcoded secrets.
 
 global:
   resolve_timeout: 5m
