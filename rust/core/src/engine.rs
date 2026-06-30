@@ -401,12 +401,20 @@ impl CoreEngine {
     /// Dispatches an export job by rendering all frames through the GPU compositor
     /// and piping them to ffmpeg for encoding. Supports all export formats.
     ///
+    /// - `format` / `bitrate_kbps` are caller-controlled (export options).
+    /// - `total_frames` is the exact number of frames to render, derived from the
+    ///   timeline duration by the caller — so exports match project length.
+    /// - `progress_tx` receives each rendered frame index (for progress bars / SSE).
+    ///
     /// This is used by the CLI and headless renderer. For web-based exports,
     /// the render-service handles encoding independently.
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn dispatch_export(
         &self,
         output_path: &str,
+        format: lazynext_export::ExportFormat,
+        bitrate_kbps: u32,
+        total_frames: u32,
         progress_tx: Option<tokio::sync::mpsc::UnboundedSender<u32>>,
     ) -> Result<(), String> {
         println!(
@@ -417,19 +425,12 @@ impl CoreEngine {
         let state = self.project.lock().await;
         let pd = state.get_project_data();
 
-        let total_frames: u32 = pd
-            .tracks
-            .iter()
-            .flat_map(|t| t.clips.iter().map(|c| c.end))
-            .max()
-            .unwrap_or(300);
-
         let config = lazynext_export::ExportConfig {
-            format: lazynext_export::ExportFormat::Mp4,
+            format,
             width: pd.width,
             height: pd.height,
             framerate: pd.framerate,
-            bitrate_kbps: 8000,
+            bitrate_kbps,
             output_path: output_path.to_string(),
         };
 
@@ -440,8 +441,8 @@ impl CoreEngine {
         }
 
         println!(
-            "[CoreEngine] Rendering {} frames ({}x{} @ {}fps)...",
-            total_frames, config.width, config.height, config.framerate
+            "[CoreEngine] Rendering {} frames ({}x{} @ {}fps, {:?})...",
+            total_frames, config.width, config.height, config.framerate, config.format
         );
 
         let pipeline = lazynext_export::ExportPipeline::new(config);
@@ -450,7 +451,7 @@ impl CoreEngine {
         let progress_tx_clone = progress_tx.clone();
 
         pipeline
-            .export(move |frame_idx| {
+            .export(total_frames, move |frame_idx| {
                 let tx_for_frame = progress_tx_clone.clone();
                 async move {
                     let rgba = engine_ref.render_frame(frame_idx).await;

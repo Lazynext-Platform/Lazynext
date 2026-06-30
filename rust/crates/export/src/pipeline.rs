@@ -13,13 +13,16 @@ impl ExportPipeline {
 
     /// Run the export pipeline.
     ///
-    /// In production, this spawns an ffmpeg child process and writes
-    /// compositor-rendered frames to its stdin. The frames come from the
-    /// GPU compositor (rust/crates/compositor/) via frame readback.
+    /// Renders exactly `total_frames` frames by invoking `render_frame(i)` for
+    /// each frame index and piping the returned RGBA bytes to an ffmpeg child
+    /// process's stdin. The frames come from the GPU compositor
+    /// (rust/crates/compositor/) via frame readback; this pipeline handles only
+    /// the encoding side.
     ///
-    /// Currently the compositor frame rendering is handled by the caller;
-    /// this pipeline handles the encoding side.
-    pub async fn export<F, Fut>(&self, mut render_frame: F) -> Result<()>
+    /// `total_frames` is caller-controlled (derived from the timeline duration)
+    /// so that exports match the project length exactly rather than a fixed
+    /// default.
+    pub async fn export<F, Fut>(&self, total_frames: u32, mut render_frame: F) -> Result<()>
     where
         F: FnMut(u32) -> Fut,
         Fut: std::future::Future<Output = Vec<u8>>,
@@ -41,7 +44,6 @@ impl ExportPipeline {
             .as_mut()
             .ok_or_else(|| anyhow::anyhow!("Failed to open stdin"))?;
 
-        let total_frames = self.config.framerate * 10; // default 10-second export
         let frame_size = (self.config.width * self.config.height * 4) as usize;
 
         for frame_idx in 0..total_frames {

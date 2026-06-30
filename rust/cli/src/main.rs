@@ -48,6 +48,10 @@ enum Commands {
         #[arg(long, default_value_t = 10)]
         duration: u32,
 
+        /// Video bitrate in kbps
+        #[arg(long, default_value_t = 8000)]
+        bitrate: u32,
+
         /// Enable progress bar
         #[arg(long, default_value_t = false)]
         progress: bool,
@@ -165,6 +169,7 @@ async fn main() {
                     height: 1080,
                     framerate: 24,
                     duration: 10,
+                    bitrate: 8000,
                     progress: false,
                 };
                 match render_single(project, &render_args).await {
@@ -194,6 +199,7 @@ async fn main() {
             height,
             framerate,
             duration,
+            bitrate,
             progress,
         } => {
             let render_args = RenderArgs {
@@ -202,6 +208,7 @@ async fn main() {
                 height: *height,
                 framerate: *framerate,
                 duration: *duration,
+                bitrate: *bitrate,
                 progress: *progress,
             };
             match render_single(project, &render_args).await {
@@ -218,6 +225,7 @@ struct RenderArgs {
     height: u32,
     framerate: u32,
     duration: u32,
+    bitrate: u32,
     progress: bool,
 }
 
@@ -353,7 +361,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
     };
 
     core_engine
-        .dispatch_export(&out_path, progress_tx)
+        .dispatch_export(&out_path, format, args.bitrate, total_frames, progress_tx)
         .await
         .map_err(|e| format!("CoreEngine export failed: {}", e))?;
 
