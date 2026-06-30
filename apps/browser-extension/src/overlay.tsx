@@ -15,16 +15,31 @@ function OverlayEditor() {
   const [ws, setWs] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    // Mock project fetching for extension
-    // In production, this would fetch from the API gateway using an extension auth token
-    setTimeout(() => {
-      setProjects([
-        { id: "proj_1", name: "Marketing Video Q3" },
-        { id: "proj_2", name: "Tutorial Series" },
-        { id: "proj_3", name: "Quick Demo" }
-      ]);
-      setSelectedProjectId("proj_1");
-    }, 500);
+    // Fetch projects from API gateway. Falls back to empty list if unreachable.
+    const gatewayUrl =
+      typeof chrome !== "undefined" && chrome.storage
+        ? (async () => {
+            const stored = await chrome.storage.local.get('apiGatewayUrl');
+            return stored?.apiGatewayUrl || 'http://localhost:8005';
+          })()
+        : Promise.resolve('http://localhost:8005');
+
+    gatewayUrl.then((baseUrl) => {
+      fetch(`${baseUrl}/api/v1/projects`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.projects) {
+            setProjects(data.projects);
+            if (data.projects.length > 0) {
+              setSelectedProjectId(data.projects[0].id);
+            }
+          }
+        })
+        .catch(() => {
+          // API gateway unreachable — show empty state
+          setProjects([]);
+        });
+    });
 
     // Connect WebSocket to Desktop / API Gateway
     const socket = new WebSocket("ws://localhost:8005/ws/extension");
