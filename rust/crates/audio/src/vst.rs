@@ -52,6 +52,9 @@ pub struct VstHost {
     output_gain: f32,
     /// Bypass flag
     bypass: bool,
+    /// Loaded VST3 library handle (keeps the .so/.dylib/.dll loaded)
+    #[cfg(not(target_arch = "wasm32"))]
+    _library: Option<libloading::Library>,
 }
 
 impl Default for VstHost {
@@ -73,6 +76,8 @@ impl VstHost {
             midi_events: Vec::new(),
             output_gain: 1.0,
             bypass: false,
+            #[cfg(not(target_arch = "wasm32"))]
+            _library: None,
         }
     }
 
@@ -108,12 +113,15 @@ impl VstHost {
                     type GetFactoryFn = unsafe extern "C" fn() -> *mut std::ffi::c_void;
                     match unsafe { library.get::<GetFactoryFn>(b"GetPluginFactory") } {
                         Ok(_get_factory) => {
-                            println!("[VST3 Host] VST3 plugin loaded: {name}");
-                            let _ = library; // Keep alive for plugin lifetime
+                            println!("[VST3 Host] VST3 plugin loaded and factory obtained: {name}");
+                            // Store the library handle to keep the plugin loaded
+                            self._library = Some(library);
                         }
                         Err(e) => {
                             println!("[VST3 Host] Not a valid VST3 plugin (missing GetPluginFactory): {e}");
                             println!("[VST3 Host] Using default parameters for '{name}'");
+                            // Library loaded but no factory — keep it anyway
+                            self._library = Some(library);
                         }
                     }
                 }

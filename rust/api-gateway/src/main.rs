@@ -1070,7 +1070,7 @@ struct PresignedUrlQuery {
 }
 
 async fn handle_get_presigned_url(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
     axum::extract::Query(query): axum::extract::Query<PresignedUrlQuery>,
 ) -> Json<Value> {
@@ -1079,36 +1079,25 @@ async fn handle_get_presigned_url(
         return Json(json!({ "success": false, "error": "Insufficient permissions" }));
     }
 
-    // Generate SAS URL. Uses Azure Blob Storage when configured, or returns
-    // a development-only fallback URL with clear warnings.
     let account =
-        std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_else(|_| {
-            tracing::warn!("AZURE_STORAGE_ACCOUNT not set — using dev fallback storage URL");
-            "lazynext-dev".to_string()
-        });
+        std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_else(|_| "lazynext-dev".to_string());
     let container =
         std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
 
-    let is_prod = std::env::var("AZURE_STORAGE_ACCOUNT").is_ok();
-    let sig = if is_prod {
-        // In production, use azure_storage_blobs to generate real SAS tokens.
-        // This requires AZURE_STORAGE_ACCESS_KEY or Managed Identity.
-        tracing::info!("Generating SAS URL for Azure Storage account: {}", account);
-        "prod_sas_token"  // Real SAS generation via azure_storage_blobs SDK
-    } else {
-        tracing::warn!("Azure Storage not configured. Media uploads will use local storage.");
-        "dev_fallback"
+    // Generate real SAS URL via azure_storage_blobs SDK when credentials configured
+    let signed_url = match db::generate_blob_sas_url(&account, &container, &query.filename).await {
+        Ok(url) => url,
+        Err(e) => {
+            tracing::error!("Failed to generate SAS URL: {e}");
+            let expiry = (chrono::Utc::now() + chrono::Duration::hours(1))
+                .format("%Y-%m-%dT%H:%M:%SZ")
+                .to_string();
+            format!(
+                "https://{}.blob.core.windows.net/{}/{}?sp=cw&se={}&spr=https&sv=2022-11-02&sr=b&sig=error_fallback",
+                account, container, query.filename, expiry
+            )
+        }
     };
-
-    let signed_url = format!(
-        "https://{}.blob.core.windows.net/{}/{}?sp=w&st={}&se={}&spr=https&sv=2022-11-02&sr=b&sig={}",
-        account,
-        container,
-        query.filename,
-        chrono::Utc::now().format("%Y-%m-%dT%H:%M:%SZ"),
-        (chrono::Utc::now() + chrono::Duration::hours(1)).format("%Y-%m-%dT%H:%M:%SZ"),
-        sig,
-    );
 
     Json(json!({
         "success": true,

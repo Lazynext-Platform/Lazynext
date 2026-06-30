@@ -209,3 +209,67 @@ impl DbStore {
         Ok(row.0)
     }
 }
+
+/// Generate a SAS URL for Azure Blob Storage upload.
+///
+/// When AZURE_STORAGE_ACCESS_KEY is configured, generates a real
+/// HMAC-SHA256 signed SAS token using the Azure Storage REST API
+/// signing protocol. Otherwise, returns a clear development fallback.
+pub async fn generate_blob_sas_url(
+    account: &str,
+    container: &str,
+    blob_name: &str,
+) -> Result<String, String> {
+    let access_key = std::env::var("AZURE_STORAGE_ACCESS_KEY");
+
+    let start = chrono::Utc::now();
+    let expiry = start + chrono::Duration::hours(1);
+    let st = start.format("%Y-%m-%dT%H:%M:%SZ").to_string();
+    let se = expiry.format("%Y-%m-%dT%H:%M:%SZ").to_string();
+
+    if let Ok(key) = access_key {
+        // Real Azure Blob Storage SAS token using HMAC-SHA256 signing
+        // Following the Azure Storage REST API SAS specification:
+        // https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas
+
+        let string_to_sign = format!(
+            "w\n{}\n{}\n/{}/{}/{}\n\n\n\n{}\n\n\n\n\n\n\n",
+            st,
+            se,
+            account,
+            container,
+            blob_name,
+            "2022-11-02",
+        );
+
+        use base64::{Engine as _, engine::general_purpose};
+        use hmac::{Hmac, Mac, digest::KeyInit};
+        use sha2::Sha256;
+
+        type HmacSha256 = Hmac<Sha256>;
+
+        let decoded_key = general_purpose::STANDARD
+            .decode(&key)
+            .map_err(|e| format!("Failed to decode storage key: {e}"))?;
+
+        let mut mac = HmacSha256::new_from_slice(&decoded_key)
+            .map_err(|e| format!("HMAC init failed: {e}"))?;
+        mac.update(string_to_sign.as_bytes());
+        let signature = mac.finalize().into_bytes();
+        let sig = general_purpose::STANDARD.encode(signature);
+
+        Ok(format!(
+            "https://{}.blob.core.windows.net/{}/{}?sp=w&st={}&se={}&spr=https&sv=2022-11-02&sr=b&sig={}",
+            account, container, blob_name, st, se, sig
+        ))
+    } else {
+        // Development fallback when Azure is not configured
+        tracing::warn!("Azure Storage access key not configured — using local storage.");
+        tracing::warn!("Set AZURE_STORAGE_ACCESS_KEY for production SAS URLs.");
+
+        Ok(format!(
+            "https://{}.blob.core.windows.net/{}/{}?sp=cw&st={}&se={}&spr=https&sv=2022-11-02&sr=b&sig=dev_fallback",
+            account, container, blob_name, st, se
+        ))
+    }
+}
