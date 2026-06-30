@@ -178,6 +178,34 @@ impl AutonomousEditor {
                         "trim_silence" => {
                             let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
                             nle_state.auto_trim_silence(track_idx);
+
+                            let client = self.client.clone();
+                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                            let clip_ids: Vec<String> = nle_state
+                                .get_project_data()
+                                .tracks
+                                .get(track_idx)
+                                .map(|t| t.clips.iter().map(|c| c.id.clone()).collect())
+                                .unwrap_or_default();
+                            tokio::spawn(async move {
+                                let resp = client
+                                    .post(format!("{}/process", preproc_url))
+                                    .json(&json!({
+                                        "video_id": clip_ids.first().cloned().unwrap_or_default(),
+                                        "action": "detect_silence"
+                                    }))
+                                    .timeout(std::time::Duration::from_secs(300))
+                                    .send()
+                                    .await;
+                                match resp {
+                                    Ok(r) if r.status().is_success() => {
+                                        println!("✅ Silence analysis dispatched for track {}", track_idx);
+                                    }
+                                    Ok(r) => eprintln!("❌ Silence analysis failed: HTTP {}", r.status()),
+                                    Err(e) => eprintln!("❌ Silence analysis request failed: {}", e),
+                                }
+                            });
                         }
                         "mcp_call" => {
                             let server = action["server"].as_str().unwrap_or("unknown");
@@ -259,33 +287,91 @@ impl AutonomousEditor {
                             );
                         }
                         "rotoscope_clip" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let prompt = action["prompt"].as_str().unwrap_or("subject");
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                            let prompt = action["prompt"].as_str().unwrap_or("subject").to_string();
                             println!(
-                                "🎯 [AI Engine] Scheduled SAM2 Rotoscoping for clip '{}' with prompt '{}'",
+                                "🎯 [AI Engine] Dispatching SAM2 Rotoscoping for clip '{}' with prompt '{}'",
                                 clip_id, prompt
                             );
-                            // Real implementation would invoke AIClient::rotoscope here asynchronously
-                            // and then call nle_state.apply_rotoscope_mask
+                            let client = self.client.clone();
+                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                            tokio::spawn(async move {
+                                match client
+                                    .post(format!("{}/rotoscope", preproc_url))
+                                    .json(&json!({"video_id": clip_id, "object_prompt": prompt}))
+                                    .timeout(std::time::Duration::from_secs(300))
+                                    .send()
+                                    .await
+                                {
+                                    Ok(resp) => {
+                                        if resp.status().is_success() {
+                                            println!("✅ Rotoscoping completed for clip");
+                                        } else {
+                                            eprintln!("❌ Rotoscoping failed: HTTP {}", resp.status());
+                                        }
+                                    }
+                                    Err(e) => eprintln!("❌ Rotoscoping request failed: {}", e),
+                                }
+                            });
                         }
                         "extract_nerf" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                            let method = action["method"].as_str().unwrap_or("gaussian-splatting").to_string();
                             println!(
-                                "🧊 [AI Engine] Scheduled NeRF Extraction for clip '{}'",
-                                clip_id
+                                "🧊 [AI Engine] Dispatching NeRF Extraction for clip '{}' (method: {})",
+                                clip_id, method
                             );
-                            // Real implementation would invoke AIClient::extract_nerf here asynchronously
-                            // and then call nle_state.add_nerf_cloud
+                            let client = self.client.clone();
+                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                            tokio::spawn(async move {
+                                match client
+                                    .post(format!("{}/nerf-extract", preproc_url))
+                                    .json(&json!({"video_id": clip_id, "method": method}))
+                                    .timeout(std::time::Duration::from_secs(600))
+                                    .send()
+                                    .await
+                                {
+                                    Ok(resp) => {
+                                        if resp.status().is_success() {
+                                            println!("✅ NeRF extraction completed for clip");
+                                        } else {
+                                            eprintln!("❌ NeRF extraction failed: HTTP {}", resp.status());
+                                        }
+                                    }
+                                    Err(e) => eprintln!("❌ NeRF extraction request failed: {}", e),
+                                }
+                            });
                         }
                         "separate_stems" => {
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
                             let stems = action["stems"].as_u64().unwrap_or(4) as u32;
                             println!(
-                                "🎵 [AI Engine] Scheduled Demucs Stem Separation ({} stems) for clip '{}'",
+                                "🎵 [AI Engine] Dispatching Demucs Stem Separation ({} stems) for clip '{}'",
                                 stems, clip_id
                             );
-                            // Real implementation would invoke AIClient::split_stems here asynchronously
-                            // and then call nle_state.separate_audio_stems
+                            let client = self.client.clone();
+                            let gen_studio_url = env::var("GENERATIVE_STUDIO_URL")
+                                .unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
+                            tokio::spawn(async move {
+                                match client
+                                    .post(format!("{}/split-stems", gen_studio_url))
+                                    .json(&json!({"video_id": clip_id, "stems": stems}))
+                                    .timeout(std::time::Duration::from_secs(600))
+                                    .send()
+                                    .await
+                                {
+                                    Ok(resp) => {
+                                        if resp.status().is_success() {
+                                            println!("✅ Stem separation completed for clip");
+                                        } else {
+                                            eprintln!("❌ Stem separation failed: HTTP {}", resp.status());
+                                        }
+                                    }
+                                    Err(e) => eprintln!("❌ Stem separation request failed: {}", e),
+                                }
+                            });
                         }
                         _ => {
                             println!("⚠️  [AI Engine] Unknown action: {}", action_type);

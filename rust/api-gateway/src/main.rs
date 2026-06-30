@@ -30,7 +30,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
-use tracing::{Level, info};
+use tracing::{Level, error, info};
 
 pub mod csrf;
 pub mod db;
@@ -1191,15 +1191,43 @@ async fn handle_stream_complete(
         return Json(json!({ "success": false, "error": "Session file not found" }));
     }
 
-    // In a real production system we use azure_storage_blobs to upload:
-    // let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_default();
-    // let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap_or_default();
-    // let storage_credentials = azure_storage::StorageCredentials::access_key(account.clone(), key);
-    // let blob_client = azure_storage_blobs::prelude::ClientBuilder::new(account, storage_credentials).blob_client("media", format!("{}.webm", session_id));
-    // let data = std::fs::read(&file_path).unwrap_or_default();
-    // let _ = blob_client.put_block_blob(data).await;
+    let azure_uploaded = {
+        let account = std::env::var("AZURE_STORAGE_ACCOUNT").unwrap_or_default();
+        let key = std::env::var("AZURE_STORAGE_ACCESS_KEY").unwrap_or_default();
+        let container = std::env::var("AZURE_STORAGE_CONTAINER").unwrap_or_else(|_| "media".to_string());
 
-    // For now, we simulate success and add it to the timeline directly
+        if !account.is_empty() && !key.is_empty() {
+            match std::fs::read(&file_path) {
+                Ok(data) => {
+                    let blob_name = format!("{}.webm", session_id);
+                    match azure_storage_blobs::prelude::ClientBuilder::new(
+                        account.clone(),
+                        azure_storage::StorageCredentials::access_key(account, key),
+                    )
+                    .blob_client(&container, &blob_name)
+                    .put_block_blob(data)
+                    .await
+                    {
+                        Ok(_) => {
+                            info!("Uploaded stream {} to Azure Blob Storage ({}/{})", session_id, container, blob_name);
+                            true
+                        }
+                        Err(e) => {
+                            error!("Azure Blob Storage upload failed: {}. Falling back to local file.", e);
+                            false
+                        }
+                    }
+                }
+                Err(e) => {
+                    error!("Failed to read local file {} for Azure upload: {}", file_path, e);
+                    false
+                }
+            }
+        } else {
+            info!("Azure Storage credentials not configured — keeping local file for session {}", session_id);
+            false
+        }
+    };
     let mut nle = state.nle.lock().await;
     let track_count = nle.get_project_data().tracks.len();
     if track_count == 0 {
@@ -1214,9 +1242,12 @@ async fn handle_stream_complete(
         300,
     );
 
-    Json(
-        json!({ "success": true, "message": "Stream finalized, uploaded to Azure Blob Storage, and added to timeline", "url": file_path }),
-    )
+    let msg = if azure_uploaded {
+        "Stream finalized, uploaded to Azure Blob Storage, and added to timeline"
+    } else {
+        "Stream finalized (local storage) and added to timeline"
+    };
+    Json(json!({ "success": true, "message": msg, "url": file_path, "azure_uploaded": azure_uploaded }))
 }
 
 /// Handler for the extension to exchange its auth token

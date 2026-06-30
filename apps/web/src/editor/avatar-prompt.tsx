@@ -1,20 +1,44 @@
 import React, { useState } from "react";
-// import { useMcpServer } from "@/hooks/use-mcp";
+
+const GEN_STUDIO_URL = process.env.NEXT_PUBLIC_GENERATIVE_STUDIO_URL || "http://127.0.0.1:8001";
 
 export function AvatarPrompt() {
 	const [script, setScript] = useState("");
 	const [isGenerating, setIsGenerating] = useState(false);
-	// const { avatarGenerator } = useMcpServer();
+	const [status, setStatus] = useState<string | null>(null);
 
 	const handleGenerate = async () => {
-		setIsGenerating(true);
-		console.log("Requesting AI Avatar generation...");
-		// TODO: Wire to generative-studio /generate-avatar endpoint (backend exists)
+		if (!script.trim()) return;
 
-		setTimeout(() => {
+		setIsGenerating(true);
+		setStatus("Contacting AI avatar studio...");
+
+		try {
+			const res = await fetch(`${GEN_STUDIO_URL}/generate-avatar`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					avatar_id: `avatar_${Date.now()}`,
+					script: script.trim(),
+					voice_id: "21m00Tcm4TlvDq8ikWAM",
+				}),
+			});
+
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+				throw new Error(err.detail || `Avatar generation failed (${res.status})`);
+			}
+
+			const data = await res.json();
+			setStatus(`Avatar generated via ${data.source || "AI studio"}!`);
+			setScript("");
+		} catch (err) {
+			const msg = err instanceof Error ? err.message : "Unknown error";
+			setStatus(`Failed: ${msg}`);
+			console.error("Avatar generation error:", msg);
+		} finally {
 			setIsGenerating(false);
-			console.log("Avatar generated and dropped onto timeline!");
-		}, 2000);
+		}
 	};
 
 	return (
@@ -27,6 +51,12 @@ export function AvatarPrompt() {
 				placeholder="Type the script for your AI avatar to read..."
 				className="w-full h-24 bg-panel text-foreground p-2 rounded border border-border focus:border-purple-500 text-sm"
 			/>
+
+			{status && (
+				<p className={`text-xs px-2 py-1 rounded ${status.startsWith("Failed") ? "bg-red-900/50 text-red-300" : "bg-green-900/50 text-green-300"}`}>
+					{status}
+				</p>
+			)}
 
 			<button
 				onClick={handleGenerate}

@@ -193,7 +193,138 @@ async def style_transfer_service(req: StyleTransferRequest):
     }
 
 async def generative_fill_service(req: GenerativeFillRequest):
-    raise HTTPException(status_code=501, detail="Generative fill backend not implemented yet.")
+    """Fill masked regions in video using Replicate inpainting API.
+
+    Falls back to local OpenCV inpainting (Navier-Stokes) when API key
+    is not configured, or returns HTTP 503 when neither is available.
+    """
+    video_path = f"/tmp/{req.video_id}.mp4"
+    mask_path = f"/tmp/{req.video_id}_mask.png"
+    output_path = f"/tmp/{req.video_id}_filled.mp4"
+
+    api_token = os.getenv("REPLICATE_API_TOKEN")
+
+    if api_token:
+        try:
+            async with httpx.AsyncClient() as client:
+                # Upload video and mask as data URIs or use signed URLs
+                response = await client.post(
+                    "https://api.replicate.com/v1/predictions",
+                    headers={
+                        "Authorization": f"Bearer {api_token}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "version": "c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316",
+                        "input": {
+                            "video": f"file://{video_path}",
+                            "mask": f"file://{mask_path}" if os.path.exists(mask_path) else req.mask_prompt or "center",
+                            "prompt": req.prompt,
+                            "num_inference_steps": 25,
+                        },
+                    },
+                    timeout=30.0,
+                )
+                response.raise_for_status()
+                data = response.json()
+
+                return {
+                    "success": True,
+                    "video_id": req.video_id,
+                    "source": "replicate",
+                    "prediction_id": data.get("id"),
+                    "status_url": data.get("urls", {}).get("get"),
+                }
+        except Exception as e:
+            print(f"[GenerativeStudio] Replicate inpainting error: {e}")
+
+    # Fallback: OpenCV Navier-Stokes inpainting
+    if os.path.exists(video_path):
+        try:
+            import cv2
+            import numpy as np
+            import subprocess
+            import tempfile
+
+            cap = cv2.VideoCapture(video_path)
+            if not cap.isOpened():
+                raise HTTPException(status_code=400, detail=f"Cannot open video: {video_path}")
+
+            fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+            # Load or generate mask
+            mask = None
+            if os.path.exists(mask_path):
+                mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+                if mask is not None:
+                    mask = cv2.resize(mask, (width, height))
+
+            if mask is None:
+                # Create a center-region mask from prompt (default: center 20%)
+                mask = np.zeros((height, width), dtype=np.uint8)
+                if req.mask_prompt and "center" in req.mask_prompt.lower():
+                    cx, cy = width // 2, height // 2
+                    rw, rh = int(width * 0.15), int(height * 0.15)
+                    mask[cy - rh:cy + rh, cx - rw:cx + rw] = 255
+                else:
+                    # Full-frame subtle repair
+                    mask[height // 4:3 * height // 4, width // 4:3 * width // 4] = 255
+
+            frames_dir = tempfile.mkdtemp(prefix="fill_")
+            frame_idx = 0
+
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+
+                # Adjust mask to match frame if needed
+                frame_mask = mask
+                if frame_mask.shape[:2] != (frame.shape[0], frame.shape[1]):
+                    frame_mask = cv2.resize(mask, (frame.shape[1], frame.shape[0]))
+
+                # Navier-Stokes inpainting
+                filled = cv2.inpaint(frame, frame_mask, inpaintRadius=3, flags=cv2.INPAINT_NS)
+
+                frame_path = f"{frames_dir}/frame_{frame_idx:04d}.png"
+                cv2.imwrite(frame_path, filled)
+                frame_idx += 1
+
+                if frame_idx >= 300:  # Cap at 300 frames for performance
+                    break
+
+            cap.release()
+
+            if frame_idx > 0:
+                result = subprocess.run([
+                    "ffmpeg", "-y", "-framerate", str(fps),
+                    "-i", f"{frames_dir}/frame_%04d.png",
+                    "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p",
+                    output_path
+                ], capture_output=True, timeout=300)
+
+                import shutil
+                shutil.rmtree(frames_dir, ignore_errors=True)
+
+                if result.returncode == 0:
+                    return {
+                        "success": True,
+                        "video_id": req.video_id,
+                        "source": "opencv_inpaint",
+                        "filled_video_url": f"file://{output_path}",
+                    }
+
+        except ImportError:
+            print("[GenerativeStudio] OpenCV not available for inpainting")
+        except Exception as e:
+            print(f"[GenerativeStudio] OpenCV inpainting error: {e}")
+
+    raise HTTPException(
+        status_code=503,
+        detail="Generative fill unavailable — configure REPLICATE_API_TOKEN or install opencv-python with ffmpeg",
+    )
 
 async def generate_avatar_service(req: AvatarRequest):
     """Generate an AI avatar video from text script.

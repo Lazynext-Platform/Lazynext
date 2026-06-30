@@ -4700,6 +4700,7 @@ dependencies = [
  "editor_core",
  "lazynext-export",
  "lazynext_core",
+ "reqwest 0.13.4",
  "serde",
  "serde_json",
  "state",
