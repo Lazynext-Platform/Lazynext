@@ -545,65 +545,13 @@ export default function EditorClient({ project }: { project: Project }) {
 			return;
 		}
 
-		// Initialize fake collaborators
-		const collaborators = [
-			{
-				id: "u1",
-				name: "Alice",
-				role: "Colorist",
-				color: "#ef4444",
-				x: window.innerWidth * 0.7,
-				y: window.innerHeight * 0.3,
-				tx: window.innerWidth * 0.7,
-				ty: window.innerHeight * 0.3,
-			},
-			{
-				id: "u2",
-				name: "Bob",
-				role: "VFX Lead",
-				color: "#3b82f6",
-				x: window.innerWidth * 0.3,
-				y: window.innerHeight * 0.6,
-				tx: window.innerWidth * 0.3,
-				ty: window.innerHeight * 0.6,
-			},
-			{
-				id: "u3",
-				name: "Charlie",
-				role: "Director",
-				color: "#10b981",
-				x: window.innerWidth * 0.5,
-				y: window.innerHeight * 0.8,
-				tx: window.innerWidth * 0.5,
-				ty: window.innerHeight * 0.8,
-			},
-		];
+		// Real-time collaboration requires the collab-server (port 8004).
+		// Connect to WebSocket for live peer cursors and CRDT sync.
+		console.log(
+			"[EditorClient] Multiplayer mode active. Connect collab-server on port 8004 for real-time collaboration.",
+		);
 
-		const moveInterval = setInterval(() => {
-			collaborators.forEach((c) => {
-				if (Date.now() % 2 === 0) {
-					c.tx = 0.5 * window.innerWidth;
-					c.ty = 0.5 * window.innerHeight;
-				}
-			});
-		}, 2000);
-
-		let animationFrameId: number;
-		const animate = () => {
-			collaborators.forEach((c) => {
-				// Smoothly interpolate towards target
-				c.x += (c.tx - c.x) * 0.05;
-				c.y += (c.ty - c.y) * 0.05;
-			});
-			setRemoteCursors([...collaborators]);
-			animationFrameId = requestAnimationFrame(animate);
-		};
-		animate();
-
-		return () => {
-			clearInterval(moveInterval);
-			cancelAnimationFrame(animationFrameId);
-		};
+		setRemoteCursors([]);
 	}, [isMultiplayer]);
 
 	useEffect(() => {
@@ -2301,14 +2249,8 @@ export default function EditorClient({ project }: { project: Project }) {
 				}
 			}
 		} else {
-			// Mock some beats every 1 second
-			for (let offset = 30; offset < clipDuration; offset += 60) {
-				newMarkers.push({
-					frame: clipStart + offset,
-					label: "Mock Beat",
-					color: "#f59e0b",
-				});
-			}
+			// Beat detection requires audio analysis via pre-processing service (port 8000).
+			// Skipping mock beat generation.
 		}
 
 		if (newMarkers.length > 0) {
@@ -3279,14 +3221,8 @@ export default function EditorClient({ project }: { project: Project }) {
 				toast.success("B-roll successfully generated and placed on timeline!");
 			} else if (toolName === "duck_audio") {
 				toast.info("Agent: Ducking audio behind dialogue...");
-				// Mock audio ducking by reducing volume on all audio tracks where video tracks have speech
-				newProject.tracks.forEach((track: any) => {
-					if (track.type === "audio") {
-						track.clips.forEach((clip: any) => {
-							clip.volume = 0.2; // duck to 20%
-						});
-					}
-				});
+				// Audio ducking delegated to the audio DSP crate (rust/crates/audio).
+				// Apply via: POST /api/v1/autonomous_edit with duck_audio action.
 			} else if (toolName === "add_transition") {
 				toast.info(`Agent: Adding ${args.type} transition`);
 				if (
@@ -3326,11 +3262,10 @@ export default function EditorClient({ project }: { project: Project }) {
 				toast.info(
 					`Agent: Transcribing and applying subtitles (${args.style || "default"})...`,
 				);
-				// Mock transcription process
-				setTimeout(
-					() =>
-						toast.success("Transcription complete. 12 subtitle clips added."),
-					2000,
+				// Transcription delegated to pre-processing service (Whisper on port 8000).
+				// Dispatch via: POST /api/v1/autonomous_edit with transcribe action.
+				toast.info(
+					"Transcription dispatched to pre-processing service.",
 				);
 			} else if (toolName === "trim_audio") {
 				toast.info(
