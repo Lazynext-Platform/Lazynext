@@ -60,6 +60,16 @@ groups:
         annotations:
           summary: "Analytics service is down"
 
+      - alert: APIGatewayDown
+        expr: up{job="lazynext-api-gateway"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          service: api-gateway
+        annotations:
+          summary: "API Gateway is down"
+          description: "API Gateway (port 8005) is unreachable. All external API access is affected."
+
   - name: slo-web-availability
     rules:
       - alert: SLOBurnRateCritical

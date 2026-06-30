@@ -130,6 +130,16 @@ jobs:
         run: |
           for app in web ai-agents render-service pre-processing generative-studio analytics-service; do
             echo "Deploying $app..."
+            # Map service name → container target port
+            case "$app" in
+              web)                  TARGET_PORT=3000 ;;
+              pre-processing)       TARGET_PORT=8000 ;;
+              generative-studio)    TARGET_PORT=8001 ;;
+              ai-agents)            TARGET_PORT=8002 ;;
+              render-service)       TARGET_PORT=8003 ;;
+              analytics-service)    TARGET_PORT=8006 ;;
+              *)                   TARGET_PORT=3000 ;;
+            esac
             az containerapp update \
               --name "lazynext-${app}-prod" \
               --resource-group lazynext-rg-production \
@@ -139,7 +149,7 @@ jobs:
               --resource-group lazynext-rg-production \
               --environment lazynext-capps-env-prod \
               --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" \
-              --target-port "${TARGET_PORT:-3000}" \
+              --target-port "${TARGET_PORT}" \
               --ingress external \
               --min-replicas 1 --max-replicas 3 \
               --cpu 0.5 --memory 1.0Gi 2>/dev/null || \

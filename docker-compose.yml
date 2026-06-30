@@ -71,6 +71,8 @@ services:
       - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-local-dev-secret-change-in-production-64chars}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-default_test_key}
+      - API_GATEWAY_URL=${API_GATEWAY_URL:-http://localhost:8005}
       - REDIS_URL=redis://redis:6379/
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=api-gateway
@@ -118,6 +120,10 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
       - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
+      - NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=${NEXT_PUBLIC_STRIPE_PRO_PRICE_ID:-price_pro_placeholder}
+      - NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID=${NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID:-price_studio_placeholder}
+      - LAZYNEXT_WEBHOOK_URL=${LAZYNEXT_WEBHOOK_URL:-}
+      - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-default_test_key}
       - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}
       - NEXT_PUBLIC_MARBLE_API_URL=${NEXT_PUBLIC_MARBLE_API_URL:-https://api.marblecms.com}
       - FREESOUND_CLIENT_ID=${FREESOUND_CLIENT_ID:-}
@@ -335,6 +341,7 @@ services:
       - "3100:3100"
     volumes:
       - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - ./monitoring/loki/rules.yml:/loki/rules/rules.yml
       - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:

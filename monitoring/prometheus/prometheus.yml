@@ -2,6 +2,13 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - /etc/prometheus/rules.yml
+  - /etc/prometheus/recording-rules.yml
+  - /etc/prometheus/slos.yaml
+  - /etc/prometheus/alerts/application.yml
+  - /etc/prometheus/alerts/kubernetes.yml
+
 scrape_configs:
   # Self-monitoring
   - job_name: 'prometheus'

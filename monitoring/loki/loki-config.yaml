@@ -38,3 +38,11 @@ limits_config:
 
 ruler:
   alertmanager_url: http://alertmanager:9093
+  storage:
+    type: local
+    local:
+      directory: /loki/rules
+  rule_path: /loki/rules-temp
+  ring:
+    kvstore:
+      store: inmemory
