@@ -43,14 +43,11 @@ impl GenerativeModel {
     pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
         let Some(api_key) = &self.api_key else {
             println!(
-                "[NeuralEngine] Warning: REPLICATE_API_TOKEN not found. Using local mock generation."
+                "[NeuralEngine] REPLICATE_API_TOKEN not configured — returning empty generation result."
             );
             #[cfg(not(target_arch = "wasm32"))]
-            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
-            return Ok(format!(
-                "generated_{}.mp4",
-                options.prompt.replace(" ", "_").to_lowercase()
-            ));
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            return Err("REPLICATE_API_TOKEN not set. Configure an API key to enable AI video generation.".to_string());
         };
 
         println!(
@@ -167,10 +164,10 @@ impl GenerativeModel {
     /// Generates text-to-speech using an external API.
     pub async fn generate_tts(&self, options: &AudioGenerationOptions) -> Result<String, String> {
         let Some(api_key) = &self.api_key else {
-            println!("[NeuralEngine] Warning: TTS API key not found. Mocking audio output.");
+            println!("[NeuralEngine] TTS API key not configured — returning empty result.");
             #[cfg(not(target_arch = "wasm32"))]
-            tokio::time::sleep(tokio::time::Duration::from_millis(800)).await;
-            return Ok("tts_output.wav".to_string());
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            return Err("API key not set. Configure a key to enable TTS generation.".to_string());
         };
 
         println!(

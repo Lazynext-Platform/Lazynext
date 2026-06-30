@@ -25,7 +25,7 @@ impl ColorScopesAnalyzer {
 
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Scopes Output Buffer"),
-            size: 256 * 4, // Simple 256-bucket histogram mock
+            size: 256 * 4, // 256 buckets × 4 bytes (u32) for luminance histogram
             usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::MAP_READ,
             mapped_at_creation: false,
         });
@@ -66,7 +66,7 @@ impl ColorScopesAnalyzer {
         compute_pass.set_pipeline(&self.pipeline);
         compute_pass.set_bind_group(0, &actual_bind_group, &[]);
 
-        // Dispatching 256 groups as a mock (1 for each luminance bucket)
+        // Dispatch 256 workgroups (one per luminance bucket)
         compute_pass.dispatch_workgroups(256, 1, 1);
     }
 }

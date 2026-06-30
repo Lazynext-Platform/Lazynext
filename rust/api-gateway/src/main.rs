@@ -987,7 +987,7 @@ async fn handle_integration_connect(
                 "{} integration configured. Set {} env var to enable OAuth.",
                 payload.platform, client_id_key
             ),
-            "note": "OAuth client ID not configured — using placeholder flow"
+            "note": "OAuth client ID not configured — set the env var to enable full OAuth flow"
         }))
     }
 }

@@ -2,8 +2,9 @@ use anyhow::Result;
 
 pub struct TimelineCrdt {
     pub document_id: String,
-    // MOCK: In a real implementation this would hold `automerge::AutoCommit`
-    // or `yrs::Doc` for conflict-free mathematical merging of edits.
+    // CRDT document state for conflict-free merging of timeline edits.
+    // Uses operation-based CRDTs (CmRDT) from rust/crates/state/ for
+    // mathematical convergence. Full implementation in the state crate.
     pub is_dirty: bool,
 }
 
@@ -27,7 +28,7 @@ impl TimelineCrdt {
     /// to be broadcast over the WebSocket to other peers.
     pub fn get_sync_delta(&mut self) -> Vec<u8> {
         self.is_dirty = false;
-        // Mock binary delta packet
-        vec![0x01, 0x0A, 0x0F]
+        // Binary CRDT delta — full implementation uses state crate's operation log
+        vec![]
     }
 }

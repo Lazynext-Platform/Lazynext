@@ -159,7 +159,7 @@ async fn main() {
             for (i, project) in projects.iter().enumerate() {
                 println!("\n📂 [{}/{}] Rendering: {}", i + 1, projects.len(), project);
                 // We fake the args struct here for the existing render_single fn
-                let mock_args = RenderArgs {
+                let render_args = RenderArgs {
                     format: format.clone(),
                     width: 1920,
                     height: 1080,
@@ -167,7 +167,7 @@ async fn main() {
                     duration: 10,
                     progress: false,
                 };
-                match render_single(project, &mock_args).await {
+                match render_single(project, &render_args).await {
                     Ok(path) => {
                         println!("✅ Completed: {}", path);
                         success += 1;

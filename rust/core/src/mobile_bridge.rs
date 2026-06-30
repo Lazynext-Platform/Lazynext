@@ -151,7 +151,7 @@ pub fn request_rotoscope(video_id: String, prompt: String) -> String {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
                     let mask_url = res
                         .mask_sequence_url
-                        .unwrap_or_else(|| "mock_mask.mp4".to_string());
+                        .unwrap_or_default();
                     let _ = engine.apply_rotoscope_mask(&video_id, &mask_url);
                     "Rotoscoping complete. Mask added.".to_string()
                 } else {
@@ -175,7 +175,7 @@ pub fn request_nerf(video_id: String) -> String {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
                     let ply_url = res
                         .point_cloud_url
-                        .unwrap_or_else(|| "mock_splat.ply".to_string());
+                        .unwrap_or_default();
                     let _ = engine.add_nerf_cloud(&ply_url);
                     "NeRF extraction complete. Splat added.".to_string()
                 } else {
@@ -197,12 +197,8 @@ pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
         match client.split_stems(&audio_id, stems).await {
             Ok(res) => {
                 if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
-                    let mut default_stems = std::collections::HashMap::new();
-                    default_stems.insert("vocals".to_string(), "mock_vocals.wav".to_string());
-                    default_stems.insert("drums".to_string(), "mock_drums.wav".to_string());
-
                     let stems_map = if res.stems.is_empty() {
-                        default_stems
+                        std::collections::HashMap::new()
                     } else {
                         res.stems
                     };
