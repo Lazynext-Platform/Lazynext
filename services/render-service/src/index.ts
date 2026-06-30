@@ -644,6 +644,11 @@ async function shutdown() {
 	console.log("[Render Farm] Received shutdown signal — draining jobs...");
 	if (worker) await worker.close();
 	if (connection) await connection.quit();
+
+	// Gracefully shut down OpenTelemetry (no racing process.exit)
+	const { shutdownTelemetry } = await import("./tracing");
+	await shutdownTelemetry();
+
 	console.log("[Render Farm] Shutdown complete.");
 	process.exit(0);
 }

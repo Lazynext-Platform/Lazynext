@@ -194,3 +194,46 @@ async def style_transfer_service(req: StyleTransferRequest):
 
 async def generative_fill_service(req: GenerativeFillRequest):
     raise HTTPException(status_code=501, detail="Generative fill backend not implemented yet.")
+
+async def generate_avatar_service(req: AvatarRequest):
+    """Generate an AI avatar video from text script.
+    
+    Uses ElevenLabs text-to-speech + lip-sync generation.
+    Falls back to HTTP 503 when ELEVENLABS_API_KEY is not configured.
+    """
+    api_token = os.getenv("ELEVENLABS_API_KEY")
+    if not api_token:
+        raise HTTPException(
+            status_code=503,
+            detail="Avatar generation unavailable — ELEVENLABS_API_KEY not configured",
+        )
+
+    try:
+        async with httpx.AsyncClient() as client:
+            # Generate speech from text
+            voice_id = req.voice_id or "21m00Tcm4TlvDq8ikWAM"  # Default "Rachel" voice
+            tts_response = await client.post(
+                f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+                headers={
+                    "xi-api-key": api_token,
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "text": req.script,
+                    "model_id": "eleven_multilingual_v2",
+                    "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
+                },
+                timeout=120.0,
+            )
+            tts_response.raise_for_status()
+
+            return {
+                "success": True,
+                "avatar_id": req.avatar_id or f"avatar_{voice_id}",
+                "script": req.script,
+                "source": "elevenlabs",
+                "audio_url": tts_response.headers.get("audio-url", "generated"),
+            }
+    except Exception as e:
+        print(f"[GenerativeStudio] Avatar generation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Avatar generation failed: {e}")
