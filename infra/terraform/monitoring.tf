@@ -30,6 +30,9 @@ locals {
     render_service    = azurerm_container_app.render_service.id
     pre_processing    = azurerm_container_app.pre_processing.id
     generative_studio = azurerm_container_app.generative_studio.id
+    api_gateway       = azurerm_container_app.api_gateway.id
+    collab_server     = azurerm_container_app.collab_server.id
+    analytics_service = azurerm_container_app.analytics_service.id
   }
 
   # Friendly service names for alert labels
@@ -39,6 +42,9 @@ locals {
     render_service    = "Render Service"
     pre_processing    = "Pre-Processing"
     generative_studio = "Generative Studio"
+    api_gateway       = "API Gateway"
+    collab_server     = "Collab Server"
+    analytics_service = "Analytics Service"
   }
 
   # Web test target URLs
@@ -48,6 +54,9 @@ locals {
     render_service    = "https://${azurerm_container_app.render_service.latest_revision_fqdn}/health"
     pre_processing    = "https://${azurerm_container_app.pre_processing.latest_revision_fqdn}/health"
     generative_studio = "https://${azurerm_container_app.generative_studio.latest_revision_fqdn}/health"
+    api_gateway       = "https://${azurerm_container_app.api_gateway.latest_revision_fqdn}/health"
+    collab_server     = "https://${azurerm_container_app.collab_server.latest_revision_fqdn}/health"
+    analytics_service = "https://${azurerm_container_app.analytics_service.latest_revision_fqdn}/health"
   }
 }
 

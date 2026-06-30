@@ -1,0 +1,288 @@
+{
+  "dashboard": {
+    "title": "Lazynext — SLO & Service Health",
+    "tags": ["lazynext", "slo", "production"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "30s",
+    "time": { "from": "now-6h", "to": "now" },
+    "panels": [
+      {
+        "id": 1, "type": "stat",
+        "title": "Overall Availability (24h)",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "avg(avg_over_time(probe_success{job=\"lazynext-blackbox\"}[24h])) * 100",
+          "legendFormat": "Availability %"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent", "decimals": 3,
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 99.5 },
+              { "color": "green", "value": 99.9 }
+            ]},
+            "mappings": []
+          }
+        }
+      },
+      {
+        "id": 2, "type": "stat",
+        "title": "Web App Error Rate",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "sum(rate(http_requests_total{service=\"lazynext-web\",status_code=~\"5..\"}[1h])) / sum(rate(http_requests_total{service=\"lazynext-web\"}[1h])) * 100",
+          "legendFormat": "Error Rate %"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent", "decimals": 4,
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1.0 },
+              { "color": "red", "value": 5.0 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 3, "type": "stat",
+        "title": "API Gateway P95 Latency",
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=\"lazynext-api-gateway\"}[5m])) * 1000",
+          "legendFormat": "p95 ms"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms", "decimals": 1,
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 500 },
+              { "color": "red", "value": 2000 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 4, "type": "stat",
+        "title": "Active Alerts",
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "count(ALERTS{alertstate=\"firing\"})",
+          "legendFormat": "Firing"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 10, "type": "timeseries",
+        "title": "Service Availability (SLO: 99.9%)",
+        "gridPos": { "x": 0, "y": 4, "w": 24, "h": 8 },
+        "targets": [
+          {
+            "expr": "avg(avg_over_time(probe_success{job=\"lazynext-blackbox\",instance=~\"$instance\"}[$__range])) * 100",
+            "legendFormat": "{{ instance }}"
+          },
+          {
+            "expr": "99.9",
+            "legendFormat": "SLO Target (99.9%)",
+            "datasource": { "type": "prometheus" }
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 99.5,
+            "max": 100,
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 99.9 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 11, "type": "timeseries",
+        "title": "HTTP Request Rate by Service",
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+        "targets": [{
+          "expr": "sum(rate(http_requests_total{service=~\"$service\"}[1m])) by (service)",
+          "legendFormat": "{{ service }}"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "reqps", "custom": { "fillOpacity": 15 } }
+        }
+      },
+      {
+        "id": 12, "type": "timeseries",
+        "title": "HTTP Error Rate by Service",
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+        "targets": [{
+          "expr": "sum(rate(http_requests_total{service=~\"$service\",status_code=~\"5..\"}[1m])) by (service) / sum(rate(http_requests_total{service=~\"$service\"}[1m])) by (service) * 100",
+          "legendFormat": "{{ service }}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "custom": { "fillOpacity": 15 },
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 2 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 13, "type": "timeseries",
+        "title": "Latency P95 by Service",
+        "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+        "targets": [{
+          "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=~\"$service\"}[5m])) * 1000",
+          "legendFormat": "{{ service }}"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "ms", "custom": { "fillOpacity": 15 } }
+        }
+      },
+      {
+        "id": 14, "type": "timeseries",
+        "title": "Container CPU Usage",
+        "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+        "targets": [{
+          "expr": "rate(container_cpu_usage_seconds_total{name=~\"lazynext-.+\"}[1m])",
+          "legendFormat": "{{ name }}"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "short", "custom": { "fillOpacity": 15 } }
+        }
+      },
+      {
+        "id": 15, "type": "timeseries",
+        "title": "Container Memory Usage",
+        "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+        "targets": [{
+          "expr": "container_memory_working_set_bytes{name=~\"lazynext-.+\"} / 1024 / 1024",
+          "legendFormat": "{{ name }}"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "MiB", "custom": { "fillOpacity": 15 } }
+        }
+      },
+      {
+        "id": 16, "type": "timeseries",
+        "title": "Database Connections",
+        "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"lazynext\"}",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "pg_settings_max_connections{name=\"max_connections\"}",
+            "legendFormat": "Max Allowed"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": { "unit": "short", "custom": { "fillOpacity": 15 } }
+        }
+      },
+      {
+        "id": 17, "type": "alertlist",
+        "title": "Active Alerts",
+        "gridPos": { "x": 0, "y": 36, "w": 24, "h": 6 },
+        "options": {
+          "showOptions": "current",
+          "sortOrder": 1,
+          "alertName": "",
+          "dashboardAlerts": true,
+          "stateFilter": { "firing": true, "pending": true }
+        }
+      },
+      {
+        "id": 18, "type": "stat",
+        "title": "SLO Compliance (30d)",
+        "gridPos": { "x": 0, "y": 42, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "avg(avg_over_time(probe_success{job=\"lazynext-blackbox\"}[30d])) * 100",
+          "legendFormat": "30d"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent", "decimals": 3,
+            "thresholds": { "mode": "absolute", "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 99.5 },
+              { "color": "green", "value": 99.9 }
+            ]}
+          }
+        }
+      },
+      {
+        "id": 19, "type": "stat",
+        "title": "Render Jobs (24h)",
+        "gridPos": { "x": 6, "y": 42, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "sum(increase(render_jobs_total{status=\"completed\"}[24h]))",
+          "legendFormat": "Completed"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "short" }
+        }
+      },
+      {
+        "id": 20, "type": "stat",
+        "title": "AI Edits (24h)",
+        "gridPos": { "x": 12, "y": 42, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "sum(increase(ai_edits_total[24h]))",
+          "legendFormat": "Edits"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "short" }
+        }
+      },
+      {
+        "id": 21, "type": "stat",
+        "title": "Active Sessions",
+        "gridPos": { "x": 18, "y": 42, "w": 6, "h": 4 },
+        "targets": [{
+          "expr": "sum(active_sessions{service=~\"collab-server\"})",
+          "legendFormat": "Users"
+        }],
+        "fieldConfig": {
+          "defaults": { "unit": "short" }
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "service",
+          "type": "query",
+          "query": "label_values(http_requests_total, service)",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".+"
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "query": "label_values(probe_success{job=\"lazynext-blackbox\"}, instance)",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".+"
+        }
+      ]
+    }
+  }
+}
