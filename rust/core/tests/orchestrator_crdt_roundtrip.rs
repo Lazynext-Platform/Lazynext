@@ -41,7 +41,7 @@ mod orchestrator_crdt_tests {
         }
 
         let stored = graph.get_entity("caption_track/caption_1").unwrap();
-        let stored_data: serde_json::Value = serde_json::from_str(&stored).unwrap();
+        let stored_data: serde_json::Value = serde_json::from_str(stored).unwrap();
         assert_eq!(stored_data["text"], "Hello");
         assert_eq!(stored_data["type"], "TextLayer");
     }
@@ -104,7 +104,7 @@ mod orchestrator_crdt_tests {
         }
 
         let stored = graph.get_entity("track_a/clip_1").unwrap();
-        let stored_value: serde_json::Value = serde_json::from_str(&stored).unwrap();
+        let stored_value: serde_json::Value = serde_json::from_str(stored).unwrap();
         assert_eq!(stored_value["name"], "My Clip");
         assert_eq!(stored_value["start"], 0);
         assert_eq!(stored_value["end"], 100);
