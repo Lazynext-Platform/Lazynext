@@ -117,14 +117,24 @@ jobs:
           docker push $ACR/lazynext-migrate:latest
 
       - name: Run Database Migrations
+        id: migrate
         run: |
+          # Update if job exists, create if it doesn't (idempotent)
+          az containerapp job update \
+            --name db-migrate \
+            --resource-group lazynext-rg-production \
+            --image "lazynextacrproduction.azurecr.io/lazynext-migrate:latest" 2>/dev/null || \
           az containerapp job create \
             --name db-migrate \
             --resource-group lazynext-rg-production \
-            --image lazynextacrproduction.azurecr.io/lazynext-migrate:latest \
+            --image "lazynextacrproduction.azurecr.io/lazynext-migrate:latest" \
             --trigger-type Manual \
             --command "bun run db:migrate" || \
-            echo "::warning ::Migration job creation failed — migrations may need manual execution"
+            echo "::warning ::Migration job create failed — migrations may need manual execution"
+          az containerapp job start \
+            --name db-migrate \
+            --resource-group lazynext-rg-production || \
+            echo "::warning ::Migration job start failed — run manually: az containerapp job start --name db-migrate"
 
       - name: Deploy to Azure Container Apps
         run: |

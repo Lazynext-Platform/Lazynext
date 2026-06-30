@@ -3,20 +3,20 @@
 
 - name: Add NVIDIA package repositories
   apt_repository:
-    repo: "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
+    repo: "deb https://developer.download.nvidia.com/compute/cuda/repos/$(lsb_release -cs)/x86_64/ /"
     state: present
 
 - name: Install NVIDIA drivers
   apt:
     name:
-      - nvidia-driver-535
+      - nvidia-driver-550
       - nvidia-utils-535
     state: present
     update_cache: yes
 
 - name: Install CUDA toolkit
   apt:
-    name: cuda-toolkit-12-2
+    name: cuda-toolkit-12-6
     state: present
 
 - name: Install NVIDIA Container Toolkit

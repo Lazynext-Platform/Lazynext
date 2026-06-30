@@ -162,12 +162,6 @@ variable "redis_sku_name" {
   }
 }
 
-variable "redis_capacity" {
-  description = "Number of Redis Enterprise shards (capacity units)"
-  type        = number
-  default     = 1
-}
-
 # ─────────────────────────────────────────────────────────────────────────────
 # CDN / Front Door
 # ─────────────────────────────────────────────────────────────────────────────

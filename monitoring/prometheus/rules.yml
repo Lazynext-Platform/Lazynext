@@ -15,7 +15,7 @@ groups:
           description: "The lazynext-web service has been unreachable for 5 minutes."
 
       - alert: PythonServiceDown
-        expr: up{job=~"pre-processing|generative-studio"} == 0
+        expr: up{job=~"lazynext-pre-processing|lazynext-generative-studio"} == 0
         for: 5m
         labels:
           severity: critical
@@ -25,7 +25,7 @@ groups:
           description: "{{ $labels.job }} has been unreachable for 5 minutes."
 
       - alert: AIServiceDown
-        expr: up{job="ai-agents"} == 0
+        expr: up{job="lazynext-ai-agents"} == 0
         for: 3m
         labels:
           severity: warning
@@ -34,7 +34,7 @@ groups:
           summary: "AI Agents service is down"
 
       - alert: RenderServiceDown
-        expr: up{job="render-service"} == 0
+        expr: up{job="lazynext-render-service"} == 0
         for: 3m
         labels:
           severity: warning
@@ -43,7 +43,7 @@ groups:
           summary: "Render service is down"
 
       - alert: CollabServerDown
-        expr: up{job="collab-server"} == 0
+        expr: up{job="lazynext-collab-server"} == 0
         for: 3m
         labels:
           severity: warning
@@ -52,7 +52,7 @@ groups:
           summary: "Collab server is down"
 
       - alert: AnalyticsServiceDown
-        expr: up{job="analytics-service"} == 0
+        expr: up{job="lazynext-analytics"} == 0
         for: 5m
         labels:
           severity: warning
