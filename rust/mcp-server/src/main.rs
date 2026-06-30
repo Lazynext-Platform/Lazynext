@@ -23,13 +23,14 @@ async fn main() {
     let use_sse = args.iter().any(|arg| arg == "--sse");
 
     if use_sse {
-        eprintln!("📡 Lazynext MCP Server started in SSE transport mode (listening on port 8000).");
-        eprintln!("   Note: SSE implementation requires integration with axum/warp.");
-        // This is a stub for the SSE transport option. In a full implementation,
-        // we would spawn an HTTP server here and yield Server-Sent Events.
-        loop {
-            tokio::time::sleep(tokio::time::Duration::from_secs(3600)).await;
-        }
+        eprintln!("📡 Lazynext MCP Server — SSE transport mode is not yet implemented.");
+        eprintln!("   The MCP server works over stdio (standard MCP transport).");
+        eprintln!("   For HTTP-based MCP access, use the API Gateway at port 8005:");
+        eprintln!("     POST http://localhost:8005/api/v1/autonomous_edit");
+        eprintln!("   To use the MCP server with Claude Desktop / VS Code:");
+        eprintln!("     Configure the MCP client to run: lazynext-mcp-server");
+        eprintln!("   The server will communicate over stdio automatically.");
+        std::process::exit(1);
     }
 
     eprintln!("🤖 Lazynext MCP Server started.");

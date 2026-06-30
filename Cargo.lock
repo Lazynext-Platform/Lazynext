@@ -4783,6 +4783,7 @@ dependencies = [
  "image 0.25.10",
  "lazynext_core",
  "log",
+ "reqwest 0.13.4",
  "rfd",
  "serde_json",
  "tokio",

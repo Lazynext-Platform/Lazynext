@@ -67,35 +67,57 @@ export default function EditorPage() {
 		// 2. Add Agent "Planning" state
 		setChat(prev => [...prev, { role: "agent", content: "Analyzing your request...", status: "planning" }]);
 
-		// Simulate API Gateway call to /v1/autonomous_edit
-		setTimeout(() => {
-			setChat(prev => {
-				const newChat = [...prev];
-				newChat[newChat.length - 1] = {
-					role: "agent",
-					content: "Executing plan: generating viral clips, adding dynamic captions, and exporting...",
-					status: "executing"
-				};
-				return newChat;
+		// 3. Call the real API Gateway for autonomous editing
+		try {
+			const gatewayUrl = process.env.NEXT_PUBLIC_RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
+			const res = await fetch(`${gatewayUrl}/api/v1/autonomous_edit`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					prompt: userMessage,
+					require_plan_approval: false,
+				}),
 			});
 
-			setTimeout(() => {
+			if (res.ok) {
+				const data = await res.json();
 				setChat(prev => {
 					const newChat = [...prev];
 					newChat[newChat.length - 1] = {
 						role: "agent",
-						content: "Edit complete! I've removed silences, color-graded the footage, and applied the TikTok preset.",
-						videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-						status: "done"
+						content: data.message || "Edit complete! Timeline has been updated.",
+						status: "done",
 					};
 					return newChat;
 				});
-				setIsProcessing(false);
-				if (isReady && time) {
-					time.play(); // Auto-play the result
-				}
-			}, 3000);
-		}, 1500);
+			} else {
+				const errData = await res.json().catch(() => ({}));
+				setChat(prev => {
+					const newChat = [...prev];
+					newChat[newChat.length - 1] = {
+						role: "agent",
+						content: `Error: ${errData.error || "API Gateway returned an error. Ensure it is running on port 8005."}`,
+						status: "done",
+					};
+					return newChat;
+				});
+			}
+		} catch (err) {
+			setChat(prev => {
+				const newChat = [...prev];
+				newChat[newChat.length - 1] = {
+					role: "agent",
+					content: "Chronos is currently offline. Start the API Gateway (port 8005) to enable AI-powered editing, or use the MCP server for agentic control.",
+					status: "done",
+				};
+				return newChat;
+			});
+		} finally {
+			setIsProcessing(false);
+			if (isReady && time) {
+				time.play();
+			}
+		}
 	};
 
 	const togglePlayback = () => {

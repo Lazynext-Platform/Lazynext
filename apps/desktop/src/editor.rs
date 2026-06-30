@@ -334,11 +334,35 @@ impl Render for EditorShell {
                                             .justify_center()
                                             .hover(|s| s.bg(rgb(0x00b4bf)))
                                             .child("Run Command")
-                                            .on_mouse_down(gpui::MouseButton::Left, |_, _, _cx| {
-                                                log::info!("AI Command triggered from Desktop UI!");
-                                                // AI intent processing dispatched via the autonomous editor.
-                                                // Connect to the API gateway for full agentic capabilities.
-                                                log::info!("To enable: start api-gateway and connect via REST endpoint.");
+                                            .on_mouse_down(gpui::MouseButton::Left, {
+                                                move |_, _, _cx| {
+                                                    log::info!("AI Command triggered from Desktop UI!");
+                                                    let gateway = std::env::var("RUST_API_GATEWAY_URL")
+                                                        .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                                                    tokio::spawn(async move {
+                                                        let client = reqwest::Client::new();
+                                                        match client
+                                                            .post(format!("{}/api/v1/autonomous_edit", gateway))
+                                                            .json(&serde_json::json!({
+                                                                "prompt": "Apply cinematic color grade and remove silences",
+                                                                "require_plan_approval": false,
+                                                            }))
+                                                            .send()
+                                                            .await
+                                                        {
+                                                            Ok(resp) => {
+                                                                if resp.status().is_success() {
+                                                                    log::info!("AI command executed successfully via API gateway");
+                                                                } else {
+                                                                    log::warn!("API gateway returned: {}", resp.status());
+                                                                }
+                                                            }
+                                                            Err(e) => {
+                                                                log::warn!("API gateway unreachable: {}. Start gateway on port 8005.", e);
+                                                            }
+                                                        }
+                                                    });
+                                                }
                                             }),
                                     ),
                             ), // -------------------------
