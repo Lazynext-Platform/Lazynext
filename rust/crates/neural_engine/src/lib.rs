@@ -216,25 +216,21 @@ impl FacialRecognitionModel {
             // Run inference
             let outputs = model.run(inputs)?;
 
-            // Post-process dummy parsing (since SCRFD output depends on multiple scales)
-            // We'll simulate reading the bounding box output tensor if it returns something
-            let mut detections = Vec::new();
-            if let Some(bboxes) = outputs.get("score_8") {
-                let _data = bboxes.try_extract_tensor::<f32>()?;
-                // Add a dummy detection from the "real" model for proof of concept
-                detections.push(FaceDetection {
-                    actor_id: "Actor_ONNX".into(),
-                    confidence: 0.95,
-                    bounding_box: BoundingBox {
-                        x: 0.3,
-                        y: 0.3,
-                        width: 0.4,
-                        height: 0.4,
-                    },
-                });
-            }
-
-            Ok(detections)
+            // SCRFD post-processing: SCRFD emits multi-scale anchor predictions
+            // (score_8/16/32 + bbox_8/16/32) that require anchor decode + NMS to
+            // turn into real bounding boxes. That decode is not yet implemented.
+            //
+            // Rather than fabricate a hardcoded detection (which would be mock data
+            // and would also mask the real heuristic fallback), we return an empty
+            // vec here. The dispatcher then falls back to `detect_faces_heuristic`
+            // (a real skin-tone heuristic) per the project's graceful-degradation
+            // policy. TODO: implement SCRFD anchor decode + NMS for real detections.
+            let _ = outputs.get("score_8"); // confirm output exists, then discard
+            println!(
+                "[NeuralEngine] ONNX inference succeeded but SCRFD post-processing \
+                (anchor decode + NMS) is not implemented — falling back to heuristic."
+            );
+            Ok(vec![])
         })();
 
         match result {

@@ -51,21 +51,35 @@ impl AutonomousEditor {
         }
     }
 
-    /// Processes a `VideoIntent` and returns a job ID for tracking the
-    /// asynchronous editing job.
+    /// **Deprecated stub.** Returns a job ID but does not perform any editing.
+    ///
+    /// The asynchronous job-tracking API (`process_intent` + `check_job_status`)
+    /// was never wired to the real render pipeline. All real callers use the
+    /// synchronous [`process_intent_with_llm`](Self::process_intent_with_llm),
+    /// which mutates the `NLEState` directly and is the supported path.
     pub async fn process_intent(&self, intent: VideoIntent) -> Result<String, String> {
-        println!("Delegating intent to planner: {}", intent.prompt);
-        let job_id = format!(
-            "job_{}",
-            &uuid::Uuid::new_v4().to_string().replace('-', "")[..8]
+        println!(
+            "⚠️  [AI Engine] process_intent (async job API) is a non-functional stub. \
+            Use process_intent_with_llm for real editing. Intent was: {}",
+            intent.prompt
         );
-        Ok(job_id)
+        Err(
+            "process_intent (async job API) is not wired to the render pipeline. \
+            Use process_intent_with_llm(&mut NLEState, &VideoIntent) instead."
+                .to_string(),
+        )
     }
 
-    /// Checks the status of an asynchronous editing job by ID.
-    pub async fn check_job_status(&self, job_id: &str) -> Result<JobStatus, String> {
-        Ok(JobStatus::Completed {
-            video_url: format!("https://cdn.lazynext.ai/videos/{}.mp4", job_id),
+    /// **Deprecated stub.** The async job API is not wired to a real job store or
+    /// render pipeline, so a status lookup cannot honestly report success. Returns
+    /// `Failed` with guidance to use the synchronous path instead of fabricating a
+    /// non-existent CDN URL.
+    pub async fn check_job_status(&self, _job_id: &str) -> Result<JobStatus, String> {
+        Ok(JobStatus::Failed {
+            error: "Async job tracking is not implemented. Use process_intent_with_llm \
+                    (synchronous) which mutates NLEState directly and renders via \
+                    CoreEngine::dispatch_export."
+                .to_string(),
         })
     }
 
