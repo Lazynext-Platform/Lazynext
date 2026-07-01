@@ -34,6 +34,6 @@ ENV PORT=8002
 EXPOSE 8002
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8002/health || exit 1
+    CMD curl -sf http://localhost:8002/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

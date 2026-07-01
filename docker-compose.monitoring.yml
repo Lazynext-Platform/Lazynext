@@ -55,7 +55,7 @@ services:
       - "traefik.http.services.grafana.loadbalancer.healthcheck.path=/api/health"
       - "traefik.http.services.grafana.loadbalancer.healthcheck.interval=15s"
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-SET_GRAFANA_PASSWORD_ENV_VAR}
       GF_SERVER_ROOT_URL: "https://monitoring.lazynext.internal/grafana"
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_USERS_ALLOW_SIGN_UP: "false"
@@ -145,7 +145,7 @@ services:
     environment:
       DATA_SOURCE_URI: "db:5432/lazynext?sslmode=disable"
       DATA_SOURCE_USER: lazynext
-      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD:-password123}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD:-SET_POSTGRES_PASSWORD_ENV_VAR}
       PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
       PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yml
       PG_EXPORTER_LOG_FORMAT: json

@@ -124,7 +124,7 @@ spec:
       terminationGracePeriodSeconds: 15
       containers:
         - name: redis
-          image: redis:8-alpine
+          image: redis:7-alpine
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false

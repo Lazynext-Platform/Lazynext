@@ -64,12 +64,12 @@ metadata:
   labels:
     app: lazynext-pre-processing
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: lazynext-pre-processing
 ---
-# PodDisruptionBudget — Generative Studio
+# PodDisruptionBudget — Generative Studio (single replica — allow eviction)
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -78,12 +78,12 @@ metadata:
   labels:
     app: lazynext-generative-studio
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: lazynext-generative-studio
 ---
-# PodDisruptionBudget — Analytics Service
+# PodDisruptionBudget — Analytics Service (single replica — allow eviction)
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -92,12 +92,12 @@ metadata:
   labels:
     app: lazynext-analytics-service
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: lazynext-analytics-service
 ---
-# PodDisruptionBudget — MCP Server
+# PodDisruptionBudget — MCP Server (single replica — allow eviction)
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -106,7 +106,7 @@ metadata:
   labels:
     app: lazynext-mcp
 spec:
-  minAvailable: 1
+  maxUnavailable: 1
   selector:
     matchLabels:
       app: lazynext-mcp

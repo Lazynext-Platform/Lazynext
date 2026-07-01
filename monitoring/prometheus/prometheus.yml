@@ -5,9 +5,11 @@ global:
 rule_files:
   - /etc/prometheus/rules.yml
   - /etc/prometheus/recording-rules.yml
-  - /etc/prometheus/slos.yaml
   - /etc/prometheus/alerts/application.yml
   - /etc/prometheus/alerts/kubernetes.yml
+  # slos.yaml is a K8s PrometheusRule CRD (apiVersion: monitoring.coreos.com/v1)
+  # — not loadable by standalone Prometheus. SLO alerts are in rules.yml.
+  # For K8s deployments, apply slos.yaml via: kubectl apply -f slos.yaml
 
 scrape_configs:
   # Self-monitoring

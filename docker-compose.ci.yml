@@ -334,7 +334,7 @@ services:
     ipc: host
     volumes:
       - ./apps/web:/app/apps/web:ro
-      - ./playwright.config.ts:/app/playwright.config.ts:ro
+      - ./apps/web/playwright.config.ts:/app/playwright.config.ts:ro
       - /app/node_modules
     networks:
       - lazynext-network

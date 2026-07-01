@@ -44,13 +44,17 @@ COPY requirements.txt .
 ENV HF_HOME=/models/huggingface
 ENV TRANSFORMERS_CACHE=/models/huggingface
 RUN mkdir -p /models/huggingface /tmp/generative \
-    && chmod 777 /tmp/generative
+    && chmod 755 /tmp/generative
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV CUDA_VISIBLE_DEVICES=0
 ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
 ENV PORT=8001
+
+# Run as non-root user
+RUN useradd -m -s /bin/bash mluser && chown -R mluser:mluser /tmp/generative /models
+USER mluser
 
 EXPOSE 8001
 

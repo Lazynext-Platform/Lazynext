@@ -28,6 +28,14 @@
 #   lazynext_grafana_admin_password
 #   lazynext_freesound_client_id
 #   lazynext_freesound_api_key
+#
+# ⚠️  IMPORTANT: Docker Compose does not expand $(cat ...) in env vars.
+# For DATABASE_URL that needs secrets, use one of:
+#   1. Entrypoint script that reads /run/secrets/postgres_password and
+#      constructs DATABASE_URL at container start
+#   2. DATABASE_URL_FILE env var pattern (app reads URL from file)
+#   3. Kubernetes ExternalSecret (azure-kv→K8s Secret→env var)
+# The lines below use option 2 — apps should support _FILE suffix.
 #   lazynext_marble_workspace_key
 
 x-logging: &logging
@@ -217,7 +225,7 @@ services:
     environment:
       - NODE_ENV=production
       - STORAGE_PROVIDER=azure
-      - DATABASE_URL=postgresql://lazynext:$(cat /run/secrets/postgres_password)@db:5432/lazynext
+      - DATABASE_URL_FILE=/run/secrets/postgres_password
       - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
       - BETTER_AUTH_URL=https://lazynext.com
       - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
@@ -281,7 +289,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8002
-      - DATABASE_URL=postgresql://lazynext:$(cat /run/secrets/postgres_password)@db:5432/lazynext
+      - DATABASE_URL_FILE=/run/secrets/postgres_password
       - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
       - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
       - GEMINI_API_KEY_FILE=/run/secrets/gemini_api_key
@@ -663,6 +671,33 @@ services:
       - --path.rootfs=/rootfs
       - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|run)($$|/)
       - --collector.filesystem.fs-types-exclude="^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$"
+
+  # ── api-gateway (not in base — production override) ──────────────
+  api-gateway:
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+    secrets:
+      - lazynext_better_auth_secret
+      - lazynext_openai_api_key
+      - lazynext_anthropic_api_key
+      - lazynext_gemini_api_key
+    environment:
+      - RUST_LOG=info
+      - DISABLE_CSRF=false
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/lazynext_better_auth_secret
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8005/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
 
 secrets:
   lazynext_postgres_password:

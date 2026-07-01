@@ -43,13 +43,17 @@ COPY requirements.txt .
 
 # Pre-create model cache directories
 RUN mkdir -p /models/whisper /models/sam2 /models/realesrgan /tmp/preprocessing \
-    && chmod 777 /tmp/preprocessing
+    && chmod 755 /tmp/preprocessing
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV CUDA_VISIBLE_DEVICES=0
 ENV PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
 ENV PORT=8000
+
+# Run as non-root user
+RUN useradd -m -s /bin/bash mluser && chown -R mluser:mluser /tmp/preprocessing /models
+USER mluser
 
 EXPOSE 8000
 
