@@ -11,12 +11,56 @@
 import "./tracing";
 import express, { Request, Response } from "express";
 import crypto from "crypto";
+import { Database } from "bun:sqlite";
+import path from "path";
 import { connectKafka, sendToKafka } from "./kafka";
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 8006;
+
+// ── SQLite Persistence Layer ────────────────────────────────────────────
+// Events are written to SQLite for durability across restarts.
+// The in-memory buffer remains as a hot cache for /api/v1/metrics queries.
+
+const DB_PATH = process.env.ANALYTICS_DB_PATH || path.resolve("analytics.db");
+let db: Database;
+
+try {
+  db = new Database(DB_PATH);
+  db.run("PRAGMA journal_mode = WAL");
+  db.run(`
+    CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT NOT NULL,
+      event_type TEXT NOT NULL,
+      metadata TEXT DEFAULT '{}',
+      session_id TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      ingested_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_events_user_id ON events(user_id)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_events_event_type ON events(event_type)`);
+  db.run(`CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp)`);
+  console.log(`[Analytics] SQLite persistence enabled at ${DB_PATH}`);
+} catch (err) {
+  console.warn(`[Analytics] SQLite unavailable (${err}) — events will not survive restarts`);
+  db = null as any;
+}
+
+function persistEvent(userId: string, eventType: string, metadata: Record<string, unknown>, sessionId: string, timestamp: number): void {
+  if (!db) return;
+  try {
+    const stmt = db.prepare(
+      "INSERT INTO events (user_id, event_type, metadata, session_id, timestamp) VALUES (?, ?, ?, ?, ?)"
+    );
+    stmt.run(userId, eventType, JSON.stringify(metadata), sessionId, timestamp);
+  } catch (err) {
+    console.warn(`[Analytics] SQLite write failed: ${err}`);
+  }
+}
 
 // ── Kafka / ClickHouse Configuration ────────────────────────────────────
 // In production, uses kafkajs for real Kafka producers and @clickhouse/client
@@ -151,6 +195,9 @@ app.post("/api/v1/events", async (req: Request, res: Response) => {
     if (eventBuffer.length > MAX_BUFFERED_EVENTS) {
       eventBuffer.shift();
     }
+
+    // Persist to SQLite for durability across restarts
+    persistEvent(userId, eventType, metadata, sid, ts);
 
     // Track session
     trackSession(userId, sid);

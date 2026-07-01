@@ -75,6 +75,28 @@ export async function connectKafka(): Promise<boolean> {
     });
     await producerInstance.connect();
 
+    // Auto-create topics if they don't exist
+    try {
+      const admin = kafkaInstance.admin();
+      await admin.connect();
+      const existingTopics = await admin.listTopics();
+      const requiredTopics = Object.values(Topics);
+      const toCreate = requiredTopics.filter((t) => !existingTopics.includes(t));
+      if (toCreate.length > 0) {
+        await admin.createTopics({
+          topics: toCreate.map((t) => ({
+            topic: t,
+            numPartitions: 3,
+            replicationFactor: 2,
+          })),
+        });
+        console.log(`[Kafka] Auto-created topics: ${toCreate.join(", ")}`);
+      }
+      await admin.disconnect();
+    } catch (err) {
+      console.warn(`[Kafka] Topic auto-creation failed (${err}) — topics may need manual provisioning`);
+    }
+
     kafkaConnected = true;
     console.log(`[Kafka] Connected to brokers: ${config.brokers.join(", ")}`);
     return true;

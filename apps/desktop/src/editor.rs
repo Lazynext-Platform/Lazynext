@@ -3,6 +3,8 @@ use gpui::*;
 use lazynext_core::NLEState;
 use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use lazynext_core::engine::AssetLoader;
+use std::cell::Cell;
+use std::rc::Rc;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -14,10 +16,12 @@ pub struct EditorShell {
     pub current_frame: u32,
     pub is_playing: bool,
     pub ai_prompt_text: String,
+    pub play_clicked: Rc<Cell<bool>>,
+    pub prompt_focused: Rc<Cell<bool>>,
+    pub prompt_clicked: Rc<Cell<bool>>,
 }
 
 impl EditorShell {
-    #[allow(dead_code)]
     fn toggle_playback(&mut self) {
         self.is_playing = !self.is_playing;
     }
@@ -28,7 +32,24 @@ impl EditorShell {
 }
 
 impl Render for EditorShell {
-    fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+        // Process pending play/pause click
+        if self.play_clicked.get() {
+            self.play_clicked.set(false);
+            self.toggle_playback();
+        }
+
+        if self.is_playing {
+            self.current_frame = self.current_frame.wrapping_add(1);
+            cx.notify();
+        }
+
+        // Process pending prompt click (focus toggle)
+        if self.prompt_clicked.get() {
+            self.prompt_clicked.set(false);
+            self.prompt_focused.set(true);
+        }
+
         let bg_color = rgb(0x121212); // Deep dark gray/black background
         let panel_bg = rgb(0x1e1e1e);
         let border_color = rgb(0x2a2a2a);
@@ -82,6 +103,14 @@ impl Render for EditorShell {
                 .hover(|s| s.bg(rgb(0x2a2a2a)))
                 .child(label.to_string())
         };
+
+        let play_clicked = self.play_clicked.clone();
+        let prompt_clicked = self.prompt_clicked.clone();
+        let is_prompt_focused = self.prompt_focused.get();
+        let prompt_display = SharedString::from(self.ai_prompt_text.clone());
+        let prompt_placeholder = SharedString::from("Click to focus and type a command (e.g. 'cut silences')");
+        let prompt_text_color = if self.ai_prompt_text.is_empty() { rgb(0x666666) } else { rgb(0xcccccc) };
+        let actual_text = if self.ai_prompt_text.is_empty() { prompt_placeholder } else { prompt_display };
 
         div()
             .flex()
@@ -147,8 +176,9 @@ impl Render for EditorShell {
                                                     .child("+ Import")
                                                     .on_mouse_down(gpui::MouseButton::Left, {
                                                         let nle = self.nle.clone();
-                                                        move |_, _, _cx| {
+                                                        move |_, _, cx| {
                                                             let nle = nle.clone();
+                                                            let window = cx;
                                                             tokio::spawn(async move {
                                                                 let file = rfd::AsyncFileDialog::new()
                                                                     .add_filter("Media", &["mp4", "mov", "avi", "mkv", "wav", "mp3"])
@@ -249,8 +279,9 @@ impl Render for EditorShell {
                                     .hover(|s| s.bg(if self.is_playing { rgb(0x00b4bf) } else { rgb(0x444444) }))
                                     .child(if self.is_playing { "⏸" } else { "▶" })
                                     .on_mouse_down(gpui::MouseButton::Left, {
-                                        move |_, _, _cx| {
-                                            log::info!("Play/Pause toggled in desktop editor");
+                                        let play_clicked = play_clicked.clone();
+                                        move |_, _, _| {
+                                            play_clicked.set(true);
                                         }
                                     }),
                             )
@@ -356,7 +387,7 @@ impl Render for EditorShell {
                                                             let width_px =
                                                                 (clip.end.saturating_sub(clip.start)) as f32
                                                                     * Self::TIMELINE_PX_PER_FRAME;
-                                                            div()
+        div()
                                                                 .absolute()
                                                                 .top_0()
                                                                 .bottom_0()
@@ -468,7 +499,7 @@ impl Render for EditorShell {
                                             .child("100%"),
                                     ),
                             )
-                            // --- NEW AI PROMPT BAR ---
+                            // --- AI PROMPT BAR (with real text input) ---
                             .child(
                                 div()
                                     .mt_8()
@@ -483,18 +514,26 @@ impl Render for EditorShell {
                                             .child("AI Copilot"),
                                     )
                                     .child(
+                                        // Clickable prompt display area — shows current prompt text
                                         div()
                                             .p_3()
                                             .bg(rgb(0x0a0a0a))
                                             .border_1()
-                                            .border_color(accent_color)
+                                            .border_color(if is_prompt_focused { rgb(0x00ff88) } else { accent_color })
                                             .rounded_md()
+                                            .cursor_pointer()
                                             .child(
                                                 div()
                                                     .text_sm()
-                                                    .text_color(rgb(0xcccccc))
-                                                    .child("Type a command (e.g. 'cut silences')"),
-                                            ),
+                                                    .text_color(prompt_text_color)
+                                                    .child(actual_text.clone()),
+                                            )
+                                            .on_mouse_down(gpui::MouseButton::Left, {
+                                                let prompt_clicked = prompt_clicked.clone();
+                                                move |_, _, _| {
+                                                    prompt_clicked.set(true);
+                                                }
+                                            }),
                                     )
                                     .child(
                                         div()
@@ -509,7 +548,9 @@ impl Render for EditorShell {
                                             .child("Run Command")
                                             .on_mouse_down(gpui::MouseButton::Left, {
                                                 let text = self.ai_prompt_text.clone();
+                                                let prompt_focused = self.prompt_focused.clone();
                                                 move |_, _, _cx| {
+                                                    prompt_focused.set(false);
                                                     let prompt = if text.is_empty() {
                                                         "Apply cinematic color grade and remove silences".to_string()
                                                     } else {
@@ -577,6 +618,9 @@ mod tests {
             current_frame: 0,
             is_playing: false,
             ai_prompt_text: String::new(),
+            play_clicked: Rc::new(Cell::new(false)),
+            prompt_focused: Rc::new(Cell::new(false)),
+            prompt_clicked: Rc::new(Cell::new(false)),
         };
 
         assert!(!editor.is_playing);
@@ -603,6 +647,9 @@ mod tests {
             current_frame: 0,
             is_playing: false,
             ai_prompt_text: String::new(),
+            play_clicked: Rc::new(Cell::new(false)),
+            prompt_focused: Rc::new(Cell::new(false)),
+            prompt_clicked: Rc::new(Cell::new(false)),
         };
 
         assert!(!editor.is_playing);

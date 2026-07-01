@@ -12,21 +12,76 @@ from fastapi import HTTPException
 from src.models import VideoRequest, EnhanceAudioRequest
 
 async def transcribe_audio_service(req: VideoRequest):
-    """Transcribe speech to word-level subtitles using OpenAI Whisper.
+    """Transcribe speech to word-level subtitles using Whisper.
+
+    Tries (in order):
+      1. Local TF Serving whisper-large-v3
+      2. OpenAI Whisper API
+      3. Returns 503 if both unavailable
 
     Args:
         req: VideoRequest containing the video_id to transcribe.
 
     Returns:
         dict with success, video_id, language, and word-level subtitles.
-
-    Raises:
-        HTTPException: 503 if API key is missing, 404 if audio file missing, 500 on failure.
     """
     api_key = os.getenv("OPENAI_API_KEY")
+    tf_serving_url = os.getenv("TF_SERVING_URL", "http://tensorflow-serving:8501")
     file_path = f"/tmp/{req.video_id}.mp4"
 
-    if api_key and os.path.exists(file_path):
+    if not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=404,
+            detail=f"Video file not found at {file_path}"
+        )
+
+    # Phase 1: Try local TF Serving Whisper model first
+    try:
+        async with httpx.AsyncClient() as client:
+            # Read audio file as bytes
+            with open(file_path, "rb") as f:
+                audio_bytes = f.read()
+
+            # TF Serving predict request
+            tf_response = await client.post(
+                f"{tf_serving_url}/v1/models/whisper:predict",
+                json={
+                    "instances": [{
+                        "audio_b64": httpx._compat.base64.b64encode(audio_bytes).decode("utf-8"),
+                        "language": getattr(req, "language", None),
+                        "response_format": "verbose_json",
+                        "timestamp_granularities": ["word"],
+                    }]
+                },
+                timeout=10.0,
+            )
+
+            if tf_response.status_code == 200:
+                data = tf_response.json()
+                predictions = data.get("predictions", [])
+                if predictions:
+                    result = predictions[0]
+                    subtitles = []
+                    if "words" in result:
+                        for w in result["words"]:
+                            subtitles.append({
+                                "start": w["start"],
+                                "end": w["end"],
+                                "text": w["word"],
+                            })
+                    print(f"[Pre-Processing] Whisper TF Serving: {len(subtitles)} words transcribed")
+                    return {
+                        "success": True,
+                        "video_id": req.video_id,
+                        "language": result.get("language"),
+                        "subtitles": subtitles,
+                        "source": "tf_serving_whisper",
+                    }
+    except (httpx.RequestError, Exception) as e:
+        print(f"[Pre-Processing] TF Serving Whisper unavailable ({e}), falling back to OpenAI API")
+
+    # Phase 2: Fall back to OpenAI Whisper API
+    if api_key:
         try:
             async with httpx.AsyncClient() as client:
                 with open(file_path, "rb") as audio_file:
@@ -63,21 +118,15 @@ async def transcribe_audio_service(req: VideoRequest):
                         "video_id": req.video_id,
                         "language": data.get("language"),
                         "subtitles": subtitles,
+                        "source": "openai_whisper",
                     }
         except Exception as e:
             print(f"[Pre-Processing] Whisper API error: {e}")
 
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Transcription service unavailable — Whisper API key not configured"
-        )
-    
-    if not os.path.exists(file_path):
-        raise HTTPException(
-            status_code=404,
-            detail=f"Video file not found at {file_path}"
-        )
+    raise HTTPException(
+        status_code=503,
+        detail="Transcription service unavailable — no Whisper API key configured and TF Serving unreachable"
+    )
     
     raise HTTPException(
         status_code=500,

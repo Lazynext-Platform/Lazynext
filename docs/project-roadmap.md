@@ -9,14 +9,13 @@
 ## Progress Overview
 
 | Metric | Count |
-|---|---|
-| Total Features | 34 |
+|---|---|---|
+| Total Features | 35 |
 | 🟢 Complete | 34 |
-| ⏸️ On Hold | 0 |
+| 🟡 In Progress | 1 |
 | 🔴 Not Started | 0 |
-| 🟡 In Progress | 0 |
 
-**Overall Progress**: ██████████ **100%** — All 33 features complete. Platform is code-complete and ready for operational deployment.
+**Overall Progress**: ██████████ **99%** — Feature #35 in progress (platform finalization).
 
 ---
 
@@ -48,6 +47,7 @@
 | 32 | Remaining Production Gaps | 🟢 Complete | #22, #30, #31 | — | Closed all 7 remaining code-verified gaps: AI actions, Azure Blob, silence trim, generative fill, MCP export, ElevenLabs, JWT secret. |
 | 33 | Production Hardening — All 7 Formats | 🟢 Complete | #32 | `feature/33-production-hardening-all-formats` | Desktop: playback + AI prompt + import/export. CLI: real media + ingest. MCP: SSE transport. Gateway: graceful shutdown + render dispatch + E2E tests. Mobile: preview + native stubs. Browser ext: timeline preview. Web: WASM automation. |
 | 34 | Real Video Playback Pipeline | 🟢 Complete | #33 | `feature/34-real-video-playback-pipeline` | Real video decode (CliFfmpegLoader) → GPU compositor → valid H.264 MP4 export. Red pixel analysis confirmed. Desktop auto-decodes textures. Web video-decoder utility. 133fps render speed. |
+| 35 | Platform Finalization | 🟡 In Progress | #33, #34 | `feature/35-platform-finalization` | Close final 8 wiring gaps. Desktop play/pause + AI prompt, mobile NativeBridge UniFFI, MCP tool expansion (50+), SAM2 ONNX, local Whisper, analytics persistence. |
 
 ---
 

@@ -1,68 +1,81 @@
 package com.lazynext.mobile.modules
 
+import uniffi.lazynext_mobile.*
+
 /**
- * Android stub — defines the bridge contract for the Lazynext mobile app.
+ * Android native module — wires React Native to the Lazynext Rust core via UniFFI.
  *
- * Implementations return mock data so the RN shell has realistic content
- * even when the native Rust core library is not compiled for the device.
- *
- * Real implementations live in:
- *   modules/lazynext-native/android/src/main/java/com/lazynext/lazynextnative/MyModule.kt
+ * Calls real UniFFI-generated bindings. On error (library not loaded, engine not
+ * initialized), falls back to graceful degradation with error messages.
  */
 object MyModuleStub {
 
-    fun getProjectInfo(): String {
-        return """
-        {
-            "name": "Demo Cut (Android Stub)",
-            "tracks": [
-                {
-                    "id": "track_1",
-                    "name": "Video",
-                    "trackType": "video",
-                    "clips": [
-                        {"id": "clip_001", "name": "Opening Shot", "start": 0, "duration": 150},
-                        {"id": "clip_002", "name": "B-Roll Montage", "start": 150, "duration": 210},
-                        {"id": "clip_003", "name": "Hero Close-up", "start": 360, "duration": 90}
-                    ]
-                },
-                {
-                    "id": "track_2",
-                    "name": "Audio",
-                    "trackType": "audio",
-                    "clips": [
-                        {"id": "clip_004", "name": "Background Music", "start": 0, "duration": 450}
-                    ]
-                }
-            ]
+    private var engineInitialized = false
+
+    private fun ensureInit() {
+        if (!engineInitialized) {
+            try {
+                initEngine("android_session", "Lazynext Mobile", 24u)
+                engineInitialized = true
+            } catch (e: Exception) {
+                android.util.Log.w("LazynextMobile", "UniFFI engine init failed: ${e.message}. Using stub responses.")
+            }
         }
-        """.trimIndent()
+    }
+
+    fun getProjectInfo(): String {
+        ensureInit()
+        return try {
+            if (engineInitialized) {
+                getProjectInfo()
+            } else {
+                throw RuntimeException("Engine not initialized")
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("LazynextMobile", "getProjectInfo failed: ${e.message}")
+            """{"name":"Lazynext Project (Offline)","tracks":[],"error":"Rust engine unavailable"}"""
+        }
     }
 
     fun processIntent(prompt: String, requireApproval: Boolean): String {
-        return """
-        {
-            "success": true,
-            "message": "Processed intent: $prompt (stub — Rust core not loaded)"
+        ensureInit()
+        return try {
+            if (engineInitialized) {
+                processIntent(prompt, requireApproval)
+            } else {
+                throw RuntimeException("Engine not initialized")
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("LazynextMobile", "processIntent failed: ${e.message}")
+            """{"success":false,"error":"Rust engine unavailable. Start api-gateway for AI capabilities."}"""
         }
-        """.trimIndent()
     }
 
     fun sendChatMessage(message: String): String {
-        return """
-        {
-            "success": true,
-            "message": "Chronos Copilot stub: received '$message'. Connect to api-gateway for full AI capabilities."
+        ensureInit()
+        return try {
+            if (engineInitialized) {
+                processIntent(message, true)
+            } else {
+                throw RuntimeException("Engine not initialized")
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("LazynextMobile", "sendChatMessage failed: ${e.message}")
+            """{"success":false,"error":"Chronos Copilot is offline. Connect to api-gateway."}"""
         }
-        """.trimIndent()
     }
 
     fun moveClip(clipId: String, newStartFrame: Long): String {
-        return """
-        {
-            "success": true,
-            "message": "Moved clip $clipId to frame $newStartFrame (stub)"
+        ensureInit()
+        return try {
+            if (engineInitialized) {
+                moveClip(clipId, newStartFrame.toUInt())
+            } else {
+                throw RuntimeException("Engine not initialized")
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("LazynextMobile", "moveClip failed: ${e.message}")
+            """{"success":false,"error":"Rust engine unavailable"}"""
         }
-        """.trimIndent()
     }
 }

@@ -2,6 +2,8 @@ use crate::editor::EditorShell;
 use gpui::*;
 use lazynext_core::NLEState;
 use lazynext_core::engine::CoreEngine;
+use std::cell::Cell;
+use std::rc::Rc;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -92,17 +94,17 @@ impl Render for Dashboard {
                                                 nle: nle.clone(),
                                                 engine: engine.clone(),
                                                 rt_handle: rt_handle.clone(),
-                                                last_frame_data: None,
-                                                current_frame: 0,
-                                                is_playing: false,
-                                                ai_prompt_text: String::new(),
-                                            })
+                last_frame_data: None,
+                current_frame: 0,
+                is_playing: false,
+                ai_prompt_text: String::new(),
+                play_clicked: Rc::new(Cell::new(false)),
+                prompt_focused: Rc::new(Cell::new(false)),
+                prompt_clicked: Rc::new(Cell::new(false)),
+            })
                                         },
                                     )
                                     .unwrap();
-
-                                    // Optional: close the dashboard window
-                                    // window.remove_window(); // not available easily here, usually we just leave it open or handle properly
                                 }
                             }),
                     )
@@ -161,6 +163,9 @@ impl Render for Dashboard {
                                                 current_frame: 0,
                                                 is_playing: false,
                                                 ai_prompt_text: String::new(),
+                                                play_clicked: Rc::new(Cell::new(false)),
+                                                prompt_focused: Rc::new(Cell::new(false)),
+                                                prompt_clicked: Rc::new(Cell::new(false)),
                                             })
                                         },
                                     )

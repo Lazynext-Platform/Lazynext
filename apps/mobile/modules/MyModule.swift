@@ -1,63 +1,74 @@
 import Foundation
 
-/// iOS stub — defines the bridge contract for the Lazynext mobile app.
+/// iOS native module — wires React Native to the Lazynext Rust core via UniFFI.
 ///
-/// Returns mock data so the RN shell has realistic content even when the
-/// native Rust core library is not compiled for the device.
-///
-/// Real implementation at:
-///   modules/lazynext-native/ios/MyModule.swift
+/// Calls real UniFFI-generated Swift bindings from lazynext_mobile.swift.
+/// On error (library not loaded, engine not initialized), falls back to
+/// graceful degradation with error messages.
 enum MyModuleStub {
 
+    private static var engineInitialized = false
+
+    private static func ensureInit() {
+        guard !engineInitialized else { return }
+        do {
+            let _ = lazynext_mobile.initEngine(sessionId: "ios_session", projectName: "Lazynext Mobile", framerate: 24)
+            engineInitialized = true
+        } catch {
+            NSLog("[LazynextMobile] UniFFI engine init failed: \(error.localizedDescription). Using stub responses.")
+        }
+    }
+
     static func getProjectInfo() -> String {
-        let mock: [String: Any] = [
-            "name": "Demo Cut (iOS Stub)",
-            "tracks": [
-                [
-                    "id": "track_1",
-                    "name": "Video",
-                    "trackType": "video",
-                    "clips": [
-                        ["id": "clip_001", "name": "Opening Shot", "start": 0, "duration": 150],
-                        ["id": "clip_002", "name": "B-Roll Montage", "start": 150, "duration": 210],
-                        ["id": "clip_003", "name": "Hero Close-up", "start": 360, "duration": 90]
-                    ]
-                ],
-                [
-                    "id": "track_2",
-                    "name": "Audio",
-                    "trackType": "audio",
-                    "clips": [
-                        ["id": "clip_004", "name": "Background Music", "start": 0, "duration": 450]
-                    ]
-                ]
-            ]
-        ]
-        return jsonString(from: mock)
+        ensureInit()
+        guard engineInitialized else {
+            return jsonString(from: ["name": "Lazynext Project (Offline)", "tracks": [], "error": "Rust engine unavailable"])
+        }
+        do {
+            return lazynext_mobile.getProjectInfo()
+        } catch {
+            NSLog("[LazynextMobile] getProjectInfo failed: \(error.localizedDescription)")
+            return jsonString(from: ["name": "Lazynext Project (Offline)", "tracks": [], "error": "Rust engine unavailable"])
+        }
     }
 
     static func processIntent(prompt: String, requireApproval: Bool) -> String {
-        let mock: [String: Any] = [
-            "success": true,
-            "message": "Processed intent: \(prompt) (stub — Rust core not loaded)"
-        ]
-        return jsonString(from: mock)
+        ensureInit()
+        guard engineInitialized else {
+            return jsonString(from: ["success": false, "error": "Rust engine unavailable. Start api-gateway for AI capabilities."])
+        }
+        do {
+            return lazynext_mobile.processIntent(prompt: prompt, requireApproval: requireApproval)
+        } catch {
+            NSLog("[LazynextMobile] processIntent failed: \(error.localizedDescription)")
+            return jsonString(from: ["success": false, "error": "Rust engine unavailable. Start api-gateway for AI capabilities."])
+        }
     }
 
     static func sendChatMessage(message: String) -> String {
-        let mock: [String: Any] = [
-            "success": true,
-            "message": "Chronos Copilot stub: received '\(message)'. Connect to api-gateway for full AI capabilities."
-        ]
-        return jsonString(from: mock)
+        ensureInit()
+        guard engineInitialized else {
+            return jsonString(from: ["success": false, "error": "Chronos Copilot is offline. Connect to api-gateway."])
+        }
+        do {
+            return lazynext_mobile.processIntent(prompt: message, requireApproval: true)
+        } catch {
+            NSLog("[LazynextMobile] sendChatMessage failed: \(error.localizedDescription)")
+            return jsonString(from: ["success": false, "error": "Chronos Copilot is offline. Connect to api-gateway."])
+        }
     }
 
     static func moveClip(clipId: String, newStartFrame: UInt64) -> String {
-        let mock: [String: Any] = [
-            "success": true,
-            "message": "Moved clip \(clipId) to frame \(newStartFrame) (stub)"
-        ]
-        return jsonString(from: mock)
+        ensureInit()
+        guard engineInitialized else {
+            return jsonString(from: ["success": false, "error": "Rust engine unavailable"])
+        }
+        do {
+            return lazynext_mobile.moveClip(clipId: clipId, newStart: UInt32(newStartFrame))
+        } catch {
+            NSLog("[LazynextMobile] moveClip failed: \(error.localizedDescription)")
+            return jsonString(from: ["success": false, "error": "Rust engine unavailable"])
+        }
     }
 
     private static func jsonString(from dict: [String: Any]) -> String {
