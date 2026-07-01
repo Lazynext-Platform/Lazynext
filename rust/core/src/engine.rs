@@ -150,6 +150,12 @@ impl CoreEngine {
         self.asset_loader = Some(loader);
     }
 
+    /// Clear the asset loader so render_frame uses static textures only.
+    /// Use this when frames are pre-uploaded as textures (e.g. CLI batch render).
+    pub fn clear_asset_loader(&mut self) {
+        self.asset_loader = None;
+    }
+
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn enable_decklink(&self) {
         let mut dl_guard = self.decklink.lock().await;
@@ -221,7 +227,13 @@ impl CoreEngine {
 
                     // Fetch frame data if asset_loader is present
                     if let Some(loader) = &self.asset_loader {
-                        match loader.load_frame(&clip.id, local_frame).await {
+                        // Resolve the actual media file path from the clip's media_id
+                        let media_path = clip.media_id.as_ref()
+                            .and_then(|mid| pd.media_pool.get(mid))
+                            .map(|asset| asset.path_or_url.clone())
+                            .unwrap_or_else(|| clip.id.clone());
+
+                        match loader.load_frame(&media_path, local_frame).await {
                             Ok(rgba) => {
                                 // We assume media matches project dimensions for this example
                                 let _ = self.upload_texture(&clip.id, &rgba, width, height).await;

@@ -5,6 +5,9 @@
 
 use clap::Parser;
 use lazynext_core::NLEState;
+use lazynext_core::engine::AssetLoader;
+use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
+use std::sync::Arc;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -289,7 +292,12 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         _ => "mp4",
     };
 
-    let out_path = format!("./out/{}.{}", project, ext);
+    // Extract just the project name from the path (remove directory and extension)
+    let project_name = std::path::Path::new(project)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or(project);
+    let out_path = format!("./out/{}.{}", project_name, ext);
     let output_ext = std::path::Path::new(&out_path)
         .extension()
         .and_then(|e| e.to_str())
@@ -330,47 +338,50 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         .collect();
 
     let engine_ptr = std::sync::Arc::new(tokio::sync::Mutex::new(engine));
-    let core_engine = lazynext_core::engine::CoreEngine::init(engine_ptr)
+    let mut core_engine = lazynext_core::engine::CoreEngine::init(engine_ptr)
         .await
         .map_err(|e| format!("CoreEngine init failed: {}", e))?;
 
-    if media_uploads.is_empty() {
-        log::warn!(
-            "No media assets in project, falling back to test pattern"
-        );
-        let img = image::open("tests/assets/test_pattern.png")
-            .map_err(|e| format!("Failed to open test pattern: {}", e))?
-            .to_rgba8();
-        let (img_w, img_h) = img.dimensions();
-        core_engine
-            .upload_texture("clip_1", img.as_raw(), img_w, img_h)
-            .await
-            .map_err(|e| format!("Failed to upload texture: {}", e))?;
-    } else {
-        for (clip_id, path) in &media_uploads {
-            match image::open(path) {
-                Ok(img) => {
-                    let rgba = img.to_rgba8();
-                    let (w, h) = rgba.dimensions();
-                    core_engine
-                        .upload_texture(clip_id, rgba.as_raw(), w, h)
-                        .await
-                        .map_err(|e| {
-                            format!(
-                                "Failed to upload texture for '{}': {}",
-                                clip_id, e
-                            )
-                        })?;
+    // Pre-decode first video frame as texture for the compositor
+    if !media_uploads.is_empty() {
+        if let Some((clip_id, path)) = media_uploads.first() {
+            let is_video = ["mp4", "mov", "mkv", "avi", "webm", "m4v", "mxf"]
+                .iter()
+                .any(|ext| path.to_lowercase().ends_with(ext));
+
+            if is_video {
+                log::info!("Decoding first frame from: {}", path);
+                let loader = CliFfmpegLoader::new(args.width, args.height);
+                match loader.load_frame(path, 0).await {
+                    Ok(rgba) => {
+                        core_engine
+                            .upload_texture(clip_id, &rgba, args.width, args.height)
+                            .await
+                            .map_err(|e| format!("Texture upload failed: {}", e))?;
+                        // Remove asset_loader so render_frame uses static texture (not per-frame decode)
+                        core_engine.clear_asset_loader();
+                        log::info!("Real video frame uploaded ({}) — rendering with static texture", path);
+                    }
+                    Err(e) => {
+                        log::warn!("Video decode failed, falling back to test pattern: {}", e);
+                        test_pattern_fallback(&core_engine).await.map_err(|e| format!("Test pattern fallback failed: {}", e))?;
+                    }
                 }
-                Err(e) => {
-                    log::warn!(
-                        "Could not open media '{}' as image: {}",
-                        path,
-                        e
-                    );
+            } else {
+                match image::open(path) {
+                    Ok(img) => {
+                        let rgba = img.to_rgba8();
+                        let (w, h) = rgba.dimensions();
+                        core_engine.upload_texture(clip_id, rgba.as_raw(), w, h).await
+                            .map_err(|e| format!("Image upload failed: {}", e))?;
+                        core_engine.clear_asset_loader();
+                    }
+                    Err(e) => log::warn!("Could not open image '{}': {}", path, e),
                 }
             }
         }
+    } else {
+        test_pattern_fallback(&core_engine).await.map_err(|e| format!("Test pattern upload failed: {}", e))?;
     }
 
     let progress_tx = if args.progress {
@@ -472,6 +483,35 @@ fn cmd_ingest(file: &str, project_id: &str) {
 
     engine.add_media_asset(asset);
 
+    // Also add a clip to the first track so the media appears on timeline
+    let track_idx = if engine.get_project_data().tracks.is_empty() {
+        engine.add_track("V1".to_string(), "video".to_string());
+        0usize
+    } else {
+        0usize
+    };
+    let clip_name = path
+        .file_stem()
+        .and_then(|n| n.to_str())
+        .unwrap_or(&name)
+        .to_string();
+    let framerate = engine.get_project_data().framerate;
+    let total_frames = (duration * framerate as f64) as u32;
+    engine.add_clip_to_track(
+        track_idx,
+        format!("clip_{}", uuid::Uuid::new_v4()),
+        asset_type.clone(),
+        clip_name.clone(),
+        0,
+        total_frames.max(1),
+    );
+    // Link clip to media asset so render can find it
+    if let Some(track) = engine.get_project_data_mut().tracks.get_mut(track_idx) {
+        if let Some(clip) = track.clips.last_mut() {
+            clip.media_id = Some(asset_id.clone());
+        }
+    }
+
     // Save updated project
     let project_json =
         serde_json::to_string_pretty(engine.get_project_data())
@@ -560,4 +600,14 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
             (10.0, 1920, 1080, asset_type)
         }
     }
+}
+
+/// Upload a test pattern texture when no real media is available.
+async fn test_pattern_fallback(engine: &lazynext_core::engine::CoreEngine) -> Result<(), String> {
+    log::warn!("No media assets — using test pattern");
+    let img = image::open("tests/assets/test_pattern.png")
+        .map_err(|e| format!("Failed to open test pattern: {}", e))?;
+    let rgba = img.to_rgba8();
+    let (w, h) = rgba.dimensions();
+    engine.upload_texture("clip_1", rgba.as_raw(), w, h).await
 }
