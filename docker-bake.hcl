@@ -29,6 +29,7 @@ group "default" {
     "db-migrate",
     "collab-server",
     "analytics-service",
+    "api-gateway",
   ]
 }
 
@@ -113,6 +114,15 @@ target "analytics-service" {
   tags       = ["${REGISTRY}/lazynext-analytics-service:${TAG}"]
   cache-from = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache"]
   cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-analytics-service:buildcache,mode=max"]
+}
+
+target "api-gateway" {
+  context    = "."
+  dockerfile = "rust/api-gateway/Dockerfile"
+  platforms  = split(",", PLATFORMS)
+  tags       = ["${REGISTRY}/lazynext-api-gateway:${TAG}"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-api-gateway:buildcache"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-api-gateway:buildcache,mode=max"]
 }
 
 // ── GPU Images ─────────────────────────────────────────────────

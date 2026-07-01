@@ -127,6 +127,13 @@ http:
         attempts: 3
         initialInterval: 100ms
 
+    # ── Strip /prometheus prefix (for monitoring sub-path routing) ─
+    strip-prom-prefix:
+      stripPrefix:
+        prefixes:
+          - "/prometheus"
+        forceSlash: false
+
     # ── Error Page Fallback ─────────────────────────────────────
     error-pages:
       errors:
