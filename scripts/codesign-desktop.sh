@@ -12,7 +12,7 @@
 set -e
 
 APP_DIR="apps/desktop"
-BINARY="${APP_DIR}/target/release/lazynext_desktop"
+BINARY="target/release/lazynext_desktop"
 APP_BUNDLE="${APP_DIR}/Lazynext.app"
 DMG_OUT="Lazynext-Desktop.dmg"
 
