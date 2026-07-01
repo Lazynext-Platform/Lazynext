@@ -1,3 +1,4 @@
+/** @module Transform handle components for resize, rotate, and skew manipulation of canvas elements */
 "use client";
 
 import { usePreviewViewport } from "@/preview/components/preview-viewport";

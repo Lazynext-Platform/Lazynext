@@ -1,3 +1,10 @@
+/**
+ * Playhead overlay — renders the vertical playhead line and drag handle
+ * with keyboard seek and snap-to-playhead highlighting.
+ *
+ * @module timeline/components/timeline-playhead
+ */
+
 "use client";
 
 import { useRef } from "react";
@@ -32,6 +39,10 @@ interface TimelinePlayheadProps {
 	isSnappingToPlayhead?: boolean;
 }
 
+/**
+ * Renders the playhead line + draggable handle with left/right arrow
+ * keyboard seek support and snap-to-playhead visual state.
+ */
 export function TimelinePlayhead({
 	zoomLevel,
 	hasHorizontalScrollbar,

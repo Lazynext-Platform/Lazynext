@@ -1,3 +1,9 @@
+/**
+ * @module Zustand store for sticker UI state — search query, category
+ * selection, browse/search results, and persisted recent stickers.
+ * Hydrates from localStorage and sanitizes stale provider IDs on load.
+ */
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {

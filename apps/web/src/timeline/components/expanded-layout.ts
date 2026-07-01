@@ -1,3 +1,11 @@
+/**
+ * Expanded keyframe lane layout — groups keyframed properties into
+ * lane rows, computes expansion heights, and resolves per-track
+ * expanded rows for the track labels column.
+ *
+ * @module timeline/components/expanded-layout
+ */
+
 import type { AnimationPath, ElementAnimations } from "@/animation/types";
 import type { TimelineTrack } from "@/timeline";
 import { getElementKeyframes } from "@/animation";

@@ -1,3 +1,4 @@
+/** @module External tools data for the marketing site featuring partner integrations */
 import { OcDataBuddyIcon, OcMarbleIcon } from "@/components/icons";
 
 export type ExternalTool = {

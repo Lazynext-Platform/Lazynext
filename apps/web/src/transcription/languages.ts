@@ -1,3 +1,8 @@
+/**
+ * @module Supported transcription language definitions — code/name pairs
+ * and the derived Language / LanguageCode utility types.
+ */
+
 export const LANGUAGES = [
 	{ code: "en", name: "English" },
 	{ code: "es", name: "Spanish" },

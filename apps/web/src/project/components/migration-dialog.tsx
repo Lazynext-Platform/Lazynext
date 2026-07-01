@@ -1,3 +1,12 @@
+/**
+ * Non-dismissable modal shown during project data migrations.
+ *
+ * Reads the current migration state from the EditorCore and displays
+ * the project being upgraded with its version range.
+ *
+ * @module project/components/migration-dialog
+ */
+
 "use client";
 
 import {
@@ -10,6 +19,10 @@ import {
 import { useEditor } from "@/editor/use-editor";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Displays a blocking modal during project migration. Reads migration
+ * state from the EditorCore and shows version range information.
+ */
 export function MigrationDialog() {
 	const editor = useEditor();
 	const migrationState = editor.project.getMigrationState();

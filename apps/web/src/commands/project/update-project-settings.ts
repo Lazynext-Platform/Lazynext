@@ -1,3 +1,4 @@
+/** @module Command for updating project-level settings (canvas size, frame rate, theme) */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { TProject, TProjectSettings } from "@/project/types";

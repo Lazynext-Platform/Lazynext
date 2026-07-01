@@ -1,3 +1,8 @@
+//! Core engine module connecting the CRDT NLE state with GPU compositor,
+//! asset loading, playback control, and SDI output via DeckLink.
+//! Provides the `CoreEngine` runtime, the `AssetLoader` trait for media
+//! frame retrieval, and the `PlaybackLoop` real-time playhead driver.
+
 use crate::nle_state::NLEState;
 use std::sync::Arc;
 use tokio::sync::Mutex;

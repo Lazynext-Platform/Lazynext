@@ -1,3 +1,4 @@
+/** @module Command for inserting a custom freeform mask point with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { insertPointOnFreeformSegment } from "@/masks/freeform/definition";

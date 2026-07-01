@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/v23-to-v24
+ */
+
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV23ToV24 } from "./transformers/v23-to-v24";

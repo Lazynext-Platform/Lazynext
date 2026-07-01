@@ -1,3 +1,5 @@
+/** @component Renders a theme-aware data table with header, body, footer, and row subcomponents. */
+
 import * as React from "react";
 
 import { cn } from "@/utils/ui";

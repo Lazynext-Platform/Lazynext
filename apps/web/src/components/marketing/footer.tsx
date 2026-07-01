@@ -1,3 +1,4 @@
+/** @module Marketing footer with product and legal links */
 import Link from "next/link";
 import { Film, Globe, Code, MessageCircle } from "lucide-react";
 import Image from "next/image";

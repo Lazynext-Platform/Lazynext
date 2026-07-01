@@ -1,3 +1,4 @@
+/** @module Preview toolbar component with canvas manipulation tools and controls */
 "use client";
 
 import { useState, useEffect } from "react";

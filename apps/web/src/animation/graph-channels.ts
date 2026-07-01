@@ -1,3 +1,10 @@
+/**
+ * @module animation/graph-channels
+ * @description Derives the UI-facing scalar channel graph data from raw
+ *   element animations. Responsible for resolving editable scalar
+ *   channels and keyframe contexts used by graph editors.
+ */
+
 import type {
 	AnimationPath,
 	ElementAnimations,
@@ -10,6 +17,7 @@ import type { ChannelEasingMode } from "@/params";
 import { isCompositeChannelData, isLeafChannelData } from "./channel-data";
 import { isScalarChannel } from "./interpolation";
 
+/** A collection of editable scalar channels with a shared easing mode. */
 export interface EditableScalarChannels {
 	easingMode: ChannelEasingMode;
 	channels: ScalarGraphChannel[];
@@ -32,6 +40,11 @@ function getEasingModeForChannelData({
 		: "independent";
 }
 
+/**
+ * Resolves all editable scalar channels for a given property path from
+ * the element's animation data. Returns `null` if no scalar channel data
+ * exists for the path.
+ */
 export function getEditableScalarChannels({
 	animations,
 	propertyPath,
@@ -64,6 +77,10 @@ export function getEditableScalarChannels({
 	return { easingMode: getEasingModeForChannelData({ data }), channels };
 }
 
+/**
+ * Like {@link getEditableScalarChannels} but returns only the channel
+ * matching a specific component key (e.g. `"r"`, `"x"`).
+ */
 export function getEditableScalarChannel({
 	animations,
 	propertyPath,
@@ -80,6 +97,10 @@ export function getEditableScalarChannel({
 	);
 }
 
+/**
+ * Resolves the full keyframe context for a specific keyframe by ID,
+ * including its index and neighbouring keys for curve editing.
+ */
 export function getScalarKeyframeContext({
 	animations,
 	propertyPath,

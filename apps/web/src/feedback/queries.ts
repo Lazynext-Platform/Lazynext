@@ -1,3 +1,4 @@
+/** @module Feedback persistence — submit user feedback to the database */
 import { generateUUID } from "@/utils/id";
 import { db } from "@/db";
 import { feedback } from "@/db/schema";

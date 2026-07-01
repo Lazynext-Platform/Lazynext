@@ -1,3 +1,4 @@
+/** @module Zustand store for sound effects — search, playback, saved sounds, and timeline integration */
 import { create } from "zustand";
 import type { SoundEffect, SavedSound } from "@/sounds/types";
 import { storageService } from "@/services/storage/service";

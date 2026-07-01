@@ -1,3 +1,4 @@
+/** @module Effects definitions registration that populates the effects registry at import time */
 import { effectsRegistry } from "../registry";
 import { blurEffectDefinition } from "./blur";
 

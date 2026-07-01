@@ -1,9 +1,16 @@
 #!/bin/bash
+# deploy.sh — Master deployment orchestrator for the Lazynext platform.
+#
+# Runs the full deployment pipeline: Terraform infra, WASM build, Fastlane mobile
+# builds, desktop codesigning, and browser extension packaging.
+#
+# Usage:
+#   ./scripts/deploy.sh
+#
+# Prerequisites:
+#   - Azure CLI authenticated (az login)
+#   - wasm-pack, Fastlane, and Apple Developer credentials (for full deploy)
 set -e
-
-# ==============================================================================
-# Lazynext Master Deployment Script (Azure Edition)
-# ==============================================================================
 
 echo "🚀 Starting Lazynext Platform Deployment..."
 

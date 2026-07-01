@@ -1,4 +1,5 @@
 "use client";
+/** @module Feedback popover with compose and history views */
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";

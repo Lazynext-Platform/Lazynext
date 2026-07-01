@@ -1,3 +1,10 @@
+/**
+ * VFX compositor panel — layer-based GPU compositor with blend
+ * modes, transforms, and effect stack management.
+ *
+ * @module components/editor/panels/vfx-compositor
+ */
+
 import React from "react";
 import { Layers, Crosshair, Sparkles, Film } from "lucide-react";
 

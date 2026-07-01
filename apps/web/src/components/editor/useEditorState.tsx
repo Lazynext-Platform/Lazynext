@@ -1,3 +1,10 @@
+/**
+ * Editor state provider — React context for project state, frames,
+ * settings, playback, and transport controls across the editor tree.
+ *
+ * @module components/editor/useEditorState
+ */
+
 "use client";
 
 import React, {

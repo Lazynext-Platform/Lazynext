@@ -1,3 +1,10 @@
+/**
+ * Web vitals reporting — sends Core Web Vitals metrics to analytics
+ * via the Next.js web-vitals API.
+ *
+ * @module components/analytics/WebVitals
+ */
+
 "use client";
 
 import { useReportWebVitals } from "next/web-vitals";

@@ -1,3 +1,9 @@
+/**
+ * Projects list page — displays all projects for the authenticated user.
+ *
+ * @page /projects
+ */
+
 import { getAllProjects } from "@/actions/project";
 import ProjectsClient from "./client";
 

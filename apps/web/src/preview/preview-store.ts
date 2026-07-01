@@ -1,3 +1,4 @@
+/** @module Zustand store for preview viewport state including zoom, pan, guides, and overlays */
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { isGuideId, type GuideId } from "@/guides";

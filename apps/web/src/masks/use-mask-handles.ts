@@ -1,3 +1,4 @@
+/** @module Hook for managing interactive mask handle state on the preview canvas */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePreviewViewport } from "@/preview/components/preview-viewport";
 import { useEditor } from "@/editor/use-editor";

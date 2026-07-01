@@ -1,3 +1,5 @@
+/** @component Renders a button with a primary action area and a secondary dropdown trigger. */
+
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { type ReactNode, forwardRef } from "react";

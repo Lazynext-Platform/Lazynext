@@ -1,3 +1,4 @@
+/** @module Storage migration v20 to v21 for project data schema updates */
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV20ToV21 } from "./transformers/v20-to-v21";

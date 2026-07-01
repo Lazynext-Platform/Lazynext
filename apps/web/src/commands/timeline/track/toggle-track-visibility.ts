@@ -1,3 +1,4 @@
+/** @module Command for toggling a track's visibility with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks } from "@/timeline";
 import { EditorCore } from "@/core";

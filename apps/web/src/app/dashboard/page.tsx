@@ -1,3 +1,9 @@
+/**
+ * Dashboard page — project overview and quick actions.
+ *
+ * @page /dashboard
+ */
+
 import type { Metadata } from "next";
 import { DashboardClient } from "./client";
 

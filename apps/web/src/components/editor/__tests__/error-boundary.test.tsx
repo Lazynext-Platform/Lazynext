@@ -1,3 +1,4 @@
+/** @module __tests__/error-boundary Test suite for EditorErrorBoundary component */
 import { describe, it, expect } from "bun:test";
 
 // EditorErrorBoundary is a class component that requires React DOM to test properly.

@@ -1,3 +1,11 @@
+/**
+ * Lazynext MCP Server — Model Context Protocol server over stdio.
+ *
+ * Exposes the `autonomous_edit` tool to MCP clients (Claude Desktop,
+ * Cursor, etc.), enabling natural-language video editing intents
+ * to be routed through the Lazynext API Gateway.
+ */
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -17,6 +25,11 @@ const server = new Server(
   }
 );
 
+/**
+ * Handler: `tools/list` — advertises the `autonomous_edit` tool to MCP
+ * clients, accepting a natural-language prompt for AI-powered timeline
+ * editing.
+ */
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: [
@@ -38,6 +51,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
   };
 });
 
+/**
+ * Handler: `tools/call` — executes the `autonomous_edit` tool by forwarding
+ * the prompt to the Lazynext API Gateway and returning the resulting job ID
+ * and status to the MCP client.
+ */
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (request.params.name === "autonomous_edit") {
     const args = request.params.arguments as { prompt?: string };

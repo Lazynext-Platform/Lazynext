@@ -1,3 +1,10 @@
+/**
+ * Editable timecode input — displays frame-synced timecode that can
+ * be clicked to type a seek position, with WASM-backed parsing.
+ *
+ * @module components/editable-timecode
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";

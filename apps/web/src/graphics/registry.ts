@@ -1,3 +1,4 @@
+/** @module Graphics registry for registering and looking up graphic shape definitions */
 import { DefinitionRegistry } from "@/params/registry";
 import type { GraphicDefinition } from "./types";
 

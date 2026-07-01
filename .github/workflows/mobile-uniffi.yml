@@ -26,11 +26,16 @@ jobs:
       run: cargo install cargo-ndk
 
     - name: Build iOS XCFramework
-      continue-on-error: true
+      continue-on-error: false
       run: |
         cd rust/core
         cargo build --target aarch64-apple-ios --release
         # In a real pipeline, we'd invoke xcodebuild -create-xcframework here
+
+    - name: Report iOS Build Failure
+      if: failure()
+      run: |
+        echo "::error title=iOS Build Failed::The iOS XCFramework build step failed. Check the 'Build iOS XCFramework' step logs for details."
 
     - name: Build Android AAR
       run: |

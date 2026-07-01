@@ -1,3 +1,9 @@
+/**
+ * @module Shared editor type definitions — Project, Clip, Track, Keyframe,
+ * Asset, and related UI display types consumed by EditorProvider and
+ * EditorClient.
+ */
+
 /** Shared editor types — used by EditorProvider context and EditorClient. */
 
 export interface Project {

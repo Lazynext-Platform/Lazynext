@@ -1,3 +1,8 @@
+/**
+ * @module Timeline orchestration manager for the NLE — all track/element/keyframe/
+ * effect/mask mutations flow through here as undoable CRDT commands.
+ */
+
 import type { EditorCore } from "@/core";
 import type { ElementBounds } from "@/preview/element-bounds";
 import type { ParamValues } from "@/params";

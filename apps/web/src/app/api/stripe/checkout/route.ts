@@ -1,3 +1,10 @@
+/**
+ * POST /api/stripe/checkout
+ *
+ * Creates a Stripe Checkout session for the authenticated user.
+ * Requires a valid Better Auth session.
+ */
+
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/auth/server";
@@ -7,6 +14,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_123", {
 	apiVersion: "2026-05-27.dahlia",
 });
 
+/** POST handler — creates a Stripe Checkout session for the authed user. */
 export async function POST(req: Request) {
 	try {
 		const session = await auth.api.getSession({

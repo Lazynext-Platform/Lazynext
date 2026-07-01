@@ -1,8 +1,24 @@
+/**
+ * Generates snap points from animation keyframes for timeline interactions.
+ *
+ * Walks every element across all tracks and emits a keyframe-type snap point
+ * at each keyframe time (offset by the element's start time).
+ *
+ * @module timeline/animation-snap-points
+ */
+
 import { getElementKeyframes } from "@/animation";
 import type { SceneTracks } from "@/timeline";
 import type { SnapPoint } from "@/timeline/snapping";
 import { addMediaTime } from "@/wasm";
 
+/**
+ * Collects keyframe snap points from all elements across the given tracks.
+ *
+ * @param tracks - the scene tracks to scan for keyframes.
+ * @param excludeElementIds - optional set of element IDs to skip.
+ * @returns an array of keyframe snap points.
+ */
 export function getAnimationKeyframeSnapPointsForTimeline({
 	tracks,
 	excludeElementIds,

@@ -1,3 +1,10 @@
+/**
+ * Export delivery panel — format/quality selection, render settings,
+ * and export triggers for video delivery.
+ *
+ * @module components/editor/panels/export-delivery
+ */
+
 import React, { useState } from "react";
 import { Download, Film, AudioWaveform, MonitorUp } from "lucide-react";
 import { toast } from "sonner";

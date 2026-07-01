@@ -1,3 +1,9 @@
+//! Time module root — re-exports frame rate, media time, and timecode.
+//!
+//! The time crate is the single source of truth for all temporal
+//! representations in Lazynext. Every other crate (state, compositor,
+//! export, UI shells) consumes time types from this module.
+
 mod frame_rate;
 mod media_time;
 mod timecode;

@@ -1,3 +1,8 @@
+/**
+ * @module Core type definitions for the stickers system — provider contract,
+ * search/browse results, and sticker item shape.
+ */
+
 import type { STICKER_CATEGORIES } from "@/stickers/categories";
 
 export type StickerCategory = keyof typeof STICKER_CATEGORIES;

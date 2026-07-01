@@ -1,3 +1,5 @@
+/** @component Renders a pulsing placeholder shape for loading states. */
+
 import { cn } from "@/utils/ui";
 
 function Skeleton({

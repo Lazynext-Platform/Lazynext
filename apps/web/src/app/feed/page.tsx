@@ -1,3 +1,9 @@
+/**
+ * Video feed page — scrollable feed of community videos with playback.
+ *
+ * @page /feed
+ */
+
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";

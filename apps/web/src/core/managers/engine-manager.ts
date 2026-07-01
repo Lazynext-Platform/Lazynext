@@ -1,3 +1,9 @@
+/**
+ * @module WASM CRDT engine bridge. Lazily initializes the CrdtEngine from
+ * the lazynext-wasm package and synchronizes timeline state after every
+ * operation, undo, or redo.
+ */
+
 import { EditorCore } from "@/core";
 import { syncTimelineFromEngine } from "@/collaboration/crdt-sync";
 

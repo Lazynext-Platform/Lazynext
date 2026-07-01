@@ -1,3 +1,11 @@
+/**
+ * Media asset processing pipeline — imports files, checks storage quota,
+ * generates thumbnails, extracts video metadata via MediaBunny, and returns
+ * processed {@link ProcessedMediaAsset} descriptors for the editor.
+ *
+ * @module media/processing
+ */
+
 import { toast } from "sonner";
 import { getMediaTypeFromFile } from "@/media/media-utils";
 import { formatStorageBytes } from "@/services/storage/quota";

@@ -1,3 +1,4 @@
+/** @module Heart mask definition with position, size, feather, and rotation parameters */
 import type { MaskDefinition } from "@/masks/types";
 import {
 	BOX_LIKE_MASK_PARAMS,

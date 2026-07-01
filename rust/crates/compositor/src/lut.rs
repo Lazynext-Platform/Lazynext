@@ -32,16 +32,20 @@ pub struct LutPreset {
     pub source: LutSource,
 }
 
+/// Indicates how a LUT preset was obtained.
 pub enum LutSource {
+    /// Loaded from a file on disk.
     File(String),
+    /// Generated from a built-in recipe.
     Builtin,
+    /// Generated at runtime.
     Runtime,
 }
 
 // ── Built-in LUT presets ────────────────────────────────────────────
 
 impl LutPreset {
-    /// Create a cinematic "Teal & Orange" LUT.
+    /// Creates a cinematic "Teal & Orange" LUT.
     pub fn teal_orange() -> Self {
         let size = 17u32;
         let n = (size * size * size) as usize;
@@ -74,7 +78,7 @@ impl LutPreset {
         }
     }
 
-    /// Create a "Bleach Bypass" LUT — desaturated, high contrast.
+    /// Creates a "Bleach Bypass" LUT — desaturated, high contrast.
     pub fn bleach_bypass() -> Self {
         let size = 17u32;
         let n = (size * size * size) as usize;
@@ -108,7 +112,7 @@ impl LutPreset {
         }
     }
 
-    /// Create a "Film Emulation" LUT with a warm tone curve.
+    /// Creates a "Film Emulation" LUT with a warm tone curve.
     pub fn film_emulation() -> Self {
         let size = 17u32;
         let n = (size * size * size) as usize;
@@ -144,7 +148,7 @@ impl LutPreset {
         }
     }
 
-    /// Create a monochrome "Noir" LUT.
+    /// Creates a monochrome "Noir" LUT.
     pub fn noir() -> Self {
         let size = 17u32;
         let n = (size * size * size) as usize;

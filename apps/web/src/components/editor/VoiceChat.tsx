@@ -1,3 +1,10 @@
+/**
+ * Voice chat — WebRTC voice communication and collaboration controls
+ * for the editor.
+ *
+ * @module components/editor/VoiceChat
+ */
+
 import { useEffect, useRef } from "react";
 import { Mic, MicOff, PhoneCall, Users } from "lucide-react";
 

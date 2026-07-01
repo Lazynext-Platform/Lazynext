@@ -1,3 +1,4 @@
+/** @module Snap guide lines rendered on the preview canvas for element alignment snapping */
 "use client";
 
 import { usePreviewViewport } from "@/preview/components/preview-viewport";

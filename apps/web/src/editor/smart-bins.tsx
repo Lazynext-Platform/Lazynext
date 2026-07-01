@@ -1,5 +1,19 @@
+/**
+ * Neural Smart Bins panel for AI-powered clip organization.
+ *
+ * Displays bins of media clips grouped by detected actors using the
+ * Neural Engine (face detection and clip tagging). Intended to be
+ * wired to `rust/crates/neural_engine` for real analysis.
+ *
+ * @module editor/smart-bins
+ */
+
 import React, { useState } from "react";
 
+/**
+ * Panel that organizes media clips into smart bins grouped by detected
+ * actor names via the Neural Engine.
+ */
 export function SmartBinsPanel() {
 	// TODO: Wire to NeuralEngineService (rust/crates/neural_engine) for real face detection + clip tagging
 	const [smartBins, setSmartBins] = useState([

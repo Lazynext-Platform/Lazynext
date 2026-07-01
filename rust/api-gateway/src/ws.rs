@@ -1,3 +1,10 @@
+//! WebSocket handler for real-time collaboration.
+//!
+//! Upgrades authenticated HTTP connections to WebSocket, joins a Redis
+//! pub/sub room keyed by project ID, and relays timeline sync requests,
+//! CRDT operations, and cursor movements between connected peers.
+//! Persists CRDT state to PostgreSQL on each operation.
+
 use crate::{AppState, rbac::AuthClaims};
 use axum::{
     extract::{
@@ -12,22 +19,28 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tracing::{debug, error, info};
 
+/// Query parameters for WebSocket upgrade requests.
 #[derive(Deserialize)]
 pub struct WsQuery {
     pub project_id: String,
     // The token is handled by the rbac middleware.
 }
 
-// Message structure for WebSocket payload
+/// WebSocket message envelope — discriminated by `type` field.
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "type", content = "payload")]
 pub enum WsMessage {
+    /// Client requests a full timeline sync snapshot.
     SyncRequest,
+    /// Server responds with the current project state.
     SyncResponse(serde_json::Value),
+    /// A CRDT operation to apply and broadcast to the room.
     CrdtOperation(CrdtOperation),
+    /// A peer's cursor position update (x, y in normalized coordinates).
     CursorMove { peer_id: String, x: f32, y: f32 },
 }
 
+/// Shared WebSocket state holding the Redis client for pub/sub messaging.
 pub struct WsState {
     pub redis_client: redis::Client,
 }

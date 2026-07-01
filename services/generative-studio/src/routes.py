@@ -1,3 +1,11 @@
+"""
+Generative Studio REST API routes.
+
+Exposes endpoints for AI media generation: video diffusion, inpainting,
+dubbing, overdubbing, stem splitting, upscaling, NeRF, style transfer,
+generative fill, and avatar generation.
+"""
+
 from fastapi import APIRouter
 from src.models import (
     DiffusionRequest, DubRequest, OverdubRequest, StyleTransferRequest,

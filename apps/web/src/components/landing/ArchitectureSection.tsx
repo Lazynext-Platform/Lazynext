@@ -1,3 +1,10 @@
+/**
+ * Architecture section — displays the multi-platform architecture
+ * diagram with project cards on the landing page.
+ *
+ * @module components/landing/ArchitectureSection
+ */
+
 import { Cpu, Combine, Blocks } from "lucide-react";
 
 const PROJECTS = [

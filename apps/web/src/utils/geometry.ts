@@ -1,3 +1,12 @@
+/**
+ * @module utils/geometry
+ * @description Geometry-related utility functions.
+ */
+
+/**
+ * Computes the reduced aspect ratio string (e.g. `"16:9"`) from a
+ * width and height using the greatest common divisor.
+ */
 export function dimensionToAspectRatio({
 	width,
 	height,

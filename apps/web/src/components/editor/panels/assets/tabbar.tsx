@@ -1,4 +1,5 @@
 "use client";
+/** @module Vertical tab bar for the assets panel with tooltip and fade overlays */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {

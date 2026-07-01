@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a popover card that appears on hover for previewing supplementary content. */
+
 import * as React from "react";
 import { HoverCard as HoverCardPrimitive } from "radix-ui";
 

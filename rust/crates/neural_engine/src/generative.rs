@@ -1,20 +1,45 @@
+//! Generative AI pipeline for video and audio synthesis via external APIs.
+//!
+//! Provides models for text-to-video generation (Replicate / Stable Video Diffusion)
+//! and text-to-speech synthesis (ElevenLabs), with graceful fallback when API keys
+//! are not configured.
+
 use serde::{Deserialize, Serialize};
 
+/// Configuration for AI-powered text-to-video generation.
+///
+/// Sent to the Replicate API (Stable Video Diffusion) to produce
+/// short video clips from natural-language prompts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoGenerationOptions {
+    /// Natural-language prompt describing the desired video content.
     pub prompt: String,
+    /// Output video width in pixels.
     pub width: u32,
+    /// Output video height in pixels.
     pub height: u32,
+    /// Number of frames to generate.
     pub num_frames: u32,
+    /// Playback frame rate of the generated video.
     pub fps: u32,
 }
 
+/// Configuration for AI-powered text-to-speech synthesis.
+///
+/// Sent to the ElevenLabs API to convert text into natural-sounding speech.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioGenerationOptions {
+    /// The text to convert into speech.
     pub text: String,
+    /// Optional ElevenLabs voice ID; defaults to a built-in voice if `None`.
     pub voice_id: Option<String>,
 }
 
+/// Generative AI model that orchestrates text-to-video and text-to-speech
+/// generation via external APIs (Replicate, ElevenLabs).
+///
+/// Gracefully degrades when API keys are not configured by returning
+/// descriptive errors instead of panicking.
 pub struct GenerativeModel {
     pub is_loaded: bool,
     api_key: Option<String>,
@@ -27,6 +52,10 @@ impl Default for GenerativeModel {
 }
 
 impl GenerativeModel {
+    /// Creates a new generative AI model instance.
+    ///
+    /// Reads the `REPLICATE_API_TOKEN` environment variable at construction
+    /// time to determine whether API calls can be made.
     pub fn new() -> Self {
         let api_key = std::env::var("REPLICATE_API_TOKEN").ok();
         println!(

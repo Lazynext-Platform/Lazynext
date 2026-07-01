@@ -1,3 +1,7 @@
+//! Build script for the DeckLink crate. Conditionally compiles the
+//! Blackmagic DeckLink C++ SDK bridge via cxx when the `decklink-sdk`
+//! feature is enabled; otherwise falls back to the pure-Rust simulation.
+
 fn main() {
     // The DeckLink C++ SDK bridge is only compiled when the `decklink-sdk`
     // feature is enabled. Without it, we use the pure-Rust simulation.

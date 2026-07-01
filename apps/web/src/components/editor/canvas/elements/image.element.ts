@@ -1,3 +1,4 @@
+/** @module Canvas element handler for image overlays — add, render, and sync transform updates */
 import type { CanvasElementHandler } from "../types";
 import { addImageElement, addBackgroundColor } from "../components/elements";
 import {

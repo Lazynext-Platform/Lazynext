@@ -1,3 +1,10 @@
+/**
+ * Effect element — timeline element wrapping a named GPU effect
+ * key with configurable intensity applied over its time range.
+ *
+ * @module components/editor/timeline/core/elements/effect.element
+ */
+
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";

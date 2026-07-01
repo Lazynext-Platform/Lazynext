@@ -1,3 +1,7 @@
+/**
+ * @module media/use-paste-media
+ */
+
 import { useEffect } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { processMediaAssets } from "@/media/processing";

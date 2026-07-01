@@ -1,3 +1,4 @@
+/** @module Hit-testing utilities for determining which element is at a given viewport position */
 import type { ElementWithBounds } from "./element-bounds";
 import type { ElementRef } from "@/timeline/types";
 

@@ -1,3 +1,10 @@
+/**
+ * Sign-in page — renders the AuthCard with SignInForm.
+ * Redirects authenticated users to the dashboard.
+ *
+ * @page /sign-in
+ */
+
 import { AuthCard } from "@/components/auth/AuthCard";
 import { SignInForm } from "@/components/auth/SignInForm";
 import { generateMetadata } from "@/seo/metadata";

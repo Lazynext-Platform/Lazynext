@@ -1,3 +1,11 @@
+/**
+ * React hook wrapping {@link PlayheadController} — wires mouse
+ * events for scrubbing, playback position updates, edge auto-scroll
+ * during scrubbing, and scroll-synced playhead rendering.
+ *
+ * @module timeline/hooks/use-timeline-playhead
+ */
+
 import { useEffect, useState } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
@@ -18,6 +26,9 @@ interface UseTimelinePlayheadProps {
 	playheadRef?: React.RefObject<HTMLDivElement | null>;
 }
 
+/**
+ * Returns playhead and ruler mousedown handlers for scrubbing/seeking.
+ */
 export function useTimelinePlayhead({
 	zoomLevel,
 	rulerRef,

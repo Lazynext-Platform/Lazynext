@@ -1,3 +1,10 @@
+/**
+ * Custom easing presets store — persisted to localStorage, allowing
+ * users to save and reuse their cubic-bezier curves.
+ *
+ * @module timeline/components/graph-editor/custom-presets-store
+ */
+
 "use client";
 
 import { useSyncExternalStore } from "react";

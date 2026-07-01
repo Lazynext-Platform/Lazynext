@@ -1,3 +1,10 @@
+/**
+ * Bookmarks barrel export — utils, snap source, preview overlay,
+ * drag hook, and the bookmarks row component.
+ *
+ * @module timeline/bookmarks
+ */
+
 export {
 	findBookmarkIndex,
 	isBookmarkAtTime,

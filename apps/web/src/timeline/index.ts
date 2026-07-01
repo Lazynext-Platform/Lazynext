@@ -1,3 +1,10 @@
+/**
+ * Timeline module barrel export — re-exports all timeline types,
+ * utilities, and the total duration calculator.
+ *
+ * @module timeline
+ */
+
 import { addMediaTime, type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 import type { SceneTracks } from "./types";
 
@@ -11,6 +18,10 @@ export * from "./zoom-utils";
 export * from "./ruler-utils";
 export * from "./pixel-utils";
 
+/**
+ * Computes the total timeline duration by scanning all elements across
+ * overlay, main, and audio tracks and taking the maximum end time.
+ */
 export function calculateTotalDuration({
 	tracks,
 }: {

@@ -1,3 +1,31 @@
+//! Lazynext Audio — real-time DSP engine and VST3 host.
+//!
+//! The audio crate provides low-latency audio processing for the NLE:
+//! a mixing console, parametric EQ, dynamics compressor, spatial audio
+//! (Ambisonics), and a VST3 plugin host for industry-standard effects.
+//!
+//! # Signal chain
+//!
+//! ```text
+//! Source Clip → EQ → Compressor → VST Insert → Mixer Bus → Limiter → Output
+//!                    └─ Sidechain ←──────────┘
+//! ```
+//!
+//! # Modules
+//!
+//! - **mixer**: Multi-bus mixing console with per-track gain/pan/mute/solo
+//! - **compressor**: Feed-forward dynamics compressor with threshold, ratio,
+//!   attack, release, knee, and makeup gain
+//! - **eq**: 10-band parametric equalizer with configurable filter types
+//!   (low-pass, high-pass, band-pass, notch, shelf, peaking)
+//! - **vst**: VST3 plugin host via `libloading` — loads, instantiates,
+//!   and processes through third-party audio plugins
+//! - **playback**: Hardware audio output via `rodio` (cpal → CoreAudio /
+//!   WASAPI / ALSA)
+//! - **spatial**: Ambisonic spatial audio (first-order B-format)
+//! - **fft**: Real-time FFT for spectral analysis and visualization
+//! - **sync**: Sample-accurate playback synchronization with video frames
+
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::too_many_arguments)]
 pub mod mixer;

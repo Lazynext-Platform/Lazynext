@@ -1,3 +1,4 @@
+/** @module Selectable surface component providing box-selection interaction area */
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

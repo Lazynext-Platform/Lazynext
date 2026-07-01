@@ -1,3 +1,33 @@
+//! Lazynext Bridge — proc-macro for WASM/JS interop conventions.
+//!
+//! The bridge crate provides a `#[export]` proc-macro attribute that
+//! enforces WASM-bindgen naming conventions and parameter constraints
+//! at compile time.
+//!
+//! # Rules enforced
+//!
+//! - Function names are auto-converted from `snake_case` to `camelCase`
+//!   for natural JavaScript consumption
+//! - Functions must accept exactly one argument (an options struct) —
+//!   positional arguments are rejected at compile time
+//! - Constants are exported as getter functions on the WASM side
+//! - Non-fn/non-const items produce a compile error at the item site
+//!
+//! # Usage
+//!
+//! ```ignore
+//! use bridge::export;
+//!
+//! #[export]
+//! fn apply_effect(opts: EffectOptions) -> Vec<u8> { ... }
+//!
+//! #[export]
+//! const MAX_BLEND_LAYERS: u32 = 64;
+//! ```
+//!
+//! The macro expands to `#[wasm_bindgen(js_name = "...")]` with the
+//! correct camelCase name and validation.
+
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{FnArg, Item, ItemConst, ItemFn, parse_macro_input};

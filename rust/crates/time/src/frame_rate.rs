@@ -1,7 +1,19 @@
+//! Frame rate representation with exact rational arithmetic.
+//!
+//! `FrameRate` stores a frame rate as a `numerator/denominator` pair
+//! (e.g., 29.97 DF = 30000/1001), enabling exact frame-to-tick
+//! conversions without floating-point drift. Standard NTSC, PAL, and
+//! film rates are provided as constants.
+
 use serde::{Deserialize, Serialize};
 
 use crate::media_time::TICKS_PER_SECOND;
 
+/// Exact rational frame rate (`numerator/denominator`).
+///
+/// Standard rates are available as associated constants (e.g.,
+/// [`FrameRate::FPS_24`], [`FrameRate::FPS_29_97`]). Use
+/// [`FrameRate::new`] for custom rates.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi, into_wasm_abi))]
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
@@ -52,6 +64,7 @@ impl FrameRate {
         denominator: 1,
     };
 
+    /// Create a new FrameRate with the given numerator and denominator.
     pub const fn new(numerator: u32, denominator: u32) -> Self {
         Self {
             numerator,
@@ -59,10 +72,12 @@ impl FrameRate {
         }
     }
 
+    /// Returns true if both numerator and denominator are positive.
     pub const fn is_valid(self) -> bool {
         self.numerator > 0 && self.denominator > 0
     }
 
+    /// Returns the frame rate as a floating-point value, or None if invalid.
     pub fn as_f64(self) -> Option<f64> {
         if !self.is_valid() {
             return None;
@@ -71,6 +86,7 @@ impl FrameRate {
         Some(f64::from(self.numerator) / f64::from(self.denominator))
     }
 
+    /// Returns the maximum frame number per second, or None if invalid.
     pub fn frame_number_upper_bound(self) -> Option<u32> {
         if !self.is_valid() {
             return None;
@@ -79,6 +95,8 @@ impl FrameRate {
         Some(self.numerator.div_ceil(self.denominator))
     }
 
+    /// Returns the number of media ticks per frame, or None if the rate is
+    /// invalid or produces fractional ticks.
     pub fn ticks_per_frame(self) -> Option<i64> {
         if !self.is_valid() {
             return None;

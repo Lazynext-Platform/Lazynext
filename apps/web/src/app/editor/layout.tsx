@@ -1,3 +1,10 @@
+/**
+ * Editor layout — auth guard that redirects unauthenticated users
+ * to sign-in (with e2e-test bypass support).
+ *
+ * @layout /editor
+ */
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth/server";

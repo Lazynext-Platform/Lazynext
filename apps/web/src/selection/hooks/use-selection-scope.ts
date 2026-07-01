@@ -1,3 +1,4 @@
+/** @module Hook for creating and managing a selection scope instance */
 import { useEffect, useState } from "react";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
 import { useSelectionContext } from "@/selection/context";

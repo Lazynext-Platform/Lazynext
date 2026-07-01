@@ -1,3 +1,4 @@
+/** @module __tests__/commands Test suite for CommandManager */
 import { describe, expect, it, beforeEach, mock } from "bun:test";
 import { CommandManager } from "../commands";
 import { Command, type CommandResult } from "@/commands";

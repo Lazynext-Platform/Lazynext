@@ -1,3 +1,4 @@
+/** @module Text drawing primitives for rendering styled text on canvas elements */
 import type { TextCanvasContext, TextBlockMeasurement } from "@/text/layout";
 import { DEFAULTS } from "@/timeline/defaults";
 import { clamp } from "@/utils/math";

@@ -1,3 +1,4 @@
+/** @module Preview overlay types and rendering logic for HUD elements on the canvas */
 import type { ReactNode } from "react";
 
 export type PreviewOverlayHudAnchor =

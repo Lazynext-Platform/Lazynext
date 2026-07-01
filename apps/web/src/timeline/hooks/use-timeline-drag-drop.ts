@@ -1,3 +1,10 @@
+/**
+ * React hook wrapping {@link DragDropController} — manages external
+ * asset drag-drop from the media panel onto the timeline.
+ *
+ * @module timeline/hooks/use-timeline-drag-drop
+ */
+
 import { useEffect, useReducer, useState, type RefObject } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
@@ -13,6 +20,10 @@ interface UseTimelineDragDropProps {
 	zoomLevel: number;
 }
 
+/**
+ * Returns drag-over state, drop target, element type, and dragover/drop
+ * event handlers for the timeline container.
+ */
 export function useTimelineDragDrop({
 	containerRef,
 	headerRef,

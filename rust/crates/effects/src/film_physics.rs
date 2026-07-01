@@ -1,3 +1,10 @@
+//! Physically-based film stock simulation.
+//!
+//! Models real film characteristics: halation (light scattering in the
+//! emulsion layer), grain structure, and photochemical color response.
+//! The uniform buffer is uploaded to the GPU each frame; the actual
+//! film emulation runs as a WGSL compute shader in the effect pipeline.
+
 use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]

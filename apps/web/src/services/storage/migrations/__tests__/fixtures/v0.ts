@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/fixtures/v0 Fixture data for V0 project */
 export const v0Project = {
 	id: "project-v0-123",
 	name: "My V0 Project",

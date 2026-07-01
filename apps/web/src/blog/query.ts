@@ -1,3 +1,4 @@
+/** @module Blog data fetching from Marble CMS with HTML processing */
 import type {
 	MarbleAuthorList,
 	MarbleCategoryList,

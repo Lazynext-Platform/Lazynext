@@ -1,3 +1,9 @@
+//! WASM bridge for export manifest generation.
+//!
+//! Builds ffmpeg command strings, AAF composition manifests (XML),
+//! and DCP Composition Playlists (CPL) from project metadata —
+//! the JavaScript layer uses these to drive the encoding pipeline.
+
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 

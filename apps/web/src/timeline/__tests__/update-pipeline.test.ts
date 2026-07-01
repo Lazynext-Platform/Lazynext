@@ -1,3 +1,4 @@
+/** @module __tests__/update-pipeline Test suite for timeline update pipeline */
 import { describe, expect, test } from "bun:test";
 import type { Transform } from "@/primitives/transform";
 import type { SceneTracks, VideoElement } from "@/timeline";

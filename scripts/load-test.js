@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // ── Lazynext Platform K6 Load Test ──────────────────────────────
 // Tests all 7 formats under concurrent load.
 //

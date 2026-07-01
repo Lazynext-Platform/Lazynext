@@ -1,3 +1,12 @@
+/**
+ * BasePage — reusable page layout shell with Header, Footer, optional
+ * hero title/description/action slot, and configurable max-width container.
+ *
+ * Used as the standard chrome wrapper across marketing and app pages.
+ *
+ * @module app/base-page
+ */
+
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { cn } from "@/utils/ui";

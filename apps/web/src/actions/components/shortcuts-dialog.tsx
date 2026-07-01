@@ -1,3 +1,4 @@
+/** @module Keyboard shortcuts dialog component displaying all available editor shortcuts */
 // @ts-nocheck — module resolution false positives with tsc vs bundler
 "use client";
 

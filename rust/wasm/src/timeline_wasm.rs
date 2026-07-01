@@ -1,3 +1,9 @@
+//! WASM bridge for timeline placement and editing operations.
+//!
+//! Exposes track placement resolution, element placement/application,
+//! combined place-on-timeline, and element deletion — consuming
+//! serialized `SceneTracks` from JavaScript and returning updated tracks.
+
 use lazynext_core::timeline::models::{SceneTracks, TimelineElement};
 use lazynext_core::timeline::placement::apply::{ApplyPlacementResult, apply_placement};
 use lazynext_core::timeline::placement::resolve::resolve_track_placement;

@@ -1,3 +1,10 @@
+/**
+ * Rectangle element — timeline shape element rendering a rectangle
+ * with fill, size, corner radius, stroke, and line-width properties.
+ *
+ * @module components/editor/timeline/core/elements/rect.element
+ */
+
 import { RectProps, Size } from "../../types";
 import { TrackElement } from "./base.element";
 import { ElementVisitor } from "../visitor/element-visitor";

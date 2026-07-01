@@ -1,3 +1,12 @@
+"""
+Lazynext Pre-Processing API (v2) — FastAPI microservice providing:
+  - /clip  — Auto-editor silence removal via Lazynext-Editor CLI
+
+Usage:
+  python3 scripts/python/main.py
+  PORT=8080 python3 scripts/python/main.py
+"""
+
 import os
 import subprocess
 from fastapi import FastAPI, BackgroundTasks, HTTPException

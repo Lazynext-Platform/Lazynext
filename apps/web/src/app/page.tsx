@@ -1,3 +1,10 @@
+/**
+ * Landing page — hero section with animated CTAs and feature grid
+ * showcasing text/voice editing, multiplayer CRDT sync, and AI agents.
+ *
+ * @page /
+ */
+
 "use client";
 
 import { MarketingNavbar } from "@/components/marketing/navbar";
@@ -7,6 +14,7 @@ import { Sparkles, Zap, Users, Cpu, ArrowRight, PlayCircle } from "lucide-react"
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
+/** Home landing page with animated hero and feature grid. */
 export default function Home() {
 	const containerRef = useRef(null);
 	const { scrollYProgress } = useScroll({

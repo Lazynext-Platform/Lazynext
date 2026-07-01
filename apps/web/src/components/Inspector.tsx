@@ -1,4 +1,11 @@
-import React, { useState } from 'react';
+/**
+ * Inspector panel — exposes keyer parameters (luma threshold,
+ * tolerance, scale) during keyframing/masking sessions.
+ *
+ * @module components/Inspector
+ */
+
+import React, { useState } from "react";
 
 export const Inspector: React.FC = () => {
   const [lumaThreshold, setLumaThreshold] = useState<number>(0.2);

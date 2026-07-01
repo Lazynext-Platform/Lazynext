@@ -1,3 +1,11 @@
+/**
+ * Image element — timeline element representing an image clip with
+ * object-fit frame, media filter, and async image dimension
+ * resolution for correct canvas placement.
+ *
+ * @module components/editor/timeline/core/elements/image.element
+ */
+
 import { getObjectFitSize, getImageDimensions } from "@twick/media-utils";
 import { Frame, ImageProps, ObjectFit, Position, Size } from "../../types";
 import { TrackElement } from "./base.element";

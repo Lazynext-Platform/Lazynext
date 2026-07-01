@@ -1,3 +1,4 @@
+/** @module Marketing navigation bar with logo, links, and theme toggle */
 import Link from "next/link";
 import { Film } from "lucide-react";
 import Image from "next/image";

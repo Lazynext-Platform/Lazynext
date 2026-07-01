@@ -1,3 +1,9 @@
+/**
+ * @module Public sticker API — multi-provider federated search, category
+ * browse, and sticker ID resolution. Handles deduplication, pagination,
+ * and recent-sticker reconstruction.
+ */
+
 import { STICKER_CATEGORIES } from "@/stickers/categories";
 import { STICKER_INTRINSIC_SIZE_FALLBACK } from "@/stickers/intrinsic-size";
 import type { StickerCategory } from "@/stickers/types";

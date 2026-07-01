@@ -1,3 +1,4 @@
+/** @module Drag-and-drop overlay shown when files are dragged over the media panel */
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UploadIcon } from "@hugeicons/core-free-icons";
 

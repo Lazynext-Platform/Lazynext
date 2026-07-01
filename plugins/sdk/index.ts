@@ -1,5 +1,6 @@
 // @lazynext/plugin-sdk API interfaces
 
+/** Top-level timeline model exposed to plugins via the SDK. */
 export interface Timeline {
     id: string;
     tracks: Track[];
@@ -7,12 +8,14 @@ export interface Timeline {
     durationFrames: number;
 }
 
+/** A single track on the timeline, containing ordered clips of a specific media type. */
 export interface Track {
     id: string;
     type: 'video' | 'audio' | 'effect';
     clips: Clip[];
 }
 
+/** A clip on a track, referencing an asset by ID with start/end frame boundaries. */
 export interface Clip {
     id: string;
     assetId: string;

@@ -1,3 +1,4 @@
+/** @module Text edit overlay for inline editing of text elements directly on the canvas */
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";

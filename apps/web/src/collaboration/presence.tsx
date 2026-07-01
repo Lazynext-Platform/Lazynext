@@ -1,3 +1,11 @@
+/**
+ * Multiplayer presence overlay — shows other users' cursors on the canvas.
+ *
+ * Each cursor is rendered as an SVG pointer with the user's ID color-coded.
+ *
+ * @module collaboration/presence
+ */
+
 import React from "react";
 
 interface CursorPosition {
@@ -7,6 +15,11 @@ interface CursorPosition {
 	color: string;
 }
 
+/**
+ * Renders remote collaborators' cursors on the editor canvas.
+ *
+ * @param cursors - array of cursor positions with user identifiers.
+ */
 export function MultiplayerPresence({
 	cursors,
 }: {

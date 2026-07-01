@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a set of layered tab panels with clickable trigger buttons and optional underline variant. */
+
 import * as React from "react";
 import { Tabs as TabsPrimitive } from "radix-ui";
 

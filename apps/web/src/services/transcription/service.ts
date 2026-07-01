@@ -1,3 +1,4 @@
+/** @module Transcription service for speech-to-text conversion using Whisper AI */
 import type {
 	TranscriptionLanguage,
 	TranscriptionResult,

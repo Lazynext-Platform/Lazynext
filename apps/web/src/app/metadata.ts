@@ -1,3 +1,13 @@
+/**
+ * Base Next.js Metadata configuration for Lazynext.
+ *
+ * Provides the canonical {@link baseMetaData} object consumed by
+ * the root layout. Includes Open Graph, Twitter/X, Pinterest, icon
+ * manifest paths, and Apple Web App settings.
+ *
+ * @module app/metadata
+ */
+
 import type { Metadata } from "next";
 import { SITE_INFO, SITE_URL } from "@/site/brand";
 

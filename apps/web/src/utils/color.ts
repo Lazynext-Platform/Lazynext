@@ -1,3 +1,4 @@
+/** @module Color conversion and parsing utilities (hex ↔ HSV, HSL, RGB) */
 import { converter, formatHex, formatHex8, parse, type Rgb } from "culori";
 
 export type ColorFormat = "hex" | "rgb" | "hsl" | "hsv";

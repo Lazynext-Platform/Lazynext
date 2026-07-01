@@ -1,4 +1,5 @@
 "use client";
+/** @module Video player component for the discover feed with remix action */
 
 import React, { useEffect, useRef, useState } from "react";
 import {

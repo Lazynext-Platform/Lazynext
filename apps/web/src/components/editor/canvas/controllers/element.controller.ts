@@ -1,3 +1,11 @@
+/**
+ * Canvas element controller — registry of Fabric.js canvas element
+ * handlers enabling type-based dispatch for adding and updating
+ * objects on the compositing canvas.
+ *
+ * @module components/editor/canvas/controllers/element.controller
+ */
+
 import type { CanvasElementHandler } from "../types";
 import { VideoElement } from "../elements/video.element";
 import { ImageElement } from "../elements/image.element";

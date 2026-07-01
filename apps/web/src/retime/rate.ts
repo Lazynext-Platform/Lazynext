@@ -1,3 +1,4 @@
+/** @module Retime rate constants and clamping utilities for playback speed control */
 export const DEFAULT_RETIME_RATE = 1;
 export const MIN_RETIME_RATE = 0.01;
 export const MAX_RETIME_RATE = 5;

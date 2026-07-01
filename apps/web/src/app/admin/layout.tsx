@@ -1,3 +1,9 @@
+/**
+ * Admin layout — auth guard restricting access to admin-role users.
+ *
+ * @layout /admin
+ */
+
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth/server";

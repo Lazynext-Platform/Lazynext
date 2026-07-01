@@ -21,23 +21,41 @@ use std::fmt;
 /// SDI video mode (resolution + framerate).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SdiVideoMode {
+    /// 1080i 50 Hz (interlaced)
     HD1080i50,
+    /// 1080i 59.94 Hz (interlaced)
     HD1080i5994,
+    /// 1080p 23.976 Hz
     HD1080p2398,
+    /// 1080p 24 Hz
     HD1080p24,
+    /// 1080p 25 Hz
     HD1080p25,
+    /// 1080p 29.97 Hz
     HD1080p2997,
+    /// 1080p 30 Hz
     HD1080p30,
+    /// 720p 50 Hz
     HD720p50,
+    /// 720p 59.94 Hz
     HD720p5994,
+    /// 720p 60 Hz
     HD720p60,
+    /// UHD 4K 23.976 Hz
     UHD4Kp2398,
+    /// UHD 4K 24 Hz
     UHD4Kp24,
+    /// UHD 4K 25 Hz
     UHD4Kp25,
+    /// UHD 4K 29.97 Hz
     UHD4Kp2997,
+    /// UHD 4K 30 Hz
     UHD4Kp30,
+    /// UHD 4K 50 Hz
     UHD4Kp50,
+    /// UHD 4K 59.94 Hz
     UHD4Kp5994,
+    /// UHD 4K 60 Hz
     UHD4Kp60,
 }
 
@@ -135,8 +153,11 @@ impl DecklinkEngine {
 
     /// Detect connected DeckLink devices.
     /// Returns the number of devices found.
+    /// Detect connected DeckLink devices.
+    ///
+    /// Returns the number of devices found. In production (with the
+    /// `decklink-sdk` feature) this iterates `IDeckLinkIterator`.
     pub fn detect_devices(&self) -> usize {
-        // In production: iterate IDeckLinkIterator
         println!("[DeckLink] Scanning for devices... (simulated: 0 devices found)");
         0
     }
@@ -204,12 +225,12 @@ impl DecklinkEngine {
         Ok(())
     }
 
-    /// Get the number of frames that have been output.
+    /// Get the total number of frames output.
     pub fn frame_count(&self) -> u64 {
         self.frame_counter
     }
 
-    /// Get the timecode of the last frame output (in frames).
+    /// Get the timecode of the last output frame, in frames.
     pub fn last_timecode_frame(&self) -> u32 {
         (self.frame_counter % u64::from(u32::MAX)) as u32
     }

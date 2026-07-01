@@ -1,3 +1,16 @@
+//! Parametric equalizer DSP engine with biquad filter cookbook formulas.
+//!
+//! Provides configurable multi-band EQ processing (low shelf, mid peaking,
+//! high shelf) using the Audio EQ Cookbook by Robert Bristow-Johnson. Each
+//! band is a second-order biquad filter connected in series.
+//!
+//! # Filter types
+//!
+//! * LowPass, HighPass — second-order cutoff filters
+//! * BandPass, Notch — second-order band-select / band-reject
+//! * LowShelf, HighShelf — first-order shelving
+//! * Peaking — parametric band boost/cut
+//!
 /// Biquad filter coefficients for parametric EQ.
 #[derive(Clone, Debug)]
 pub struct BiquadCoeffs {
@@ -11,16 +24,26 @@ pub struct BiquadCoeffs {
 /// Filter types supported by the parametric EQ.
 #[derive(Clone, Debug, PartialEq)]
 pub enum FilterType {
+    /// Passes frequencies below the cutoff and attenuates above.
     LowPass,
+    /// Passes frequencies above the cutoff and attenuates below.
     HighPass,
+    /// Passes a narrow band of frequencies around the cutoff.
     BandPass,
+    /// Boosts or cuts frequencies below the cutoff.
     LowShelf,
+    /// Boosts or cuts frequencies above the cutoff.
     HighShelf,
+    /// Boosts or cuts a narrow band of frequencies at the center frequency.
     Peaking,
+    /// Attenuates a very narrow band of frequencies (inverse of band-pass).
     Notch,
 }
 
-/// A second-order biquad filter stage.
+/// A second-order biquad filter stage with state memory for sample-by-sample processing.
+///
+/// Each instance maintains the previous two input and output samples for the
+/// direct-form I transposed topology.
 pub struct BiquadFilter {
     coeffs: BiquadCoeffs,
     x1: f64,
@@ -213,6 +236,7 @@ pub struct ParametricEq {
 }
 
 impl ParametricEq {
+    /// Create a three-band parametric EQ with configurable frequencies and gains.
     pub fn new(
         low_freq: f64,
         low_gain_db: f64,
@@ -248,12 +272,14 @@ impl ParametricEq {
         }
     }
 
+    /// Process a single sample through all three bands in series (low → mid → high).
     pub fn process(&mut self, input: f64) -> f64 {
         let low = self.low_shelf.process(input);
         let mid = self.mid_peaking.process(low);
         self.high_shelf.process(mid)
     }
 
+    /// Process an entire buffer of f64 samples in-place through all three bands.
     pub fn process_buffer(&mut self, buffer: &mut [f64]) {
         for sample in buffer.iter_mut() {
             *sample = self.process(*sample);

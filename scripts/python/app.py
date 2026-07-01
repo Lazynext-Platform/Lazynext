@@ -1,3 +1,12 @@
+"""
+Lazynext Pre-Processing API (v1) — FastAPI microservice providing:
+  - /transcribe  — Whisper speech-to-text transcription
+  - /auto-edit   — Lazynext-Editor silence trimming
+
+Usage:
+  uvicorn scripts.python.app:app --host 0.0.0.0 --port 5000
+"""
+
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import time

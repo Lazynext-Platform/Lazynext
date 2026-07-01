@@ -1,3 +1,4 @@
+/** @module Editor-level selection state compositing element and keyframe selections */
 import type { SelectedKeyframeRef } from "@/animation/types";
 import type { ElementRef } from "@/timeline/types";
 

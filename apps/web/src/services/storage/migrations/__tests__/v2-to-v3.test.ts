@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v2-to-v3 Test suite for V2 to V3 migration */
 import { describe, expect, test } from "bun:test";
 import { getProjectId, transformProjectV2ToV3 } from "../transformers/v2-to-v3";
 import {

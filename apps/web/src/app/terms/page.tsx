@@ -1,3 +1,9 @@
+/**
+ * Terms of service page — accordion-layout legal content.
+ *
+ * @page /terms
+ */
+
 import type { Metadata } from "next";
 import { BasePage } from "@/app/base-page";
 import {

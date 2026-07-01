@@ -1,3 +1,9 @@
+//! WASM bridge for GPU mask operations.
+//!
+//! Applies mask feathering (Gaussian blur on alpha) via the GPU mask
+//! pipeline and polygon mask composition via the 2D canvas API,
+//! returning processed offscreen canvases to JavaScript.
+
 #![cfg(target_arch = "wasm32")]
 
 use gpu::wgpu;

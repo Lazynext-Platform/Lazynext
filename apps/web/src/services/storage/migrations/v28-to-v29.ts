@@ -1,3 +1,4 @@
+/** @module Storage migration v28 to v29 */
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV28ToV29 } from "./transformers/v28-to-v29";

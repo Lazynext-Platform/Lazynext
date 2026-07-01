@@ -1,3 +1,7 @@
+/**
+ * @module timeline/hooks/element/use-keyframe-selection
+ */
+
 import { useCallback, useSyncExternalStore } from "react";
 import { useEditor } from "@/editor/use-editor";
 import type { SelectedKeyframeRef } from "@/animation/types";

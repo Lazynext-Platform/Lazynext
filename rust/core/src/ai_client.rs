@@ -1,23 +1,29 @@
+//! AI service client for rotoscoping, NeRF extraction, and audio stem splitting.
+
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
+/// A rotoscoping request containing a video ID and the object to mask.
 #[derive(Serialize)]
 pub struct RotoscopeRequest {
     pub video_id: String,
     pub object_prompt: String,
 }
 
+/// A rotoscoping response with a success flag and optional mask sequence URL.
 #[derive(Deserialize, Debug)]
 pub struct RotoscopeResponse {
     pub success: bool,
     pub mask_sequence_url: Option<String>,
 }
 
+/// A NeRF extraction request containing a video ID.
 #[derive(Serialize)]
 pub struct NeRFRequest {
     pub video_id: String,
 }
 
+/// A NeRF extraction response with optional mesh and point cloud URLs.
 #[derive(Deserialize, Debug)]
 pub struct NeRFResponse {
     pub success: bool,
@@ -25,18 +31,23 @@ pub struct NeRFResponse {
     pub point_cloud_url: Option<String>,
 }
 
+/// A stem separation request with an audio ID and desired stem count.
 #[derive(Serialize)]
 pub struct StemSplitRequest {
     pub audio_id: String,
     pub stems: u32,
 }
 
+/// A stem separation response with a map of stem name to audio URL.
 #[derive(Deserialize, Debug)]
 pub struct StemSplitResponse {
     pub success: bool,
     pub stems: std::collections::HashMap<String, String>,
 }
 
+/// HTTP client for AI-powered video operations: rotoscoping, NeRF extraction,
+/// and audio stem splitting. Communicates with the pre-processing and
+/// generative studio microservices.
 pub struct AIClient {
     client: Client,
     pre_processing_url: String,
@@ -50,6 +61,7 @@ impl Default for AIClient {
 }
 
 impl AIClient {
+    /// Creates a new `AIClient` pointing to the default local service URLs.
     pub fn new() -> Self {
         Self {
             client: Client::new(),
@@ -58,6 +70,8 @@ impl AIClient {
         }
     }
 
+    /// Sends a rotoscoping request to the pre-processing service for the
+    /// given video and object prompt. Returns the mask sequence URL on success.
     pub async fn rotoscope(
         &self,
         video_id: &str,
@@ -80,6 +94,8 @@ impl AIClient {
             .map_err(|e| e.to_string())
     }
 
+    /// Sends a NeRF extraction request to the pre-processing service for
+    /// the given video. Returns mesh and point cloud URLs on success.
     pub async fn extract_nerf(&self, video_id: &str) -> Result<NeRFResponse, String> {
         let req = NeRFRequest {
             video_id: video_id.to_string(),
@@ -98,6 +114,8 @@ impl AIClient {
         res.json::<NeRFResponse>().await.map_err(|e| e.to_string())
     }
 
+    /// Sends a stem separation request to the generative studio service for
+    /// the given audio, splitting it into the specified number of stems.
     pub async fn split_stems(
         &self,
         audio_id: &str,

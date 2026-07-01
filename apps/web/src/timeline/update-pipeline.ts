@@ -1,3 +1,11 @@
+/**
+ * Element update pipeline — applies derive/enforce rules when timeline
+ * element fields change, ensuring derived values (duration from retime,
+ * clamped animations) stay consistent.
+ *
+ * @module timeline/update-pipeline
+ */
+
 import { clampAnimationsToDuration } from "@/animation";
 import {
 	clampRetimeRate,
@@ -10,6 +18,7 @@ import { ZERO_MEDIA_TIME, roundMediaTime } from "@/wasm";
 
 type ElementUpdateField = keyof TimelineElement | string;
 
+/** Context provided to update rules so they can reason about sibling tracks/elements. */
 export interface ElementUpdateContext {
 	tracks: SceneTracks;
 	trackId: string;
@@ -132,6 +141,12 @@ const enforceRules: ElementUpdateRule[] = [
 	},
 ];
 
+/**
+ * Applies a partial update to an element, running derive and enforce
+ * rules to keep secondary fields (duration, animations) consistent.
+ *
+ * @returns the updated element after all rules have been applied.
+ */
 export function applyElementUpdate({
 	element,
 	patch,

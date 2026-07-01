@@ -1,3 +1,16 @@
+/**
+ * ProjectsClient — full projects browser with grid/list view modes,
+ * multi-select checkboxes, search, sort, context menus, and bulk
+ * duplicate/delete actions.
+ *
+ * Seeds the IndexedDB cache from server-provided initial projects,
+ * then delegates filtering and sorting to the editor core. Displays
+ * skeleton placeholders during loading and an empty-state call-to-action
+ * when no projects exist.
+ *
+ * @module projects/client
+ */
+
 "use client";
 
 import Image from "next/image";

@@ -1,3 +1,10 @@
+/**
+ * Computes the CSS position (left, top, height) for the snap-indicator
+ * line based on the current snap point and zoom level.
+ *
+ * @module timeline/hooks/use-snap-indicator-position
+ */
+
 import { useContainerSize } from "@/hooks/use-container-size";
 import { timelineTimeToSnappedPixels } from "@/timeline";
 import { TIMELINE_TRACK_LABELS_COLUMN_WIDTH_PX } from "@/timeline/components/layout";
@@ -15,6 +22,10 @@ interface SnapIndicatorPosition {
 	height: number;
 }
 
+/**
+ * Returns the pixel position for a snap indicator line so it aligns
+ * with the snapped time on the timeline.
+ */
 export function useSnapIndicatorPosition({
 	snapPoint,
 	zoomLevel,

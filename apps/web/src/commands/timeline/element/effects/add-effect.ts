@@ -1,3 +1,4 @@
+/** @module Command for adding an effect to an element with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import { isVisualElement, updateElementInSceneTracks } from "@/timeline";

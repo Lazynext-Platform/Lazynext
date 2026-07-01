@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a toggle switch for boolean on/off states. */
+
 import * as React from "react";
 import { Switch as SwitchPrimitives } from "radix-ui";
 

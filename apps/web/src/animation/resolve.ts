@@ -1,9 +1,20 @@
+/**
+ * @module animation/resolve
+ * @description Converts timeline time to element-local time and resolves
+ *   animated property values at a given time point, including color
+ *   decomposition for composite RGBA channels.
+ */
+
 import type { AnimationPath, ElementAnimations } from "@/animation/types";
 import { formatLinearRgba, parseColorToLinearRgba } from "@/params";
 import type { ParamValue } from "@/params";
 import { isCompositeChannelData, isLeafChannelData } from "./channel-data";
 import { getChannelValueAtTime, isScalarChannel } from "./interpolation";
 
+/**
+ * Converts a global timeline time to an element-local time, clamped to
+ * `[0, elementDuration]`.
+ */
 export function getElementLocalTime({
 	timelineTime,
 	elementStartTime,
@@ -25,6 +36,12 @@ export function getElementLocalTime({
 	return localTime;
 }
 
+/**
+ * Resolves the value of an animation property path at a given local
+ * time. For color properties, decomposes the color into RGBA
+ * components, samples each channel individually, and recomposes.
+ * Falls back to the provided value when no animation data exists.
+ */
 export function resolveAnimationPathValueAtTime({
 	animations,
 	propertyPath,

@@ -1,3 +1,9 @@
+/**
+ * Superadmin analytics — charts, metrics, and usage dashboards.
+ *
+ * @page /superadmin/analytics
+ */
+
 "use client";
 
 import { Header } from "@/components/header";

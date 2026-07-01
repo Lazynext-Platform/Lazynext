@@ -1,3 +1,4 @@
+/** @module Project data transformer v27 to v28 */
 import { roundMediaTime } from "@/wasm";
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";

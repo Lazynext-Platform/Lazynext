@@ -1,3 +1,8 @@
+//! Core types for the placement subsystem: `PlacementTimeSpan`,
+//! `PlacementSubject`, `PlacementStrategy`, and `PlacementResult`.
+
+/// A time span for placement, with the start time, duration, and an optional
+/// exclusion of a specific element (used when moving/resizing an existing element).
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct PlacementTimeSpan {
@@ -8,6 +13,7 @@ pub struct PlacementTimeSpan {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
+/// What is being placed — either a typed element or a track type string.
 pub enum PlacementSubject {
     ElementType(String),
     TrackType(String),
@@ -15,6 +21,7 @@ pub enum PlacementSubject {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(tag = "type", rename_all = "camelCase")]
+/// The strategy for resolving where a placement should land on the timeline.
 pub enum PlacementStrategy {
     Explicit {
         #[serde(rename = "trackId")]
@@ -42,6 +49,8 @@ pub enum PlacementStrategy {
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
 #[serde(tag = "kind", rename_all = "camelCase")]
+/// The resolved result of a placement operation — either an existing track
+/// that can accept the element(s) or a new track to be created.
 pub enum PlacementResult {
     ExistingTrack {
         #[serde(rename = "trackId")]

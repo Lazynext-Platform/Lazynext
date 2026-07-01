@@ -1,3 +1,10 @@
+/**
+ * Auth card — glassmorphic card wrapper for sign-in and sign-up forms
+ * with Lazynext branding.
+ *
+ * @module components/auth/AuthCard
+ */
+
 "use client";
 
 import React from "react";

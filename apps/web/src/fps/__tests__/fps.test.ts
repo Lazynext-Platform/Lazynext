@@ -1,3 +1,4 @@
+/** @module __tests__/fps Test suite for FPS utilities */
 import { describe, expect, test } from "bun:test";
 import {
 	getHighestImportedVideoFps,

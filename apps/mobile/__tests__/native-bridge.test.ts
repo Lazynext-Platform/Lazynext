@@ -1,3 +1,4 @@
+/** @module __tests__/native-bridge Test suite for NativeBridge */
 describe("NativeBridge", () => {
 	it("getProjectInfo returns project data", async () => {
 		const mod = await import(

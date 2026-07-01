@@ -1,3 +1,10 @@
+//! GPU texture pool with per-frame recycling.
+//!
+//! The texture pool avoids expensive GPU allocations by caching textures
+//! keyed by (width, height). After each frame the compositor calls
+//! `recycle_frame()` to return in-use textures to the available pool,
+//! and `acquire()` retrieves a recycled texture or creates a new one.
+
 use std::collections::HashMap;
 
 use gpu::{GpuContext, wgpu};

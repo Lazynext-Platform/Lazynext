@@ -1,3 +1,10 @@
+/**
+ * Theme toggle — dropdown menu with light/dark/system options,
+ * synced with next-themes.
+ *
+ * @module components/theme-toggle
+ */
+
 "use client";
 
 import { Button } from "./ui/button";

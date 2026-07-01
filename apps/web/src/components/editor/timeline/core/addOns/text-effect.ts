@@ -1,3 +1,11 @@
+/**
+ * Text effect add-on — wraps text animation effect properties
+ * (duration, delay, bufferTime) with JSON serialization for
+ * text element entrance/exit effects.
+ *
+ * @module components/editor/timeline/core/addOns/text-effect
+ */
+
 import { TextEffect } from "../../types";
 
 export class ElementTextEffect {

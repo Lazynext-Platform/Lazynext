@@ -1,3 +1,10 @@
+/**
+ * Group resize type definitions — member shape, update patches, and
+ * computed results.
+ *
+ * @module timeline/group-resize/types
+ */
+
 import type { FrameRate } from "lazynext-wasm";
 import type { ElementRef, RetimeConfig } from "@/timeline/types";
 import type { MediaTime } from "@/wasm";

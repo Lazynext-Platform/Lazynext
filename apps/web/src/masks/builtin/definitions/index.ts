@@ -1,3 +1,4 @@
+/** @module Built-in mask definitions registration that populates the masks registry */
 import {
 	masksRegistry,
 	type MaskDefinitionForRegistration,

@@ -1,3 +1,10 @@
+/**
+ * Sign-in form — email/password authentication with error display
+ * and loading state.
+ *
+ * @module components/auth/SignInForm
+ */
+
 "use client";
 
 import React, { useState } from "react";

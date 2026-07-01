@@ -1,3 +1,4 @@
+/** @module Mask utility functions for line-edge intersection and geometry calculations */
 const LINE_PARALLEL_EPSILON = 1e-10;
 
 export function lineEdgeIntersection({

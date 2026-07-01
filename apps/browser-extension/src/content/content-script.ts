@@ -1,3 +1,4 @@
+/** @module content/content-script Content script for browser extension video detection */
 // Content Script — injected on all URLs to support video detection
 // and timeline injection from the Lazynext browser extension.
 //

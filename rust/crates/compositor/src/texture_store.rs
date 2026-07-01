@@ -1,3 +1,10 @@
+//! Persistent texture storage keyed by media ID.
+//!
+//! Unlike the TexturePool (which recycles textures per frame by size),
+//! the TextureStore caches decoded media textures by their unique media ID.
+//! This avoids re-decoding video frames that haven't changed between
+//! compositor frames — critical for timeline scrubbing performance.
+
 use std::collections::HashMap;
 
 use gpu::wgpu;

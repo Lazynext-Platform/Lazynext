@@ -1,3 +1,4 @@
+/** @module Zustand store for assets panel tabs, media view mode, and sort preferences */
 import type { ElementType } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";

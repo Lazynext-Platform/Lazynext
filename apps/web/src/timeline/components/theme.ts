@@ -1,3 +1,10 @@
+/**
+ * Timeline UI theme — element colors by track type, waveform color,
+ * selected-row background class, and bookmark default color.
+ *
+ * @module timeline/components/theme
+ */
+
 import type { TrackType } from "@/timeline";
 
 export const TIMELINE_AUDIO_WAVEFORM_COLOR = "rgba(255, 255, 255, 0.7)";

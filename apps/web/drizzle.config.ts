@@ -1,3 +1,4 @@
+/** @module Drizzle Kit configuration for PostgreSQL schema migrations */
 import { defineConfig } from "drizzle-kit";
 import * as dotenv from "dotenv";
 

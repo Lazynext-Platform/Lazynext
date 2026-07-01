@@ -1,3 +1,4 @@
+/** @module Canvas element handler for video clips — add, render, and sync transform updates */
 import type { CanvasElementHandler } from "../types";
 import { addVideoElement, addBackgroundColor } from "../components/elements";
 import {

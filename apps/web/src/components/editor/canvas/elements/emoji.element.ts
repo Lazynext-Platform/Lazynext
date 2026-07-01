@@ -1,3 +1,4 @@
+/** @module Canvas element handler for emoji/image stickers */
 import type { CanvasElementHandler } from "../types";
 import { addImageElement } from "../components/elements";
 import {

@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a group of mutually exclusive radio button options with a dot indicator. */
+
 import * as React from "react";
 import { RadioGroup as RadioGroupPrimitive } from "radix-ui";
 import { Circle } from "lucide-react";

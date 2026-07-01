@@ -1,3 +1,4 @@
+/** @module Sound search hook with debounced API calls and infinite scroll pagination */
 import { useEffect } from "react";
 import { useSoundsStore } from "@/sounds/sounds-store";
 

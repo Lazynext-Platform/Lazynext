@@ -1,3 +1,8 @@
+"""
+Video analysis services: scene detection, silence removal, motion tracking,
+auto-reframing, retouching, hook extraction, proxy generation, and ingestion.
+"""
+
 import asyncio
 import json
 import os
@@ -9,6 +14,16 @@ from src.models import (
 )
 
 async def process_video_service(req: ProcessRequest):
+    """Execute one or more video processing operations (auto_editor, scene_detect, clean_audio).
+
+    Operations run sequentially and return per-operation results with metadata.
+
+    Args:
+        req: ProcessRequest with video_id and a list of operation names.
+
+    Returns:
+        dict with success, video_id, and operations_completed list.
+    """
     completed = []
 
     audio_samples = None
@@ -185,6 +200,17 @@ async def process_video_service(req: ProcessRequest):
     }
 
 async def track_motion_service(req: TrackRequest):
+    """Track an object within a region-of-interest across video frames using OpenCV CSRT.
+
+    Args:
+        req: TrackRequest with video_id, frame range, and ROI coordinates.
+
+    Returns:
+        dict with success, video_id, tracker name, frames_tracked, and keyframes list.
+
+    Raises:
+        HTTPException: 503 if OpenCV unavailable, 404 if tracking fails, 500 on error.
+    """
     tracker_name = "dev-fallback"
     keyframes = []
     num_frames = max(req.end_frame - req.start_frame, 60)
@@ -250,6 +276,17 @@ async def track_motion_service(req: TrackRequest):
     }
 
 async def auto_reframe_service(req: ReframeRequest):
+    """Auto-reframe a video to a target aspect ratio (e.g. 9:16 for TikTok).
+
+    Uses motion-based subject tracking when OpenCV is available, falling back
+    to center-crop. Produces a reframed MP4 via ffmpeg.
+
+    Args:
+        req: ReframeRequest with video_id and target_aspect_ratio.
+
+    Returns:
+        dict with success, dimensions, method, keyframes, and output_url.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_path = f"/tmp/{req.video_id}_reframed.mp4"
     method = "center_crop"
@@ -364,6 +401,20 @@ async def auto_reframe_service(req: ReframeRequest):
     }
 
 async def retouch_service(req: RetouchRequest):
+    """Apply AI beauty retouching via bilateral filtering and Gaussian blur.
+
+    Processes frames through a LAB colorspace pipeline, encodes the result
+    with ffmpeg, and returns the output URL.
+
+    Args:
+        req: RetouchRequest with video_id and intensity (0.0–1.0).
+
+    Returns:
+        dict with success, intensity_applied, method, and output_url.
+
+    Raises:
+        HTTPException: 503 if OpenCV unavailable, 500 on processing error.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_path = f"/tmp/{req.video_id}_retouched.mp4"
     method = None
@@ -467,6 +518,17 @@ async def retouch_service(req: RetouchRequest):
     }
 
 async def extract_hook_service(req: ExtractHookRequest):
+    """Extract the most engaging segment of a video for use as a viral hook.
+
+    Analyzes RMS energy via ffmpeg-decoded audio to find the highest-energy
+    window matching the target duration.
+
+    Args:
+        req: ExtractHookRequest with video_id and target_duration in seconds.
+
+    Returns:
+        dict with success, hook_start_time, hook_duration, and detection method.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     hook_start = 0.0
     hook_end = req.target_duration
@@ -536,6 +598,17 @@ async def extract_hook_service(req: ExtractHookRequest):
     }
 
 async def generate_proxies_service(req: ProxyRequest):
+    """Generate low-resolution proxy files for smooth editing performance.
+
+    Encodes a scaled, video-only MP4 at the requested quality preset
+    using ffmpeg libx264.
+
+    Args:
+        req: ProxyRequest with video_id and proxy_quality preset.
+
+    Returns:
+        dict with success, proxy_quality, scale, bitrate, method, and proxy_url.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_path = f"/tmp/{req.video_id}_proxy.mp4"
     quality_presets = {
@@ -585,6 +658,20 @@ async def generate_proxies_service(req: ProxyRequest):
     }
 
 async def ingest_media_service(req: IngestRequest):
+    """Ingest a media file into a project, producing a proxy and spritesheet.
+
+    In production, runs ffmpeg to generate a 720p proxy and a 10x10 tile
+    spritesheet. Falls back to mock URLs in development.
+
+    Args:
+        req: IngestRequest with file_path and project_id.
+
+    Returns:
+        dict with success, project_id, video_id, proxy_url, and spritesheet_url.
+
+    Raises:
+        HTTPException: 404 if file not found in production, 500 on ffmpeg failure.
+    """
     from pathlib import Path
     
     input_path = Path(req.file_path)

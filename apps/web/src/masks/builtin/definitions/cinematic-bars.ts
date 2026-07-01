@@ -1,3 +1,4 @@
+/** @module Cinematic bars mask definition for widescreen letterbox effect with adjustable bar size */
 import type {
 	MaskDefaultContext,
 	MaskDefinition,

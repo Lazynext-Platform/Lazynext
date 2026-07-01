@@ -1,3 +1,4 @@
+/** @module Utility for inserting parsed subtitle cues into the timeline as caption elements */
 import type { EditorCore } from "@/core";
 import {
 	AddTrackCommand,

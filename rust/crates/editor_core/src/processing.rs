@@ -1,3 +1,8 @@
+//! Audio and video analysis utilities for the editor pipeline.
+//!
+//! Includes silence detection via RMS windowing, GOP-aligned lossless trimming for
+//! cut-without-re-encode workflows, and frame-differencing scene change detection.
+
 // ── Silence Detection ──
 
 /// Detect silence regions in an audio buffer.

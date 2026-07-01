@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v20-to-v21 Test suite for V20 to V21 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV20ToV21 } from "../transformers/v20-to-v21";
 import { asRecord } from "./helpers";

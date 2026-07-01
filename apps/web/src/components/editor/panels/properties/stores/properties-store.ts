@@ -1,3 +1,4 @@
+/** @module Zustand store for active property tabs and transform scale lock state */
 import { create } from "zustand";
 
 interface PropertiesState {

@@ -1,3 +1,27 @@
+//! Lazynext Plugin Runtime — JavaScript plugin engine via Boa.
+//!
+//! The plugin crate provides an embedded JavaScript runtime (Boa engine)
+//! for executing user-authored timeline scripts. Plugins can query and
+//! manipulate the editor timeline through a safe `EditorAPI` facade.
+//!
+//! # Architecture
+//!
+//! ```text
+//! User Script → Boa JS Engine → EditorAPI → Timeline State
+//!                └─ Sandboxed    └─ RefCell       (read/write)
+//!                   context         facade
+//! ```
+//!
+//! Scripts can set the current time position via `setTime(t)`, and the
+//! Rust host reads the result back through shared state. For GPU effects,
+//! see the `wasm_sandbox` module which loads WASM-based shader plugins.
+//!
+//! # Security
+//!
+//! The Boa context is sandboxed — scripts cannot access the file system,
+//! network, or system APIs. Time and timeline metadata are the only
+//! exposed surfaces.
+
 use boa_engine::{Context, Source};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;

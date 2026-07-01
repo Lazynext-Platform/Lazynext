@@ -1,3 +1,10 @@
+//! Multi-channel Signed Distance Field (MSDF) text rendering.
+//!
+//! GPU-accelerated rendering of crisp, resolution-independent text
+//! glyphs from MSDF atlas textures. Supports colored text, outlines,
+//! and soft drop shadows via a dedicated WGSL fragment shader and
+//! uniform buffer.
+
 use bytemuck::{Pod, Zeroable};
 use gpu::{FULLSCREEN_SHADER_SOURCE, GpuContext, wgpu};
 
@@ -16,6 +23,7 @@ struct MSDFUniformBuffer {
     _padding: [f32; 3],
 }
 
+/// Options for applying an MSDF text glyph to a render target.
 pub struct ApplyMSDFOptions<'a> {
     pub target_view: &'a wgpu::TextureView,
     pub msdf_texture: &'a wgpu::Texture,
@@ -28,12 +36,14 @@ pub struct ApplyMSDFOptions<'a> {
     pub shadow_blur: f32,
 }
 
+/// GPU pipeline for rendering multi-channel signed distance field text.
 pub struct MSDFPipeline {
     uniform_bind_group_layout: wgpu::BindGroupLayout,
     pipeline: wgpu::RenderPipeline,
 }
 
 impl MSDFPipeline {
+    /// Creates a new `MSDFPipeline` with shader modules, bind group layout, and render pipeline.
     pub fn new(context: &GpuContext) -> Self {
         let device = context.device();
 
@@ -111,6 +121,8 @@ impl MSDFPipeline {
         }
     }
 
+    /// Records MSDF render commands into an existing command encoder, blending
+    /// glyph color, outline, and shadow onto the target texture view.
     pub fn apply_with_encoder(
         &self,
         context: &GpuContext,

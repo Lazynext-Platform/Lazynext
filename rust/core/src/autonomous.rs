@@ -1,9 +1,15 @@
+//! Autonomous AI editor that translates natural language intents into NLE timeline
+//! operations. Supports multiple LLM providers (OpenAI, Anthropic, Gemini, Ollama)
+//! with deterministic local fallback when no API key is available.
+
 use crate::NLEState;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::env;
 
+/// A user's natural language editing intent, including source files and
+/// provider preferences.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VideoIntent {
     pub prompt: String,
@@ -13,6 +19,8 @@ pub struct VideoIntent {
     pub llm_provider: Option<String>,
 }
 
+/// The status of an autonomous editing job as it progresses through planning,
+/// execution, and completion.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum JobStatus {
     Pending,
@@ -23,6 +31,8 @@ pub enum JobStatus {
     Failed { error: String },
 }
 
+/// The autonomous editor engine. Takes a `VideoIntent`, optionally calls an
+/// LLM to produce editing actions, and applies them to the NLE state.
 pub struct AutonomousEditor {
     client: Client,
 }
@@ -34,12 +44,15 @@ impl Default for AutonomousEditor {
 }
 
 impl AutonomousEditor {
+    /// Creates a new `AutonomousEditor` with a fresh HTTP client.
     pub fn new() -> Self {
         Self {
             client: Client::new(),
         }
     }
 
+    /// Processes a `VideoIntent` and returns a job ID for tracking the
+    /// asynchronous editing job.
     pub async fn process_intent(&self, intent: VideoIntent) -> Result<String, String> {
         println!("Delegating intent to planner: {}", intent.prompt);
         let job_id = format!(
@@ -49,6 +62,7 @@ impl AutonomousEditor {
         Ok(job_id)
     }
 
+    /// Checks the status of an asynchronous editing job by ID.
     pub async fn check_job_status(&self, job_id: &str) -> Result<JobStatus, String> {
         Ok(JobStatus::Completed {
             video_url: format!("https://cdn.lazynext.ai/videos/{}.mp4", job_id),

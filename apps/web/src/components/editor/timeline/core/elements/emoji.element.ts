@@ -1,3 +1,10 @@
+/**
+ * Emoji element — timeline element extending ImageElement to
+ * represent an emoji with contain object-fit and a default square size.
+ *
+ * @module components/editor/timeline/core/elements/emoji.element
+ */
+
 import { ImageElement } from "./image.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";

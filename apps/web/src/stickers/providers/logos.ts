@@ -1,3 +1,9 @@
+/**
+ * @module stickers/providers/logos
+ * @description Placeholder logos sticker provider — resolves sticker
+ *   IDs directly as URLs, returns empty search/browse results.
+ */
+
 import type {
 	StickerBrowseResult,
 	StickerItem,
@@ -17,6 +23,7 @@ const EMPTY_BROWSE_RESULT: StickerBrowseResult = {
 	sections: [],
 };
 
+/** Placeholder provider returning empty results for all queries. */
 export const logosProvider: StickerProvider = {
 	id: LOGOS_PROVIDER_ID,
 	async search(): Promise<StickerSearchResult> {

@@ -1,3 +1,4 @@
+/** @module Box-like mask utilities for rendering rectangle/ellipse mask overlays with feather */
 import {
 	DEFAULT_SHAPE_MASK_SHORT_SIDE_RATIO,
 	MIN_MASK_DIMENSION,

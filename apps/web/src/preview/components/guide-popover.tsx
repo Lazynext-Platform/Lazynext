@@ -1,3 +1,4 @@
+/** @module Guide popover component for selecting and configuring canvas alignment guides */
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";

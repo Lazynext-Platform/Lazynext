@@ -1,3 +1,4 @@
+/** @module Command for upserting an effect parameter keyframe with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { buildEffectParamPath, upsertPathKeyframe } from "@/animation";

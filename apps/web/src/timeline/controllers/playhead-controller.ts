@@ -1,3 +1,10 @@
+/**
+ * Playhead controller — scrubbing, seek-on-click, frame snapping,
+ * playhead-positioned DOM updates, and playback auto-scroll.
+ *
+ * @module timeline/controllers/playhead-controller
+ */
+
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { FrameRate } from "lazynext-wasm";
 import {
@@ -38,6 +45,7 @@ type Session = { kind: "idle" } | ScrubSession;
 
 // --- Config ---
 
+/** Configuration for the playhead controller, provided by the React host. */
 export interface PlayheadConfig {
 	zoomLevel: number;
 	duration: MediaTime;
@@ -59,6 +67,7 @@ export interface PlayheadConfig {
 	}) => void;
 }
 
+/** Ref wrapper so the controller always reads the latest config. */
 export interface PlayheadConfigRef {
 	readonly current: PlayheadConfig;
 }
@@ -94,6 +103,10 @@ function pixelToTime({
 
 // --- Controller ---
 
+/**
+ * Manages playhead scrubbing (ruler drag + playhead handle drag),
+ * DOM-level playhead positioning, and playback auto-scroll.
+ */
 export class PlayheadController {
 	private lastMouseClientX = 0;
 

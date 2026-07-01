@@ -1,3 +1,4 @@
+/** @module Retime resolution for mapping between clip time and source time with keyframe support */
 import type { RetimeConfig } from "@/timeline";
 import { clampRetimeRate } from "@/retime/rate";
 

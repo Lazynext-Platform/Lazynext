@@ -1,3 +1,9 @@
+/**
+ * @module Default sticker provider registration — registers the built-in
+ * logos, flags, and shapes providers into the global stickersRegistry,
+ * skipping any that are already present.
+ */
+
 import { stickersRegistry } from "../registry";
 import type { StickerProvider } from "@/stickers/types";
 import { flagsProvider } from "./flags";

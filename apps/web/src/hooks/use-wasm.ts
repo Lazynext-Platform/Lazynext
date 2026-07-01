@@ -1,9 +1,29 @@
+/**
+ * WASM bridge hook for the Lazynext NLE engine.
+ *
+ * Lazily loads the lazynext-wasm WebAssembly module on first use, initializes
+ * a global {@link NLEState} instance, and polls the Rust engine every animation
+ * frame to keep React UI state in sync with the native timeline.
+ *
+ * The WASM module is cached globally — subsequent calls reuse the same instance.
+ */
+
 import { useEffect, useState, useRef } from "react";
 
 // We use dynamic import for WASM since it's asyncWebAssembly
 let wasmPromise: Promise<typeof import("lazynext-wasm")> | null = null;
 let globalNLEState: any = null;
 
+/**
+ * React hook that provides access to the WASM NLE engine.
+ *
+ * @returns An object containing:
+ *  - `isReady` — boolean indicating whether the WASM module has loaded and initialized.
+ *  - `time` — a proxy object wrapping the NLEState's playback controls (play, pause,
+ *    getFrame, setFrame) and timeline mutations (cut, trim, track/clip management).
+ *  - `frame` — the current playback frame, updated every animation frame.
+ *  - `projectData` — the full project data snapshot (null until isReady is true).
+ */
 export function useWasm() {
 	const [isReady, setIsReady] = useState(!!globalNLEState);
 	const [frame, setFrame] = useState(

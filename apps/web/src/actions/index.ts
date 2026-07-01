@@ -1,3 +1,4 @@
+/** @module Actions module barrel export for action definitions, types, and registry */
 export * from "./definitions";
 export * from "./types";
 export * from "./registry";

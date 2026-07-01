@@ -1,3 +1,4 @@
+/** @module Command for removing a mask from an element with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { isMaskableElement, updateElementInSceneTracks } from "@/timeline";

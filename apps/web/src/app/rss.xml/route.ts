@@ -1,3 +1,10 @@
+/**
+ * RSS 2.0 feed route handler — generates a Feed from published blog
+ * posts and returns it as `text/xml` with a 24-hour CDN cache header.
+ *
+ * @module app/rss
+ */
+
 import { Feed } from "feed";
 import { getPosts } from "@/blog/query";
 import { SITE_INFO, SITE_URL } from "@/site/brand";

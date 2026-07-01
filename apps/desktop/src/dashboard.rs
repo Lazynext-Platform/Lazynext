@@ -95,6 +95,7 @@ impl Render for Dashboard {
                                                 last_frame_data: None,
                                                 current_frame: 0,
                                                 is_playing: false,
+                                                ai_prompt_text: String::new(),
                                             })
                                         },
                                     )
@@ -159,6 +160,7 @@ impl Render for Dashboard {
                                                 last_frame_data: None,
                                                 current_frame: 0,
                                                 is_playing: false,
+                                                ai_prompt_text: String::new(),
                                             })
                                         },
                                     )

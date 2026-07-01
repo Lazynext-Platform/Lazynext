@@ -1,3 +1,4 @@
+/** @module Sticker render node for rendering sticker images on the compositor */
 import { resolveStickerId } from "@/stickers";
 import {
 	VisualNode,

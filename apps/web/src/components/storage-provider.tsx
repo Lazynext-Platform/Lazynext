@@ -1,3 +1,10 @@
+/**
+ * Storage provider — context provider that initializes the storage
+ * service and exposes loading/error state to the editor tree.
+ *
+ * @module components/storage-provider
+ */
+
 "use client";
 
 import { createContext, useContext, useEffect, useRef, useState } from "react";

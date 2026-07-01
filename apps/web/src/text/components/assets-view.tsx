@@ -1,3 +1,4 @@
+/** @module Text assets panel view for adding text presets to the timeline */
 import { DraggableItem } from "@/components/editor/panels/assets/draggable-item";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import { useEditor } from "@/editor/use-editor";

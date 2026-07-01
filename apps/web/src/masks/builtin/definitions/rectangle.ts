@@ -1,3 +1,4 @@
+/** @module Rectangle mask definition with position, size, corner radius, and feather parameters */
 import type { MaskDefinition } from "@/masks/types";
 import {
 	BOX_LIKE_MASK_PARAMS,

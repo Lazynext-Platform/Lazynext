@@ -21,6 +21,10 @@ pub enum StereoMode {
     FullRes,
 }
 
+/// Camera configuration for stereoscopic 3D rendering.
+///
+/// Defines left/right eye clip sources, interocular distance, convergence
+/// plane, and the current output mode.
 pub struct StereoscopicCamera {
     pub left_eye_clip_id: String,
     pub right_eye_clip_id: String,

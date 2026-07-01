@@ -1,5 +1,6 @@
+/** @module screens/EditorScreen Editor screen component for mobile */
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { NativeBridge } from '../NativeBridge';
 
 const { width } = Dimensions.get('window');
@@ -34,12 +35,27 @@ export const EditorScreen = () => {
     });
   }, []);
 
+  const handleImportMedia = () => {
+    console.log("Import Media pressed — expo-image-picker not yet integrated.");
+    Alert.alert(
+      "Import Media",
+      "Media import will be available when expo-image-picker is integrated.\n\nYou can also use the Chronos Copilot tab to generate B-roll or add clips via natural language."
+    );
+  };
+
+  const clipCount = clips.length;
+
   return (
     <View style={styles.container}>
       
       {/* Video Preview Area */}
       <View style={styles.previewContainer}>
-        <Text style={styles.previewText}>Video Preview Render Surface (Rust WGPU)</Text>
+        <View style={styles.previewBox}>
+          <Text style={styles.previewProjectName}>{projectName || 'No Project Open'}</Text>
+          <Text style={styles.previewMeta}>
+            {clipCount} clip{clipCount !== 1 ? 's' : ''} on timeline
+          </Text>
+        </View>
       </View>
 
       {/* Editor Controls / Timeline */}
@@ -48,6 +64,10 @@ export const EditorScreen = () => {
           <Text style={styles.headerTitle}>{projectName || 'TIMELINE'}</Text>
           <Text style={styles.headerFrame}>Frame: {currentFrame}</Text>
         </View>
+
+        <TouchableOpacity style={styles.importButton} onPress={handleImportMedia}>
+          <Text style={styles.importButtonText}>Import Media</Text>
+        </TouchableOpacity>
 
         <ScrollView horizontal style={styles.timelineScroll} showsHorizontalScrollIndicator={false}>
           <View style={[styles.timelineTrack, { width: 1000 }]}>
@@ -81,10 +101,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 24,
   },
-  previewText: {
-    color: '#333',
-    fontWeight: 'bold',
+  previewBox: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    maxHeight: 300,
+    backgroundColor: '#0d0d1a',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  previewProjectName: {
+    color: '#e0e0ff',
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  previewMeta: {
+    color: 'rgba(160, 160, 200, 0.7)',
+    fontSize: 14,
+    fontWeight: '500',
   },
   editorContainer: {
     flex: 0.4,
@@ -148,5 +189,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 11,
     fontWeight: '500',
+  },
+  importButton: {
+    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(99, 102, 241, 0.4)',
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  importButtonText: {
+    color: '#818cf8',
+    fontSize: 13,
+    fontWeight: '600',
   }
 });

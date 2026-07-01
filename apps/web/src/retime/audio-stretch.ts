@@ -1,3 +1,4 @@
+/** @module Audio time-stretching with pitch correction using SoundTouchJS */
 import { PitchShifter } from "soundtouchjs";
 import { clampRetimeRate, shouldMaintainPitch } from "@/retime/rate";
 import type { RetimeConfig } from "@/timeline";

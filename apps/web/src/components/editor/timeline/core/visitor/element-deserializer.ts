@@ -1,3 +1,4 @@
+/** @module Element deserializer for reconstructing timeline elements from JSON data */
 import { ElementJSON } from "../../types";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

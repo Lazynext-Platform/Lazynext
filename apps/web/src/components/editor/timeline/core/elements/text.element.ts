@@ -1,3 +1,11 @@
+/**
+ * Text element — timeline element for text overlays with font
+ * styling (family, size, weight, style), alignment, stroke,
+ * fill color, and text-effect animation support.
+ *
+ * @module components/editor/timeline/core/elements/text.element
+ */
+
 import { TextAlign, TextProps } from "../../types";
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";

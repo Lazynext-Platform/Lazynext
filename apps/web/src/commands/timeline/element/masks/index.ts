@@ -1,3 +1,4 @@
+/** @module Mask commands barrel export */
 export { DeleteFreeformPathMaskPointsCommand } from "./delete-custom-mask-points";
 export { InsertFreeformPathMaskPointCommand } from "./insert-custom-mask-point";
 export { RemoveMaskCommand } from "./remove-mask";

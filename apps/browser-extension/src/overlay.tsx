@@ -1,9 +1,88 @@
+/** @module overlay Overlay component for browser extension */
 import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 interface Project {
   id: string;
   name: string;
+}
+
+interface TimelineClip {
+  id: string;
+  type: string;
+  source: string;
+  duration?: number;
+}
+
+function TimelinePreview() {
+  const [clips, setClips] = useState<TimelineClip[]>([]);
+
+  useEffect(() => {
+    const loadClips = () => {
+      chrome.storage.local.get(["timelineClips"], (result) => {
+        if (result.timelineClips) {
+          setClips(result.timelineClips as TimelineClip[]);
+        }
+      });
+    };
+    loadClips();
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string,
+    ) => {
+      if (areaName === "local" && changes.timelineClips) {
+        setClips((changes.timelineClips.newValue as TimelineClip[]) || []);
+      }
+    };
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
+  if (clips.length === 0) return null;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
+        padding: "10px",
+        background: "rgba(255, 255, 255, 0.03)",
+        border: "1px solid #333",
+        borderRadius: "6px",
+      }}
+    >
+      <span style={{ fontSize: "11px", fontWeight: 600, color: "#888" }}>
+        Timeline ({clips.length} clip{clips.length !== 1 ? "s" : ""})
+      </span>
+      {clips.map((clip) => (
+        <div
+          key={clip.id}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            fontSize: "12px",
+            color: "#ccc",
+          }}
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "8px",
+              height: "8px",
+              borderRadius: "2px",
+              background: clip.type === "video" ? "#00e5ff" : "#ffaa00",
+            }}
+          />
+          {clip.type} — {clip.source}
+          {clip.duration != null ? ` (${clip.duration}s)` : ""}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function OverlayEditor() {
@@ -173,6 +252,8 @@ function OverlayEditor() {
             {status}
           </div>
         )}
+
+        <TimelinePreview />
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
           <label style={{ fontSize: "14px", fontWeight: "600", color: "#00e5ff" }}>AI Copilot</label>

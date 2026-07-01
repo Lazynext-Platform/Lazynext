@@ -1,5 +1,9 @@
+//! Timeline data models — elements, tracks, and scene track containers.
+
 use serde::{Deserialize, Serialize};
 
+/// A single element on the timeline — a video, audio, text, or effect item
+/// with a start time, duration, and optional track association.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TimelineElement {
@@ -11,6 +15,7 @@ pub struct TimelineElement {
     // other fields omitted for placement logic
 }
 
+/// A timeline track containing a sequence of elements of a common type.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TimelineTrack {
@@ -19,6 +24,8 @@ pub struct TimelineTrack {
     pub elements: Vec<TimelineElement>,
 }
 
+/// The full scene track layout: overlay tracks on top, one main track in the
+/// middle, and audio tracks on the bottom.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SceneTracks {

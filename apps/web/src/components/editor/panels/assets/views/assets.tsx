@@ -1,4 +1,5 @@
 "use client";
+/** @module Media assets view — file import, drag-drop, sort, select, and timeline insertion */
 
 import Image from "next/image";
 import { useMemo, useState } from "react";

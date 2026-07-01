@@ -1,3 +1,13 @@
+//! CRDT timeline data structures for collaborative NLE editing.
+//!
+//! This module provides a Last-Writer-Wins (LWW) conflict-free replicated data
+//! type for synchronizing timeline state across multiple peers. The
+//! [`CRDTTimeline`] aggregates LWW registers for each clip property, ensuring
+//! eventual consistency without central coordination. Both state-based
+//! (CvRDT) and operation-based (CmRDT) merge strategies are supported, with
+//! vector clocks and tombstone maps handling causal ordering and preventing
+//! deleted-resurrection anomalies.
+
 use crate::Clip;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

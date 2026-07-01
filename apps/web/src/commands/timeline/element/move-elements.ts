@@ -1,3 +1,4 @@
+/** @module Command for moving elements between tracks/times with undo support */
 import {
 	Command,
 	createElementSelectionResult,

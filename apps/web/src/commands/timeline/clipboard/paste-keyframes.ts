@@ -1,3 +1,4 @@
+/** @module Command for pasting clipboard keyframes onto elements with undo support */
 import { EditorCore } from "@/core";
 import {
 	getKeyframeAtTime,

@@ -1,3 +1,4 @@
+/** @module Waveform cache service for generating and caching audio waveform previews */
 "use client";
 
 import { createAudioContext } from "@/media/audio";

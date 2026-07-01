@@ -1,3 +1,4 @@
+/** @module Command for adding a media asset to the project with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import { toast } from "sonner";

@@ -1,3 +1,4 @@
+/** @module Selection type definitions for selection state, box selection bounds, and hooks */
 export interface SelectionState {
 	selectedIds: string[];
 	anchorId: string | null;

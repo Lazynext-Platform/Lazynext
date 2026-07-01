@@ -1,3 +1,10 @@
+/**
+ * Built-in easing presets — linear, ease-in/out variants, and their
+ * normalized cubic-bezier representations.
+ *
+ * @module timeline/components/graph-editor/easing-presets
+ */
+
 import type { NormalizedCubicBezier } from "@/animation/types";
 
 export const PRESET_MATCH_TOLERANCE = 0.02;

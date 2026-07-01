@@ -1,3 +1,4 @@
+/** @module Command for pasting clipboard elements onto the timeline with undo support */
 import {
 	Command,
 	createElementSelectionResult,

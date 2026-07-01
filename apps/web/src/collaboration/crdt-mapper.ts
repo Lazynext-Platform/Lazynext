@@ -1,3 +1,13 @@
+/**
+ * Maps the flat WASM EntityGraph back to nested React TScene[] trees.
+ *
+ * The WASM EntityGraph is a flat key-value store with entity definitions
+ * and parent-child links. This module hydrates that flat structure into
+ * the nested scene → track → element hierarchy that the React UI expects.
+ *
+ * @module collaboration/crdt-mapper
+ */
+
 import type { TScene, TimelineTrack, TimelineElement, SceneTracks, Bookmark } from "@/timeline";
 
 /**
@@ -8,6 +18,16 @@ import type { TScene, TimelineTrack, TimelineElement, SceneTracks, Bookmark } fr
  *   entities: { "scene_1": "{id: 'scene_1', name: 'Main'}", "track_1": "..." },
  *   links: { "scene_1": ["track_1", "track_2"] }
  * }
+ */
+/**
+ * Converts a flat WASM EntityGraph into a sorted array of TScene objects.
+ *
+ * Each entity is parsed from JSON, then scenes are identified, their
+ * tracks/elements/bookmarks are hydrated from link maps, and the result
+ * is sorted with the main scene first.
+ *
+ * @param entityGraph - the raw entity graph from the WASM CRDT engine.
+ * @returns a sorted array of hydrated TScene objects.
  */
 export function hydrateScenesFromEntityGraph(entityGraph: any): TScene[] {
 	if (!entityGraph || !entityGraph.entities) {

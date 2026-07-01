@@ -1,3 +1,4 @@
+/** @module Preview interaction controller handling mouse/pointer events for canvas manipulation */
 import type {
 	MouseEvent as ReactMouseEvent,
 	PointerEvent as ReactPointerEvent,

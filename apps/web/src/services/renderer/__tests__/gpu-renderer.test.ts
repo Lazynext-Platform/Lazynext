@@ -1,3 +1,4 @@
+/** @module __tests__/gpu-renderer Test suite for GPU renderer */
 import { describe, test, expect, mock, beforeEach } from "bun:test";
 
 // Return a plain object (canvas-substitute) from the WASM mock so that

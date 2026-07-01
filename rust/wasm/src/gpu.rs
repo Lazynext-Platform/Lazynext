@@ -1,3 +1,10 @@
+//! GPU runtime initialization and utilities for WebAssembly.
+//!
+//! Manages a thread-local `GpuRuntime` holding the WebGPU/WebGL context,
+//! effect pipeline, and mask pipeline. Provides helpers for importing
+//! offscreen canvases as textures, rendering textures to canvases,
+//! reading typed properties from JS objects, and waveform analysis.
+
 #![cfg(target_arch = "wasm32")]
 
 use std::cell::RefCell;

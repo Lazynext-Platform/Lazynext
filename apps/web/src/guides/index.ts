@@ -1,3 +1,4 @@
+/** @module Guides module barrel export for canvas guide definitions and lookup */
 import { GUIDE_REGISTRY } from "./registry";
 import type { GuideDefinition } from "@/guides/types";
 

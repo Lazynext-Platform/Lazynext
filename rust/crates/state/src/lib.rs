@@ -1,3 +1,32 @@
+//! Lazynext State — CRDT-powered collaborative data model.
+//!
+//! The state crate is the single source of truth for all timeline data in
+//! Lazynext. Every edit — whether from a human, an AI agent, or a remote
+//! peer — is represented as a CRDT operation that converges deterministically
+//! across all replicas without requiring a central coordinator.
+//!
+//! # Design
+//!
+//! - **CRDT timeline** (`crdt`): LWW-Register + operation-based CRDT for
+//!   real-time multi-user editing with guaranteed convergence
+//! - **Entity graph** (`entity_graph`): Full NLE scene graph (tracks, clips,
+//!   effects, keyframes) as a traversable CRDT data structure
+//! - **Operations** (`operations`): All mutation types (TrackInsert, ClipInsert,
+//!   ClipDelete, KeyframeUpdate, etc.) with serialization and `inverse()`
+//! - **Keyframes** (`keyframe`): Interpolatable property animations with
+//!   easing functions (linear, ease-in/out, bezier)
+//! - **Tombstones** (`tombstone`): Deletion markers with vector clock
+//!   causality — prevents zombie data from re-surfacing after merge
+//! - **Vector clocks** (`vector_clock`): Lamport-style partial ordering for
+//!   causal consistency across distributed peers
+//!
+//! # Public types
+//!
+//! The top-level `Clip`, `Track`, and `ProjectData` types provide a simple
+//! Serde-serializable API for CRDT snapshot import/export. For full CRDT
+//! semantics (merge, sync, conflict resolution), use the `crdt` module
+//! directly.
+
 #![allow(clippy::large_enum_variant)]
 pub mod crdt;
 pub mod entity_graph;

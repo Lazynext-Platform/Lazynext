@@ -64,6 +64,7 @@ impl Default for VstHost {
 }
 
 impl VstHost {
+    /// Create a new VST3 host with default settings (48 kHz, 512-sample block size).
     pub fn new() -> Self {
         Self {
             plugin_path: String::new(),

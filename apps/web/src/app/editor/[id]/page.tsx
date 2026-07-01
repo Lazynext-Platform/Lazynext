@@ -1,3 +1,10 @@
+/**
+ * Project-specific editor page — loads a project by ID, wraps the
+ * modern editor client with state provider and error boundary.
+ *
+ * @page /editor/[id]
+ */
+
 import ModernEditorClient from "@/components/editor/ModernEditorClient";
 import ExportButton from "@/components/editor/export-button";
 import { EditorErrorBoundary } from "@/components/editor/EditorErrorBoundary";

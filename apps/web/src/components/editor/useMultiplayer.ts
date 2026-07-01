@@ -1,3 +1,4 @@
+/** @module Multiplayer WebSocket hook for CRDT delta broadcasting */
 import { useEffect, useRef, useCallback, useState } from "react";
 
 interface MultiplayerHookArgs {

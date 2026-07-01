@@ -1,3 +1,10 @@
+/**
+ * Loading — Next.js Suspense fallback rendered while route segments
+ * stream in. Displays a centered spinner with subtle loading text.
+ *
+ * @module app/loading
+ */
+
 export default function Loading() {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background">

@@ -1,3 +1,5 @@
+/** @component Renders a markdown string as styled prose content via react-markdown. */
+
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/utils/ui";
 

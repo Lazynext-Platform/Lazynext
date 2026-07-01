@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v16-to-v17 Test suite for V16 to V17 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV16ToV17 } from "../transformers/v16-to-v17";
 import { asRecord, asRecordArray } from "./helpers";

@@ -1,12 +1,20 @@
+//! 3D transform primitives for spatial compositing.
+//!
+//! Defines `Vector3`, `Transform3D` (position / Euler rotation / scale),
+//! and `Camera3D` for placing 2D video layers in 3D space with
+//! model and perspective projection matrices for WebGPU.
+
+/// A 3-component vector for positions, rotations, and scale.
 pub struct Vector3 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
+/// 3D transform with position, Euler rotation (pitch/yaw/roll), and scale.
 pub struct Transform3D {
     pub position: Vector3,
-    pub rotation: Vector3, // Euler angles (Pitch, Yaw, Roll)
+    pub rotation: Vector3,
     pub scale: Vector3,
 }
 
@@ -17,6 +25,7 @@ impl Default for Transform3D {
 }
 
 impl Transform3D {
+    /// Creates a new `Transform3D` at origin with identity scale and zero rotation.
     pub fn new() -> Self {
         Self {
             position: Vector3 {
@@ -51,6 +60,7 @@ impl Transform3D {
     }
 }
 
+/// A perspective camera for viewing 3D composited layers.
 pub struct Camera3D {
     pub position: Vector3,
     pub fov_degrees: f32,

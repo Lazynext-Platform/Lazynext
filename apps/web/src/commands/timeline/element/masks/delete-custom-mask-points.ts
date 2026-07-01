@@ -1,3 +1,4 @@
+/** @module Command for deleting custom freeform mask points with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import {

@@ -1,3 +1,4 @@
+/** @module Icon element — timeline element representing an icon overlay on the canvas */
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";

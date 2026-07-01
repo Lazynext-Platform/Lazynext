@@ -1,0 +1,79 @@
+# ── Database Alert Rules ──────────────────────────────────────────
+# PostgreSQL-specific alerts covering availability, connection
+# saturation, query performance, and replication health.
+#
+# Assumes the following PostgreSQL Exporter metrics:
+#   pg_up, pg_stat_database_numbackends, pg_stat_database_xact_commit,
+#   pg_stat_database_xact_rollback, pg_stat_replication_flush_lag,
+#   pg_settings_max_connections
+
+groups:
+  - name: lazynext-postgresql
+    rules:
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL instance {{ $labels.instance }} is down"
+          description: |
+            PostgreSQL exporter reports pg_up == 0 on {{ $labels.instance }}
+            for more than 1 minute. The database is unreachable.
+            Check instance health, disk space, and PostgreSQL process.
+            Runbook: monitoring/runbooks/postgresql-down.md
+
+      - alert: PostgreSQLHighConnections
+        expr: |
+          pg_stat_database_numbackends
+          / on() pg_settings_max_connections > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "PostgreSQL connections > 80% of max on {{ $labels.instance }}"
+          description: |
+            Database {{ $labels.datname }} on {{ $labels.instance }}
+            is at {{ $value | humanizePercentage }} of max connections.
+            Active connections: {{ query "pg_stat_database_numbackends" | first | value }}
+            Max connections: {{ query "pg_settings_max_connections" | first | value }}
+            New connections may be refused if capacity is reached.
+            Check for connection leaks, idle-in-transaction sessions,
+            or consider increasing max_connections.
+
+      - alert: PostgreSQLSlowQueries
+        expr: |
+          rate(pg_stat_database_xact_commit[5m]) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High PostgreSQL transaction commit rate on {{ $labels.instance }}"
+          description: |
+            Database {{ $labels.datname }} on {{ $labels.instance }}
+            is processing {{ $value | humanize }} transactions per second.
+            Sustained high transaction rate may indicate a slow query
+            or an inefficient application query pattern.
+            Review pg_stat_statements for the top queries by total_time.
+            Check for missing indexes, sequential scans on large tables,
+            or N+1 query patterns in application code.
+
+      - alert: PostgreSQLReplicationLag
+        expr: |
+          pg_stat_replication_flush_lag_seconds > 10
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL replication lag > 10 seconds on {{ $labels.instance }}"
+          description: |
+            Replication lag on {{ $labels.instance }} is
+            {{ $value }}s (threshold: 10s). Read replicas are serving
+            stale data and failover may result in data loss.
+            Check replica server load, network latency, and WAL
+            generation rate on the primary.
+            Runbook: monitoring/runbooks/postgresql-replication-lag.md

@@ -1,3 +1,10 @@
+/**
+ * Root layout — wraps all pages with theme provider, analytics,
+ * SEO metadata, cookie consent, and the global TooltipProvider.
+ *
+ * @layout /
+ */
+
 import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 import "../globals.css";
@@ -18,6 +25,7 @@ export const metadata = generateMetadata({});
 
 import { PostHogProvider } from "@/components/providers/posthog-provider";
 
+/** App root layout with providers, scripts, and global page shell. */
 export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {

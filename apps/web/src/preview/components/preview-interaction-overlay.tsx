@@ -1,3 +1,4 @@
+/** @module Preview interaction overlay handling mouse/touch events for canvas manipulation */
 import { useState } from "react";
 import { usePreviewViewport } from "@/preview/components/preview-viewport";
 import { usePreviewInteraction } from "@/preview/hooks/use-preview-interaction";

@@ -1,3 +1,5 @@
+/** @component Renders a small count/label pill for statuses and metadata. */
+
 import type * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 

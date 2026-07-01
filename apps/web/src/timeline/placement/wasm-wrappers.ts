@@ -1,3 +1,12 @@
+/**
+ * TypeScript wrappers around the WASM placement engine.
+ *
+ * These adapt Rust/WASM functions for the TypeScript timeline layer,
+ * adding null-safety and typed return values.
+ *
+ * @module timeline/placement/wasm-wrappers
+ */
+
 import {
 	applyPlacement as wasmApplyPlacement,
 	resolveTrackPlacement as wasmResolveTrackPlacement,
@@ -11,6 +20,10 @@ import type {
 } from "./types";
 import type { SceneTracks, TimelineElement } from "@/timeline";
 
+/**
+ * Resolves placement options by calling the WASM engine. Returns null
+ * when no placement can be found.
+ */
 export function resolveTrackPlacement({
 	tracks,
 	timeSpans,
@@ -31,6 +44,10 @@ export function resolveTrackPlacement({
 	return result ? (result as PlacementResult) : null;
 }
 
+/**
+ * Applies a resolved placement result to the timeline via WASM,
+ * returning updated tracks and the target track ID.
+ */
 export function applyPlacement({
 	tracks,
 	placementResult,
@@ -53,6 +70,9 @@ export function applyPlacement({
 		: null;
 }
 
+/**
+ * Resolves and applies element placement in a single WASM call.
+ */
 export function placeElementsOnTimeline({
 	tracks,
 	subject,

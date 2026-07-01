@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a theme-aware toast notification provider using Sonner. */
+
 import { useTheme } from "next-themes";
 import { Toaster as Sonner } from "sonner";
 

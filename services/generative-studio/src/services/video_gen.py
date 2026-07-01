@@ -1,3 +1,12 @@
+"""
+Video generation services: diffusion, upscaling, NeRF, style transfer,
+generative fill, and AI avatar generation.
+
+Uses Replicate for cloud inference (Stable Video Diffusion, inpainting),
+RealESRGAN for upscaling, ElevenLabs for avatar TTS, and OpenCV-based
+local fallbacks for style transfer and inpainting.
+"""
+
 import asyncio
 import os
 import httpx
@@ -10,6 +19,20 @@ from src.models import (
 from upscale_pipeline import UpscalePipeline, UpscaleConfig
 
 async def generate_video_service(req: DiffusionRequest):
+    """Generate video from a text prompt via Replicate Stable Video Diffusion.
+
+    Submits a prediction to the Replicate API and returns the prediction ID
+    for polling.
+
+    Args:
+        req: DiffusionRequest with prompt, dimensions, and frame count.
+
+    Returns:
+        dict with success, prompt, source, prediction_id, and status_url.
+
+    Raises:
+        HTTPException: 503 if REPLICATE_API_TOKEN is missing, 500 on failure.
+    """
     api_token = os.getenv("REPLICATE_API_TOKEN")
 
     if api_token:
@@ -64,6 +87,20 @@ async def generate_video_service(req: DiffusionRequest):
     )
 
 async def upscale_video_service(req: UpscaleRequest):
+    """Upscale video resolution using RealESRGAN (2x or 4x).
+
+    Runs the UpscalePipeline in a thread pool to avoid blocking the async
+    event loop.
+
+    Args:
+        req: UpscaleRequest with video_id and scale factor.
+
+    Returns:
+        dict with success, video_id, scale, source, and output_url.
+
+    Raises:
+        HTTPException: 503 if upscaling fails.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_path = f"/tmp/{req.video_id}_{req.scale}x.mp4"
 
@@ -93,6 +130,10 @@ async def upscale_video_service(req: UpscaleRequest):
     }
 
 async def extract_nerf_service(req: NeRFRequest):
+    """Deprecated NeRF endpoint — returns 410 Gone with redirect header.
+
+    Use /nerf-extract on the pre-processing service (port 8000) instead.
+    """
     return JSONResponse(
         status_code=410,
         content={
@@ -104,6 +145,20 @@ async def extract_nerf_service(req: NeRFRequest):
     )
 
 async def style_transfer_service(req: StyleTransferRequest):
+    """Apply visual style transfer to a video using OpenCV effects.
+
+    Supports anime (edge-aware), claymation (stylization), pencil sketch,
+    and detail-enhancement styles. Encodes result with ffmpeg.
+
+    Args:
+        req: StyleTransferRequest with video_id and style_prompt.
+
+    Returns:
+        dict with success, video_id, style_applied, source, and styled_video_url.
+
+    Raises:
+        HTTPException: 503 if OpenCV unavailable, 500 on processing error.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_path = f"/tmp/{req.video_id}_styled.mp4"
     method = None

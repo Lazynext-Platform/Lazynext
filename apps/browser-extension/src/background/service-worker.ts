@@ -1,3 +1,4 @@
+/** @module background/service-worker Service worker for browser extension background script */
 // Service Worker (Background Script)
 
 let API_GATEWAY = "http://localhost:8005";

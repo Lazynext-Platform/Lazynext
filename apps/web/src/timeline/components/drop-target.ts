@@ -1,3 +1,10 @@
+/**
+ * Drop-target computation — resolves where a dragged or externally-dropped
+ * element lands on the timeline, using the WASM placement engine.
+ *
+ * @module timeline/components/drop-target
+ */
+
 import type { TimelineTrack, TimelineElement } from "@/timeline";
 import type { ComputeDropTargetParams, DropTarget } from "@/timeline";
 import { resolveTrackPlacement } from "@/timeline/placement";
@@ -100,6 +107,10 @@ function fallbackNewTrackDropTarget({
 	};
 }
 
+/**
+ * Computes where a dragged/dropped element should land on the timeline,
+ * including track-is-new-tracking and target-element hit detection.
+ */
 export function computeDropTarget({
 	elementType,
 	mouseX,
@@ -260,6 +271,9 @@ export function computeDropTarget({
 	};
 }
 
+/**
+ * Returns the Y pixel position of the drop-line for a given drop target.
+ */
 export function getDropLineY({
 	dropTarget,
 	tracks,

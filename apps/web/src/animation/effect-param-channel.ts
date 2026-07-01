@@ -1,11 +1,24 @@
+/**
+ * @module animation/effect-param-channel
+ * @description Builds, validates, parses, and resolves effect param
+ *   animation paths. Effect params have the shape
+ *   `effects.<effectId>.params.<paramKey>`.
+ */
+
 import type { ElementAnimations, EffectParamPath } from "@/animation/types";
 import type { ParamValues } from "@/params";
 import { removeElementKeyframe } from "./keyframes";
 import { resolveAnimationPathValueAtTime } from "./resolve";
 
+/** Prefix for all effect param animation paths. */
 export const EFFECT_PARAM_PATH_PREFIX = "effects.";
+/** Separator between the effect ID and the param key. */
 export const EFFECT_PARAM_PATH_SUFFIX = ".params.";
 
+/**
+ * Constructs a full effect param animation path from an effect ID and
+ * a param key.
+ */
 export function buildEffectParamPath({
 	effectId,
 	paramKey,
@@ -16,6 +29,7 @@ export function buildEffectParamPath({
 	return `${EFFECT_PARAM_PATH_PREFIX}${effectId}${EFFECT_PARAM_PATH_SUFFIX}${paramKey}`;
 }
 
+/** Returns `true` when the string matches the effect param path pattern. */
 export function isEffectParamPath(
 	propertyPath: string,
 ): propertyPath is EffectParamPath {
@@ -25,6 +39,10 @@ export function isEffectParamPath(
 	);
 }
 
+/**
+ * Parses an effect param path into its constituent effect ID and param
+ * key. Returns `null` if the path is malformed.
+ */
 export function parseEffectParamPath({
 	propertyPath,
 }: {
@@ -51,6 +69,10 @@ export function parseEffectParamPath({
 	return { effectId, paramKey };
 }
 
+/**
+ * Resolves all effect params at a given local time, mixing static
+ * defaults with any animated keyframe values.
+ */
 export function resolveEffectParamsAtTime({
 	effectId,
 	params,
@@ -80,6 +102,9 @@ export function resolveEffectParamsAtTime({
 	return resolved;
 }
 
+/**
+ * Removes a single keyframe from an effect param's animation channel.
+ */
 export function removeEffectParamKeyframe({
 	animations,
 	effectId,

@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # start-platform.sh
-# Bootstraps and starts all Lazynext services
+#
+# Bootstraps and starts all Lazynext services in development mode.
+# Launches: Docker infra (Redis, Postgres), WASM builder, Next.js frontend,
+# Render Service, Pre-Processing ML Service, Generative Studio, and AI Agents.
+#
+# Usage:
+#   ./start-platform.sh
+#   Press Ctrl+C to shut down all services.
 
 echo "Cleaning up any old background processes..."
 lsof -ti:3000,8000,8001,8002,8003,8004,8006 | xargs kill -9 2>/dev/null || true

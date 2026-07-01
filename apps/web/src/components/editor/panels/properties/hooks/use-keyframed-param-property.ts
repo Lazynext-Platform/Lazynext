@@ -1,4 +1,5 @@
 "use client";
+/** @module Hook for keyframed parameter editing — preview, commit, and toggle keyframes */
 
 import { useEditor } from "@/editor/use-editor";
 import {

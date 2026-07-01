@@ -1,3 +1,4 @@
+/** @module Preview overlay compositor for rendering guide overlays on the canvas */
 import { getGuideById, type GuideId } from "@/guides";
 import {
 	EMPTY_PREVIEW_OVERLAY_SOURCE_RESULT,

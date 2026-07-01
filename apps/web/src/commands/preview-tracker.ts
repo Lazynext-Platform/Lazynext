@@ -1,3 +1,4 @@
+/** @module Preview tracker utility for snapshot-based preview state change detection */
 export class PreviewTracker<T> {
 	private snapshot: T | null = null;
 

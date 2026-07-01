@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a group of toggle buttons with single or multiple selection support. */
+
 import * as React from "react";
 import { ToggleGroup as ToggleGroupPrimitive } from "radix-ui";
 import type { VariantProps } from "class-variance-authority";

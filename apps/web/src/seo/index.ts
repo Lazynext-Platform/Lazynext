@@ -1,3 +1,10 @@
+/**
+ * SEO barrel export — re-exports metadata config, Schema.org JSON-LD
+ * components, head meta tags, and social card generators.
+ *
+ * @module seo
+ */
+
 export { SITE_CONFIG, generateMetadata } from "./metadata";
 export {
 	OrganizationLD,

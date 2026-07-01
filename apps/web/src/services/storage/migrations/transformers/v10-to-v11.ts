@@ -1,3 +1,4 @@
+/** @module Project data transformer v10 to v11 */
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";
 

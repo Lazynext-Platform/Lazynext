@@ -1,3 +1,11 @@
+/**
+ * Element animation add-on — encapsulates enter/exit animation
+ * properties (direction, intensity, duration, interval) with
+ * JSON serialization support for timeline elements.
+ *
+ * @module components/editor/timeline/core/addOns/animation
+ */
+
 import { Animation } from "../../types";
 
 export class ElementAnimation {

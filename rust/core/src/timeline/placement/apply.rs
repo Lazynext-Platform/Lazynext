@@ -1,13 +1,21 @@
+//! Applies a resolved placement decision to the scene track layout,
+//! inserting elements into an existing or newly created track.
+
 use crate::timeline::models::{SceneTracks, TimelineElement, TimelineTrack};
 use crate::timeline::placement::track_factory::build_empty_track;
 use crate::timeline::placement::types::PlacementResult;
 use uuid::Uuid;
 
+/// The result of applying a placement decision: the updated scene tracks
+/// and the ID of the track that received the elements.
 pub struct ApplyPlacementResult {
     pub updated_tracks: SceneTracks,
     pub target_track_id: String,
 }
 
+/// Applies a resolved placement result to the scene tracks, adding elements
+/// to either an existing track or a newly created one. An optional override
+/// can specify a different insert index for a new track.
 pub fn apply_placement(
     tracks: &SceneTracks,
     placement_result: &PlacementResult,

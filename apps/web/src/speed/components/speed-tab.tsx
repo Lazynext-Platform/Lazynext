@@ -1,3 +1,4 @@
+/** @module Speed tab for adjusting media playback rate and pitch preservation */
 import { useRef } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { NumberField } from "@/components/ui/number-field";

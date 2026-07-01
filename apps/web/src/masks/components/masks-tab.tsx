@@ -1,3 +1,4 @@
+/** @module Masks tab component for editing mask properties in the properties panel */
 "use client";
 
 import type { MaskableElement } from "@/timeline";

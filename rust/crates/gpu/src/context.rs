@@ -1,3 +1,9 @@
+//! GPU context management: device acquisition, texture I/O, and surface rendering.
+//!
+//! Provides the central [`GpuContext`] abstraction that owns the wgpu instance,
+//! adapter, device, and queue. Handles WebGPU vs WebGL fallback on WASM targets,
+//! texture upload/readback, and blit-to-surface presentation.
+
 use wgpu::util::DeviceExt;
 
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]

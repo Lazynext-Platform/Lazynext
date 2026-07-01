@@ -1,3 +1,4 @@
+/** @module Graphics definitions registration that populates the graphics registry at import time */
 import { graphicsRegistry } from "../registry";
 import { ellipseGraphicDefinition } from "./ellipse";
 import { polygonGraphicDefinition } from "./polygon";

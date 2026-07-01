@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a horizontal or vertical dividing line for visual separation. */
+
 import * as React from "react";
 import * as SeparatorPrimitive from "@radix-ui/react-separator";
 

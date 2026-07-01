@@ -1,3 +1,8 @@
+/**
+ * @module Scene lifecycle manager — create, delete, rename, switch scenes plus
+ * bookmark CRUD. All mutations emit CRDT property-update operations.
+ */
+
 import type { EditorCore } from "@/core";
 import type { Bookmark, SceneTracks, TScene } from "@/timeline";
 import { storageService } from "@/services/storage/service";

@@ -1,3 +1,4 @@
+/** @module Project JSON migration utilities for upgrading legacy project data formats */
 import type { ElementJSON, ProjectJSON } from "../types";
 
 export const CURRENT_PROJECT_VERSION = 2;

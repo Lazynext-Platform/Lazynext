@@ -1,3 +1,11 @@
+/**
+ * External drag-and-drop controller — handles dragging media assets,
+ * text, stickers, graphics, and effects from the asset panel onto the
+ * timeline, plus file drops from the OS.
+ *
+ * @module timeline/controllers/drag-drop-controller
+ */
+
 import type { DragEvent } from "react";
 import { processMediaAssets } from "@/media/processing";
 import { showMediaUploadToast } from "@/media/upload-toast";
@@ -34,6 +42,7 @@ import { roundFrameTime, type MediaTime } from "@/wasm";
 
 // --- Config ---
 
+/** Configuration for the drag-drop controller. */
 export interface DragDropConfig {
 	zoomLevel: number;
 	getContainerEl: () => HTMLDivElement | null;
@@ -61,6 +70,7 @@ export interface DragDropConfig {
 	}) => void;
 }
 
+/** Ref wrapper for drag-drop config. */
 export interface DragDropConfigRef {
 	readonly current: DragDropConfig;
 }
@@ -133,6 +143,10 @@ function orderedTracks({
 
 // --- Controller ---
 
+/**
+ * Handles dragenter/dragover/dragleave/drop events on the timeline,
+ * computing drop targets and dispatching element insertion commands.
+ */
 export class DragDropController {
 	private state: DragDropState = { kind: "idle" };
 	private enterCount = 0;

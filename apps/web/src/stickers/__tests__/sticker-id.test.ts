@@ -1,3 +1,4 @@
+/** @module __tests__/sticker-id Test suite for sticker ID parsing and building */
 import { describe, expect, test } from "bun:test";
 import { buildStickerId, parseStickerId } from "../sticker-id";
 

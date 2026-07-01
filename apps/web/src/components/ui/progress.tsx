@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a horizontal progress indicator bar with configurable fill ratio. */
+
 import * as React from "react";
 import { Progress as ProgressPrimitive } from "radix-ui";
 

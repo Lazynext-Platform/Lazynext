@@ -1,5 +1,15 @@
+/**
+ * Collects snap points from multiple lazily-evaluated sources.
+ *
+ * @module timeline/snapping/build
+ */
+
 import type { SnapPoint, TimelineSnapPointSource } from "./types";
 
+/**
+ * Iterates all registered snap sources and concatenates their snap
+ * points into a flat array.
+ */
 export function buildTimelineSnapPoints({
 	sources,
 }: {

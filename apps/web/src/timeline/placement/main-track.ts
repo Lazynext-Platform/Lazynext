@@ -1,8 +1,20 @@
+/**
+ * Main-track placement rules — the main track anchors the timeline;
+ * elements pushed to its start snap to zero, and the earliest element's
+ * position constrains new placements.
+ *
+ * @module timeline/placement/main-track
+ */
+
 import type { SceneTracks, TimelineElement, VideoTrack } from "@/timeline";
 import { type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
 export const MAIN_TRACK_NAME = "Main Track";
 
+/**
+ * Returns the earliest element on the main track, excluding the optional
+ * element ID.
+ */
 export function getEarliestMainTrackElement({
 	mainTrack,
 	excludeElementId,
@@ -24,6 +36,10 @@ export function getEarliestMainTrackElement({
 	});
 }
 
+/**
+ * Clamps a start time for the main track: elements that would become
+ * the earliest are forced to zero; others keep their requested time.
+ */
 export function enforceMainTrackStart({
 	tracks,
 	targetTrackId,

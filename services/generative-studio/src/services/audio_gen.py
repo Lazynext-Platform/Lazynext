@@ -1,3 +1,10 @@
+"""
+Audio generation services: dubbing, voice-cloned overdubbing, and stem separation.
+
+Uses ElevenLabs for TTS/dubbing, Coqui TTS as local fallback, and Demucs/Spleeter/
+librosa for stem separation, cascading through available backends.
+"""
+
 import asyncio
 import os
 import httpx
@@ -8,6 +15,17 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from demucs_pipeline import DemucsPipeline, DemucsConfig
 async def dub_video_service(req: DubRequest):
+    """Generate AI-dubbed speech in a target language using ElevenLabs TTS.
+
+    Args:
+        req: DubRequest with clip_id, target_language, and text_to_dub.
+
+    Returns:
+        dict with success, clip_id, language, source, and audio_url.
+
+    Raises:
+        HTTPException: 503 if ELEVENLABS_API_KEY is missing, 500 on failure.
+    """
     api_key = os.getenv("ELEVENLABS_API_KEY")
 
     if api_key:
@@ -57,6 +75,20 @@ async def dub_video_service(req: DubRequest):
     )
 
 async def overdub_audio_service(req: OverdubRequest):
+    """Generate voice-cloned overdub audio using ElevenLabs or local Coqui TTS.
+
+    Attempts ElevenLabs with cloned voice first, then falls back to Coqui
+    TTS (Tacotron2-DDC) if ElevenLabs is unavailable.
+
+    Args:
+        req: OverdubRequest with text, voice_id, and optional original_audio_url.
+
+    Returns:
+        dict with success, source, and audio_url.
+
+    Raises:
+        HTTPException: 503 if neither ElevenLabs nor local TTS succeeds.
+    """
     api_key = os.getenv("ELEVENLABS_API_KEY")
 
     if api_key:
@@ -111,6 +143,19 @@ async def overdub_audio_service(req: OverdubRequest):
     )
 
 async def split_stems_service(req: StemSplitRequest):
+    """Separate audio into vocal/instrumental stems using Demucs, Spleeter, or librosa.
+
+    Cascades through backends: Demucs (preferred) → Spleeter → librosa HPSS.
+
+    Args:
+        req: StemSplitRequest with audio_id and stem count (2, 4, or 5).
+
+    Returns:
+        dict with success, audio_id, source, and stems mapping name → URL.
+
+    Raises:
+        HTTPException: 503 if no stem separation backend is available.
+    """
     audio_path = f"/tmp/{req.audio_id}.wav"
     stems_output = {}
     method = None

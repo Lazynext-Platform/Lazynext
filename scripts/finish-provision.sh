@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
-# finish-provision.sh — Complete the Azure provisioning + GitHub secrets
-# Run this with: bash scripts/finish-provision.sh
+# finish-provision.sh — Finalize Azure provisioning and wire GitHub Actions secrets.
+#
+# Fixes storage account key access, applies remaining Terraform resources (~32),
+# outputs infrastructure details, and sets the AZURE_CLIENT_ID GitHub secret for CI/CD.
+#
+# Usage:
+#   bash scripts/finish-provision.sh
+#
+# Prerequisites:
+#   - Azure CLI authenticated (az login)
+#   - GitHub CLI authenticated (gh auth login)
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TF_DIR="$SCRIPT_DIR/../terraform/azure"

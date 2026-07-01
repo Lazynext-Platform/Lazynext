@@ -1,3 +1,4 @@
+/** @module Frame rate preset options for project settings (24, 25, 30, 60 fps) */
 export const FPS_PRESETS = [
 	{ value: "24", label: "24 fps" },
 	{ value: "25", label: "25 fps" },

@@ -1,3 +1,11 @@
+/**
+ * Dynamic sitemap.xml generation — returns static marketing pages plus
+ * all published blog posts with appropriate change frequency and priority
+ * values for search engine crawlers.
+ *
+ * @module app/sitemap
+ */
+
 import { SITE_URL } from "@/site/brand";
 import { getPosts } from "@/blog/query";
 import type { MetadataRoute } from "next";

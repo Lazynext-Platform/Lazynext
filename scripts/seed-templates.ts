@@ -1,3 +1,13 @@
+/**
+ * seed-templates.ts — Insert default project templates into the database.
+ *
+ * Creates the YouTube Vlogger Pack and TikTok Viral Hook templates using
+ * Drizzle ORM. Safe to re-run — uses onConflictDoNothing.
+ *
+ * Usage:
+ *   bun run scripts/seed-templates.ts
+ */
+
 import { db } from "../apps/web/src/db";
 import { projects } from "../apps/web/src/db/schema";
 

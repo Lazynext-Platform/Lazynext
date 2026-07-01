@@ -26,6 +26,7 @@ interface KafkaConfig {
   };
 }
 
+/** Build a KafkaConfig from environment variables, or return null if unconfigured. */
 async function getConfig(): Promise<KafkaConfig | null> {
   const brokersEnv = process.env.KAFKA_BROKERS;
   if (!brokersEnv) return null;
@@ -55,6 +56,7 @@ async function getConfig(): Promise<KafkaConfig | null> {
   return config;
 }
 
+/** Connect to Kafka via kafkajs; returns true on success, false if unavailable. */
 export async function connectKafka(): Promise<boolean> {
   if (kafkaConnected) return true;
 
@@ -82,6 +84,7 @@ export async function connectKafka(): Promise<boolean> {
   }
 }
 
+/** Send messages to a Kafka topic; returns false if producer is not connected. */
 export async function sendToKafka(
   topic: string,
   messages: Array<{ key: string; value: Record<string, unknown> }>,
@@ -117,6 +120,7 @@ export async function flushBatch(
   return success ? batch.length : 0;
 }
 
+/** Gracefully disconnect the Kafka producer. */
 export async function disconnectKafka(): Promise<void> {
   if (producerInstance) {
     try {
@@ -129,12 +133,14 @@ export async function disconnectKafka(): Promise<void> {
   }
 }
 
+/** Check whether the Kafka producer is currently connected. */
 export function isKafkaConnected(): boolean {
   return kafkaConnected;
 }
 
 // ── Topic Definitions ─────────────────────────────────────────────────
 
+/** Kafka topic name constants used across the analytics pipeline. */
 export const Topics = {
   USER_EVENTS: "lazynext.user.events",
   EDIT_OPERATIONS: "lazynext.editor.operations",

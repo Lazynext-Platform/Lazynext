@@ -1,3 +1,4 @@
+/** @module vite.config Vite configuration for browser extension */
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { resolve, dirname } from "path";

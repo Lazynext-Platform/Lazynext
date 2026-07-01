@@ -1,3 +1,4 @@
+/** @module Command for moving a scene bookmark to a different position */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { TScene } from "@/timeline";

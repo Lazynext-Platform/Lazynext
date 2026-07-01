@@ -1,3 +1,10 @@
+/**
+ * GET /api/authtest
+ *
+ * Diagnostic endpoint that returns sanitised info about the
+ * DATABASE_URL environment variable.
+ */
+
 import { NextResponse } from "next/server";
 
 export async function GET() {

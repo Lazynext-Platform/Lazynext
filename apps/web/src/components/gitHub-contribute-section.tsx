@@ -1,3 +1,10 @@
+/**
+ * GitHub contribute CTA section — "Star on GitHub" and "View on GitHub"
+ * buttons with customizable title and description.
+ *
+ * @module components/gitHub-contribute-section
+ */
+
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { SOCIAL_LINKS } from "@/site/social";

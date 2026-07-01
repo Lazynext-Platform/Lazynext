@@ -1,3 +1,4 @@
+/** @module Guide type definitions for canvas alignment guides and overlays */
 import type { ReactNode } from "react";
 
 export interface GridConfig {

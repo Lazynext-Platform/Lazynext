@@ -1,3 +1,4 @@
+/** @module Command for removing a bookmark from a scene with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { TScene } from "@/timeline";

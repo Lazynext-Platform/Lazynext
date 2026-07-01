@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a resizable panel layout with draggable gutter handles. */
+
 import * as ResizablePrimitive from "react-resizable-panels";
 
 import { cn } from "@/utils/ui";

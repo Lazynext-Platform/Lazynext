@@ -31,7 +31,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 pub mod csrf;
 pub mod db;
@@ -105,12 +105,24 @@ async fn main() {
     info!("Initializing Lazynext API Gateway...");
 
     // ── Database ───────────────────────────────────────────────────────
-    let database_url =
-        std::env::var("DATABASE_URL").expect("DATABASE_URL environment variable is required");
-    let db_store = DbStore::new(&database_url)
-        .await
-        .expect("Failed to connect to PostgreSQL database");
-    let db_arc = Arc::new(db_store);
+    let db_arc = match std::env::var("DATABASE_URL") {
+        Ok(ref url) if !url.is_empty() => {
+            match DbStore::new(url).await {
+                Ok(store) => {
+                    info!("Connected to PostgreSQL database");
+                    Arc::new(store)
+                }
+                Err(e) => {
+                    warn!("PostgreSQL unavailable ({}): starting in dev mode", e);
+                    Arc::new(DbStore::new_dev())
+                }
+            }
+        }
+        _ => {
+            info!("DATABASE_URL not set — starting in development mode");
+            Arc::new(DbStore::new_dev())
+        }
+    };
 
     // ── NLE State ──────────────────────────────────────────────────────
     let (tx, mut rx) = mpsc::channel::<NLEEvent>(100);
@@ -605,7 +617,7 @@ async fn find_user_by_stripe_customer(
         "SELECT id, email, name, email_verified, image, role, stripe_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE stripe_customer_id = $1",
     )
     .bind(customer_id)
-    .fetch_optional(&db.pool)
+    .fetch_optional(db.pool_ref()?)
     .await?;
 
     Ok(row.map(|r| db::User {

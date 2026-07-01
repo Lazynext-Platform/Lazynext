@@ -1,3 +1,14 @@
+#!/usr/bin/env node
+/**
+ * fix-theme-colors.js — Batch-replace hardcoded Tailwind color classes with
+ * semantic theme tokens (e.g. bg-zinc-950 → bg-background) across the web app.
+ *
+ * Recursively walks apps/web/src and rewrites all .tsx/.ts files.
+ *
+ * Usage:
+ *   node scripts/fix-theme-colors.js
+ */
+
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -1,3 +1,9 @@
+/**
+ * Blog listing page — all published articles sorted by date.
+ *
+ * @page /blog
+ */
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BasePage } from "@/app/base-page";

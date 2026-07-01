@@ -1,3 +1,4 @@
+/** @module Polygon graphic definition with fill, stroke, side count, and parametric rendering */
 import type { ParamDefinition } from "@/params";
 import { applyAlignedStroke } from "../stroke";
 import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";

@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/runner
+ */
+
 import {
 	IndexedDBAdapter,
 	deleteDatabase,

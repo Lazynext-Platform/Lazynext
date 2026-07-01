@@ -1,3 +1,9 @@
+/**
+ * Billing page — subscription plans and payment management.
+ *
+ * @page /billing
+ */
+
 "use client";
 
 import { useState } from "react";

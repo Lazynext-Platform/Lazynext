@@ -1,3 +1,6 @@
+//! Plugin manager for loading and executing third-party WASM video effect
+//! plugins in a sandboxed environment.
+
 use lazynext_plugin_api::{FrameBuffer, VideoEffect};
 use std::collections::HashMap;
 
@@ -14,6 +17,7 @@ impl Default for PluginManager {
 }
 
 impl PluginManager {
+    /// Creates a new `PluginManager` with no loaded plugins.
     pub fn new() -> Self {
         PluginManager {
             loaded_plugins: HashMap::new(),

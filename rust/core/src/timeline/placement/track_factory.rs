@@ -1,5 +1,9 @@
+//! Utility functions for creating new timeline tracks with appropriate
+//! default names based on track type.
+
 use crate::timeline::models::TimelineTrack;
 
+/// Returns a human-readable default name for a given track type.
 pub fn default_track_name(track_type: &str) -> &str {
     match track_type {
         "video" => "Video Track",
@@ -11,6 +15,8 @@ pub fn default_track_name(track_type: &str) -> &str {
     }
 }
 
+/// Builds a new empty `TimelineTrack` with the given id, type, and optional
+/// name. Falls back to a default name derived from the track type.
 pub fn build_empty_track(id: String, track_type: &str, name: Option<String>) -> TimelineTrack {
     let _track_name = name.unwrap_or_else(|| default_track_name(track_type).to_string());
 

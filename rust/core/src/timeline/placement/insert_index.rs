@@ -1,5 +1,13 @@
+//! Computes the correct insertion index for new tracks based on
+//! track type, preferred position, and directional hints ("above"/"below").
+
 use crate::timeline::models::SceneTracks;
 
+/// Returns the default insertion index for a new track of the given type.
+///
+/// - Audio tracks are placed after the main track and all overlay tracks.
+/// - Effect tracks are placed at index 0 (top).
+/// - All other track types are placed just above the main track.
 pub fn get_default_insert_index_for_track(tracks: &SceneTracks, track_type: &str) -> usize {
     if track_type == "audio" {
         return tracks.overlay.len() + 1 + tracks.audio.len();
@@ -12,6 +20,9 @@ pub fn get_default_insert_index_for_track(tracks: &SceneTracks, track_type: &str
     tracks.overlay.len()
 }
 
+/// Returns the highest (topmost) possible insertion index for a new track
+/// of the given type. For audio tracks this is immediately after the main
+/// track; all other types return index 0.
 pub fn get_highest_insert_index_for_track(tracks: &SceneTracks, track_type: &str) -> usize {
     if track_type == "audio" {
         return tracks.overlay.len() + 1;
@@ -20,11 +31,16 @@ pub fn get_highest_insert_index_for_track(tracks: &SceneTracks, track_type: &str
     0
 }
 
+/// The computed placement for a new track: its insert index and an optional
+/// positional hint ("above" or "below").
 pub struct PreferredNewTrackPlacement {
     pub insert_index: usize,
     pub insert_position: Option<String>,
 }
 
+/// Resolves the optimal position for a new track, taking into account the
+/// current track layout, the preferred index, and the placement direction
+/// ("above" or "below").
 pub fn resolve_preferred_new_track_placement(
     tracks: &SceneTracks,
     track_type: &str,

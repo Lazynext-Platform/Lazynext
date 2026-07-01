@@ -1,6 +1,14 @@
+/**
+ * Track placement helpers — maps track IDs and display indices to
+ * {@link TrackPlacement} descriptors for group-move resolution.
+ *
+ * @module timeline/group-move/track-placement
+ */
+
 import type { SceneTracks, TimelineTrack } from "@/timeline";
 import type { GroupTrackSection } from "./types";
 
+/** Describes a track's position in the display order and section. */
 export interface TrackPlacement {
 	trackId: string;
 	trackType: TimelineTrack["type"];
@@ -9,6 +17,7 @@ export interface TrackPlacement {
 	displayIndex: number;
 }
 
+/** Returns tracks in display order: overlays, main, then audio. */
 export function getDisplayTracks({
 	tracks,
 }: {
@@ -17,6 +26,7 @@ export function getDisplayTracks({
 	return [...tracks.overlay, tracks.main, ...tracks.audio];
 }
 
+/** Resolves a track ID to its placement in the display order. */
 export function getTrackPlacementById({
 	tracks,
 	trackId,
@@ -63,6 +73,7 @@ export function getTrackPlacementById({
 	return null;
 }
 
+/** Resolves a display index to its track placement. */
 export function getTrackPlacementByDisplayIndex({
 	tracks,
 	displayIndex,

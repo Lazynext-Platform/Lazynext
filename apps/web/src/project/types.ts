@@ -1,3 +1,12 @@
+/**
+ * Core project type definitions for the NLE.
+ *
+ * Covers project metadata, settings, timeline view state, and the
+ * top-level TProject structure that is serialized to the database.
+ *
+ * @module project/types
+ */
+
 import type { FrameRate } from "lazynext-wasm";
 import type { TScene } from "@/timeline/types";
 import type { MediaTime } from "@/wasm";

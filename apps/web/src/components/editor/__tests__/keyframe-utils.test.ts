@@ -1,3 +1,4 @@
+/** @module __tests__/keyframe-utils Test suite for keyframe utility functions */
 import { describe, it, expect } from "bun:test";
 import { getKeyframedValue, hasKeyframe } from "../keyframe-utils";
 

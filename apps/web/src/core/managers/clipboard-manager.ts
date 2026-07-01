@@ -1,3 +1,9 @@
+/**
+ * @module In-session clipboard for timeline elements and keyframes. Copy
+ * snapshots the current selection into a serializable entry; paste reconstructs
+ * a command that duplicates the entry at the playhead.
+ */
+
 import type { EditorCore } from "@/core";
 import {
 	buildPasteClipboardCommand,

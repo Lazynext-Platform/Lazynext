@@ -1,3 +1,10 @@
+/**
+ * Caption element — timeline element holding a text string with
+ * explicit start/end times for subtitle/caption rendering.
+ *
+ * @module components/editor/timeline/core/elements/caption.element
+ */
+
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { TIMELINE_ELEMENT_TYPE } from "../../utils/constants";

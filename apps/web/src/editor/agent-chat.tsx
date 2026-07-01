@@ -1,3 +1,13 @@
+/**
+ * Agent Chat panel for conversing with the Chronos AI Copilot.
+ *
+ * Renders a message stream (system, user, tool messages) and sends
+ * natural-language commands to the `/api/chat` endpoint. Tool call
+ * results are forwarded to the editor client via `onExecuteTool`.
+ *
+ * @module editor/agent-chat
+ */
+
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -8,6 +18,13 @@ interface Message {
 	toolName?: string;
 }
 
+/**
+ * Interactive chat panel that sends natural-language commands to the
+ * AI copilot endpoint and displays tool execution results inline.
+ *
+ * @param onExecuteTool - callback invoked when the AI returns a tool call,
+ *   receiving the tool name and its arguments for execution in the editor.
+ */
 export function AgentChat({
 	onExecuteTool,
 }: {

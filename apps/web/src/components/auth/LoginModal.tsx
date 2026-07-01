@@ -1,3 +1,10 @@
+/**
+ * Login modal — dialog with sign-in form, social auth options,
+ * and animated background.
+ *
+ * @module components/auth/LoginModal
+ */
+
 "use client";
 
 import React, { useState } from "react";

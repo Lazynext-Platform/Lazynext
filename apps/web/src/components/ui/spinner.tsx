@@ -1,3 +1,5 @@
+/** @component Renders an animated loading spinner icon with accessible labels. */
+
 import { HugeiconsIcon, type HugeiconsIconProps } from "@hugeicons/react";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/utils/ui";

@@ -1,3 +1,9 @@
+/**
+ * Privacy policy page — accordion-layout legal content.
+ *
+ * @page /privacy
+ */
+
 import type { Metadata } from "next";
 import { BasePage } from "@/app/base-page";
 import {

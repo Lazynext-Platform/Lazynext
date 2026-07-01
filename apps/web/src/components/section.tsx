@@ -1,3 +1,10 @@
+/**
+ * Collapsible section component — expand/collapse with cache-based
+ * state persistence across mounts.
+ *
+ * @module components/section
+ */
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { cn } from "@/utils/ui";
 import { HugeiconsIcon } from "@hugeicons/react";

@@ -1,4 +1,5 @@
 "use client";
+/** @module Properties panel — renders per-element property tabs with keyframe support */
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";

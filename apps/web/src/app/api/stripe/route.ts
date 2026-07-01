@@ -1,3 +1,4 @@
+/** @module Stripe webhook handler for subscription events */
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 

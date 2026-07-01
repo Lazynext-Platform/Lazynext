@@ -1,3 +1,4 @@
+/** @module Hook for box-selection drag interaction to select multiple items by bounding box */
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";

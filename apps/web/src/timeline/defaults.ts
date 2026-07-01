@@ -1,3 +1,10 @@
+/**
+ * Default parameter values for new timeline elements — transforms,
+ * text styling, blend modes, volume, and view state.
+ *
+ * @module timeline/defaults
+ */
+
 import { DEFAULT_NEW_ELEMENT_DURATION } from "@/timeline/creation";
 import type { TTimelineViewState } from "@/project/types";
 import type { Transform } from "@/primitives/transform";
@@ -70,6 +77,7 @@ const defaultTimelineViewState: TTimelineViewState = {
 	playheadTime: ZERO_MEDIA_TIME,
 };
 
+/** Global defaults for element transforms, text, and timeline view state. */
 export const DEFAULTS = {
 	element: {
 		transform: defaultTransform,

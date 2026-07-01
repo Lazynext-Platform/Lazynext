@@ -1,3 +1,4 @@
+/** @module Effect preview renderer for generating thumbnail previews of individual effects */
 import { createCanvasSurface } from "./canvas-utils";
 import { effectsRegistry, resolveEffectPasses } from "@/effects";
 import { buildDefaultParamValues } from "@/params/registry";

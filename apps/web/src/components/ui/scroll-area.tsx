@@ -1,3 +1,5 @@
+/** @component Renders a scrollable container with a themed scrollbar. */
+
 import * as React from "react";
 import { cn } from "@/utils/ui";
 

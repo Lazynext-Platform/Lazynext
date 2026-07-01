@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a theme-aware number input with increment/decrement buttons and keyboard support. */
+
 import { cn } from "@/utils/ui";
 import { clamp } from "@/utils/math";
 import { useRef, useState, useLayoutEffect, type ComponentProps } from "react";

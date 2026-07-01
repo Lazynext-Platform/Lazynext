@@ -1,3 +1,4 @@
+/** @module __tests__/animated-params Test suite for animated parameter utilities */
 import { describe, expect, test } from "bun:test";
 import {
 	coerceParamValue,

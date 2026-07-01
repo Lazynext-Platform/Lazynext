@@ -1,3 +1,10 @@
+/**
+ * @module animation/keyframe-query
+ * @description Keyframe querying utilities — flattens composite
+ *   channel data into UI-friendly element keyframes and supports
+ *   lookup by time or keyframe ID.
+ */
+
 import type {
 	AnimationChannel,
 	AnimationPath,
@@ -194,6 +201,10 @@ function toElementKeyframe({
 	};
 }
 
+/**
+ * Flattens all of an element's animation data into a chronologically
+ * sorted array of {@link ElementKeyframe} items for the timeline UI.
+ */
 export function getElementKeyframes({
 	animations,
 }: {
@@ -227,6 +238,7 @@ export function getElementKeyframes({
 		});
 }
 
+/** Returns `true` when at least one keyframe exists for the given path. */
 export function hasKeyframesForPath({
 	animations,
 	propertyPath,
@@ -239,6 +251,10 @@ export function hasKeyframesForPath({
 	);
 }
 
+/**
+ * Finds the preferred keyframe at a specific time for a given property
+ * path. Returns `null` if no keyframe exists at that time.
+ */
 export function getKeyframeAtTime({
 	animations,
 	propertyPath,
@@ -269,6 +285,10 @@ export function getKeyframeAtTime({
 	});
 }
 
+/**
+ * Finds a keyframe by its unique ID within a specific property path.
+ * Returns `null` if not found.
+ */
 export function getKeyframeById({
 	animations,
 	propertyPath,

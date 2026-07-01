@@ -1,3 +1,4 @@
+/** @module Elements clipboard handler for copying/pasting timeline elements */
 import { PasteCommand } from "@/commands/timeline";
 import type { ClipboardHandler } from "../types";
 

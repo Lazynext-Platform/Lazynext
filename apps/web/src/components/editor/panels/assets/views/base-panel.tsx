@@ -1,3 +1,4 @@
+/** @module Base panel layout wrapper with optional title, actions, and scroll area */
 import { cn } from "@/utils/ui";
 
 interface PanelViewProps extends React.HTMLAttributes<HTMLDivElement> {

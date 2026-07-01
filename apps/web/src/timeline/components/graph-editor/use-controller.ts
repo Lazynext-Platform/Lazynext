@@ -1,3 +1,10 @@
+/**
+ * Graph editor controller hook — manages easing popover open/close,
+ * preview, commit, and Escape-to-cancel lifecycle.
+ *
+ * @module timeline/components/graph-editor/use-controller
+ */
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

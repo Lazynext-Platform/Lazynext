@@ -1,3 +1,6 @@
+//! Ring-buffer decoder that maintains continuous FFmpeg decoding streams with
+//! LRU frame caching and asynchronous seek support via `AssetLoader`.
+
 use crate::engine::AssetLoader;
 use lru::LruCache;
 use std::collections::HashMap;
@@ -145,7 +148,10 @@ impl DecodeStream {
     }
 }
 
-/// A highly optimized AssetLoader that maintains continuous FFmpeg decoding streams.
+/// A highly optimized `AssetLoader` that maintains continuous FFmpeg decoding
+/// streams with LRU frame caching. Each media file gets a dedicated
+/// `DecodeStream` that runs in a background thread, pre-decoding frames into
+/// a ring buffer for low-latency scrubbing.
 pub struct RingBufferDecoder {
     width: u32,
     height: u32,
@@ -153,6 +159,8 @@ pub struct RingBufferDecoder {
 }
 
 impl RingBufferDecoder {
+    /// Creates a new `RingBufferDecoder` that will produce frames at the given
+    /// resolution.
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             width,
@@ -189,6 +197,9 @@ impl AssetLoader for RingBufferDecoder {
     }
 }
 
+/// A native FFmpeg decoder that reads a media file directly via the
+/// `ffmpeg-next` crate. Supports seeking to arbitrary frames with on-the-fly
+/// scaling to the requested output resolution.
 #[cfg(feature = "native-ffmpeg")]
 pub struct NativeFfmpegDecoder {
     media_path: String,
@@ -198,6 +209,8 @@ pub struct NativeFfmpegDecoder {
 
 #[cfg(feature = "native-ffmpeg")]
 impl NativeFfmpegDecoder {
+    /// Initializes FFmpeg and creates a new decoder for the given media file
+    /// at the specified output resolution.
     pub fn new(media_path: String, width: u32, height: u32) -> Self {
         ffmpeg_next::init().unwrap_or_else(|e| eprintln!("FFmpeg init failed: {}", e));
         Self {
@@ -207,6 +220,8 @@ impl NativeFfmpegDecoder {
         }
     }
 
+    /// Decodes a single frame at the given index, seeking to the approximate
+    /// position and scaling to the target resolution. Returns raw RGBA bytes.
     pub fn decode_frame(&self, frame_idx: u32) -> Option<Vec<u8>> {
         let mut ictx = ffmpeg_next::format::input(&self.media_path).ok()?;
         let input = ictx.streams().best(ffmpeg_next::media::Type::Video)?;

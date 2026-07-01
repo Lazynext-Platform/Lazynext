@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a date/month grid picker for selecting single dates or ranges. */
+
 import type * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";

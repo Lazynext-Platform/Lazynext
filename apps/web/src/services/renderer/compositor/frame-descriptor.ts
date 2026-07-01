@@ -1,3 +1,4 @@
+/** @module Frame descriptor for building and executing per-frame compositor render passes */
 import { drawCssBackground } from "@/gradients";
 import { getMaskDefinition } from "@/masks";
 import { incrementCounter } from "@/diagnostics/render-perf";

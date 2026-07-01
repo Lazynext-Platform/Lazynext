@@ -1,3 +1,8 @@
+/**
+ * @module Render job status polling — checks the render-service first, then
+ * falls back to an in-memory "offline" state when the service is unreachable.
+ */
+
 import { NextResponse } from "next/server";
 
 const RENDER_SERVICE_URL =
@@ -9,6 +14,11 @@ const localJobs = new Map<
 	{ progress: number; status: string; createdAt: number }
 >();
 
+/**
+ * GET /api/render/status?jobId=...
+ * Polls the current status and progress of a render job. Proxies the render
+ * service when available; returns offline status for locally-tracked jobs.
+ */
 export async function GET(request: Request) {
 	try {
 		const { searchParams } = new URL(request.url);

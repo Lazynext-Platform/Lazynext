@@ -1,3 +1,10 @@
+/**
+ * @module Frame-streaming export job endpoint. Creates an awaiting-frames
+ * job on the render-service and returns the endpoint URLs the browser uses
+ * to stream RGBA frames (WYSIWYG compositor rendered). Falls back to
+ * local WebCodecs encoding when the service is offline.
+ */
+
 import { NextResponse } from "next/server";
 import { getProject } from "@/actions/project";
 

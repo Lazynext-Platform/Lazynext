@@ -1,3 +1,4 @@
+/** @module Guide registry aggregating all canvas guide definitions */
 import type { GuideDefinition } from "@/guides/types";
 import { gridGuide } from "./definitions/grid";
 import { customGuide } from "./definitions/custom";

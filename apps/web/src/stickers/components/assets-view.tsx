@@ -1,3 +1,9 @@
+/**
+ * @module stickers/components/assets-view
+ * @description The sticker asset browser panel — renders a searchable,
+ *   categorised grid of stickers with drag-to-timeline support.
+ */
+
 "use client";
 
 import Image from "next/image";
@@ -29,6 +35,7 @@ import { cn } from "@/utils/ui";
 import { HappyIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+/** Top-level sticker browser panel with search, tabs, and content. */
 export function StickersView() {
 	const {
 		browseContent,
@@ -317,6 +324,7 @@ function StickerSection({
 	);
 }
 
+/** Props for an individual sticker in the browser grid. */
 interface StickerItemProps {
 	item: StickerData;
 	shouldCapSize?: boolean;

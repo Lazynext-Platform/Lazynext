@@ -1,3 +1,10 @@
+/**
+ * Project server actions — authenticated project creation proxied to the
+ * Rust API Gateway.
+ *
+ * @module project/actions
+ */
+
 "use server";
 
 import { auth } from "@/auth/server";

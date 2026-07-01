@@ -1,3 +1,8 @@
+/**
+ * @module Frame-accurate playback engine with timeline scrubbing, volume/mute
+ * controls, and automatic scope reconciliation when the timeline changes.
+ */
+
 import type { EditorCore } from "@/core";
 import {
 	addMediaTime,

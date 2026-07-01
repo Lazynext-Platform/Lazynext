@@ -1,3 +1,4 @@
+/** @module Clipboard type definitions for element and keyframe clipboard operations */
 import type { EditorCore } from "@/core";
 import type {
 	AnimationInterpolation,

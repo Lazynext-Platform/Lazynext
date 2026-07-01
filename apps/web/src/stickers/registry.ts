@@ -1,3 +1,8 @@
+/**
+ * @module Lightweight sticker provider registry built on the generic
+ * DefinitionRegistry. Holds all registered StickerProvider instances.
+ */
+
 import type { StickerProvider } from "@/stickers/types";
 import { DefinitionRegistry } from "@/params/registry";
 

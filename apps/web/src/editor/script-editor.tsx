@@ -1,6 +1,22 @@
+/**
+ * Screenplay editor that maps transcript text to timeline cuts.
+ *
+ * Displays a Whisper-transcribed script. When the user highlights a
+ * sentence, the corresponding video segment is selected on the
+ * timeline via WASM.
+ *
+ * @module editor/script-editor
+ */
+
 import React, { useState } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
+/**
+ * Text-based screenplay editor connected to the timeline.
+ *
+ * Renders transcript lines and, on text selection, commands the Rust
+ * engine to cut the timeline to the matching dialogue segment.
+ */
 export function ScriptEditor() {
 	const { time } = useWasm();
 	const [selectedText, setSelectedText] = useState("");

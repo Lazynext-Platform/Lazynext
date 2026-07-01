@@ -1,3 +1,4 @@
+/** @module Rendering module barrel export for composited frame rendering types and blend modes */
 import type { ParamValues } from "@/params";
 import type { Transform } from "@/primitives/transform";
 import { type BlendMode, isBlendMode } from "@/primitives/blend-mode";

@@ -1,3 +1,10 @@
+/**
+ * Modern editor client — the primary NLE workspace with playback
+ * viewer, chat interface, and agent controls.
+ *
+ * @module components/editor/ModernEditorClient
+ */
+
 "use client";
 
 import React, { useState, useEffect } from "react";

@@ -1,3 +1,10 @@
+/**
+ * Bookmarks row component — renders bookmark diamonds on a dedicated
+ * horizontal strip above the ruler, with drag-to-move support.
+ *
+ * @module timeline/bookmarks/components/bookmarks
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";

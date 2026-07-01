@@ -1,3 +1,4 @@
+/** @module Text mask definition that uses element text bounds for the mask shape */
 import type { ParamDefinition } from "@/params";
 import type {
 	MaskDefinition,

@@ -1,3 +1,9 @@
+/**
+ * Auth layout — centered card container shared by sign-in and sign-up pages.
+ *
+ * @layout /(auth)
+ */
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

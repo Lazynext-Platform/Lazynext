@@ -1,3 +1,8 @@
+//! WASM bridge for audio DSP processing.
+//!
+//! Exposes master-bus limiting, parametric EQ, and dynamics compression
+//! as standalone WASM functions that operate on float sample buffers.
+
 use wasm_bindgen::prelude::*;
 
 /// Process an audio buffer through the master bus (hard limiting).

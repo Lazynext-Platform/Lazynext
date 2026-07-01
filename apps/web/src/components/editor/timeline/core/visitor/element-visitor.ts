@@ -1,3 +1,4 @@
+/** @module Element visitor interface for double-dispatch operations on timeline elements */
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";
 import { ImageElement } from "../elements/image.element";

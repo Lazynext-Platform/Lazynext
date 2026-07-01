@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v30-to-v31 Test suite for V30 to V31 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV30ToV31 } from "../transformers/v30-to-v31";
 import { asRecord, asRecordArray } from "./helpers";

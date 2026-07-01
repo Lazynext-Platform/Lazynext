@@ -1,3 +1,8 @@
+/**
+ * @module Sticker ID resolver — parses a composite sticker ID, looks up the
+ * registered provider, and delegates to its `resolveUrl` method.
+ */
+
 import { stickersRegistry } from "./registry";
 import { parseStickerId } from "./sticker-id";
 import { registerDefaultStickerProviders } from "./providers";

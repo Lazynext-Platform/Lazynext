@@ -1,3 +1,9 @@
+/**
+ * User profile page — displays user info, usage stats, and settings.
+ *
+ * @page /profile
+ */
+
 "use client";
 
 import { motion } from "framer-motion";

@@ -1,3 +1,10 @@
+/**
+ * Features grid — animated card grid showcasing core platform
+ * capabilities on the landing page.
+ *
+ * @module components/landing/FeaturesGrid
+ */
+
 import {
 	Activity,
 	Database,

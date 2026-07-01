@@ -1,7 +1,24 @@
+/**
+ * AI Actor Studio panel for generating avatar videos from text scripts.
+ *
+ * Sends a script to the generative studio service (Python FastAPI on port 8001)
+ * which produces an AI avatar speaking the provided text. The resulting media
+ * is intended to be inserted onto the timeline.
+ *
+ * @module editor/avatar-prompt
+ */
+
 import React, { useState } from "react";
 
 const GEN_STUDIO_URL = process.env.NEXT_PUBLIC_GENERATIVE_STUDIO_URL || "http://127.0.0.1:8001";
 
+/**
+ * Text-to-avatar generation panel.
+ *
+ * Accepts a text script, sends it to the AI avatar studio, and displays
+ * generation status. On success the avatar media can be inserted onto
+ * the timeline.
+ */
 export function AvatarPrompt() {
 	const [script, setScript] = useState("");
 	const [isGenerating, setIsGenerating] = useState(false);

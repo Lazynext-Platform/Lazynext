@@ -1,3 +1,4 @@
+/** @module Scene builder that constructs the compositor node tree from timeline tracks */
 import type { SceneTracks, TimelineTrack } from "@/timeline";
 import type { MediaAsset } from "@/media/types";
 import { RootNode } from "./nodes/root-node";

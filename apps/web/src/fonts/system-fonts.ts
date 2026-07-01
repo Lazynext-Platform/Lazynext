@@ -1,3 +1,4 @@
+/** @module System font set containing common web-safe fonts available without loading */
 export const SYSTEM_FONTS = new Set([
 	"Arial",
 	"Helvetica",

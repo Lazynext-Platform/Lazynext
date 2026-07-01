@@ -1,10 +1,23 @@
+/**
+ * Spotlight-style command interface for the Chronos AI Copilot.
+ *
+ * Renders a full-screen glassmorphic overlay with a text prompt,
+ * suggestion chips, and a live WGPU preview canvas. Submitted
+ * intents are dispatched to the editor's AI pipeline.
+ *
+ * @module editor/PromptMode
+ */
+
 import React, { useState, useEffect } from "react";
 import { useEditor } from "./use-editor";
 import { Bot, Sparkles, Command } from "lucide-react";
 
 /**
- * PromptMode: A premium, glassmorphic "Spotlight" command interface
- * for conversing with the Chronos Copilot.
+ * Premium command interface for conversing with the Chronos Copilot.
+ *
+ * A full-screen glassmorphic overlay (activated via Cmd+K) that accepts
+ * natural-language editing intents and previews the live editor canvas
+ * while the AI agent processes the request.
  */
 export const PromptMode: React.FC = () => {
 	const { sendIntent, isAgentThinking } = useEditor();

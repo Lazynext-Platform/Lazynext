@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-# Lazynext Headless Render Farm Deployment Script
+# farm_deploy.sh — Deploy the Lazynext CLI daemon across a headless render farm.
+#
+# Compiles the Rust CLI binary in release mode, distributes it to 5 render nodes,
+# and triggers a distributed render job across the farm.
+#
+# Usage:
+#   ./scripts/farm_deploy.sh
+#
+# Prerequisites:
+#   - Rust toolchain installed (cargo build)
+#   - Render nodes accessible at node-{1..5}.lazynext.internal
 
 echo "🚀 Provisioning Lazynext Headless Render Node..."
 

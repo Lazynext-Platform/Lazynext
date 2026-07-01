@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v18-to-v19 Test suite for V18 to V19 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV18ToV19 } from "../transformers/v18-to-v19";
 import { asRecord } from "./helpers";

@@ -1,3 +1,9 @@
+//! Keyframe interpolation engine.
+//!
+//! Defines cubic Bezier easing curves (ease-in, ease-out, ease-in-out,
+//! linear) and an `Interpolator` that computes property values at any
+//! point in time between sorted keyframes.
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BezierCurve {
     pub p0: f32, // start control point
@@ -61,6 +67,7 @@ impl BezierCurve {
     }
 }
 
+/// A single keyframe at a given time with a property value and easing curve.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Keyframe {
     pub time: f32,  // Absolute time in seconds
@@ -68,6 +75,7 @@ pub struct Keyframe {
     pub curve: BezierCurve,
 }
 
+/// Stateless interpolator that computes property values between keyframes.
 pub struct Interpolator;
 
 impl Interpolator {

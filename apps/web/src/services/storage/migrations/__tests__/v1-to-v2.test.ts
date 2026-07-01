@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v1-to-v2 Test suite for V1 to V2 migration */
 import { describe, expect, test } from "bun:test";
 import {
 	getProjectId,

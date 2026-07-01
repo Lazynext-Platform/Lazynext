@@ -1,3 +1,10 @@
+/**
+ * @module animation
+ * @description Public API for the animation subsystem. Re-exports all
+ *   channel evaluation, keyframe manipulation, graph resolution, and
+ *   effect/graphic param helpers.
+ */
+
 export {
 	getChannelValueAtTime,
 	getDiscreteChannelValueAtTime,

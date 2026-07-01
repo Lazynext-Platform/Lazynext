@@ -1,3 +1,4 @@
+/** @module IndexedDB storage adapter for browser-based persistent storage */
 import type { StorageAdapter } from "./types";
 
 export class IndexedDBAdapter<T> implements StorageAdapter<T> {

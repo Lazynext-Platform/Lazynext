@@ -4,6 +4,8 @@
  * Handles serialization/deserialization of CRDT operations,
  * vector clock merging, and tombstone propagation between
  * the network layer and the Rust WASM core.
+ *
+ * @module collaboration/crdt-sync
  */
 
 import type { CrdtEngine } from "lazynext-wasm";

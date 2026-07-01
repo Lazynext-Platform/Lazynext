@@ -1,3 +1,4 @@
+/** @module TikTok layout SVG component rendering safe zones and UI element positions */
 export function TikTokLayout() {
 	return (
 		<svg

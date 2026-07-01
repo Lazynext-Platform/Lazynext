@@ -1,3 +1,4 @@
+/** @module Hit-testing utilities for determining intersection between selection box and items */
 function isIntersecting({
 	selectionRect,
 	itemRect,

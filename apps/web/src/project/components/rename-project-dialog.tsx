@@ -1,3 +1,9 @@
+/**
+ * Dialog for renaming an existing project.
+ *
+ * @module project/components/rename-project-dialog
+ */
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,6 +17,15 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 
+/**
+ * Modal dialog for renaming a project. Resets the input to the
+ * current name each time the dialog opens.
+ *
+ * @param isOpen - whether the dialog is visible.
+ * @param onOpenChange - callback when open state changes.
+ * @param onConfirm - callback with the new project name.
+ * @param projectName - current name of the project.
+ */
 export function RenameProjectDialog({
 	isOpen,
 	onOpenChange,

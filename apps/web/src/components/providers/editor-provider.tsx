@@ -1,3 +1,10 @@
+/**
+ * Editor provider — initializes the EditorCore singleton (loading
+ * project, WASM engine) and renders children only after ready.
+ *
+ * @module components/providers/editor-provider
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";

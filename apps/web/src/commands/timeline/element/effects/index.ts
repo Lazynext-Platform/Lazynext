@@ -1,3 +1,4 @@
+/** @module Element effects commands barrel export */
 export { AddClipEffectCommand } from "./add-effect";
 export { RemoveClipEffectCommand } from "./remove-effect";
 export { ToggleClipEffectCommand } from "./toggle-effect";

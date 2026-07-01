@@ -1,3 +1,4 @@
+/** @module Storage quota utility for estimating and displaying storage usage information */
 import { formatNumberForDisplay } from "@/utils/math";
 
 const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;

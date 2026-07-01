@@ -1,3 +1,4 @@
+/** @module End-to-end tests for the editor workspace */
 import { test, expect } from "@playwright/test";
 
 test.describe("Lazynext E2E - Editor Workspace", () => {

@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-# Create all 5 Container Apps with AMD64 images in ACR
-# Web app is already created — this creates the remaining 4
+# create-apps.sh — Provision Azure Container Apps with AMD64 images.
+#
+# Creates 4 Lazynext microservice containers (ai-agents, render, pre-processing,
+# generative-studio) in Azure Container Apps. The web app is assumed to already exist.
+#
+# Usage:
+#   ./scripts/create-apps.sh
+#
+# Prerequisites:
+#   - Azure CLI installed and authenticated (az login)
+#   - ACR images pushed for all 4 services
+#   - Web container app already created
 set -e
 ACR="lazynextacrdevlmblwn.azurecr.io"
 RG="lazynext-rg-dev"

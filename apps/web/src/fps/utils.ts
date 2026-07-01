@@ -1,3 +1,4 @@
+/** @module Frame rate utility functions for conversion, normalization, and auto-detection */
 import type { FrameRate } from "lazynext-wasm";
 import type { MediaAsset } from "@/media/types";
 

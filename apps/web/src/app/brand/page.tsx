@@ -1,3 +1,9 @@
+/**
+ * Brand assets page — logos, colors, typography, and brand guidelines.
+ *
+ * @page /brand
+ */
+
 "use client";
 
 import type { CSSProperties } from "react";

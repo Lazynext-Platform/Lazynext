@@ -1,3 +1,4 @@
+/** @module Keybindings migration v4 to v5 */
 import { getPersistedKeybindingsState } from "../persisted-state";
 
 export function v4ToV5({ state }: { state: unknown }): unknown {

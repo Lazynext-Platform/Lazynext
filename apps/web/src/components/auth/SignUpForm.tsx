@@ -1,3 +1,10 @@
+/**
+ * Sign-up form — name, email, password registration with error
+ * display and loading state.
+ *
+ * @module components/auth/SignUpForm
+ */
+
 "use client";
 
 import React, { useState } from "react";

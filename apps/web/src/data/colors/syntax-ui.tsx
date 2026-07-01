@@ -1,3 +1,4 @@
+/** @module Syntax UI gradient color presets for graphic fill options */
 // These are the gradients from Syntax UI (https://syntaxui.com/effects/gradients)
 
 export const syntaxUIGradients = [

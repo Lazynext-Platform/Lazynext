@@ -1,3 +1,4 @@
+/** @module Persisted keybindings state type definitions for localStorage persistence */
 export type PersistedKeybindingConfig = Record<string, string | undefined>;
 
 export interface PersistedKeybindingsState {

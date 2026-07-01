@@ -1,3 +1,10 @@
+/**
+ * Arrow element — timeline shape element rendering an arrow with
+ * fill, size, and configurable line width.
+ *
+ * @module components/editor/timeline/core/elements/arrow.element
+ */
+
 import { ArrowProps, Size } from "../../types";
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";

@@ -1,3 +1,11 @@
+/**
+ * NotFound — Next.js 404 page rendered when no route matches.
+ * Displays a large "404" decorative number, descriptive message,
+ * and links to Home and My Projects.
+ *
+ * @module app/not-found
+ */
+
 import Link from "next/link";
 
 export default function NotFound() {

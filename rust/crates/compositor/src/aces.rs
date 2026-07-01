@@ -7,30 +7,45 @@
 //!
 //! Reference: SMPTE ST 2065-1:2021, ACES 1.3 Technical Specifications
 
+/// Configuration for the ACES color pipeline.
 pub struct AcesColorPipeline {
     pub is_enabled: bool,
     pub input_transform: InputDeviceTransform,
     pub output_transform: OutputDeviceTransform,
 }
 
+/// Input device transform — maps camera-native color spaces to ACES AP0.
 #[derive(Clone, Copy, Debug)]
 pub enum InputDeviceTransform {
+    /// ARRI LogC4 wide gamut
     ArriLogC4,
+    /// RED Log3G10 / REDWideGamutRGB
     RedLogFilm,
+    /// Sony S-Log3 / S-Gamut3.cine
     SonySLog3,
+    /// Blackmagic Design Film Gen 5
     BlackmagicFilmGen5,
+    /// Canon Log 3 / Cinema Gamut
     CanonLog3,
+    /// Rec.709 (treated as linear, identity IDT)
     Rec709,
+    /// sRGB (treated as linear, identity IDT)
     SRGB,
 }
 
+/// Output device transform — maps ACES AP0 render to a display color space.
 #[derive(Clone, Copy, Debug)]
 pub enum OutputDeviceTransform {
-    Rec709,     // Standard SDR — web, most displays
-    Rec2020Hdr, // HDR10 / Dolby Vision
-    DciP3,      // Theatrical cinema projection
-    SRGB,       // Computer monitors
-    DisplayP3,  // Apple devices
+    /// Standard SDR — web, most displays
+    Rec709,
+    /// HDR10 / Dolby Vision (Rec.2020)
+    Rec2020Hdr,
+    /// Theatrical cinema projection (DCI-P3)
+    DciP3,
+    /// Computer monitors (sRGB)
+    SRGB,
+    /// Apple devices (Display P3)
+    DisplayP3,
 }
 
 impl Default for AcesColorPipeline {
@@ -40,6 +55,8 @@ impl Default for AcesColorPipeline {
 }
 
 impl AcesColorPipeline {
+    /// Creates a new `AcesColorPipeline` with Rec.709 input and output,
+    /// enabled by default.
     pub fn new() -> Self {
         Self {
             is_enabled: true,

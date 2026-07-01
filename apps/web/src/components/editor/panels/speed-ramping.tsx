@@ -1,3 +1,9 @@
+/**
+ * Speed ramping panel — curve-based speed/time remapping controls.
+ *
+ * @module components/editor/panels/speed-ramping
+ */
+
 import React from "react";
 import { Activity, FastForward } from "lucide-react";
 

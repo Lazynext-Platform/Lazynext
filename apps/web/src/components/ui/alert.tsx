@@ -1,3 +1,5 @@
+/** @component Renders a callout message block for displaying contextual feedback. */
+
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/ui";

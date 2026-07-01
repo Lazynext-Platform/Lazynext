@@ -1,3 +1,4 @@
+/** @module Base migration class and interfaces for storage schema migrations */
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 
 export interface StorageMigrationRunArgs {

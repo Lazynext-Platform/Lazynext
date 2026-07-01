@@ -1,3 +1,10 @@
+/**
+ * GET /api/dbtest
+ *
+ * Diagnostic endpoint — connects to the database and returns the
+ * list of public tables.
+ */
+
 import { NextResponse } from "next/server";
 
 export async function GET() {

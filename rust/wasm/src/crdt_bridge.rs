@@ -1,3 +1,9 @@
+//! Native CRDT patch processing bridge for WebAssembly.
+//!
+//! Parses and validates CRDT patches and full project CRDT trees received
+//! from JavaScript, providing a WASM entry point for conflict-free replicated
+//! data type operations on the timeline.
+
 use serde_json::Value;
 use wasm_bindgen::prelude::*;
 

@@ -1,3 +1,13 @@
+/**
+ * Admin server actions — authenticated fetch wrappers for the Lazynext
+ * Rust API Gateway admin endpoints (dashboard metrics, user listings).
+ *
+ * All actions require an active Better Auth session and route through
+ * the Rust API Gateway at {@link RUST_API_GATEWAY_URL}.
+ *
+ * @module admin/actions
+ */
+
 "use server";
 
 import { auth } from "@/auth/server";

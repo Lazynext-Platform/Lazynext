@@ -1,3 +1,10 @@
+/**
+ * Canvas-based audio waveform renderer — draws amplitude bars from
+ * cached waveform summaries with gain scaling and scroll clipping.
+ *
+ * @module timeline/components/audio-waveform
+ */
+
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
@@ -19,6 +26,7 @@ const BAR_WIDTH = 1;
 const BAR_GAP = 1;
 const BAR_STEP = BAR_WIDTH + BAR_GAP;
 const WAVEFORM_BURN_COLOR = "rgba(255, 110, 20, 0.9)";
+/** Number of gain samples evenly distributed across the waveform. */
 export const WAVEFORM_GAIN_SAMPLE_COUNT = 200;
 
 function sampleGainAtClipTime({
@@ -56,6 +64,10 @@ interface AudioWaveformProps {
 	className?: string;
 }
 
+/**
+ * Renders an audio waveform to a canvas using cached waveform summaries,
+ * applying gain envelope, retime mapping, and scroll-clipped rendering.
+ */
 export function AudioWaveform({
 	sourceKey,
 	sourceFile,

@@ -1,3 +1,7 @@
+/**
+ * @module app/api/user/credits
+ */
+
 import { NextResponse } from "next/server";
 import { auth } from "@/auth/server";
 import { headers } from "next/headers";

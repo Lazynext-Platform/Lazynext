@@ -1,7 +1,20 @@
+/**
+ * Persistent Zustand store for editor panel sizes.
+ *
+ * Stores the pixel dimensions of the main editor panels (tools, preview,
+ * properties, mainContent, timeline) and persists them to localStorage.
+ * Includes a migration path for older panel state shapes.
+ *
+ * @module editor/panel-store
+ */
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { PANEL_CONFIG } from "@/panels/layout";
 
+/**
+ * Pixel dimensions for each resizable editor panel.
+ */
 export interface PanelSizes {
 	tools: number;
 	preview: number;
@@ -10,6 +23,7 @@ export interface PanelSizes {
 	timeline: number;
 }
 
+/** Identifier for a single resizable panel in the editor layout. */
 export type PanelId = keyof PanelSizes;
 
 interface PanelState {
@@ -19,6 +33,12 @@ interface PanelState {
 	resetPanels: () => void;
 }
 
+/**
+ * Zustand hook for reading and mutating editor panel sizes.
+ *
+ * Persisted to localStorage under the key `"panel-sizes"` with automatic
+ * migration from older panel state shapes.
+ */
 export const usePanelStore = create<PanelState>()(
 	persist(
 		(set) => ({

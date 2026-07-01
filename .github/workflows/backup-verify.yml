@@ -49,9 +49,9 @@ jobs:
           TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
+          RESTORE_TARGET="${{ github.event.inputs.restore-target || 'staging' }}"
           DB_SERVER="lazynext-pg-${RESTORE_TARGET}"
           DB_NAME="lazynext"
-          RESTORE_TARGET="${{ github.event.inputs.restore-target || 'staging' }}"
 
           PG_PASSWORD="${{ secrets.AZURE_PG_PASSWORD }}"
 

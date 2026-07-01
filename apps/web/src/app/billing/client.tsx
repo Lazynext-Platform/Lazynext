@@ -1,3 +1,14 @@
+/**
+ * BillingPageClient — SaaS billing portal with plan comparison cards,
+ * current usage telemetry, and Stripe checkout integration.
+ *
+ * Renders three plan tiers (Hobby / Pro / Studio) and fetches live
+ * AI credit + render hour usage from the server. Falls back gracefully
+ * to placeholder data when the backend is unavailable.
+ *
+ * @module billing/client
+ */
+
 "use client";
 
 import React, { useEffect, useState } from "react";

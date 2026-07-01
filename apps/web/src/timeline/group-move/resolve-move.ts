@@ -1,3 +1,10 @@
+/**
+ * Resolves a group move — computes planned element moves and optional
+ * track creations for existing-track and new-track targets.
+ *
+ * @module timeline/group-move/resolve-move
+ */
+
 import type { SceneTracks } from "@/timeline";
 import { getTrackTypeForElementType } from "@/timeline/placement/compatibility";
 import { canPlaceTimeSpansOnTrack } from "@/timeline/placement/overlap";
@@ -31,6 +38,12 @@ type GroupMoveTarget =
 			newTrackIds: string[];
 	  };
 
+/**
+ * Resolves a move group to planned moves (and possibly new track
+ * creations), handling main-track clamping and overlap validation.
+ *
+ * @returns a {@link GroupMoveResult} or null if the move is invalid.
+ */
 export function resolveGroupMove({
 	group,
 	tracks,

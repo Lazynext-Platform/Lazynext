@@ -47,6 +47,9 @@ terminals
 apps/web/.font-cache
 **/__pycache__
 **/*.pyc
+**/.venv
+**/venv
+**/.pytest_cache
 
 # Test files
 **/__tests__

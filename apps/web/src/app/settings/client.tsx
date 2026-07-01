@@ -1,3 +1,13 @@
+/**
+ * SettingsPageClient — user account settings page with profile editing,
+ * autosave / snap-to-grid preference toggles, and a danger-zone section
+ * for account deletion.
+ *
+ * Requires an active session; redirects to /sign-in otherwise.
+ *
+ * @module settings/client
+ */
+
 "use client";
 
 import React, { useState } from "react";

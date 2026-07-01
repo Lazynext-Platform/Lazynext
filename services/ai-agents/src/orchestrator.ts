@@ -1,12 +1,18 @@
-import { getAllMcpTools, callMcpTool } from "./mcp";
-
 /**
  * Multi-step AI agent orchestrator for Chronos Copilot.
  *
- * Receives a high-level editing intent, decomposes it into tool calls,
- * executes each tool against the Lazynext microservices, and returns
- * a structured execution plan with results.
+ * Receives a high-level editing intent, decomposes it into tool calls
+ * (via LLM or rule-based), executes each tool against the Lazynext
+ * microservices, and returns a structured execution plan with results.
+ *
+ * Features:
+ *   - Intelligent multi-provider routing (OpenAI / Anthropic / Ollama)
+ *   - Agentic Repair Loop with automatic retry on tool failures
+ *   - SSE streaming for real-time plan execution progress
+ *   - CRDT patch generation for autonomous timeline edits
  */
+
+import { getAllMcpTools, callMcpTool } from "./mcp";
 
 interface ToolCall {
   action: string;

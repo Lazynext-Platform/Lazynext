@@ -1,3 +1,4 @@
+/** @module Canvas renderer leveraging WASM bridge for GPU-accelerated frame compositing */
 import { wasmBridge } from "@/core/wasm-bridge";
 import type { FrameRate } from "lazynext-wasm";
 

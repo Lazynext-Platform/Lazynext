@@ -1,3 +1,13 @@
+/**
+ * Timeline ruler label and tick computation.
+ *
+ * Determines optimal label/tick intervals based on zoom level and
+ * frame rate, formats timestamp strings, and determines which time
+ * positions show a label.
+ *
+ * @module timeline/ruler-utils
+ */
+
 import type { FrameRate } from "lazynext-wasm";
 import { BASE_TIMELINE_PIXELS_PER_SECOND } from "@/timeline/scale";
 import { frameRateToFloat } from "@/fps/utils";
@@ -31,6 +41,7 @@ const MIN_LABEL_SPACING_PX = 120;
  */
 const MIN_TICK_SPACING_PX = 18;
 
+/** Label and tick interval configuration computed from zoom level and FPS. */
 export interface RulerConfig {
 	/** time interval in seconds between each label */
 	labelIntervalSeconds: number;
@@ -39,9 +50,10 @@ export interface RulerConfig {
 }
 
 /**
- * determines the optimal label and tick intervals based on zoom level and FPS.
+/**
+ * Determines the optimal label and tick intervals based on zoom level and FPS.
  *
- * labels and ticks scale independently:
+ * Labels and ticks scale independently:
  * - labels need wide spacing (~50px) to stay readable
  * - ticks can be denser (~8px) to show finer subdivisions
  *
@@ -50,6 +62,10 @@ export interface RulerConfig {
  * - zoomed in: labels every 10f, ticks every 1f
  * - zoomed out: labels every 15f, ticks every 3f
  * - very zoomed out: labels every 1s, ticks every 5f
+ *
+ * @param zoomLevel - the current timeline zoom multiplier.
+ * @param fps - the project frame rate.
+ * @returns the computed label and tick intervals in seconds.
  */
 export function getRulerConfig({
 	zoomLevel,
@@ -175,7 +191,11 @@ function findOptimalInterval({
 }
 
 /**
- * checks if a time should have a label based on the label interval.
+ * Returns `true` if the given time aligns with the label interval
+ * (i.e. a label should be drawn at this position).
+ *
+ * @param time - the time in seconds.
+ * @param labelIntervalSeconds - the label interval from {@link getRulerConfig}.
  */
 export function shouldShowLabel({
 	time,
@@ -190,10 +210,13 @@ export function shouldShowLabel({
 }
 
 /**
- * formats a ruler tick label.
+ * Formats a ruler tick label.
  *
- * - on second boundaries: "MM:SS" (e.g., "00:00", "01:30")
- * - between seconds: "Xf" (e.g., "5f", "15f")
+ * - On second boundaries: "MM:SS" (e.g., "00:00", "01:30")
+ * - Between seconds: "Xf" (e.g., "5f", "15f")
+ *
+ * @param timeInSeconds - the time position in seconds.
+ * @param fps - the project frame rate.
  */
 export function formatRulerLabel({
 	timeInSeconds,

@@ -1,3 +1,4 @@
+/** @module Element validator visitor for validating timeline element data integrity */
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

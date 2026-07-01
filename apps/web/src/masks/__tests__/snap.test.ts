@@ -1,3 +1,4 @@
+/** @module __tests__/snap Test suite for mask snap utilities */
 import { describe, expect, test } from "bun:test";
 import {
 	findClosestPointOnFreeformSegment,

@@ -1,3 +1,10 @@
+/**
+ * Snap indicator line — rendered when dragging/resizing and a snap
+ * point is active, showing where the element will snap.
+ *
+ * @module timeline/components/snap-indicator
+ */
+
 "use client";
 
 import { useSnapIndicatorPosition } from "@/timeline/hooks/use-snap-indicator-position";
@@ -15,6 +22,9 @@ interface SnapIndicatorProps {
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
 }
 
+/**
+ * Displays a snap indicator line at the snap point position when visible.
+ */
 export function SnapIndicator({
 	snapPoint,
 	zoomLevel,

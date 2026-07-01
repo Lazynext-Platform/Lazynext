@@ -1,3 +1,4 @@
+/** @module Element commands barrel export */
 export { InsertElementCommand } from "./insert-element";
 export { DeleteElementsCommand } from "./delete-elements";
 export { DuplicateElementsCommand } from "./duplicate-elements";

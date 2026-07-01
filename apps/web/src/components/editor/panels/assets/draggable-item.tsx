@@ -1,4 +1,5 @@
 "use client";
+/** @module Draggable item — a drag-and-drop asset card for timeline insertion */
 
 import { Plus } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";

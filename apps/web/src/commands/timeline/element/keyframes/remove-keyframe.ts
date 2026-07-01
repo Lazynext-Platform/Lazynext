@@ -1,3 +1,4 @@
+/** @module Command for removing a keyframe from an element's animation path with undo support */
 import { EditorCore } from "@/core";
 import { hasKeyframesForPath, removeElementKeyframe } from "@/animation";
 import { Command, type CommandResult } from "@/commands/base-command";

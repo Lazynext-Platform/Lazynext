@@ -1,3 +1,4 @@
+/** @module Editor registry for storing and looking up timeline editor instances by context ID */
 import { TimelineEditor } from "../core/editor/timeline.editor";
 
 // Global registry to store editor instances by contextId

@@ -1,3 +1,4 @@
+/** @module Command for splitting timeline elements at the playhead with undo support */
 import {
 	Command,
 	createElementSelectionResult,

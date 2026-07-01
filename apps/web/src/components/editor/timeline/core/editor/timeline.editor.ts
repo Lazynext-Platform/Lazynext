@@ -1,3 +1,12 @@
+/**
+ * Timeline editor — the central orchestrator for all timeline
+ * mutations: add/remove/update/split/duplicate elements, track
+ * management, ripple delete, transitions, undo/redo integration,
+ * and project load/snapshot support.
+ *
+ * @module components/editor/timeline/core/editor/timeline.editor
+ */
+
 import {
 	canSplitElement,
 	extractVideoAudio,

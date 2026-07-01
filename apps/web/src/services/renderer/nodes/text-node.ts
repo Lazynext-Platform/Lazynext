@@ -1,3 +1,4 @@
+/** @module Text render node for rendering styled text elements on the compositor */
 import { BaseNode } from "./base-node";
 import type { TextElement } from "@/timeline";
 import type { EffectPass } from "@/effects/types";

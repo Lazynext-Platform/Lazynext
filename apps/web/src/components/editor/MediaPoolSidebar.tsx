@@ -1,3 +1,10 @@
+/**
+ * Media pool sidebar — asset browser with search, filtering,
+ * drag-to-timeline, and category organization.
+ *
+ * @module components/editor/MediaPoolSidebar
+ */
+
 "use client";
 
 import React from "react";

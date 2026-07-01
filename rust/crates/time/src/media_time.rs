@@ -1,3 +1,10 @@
+//! High-precision media time in 120,000 ticks per second.
+//!
+//! `MediaTime` is the single source of truth for all temporal
+//! operations: frame alignment, snapping, clamping, arithmetic,
+//! and bidirectional conversion with [`FrameRate`]. Free functions
+//! are exported to the WASM bridge for frontend consumption.
+
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use bridge::export;

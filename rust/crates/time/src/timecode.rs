@@ -1,3 +1,10 @@
+//! Timecode formatting and parsing with WASM bridge exports.
+//!
+//! Supports MM:SS, HH:MM:SS, HH:MM:SS:CS (centiseconds), and
+//! HH:MM:SS:FF (frames) formats. All functions validate bounds
+//! (e.g., seconds < 60, frames < frame_rate upper bound) and
+//! reject invalid input.
+
 use bridge::export;
 use serde::{Deserialize, Serialize};
 
@@ -11,20 +18,26 @@ const SECONDS_PER_MINUTE: i64 = 60;
 const CENTISECONDS_PER_SECOND: i64 = 100;
 const TICKS_PER_CENTISECOND: i64 = TICKS_PER_SECOND / CENTISECONDS_PER_SECOND;
 
+/// Supported timecode display formats.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi, into_wasm_abi))]
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TimeCodeFormat {
+    /// Minutes:Seconds (MM:SS).
     #[serde(rename = "MM:SS")]
     MmSs,
+    /// Hours:Minutes:Seconds (HH:MM:SS).
     #[serde(rename = "HH:MM:SS")]
     HhMmSs,
+    /// Hours:Minutes:Seconds:Centiseconds (HH:MM:SS:CS).
     #[serde(rename = "HH:MM:SS:CS")]
     HhMmSsCs,
+    /// Hours:Minutes:Seconds:Frames (HH:MM:SS:FF).
     #[serde(rename = "HH:MM:SS:FF")]
     HhMmSsFf,
 }
 
+/// Options for formatting a MediaTime into a timecode string.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -37,6 +50,7 @@ pub struct FormatTimecodeOptions {
     pub rate: Option<FrameRate>,
 }
 
+/// Options for parsing a timecode string into a MediaTime.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -49,6 +63,7 @@ pub struct ParseTimecodeOptions {
     pub rate: Option<FrameRate>,
 }
 
+/// Options for auto-detecting the timecode format from a string.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -57,6 +72,7 @@ pub struct GuessTimecodeFormatOptions {
     pub time_code: String,
 }
 
+/// Detects the timecode format from a colon-delimited string by counting parts.
 #[export]
 pub fn guess_timecode_format(
     GuessTimecodeFormatOptions { time_code }: GuessTimecodeFormatOptions,
@@ -80,6 +96,8 @@ pub fn guess_timecode_format(
     }
 }
 
+/// Formats a MediaTime into a timecode string using the specified format and
+/// optional frame rate.
 #[export]
 pub fn format_timecode(
     FormatTimecodeOptions { time, format, rate }: FormatTimecodeOptions,
@@ -114,6 +132,8 @@ pub fn format_timecode(
     }
 }
 
+/// Parses a timecode string into a MediaTime using the specified format and
+/// optional frame rate.
 #[export]
 pub fn parse_timecode(
     ParseTimecodeOptions {

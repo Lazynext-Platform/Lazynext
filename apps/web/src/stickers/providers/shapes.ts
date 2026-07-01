@@ -1,3 +1,9 @@
+/**
+ * @module Shape sticker provider — backed by the graphics registry. Exposes
+ * built-in shapes (rectangle, ellipse, polygon, star, etc.) as searchable,
+ * browsable sticker items.
+ */
+
 import {
 	buildGraphicPreviewUrl,
 	buildDefaultGraphicInstance,

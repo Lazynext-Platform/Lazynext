@@ -1,3 +1,9 @@
+/**
+ * Roadmap page — feature planning with status badges and contribution CTA.
+ *
+ * @page /roadmap
+ */
+
 import type { Metadata } from "next";
 import { BasePage } from "@/app/base-page";
 import { GitHubContributeSection } from "@/components/gitHub-contribute-section";

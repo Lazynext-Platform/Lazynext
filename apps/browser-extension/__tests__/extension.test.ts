@@ -1,3 +1,4 @@
+/** @module __tests__/extension Test suite for browser extension */
 import { describe, it, expect, vi } from "vitest";
 
 // Mock chrome API

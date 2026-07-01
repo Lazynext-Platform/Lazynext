@@ -1,3 +1,10 @@
+/**
+ * Draggable volume line overlay for audio elements — allows the user
+ * to drag the volume line up/down to adjust clip volume in dB.
+ *
+ * @module timeline/components/audio-volume-line
+ */
+
 "use client";
 
 import { useCallback, useRef, useState } from "react";
@@ -46,6 +53,10 @@ function getVolumeFromPointer({
 	return clampVolume({ value: getDbFromLinePos({ percent: progressPercent }) });
 }
 
+/**
+ * Renders a draggable horizontal volume line inside an audio track element,
+ * with a dB tooltip shown during drag.
+ */
 export function AudioVolumeLine({
 	element,
 	trackId,

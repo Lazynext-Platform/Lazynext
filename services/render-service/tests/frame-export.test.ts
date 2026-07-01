@@ -1,3 +1,5 @@
+/** @module tests/frame-export Test suite for frame export pipeline (RGBA → FFMPEG). */
+
 import { expect, test, describe } from "bun:test";
 import {
 	appendFrame,

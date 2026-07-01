@@ -1,3 +1,9 @@
+/**
+ * API documentation page with generated SEO metadata.
+ *
+ * @page /docs
+ */
+
 import { generateMetadata } from "@/seo/metadata";
 
 export const metadata = generateMetadata({

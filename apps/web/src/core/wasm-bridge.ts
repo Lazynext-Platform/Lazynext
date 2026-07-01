@@ -1,3 +1,9 @@
+/**
+ * @module Singleton WASM engine bridge. Provides lazy one-time initialization
+ * of the WasmEngine and exposes it for timeline state queries and canvas
+ * rendering throughout the app.
+ */
+
 import { WasmEngine } from "lazynext-wasm";
 
 class WasmBridge {

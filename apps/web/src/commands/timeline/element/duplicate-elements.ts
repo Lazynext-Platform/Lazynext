@@ -1,3 +1,4 @@
+/** @module Command for duplicating timeline elements with undo support */
 import {
 	Command,
 	createElementSelectionResult,

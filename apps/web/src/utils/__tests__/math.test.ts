@@ -1,3 +1,4 @@
+/** @module __tests__/math Test suite for math utilities */
 import { describe, expect, it } from "bun:test";
 import {
 	evaluateMathExpression,

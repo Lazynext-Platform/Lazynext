@@ -1,3 +1,4 @@
+/** @module Custom guide definition with interactive ruler/grid line placement */
 import {
 	PlusSignIcon,
 	RulerIcon,

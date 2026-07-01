@@ -1,3 +1,7 @@
+/**
+ * @module timeline/hooks/element/use-keyframe-drag
+ */
+
 import { useEffect, useReducer, useState } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";

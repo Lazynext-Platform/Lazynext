@@ -1,3 +1,10 @@
+/**
+ * Onboarding wizard — step-by-step introduction for new users
+ * with feature highlights and quick-start actions.
+ *
+ * @module components/editor/onboarding
+ */
+
 "use client";
 
 import { ArrowRightIcon } from "lucide-react";

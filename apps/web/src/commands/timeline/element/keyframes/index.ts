@@ -1,3 +1,4 @@
+/** @module Keyframe commands barrel export */
 export * from "./remove-effect-param-keyframe";
 export * from "./remove-keyframe";
 export * from "./retime-keyframe";

@@ -1,3 +1,11 @@
+/**
+ * GET /api/sounds/search
+ *
+ * Proxies sound searches to the Freesound API with rate limiting,
+ * parameter validation, filter presets for songs/effects, and
+ * response transformation.
+ */
+
 import { webEnv } from "@/env/web";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -172,6 +180,7 @@ function transformFreesoundResult(
 	};
 }
 
+/** GET handler — validates params, queries Freesound, transforms response. */
 export async function GET(request: NextRequest) {
 	try {
 		const { limited } = await checkRateLimit({ request });

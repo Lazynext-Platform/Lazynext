@@ -1,3 +1,12 @@
+/**
+ * Lazynext AI Agents — Express HTTP + WebSocket server.
+ *
+ * Hosts the Chronos Copilot orchestrator, AI-powered generative sub-routes,
+ * CRDT sync server (Socket.IO), and MCP server initialization. Routes
+ * natural-language editing intents through the orchestrator and broadcasts
+ * CRDT patches autonomously to connected clients.
+ */
+
 import "./tracing";
 import express from "express";
 import { createServer } from "http";

@@ -1,3 +1,4 @@
+/** @module __tests__/date Test suite for date utilities */
 import { describe, expect, it } from "bun:test";
 import { formatDate } from "../date";
 

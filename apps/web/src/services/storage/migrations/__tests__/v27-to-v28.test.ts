@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v27-to-v28 Test suite for V27 to V28 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV27ToV28 } from "../transformers/v27-to-v28";
 import { asRecord, asRecordArray } from "./helpers";

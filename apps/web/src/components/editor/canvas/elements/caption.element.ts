@@ -1,3 +1,4 @@
+/** @module Canvas element handler for caption overlays */
 import type { CanvasElementHandler } from "../types";
 import { addCaptionElement } from "../components/elements";
 import {

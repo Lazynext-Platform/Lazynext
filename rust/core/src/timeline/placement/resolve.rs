@@ -1,3 +1,8 @@
+//! Placement resolution engine. Given a placement subject, time spans,
+//! and a strategy (explicit, first-available, preferred-index, above-source,
+//! always-new), determines whether elements land on an existing track or
+//! require creating a new one.
+
 use crate::timeline::models::{SceneTracks, TimelineTrack};
 use crate::timeline::placement::compatibility::get_track_type_for_element_type;
 use crate::timeline::placement::insert_index::{
@@ -90,6 +95,9 @@ fn get_insert_direction<'a>(
     hover_direction
 }
 
+/// Resolves where a placement subject (element type or track type) should go
+/// given the current scene tracks and a placement strategy. Returns a
+/// `PlacementResult` indicating an existing track or a new track to create.
 pub fn resolve_track_placement(
     tracks: &SceneTracks,
     subject: &PlacementSubject,

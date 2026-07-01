@@ -1,3 +1,9 @@
+//! GPU-accelerated mask feathering via Jump Flood Algorithm (JFA).
+//!
+//! Computes a signed distance field from a binary mask texture and applies a
+//! configurable feather radius to produce soft-edged alpha masks usable as
+//! tracking mattes or rotoscoping guides.
+
 use bytemuck::{Pod, Zeroable};
 use gpu::{FULLSCREEN_SHADER_SOURCE, GpuContext};
 use wgpu::util::DeviceExt;
@@ -6,13 +12,27 @@ use crate::SdfPipeline;
 
 const JFA_DISTANCE_SHADER_SOURCE: &str = include_str!("shaders/jfa_distance.wgsl");
 
+/// Options for the mask feathering pass.
+///
+/// Specifies the input binary mask texture, its dimensions, and the desired
+/// feather radius. The output is a soft-edged alpha mask suitable for tracking
+/// mattes and rotoscoping guides.
 pub struct ApplyMaskFeatherOptions<'a> {
+    /// Input binary mask texture to be feathered.
     pub mask: &'a wgpu::Texture,
+    /// Width of the mask texture in pixels.
     pub width: u32,
+    /// Height of the mask texture in pixels.
     pub height: u32,
+    /// Feather radius in pixels; larger values produce softer edges.
     pub feather: f32,
 }
 
+/// GPU render pipeline that applies a configurable feather radius to a binary
+/// mask by combining inside and outside signed distance fields.
+///
+/// Uses the Jump Flood Algorithm (JFA) via [`SdfPipeline`] to compute distance
+/// fields, then blends them in a single distance-based feather shader.
 pub struct MaskFeatherPipeline {
     sdf_pipeline: SdfPipeline,
     inside_texture_bind_group_layout: wgpu::BindGroupLayout,
@@ -30,6 +50,10 @@ struct DistanceUniformBuffer {
 }
 
 impl MaskFeatherPipeline {
+    /// Creates a new mask feather pipeline with the given GPU context.
+    ///
+    /// Compiles the JFA distance WGSL shader and sets up all bind group
+    /// layouts and the distance render pipeline.
     pub fn new(context: &GpuContext) -> Self {
         let device = context.device();
         let inside_texture_bind_group_layout =
@@ -150,6 +174,12 @@ impl MaskFeatherPipeline {
         }
     }
 
+    /// Applies a feather to a binary mask, creating and submitting a new
+    /// command encoder and returning a soft-edged alpha texture.
+    ///
+    /// This is the high-level entry point; for batched GPU work use
+    /// [`apply_mask_feather_with_encoder`](Self::apply_mask_feather_with_encoder)
+    /// to avoid extra encoder overhead.
     pub fn apply_mask_feather(
         &self,
         context: &GpuContext,
@@ -180,6 +210,10 @@ impl MaskFeatherPipeline {
         output
     }
 
+    /// Applies a feather to a binary mask using an existing command encoder.
+    ///
+    /// Useful for batching multiple feather operations into a single encoder
+    /// submission. Returns a soft-edged alpha texture.
     pub fn apply_mask_feather_with_encoder(
         &self,
         context: &GpuContext,

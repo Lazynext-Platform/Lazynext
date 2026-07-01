@@ -1,3 +1,10 @@
+/**
+ * Sign-up page — renders the AuthCard with SignUpForm.
+ * Redirects authenticated users to the dashboard.
+ *
+ * @page /sign-up
+ */
+
 import { AuthCard } from "@/components/auth/AuthCard";
 import { SignUpForm } from "@/components/auth/SignUpForm";
 import { generateMetadata } from "@/seo/metadata";

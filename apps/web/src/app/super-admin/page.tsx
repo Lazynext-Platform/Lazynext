@@ -1,3 +1,9 @@
+/**
+ * Super-admin dashboard — high-level platform stats and admin tools.
+ *
+ * @page /super-admin
+ */
+
 import React from "react";
 import { StatCard } from "@/components/admin/StatCard";
 

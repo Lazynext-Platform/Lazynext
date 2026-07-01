@@ -1,3 +1,10 @@
+/**
+ * Timeline layout constants — track heights, gap, ruler height,
+ * scrollbar size, and label column width.
+ *
+ * @module timeline/components/layout
+ */
+
 import type { TrackType } from "@/timeline";
 
 export const TIMELINE_TRACK_HEIGHTS_PX: Record<TrackType, number> = {

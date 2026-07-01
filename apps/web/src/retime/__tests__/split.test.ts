@@ -1,3 +1,4 @@
+/** @module __tests__/split Test suite for retime split utilities */
 import { describe, expect, test } from "bun:test";
 import { getSourceSpanAtClipTime, splitRetimeAtClipTime } from "@/retime";
 import type { RetimeConfig } from "@/timeline";

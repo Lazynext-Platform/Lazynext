@@ -1,3 +1,10 @@
+//! FFT-based audio frequency analysis.
+//!
+//! Uses the `rustfft` library to compute frequency magnitude bins from mono
+//! audio buffers. The analyzer splits the spectrum into low, mid, and high
+//! bands, producing data suitable for audio-reactive WebGPU shaders and
+//! visualizations.
+
 use rustfft::{FftPlanner, num_complex::Complex};
 
 /// An FFT-based audio analyzer for generating frequency bins.

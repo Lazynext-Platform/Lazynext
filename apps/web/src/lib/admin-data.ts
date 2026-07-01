@@ -1,4 +1,13 @@
-// Admin Data Service — Real PostgreSQL queries for admin dashboards.
+/**
+ * Admin data service — real PostgreSQL queries for admin dashboards.
+ *
+ * Queries user counts, subscription metrics, project totals, and recent
+ * user registrations via Drizzle ORM. Gracefully degrades to empty/null
+ * data when the database is unreachable.
+ *
+ * @module lib/admin-data
+ */
+
 // Replaces the mock-db.ts fake data with live Drizzle queries.
 // Graceful degradation: returns empty/null data when DB is unreachable.
 

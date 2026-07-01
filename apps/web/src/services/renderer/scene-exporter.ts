@@ -1,3 +1,4 @@
+/** @module Scene exporter for rendering full timeline scenes to video/audio output */
 import EventEmitter from "eventemitter3";
 
 import {

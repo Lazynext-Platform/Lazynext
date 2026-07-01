@@ -1,13 +1,26 @@
+/**
+ * Scene management utilities — find the main scene, create defaults,
+ * validate deletions, and compute project duration.
+ *
+ * @module timeline/scenes
+ */
+
 import type { TScene } from "@/timeline";
 import { generateUUID } from "@/utils/id";
 import { calculateTotalDuration } from "@/timeline";
 import { MAIN_TRACK_NAME } from "@/timeline/placement/main-track";
 import { type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
+/**
+ * Returns the scene marked as `isMain`, or null if none exists.
+ */
 export function getMainScene({ scenes }: { scenes: TScene[] }): TScene | null {
 	return scenes.find((scene) => scene.isMain) || null;
 }
 
+/**
+ * Ensures the scene list contains a main scene, prepending one if missing.
+ */
 export function ensureMainScene({ scenes }: { scenes: TScene[] }): TScene[] {
 	const hasMain = scenes.some((scene) => scene.isMain);
 	if (!hasMain) {
@@ -17,6 +30,10 @@ export function ensureMainScene({ scenes }: { scenes: TScene[] }): TScene[] {
 	return scenes;
 }
 
+/**
+ * Creates a new scene with one empty main video track, no overlays,
+ * no audio tracks, and no bookmarks.
+ */
 export function buildDefaultScene({
 	name,
 	isMain,
@@ -46,6 +63,9 @@ export function buildDefaultScene({
 	};
 }
 
+/**
+ * Checks whether a scene can be deleted. The main scene is protected.
+ */
 export function canDeleteScene({ scene }: { scene: TScene }): {
 	canDelete: boolean;
 	reason?: string;
@@ -56,6 +76,9 @@ export function canDeleteScene({ scene }: { scene: TScene }): {
 	return { canDelete: true };
 }
 
+/**
+ * Determines which scene to navigate to after deleting a scene.
+ */
 export function getFallbackSceneAfterDelete({
 	scenes,
 	deletedSceneId,
@@ -71,6 +94,10 @@ export function getFallbackSceneAfterDelete({
 	return getMainScene({ scenes });
 }
 
+/**
+ * Resolves the current scene by ID, falling back to the main scene,
+ * then the first scene, then null.
+ */
 export function findCurrentScene({
 	scenes,
 	currentSceneId,
@@ -86,6 +113,9 @@ export function findCurrentScene({
 	);
 }
 
+/**
+ * Computes the total project duration from the main scene's tracks.
+ */
 export function getProjectDurationFromScenes({
 	scenes,
 }: {
@@ -99,6 +129,9 @@ export function getProjectDurationFromScenes({
 	return calculateTotalDuration({ tracks: mainScene.tracks });
 }
 
+/**
+ * Returns a new scene array with the identified scene partially updated.
+ */
 export function updateSceneInArray({
 	scenes,
 	sceneId,

@@ -1,3 +1,7 @@
+//! Vector clock implementation for causal ordering in the CRDT system.
+//! Tracks logical time per peer, supports merge (element-wise max),
+//! happens-before comparison, and concurrent-with detection.
+
 #![allow(clippy::large_enum_variant)]
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -12,6 +16,7 @@ pub struct VectorClock {
 }
 
 impl VectorClock {
+    /// Create a new vector clock with no peer entries.
     pub fn new() -> Self {
         Self {
             inner: HashMap::new(),
@@ -66,12 +71,12 @@ impl VectorClock {
         strictly_less
     }
 
-    /// Returns true if neither clock happens-before the other.
+    /// Returns true if neither clock happens-before the other (they are causally concurrent).
     pub fn concurrent_with(&self, other: &VectorClock) -> bool {
         !self.happens_before(other) && !other.happens_before(self)
     }
 
-    /// Number of peers tracked in this clock.
+    /// Returns the number of peers currently tracked in this vector clock.
     pub fn peer_count(&self) -> usize {
         self.inner.len()
     }

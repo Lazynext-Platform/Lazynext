@@ -1,3 +1,4 @@
+/** @module Render resolution utilities for computing element states at specific frame times */
 import { mediaTimeToSeconds, roundMediaTime } from "@/wasm";
 import { getElementLocalTime } from "@/animation";
 import { resolveEffectParamsAtTime } from "@/animation/effect-param-channel";

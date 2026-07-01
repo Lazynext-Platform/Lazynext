@@ -1,3 +1,4 @@
+/** @module Command for updating timeline element properties with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks, TimelineElement } from "@/timeline";

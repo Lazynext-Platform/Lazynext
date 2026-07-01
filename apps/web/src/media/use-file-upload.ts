@@ -1,3 +1,7 @@
+/**
+ * @module media/use-file-upload
+ */
+
 import { useState, useRef } from "react";
 import { useEditor } from "@/editor/use-editor";
 

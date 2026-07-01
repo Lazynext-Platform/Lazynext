@@ -1,3 +1,10 @@
+/**
+ * Audio mixer panel — per-track volume sliders, mute/solo controls,
+ * and master output management.
+ *
+ * @module components/editor/panels/audio-mixer
+ */
+
 import React, { useState, useEffect } from "react";
 import { Volume2, VolumeX, Sliders } from "lucide-react";
 

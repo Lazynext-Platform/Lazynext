@@ -1,3 +1,9 @@
+/**
+ * @module Canvas renderer and export pipeline. Manages the render tree,
+ * snapshot capture (save/copy to clipboard), and full project export via the
+ * compositor scene builder and encoder.
+ */
+
 import type { EditorCore } from "@/core";
 import type { RootNode } from "@/services/renderer/nodes/root-node";
 import type { ExportOptions, ExportResult } from "@/export";

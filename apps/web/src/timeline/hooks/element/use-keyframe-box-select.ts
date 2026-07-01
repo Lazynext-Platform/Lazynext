@@ -1,3 +1,7 @@
+/**
+ * @module timeline/hooks/element/use-keyframe-box-select
+ */
+
 import { useCallback, useRef, useMemo } from "react";
 import { useBoxSelect } from "@/selection/hooks/use-box-select";
 import {

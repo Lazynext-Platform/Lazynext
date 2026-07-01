@@ -1,3 +1,4 @@
+/** @module Command for adding a new track to the timeline with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks, TrackType } from "@/timeline";
 import { generateUUID } from "@/utils/id";

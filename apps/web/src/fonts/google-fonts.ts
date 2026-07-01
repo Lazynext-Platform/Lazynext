@@ -1,3 +1,4 @@
+/** @module Google Fonts integration for fetching and caching web font atlases */
 import type { FontAtlas } from "@/fonts/types";
 import { SYSTEM_FONTS } from "@/fonts/system-fonts";
 

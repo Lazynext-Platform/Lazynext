@@ -1,3 +1,10 @@
+//! WASM bridge for the GPU compositor.
+//!
+//! Manages a per-thread compositor runtime backed by a WebGPU/WebGL canvas.
+//! Provides full project rendering — parses a JSON project description
+//! (tracks, clips, transforms, keyframes, filters, shadows, text, chroma-key
+//! effects) and dispatches composited frames to the GPU surface.
+
 #![cfg(target_arch = "wasm32")]
 
 use std::cell::RefCell;

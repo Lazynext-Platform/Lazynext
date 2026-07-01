@@ -1,3 +1,10 @@
+/**
+ * Bookmark drag hook — handles mousedown/move/up on bookmark diamonds
+ * to reposition bookmarks on the timeline with snap support.
+ *
+ * @module timeline/bookmarks/hooks/use-bookmark-drag
+ */
+
 import {
 	useState,
 	useCallback,

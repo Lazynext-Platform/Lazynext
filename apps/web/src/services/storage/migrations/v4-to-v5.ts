@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/v4-to-v5
+ */
+
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV4ToV5 } from "./transformers/v4-to-v5";

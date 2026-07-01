@@ -1,3 +1,4 @@
+/** @module Freeform mask definition with pen-tool path editing and parameter registration */
 import { generateUUID } from "@/utils/id";
 import type { ParamDefinition } from "@/params";
 import { PEN_CURSOR } from "@/preview/components/cursors";

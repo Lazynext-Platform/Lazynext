@@ -1,3 +1,4 @@
+/** @module Element cloner visitor for deep-cloning timeline elements by type */
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

@@ -1,3 +1,4 @@
+/** @module Effects module barrel export for effect instantiation and default params */
 import { generateUUID } from "@/utils/id";
 import { buildDefaultParamValues } from "@/params/registry";
 import { effectsRegistry } from "./registry";

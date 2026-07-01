@@ -1,3 +1,10 @@
+/**
+ * Karaoke text component — highlights words in sync with the current
+ * playback frame for lyric/subtitle animations.
+ *
+ * @module components/karaoke-text
+ */
+
 import React from "react";
 import { useWasm } from "@/hooks/use-wasm";
 

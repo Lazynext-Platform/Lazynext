@@ -1,4 +1,11 @@
-import React, { useState } from 'react';
+/**
+ * Media bin panel — displays imported media assets (video, audio, image)
+ * with thumbnails and provides drag-and-drop onto the timeline.
+ *
+ * @module components/MediaBin
+ */
+
+import React, { useState } from "react";
 
 interface MediaAsset {
   id: string;

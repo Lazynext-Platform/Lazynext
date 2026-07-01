@@ -1,3 +1,4 @@
+/** @module App Root application component for mobile */
 import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,

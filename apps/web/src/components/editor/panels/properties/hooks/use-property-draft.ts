@@ -1,3 +1,4 @@
+/** @module Property draft hook — handles editing, scrubbing, math expressions, and commit */
 import { useState } from "react";
 import { evaluateMathExpression } from "@/utils/math";
 

@@ -1,3 +1,10 @@
+/**
+ * Interaction constants — drag thresholds, scroll step, zoom factor,
+ * and playhead-anchor zoom slider threshold.
+ *
+ * @module timeline/components/interaction
+ */
+
 export const TIMELINE_DRAG_THRESHOLD_PX = 5;
 export const TIMELINE_HORIZONTAL_WHEEL_STEP_PX = 40;
 export const TIMELINE_ZOOM_BUTTON_FACTOR = 1.7;

@@ -1,3 +1,10 @@
+/**
+ * WASM player — renders individual frames from the WASM compositor
+ * onto a canvas with playback controls.
+ *
+ * @module components/editor/wasm-player
+ */
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";

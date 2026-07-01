@@ -55,36 +55,45 @@ pub struct AdminMetrics {
 
 #[derive(Clone)]
 pub struct DbStore {
-    pub pool: PgPool,
+    pool: Option<PgPool>,
+    is_dev_mode: bool,
 }
 
 impl DbStore {
     /// Create a new database store connected to PostgreSQL.
-    ///
-    /// `DATABASE_URL` must be set to a valid PostgreSQL connection string,
-    /// e.g. `postgresql://lazynext:password@localhost:5432/lazynext`.
-    /// Falls back to the standard Docker Compose connection for local dev.
     pub async fn new(database_url: &str) -> Result<Self, sqlx::Error> {
         let pool = PgPoolOptions::new()
             .max_connections(10)
             .connect(database_url)
             .await?;
-
         tracing::info!("Connected to PostgreSQL database");
-        Ok(Self { pool })
+        Ok(Self { pool: Some(pool), is_dev_mode: false })
     }
 
-    /// Perform a lightweight query to verify DB connection is healthy.
+    /// Create a development-mode store with no database.
+    pub fn new_dev() -> Self {
+        tracing::warn!("Starting in development mode — database features disabled");
+        Self { pool: None, is_dev_mode: true }
+    }
+
+    pub fn has_db(&self) -> bool { self.pool.is_some() }
+    pub fn is_dev(&self) -> bool { self.is_dev_mode }
+
+    pub fn pool_ref(&self) -> Result<&PgPool, sqlx::Error> {
+        self.pool.as_ref().ok_or_else(||
+            sqlx::Error::Protocol("No database — running in dev mode".into())
+        )
+    }
+
     pub async fn health_check(&self) -> Result<(), sqlx::Error> {
-        sqlx::query("SELECT 1").execute(&self.pool).await?;
+        sqlx::query("SELECT 1").execute(self.pool_ref()?).await?;
         Ok(())
     }
 
-    /// Retrieve a user by their ID. Returns `None` if the user doesn't exist.
     pub async fn get_user(&self, user_id: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
             .bind(user_id)
-            .fetch_optional(&self.pool)
+            .fetch_optional(self.pool_ref()?)
             .await
     }
 
@@ -114,7 +123,7 @@ impl DbStore {
         .bind(user.ai_credits)
         .bind(user.created_at)
         .bind(user.updated_at)
-        .execute(&self.pool)
+        .execute(self.pool_ref()?)
         .await?;
         Ok(())
     }
@@ -122,12 +131,12 @@ impl DbStore {
     /// Fetch admin dashboard metrics.
     pub async fn get_admin_metrics(&self) -> Result<AdminMetrics, sqlx::Error> {
         let total_users: (i64,) = sqlx::query_as("SELECT COUNT(*)::bigint FROM \"user\"")
-            .fetch_one(&self.pool)
+            .fetch_one(self.pool_ref()?)
             .await?;
 
         let active_subs: (i64,) =
             sqlx::query_as("SELECT COUNT(*)::bigint FROM subscriptions WHERE tier != 'free'")
-                .fetch_one(&self.pool)
+                .fetch_one(self.pool_ref()?)
                 .await?;
 
         // Monthly revenue: all paid tiers at $29/mo (simplified).
@@ -142,7 +151,7 @@ impl DbStore {
     pub async fn get_projects_for_user(&self, user_id: &str) -> Result<Vec<Project>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM projects WHERE user_id = $1 ORDER BY updated_at DESC")
             .bind(user_id)
-            .fetch_all(&self.pool)
+            .fetch_all(self.pool_ref()?)
             .await
     }
 
@@ -155,7 +164,7 @@ impl DbStore {
             "SELECT * FROM subscriptions WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1",
         )
         .bind(user_id)
-        .fetch_optional(&self.pool)
+        .fetch_optional(self.pool_ref()?)
         .await
     }
 
@@ -178,7 +187,7 @@ impl DbStore {
         .bind(&sub.tier)
         .bind(sub.created_at)
         .bind(sub.updated_at)
-        .execute(&self.pool)
+        .execute(self.pool_ref()?)
         .await?;
         Ok(())
     }
@@ -191,7 +200,7 @@ impl DbStore {
         sqlx::query("UPDATE projects SET data = $1, updated_at = NOW() WHERE id = $2")
             .bind(data)
             .bind(project_id)
-            .execute(&self.pool)
+            .execute(self.pool_ref()?)
             .await?;
         Ok(())
     }
@@ -203,7 +212,7 @@ impl DbStore {
         )
         .bind(user_id)
         .bind(amount)
-        .fetch_one(&self.pool)
+        .fetch_one(self.pool_ref()?)
         .await?;
 
         Ok(row.0)

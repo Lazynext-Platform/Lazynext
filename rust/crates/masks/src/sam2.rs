@@ -1,15 +1,17 @@
-/// Structural bindings for Segment Anything Model (SAM2).
-/// Used for intelligent auto-masking and rotoscoping based on viewport clicks.
-///
-/// When the ONNX feature is enabled (via neural_engine/onnx), real AI inference
-/// is used. Otherwise, a geometric mask fallback is provided.
+//! Segment Anything Model (SAM2) integration for intelligent auto-masking.
+//!
+//! Provides AI-assisted mask generation from viewport click points or bounding
+//! boxes. When the `onnx` feature is enabled (via `neural_engine/onnx`), real
+//! ONNX inference is used; otherwise a geometric fallback mask is generated.
 
+/// A 2D point in normalized image coordinates (0..width, 0..height).
 #[derive(Debug, Clone)]
 pub struct Coordinate {
     pub x: f32,
     pub y: f32,
 }
 
+/// An axis-aligned bounding box in normalized image coordinates.
 #[derive(Debug, Clone)]
 pub struct BoundingBox {
     pub x_min: f32,
@@ -26,6 +28,7 @@ pub struct AlphaMatte {
     pub data: Vec<u8>, // Single channel 8-bit alpha mask
 }
 
+/// SAM2 mask generation engine with ONNX inference and geometric fallback.
 pub struct Sam2MaskEngine {
     pub is_model_loaded: bool,
     onnx_available: bool,
@@ -38,6 +41,11 @@ impl Default for Sam2MaskEngine {
 }
 
 impl Sam2MaskEngine {
+    /// Creates a new SAM2 mask generation engine.
+    ///
+    /// Checks for ONNX runtime availability at construction time. When the
+    /// `onnx` feature is enabled, real AI-powered masking is used; otherwise
+    /// a geometric fallback is employed.
     pub fn new() -> Self {
         let onnx_available = Self::check_onnx_available();
         println!("[SAM2] Initializing Segment Anything Model Engine...");

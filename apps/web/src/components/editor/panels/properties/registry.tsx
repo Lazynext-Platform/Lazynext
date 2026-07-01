@@ -1,3 +1,4 @@
+/** @module Properties tab registry — maps element types to their available property tabs */
 import type { ReactNode } from "react";
 import type {
 	EffectElement,

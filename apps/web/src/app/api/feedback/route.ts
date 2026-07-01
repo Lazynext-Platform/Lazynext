@@ -1,3 +1,8 @@
+/**
+ * @module User feedback submission endpoint — rate-limited, Zod-validated
+ * POST handler that persists feedback entries.
+ */
+
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { checkRateLimit } from "@/auth/rate-limit";
@@ -10,6 +15,11 @@ const submitSchema = z.object({
 		.max(MAX_MESSAGE_LENGTH, "Message too long"),
 });
 
+/**
+ * POST /api/feedback
+ * Rate-limited feedback submission. Validates the message with Zod and
+ * persists the entry via the feedback service.
+ */
 export async function POST(request: NextRequest) {
 	const { limited } = await checkRateLimit({ request });
 	if (limited) {

@@ -1,3 +1,9 @@
+/**
+ * Multicam grid panel — 2x2 camera angle switcher with live cut keys.
+ *
+ * @module components/editor/panels/multicam-grid
+ */
+
 import React, { useState } from "react";
 import { LayoutGrid, CheckCircle2 } from "lucide-react";
 

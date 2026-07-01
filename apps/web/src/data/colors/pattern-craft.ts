@@ -1,3 +1,4 @@
+/** @module Pattern Craft gradient color presets for graphic fill options */
 // These are the gradients from Pattern Craft (https://patterncraft.fun/)
 
 export const patternCraftGradients = [

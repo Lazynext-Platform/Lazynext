@@ -1,3 +1,4 @@
+/** @module Canvas element handler for arrow annotations */
 import type { CanvasElementHandler } from "../types";
 import { Group, Rect, Triangle } from "fabric";
 import {

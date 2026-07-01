@@ -10,6 +10,7 @@ use state::ProjectData;
 use std::fs::File;
 use std::io::Write;
 
+/// Stateless exporter for the Advanced Authoring Format (AAF).
 pub struct AAFExporter;
 
 impl Default for AAFExporter {
@@ -19,6 +20,7 @@ impl Default for AAFExporter {
 }
 
 impl AAFExporter {
+    /// Create a new AAF exporter.
     pub fn new() -> Self {
         Self
     }

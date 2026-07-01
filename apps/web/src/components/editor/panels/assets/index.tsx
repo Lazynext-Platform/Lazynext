@@ -1,4 +1,5 @@
 "use client";
+/** @module Assets panel — top-level container with tab bar and routed sub-views */
 
 import { Separator } from "@/components/ui/separator";
 import {

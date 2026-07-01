@@ -1,3 +1,4 @@
+/** @module CSS gradient parser that converts gradient strings into an AST for canvas rendering */
 /*
  * Original source: developed for Lazynext.
  */

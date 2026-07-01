@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a floating modal overlay with header, body, footer, and a close button. */
+
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X } from "lucide-react";

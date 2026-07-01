@@ -1,3 +1,11 @@
+/**
+ * React hook wrapping {@link ResizeController} — manages element-edge
+ * trim/extend with group-aware multi-element resize, snap-on-edge, and
+ * Escape-to-cancel support.
+ *
+ * @module timeline/hooks/use-timeline-resize
+ */
+
 import { useEffect, useReducer, useState } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
@@ -20,6 +28,10 @@ interface UseTimelineResizeProps {
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 
+/**
+ * Returns resize-active state and the {@link onResizeStart} handler
+ * for initiating element-edge resize.
+ */
 export function useTimelineResize({
 	zoomLevel,
 	onSnapPointChange,

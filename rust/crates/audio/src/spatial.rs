@@ -1,3 +1,12 @@
+//! Spatial audio pipeline: 3D object positioning and binaural rendering.
+//!
+//! Models audio sources as objects in a hemispherical room coordinate system
+//! and simulates panning across multi-channel speaker layouts (up to 7.1.4
+//! Dolby Atmos). The HRTF processor converts monaural sources into binaural
+//! stereo output using interaural time/level differences for headphone
+//! listening.
+
+/// An audio source positioned in 3D space.
 pub struct AudioObject {
     pub id: String,
     // 3D coordinates representing where the sound exists in a physical room hemisphere

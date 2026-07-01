@@ -1,3 +1,10 @@
+/**
+ * Scenes drawer — slide-out sheet for viewing and switching between
+ * project scenes with creation, deletion, and reordering.
+ *
+ * @module components/editor/scenes-view
+ */
+
 "use client";
 
 import {

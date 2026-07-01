@@ -1,3 +1,4 @@
+/** @module Keybindings migration runner and versioned migration registry */
 import { v2ToV3 } from "./v2-to-v3";
 import { v3ToV4 } from "./v3-to-v4";
 import { v4ToV5 } from "./v4-to-v5";

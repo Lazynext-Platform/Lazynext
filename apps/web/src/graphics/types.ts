@@ -1,3 +1,4 @@
+/** @module Graphics type definitions for graphic element rendering and registration */
 import type { ParamDefinition, ParamValues } from "@/params";
 
 export const DEFAULT_GRAPHIC_SOURCE_SIZE = 512;

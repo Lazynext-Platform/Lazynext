@@ -1,3 +1,4 @@
+/** @module Migration transformer utility functions for type checking and record extraction */
 import type { ProjectRecord } from "./types";
 
 export function isRecord(value: unknown): value is ProjectRecord {

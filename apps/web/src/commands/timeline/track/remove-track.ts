@@ -1,3 +1,4 @@
+/** @module Command for removing a track from the timeline with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { SceneTracks } from "@/timeline";

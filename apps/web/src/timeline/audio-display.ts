@@ -1,3 +1,10 @@
+/**
+ * Audio volume display mapping — converts between decibel values and
+ * UI positions on waveform clips (volume line, bar fraction).
+ *
+ * @module timeline/audio-display
+ */
+
 import { clampDb } from "./audio-state";
 import { VOLUME_DB_MAX, VOLUME_DB_MIN } from "./audio-constants";
 

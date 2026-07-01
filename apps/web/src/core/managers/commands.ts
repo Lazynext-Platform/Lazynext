@@ -1,3 +1,8 @@
+/**
+ * @module Command history manager — undo/redo stack with arbitrary Command
+ * objects, ripple-editing support, and selection-aware state restoration.
+ */
+
 import type { EditorCore } from "@/core";
 import type { Command, CommandResult } from "@/commands";
 import type { EditorSelectionSnapshot } from "@/selection/editor-selection";

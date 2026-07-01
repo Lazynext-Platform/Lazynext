@@ -1,3 +1,4 @@
+/** @module Gradient canvas rendering engine for drawing CSS-like gradients on HTML canvas */
 import type {
 	GradientAst,
 	Color,

@@ -1,3 +1,4 @@
+/** @module Masks registry for registering and looking up mask definitions */
 import { MAX_FEATHER } from "@/masks/feather";
 import type { ParamDefinition } from "@/params";
 import type {

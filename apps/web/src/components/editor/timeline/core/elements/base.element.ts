@@ -1,3 +1,11 @@
+/**
+ * Abstract base element — foundation class for all timeline elements
+ * providing id, timing (start/end), track assignment, position,
+ * rotation, opacity, animation, and transition metadata.
+ *
+ * @module components/editor/timeline/core/elements/base.element
+ */
+
 import { generateShortUuid } from "../../utils/timeline.utils";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { ElementAnimation } from "../addOns/animation";

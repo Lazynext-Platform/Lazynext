@@ -1,3 +1,10 @@
+/**
+ * Editor header — project name, export/undo/redo buttons, and
+ * project settings dropdown.
+ *
+ * @module components/editor/editor-header
+ */
+
 "use client";
 
 import { Button } from "../ui/button";

@@ -1,5 +1,27 @@
+/**
+ * Frame-by-frame export pipeline using Canvas captureStream + MediaRecorder.
+ *
+ * Renders each frame through the WASM bridge onto an offscreen canvas,
+ * captures the stream, and encodes it as a WebM blob. Intended as a
+ * lightweight client-side export; production exports use the Rust FFmpeg
+ * encoding pipeline.
+ *
+ * @module export/dispatch
+ */
+
 import { wasmBridge } from "../core/wasm-bridge";
 
+/**
+ * Renders every frame of a project through the WASM compositor and
+ * encodes the result as a WebM blob via MediaRecorder.
+ *
+ * @param width - output canvas width in pixels.
+ * @param height - output canvas height in pixels.
+ * @param durationFrames - total number of frames to render.
+ * @param fps - frames per second for the output.
+ * @param onProgress - callback receiving a 0–1 progress value.
+ * @returns a Promise resolving to the encoded video Blob.
+ */
 export async function dispatchExport(
     width: number,
     height: number,

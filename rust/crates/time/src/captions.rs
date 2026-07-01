@@ -1,13 +1,24 @@
+//! Caption and subtitle encoding to standard interchange formats.
+//!
+//! `CaptionEncoder` serializes subtitle cue lists into SubRip (.srt)
+//! and WebVTT (.vtt) format strings with millisecond-precision timestamps.
+
 use anyhow::Result;
 use std::fmt::Write;
 
+/// A single subtitle cue with timing in milliseconds.
 pub struct Subtitle {
+    /// Unique cue identifier within the track.
     pub id: u32,
+    /// Start time in milliseconds.
     pub start_ms: u64,
+    /// End time in milliseconds.
     pub end_ms: u64,
+    /// Display text for this cue.
     pub text: String,
 }
 
+/// Stateless encoder for subtitle interchange formats (SRT and WebVTT).
 pub struct CaptionEncoder;
 
 impl CaptionEncoder {

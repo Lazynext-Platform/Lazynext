@@ -2,7 +2,9 @@
  * Remote cursor overlay for multiplayer collaboration.
  *
  * Renders other users' cursors on the editor canvas with their
- * names and selection highlights.
+ * names, colors, and optional selection highlights.
+ *
+ * @module collaboration/cursors
  */
 
 import React from "react";
@@ -20,6 +22,11 @@ interface CursorsOverlayProps {
 	cursors: RemoteCursor[];
 }
 
+/**
+ * Renders remote user cursors as SVG pointers with colored name labels.
+ *
+ * @param cursors - array of remote cursor positions with peer metadata.
+ */
 export function CursorsOverlay({ cursors }: CursorsOverlayProps) {
 	if (cursors.length === 0) return null;
 

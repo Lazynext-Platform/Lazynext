@@ -1,3 +1,10 @@
+//! WebCodecs video decoder wrapper for WebAssembly.
+//!
+//! Wraps the browser's native `VideoDecoder` API (hardware-accelerated)
+//! for H.264/VP9/AV1 decoding. Manages decoder lifecycle (configure,
+//! decode chunks, flush, reset, close) and bridges decoded `VideoFrame`
+//! objects to JavaScript callbacks.
+
 use js_sys::{Function, Uint8Array};
 use wasm_bindgen::prelude::*;
 

@@ -1,14 +1,26 @@
+/**
+ * Audio DSP helpers — volume, mute, linear gain, and automation envelope
+ * sampling for timeline audio and video elements.
+ *
+ * @module timeline/audio-state
+ */
+
 import { hasKeyframesForPath } from "@/animation/keyframe-query";
 import { resolveNumberAtTime } from "@/animation/values";
 import { VOLUME_DB_MAX, VOLUME_DB_MIN } from "./audio-constants";
 import type { TimelineElement } from "./types";
 const DEFAULT_STEP_SECONDS = 1 / 60;
 
+/** Elements that carry audio — either audio-only or video-with-source-audio. */
 export type AudioCapableElement = Extract<
 	TimelineElement,
 	{ type: "audio" | "video" }
 >;
 
+/**
+ * Clamps a decibel value to the valid range [VOLUME_DB_MIN, VOLUME_DB_MAX].
+ * Non-finite values default to 0 dB.
+ */
 export function clampDb(value: number): number {
 	if (!Number.isFinite(value)) {
 		return 0;
@@ -17,10 +29,16 @@ export function clampDb(value: number): number {
 	return Math.min(VOLUME_DB_MAX, Math.max(VOLUME_DB_MIN, value));
 }
 
+/**
+ * Converts a decibel value to a linear gain factor (0–∞).
+ */
 export function dBToLinear(db: number): number {
 	return 10 ** (clampDb(db) / 20);
 }
 
+/**
+ * Reads the volume parameter from an audio-capable element, defaulting to 0.
+ */
 export function getElementVolume({
 	element,
 }: {
@@ -30,6 +48,9 @@ export function getElementVolume({
 	return typeof value === "number" ? value : 0;
 }
 
+/**
+ * Returns `true` if the element is muted via its `muted` param.
+ */
 export function isElementMuted({
 	element,
 }: {
@@ -38,6 +59,9 @@ export function isElementMuted({
 	return element.params.muted === true;
 }
 
+/**
+ * Returns `true` if the element has animated keyframes on the `volume` property.
+ */
 export function hasAnimatedVolume({
 	element,
 }: {
@@ -51,6 +75,13 @@ export function hasAnimatedVolume({
 
 import { TICKS_PER_SECOND } from "@/wasm";
 
+/**
+ * Resolves the effective linear gain at a given local time, accounting
+ * for track/element mute, volume keyframe animations, and the volume
+ * parameter.
+ *
+ * @returns linear gain (0 = silent).
+ */
 export function resolveEffectiveAudioGain({
 	element,
 	trackMuted = false,
@@ -74,6 +105,10 @@ export function resolveEffectiveAudioGain({
 	return dBToLinear(resolvedDb);
 }
 
+/**
+ * Pre-computes `count` gain samples evenly distributed across the
+ * element's duration, used by the waveform renderer.
+ */
 export function buildWaveformGainSamples({
 	element,
 	count,
@@ -88,6 +123,10 @@ export function buildWaveformGainSamples({
 	});
 }
 
+/**
+ * Builds a linear-gain automation envelope over a time range, emitting
+ * points at `stepSeconds` granularity (defaults to 1/60 s).
+ */
 export function buildAudioGainAutomation({
 	element,
 	trackMuted = false,

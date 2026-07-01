@@ -4642,8 +4642,10 @@ dependencies = [
  "lazynext-export",
  "lazynext_core",
  "log",
+ "serde",
  "serde_json",
  "tokio",
+ "uuid",
 ]
 
 [[package]]
@@ -4684,6 +4686,7 @@ dependencies = [
  "gpu",
  "gpui",
  "image 0.25.10",
+ "lazynext-export",
  "lazynext_core",
  "log",
  "reqwest 0.13.4",
@@ -4697,7 +4700,9 @@ dependencies = [
 name = "lazynext_mcp_server"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "editor_core",
+ "futures",
  "lazynext-export",
  "lazynext_core",
  "reqwest 0.13.4",
@@ -4705,6 +4710,8 @@ dependencies = [
  "serde_json",
  "state",
  "tokio",
+ "tokio-stream",
+ "tower-http 0.6.11",
  "uuid",
 ]
 

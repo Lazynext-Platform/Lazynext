@@ -1,3 +1,13 @@
+/**
+ * Lazynext Analytics Service — Express HTTP server.
+ *
+ * Ingests high-velocity user telemetry events, buffers them in memory,
+ * pushes to Kafka (when available), and queries ClickHouse for OLAP
+ * dashboards. Computes LTV metrics and provides a real-time metrics API.
+ *
+ * Falls back to in-memory buffering when Kafka/ClickHouse are unavailable.
+ */
+
 import "./tracing";
 import express, { Request, Response } from "express";
 import crypto from "crypto";
@@ -40,6 +50,7 @@ const kafkaProducer = {
 // ── ClickHouse Client (used for dashboards and LTV queries) ────────────
 let clickhouseAvailable = false;
 
+/** Query ClickHouse via HTTP, returning rows as parsed JSON objects. */
 async function queryClickHouse(_query: string): Promise<any[]> {
   if (process.env.CLICKHOUSE_URL) {
     try {
@@ -65,6 +76,7 @@ async function queryClickHouse(_query: string): Promise<any[]> {
 // Groups events by user session for engagement metrics
 const activeSessions = new Map<string, { startTime: number; lastEvent: number; eventCount: number }>();
 
+/** Track an active user session, cleaning up stale sessions (inactive >30 min). */
 function trackSession(userId: string, sessionId: string): void {
   const key = `${userId}:${sessionId}`;
   const now = Date.now();
@@ -87,6 +99,9 @@ function trackSession(userId: string, sessionId: string): void {
 
 // ── Routes ──────────────────────────────────────────────────────────────
 
+/**
+ * GET /health — Health check with Kafka/ClickHouse connectivity status.
+ */
 app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",

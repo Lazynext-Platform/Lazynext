@@ -1,3 +1,4 @@
+/** @module Param definitions registry for all element property parameters */
 import type { ParamDefinition, ParamValue, ParamValues } from "@/params";
 import { MIN_TRANSFORM_SCALE } from "@/animation/transform";
 import type { BlendMode } from "@/rendering";

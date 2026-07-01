@@ -1,4 +1,8 @@
-// Context and Result used in pipeline.rs
+//! Export format configuration and FFMPEG encoder argument builder.
+//!
+//! Provides the `ExportConfig` struct and `ExportEncoder` which translate
+//! high-level export settings into FFMPEG CLI argument vectors suitable
+//! for piping raw video frames via stdin.
 
 /// Configuration for an export job.
 #[derive(Clone, Debug)]
@@ -11,12 +15,18 @@ pub struct ExportConfig {
     pub output_path: String,
 }
 
+/// Supported export container and codec combinations.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ExportFormat {
+    /// H.264 video in an MP4 container.
     Mp4,
+    /// Apple ProRes video in a MOV container.
     ProRes,
+    /// Digital Cinema Package (JPEG 2000) in an MXF container.
     Dcp,
+    /// Avid DNxHD in an AAF container.
     Aaf,
+    /// H.264 video in a MOV container.
     Mov,
 }
 
@@ -36,6 +46,7 @@ impl ExportFormat {
         }
     }
 
+    /// Returns the file extension for this export format.
     pub fn extension(&self) -> &str {
         match self {
             ExportFormat::Mp4 => "mp4",
@@ -46,6 +57,7 @@ impl ExportFormat {
         }
     }
 
+    /// Returns the FFMPEG codec name for this export format.
     pub fn codec(&self) -> &str {
         match self {
             ExportFormat::Mp4 => "libx264",

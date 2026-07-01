@@ -1,10 +1,8 @@
 /**
- * Hardware console manager for physical control surfaces.
+ * @module MIDI hardware console manager for physical control surfaces
+ * (DaVinci Resolve panels, Loupedeck, MIDI controllers). Uses the Web MIDI
+ * API for timeline scrubbing, color grading, and mixing.
  *
- * Supports MIDI-enabled hardware like DaVinci Resolve panels, Loupedeck,
- * and MIDI controllers for timeline scrubbing, color grading, and mixing.
- *
- * Uses the Web MIDI API (navigator.requestMIDIAccess).
  * Falls back gracefully if MIDI is not available.
  */
 

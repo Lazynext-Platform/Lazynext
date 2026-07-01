@@ -1,3 +1,7 @@
+/**
+ * @module media/thumbnail
+ */
+
 const THUMBNAIL_MAX_WIDTH = 1280;
 const THUMBNAIL_MAX_HEIGHT = 720;
 

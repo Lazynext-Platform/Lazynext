@@ -1,3 +1,4 @@
+/** @module __tests__/channel-data Test suite for channel data utilities */
 import { describe, expect, it } from "bun:test";
 import {
 	isLeafChannelData,

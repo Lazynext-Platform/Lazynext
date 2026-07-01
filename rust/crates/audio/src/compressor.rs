@@ -1,4 +1,16 @@
-/// A dynamics compressor with soft-knee, adjustable ratio, and make-up gain.
+//! Dynamics compressor DSP with soft-knee, sidechain support, and envelope smoothing.
+//!
+//! Provides a stereo-capable compressor with adjustable threshold, ratio,
+//! knee width, attack/release times, and make-up gain. Supports sidechain
+//! processing where one signal controls gain reduction applied to another
+//! (e.g. kick-drum ducking on a bass line).
+//!
+/// A stereo-capable dynamics compressor with soft-knee, adjustable ratio,
+/// envelope-based attack/release smoothing, and make-up gain.
+///
+/// Gain reduction is computed per-sample using a soft-knee curve and smoothed
+/// with separate attack and release coefficients. Supports sidechain processing
+/// where one signal controls gain reduction applied to another.
 pub struct Compressor {
     threshold_db: f64,
     ratio: f64,
@@ -88,7 +100,10 @@ impl Compressor {
     }
 
     /// Process a single sample with sidechain input.
-    /// The gain reduction is computed from `sidechain_input` but applied to `input`.
+    ///
+    /// The gain reduction is computed from `sidechain_input` (e.g. a kick drum)
+    /// but applied to `input` (e.g. a bass line). Useful for ducking effects
+    /// where one signal should be attenuated when another is loud.
     pub fn process_sidechain(&mut self, input: f64, sidechain_input: f64) -> f64 {
         // Compute sidechain input level in dB
         let sidechain_db = if sidechain_input.abs() < 1e-10 {

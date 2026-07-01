@@ -1,3 +1,4 @@
+/** @module Command for inserting a new element onto the timeline with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import { buildEntityInsertOp, buildPropertyUpdateOp } from "@/collaboration/crdt-builders";

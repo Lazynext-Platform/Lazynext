@@ -1,3 +1,10 @@
+/**
+ * React hook wrapping {@link SeekController} — detects click-vs-drag
+ * on the ruler/tracks and seeks the playhead on click.
+ *
+ * @module timeline/hooks/use-timeline-seek
+ */
+
 import { useEffect, useState, type RefObject } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
@@ -19,6 +26,10 @@ interface UseTimelineSeekProps {
 	seek: (time: MediaTime) => void;
 }
 
+/**
+ * Returns mouse-down and click handlers for seeking by clicking the
+ * ruler or tracks area.
+ */
 export function useTimelineSeek({
 	playheadRef,
 	trackLabelsRef,

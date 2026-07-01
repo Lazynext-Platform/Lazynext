@@ -1,3 +1,4 @@
+/** @module GPU renderer orchestrating WASM-accelerated frame compositing with effects and masks */
 import {
 	applyEffectPasses,
 	applyMaskFeather as applyMaskFeatherWasm,

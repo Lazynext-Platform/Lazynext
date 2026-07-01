@@ -1,3 +1,4 @@
+/** @module Media utility barrel — types, color filters, metadata extraction, and file helpers */
 // Types
 export type { Dimensions, VideoMeta, Position } from "./types";
 export { COLOR_FILTERS, type ColorFilterPreset } from "./color-filters";

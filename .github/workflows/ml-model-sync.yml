@@ -292,6 +292,19 @@ jobs:
           WARMUP_REQUESTS = 10
           BENCHMARK_REQUESTS = 50
 
+          def build_payload(model_name):
+              import numpy as np
+              np.random.seed(42)
+              shapes = {
+                  "mobilenet_v2": (1, 224, 224, 3),
+                  "realesrgan": (1, 128, 128, 3),
+                  "whisper": (1, 80, 300),
+                  "sam2": (1, 256, 256, 3),
+              }
+              shape = shapes.get(model_name, (1, 10))
+              data = np.random.rand(*shape).astype(np.float32).tolist()
+              return {"signature_name": "serving_default", "instances": data}
+
           results = {}
 
           for model_name in MODELS:
@@ -503,6 +516,23 @@ jobs:
           headers = {"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
 
           MODELS = ["whisper", "sam2", "realesrgan", "mobilenet_v2"]
+
+          def build_payload(model_name):
+              import numpy as np
+              np.random.seed(42)
+              shapes = {
+                  "mobilenet_v2": (1, 224, 224, 3),
+                  "realesrgan": (1, 128, 128, 3),
+                  "whisper": (1, 80, 300),
+                  "sam2": (1, 256, 256, 3),
+              }
+              shape = shapes.get(model_name, (1, 10))
+              data = np.random.rand(*shape).astype(np.float32).tolist()
+              return {"signature_name": "serving_default", "instances": data}
+
+          def build_all_payloads():
+              return {m: build_payload(m) for m in MODELS}
+
           PAYLOADS = build_all_payloads()
 
           warmup_results = {}

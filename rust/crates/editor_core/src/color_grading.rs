@@ -1,5 +1,12 @@
+//! In-place color grading pipeline for RGBA frame buffers.
+//!
+//! Applies contrast, brightness, and saturation adjustments directly to pixel data
+//! without intermediate allocations. Exposed to JavaScript via `wasm-bindgen` for
+//! real-time preview in the web editor shell.
+
 use wasm_bindgen::prelude::*;
 
+/// In-place color grading processor for RGBA frame buffers.
 #[wasm_bindgen]
 pub struct ColorGradingProcessor {
     contrast: f32,
@@ -9,6 +16,11 @@ pub struct ColorGradingProcessor {
 
 #[wasm_bindgen]
 impl ColorGradingProcessor {
+    /// Create a new color grading processor with the given parameters.
+    ///
+    /// * `contrast` — multiplier around 0.5 midpoint (1.0 = no change)
+    /// * `brightness` — additive offset in [0, 1] range (0.0 = no change)
+    /// * `saturation` — multiplier on color difference from luma (1.0 = no change)
     #[wasm_bindgen(constructor)]
     pub fn new(contrast: f32, brightness: f32, saturation: f32) -> Self {
         Self {

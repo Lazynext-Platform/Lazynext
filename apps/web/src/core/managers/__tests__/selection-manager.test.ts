@@ -1,3 +1,4 @@
+/** @module __tests__/selection-manager Test suite for SelectionManager */
 import { describe, expect, it, beforeEach } from "bun:test";
 import { SelectionManager } from "../selection-manager";
 

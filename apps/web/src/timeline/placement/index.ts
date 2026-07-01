@@ -1,3 +1,10 @@
+/**
+ * Track placement module barrel — re-exports WASM placement wrappers,
+ * compatibility checks, insert-index helpers, and track factory.
+ *
+ * @module timeline/placement
+ */
+
 export { applyPlacement, resolveTrackPlacement, placeElementsOnTimeline } from "./wasm-wrappers";
 export {
 	canElementGoOnTrack,

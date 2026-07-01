@@ -1,6 +1,31 @@
+/** @module NativeBridge Native bridge interface for mobile */
 import { Platform } from 'react-native';
-// @ts-ignore
+// @ts-ignore — native module available only on device; JS fallback below
 import MyModule from '../modules/lazynext-native/src/MyModule';
+
+const MOCK_PROJECT = {
+  name: "Demo Cut (Offline)",
+  tracks: [
+    {
+      id: "track_1",
+      name: "Video",
+      trackType: "video",
+      clips: [
+        { id: "clip_001", name: "Opening Shot", start: 0, duration: 150 },
+        { id: "clip_002", name: "B-Roll Montage", start: 150, duration: 210 },
+        { id: "clip_003", name: "Hero Close-up", start: 360, duration: 90 },
+      ],
+    },
+    {
+      id: "track_2",
+      name: "Audio",
+      trackType: "audio",
+      clips: [
+        { id: "clip_004", name: "Background Music", start: 0, duration: 450 },
+      ],
+    },
+  ],
+};
 
 export const NativeBridge = {
   async fetchProject(): Promise<{
@@ -17,7 +42,7 @@ export const NativeBridge = {
       };
     } catch (e) {
       console.warn("NativeModule fetch error, falling back:", e);
-      return { name: "Offline Project", tracks: [] };
+      return MOCK_PROJECT;
     }
   },
 

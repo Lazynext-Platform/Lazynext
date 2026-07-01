@@ -1,3 +1,4 @@
+/** @module Canvas element handler for post-processing effects (no Fabric rendering) */
 import type { CanvasElementHandler } from "../types";
 import { ELEMENT_TYPES } from "../helpers/constants";
 

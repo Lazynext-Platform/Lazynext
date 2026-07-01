@@ -1,3 +1,9 @@
+//! Temporal versioning — branching, merging, and versioning of CRDT timelines.
+//!
+//! Implements a multiverse model where every named branch is an independent
+//! NLE state. Three-way CRDT merges resolve conflicts deterministically using
+//! vector clocks and tombstones, and snapshots enable undo/redo navigation.
+
 use lazynext_core::NLEState;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -26,6 +32,7 @@ pub struct MultiverseManager {
 }
 
 impl MultiverseManager {
+    /// Create a new multiverse manager with an initial "canon" reality.
     pub fn new(canon_state: NLEState) -> Self {
         let mut realities = HashMap::new();
         realities.insert("canon".to_string(), canon_state);
@@ -195,18 +202,22 @@ impl MultiverseManager {
         Ok(())
     }
 
+    /// Return a shared reference to the current branch's NLE state.
     pub fn get_current(&self) -> &NLEState {
         self.realities.get(&self.current_reality).unwrap()
     }
 
+    /// Return a mutable reference to the current branch's NLE state.
     pub fn get_current_mut(&mut self) -> &mut NLEState {
         self.realities.get_mut(&self.current_reality).unwrap()
     }
 
+    /// Return the name of the currently checked-out branch.
     pub fn current_branch(&self) -> &str {
         &self.current_reality
     }
 
+    /// Return the names of all existing branches.
     pub fn all_branches(&self) -> Vec<&str> {
         self.realities.keys().map(|k| k.as_str()).collect()
     }

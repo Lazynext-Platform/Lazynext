@@ -1,14 +1,22 @@
+//! CRDT-based timeline synchronization for collaborative editing.
+//!
+//! `TimelineCrdt` provides operation-based conflict-free merging of
+//! timeline edits across WebSocket-connected peers. The full CRDT
+//! implementation lives in the `state` crate; this module exposes
+//! the delta-apply/delta-extract interface.
+
 use anyhow::Result;
 
+/// Operation-based CRDT for conflict-free timeline synchronization.
 pub struct TimelineCrdt {
+    /// Unique document identifier shared across peers.
     pub document_id: String,
-    // CRDT document state for conflict-free merging of timeline edits.
-    // Uses operation-based CRDTs (CmRDT) from rust/crates/state/ for
-    // mathematical convergence. Full implementation in the state crate.
+    /// True when local state has unsynchronized changes.
     pub is_dirty: bool,
 }
 
 impl TimelineCrdt {
+    /// Create a new CRDT timeline for the given document.
     pub fn new(doc_id: &str) -> Self {
         Self {
             document_id: doc_id.to_string(),

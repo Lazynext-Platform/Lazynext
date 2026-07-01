@@ -1,3 +1,10 @@
+/**
+ * Audio waveform visualization component — renders a deterministic
+ * waveform based on width and seed parameters.
+ *
+ * @module components/editor/AudioWaveform
+ */
+
 export default function AudioWaveform({
 	width,
 	seed,

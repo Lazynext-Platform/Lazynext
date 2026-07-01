@@ -1,3 +1,10 @@
+/**
+ * Bookmark utility functions — find, toggle, remove, update, move,
+ * and query bookmarks on the timeline.
+ *
+ * @module timeline/bookmarks/utils
+ */
+
 import type { Bookmark } from "@/timeline";
 import type { FrameRate } from "lazynext-wasm";
 import { addMediaTime, roundFrameTime, type MediaTime } from "@/wasm";
@@ -12,6 +19,7 @@ function bookmarkTimeEqual({
 	return bookmarkTime === frameTime;
 }
 
+/** Finds the index of a bookmark at the given frame time. */
 export function findBookmarkIndex({
 	bookmarks,
 	frameTime,
@@ -24,6 +32,7 @@ export function findBookmarkIndex({
 	);
 }
 
+/** Returns `true` if a bookmark exists at the given frame time. */
 export function isBookmarkAtTime({
 	bookmarks,
 	frameTime,
@@ -36,6 +45,7 @@ export function isBookmarkAtTime({
 	);
 }
 
+/** Toggles a bookmark at the given time — adds if absent, removes if present. */
 export function toggleBookmarkInArray({
 	bookmarks,
 	frameTime,
@@ -53,6 +63,7 @@ export function toggleBookmarkInArray({
 	return newBookmarks.slice().sort((a, b) => a.time - b.time);
 }
 
+/** Removes the bookmark at the given frame time. */
 export function removeBookmarkFromArray({
 	bookmarks,
 	frameTime,
@@ -66,6 +77,7 @@ export function removeBookmarkFromArray({
 	);
 }
 
+/** Applies partial updates to the bookmark at the given frame time. */
 export function updateBookmarkInArray({
 	bookmarks,
 	frameTime,
@@ -86,6 +98,7 @@ export function updateBookmarkInArray({
 	return result;
 }
 
+/** Moves a bookmark from one time to another, re-sorting the array. */
 export function moveBookmarkInArray({
 	bookmarks,
 	fromTime,
@@ -106,6 +119,7 @@ export function moveBookmarkInArray({
 	return result.slice().sort((a, b) => a.time - b.time);
 }
 
+/** Rounds a time to the nearest frame boundary. */
 export function getFrameTime({
 	time,
 	fps,
@@ -116,6 +130,7 @@ export function getFrameTime({
 	return roundFrameTime({ time, fps });
 }
 
+/** Returns the bookmark at the given frame time, or null. */
 export function getBookmarkAtTime({
 	bookmarks,
 	frameTime,
@@ -127,6 +142,7 @@ export function getBookmarkAtTime({
 	return index === -1 ? null : bookmarks[index];
 }
 
+/** Returns all bookmarks whose time range contains the given time. */
 export function getBookmarksActiveAtTime({
 	bookmarks,
 	time,

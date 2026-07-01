@@ -1,3 +1,4 @@
+/** @module Hook for registering keyboard shortcut handlers with action dispatch */
 import { useCallback, useEffect, useRef } from "react";
 import type {
 	TAction,

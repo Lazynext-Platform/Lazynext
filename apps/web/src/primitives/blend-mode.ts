@@ -1,3 +1,4 @@
+/** @module Blend mode type definitions and runtime type guard */
 export type BlendMode =
 	| "normal"
 	| "darken"

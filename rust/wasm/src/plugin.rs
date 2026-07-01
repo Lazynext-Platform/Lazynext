@@ -1,3 +1,8 @@
+//! WASM plugin runtime bridge.
+//!
+//! Wraps the plugin runtime so JavaScript can execute sandboxed
+//! plugin scripts (e.g. Lua or JavaScript) against the NLE state.
+
 use plugin::PluginRuntime;
 use wasm_bindgen::prelude::*;
 

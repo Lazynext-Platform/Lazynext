@@ -1,4 +1,5 @@
 "use client";
+/** @module Changelog notification popover showing latest release to returning users */
 
 import { useState, useEffect } from "react";
 import Link from "next/link";

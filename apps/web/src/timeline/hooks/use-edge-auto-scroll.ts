@@ -1,3 +1,11 @@
+/**
+ * Provides edge-triggered auto-scrolling during drag operations.
+ * When the mouse hovers near the edges of the viewport, the timeline
+ * scrolls proportionally in that direction.
+ *
+ * @module timeline/hooks/use-edge-auto-scroll
+ */
+
 import { useEffect, useRef } from "react";
 
 interface UseEdgeAutoScrollParams {
@@ -10,6 +18,10 @@ interface UseEdgeAutoScrollParams {
 	maxScrollSpeed?: number;
 }
 
+/**
+ * Drives edge auto-scroll during drag; when active, animates
+ * scroll speed based on mouse distance from viewport edges.
+ */
 export function useEdgeAutoScroll({
 	isActive,
 	getMouseClientX,

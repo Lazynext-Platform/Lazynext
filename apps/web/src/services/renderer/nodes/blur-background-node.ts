@@ -1,3 +1,4 @@
+/** @module Blur background render node for applying background blur effects in the compositor tree */
 import type { EffectPass } from "@/effects/types";
 import type { RetimeConfig } from "@/timeline";
 import { BaseNode } from "./base-node";

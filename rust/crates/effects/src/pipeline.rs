@@ -1,3 +1,9 @@
+//! GPU effects pipeline that applies post-processing effect shaders
+//! (gaussian blur, chroma key, glitch, color grade, fire, portal,
+//! VHS, CRT, glow, vignette, and 3D LUT) to textures via wgpu
+//! render passes. Supports chained effect passes with per-pass
+//! uniform parameters and batching with external command encoders.
+
 use std::collections::HashMap;
 
 use bytemuck::{Pod, Zeroable};
@@ -39,13 +45,19 @@ const VIGNETTE_SHADER_SOURCE: &str = include_str!("shaders/vignette.wgsl");
 
 const LUT_3D_SHADER_SOURCE: &str = include_str!("shaders/lut_3d.wgsl");
 
+/// Input parameters for applying a chain of effects passes.
 pub struct ApplyEffectsOptions<'a> {
+    /// The source texture to read from.
     pub source: &'a wgpu::Texture,
+    /// Output width in pixels.
     pub width: u32,
+    /// Output height in pixels.
     pub height: u32,
+    /// Ordered list of effect passes to apply.
     pub passes: &'a [EffectPass],
 }
 
+/// GPU pipeline that applies post-processing effects via compute shaders.
 pub struct EffectPipeline {
     uniform_bind_group_layout: wgpu::BindGroupLayout,
     lut3d_bind_group_layout: wgpu::BindGroupLayout,
@@ -86,6 +98,7 @@ struct EffectUniformBuffer {
 }
 
 impl EffectPipeline {
+    /// Create a new effect pipeline, compiling all built-in effect shaders.
     pub fn new(context: &GpuContext) -> Self {
         let uniform_bind_group_layout =
             context
@@ -666,14 +679,20 @@ impl EffectPipeline {
     }
 }
 
+/// Input parameters for applying a 3D LUT color transform.
 pub struct ApplyLutOptions<'a> {
+    /// The source texture to read from.
     pub source: &'a wgpu::Texture,
+    /// Output width in pixels.
     pub width: u32,
+    /// Output height in pixels.
     pub height: u32,
+    /// The 3D lookup-table texture.
     pub lut_texture: &'a wgpu::Texture,
 }
 
 impl EffectPipeline {
+    /// Apply a 3D LUT color grade to the source texture, returning the output texture.
     pub fn apply_lut(
         &self,
         context: &GpuContext,
@@ -761,6 +780,8 @@ impl EffectPipeline {
         Ok(output_texture)
     }
 
+    /// Apply a chain of effects to the source texture, encoding and submitting GPU work.
+    /// Returns the final output texture.
     pub fn apply(
         &self,
         context: &GpuContext,
@@ -791,6 +812,8 @@ impl EffectPipeline {
         Ok(output)
     }
 
+    /// Apply effects using an existing command encoder (for batching with other GPU work).
+    /// The caller is responsible for submitting the encoder.
     pub fn apply_with_encoder(
         &self,
         context: &GpuContext,

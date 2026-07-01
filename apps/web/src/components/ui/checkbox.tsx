@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a square toggle with a check indicator for boolean selection. */
+
 import * as React from "react";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
 import { Check } from "lucide-react";

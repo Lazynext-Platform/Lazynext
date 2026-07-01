@@ -1,3 +1,4 @@
+/** @module Data service for serializing and deserializing project editors to/from JSON */
 import Watermark from "../core/addOns/watermark";
 import { TrackElement } from "../core/elements/base.element";
 import { Track } from "../core/track/track";

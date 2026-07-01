@@ -1,3 +1,4 @@
+/** @module Star graphic definition with fill, stroke, spoke count, and parametric rendering */
 import type { ParamDefinition } from "@/params";
 import { applyAlignedStroke } from "../stroke";
 import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";

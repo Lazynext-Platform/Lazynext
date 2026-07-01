@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a toggle button with visual on/off pressed state and variant styles. */
+
 import * as React from "react";
 import { Toggle as TogglePrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

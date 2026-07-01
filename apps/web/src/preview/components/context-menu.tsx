@@ -1,3 +1,4 @@
+/** @module Context menu component for canvas element right-click actions (copy, delete, arrange) */
 "use client";
 
 import {

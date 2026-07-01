@@ -1,3 +1,4 @@
+/** @module Platform detection utilities for keyboard shortcuts and OS-specific behavior */
 export function getPlatformSpecialKey(): string {
 	return isAppleDevice() ? "⌘" : "Ctrl";
 }

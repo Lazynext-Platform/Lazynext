@@ -1,3 +1,11 @@
+/**
+ * Graph editor session — resolves editable scalar channels,
+ * curve handles, and normalized cubic-bezier representations
+ * for keyframe interpolation editing.
+ *
+ * @module timeline/components/graph-editor/session
+ */
+
 import {
 	getCurveHandlesForNormalizedCubicBezier,
 	getEditableScalarChannels,

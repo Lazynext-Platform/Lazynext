@@ -1,3 +1,8 @@
+//! Lazynext Headless CLI — batch rendering and AI editing from the terminal.
+//!
+//! Supports single-project rendering, batch rendering across multiple projects,
+//! and natural-language AI-powered timeline editing via subcommands.
+
 use clap::Parser;
 use lazynext_core::NLEState;
 
@@ -65,6 +70,16 @@ enum Commands {
         #[arg(short, long, default_value = "mp4")]
         format: String,
     },
+    /// Ingest a media file into a project
+    Ingest {
+        /// Path to the media file
+        #[arg(short, long)]
+        file: String,
+
+        /// Path to the project JSON file
+        #[arg(short, long)]
+        project_id: String,
+    },
 }
 
 #[tokio::main]
@@ -102,20 +117,7 @@ async fn main() {
                         project_data.name.clone(),
                         project_data.framerate,
                     );
-                    for track in project_data.tracks {
-                        eng.add_track(track.id.clone(), track.kind.clone());
-                        let track_idx = eng.get_project_data().tracks.len() - 1;
-                        for clip in track.clips {
-                            eng.add_clip_to_track(
-                                track_idx,
-                                clip.id.clone(),
-                                clip.clip_type.clone(),
-                                clip.name.clone(),
-                                clip.start,
-                                clip.end - clip.start, // duration
-                            );
-                        }
-                    }
+                    eng.load_project_data(project_data);
                     eng
                 } else {
                     NLEState::new("cli_session".to_string(), "CLI AI Edit".to_string(), 24)
@@ -216,9 +218,13 @@ async fn main() {
                 Err(e) => eprintln!("❌ Export failed: {}", e),
             }
         }
+        Commands::Ingest { file, project_id } => {
+            cmd_ingest(file, project_id);
+        }
     }
 }
 
+/// Arguments controlling the output of a single render job.
 struct RenderArgs {
     format: String,
     width: u32,
@@ -241,28 +247,12 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
         let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content)
             .map_err(|e| format!("Failed to parse project JSON: {}", e))?;
 
-        // Reconstruct engine from project data
         let mut eng = NLEState::new(
             project_data.id.clone(),
             project_data.name.clone(),
             project_data.framerate,
         );
-        // Reconstruct engine from project data by iterating tracks and clips.
-        // Note: there is no set_project_data — we rebuild via public API.
-        for track in project_data.tracks {
-            eng.add_track(track.id.clone(), track.kind.clone());
-            let track_idx = eng.get_project_data().tracks.len() - 1;
-            for clip in track.clips {
-                eng.add_clip_to_track(
-                    track_idx,
-                    clip.id.clone(),
-                    clip.clip_type.clone(),
-                    clip.name.clone(),
-                    clip.start,
-                    clip.end - clip.start, // duration
-                );
-            }
-        }
+        eng.load_project_data(project_data);
         eng
     } else {
         println!(
@@ -325,20 +315,63 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
 
     let start = std::time::Instant::now();
 
+    // Collect media from project's assets for texture upload
+    let pd = engine.get_project_data().clone();
+    let media_uploads: Vec<(String, String)> = pd
+        .tracks
+        .iter()
+        .flat_map(|t| t.clips.iter())
+        .filter_map(|c| {
+            c.media_id
+                .as_ref()
+                .and_then(|mid| pd.media_pool.get(mid))
+                .map(|asset| (c.id.clone(), asset.path_or_url.clone()))
+        })
+        .collect();
+
     let engine_ptr = std::sync::Arc::new(tokio::sync::Mutex::new(engine));
     let core_engine = lazynext_core::engine::CoreEngine::init(engine_ptr)
         .await
         .map_err(|e| format!("CoreEngine init failed: {}", e))?;
 
-    // Load test pattern and upload as clip_1
-    let img = image::open("tests/assets/test_pattern.png")
-        .map_err(|e| format!("Failed to open test pattern: {}", e))?
-        .to_rgba8();
-    let (img_w, img_h) = img.dimensions();
-    core_engine
-        .upload_texture("clip_1", img.as_raw(), img_w, img_h)
-        .await
-        .map_err(|e| format!("Failed to upload texture: {}", e))?;
+    if media_uploads.is_empty() {
+        log::warn!(
+            "No media assets in project, falling back to test pattern"
+        );
+        let img = image::open("tests/assets/test_pattern.png")
+            .map_err(|e| format!("Failed to open test pattern: {}", e))?
+            .to_rgba8();
+        let (img_w, img_h) = img.dimensions();
+        core_engine
+            .upload_texture("clip_1", img.as_raw(), img_w, img_h)
+            .await
+            .map_err(|e| format!("Failed to upload texture: {}", e))?;
+    } else {
+        for (clip_id, path) in &media_uploads {
+            match image::open(path) {
+                Ok(img) => {
+                    let rgba = img.to_rgba8();
+                    let (w, h) = rgba.dimensions();
+                    core_engine
+                        .upload_texture(clip_id, rgba.as_raw(), w, h)
+                        .await
+                        .map_err(|e| {
+                            format!(
+                                "Failed to upload texture for '{}': {}",
+                                clip_id, e
+                            )
+                        })?;
+                }
+                Err(e) => {
+                    log::warn!(
+                        "Could not open media '{}' as image: {}",
+                        path,
+                        e
+                    );
+                }
+            }
+        }
+    }
 
     let progress_tx = if args.progress {
         let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel();
@@ -378,4 +411,153 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
     );
 
     Ok(out_path)
+}
+
+/// Ingest a media file into a project, probing metadata with ffprobe
+/// and saving the updated project JSON.
+fn cmd_ingest(file: &str, project_id: &str) {
+    println!("📥 Ingesting '{}' into project '{}'", file, project_id);
+
+    let path = std::path::Path::new(file);
+    if !path.exists() {
+        eprintln!("❌ File not found: {}", file);
+        return;
+    }
+
+    let (duration, width, height, asset_type) = probe_media(file);
+    let name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("unknown")
+        .to_string();
+    let asset_id = uuid::Uuid::new_v4().to_string();
+
+    let asset = lazynext_core::nle_state::MediaAsset {
+        id: asset_id.clone(),
+        name: name.clone(),
+        path_or_url: file.to_string(),
+        asset_type: asset_type.clone(),
+        duration,
+        width,
+        height,
+    };
+
+    // Load or create the project
+    let mut engine = if std::path::Path::new(project_id).exists() {
+        let content =
+            std::fs::read_to_string(project_id).unwrap_or_else(|e| {
+                eprintln!("❌ Failed to read project file: {}", e);
+                std::process::exit(1);
+            });
+        let project_data: lazynext_core::nle_state::ProjectData =
+            serde_json::from_str(&content).unwrap_or_else(|e| {
+                eprintln!("❌ Failed to parse project JSON: {}", e);
+                std::process::exit(1);
+            });
+        let mut eng = NLEState::new(
+            project_data.id.clone(),
+            project_data.name.clone(),
+            project_data.framerate,
+        );
+        eng.load_project_data(project_data);
+        eng
+    } else {
+        println!("📂 Project file '{}' not found, creating new.", project_id);
+        NLEState::new(
+            project_id.to_string(),
+            "Ingested Project".to_string(),
+            24,
+        )
+    };
+
+    engine.add_media_asset(asset);
+
+    // Save updated project
+    let project_json =
+        serde_json::to_string_pretty(engine.get_project_data())
+            .expect("Failed to serialize project");
+    std::fs::write(project_id, project_json)
+        .unwrap_or_else(|e| eprintln!("❌ Failed to save project: {}", e));
+
+    println!(
+        "✅ Ingested '{}' ({}: {}x{} {:.1}s) into project '{}'",
+        name, asset_type, width, height, duration, project_id
+    );
+}
+
+/// Probe a media file with ffprobe to extract duration, resolution, and type.
+fn probe_media(path: &str) -> (f64, u32, u32, String) {
+    let output = std::process::Command::new("ffprobe")
+        .arg("-v")
+        .arg("quiet")
+        .arg("-print_format")
+        .arg("json")
+        .arg("-show_format")
+        .arg("-show_streams")
+        .arg(path)
+        .output();
+
+    match output {
+        Ok(out) if out.status.success() => {
+            if let Ok(info) = serde_json::from_slice::<serde_json::Value>(&out.stdout) {
+                let duration = info["format"]["duration"]
+                    .as_str()
+                    .and_then(|s| s.parse::<f64>().ok())
+                    .unwrap_or(10.0);
+
+                let mut width: u32 = 0;
+                let mut height: u32 = 0;
+                let mut asset_type = "unknown".to_string();
+
+                if let Some(streams) = info["streams"].as_array() {
+                    for stream in streams {
+                        let codec_type =
+                            stream["codec_type"].as_str().unwrap_or("");
+                        match codec_type {
+                            "video" => {
+                                width = stream["width"].as_u64().unwrap_or(0)
+                                    as u32;
+                                height =
+                                    stream["height"].as_u64().unwrap_or(0)
+                                        as u32;
+                                asset_type = "video".to_string();
+                            }
+                            "audio" if asset_type == "unknown" => {
+                                asset_type = "audio".to_string();
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                if width == 0 {
+                    width = 1920;
+                }
+                if height == 0 {
+                    height = 1080;
+                }
+
+                (duration, width, height, asset_type)
+            } else {
+                (10.0, 1920, 1080, "unknown".to_string())
+            }
+        }
+        _ => {
+            let ext = std::path::Path::new(path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_lowercase();
+            let asset_type = match ext.as_str() {
+                "mp4" | "mov" | "avi" | "mkv" | "webm" | "mxf" => "video",
+                "mp3" | "wav" | "aac" | "flac" | "ogg" | "m4a" => "audio",
+                "png" | "jpg" | "jpeg" | "gif" | "webp" | "tiff" | "bmp" => {
+                    "image"
+                }
+                _ => "unknown",
+            }
+            .to_string();
+            (10.0, 1920, 1080, asset_type)
+        }
+    }
 }

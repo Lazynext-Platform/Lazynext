@@ -1,3 +1,19 @@
+//! Core NLE state machine — CRDT-powered timeline, project data, and operation log.
+//!
+//! `NLEState` is the central state container for the Lazynext editor. It owns
+//! the CRDT operation log, vector clock, tombstone map, project metadata,
+//! track/clip hierarchy, and animation channels. All mutations flow through
+//! CRDT operations for deterministic multi-user convergence.
+//!
+//! # Key types
+//!
+//! - **`NLEState`**: Central state — wraps `CRDTTimeline`, peers, tombstones,
+//!   project data, and event broadcast channel
+//! - **`Clip`**: A timeline clip with media reference, trim range, and per-property
+//!   animation channels (opacity, scale, rotation, volume, etc.)
+//! - **`MediaAsset`**: A source media file (video, audio, or image) referenced by clips
+//! - **`NLEEvent`**: Broadcast events emitted when clips are added or renders complete
+
 use lazynext_provenance::generate_state_fingerprint;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -10,6 +26,7 @@ pub use state::vector_clock::VectorClock;
 
 // ── NLE Event ──
 
+/// Broadcast events emitted when clips are added or renders complete.
 #[derive(Clone, Debug)]
 pub enum NLEEvent {
     ClipAdded(String),
@@ -18,6 +35,8 @@ pub enum NLEEvent {
 
 // ── Core domain types ──
 
+/// A source media file (video, audio, or image) referenced by clips in the
+/// timeline.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MediaAsset {
     pub id: String,
@@ -29,6 +48,8 @@ pub struct MediaAsset {
     pub height: u32,
 }
 
+/// A timeline clip with media reference, trim range, and per-property
+/// animation channels (opacity, scale, rotation, volume, etc.).
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub id: String,
@@ -73,6 +94,8 @@ impl Clip {
     }
 }
 
+/// A timeline track containing a sequence of clips with mute, solo, and
+/// lock flags.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Track {
     pub id: String,
@@ -86,6 +109,8 @@ pub struct Track {
     pub locked: bool,
 }
 
+/// The full project state: tracks, dimensions, framerate, media pool, and
+/// background color.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ProjectData {
     pub id: String,
@@ -101,6 +126,8 @@ pub struct ProjectData {
 
 // ── NLE State (the engine) ──
 
+/// The central NLE state container. Owns the CRDT operation log, vector clock,
+/// tombstone map, project data, and snapshot-based undo/redo stacks.
 #[derive(Clone)]
 pub struct NLEState {
     data: ProjectData,
@@ -120,6 +147,8 @@ pub struct NLEState {
 }
 
 impl NLEState {
+    /// Creates a new `NLEState` with default 1920x1080 dimensions, black
+    /// background, and a fresh peer ID.
     pub fn new(project_id: String, name: String, framerate: u32) -> Self {
         NLEState {
             data: ProjectData {
@@ -142,6 +171,8 @@ impl NLEState {
         }
     }
 
+    /// Creates a new `NLEState` with an event dispatcher for broadcasting
+    /// clip-added and render-complete events.
     pub fn new_with_dispatcher(
         id: String,
         name: String,
@@ -158,14 +189,17 @@ impl NLEState {
 
     // ── Project data access ──
 
+    /// Returns an immutable reference to the project data.
     pub fn get_project_data(&self) -> &ProjectData {
         &self.data
     }
 
+    /// Returns a mutable reference to the project data.
     pub fn get_project_data_mut(&mut self) -> &mut ProjectData {
         &mut self.data
     }
 
+    /// Sets the canvas dimensions for the project.
     pub fn set_dimensions(&mut self, width: u32, height: u32) {
         self.data.width = width;
         self.data.height = height;
@@ -180,6 +214,7 @@ impl NLEState {
         self.op_log = CrdtOperationLog::default();
     }
 
+    /// Returns the project framerate in frames per second.
     pub fn framerate(&self) -> u32 {
         self.data.framerate
     }
@@ -188,6 +223,8 @@ impl NLEState {
 
     // ── AI Model Integrations ──
 
+    /// Applies a rotoscope mask sequence to a clip by creating a new mask
+    /// track and populating it with a mask clip and media asset.
     pub fn apply_rotoscope_mask(
         &mut self,
         _video_clip_id: &str,
@@ -229,6 +266,7 @@ impl NLEState {
         Ok(mask_clip_id)
     }
 
+    /// Adds a Gaussian splat point cloud as a 3D track and clip in the timeline.
     pub fn add_nerf_cloud(&mut self, ply_url: &str) -> Result<String, String> {
         // Create a new 3D track and clip
         let nerf_track_id = format!("track_3d_{}", uuid::Uuid::new_v4());
@@ -264,6 +302,8 @@ impl NLEState {
         Ok(nerf_clip_id)
     }
 
+    /// Separates an audio clip into individual stems (vocals, drums, bass,
+    /// other) by creating a new audio track for each stem.
     pub fn separate_audio_stems(
         &mut self,
         _original_clip_id: &str,
@@ -316,6 +356,8 @@ impl NLEState {
         }
     }
 
+    /// Adds a new track to the timeline with the given ID and kind
+    /// ("video", "audio", etc.). Records the operation for undo/redo.
     pub fn add_track(&mut self, id: String, kind: String) {
         let snapshot = self.data.clone();
         let op = CrdtOperation::TrackInsert {
@@ -334,6 +376,8 @@ impl NLEState {
         self.apply_and_record(op, snapshot);
     }
 
+    /// Removes the track at the given index. Returns false if the index is
+    /// out of bounds. Records the operation for undo/redo.
     pub fn remove_track(&mut self, track_idx: usize) -> bool {
         let snapshot = self.data.clone();
         if track_idx < self.data.tracks.len() {
@@ -346,6 +390,8 @@ impl NLEState {
         }
     }
 
+    /// Sets the muted state of the track at the given index. Returns false
+    /// if the index is out of bounds. Records the operation for undo/redo.
     pub fn set_track_muted(&mut self, track_idx: usize, muted: bool) -> bool {
         let track_id = {
             let tracks = &mut self.data.tracks;
@@ -367,6 +413,8 @@ impl NLEState {
         true
     }
 
+    /// Sets the soloed state of the track at the given index. Returns false
+    /// if the index is out of bounds. Records the operation for undo/redo.
     pub fn set_track_soloed(&mut self, track_idx: usize, soloed: bool) -> bool {
         let track_id = {
             let tracks = &mut self.data.tracks;
@@ -388,6 +436,8 @@ impl NLEState {
         true
     }
 
+    /// Sets the locked state of the track at the given index. Returns false
+    /// if the index is out of bounds. Records the operation for undo/redo.
     pub fn set_track_locked(&mut self, track_idx: usize, locked: bool) -> bool {
         let track_id = {
             let tracks = &mut self.data.tracks;
@@ -409,6 +459,8 @@ impl NLEState {
         true
     }
 
+    /// Moves the track at `track_idx` to `new_pos`. Returns false if either
+    /// index is out of bounds. Records the operation for undo/redo.
     pub fn set_track_position(&mut self, track_idx: usize, new_pos: usize) -> bool {
         if track_idx >= self.data.tracks.len() || new_pos >= self.data.tracks.len() {
             return false;
@@ -439,6 +491,8 @@ impl NLEState {
 
     // ── Clip operations ──
 
+    /// Adds a new clip to the track at the given index with the specified
+    /// type, name, and frame range. Records the operation for undo/redo.
     pub fn add_clip_to_track(
         &mut self,
         track_idx: usize,
@@ -476,6 +530,8 @@ impl NLEState {
         }
     }
 
+    /// Removes a clip by ID from the track at the given index. Returns false
+    /// if the clip was not found. Records the operation for undo/redo.
     pub fn remove_clip_from_track(&mut self, track_idx: usize, clip_id: &str) -> bool {
         let snapshot = self.data.clone();
         if let Some(track) = self.data.tracks.get_mut(track_idx) {
@@ -671,6 +727,8 @@ impl NLEState {
 
     // ── Render trigger ──
 
+    /// Broadcasts a `RenderComplete` event through the dispatcher (if set)
+    /// containing the project ID and a content-hash fingerprint.
     pub fn trigger_render_complete(&mut self) {
         if let Some(ref tx) = self.dispatcher {
             let id = self.data.id.clone();
@@ -699,6 +757,8 @@ impl NLEState {
 
     // ── AI Agent logic ──
 
+    /// Marks all clips on the given track for silence trimming. The actual
+    /// audio analysis is dispatched to the pre-processing service.
     pub fn auto_trim_silence(&mut self, track_idx: usize) {
         if track_idx >= self.data.tracks.len() {
             return;
@@ -727,6 +787,8 @@ impl NLEState {
         );
     }
 
+    /// Removes clips from the given track that fall entirely within the
+    /// specified silence regions (start and end times in seconds).
     pub fn apply_silence_trims(&mut self, track_idx: usize, silence_regions: &[(f64, f64)]) {
         if track_idx >= self.data.tracks.len() {
             return;

@@ -1,3 +1,10 @@
+/**
+ * Timeline ruler — renders tick marks, labels, and handles mouse
+ * events for seeking, click, and wheel scrolling.
+ *
+ * @module timeline/components/timeline-ruler
+ */
+
 import { type JSX } from "react";
 import { BASE_TIMELINE_PIXELS_PER_SECOND } from "@/timeline/scale";
 import { mediaTimeToSeconds } from "lazynext-wasm";
@@ -20,6 +27,10 @@ interface TimelineRulerProps {
 	handleRulerMouseDown: (e: React.MouseEvent) => void;
 }
 
+/**
+ * Renders the ruler with visible-range tick slicing, wheel/click/mousedown
+ * event delegation, and scroll-position awareness.
+ */
 export function TimelineRuler({
 	zoomLevel,
 	dynamicTimelineWidth,

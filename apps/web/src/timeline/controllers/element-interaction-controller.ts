@@ -1,3 +1,11 @@
+/**
+ * Element interaction controller — element mousedown/drag/drop on the
+ * timeline, managing move groups, snap, drop-target resolution, and
+ * cross-track re-placement.
+ *
+ * @module timeline/controllers/element-interaction-controller
+ */
+
 import type { MouseEvent as ReactMouseEvent } from "react";
 import {
 	buildMoveGroup,
@@ -72,6 +80,7 @@ export interface SnapConfig {
 	onChange?: (snapPoint: SnapPoint | null) => void;
 }
 
+/** Dependency-injection interfaces for the controller. */
 export interface ElementInteractionDeps {
 	viewport: ViewportAdapter;
 	input: InputAdapter;
@@ -82,6 +91,7 @@ export interface ElementInteractionDeps {
 	snap: SnapConfig;
 }
 
+/** Ref wrapper for interaction deps. */
 export interface ElementInteractionDepsRef {
 	readonly current: ElementInteractionDeps;
 }
@@ -288,6 +298,11 @@ function resolveGroupMoveForDrop({
 
 // --- Controller ---
 
+/**
+ * Coordinates element mousedown → drag threshold → move group →
+ * snap → drop target → commit on mouseup. Exposes a read-only
+ * {@link ElementDragView} for React rendering.
+ */
 export class ElementInteractionController {
 	private session: Session = { kind: "idle" };
 	// True once the active gesture crossed the drag threshold. Read by

@@ -1,3 +1,4 @@
+/** @module Command for updating a scalar keyframe's easing curve with undo support */
 import { EditorCore } from "@/core";
 import { updateScalarKeyframeCurve } from "@/animation";
 import { Command, type CommandResult } from "@/commands/base-command";

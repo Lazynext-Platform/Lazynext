@@ -1,3 +1,16 @@
+/**
+ * Audio pipeline — collects, decodes, mixes, and masters timeline audio
+ * into a final stereo AudioBuffer for export or live preview.
+ *
+ * Handles:
+ * - AudioBuffer decoding from uploaded assets and library URLs
+ * - Waveform peak/RMS range extraction for visualizers
+ * - Multi-track mixing with per-element trim, volume, retime, and mute
+ * - OfflineAudioContext-based resampling and mastering chain insertion
+ *
+ * @module media/audio
+ */
+
 import type {
 	AudioElement,
 	VideoElement,
@@ -26,6 +39,7 @@ import { computeRmsBuckets, type SampleBucket } from "@/media/waveform-summary";
 const MAX_AUDIO_CHANNELS = 2;
 const EXPORT_SAMPLE_RATE = 44100;
 
+/** Decoded audio element ready for timeline mixing. */
 export interface CollectedAudioElement {
 	timelineElement: AudioCapableElement;
 	buffer: AudioBuffer;
@@ -38,6 +52,7 @@ export interface CollectedAudioElement {
 	retime?: RetimeConfig;
 }
 
+/** Creates an AudioContext with an optional sample rate, falling back to webkit prefixed constructor. */
 export function createAudioContext({
 	sampleRate,
 }: {
@@ -51,11 +66,13 @@ export function createAudioContext({
 	return new AudioContextConstructor(sampleRate ? { sampleRate } : undefined);
 }
 
+/** Mono-downmixed Float32 PCM samples with their native sample rate. */
 export interface DecodedAudio {
 	samples: Float32Array;
 	sampleRate: number;
 }
 
+/** Decodes an audio Blob to a mono Float32Array, optionally at a target sample rate. */
 export async function decodeAudioToFloat32({
 	audioBlob,
 	sampleRate,
@@ -83,11 +100,13 @@ export async function decodeAudioToFloat32({
 	return { samples, sampleRate: audioBuffer.sampleRate };
 }
 
+/** A timeline element paired with its resolved media asset, eligible for audio processing. */
 export interface AudibleElementCandidate {
 	element: AudioElement | VideoElement;
 	mediaAsset: MediaAsset | null;
 }
 
+/** Scans all tracks for elements that have enabled audio and returns them paired with their media assets. */
 export function collectAudibleCandidates({
 	tracks,
 	mediaAssets,
@@ -118,6 +137,7 @@ export function collectAudibleCandidates({
 	return candidates;
 }
 
+/** Returns true when at least one audible, unmuted element exists on any track. */
 export function timelineHasAudio({
 	tracks,
 	mediaAssets,
@@ -130,6 +150,7 @@ export function timelineHasAudio({
 	);
 }
 
+/** Resolves AudioBuffers for all audible timeline elements, ready for mixing. */
 export async function collectAudioElements({
 	tracks,
 	mediaAssets,
@@ -346,6 +367,7 @@ interface AudioMixSource {
 	retime?: RetimeConfig;
 }
 
+/** Lightweight clip descriptor for the audio waveform/scrubbing UI. */
 export interface AudioClipSource {
 	timelineElement: AudioCapableElement;
 	id: string;
@@ -480,6 +502,7 @@ function collectMediaAudioClip({
 	};
 }
 
+/** Collects file-level audio sources for mixing, fetching library audio via HTTP when needed. */
 export async function collectAudioMixSources({
 	tracks,
 	mediaAssets,
@@ -543,6 +566,7 @@ export async function collectAudioMixSources({
 	return audioMixSources;
 }
 
+/** Collects per-element audio clip descriptors including mute state and volume for the scrubber UI. */
 export async function collectAudioClips({
 	tracks,
 	mediaAssets,
@@ -619,6 +643,7 @@ export async function collectAudioClips({
 	return clips;
 }
 
+/** Mixes all audible timeline elements into a single stereo AudioBuffer with mastering applied. */
 export async function createTimelineAudioBuffer({
 	tracks,
 	mediaAssets,
@@ -715,6 +740,7 @@ function collectPeakRange({
 	return peaks;
 }
 
+/** Extracts per-bucket peak amplitudes from an AudioBuffer range for waveform rendering. */
 export function extractPeakRange({
 	buffer,
 	count,
@@ -736,6 +762,7 @@ export function extractPeakRange({
 	);
 }
 
+/** Computes the start and end sample indices for a waveform bucket within a sample range. */
 export function getSampleBucketRange({
 	startSample,
 	endSample,
@@ -761,6 +788,7 @@ export function getSampleBucketRange({
 	};
 }
 
+/** Computes RMS amplitude for each pre-computed sample bucket. */
 export function extractRmsBuckets({
 	buffer,
 	buckets,

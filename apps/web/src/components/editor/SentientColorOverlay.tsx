@@ -1,3 +1,10 @@
+/**
+ * Sentient Color overlay — AI-driven color grading overlay with
+ * real-time adjustment controls.
+ *
+ * @module components/editor/SentientColorOverlay
+ */
+
 "use client";
 
 import React from "react";

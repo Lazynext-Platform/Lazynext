@@ -1,3 +1,4 @@
+/** @module Command for toggling source audio separation from a video element with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import {

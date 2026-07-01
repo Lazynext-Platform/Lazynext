@@ -1,3 +1,9 @@
+//! Secure WebAssembly sandbox for loading and executing untrusted third-party plugins.
+//!
+//! Provides an opt-in plugin ecosystem where community developers can submit compiled
+//! `.wasm` modules that run with restricted host API access. In production this is backed
+//! by `wasmtime` or `wasmer`; the current implementation is a simulated scaffold.
+
 /// Simulated WebAssembly sandbox execution environment for untrusted third-party plugins.
 /// In production, this utilizes `wasmtime` or `wasmer` to securely load compiled .wasm
 /// binaries provided by community developers, exposing only safe host APIs.
@@ -16,6 +22,10 @@ impl Default for WasmSandbox {
 }
 
 impl WasmSandbox {
+    /// Creates a new, uninitialized WebAssembly sandbox.
+    ///
+    /// Call [`load_plugin`](Self::load_plugin) to load a compiled `.wasm`
+    /// binary before invoking any exported functions.
     pub fn new() -> Self {
         Self {
             is_initialized: false,

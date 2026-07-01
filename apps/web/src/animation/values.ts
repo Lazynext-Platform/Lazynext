@@ -1,3 +1,9 @@
+/**
+ * @module animation/values
+ * @description Convenience resolvers that combine an element's base
+ *   property value with its animated channel data at a given time.
+ */
+
 import type {
 	AnimationColorPropertyPath,
 	AnimationNumericPropertyPath,
@@ -6,6 +12,10 @@ import type {
 import { resolveAnimationPathValueAtTime } from "./resolve";
 import type { Transform } from "@/primitives/transform";
 
+/**
+ * Resolves the animated opacity value, falling back to the element's
+ * base opacity.
+ */
 export function resolveOpacityAtTime({
 	baseOpacity,
 	animations,
@@ -23,6 +33,10 @@ export function resolveOpacityAtTime({
 	});
 }
 
+/**
+ * Resolves a named numeric animation property at a given time, falling
+ * back to the base value.
+ */
 export function resolveNumberAtTime({
 	baseValue,
 	animations,
@@ -42,6 +56,10 @@ export function resolveNumberAtTime({
 	});
 }
 
+/**
+ * Resolves a color animation property at a given time, falling back to
+ * the base color string.
+ */
 export function resolveColorAtTime({
 	baseColor,
 	animations,
@@ -61,6 +79,10 @@ export function resolveColorAtTime({
 	});
 }
 
+/**
+ * Resolves the full animated transform (position, scale, rotation) at
+ * a given time, mixing with the base transform value.
+ */
 export function resolveTransformAtTime({
 	baseTransform,
 	animations,

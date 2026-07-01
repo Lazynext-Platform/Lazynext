@@ -1,3 +1,9 @@
+/**
+ * Admin dashboard — user metrics, billing overview, and system stats.
+ *
+ * @page /admin
+ */
+
 import { getDashboardMetrics, getRecentUsers } from "@/app/actions/admin";
 import { Users, CreditCard, Server } from "lucide-react";
 

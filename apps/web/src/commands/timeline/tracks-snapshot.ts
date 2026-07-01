@@ -1,3 +1,4 @@
+/** @module Command for saving/restoring a full tracks snapshot with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks } from "@/timeline";
 import { EditorCore } from "@/core";

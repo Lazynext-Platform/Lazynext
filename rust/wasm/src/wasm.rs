@@ -1,3 +1,9 @@
+//! WASM crate root — module declarations and re-exports.
+//!
+//! This is the library entry point for all WASM bindings. Every submodule
+//! is conditionally compiled for `wasm32` and re-exported so downstream
+//! JavaScript code sees a flat namespace of WASM functions.
+
 #[cfg(target_arch = "wasm32")]
 mod compositor;
 #[cfg(target_arch = "wasm32")]

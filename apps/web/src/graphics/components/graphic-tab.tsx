@@ -1,3 +1,4 @@
+/** @module Graphic properties tab component for editing shape parameters in the properties panel */
 "use client";
 
 import { useRef } from "react";

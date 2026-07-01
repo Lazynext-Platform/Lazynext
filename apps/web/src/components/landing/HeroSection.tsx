@@ -1,3 +1,10 @@
+/**
+ * Marketing hero section — headline, CTA buttons, and animated feature
+ * preview for the landing page.
+ *
+ * @module components/landing/HeroSection
+ */
+
 import Link from "next/link";
 import { Sparkles, TerminalSquare, Layers, Wand2 } from "lucide-react";
 

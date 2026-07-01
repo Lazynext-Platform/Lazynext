@@ -1,3 +1,4 @@
+/** @module Browser utilities for file downloads, scroll parent detection, and input detection */
 export function downloadBlob({
 	blob,
 	filename,

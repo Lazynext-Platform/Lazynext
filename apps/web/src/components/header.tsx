@@ -1,3 +1,10 @@
+/**
+ * Global header — logo, navigation links, theme toggle, and auth
+ * actions (sign in/sign out).
+ *
+ * @module components/header
+ */
+
 "use client";
 
 import { useState } from "react";

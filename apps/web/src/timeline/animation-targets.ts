@@ -1,3 +1,13 @@
+/**
+ * Resolves animation paths to their target descriptors — channel layout,
+ * interpolation, numeric ranges, and getter/setter for base values.
+ *
+ * Supports element-level params, graphic definition params, and per-effect
+ * params on visual elements.
+ *
+ * @module timeline/animation-targets
+ */
+
 import type {
 	AnimationInterpolation,
 	AnimationPath,
@@ -21,6 +31,11 @@ import { getElementParam } from "@/params/registry";
 import type { TimelineElement } from "@/timeline";
 import { isVisualElement } from "@/timeline/element-utils";
 
+/**
+ * Describes the full keyframe-animation target for a given path:
+ * how its channels are laid out, how to default-interpolate, valid
+ * numeric ranges, and how to read/write the base param value.
+ */
 export interface AnimationPathDescriptor {
 	channelLayout: ParamChannelLayout;
 	defaultInterpolation: AnimationInterpolation;
@@ -174,6 +189,15 @@ function buildEffectParamDescriptor({
 	});
 }
 
+/**
+ * Resolves an animation path string to a concrete descriptor for the
+ * given timeline element, checking element params, graphic definition
+ * params, and per-effect params in order.
+ *
+ * @param element - the timeline element whose parameters are being animated.
+ * @param path - an animation property path string.
+ * @returns an {@link AnimationPathDescriptor} or null if unresolvable.
+ */
 export function resolveAnimationTarget({
 	element,
 	path,

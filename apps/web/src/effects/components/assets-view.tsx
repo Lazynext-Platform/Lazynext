@@ -1,3 +1,4 @@
+/** @module Effects assets panel view with searchable effect list for adding to clips */
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";

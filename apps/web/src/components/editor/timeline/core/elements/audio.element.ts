@@ -1,3 +1,11 @@
+/**
+ * Audio element — timeline element representing an audio clip with
+ * playback rate, volume, loop, and async duration resolution via
+ * @twick/media-utils.
+ *
+ * @module components/editor/timeline/core/elements/audio.element
+ */
+
 import { getAudioDuration } from "@twick/media-utils";
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";

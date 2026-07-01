@@ -1,3 +1,13 @@
+/**
+ * GlobalError — Next.js root error boundary (replaces the root layout
+ * when an unhandled error escapes). Renders a 500 page with Try Again
+ * and Go Home actions.
+ *
+ * Logs the error digest to the console for debugging.
+ *
+ * @module app/global-error
+ */
+
 "use client";
 
 import { useEffect } from "react";

@@ -1,6 +1,17 @@
+/**
+ * Resolves the closest snap point to a target time within the max
+ * snap distance, returning the snapped time and distance info.
+ *
+ * @module timeline/snapping/resolve
+ */
+
 import type { SnapPoint, SnapResult } from "./types";
 import type { MediaTime } from "@/wasm";
 
+/**
+ * Finds the closest snap point within `maxSnapDistance` ticks of the
+ * target time. If none is within range, returns the original time.
+ */
 export function resolveTimelineSnap({
 	targetTime,
 	snapPoints,

@@ -1,3 +1,4 @@
+/** @module Selection context provider and hook for sharing selection state across components */
 "use client";
 
 import { createContext, useContext } from "react";

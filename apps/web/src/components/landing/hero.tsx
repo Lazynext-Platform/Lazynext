@@ -1,3 +1,10 @@
+/**
+ * Hero component — animated hero section with gradient background,
+ * CTA buttons, and screenshot preview for the landing page.
+ *
+ * @module components/landing/hero
+ */
+
 "use client";
 
 import { Button } from "../ui/button";

@@ -1,3 +1,4 @@
+/** @module Storage migration v21 to v22 */
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV21ToV22 } from "./transformers/v21-to-v22";

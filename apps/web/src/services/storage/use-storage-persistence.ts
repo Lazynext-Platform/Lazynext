@@ -1,3 +1,4 @@
+/** @module Hook for managing storage persistence dialog visibility and user preferences */
 "use client";
 
 import { useEffect, useState } from "react";

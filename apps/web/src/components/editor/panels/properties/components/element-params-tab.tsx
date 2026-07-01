@@ -1,4 +1,5 @@
 "use client";
+/** @module Element parameter tab — renders editable property fields with animation resolution */
 
 import { resolveAnimationPathValueAtTime } from "@/animation";
 import { Section, SectionContent, SectionFields } from "@/components/section";

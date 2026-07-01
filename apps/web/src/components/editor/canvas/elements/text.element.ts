@@ -1,3 +1,4 @@
+/** @module Canvas element handler for text overlays */
 import type { CanvasElementHandler } from "../types";
 import { addTextElement } from "../components/elements";
 import {

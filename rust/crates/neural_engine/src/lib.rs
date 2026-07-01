@@ -1,3 +1,31 @@
+//! Lazynext Neural Engine — AI-powered media analysis and tagging.
+//!
+//! The neural engine provides on-device AI capabilities for automatic
+//! media analysis: face detection, smart clip tagging, optical flow
+//! computation, and clip organization into semantic bins.
+//!
+//! # Models
+//!
+//! - **Face detection**: SCRFD/YOLO-face via ONNX Runtime (`onnx` feature),
+//!   with a lightweight skin-tone heuristic fallback when ONNX is unavailable
+//! - **Clip tagging**: Filename-based heuristics as a lightweight proxy for
+//!   CLIP embeddings; upgradable to real CLIP via ONNX
+//! - **Optical flow**: WebGPU compute shader for dense motion estimation
+//!   between consecutive frames (foundation for AI slow-motion / retiming)
+//!
+//! # Architecture
+//!
+//! ```text
+//! Media Frame → Face Detection → Smart Bins → Timeline Suggestions
+//!               ├─ ONNX (GPU)      ├─ "interview"
+//!               └─ Heuristic       ├─ "drone"
+//!                    (CPU)         └─ "b-roll"
+//! ```
+//!
+//! The `NeuralComputePipeline` provides WebGPU-accelerated tensor
+//! operations (background removal, edge detection) that run directly
+//! on the user's GPU without cloud round-trips.
+
 pub mod generative;
 
 use serde::{Deserialize, Serialize};

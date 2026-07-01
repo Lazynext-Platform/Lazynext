@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v19-to-v20 Test suite for V19 to V20 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV19ToV20 } from "../transformers/v19-to-v20";
 import { asRecordArray } from "./helpers";

@@ -1,3 +1,10 @@
+/**
+ * Track layout helpers — height, cumulative offset, and total height
+ * computation accounting for expanded keyframe lanes.
+ *
+ * @module timeline/components/track-layout
+ */
+
 import type { TrackType } from "@/timeline";
 import {
 	KEYFRAME_LANE_HEIGHT_PX,

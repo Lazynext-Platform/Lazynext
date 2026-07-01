@@ -1,3 +1,4 @@
+/** @module Preview canvas root component composing viewport, overlays, and interaction layers */
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

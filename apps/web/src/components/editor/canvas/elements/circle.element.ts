@@ -1,3 +1,4 @@
+/** @module Canvas element handler for circle shapes */
 import type { CanvasElementHandler } from "../types";
 import { addCircleElement } from "../components/elements";
 import {

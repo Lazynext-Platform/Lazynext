@@ -1,3 +1,10 @@
+/**
+ * Storage migration v27 → v28 — transforms project records from
+ * schema version 27 to version 28.
+ *
+ * @module services/storage/migrations/v27-to-v28
+ */
+
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV27ToV28 } from "./transformers/v27-to-v28";

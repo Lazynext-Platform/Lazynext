@@ -1,3 +1,4 @@
+/** @module __tests__/geometry Test suite for geometry utilities */
 import { describe, expect, it } from "bun:test";
 import { dimensionToAspectRatio } from "../geometry";
 

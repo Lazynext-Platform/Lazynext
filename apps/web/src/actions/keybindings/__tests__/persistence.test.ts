@@ -1,3 +1,4 @@
+/** @module __tests__/persistence Test suite for keybindings persistence */
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import {
 	decodePersistedKeybindingsState,

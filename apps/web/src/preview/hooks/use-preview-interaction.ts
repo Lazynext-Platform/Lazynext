@@ -1,3 +1,4 @@
+/** @module Hook for coordinating preview canvas interaction with controllers and gestures */
 import { useEffect, useReducer, useState } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";

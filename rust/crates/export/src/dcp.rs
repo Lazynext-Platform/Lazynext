@@ -14,6 +14,7 @@ use std::fs::File;
 use std::io::Write;
 use uuid::Uuid;
 
+/// Generates SMPTE-compliant Digital Cinema Package (DCP) metadata.
 pub struct DCPGenerator;
 
 impl Default for DCPGenerator {
@@ -23,6 +24,7 @@ impl Default for DCPGenerator {
 }
 
 impl DCPGenerator {
+    /// Create a new DCP generator.
     pub fn new() -> Self {
         Self
     }

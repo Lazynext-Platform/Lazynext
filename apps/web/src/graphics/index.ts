@@ -1,3 +1,4 @@
+/** @module Graphics module barrel export for rendering, params, and graphic definitions */
 import { resolveGraphicParamsAtTime } from "@/animation";
 import type { ElementAnimations } from "@/animation/types";
 import { buildDefaultParamValues } from "@/params/registry";

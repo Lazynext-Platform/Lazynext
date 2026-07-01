@@ -1,3 +1,4 @@
+/** @module Effects tab component in the properties panel for managing clip effects and their params */
 "use client";
 
 import { useState } from "react";

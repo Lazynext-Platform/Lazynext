@@ -1,3 +1,4 @@
+/** @module Zustand store for keyboard shortcut keybindings with persistence and migration */
 "use client";
 
 import { create } from "zustand";

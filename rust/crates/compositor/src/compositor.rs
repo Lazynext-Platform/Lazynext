@@ -1,3 +1,10 @@
+//! GPU-accelerated compositor rendering pipeline built on wgpu.
+//! Takes a `FrameDescriptor` of layers, effects, masks, and text,
+//! renders them through a multi-pass pipeline (layer transform → effects
+//! → masking → blending) using WGSL shaders, and outputs composite
+//! textures or presents directly to a surface. Supports 17 blend modes,
+//! 11 GPU effect shaders, MSDF text rendering, and color grading.
+
 use crate::msdf::{ApplyMSDFOptions, MSDFPipeline};
 use bytemuck::{Pod, Zeroable};
 use effects::{ApplyEffectsOptions, EffectPass, EffectPipeline, UniformValue};
@@ -20,11 +27,14 @@ const LAYER_SHADER_SOURCE: &str = include_str!("shaders/layer.wgsl");
 const BLEND_SHADER_SOURCE: &str = include_str!("shaders/blend.wgsl");
 const MASK_SHADER_SOURCE: &str = include_str!("shaders/mask.wgsl");
 
+/// Options for rendering a frame directly to a surface.
 pub struct RenderFrameOptions<'a, 'surface> {
     pub frame: &'a FrameDescriptor,
     pub surface: &'a wgpu::Surface<'surface>,
 }
 
+/// GPU-accelerated compositor that renders layers, effects, masks, and text
+/// into output textures or surfaces.
 pub struct Compositor {
     textures: TextureStore,
     texture_pool: TexturePool,
@@ -39,12 +49,16 @@ pub struct Compositor {
     mask_pipeline: wgpu::RenderPipeline,
 }
 
+/// Errors that can occur during compositor operations.
 #[derive(Debug, Error)]
 pub enum CompositorError {
+    /// A required texture was not found in the texture store.
     #[error("Texture '{texture_id}' is not available")]
     MissingTexture { texture_id: String },
+    /// An error occurred while applying GPU effects.
     #[error("Failed to apply effects: {0}")]
     Effects(#[from] effects::EffectsError),
+    /// A GPU operation failed (e.g. surface acquisition or present).
     #[error("Failed to present frame: {0}")]
     Gpu(#[from] gpu::GpuError),
 }
@@ -94,6 +108,8 @@ struct MaskUniformBuffer {
 }
 
 impl Compositor {
+    /// Creates a new `Compositor` with all pipelines, bind group layouts,
+    /// and sub-pipelines (effects, masks, MSDF) initialized.
     pub fn new(context: &GpuContext) -> Self {
         let device = context.device();
         let fullscreen_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -300,14 +316,17 @@ impl Compositor {
         }
     }
 
+    /// Inserts or updates a texture in the compositor's texture store by ID.
     pub fn upsert_texture(&mut self, id: String, texture: wgpu::Texture) {
         self.textures.upsert(id, texture);
     }
 
+    /// Removes a texture from the compositor's texture store by ID.
     pub fn release_texture(&mut self, id: &str) {
         self.textures.remove(id);
     }
 
+    /// Returns `true` if a texture with the given ID exists in the texture store.
     pub fn has_texture(&self, id: &str) -> bool {
         self.textures.get(id).is_some()
     }

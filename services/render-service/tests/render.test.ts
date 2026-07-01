@@ -1,3 +1,5 @@
+/** @module tests/render Test suite for render service job lifecycle. */
+
 import { expect, test, describe, beforeAll, afterAll } from "bun:test";
 import app from "../src/index";
 

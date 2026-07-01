@@ -1,3 +1,10 @@
+/**
+ * @module stickers/providers/countries-data
+ * @description Static country and region data used by the flags
+ *   sticker provider for search and browse.
+ */
+
+/** All supported geographic regions with search aliases. */
 export const REGIONS = [
 	{ id: "Western Europe", aliases: ["west europe"] },
 	{ id: "Eastern Europe", aliases: ["east europe"] },
@@ -20,8 +27,10 @@ export const REGIONS = [
 	{ id: "North Atlantic", aliases: [] },
 ] as const;
 
+/** A valid region ID. */
 export type RegionId = (typeof REGIONS)[number]["id"];
 
+/** Groups regions under broader labels (e.g. "europe"). */
 export const REGION_GROUPS: Partial<Record<string, RegionId[]>> = {
 	europe: [
 		"Western Europe",
@@ -34,6 +43,7 @@ export const REGION_GROUPS: Partial<Record<string, RegionId[]>> = {
 	america: ["North America", "South America", "Central America", "Caribbean"],
 };
 
+/** A single country record with flag metadata. */
 export interface CountryRecord {
 	name: string;
 	code: string;
@@ -42,6 +52,7 @@ export interface CountryRecord {
 	region?: RegionId;
 }
 
+/** All country records with ISO codes and searchable metadata. */
 export const COUNTRIES: CountryRecord[] = [
 	{
 		name: "Andorra",

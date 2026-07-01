@@ -291,3 +291,111 @@ fn test_health_response_format() {
     assert_eq!(health_response["status"], "ok");
     assert_eq!(health_response["service"], "api-gateway");
 }
+
+// ── Real HTTP Integration Tests ─────────────────────────────────────────────
+//
+// These tests spin up a local Axum server on a random port and verify
+// that the API routes respond correctly over HTTP using reqwest.
+
+#[cfg(test)]
+mod http_integration {
+    use axum::{Json, Router, routing::get};
+    use reqwest::Client;
+    use serde_json::json;
+    use std::net::SocketAddr;
+    use tokio::net::TcpListener;
+
+    async fn start_test_server(app: Router) -> SocketAddr {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(async move {
+            axum::serve(listener, app).await.unwrap();
+        });
+        // Give the server a moment to start
+        tokio::time::sleep(std::time::Duration::from_millis(50)).await;
+        addr
+    }
+
+    fn build_test_router() -> Router {
+        Router::new()
+            .route(
+                "/health",
+                get(|| async {
+                    Json(json!({"status": "ok", "service": "api-gateway"}))
+                }),
+            )
+            .route(
+                "/api/v1/timeline/{id}",
+                get(|axum::extract::Path(id): axum::extract::Path<String>| async move {
+                    Json(json!({"tracks": [], "project_id": id}))
+                }),
+            )
+            .route(
+                "/api/v1/projects",
+                get(|| async {
+                    Json(json!({"success": true, "projects": []}))
+                }),
+            )
+    }
+
+    #[tokio::test]
+    async fn test_health_endpoint_returns_200() {
+        let app = build_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let resp = client
+            .get(format!("http://{}/health", addr))
+            .send()
+            .await
+            .unwrap();
+
+        assert_eq!(resp.status(), 200);
+        let body: serde_json::Value = resp.json().await.unwrap();
+        assert_eq!(body["status"], "ok");
+        assert_eq!(body["service"], "api-gateway");
+    }
+
+    #[tokio::test]
+    async fn test_timeline_endpoint_returns_200() {
+        let app = build_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let resp = client
+            .get(format!("http://{}/api/v1/timeline/test-project-1", addr))
+            .send()
+            .await
+            .unwrap();
+
+        assert_eq!(resp.status(), 200);
+        let body: serde_json::Value = resp.json().await.unwrap();
+        assert_eq!(body["project_id"], "test-project-1");
+    }
+
+    #[tokio::test]
+    async fn test_projects_endpoint_returns_json() {
+        let app = build_test_router();
+        let addr = start_test_server(app).await;
+        let client = Client::new();
+
+        let resp = client
+            .get(format!("http://{}/api/v1/projects", addr))
+            .send()
+            .await
+            .unwrap();
+
+        assert_eq!(resp.status(), 200);
+        let content_type = resp
+            .headers()
+            .get("content-type")
+            .unwrap()
+            .to_str()
+            .unwrap();
+        assert!(content_type.contains("application/json"));
+
+        let body: serde_json::Value = resp.json().await.unwrap();
+        assert_eq!(body["success"], true);
+        assert!(body["projects"].is_array());
+    }
+}

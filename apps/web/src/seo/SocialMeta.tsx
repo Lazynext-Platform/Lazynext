@@ -1,5 +1,12 @@
 // Social Media Optimization — sharing previews for all platforms
 
+/**
+ * SocialMeta — lightweight Open Graph and Twitter/X card meta tags for
+ * social sharing previews (Facebook, LinkedIn, Discord, Twitter, etc.).
+ *
+ * @module seo/SocialMeta
+ */
+
 import React from "react";
 
 interface SocialMetaProps {

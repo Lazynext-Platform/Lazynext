@@ -1,3 +1,4 @@
+/** @module Storage persistence dialog component for prompting users about data storage */
 "use client";
 
 import { Button } from "@/components/ui/button";

@@ -1,3 +1,11 @@
+/**
+ * Zoom controller — manages wheel-based zoom gestures, zoom level
+ * clamping, scroll anchoring around the playhead, and initial zoom
+ * restoration.
+ *
+ * @module timeline/controllers/zoom-controller
+ */
+
 import type { WheelEvent as ReactWheelEvent } from "react";
 import { TIMELINE_ZOOM_ANCHOR_PLAYHEAD_THRESHOLD } from "@/timeline/components/interaction";
 import { timelineTimeToPixels } from "@/timeline/pixel-utils";
@@ -7,6 +15,7 @@ import type { MediaTime } from "@/wasm";
 
 type ZoomUpdater = number | ((prev: number) => number);
 
+/** Configuration bag provided by the React host. */
 export interface ZoomConfig {
 	minZoom: number;
 	getContainerEl: () => HTMLDivElement | null;
@@ -21,6 +30,7 @@ export interface ZoomConfig {
 	}) => void;
 }
 
+/** Ref wrapper so the controller always reads the latest config. */
 export interface ZoomConfigRef {
 	readonly current: ZoomConfig;
 }
@@ -35,6 +45,10 @@ function clampZoom({
 	return Math.max(minZoom, Math.min(TIMELINE_ZOOM_MAX, zoomLevel));
 }
 
+/**
+ * Handles zoom gestures (Ctrl/Cmd + wheel), applies scroll anchoring
+ * around the playhead, and synchronizes ruler/tracks scroll positions.
+ */
 export class ZoomController {
 	private readonly configRef: ZoomConfigRef;
 	private readonly subscribers = new Set<() => void>();

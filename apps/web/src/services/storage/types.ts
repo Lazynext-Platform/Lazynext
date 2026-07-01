@@ -1,3 +1,4 @@
+/** @module Storage type definitions for adapters, project records, and persistence interfaces */
 import type { MediaType } from "@/media/types";
 import type {
 	TProject,

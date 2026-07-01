@@ -1,3 +1,4 @@
+/** @module Mask geometry utilities for computing mask bounds and snap guides */
 import type { ElementBounds } from "@/preview/element-bounds";
 import type { SnapLine } from "@/preview/preview-snap";
 import { MIN_MASK_DIMENSION } from "@/masks/dimensions";

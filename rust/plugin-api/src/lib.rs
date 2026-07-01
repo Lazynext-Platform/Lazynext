@@ -1,3 +1,9 @@
+//! Plugin API for Lazynext — WASM effect plugins and frame processing.
+//!
+//! Defines the `VideoEffect` trait that every plugin must implement, the
+//! `FrameBuffer` type for RGBA pixel data, and the `WasmPluginRuntime` for
+//! loading and executing sandboxed `.wasm` plugin binaries at runtime.
+
 use serde::{Deserialize, Serialize};
 
 /// A frame buffer passed to plugin `process_frame` calls.
@@ -106,6 +112,7 @@ pub struct WasmPluginRuntime {
 }
 
 impl WasmPluginRuntime {
+    /// Create an empty WASM plugin runtime with no loaded plugins.
     pub fn new() -> Self {
         Self {
             plugins: std::collections::HashMap::new(),
@@ -157,16 +164,19 @@ impl WasmPluginRuntime {
     }
 
     /// Check if a plugin with the given ID is loaded.
+    /// Check whether a plugin with the given ID has been loaded.
     pub fn has_plugin(&self, plugin_id: &str) -> bool {
         self.plugins.contains_key(plugin_id)
     }
 
     /// Get metadata for all loaded plugins.
+    /// Return metadata for every currently loaded plugin.
     pub fn list_plugins(&self) -> Vec<&WasmPluginMetadata> {
         self.plugins.values().collect()
     }
 
     /// Unload a plugin by ID.
+    /// Remove a loaded plugin from the runtime by its ID.
     pub fn unload_plugin(&mut self, plugin_id: &str) {
         self.plugins.remove(plugin_id);
     }

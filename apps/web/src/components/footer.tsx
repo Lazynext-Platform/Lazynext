@@ -1,3 +1,10 @@
+/**
+ * Global footer — resource links, company links, social icons,
+ * and copyright notice.
+ *
+ * @module components/footer
+ */
+
 import Link from "next/link";
 import { RiDiscordFill, RiTwitterXLine } from "react-icons/ri";
 import Image from "next/image";

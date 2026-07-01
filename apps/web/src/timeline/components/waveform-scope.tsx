@@ -1,6 +1,16 @@
+/**
+ * Waveform monitor panel — renders a grid-and-axis visualization
+ * placeholder for GPU-analyzed waveform data.
+ *
+ * @module timeline/components/waveform-scope
+ */
+
 import React, { useEffect, useRef } from "react";
 // import { useWasm } from "@/hooks/use-wasm";
 
+/**
+ * Renders a waveform monitor canvas with grid lines and a label header.
+ */
 export function WaveformScope() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	// const { gpu } = useWasm();

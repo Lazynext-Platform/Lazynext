@@ -1,8 +1,3 @@
-#![allow(
-    clippy::unnecessary_cast,
-    clippy::too_many_arguments,
-    clippy::cast_abs_to_unsigned
-)]
 //! Optical flow engine for frame interpolation and speed ramping.
 //!
 //! Provides motion-compensated frame interpolation for smooth slow-motion
@@ -13,6 +8,12 @@
 //!   - GPU: WebGPU compute shader (Lucas-Kanade dense optical flow)
 //!   - CPU: Block matching with sub-pixel refinement (3DRS)
 //!   - AI:  RIFE ONNX model (optional, highest quality)
+
+#![allow(
+    clippy::unnecessary_cast,
+    clippy::too_many_arguments,
+    clippy::cast_abs_to_unsigned
+)]
 
 /// Optical flow vector for a single pixel/block.
 #[derive(Clone, Copy, Debug, Default)]
@@ -49,6 +50,9 @@ impl Default for OpticalFlowConfig {
 }
 
 /// Motion-compensated frame interpolation engine.
+///
+/// Supports GPU compute (WebGPU Lucas-Kanade), CPU block matching with
+/// sub-pixel refinement, and optional AI-based (RIFE ONNX) flow estimation.
 pub struct OpticalFlowEngine {
     pub is_initialized: bool,
     config: OpticalFlowConfig,
@@ -63,6 +67,7 @@ impl Default for OpticalFlowEngine {
 }
 
 impl OpticalFlowEngine {
+    /// Creates a new `OpticalFlowEngine` with default configuration and no GPU shader.
     pub fn new() -> Self {
         Self {
             is_initialized: true,
@@ -71,6 +76,8 @@ impl OpticalFlowEngine {
         }
     }
 
+    /// Consumes `self` and returns a new engine with the given configuration.
+    /// If `config.use_gpu` is `true`, loads the WGSL compute shader source.
     pub fn with_config(mut self, config: OpticalFlowConfig) -> Self {
         let use_gpu = config.use_gpu;
         self.config = config;

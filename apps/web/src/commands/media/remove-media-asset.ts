@@ -1,3 +1,4 @@
+/** @module Command for removing a media asset from the project with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { MediaAsset } from "@/media/types";

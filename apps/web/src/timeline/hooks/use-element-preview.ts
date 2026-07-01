@@ -1,3 +1,10 @@
+/**
+ * Subscribes to render tracks and returns the live (preview-aware)
+ * element plus helpers for previewing and committing updates.
+ *
+ * @module timeline/hooks/use-element-preview
+ */
+
 import { useEditor } from "@/editor/use-editor";
 import { findTrackInSceneTracks, type TimelineElement } from "@/timeline";
 

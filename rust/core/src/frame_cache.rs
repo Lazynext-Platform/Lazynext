@@ -1,3 +1,6 @@
+//! LRU frame cache decorator — wraps an `AssetLoader` to avoid redundant
+//! frame decoding when scrubbing or looping through the timeline.
+
 use crate::engine::AssetLoader;
 use lru::LruCache;
 use std::future::Future;
@@ -15,6 +18,8 @@ pub struct FrameCacheLoader {
 }
 
 impl FrameCacheLoader {
+    /// Creates a new `FrameCacheLoader` wrapping the given `AssetLoader`
+    /// with a cache of the specified capacity.
     pub fn new(inner: Arc<dyn AssetLoader>, capacity: usize) -> Self {
         let cap = NonZeroUsize::new(capacity).unwrap_or(NonZeroUsize::new(1).unwrap());
         Self {

@@ -1,3 +1,10 @@
+/**
+ * Graph editor popover — easing presets, custom curves, and component
+ * tabs for selecting/tweaking keyframe interpolation.
+ *
+ * @module timeline/components/graph-editor/popover
+ */
+
 "use client";
 
 import { useState } from "react";

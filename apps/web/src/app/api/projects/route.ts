@@ -1,9 +1,19 @@
+/**
+ * @module Projects API — fetches the authenticated user's project list from
+ * the Rust API Gateway with session-based authorization.
+ */
+
 import { NextResponse } from "next/server";
 import { auth } from "@/auth/server";
 import { headers } from "next/headers";
 
 const RUST_API_GATEWAY_URL = process.env.RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
 
+/**
+ * GET /api/projects
+ * Returns the list of projects owned by the authenticated user, proxied
+ * through the Rust API Gateway.
+ */
 export async function GET() {
 	try {
 		const session = await auth.api.getSession({

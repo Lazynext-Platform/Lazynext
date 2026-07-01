@@ -1,3 +1,8 @@
+//! Tombstone-based deletion tracking for CRDT garbage collection.
+//! When an entity is deleted, a `TombstoneEntry` records the vector clock
+//! at deletion time. Tombstones are safe to GC once every peer's clock
+//! has passed the deletion horizon.
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

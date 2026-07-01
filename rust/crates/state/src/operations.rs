@@ -1,3 +1,8 @@
+//! CRDT operation types for the operation-based CRDT (CmRDT) log.
+//! Defines `CrdtOperation` (clip/track/entity insert, delete, move, trim,
+//! split, property update), `OperationMeta` for causal ordering, a
+//! `CrdtClock` (Lamport-style), and `CrdtOperationLog` (append-only log).
+
 use serde::{Deserialize, Serialize};
 
 /// Metadata carried by every CRDT operation for causal ordering.
@@ -24,54 +29,57 @@ pub struct ClipPayload {
 /// All operation types in the CmRDT (operation-based CRDT) log.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum CrdtOperation {
+    /// Insert a clip at a specific position on a track.
     ClipInsert {
         clip_id: String,
         track_id: String,
         position: usize,
         clip: ClipPayload,
     },
-    ClipDelete {
-        clip_id: String,
-        track_id: String,
-    },
+    /// Remove a clip from a track.
+    ClipDelete { clip_id: String, track_id: String },
+    /// Move a clip from one track to another at a new position.
     ClipMove {
         clip_id: String,
         from_track: String,
         to_track: String,
         new_position: usize,
     },
+    /// Trim a clip by adjusting its start and end points.
     ClipTrim {
         clip_id: String,
         new_start: u32,
         new_end: u32,
     },
+    /// Split a clip into two at the given point, producing a new clip ID.
     ClipSplit {
         clip_id: String,
         split_point: u32,
         new_clip_id: String,
     },
+    /// Insert a new track of a given kind at a specific position.
     TrackInsert {
         track_id: String,
         kind: String,
         position: usize,
     },
-    TrackDelete {
-        track_id: String,
-    },
+    /// Remove a track from the timeline.
+    TrackDelete { track_id: String },
+    /// Update a named property on a target entity, optionally preserving the old value for undo.
     PropertyUpdate {
         target_id: String,
         property: String,
         value: serde_json::Value,
         old_value: Option<serde_json::Value>,
     },
+    /// Insert a generic entity (e.g. marker, keyframe) into the state.
     EntityInsert {
         entity_id: String,
         entity_type: String,
         data: serde_json::Value,
     },
-    EntityDelete {
-        entity_id: String,
-    },
+    /// Remove a generic entity from the state.
+    EntityDelete { entity_id: String },
 }
 
 impl CrdtOperation {
@@ -139,6 +147,7 @@ pub struct CrdtClock {
 }
 
 impl CrdtClock {
+    /// Create a new clock starting at zero.
     pub fn new() -> Self {
         Self { counter: 0 }
     }
@@ -175,12 +184,14 @@ pub struct CrdtOperationLog {
 }
 
 impl CrdtOperationLog {
+    /// Create an empty operation log.
     pub fn new() -> Self {
         Self {
             operations: Vec::new(),
         }
     }
 
+    /// Append an operation to the end of the log.
     pub fn push(&mut self, op: CrdtOperation) {
         self.operations.push(op);
     }

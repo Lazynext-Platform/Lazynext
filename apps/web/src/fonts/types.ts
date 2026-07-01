@@ -1,3 +1,4 @@
+/** @module Font type definitions for font options and atlas glyph data */
 export interface FontOption {
 	value: string;
 	label: string;

@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a transient notification overlay with optional title, description, and action buttons. */
+
 import * as React from "react";
 import { Toast as ToastPrimitives } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

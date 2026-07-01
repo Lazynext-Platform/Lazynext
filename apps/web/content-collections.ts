@@ -1,3 +1,4 @@
+/** @module Content collections definition for changelog entries */
 import { defineCollection, defineConfig } from "@content-collections/core";
 import { z } from "zod";
 

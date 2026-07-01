@@ -1,3 +1,7 @@
+/**
+ * @module media/upload-toast
+ */
+
 import { toast } from "sonner";
 
 export interface MediaUploadToastResult {

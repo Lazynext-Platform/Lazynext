@@ -6,6 +6,7 @@ description = "Lazynext native desktop editor — wgpu-accelerated video composi
 
 [dependencies]
 lazynext_core = { path = "../../rust/core" }
+lazynext-export = { path = "../../rust/crates/export" }
 gpu = { path = "../../rust/crates/gpu" }
 compositor = { path = "../../rust/crates/compositor" }
 tokio = { version = "1.0", features = ["full"] }

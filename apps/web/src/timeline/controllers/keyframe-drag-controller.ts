@@ -1,3 +1,11 @@
+/**
+ * Keyframe-drag controller — handles mousedown/mousemove/mouseup on
+ * keyframe diamonds, supporting single/multi/range selection and
+ * time-axis dragging with frame snapping.
+ *
+ * @module timeline/controllers/keyframe-drag-controller
+ */
+
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { FrameRate } from "lazynext-wasm";
 import { BASE_TIMELINE_PIXELS_PER_SECOND } from "@/timeline/scale";
@@ -39,6 +47,7 @@ type Session = { kind: "idle" } | PendingSession | ActiveSession;
 
 // --- Public state ---
 
+/** Publicly readable drag state exposed to React components. */
 export interface KeyframeDragState {
 	isDragging: boolean;
 	draggingKeyframeIds: Set<string>;
@@ -53,6 +62,7 @@ const IDLE_DRAG_STATE: KeyframeDragState = {
 
 // --- Config ---
 
+/** Configuration for the keyframe drag controller. */
 export interface KeyframeDragConfig {
 	zoomLevel: number;
 	getFps: () => FrameRate | null;
@@ -75,12 +85,17 @@ export interface KeyframeDragConfig {
 	getTotalDuration: () => MediaTime;
 }
 
+/** Ref wrapper so the controller always reads the latest config. */
 export interface KeyframeDragConfigRef {
 	readonly current: KeyframeDragConfig;
 }
 
 // --- Controller ---
 
+/**
+ * Handles keyframe interaction — drag to retime, click to select/toggle,
+ * shift-click for range selection, and modifier+click for additive selection.
+ */
 export class KeyframeDragController {
 	private session: Session = { kind: "idle" };
 	// Persists through mouseup so the click handler can detect drag vs click

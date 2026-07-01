@@ -1,3 +1,10 @@
+/**
+ * Lumetri scopes — waveform, vectorscope, RGB parade, and histogram
+ * monitors for color grading feedback.
+ *
+ * @module components/editor/panels/scopes
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 
 export function LumetriScopes({

@@ -1,5 +1,15 @@
+/**
+ * Insert-index helpers for placing new tracks within the overlay/audio
+ * ordering, respecting the main track position.
+ *
+ * @module timeline/placement/insert-index
+ */
+
 import type { SceneTracks, TrackType } from "@/timeline";
 
+/**
+ * Returns the default insert index for a new track of the given type.
+ */
 export function getDefaultInsertIndexForTrack({
 	tracks,
 	trackType,
@@ -18,6 +28,9 @@ export function getDefaultInsertIndexForTrack({
 	return tracks.overlay.length;
 }
 
+/**
+ * Returns the highest (farthest right) insert index for a new track.
+ */
 export function getHighestInsertIndexForTrack({
 	tracks,
 	trackType,
@@ -32,6 +45,10 @@ export function getHighestInsertIndexForTrack({
 	return 0;
 }
 
+/**
+ * Resolves the insert index and position (above/below) for a new track,
+ * keeping audio tracks always below the main track.
+ */
 export function resolvePreferredNewTrackPlacement({
 	tracks,
 	trackType,

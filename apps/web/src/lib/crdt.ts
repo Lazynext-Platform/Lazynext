@@ -6,6 +6,15 @@
  * in real-time, allowing Figma-style multi-user collaborative editing on the same timeline.
  */
 
+/**
+ * Manages real-time collaborative editing on a timeline project.
+ *
+ * Scaffolding for Phase 7 — intended to wrap Yjs and y-webrtc for broadcasting
+ * incremental JSON patches of `projectData` to all connected peers in the given room.
+ *
+ * @param roomId — unique identifier for the collaboration session.
+ * @param onRemoteChange — callback invoked when a remote peer pushes an update.
+ */
 export class CollaborationSync {
 	private roomId: string;
 	private clientId: string;
@@ -24,6 +33,7 @@ export class CollaborationSync {
 
 	/**
 	 * Broadcasts a state change to other connected peers in the room.
+	 * @param newProjectData — the updated project state to synchronize.
 	 */
 	public broadcastUpdate(newProjectData: any) {
 		// Scaffold: Generate a Yjs delta and broadcast over WebRTC DataChannel

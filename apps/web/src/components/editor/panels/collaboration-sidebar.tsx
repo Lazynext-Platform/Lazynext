@@ -1,3 +1,10 @@
+/**
+ * Collaboration sidebar — messaging, review/approval workflow,
+ * and team communication panel.
+ *
+ * @module components/editor/panels/collaboration-sidebar
+ */
+
 import React, { useState } from "react";
 import { MessageSquare, CheckCircle, XCircle, Send } from "lucide-react";
 

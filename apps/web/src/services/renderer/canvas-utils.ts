@@ -1,3 +1,4 @@
+/** @module Canvas utility functions for creating and managing offscreen canvas surfaces */
 export function createCanvasSurface({
 	width,
 	height,

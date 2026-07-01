@@ -1,3 +1,8 @@
+/**
+ * @module Background blur intensity presets and default value for the
+ * blur background effect.
+ */
+
 export const BACKGROUND_BLUR_INTENSITY_PRESETS: Array<{
 	label: string;
 	value: number;

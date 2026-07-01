@@ -1,3 +1,10 @@
+/**
+ * Resize controller — trim/extend element edges with group-aware
+ * multi-element resize, snap-on-edge support, and frame snapping.
+ *
+ * @module timeline/controllers/resize-controller
+ */
+
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { BASE_TIMELINE_PIXELS_PER_SECOND } from "@/timeline/scale";
 import {
@@ -49,6 +56,7 @@ type Session = { kind: "idle" } | ResizeSession;
 
 // --- Config ---
 
+/** Configuration for the element resize controller. */
 export interface ResizeConfig {
 	zoomLevel: number;
 	snappingEnabled: boolean;
@@ -63,12 +71,14 @@ export interface ResizeConfig {
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 
+/** Ref wrapper for resize config. */
 export interface ResizeConfigRef {
 	readonly current: ResizeConfig;
 }
 
 // --- Pure helpers ---
 
+/** Builds resize member data from selected elements for group resize computation. */
 export function buildResizeMembers({
 	tracks,
 	selectedElements,
@@ -160,6 +170,10 @@ function hasResizeChanges({
 
 // --- Controller ---
 
+/**
+ * Manages element-edge resize interactions — previews via the editor
+ * preview system and commits via commands on mouseup.
+ */
 export class ResizeController {
 	private session: Session = { kind: "idle" };
 	private readonly subscribers = new Set<() => void>();

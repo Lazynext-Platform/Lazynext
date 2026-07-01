@@ -1,3 +1,10 @@
+/**
+ * Text presets panel — animated text templates with preview
+ * thumbnails and drag-to-timeline insertion.
+ *
+ * @module components/editor/panels/text-presets
+ */
+
 import React from "react";
 import { Type, Play } from "lucide-react";
 

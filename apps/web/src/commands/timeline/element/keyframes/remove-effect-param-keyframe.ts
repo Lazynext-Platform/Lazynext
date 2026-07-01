@@ -1,3 +1,4 @@
+/** @module Command for removing an effect parameter keyframe with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { removeEffectParamKeyframe } from "@/animation/effect-param-channel";

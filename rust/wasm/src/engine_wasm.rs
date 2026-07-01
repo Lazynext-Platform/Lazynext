@@ -1,3 +1,9 @@
+//! Core NLE engine exposed to WebAssembly.
+//!
+//! Wraps the full `CoreEngine` and `NLEState` in an async WASM-accessible
+//! API — project lifecycle, track/clip management, media pool, and
+//! rendering to an HTML canvas.
+
 #[cfg(target_arch = "wasm32")]
 use lazynext_core::{engine::CoreEngine, nle_state::NLEState};
 use std::sync::Arc;

@@ -1,3 +1,9 @@
+/**
+ * Contributors page — community contributors with GitHub contribution CTA.
+ *
+ * @page /contributors
+ */
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import { GitHubContributeSection } from "@/components/gitHub-contribute-section";

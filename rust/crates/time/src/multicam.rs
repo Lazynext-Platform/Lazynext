@@ -1,10 +1,22 @@
+//! Multicam clip management with live angle switching.
+//!
+//! `MulticamClip` holds multiple camera angles and tracks the active
+//! angle. Live cuts are triggered by the frontend during playback and
+//! insert hard cuts at the current frame timestamp.
+
+/// A multicam clip with multiple camera angles and live switching.
 pub struct MulticamClip {
+    /// Unique identifier for this multicam clip.
     pub id: String,
-    pub camera_angles: Vec<String>, // IDs of underlying media clips
+    /// IDs of the underlying media clips, one per camera angle.
+    pub camera_angles: Vec<String>,
+    /// Index of the currently active camera angle.
     pub active_angle: usize,
 }
 
 impl MulticamClip {
+    /// Create a new multicam clip with the given camera angles.
+    /// Defaults to angle 0 (Cam 1) as active.
     pub fn new(id: &str, angles: Vec<String>) -> Self {
         Self {
             id: id.to_string(),

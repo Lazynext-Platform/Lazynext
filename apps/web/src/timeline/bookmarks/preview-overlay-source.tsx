@@ -1,3 +1,10 @@
+/**
+ * Bookmark preview overlay — provides a preview overlay source so
+ * bookmark notes can be shown as floating tooltips in the player.
+ *
+ * @module timeline/bookmarks/preview-overlay-source
+ */
+
 import type { Bookmark } from "@/timeline";
 import {
 	EMPTY_PREVIEW_OVERLAY_SOURCE_RESULT,

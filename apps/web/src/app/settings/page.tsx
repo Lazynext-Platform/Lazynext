@@ -1,3 +1,9 @@
+/**
+ * Settings page — user profile, preferences, and account management.
+ *
+ * @page /settings
+ */
+
 import type { Metadata } from "next";
 import { SettingsPageClient } from "./client";
 

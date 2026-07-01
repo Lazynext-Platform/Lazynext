@@ -1,3 +1,7 @@
+/**
+ * @module lib/admin-data.test
+ */
+
 import { describe, it, expect } from "bun:test";
 import { adminData } from "./admin-data";
 

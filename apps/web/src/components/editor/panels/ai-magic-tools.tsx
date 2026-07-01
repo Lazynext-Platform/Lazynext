@@ -1,3 +1,10 @@
+/**
+ * AI Magic Tools panel — one-click AI tools for voiceover, music
+ * generation, smart silence removal, and object-aware editing.
+ *
+ * @module components/editor/panels/ai-magic-tools
+ */
+
 import React, { useState } from "react";
 import { Sparkles, Wand2, Video, Mic, Music, RefreshCw } from "lucide-react";
 import { useEditorState } from "../useEditorState";

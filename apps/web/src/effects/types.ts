@@ -1,3 +1,4 @@
+/** @module Effects type definitions for GPU effect registration and parameter passing */
 import type { ParamDefinition, ParamValues } from "@/params";
 
 export interface Effect {

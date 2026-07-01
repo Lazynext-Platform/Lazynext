@@ -1,5 +1,20 @@
+/**
+ * Hook for toggling fullscreen mode on a DOM element.
+ *
+ * Listens to `fullscreenchange` events and provides a toggle function
+ * that enters/exits fullscreen for the referenced container.
+ *
+ * @module hooks/use-fullscreen
+ */
+
 import { useCallback, useEffect, useState } from "react";
 
+/**
+ * Manages fullscreen state for a given container element.
+ *
+ * @param containerRef - ref to the element to fullscreen.
+ * @returns `isFullscreen` (boolean) and `toggleFullscreen` function.
+ */
 export function useFullscreen({
 	containerRef,
 }: {

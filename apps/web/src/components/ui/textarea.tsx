@@ -1,3 +1,5 @@
+/** @component Renders a theme-aware multi-line text input. */
+
 import * as React from "react";
 
 import { cn } from "@/utils/ui";

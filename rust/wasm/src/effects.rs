@@ -1,3 +1,9 @@
+//! WASM bridge for GPU effect passes.
+//!
+//! Applies compositor effect chains (custom shaders, 3D LUTs, chroma-key)
+//! to offscreen canvases via the GPU runtime, returning processed canvases
+//! back to JavaScript for further compositing or display.
+
 #![cfg(target_arch = "wasm32")]
 
 use effects::{ApplyEffectsOptions, EffectPass, UniformValue};

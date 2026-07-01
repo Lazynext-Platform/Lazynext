@@ -1,3 +1,4 @@
+/** @module Graphics stroke rendering utilities for drawing aligned strokes on shapes */
 import type { GraphicStrokeAlign } from "./definitions/shared";
 
 type GraphicRenderContext =

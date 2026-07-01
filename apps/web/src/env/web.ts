@@ -1,3 +1,4 @@
+/** @module Web environment validation schema using Zod */
 import { z } from "zod";
 
 const webEnvSchema = z.object({

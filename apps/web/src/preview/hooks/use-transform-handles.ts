@@ -1,3 +1,4 @@
+/** @module Hook for managing transform handle interaction state (resize, rotate, skew) */
 import { useEffect, useReducer, useState } from "react";
 import { usePreviewViewport } from "@/preview/components/preview-viewport";
 import type { OnSnapLinesChange } from "@/preview/hooks/use-preview-interaction";

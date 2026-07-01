@@ -1,3 +1,4 @@
+/** @module Mask snapping utilities for aligning mask handles to geometry and guides */
 import type { ElementBounds } from "@/preview/element-bounds";
 import { MIN_MASK_DIMENSION } from "@/masks/dimensions";
 import {

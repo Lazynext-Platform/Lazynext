@@ -1,3 +1,8 @@
+//! Convenience helpers for MP4 (H.264) export configuration.
+//!
+//! Re-exports the core encoder and pipeline types, and provides a
+//! one-call config builder with sensible defaults for H.264 output.
+
 use crate::encoder::ExportFormat;
 
 /// Re-export for discoverability.

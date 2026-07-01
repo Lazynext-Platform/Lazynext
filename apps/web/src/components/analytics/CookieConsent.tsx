@@ -1,3 +1,10 @@
+/**
+ * Cookie consent banner — GDPR-compliant cookie consent with
+ * accept/deny stored in localStorage.
+ *
+ * @module components/analytics/CookieConsent
+ */
+
 "use client";
 
 import React, { useState, useEffect } from "react";

@@ -1,3 +1,4 @@
+/** @module Effect layer render node for applying GPU effect passes in the compositor tree */
 import type { EffectPass } from "@/effects/types";
 import type { ParamValues } from "@/params";
 import { BaseNode } from "./base-node";

@@ -1,3 +1,4 @@
+/** @module Subtitles assets panel view for importing and managing SRT/ASS subtitle files */
 import { Button } from "@/components/ui/button";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";
 import {

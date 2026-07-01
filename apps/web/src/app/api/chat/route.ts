@@ -1,5 +1,15 @@
+/**
+ * @module AI chat endpoint — forwards natural-language edit prompts to the
+ * Rust API Gateway's autonomous_edit endpoint and returns the result.
+ */
+
 import { NextResponse } from "next/server";
 
+/**
+ * POST /api/chat
+ * Accepts a JSON body with a `prompt` field and proxies it to the Rust
+ * API Gateway for autonomous timeline editing.
+ */
 export async function POST(req: Request) {
 	try {
 		const { prompt } = await req.json();

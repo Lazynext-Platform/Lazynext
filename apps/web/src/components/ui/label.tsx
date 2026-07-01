@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a styled accessible label element tied to a form control. */
+
 import * as React from "react";
 import { Label as LabelPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

@@ -1,3 +1,4 @@
+/** @module Debug API endpoint exposing environment variable status */
 import { NextResponse } from "next/server";
 
 export async function GET() {

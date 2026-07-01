@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a slide-in panel overlay from any edge of the viewport. */
+
 import * as React from "react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

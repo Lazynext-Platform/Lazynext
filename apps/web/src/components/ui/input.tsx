@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a theme-aware text input with optional password toggle and clear button. */
+
 import { Eye, EyeOff, X } from "lucide-react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/ui";

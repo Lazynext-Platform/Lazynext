@@ -1,3 +1,4 @@
+/** @module Drizzle ORM database schema definitions for PostgreSQL tables */
 import {
   pgTable,
   text,

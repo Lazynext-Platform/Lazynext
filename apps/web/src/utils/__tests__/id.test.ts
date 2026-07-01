@@ -1,3 +1,4 @@
+/** @module __tests__/id Test suite for ID generation utilities */
 import { describe, expect, it } from "bun:test";
 import { generateUUID } from "../id";
 

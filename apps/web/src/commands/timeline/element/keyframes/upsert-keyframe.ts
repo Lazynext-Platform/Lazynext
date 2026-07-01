@@ -1,3 +1,4 @@
+/** @module Command for upserting a keyframe on an element's animation path with undo support */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { upsertPathKeyframe } from "@/animation";

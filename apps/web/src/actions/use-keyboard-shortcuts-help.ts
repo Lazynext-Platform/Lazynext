@@ -1,3 +1,4 @@
+/** @module Hook for generating help text and search data for keyboard shortcuts */
 "use client";
 
 import { useMemo } from "react";

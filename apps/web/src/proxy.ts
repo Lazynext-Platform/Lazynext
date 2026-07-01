@@ -1,3 +1,9 @@
+/**
+ * @module proxy
+ * @description Next.js middleware proxy for API route forwarding and CORS handling.
+ * Rewrites incoming requests to upstream microservices based on path prefixes.
+ */
+
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function proxy(request: NextRequest) {

@@ -1,3 +1,5 @@
+"""Test suite for generative-studio FastAPI endpoints."""
+
 import pytest
 from fastapi.testclient import TestClient
 import os

@@ -1,4 +1,13 @@
 // Social Media Card Generators for all platforms
+
+/**
+ * SocialCards — renders Open Graph, Twitter/X, Pinterest, Apple, Android,
+ * and Microsoft meta tags for rich social-media link previews across all
+ * major platforms.
+ *
+ * @module seo/SocialCards
+ */
+
 import React from "react";
 
 interface SocialCardProps {

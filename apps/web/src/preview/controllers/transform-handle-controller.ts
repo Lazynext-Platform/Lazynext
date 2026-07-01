@@ -1,3 +1,4 @@
+/** @module Transform handle controller for drag-based element resize, rotate, and position operations */
 import type { PointerEvent as ReactPointerEvent } from "react";
 import type { MediaAsset } from "@/media/types";
 import {

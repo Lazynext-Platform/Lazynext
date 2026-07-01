@@ -1,4 +1,5 @@
 "use client";
+/** @module Project settings view — frame rate, aspect ratio, canvas size, and background */
 
 import { useState } from "react";
 import { PanelView } from "@/components/editor/panels/assets/views/base-panel";

@@ -1,3 +1,10 @@
+/**
+ * Editor-level timeline wrapper — integrates the full timeline component
+ * with the editor state and project context.
+ *
+ * @module components/editor/timeline
+ */
+
 import {
 	useState,
 	useEffect,

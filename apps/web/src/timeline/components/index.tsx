@@ -1,3 +1,11 @@
+/**
+ * Main Timeline component — wires the zoom controller, playhead, ruler,
+ * track rows, bookmarks, drag-drop, box-select, snap indicator, and
+ * scroll sync into a single interactive timeline view.
+ *
+ * @module timeline/components
+ */
+
 "use client";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -114,6 +122,10 @@ const TRACK_ICONS: Record<TimelineTrack["type"], ReactNode> = {
 	),
 };
 
+/**
+ * Root timeline component — orchestrates all timeline sub-components,
+ * controllers, hooks, and gesture handling.
+ */
 export function Timeline() {
 	const snappingEnabled = useTimelineStore((s) => s.snappingEnabled);
 	const {

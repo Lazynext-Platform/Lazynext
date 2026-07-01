@@ -1,3 +1,4 @@
+/** @module Keyframe toggle button for enabling/disabling keyframed animation on a property */
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { KeyframeIcon } from "@hugeicons/core-free-icons";

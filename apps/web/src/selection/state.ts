@@ -1,3 +1,4 @@
+/** @module Selection state reducer for managing selected element/keyframe IDs and box selection */
 import type { BoxSelectionChange, SelectionState } from "@/selection/types";
 
 function dedupeIds({ ids }: { ids: string[] }) {

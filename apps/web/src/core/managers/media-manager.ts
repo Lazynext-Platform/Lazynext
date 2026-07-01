@@ -1,3 +1,9 @@
+/**
+ * @module Media asset lifecycle manager — add, remove, load, and clear
+ * assets backed by IndexedDB storage. Also revokes object URLs and clears
+ * caches (video, waveform) on unload.
+ */
+
 import type { EditorCore } from "@/core";
 import { toast } from "sonner";
 import type { MediaAsset } from "@/media/types";

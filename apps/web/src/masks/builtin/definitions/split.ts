@@ -1,3 +1,4 @@
+/** @module Split mask definition for creating a line-cut mask with angle and feather controls */
 import { computeFeatherUpdate } from "@/masks/param-update";
 import type {
 	MaskDefinition,

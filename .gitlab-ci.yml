@@ -1,0 +1,138 @@
+# GitLab CI/CD pipeline for Lazynext monorepo
+# Uses Docker-in-Docker for container builds, Rust cache, and parallel stages
+
+stages:
+  - setup
+  - lint
+  - build
+  - test
+  - security
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: lazynext.azurecr.io
+  RUST_VERSION: "1.96"
+  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
+  BUN_INSTALL: "$CI_PROJECT_DIR/.bun"
+
+default:
+  image: rust:${RUST_VERSION}-slim
+  before_script:
+    - apt-get update && apt-get install -y curl git python3 python3-pip nodejs npm
+    - cargo install wasm-pack cargo-chef
+    - curl -fsSL https://bun.sh/install | bash
+
+cache:
+  paths:
+    - .cargo/
+    - target/
+    - node_modules/
+    - .bun/
+
+# ── Setup ──────────────────────────────────────────────────────────
+setup:dependencies:
+  stage: setup
+  script:
+    - ~/.bun/bin/bun install
+    - pip3 install -r services/pre-processing/requirements.txt
+    - pip3 install -r services/generative-studio/requirements.txt
+
+# ── Lint ───────────────────────────────────────────────────────────
+lint:rust:
+  stage: lint
+  script:
+    - cargo fmt --check
+    - cargo clippy --workspace -- -D warnings
+
+lint:typescript:
+  stage: lint
+  image: oven/bun:1.3.14
+  script:
+    - bun install
+    - bun run lint
+    - bun run typecheck
+
+lint:python:
+  stage: lint
+  image: python:3.13-slim
+  script:
+    - pip install ruff
+    - ruff check services/
+    - ruff format --check services/
+
+lint:terraform:
+  stage: lint
+  image: hashicorp/terraform:latest
+  script:
+    - cd infra/terraform && terraform fmt -check && terraform validate
+
+# ── Build ──────────────────────────────────────────────────────────
+build:rust:
+  stage: build
+  script:
+    - cargo build --workspace --release
+    - cd rust/wasm && wasm-pack build --target web
+  artifacts:
+    paths:
+      - target/release/
+      - rust/wasm/pkg/
+    expire_in: 1 day
+
+build:web:
+  stage: build
+  image: oven/bun:1.3.14
+  script:
+    - bun install
+    - cd apps/web && bun run build
+  artifacts:
+    paths:
+      - apps/web/.next/
+    expire_in: 1 day
+
+build:docker:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - bash scripts/docker-build.sh --tag ${CI_COMMIT_SHORT_SHA}
+
+# ── Test ───────────────────────────────────────────────────────────
+test:unit:
+  stage: test
+  script:
+    - cargo test --workspace
+    - ~/.bun/bin/bun test
+    - python3 -m pytest services/
+
+test:e2e:
+  stage: test
+  when: manual
+  script:
+    - bash scripts/full-e2e.sh
+
+# ── Security ───────────────────────────────────────────────────────
+security:scan:
+  stage: security
+  script:
+    - bash scripts/scan-images.sh
+    - gitleaks detect --source . --config .github/gitleaks.toml
+
+# ── Deploy ─────────────────────────────────────────────────────────
+deploy:staging:
+  stage: deploy
+  when: manual
+  only:
+    - main
+  script:
+    - bash scripts/deploy.sh staging
+  environment: staging
+
+deploy:production:
+  stage: deploy
+  when: manual
+  only:
+    - tags
+  script:
+    - bash scripts/deploy.sh production
+  environment: production

@@ -1,3 +1,6 @@
+//! Timeline placement system — clip insertion, overlap resolution, and
+//! track management sub-modules.
+
 pub mod apply;
 pub mod compatibility;
 pub mod insert_index;

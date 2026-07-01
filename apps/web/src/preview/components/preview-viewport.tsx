@@ -1,3 +1,4 @@
+/** @module Preview viewport component managing video canvas rendering, zoom, and pan */
 "use client";
 
 import {

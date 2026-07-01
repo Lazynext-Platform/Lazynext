@@ -1,3 +1,10 @@
+/**
+ * Group move types — move group members, planned moves, track
+ * creation entries, and resolved move results.
+ *
+ * @module timeline/group-move/types
+ */
+
 import type { ElementRef, ElementType, TrackType } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 

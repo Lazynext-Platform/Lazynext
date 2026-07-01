@@ -1,3 +1,9 @@
+/**
+ * Blog post page — renders a single article by slug with prose styling.
+ *
+ * @page /blog/[slug]
+ */
+
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";

@@ -85,3 +85,9 @@ infra/terraform/.terraform.lock.hcl
 
 **/.DS_Store
 **/.gradle/
+.venv/
+venv/
+signin-snapshot.txt
+web-app-home.txt
+out/
+.playwright-mcp/

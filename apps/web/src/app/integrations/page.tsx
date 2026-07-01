@@ -1,3 +1,9 @@
+/**
+ * Integrations page — third-party services and API connections.
+ *
+ * @page /integrations
+ */
+
 "use client";
 
 import { motion } from "framer-motion";

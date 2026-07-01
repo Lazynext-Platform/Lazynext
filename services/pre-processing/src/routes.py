@@ -1,3 +1,12 @@
+"""
+Pre-Processing REST API routes.
+
+Exposes endpoints for media analysis and transformation:
+transcription, scene detection, motion tracking, rotoscoping,
+NeRF extraction, auto-reframing, audio enhancement, retouching,
+hook extraction, proxy generation, and media ingestion.
+"""
+
 from fastapi import APIRouter
 from src.models import (
     VideoRequest, EnhanceAudioRequest, ProcessRequest,

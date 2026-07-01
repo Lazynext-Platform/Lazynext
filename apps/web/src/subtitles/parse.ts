@@ -1,3 +1,4 @@
+/** @module Subtitle file parser dispatcher that delegates to SRT or ASS parsers */
 import { parseAss } from "./ass";
 import { parseSrt } from "./srt";
 import type { ParseSubtitleResult } from "./types";

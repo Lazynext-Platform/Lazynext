@@ -1,3 +1,10 @@
+/**
+ * Timeline type definitions — Animation, Size, and related types for
+ * element properties, transitions, and metadata used across the editor.
+ *
+ * @module components/editor/timeline/types
+ */
+
 export type Animation = {
 	name: string;
 	interval?: number;

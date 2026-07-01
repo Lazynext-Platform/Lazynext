@@ -1,3 +1,4 @@
+/** @module Masks module barrel export for mask instantiation and registry lookup */
 import type { Mask, MaskDefaultContext, MaskType } from "@/masks/types";
 import { masksRegistry } from "./registry";
 import { generateUUID } from "@/utils/id";

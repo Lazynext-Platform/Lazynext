@@ -119,6 +119,7 @@ export function buildRawVideoEncodeArgs(
 	return args;
 }
 
+/** Create a new frame-stream export job and register it in the in-memory map. */
 export function createFrameJob(config: FrameJobConfig): FrameJob {
 	const job: FrameJob = {
 		...config,
@@ -134,10 +135,12 @@ export function createFrameJob(config: FrameJobConfig): FrameJob {
 	return job;
 }
 
+/** Look up a frame-stream job by ID. */
 export function getFrameJob(jobId: string): FrameJob | undefined {
 	return JOBS.get(jobId);
 }
 
+/** Cancel a frame-stream job, killing any running ffmpeg process. */
 export function deleteFrameJob(jobId: string): boolean {
 	const job = JOBS.get(jobId);
 	if (!job) return false;

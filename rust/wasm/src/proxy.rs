@@ -1,3 +1,9 @@
+//! Background proxy generation for timeline scrubbing.
+//!
+//! Queues downscaling of high-resolution video files to 720p intra-frame
+//! proxies via a Web Worker pool (WebCodecs or ffmpeg-wasm), enabling
+//! smooth timeline scrubbing in the browser.
+
 use std::sync::{Arc, Mutex};
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;

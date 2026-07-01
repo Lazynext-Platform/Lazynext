@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+"""
+Clean attribution references in source files (v1 — legacy).
+
+Replaces known Lazynext-Corporation attribution patterns and normalizes
+GitHub URLs. Prefer clean_attributions_v2.py for new workflows.
+
+Usage:
+  python3 scripts/clean_attributions.py
+"""
+
 import os
 import re
 

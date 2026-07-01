@@ -1,3 +1,4 @@
+/** @module Watermark add-on for applying text or image watermarks to timeline elements */
 import { ImageProps, Position, TextProps, WatermarkJSON } from "../../types";
 
 class Watermark {

@@ -1,3 +1,10 @@
+/**
+ * Mobile gate — detects mobile/tablet viewports and shows an
+ * "unsupported" interstitial with call-to-action for desktop.
+ *
+ * @module components/editor/mobile-gate
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";

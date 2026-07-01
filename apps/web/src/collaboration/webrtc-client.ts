@@ -19,6 +19,15 @@
  *   TURN_CREDENTIAL=your-turn-credential
  */
 
+/**
+ * WebRTC Data Channel Client for P2P Collaboration.
+ *
+ * Establishes direct peer-to-peer connections between editors for
+ * low-latency CRDT delta exchange without server hops.
+ *
+ * @module collaboration/webrtc-client
+ */
+
 import type { CollaborationSocket } from "./socket";
 
 interface WebRTCConfig {

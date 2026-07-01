@@ -1,3 +1,10 @@
+/**
+ * Zoom level computation — minimum zoom to fit content, padding
+ * ratios, and linear↔exponential slider mapping.
+ *
+ * @module timeline/zoom-utils
+ */
+
 import {
 	BASE_TIMELINE_PIXELS_PER_SECOND,
 	TIMELINE_ZOOM_MAX,
@@ -8,6 +15,13 @@ const PADDING_MAX_RATIO = 0.75;
 const PADDING_MIN_RATIO = 0.15;
 const PADDING_MIN_AT_ZOOM_PERCENT = 0.2;
 
+/**
+ * Computes the minimum zoom level such that the entire timeline
+ * duration fits within the container, capped at the max zoom.
+ *
+ * @param duration - total project duration in ticks.
+ * @param containerWidth - current container width in pixels.
+ */
 export function getTimelineZoomMin({
 	duration,
 	containerWidth,
@@ -25,6 +39,10 @@ export function getTimelineZoomMin({
 	return Math.min(TIMELINE_ZOOM_MAX, zoomToFit);
 }
 
+/**
+ * Returns the pixel-width of the leading/trailing padding area for the
+ * timeline at the current zoom, interpolating between min and max ratios.
+ */
 export function getTimelinePaddingPx({
 	containerWidth,
 	zoomLevel,
@@ -46,6 +64,9 @@ export function getTimelinePaddingPx({
 	return containerWidth * paddingRatio;
 }
 
+/**
+ * Returns the current zoom level as a 0–1 fraction of the zoom range.
+ */
 export function getZoomPercent({
 	zoomLevel,
 	minZoom,
@@ -57,8 +78,8 @@ export function getZoomPercent({
 }
 
 /**
- * convert linear slider position (0-1) to exponential zoom level.
- * at low slider values, zoom changes are small. at high values, changes are large.
+ * Converts a linear slider position (0–1) to an exponential zoom level.
+ * At low slider values zoom changes are small; at high values changes are large.
  */
 export function sliderToZoom({
 	sliderPosition,
@@ -74,7 +95,7 @@ export function sliderToZoom({
 }
 
 /**
- * convert exponential zoom level to linear slider position (0-1).
+ * Converts an exponential zoom level back to a linear slider position (0–1).
  */
 export function zoomToSlider({
 	zoomLevel,

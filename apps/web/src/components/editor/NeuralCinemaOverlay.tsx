@@ -1,3 +1,10 @@
+/**
+ * Neural Cinema overlay — AI-powered cinematic style overlay
+ * with real-time neural rendering status.
+ *
+ * @module components/editor/NeuralCinemaOverlay
+ */
+
 "use client";
 
 import React from "react";

@@ -1,3 +1,4 @@
+/** @module Retime split resolution for mapping clip time spans to source time spans */
 import type { RetimeConfig } from "@/timeline";
 import { getSourceTimeAtClipTime } from "./resolve";
 

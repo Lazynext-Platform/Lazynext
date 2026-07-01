@@ -1,3 +1,10 @@
+/**
+ * Renders a single track row with its elements, drag-drop zone, and
+ * background click handler for selection/deselection.
+ *
+ * @module timeline/components/timeline-track
+ */
+
 "use client";
 
 import { useElementSelection } from "@/timeline/hooks/element/use-element-selection";
@@ -33,6 +40,10 @@ interface TimelineTrackContentProps {
 	targetElementId?: string | null;
 }
 
+/**
+ * Renders a track row: empty-state dashed border or element clips,
+ * plus a transparent button overlay for track-level click selection.
+ */
 export function TimelineTrackContent({
 	track,
 	zoomLevel,

@@ -1,6 +1,12 @@
 /**
- * UI state for the timeline
- * For core logic, use EditorCore instead.
+ * Lightweight Zustand store for timeline UI preferences — snapping,
+ * ripple editing, and expanded element state.
+ *
+ * Persisted to localStorage under the key `"timeline-store"`.
+ *
+ * For core state logic, use {@link EditorCore} instead.
+ *
+ * @module timeline/timeline-store
  */
 
 import { create } from "zustand";
@@ -15,6 +21,9 @@ interface TimelineStore {
 	toggleElementExpanded: (elementId: string) => void;
 }
 
+/**
+ * Hook to read/write timeline UI preferences.
+ */
 export const useTimelineStore = create<TimelineStore>()(
 	persist(
 		(set) => ({

@@ -1,3 +1,10 @@
+/**
+ * Element utility functions — type predicates, element factory builders,
+ * and query helpers for timeline tracks.
+ *
+ * @module timeline/element-utils
+ */
+
 import { DEFAULT_NEW_ELEMENT_DURATION } from "@/timeline/creation";
 import {
 	MASKABLE_ELEMENT_TYPES,
@@ -34,36 +41,42 @@ import {
 import { capitalizeFirstLetter } from "@/utils/string";
 import { type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
+/** Type predicate for elements that carry audio (audio or video). */
 export function canElementHaveAudio(
 	element: TimelineElement,
 ): element is AudioElement | VideoElement {
 	return element.type === "audio" || element.type === "video";
 }
 
+/** Type predicate for elements that render visually on the compositor. */
 export function isVisualElement(
 	element: TimelineElement,
 ): element is VisualElement {
 	return (VISUAL_ELEMENT_TYPES as readonly string[]).includes(element.type);
 }
 
+/** Type predicate for elements that can have masks applied. */
 export function isMaskableElement(
 	element: TimelineElement,
 ): element is MaskableElement {
 	return (MASKABLE_ELEMENT_TYPES as readonly string[]).includes(element.type);
 }
 
+/** Type predicate for elements that support speed retiming. */
 export function isRetimableElement(
 	element: TimelineElement,
 ): element is RetimableElement {
 	return (RETIMABLE_ELEMENT_TYPES as readonly string[]).includes(element.type);
 }
 
+/** Type predicate for elements that can be hidden on the timeline. */
 export function canElementBeHidden(
 	element: TimelineElement,
 ): element is VisualElement {
 	return isVisualElement(element);
 }
 
+/** Returns `true` if the visual element has at least one attached effect. */
 export function hasElementEffects({
 	element,
 }: {
@@ -72,12 +85,14 @@ export function hasElementEffects({
 	return isVisualElement(element) && (element.effects?.length ?? 0) > 0;
 }
 
+/** Type predicate for elements backed by a media asset ID. */
 export function hasMediaId(
 	element: TimelineElement,
 ): element is UploadAudioElement | VideoElement | ImageElement {
 	return "mediaId" in element;
 }
 
+/** Returns `true` if the element creation shape requires a media ID. */
 export function requiresMediaId({
 	element,
 }: {
@@ -98,6 +113,10 @@ function buildDefaultElementParams({
 	return buildDefaultParamValues(getBuiltInElementParams({ type }));
 }
 
+/**
+ * Builds a text element creation shape from partial data, filling in
+ * defaults for missing fields.
+ */
 export function buildTextElement({
 	raw,
 	startTime,
@@ -121,6 +140,10 @@ export function buildTextElement({
 	};
 }
 
+/**
+ * Builds a new effect element from a registered effect type, with
+ * default params and duration.
+ */
 export function buildEffectElement({
 	effectType,
 	startTime,
@@ -143,6 +166,10 @@ export function buildEffectElement({
 	};
 }
 
+/**
+ * Builds a new sticker element from a sticker ID, deriving its name
+ * from the ID and using default duration/params.
+ */
 export function buildStickerElement({
 	stickerId,
 	name,
@@ -172,6 +199,10 @@ export function buildStickerElement({
 	};
 }
 
+/**
+ * Builds a new graphic element from a definition, merging default and
+ * instance params with any provided overrides.
+ */
 export function buildGraphicElement({
 	definitionId,
 	name,
@@ -299,6 +330,10 @@ function buildUploadAudioElement({
 	return element;
 }
 
+/**
+ * Builds an element creation shape from a media asset, dispatching on
+ * media type (audio/video/image).
+ */
 export function buildElementFromMedia({
 	mediaId,
 	mediaType,
@@ -330,6 +365,9 @@ export function buildElementFromMedia({
 	}
 }
 
+/**
+ * Builds a library-sourced audio element from a source URL.
+ */
 export function buildLibraryAudioElement({
 	sourceUrl,
 	name,
@@ -361,6 +399,9 @@ export function buildLibraryAudioElement({
 	return element;
 }
 
+/**
+ * Returns all elements whose time range contains the given time position.
+ */
 export function getElementsAtTime({
 	tracks,
 	time,
@@ -385,6 +426,10 @@ export function getElementsAtTime({
 	return result;
 }
 
+/**
+ * Collects all unique font family strings used by text elements and
+ * text masks across all tracks.
+ */
 export function getElementFontFamilies({
 	tracks,
 }: {

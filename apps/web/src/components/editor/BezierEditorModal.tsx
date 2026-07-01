@@ -1,3 +1,10 @@
+/**
+ * Bézier editor modal — interactive curve editor for easing
+ * keyframe interpolation with drag-and-drop control points.
+ *
+ * @module components/editor/BezierEditorModal
+ */
+
 "use client";
 
 import React from "react";

@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v22-to-v23 Test suite for V22 to V23 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV22ToV23 } from "../transformers/v22-to-v23";
 import { asRecord, asRecordArray } from "./helpers";

@@ -1,3 +1,10 @@
+//! Role-based access control — JWT authentication middleware.
+//!
+//! Validates better-auth HS256 JWTs on every authenticated request,
+//! extracts `AuthClaims` (sub, email, name, role), maps roles to a
+//! `WorkspaceRole` hierarchy (Viewer < Editor < Admin), and inserts
+//! claims into request extensions for downstream handlers.
+
 use axum::{
     extract::Request,
     http::{StatusCode, header},

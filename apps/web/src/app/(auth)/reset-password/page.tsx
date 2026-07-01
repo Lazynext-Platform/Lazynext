@@ -1,3 +1,9 @@
+/**
+ * Reset password page — token-based password reset form.
+ *
+ * @page /reset-password
+ */
+
 "use client";
 
 import React, { useState } from "react";

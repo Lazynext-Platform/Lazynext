@@ -1,3 +1,10 @@
+/**
+ * Main editor client — full-featured NLE workspace with playback
+ * viewer, properties panel, timeline, media bin, and AI copilot.
+ *
+ * @module components/editor/EditorClient
+ */
+
 /* eslint-disable jsx-a11y/media-has-caption, jsx-a11y/no-autofocus */
 "use client";
 

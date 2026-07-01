@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/v1-to-v2
+ */
+
 import {
 	IndexedDBAdapter,
 	deleteDatabase,

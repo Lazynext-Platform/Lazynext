@@ -1,3 +1,4 @@
+/** @module Hook for tracking overlay open/close state in the keybindings store */
 import { useCallback, useEffect, useId, useRef } from "react";
 import { useKeybindingsStore } from "@/actions/keybindings-store";
 

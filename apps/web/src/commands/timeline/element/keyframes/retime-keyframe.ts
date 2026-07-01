@@ -1,3 +1,4 @@
+/** @module Command for retiming a keyframe on an element's animation path with undo support */
 import { EditorCore } from "@/core";
 import { retimeElementKeyframe } from "@/animation";
 import { Command, type CommandResult } from "@/commands/base-command";

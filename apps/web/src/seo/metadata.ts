@@ -1,5 +1,13 @@
 // Centralized SEO metadata for lazynext.com
 
+/**
+ * SEO metadata helpers — canonical site config and a {@link generateMetadata}
+ * utility that produces Next.js Metadata objects with Open Graph, Twitter/X,
+ * robots, and Apple Web App properties.
+ *
+ * @module seo/metadata
+ */
+
 export const SITE_CONFIG = {
 	name: "Lazynext",
 	shortName: "Lazynext",

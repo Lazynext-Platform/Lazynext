@@ -1,3 +1,10 @@
+/**
+ * Video scopes — waveform, vectorscope, and histogram monitors
+ * rendered via canvas for color grading feedback.
+ *
+ * @module components/editor/VideoScopes
+ */
+
 "use client";
 
 import { useRef, useEffect, useState } from "react";

@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v8-to-v9 Test suite for V8 to V9 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV8ToV9 } from "../transformers/v8-to-v9";
 import { asRecord, asRecordArray } from "./helpers";

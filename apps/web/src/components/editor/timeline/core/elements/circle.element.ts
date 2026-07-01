@@ -1,3 +1,10 @@
+/**
+ * Circle element — timeline shape element rendering a circle with
+ * fill, radius, stroke, and line-width properties.
+ *
+ * @module components/editor/timeline/core/elements/circle.element
+ */
+
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";
 import { CircleProps } from "../../types";

@@ -1,3 +1,7 @@
+/**
+ * @module media/mediabunny
+ */
+
 import {
 	Input,
 	ALL_FORMATS,

@@ -1,3 +1,9 @@
+/**
+ * Renders a single tick mark (and optional label) on the timeline ruler.
+ *
+ * @module timeline/components/timeline-tick
+ */
+
 "use client";
 
 import type { FrameRate } from "lazynext-wasm";

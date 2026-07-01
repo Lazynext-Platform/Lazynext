@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a combobox popover for browsing and selecting typefaces with live previews. */
+
 import {
 	useState,
 	useMemo,

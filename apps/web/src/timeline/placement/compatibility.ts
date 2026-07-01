@@ -1,3 +1,12 @@
+/**
+ * Element↔track compatibility checks and validation.
+ *
+ * Maps element types to track types and provides predicates for
+ * determining whether an element can be placed on a given track.
+ *
+ * @module timeline/placement/compatibility
+ */
+
 import type { ElementType, TrackType } from "@/timeline";
 
 const ELEMENT_TRACK_MAP: Record<ElementType, TrackType> = {
@@ -10,6 +19,9 @@ const ELEMENT_TRACK_MAP: Record<ElementType, TrackType> = {
 	image: "video",
 };
 
+/**
+ * Returns the track type that accommodates the given element type.
+ */
 export function getTrackTypeForElementType({
 	elementType,
 }: {
@@ -18,6 +30,9 @@ export function getTrackTypeForElementType({
 	return ELEMENT_TRACK_MAP[elementType];
 }
 
+/**
+ * Returns `true` if the element type can be placed on the given track type.
+ */
 export function canElementGoOnTrack({
 	elementType,
 	trackType,
@@ -28,6 +43,10 @@ export function canElementGoOnTrack({
 	return getTrackTypeForElementType({ elementType }) === trackType;
 }
 
+/**
+ * Validates element/track compatibility, returning an error message
+ * when incompatible.
+ */
 export function validateElementTrackCompatibility({
 	element,
 	track,

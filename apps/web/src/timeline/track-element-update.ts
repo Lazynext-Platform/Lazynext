@@ -1,5 +1,17 @@
+/**
+ * Immutable helpers for updating tracks and elements within
+ * {@link SceneTracks}.
+ *
+ * @module timeline/track-element-update
+ */
+
 import type { SceneTracks, TimelineElement, TimelineTrack } from "@/timeline";
 
+/**
+ * Finds a track by ID within a scene's track collection.
+ *
+ * @returns the matching track or null if not found.
+ */
 export function findTrackInSceneTracks({
 	tracks,
 	trackId,
@@ -18,6 +30,10 @@ export function findTrackInSceneTracks({
 	);
 }
 
+/**
+ * Applies an immutable update to the track identified by `trackId`,
+ * returning a new SceneTracks with the updated track.
+ */
 export function updateTrackInSceneTracks({
 	tracks,
 	trackId,
@@ -88,6 +104,11 @@ function updateElementInTrack<TTrack extends TimelineTrack>({
 	} as TTrack;
 }
 
+/**
+ * Finds the element by ID within the given track and applies an
+ * immutable update, returning new SceneTracks. An optional predicate
+ * can gate whether the update is applied.
+ */
 export function updateElementInSceneTracks({
 	tracks,
 	trackId,

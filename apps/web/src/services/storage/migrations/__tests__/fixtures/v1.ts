@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/fixtures/v1 Fixture data for V1 project */
 export const v1Project = {
 	id: "project-v1-123",
 	version: 1,

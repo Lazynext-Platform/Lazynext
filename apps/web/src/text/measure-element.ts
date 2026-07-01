@@ -1,3 +1,4 @@
+/** @module Text element measurement for calculating visual bounds and dimensions on canvas */
 import { CORNER_RADIUS_MIN } from "@/text/background";
 import { DEFAULTS } from "@/timeline/defaults";
 import type { TextElement } from "@/timeline";

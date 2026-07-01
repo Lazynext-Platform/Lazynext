@@ -1,3 +1,4 @@
+/** @module Selectable item wrapper component for elements that can be box-selected */
 "use client";
 
 import { forwardRef, useCallback } from "react";

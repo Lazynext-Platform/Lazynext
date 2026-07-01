@@ -1,3 +1,4 @@
+/** @module SRT subtitle format parser for importing/exporting timed caption files */
 import type { ParseSubtitleResult, SubtitleCue } from "./types";
 
 const TIMESTAMP_SEPARATOR = /\s*-->\s*/;

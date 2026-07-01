@@ -1,3 +1,4 @@
+/** @module Graphic render node for rendering vector graphic elements on the compositor */
 import { createCanvasSurface } from "../canvas-utils";
 import {
 	DEFAULT_GRAPHIC_SOURCE_SIZE,

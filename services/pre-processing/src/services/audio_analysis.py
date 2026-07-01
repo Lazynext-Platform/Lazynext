@@ -1,3 +1,10 @@
+"""
+Audio analysis services: transcription and enhancement.
+
+Uses OpenAI Whisper for speech-to-text and a local SciPy DSP pipeline
+for noise reduction, compression, and EQ enhancement.
+"""
+
 import asyncio
 import os
 import httpx
@@ -5,6 +12,17 @@ from fastapi import HTTPException
 from src.models import VideoRequest, EnhanceAudioRequest
 
 async def transcribe_audio_service(req: VideoRequest):
+    """Transcribe speech to word-level subtitles using OpenAI Whisper.
+
+    Args:
+        req: VideoRequest containing the video_id to transcribe.
+
+    Returns:
+        dict with success, video_id, language, and word-level subtitles.
+
+    Raises:
+        HTTPException: 503 if API key is missing, 404 if audio file missing, 500 on failure.
+    """
     api_key = os.getenv("OPENAI_API_KEY")
     file_path = f"/tmp/{req.video_id}.mp4"
 
@@ -66,6 +84,20 @@ async def transcribe_audio_service(req: VideoRequest):
         detail="Transcription service failed internally"
     )
 async def enhance_audio_service(req: EnhanceAudioRequest):
+    """Enhance audio quality using a DSP pipeline (high-pass, gate, compressor, EQ).
+
+    Supports `studio_podcast` and `vocal_boost` target profiles using SciPy filters.
+    Produces an enhanced WAV file and returns its URL.
+
+    Args:
+        req: EnhanceAudioRequest with video_id and target_profile.
+
+    Returns:
+        dict with success, video_id, enhanced_audio_url, profile_applied, and method.
+
+    Raises:
+        HTTPException: 503 if DSP dependencies are missing, 500 on processing error.
+    """
     audio_path = f"/tmp/{req.video_id}.wav"
     output_path = f"/tmp/{req.video_id}_enhanced.wav"
     method = None

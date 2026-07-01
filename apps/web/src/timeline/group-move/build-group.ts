@@ -1,9 +1,22 @@
+/**
+ * Builds a {@link MoveGroup} from an anchor element and selected peers,
+ * computing each member's time offset, track section, and display index.
+ *
+ * @module timeline/group-move/build-group
+ */
+
 import type { ElementRef, SceneTracks } from "@/timeline";
 import { findTrackInSceneTracks } from "@/timeline/track-element-update";
 import type { GroupMember, MoveGroup } from "./types";
 import { getTrackPlacementById } from "./track-placement";
 import { subMediaTime } from "@/wasm";
 
+/**
+ * Constructs a move group from the anchor and selected elements,
+ * resolving track placements and computing per-member time offsets.
+ *
+ * @returns a {@link MoveGroup} or null if resolution fails.
+ */
 export function buildMoveGroup({
 	anchorRef,
 	selectedElements,

@@ -1,3 +1,10 @@
+/**
+ * Feature toolbar — horizontal toolbar with split, trim, ripple,
+ * and other editing actions for the active editor state.
+ *
+ * @module components/editor/FeatureToolbar
+ */
+
 "use client";
 
 import React from "react";

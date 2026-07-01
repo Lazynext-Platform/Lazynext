@@ -1,3 +1,16 @@
+/**
+ * Lazynext Render Farm — Express HTTP server.
+ *
+ * Accepts render jobs, manages a BullMQ queue backed by Redis, builds
+ * ffmpeg overlay graphs from timeline data, signs outputs with C2PA
+ * provenance manifests, and uploads to Azure Blob Storage.
+ *
+ * Supports two export modes:
+ *   1. Legacy timeline mode — server builds ffmpeg command from timeline data
+ *   2. Frame-stream mode — browser streams RGBA frames to /frames endpoints;
+ *      server encodes with rawvideo-on-stdin ffmpeg
+ */
+
 import "./tracing";
 import express, { Request, Response } from "express";
 import cors from "cors";
@@ -43,6 +56,7 @@ let renderQueue: Queue<RenderJob> | null = null;
 let worker: Worker<RenderJob & { timelineData?: any }> | null = null;
 let redisAvailable = false;
 
+/** Lazily create a Redis connection singleton. */
 function getRedis(): Redis {
 	if (!connection) {
 		connection = new Redis(REDIS_URL, {
@@ -53,6 +67,7 @@ function getRedis(): Redis {
 	return connection;
 }
 
+/** Ensure Redis is connected; returns true if available, false otherwise. */
 async function ensureRedis(): Promise<boolean> {
 	if (redisAvailable) return true;
 	try {
@@ -68,6 +83,7 @@ async function ensureRedis(): Promise<boolean> {
 	}
 }
 
+/** Lazily create the BullMQ render-jobs queue. */
 async function getQueue(): Promise<Queue<RenderJob>> {
 	if (!renderQueue) {
 		const r = getRedis();
@@ -76,6 +92,7 @@ async function getQueue(): Promise<Queue<RenderJob>> {
 	return renderQueue;
 }
 
+/** Lazily create the BullMQ worker for render job processing. */
 async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> {
 	if (!worker) {
 		const r = getRedis();
@@ -93,6 +110,7 @@ async function getWorker(): Promise<Worker<RenderJob & { timelineData?: any }>> 
 // Uses DefaultAzureCredential (Managed Identity in Container Apps, az login locally).
 let blobClient: any = null;
 
+/** Lazily create an Azure Blob Storage client via DefaultAzureCredential. */
 async function getBlobClient(): Promise<any> {
 	if (blobClient) return blobClient;
 	if (process.env.STORAGE_PROVIDER !== "azure") return null;
@@ -118,6 +136,12 @@ async function getBlobClient(): Promise<any> {
 	return blobClient;
 }
 
+/**
+ * POST /api/v1/jobs — Enqueue a new render job.
+ *
+ * Body: { projectId, format? }
+ * Returns 202 with jobId on success, 503 if Redis is unavailable.
+ */
 app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 	const { projectId, format = "mp4" } = req.body;
 
@@ -146,6 +170,13 @@ app.post("/api/v1/jobs", async (req: Request, res: Response) => {
 	res.status(202).json({ success: true, jobId });
 });
 
+/**
+ * POST /api/v1/export — Create an export job.
+ *
+ * Supports legacy timeline mode (timelineData provided) via BullMQ
+ * and frame-stream mode (width/height/totalFrames without timelineData)
+ * via the frame-export module.
+ */
 app.post("/api/v1/export", async (req: Request, res: Response) => {
 	const {
 		projectId,
@@ -302,6 +333,9 @@ app.delete("/api/v1/export/:jobId", async (req: Request, res: Response) => {
 	res.status(200).json({ success: true, jobId, status: "cancelled" });
 });
 
+/**
+ * GET /api/v1/jobs/:jobId — Query a render job's status and data.
+ */
 app.get("/api/v1/jobs/:jobId", async (req: Request, res: Response) => {
 	const jobId = req.params.jobId as string;
 	if (!(await ensureRedis())) {
@@ -344,6 +378,11 @@ interface TimelineData {
 	bgColor?: [number, number, number, number];
 }
 
+/**
+ * BullMQ worker processor: builds ffmpeg args from timeline data, spawns
+ * ffmpeg, tracks progress via stderr timecode parsing, signs with C2PA,
+ * and uploads to Azure Blob Storage.
+ */
 async function renderJobProcessor(job: Job<RenderJob & { timelineData?: any }>) {
 	console.log(`[Render Farm Worker] Started job ${job.id} (Type: ${job.name})...`);
 	job.data.status = "rendering";
@@ -656,7 +695,12 @@ async function signWithC2PA(
   );
 }
 
-// ── SSE endpoint ──────────────────────────────────────────────────────
+/**
+ * GET /api/v1/jobs/:jobId/stream — SSE endpoint for real-time job progress.
+ *
+ * Emits progress events every 1.5 seconds. The stream closes when the
+ * job reaches completed or failed state.
+ */
 app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	const jobId = req.params.jobId as string;
 	if (!(await ensureRedis())) {
@@ -695,6 +739,13 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
 	req.on("close", () => clearInterval(intervalId));
 });
 
+/**
+ * POST /api/v1/publish — Publish a rendered video to social media platforms.
+ *
+ * Body: { video_url, platform?, description?, title?, tags? }
+ * Downloads the video if a URL is provided, then publishes to each
+ * requested platform independently.
+ */
 app.post("/api/v1/publish", async (req: Request, res: Response) => {
 	const { video_url, platform = "tiktok", description, title, tags } = req.body;
 

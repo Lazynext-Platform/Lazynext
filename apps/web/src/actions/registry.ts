@@ -1,3 +1,4 @@
+/** @module Actions registry for registering and dispatching editor commands with keyboard shortcuts */
 import type {
 	TAction,
 	TActionFunc,

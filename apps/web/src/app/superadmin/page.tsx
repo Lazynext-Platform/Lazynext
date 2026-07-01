@@ -1,3 +1,9 @@
+/**
+ * Superadmin panel — system monitoring, user management, and analytics.
+ *
+ * @page /superadmin
+ */
+
 import { Header } from "@/components/header";
 import Link from "next/link";
 import {

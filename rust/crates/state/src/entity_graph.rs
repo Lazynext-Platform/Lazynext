@@ -1,3 +1,10 @@
+//! Entity graph for maintaining project-wide semantic consistency.
+//!
+//! The entity graph maps global semantic entities (e.g. "caption_style",
+//! "brand_color") to their serialized values and links timeline clips/tracks to
+//! those entities. This allows style choices and entity constraints to remain
+//! coherent across all chunks in a project.
+
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -14,6 +21,7 @@ pub struct EntityGraph {
 }
 
 impl EntityGraph {
+    /// Create an empty entity graph.
     pub fn new() -> Self {
         Self {
             entities: HashMap::new(),

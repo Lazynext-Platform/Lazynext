@@ -1,3 +1,11 @@
+/**
+ * Video element — timeline element representing a video clip with
+ * playback rate, media filter, volume, object-fit frame, and
+ * async metadata resolution via @twick/media-utils.
+ *
+ * @module components/editor/timeline/core/elements/video.element
+ */
+
 import { getObjectFitSize, getVideoMeta } from "@twick/media-utils";
 import { Frame, ObjectFit, Position, Size, VideoProps } from "../../types";
 import { TrackElement } from "./base.element";

@@ -1,3 +1,10 @@
+/**
+ * Box-select hit-testing — resolves which timeline elements intersect
+ * a drag selection rectangle in content coordinates.
+ *
+ * @module timeline/components/selection-hit-testing
+ */
+
 import type { TimelineTrack } from "@/timeline";
 import { timelineTimeToPixels } from "@/timeline/pixel-utils";
 import { TIMELINE_CONTENT_TOP_PADDING_PX } from "./layout";
@@ -73,6 +80,10 @@ function isRectangleIntersecting({
 	);
 }
 
+/**
+ * Determines which timeline elements are fully or partially enclosed
+ * by the current box-select rectangle.
+ */
 export function resolveTimelineElementIntersections({
 	container,
 	scrollContainer,

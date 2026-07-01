@@ -1,3 +1,11 @@
+/**
+ * Read-only dialog displaying project metadata.
+ *
+ * Shows duration, created/modified dates, and a truncated project ID.
+ *
+ * @module project/components/project-info-dialog
+ */
+
 import {
 	Dialog,
 	DialogBody,
@@ -38,6 +46,13 @@ function InfoRow({
 	);
 }
 
+/**
+ * Displays project metadata in a read-only dialog.
+ *
+ * @param isOpen - whether the dialog is visible.
+ * @param onOpenChange - callback when open state changes.
+ * @param project - project metadata to display.
+ */
 export function ProjectInfoDialog({
 	isOpen,
 	onOpenChange,

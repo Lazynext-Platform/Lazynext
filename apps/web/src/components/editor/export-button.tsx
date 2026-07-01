@@ -1,3 +1,9 @@
+/**
+ * Export button — triggers the export pipeline for a given project.
+ *
+ * @module components/editor/export-button
+ */
+
 "use client";
 
 import { useState } from "react";

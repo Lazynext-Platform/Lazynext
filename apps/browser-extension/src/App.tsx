@@ -1,3 +1,4 @@
+/** @module App Root application component for browser extension */
 import { useState, useEffect } from "react";
 
 async function getApiGatewayUrl(): Promise<string> {

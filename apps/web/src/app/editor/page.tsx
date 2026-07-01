@@ -1,3 +1,10 @@
+/**
+ * Standalone agentic editor page — canvas preview + Chronos
+ * AI chat interface with playback controls.
+ *
+ * @page /editor
+ */
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";

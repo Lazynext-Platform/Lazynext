@@ -1,4 +1,5 @@
 "use client";
+/** @module Adjustment view — color correction sliders (brightness, contrast, saturation, temperature) */
 
 export function AdjustmentView() {
 	return (

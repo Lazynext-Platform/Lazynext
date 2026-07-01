@@ -1,3 +1,4 @@
+/** @module Chapter export utility for extracting chapter markers to various formats */
 import type { ChapterMarker, ProjectJSON } from "../types";
 
 const formatSeconds = (value: number): string => {

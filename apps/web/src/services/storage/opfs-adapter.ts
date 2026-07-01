@@ -1,3 +1,4 @@
+/** @module OPFS (Origin Private File System) storage adapter for persisted file storage */
 import type { StorageAdapter } from "./types";
 
 export class OPFSAdapter implements StorageAdapter<File> {

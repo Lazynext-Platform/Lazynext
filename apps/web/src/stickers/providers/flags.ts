@@ -1,3 +1,9 @@
+/**
+ * @module Country flag sticker provider — searches a lazily-loaded country
+ * dataset by name, code, or region alias. Exposes `flagsProvider` for the
+ * sticker registry and utility functions for region/query resolution.
+ */
+
 import { buildStickerId, parseStickerId } from "../sticker-id";
 import type {
 	StickerBrowseResult,

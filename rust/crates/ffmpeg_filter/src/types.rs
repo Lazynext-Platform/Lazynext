@@ -1,3 +1,9 @@
+//! Shared types for the FFMPEG filter system.
+//!
+//! Defines pad labels, input stream specs, resolution presets
+//! (HD to 8K), frame rates, pixel formats, sample formats/rates,
+//! and scaling algorithms — all serializable for WASM bridge use.
+
 use serde::{Deserialize, Serialize};
 
 /// Input/output pad labels for filter connections.
@@ -30,6 +36,7 @@ pub enum Resolution {
 }
 
 impl Resolution {
+    /// Returns the width in pixels.
     pub fn width(&self) -> u32 {
         match self {
             Resolution::HD1080 => 1920,
@@ -40,6 +47,7 @@ impl Resolution {
         }
     }
 
+    /// Returns the height in pixels.
     pub fn height(&self) -> u32 {
         match self {
             Resolution::HD1080 => 1080,
@@ -60,10 +68,15 @@ impl std::fmt::Display for Resolution {
 /// Standard frame rates.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum FrameRate {
+    /// 24 frames per second.
     Fps24,
+    /// 30 frames per second.
     Fps30,
+    /// 60 frames per second.
     Fps60,
+    /// 120 frames per second.
     Fps120,
+    /// Custom frame rate.
     Custom(u32),
 }
 
@@ -82,11 +95,17 @@ impl std::fmt::Display for FrameRate {
 /// Pixel format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PixelFormat {
+    /// 4:2:0 subsampled YUV.
     Yuv420p,
+    /// 4:2:2 subsampled YUV.
     Yuv422p,
+    /// 4:4:4 full-sampled YUV.
     Yuv444p,
+    /// 24-bit RGB.
     Rgb24,
+    /// 32-bit RGBA.
     Rgba,
+    /// 8-bit grayscale.
     Gray,
 }
 
@@ -107,9 +126,13 @@ impl std::fmt::Display for PixelFormat {
 /// Audio sample format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SampleFormat {
+    /// Signed 16-bit integer.
     S16,
+    /// Signed 32-bit integer.
     S32,
+    /// 32-bit floating point.
     Flt,
+    /// 64-bit double precision.
     Dbl,
 }
 
@@ -128,8 +151,11 @@ impl std::fmt::Display for SampleFormat {
 /// Audio sample rate in Hz.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SampleRate {
+    /// 44.1 kHz (CD quality).
     Hz44100,
+    /// 48 kHz (professional video).
     Hz48000,
+    /// 96 kHz (high-resolution).
     Hz96000,
 }
 
@@ -146,9 +172,13 @@ impl std::fmt::Display for SampleRate {
 /// Scaling algorithm for video resize.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ScaleAlgorithm {
+    /// Bilinear interpolation (fast, lower quality).
     Bilinear,
+    /// Bicubic interpolation (balanced speed and quality).
     Bicubic,
+    /// Lanczos interpolation (high quality with slight sharpening).
     Lanczos,
+    /// Spline interpolation (smooth, high quality).
     Spline,
 }
 

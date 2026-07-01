@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a React Hook Form wrapper with validation, field rendering, and draft persistence. */
+
 import * as React from "react";
 import { type Label as LabelPrimitive, Slot as SlotPrimitive } from "radix-ui";
 

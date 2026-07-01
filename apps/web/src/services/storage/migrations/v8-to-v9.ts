@@ -1,3 +1,4 @@
+/** @module Storage migration v8 to v9 */
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV8ToV9 } from "./transformers/v8-to-v9";

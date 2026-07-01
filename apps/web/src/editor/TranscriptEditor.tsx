@@ -1,6 +1,22 @@
+/**
+ * Transcript editor for text-based video editing.
+ *
+ * Displays a Whisper-generated transcript with timestamps. Clicking a
+ * line seeks the timeline to that moment. Deleting a line triggers a
+ * razor cut on the corresponding video segment via WASM.
+ *
+ * @module editor/TranscriptEditor
+ */
+
 import React, { useState } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
+/**
+ * Interactive transcript editor linked to the NLE timeline.
+ *
+ * Click a transcript line to seek, delete a line to razor-cut the
+ * underlying video segment on the timeline.
+ */
 export function TranscriptEditor() {
 	const { time } = useWasm();
 

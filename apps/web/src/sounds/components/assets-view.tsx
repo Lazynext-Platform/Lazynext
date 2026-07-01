@@ -1,4 +1,5 @@
 "use client";
+/** @module Sounds assets panel — browse, search, play, and save sound effects */
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

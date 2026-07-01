@@ -1,3 +1,7 @@
+/**
+ * @module timeline/hooks/element/use-element-interaction
+ */
+
 import { useEffect, useReducer, useState, type RefObject } from "react";
 import { useEditor } from "@/editor/use-editor";
 import { useCommittedRef } from "@/hooks/use-committed-ref";

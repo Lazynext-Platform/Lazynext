@@ -1,3 +1,8 @@
+/**
+ * @module Panel layout configuration — fixed percentage splits for the
+ * editor's workspace panels (tools, preview, properties, timeline).
+ */
+
 export const PANEL_CONFIG = {
 	panels: {
 		tools: 25,

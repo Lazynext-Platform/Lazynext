@@ -1,3 +1,5 @@
+/** @component Renders a trail of page links indicating the current navigation path. */
+
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { Slot } from "radix-ui";
 

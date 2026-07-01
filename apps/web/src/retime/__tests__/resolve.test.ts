@@ -1,3 +1,4 @@
+/** @module __tests__/resolve Test suite for retime resolve utilities */
 import { describe, expect, test } from "bun:test";
 import {
 	getClipTimeAtSourceTime,

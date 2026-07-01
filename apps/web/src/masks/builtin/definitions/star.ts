@@ -1,3 +1,4 @@
+/** @module Star mask definition with spoke count, position, size, and feather parameters */
 import type { MaskDefinition } from "@/masks/types";
 import {
 	BOX_LIKE_MASK_PARAMS,

@@ -1,3 +1,4 @@
+/** @module Keyframes clipboard handler for copying/pasting keyframe data between elements */
 import { getKeyframeById } from "@/animation";
 import { getChannelEntriesFromData } from "@/animation/channel-data";
 import { isScalarChannel } from "@/animation/interpolation";

@@ -1,3 +1,4 @@
+/** @module Storage migration v16 to v17 */
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV16ToV17 } from "./transformers/v16-to-v17";

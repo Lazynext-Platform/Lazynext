@@ -1,3 +1,9 @@
+//! FFMPEG filter graph builder that generates `-filter_complex` strings.
+//!
+//! `FilterGraph` manages an ordered sequence of filters connected via
+//! labeled pads. It provides presets for common pipelines: scale+FPS,
+//! color grading, text overlay, and audio normalization.
+
 use crate::filter::Filter;
 use crate::types::*;
 
@@ -74,7 +80,7 @@ impl FilterGraph {
         parts.join(";")
     }
 
-    /// Build preset: scale + fps conversion for output standardization.
+    /// Build a scale + FPS conversion preset for output standardization.
     pub fn preset_scale_and_fps(
         resolution: Resolution,
         fps: FrameRate,
@@ -103,7 +109,7 @@ impl FilterGraph {
             })
     }
 
-    /// Build preset: color grade (balance + hue).
+    /// Build a color grading preset (color balance followed by hue adjustment).
     pub fn preset_color_grade(red: f32, green: f32, blue: f32, hue: f32, saturation: f32) -> Self {
         let balance_label = PadLabels {
             input: "v".to_string(),
@@ -128,7 +134,7 @@ impl FilterGraph {
             })
     }
 
-    /// Build preset: text overlay with custom font.
+    /// Build a text overlay preset with custom font and positioning.
     pub fn preset_text_overlay(
         text: impl Into<String>,
         font_size: u32,
@@ -147,7 +153,7 @@ impl FilterGraph {
         })
     }
 
-    /// Build preset: audio normalization chain.
+    /// Build an audio normalization preset using the volume filter.
     pub fn preset_audio_normalize(target_db: f32) -> Self {
         let vol_label = PadLabels {
             input: "a".to_string(),

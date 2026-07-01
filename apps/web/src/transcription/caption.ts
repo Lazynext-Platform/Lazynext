@@ -1,9 +1,20 @@
+/**
+ * @module transcription/caption
+ * @description Splits raw transcription segments into time-ranged
+ *   caption chunks suitable for rendering on the timeline.
+ */
+
 import type { TranscriptionSegment, CaptionChunk } from "@/transcription/types";
 import {
 	DEFAULT_WORDS_PER_CAPTION,
 	MIN_CAPTION_DURATION_SECONDS,
 } from "@/transcription/caption-defaults";
 
+/**
+ * Converts an ordered list of transcription segments into caption
+ * chunks, respecting a target word count per chunk and a minimum
+ * display duration.
+ */
 export function buildCaptionChunks({
 	segments,
 	wordsPerChunk = DEFAULT_WORDS_PER_CAPTION,

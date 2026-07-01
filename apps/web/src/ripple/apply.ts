@@ -1,12 +1,23 @@
+/**
+ * @module ripple/apply
+ * @description Applies computed ripple adjustments to scene tracks,
+ *   shifting elements backward when gaps are freed.
+ */
+
 import type { SceneTracks, TimelineTrack } from "@/timeline/types";
 import { rippleShiftElements } from "./shift";
 
+/** Describes a single ripple operation on a track. */
 export interface RippleAdjustment {
 	trackId: string;
 	afterTime: number;
 	shiftAmount: number;
 }
 
+/**
+ * Applies multiple ripple adjustments across all tracks in a scene,
+ * preserving per-track ordering.
+ */
 export function applyRippleAdjustments({
 	tracks,
 	adjustments,

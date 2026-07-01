@@ -1,3 +1,4 @@
+/** @module Mask handle components for interactive freeform mask point editing on the canvas */
 "use client";
 
 import { PEN_CURSOR } from "@/preview/components/cursors";

@@ -1,3 +1,5 @@
+//! Export pipeline for rendering compositor frames and piping them to ffmpeg.
+
 use crate::encoder::{ExportConfig, ExportEncoder};
 use anyhow::Result;
 
@@ -7,6 +9,7 @@ pub struct ExportPipeline {
 }
 
 impl ExportPipeline {
+    /// Create a new export pipeline with the given configuration.
     pub fn new(config: ExportConfig) -> Self {
         Self { config }
     }
@@ -82,7 +85,7 @@ impl ExportPipeline {
     }
 }
 
-/// Synchronous convenience: build ffmpeg command for shell invocation.
+/// Build an ffmpeg command string from an export configuration for shell invocation.
 pub fn build_export_command(config: &ExportConfig) -> String {
     let args = ExportEncoder::build_ffmpeg_args(config);
     format!("ffmpeg {}", args.join(" "))

@@ -1,3 +1,9 @@
+/**
+ * @module animation/interpolation
+ * @description Channel value evaluation and interpolation helpers.
+ *   Delegates to WASM for scalar / discrete channel sampling.
+ */
+
 import type {
 	AnimationChannel,
 	AnimationInterpolation,
@@ -10,6 +16,7 @@ import type {
 import type { ParamValue } from "@/params";
 import { evaluateScalarChannel, evaluateDiscreteChannel } from "@/wasm";
 
+/** Returns `true` when a channel contains scalar (numeric) keyframes. */
 export function isScalarChannel(
 	channel: AnimationChannel,
 ): channel is ScalarAnimationChannel {
@@ -19,8 +26,10 @@ export function isScalarChannel(
 	);
 }
 
-// Retained for any components that expect to call normalizeChannel before passing to WASM,
-// though WASM now handles normalization internally. We return the channel as-is to avoid breaking signatures.
+/**
+ * Normalises a channel before passing to WASM. Now a no-op since WASM
+ * handles normalisation internally; retained for API compatibility.
+ */
 export function normalizeChannel({
 	channel,
 }: {
@@ -44,6 +53,10 @@ export function normalizeChannel({
 	return channel;
 }
 
+/**
+ * Converts a raw scalar segment type to the user-facing interpolation
+ * mode.
+ */
 export function getScalarSegmentInterpolation({
 	segment,
 }: {
@@ -56,6 +69,10 @@ export function getScalarSegmentInterpolation({
 	return segment === "bezier" ? "bezier" : "linear";
 }
 
+/**
+ * Evaluates a scalar (numeric) channel at a given time, falling back
+ * to the provided value when the channel is empty.
+ */
 export function getScalarChannelValueAtTime({
 	channel,
 	time,
@@ -72,6 +89,10 @@ export function getScalarChannelValueAtTime({
 	return evaluateScalarChannel(channel, time, fallbackValue);
 }
 
+/**
+ * Evaluates a discrete channel at a given time, falling back to the
+ * provided value when the channel is empty.
+ */
 export function getDiscreteChannelValueAtTime({
 	channel,
 	time,
@@ -85,12 +106,15 @@ export function getDiscreteChannelValueAtTime({
 		return fallbackValue;
 	}
 
-	// wasm-bindgen requires strings or numbers. 
-	// Our discrete values are primarily strings, so we pass string representation.
 	const result = evaluateDiscreteChannel(channel, time, fallbackValue as string);
 	return result as DiscreteValue;
 }
 
+/**
+ * Polymorphic channel evaluator — dispatches to
+ * {@link getScalarChannelValueAtTime} or
+ * {@link getDiscreteChannelValueAtTime} based on the fallback value type.
+ */
 export function getChannelValueAtTime({
 	channel,
 	time,

@@ -1,3 +1,10 @@
+/**
+ * Drop target line — horizontal line showing where a dragged element
+ * or external drop will land on the timeline.
+ *
+ * @module timeline/components/drag-line
+ */
+
 import { getDropLineY } from "./drop-target";
 import type { TimelineTrack, DropTarget } from "@/timeline";
 import { TIMELINE_LAYERS } from "./layers";
@@ -9,6 +16,9 @@ interface DragLineProps {
 	headerHeight?: number;
 }
 
+/**
+ * Renders a horizontal drop-target indicator line, or null if invisible.
+ */
 export function DragLine({
 	dropTarget,
 	tracks,

@@ -1,3 +1,4 @@
+/** @module Transcription web worker running Whisper pipeline for speech recognition */
 import {
 	pipeline,
 	type AutomaticSpeechRecognitionPipeline,

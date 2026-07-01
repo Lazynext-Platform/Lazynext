@@ -1,3 +1,14 @@
+/**
+ * Projects Zustand store — persisted client state for the projects
+ * browser: search query, sort key/order, view mode (grid vs list),
+ * and multi-select / shift-click range selection.
+ *
+ * View mode and sort preferences are persisted to localStorage via
+ * Zustand's `persist` middleware (key: `"projects-view-mode"`).
+ *
+ * @module projects/store
+ */
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { TProjectSortKey } from "@/project/types";

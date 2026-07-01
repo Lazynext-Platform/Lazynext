@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/v7-to-v8
+ */
+
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV7ToV8 } from "./transformers/v7-to-v8";

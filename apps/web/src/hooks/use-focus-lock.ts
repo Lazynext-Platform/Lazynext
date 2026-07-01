@@ -1,3 +1,13 @@
+/**
+ * Focus lock hook for modal dialogs and overlays.
+ *
+ * When active, prevents pointer events on everything outside the
+ * locked container. Clicking outside dismisses the lock. Supports
+ * an optional CSS selector for elements that should remain interactive.
+ *
+ * @module hooks/use-focus-lock
+ */
+
 import { useEffect, useRef } from "react";
 import { useCommittedRef } from "@/hooks/use-committed-ref";
 
@@ -26,6 +36,15 @@ function buildFocusLockCSS({
 	return rules.join("\n");
 }
 
+/**
+ * Locks focus and pointer events to a container element.
+ *
+ * @param isActive - when true, the lock is engaged.
+ * @param onDismiss - called when the user clicks outside the container.
+ * @param cursor - cursor style to apply to locked-out elements (default "default").
+ * @param allowSelector - CSS selector for elements that bypass the lock.
+ * @returns a ref to attach to the container element.
+ */
 export function useFocusLock<T extends HTMLElement = HTMLElement>({
 	isActive,
 	onDismiss,

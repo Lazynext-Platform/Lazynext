@@ -1,3 +1,4 @@
+/** @module Database migration runner for Drizzle ORM */
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Pool } from "pg";

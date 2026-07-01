@@ -1,3 +1,4 @@
+/** @module Image render node for rendering image elements on the compositor */
 import {
 	VisualNode,
 	type ResolvedVisualSourceNodeState,

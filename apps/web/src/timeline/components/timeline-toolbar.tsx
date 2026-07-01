@@ -1,3 +1,10 @@
+/**
+ * Timeline toolbar — split, duplicate, delete, bookmark, source audio,
+ * snapping, ripple editing, and zoom controls.
+ *
+ * @module timeline/components/timeline-toolbar
+ */
+
 import { useEditor } from "@/editor/use-editor";
 import { useElementSelection } from "@/timeline/hooks/element/use-element-selection";
 import {
@@ -51,6 +58,10 @@ import { GraphEditorPopover } from "./graph-editor/popover";
 import { PopoverTrigger } from "@/components/ui/popover";
 import { useGraphEditorController } from "./graph-editor/use-controller";
 
+/**
+ * Renders the toolbar with editing actions, scene selector, snapping
+ * toggle, ripple toggle, and zoom slider/buttons.
+ */
 export function TimelineToolbar({
 	zoomLevel,
 	minZoom,

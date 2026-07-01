@@ -1,3 +1,13 @@
+/**
+ * Export module — types, constants, and helpers for video export.
+ *
+ * Defines export formats (MP4, WebM), quality levels, and helper
+ * functions for MIME type resolution, file extension lookup, and
+ * client-side buffer download.
+ *
+ * @module export
+ */
+
 import type { FrameRate } from "lazynext-wasm";
 import { EXPORT_MIME_TYPES } from "./mime-types";
 

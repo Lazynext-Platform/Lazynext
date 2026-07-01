@@ -1,3 +1,4 @@
+/** @module Caption export utility for extracting captions to SRT and other formats */
 import type { ElementJSON, ProjectJSON } from "../types";
 
 type CaptionLike = {

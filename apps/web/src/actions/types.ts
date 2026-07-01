@@ -1,3 +1,4 @@
+/** @module Actions type definitions for action handlers, shortcuts, and refs */
 import type { MutableRefObject } from "react";
 import type { TAction } from "./definitions";
 

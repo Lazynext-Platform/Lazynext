@@ -1,3 +1,10 @@
+/**
+ * OpenTelemetry tracing setup for the AI Agents service.
+ *
+ * Exports traces via OTLP gRPC when OTEL_EXPORTER_OTLP_ENDPOINT is set.
+ * Gracefully shut down on SIGTERM.
+ */
+
 import * as opentelemetry from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";

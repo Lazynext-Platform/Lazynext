@@ -1,3 +1,4 @@
+/** @module Freeform path mask data structures for point-based mask outlines */
 import type { ElementBounds } from "@/preview/element-bounds";
 
 export interface FreeformPathPoint {

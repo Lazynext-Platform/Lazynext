@@ -1,3 +1,10 @@
+/**
+ * Experimental panels — advanced editing panels for keyframe
+ * curves, audio visualization, and GPU compositing.
+ *
+ * @module components/editor/ExperimentalPanels
+ */
+
 "use client";
 
 import React from "react";

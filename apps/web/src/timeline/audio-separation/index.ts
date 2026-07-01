@@ -1,3 +1,10 @@
+/**
+ * Source audio separation — extract, recover, and toggle audio from
+ * video elements as independent audio tracks.
+ *
+ * @module timeline/audio-separation
+ */
+
 import { cloneAnimations } from "@/animation";
 import type { ElementAnimations } from "@/animation/types";
 import type { MediaAsset } from "@/media/types";
@@ -11,6 +18,7 @@ import type {
 
 type MediaAudioState = Pick<MediaAsset, "hasAudio">;
 
+/** Returns `true` if the source audio is still embedded in the video element. */
 export function isSourceAudioEnabled({
 	element,
 }: {
@@ -19,6 +27,7 @@ export function isSourceAudioEnabled({
 	return element.isSourceAudioEnabled !== false;
 }
 
+/** Returns `true` if the source audio has been extracted from the video. */
 export function isSourceAudioSeparated({
 	element,
 }: {
@@ -27,6 +36,7 @@ export function isSourceAudioSeparated({
 	return !isSourceAudioEnabled({ element });
 }
 
+/** Type predicate: video element with source audio that can be extracted. */
 export function canExtractSourceAudio(
 	element: TimelineElement,
 	mediaAsset: MediaAudioState | null | undefined,
@@ -39,12 +49,14 @@ export function canExtractSourceAudio(
 	);
 }
 
+/** Type predicate: video element whose audio was previously extracted. */
 export function canRecoverSourceAudio(
 	element: TimelineElement,
 ): element is VideoElement {
 	return element.type === "video" && isSourceAudioSeparated({ element });
 }
 
+/** Type predicate: video element whose source audio can be toggled. */
 export function canToggleSourceAudio(
 	element: TimelineElement,
 	mediaAsset: MediaAudioState | null | undefined,
@@ -54,6 +66,7 @@ export function canToggleSourceAudio(
 	);
 }
 
+/** Returns `true` if the element has currently enabled audio. */
 export function doesElementHaveEnabledAudio({
 	element,
 	mediaAsset,
@@ -72,6 +85,10 @@ export function doesElementHaveEnabledAudio({
 	);
 }
 
+/**
+ * Builds a standalone audio element cloned from a video element's
+ * source audio, copying trim, retime, and volume animation keyframes.
+ */
 export function buildSeparatedAudioElement({
 	sourceElement,
 }: {
@@ -106,6 +123,7 @@ export function buildSeparatedAudioElement({
 	};
 }
 
+/** Returns the label to show on the source-audio toggle button. */
 export function getSourceAudioActionLabel({
 	element,
 }: {

@@ -1,3 +1,4 @@
+/** @module Unit tests for the StatCard admin component */
 import { describe, expect, it, afterEach } from "bun:test";
 import { render, screen, cleanup } from "@testing-library/react";
 import { StatCard } from "./StatCard";

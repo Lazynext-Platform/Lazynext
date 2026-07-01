@@ -1,3 +1,7 @@
+/**
+ * @module media/waveform-summary
+ */
+
 "use client";
 
 import { getSourceTimeAtClipTime } from "@/retime";

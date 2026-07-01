@@ -1,0 +1,7 @@
+target/
+.git/
+*.md
+!README.md
+.env*
+__pycache__
+.DS_Store

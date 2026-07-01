@@ -1,3 +1,4 @@
+/** @module Selection scope tracking for managing multiple selection contexts */
 export type ScopeEntry = {
 	hasSelection: () => boolean;
 	clear: () => void;

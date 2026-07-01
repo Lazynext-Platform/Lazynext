@@ -1,3 +1,4 @@
+/** @module Video render node for decoding and rendering video frames on the compositor */
 import {
 	VisualNode,
 	type ResolvedVisualSourceNodeState,

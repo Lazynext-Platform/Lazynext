@@ -1,3 +1,10 @@
+/**
+ * PostHog provider — initializes PostHog analytics and wraps the
+ * app with the PostHog React context provider.
+ *
+ * @module components/providers/posthog-provider
+ */
+
 "use client";
 
 import posthog from "posthog-js";

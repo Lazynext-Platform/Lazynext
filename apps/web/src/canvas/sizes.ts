@@ -1,3 +1,4 @@
+/** @module Default canvas size presets and the default canvas dimensions */
 import type { TCanvasSize } from "@/project/types";
 
 export const DEFAULT_CANVAS_PRESETS: TCanvasSize[] = [

@@ -1,3 +1,9 @@
+/**
+ * Top toolbar — minimalist top navigation bar for the editor.
+ *
+ * @module components/editor/TopToolbar
+ */
+
 import React from "react";
 
 // Phase 52: Extracting Top Navigation

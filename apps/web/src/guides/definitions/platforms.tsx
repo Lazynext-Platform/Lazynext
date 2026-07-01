@@ -1,3 +1,4 @@
+/** @module Platform-specific guide definitions for social media safe zones (TikTok, Instagram, etc.) */
 import Image from "next/image";
 import type { GuideDefinition } from "@/guides/types";
 import { TikTokLayout } from "./tiktok-layout";

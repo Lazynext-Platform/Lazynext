@@ -1,4 +1,6 @@
 "use client";
+/** @module Transitions view — lists available timeline transitions */
+
 
 import { Button } from "@/components/ui/button";
 

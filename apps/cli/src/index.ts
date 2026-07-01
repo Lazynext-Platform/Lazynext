@@ -1,3 +1,4 @@
+/** @module cli CLI entry point for Lazynext */
 #!/usr/bin/env node
 
 import { Command } from "commander";

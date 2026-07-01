@@ -1,3 +1,9 @@
+//! GPU-accelerated signed distance field computation via Jump Flood Algorithm (JFA).
+//!
+//! Converts a binary mask texture into a pair of signed distance field textures
+//! (inside and outside) using ping-pong JFA render passes. These distance fields
+//! power soft-edged masking, glows, outlines, and other distance-based effects.
+
 use bytemuck::{Pod, Zeroable};
 use gpu::{FULLSCREEN_SHADER_SOURCE, GpuContext};
 use wgpu::util::DeviceExt;
@@ -5,11 +11,17 @@ use wgpu::util::DeviceExt;
 const JFA_INIT_SHADER_SOURCE: &str = include_str!("shaders/jfa_init.wgsl");
 const JFA_STEP_SHADER_SOURCE: &str = include_str!("shaders/jfa_step.wgsl");
 
+/// Pair of textures containing the inside and outside signed distance fields
+/// for a mask, used by downstream feathering and effect passes.
 pub struct SignedDistanceFieldTextures {
     pub inside_texture: wgpu::Texture,
     pub outside_texture: wgpu::Texture,
 }
 
+/// GPU render pipeline that computes signed distance fields via JFA.
+///
+/// Runs an init pass followed by log₂(max(width, height)) step passes
+/// in a ping-pong texture configuration.
 pub struct SdfPipeline {
     texture_bind_group_layout: wgpu::BindGroupLayout,
     uniform_bind_group_layout: wgpu::BindGroupLayout,
@@ -17,6 +29,7 @@ pub struct SdfPipeline {
     step_pipeline: wgpu::RenderPipeline,
 }
 
+/// Uniform buffer for the JFA init pass carrying texture resolution and inverted-mode flag.
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct JfaInitUniformBuffer {
@@ -25,6 +38,7 @@ struct JfaInitUniformBuffer {
     _padding: f32,
 }
 
+/// Uniform buffer for each JFA step pass carrying the current step size in pixels.
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct JfaStepUniformBuffer {
@@ -34,6 +48,10 @@ struct JfaStepUniformBuffer {
 }
 
 impl SdfPipeline {
+    /// Creates a new SDF pipeline with the given GPU context.
+    ///
+    /// Compiles the JFA init and step WGSL shaders and sets up bind group
+    /// layouts and render pipeline state.
     pub fn new(context: &GpuContext) -> Self {
         let device = context.device();
         let texture_bind_group_layout =
@@ -117,6 +135,13 @@ impl SdfPipeline {
         }
     }
 
+    /// Computes a signed distance field from a binary mask texture.
+    ///
+    /// Creates and submits a new command encoder, running the full JFA pipeline
+    /// (init pass + log₂(max(w, h)) step passes) and returning the inside and
+    /// outside distance field textures.
+    ///
+    /// For batching, use [`compute_signed_distance_field_with_encoder`].
     pub fn compute_signed_distance_field(
         &self,
         context: &GpuContext,
@@ -141,6 +166,11 @@ impl SdfPipeline {
         textures
     }
 
+    /// Computes a signed distance field using an existing command encoder.
+    ///
+    /// Runs the full JFA pipeline (init + log₂ step passes) within the given
+    /// encoder. The caller is responsible for submitting the encoder.
+    /// Returns the inside and outside distance field textures.
     pub fn compute_signed_distance_field_with_encoder(
         &self,
         context: &GpuContext,

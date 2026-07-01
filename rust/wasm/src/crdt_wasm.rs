@@ -1,3 +1,10 @@
+//! WASM-facing CRDT engine for collaborative editing.
+//!
+//! Provides a `CrdtEngine` class with an append-only operation log,
+//! vector clocks, tombstones, undo/redo stacks, and an entity graph
+//! — the full conflict-free replicated data type machinery needed
+//! for real-time multi-peer timeline collaboration.
+
 use serde_wasm_bindgen::{from_value, to_value};
 use state::entity_graph::EntityGraph;
 use state::operations::{CrdtOperation, CrdtOperationLog};

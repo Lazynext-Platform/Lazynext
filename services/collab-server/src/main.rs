@@ -88,12 +88,16 @@ enum ServerMessage {
     },
 }
 
+/// Shared application state: project-room broadcast channels,
+/// peer-to-room mappings, and a database handle.
 struct AppState {
     rooms: DashMap<String, tokio::sync::broadcast::Sender<String>>,
     peer_rooms: DashMap<String, String>,
     db: Arc<DbStore>,
 }
 
+/// Verify a JWT token signed with BETTER_AUTH_SECRET using HS256.
+/// Returns the `sub` claim on success, or an error string on failure.
 fn verify_token(token: &str) -> Result<String, String> {
     let secret = std::env::var("BETTER_AUTH_SECRET")
         .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-64-chars-here".to_string());
@@ -112,10 +116,15 @@ fn verify_token(token: &str) -> Result<String, String> {
         .to_string())
 }
 
+/// Serialize a ServerMessage to a JSON string (infallible).
 fn send_msg(msg: &ServerMessage) -> String {
     serde_json::to_string(msg).unwrap()
 }
 
+/// Handle an individual WebSocket connection lifecycle.
+///
+/// Authenticates on Join, manages project-room membership, relays
+/// CRDT deltas to all peers in the room, and forwards WebRTC signaling.
 async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
     let mut peer_id = String::new();
     let mut project_id = String::new();
@@ -261,6 +270,7 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
     }
 }
 
+/// Axum WebSocket upgrade handler — passes the socket to `handle_socket`.
 async fn ws_handler(
     ws: WebSocketUpgrade,
     Extension(state): Extension<Arc<AppState>>,
@@ -268,12 +278,14 @@ async fn ws_handler(
     ws.on_upgrade(move |socket| handle_socket(socket, state))
 }
 
+/// Request payload for persisting project state.
 #[derive(Deserialize)]
 struct SaveRequest {
     project_id: String,
     state: serde_json::Value,
 }
 
+/// POST /api/save — Persist a project's CRDT state to the database.
 async fn save_state(
     Extension(state): Extension<Arc<AppState>>,
     Json(payload): Json<SaveRequest>,
@@ -291,6 +303,7 @@ async fn save_state(
     }
 }
 
+/// GET /api/load/:project_id — Load a project's CRDT state from the database.
 async fn load_state(
     Extension(state): Extension<Arc<AppState>>,
     Path(project_id): Path<String>,

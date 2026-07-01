@@ -1,3 +1,4 @@
+/** @module Command for deleting timeline elements with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import type { SceneTracks } from "@/timeline";
 import { EditorCore } from "@/core";

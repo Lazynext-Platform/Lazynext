@@ -1,10 +1,18 @@
+//! Audio track synchronization via FFT cross-correlation.
+//!
+//! Computes the sample-accurate offset between two audio tracks (master and
+//! secondary) using forward/inverse FFT-based cross-correlation. A positive
+//! offset indicates the secondary track is delayed relative to the master.
+
 use rustfft::{FftPlanner, num_complex::Complex};
 
+/// Synchronizer that aligns two audio tracks by cross-correlation.
 pub struct AudioSynchronizer {
     pub sample_rate: u32,
 }
 
 impl AudioSynchronizer {
+    /// Create a new synchronizer for the given sample rate.
     pub fn new(sample_rate: u32) -> Self {
         Self { sample_rate }
     }

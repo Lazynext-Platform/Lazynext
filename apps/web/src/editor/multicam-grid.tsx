@@ -1,7 +1,24 @@
+/**
+ * Multi-camera angle grid for live switching during playback.
+ *
+ * Renders four camera angles (Wide, Close up, Over shoulder, Drone) as a
+ * 2x2 grid. Pressing keys 1–4 triggers a live cut on the WASM engine.
+ * Active angle is highlighted with a red border and REC indicator.
+ *
+ * @module editor/multicam-grid
+ */
+
 import React, { useEffect, useState, useRef } from "react";
 import { useWasm } from "@/hooks/use-wasm";
 import { wasmBridge } from "@/core/wasm-bridge";
 
+/**
+ * Multi-camera angle grid component.
+ *
+ * Displays four camera angles in a 2x2 grid. Keyboard shortcuts 1-4
+ * perform live cuts via the WASM compositor. The active angle is
+ * rendered through the WGPU bridge.
+ */
 export function MulticamGrid() {
 	const [activeAngle, setActiveAngle] = useState(0);
 	const { time, frame, isReady } = useWasm();

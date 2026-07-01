@@ -1,3 +1,4 @@
+/** @module Preview coordinate conversion between viewport and video coordinate spaces */
 export interface PreviewViewportGeometry {
 	canvasHeight: number;
 	canvasWidth: number;

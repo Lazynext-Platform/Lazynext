@@ -1,3 +1,9 @@
+//! Element-to-track type compatibility mapping and validation.
+//! Determines which track type a given element belongs on and
+//! validates that placements are compatible.
+
+/// Maps an element type to the track type it belongs on.
+/// e.g. "audio" → "audio", "image" → "video", "sticker" → "graphic".
 pub fn get_track_type_for_element_type(element_type: &str) -> &'static str {
     match element_type {
         "audio" => "audio",
@@ -11,15 +17,21 @@ pub fn get_track_type_for_element_type(element_type: &str) -> &'static str {
     }
 }
 
+/// Returns true if an element of the given type can be placed on a track
+/// of the given type.
 pub fn can_element_go_on_track(element_type: &str, track_type: &str) -> bool {
     get_track_type_for_element_type(element_type) == track_type
 }
 
+/// The result of validating whether an element type is compatible with a
+/// track type.
 pub struct ValidationResult {
     pub is_valid: bool,
     pub error_message: Option<String>,
 }
 
+/// Validates that an element type is compatible with the given track type,
+/// returning a `ValidationResult` with error details on mismatch.
 pub fn validate_element_track_compatibility(
     element_type: &str,
     track_type: &str,

@@ -1,3 +1,4 @@
+/** @module Visual render node base class for nodes with effects, masks, and transforms */
 import { BaseNode } from "./base-node";
 import type { Effect, EffectPass } from "@/effects/types";
 import type { Mask } from "@/masks/types";

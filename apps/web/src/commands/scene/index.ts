@@ -1,3 +1,4 @@
+/** @module Scene commands barrel export */
 export { CreateSceneCommand } from "./create-scene";
 export { DeleteSceneCommand } from "./delete-scene";
 export { RenameSceneCommand } from "./rename-scene";

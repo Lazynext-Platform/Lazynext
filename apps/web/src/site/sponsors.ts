@@ -1,3 +1,4 @@
+/** @module Sponsor type definitions and data for the marketing site */
 export type Sponsor = {
 	name: string;
 	url: string;

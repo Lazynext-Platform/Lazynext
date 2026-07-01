@@ -1,3 +1,4 @@
+/** @module Admin QueueTable component displaying render job status */
 import React from "react";
 
 interface QueueItem {

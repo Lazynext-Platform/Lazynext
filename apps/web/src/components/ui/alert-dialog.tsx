@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a modal dialog for critical alerts requiring user acknowledgment. */
+
 import * as React from "react";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 

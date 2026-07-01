@@ -1,3 +1,4 @@
+/** @module __tests__/resolve Test suite for track placement resolution */
 import { describe, expect, test } from "bun:test";
 import type {
 	AudioElement,

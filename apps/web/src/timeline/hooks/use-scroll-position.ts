@@ -1,3 +1,10 @@
+/**
+ * Reactive hook tracking the scrollLeft and viewportWidth of a scroll
+ * container via scroll events and ResizeObserver, throttled to rAF.
+ *
+ * @module timeline/hooks/use-scroll-position
+ */
+
 import { useEffect, useState, useRef } from "react";
 
 interface UseScrollPositionReturn {
@@ -5,6 +12,10 @@ interface UseScrollPositionReturn {
 	viewportWidth: number;
 }
 
+/**
+ * Returns `{ scrollLeft, viewportWidth }` for the given scroll container,
+ * updating on scroll and resize.
+ */
 export function useScrollPosition({
 	scrollRef,
 }: {

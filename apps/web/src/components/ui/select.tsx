@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a dropdown select menu with option filtering and keyboard navigation. */
+
 import * as React from "react";
 import { Select as SelectPrimitive } from "radix-ui";
 import { Check } from "lucide-react";

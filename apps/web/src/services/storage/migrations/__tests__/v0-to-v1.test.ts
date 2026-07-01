@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v0-to-v1 Test suite for V0 to V1 migration */
 import { describe, expect, test } from "bun:test";
 import { getProjectId, transformProjectV0ToV1 } from "../transformers/v0-to-v1";
 import {

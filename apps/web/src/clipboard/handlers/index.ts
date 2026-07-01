@@ -1,3 +1,4 @@
+/** @module Clipboard handlers barrel export and dispatcher for element and keyframe clipboard operations */
 import type {
 	ClipboardEntry,
 	ClipboardEntryType,

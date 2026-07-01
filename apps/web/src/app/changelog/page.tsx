@@ -1,3 +1,9 @@
+/**
+ * Changelog listing page — all releases in descending order.
+ *
+ * @page /changelog
+ */
+
 import type { Metadata } from "next";
 import { BasePage } from "@/app/base-page";
 import { Separator } from "@/components/ui/separator";

@@ -1,3 +1,4 @@
+/** @module Handle primitive SVG components for the various canvas interaction handles */
 "use client";
 
 import { cn } from "@/utils/ui";

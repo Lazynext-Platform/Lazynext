@@ -1,3 +1,4 @@
+/** @module Gaussian blur effect definition with adjustable blur strength and quality */
 import type { EffectDefinition, EffectPass } from "@/effects/types";
 
 export const GAUSSIAN_BLUR_SHADER = "gaussian-blur";

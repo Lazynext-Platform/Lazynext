@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a floating card anchored to a trigger element with overlay dismissal. */
+
 import * as React from "react";
 import { Popover as PopoverPrimitive } from "radix-ui";
 import { cn } from "@/utils/ui";

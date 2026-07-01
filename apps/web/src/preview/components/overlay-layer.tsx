@@ -1,3 +1,4 @@
+/** @module Overlay layer component for compositing HUD overlays on the preview canvas */
 "use client";
 
 import type {

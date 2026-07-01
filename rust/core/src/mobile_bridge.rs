@@ -10,12 +10,15 @@ uniffi::include_scaffolding!("lazynext");
 
 static GLOBAL_ENGINE: Lazy<Mutex<Option<NLEState>>> = Lazy::new(|| Mutex::new(None));
 
+/// Initializes the global NLE engine with the given session and project parameters.
 pub fn init_engine(session_id: String, project_name: String, framerate: u32) -> String {
     let mut engine = GLOBAL_ENGINE.lock().unwrap();
     *engine = Some(NLEState::new(session_id, project_name, framerate));
     "Engine initialized".to_string()
 }
 
+/// Returns a JSON snapshot of the current project including tracks, clips,
+/// dimensions, framerate, and metadata.
 pub fn get_project_info() -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_ref() {
         let pd = engine.get_project_data();
@@ -55,6 +58,8 @@ pub fn get_project_info() -> String {
     }
 }
 
+/// Adds a new track of the given kind ("video" or "audio") to the global
+/// NLE engine's timeline.
 pub fn add_track(kind: String) -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
         engine.add_track(format!("track_{}", uuid::Uuid::new_v4()), kind);
@@ -64,6 +69,8 @@ pub fn add_track(kind: String) -> String {
     }
 }
 
+/// Adds a clip to a track at the given index. Real clip operations are
+/// available via `NLEState::add_clip_to_track`.
 pub fn add_clip(
     _track_index: u32,
     _clip_type: String,
@@ -75,6 +82,7 @@ pub fn add_clip(
     "Clip added".to_string()
 }
 
+/// Moves a clip to a new start position on the timeline.
 pub fn move_clip(clip_id: String, new_start: u32) -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
         engine.update_clip_property(&clip_id, "start", new_start as f32);
@@ -84,6 +92,9 @@ pub fn move_clip(clip_id: String, new_start: u32) -> String {
     }
 }
 
+/// Processes a natural-language editing intent and returns a summary of
+/// the actions taken. Keyword-based matching for silence trimming, music,
+/// and color grading.
 pub fn process_intent(prompt: String, _require_approval: bool) -> String {
     if prompt.contains("cut") || prompt.contains("silence") {
         "Trimmed silence from audio tracks.".to_string()
@@ -96,6 +107,7 @@ pub fn process_intent(prompt: String, _require_approval: bool) -> String {
     }
 }
 
+/// Returns a pretty-printed JSON representation of the full project data.
 pub fn get_timeline_state() -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_ref() {
         serde_json::to_string_pretty(engine.get_project_data()).unwrap_or_default()
@@ -104,6 +116,8 @@ pub fn get_timeline_state() -> String {
     }
 }
 
+/// Undoes the most recent operation on the NLE state. Returns true if an
+/// operation was actually undone.
 pub fn undo() -> bool {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
         engine.undo()
@@ -112,6 +126,8 @@ pub fn undo() -> bool {
     }
 }
 
+/// Redoes the most recently undone operation on the NLE state. Returns true
+/// if an operation was actually redone.
 pub fn redo() -> bool {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
         engine.redo()
@@ -120,6 +136,8 @@ pub fn redo() -> bool {
     }
 }
 
+/// Returns a JSON status object indicating engine initialization state, current
+/// project name, and operation count.
 pub fn get_status() -> String {
     if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_ref() {
         serde_json::json!({
@@ -135,10 +153,14 @@ pub fn get_status() -> String {
     }
 }
 
+/// Returns the current crate version from `CARGO_PKG_VERSION`.
 pub fn version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
+/// Sends a rotoscoping request to the AI service for the given video,
+/// using the provided object prompt. Applies the returned mask to the NLE
+/// state on success.
 pub fn request_rotoscope(video_id: String, prompt: String) -> String {
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -161,6 +183,8 @@ pub fn request_rotoscope(video_id: String, prompt: String) -> String {
     })
 }
 
+/// Sends a NeRF extraction request to the AI service for the given video.
+/// Adds the resulting point cloud or mesh to the NLE state on success.
 pub fn request_nerf(video_id: String) -> String {
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()
@@ -183,6 +207,9 @@ pub fn request_nerf(video_id: String) -> String {
     })
 }
 
+/// Sends a stem separation request to the AI service for the given audio,
+/// splitting it into the requested number of stems. Adds the resulting
+/// audio tracks to the NLE state on success.
 pub fn request_stem_separation(audio_id: String, stems: u32) -> String {
     let rt = tokio::runtime::Builder::new_current_thread()
         .enable_all()

@@ -1,3 +1,10 @@
+/**
+ * Computes simultaneous multi-element resize respecting neighbor
+ * boundaries, source duration limits, and retime rate adjustments.
+ *
+ * @module timeline/group-resize/compute-resize
+ */
+
 import {
 	getSourceSpanAtClipTime,
 	getTimelineDurationForSourceSpan,
@@ -23,6 +30,11 @@ import type {
 	ResizeSide,
 } from "./types";
 
+/**
+ * Computes the group resize result for the given members, side, and
+ * delta, snapping to frame boundaries and clamping to neighbor/retime
+ * constraints.
+ */
 export function computeGroupResize({
 	members,
 	side,

@@ -11,10 +11,11 @@ pub struct EditorShell {
     pub last_frame_data: Option<gpui::ImageSource>,
     pub current_frame: u32,
     pub is_playing: bool,
+    pub ai_prompt_text: String,
 }
 
 impl EditorShell {
-    #[allow(dead_code)] // wired when full GPUI playback loop is implemented
+    #[allow(dead_code)]
     fn toggle_playback(&mut self) {
         self.is_playing = !self.is_playing;
     }
@@ -109,7 +110,62 @@ impl Render for EditorShell {
                                             .p_4()
                                             .border_b_1()
                                             .border_color(border_color)
-                                            .child("Project Media"),
+                                            .flex()
+                                            .justify_between()
+                                            .child("Project Media")
+                                            .child(
+                                                div()
+                                                    .px_2()
+                                                    .py_1()
+                                                    .bg(accent_color)
+                                                    .text_color(rgb(0x000000))
+                                                    .rounded_sm()
+                                                    .cursor_pointer()
+                                                    .text_sm()
+                                                    .hover(|s| s.bg(rgb(0x00b4bf)))
+                                                    .child("+ Import")
+                                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                                        let nle = self.nle.clone();
+                                                        move |_, _, _cx| {
+                                                            let nle = nle.clone();
+                                                            tokio::spawn(async move {
+                                                                let file = rfd::AsyncFileDialog::new()
+                                                                    .add_filter("Media", &["mp4", "mov", "avi", "mkv", "wav", "mp3"])
+                                                                    .pick_file()
+                                                                    .await;
+                                                                if let Some(file) = file {
+                                                                    let path = file.path().to_string_lossy().to_string();
+                                                                    log::info!("Importing media: {}", path);
+                                                                    let clip_name = std::path::Path::new(&path)
+                                                                        .file_stem()
+                                                                        .map(|s| s.to_string_lossy().to_string())
+                                                                        .unwrap_or_else(|| "imported".to_string());
+                                                                    let mut nle_guard = nle.lock().await;
+                                                                    nle_guard.add_media_asset(
+                                                                        lazynext_core::nle_state::MediaAsset {
+                                                                            id: format!("media_{}", uuid::Uuid::new_v4()),
+                                                                            name: clip_name.clone(),
+                                                                            path_or_url: path,
+                                                                            asset_type: "video".to_string(),
+                                                                            duration: 10.0,
+                                                                            width: 1920,
+                                                                            height: 1080,
+                                                                        },
+                                                                    );
+                                                                    nle_guard.add_clip_to_track(
+                                                                        0,
+                                                                        format!("clip_{}", uuid::Uuid::new_v4()),
+                                                                        "video".to_string(),
+                                                                        clip_name.clone(),
+                                                                        0,
+                                                                        240,
+                                                                    );
+                                                                    log::info!("Media imported: {}", clip_name);
+                                                                }
+                                                            });
+                                                        }
+                                                    }),
+                                            ),
                                     ),
                             )
                             .child(
@@ -182,6 +238,47 @@ impl Render for EditorShell {
                                     .text_sm()
                                     .text_color(rgb(0x888888))
                                     .child(format!("Frame {}", self.current_frame)),
+                            )
+                            .child(div().flex_1())
+                            .child(
+                                div()
+                                    .px_3()
+                                    .py_1()
+                                    .bg(accent_color)
+                                    .text_color(rgb(0x000000))
+                                    .rounded_md()
+                                    .cursor_pointer()
+                                    .text_sm()
+                                    .hover(|s| s.bg(rgb(0x00b4bf)))
+                                    .child("Export MP4")
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        let engine = self.engine.clone();
+                                        move |_, _, _cx| {
+                                            let engine = engine.clone();
+                                            tokio::spawn(async move {
+                                                let file = rfd::AsyncFileDialog::new()
+                                                    .add_filter("MP4 Video", &["mp4"])
+                                                    .set_file_name("export.mp4")
+                                                    .save_file()
+                                                    .await;
+                                                if let Some(file) = file {
+                                                    let path = file.path().to_string_lossy().to_string();
+                                                    log::info!("Exporting to: {}", path);
+                                                    let engine_guard = engine.lock().await;
+                                                    match engine_guard.dispatch_export(
+                                                        &path,
+                                                        lazynext_export::ExportFormat::Mp4,
+                                                        5000,
+                                                        240,
+                                                        None,
+                                                    ).await {
+                                                        Ok(_) => log::info!("Export complete: {}", path),
+                                                        Err(e) => log::error!("Export failed: {}", e),
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }),
                             ),
                     )
                     .child(
@@ -390,8 +487,14 @@ impl Render for EditorShell {
                                             .hover(|s| s.bg(rgb(0x00b4bf)))
                                             .child("Run Command")
                                             .on_mouse_down(gpui::MouseButton::Left, {
+                                                let text = self.ai_prompt_text.clone();
                                                 move |_, _, _cx| {
-                                                    log::info!("AI Command triggered from Desktop UI!");
+                                                    let prompt = if text.is_empty() {
+                                                        "Apply cinematic color grade and remove silences".to_string()
+                                                    } else {
+                                                        text.clone()
+                                                    };
+                                                    log::info!("AI Command triggered: {}", prompt);
                                                     let gateway = std::env::var("RUST_API_GATEWAY_URL")
                                                         .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
                                                     tokio::spawn(async move {
@@ -399,7 +502,7 @@ impl Render for EditorShell {
                                                         match client
                                                             .post(format!("{}/api/v1/autonomous_edit", gateway))
                                                             .json(&serde_json::json!({
-                                                                "prompt": "Apply cinematic color grade and remove silences",
+                                                                "prompt": prompt,
                                                                 "require_plan_approval": false,
                                                             }))
                                                             .send()
@@ -452,6 +555,7 @@ mod tests {
             last_frame_data: None,
             current_frame: 0,
             is_playing: false,
+            ai_prompt_text: String::new(),
         };
 
         assert!(!editor.is_playing);
@@ -477,6 +581,7 @@ mod tests {
             last_frame_data: None,
             current_frame: 0,
             is_playing: false,
+            ai_prompt_text: String::new(),
         };
 
         assert!(!editor.is_playing);

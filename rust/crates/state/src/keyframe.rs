@@ -1,3 +1,11 @@
+//! Keyframe animation system for interpolating timeline properties.
+//!
+//! Provides a typed keyframe abstraction with configurable easing curves
+//! (linear, step, cubic bezier, and custom bezier handles) and a scalar
+//! animation channel that evaluates interpolated values at arbitrary frame
+//! positions. Intended to be the Rust implementation backing the TypeScript
+//! keyframe utilities in the web shell via WASM.
+
 use serde::{Deserialize, Serialize};
 
 /// Easing functions for keyframe interpolation.
@@ -35,6 +43,7 @@ pub struct Keyframe<T> {
 }
 
 impl<T> Keyframe<T> {
+    /// Create a new keyframe at the given frame with an easing curve.
     pub fn new(frame: u32, value: T, easing: Easing) -> Self {
         Self {
             frame,
@@ -162,6 +171,7 @@ impl ScalarAnimationChannel {
             .is_ok()
     }
 
+    /// Return the number of keyframes in the channel.
     pub fn keyframe_count(&self) -> usize {
         self.keyframes.len()
     }

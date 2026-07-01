@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations
+ */
+
 export { StorageMigration } from "./base";
 import { V0toV1Migration } from "./v0-to-v1";
 import { V1toV2Migration } from "./v1-to-v2";

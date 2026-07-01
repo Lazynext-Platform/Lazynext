@@ -1,3 +1,4 @@
+/** @module Canvas element handler for rectangle shapes */
 import type { CanvasElementHandler } from "../types";
 import { addRectElement } from "../components/elements";
 import {

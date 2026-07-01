@@ -1,3 +1,5 @@
+/** @component Renders a popover with saturation/hue sliders and hex input for color selection. */
+
 import {
 	type ComponentProps,
 	forwardRef,

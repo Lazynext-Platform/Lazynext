@@ -1,3 +1,10 @@
+/**
+ * CTA section — "Start Creating for Free" call-to-action with
+ * gradient button on the landing page.
+ *
+ * @module components/landing/CTASection
+ */
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 

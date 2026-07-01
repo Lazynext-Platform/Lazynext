@@ -1,3 +1,15 @@
+/**
+ * Cloud-agnostic storage abstraction.
+ *
+ * In local development, saves to the filesystem via Node.js `fs`.
+ * In production (Azure), uploads files to Azure Blob Storage using
+ * the `@azure/storage-blob` SDK with `DefaultAzureCredential`.
+ *
+ * The active adapter is selected via the `STORAGE_PROVIDER` env var.
+ *
+ * @module lib/storage
+ */
+
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -8,6 +20,7 @@ import path from "path";
  * In production (Azure), this interface uploads files to Azure Blob Storage.
  */
 
+/** Common interface for file-system-like storage backends. */
 export interface StorageAdapter {
 	writeFile(filePath: string, data: string | Buffer): Promise<void>;
 	readFile(filePath: string): Promise<Buffer>;
@@ -85,6 +98,7 @@ class AzureBlobStorageAdapter implements StorageAdapter {
 
 // ── Storage Service Export ────────────────────────────────────────────────
 
+/** Singleton storage service, selects adapter based on STORAGE_PROVIDER. */
 export const StorageService: StorageAdapter =
 	process.env.STORAGE_PROVIDER === "azure"
 		? new AzureBlobStorageAdapter()

@@ -1,3 +1,4 @@
+/** @module migrations/__tests__/v4-to-v5 Test suite for V4 to V5 migration */
 import { describe, expect, test } from "bun:test";
 import { transformProjectV4ToV5 } from "../transformers/v4-to-v5";
 import { v3Project } from "./fixtures";

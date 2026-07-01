@@ -1,4 +1,5 @@
 "use client";
+/** @module Copy-to-clipboard button that exports changelog entries as markdown */
 
 import { useState } from "react";
 import { CheckIcon, ClipboardIcon } from "lucide-react";

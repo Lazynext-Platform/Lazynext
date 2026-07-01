@@ -1,3 +1,5 @@
+/** @component Renders theme-aware rich prose content from raw HTML using rehype. */
+
 import { cn } from "@/utils/ui";
 import rehypeParse from "rehype-parse";
 import { unified } from "unified";

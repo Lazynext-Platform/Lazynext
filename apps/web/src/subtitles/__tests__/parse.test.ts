@@ -1,3 +1,4 @@
+/** @module __tests__/parse Test suite for subtitle parsing */
 import { describe, expect, it } from "bun:test";
 import { parseSubtitleFile } from "../parse";
 

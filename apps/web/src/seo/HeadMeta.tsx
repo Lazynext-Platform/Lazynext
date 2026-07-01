@@ -1,5 +1,14 @@
 // Advanced SEO head elements (Dublin Core, verification, preconnect, etc.)
 
+/**
+ * HeadMeta — renders search-engine verification tags, Dublin Core metadata,
+ * critical-origin preconnect hints, geotags, and author/generator meta.
+ *
+ * Also exports {@link PreloadHeroImage} for above-the-fold image preloading.
+ *
+ * @module seo/HeadMeta
+ */
+
 import React from "react";
 
 export function SEOHeadTags() {

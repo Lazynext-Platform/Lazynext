@@ -1,3 +1,11 @@
+/**
+ * Snaps the edges of every member in a move group against element
+ * edges, playhead, and keyframe snap points — returning the
+ * anchor-start-time offset that achieves the closest snap.
+ *
+ * @module timeline/group-move/snap
+ */
+
 import type { SceneTracks } from "@/timeline";
 import {
 	buildTimelineSnapPoints,
@@ -11,6 +19,11 @@ import { getAnimationKeyframeSnapPointsForTimeline } from "@/timeline/animation-
 import type { MoveGroup } from "./types";
 import { addMediaTime, type MediaTime, subMediaTime } from "@/wasm";
 
+/**
+ * Snaps the start and end edges of every member in the move group,
+ * returning the anchor-start time that brings the group closest to
+ * a snap point.
+ */
 export function snapGroupEdges({
 	group,
 	anchorStartTime,

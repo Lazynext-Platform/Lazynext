@@ -1,3 +1,4 @@
+/** @module __tests__/params Test suite for parameter utilities */
 import { describe, expect, it } from "bun:test";
 import {
 	parseColorToLinearRgba,

@@ -1,8 +1,20 @@
+/**
+ * @module Render export endpoint — dispatches render jobs to the
+ * render-service microservice, falling back to a local job ID when the
+ * service is unreachable.
+ */
+
 import { NextResponse } from "next/server";
 
 const RENDER_SERVICE_URL =
 	process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
+/**
+ * POST /api/render/export
+ * Queues a render job for the given project and returns a job ID plus a
+ * status-polling endpoint. Falls back to a local job ID if the render
+ * microservice is not running.
+ */
 export async function POST(request: Request) {
 	try {
 		const { projectId, timelineData, renderSettings } = await request.json();

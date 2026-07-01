@@ -1,3 +1,4 @@
+/** @module __tests__/keyframe-query Test suite for keyframe query functions */
 import { describe, expect, it } from "bun:test";
 import {
 	getKeyframeById,

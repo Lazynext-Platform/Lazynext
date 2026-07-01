@@ -1,3 +1,11 @@
+/**
+ * Canvas utility functions — Fabric.js canvas creation, coordinate
+ * space conversion (video ↔ canvas), z-order manipulation, element
+ * clearing, text measurement, and frame-effect lookup.
+ *
+ * @module components/editor/canvas/helpers/canvas.util
+ */
+
 import { Canvas as FabricCanvas } from "fabric";
 import { CanvasMetadata, CanvasProps } from "../types";
 import { Dimensions, Position } from "@twick/media-utils";

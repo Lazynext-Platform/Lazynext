@@ -1,3 +1,4 @@
+/** @module Empty state view shown when no element is selected in the properties panel */
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Settings05Icon } from "@hugeicons/core-free-icons";
 

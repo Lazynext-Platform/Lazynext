@@ -1,3 +1,9 @@
+/**
+ * @module Real-time audio playback manager using the Web Audio API. Handles
+ * streaming decode, retime/pitch preservation, volume automation, mastering
+ * chain, and latency-adaptive scheduling.
+ */
+
 import type { EditorCore } from "@/core";
 import { TICKS_PER_SECOND } from "@/wasm";
 import { clampRetimeRate, shouldMaintainPitch } from "@/retime/rate";

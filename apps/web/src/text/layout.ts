@@ -1,3 +1,4 @@
+/** @module Text layout engine for measuring and positioning text blocks on the canvas */
 import type { TextBackground } from "@/text/background";
 import { DEFAULTS } from "@/timeline/defaults";
 import type { TextAlign } from "@/text/primitives";

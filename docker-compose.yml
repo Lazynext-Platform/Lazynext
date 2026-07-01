@@ -63,8 +63,8 @@ services:
   # ── API Gateway (Rust) ──────────────────────────────────────────
   api-gateway:
     build:
-      context: ./rust
-      dockerfile: api-gateway/Dockerfile
+      context: .
+      dockerfile: rust/api-gateway/Dockerfile
     ports:
       - "8005:8005"
     environment:
@@ -211,8 +211,8 @@ services:
   # ── Collab Server (Native Rust CRDT Sync + WebRTC Signaling) ───
   collab-server:
     build:
-      context: ./services/collab-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/collab-server/Dockerfile
     ports:
       - "8004:8004"
     environment:

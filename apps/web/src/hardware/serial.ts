@@ -1,3 +1,8 @@
+/**
+ * @module RS-422 serial deck controller for physical VTR tape decks via the
+ * Web Serial API. Sends Sony 9-pin protocol commands for ingest workflows.
+ */
+
 export class RS422DeckController {
 	private port: any = null;
 

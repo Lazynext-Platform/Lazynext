@@ -1,3 +1,12 @@
+/**
+ * Semantic Execution Contract visualizer.
+ *
+ * Displays CRDT operations as an auditable, linear script — every edit
+ * is a deterministic, verifiable, and replayable operation log.
+ *
+ * @module editor/ExecutionContract
+ */
+
 import React, { useEffect, useState } from "react";
 import { useEditor } from "./use-editor";
 

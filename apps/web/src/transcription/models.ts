@@ -1,5 +1,12 @@
+/**
+ * @module transcription/models
+ * @description Available Whisper transcription models and their
+ *   HuggingFace ONNX identifiers.
+ */
+
 import type { TranscriptionModel, TranscriptionModelId } from "./types";
 
+/** All available transcription models ordered by complexity. */
 export const TRANSCRIPTION_MODELS: TranscriptionModel[] = [
 	{
 		id: "whisper-tiny",
@@ -27,5 +34,6 @@ export const TRANSCRIPTION_MODELS: TranscriptionModel[] = [
 	},
 ];
 
+/** The default transcription model used when none is selected. */
 export const DEFAULT_TRANSCRIPTION_MODEL: TranscriptionModelId =
 	"whisper-small";

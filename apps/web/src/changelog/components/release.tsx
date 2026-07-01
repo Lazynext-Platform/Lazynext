@@ -1,3 +1,4 @@
+/** @module Release article components for rendering changelog entries */
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/utils/ui";

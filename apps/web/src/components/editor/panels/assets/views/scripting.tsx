@@ -1,4 +1,5 @@
 "use client";
+/** @module Scripting view — execute plugin scripts via the WASM plugin runtime */
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

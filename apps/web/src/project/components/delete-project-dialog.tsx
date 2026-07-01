@@ -1,3 +1,12 @@
+/**
+ * Confirmation dialog for permanently deleting one or more projects.
+ *
+ * Requires the user to type "DELETE" to confirm. Supports single and
+ * bulk deletion with appropriate warnings.
+ *
+ * @module project/components/delete-project-dialog
+ */
+
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,6 +20,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
+/**
+ * Destructive confirmation dialog for project deletion.
+ *
+ * @param isOpen - whether the dialog is visible.
+ * @param onOpenChange - callback when open state changes.
+ * @param onConfirm - callback invoked when deletion is confirmed.
+ * @param projectNames - list of project names to delete.
+ */
 export function DeleteProjectDialog({
 	isOpen,
 	onOpenChange,

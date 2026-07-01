@@ -1,3 +1,4 @@
+/** @module Selection box visual overlay rendered during box-selection drag operations */
 "use client";
 
 import type { SelectionBoxBounds } from "@/selection/types";

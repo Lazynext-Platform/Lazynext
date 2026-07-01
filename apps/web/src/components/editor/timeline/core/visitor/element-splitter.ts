@@ -1,3 +1,12 @@
+/**
+ * Element splitter visitor — splits timeline elements at a given
+ * time point, producing two cloned elements. Handles video/audio
+ * playback-rate offset, text/caption word-boundary splitting, and
+ * flat duplication for shape/effect elements.
+ *
+ * @module components/editor/timeline/core/visitor/element-splitter
+ */
+
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

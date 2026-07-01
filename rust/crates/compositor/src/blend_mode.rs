@@ -1,28 +1,52 @@
+//! Compositing blend modes for GPU layer compositing.
+//!
+//! Defines the 17 Porter-Duff derivative and separable blend modes
+//! used for compositing layers in the NLE. Each variant maps to a
+//! shader code index consumed by the GPU compositor pipeline.
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum BlendMode {
+    /// Standard alpha compositing with no blending.
     Normal,
+    /// Selects the darker of the base and blend colors per channel.
     Darken,
+    /// Multiplies base and blend colors per channel, always producing a darker result.
     Multiply,
+    /// Darkens the base color to reflect the blend color by increasing contrast.
     ColorBurn,
+    /// Selects the lighter of the base and blend colors per channel.
     Lighten,
+    /// Inverts, multiplies, and inverts again, always producing a lighter result.
     Screen,
+    /// Adds base and blend values, clamped to 1.0.
     PlusLighter,
+    /// Brightens the base color to reflect the blend color by decreasing contrast.
     ColorDodge,
+    /// Combines Multiply and Screen based on base color luminance.
     Overlay,
+    /// Similar to Overlay but with a softer, more diffused effect.
     SoftLight,
+    /// Combines Multiply and Screen based on blend color luminance.
     HardLight,
+    /// Subtracts the darker from the lighter color per channel.
     Difference,
+    /// Similar to Difference but with lower contrast.
     Exclusion,
+    /// Preserves the hue of the blend layer while keeping base luminance and saturation.
     Hue,
+    /// Preserves the saturation of the blend layer while keeping base hue and luminance.
     Saturation,
+    /// Preserves the hue and saturation of the blend layer while keeping base luminance.
     Color,
+    /// Preserves the luminance of the blend layer while keeping base hue and saturation.
     Luminosity,
 }
 
 impl BlendMode {
+    /// Returns the GPU shader index for this blend mode (0–16).
     pub fn shader_code(self) -> u32 {
         match self {
             Self::Normal => 0,

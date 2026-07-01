@@ -1,3 +1,9 @@
+//! Peer-to-peer mesh networking for real-time CRDT collaboration.
+//!
+//! Discovers peers on the local network via UDP broadcast, maintains a TCP
+//! mesh for CRDT delta exchange, and broadcasts NLE events to all connected
+//! peers. Supports mDNS service discovery and WebRTC data channels in production.
+
 #![allow(clippy::while_let_loop)]
 use lazynext_core::NLEEvent;
 use serde::{Deserialize, Serialize};

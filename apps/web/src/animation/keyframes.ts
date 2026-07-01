@@ -1,3 +1,10 @@
+/**
+ * @module animation/keyframes
+ * @description Keyframe CRUD operations — upsert, remove, retime, clone,
+ *   split, and clamp. All mutations return a new {@link ElementAnimations}
+ *   value rather than mutating in-place.
+ */
+
 import type {
 	AnimationChannel,
 	ChannelData,
@@ -462,6 +469,10 @@ function upsertScalarChannelKey({
 	});
 }
 
+/**
+ * Retrieves the primary animation channel for a given property path.
+ * For composite data, returns the first leaf channel found.
+ */
 export function getChannel({
 	animations,
 	propertyPath,
@@ -476,6 +487,12 @@ export function getChannel({
 	return getChannelsFromData({ data })[0];
 }
 
+/**
+ * Inserts or updates a keyframe at a given path and time, respecting
+ * the channel layout (leaf vs composite). Coerces the value first via
+ * the provided function; if coercion returns `null` the operation is
+ * aborted.
+ */
 export function upsertPathKeyframe({
 	animations,
 	propertyPath,
@@ -579,6 +596,11 @@ export function upsertPathKeyframe({
 	});
 }
 
+/**
+ * Low-level upsert: inserts or updates a keyframe directly on a
+ * channel, returning the modified channel (or `undefined` if the
+ * input channel was undefined).
+ */
 export function upsertKeyframe({
 	channel,
 	time,
@@ -618,6 +640,10 @@ export function upsertKeyframe({
 	});
 }
 
+/**
+ * Removes a keyframe by ID from a channel. Returns `undefined` when
+ * the last keyframe is removed.
+ */
 export function removeKeyframe({
 	channel,
 	keyframeId,
@@ -662,6 +688,10 @@ export function removeKeyframe({
 	});
 }
 
+/**
+ * Moves a keyframe to a new time position, preserving all other
+ * keyframe properties.
+ */
 export function retimeKeyframe({
 	channel,
 	keyframeId,
@@ -718,6 +748,10 @@ export function retimeKeyframe({
 	});
 }
 
+/**
+ * Replaces the entire channel for a property path (treating it as a
+ * leaf with component key `"value"`).
+ */
 export function setChannel({
 	animations,
 	propertyPath,
@@ -735,6 +769,10 @@ export function setChannel({
 	});
 }
 
+/**
+ * Replaces a specific component channel (e.g. `"r"`, `"x"`) within
+ * the composite data for a property path.
+ */
 export function setBindingComponentChannel({
 	animations,
 	propertyPath,
@@ -760,6 +798,10 @@ export function setBindingComponentChannel({
 	});
 }
 
+/**
+ * Applies a partial curve patch (handles, segment type, tangent mode)
+ * to a specific scalar keyframe.
+ */
 export function updateScalarKeyframeCurve({
 	animations,
 	propertyPath,
@@ -844,6 +886,10 @@ function cloneChannelWithKeyIds({
 			});
 }
 
+/**
+ * Deep-clones element animations. Optionally regenerates all keyframe
+ * IDs (useful when duplicating elements).
+ */
 export function cloneAnimations({
 	animations,
 	shouldRegenerateKeyframeIds = false,
@@ -893,6 +939,10 @@ export function cloneAnimations({
 	});
 }
 
+/**
+ * Trims animations to a maximum duration by splitting at the duration
+ * boundary and keeping only the left portion.
+ */
 export function clampAnimationsToDuration({
 	animations,
 	duration,
@@ -1257,6 +1307,12 @@ function splitChannelAtTime({
 			});
 }
 
+/**
+ * Splits all animation channels at a given time, producing left and
+ * right animation maps. Bezier segments are properly subdivided.
+ * When `shouldIncludeSplitBoundary` is true boundary keyframes are
+ * inserted at the split point.
+ */
 export function splitAnimationsAtTime({
 	animations,
 	splitTime,
@@ -1317,6 +1373,10 @@ export function splitAnimationsAtTime({
 	};
 }
 
+/**
+ * Removes a keyframe by ID across all component channels for a given
+ * property path.
+ */
 export function removeElementKeyframe({
 	animations,
 	propertyPath,
@@ -1353,6 +1413,10 @@ export function removeElementKeyframe({
 	});
 }
 
+/**
+ * Moves a keyframe to a new time across all component channels for a
+ * given property path.
+ */
 export function retimeElementKeyframe({
 	animations,
 	propertyPath,

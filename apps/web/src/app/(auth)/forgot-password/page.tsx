@@ -1,3 +1,9 @@
+/**
+ * Forgot password page — email-based password reset flow.
+ *
+ * @page /forgot-password
+ */
+
 "use client";
 
 import React, { useState } from "react";

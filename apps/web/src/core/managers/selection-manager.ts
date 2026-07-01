@@ -1,3 +1,8 @@
+/**
+ * @module Multi-modal selection state manager — tracks selected elements,
+ * keyframes, and mask points with snapshot/restore support for undo/redo.
+ */
+
 import type { EditorCore } from "@/core";
 import type { SelectedKeyframeRef } from "@/animation/types";
 import type {

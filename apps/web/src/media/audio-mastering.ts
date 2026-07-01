@@ -1,3 +1,13 @@
+/**
+ * Audio mastering chain — dynamics compression and peak limiting applied
+ * as the final stage of timeline audio export.
+ *
+ * Bypasses processing when the input peak is already below headroom to
+ * avoid unnecessary offline rendering.
+ *
+ * @module media/audio-mastering
+ */
+
 const MASTER_LIMITER_THRESHOLD_DB = -1;
 const MASTER_LIMITER_KNEE_DB = 0;
 const MASTER_LIMITER_RATIO = 20;
@@ -5,7 +15,10 @@ const MASTER_LIMITER_ATTACK_SECONDS = 0.001;
 const MASTER_LIMITER_RELEASE_SECONDS = 0.12;
 const MASTER_OUTPUT_HEADROOM = 0.98;
 
+/** Returns the maximum absolute sample value across all channels of an AudioBuffer. */
 export function getAudioBufferPeak({
+
+
 	audioBuffer,
 }: {
 	audioBuffer: AudioBuffer;
@@ -25,7 +38,10 @@ export function getAudioBufferPeak({
 	return peak;
 }
 
+/** Builds a dynamics-compressor → output-gain mastering chain and returns its input node. */
 export function createAudioMasteringChain({
+
+
 	audioContext,
 	destination,
 }: {
@@ -52,7 +68,10 @@ export function createAudioMasteringChain({
 	return { input };
 }
 
+/** Applies the mastering chain to an AudioBuffer if its peak exceeds headroom, otherwise returns it unchanged. */
 export async function applyAudioMasteringToBuffer({
+
+
 	audioBuffer,
 }: {
 	audioBuffer: AudioBuffer;

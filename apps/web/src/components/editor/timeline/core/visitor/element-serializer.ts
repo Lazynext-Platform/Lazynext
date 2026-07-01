@@ -1,3 +1,4 @@
+/** @module Element serializer visitor for converting timeline elements to JSON representation */
 import { ElementJSON } from "../../types";
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";

@@ -1,3 +1,8 @@
+/**
+ * @module User profile API — read/write the authenticated user's profile
+ * fields (name) backed by Drizzle ORM and the database schema.
+ */
+
 import { auth } from "@/auth/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";

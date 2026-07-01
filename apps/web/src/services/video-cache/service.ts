@@ -1,3 +1,4 @@
+/** @module Video cache service for pre-processing and caching video frames for playback */
 import {
 	Input,
 	ALL_FORMATS,

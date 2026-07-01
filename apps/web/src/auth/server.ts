@@ -1,3 +1,10 @@
+/**
+ * @module auth/server
+ * @description Server-side Better Auth configuration with Drizzle
+ *   adapter, email/password, email verification, and multi-transport
+ *   email delivery (SMTP preferred, Resend fallback).
+ */
+
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
@@ -62,6 +69,7 @@ async function sendEmail({
 	);
 }
 
+/** The configured Better Auth instance. */
 export const auth = betterAuth({
 	database: drizzleAdapter(db, { provider: "pg", usePlural: false, schema }),
 	secret:
@@ -114,4 +122,5 @@ export const auth = betterAuth({
 	baseURL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
 });
 
+/** Inferred type of the Better Auth instance. */
 export type Auth = typeof auth;

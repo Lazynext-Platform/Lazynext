@@ -1,3 +1,28 @@
+//! Lazynext Provenance — C2PA content authenticity and integrity.
+//!
+//! The provenance crate provides cryptographic attestation for every
+//! edit made in Lazynext. It implements content fingerprinting (SHA-256)
+//! and C2PA manifest generation to create a verifiable chain of custody
+//! from source media to final export.
+//!
+//! # C2PA (Coalition for Content Provenance and Authenticity)
+//!
+//! C2PA is an open technical standard (backed by Adobe, Microsoft, BBC,
+//! and others) for cryptographically binding provenance metadata to
+//! media files. Each C2PA manifest includes:
+//!
+//! - **Assertions**: What happened (e.g., "clip trimmed at frames 0-240")
+//! - **Claims**: Who did it (signed with an X.509 certificate)
+//! - **Ingredients**: What source media was used
+//! - **Trust list**: Which certificate authorities are trusted
+//!
+//! # Current implementation
+//!
+//! The `generate_state_fingerprint` function produces SHA-256 hashes of
+//! serializable state for tamper detection. Full C2PA 2.1 compliance
+//! (X.509 cert chains, CBOR manifests, ingredient references) is in the
+//! `c2pa` module.
+
 pub mod c2pa;
 
 use serde::Serialize;

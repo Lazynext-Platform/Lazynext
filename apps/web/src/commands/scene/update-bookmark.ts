@@ -1,3 +1,4 @@
+/** @module Command for updating a scene bookmark's properties with undo support */
 import { Command, type CommandResult } from "@/commands/base-command";
 import { EditorCore } from "@/core";
 import type { Bookmark, TScene } from "@/timeline";

@@ -1,3 +1,10 @@
+/**
+ * Interactive cubic-bezier graph editor — drag control points to
+ * shape easing curves with snap-to-grid support.
+ *
+ * @module timeline/components/graph-editor/bezier-graph
+ */
+
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";

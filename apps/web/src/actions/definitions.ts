@@ -1,3 +1,4 @@
+/** @module Action definitions mapping shortcut keys to editor commands and menu items */
 import type { ShortcutKey } from "@/actions/keybinding";
 import type { TActionWithOptionalArgs } from "./types";
 

@@ -1,3 +1,5 @@
+/** @component Renders a container with heading, description, content, and footer layout slots. */
+
 import * as React from "react";
 
 import { cn } from "@/utils/ui";

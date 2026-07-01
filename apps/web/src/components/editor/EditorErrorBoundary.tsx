@@ -1,3 +1,10 @@
+/**
+ * Error boundary for the editor — catches render errors and displays
+ * a fallback UI with a retry button.
+ *
+ * @module components/editor/EditorErrorBoundary
+ */
+
 "use client";
 
 import React, { Component } from "react";

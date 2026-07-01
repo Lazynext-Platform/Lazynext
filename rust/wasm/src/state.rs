@@ -1,3 +1,9 @@
+//! NLE state management exposed to WebAssembly.
+//!
+//! Wraps `ProjectData` in a WASM-accessible `NLEState` class with
+//! track/clip CRUD, playback controls, clip splitting/trimming,
+//! script-driven cut insertion, and live multicam switching.
+
 use serde_wasm_bindgen::{from_value, to_value};
 use state::{ProjectData, Track};
 use wasm_bindgen::prelude::*;

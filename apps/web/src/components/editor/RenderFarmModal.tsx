@@ -1,3 +1,10 @@
+/**
+ * Render farm modal — displays the distributed render farm status
+ * with node health and queue metrics.
+ *
+ * @module components/editor/RenderFarmModal
+ */
+
 "use client";
 
 import React from "react";

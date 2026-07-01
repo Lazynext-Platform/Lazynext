@@ -1,3 +1,4 @@
+/** @module Base render node abstract class for the compositor node tree */
 export type BaseNodeParams = object | undefined;
 export type AnyBaseNode = BaseNode<BaseNodeParams, unknown>;
 

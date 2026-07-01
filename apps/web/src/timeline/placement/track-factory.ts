@@ -1,3 +1,9 @@
+/**
+ * Track factory — creates empty tracks of each type with default settings.
+ *
+ * @module timeline/placement/track-factory
+ */
+
 import { DEFAULT_TRACK_NAMES } from "@/timeline/tracks";
 import type {
 	AudioTrack,
@@ -64,6 +70,10 @@ export function buildEmptyTrack({
 	type: TrackType;
 	name?: string;
 }): TimelineTrack;
+/**
+ * Creates a new empty track of the given type with no elements.
+ * Overloads provide type-narrowed return types for each track variant.
+ */
 export function buildEmptyTrack({
 	id,
 	type,

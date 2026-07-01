@@ -1,4 +1,14 @@
 // Complete Schema.org structured data for all content types
+
+/**
+ * SchemaOrg — JSON-LD structured data components for rich search results.
+ *
+ * Exports: {@link OrganizationLD}, {@link SoftwareAppLD}, {@link WebSiteLD},
+ * {@link VideoObjectLD}, {@link BreadcrumbLD}, {@link HowToLD}, {@link ProductLD}.
+ *
+ * @module seo/SchemaOrg
+ */
+
 import React from "react";
 
 /* ── Organization ── */

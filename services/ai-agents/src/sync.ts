@@ -1,3 +1,13 @@
+/**
+ * CRDT sync and WebRTC signaling server over Socket.IO.
+ *
+ * Provides:
+ *   - JWT-authenticated WebSocket connections (HS256 via better-auth)
+ *   - Project-room-based CRDT delta broadcasting
+ *   - WebRTC signaling relay for P2P media streaming
+ *   - Autonomous AI-to-timeline CRDT patch injection
+ */
+
 import { Server as SocketIOServer } from "socket.io";
 import { Server as HttpServer } from "http";
 import { createHmac } from "crypto";
@@ -50,6 +60,13 @@ function verifyToken(token: string): { sub: string; email: string; role: string 
 
 let ioInstance: SocketIOServer | null = null;
 
+/**
+ * Initialize the Socket.IO sync server on an existing HTTP server.
+ *
+ * Configures CORS, JWT auth middleware, room-based CRDT broadcasting,
+ * and WebRTC signaling relay. Clients must provide a valid HS256 JWT
+ * token signed by better-auth during the handshake.
+ */
 export function setupSyncServer(httpServer: HttpServer) {
   ioInstance = new SocketIOServer(httpServer, {
     cors: {
@@ -151,6 +168,12 @@ export function setupSyncServer(httpServer: HttpServer) {
   console.log("[Sync] WebSocket CRDT Server initialized (auth required).");
 }
 
+/**
+ * Broadcast autonomous AI CRDT patches to all clients in a project room.
+ *
+ * Used by the orchestrator to push AI-generated timeline edits directly
+ * to connected editors without user intervention.
+ */
 export function broadcastCrdtPatch(projectId: string, patch: any) {
   if (ioInstance) {
     console.log(`[Sync] Broadcasting autonomous AI CRDT patch to project ${projectId}`);

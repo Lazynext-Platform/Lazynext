@@ -1,3 +1,4 @@
+/** @module __tests__/color Test suite for color utilities */
 import { describe, expect, it } from "bun:test";
 import { hexToHsv, parseHexAlpha, appendAlpha } from "../color";
 

@@ -1,3 +1,11 @@
+/**
+ * MCP (Model Context Protocol) client manager.
+ *
+ * Initializes and manages connections to external MCP servers (Playwright,
+ * Firecrawl, Context7) over stdio transport. Provides tool discovery and
+ * execution across all connected servers for the AI orchestrator.
+ */
+
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 

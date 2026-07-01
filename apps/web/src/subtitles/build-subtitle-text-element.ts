@@ -1,3 +1,4 @@
+/** @module Utility for building text element objects from parsed subtitle cues */
 import { FONT_SIZE_SCALE_REFERENCE } from "@/text/typography";
 import {
 	getTextVisualRect,

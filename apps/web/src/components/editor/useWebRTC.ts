@@ -1,3 +1,4 @@
+/** @module WebRTC hook for real-time voice chat between editor collaborators */
 import { useEffect, useRef, useState } from "react";
 
 interface UseWebRTCOptions {

@@ -1,3 +1,10 @@
+/**
+ * @module ripple/diff
+ * @description Computes ripple adjustments by comparing "before" and
+ *   "after" track states, identifying freed intervals where downstream
+ *   elements should be shifted left to close gaps.
+ */
+
 import type {
 	SceneTracks,
 	TimelineElement,
@@ -14,6 +21,11 @@ interface ElementSpan extends Interval {
 	id: string;
 }
 
+/**
+ * Diffs the before/after track states and returns an ordered list of
+ * ripple adjustments. Each adjustment specifies which track, after
+ * what time, and by how much elements should shift.
+ */
 export function computeRippleAdjustments({
 	beforeTracks,
 	afterTracks,

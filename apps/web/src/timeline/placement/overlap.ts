@@ -1,3 +1,10 @@
+/**
+ * Overlap detection for placement — checks whether a set of time spans
+ * conflicts with existing elements on a track.
+ *
+ * @module timeline/placement/overlap
+ */
+
 import type { TimelineElement } from "@/timeline";
 import type { PlacementTimeSpan } from "./types";
 
@@ -26,6 +33,10 @@ function wouldElementOverlap({
 	});
 }
 
+/**
+ * Returns `true` if every time span can be placed on the track without
+ * overlapping existing elements.
+ */
 export function canPlaceTimeSpansOnTrack({
 	track,
 	timeSpans,

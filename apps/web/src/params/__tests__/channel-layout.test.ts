@@ -1,3 +1,4 @@
+/** @module __tests__/channel-layout Test suite for channel layout utilities */
 import { describe, expect, test } from "bun:test";
 import { formatLinearRgba } from "@/params";
 

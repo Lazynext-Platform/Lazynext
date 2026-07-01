@@ -1,3 +1,11 @@
+/**
+ * Timeline element component — renders a single clip/element on a track
+ * with thumbnails, waveforms, keyframe diamonds, resize handles, and
+ * context menus.
+ *
+ * @module timeline/components/timeline-element
+ */
+
 "use client";
 
 import { createContext, useContext } from "react";
@@ -105,6 +113,7 @@ interface KeyframeIndicator {
 	keyframes: SelectedKeyframeRef[];
 }
 
+/** Builds a keyframe indicator with pixel offset from the element's left edge. */
 export function buildKeyframeIndicator({
 	keyframe,
 	trackId,
@@ -141,6 +150,7 @@ export function buildKeyframeIndicator({
 	};
 }
 
+/** Groups keyframes into indicators, merging co-located keyframes. */
 export function getKeyframeIndicators({
 	keyframes,
 	trackId,
@@ -188,6 +198,7 @@ export function getKeyframeIndicators({
 	return [...keyframesByTime.values()].sort((a, b) => a.time - b.time);
 }
 
+/** Returns the human-readable shortcut for a given action. */
 export function getDisplayShortcut({ action }: { action: TAction }) {
 	const defaultShortcuts = getActionDefinition({ action }).defaultShortcuts;
 	if (!defaultShortcuts?.length) {
@@ -222,6 +233,10 @@ interface TimelineElementProps {
 	isDropTarget?: boolean;
 }
 
+/**
+ * Renders a single timeline element (clip, text, sticker, graphic, effect,
+ * audio) with drag/resize/selection/keyframe support.
+ */
 export function TimelineElement({
 	element,
 	track,

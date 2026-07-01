@@ -1,3 +1,8 @@
+//! WASM bridge for the neural engine.
+//!
+//! Initializes the facial recognition model and exposes face detection
+//! on raw frame data, returning detection results as JSON to JavaScript.
+
 use neural_engine::FacialRecognitionModel;
 use serde_wasm_bindgen;
 use wasm_bindgen::prelude::*;

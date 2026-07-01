@@ -1,3 +1,4 @@
+/** @module Storage service orchestrating project persistence across adapters with migration support */
 import type { TProject, TProjectMetadata } from "@/project/types";
 import { getProjectDurationFromScenes } from "@/timeline/scenes";
 import type { MediaAsset } from "@/media/types";

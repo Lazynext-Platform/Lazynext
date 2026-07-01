@@ -1,3 +1,9 @@
+/**
+ * @module Debounced auto-save manager. Subscribes to scene and timeline
+ * changes, queues a save after a configurable debounce window, and supports
+ * pause/resume/flush for export or bulk operations.
+ */
+
 import type { EditorCore } from "@/core";
 
 type SaveManagerOptions = {

@@ -1,3 +1,7 @@
+/**
+ * @module next.config
+ */
+
 import type { NextConfig } from "next";
 
 import { withContentCollections } from "@content-collections/next";

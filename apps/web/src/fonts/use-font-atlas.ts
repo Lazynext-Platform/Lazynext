@@ -1,3 +1,4 @@
+/** @module Hook for asynchronously loading and caching font atlases for text rendering */
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
 	getCachedFontAtlas,

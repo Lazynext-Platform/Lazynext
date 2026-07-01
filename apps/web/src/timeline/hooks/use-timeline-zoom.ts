@@ -32,6 +32,14 @@ interface UseTimelineZoomReturn {
 	saveScrollPosition: () => void;
 }
 
+/**
+ * Connects the zoom controller to the React lifecycle, providing
+ * zoom level, setter, wheel handler, and scroll-save callback.
+ */
+/**
+ * Connects the zoom controller to the React lifecycle, providing
+ * zoom level, setter, wheel handler, and scroll-save callback.
+ */
 export function useTimelineZoom({
 	containerRef,
 	minZoom = TIMELINE_ZOOM_MIN,

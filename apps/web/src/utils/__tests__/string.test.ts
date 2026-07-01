@@ -1,3 +1,4 @@
+/** @module __tests__/string Test suite for string utilities */
 import { describe, expect, it } from "bun:test";
 import { capitalizeFirstLetter, uppercase } from "../string";
 

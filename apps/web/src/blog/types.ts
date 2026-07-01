@@ -1,3 +1,4 @@
+/** @module Blog type definitions — Post, Pagination, Author, Category, Tag */
 export type Post = {
 	id: string;
 	slug: string;

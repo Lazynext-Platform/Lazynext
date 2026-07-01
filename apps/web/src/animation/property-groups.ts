@@ -1,3 +1,10 @@
+/**
+ * @module animation/property-groups
+ * @description Queries keyframe groups — collections of related animation
+ *   properties (e.g. `transform.scale` maps to both X and Y). Used by
+ *   the timeline UI to select/unlock grouped keyframes together.
+ */
+
 import type {
 	AnimationPropertyGroup,
 	AnimationPropertyPath,
@@ -6,11 +13,16 @@ import type {
 import { ANIMATION_PROPERTY_GROUPS } from "@/animation/types";
 import { getKeyframeAtTime } from "./keyframe-query";
 
+/** Reference to a keyframe within an animation property group. */
 export interface GroupKeyframeRef {
 	propertyPath: AnimationPropertyPath;
 	keyframeId: string;
 }
 
+/**
+ * Returns all keyframe references that exist at the given time across
+ * all properties in the group.
+ */
 export function getGroupKeyframesAtTime({
 	animations,
 	group,
@@ -26,6 +38,10 @@ export function getGroupKeyframesAtTime({
 	});
 }
 
+/**
+ * Returns `true` when any property in the group has a keyframe at the
+ * given time.
+ */
 export function hasGroupKeyframeAtTime({
 	animations,
 	group,

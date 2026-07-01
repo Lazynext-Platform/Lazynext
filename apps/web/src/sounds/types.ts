@@ -1,3 +1,4 @@
+/** @module Sound effect and saved sound type definitions */
 export interface SoundEffect {
 	id: number;
 	name: string;

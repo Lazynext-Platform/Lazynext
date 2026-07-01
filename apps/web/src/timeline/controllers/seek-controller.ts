@@ -1,3 +1,11 @@
+/**
+ * Seek-on-click controller — detects short clicks (not drags) on the
+ * ruler or tracks area and seeks the playhead to that position with
+ * frame snapping.
+ *
+ * @module timeline/controllers/seek-controller
+ */
+
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { FrameRate } from "lazynext-wasm";
 import { BASE_TIMELINE_PIXELS_PER_SECOND } from "@/timeline/scale";
@@ -20,6 +28,7 @@ interface PendingSeekSession {
 
 type Session = { kind: "idle" } | PendingSeekSession;
 
+/** Configuration for the seek controller. */
 export interface SeekConfig {
 	zoomLevel: number;
 	duration: MediaTime;
@@ -38,6 +47,7 @@ export interface SeekConfig {
 	}) => void;
 }
 
+/** Ref wrapper for seek config. */
 export interface SeekConfigRef {
 	readonly current: SeekConfig;
 }
@@ -82,6 +92,10 @@ function isClickGesture({
 	return deltaX <= 5 && deltaY <= 5 && deltaTime <= 500;
 }
 
+/**
+ * Detects click-vs-drag gestures on the ruler/tracks and seeks the
+ * playhead on click, clearing selection when appropriate.
+ */
 export class SeekController {
 	private session: Session = { kind: "idle" };
 	private readonly configRef: SeekConfigRef;

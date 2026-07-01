@@ -1,5 +1,16 @@
+//! GPU-accelerated color scopes: waveform monitor and vectorscope.
+//!
+//! Dispatches compute shaders to analyze frame luminance histograms for
+//! real-time waveform and vectorscope displays, providing essential color
+//! analysis tools for the color grading workflow.
+
 use wgpu::{Buffer, ComputePipeline, Device, Queue};
 
+/// GPU-accelerated color scopes analyzer for waveform and vectorscope displays.
+///
+/// Dispatches compute shaders to build luminance histograms from frame textures,
+/// enabling real-time waveform monitoring and vectorscope visualization during
+/// color grading.
 #[allow(dead_code)]
 pub struct ColorScopesAnalyzer {
     pipeline: ComputePipeline,
@@ -7,6 +18,10 @@ pub struct ColorScopesAnalyzer {
 }
 
 impl ColorScopesAnalyzer {
+    /// Creates a new color scopes analyzer for the given device.
+    ///
+    /// Compiles the WGSL scopes compute shader, creates the compute pipeline,
+    /// and allocates a 256-bucket luminance histogram output buffer.
     pub fn new(device: &Device) -> Self {
         // Load the WGSL shader for Waveform & Vectorscope computation
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -33,6 +48,11 @@ impl ColorScopesAnalyzer {
         Self { pipeline, buffer }
     }
 
+    /// Dispatches a compute pass that analyzes the given frame texture and
+    /// populates a luminance histogram for waveform monitoring.
+    ///
+    /// The caller provides the bind group layout that matches the scopes
+    /// pipeline (binding 0 = texture, binding 1 = storage buffer).
     pub fn compute_waveform(
         &self,
         device: &wgpu::Device,

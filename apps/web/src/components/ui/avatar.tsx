@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a user profile image with an initials fallback. */
+
 import * as React from "react";
 import { Avatar as AvatarPrimitive } from "radix-ui";
 

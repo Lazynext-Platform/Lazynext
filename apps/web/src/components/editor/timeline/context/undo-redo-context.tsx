@@ -1,3 +1,10 @@
+/**
+ * Undo/redo context — React context provider with stack-based undo/redo
+ * history, localStorage persistence, and configurable history size.
+ *
+ * @module components/editor/timeline/context/undo-redo-context
+ */
+
 import { createContext, useContext, useState } from "react";
 import { ProjectJSON } from "../types";
 

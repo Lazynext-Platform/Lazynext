@@ -1,3 +1,4 @@
+/** @module Unit tests for the QueueTable admin component */
 import { describe, expect, it, afterEach } from "bun:test";
 import { render, screen, cleanup } from "@testing-library/react";
 import { QueueTable } from "./QueueTable";

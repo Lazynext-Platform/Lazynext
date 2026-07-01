@@ -1,3 +1,9 @@
+/**
+ * @module Runtime diagnostic registry. Registers predicate-based checks that
+ * evaluate editor state to surface actionable warnings (e.g. missing export
+ * settings, empty tracks).
+ */
+
 import type { EditorCore } from "@/core";
 import type { DiagnosticDefinition } from "@/diagnostics/types";
 

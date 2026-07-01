@@ -1,3 +1,10 @@
+/**
+ * Handlebars UI component — animated horizontal bar/rail with
+ * scroll-linked motion for the landing page.
+ *
+ * @module components/landing/handlebars
+ */
+
 "use client";
 
 import {

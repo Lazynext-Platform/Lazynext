@@ -114,11 +114,11 @@ Key facts:
 | 3.1 | **Implement UniFFI bridge** — Add `uniffi` dependency to `rust/core`, define `.udl` file, generate Kotlin/Swift bindings, build native modules. `rust/core/src/mobile_bridge.rs` has the struct defined but it's not wired. | ✅ Done — UniFFI-generated bindings exist for iOS (lazynext_mobile.swift, FFI.h) and Android (lazynext_mobile.kt). | Huge |
 | 3.2 | **Build native project scaffolding** — Generate `android/` and `ios/` directories with native module linking. | ✅ Done — Full Xcode project + Gradle project with Expo native modules. | Large |
 | 3.3 | **Replace JavaScript mock bridge** — Connect the real UniFFI-generated bindings so AI prompts actually call the Rust engine. | ✅ Done — NativeBridge.ts calls real MyModule APIs (getProjectInfo, processIntent, moveClip). EditorScreen wired via fetchProject(). | Large |
-| 3.4 | **Build AI Copilot screen** — Currently a placeholder with two Text components. Needs full chat interface with streaming responses. | ⬚ Pending | Medium |
+| 3.4 | **Build AI Copilot screen** — Mobile chat interface with streaming AI responses. | ✅ Done — Feature #29; AIChatScreen wired to real API. | Medium |
 | 3.5 | **Build timeline viewer** — Mobile-optimized timeline view for reviewing/scrubbing projects. | ✅ Done — EditorScreen.tsx (150 lines) with timeline, playhead, real clip data from NativeBridge. | Large |
 | 3.6 | **Add missing assets** — `app.json` references `icon.png`, `splash.png`, `adaptive-icon.png` that don't exist. | ✅ Done — All 3 assets present under apps/mobile/assets/. | Small |
 | 3.7 | **Add `tsconfig.json`** — Missing, despite TypeScript being a devDependency. | ✅ Done — apps/mobile/tsconfig.json exists. | Small |
-| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | ⬚ Pending | Small |
+| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | ✅ Done — Feature #29; quick-action race condition fixed (stale prompt silent no-op); pencil timer unmount cleanup added. | Small |
 | 3.9 | **Add tests** — Zero test files, no test runner configured. | ✅ Done — native-bridge.test.ts (47 lines). | Medium |
 
 ---
@@ -251,7 +251,7 @@ These underpin all 7 formats:
 | I4 | **Consolidate docker-compose files** — 7 files, many redundant. Reduce to 2 (main + dev). | Low | Small |
 | I5 | **Standardize env var naming** — `RENDER_SERVICE_URL` vs `NEXT_PUBLIC_RENDER_SERVICE_URL` inconsistency. | Low | Small |
 | I6 | **Add OpenTelemetry instrumentation** — No OTel in any service code despite having Tempo for tracing. | Medium | Large |
-| I7 | **Configure Alertmanager receivers** — Slack/PagerDuty have placeholder keys. | Medium | Small |
+| I7 | **Configure Alertmanager receivers** — Slack/PagerDuty keys are deployment configuration (env vars), not a code gap. | Low | Small |
 | I8 | **Add end-to-end integration test** — Test full `ingest → transcribe → edit → render` pipeline across all services. | High | Large |
 | I9 | **Build migration image in CI** — `Dockerfile.migrate` exists and is used by K8s init containers but not built by any CI pipeline. | Medium | Small |
 | I10 | **Add API documentation** — No OpenAPI specs for any microservice. | Medium | Medium |

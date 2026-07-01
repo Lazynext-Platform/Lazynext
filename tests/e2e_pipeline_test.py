@@ -1,3 +1,18 @@
+"""
+End-to-end pipeline test for the Lazynext API Gateway.
+
+Simulates a full video processing pipeline:
+  1. Health check the gateway
+  2. Ingest media via /api/v1/pre-processing/ingest
+  3. Request transcription via /api/v1/pre-processing/transcribe
+  4. Request rotoscoping via /api/v1/pre-processing/rotoscope
+
+All steps degrade gracefully — tests are skipped if services are unreachable.
+
+Usage:
+  pytest tests/e2e_pipeline_test.py -v
+"""
+
 import pytest
 import httpx
 import os

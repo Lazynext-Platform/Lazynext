@@ -1,3 +1,4 @@
+/** @module Project data transformer v0 to v1 */
 import { generateUUID } from "@/utils/id";
 import type { MigrationResult, ProjectRecord } from "./types";
 import { isRecord } from "./utils";

@@ -1,3 +1,4 @@
+/** @module Custom UI SVG icon components */
 import type { IconProps } from "./types";
 
 export function OcVideoIcon({ className = "", size = 32 }: IconProps) {

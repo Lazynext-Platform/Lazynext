@@ -1,3 +1,11 @@
+"""
+Computer Vision model services: SAM2 rotoscoping and NeRF 3D reconstruction.
+
+Orchestrates ONNX inference pipelines for Segment Anything 2 (rotoscoping)
+and Neural Radiance Fields (3D extraction), with TensorFlow Serving fallback
+for SAM2 when ONNX is unavailable.
+"""
+
 import asyncio
 import os
 import httpx
@@ -12,6 +20,20 @@ from sam2_pipeline import Sam2Pipeline, Sam2Config
 TF_SERVING_URL = os.getenv("TF_SERVING_URL", "http://tensorflow-serving:8501")
 
 async def rotoscope_service(req: RotoscopeRequest):
+    """Run SAM2 rotoscoping to segment an object across video frames.
+
+    Executes the SAM2 ONNX pipeline in a thread pool, falling back to
+    TensorFlow Serving if ONNX inference fails.
+
+    Args:
+        req: RotoscopeRequest with video_id, object_prompt, and frame range.
+
+    Returns:
+        dict with success, video_id, object, source (ONNX/TF), and mask_sequence_url.
+
+    Raises:
+        HTTPException: 503 if both ONNX and TF Serving are unavailable.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     mask_dir = f"/tmp/masks_{req.video_id}"
     os.makedirs(mask_dir, exist_ok=True)
@@ -51,6 +73,20 @@ async def rotoscope_service(req: RotoscopeRequest):
     }
 
 async def extract_nerf_service(req: NeRFRequest):
+    """Extract a 3D NeRF model from video frames.
+
+    Runs the NeRF pipeline (Nerfacto by default) in a thread pool executor
+    to produce a 3D mesh and point cloud from input video.
+
+    Args:
+        req: NeRFRequest with video_id and method.
+
+    Returns:
+        dict with success, video_id, method, source, mesh_url, and point_cloud_url.
+
+    Raises:
+        HTTPException: 503 if NeRF extraction fails.
+    """
     video_path = f"/tmp/{req.video_id}.mp4"
     output_dir = f"/tmp/nerf_{req.video_id}"
 

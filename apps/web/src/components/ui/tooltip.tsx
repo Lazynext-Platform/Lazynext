@@ -1,3 +1,5 @@
+/** @component Renders a contextual popover that appears on hover or focus with variant styles. */
+
 import { cva, type VariantProps } from "class-variance-authority";
 import { Tooltip as TooltipPrimitive } from "radix-ui";
 import * as React from "react";

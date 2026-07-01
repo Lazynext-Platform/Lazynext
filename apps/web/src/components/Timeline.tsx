@@ -1,3 +1,4 @@
+/** @module Timeline component with scrubber playhead and clip tracks */
 import React, { useState, useEffect, useRef } from 'react';
 
 // Types mapped from Rust's lazynext_core::engine

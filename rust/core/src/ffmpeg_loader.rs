@@ -1,3 +1,6 @@
+//! FFmpeg-based frame decoder that invokes the `ffmpeg` CLI to extract raw RGBA
+//! video frames on demand via the `AssetLoader` trait.
+
 use crate::engine::AssetLoader;
 use std::future::Future;
 use std::io::Read;

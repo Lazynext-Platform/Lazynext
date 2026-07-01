@@ -1,3 +1,9 @@
+//! WASM bridge for animation keyframe evaluation.
+//!
+//! Exposes scalar (bezier/easing) and discrete animation channel evaluators
+//! that consume JSON-serialized keyframe data from JavaScript and evaluate
+//! property values at a given time tick.
+
 use serde::Deserialize;
 use serde_wasm_bindgen::from_value;
 use state::keyframe::{Easing, Keyframe, ScalarAnimationChannel};

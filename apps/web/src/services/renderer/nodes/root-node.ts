@@ -1,3 +1,4 @@
+/** @module Root render node serving as the top-level compositor tree node */
 import { BaseNode } from "./base-node";
 
 export type RootNodeParams = {

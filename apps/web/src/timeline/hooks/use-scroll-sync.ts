@@ -1,3 +1,10 @@
+/**
+ * Synchronizes horizontal and vertical scroll positions between the
+ * ruler, tracks, track labels, and bookmarks viewports.
+ *
+ * @module timeline/hooks/use-scroll-sync
+ */
+
 import { useEffect, useRef } from "react";
 
 interface UseScrollSyncProps {
@@ -7,6 +14,10 @@ interface UseScrollSyncProps {
 	bookmarksScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 
+/**
+ * Hook that wires up scroll event listeners across the ruler, tracks,
+ * bookmarks, and track labels scroll containers so they stay in sync.
+ */
 export function useScrollSync({
 	tracksScrollRef,
 	rulerScrollRef,

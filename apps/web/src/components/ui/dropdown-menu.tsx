@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a toggleable popover menu with items, checkboxes, radio groups, and submenus. */
+
 import * as React from "react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import { Check, ChevronRight, Circle } from "lucide-react";

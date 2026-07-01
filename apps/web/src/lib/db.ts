@@ -1,6 +1,21 @@
+/**
+ * IndexedDB persistence layer for local project state.
+ *
+ * Provides raw IndexedDB operations for opening the database, saving,
+ * loading, and clearing project state. Used for offline/local editing
+ * before syncing to the server.
+ *
+ * @module lib/db
+ */
+
 const DB_NAME = "lazynext_db";
 const STORE_NAME = "lazynext_store";
 
+/**
+ * Opens (or creates) the IndexedDB instance for Lazynext.
+ *
+ * @returns a Promise resolving to the opened IDBDatabase.
+ */
 export async function openDB(): Promise<IDBDatabase> {
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open(DB_NAME, 1);
@@ -16,6 +31,12 @@ export async function openDB(): Promise<IDBDatabase> {
 	});
 }
 
+/**
+ * Persists the current project state and media assets to IndexedDB.
+ *
+ * @param projectData - the serializable project state.
+ * @param assets - array of media asset objects.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function saveProjectState(projectData: any, assets: any[]) {
 	const db = await openDB();
@@ -40,6 +61,11 @@ export async function saveProjectState(projectData: any, assets: any[]) {
 	});
 }
 
+/**
+ * Loads the most recently saved project state from IndexedDB.
+ *
+ * @returns the project data and assets, or null if nothing is saved.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function loadProjectState(): Promise<{
 	projectData: any;
@@ -69,6 +95,9 @@ export async function loadProjectState(): Promise<{
 	});
 }
 
+/**
+ * Removes the saved project state from IndexedDB.
+ */
 export async function clearProjectState() {
 	const db = await openDB();
 	return new Promise<void>((resolve, reject) => {

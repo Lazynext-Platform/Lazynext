@@ -1,5 +1,7 @@
 "use client";
 
+/** @component Renders a right-click overlay menu with items, submenus, and shortcuts. */
+
 import * as React from "react";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

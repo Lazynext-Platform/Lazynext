@@ -1,3 +1,5 @@
+/** @component Renders a styled, theme-aware clickable button element. */
+
 import * as React from "react";
 import { Slot as SlotPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";

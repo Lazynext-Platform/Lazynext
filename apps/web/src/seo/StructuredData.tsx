@@ -1,5 +1,15 @@
 // JSON-LD Structured Data for rich search results (Google, Bing)
 
+/**
+ * StructuredData — JSON-LD schema components for Google/Bing rich results.
+ *
+ * Exports: {@link OrganizationSchema}, {@link SoftwareAppSchema},
+ * {@link BreadcrumbSchema}, {@link FAQSchema}, and the combined
+ * {@link SEOHead} component.
+ *
+ * @module seo/StructuredData
+ */
+
 import React from "react";
 
 interface OrganizationSchemaProps {

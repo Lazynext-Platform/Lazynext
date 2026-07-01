@@ -1,3 +1,7 @@
+"""
+Image generation services: video/image inpainting via local Diffusers.
+"""
+
 import asyncio
 import os
 import httpx

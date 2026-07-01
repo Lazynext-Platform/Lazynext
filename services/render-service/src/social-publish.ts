@@ -112,6 +112,10 @@ async function fetchWithStatus(
 
 // ── OAuth Token Management ────────────────────────────────────────────
 
+/**
+ * Retrieve a valid OAuth access token, refreshing if expired.
+ * Falls back to the stored token when no refresh token is available.
+ */
 async function getValidToken(
   platform: string,
   clientId: string,

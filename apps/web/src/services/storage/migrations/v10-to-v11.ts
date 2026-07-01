@@ -1,3 +1,7 @@
+/**
+ * @module services/storage/migrations/v10-to-v11
+ */
+
 import { StorageMigration, type StorageMigrationRunArgs } from "./base";
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 import { transformProjectV10ToV11 } from "./transformers/v10-to-v11";

@@ -1,3 +1,4 @@
+/** @module ASS (Advanced SubStation Alpha) subtitle format parser */
 import type {
 	ParseSubtitleResult,
 	SubtitleCue,
