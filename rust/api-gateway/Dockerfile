@@ -1,6 +1,6 @@
 FROM rust:1.96-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    pkg-config libssl-dev libasound2-dev \
+    pkg-config libssl-dev libasound2-dev curl \
     libegl1-mesa-dev libxcb-shape0-dev libxcb-xfixes0-dev \
     libxkbcommon-dev libwayland-dev \
     && rm -rf /var/lib/apt/lists/*
