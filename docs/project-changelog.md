@@ -6,7 +6,20 @@
 
 ---
 
-## [Unreleased] — 2026-06-30 (Post-#09 hardening pass)
+## [Unreleased] — 2026-07-01 (Features #33–#34)
+
+### Added
+- **Feature #33 — Production Hardening All 7 Formats**: Desktop (playback, AI prompt, import, export), CLI (real media, ingest), MCP (SSE transport, 14 tools), API Gateway (graceful shutdown, render dispatch, E2E tests), Mobile (native stubs, preview), Browser Extension (timeline preview), Web (WASM automation)
+- **Feature #34 — Real Video Playback Pipeline**: Real video decode via CliFfmpegLoader → GPU compositor → valid H.264 MP4 export. Verified with red pixel analysis. Desktop auto-decodes video textures for real preview. Web video-decoder utility (WebCodecs API wrapper).
+- **Infrastructure**: Jenkinsfile, GitLab CI (.gitlab-ci.yml), 14 GitHub Actions workflows, Docker (15 Dockerfiles, 8 compose files), Kubernetes (34 manifests), Terraform (16 .tf files), Ansible (6 roles), Monitoring (Prometheus, Grafana, Loki, Tempo, Alloy, 5 dashboards, 5 runbooks)
+- **TensorFlow**: models.conf for Whisper, SAM2, RIFE, ESRGAN
+- **Database**: README, migration scripts, PostgreSQL alerts
+
+### Fixed
+- CLI export pipeline: real video decode → GPU compositor → valid MP4 output (was: test patterns only)
+- API Gateway: starts without PostgreSQL in development mode
+- Docker compose: build contexts fixed for Rust services
+- CI workflows: ml-model-sync undefined functions, backup-verify variable ordering, mobile-uniffi continue-on-error
 
 ### Added
 - **Feature #10 — Rust Core Hardening**: completed CRDT conflict-resolution TODO in `nle_state.rs` (+130 lines), fixed `temporal-versioning` merge bug (clips no longer silently land on track 0), added first-time tests for gpu/masks/temporal-versioning/mcp/cli/wasm, wired SAM2 ONNX inference path, VST3 `libloading` host, and C2PA manifest signing.
