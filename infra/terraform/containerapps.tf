@@ -602,7 +602,10 @@ resource "azurerm_container_app" "api_gateway" {
     name  = "better-auth-secret"
     value = var.better_auth_secret
   }
-
+  secret {
+    name  = "stripe-webhook-secret"
+    value = var.stripe_webhook_secret
+  }
   secret {
     name  = "acr-password"
     value = azurerm_container_registry.acr.admin_password
