@@ -32,7 +32,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Install uniffi-bindgen
-      run: cargo install uniffi-bindgen
+      run: cargo install uniffi --features=bindgen || cargo install uniffi_bindgen
 
     - name: Generate Kotlin bindings
       run: |
