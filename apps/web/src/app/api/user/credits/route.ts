@@ -19,7 +19,7 @@ export async function GET() {
 
 		const res = await fetch(`${RUST_API_GATEWAY_URL}/api/v1/user/credits`, {
 			headers: {
-				"Authorization": `Bearer ${session.user.id}`
+				"X-Internal-API-Key": process.env.INTERNAL_API_KEY || "lazynext-internal-dev-key"
 			}
 		});
 

@@ -14,6 +14,7 @@ use std::env;
 pub struct VideoIntent {
     pub prompt: String,
     pub require_plan_approval: bool,
+    #[serde(default)]
     pub source_files: Vec<String>,
     #[serde(default)]
     pub llm_provider: Option<String>,

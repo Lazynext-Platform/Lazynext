@@ -122,12 +122,42 @@ pub fn jwt_validation() -> &'static Validation {
 /// Axum middleware that validates a better-auth JWT on every request.
 ///
 /// # Behaviour
-/// 1. Extracts `Authorization: Bearer <token>` header.
-/// 2. Decodes and validates the JWT using `BETTER_AUTH_SECRET`.
-/// 3. On success: inserts [`AuthClaims`] into request extensions and
+/// 1. Checks for `X-Internal-API-Key` header — if present and matches
+///    `INTERNAL_API_KEY` env var, creates synthetic Admin claims and
+///    bypasses JWT validation (for trusted internal services like the
+///    web app server).
+/// 2. Otherwise, extracts `Authorization: Bearer <token>` header.
+/// 3. Decodes and validates the JWT using `BETTER_AUTH_SECRET`.
+/// 4. On success: inserts [`AuthClaims`] into request extensions and
 ///    forwards to the next layer / handler.
-/// 4. On failure: returns 401 with a JSON error body.
+/// 5. On failure: returns 401 with a JSON error body.
 pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response, StatusCode> {
+    // ── Internal API key path ─────────────────────────────────────────
+    if let Some(internal_key) = std::env::var("INTERNAL_API_KEY").ok() {
+        if !internal_key.is_empty() {
+            if let Some(req_key) = req
+                .headers()
+                .get("x-internal-api-key")
+                .and_then(|v| v.to_str().ok())
+            {
+                if req_key == internal_key {
+                    let claims = AuthClaims {
+                        sub: "internal".into(),
+                        email: "internal@lazynext.local".into(),
+                        name: Some("Internal Service".into()),
+                        role: Some("admin".into()),
+                        email_verified: Some(true),
+                        iat: 0,
+                        exp: u64::MAX,
+                    };
+                    req.extensions_mut().insert(claims);
+                    return Ok(next.run(req).await);
+                }
+            }
+        }
+    }
+
+    // ── JWT path ─────────────────────────────────────────────────────
     let token = extract_bearer_token(&req).ok_or(StatusCode::UNAUTHORIZED)?;
 
     let claims = decode::<AuthClaims>(&token, jwt_decoding_key(), jwt_validation())

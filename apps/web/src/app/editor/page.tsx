@@ -76,8 +76,7 @@ export default function EditorPage() {
 
 		// 3. Call the real API Gateway for autonomous editing
 		try {
-			const gatewayUrl = process.env.NEXT_PUBLIC_RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
-			const res = await fetch(`${gatewayUrl}/api/v1/autonomous_edit`, {
+			const res = await fetch("/api/ai/autonomous-edit", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
