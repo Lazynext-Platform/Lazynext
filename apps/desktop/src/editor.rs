@@ -1,6 +1,8 @@
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;
+use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
+use lazynext_core::engine::AssetLoader;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -38,6 +40,25 @@ impl Render for EditorShell {
             let pd = nle_guard.get_project_data().clone();
 
             let engine = self.engine.lock().await;
+            // Auto-upload video textures from media_pool on first render
+            for track in &pd.tracks {
+                for clip in &track.clips {
+                    if let Some(media_id) = &clip.media_id {
+                        if let Some(asset) = pd.media_pool.get(media_id) {
+                            let path = &asset.path_or_url;
+                            let is_video = ["mp4", "mov", "mkv", "avi", "webm"]
+                                .iter()
+                                .any(|e| path.to_lowercase().ends_with(e));
+                            if is_video {
+                                let loader = CliFfmpegLoader::new(pd.width, pd.height);
+                                if let Ok(rgba) = loader.load_frame(path, 0).await {
+                                    let _ = engine.upload_texture(&clip.id, &rgba, pd.width, pd.height).await;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             let frame = engine.render_frame(self.current_frame).await;
             (pd, frame.ok())
         });
