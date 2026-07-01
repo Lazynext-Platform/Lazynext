@@ -364,7 +364,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
                     }
                     Err(e) => {
                         log::warn!("Video decode failed, falling back to test pattern: {}", e);
-                        test_pattern_fallback(&core_engine).await.map_err(|e| format!("Test pattern fallback failed: {}", e))?;
+                        test_pattern_fallback(&mut core_engine).await.map_err(|e| format!("Test pattern fallback failed: {}", e))?;
                     }
                 }
             } else {
@@ -381,7 +381,7 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
             }
         }
     } else {
-        test_pattern_fallback(&core_engine).await.map_err(|e| format!("Test pattern upload failed: {}", e))?;
+        test_pattern_fallback(&mut core_engine).await.map_err(|e| format!("Test pattern upload failed: {}", e))?;
     }
 
     let progress_tx = if args.progress {
@@ -603,11 +603,13 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
 }
 
 /// Upload a test pattern texture when no real media is available.
-async fn test_pattern_fallback(engine: &lazynext_core::engine::CoreEngine) -> Result<(), String> {
+async fn test_pattern_fallback(engine: &mut lazynext_core::engine::CoreEngine) -> Result<(), String> {
     log::warn!("No media assets — using test pattern");
     let img = image::open("tests/assets/test_pattern.png")
         .map_err(|e| format!("Failed to open test pattern: {}", e))?;
     let rgba = img.to_rgba8();
     let (w, h) = rgba.dimensions();
-    engine.upload_texture("clip_1", rgba.as_raw(), w, h).await
+    engine.upload_texture("clip_1", rgba.as_raw(), w, h).await?;
+    engine.clear_asset_loader();
+    Ok(())
 }
