@@ -30,7 +30,7 @@ spec:
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Exists"
-          value: "present"
+          # value: not needed with Exists operator
           effect: "NoSchedule"
       containers:
         - name: lazynext-pre-processing-gpu
@@ -148,7 +148,7 @@ spec:
       tolerations:
         - key: "nvidia.com/gpu"
           operator: "Exists"
-          value: "present"
+          # value: not needed with Exists operator
           effect: "NoSchedule"
       containers:
         - name: lazynext-generative-studio-gpu
