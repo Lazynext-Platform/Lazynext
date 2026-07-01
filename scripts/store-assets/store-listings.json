@@ -1,0 +1,30 @@
+{
+  "chrome_web_store": {
+    "name": "Lazynext — AI Video Editor",
+    "short_description": "Capture any video into your Lazynext timeline. AI-powered editing, one click.",
+    "description": "Lazynext is the autonomous video editor. This extension lets you capture videos from any webpage — YouTube, TikTok, Vimeo, social media — and send them directly to your Lazynext timeline for instant AI-powered editing.\n\n● One-click capture from any page with a video\n● Right-click any video → Send to Lazynext\n● Automatically detects videos on the current tab\n● Pairs with the Lazynext Web App (localhost:3000 or lazynext.ai)\n● Video timeline preview in the extension popup\n\nJust speak or type what you want to create — Lazynext's Chronos AI agent handles the rest.",
+    "category": "productivity",
+    "privacy_policy_url": "https://lazynext.ai/privacy",
+    "homepage_url": "https://lazynext.ai",
+    "screenshots": "store-assets/chrome/screenshot-*.png (1280x800)",
+    "icon": "dist/icons/icon128.png"
+  },
+  "apple_app_store": {
+    "name": "Lazynext — AI Video Editor",
+    "subtitle": "Type. Speak. Edit. Done.",
+    "description": "Lazynext is the autonomous video editor built for the AI era. Just type or speak in plain language — Lazynext handles the cutting, grading, masking, and motion graphics automatically.\n\n● AI Copilot: Chronos understands plain language editing commands\n● GPU Compositor: 17 blend modes, 11 effect shaders, real-time preview\n● Multiplayer: Edit the same timeline with collaborators worldwide\n● Desktop App: Native GPUI performance with DeckLink SDI output\n● Export: MP4, ProRes, DCP, AAF, MOV\n\nBuilt on Rust, WebAssembly, and WebGPU for native desktop performance.",
+    "keywords": ["video editor", "ai editor", "nle", "film editing", "content creation"],
+    "category": "Photo & Video",
+    "privacy_url": "https://lazynext.ai/privacy",
+    "support_url": "https://lazynext.ai/support",
+    "screenshots": "store-assets/ios/screenshot-*.png (6.7\" and 6.5\" required)"
+  },
+  "google_play": {
+    "name": "Lazynext — AI Video Editor",
+    "short_description": "Type or speak. Lazynext edits for you.",
+    "full_description": "Lazynext is the autonomous video editor built for the AI era. Just type or speak in plain language — the Chronos AI Copilot handles the cutting, grading, masking, and motion graphics automatically.\n\n● AI Copilot: Natural language editing commands\n● GPU Compositor: 17 blend modes, 11 effect shaders\n● Multiplayer CRDT: Real-time collaborative editing\n● Export: MP4, ProRes, DCP, MOV\n● Native performance via Rust + UniFFI\n\nBuilt on Rust for maximum performance.",
+    "category": "Video Players & Editors",
+    "privacy_url": "https://lazynext.ai/privacy",
+    "screenshots": "store-assets/android/screenshot-*.png"
+  }
+}

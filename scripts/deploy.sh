@@ -45,10 +45,8 @@ cd ../../
 echo "✅ Azure Infrastructure Provisioned."
 
 # 3. Build WebAssembly (Web Platform)
-echo "🕸️ Compiling Rust Core to WebAssembly..."
-cd rust/core
-wasm-pack build --target web --out-dir ../../apps/web/pkg
-cd ../../
+echo "🕸️ Building Rust Core to WebAssembly..."
+./build-wasm.sh
 echo "✅ WASM Built. Push to GitHub to trigger the Next.js deployment to Vercel/Azure Static Web Apps."
 
 # 4. Build Mobile Apps (Fastlane)
@@ -67,17 +65,16 @@ fi
 
 # 5. Sign Desktop App (macOS)
 echo "💻 Codesigning Desktop Application..."
-if [ -f "apps/desktop/scripts/codesign.sh" ]; then
-    # In a real environment, you need your Apple Developer ID
-    # ./apps/desktop/scripts/codesign.sh
-    echo "✅ Desktop codesign script is ready (run manually with Apple Developer ID)."
+if [ -f "scripts/codesign-desktop.sh" ]; then
+    echo "✅ Desktop codesign script ready — run with:"
+    echo "   APPLE_DEVELOPER_ID=... APPLE_ID_EMAIL=... APPLE_TEAM_ID=... ./scripts/codesign-desktop.sh"
 else
     echo "⚠️ Desktop codesign script not found."
 fi
 
 # 6. Browser Extension
 echo "🧩 Browser Extension..."
-echo "✅ The Extension is ready in apps/extension/."
-echo "Please zip it and upload to the Chrome Web Store along with apps/extension/PRIVACY_POLICY.md."
+echo "✅ The Extension is ready in apps/browser-extension/dist/."
+echo "Please zip the dist folder and upload to the Chrome Web Store."
 
 echo "🎉 Deployment Orchestration Complete!"
