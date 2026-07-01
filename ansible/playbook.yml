@@ -5,7 +5,8 @@
   roles:
     - common
     - docker
-    - nvidia
+    - role: nvidia
+      when: "'gpu_nodes' in group_names"
     - k8s
   tasks:
     - name: Install FFmpeg (required for render farm nodes)

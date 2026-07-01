@@ -15,7 +15,7 @@
   vars:
     target_environment: "{{ target_environment | default('staging') }}"
     kustomize_overlay: "{{ kustomize_overlay | default(target_environment) }}"
-    k8s_manifests_dir: "{{ playbook_dir | dirname }}/k8s"
+    k8s_manifests_dir: "{{ playbook_dir | dirname | dirname }}/k8s"
     kustomize_dir: "{{ k8s_manifests_dir }}/overlays/{{ kustomize_overlay }}"
     app_namespace: "lazynext-{{ target_environment }}"
     deployment_timeout: 300

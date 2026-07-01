@@ -5,5 +5,12 @@
   roles:
     - common
     - docker
-    - nvidia
+    - role: nvidia
+      when: "'gpu_nodes' in group_names"
     - k8s
+
+- name: Deploy Monitoring Stack
+  hosts: masters
+  become: yes
+  roles:
+    - monitoring

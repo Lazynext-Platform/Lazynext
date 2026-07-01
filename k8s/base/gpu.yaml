@@ -29,7 +29,7 @@ spec:
         accelerator: nvidia
       tolerations:
         - key: "nvidia.com/gpu"
-          operator: "Equal"
+          operator: "Exists"
           value: "present"
           effect: "NoSchedule"
       containers:
@@ -147,7 +147,7 @@ spec:
         accelerator: nvidia
       tolerations:
         - key: "nvidia.com/gpu"
-          operator: "Equal"
+          operator: "Exists"
           value: "present"
           effect: "NoSchedule"
       containers:

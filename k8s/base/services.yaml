@@ -66,7 +66,10 @@ spec:
             timeoutSeconds: 3
           env:
             - name: NODE_ENV
-              value: "production"
+              valueFrom:
+                configMapKeyRef:
+                name: lazynext-config
+                key: NODE_ENV
             - name: NEXT_PUBLIC_SITE_URL
               value: "https://lazynext.ai"
             # From ConfigMap
@@ -630,8 +633,8 @@ spec:
             runAsUser: 1001
             seccompProfile:
               type: RuntimeDefault
-          stdin: true
-          tty: true
+          stdin: false
+          tty: false
           resources:
             requests:
               cpu: "100m"
@@ -758,7 +761,10 @@ spec:
               memory: "1Gi"
           env:
             - name: NODE_ENV
-              value: "production"
+              valueFrom:
+                configMapKeyRef:
+                name: lazynext-config
+                key: NODE_ENV
           livenessProbe:
             httpGet:
               path: /health

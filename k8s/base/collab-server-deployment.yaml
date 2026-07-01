@@ -22,7 +22,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: collab-server
-          image: lazynextacrproduction.azurecr.io/lazynext-collab-server:latest
+          image: ghcr.io/lazynext-platform/lazynext-collab-server:latest
           ports:
             - containerPort: 8004
               name: ws
