@@ -106,22 +106,7 @@ output "tenant_id" {
 }
 
 # ── Redis Cache ─────────────────────────────────────────────────────────────
-
-output "redis_host" {
-  description = "Azure Cache for Redis Enterprise hostname"
-  value       = azurerm_redis_enterprise_cluster.main.hostname
-}
-
-output "redis_port" {
-  description = "Azure Cache for Redis Enterprise SSL port"
-  value       = 10000
-}
-
-output "redis_primary_key" {
-  description = "Redis Enterprise database primary access key (retrieve via: az redisenterprise database list-keys --cluster-name lazynext-redis-{env} --resource-group lazynext-rg-{env})"
-  value       = "Use 'az redisenterprise database list-keys' to retrieve the access key. The key is not directly exported by the Terraform provider for Redis Enterprise."
-  sensitive   = true
-}
+# Redis managed via Upstash (UPSTASH_REDIS_URL) — no Azure Redis provisioned
 
 # ── CDN / Front Door ────────────────────────────────────────────────────────
 

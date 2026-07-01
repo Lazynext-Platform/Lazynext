@@ -110,9 +110,9 @@ resource "azurerm_cdn_frontdoor_custom_domain_association" "media" {
 # ── Front Door WAF Policy ───────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_firewall_policy" "media" {
-  name                = "lazynext-cdn-waf-${var.environment}"
+  name                = "lazynextcdnwaf${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
-  sku_name            = var.cdn_sku_name
+  sku_name            = "Premium_AzureFrontDoor"
   mode                = var.environment == "production" ? "Prevention" : "Detection"
 
   enabled = true

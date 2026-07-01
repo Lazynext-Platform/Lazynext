@@ -72,7 +72,6 @@ resource "azurerm_application_insights" "service" {
 
   # Workspace-based: all telemetry flows into the shared Log Analytics workspace
   workspace_id                 = azurerm_log_analytics_workspace.container_apps.id
-  local_authentication_enabled = true
 
   tags = {
     Environment = var.environment
@@ -87,7 +86,7 @@ resource "azurerm_application_insights" "service" {
 resource "azurerm_key_vault_secret" "appinsights_connection_string" {
   for_each = local.container_apps
 
-  name         = "APPINSIGHTS-CONNECTION-STRING-${replace(upper(each.key), "-", "-")}"
+  name         = "appinsights-connection-string-${replace(lower(each.key), "_", "-")}"
   value        = azurerm_application_insights.service[each.key].connection_string
   key_vault_id = azurerm_key_vault.secrets.id
   content_type = "text/plain"

@@ -73,30 +73,9 @@ resource "azurerm_web_application_firewall_policy" "main" {
     }
   }
 
-  # ── Custom Rule 1: Rate Limiting (100 req/sec per IP) ─────────────────
+  # Rate limiting handled at API Gateway middleware (ratelimit.rs)
 
-
-  custom_rules {
-    name      = "RateLimitPerIP"
-    priority  = 10
-    rule_type = "RateLimitRule"
-    action    = "Block"
-    enabled   = true
-
-    rate_limit_duration  = "OneMin"
-    rate_limit_threshold = 6000 # 100 req/sec * 60 sec
-
-    match_conditions {
-      match_variables {
-        variable_name = "RemoteAddr"
-      }
-      operator           = "IPMatch"
-      negation_condition = false
-      match_values       = ["0.0.0.0/0", "::/0"]
-    }
-  }
-
-  # ── Custom Rule 2: Geo-Filter (allow US, CA, EU only) ────────────────
+  # ── Custom Rule 1: Geo-Filter ────────────────────────────────
 
   custom_rules {
     name      = "GeoFilterAllowList"
