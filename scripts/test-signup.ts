@@ -10,7 +10,7 @@ const BASE_URL = process.env.TEST_BASE_URL ?? "http://localhost:3000";
 
 async function main() {
 	const testEmail = `test-${Date.now()}@lazynext.ai`;
-	const testPassword = "TestPassword123!";
+	const testPassword = process.env.TEST_PASSWORD || "TestP@ss!";
 
 	console.log(`Testing sign-up with: ${testEmail}`);
 

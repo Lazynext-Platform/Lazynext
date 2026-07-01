@@ -13,7 +13,7 @@ PRE_PROCESSING_URL="${PRE_PROCESSING_URL:-http://localhost:8000}"
 GENERATIVE_STUDIO_URL="${GENERATIVE_STUDIO_URL:-http://localhost:8001}"
 AI_AGENTS_URL="${AI_AGENTS_URL:-http://localhost:8002}"
 RENDER_SERVICE_URL="${RENDER_SERVICE_URL:-http://localhost:8003}"
-DB_URL="${DB_URL:-postgresql://lazynext:password123@localhost:5434/lazynext}"
+DB_URL="${DB_URL:?Set DB_URL env var}"
 REDIS_URL="${REDIS_URL:-redis://localhost:6379}"
 
 TIMEOUT=10

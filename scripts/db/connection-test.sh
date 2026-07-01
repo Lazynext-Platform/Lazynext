@@ -26,7 +26,7 @@ DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5434}"
 DB_USER="${DB_USER:-lazynext}"
 DB_NAME="${DB_NAME:-lazynext}"
-DB_PASSWORD="${DB_PASSWORD:-password123}"
+DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD env var}"
 DATABASE_URL="${DATABASE_URL:-postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}}"
 
 # PgBouncer
