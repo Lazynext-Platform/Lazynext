@@ -3,42 +3,169 @@ name: Build Mobile UniFFI (iOS/Android)
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - "rust/core/**"
+      - "rust/core/uniffi/**"
+      - "apps/mobile/**"
+      - "rust/crates/state/**"
   pull_request:
     branches: [ "main" ]
+    paths:
+      - "rust/core/**"
+      - "rust/core/uniffi/**"
+      - "apps/mobile/**"
+      - "rust/crates/state/**"
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-mobile:
-    runs-on: macos-latest
-
+  generate-bindings:
+    runs-on: ubuntu-latest
+    outputs:
+      udl-hash: ${{ steps.hash.outputs.udl }}
     steps:
     - uses: actions/checkout@v4
 
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
 
-    - name: Add mobile targets
-      run: rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-linux-android armv7-linux-androideabi
+    - name: Install uniffi-bindgen
+      run: cargo install uniffi-bindgen
+
+    - name: Generate Kotlin bindings
+      run: |
+        cd rust/core
+        uniffi-bindgen generate uniffi/lazynext.udl --language kotlin --out-dir generated/kotlin
+
+    - name: Generate Swift bindings
+      run: |
+        cd rust/core
+        uniffi-bindgen generate uniffi/lazynext.udl --language swift --out-dir generated/swift
+
+    - name: Hash UDL for cache key
+      id: hash
+      run: echo "udl=$(sha256sum rust/core/uniffi/lazynext.udl | cut -d' ' -f1)" >> $GITHUB_OUTPUT
+
+    - name: Upload generated bindings
+      uses: actions/upload-artifact@v4
+      with:
+        name: uniffi-bindings
+        path: |
+          rust/core/generated/kotlin/
+          rust/core/generated/swift/
+
+  build-ios:
+    needs: generate-bindings
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Add iOS targets
+      run: rustup target add aarch64-apple-ios x86_64-apple-ios
+
+    - name: Download bindings
+      uses: actions/download-artifact@v4
+      with:
+        name: uniffi-bindings
+        path: rust/core/generated/
+
+    - name: Build iOS static libs
+      run: |
+        cd rust/core
+        cargo build --target aarch64-apple-ios --release
+        cargo build --target x86_64-apple-ios --release
+
+    - name: Create XCFramework
+      run: |
+        mkdir -p build/ios
+        xcodebuild -create-xcframework \
+          -library rust/core/target/aarch64-apple-ios/release/liblazynext_core.a \
+          -library rust/core/target/x86_64-apple-ios/release/liblazynext_core.a \
+          -output build/ios/LazynextCore.xcframework
+
+    - name: Package with Swift headers
+      run: |
+        cp rust/core/generated/swift/*.swift build/ios/
+        cd build/ios && zip -r ../../lazynext-ios-sdk.zip .
+
+    - name: Upload iOS SDK
+      uses: actions/upload-artifact@v4
+      with:
+        name: lazynext-ios-sdk
+        path: lazynext-ios-sdk.zip
+
+  build-android:
+    needs: generate-bindings
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Add Android targets
+      run: rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
 
     - name: Install cargo-ndk
       run: cargo install cargo-ndk
 
-    - name: Build iOS XCFramework
-      continue-on-error: false
+    - name: Download bindings
+      uses: actions/download-artifact@v4
+      with:
+        name: uniffi-bindings
+        path: rust/core/generated/
+
+    - name: Build Android native libs
       run: |
         cd rust/core
-        cargo build --target aarch64-apple-ios --release
-        # In a real pipeline, we'd invoke xcodebuild -create-xcframework here
+        cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 -t x86 build --release
 
-    - name: Report iOS Build Failure
-      if: failure()
+    - name: Package AAR
       run: |
-        echo "::error title=iOS Build Failed::The iOS XCFramework build step failed. Check the 'Build iOS XCFramework' step logs for details."
+        mkdir -p build/android/jniLibs
+        cp -r rust/core/target/aarch64-linux-android/release build/android/jniLibs/arm64-v8a
+        cp -r rust/core/target/armv7-linux-androideabi/release build/android/jniLibs/armeabi-v7a
+        cp -r rust/core/target/x86_64-linux-android/release build/android/jniLibs/x86_64
+        cp -r rust/core/target/i686-linux-android/release build/android/jniLibs/x86
+        mkdir -p build/android/kotlin
+        cp rust/core/generated/kotlin/*.kt build/android/kotlin/
+        cd build/android && zip -r ../../lazynext-android-sdk.zip .
 
-    - name: Build Android AAR
+    - name: Upload Android SDK
+      uses: actions/upload-artifact@v4
+      with:
+        name: lazynext-android-sdk
+        path: lazynext-android-sdk.zip
+
+  verify:
+    needs: [build-ios, build-android]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download iOS SDK
+      uses: actions/download-artifact@v4
+      with:
+        name: lazynext-ios-sdk
+
+    - name: Download Android SDK
+      uses: actions/download-artifact@v4
+      with:
+        name: lazynext-android-sdk
+
+    - name: Verify artifacts
       run: |
-        cd rust/core
-        cargo ndk -t arm64-v8a build --release
-        # In a real pipeline, we'd package to jniLibs here
+        echo "iOS SDK: $(du -sh lazynext-ios-sdk.zip)"
+        echo "Android SDK: $(du -sh lazynext-android-sdk.zip)"
+        unzip -l lazynext-ios-sdk.zip | head -10
+        unzip -l lazynext-android-sdk.zip | head -10
+
+    - name: Create release summary
+      run: |
+        echo "## Mobile SDK Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- iOS XCFramework: \`lazynext-ios-sdk.zip\`" >> $GITHUB_STEP_SUMMARY
+        echo "- Android AAR: \`lazynext-android-sdk.zip\`" >> $GITHUB_STEP_SUMMARY
+        echo "- UniFFI bindings generated from \`rust/core/uniffi/lazynext.udl\`" >> $GITHUB_STEP_SUMMARY

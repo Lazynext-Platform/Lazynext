@@ -1,6 +1,19 @@
 # ── Traefik TLS Configuration ──────────────────────────────────────
 # Mounted at /etc/traefik/tls.yml
-# Referenced via --entrypoints.websecure.http.tls.options=modern@file
+#
+# Production: Uses Let's Encrypt via Cloudflare DNS-01 challenge.
+#   Certificates stored in /letsencrypt/acme.json automatically.
+#
+# Development: Generate self-signed certs:
+#   mkdir -p /etc/traefik/certs
+#   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#     -keyout /etc/traefik/certs/lazynext.com.key \
+#     -out /etc/traefik/certs/lazynext.com.crt \
+#     -subj "/CN=*.lazynext.local"
+#
+# Azure Application Gateway:
+#   Upload PFX to Key Vault, reference in waf.tf ssl_certificate block.
+#   See infra/terraform/waf.tf for the commented HTTPS listener config.
 
 tls:
   stores:
@@ -10,10 +23,6 @@ tls:
         keyFile: /etc/traefik/certs/lazynext.com.key
 
   certificates:
-    # Wildcard cert resolved via Cloudflare DNS-01 challenge;
-    # stored in /letsencrypt/acme.json by the cloudflare cert resolver.
-    # This section only defines fallback / self-signed certs for
-    # internal development — in production the ACME resolver is used.
     - certFile: /etc/traefik/certs/lazynext.com.crt
       keyFile: /etc/traefik/certs/lazynext.com.key
       stores:
