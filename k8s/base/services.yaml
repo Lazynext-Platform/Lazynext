@@ -621,6 +621,8 @@ spec:
         app: lazynext-mcp
         component: backend
     spec:
+      priorityClassName: low-priority
+      terminationGracePeriodSeconds: 30
       containers:
         - name: lazynext-mcp
           image: ghcr.io/lazynext-platform/lazynext-mcp:latest

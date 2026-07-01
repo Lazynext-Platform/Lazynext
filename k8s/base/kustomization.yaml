@@ -56,6 +56,9 @@ images:
   - name: ghcr.io/lazynext-platform/lazynext-analytics-service
     newName: lazynextacrdevlmblwn.azurecr.io/lazynext-analytics-service
     newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-collab-server
+    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-collab-server
+    newTag: latest
 
 # Strategic merge patches for init containers
 patches:
