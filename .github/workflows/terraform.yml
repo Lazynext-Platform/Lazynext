@@ -56,7 +56,7 @@ jobs:
         run: |
           terraform plan \
             -var="environment=${{ inputs.environment }}" \
-            -var="db_password=${{ secrets.TF_DB_PASSWORD || 'TEMP_CHANGE_ME' }}" \
+            -var="db_password=${{ secrets.TF_DB_PASSWORD }}" \
             -out=tfplan
 
       - name: Terraform Apply

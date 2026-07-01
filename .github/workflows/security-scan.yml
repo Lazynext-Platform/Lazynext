@@ -90,8 +90,8 @@ jobs:
       - name: Install Dependencies (Python)
         if: matrix.language == 'python'
         run: |
-          pip install -r services/pre-processing/requirements.txt 2>/dev/null || true
-          pip install -r services/generative-studio/requirements.txt 2>/dev/null || true
+          pip install -r services/pre-processing/requirements.txt
+          pip install -r services/generative-studio/requirements.txt
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
@@ -201,7 +201,7 @@ jobs:
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          args: "--config .github/gitleaks.toml --verbose --redact 2>/dev/null || true"
+          args: "--config .github/gitleaks.toml --verbose --redact"
         continue-on-error: true
 
       - name: Check for .env Files
