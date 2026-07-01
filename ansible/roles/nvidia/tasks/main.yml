@@ -1,22 +1,39 @@
 ---
 # tasks file for nvidia
 
-- name: Add NVIDIA package repositories
-  apt_repository:
-    repo: "deb https://developer.download.nvidia.com/compute/cuda/repos/$(lsb_release -cs)/x86_64/ /"
+- name: Add NVIDIA CUDA GPG key
+  apt_key:
+    url: https://developer.download.nvidia.com/compute/cuda/repos/{{ ansible_distribution_release }}/x86_64/3bf863cc.pub
     state: present
+
+- name: Add NVIDIA CUDA package repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/nvidia-cuda.gpg] https://developer.download.nvidia.com/compute/cuda/repos/{{ ansible_distribution_release }}/x86_64/ /"
+    state: present
+    filename: nvidia-cuda
+
+- name: Add NVIDIA Container Toolkit GPG key
+  apt_key:
+    url: https://nvidia.github.io/libnvidia-container/gpgkey
+    state: present
+
+- name: Add NVIDIA Container Toolkit repository
+  apt_repository:
+    repo: "deb https://nvidia.github.io/libnvidia-container/stable/{{ ansible_distribution }}{{ ansible_distribution_version | regex_replace('\\..*', '') }}/amd64/ /"
+    state: present
+    filename: nvidia-container-toolkit
 
 - name: Install NVIDIA drivers
   apt:
     name:
       - nvidia-driver-{{ nvidia_driver_version | default('570') }}
-      - nvidia-utils-535
+      - nvidia-utils-{{ nvidia_driver_version }}
     state: present
     update_cache: yes
 
 - name: Install CUDA toolkit
   apt:
-    name: cuda-toolkit-12-6
+    name: cuda-toolkit-{{ nvidia_cuda_version }}
     state: present
 
 - name: Install NVIDIA Container Toolkit
@@ -26,8 +43,9 @@
 
 - name: Configure Docker to use NVIDIA runtime
   command: nvidia-ctk runtime configure --runtime=docker
+  creates: /etc/docker/daemon.json
 
 - name: Restart Docker
-  service:
+  ansible.builtin.systemd:
     name: docker
     state: restarted

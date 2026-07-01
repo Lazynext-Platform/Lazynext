@@ -14,15 +14,13 @@ COPY src/ src/
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
 # ── Stage 2: Runtime ──
-FROM debian:trixie-slim AS runner
+FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
 
-# Install Bun + FFmpeg
+# Install FFmpeg (only runtime dep beyond Bun)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl unzip ca-certificates ffmpeg \
-    && curl -fsSL https://bun.sh/install | bash \
-    && mv /root/.bun/bin/bun /usr/local/bin/bun \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system --gid 1001 nodejs \

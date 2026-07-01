@@ -63,7 +63,7 @@ spec:
                     configMapKeyRef:
                       name: lazynext-config
                       key: MEDIA_BUCKET
-                      optional: true
+                      
               resources:
                 requests:
                   cpu: "100m"

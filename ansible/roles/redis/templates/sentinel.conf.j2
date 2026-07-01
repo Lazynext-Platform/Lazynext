@@ -31,8 +31,8 @@ dir /var/lib/redis
 
 # Runtime reconfiguration
 sentinel deny-scripts-reconfig yes
-SENTINEL resolve-hostnames no
-SENTINEL announce-hostnames no
+sentinel resolve-hostnames no
+sentinel announce-hostnames no
 
 # Safety — only failover if at least one replica is reachable
 sentinel replica-priority lazynext-master 100

@@ -229,7 +229,7 @@ spec:
     spec:
       containers:
         - name: redis-proxy
-          image: hiett/serverless-redis-http:latest
+          image: hiett/serverless-redis-http:v0.2.0
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
