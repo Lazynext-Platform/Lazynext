@@ -6,9 +6,12 @@
 
 ---
 
-## [Unreleased] — 2026-07-01 (Features #33–#34)
+## [Unreleased] — 2026-07-01 (Feature #35)
 
 ### Added
+- **Feature #35 — Platform Finalization**: Desktop play/pause playback toggle with continuous frame advance; AI prompt text display; Mobile NativeBridge real UniFFI wiring (Swift + Kotlin); MCP Server 47-tool expansion; SAM2 ONNX runtime path; Local Whisper TF Serving path; Analytics SQLite persistence; Kafka auto-topic creation.
+
+## [0.9.0] — 2026-07-01 (Features #33–#34)
 - **Feature #33 — Production Hardening All 7 Formats**: Desktop (playback, AI prompt, import, export), CLI (real media, ingest), MCP (SSE transport, 14 tools), API Gateway (graceful shutdown, render dispatch, E2E tests), Mobile (native stubs, preview), Browser Extension (timeline preview), Web (WASM automation)
 - **Feature #34 — Real Video Playback Pipeline**: Real video decode via CliFfmpegLoader → GPU compositor → valid H.264 MP4 export. Verified with red pixel analysis. Desktop auto-decodes video textures for real preview. Web video-decoder utility (WebCodecs API wrapper).
 - **Infrastructure**: Jenkinsfile, GitLab CI (.gitlab-ci.yml), 14 GitHub Actions workflows, Docker (15 Dockerfiles, 8 compose files), Kubernetes (34 manifests), Terraform (16 .tf files), Ansible (6 roles), Monitoring (Prometheus, Grafana, Loki, Tempo, Alloy, 5 dashboards, 5 runbooks)
