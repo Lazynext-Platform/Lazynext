@@ -93,7 +93,7 @@ enum ServerMessage {
 struct AppState {
     rooms: DashMap<String, tokio::sync::broadcast::Sender<String>>,
     peer_rooms: DashMap<String, String>,
-    db: Arc<DbStore>,
+    db: Option<Arc<DbStore>>,
 }
 
 /// Verify a JWT token signed with BETTER_AUTH_SECRET using HS256.
@@ -290,11 +290,11 @@ async fn save_state(
     Extension(state): Extension<Arc<AppState>>,
     Json(payload): Json<SaveRequest>,
 ) -> impl IntoResponse {
-    match state
-        .db
-        .save_state(&payload.project_id, &payload.state)
-        .await
-    {
+    let db = match &state.db {
+        Some(db) => db,
+        None => return Json(serde_json::json!({"error": "database unavailable"})),
+    };
+    match db.save_state(&payload.project_id, &payload.state).await {
         Ok(_) => Json(serde_json::json!({"saved": true})),
         Err(e) => {
             error!("Failed to save state: {}", e);
@@ -308,7 +308,11 @@ async fn load_state(
     Extension(state): Extension<Arc<AppState>>,
     Path(project_id): Path<String>,
 ) -> impl IntoResponse {
-    match state.db.load_state(&project_id).await {
+    let db = match &state.db {
+        Some(db) => db,
+        None => return Json(serde_json::json!({"error": "database unavailable"})),
+    };
+    match db.load_state(&project_id).await {
         Ok(Some(s)) => Json(serde_json::json!({"state": s, "loaded": true})),
         Ok(None) => Json(serde_json::json!({"error": "not found"})),
         Err(e) => {
@@ -356,11 +360,14 @@ async fn main() {
     info!("🚀 Lazynext Collab Server starting...");
     dotenvy::dotenv().ok();
 
-    let db = match DbStore::new().await {
-        Ok(db) => Arc::new(db),
+    let db: Option<Arc<DbStore>> = match DbStore::new().await {
+        Ok(db) => {
+            info!("Database connected");
+            Some(Arc::new(db))
+        }
         Err(e) => {
-            error!("Failed to connect to db: {}", e);
-            std::process::exit(1);
+            error!("Failed to connect to db: {} — running without persistence", e);
+            None
         }
     };
 
@@ -374,7 +381,7 @@ async fn main() {
         .route("/ws", get(ws_handler))
         .route("/health", get(|| async { "OK" }))
         .route("/api/save", post(save_state))
-        .route("/api/load/:project_id", get(load_state))
+        .route("/api/load/{project_id}", get(load_state))
         .layer(Extension(state));
 
     let port: u16 = std::env::var("COLLAB_PORT")
