@@ -64,7 +64,10 @@ lint:terraform:
   stage: lint
   image: hashicorp/terraform:latest
   script:
-    - cd infra/terraform && terraform fmt -check && terraform validate
+    - cd infra/terraform
+    - terraform init -backend=false
+    - terraform fmt -check
+    - terraform validate
 
 # ── Build ──────────────────────────────────────────────────────────
 build:rust:
@@ -88,6 +91,11 @@ build:web:
     paths:
       - apps/web/.next/
     expire_in: 1 day
+
+build:desktop:
+  stage: build
+  script:
+    - cargo check -p lazynext_desktop
 
 build:docker:
   stage: build

@@ -4,11 +4,16 @@
 pipeline {
     agent any
 
+    triggers {
+        pollSCM('H/15 * * * *')  // poll every 15 minutes for changes
+    }
+
     environment {
         DOCKER_REGISTRY = 'lazynext.azurecr.io'
         RUST_VERSION    = '1.96'
         BUN_VERSION     = '1.3.14'
         CARGO_TERM_COLOR = 'always'
+        GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
     }
 
     parameters {
@@ -67,14 +72,18 @@ pipeline {
                 }
                 stage('Python Lint') {
                     steps {
+                        sh 'python3 -m pip install ruff'
                         sh 'python3 -m ruff check services/'
                         sh 'python3 -m ruff format --check services/'
                     }
                 }
                 stage('Terraform Lint') {
                     steps {
-                        sh 'terraform -chdir=infra/terraform fmt -check'
-                        sh 'terraform -chdir=infra/terraform validate'
+                        dir('infra/terraform') {
+                            sh 'terraform init -backend=false'
+                            sh 'terraform fmt -check'
+                            sh 'terraform validate'
+                        }
                     }
                 }
             }
@@ -90,12 +99,19 @@ pipeline {
                 }
                 stage('Build Web') {
                     steps {
-                        sh 'cd apps/web && ~/.bun/bin/bun run build'
+                        dir('apps/web') {
+                            sh '~/.bun/bin/bun run build'
+                        }
+                    }
+                }
+                stage('Build Desktop (check)') {
+                    steps {
+                        sh 'cargo check -p lazynext_desktop'
                     }
                 }
                 stage('Build Docker') {
                     steps {
-                        sh 'bash scripts/docker-build.sh --tag ${BUILD_NUMBER}'
+                        sh 'bash scripts/docker-build.sh --tag ${GIT_SHA}'
                     }
                 }
             }
@@ -165,8 +181,9 @@ pipeline {
     post {
         always {
             cleanWs()
-            archiveArtifacts artifacts: '**/target/release/lazynext_*', fingerprint: true
-            junit '**/test-results/**/*.xml'
+            archiveArtifacts artifacts: 'target/release/lazynext_*', fingerprint: true
+            archiveArtifacts artifacts: 'Lazynext-Desktop.dmg', fingerprint: true
+            archiveArtifacts artifacts: 'apps/web/.next/**', fingerprint: true
         }
         success {
             slackSend(color: 'good', message: "Pipeline ${env.BUILD_NUMBER} succeeded: ${env.BUILD_URL}")

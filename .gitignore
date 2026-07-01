@@ -82,6 +82,13 @@ services/render-service/outputs/**/.terraform/
 infra/terraform/**/*.tfstate
 infra/terraform/**/*.tfstate.backup
 infra/terraform/.terraform.lock.hcl
+infra/terraform/**/terraform.tfvars
+!infra/terraform/**/terraform.tfvars.example
+
+# Build artifacts
+Lazynext-Desktop.dmg
+apps/desktop/Lazynext.app/
+apps/mobile/dist/
 
 **/.DS_Store
 **/.gradle/

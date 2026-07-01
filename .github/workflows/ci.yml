@@ -1,392 +1,187 @@
-name: Lazynext CI/CD
+name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
   pull_request:
-    branches: ["main"]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
-
-permissions:
-  contents: read
-  packages: write
-  id-token: write
+  RUSTFLAGS: "-D warnings"
 
 jobs:
-  rust-core:
-    name: Rust Core — Test & Build WASM
+  # ── Lint ────────────────────────────────────────────────────────────────
+  lint-rust:
+    name: "Lint: Rust"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: false
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with: { components: "rustfmt,clippy" }
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
 
-      - name: Install Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
-          targets: wasm32-unknown-unknown
-          components: rustfmt, clippy
-
-      - name: Cache Cargo Registry
-        uses: Swatinem/rust-cache@v2
-        with:
-          save-if: ${{ github.ref == 'refs/heads/main' }}
-
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
-
-      - name: Cargo fmt
-        run: cargo fmt --all --check
-
-      - name: Cargo clippy
-        run: cargo clippy --workspace --exclude http-types --all-targets -- -D warnings
-
-      - name: Cargo Test (Workspace)
-        run: cargo test --workspace --verbose
-
-      - name: Build WASM Package
-        continue-on-error: true
-        run: |
-          rustup target add wasm32-unknown-unknown
-          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-          RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --target web rust/wasm 2>&1 || echo "::warning ::WASM build failed — mio/tokio networking unsupported on wasm32 target. Web Docker build will be skipped."
-
-      - name: Upload WASM Package
-        if: hashFiles('rust/wasm/pkg/lazynext_wasm.js') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: wasm-pkg
-          path: rust/wasm/pkg/
-          retention-days: 1
-
-  python-services:
-    name: Python Microservices — Test
+  lint-ts:
+    name: "Lint: TypeScript"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with: { bun-version: "1.3.14" }
+      - run: bun install
+      - run: bun run lint
+        working-directory: apps/web
+      - run: bun run typecheck
+        working-directory: apps/web
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Test Pre-Processing Service
-        run: |
-          cd services/pre-processing
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio
-          python -m pytest tests/ -v || echo "::warning ::No pre-processing tests yet"
-
-      - name: Test Generative Studio
-        run: |
-          cd services/generative-studio
-          pip install -r requirements.txt
-          pip install pytest pytest-asyncio
-          python -m pytest tests/ -v || echo "::warning ::No generative-studio tests yet"
-
-  web-app:
-    name: Frontend — Lint, Typecheck & Test
-    needs: rust-core
+  lint-python:
+    name: "Lint: Python"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: false
+      - uses: astral-sh/ruff-action@v3
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Download WASM Package
-        continue-on-error: true
-        uses: actions/download-artifact@v4
-        with:
-          name: wasm-pkg
-          path: rust/wasm/pkg/
-
-      - name: Install Dependencies
-        env:
-          npm_config_ignore_scripts: "true"
-        run: |
-          bun install --ignore-scripts 2>&1 || {
-            echo "::warning ::Install failed — retrying without native modules..."
-            bun install --ignore-scripts --no-optional 2>&1 || echo "::warning ::Install with retries also failed"
-          }
-
-      - name: Lint
-        run: bun run lint
-
-      - name: Typecheck
-        env:
-          SKIP_ENV_VALIDATION: "1"
-        run: bun run typecheck
-
-      - name: Link WASM for Build
-        run: |
-          if [ -d "rust/wasm/pkg" ] && [ "$(ls -A rust/wasm/pkg/ 2>/dev/null)" ]; then
-            mkdir -p apps/web/node_modules/lazynext-wasm
-            cp -r rust/wasm/pkg/* apps/web/node_modules/lazynext-wasm/ 2>/dev/null || true
-            echo "WASM package linked for Next.js build"
-          else
-            echo "::warning ::WASM package not found — build may fail without it"
-          fi
-
-      - name: Build (Next.js)
-        env:
-          SKIP_WASM_BUILD: "1"
-          SKIP_ENV_VALIDATION: "1"
-          MARBLE_WORKSPACE_KEY: "ci-placeholder"
-          FREESOUND_CLIENT_ID: "ci-placeholder"
-          FREESOUND_API_KEY: "ci-placeholder"
-          BETTER_AUTH_SECRET: "ci-build-placeholder-secret-64chars-long"
-        run: cd apps/web && npx next build 2>&1 || echo "::warning ::Next.js build failed — WASM artifact may be incomplete"
-
-      - name: Unit Tests
-        run: bun run test 2>&1 || echo "::warning ::Unit tests failed — WASM binary may not be available in CI"
-
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps
-
-      - name: Start Dev Server & Run E2E Tests
-        run: |
-          cd apps/web
-          bun run dev &
-          DEV_PID=$!
-          # Wait for the dev server to be ready
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:3000 > /dev/null 2>&1; then
-              echo "✅ Dev server ready"
-              break
-            fi
-            echo "⏳ Waiting for dev server... ($i/30)"
-            sleep 2
-          done
-          # Run E2E tests
-          bun run test:e2e || echo "::warning ::Some E2E tests failed (may be environment-related)"
-          # Cleanup
-          kill $DEV_PID 2>/dev/null || true
-
-  node-services:
-    name: Node Microservices — Test
+  lint-terraform:
+    name: "Lint: Terraform"
     runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:8-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive
+        working-directory: infra/terraform
+      - run: terraform init -backend=false
+        working-directory: infra/terraform
+      - run: terraform validate
+        working-directory: infra/terraform
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Test AI Agents Service
-        run: |
-          cd services/ai-agents
-          bun install
-          bun test || echo "::warning ::No AI agents tests yet"
-
-      - name: Test Render Service
-        run: |
-          cd services/render-service
-          bun install
-          bun test || echo "::warning ::No render-service tests yet"
-        env:
-          UPSTASH_REDIS_REST_URL: redis://localhost:6379
-
-      - name: Test Analytics Service
-        run: |
-          cd services/analytics-service
-          bun install
-          bun test || echo "::warning ::No analytics-service tests yet"
-
-  docker-deploy:
-    name: Docker — Build & Push Images
-    needs: [rust-core, web-app, python-services, node-services]
+  # ── Test ────────────────────────────────────────────────────────────────
+  test-rust:
+    name: "Test: Rust (${{ matrix.crate }})"
     runs-on: ubuntu-latest
+    needs: [lint-rust]
+    strategy:
+      fail-fast: false
+      matrix:
+        crate:
+          - lazynext_core
+          - lazynext_cli
+          - lazynext_api_gateway
+          - lazynext_mcp_server
+          - lazynext_p2p_sync
+          - lazynext_plugin_api
+          - lazynext_provenance
+          - lazynext_temporal_versioning
+          - compositor
+          - state
+          - audio
+          - effects
+          - gpu
+          - masks
+          - neural_engine
+          - time
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p ${{ matrix.crate }} -- --nocapture
+
+  test-web:
+    name: "Test: Web"
+    runs-on: ubuntu-latest
+    needs: [lint-ts]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with: { bun-version: "1.3.14" }
+      - run: bun install
+      - run: bun test
+        working-directory: apps/web
+
+  test-extension:
+    name: "Test: Extension"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with: { bun-version: "1.3.14" }
+      - run: bun install
+        working-directory: apps/browser-extension
+      - run: bun test
+        working-directory: apps/browser-extension
+
+  test-python:
+    name: "Test: Python"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - run: pip install pytest
+      - run: pip install -r requirements.txt || true
+        working-directory: services/pre-processing
+      - run: pip install -r requirements.txt || true
+        working-directory: services/generative-studio
+      - run: python -m pytest services/
+
+  # ── Build ───────────────────────────────────────────────────────────────
+  build-rust:
+    name: "Build: Rust workspace"
+    runs-on: ubuntu-latest
+    needs: [lint-rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --workspace --release
+
+  build-web:
+    name: "Build: Web"
+    runs-on: ubuntu-latest
+    needs: [lint-ts]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with: { bun-version: "1.3.14" }
+      - run: bun install
+      - uses: dtolnay/rust-toolchain@1.96.0
+      - uses: jetli/wasm-pack-action@v0.4
+      - run: ./build-wasm.sh
+      - run: bun run build
+        working-directory: apps/web
+
+  build-desktop:
+    name: "Build: Desktop (check)"
+    runs-on: ubuntu-latest
+    needs: [lint-rust]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.96.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check -p lazynext_desktop
+
+  # ── Security ────────────────────────────────────────────────────────────
+  security-scan:
+    name: "Security: Gitleaks"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        with: { config-path: ".github/gitleaks.toml" }
+
+  # ── E2E ─────────────────────────────────────────────────────────────────
+  e2e:
+    name: "E2E: Full pipeline"
+    runs-on: ubuntu-latest
+    needs: [build-rust, build-web]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    env:
-      HAS_AZURE: ${{ secrets.AZURE_CLIENT_ID != '' }}
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: false
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-        with:
-          driver-opts: network=host
-
-      - name: Download WASM Package (for Docker)
-        continue-on-error: true
-        uses: actions/download-artifact@v4
-        with:
-          name: wasm-pkg
-          path: rust/wasm/pkg/
-
-      - name: Login to Azure (if secrets available)
-        if: env.HAS_AZURE == 'true'
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Login to ACR (if Azure available)
-        if: env.HAS_AZURE == 'true'
-        run: az acr login --name lazynextacrdevlmblwn
-
-      # ── Build all 8 Docker images ────────────────────────────────
-      - name: Check WASM Package
-        run: |
-          echo "=== Listing WASM artifact paths ==="
-          find rust/wasm/pkg -type f 2>/dev/null || echo "(no pkg directory)"
-          find . -name "lazynext_wasm.js" -type f 2>/dev/null || echo "(lazynext_wasm.js not found anywhere)"
-          echo "=== End listing ==="
-          if [ -f "rust/wasm/pkg/lazynext_wasm.js" ]; then
-            echo "✅ WASM package found at rust/wasm/pkg/lazynext_wasm.js"
-            echo "WASM_READY=true" >> $GITHUB_ENV
-          elif [ -f "rust/wasm/pkg/pkg/lazynext_wasm.js" ]; then
-            echo "✅ WASM package found at rust/wasm/pkg/pkg/lazynext_wasm.js (nested pkg)"
-            mkdir -p rust/wasm/pkg
-            cp rust/wasm/pkg/pkg/* rust/wasm/pkg/
-            echo "WASM_READY=true" >> $GITHUB_ENV
-          elif ls rust/wasm/pkg/lazynext_wasm*.js 2>/dev/null; then
-            echo "✅ WASM package found (wildcard match)"
-            echo "WASM_READY=true" >> $GITHUB_ENV
-          else
-            echo "::warning ::WASM package not found — skipping web Docker build."
-            echo "WASM_READY=false" >> $GITHUB_ENV
-          fi
-
-      - name: Build Web App
-        if: env.WASM_READY == 'true'
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          push: ${{ env.HAS_AZURE == 'true' }}
-          load: true
-          tags: lazynext-web:latest
-          build-args: |
-            SKIP_WASM_BUILD=1
-            NEXT_PUBLIC_SITE_URL=http://localhost:3000
-            NEXT_PUBLIC_PREPROCESSING_URL=http://localhost:8000
-            NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
-            NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
-            NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
-
-      - name: Build AI Agents
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/ai-agents
-          file: ./services/ai-agents/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-ai-agents:latest
-
-      - name: Build Render Service
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/render-service
-          file: ./services/render-service/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-render-service:latest
-
-      - name: Build Pre-Processing
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/pre-processing
-          file: ./services/pre-processing/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-pre-processing:latest
-
-      - name: Build Generative Studio
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/generative-studio
-          file: ./services/generative-studio/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-generative-studio:latest
-
-      - name: Build Analytics Service
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: ./services/analytics-service
-          file: ./services/analytics-service/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-analytics-service:latest
-
-      - name: Build MCP Server
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./rust/mcp-server/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-mcp:latest
-
-      - name: Build Collab Server
-        continue-on-error: true
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./services/collab-server/Dockerfile
-          push: false
-          load: true
-          tags: lazynext-collab-server:latest
-
-      # ── Verify images ─────────────────────────────────────────────
-      - name: Verify Docker Images
-        run: |
-          echo "=== Built Docker Images ==="
-          docker images --filter=reference='lazynext-*' --format='{{.Repository}}:{{.Tag}} {{.Size}}'
-          echo "All images built successfully."
-
-      # ── Deploy (Azure only) ────────────────────────────────────────
-      - name: Deploy to Azure Container Apps
-        if: env.HAS_AZURE == 'true'
-        run: |
-          ACR="lazynextacrdevlmblwn.azurecr.io"
-          RG="lazynext-rg-dev"
-          for svc in web ai-agents render-service pre-processing generative-studio analytics-service mcp collab-server; do
-            echo "Deploying $svc..."
-            az containerapp update \
-              --name "lazynext-${svc}-dev" \
-              --resource-group "$RG" \
-              --image "${ACR}/lazynext-${svc}:latest" 2>/dev/null || \
-              echo "::warning ::Container App lazynext-${svc}-dev not found — skipping"
-          done
-
-      - name: Verify Deployment
-        if: env.HAS_AZURE == 'true'
-        run: |
-          RG="lazynext-rg-dev"
+      - run: ./scripts/full-e2e.sh

@@ -8,11 +8,11 @@ kubernetes_version = "1.32"
 node_count         = 1
 
 # ── Database ─────────────────────────────────────────────────────────────
-db_password = "LazynextDev2026!Postgres"
+db_password = "REPLACE_ME_DB_PASSWORD_MIN_16_CHARS"
 db_sku_name = "B_Standard_B1ms"
 
 # ── Application ──────────────────────────────────────────────────────────
-better_auth_secret = "lazynext-dev-better-auth-secret-key-2026-minimum-64-characters-long"
+better_auth_secret = "REPLACE_ME_64_CHAR_BETTER_AUTH_SECRET_MINIMUM_64_CHARACTERS_LONG"
 
 # ── API Keys (placeholder — replace with real keys after dev testing) ───
 openai_api_key        = "sk-placeholder-openai-key-for-dev"
