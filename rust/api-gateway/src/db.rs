@@ -1,3 +1,9 @@
+//! Database models and PostgreSQL store for the API gateway.
+//!
+//! Defines structs mirroring the Drizzle schema (users, projects,
+//! subscriptions), a `DbStore` with connection pooling and CRUD methods,
+//! credit deduction, and Azure Blob Storage SAS URL generation.
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::{PgPool, PgPoolOptions};

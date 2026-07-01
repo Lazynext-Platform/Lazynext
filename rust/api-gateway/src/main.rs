@@ -1,3 +1,10 @@
+//! Lazynext API Gateway — Axum server entry point.
+//!
+//! Starts an HTTP server on port 8005 with public and authenticated route
+//! groups. Composes middleware layers (tracing, CSRF, rate limiting, RBAC),
+//! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
+//! Redis-backed WebSocket state.
+
 #![allow(
     dead_code,
     unused_variables,
