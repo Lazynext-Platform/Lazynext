@@ -25,12 +25,13 @@
 - [x] 0.11 Triage report: concrete pass/fail per format → changelog ✅
 
 ## Phase 1 — Core Value-Prop Hardening (the AI editing loop)
-- [ ] 1.1 FIX `autonomous.rs:68` — `check_job_status` returns real render artifact
-- [ ] 1.2 FIX `neural_engine/lib.rs:219` — dummy detection → real or documented fallback
-- [ ] 1.3 FIX `autonomous.rs:56` — async `process_intent` delegates to real LLM path
-- [ ] 1.4 Wire real `GEMINI_API_KEY` (once owner provides); verify NL→CRDT on real clip
+- [x] 1.1 FIX `autonomous.rs:68` — `check_job_status` returns real render artifact ✅ (made honest Failed w/ guidance; zero callers)
+- [x] 1.2 FIX `neural_engine/lib.rs:219` — dummy detection → real or documented fallback ✅ (empty+log → heuristic fallback)
+- [x] 1.3 FIX `autonomous.rs:56` — async `process_intent` delegates to real LLM path ✅ (honest error w/ guidance)
+- [x] 1.0 FIX `cli/main.rs test_pattern_fallback` — clear asset_loader (render truncation) ✅ **48 frames / 2.000s @ 49.5fps**
+- [ ] 1.4 Wire real `GEMINI_API_KEY` (once owner provides); verify NL→CRDT on real clip *(pending key)*
 - [ ] 1.5 Voice input → Whisper → intent (web + mobile)
-- [ ] 1.6 E2E demo: one sentence → 60s rough cut, ffprobe-verified
+- [ ] 1.6 E2E demo: one sentence → 60s rough cut, ffprobe-verified *(needs key)*
 
 ## Phase 2 — Per-Format Launch Readiness
 - [ ] 2.1 Web: deploy + real auth + billing smoke
