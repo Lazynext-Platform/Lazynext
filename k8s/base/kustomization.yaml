@@ -25,6 +25,7 @@ resources:
   - ingress.yaml
   - collab-server-deployment.yaml
   - collab-server-networkpolicy.yaml
+  - collab-server-ingress.yaml
   - analytics-service-networkpolicy.yaml
 
 labels:

@@ -98,8 +98,8 @@ target "db-migrate" {
 }
 
 target "collab-server" {
-  context    = "./services/collab-server"
-  dockerfile = "Dockerfile"
+  context    = "."
+  dockerfile = "services/collab-server/Dockerfile"
   platforms  = split(",", PLATFORMS)
   tags       = ["${REGISTRY}/lazynext-collab-server:${TAG}"]
   cache-from = ["type=registry,ref=${REGISTRY}/lazynext-collab-server:buildcache"]

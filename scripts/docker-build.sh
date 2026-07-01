@@ -78,12 +78,12 @@ main() {
   # Core Rust builder (shared base)
   build_and_push "lazynext-rust-builder" "Dockerfile.rust-builder" "." || ((failures++))
 
-  # Web App
-  build_and_push "lazynext-web" "apps/web/Dockerfile" "apps/web" "--build-arg NEXT_PUBLIC_API_URL=http://api-gateway:8005" || ((failures++))
+  # Web App (needs root context for package.json)
+  build_and_push "lazynext-web" "apps/web/Dockerfile" "." "--build-arg NEXT_PUBLIC_API_URL=http://api-gateway:8005" || ((failures++))
 
-  # API Gateway (Rust)
+  # API Gateway (Rust — needs root context for Cargo.toml)
   if [[ "$SKIP_RUST" != "1" ]]; then
-    build_and_push "lazynext-api-gateway" "rust/api-gateway/Dockerfile" "rust" || ((failures++))
+    build_and_push "lazynext-api-gateway" "rust/api-gateway/Dockerfile" "." || ((failures++))
   fi
 
   # AI Agents (Node.js)
@@ -106,9 +106,9 @@ main() {
     build_and_push "lazynext-generative-studio" "services/generative-studio/Dockerfile" "services/generative-studio" || ((failures++))
   fi
 
-  # Collab Server (Rust)
+  # Collab Server (Rust — needs root context for Cargo.toml)
   if [[ "$SKIP_RUST" != "1" ]]; then
-    build_and_push "lazynext-collab-server" "services/collab-server/Dockerfile" "services/collab-server" || ((failures++))
+    build_and_push "lazynext-collab-server" "services/collab-server/Dockerfile" "." || ((failures++))
   fi
 
   # Analytics Service (Node.js)
