@@ -91,3 +91,4 @@ signin-snapshot.txt
 web-app-home.txt
 out/
 .playwright-mcp/
+.opencode/opencode.json
