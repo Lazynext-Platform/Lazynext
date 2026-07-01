@@ -115,11 +115,18 @@ impl AutonomousEditor {
                 env::var("ANTHROPIC_API_KEY").unwrap_or_default(),
                 "claude-3-5-sonnet-20240620".to_string(),
             ),
-            "gemini" => (
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent".to_string(),
-                env::var("GEMINI_API_KEY").unwrap_or_default(),
-                "gemini-1.5-pro".to_string(),
-            ),
+            "gemini" => {
+                let key = env::var("GEMINI_API_KEY").unwrap_or_default();
+                let url = if key.is_empty() {
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent".to_string()
+                } else {
+                    format!(
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
+                        key
+                    )
+                };
+                (url, key, "gemini-2.5-flash".to_string())
+            },
             _ => (
                 "http://localhost:11434/api/chat".to_string(),
                 String::new(),
@@ -446,6 +453,7 @@ impl AutonomousEditor {
     ) -> Result<Value, String> {
         // Determine if this is an Anthropic endpoint (different payload format)
         let is_anthropic = api_url.contains("anthropic.com");
+        let is_gemini = api_url.contains("generativelanguage.googleapis.com");
 
         let payload = if is_anthropic {
             json!({
@@ -455,6 +463,21 @@ impl AutonomousEditor {
                 "messages": [
                     {"role": "user", "content": user_prompt}
                 ]
+            })
+        } else if is_gemini {
+            json!({
+                "contents": [
+                    {
+                        "parts": [{"text": format!("{}\n\nUser request: {}", system_prompt, user_prompt)}],
+                        "role": "user"
+                    }
+                ],
+                "system_instruction": {
+                    "parts": [{"text": system_prompt}]
+                },
+                "generationConfig": {
+                    "response_mime_type": "application/json"
+                }
             })
         } else {
             json!({
@@ -478,7 +501,7 @@ impl AutonomousEditor {
             if is_anthropic {
                 req = req.header("x-api-key", api_key);
                 req = req.header("anthropic-version", "2023-06-01");
-            } else {
+            } else if !is_gemini {
                 req = req.header("Authorization", format!("Bearer {}", api_key));
             }
         }
