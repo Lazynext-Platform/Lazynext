@@ -6,8 +6,6 @@
 # Build outputs
 **/.next
 **/target
-!target/release/collab-server
-!target/release/lazynext_api_gateway
 **/dist
 **/build
 **/.turbo
