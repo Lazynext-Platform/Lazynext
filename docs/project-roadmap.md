@@ -2,7 +2,7 @@
 
 > **Project**: Lazynext
 > **Current Milestone**: v1.0 (First Production Release)
-> **Last Updated**: 2026-07-01
+> **Last Updated**: 2026-07-02
 
 ---
 
@@ -10,12 +10,12 @@
 
 | Metric | Count |
 |---|---|---|
-| Total Features | 35 |
-| 🟢 Complete | 35 |
+| Total Features | 36 |
+| 🟢 Complete | 36 |
 | 🟡 In Progress | 0 |
 | 🔴 Not Started | 0 |
 
-**Overall Progress**: ██████████ **100%** — All 35 features complete. Platform is code-complete. Remaining: operational deployment.
+**Overall Progress**: ██████████ **100%** — All 36 features complete. Platform is launch-ready. Remaining: owner-gated deploy (API keys, app store accounts, Azure credentials).
 
 ---
 
@@ -48,6 +48,7 @@
 | 33 | Production Hardening — All 7 Formats | 🟢 Complete | #32 | `feature/33-production-hardening-all-formats` | Desktop: playback + AI prompt + import/export. CLI: real media + ingest. MCP: SSE transport. Gateway: graceful shutdown + render dispatch + E2E tests. Mobile: preview + native stubs. Browser ext: timeline preview. Web: WASM automation. |
 | 34 | Real Video Playback Pipeline | 🟢 Complete | #33 | `feature/34-real-video-playback-pipeline` | Real video decode (CliFfmpegLoader) → GPU compositor → valid H.264 MP4 export. Red pixel analysis confirmed. Desktop auto-decodes textures. Web video-decoder utility. 133fps render speed. |
 | 35 | Platform Finalization | 🟢 Complete | #33, #34 | `feature/35-platform-finalization` | Close final 8 wiring gaps. Desktop play/pause + AI prompt, mobile NativeBridge real UniFFI, MCP tool expansion (47 tools), SAM2 ONNX, local Whisper, analytics SQLite persistence, Kafka auto-topics. |
+| 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36-e2e-launch-readiness` | Independent audit + 8 bug fixes (render truncation, fake CDN URL, dummy face detection, thin async intent, JWT crypto panic, CORS, serde default, web→gateway auth). All 7 formats verified live/compile. Chronos web AI loop works end-to-end. 8 commits, 0 regressions. Phase 2 prep: codesign, store listings, deploy fix.
 
 ---
 
