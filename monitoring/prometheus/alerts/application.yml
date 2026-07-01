@@ -217,7 +217,7 @@ groups:
             sum(rate(stripe_webhook_total[15m]))
           ) > 0
           or
-          sum(rate(http_requests_total{job="lazynext-web",path=~"/api/payments.*",status_code=~"5.."}[10m])) > 0
+          sum(rate(http_requests_total{service="lazynext-web",path=~"/api/payments.*",status_code=~"5.."}[10m])) > 0
         for: 5m
         labels:
           severity: critical
@@ -372,7 +372,7 @@ groups:
     rules:
       - alert: ExternalAPIDependencyDown
         expr: |
-          up{job=~"pre-processing|generative-studio"}
+          up{service=~"pre-processing|generative-studio"} == 0
           or
           external_api_status{service=~"replicate|elevenlabs|openai"} == 0
         for: 10m
@@ -404,7 +404,7 @@ groups:
     rules:
       - alert: AuthFailureSpike
         expr: |
-          sum(rate(http_requests_total{path=~"/api/auth.*",status_code=~"401|403"}[10m])) > 20
+          sum(rate(http_requests_total{service="lazynext-web",path=~"/api/auth.*",status_code=~"401|403"}[10m])) > 20
         for: 10m
         labels:
           severity: warning
@@ -418,7 +418,7 @@ groups:
 
       - alert: AuthServiceDown
         expr: |
-          rate(http_requests_total{path="/api/auth/session"}[5m]) == 0
+          rate(http_requests_total{service="lazynext-web",path="/api/auth/session"}[5m]) == 0
         for: 10m
         labels:
           severity: warning
