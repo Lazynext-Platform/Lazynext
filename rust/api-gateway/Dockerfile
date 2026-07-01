@@ -12,12 +12,11 @@ RUN echo 'fn main() {}' > rust/core/src/main.rs && echo 'fn main() {}' > rust/p2
 RUN echo 'fn main() {}' > rust/plugin-api/src/main.rs && echo 'fn main() {}' > rust/provenance/src/main.rs
 RUN echo 'fn main() {}' > rust/temporal-versioning/src/main.rs && echo 'fn main() {}' > rust/wasm/src/main.rs
 RUN echo 'fn main() {}' > rust/mcp-server/src/main.rs && echo 'fn main() {}' > rust/cli/src/main.rs
-RUN cargo build --release -p collab-server -p lazynext_api_gateway
+RUN cargo build --release -p lazynext_api_gateway
 
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl libssl3 && rm -rf /var/lib/apt/lists/*
 COPY --from=0 /app/target/release/lazynext_api_gateway /usr/local/bin/lazynext-api-gateway
 EXPOSE 8005
-HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -sf http://localhost:8005/health || exit 1
+HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 CMD curl -sf http://localhost:8005/health || exit 1
 CMD ["/usr/local/bin/lazynext-api-gateway"]
