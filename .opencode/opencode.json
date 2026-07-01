@@ -14,7 +14,7 @@
     "firecrawl": {
       "type": "local",
       "command": ["npx", "-y", "firecrawl-mcp-server"],
-      "enabled": true,
+      "enabled": false,
       "env": {
         "FIRECRAWL_API_KEY": "YOUR_KEY_HERE"
       }
