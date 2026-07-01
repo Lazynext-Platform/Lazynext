@@ -30,5 +30,6 @@ Each subdirectory documents a Lazynext feature. Features 01–17 are retroactive
 | 29 | Mobile AI Copilot | Complete | Lightweight |
 | 32 | Remaining Production Gaps | Complete | Retroactive summary |
 | 33 | Production Hardening — All 7 Formats | Complete | Full lifecycle |
+| 34 | Real Video Playback Pipeline | Complete | Full lifecycle |
 
 See `docs/project-roadmap.md` for dependency ordering and current status.

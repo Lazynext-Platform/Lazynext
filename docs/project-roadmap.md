@@ -10,8 +10,8 @@
 
 | Metric | Count |
 |---|---|
-| Total Features | 33 |
-| 🟢 Complete | 33 |
+| Total Features | 34 |
+| 🟢 Complete | 34 |
 | ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
@@ -47,6 +47,7 @@
 | 21 | Mobile App Completion | 🟢 Complete | #01, #08, #13 | `feature/21-mobile-uniffi-editor` | Wired EditorScreen to NativeBridge (real data instead of mock). All 9 assessment tasks verified. |
 | 32 | Remaining Production Gaps | 🟢 Complete | #22, #30, #31 | — | Closed all 7 remaining code-verified gaps: AI actions, Azure Blob, silence trim, generative fill, MCP export, ElevenLabs, JWT secret. |
 | 33 | Production Hardening — All 7 Formats | 🟢 Complete | #32 | `feature/33-production-hardening-all-formats` | Desktop: playback + AI prompt + import/export. CLI: real media + ingest. MCP: SSE transport. Gateway: graceful shutdown + render dispatch + E2E tests. Mobile: preview + native stubs. Browser ext: timeline preview. Web: WASM automation. |
+| 34 | Real Video Playback Pipeline | 🟢 Complete | #33 | `feature/34-real-video-playback-pipeline` | Real video decode (CliFfmpegLoader) → GPU compositor → valid H.264 MP4 export. Red pixel analysis confirmed. Desktop auto-decodes textures. Web video-decoder utility. 133fps render speed. |
 
 ---
 
