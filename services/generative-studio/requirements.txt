@@ -1,6 +1,6 @@
 fastapi==0.115.0
 uvicorn==0.49.0
-pydantic==2.10.0
+pydantic==2.13.4
 httpx==0.28.1
 # AI Video/Audio (import-checked for production path)
 numpy>=2.0.0
