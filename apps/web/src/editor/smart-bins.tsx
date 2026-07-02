@@ -10,7 +10,18 @@
  */
 
 import React, { useCallback, useState } from "react";
-import { autoTagFootage, buildSmartBins } from "@/wasm";
+
+async function loadWasmNeural() {
+	try {
+		const wasm = await import("@/wasm");
+		return {
+			autoTagFootage: (wasm as any).autoTagFootage as (ids: string[]) => Record<string, string[]>,
+			buildSmartBins: (wasm as any).buildSmartBins as (tagged: Record<string, string[]>) => { label: string; clip_ids: string[] }[],
+		};
+	} catch {
+		return null;
+	}
+}
 
 export function SmartBinsPanel() {
 	const [smartBins, setSmartBins] = useState<
@@ -21,9 +32,11 @@ export function SmartBinsPanel() {
 	const handleAutoAnalyze = useCallback(async () => {
 		setLoading(true);
 		try {
+			const neural = await loadWasmNeural();
+			if (!neural) return;
 			const clipIds = ["interview_main.mp4", "drone_shot.mp4", "broll_city.mp4", "vlog_intro.mp4", "nature_timelapse.mp4", "car_chase.mp4"];
-			const tagged = autoTagFootage(clipIds);
-			const bins = buildSmartBins(tagged);
+			const tagged = neural.autoTagFootage(clipIds);
+			const bins = neural.buildSmartBins(tagged);
 			setSmartBins(bins);
 		} catch {
 			// Fallback if WASM is not yet initialised
