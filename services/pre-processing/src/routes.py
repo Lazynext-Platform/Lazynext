@@ -33,6 +33,10 @@ router = APIRouter()
 def read_root():
     return {"status": "ok", "service": "pre-processing"}
 
+@router.get("/health")
+def health_check():
+    return {"status": "ok", "service": "pre-processing"}
+
 @router.post("/transcribe")
 async def transcribe_audio(req: VideoRequest):
     return await transcribe_audio_service(req)

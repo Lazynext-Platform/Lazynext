@@ -29,7 +29,9 @@ RUN cargo build --release --bin lazynext_mcp_server
 # Use same base as builder to match glibc
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
+RUN groupadd --system --gid 1001 mcp && useradd --system --uid 1001 --gid mcp mcpserver
 COPY --from=builder /build/target/release/lazynext_mcp_server /usr/local/bin/mcp_server
+USER mcpserver
 
 # MCP servers use stdio, not TCP.  No port is exposed.
 # STDIN/STDOUT carry JSON-RPC 2.0 messages.

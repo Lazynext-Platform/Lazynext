@@ -366,7 +366,10 @@ async fn main() {
             Some(Arc::new(db))
         }
         Err(e) => {
-            error!("Failed to connect to db: {} — running without persistence", e);
+            error!(
+                "Failed to connect to db: {} — running without persistence",
+                e
+            );
             None
         }
     };

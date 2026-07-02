@@ -12,10 +12,9 @@
     clippy::collapsible_match
 )]
 use axum::{
-    Router,
+    Json, Router,
     extract::State,
     routing::{get, post},
-    Json,
 };
 use futures::stream::Stream;
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
@@ -389,8 +388,7 @@ async fn process_mcp_request(
                     let name = req["params"]["arguments"]["name"]
                         .as_str()
                         .unwrap_or("Untitled Clip");
-                    let start =
-                        req["params"]["arguments"]["start"].as_u64().unwrap_or(0) as u32;
+                    let start = req["params"]["arguments"]["start"].as_u64().unwrap_or(0) as u32;
                     let end = req["params"]["arguments"]["end"].as_u64().unwrap_or(300) as u32;
                     nle.add_clip_to_track(
                         track_idx,
@@ -449,8 +447,7 @@ async fn process_mcp_request(
                     let property = req["params"]["arguments"]["property"]
                         .as_str()
                         .unwrap_or("opacity");
-                    let frame =
-                        req["params"]["arguments"]["frame"].as_u64().unwrap_or(0) as u32;
+                    let frame = req["params"]["arguments"]["frame"].as_u64().unwrap_or(0) as u32;
                     let value = req["params"]["arguments"]["value"].as_f64().unwrap_or(0.0);
                     let easing_str = req["params"]["arguments"]["easing"]
                         .as_str()
@@ -462,8 +459,8 @@ async fn process_mcp_request(
                         "ease_in_out" => state::keyframe::Easing::EaseInOut,
                         _ => state::keyframe::Easing::Linear,
                     };
-                    let ok = nle
-                        .set_clip_keyframe(track_idx, clip_id, property, frame, value, easing);
+                    let ok =
+                        nle.set_clip_keyframe(track_idx, clip_id, property, frame, value, easing);
                     json!({
                         "jsonrpc": "2.0",
                         "id": id,
@@ -485,8 +482,7 @@ async fn process_mcp_request(
                     let output_path = req["params"]["arguments"]["output_path"]
                         .as_str()
                         .unwrap_or("./out/export.mp4");
-                    let width =
-                        req["params"]["arguments"]["width"].as_u64().unwrap_or(1920) as u32;
+                    let width = req["params"]["arguments"]["width"].as_u64().unwrap_or(1920) as u32;
                     let height = req["params"]["arguments"]["height"]
                         .as_u64()
                         .unwrap_or(1080) as u32;
@@ -542,12 +538,7 @@ async fn process_mcp_request(
                             let pipeline = lazynext_export::ExportPipeline::new(config);
                             match pipeline
                                 .export(total_frames, |frame_idx| async move {
-                                    generate_test_pattern(
-                                        frame_idx,
-                                        total_frames,
-                                        width,
-                                        height,
-                                    )
+                                    generate_test_pattern(frame_idx, total_frames, width, height)
                                 })
                                 .await
                             {
@@ -686,19 +677,16 @@ async fn process_mcp_request(
                                 let track_count = nle.get_project_data().tracks.len();
                                 if track_indices.len() == track_count {
                                     if track_indices.iter().all(|&i| i < track_count) {
-                                        for (new_pos, &old_idx) in
-                                            track_indices.iter().enumerate()
+                                        for (new_pos, &old_idx) in track_indices.iter().enumerate()
                                         {
                                             if new_pos != old_idx {
                                                 nle.set_track_position(old_idx, new_pos);
                                             }
                                         }
-                                        results
-                                            .push(format!("Reordered {} tracks.", track_count));
+                                        results.push(format!("Reordered {} tracks.", track_count));
                                     } else {
-                                        results.push(
-                                            "Invalid track indices for reorder.".to_string(),
-                                        );
+                                        results
+                                            .push("Invalid track indices for reorder.".to_string());
                                     }
                                 } else {
                                     results.push(format!(
@@ -1133,7 +1121,10 @@ async fn run_sse_server() {
         .with_state(state);
 
     let addr = "127.0.0.1:9000";
-    eprintln!("📡 Lazynext MCP Server — SSE transport mode on http://{}", addr);
+    eprintln!(
+        "📡 Lazynext MCP Server — SSE transport mode on http://{}",
+        addr
+    );
     eprintln!("   POST http://{}/mcp/message", addr);
     eprintln!("   GET  http://{}/mcp/events", addr);
 
@@ -1146,22 +1137,17 @@ async fn handle_sse_message(
     Json(req): Json<Value>,
 ) -> Json<Value> {
     let mut nle = state.nle.lock().await;
-    let response =
-        process_mcp_request(&req, &mut nle, &state.editor, &state.api_key).await;
+    let response = process_mcp_request(&req, &mut nle, &state.editor, &state.api_key).await;
     Json(response)
 }
 
-async fn handle_sse_events() -> axum::response::sse::Sse<
-    impl Stream<Item = Result<axum::response::sse::Event, Infallible>>,
-> {
-    use tokio_stream::wrappers::IntervalStream;
+async fn handle_sse_events()
+-> axum::response::sse::Sse<impl Stream<Item = Result<axum::response::sse::Event, Infallible>>> {
     use tokio_stream::StreamExt;
-    let stream = IntervalStream::new(tokio::time::interval(
-        std::time::Duration::from_secs(15),
-    ))
-    .map(|_| Ok(axum::response::sse::Event::default().comment("keep-alive")));
-    axum::response::sse::Sse::new(stream)
-        .keep_alive(axum::response::sse::KeepAlive::default())
+    use tokio_stream::wrappers::IntervalStream;
+    let stream = IntervalStream::new(tokio::time::interval(std::time::Duration::from_secs(15)))
+        .map(|_| Ok(axum::response::sse::Event::default().comment("keep-alive")));
+    axum::response::sse::Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::default())
 }
 
 #[tokio::main]

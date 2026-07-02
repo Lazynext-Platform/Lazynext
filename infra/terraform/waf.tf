@@ -444,29 +444,40 @@ resource "azurerm_application_gateway" "main" {
     host_name                      = var.app_domain
   }
 
-  # Port 443 listeners (HTTPS — requires SSL certificate; see notes below)
-  #
-  # Production: after uploading an SSL certificate to the gateway (via
-  # Portal or CLI), uncomment the HTTPS listeners and routing rules below
-  # and set ssl_certificate_name on each listener.
-  #
-  # Alternatively, use Key Vault integration:
-  #   1. Upload a certificate to Key Vault:
-  #      az keyvault certificate import --vault-name lazynext-kv-{env} \
-  #        --name lazynext-tls --file lazynext.pfx
-  #   2. Add an ssl_certificate block referencing the KV secret ID:
-  #      ssl_certificate {
-  #        name                = "ssl-lazynext"
-  #        key_vault_secret_id = "<secret-id>"
-  #      }
+  # Port 443 listeners (HTTPS)
+  http_listener {
+    name                           = "listener-web-https"
+    frontend_ip_configuration_name = "lazynext-agw-feip-public-${var.environment}"
+    frontend_port_name             = "port-https"
+    protocol                       = "Https"
+    host_name                      = var.app_domain
+    # SSL certificate must be uploaded to Key Vault before apply:
+    #   az keyvault certificate import --vault-name lazynext-kv-${var.environment} \
+    #     --name lazynext-tls --file lazynext.pfx
+    # Then uncomment the ssl_certificate block below with the secret ID:
+    # ssl_certificate {
+    #   name                = "ssl-lazynext"
+    #   key_vault_secret_id = "<key-vault-cert-secret-id>"
+    # }
+  }
 
   # ── Request Routing Rules ─────────────────────────────────────────────
 
-  # Web App (HTTP — for dev/staging; add HTTPS rule for production)
+  # Web App (HTTP — dev/staging; HTTPS for production)
   request_routing_rule {
-    name                       = "rule-web"
+    name                       = "rule-web-https"
     rule_type                  = "Basic"
     priority                   = 100
+    http_listener_name         = "listener-web-https"
+    backend_address_pool_name  = "pool-web"
+    backend_http_settings_name = "http-settings-web"
+  }
+
+  # Fallback HTTP rule (redirects to HTTPS, or direct access for dev)
+  request_routing_rule {
+    name                       = "rule-web-http"
+    rule_type                  = "Basic"
+    priority                   = 110
     http_listener_name         = "listener-web-http"
     backend_address_pool_name  = "pool-web"
     backend_http_settings_name = "http-settings-web"

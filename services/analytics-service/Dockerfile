@@ -29,8 +29,8 @@ ENV PORT=8006
 
 EXPOSE 8006
 
-# oven/bun:alpine ships with curl, not wget
+# oven/bun:alpine ships with wget (via BusyBox)
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -sf http://localhost:8006/health || exit 1
+    CMD wget -qO- http://localhost:8006/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

@@ -71,7 +71,7 @@ resource "azurerm_application_insights" "service" {
   application_type    = "web"
 
   # Workspace-based: all telemetry flows into the shared Log Analytics workspace
-  workspace_id                 = azurerm_log_analytics_workspace.container_apps.id
+  workspace_id = azurerm_log_analytics_workspace.container_apps.id
 
   tags = {
     Environment = var.environment

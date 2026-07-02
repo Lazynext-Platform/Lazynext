@@ -1,8 +1,8 @@
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;
-use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use lazynext_core::engine::AssetLoader;
+use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -73,7 +73,9 @@ impl Render for EditorShell {
                             if is_video {
                                 let loader = CliFfmpegLoader::new(pd.width, pd.height);
                                 if let Ok(rgba) = loader.load_frame(path, 0).await {
-                                    let _ = engine.upload_texture(&clip.id, &rgba, pd.width, pd.height).await;
+                                    let _ = engine
+                                        .upload_texture(&clip.id, &rgba, pd.width, pd.height)
+                                        .await;
                                 }
                             }
                         }
@@ -108,9 +110,18 @@ impl Render for EditorShell {
         let prompt_clicked = self.prompt_clicked.clone();
         let is_prompt_focused = self.prompt_focused.get();
         let prompt_display = SharedString::from(self.ai_prompt_text.clone());
-        let prompt_placeholder = SharedString::from("Click to focus and type a command (e.g. 'cut silences')");
-        let prompt_text_color = if self.ai_prompt_text.is_empty() { rgb(0x666666) } else { rgb(0xcccccc) };
-        let actual_text = if self.ai_prompt_text.is_empty() { prompt_placeholder } else { prompt_display };
+        let prompt_placeholder =
+            SharedString::from("Click to focus and type a command (e.g. 'cut silences')");
+        let prompt_text_color = if self.ai_prompt_text.is_empty() {
+            rgb(0x666666)
+        } else {
+            rgb(0xcccccc)
+        };
+        let actual_text = if self.ai_prompt_text.is_empty() {
+            prompt_placeholder
+        } else {
+            prompt_display
+        };
 
         div()
             .flex()

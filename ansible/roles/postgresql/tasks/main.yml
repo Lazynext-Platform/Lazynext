@@ -305,7 +305,7 @@
   become_user: postgres
   community.postgresql.postgresql_user:
     name: postgres_exporter
-    password: "{{ vault_postgres_exporter_password | default('{{ vault_postgres_exporter_password | default('REPLACE_ME_EXPORTER_PASSWORD') }}') }}"
+    password: "{{ vault_postgres_exporter_password | default('REPLACE_ME_EXPORTER_PASSWORD') }}"
     encrypted: yes
     state: present
   no_log: true

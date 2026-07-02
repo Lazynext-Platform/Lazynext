@@ -42,10 +42,12 @@ jobs:
     name: Azure Deploy — Build, Push & Deploy
     needs: [node-checks]
     runs-on: ubuntu-latest
-    # Only auto-deploy when explicitly triggered via workflow_dispatch;
-    # on push events, skip the deploy job so the workflow doesn't fail
-    # when Azure credentials are not yet configured.
-    if: github.event_name == 'workflow_dispatch'
+    # Auto-deploy on push to main when Azure credentials are configured.
+    # Falls back to node-checks only when credentials are absent.
+    # Override via workflow_dispatch inputs for manual control.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && vars.AZURE_CLIENT_ID != '')
   # If deployment fails, fail the pipeline so the team is notified
   # and can roll back. Do NOT use continue-on-error for production deploys.
     steps:
