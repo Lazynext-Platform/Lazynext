@@ -27,6 +27,10 @@ router = APIRouter()
 def read_root():
     return {"status": "ok", "service": "generative-studio"}
 
+@router.get("/health")
+def health_check():
+    return {"status": "ok", "service": "generative-studio"}
+
 @router.post("/generate-video")
 async def generate_video(req: DiffusionRequest):
     return await generate_video_service(req)

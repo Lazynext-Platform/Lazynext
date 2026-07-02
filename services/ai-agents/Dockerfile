@@ -19,6 +19,9 @@ FROM oven/bun:1.3-alpine AS runner
 
 WORKDIR /app
 
+# Install npm/npx for MCP server support
+RUN apk add --no-cache npm
+
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 -G nodejs
 
 # Copy production deps only
@@ -34,6 +37,6 @@ ENV PORT=8002
 EXPOSE 8002
 
 HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -sf http://localhost:8002/health || exit 1
+    CMD wget -qO- http://localhost:8002/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]
