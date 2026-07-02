@@ -7,7 +7,6 @@ use clap::Parser;
 use lazynext_core::NLEState;
 use lazynext_core::engine::AssetLoader;
 use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
-use std::sync::Arc;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
