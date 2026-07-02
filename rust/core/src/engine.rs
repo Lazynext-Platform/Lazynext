@@ -228,7 +228,9 @@ impl CoreEngine {
                     // Fetch frame data if asset_loader is present
                     if let Some(loader) = &self.asset_loader {
                         // Resolve the actual media file path from the clip's media_id
-                        let media_path = clip.media_id.as_ref()
+                        let media_path = clip
+                            .media_id
+                            .as_ref()
                             .and_then(|mid| pd.media_pool.get(mid))
                             .map(|asset| asset.path_or_url.clone())
                             .unwrap_or_else(|| clip.id.clone());

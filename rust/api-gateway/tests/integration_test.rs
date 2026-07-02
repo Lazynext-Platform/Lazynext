@@ -320,21 +320,19 @@ mod http_integration {
         Router::new()
             .route(
                 "/health",
-                get(|| async {
-                    Json(json!({"status": "ok", "service": "api-gateway"}))
-                }),
+                get(|| async { Json(json!({"status": "ok", "service": "api-gateway"})) }),
             )
             .route(
                 "/api/v1/timeline/{id}",
-                get(|axum::extract::Path(id): axum::extract::Path<String>| async move {
-                    Json(json!({"tracks": [], "project_id": id}))
-                }),
+                get(
+                    |axum::extract::Path(id): axum::extract::Path<String>| async move {
+                        Json(json!({"tracks": [], "project_id": id}))
+                    },
+                ),
             )
             .route(
                 "/api/v1/projects",
-                get(|| async {
-                    Json(json!({"success": true, "projects": []}))
-                }),
+                get(|| async { Json(json!({"success": true, "projects": []})) }),
             )
     }
 

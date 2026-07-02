@@ -359,11 +359,16 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
                             .map_err(|e| format!("Texture upload failed: {}", e))?;
                         // Remove asset_loader so render_frame uses static texture (not per-frame decode)
                         core_engine.clear_asset_loader();
-                        log::info!("Real video frame uploaded ({}) — rendering with static texture", path);
+                        log::info!(
+                            "Real video frame uploaded ({}) — rendering with static texture",
+                            path
+                        );
                     }
                     Err(e) => {
                         log::warn!("Video decode failed, falling back to test pattern: {}", e);
-                        test_pattern_fallback(&mut core_engine).await.map_err(|e| format!("Test pattern fallback failed: {}", e))?;
+                        test_pattern_fallback(&mut core_engine)
+                            .await
+                            .map_err(|e| format!("Test pattern fallback failed: {}", e))?;
                     }
                 }
             } else {
@@ -371,7 +376,9 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
                     Ok(img) => {
                         let rgba = img.to_rgba8();
                         let (w, h) = rgba.dimensions();
-                        core_engine.upload_texture(clip_id, rgba.as_raw(), w, h).await
+                        core_engine
+                            .upload_texture(clip_id, rgba.as_raw(), w, h)
+                            .await
                             .map_err(|e| format!("Image upload failed: {}", e))?;
                         core_engine.clear_asset_loader();
                     }
@@ -380,7 +387,9 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
             }
         }
     } else {
-        test_pattern_fallback(&mut core_engine).await.map_err(|e| format!("Test pattern upload failed: {}", e))?;
+        test_pattern_fallback(&mut core_engine)
+            .await
+            .map_err(|e| format!("Test pattern upload failed: {}", e))?;
     }
 
     let progress_tx = if args.progress {
@@ -454,13 +463,12 @@ fn cmd_ingest(file: &str, project_id: &str) {
 
     // Load or create the project
     let mut engine = if std::path::Path::new(project_id).exists() {
-        let content =
-            std::fs::read_to_string(project_id).unwrap_or_else(|e| {
-                eprintln!("❌ Failed to read project file: {}", e);
-                std::process::exit(1);
-            });
-        let project_data: lazynext_core::nle_state::ProjectData =
-            serde_json::from_str(&content).unwrap_or_else(|e| {
+        let content = std::fs::read_to_string(project_id).unwrap_or_else(|e| {
+            eprintln!("❌ Failed to read project file: {}", e);
+            std::process::exit(1);
+        });
+        let project_data: lazynext_core::nle_state::ProjectData = serde_json::from_str(&content)
+            .unwrap_or_else(|e| {
                 eprintln!("❌ Failed to parse project JSON: {}", e);
                 std::process::exit(1);
             });
@@ -473,11 +481,7 @@ fn cmd_ingest(file: &str, project_id: &str) {
         eng
     } else {
         println!("📂 Project file '{}' not found, creating new.", project_id);
-        NLEState::new(
-            project_id.to_string(),
-            "Ingested Project".to_string(),
-            24,
-        )
+        NLEState::new(project_id.to_string(), "Ingested Project".to_string(), 24)
     };
 
     engine.add_media_asset(asset);
@@ -512,9 +516,8 @@ fn cmd_ingest(file: &str, project_id: &str) {
     }
 
     // Save updated project
-    let project_json =
-        serde_json::to_string_pretty(engine.get_project_data())
-            .expect("Failed to serialize project");
+    let project_json = serde_json::to_string_pretty(engine.get_project_data())
+        .expect("Failed to serialize project");
     std::fs::write(project_id, project_json)
         .unwrap_or_else(|e| eprintln!("❌ Failed to save project: {}", e));
 
@@ -550,15 +553,11 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
 
                 if let Some(streams) = info["streams"].as_array() {
                     for stream in streams {
-                        let codec_type =
-                            stream["codec_type"].as_str().unwrap_or("");
+                        let codec_type = stream["codec_type"].as_str().unwrap_or("");
                         match codec_type {
                             "video" => {
-                                width = stream["width"].as_u64().unwrap_or(0)
-                                    as u32;
-                                height =
-                                    stream["height"].as_u64().unwrap_or(0)
-                                        as u32;
+                                width = stream["width"].as_u64().unwrap_or(0) as u32;
+                                height = stream["height"].as_u64().unwrap_or(0) as u32;
                                 asset_type = "video".to_string();
                             }
                             "audio" if asset_type == "unknown" => {
@@ -590,9 +589,7 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
             let asset_type = match ext.as_str() {
                 "mp4" | "mov" | "avi" | "mkv" | "webm" | "mxf" => "video",
                 "mp3" | "wav" | "aac" | "flac" | "ogg" | "m4a" => "audio",
-                "png" | "jpg" | "jpeg" | "gif" | "webp" | "tiff" | "bmp" => {
-                    "image"
-                }
+                "png" | "jpg" | "jpeg" | "gif" | "webp" | "tiff" | "bmp" => "image",
                 _ => "unknown",
             }
             .to_string();
@@ -602,7 +599,9 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
 }
 
 /// Upload a test pattern texture when no real media is available.
-async fn test_pattern_fallback(engine: &mut lazynext_core::engine::CoreEngine) -> Result<(), String> {
+async fn test_pattern_fallback(
+    engine: &mut lazynext_core::engine::CoreEngine,
+) -> Result<(), String> {
     log::warn!("No media assets — using test pattern");
     let img = image::open("tests/assets/test_pattern.png")
         .map_err(|e| format!("Failed to open test pattern: {}", e))?;

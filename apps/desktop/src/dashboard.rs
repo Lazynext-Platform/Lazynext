@@ -94,14 +94,14 @@ impl Render for Dashboard {
                                                 nle: nle.clone(),
                                                 engine: engine.clone(),
                                                 rt_handle: rt_handle.clone(),
-                last_frame_data: None,
-                current_frame: 0,
-                is_playing: false,
-                ai_prompt_text: String::new(),
-                play_clicked: Rc::new(Cell::new(false)),
-                prompt_focused: Rc::new(Cell::new(false)),
-                prompt_clicked: Rc::new(Cell::new(false)),
-            })
+                                                last_frame_data: None,
+                                                current_frame: 0,
+                                                is_playing: false,
+                                                ai_prompt_text: String::new(),
+                                                play_clicked: Rc::new(Cell::new(false)),
+                                                prompt_focused: Rc::new(Cell::new(false)),
+                                                prompt_clicked: Rc::new(Cell::new(false)),
+                                            })
                                         },
                                     )
                                     .unwrap();

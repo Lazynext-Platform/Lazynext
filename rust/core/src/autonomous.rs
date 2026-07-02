@@ -126,7 +126,7 @@ impl AutonomousEditor {
                     )
                 };
                 (url, key, "gemini-2.5-flash".to_string())
-            },
+            }
             _ => (
                 "http://localhost:11434/api/chat".to_string(),
                 String::new(),

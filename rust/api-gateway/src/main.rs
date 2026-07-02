@@ -113,18 +113,16 @@ async fn main() {
 
     // ── Database ───────────────────────────────────────────────────────
     let db_arc = match std::env::var("DATABASE_URL") {
-        Ok(ref url) if !url.is_empty() => {
-            match DbStore::new(url).await {
-                Ok(store) => {
-                    info!("Connected to PostgreSQL database");
-                    Arc::new(store)
-                }
-                Err(e) => {
-                    warn!("PostgreSQL unavailable ({}): starting in dev mode", e);
-                    Arc::new(DbStore::new_dev())
-                }
+        Ok(ref url) if !url.is_empty() => match DbStore::new(url).await {
+            Ok(store) => {
+                info!("Connected to PostgreSQL database");
+                Arc::new(store)
             }
-        }
+            Err(e) => {
+                warn!("PostgreSQL unavailable ({}): starting in dev mode", e);
+                Arc::new(DbStore::new_dev())
+            }
+        },
         _ => {
             info!("DATABASE_URL not set — starting in development mode");
             Arc::new(DbStore::new_dev())

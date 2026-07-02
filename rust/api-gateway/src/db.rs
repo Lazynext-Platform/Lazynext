@@ -73,22 +73,32 @@ impl DbStore {
             .connect(database_url)
             .await?;
         tracing::info!("Connected to PostgreSQL database");
-        Ok(Self { pool: Some(pool), is_dev_mode: false })
+        Ok(Self {
+            pool: Some(pool),
+            is_dev_mode: false,
+        })
     }
 
     /// Create a development-mode store with no database.
     pub fn new_dev() -> Self {
         tracing::warn!("Starting in development mode — database features disabled");
-        Self { pool: None, is_dev_mode: true }
+        Self {
+            pool: None,
+            is_dev_mode: true,
+        }
     }
 
-    pub fn has_db(&self) -> bool { self.pool.is_some() }
-    pub fn is_dev(&self) -> bool { self.is_dev_mode }
+    pub fn has_db(&self) -> bool {
+        self.pool.is_some()
+    }
+    pub fn is_dev(&self) -> bool {
+        self.is_dev_mode
+    }
 
     pub fn pool_ref(&self) -> Result<&PgPool, sqlx::Error> {
-        self.pool.as_ref().ok_or_else(||
-            sqlx::Error::Protocol("No database — running in dev mode".into())
-        )
+        self.pool
+            .as_ref()
+            .ok_or_else(|| sqlx::Error::Protocol("No database — running in dev mode".into()))
     }
 
     pub async fn health_check(&self) -> Result<(), sqlx::Error> {
