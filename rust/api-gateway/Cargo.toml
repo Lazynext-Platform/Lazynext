@@ -22,7 +22,7 @@ base64 = "0.22"
 hmac = "0.13"
 sha2 = "0.11"
 hex = "0.4"
-rand = "0.8"
+rand = "0.10"
 futures = "0.3.32"
 redis = { version = "0.25", features = ["tokio-comp"] }
 azure_core = "0.21.0"
