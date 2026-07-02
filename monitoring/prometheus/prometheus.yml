@@ -67,7 +67,4 @@ scrape_configs:
     static_configs:
       - targets: ['blackbox-exporter:9115']
 
-  # External services
-  - job_name: 'tensorflow-serving'
-    static_configs:
-      - targets: ['tensorflow-serving:8501']
+  # External services (add specific exporters here if needed)

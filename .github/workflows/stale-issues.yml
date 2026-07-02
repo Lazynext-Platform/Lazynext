@@ -118,7 +118,7 @@ jobs:
           # ── Operations ──────────────────────────────────────────────────
           operations-per-run: 100
           remove-stale-when-updated: true
-          delete-branch: true
+          delete-branch: false
           ascending: true
           enable-statistics: true
 
