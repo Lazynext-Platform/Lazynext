@@ -68,3 +68,5 @@ images:
     newTag: staging
   - name: ghcr.io/lazynext-platform/lazynext-analytics-service
     newTag: staging
+  - name: ghcr.io/lazynext-platform/lazynext-collab-server
+    newTag: staging

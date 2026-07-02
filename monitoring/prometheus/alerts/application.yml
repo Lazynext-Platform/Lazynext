@@ -3,15 +3,23 @@
 # inference, WebSocket connections, payments, database migrations,
 # media processing, and CRDT collaboration.
 #
-# These rules layer on top of the recording rules in recording-rules.yml
-# and assume the following metric names emitted by lazynext services:
-#   render_jobs_total, render_jobs_failed_total, render_duration_seconds
-#   ml_inference_requests_total, ml_inference_errors_total
-#   whisper_inference_duration_seconds, sam2_inference_duration_seconds
-#   websocket_connections_active, websocket_disconnects_total
-#   stripe_webhook_total, stripe_webhook_errors_total
-#   db_migration_status, media_processing_queue_size
-#   crdt_conflicts_total
+# ⚠️ INSTRUMENTATION REQUIRED: These alerts reference custom metrics
+# (render_jobs_total, ml_inference_errors_total, etc.) that must be
+# emitted by the application services at /metrics endpoints.
+# Until instrumentation is wired, these alerts will not fire.
+# The rule structures below serve as the target spec for the
+# instrumentation work item.
+#
+# Required metrics (exported at /metrics on each service):
+#   render-service:    render_jobs_total, render_jobs_failed_total,
+#                      render_duration_seconds, render_queue_size,
+#                      render_workers_active
+#   ai-agents:         ml_inference_requests_total, ml_inference_errors_total
+#   pre-processing:    whisper_inference_duration_seconds,
+#                      sam2_inference_duration_seconds
+#   collab-server:     websocket_connections_active, websocket_disconnects_total
+#   api-gateway:       stripe_webhook_total, stripe_webhook_errors_total
+#   analytics-service: media_processing_queue_size
 
 groups:
   # ── Render Service ──────────────────────────────────────────────

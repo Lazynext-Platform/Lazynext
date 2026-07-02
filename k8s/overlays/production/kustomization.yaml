@@ -160,3 +160,6 @@ images:
   - name: ghcr.io/lazynext-platform/lazynext-analytics-service
     newName: lazynextacrproduction.azurecr.io/lazynext-analytics-service
     newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-collab-server
+    newName: lazynextacrproduction.azurecr.io/lazynext-collab-server
+    newTag: latest

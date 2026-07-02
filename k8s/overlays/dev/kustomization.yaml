@@ -6,7 +6,9 @@ namespace: lazynext-dev
 resources:
   - ../../base
 
-namePrefix: dev-
+# NOTE: namePrefix removed — it breaks inter-service DNS by renaming
+# all resources (services, PVCs, etc.) in the namespace. Use labels
+# below to distinguish environments instead.
 
 labels:
   - pairs:
@@ -69,4 +71,6 @@ images:
   - name: ghcr.io/lazynext-platform/lazynext-mcp
     newTag: dev
   - name: ghcr.io/lazynext-platform/lazynext-analytics-service
+    newTag: dev
+  - name: ghcr.io/lazynext-platform/lazynext-collab-server
     newTag: dev
