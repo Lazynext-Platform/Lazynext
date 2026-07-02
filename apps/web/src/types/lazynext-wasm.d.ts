@@ -128,6 +128,8 @@ declare module "lazynext-wasm" {
   // ── Neural ──────────────────────────────────────────────────────────
   export function initNeuralEngine(): void;
   export function detectFaces(frame: Uint8Array, width: number, height: number): any[];
+  export function autoTagFootage(clipIds: string[]): Record<string, string[]>;
+  export function buildSmartBins(tagged: Record<string, string[]>): { label: string; clip_ids: string[] }[];
 
   // ── WASM Init ───────────────────────────────────────────────────────
   export function initSync(module: WebAssembly.Module | unknown): void;
