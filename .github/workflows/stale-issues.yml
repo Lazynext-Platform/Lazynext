@@ -32,7 +32,7 @@ jobs:
     name: Mark Stale & Close
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v9
+      - uses: actions/stale@v10
         with:
           # ── Timing ───────────────────────────────────────────────────
           days-before-issue-stale: ${{ github.event.inputs.days-before-stale || 60 }}
