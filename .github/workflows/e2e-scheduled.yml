@@ -255,7 +255,7 @@ jobs:
 
       - name: Notify on Failure
         if: env.overall == 'failure' && github.event_name == 'schedule'
-        uses: slackapi/slack-github-action@v2
+        uses: slackapi/slack-github-action@v3
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
