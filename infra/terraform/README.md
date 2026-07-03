@@ -24,6 +24,7 @@ Resource Group: lazynext-rg-{env}
 │   ├── web, ai-agents, render-service
 │   ├── pre-processing, generative-studio
 │   ├── api-gateway, collab-server, analytics
+├── Azure DNS Zone (lazynext.com)
 ├── Application Gateway v2 + WAF (OWASP 3.2)
 ├── Azure Front Door CDN + WAF
 ├── PostgreSQL Flexible Server 17 (private network)
@@ -55,6 +56,7 @@ Resource Group: lazynext-rg-{env}
 | `backup.tf` | Backup vaults with policies for PG + Blob |
 | `private-endpoints.tf` | Private DNS zones + endpoints |
 | `oidc.tf` | GitHub Actions OIDC federation |
+| `dns.tf` | Azure DNS zone + A/CNAME records for lazynext.com |
 | `aks.tf.disabled` | AKS config (disabled — using Container Apps) |
 
 ## Environments

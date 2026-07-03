@@ -22,16 +22,19 @@
     clippy::too_many_lines,
     clippy::wrong_self_convention
 )]
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::middleware;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::{Extension, Json, Router};
 // Note: axum 0.8 retains `Extension` as an extractor.
 // AuthClaims are inserted in `rbac::authorize_request` and
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
-use lazynext_core::{NLEEvent, NLEState};
+use lazynext_core::{
+    Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine,
+    RoutineScheduler, Task, TaskQueue,
+};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::net::SocketAddr;
@@ -67,6 +70,9 @@ pub struct AppState {
     editor: Arc<AutonomousEditor>,
     db: Arc<DbStore>,
     ws_state: Arc<ws::WsState>,
+    scheduler: Arc<Mutex<RoutineScheduler>>,
+    channel_manager: Arc<Mutex<ChannelManager>>,
+    task_queue: Arc<Mutex<TaskQueue>>,
 }
 
 #[tokio::main]
@@ -172,11 +178,21 @@ async fn main() {
     let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let ws_state = Arc::new(ws::WsState::new(redis_client));
 
+    let scheduler = Arc::new(Mutex::new(RoutineScheduler::new(
+        nle_state.clone(),
+        Arc::new(AutonomousEditor::new()),
+    )));
+    let channel_manager = Arc::new(Mutex::new(ChannelManager::new()));
+    let task_queue = Arc::new(Mutex::new(TaskQueue::new()));
+
     let state = AppState {
         nle: nle_state.clone(),
         editor: Arc::new(AutonomousEditor::new()),
         db: db_arc,
         ws_state: ws_state.clone(),
+        scheduler,
+        channel_manager,
+        task_queue,
     };
 
     #[derive(OpenApi)]
@@ -239,6 +255,35 @@ async fn main() {
             "/api/v1/auth/extension-token",
             post(handle_extension_token_exchange),
         )
+        .route("/api/v1/social/reframe", post(handle_social_reframe))
+        .route("/api/v1/social/publish", post(handle_social_publish))
+        .route(
+            "/api/v1/social/metadata",
+            post(handle_social_metadata),
+        )
+        .route("/api/v1/social/schedule", get(handle_social_schedule))
+        // ── Scheduled Routines ──────────────────────────────────────
+        .route("/api/v1/routines", post(handle_create_routine))
+        .route("/api/v1/routines", get(handle_list_routines))
+        .route("/api/v1/routines/{id}", delete(handle_cancel_routine))
+        .route(
+            "/api/v1/routines/{id}/execute",
+            post(handle_execute_routine),
+        )
+        // ── Channels ────────────────────────────────────────────────
+        .route(
+            "/api/v1/channels/webhook",
+            post(handle_register_webhook),
+        )
+        .route(
+            "/api/v1/channels/event",
+            post(handle_channel_event),
+        )
+        .route("/api/v1/channels", get(handle_list_channels))
+        // ── Background Tasks ─────────────────────────────────────────
+        .route("/api/v1/tasks", post(handle_enqueue_task))
+        .route("/api/v1/tasks", get(handle_list_tasks))
+        .route("/api/v1/tasks/{id}", get(handle_get_task))
         .layer(middleware::from_fn(rbac::authorize_request))
         .layer(middleware::from_fn(csrf::csrf_protection))
         .layer(middleware::from_fn_with_state(
@@ -1007,6 +1052,354 @@ async fn handle_integration_connect(
             ),
             "note": "OAuth client ID not configured — set the env var to enable full OAuth flow"
         }))
+    }
+}
+
+// ── Social Publish Proxy Handlers ────────────────────────────────────────
+//
+// These handlers forward requests to the social-publish microservice
+// (running on port 8007). The social-publish service handles platform-
+// specific uploads, reframing, metadata generation, and scheduling.
+//
+// Each handler forwards the incoming JSON body and returns the upstream
+// response. The gateway adds authentication (JWT validated by RBAC
+// middleware) and rate limiting.
+
+fn social_publish_url() -> String {
+    std::env::var("SOCIAL_PUBLISH_URL")
+        .unwrap_or_else(|_| "http://localhost:8007".to_string())
+}
+
+/// POST /api/v1/social/reframe — Proxy auto-reframe to social-publish
+async fn handle_social_reframe(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let client = reqwest::Client::new();
+    let base = social_publish_url();
+    match client
+        .post(format!("{base}/auto-reframe"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// POST /api/v1/social/publish — Proxy publish to social-publish
+async fn handle_social_publish(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let platform = payload
+        .get("platform")
+        .and_then(|v| v.as_str())
+        .unwrap_or("tiktok");
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client
+        .post(format!("{base}/publish/{platform}"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// POST /api/v1/social/metadata — Proxy metadata generation to social-publish
+async fn handle_social_metadata(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client
+        .post(format!("{base}/generate-metadata"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// GET /api/v1/social/schedule — List scheduled posts from social-publish
+async fn handle_social_schedule(
+    Extension(claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client.get(format!("{base}/schedule")).send().await {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+// ── Scheduled Routines Handlers ────────────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct CreateRoutinePayload {
+    name: String,
+    cron_expression: String,
+    prompt: String,
+    #[serde(default)]
+    enabled: bool,
+}
+
+async fn handle_create_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<CreateRoutinePayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    if RoutineScheduler::parse_cron(&payload.cron_expression).is_err() {
+        return Json(json!({
+            "success": false,
+            "error": "Invalid cron expression"
+        }));
+    }
+
+    let routine = Routine {
+        id: uuid::Uuid::new_v4().to_string(),
+        name: payload.name,
+        cron_expression: payload.cron_expression,
+        prompt: payload.prompt,
+        enabled: payload.enabled,
+        last_run: None,
+        created_at: chrono::Utc::now().to_rfc3339(),
+    };
+
+    let mut scheduler = state.scheduler.lock().await;
+    scheduler.schedule_routine(routine.clone());
+
+    Json(json!({ "success": true, "routine": routine }))
+}
+
+async fn handle_list_routines(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let scheduler = state.scheduler.lock().await;
+    let routines = scheduler.list_routines();
+    Json(json!({ "success": true, "routines": routines }))
+}
+
+#[derive(serde::Deserialize)]
+struct RoutineIdPath {
+    id: String,
+}
+
+async fn handle_cancel_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Path(path): Path<RoutineIdPath>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let mut scheduler = state.scheduler.lock().await;
+    let removed = scheduler.cancel_routine(&path.id);
+    Json(json!({ "success": removed, "id": path.id }))
+}
+
+async fn handle_execute_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Path(path): Path<RoutineIdPath>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let mut scheduler = state.scheduler.lock().await;
+    match scheduler.execute_routine(&path.id).await {
+        Ok(msg) => Json(json!({ "success": true, "message": msg })),
+        Err(e) => Json(json!({ "success": false, "error": e })),
+    }
+}
+
+// ── Channels Handlers ──────────────────────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct RegisterWebhookPayload {
+    channel: String,
+    url: String,
+    secret: String,
+}
+
+async fn handle_register_webhook(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<RegisterWebhookPayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_admin() {
+        return Json(json!({ "success": false, "error": "Admin access required" }));
+    }
+
+    let channel_enum = match payload.channel.to_lowercase().as_str() {
+        "telegram" => Channel::Telegram,
+        "discord" => Channel::Discord,
+        "slack" => Channel::Slack,
+        "imessage" => Channel::IMessage,
+        "webhook" => Channel::Webhook,
+        _ => {
+            return Json(json!({
+                "success": false,
+                "error": format!("Unknown channel type: {}", payload.channel)
+            }));
+        }
+    };
+
+    let mut mgr = state.channel_manager.lock().await;
+    let reg = mgr.register_webhook(channel_enum, payload.url, payload.secret);
+
+    Json(json!({ "success": true, "channel": reg }))
+}
+
+async fn handle_channel_event(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+    Json(payload): Json<ChannelEvent>,
+) -> Json<Value> {
+    let mgr = state.channel_manager.lock().await;
+    match mgr.process_incoming_event(payload) {
+        Ok(result) => Json(json!({ "success": true, "result": result })),
+        Err(e) => Json(json!({ "success": false, "error": e })),
+    }
+}
+
+async fn handle_list_channels(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let mgr = state.channel_manager.lock().await;
+    let channels = mgr.list_channels();
+    Json(json!({ "success": true, "channels": channels }))
+}
+
+// ── Background Tasks Handlers ──────────────────────────────────────────────
+
+#[derive(serde::Deserialize)]
+struct EnqueueTaskPayload {
+    name: String,
+    payload: String,
+    #[serde(default = "default_priority")]
+    priority: u8,
+    task_type: String,
+}
+
+fn default_priority() -> u8 {
+    100
+}
+
+async fn handle_enqueue_task(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<EnqueueTaskPayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let task_type = match payload.task_type.to_lowercase().as_str() {
+        "auto_export" => lazynext_core::TaskType::AutoExport,
+        "auto_backup" => lazynext_core::TaskType::AutoBackup,
+        "media_cleanup" => lazynext_core::TaskType::MediaCleanup,
+        "proxy_generation" => lazynext_core::TaskType::ProxyGeneration,
+        "thumbnail_regeneration" => lazynext_core::TaskType::ThumbnailRegeneration,
+        _ => {
+            return Json(json!({
+                "success": false,
+                "error": format!("Unknown task type: {}", payload.task_type)
+            }));
+        }
+    };
+
+    let task = Task {
+        id: String::new(),
+        name: payload.name,
+        payload: payload.payload,
+        priority: payload.priority,
+        status: lazynext_core::TaskStatus::Pending,
+        created_at: String::new(),
+        task_type,
+    };
+
+    let mut queue = state.task_queue.lock().await;
+    let task = queue.enqueue(task);
+
+    Json(json!({ "success": true, "task": task }))
+}
+
+async fn handle_list_tasks(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let queue = state.task_queue.lock().await;
+    let tasks = queue.list_tasks();
+    Json(json!({
+        "success": true,
+        "tasks": tasks,
+        "pending_count": queue.pending_count(),
+        "total_count": queue.total_count(),
+    }))
+}
+
+#[derive(serde::Deserialize)]
+struct TaskIdPath {
+    id: String,
+}
+
+async fn handle_get_task(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+    Path(path): Path<TaskIdPath>,
+) -> Json<Value> {
+    let queue = state.task_queue.lock().await;
+    match queue.get_task(&path.id) {
+        Some(task) => Json(json!({ "success": true, "task": task })),
+        None => Json(json!({
+            "success": false,
+            "error": "Task not found"
+        })),
     }
 }
 

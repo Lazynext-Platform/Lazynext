@@ -1,0 +1,572 @@
+{
+  "dashboard": {
+    "uid": "lazynext-ai-pipeline",
+    "title": "Lazynext — AI Pipeline",
+    "tags": ["lazynext", "ai", "llm", "production"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "10s",
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "LLM Call Volume (calls/min)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(llm_requests_total[1m])) by (provider, model) * 60",
+            "legendFormat": "{{provider}}/{{model}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cpm",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 2,
+        "title": "LLM Success Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "(1 - sum(rate(llm_errors_total[5m])) by (provider) / sum(rate(llm_requests_total[5m])) by (provider)) * 100",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "spanNulls": true
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 3,
+        "title": "Token Usage Rate (total)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 7, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(llm_tokens_total[5m])) by (provider, direction)",
+            "legendFormat": "{{provider}} {{direction}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "tokens/s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 4,
+        "title": "Cumulative Token Usage (today)",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 7, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(increase(llm_tokens_total{direction=\"output\"}[24h]))",
+            "legendFormat": "Output",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "tokens",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "blue"},
+                {"value": 10000, "color": "green"},
+                {"value": 100000, "color": "yellow"},
+                {"value": 1000000, "color": "red"}
+              ]
+            },
+            "decimals": 0
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value",
+          "textMode": "value_and_name"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Estimated Cost (24h)",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 10, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(increase(llm_tokens_total{direction=\"output\"}[24h])) * 0.000015",
+            "legendFormat": "Cost",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "orange"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 6,
+        "title": "LLM Latency p50/p95/p99",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 7, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, provider))",
+            "legendFormat": "{{provider}} p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, provider))",
+            "legendFormat": "{{provider}} p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, provider))",
+            "legendFormat": "{{provider}} p99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 7,
+        "title": "AI Agent Tool Executions",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 14, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(ai_tool_executions_total[5m])) by (tool_name)",
+            "legendFormat": "{{tool_name}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 8,
+        "title": "Tool Success Rate by Tool",
+        "type": "barchart",
+        "gridPos": {"x": 8, "y": 14, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "(1 - sum(rate(ai_tool_errors_total[15m])) by (tool_name) / sum(rate(ai_tool_executions_total[15m])) by (tool_name)) * 100",
+            "legendFormat": "{{tool_name}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 9,
+        "title": "AI Agent Orchestration Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 14, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(ai_orchestrations_total[5m])) by (status)",
+            "legendFormat": "{{status}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 10,
+        "title": "AI Agent Error Rate by Type",
+        "type": "barchart",
+        "gridPos": {"x": 0, "y": 22, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(ai_agent_errors_total[15m])) by (error_type)",
+            "legendFormat": "{{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "red"}
+              ]
+            },
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 11,
+        "title": "Tool Execution Latency (p95)",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 22, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(ai_tool_duration_seconds_bucket[5m])) by (le, tool_name))",
+            "legendFormat": "{{tool_name}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 12,
+        "title": "NL Command Processing Rate",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 22, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(rate(nl_commands_processed_total[1m])) * 60",
+            "legendFormat": "cmds/min",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cpm",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "blue"},
+                {"value": 1, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 13,
+        "title": "NL Command Success Rate",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 22, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "(1 - sum(rate(nl_command_errors_total[15m])) / sum(rate(nl_commands_processed_total[15m]))) * 100",
+            "legendFormat": "Success",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 90, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 14,
+        "title": "Agent Queue Depth",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 25, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "avg(ai_agent_queue_depth)",
+            "legendFormat": "Queue",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 25, "color": "orange"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 15,
+        "title": "LLM Error Breakdown by Type",
+        "type": "piechart",
+        "gridPos": {"x": 20, "y": 25, "w": 4, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(increase(llm_errors_total[1h])) by (error_type)",
+            "legendFormat": "{{error_type}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "displayLabels": ["name", "percent"],
+          "legend": {"displayMode": "table", "placement": "bottom"},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 16,
+        "title": "External API Rate Limit Hits",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 29, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(rate(external_api_rate_limit_hits_total[5m])) by (provider)",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cps",
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 80
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "transparent"},
+                {"value": 1, "color": "red"}
+              ]
+            },
+            "color": {"mode": "thresholds"}
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      },
+      {
+        "id": 17,
+        "title": "Token Usage by Model (last 1h)",
+        "type": "piechart",
+        "gridPos": {"x": 12, "y": 29, "w": 6, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(llm_tokens_total[1h])) by (model, direction)",
+            "legendFormat": "{{model}} {{direction}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "displayLabels": ["name", "percent"],
+          "legend": {"displayMode": "table", "placement": "bottom"},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 18,
+        "title": "Token Usage by Provider (last 1h)",
+        "type": "piechart",
+        "gridPos": {"x": 18, "y": 29, "w": 6, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(llm_tokens_total[1h])) by (provider)",
+            "legendFormat": "{{provider}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "displayLabels": ["name", "percent"],
+          "legend": {"displayMode": "table", "placement": "right"},
+          "pieType": "donut"
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "label": "Environment",
+          "query": "label_values(up, environment)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        },
+        {
+          "name": "provider",
+          "type": "query",
+          "label": "LLM Provider",
+          "query": "label_values(llm_requests_total, provider)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        },
+        {
+          "name": "model",
+          "type": "query",
+          "label": "Model",
+          "query": "label_values(llm_requests_total, model)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        }
+      ]
+    }
+  }
+}

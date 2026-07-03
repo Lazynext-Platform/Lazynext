@@ -37,7 +37,7 @@ pub enum NLEEvent {
 
 /// A source media file (video, audio, or image) referenced by clips in the
 /// timeline.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaAsset {
     pub id: String,
     pub name: String,
@@ -50,7 +50,7 @@ pub struct MediaAsset {
 
 /// A timeline clip with media reference, trim range, and per-property
 /// animation channels (opacity, scale, rotation, volume, etc.).
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub id: String,
     pub clip_type: String,
@@ -96,7 +96,7 @@ impl Clip {
 
 /// A timeline track containing a sequence of clips with mute, solo, and
 /// lock flags.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Track {
     pub id: String,
     pub kind: String,
@@ -111,7 +111,7 @@ pub struct Track {
 
 /// The full project state: tracks, dimensions, framerate, media pool, and
 /// background color.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectData {
     pub id: String,
     pub name: String,

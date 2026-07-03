@@ -56,3 +56,10 @@ services:
   redis:
     ports:
       - "6379:6379"  # Local Redis Insight / CLI access
+
+  social-publish:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./services/social-publish/src:/app/src:delegated
+    command: ["bun", "--watch", "run", "src/index.ts"]

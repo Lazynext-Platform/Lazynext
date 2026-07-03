@@ -5,8 +5,17 @@ use lazynext_core::engine::AssetLoader;
 use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::Instant;
 use tokio::sync::Mutex;
+
+#[derive(Clone)]
+pub struct AgentSuggestion {
+    pub id: String,
+    pub title: String,
+    pub description: String,
+}
 
 pub struct EditorShell {
     pub nle: Arc<Mutex<NLEState>>,
@@ -19,11 +28,29 @@ pub struct EditorShell {
     pub play_clicked: Rc<Cell<bool>>,
     pub prompt_focused: Rc<Cell<bool>>,
     pub prompt_clicked: Rc<Cell<bool>>,
+    pub agent_active: Rc<Cell<bool>>,
+    pub agent_suggestions: Arc<tokio::sync::Mutex<Vec<AgentSuggestion>>>,
+    pub suggestions_expanded: bool,
+    pub suggestions_expand_clicked: Rc<Cell<bool>>,
+    pub selected_suggestion: Option<usize>,
+    pub suggestion_select_clicked: Rc<Cell<bool>>,
+    pub suggestion_select_idx: usize,
+    pub frame_step_back5_clicked: Rc<Cell<bool>>,
+    pub frame_step_back1_clicked: Rc<Cell<bool>>,
+    pub frame_step_fwd1_clicked: Rc<Cell<bool>>,
+    pub frame_step_fwd5_clicked: Rc<Cell<bool>>,
+    pub exporting: Arc<AtomicBool>,
+    pub export_start_time: Option<Instant>,
 }
 
 impl EditorShell {
     fn toggle_playback(&mut self) {
         self.is_playing = !self.is_playing;
+    }
+
+    fn step_frame(&mut self, delta: i32) {
+        let new_frame = self.current_frame as i32 + delta;
+        self.current_frame = if new_frame < 0 { 0 } else { new_frame as u32 };
     }
 
     /// Timeline constants — zoomed so the visible range covers ~10 seconds at 24 fps.
@@ -42,6 +69,51 @@ impl Render for EditorShell {
         if self.is_playing {
             self.current_frame = self.current_frame.wrapping_add(1);
             cx.notify();
+        }
+
+        // Process frame-step clicks
+        if self.frame_step_back5_clicked.get() {
+            self.frame_step_back5_clicked.set(false);
+            self.step_frame(-5);
+        }
+        if self.frame_step_back1_clicked.get() {
+            self.frame_step_back1_clicked.set(false);
+            self.step_frame(-1);
+        }
+        if self.frame_step_fwd1_clicked.get() {
+            self.frame_step_fwd1_clicked.set(false);
+            self.step_frame(1);
+        }
+        if self.frame_step_fwd5_clicked.get() {
+            self.frame_step_fwd5_clicked.set(false);
+            self.step_frame(5);
+        }
+
+        // Process agent suggestions expand/collapse
+        if self.suggestions_expand_clicked.get() {
+            self.suggestions_expand_clicked.set(false);
+            self.suggestions_expanded = !self.suggestions_expanded;
+        }
+
+        // Process suggestion selection
+        if self.suggestion_select_clicked.get() {
+            self.suggestion_select_clicked.set(false);
+            let idx = self.suggestion_select_idx;
+            self.selected_suggestion = if self.selected_suggestion == Some(idx) {
+                None
+            } else {
+                Some(idx)
+            };
+        }
+
+        // Export live-update
+        if self.exporting.load(Ordering::SeqCst) {
+            if self.export_start_time.is_none() {
+                self.export_start_time = Some(Instant::now());
+            }
+            cx.notify();
+        } else {
+            self.export_start_time = None;
         }
 
         // Process pending prompt click (focus toggle)
@@ -189,7 +261,7 @@ impl Render for EditorShell {
                                                         let nle = self.nle.clone();
                                                         move |_, _, cx| {
                                                             let nle = nle.clone();
-                                                            let window = cx;
+                                                            let _window = cx;
                                                             tokio::spawn(async move {
                                                                 let file = rfd::AsyncFileDialog::new()
                                                                     .add_filter("Media", &["mp4", "mov", "avi", "mkv", "wav", "mp3"])
@@ -272,11 +344,45 @@ impl Render for EditorShell {
                             .h(px(36.0))
                             .flex()
                             .items_center()
-                            .gap_2()
+                            .gap_1()
                             .px_3()
                             .bg(rgb(0x1a1a1a))
                             .border_b_1()
                             .border_color(border_color)
+                            .child(
+                                div()
+                                    .w(px(26.0))
+                                    .h(px(26.0))
+                                    .flex()
+                                    .justify_center()
+                                    .items_center()
+                                    .rounded_sm()
+                                    .bg(rgb(0x333333))
+                                    .cursor_pointer()
+                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .child("⏮")
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        let c = self.frame_step_back5_clicked.clone();
+                                        move |_, _, _| c.set(true)
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .w(px(26.0))
+                                    .h(px(26.0))
+                                    .flex()
+                                    .justify_center()
+                                    .items_center()
+                                    .rounded_sm()
+                                    .bg(rgb(0x333333))
+                                    .cursor_pointer()
+                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .child("◀")
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        let c = self.frame_step_back1_clicked.clone();
+                                        move |_, _, _| c.set(true)
+                                    }),
+                            )
                             .child(
                                 div()
                                     .w(px(32.0))
@@ -298,9 +404,50 @@ impl Render for EditorShell {
                             )
                             .child(
                                 div()
+                                    .w(px(26.0))
+                                    .h(px(26.0))
+                                    .flex()
+                                    .justify_center()
+                                    .items_center()
+                                    .rounded_sm()
+                                    .bg(rgb(0x333333))
+                                    .cursor_pointer()
+                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .child("▶")
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        let c = self.frame_step_fwd1_clicked.clone();
+                                        move |_, _, _| c.set(true)
+                                    }),
+                            )
+                            .child(
+                                div()
+                                    .w(px(26.0))
+                                    .h(px(26.0))
+                                    .flex()
+                                    .justify_center()
+                                    .items_center()
+                                    .rounded_sm()
+                                    .bg(rgb(0x333333))
+                                    .cursor_pointer()
+                                    .hover(|s| s.bg(rgb(0x444444)))
+                                    .child("⏭")
+                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                        let c = self.frame_step_fwd5_clicked.clone();
+                                        move |_, _, _| c.set(true)
+                                    }),
+                            )
+                            .child(
+                                div()
                                     .text_sm()
                                     .text_color(rgb(0x888888))
                                     .child(format!("Frame {}", self.current_frame)),
+                            )
+                            .child(div().flex_1())
+                            .child(
+                                div()
+                                    .text_xs()
+                                    .text_color(rgb(0x555555))
+                                    .child("Space:Play/Pause  ←→:Step ±1  ⇧←→:Step ±5"),
                             )
                             .child(div().flex_1())
                             .child(
@@ -316,8 +463,11 @@ impl Render for EditorShell {
                                     .child("Export MP4")
                                     .on_mouse_down(gpui::MouseButton::Left, {
                                         let engine = self.engine.clone();
+                                        let exporting = self.exporting.clone();
                                         move |_, _, _cx| {
                                             let engine = engine.clone();
+                                            let exporting = exporting.clone();
+                                            exporting.store(true, Ordering::SeqCst);
                                             tokio::spawn(async move {
                                                 let file = rfd::AsyncFileDialog::new()
                                                     .add_filter("MP4 Video", &["mp4"])
@@ -339,6 +489,7 @@ impl Render for EditorShell {
                                                         Err(e) => log::error!("Export failed: {}", e),
                                                     }
                                                 }
+                                                exporting.store(false, Ordering::SeqCst);
                                             });
                                         }
                                     }),
@@ -596,9 +747,229 @@ impl Render for EditorShell {
                                                 }
                                             }),
                                     ),
-                            ), // -------------------------
+                            ) // -------------------------
+                            // --- AUTONOMOUS AGENT ---
+                            .child(
+                                div()
+                                    .flex()
+                                    .flex_col()
+                                    .gap_2()
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .justify_between()
+                                            .items_center()
+                                            .child(
+                                                div()
+                                                    .text_sm()
+                                                    .font_weight(FontWeight::BOLD)
+                                                    .text_color(if self.agent_active.get() { rgb(0x00ff88) } else { rgb(0xff4444) })
+                                                    .child(if self.agent_active.get() { "Agent: Active" } else { "Agent: Stopped" }),
+                                            )
+                                            .child(
+                                                div()
+                                                    .px_2()
+                                                    .py_1()
+                                                    .rounded_sm()
+                                                    .text_sm()
+                                                    .cursor_pointer()
+                                                    .bg(if self.agent_active.get() { rgb(0xff4444) } else { rgb(0x00ff88) })
+                                                    .text_color(rgb(0x000000))
+                                                    .hover(|s| s.opacity(0.8))
+                                                    .child(if self.agent_active.get() { "Stop" } else { "Start" })
+                                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                                        let agent_active = self.agent_active.clone();
+                                                        let agent_suggestions = self.agent_suggestions.clone();
+                                                        move |_, _, _| {
+                                                            let currently = agent_active.get();
+                                                            agent_active.set(!currently);
+                                                            let suggestions = agent_suggestions.clone();
+                                                            tokio::spawn(async move {
+                                                                let gateway = std::env::var("RUST_API_GATEWAY_URL")
+                                                                    .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                                                                let client = reqwest::Client::new();
+                                                                if currently {
+                                                                    let _ = client
+                                                                        .post(format!("{}/api/v1/agent/stop", gateway))
+                                                                        .send().await;
+                                                                    suggestions.lock().await.clear();
+                                                                } else {
+                                                                    let _ = client
+                                                                        .post(format!("{}/api/v1/agent/start", gateway))
+                                                                        .send().await;
+                                                                }
+                                                            });
+                                                        }
+                                                    }),
+                                            ),
+                                    )
+                                    .child(
+                                        div()
+                                            .flex()
+                                            .justify_between()
+                                            .items_center()
+                                            .cursor_pointer()
+                                            .on_mouse_down(gpui::MouseButton::Left, {
+                                                let c = self.suggestions_expand_clicked.clone();
+                                                move |_, _, _| c.set(true)
+                                            })
+                                            .child(
+                                                div()
+                                                    .text_sm()
+                                                    .text_color(rgb(0x888888))
+                                                    .child("Suggestions ▼"),
+                                            )
+                                            .child(
+                                                div()
+                                                    .px_2()
+                                                    .py_1()
+                                                    .bg(rgb(0x2a2a2a))
+                                                    .rounded_sm()
+                                                    .text_xs()
+                                                    .text_color(rgb(0x888888))
+                                                    .cursor_pointer()
+                                                    .hover(|s| s.bg(rgb(0x3a3a3a)))
+                                                    .child("↻ Fetch")
+                                                    .on_mouse_down(gpui::MouseButton::Left, {
+                                                        let agent_suggestions = self.agent_suggestions.clone();
+                                                        move |_, _, cx| {
+                                                            cx.stop_propagation();
+                                                            let suggestions = agent_suggestions.clone();
+                                                            tokio::spawn(async move {
+                                                                let gateway = std::env::var("RUST_API_GATEWAY_URL")
+                                                                    .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                                                                let client = reqwest::Client::new();
+                                                                if let Ok(resp) = client
+                                                                    .get(format!("{}/api/v1/agent/suggestions", gateway))
+                                                                    .send().await
+                                                                    && let Ok(body) = resp.text().await
+                                                                    && let Ok(json) = serde_json::from_str::<serde_json::Value>(&body) {
+                                                                    let mut guard = suggestions.lock().await;
+                                                                    guard.clear();
+                                                                    if let Some(arr) = json["suggestions"].as_array() {
+                                                                        for s in arr {
+                                                                            guard.push(AgentSuggestion {
+                                                                                id: s["id"].as_str().unwrap_or("").to_string(),
+                                                                                title: s["title"].as_str().unwrap_or("").to_string(),
+                                                                                description: s["description"].as_str().unwrap_or("").to_string(),
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                    }),
+                                            ),
+                                    )
+                                    .when(self.suggestions_expanded, |parent| {
+                                        let list = self.rt_handle.block_on(async {
+                                            self.agent_suggestions.lock().await.clone()
+                                        });
+                                        parent.child(
+                                            div()
+                                                .flex()
+                                                .flex_col()
+                                                .gap_1()
+                                                .max_h(px(200.0))
+                                                .overflow_hidden()
+                                                .children(list.iter().enumerate().map(|(i, s)| {
+                                                    let is_sel = self.selected_suggestion == Some(i);
+                                                    let title = s.title.clone();
+                                                    let desc = s.description.clone();
+                                                    let sugs = self.agent_suggestions.clone();
+                                                    let s_clicked = self.suggestion_select_clicked.clone();
+                                                    div()
+                                                        .flex()
+                                                        .flex_col()
+                                                        .p_2()
+                                                        .bg(if is_sel { rgb(0x2a2a2a) } else { rgb(0x1a1a1a) })
+                                                        .border_1()
+                                                        .border_color(if is_sel { accent_color } else { rgb(0x333333) })
+                                                        .rounded_md()
+                                                        .cursor_pointer()
+                                                        .on_mouse_down(gpui::MouseButton::Left, {
+                                                            let c = s_clicked.clone();
+                                                            move |_, _, _| { c.set(true); }
+                                                        })
+                                                        .child(
+                                                            div()
+                                                                .text_sm()
+                                                                .text_color(rgb(0xcccccc))
+                                                                .child(title),
+                                                        )
+                                                        .when(is_sel, |el| {
+                                                            el.child(
+                                                                div()
+                                                                    .mt_1()
+                                                                    .text_xs()
+                                                                    .text_color(rgb(0x888888))
+                                                                    .child(desc),
+                                                            )
+                                                            .child(
+                                                                div()
+                                                                    .mt_2()
+                                                                    .flex()
+                                                                    .justify_end()
+                                                                    .child(
+                                                                        div()
+                                                                            .px_2()
+                                                                            .py_1()
+                                                                            .bg(rgb(0xff4444))
+                                                                            .text_color(rgb(0xffffff))
+                                                                            .rounded_sm()
+                                                                            .text_xs()
+                                                                            .cursor_pointer()
+                                                                            .hover(|s| s.bg(rgb(0xcc3333)))
+                                                                            .child("Dismiss")
+                                                                            .on_mouse_down(gpui::MouseButton::Left, {
+                                                                                let sg = sugs.clone();
+                                                                                let idx = i;
+                                                                                let sc = s_clicked.clone();
+                                                                                move |_, _, cx| {
+                                                                                    cx.stop_propagation();
+                                                                                    let sg2 = sg.clone();
+                                                                                    tokio::spawn(async move {
+                                                                                        let mut guard = sg2.lock().await;
+                                                                                        if idx < guard.len() {
+                                                                                            guard.remove(idx);
+                                                                                        }
+                                                                                    });
+                                                                                    sc.set(true);
+                                                                                }
+                                                                            }),
+                                                                    ),
+                                                            )
+                                                        })
+                                                })),
+                                        )
+                                    }),
+                            ),
                     ),
             )
+            .when(self.exporting.load(Ordering::SeqCst), |el| {
+                let elapsed = self.export_start_time.map_or(0.0, |t| t.elapsed().as_secs_f32());
+                let eta_text = if elapsed < 1.0 {
+                    "Exporting...".into()
+                } else {
+                    format!("Exporting... (elapsed: {:.0}s, est. total: ~{:.0}s)", elapsed, elapsed * 2.5)
+                };
+                el.child(
+                    div()
+                        .h(px(28.0))
+                        .flex()
+                        .items_center()
+                        .px_3()
+                        .bg(rgb(0x1a3a1a))
+                        .border_t_1()
+                        .border_color(rgb(0x00ff88))
+                        .child(
+                            div()
+                                .text_sm()
+                                .text_color(rgb(0x00ff88))
+                                .child(eta_text),
+                        ),
+                )
+            })
     }
 }
 
@@ -632,6 +1003,19 @@ mod tests {
             play_clicked: Rc::new(Cell::new(false)),
             prompt_focused: Rc::new(Cell::new(false)),
             prompt_clicked: Rc::new(Cell::new(false)),
+            agent_active: Rc::new(Cell::new(false)),
+            agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+            suggestions_expanded: false,
+            suggestions_expand_clicked: Rc::new(Cell::new(false)),
+            selected_suggestion: None,
+            suggestion_select_clicked: Rc::new(Cell::new(false)),
+            suggestion_select_idx: 0,
+            frame_step_back5_clicked: Rc::new(Cell::new(false)),
+            frame_step_back1_clicked: Rc::new(Cell::new(false)),
+            frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
+            frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+            exporting: Arc::new(AtomicBool::new(false)),
+            export_start_time: None,
         };
 
         assert!(!editor.is_playing);
@@ -661,6 +1045,19 @@ mod tests {
             play_clicked: Rc::new(Cell::new(false)),
             prompt_focused: Rc::new(Cell::new(false)),
             prompt_clicked: Rc::new(Cell::new(false)),
+            agent_active: Rc::new(Cell::new(false)),
+            agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+            suggestions_expanded: false,
+            suggestions_expand_clicked: Rc::new(Cell::new(false)),
+            selected_suggestion: None,
+            suggestion_select_clicked: Rc::new(Cell::new(false)),
+            suggestion_select_idx: 0,
+            frame_step_back5_clicked: Rc::new(Cell::new(false)),
+            frame_step_back1_clicked: Rc::new(Cell::new(false)),
+            frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
+            frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+            exporting: Arc::new(AtomicBool::new(false)),
+            export_start_time: None,
         };
 
         assert!(!editor.is_playing);

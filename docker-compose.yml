@@ -76,6 +76,8 @@ services:
       - REDIS_URL=redis://redis:6379/
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=api-gateway
+      - SOCIAL_PUBLISH_URL=http://social-publish:8007
+      - DISABLE_CSRF=1
     depends_on:
       db:
         condition: service_healthy
@@ -115,6 +117,7 @@ services:
       - NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
       - NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
       - NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
+      - NEXT_PUBLIC_SOCIAL_PUBLISH_URL=http://localhost:8007
       - NEXT_PUBLIC_POSTHOG_KEY=phc_dev
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
@@ -142,6 +145,8 @@ services:
       pre-processing:
         condition: service_started
       ai-agents:
+        condition: service_started
+      social-publish:
         condition: service_started
     networks:
       - lazynext-network
@@ -308,6 +313,37 @@ services:
       retries: 3
       start_period: 10s
 
+  # ── Social Publish Service ──────────────────────────────────────
+  social-publish:
+    build:
+      context: .
+      dockerfile: services/social-publish/Dockerfile
+    ports:
+      - "8007:8007"
+    environment:
+      - NODE_ENV=production
+      - PORT=8007
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY:-}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - INSTAGRAM_APP_ID=${INSTAGRAM_APP_ID:-}
+      - INSTAGRAM_APP_SECRET=${INSTAGRAM_APP_SECRET:-}
+      - TWITTER_CLIENT_ID=${TWITTER_CLIENT_ID:-}
+      - TWITTER_CLIENT_SECRET=${TWITTER_CLIENT_SECRET:-}
+      - INSTAGRAM_USER_ID=${INSTAGRAM_USER_ID:-}
+    networks:
+      - lazynext-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8007/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # ── Observability (Prometheus, Grafana, Loki, Alloy) ──────────
   prometheus:
     image: prom/prometheus:v3.3.1
@@ -357,6 +393,10 @@ services:
       - "9093:9093"
     volumes:
       - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/PLACEHOLDER}
+      - SLACK_WEBHOOK_URL_WARNING=${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/PLACEHOLDER}
+      - CUSTOM_WEBHOOK_URL=${CUSTOM_WEBHOOK_URL:-https://webhook.site/PLACEHOLDER}
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'

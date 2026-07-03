@@ -18,9 +18,9 @@ use axum::{
 };
 /// Generate a cryptographically random CSRF token (32 hex chars = 128 bits).
 fn generate_csrf_token() -> String {
-    use rand::Rng;
-    let mut rng = rand::thread_rng();
-    let bytes: [u8; 16] = rng.r#gen();
+    use rand::RngExt;
+    let mut rng = rand::rng();
+    let bytes: [u8; 16] = rng.random();
     hex::encode(bytes)
 }
 

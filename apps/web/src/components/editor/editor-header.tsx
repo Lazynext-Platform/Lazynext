@@ -24,6 +24,8 @@ import { FaDiscord } from "react-icons/fa6";
 import ExportButton from "./export-button";
 import { FeedbackPopover } from "@/feedback/components/feedback-popover";
 import { ThemeToggle } from "../theme-toggle";
+import { AutoSaveIndicator } from "./AutoSaveIndicator";
+import { ShareButton } from "./ShareButton";
 import { DEFAULT_LOGO_URL } from "@/site/brand";
 import { SOCIAL_LINKS } from "@/site/social";
 import { toast } from "sonner";
@@ -44,6 +46,10 @@ export function EditorHeader() {
 				<EditableProjectName />
 			</div>
 			<nav className="flex items-center gap-2">
+				<AutoSaveIndicator />
+				{activeProject?.metadata.id && (
+					<ShareButton projectId={activeProject.metadata.id} />
+				)}
 				<FeedbackPopover />
 				<ExportButton projectId={activeProject?.metadata.id || ""} />
 				<ThemeToggle />

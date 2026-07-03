@@ -1,7 +1,9 @@
 # ── Core ─────────────────────────────────────────────────────────────────
-location    = "southeastasia"
-environment = "dev"
-app_domain  = "lazynext.ai"
+location     = "southeastasia"
+environment  = "dev"
+app_domain   = "lazynext.ai"
+domain_name  = "lazynext.com"
+create_dns_zone = false
 
 # ── AKS ──────────────────────────────────────────────────────────────────
 kubernetes_version = "1.32"

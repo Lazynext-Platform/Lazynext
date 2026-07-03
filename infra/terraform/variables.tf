@@ -14,15 +14,27 @@ variable "environment" {
   default     = "dev"
 
   validation {
-    condition     = contains(["dev", "staging", "production"], var.environment)
-    error_message = "Environment must be one of: dev, staging, production."
+    condition     = contains(["dev", "staging", "prod", "production"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod, production."
   }
 }
 
 variable "app_domain" {
-  description = "The public domain of the Lazynext web app"
+  description = "The public domain of the Lazynext web app (primary domain)"
   type        = string
-  default     = "lazynext.ai"
+  default     = "lazynext.com"
+}
+
+variable "domain_name" {
+  description = "Primary domain for DNS zone and TLS certificates"
+  type        = string
+  default     = "lazynext.com"
+}
+
+variable "create_dns_zone" {
+  description = "Provision an Azure DNS zone for the domain (set false if using external DNS)"
+  type        = bool
+  default     = false
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -182,7 +194,7 @@ variable "cdn_sku_name" {
 variable "media_custom_domain" {
   description = "Custom domain for the media CDN endpoint"
   type        = string
-  default     = "media.lazynext.ai"
+  default     = "media.lazynext.com"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

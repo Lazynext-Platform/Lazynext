@@ -1,0 +1,15 @@
+[project]
+name = "lazynext-agent-sdk"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx",
+    "pydantic>=2",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["lazynext_agent*"]
