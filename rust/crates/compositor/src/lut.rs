@@ -16,9 +16,9 @@ pub struct Lut3D {
     pub title: String,
     /// Number of sample points per dimension (e.g. 33 for a 33³ LUT)
     pub size: u32,
-    /// Input domain minimum (default [0,0,0])
+    /// Input domain minimum (default `[0, 0, 0]`)
     pub domain_min: [f32; 3],
-    /// Input domain maximum (default [1,1,1])
+    /// Input domain maximum (default `[1, 1, 1]`)
     pub domain_max: [f32; 3],
     /// Flat array of LUT entries in BGR order (size³ × 3 floats)
     pub data: Vec<f32>,
