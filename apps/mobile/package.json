@@ -15,7 +15,7 @@
     "@react-navigation/native": "^7.3.3",
     "expo": "~56.0.12",
     "expo-camera": "~17.0.5",
-    "expo-face-detector": "~14.0.2",
+    "expo-face-detector": "~13.0.2",
     "expo-gl": "~15.0.4",
     "expo-media-library": "~18.0.3",
     "expo-status-bar": "~56.0.4",
