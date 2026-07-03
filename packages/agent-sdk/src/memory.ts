@@ -1,10 +1,10 @@
 /**
- * Memory management for the Chronos Agent SDK.
+ * Memory management for the Lazynext AI Agent Agent SDK.
  *
  * Provides a key-value store with summarisation capabilities that
- * persists for the lifetime of the {@link ChronosAgent} instance.
+ * persists for the lifetime of the {@link Lazynext AI AgentAgent} instance.
  * The remote gateway also maintains its own memory store; call
- * {@link ChronosAgent.getMemory} to retrieve the server-side state.
+ * {@link Lazynext AI AgentAgent.getMemory} to retrieve the server-side state.
  *
  * ```ts
  * import { MemoryManager } from "@lazynext/agent-sdk";

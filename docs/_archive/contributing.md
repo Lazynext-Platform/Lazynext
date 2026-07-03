@@ -51,7 +51,7 @@ Before writing anything in an app, ask: "Does this belong in `rust/`?"
 | `apps/browser-extension` | Chrome extension for capturing video into the timeline |
 | `services/pre-processing` | Python FastAPI on port 8000: Whisper transcription, SAM2 rotoscoping, NeRF extraction |
 | `services/generative-studio` | Python FastAPI on port 8001: Stable Video Diffusion, ElevenLabs dubbing, Demucs stem separation |
-| `services/ai-agents` | Node.js (Bun) on port 8002: Chronos Copilot LLM orchestration + CRDT WebSocket sync |
+| `services/ai-agents` | Node.js (Bun) on port 8002: Lazynext AI Agent Copilot LLM orchestration + CRDT WebSocket sync |
 | `services/render-service` | Node.js (Bun) on port 8003: FFMPEG render farm with SSE progress streaming |
 | `services/collab-server` | Rust (Axum) on port 8004: CRDT WebSocket sync + WebRTC signaling relay |
 | `services/analytics-service` | Node.js (Bun) on port 8006: High-velocity data ingestion and LTV calculation engine |

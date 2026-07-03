@@ -1,7 +1,7 @@
 /**
- * Chronos Agent Tool Registry
+ * Lazynext AI Agent Agent Tool Registry
  *
- * Exposes the canonical list of 80+ MCP tools available to the Chronos
+ * Exposes the canonical list of 80+ MCP tools available to the Lazynext AI Agent
  * agent loop.  Tools are organised into six categories matching the
  * NLE domain: **editing**, **audio**, **color**, **export**, **AI**,
  * and **project**.
@@ -40,7 +40,7 @@ export interface ToolDefinition {
 // ── Tool Registry ───────────────────────────────────────────────────────────
 
 /**
- * Immutable list of all MCP tools available to the Chronos agent loop.
+ * Immutable list of all MCP tools available to the Lazynext AI Agent agent loop.
  *
  * The list is organised by category.  Use {@link getToolsByCategory} to
  * filter by domain, or call {@link getAvailableTools} to receive the
@@ -1408,7 +1408,7 @@ const TOOL_REGISTRY: ToolDefinition[] = [
 // ── Public Helpers ────────────────────────────────────────────────────────────
 
 /**
- * Return the full list of 90 MCP tools available to the Chronos agent.
+ * Return the full list of 90 MCP tools available to the Lazynext AI Agent agent.
  *
  * ```ts
  * import { getAvailableTools } from "@lazynext/agent-sdk";

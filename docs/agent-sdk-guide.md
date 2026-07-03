@@ -55,7 +55,7 @@ console.log(`Export queued: ${exportJob.jobId}`);
 
 ### Streaming Queries
 
-Get real-time streaming responses from the Chronos Copilot:
+Get real-time streaming responses from the Lazynext AI Agent Copilot:
 
 ```typescript
 const stream = agent.editStream(project.id, {

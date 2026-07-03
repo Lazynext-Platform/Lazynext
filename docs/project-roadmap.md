@@ -40,7 +40,7 @@
 | 15 | AI Editor — Real API Wiring | 🟢 Complete | #02, #10 | `feature/15-ai-editor-real-api` | Wired web editor AI chat to real API + desktop AI + MCP tests + mobile tests. |
 | 16 | Final Gaps — SDK / External Deps | 🟢 Complete | #10, #11 | `feature/16-final-gaps` | Wired UniFFI, SAM2 ONNX, VST3 libloading, E2E integration tests. |
 | 17 | Platform-wide Mock Removal + Audit Fixes | 🟢 Complete | #15, #16 | (squash merges on main) | Zero mocks in production code; comprehensive CI/CD, infra, and monitoring audit fixes. |
-| 18 | AI-Driven Editing — End-to-End Chronos Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations. 16/18 tasks done. SSE streaming, dryRun, patch adapter. |
+| 18 | AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline | 🟢 Complete | #01, #02, #10, #15 | `feature/18-ai-driven-editing` | Make NL commands produce real CRDT timeline mutations. 16/18 tasks done. SSE streaming, dryRun, patch adapter. |
 | 19 | GPU Rendering & WASM Integration Hardening | 🟢 Complete | #01, #02, #10 | `feature/19-webgpu-and-wasm-port` | Corrected false assessment claims. GPU pipeline verified real. 5 unit + 1 E2E tests. |
 | 20 | Desktop GPUI Editor Completion | 🟢 Complete | #01, #07, #12 | `feature/20-desktop-gpui-editor` | Replaced mock timeline with real clip data. Added playback controls, play/pause, 2 editor tests. Assessment corrected. |
 | 21 | Mobile App Completion | 🟢 Complete | #01, #08, #13 | `feature/21-mobile-uniffi-editor` | Wired EditorScreen to NativeBridge (real data instead of mock). All 9 assessment tasks verified. |
@@ -48,7 +48,7 @@
 | 33 | Production Hardening — All 7 Formats | 🟢 Complete | #32 | `feature/33-production-hardening-all-formats` | Desktop: playback + AI prompt + import/export. CLI: real media + ingest. MCP: SSE transport. Gateway: graceful shutdown + render dispatch + E2E tests. Mobile: preview + native stubs. Browser ext: timeline preview. Web: WASM automation. |
 | 34 | Real Video Playback Pipeline | 🟢 Complete | #33 | `feature/34-real-video-playback-pipeline` | Real video decode (CliFfmpegLoader) → GPU compositor → valid H.264 MP4 export. Red pixel analysis confirmed. Desktop auto-decodes textures. Web video-decoder utility. 133fps render speed. |
 | 35 | Platform Finalization | 🟢 Complete | #33, #34 | `feature/35-platform-finalization` | Close final 8 wiring gaps. Desktop play/pause + AI prompt, mobile NativeBridge real UniFFI, MCP tool expansion (47 tools), SAM2 ONNX, local Whisper, analytics SQLite persistence, Kafka auto-topics. |
-| 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36-e2e-launch-readiness` | Independent audit + 8 bug fixes (render truncation, fake CDN URL, dummy face detection, thin async intent, JWT crypto panic, CORS, serde default, web→gateway auth). All 7 formats verified live/compile. Chronos web AI loop works end-to-end. 8 commits, 0 regressions. Phase 2 prep: codesign, store listings, deploy fix.
+| 36 | E2E Launch Readiness | 🟢 Complete | #35 | `feature/36-e2e-launch-readiness` | Independent audit + 8 bug fixes (render truncation, fake CDN URL, dummy face detection, thin async intent, JWT crypto panic, CORS, serde default, web→gateway auth). All 7 formats verified live/compile. Lazynext AI Agent web AI loop works end-to-end. 8 commits, 0 regressions. Phase 2 prep: codesign, store listings, deploy fix.
 
 ---
 
@@ -79,7 +79,7 @@
 ## Session Note — 2026-06-30 (Feature #18 kickoff)
 
 - **Who**: AI Agent (opencode)
-- **Worked On**: Opened Feature #18 — AI-Driven Editing: End-to-End Chronos Pipeline. Created discussion.md (Mastery Stage 1).
+- **Worked On**: Opened Feature #18 — AI-Driven Editing: End-to-End Lazynext AI Agent Pipeline. Created discussion.md (Mastery Stage 1).
 - **Key finding during exploration**: `syncTimelineFromEngine()` in `crdt-sync.ts` is ALREADY implemented (not empty as PLATFORM_ASSESSMENT claimed) — it reads the WASM entity graph, hydrates scenes, and updates React via `EditorCore`. The orchestrator has 50+ named tools. The real gap is auditing which are real vs. LLM-described stubs.
 - **Stopped At**: Stage 1 (Discuss) — discussion.md marked COMPLETE. Next: Stage 2 (Architecture), starting with the per-tool reality audit.
 - **Blockers**: None. Stage 4 (Approve) will need human signoff before any build.

@@ -9,7 +9,7 @@
 
 ## What Are We Building?
 
-Lazynext is an enterprise-grade, multi-platform AI-native video editing ecosystem. It is a Non-Linear Editor (NLE) where an AI Copilot (Chronos) accepts natural language commands to edit video — replacing manual timeline manipulation with prompt-driven workflows. Every edit is a CRDT operation, every render is GPU-accelerated, and Rust owns all business logic across 7 delivery surfaces (web, desktop, mobile, browser extension, CLI, REST API, MCP server).
+Lazynext is an enterprise-grade, multi-platform AI-native video editing ecosystem. It is a Non-Linear Editor (NLE) where an AI Copilot (Lazynext AI Agent) accepts natural language commands to edit video — replacing manual timeline manipulation with prompt-driven workflows. Every edit is a CRDT operation, every render is GPU-accelerated, and Rust owns all business logic across 7 delivery surfaces (web, desktop, mobile, browser extension, CLI, REST API, MCP server).
 
 ## Why Does This Project Exist?
 
@@ -64,7 +64,7 @@ Professional video editing is bottlenecked by complex UI and manual workflows. E
 | State synchronization | CRDTs (LWW-Register + operation-based) | Real-time multi-user editing without conflicts |
 | Compositor | Custom GPU pipeline (wgpu) | Full control over blend modes, effects, and performance |
 | Export encoding | FFMPEG with type-safe filter graph | Avoids stringly-typed FFMPEG errors; supports 6+ formats |
-| AI orchestration | Chronos Copilot in `services/ai-agents` | LLM translates natural language → CRDT operations |
+| AI orchestration | Lazynext AI Agent Copilot in `services/ai-agents` | LLM translates natural language → CRDT operations |
 | Plugin system | VST3 host + custom shader SDK | Industry-standard audio plugins; extensible GPU effects |
 | Content authenticity | C2PA specification (`rust/provenance`) | Cryptographic provenance for every edit |
 
@@ -129,7 +129,7 @@ lazynext/
 |---|---|---|
 | Core NLE engine (CRDT state, timeline, compositor) | 🔴 Must Have | Foundation — everything depends on this |
 | Web App editor UI | 🔴 Must Have | Primary delivery surface |
-| AI Copilot (Chronos) | 🔴 Must Have | Key differentiator |
+| AI Copilot (Lazynext AI Agent) | 🔴 Must Have | Key differentiator |
 | Export pipeline (FFMPEG) | 🔴 Must Have | Without export, it's not a video editor |
 | Real-time collaboration (CRDT sync) | 🔴 Must Have | Core architectural choice |
 | REST API Gateway | 🔴 Must Have | Programmatic access + web app backend |

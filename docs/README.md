@@ -56,7 +56,7 @@ Active & completed features are documented under `docs/features/`:
 | [#05 — MCP Server](features/05-mcp-server/summary.md) | MCP protocol server, 47 tools, 4 resources, 4 prompts |
 | [#07 — Desktop App](features/07-desktop-app/summary.md) | GPUI native desktop, wgpu compositor |
 | [#08 — Mobile App](features/08-mobile-app/summary.md) | React Native, UniFFI, NativeBridge |
-| [#18 — AI-Driven Editing](features/18-ai-driven-editing/architecture.md) | Chronos Copilot, NL → CRDT pipeline |
+| [#18 — AI-Driven Editing](features/18-ai-driven-editing/architecture.md) | Lazynext AI Agent Copilot, NL → CRDT pipeline |
 | [#22 — Real Export Pipeline](features/22-real-export-pipeline/architecture.md) | GPU compositor → FFmpeg WYSIWYG export |
 | [#34 — Real Video Playback](features/34-real-video-playback-pipeline/architecture.md) | Video decode → GPU compositor → H.264 export |
 | [#36 — E2E Launch Readiness](features/36-e2e-launch-readiness/architecture.md) | Final audit, 8 bug fixes, all 7 formats verified |

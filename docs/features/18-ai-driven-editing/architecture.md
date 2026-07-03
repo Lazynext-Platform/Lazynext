@@ -1,4 +1,4 @@
-# 🏗️ Architecture: AI-Driven Editing — End-to-End Chronos Pipeline
+# 🏗️ Architecture: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
 > **Feature**: `18` — AI-Driven Editing
 > **Status**: FINALIZED
@@ -14,7 +14,7 @@ User types/speaks NL command
         ▼
 ┌──────────────────────────────────┐
 │  Web Editor Chat (Next.js)       │  apps/web/src/components/editor/
-│  POST /api/chronos → ai-agents   │
+│  POST /api/lazynext-ai → ai-agents   │
 └──────────────────┬───────────────┘
                    │ HTTP POST {prompt, projectId}
                    ▼
@@ -136,7 +136,7 @@ The orchestrator generates patches in this shape:
 6. **Error visibility**: when a tool fails, the error string (`"Transcription failed"`) must propagate to the chat UI as a visible message, not be swallowed.
 
 ### D. Testing
-7. **Integration test**: `POST /api/chronos {prompt: "transcribe video 1"} → verify captions appear on timeline`.
+7. **Integration test**: `POST /api/lazynext-ai {prompt: "transcribe video 1"} → verify captions appear on timeline`.
 8. **CRDT round-trip test**: generate a patch, apply via engine, read entity graph back, assert the expected entity exists.
 
 ## Files impacted
@@ -148,5 +148,5 @@ The orchestrator generates patches in this shape:
 | `apps/web/src/collaboration/crdt-sync.ts` | Add patch adapter layer (orchestrator path → engine path) |
 | `apps/web/src/components/editor/` AI chat component | Show step-level progress, errors from downstream |
 | `rust/core/src/nle_state.rs` | Document `applyOperation` expected schema (read-only; schema from audit) |
-| `apps/web/src/app/api/chronos/` or equivalent | Verify the route that POSTs to ai-agents / wire streaming |
+| `apps/web/src/app/api/lazynext-ai/` or equivalent | Verify the route that POSTs to ai-agents / wire streaming |
 | New: `rust/tests/orchestrator_crdt_roundtrip.rs` | Integration test |

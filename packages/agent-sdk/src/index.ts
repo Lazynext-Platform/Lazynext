@@ -1,16 +1,16 @@
 /**
- * Chronos Agent SDK — TypeScript
+ * Lazynext AI Agent Agent SDK — TypeScript
  *
- * Programmatic access to the Chronos AI agent loop for NLE timeline
+ * Programmatic access to the Lazynext AI Agent AI agent loop for NLE timeline
  * operations. Natural language prompts are translated into CRDT
  * timeline mutations via the Lazynext API Gateway.
  *
  * ## Quick Start
  *
  * ```ts
- * import { ChronosAgent } from "@lazynext/agent-sdk";
+ * import { Lazynext AI AgentAgent } from "@lazynext/agent-sdk";
  *
- * const agent = new ChronosAgent({
+ * const agent = new Lazynext AI AgentAgent({
  *   apiEndpoint: "http://localhost:8005",
  *   mode: "auto_execute",
  * });
@@ -50,7 +50,7 @@ export {
 export { MemoryManager } from "./memory";
 export { RulesManager, type Rule } from "./rules";
 
-// ── Internal imports for the ChronosAgent class ─────────────────────────────
+// ── Internal imports for the Lazynext AI AgentAgent class ─────────────────────────────
 import type {
 	AgentOptions,
 	AgentEvent,
@@ -62,10 +62,10 @@ import type {
 	RuleConfig,
 } from "./types";
 
-// ── ChronosAgent ────────────────────────────────────────────────────────────
+// ── Lazynext AI AgentAgent ────────────────────────────────────────────────────────────
 
 /**
- * Primary entry point for the Chronos AI agent.
+ * Primary entry point for the Lazynext AI Agent AI agent.
  *
  * Communicates with the Lazynext API Gateway (default `http://localhost:8005`)
  * to translate natural language into CRDT timeline operations.
@@ -82,15 +82,15 @@ import type {
  *
  * | Method                     | Gateway Route                              |
  * | -------------------------- | ------------------------------------------ |
- * | `agent.query()`            | `POST /api/v1/chronos/stream`              |
- * | `agent.search()`           | `POST /api/v1/chronos/search`              |
- * | `agent.executeSlashCommand()` | `POST /api/v1/chronos/slash`           |
- * | `agent.getMemory()`        | `GET  /api/v1/chronos/memory`              |
- * | `agent.getSuggestions()`   | `GET  /api/v1/chronos/suggestions`         |
- * | `agent.applySuggestion()`  | `POST /api/v1/chronos/suggestions/:id/apply`|
- * | `agent.runAudit()`         | `POST /api/v1/chronos/audit`               |
+ * | `agent.query()`            | `POST /api/v1/lazynext-ai/stream`              |
+ * | `agent.search()`           | `POST /api/v1/lazynext-ai/search`              |
+ * | `agent.executeSlashCommand()` | `POST /api/v1/lazynext-ai/slash`           |
+ * | `agent.getMemory()`        | `GET  /api/v1/lazynext-ai/memory`              |
+ * | `agent.getSuggestions()`   | `GET  /api/v1/lazynext-ai/suggestions`         |
+ * | `agent.applySuggestion()`  | `POST /api/v1/lazynext-ai/suggestions/:id/apply`|
+ * | `agent.runAudit()`         | `POST /api/v1/lazynext-ai/audit`               |
  */
-export class ChronosAgent {
+export class Lazynext AI AgentAgent {
 	private readonly apiEndpoint: string;
 	private readonly apiKey?: string;
 	private readonly mode: string;
@@ -125,7 +125,7 @@ export class ChronosAgent {
 		if (!resp.ok) {
 			const body = await resp.text();
 			throw new Error(
-				`Chronos API error ${resp.status} on GET ${path}: ${body}`,
+				`Lazynext AI Agent API error ${resp.status} on GET ${path}: ${body}`,
 			);
 		}
 		return resp.json() as Promise<T>;
@@ -140,7 +140,7 @@ export class ChronosAgent {
 		if (!resp.ok) {
 			const text = await resp.text();
 			throw new Error(
-				`Chronos API error ${resp.status} on POST ${path}: ${text}`,
+				`Lazynext AI Agent API error ${resp.status} on POST ${path}: ${text}`,
 			);
 		}
 		return resp.json() as Promise<T>;
@@ -162,7 +162,7 @@ export class ChronosAgent {
 		if (!resp.ok) {
 			const text = await resp.text();
 			throw new Error(
-				`Chronos API error ${resp.status} on POST ${path}: ${text}`,
+				`Lazynext AI Agent API error ${resp.status} on POST ${path}: ${text}`,
 			);
 		}
 
@@ -215,7 +215,7 @@ export class ChronosAgent {
 	// ── Public API ────────────────────────────────────────────────────────
 
 	/**
-	 * Send a natural-language prompt that is streamed through the Chronos
+	 * Send a natural-language prompt that is streamed through the Lazynext AI Agent
 	 * agent loop and translated into CRDT timeline operations.
 	 *
 	 * Returns an async generator of {@link AgentEvent} objects.
@@ -231,7 +231,7 @@ export class ChronosAgent {
 		prompt: string,
 	): AsyncGenerator<AgentEvent, void, undefined> {
 		const stream = await this.postStream<AgentEvent>(
-			"/api/v1/chronos/stream",
+			"/api/v1/lazynext-ai/stream",
 			{ prompt, mode: this.mode, tools: this.allowedTools },
 		);
 		yield* stream;
@@ -242,7 +242,7 @@ export class ChronosAgent {
 	 * matching the natural-language query.
 	 */
 	search(query: string): Promise<SearchResult[]> {
-		return this.post<SearchResult[]>("/api/v1/chronos/search", {
+		return this.post<SearchResult[]>("/api/v1/lazynext-ai/search", {
 			query,
 		});
 	}
@@ -252,7 +252,7 @@ export class ChronosAgent {
 	 * `/caption`).
 	 */
 	executeSlashCommand(command: string): Promise<CommandResult> {
-		return this.post<CommandResult>("/api/v1/chronos/slash", {
+		return this.post<CommandResult>("/api/v1/lazynext-ai/slash", {
 			command,
 		});
 	}
@@ -261,7 +261,7 @@ export class ChronosAgent {
 	 * Retrieve the agent's conversation memory for the current session.
 	 */
 	getMemory(): Promise<ConversationMemory> {
-		return this.get<ConversationMemory>("/api/v1/chronos/memory");
+		return this.get<ConversationMemory>("/api/v1/lazynext-ai/memory");
 	}
 
 	/**
@@ -280,7 +280,7 @@ export class ChronosAgent {
 	 */
 	getSuggestions(): Promise<AgentSuggestion[]> {
 		return this.get<AgentSuggestion[]>(
-			"/api/v1/chronos/suggestions",
+			"/api/v1/lazynext-ai/suggestions",
 		);
 	}
 
@@ -291,7 +291,7 @@ export class ChronosAgent {
 	 */
 	async applySuggestion(id: string): Promise<boolean> {
 		const resp = await this.post<{ applied: boolean }>(
-			`/api/v1/chronos/suggestions/${encodeURIComponent(id)}/apply`,
+			`/api/v1/lazynext-ai/suggestions/${encodeURIComponent(id)}/apply`,
 			{},
 		);
 		return resp.applied;
@@ -302,6 +302,6 @@ export class ChronosAgent {
 	 * overlaps, alignment issues, missing audio, and render safety.
 	 */
 	runAudit(): Promise<TimelineAudit> {
-		return this.post<TimelineAudit>("/api/v1/chronos/audit", {});
+		return this.post<TimelineAudit>("/api/v1/lazynext-ai/audit", {});
 	}
 }

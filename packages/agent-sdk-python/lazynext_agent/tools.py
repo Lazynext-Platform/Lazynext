@@ -1,7 +1,7 @@
 """
-Chronos Agent Tool Registry — Python
+Lazynext AI Agent Agent Tool Registry — Python
 
-Exposes the canonical list of 90 MCP tools available to the Chronos
+Exposes the canonical list of 90 MCP tools available to the Lazynext AI Agent
 agent loop, organised into the same six categories as the TypeScript
 SDK: editing, audio, color, export, AI, project.
 """
@@ -1276,7 +1276,7 @@ TOOL_REGISTRY: list[ToolDefinition] = [
 
 
 def get_available_tools() -> list[ToolDefinition]:
-    """Return the full list of 90 MCP tools available to the Chronos agent."""
+    """Return the full list of 90 MCP tools available to the Lazynext AI Agent agent."""
     return list(TOOL_REGISTRY)
 
 

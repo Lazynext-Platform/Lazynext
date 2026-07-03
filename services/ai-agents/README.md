@@ -1,6 +1,6 @@
 # AI Agents
 
-**Chronos Copilot — Natural language editing orchestration engine.**
+**Lazynext AI Agent Copilot — Natural language editing orchestration engine.**
 
 ## Port
 

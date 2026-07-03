@@ -35,7 +35,7 @@ highest-leverage work is **verify-and-finish**, not rebuild. Rebuilding would di
 
 - **From #34/#35**: "write lifecycle docs, then verify against reality" caught
   assessment errors before. We will re-verify every claim with a live run, not a grep.
-- **From #18**: The Chronos NL→CRDT pipeline was declared done; the *async job* path
+- **From #18**: The Lazynext AI Agent NL→CRDT pipeline was declared done; the *async job* path
   still returns a fake CDN URL (`autonomous.rs:68`). Verification must exercise the
   async path, not just the sync one.
 

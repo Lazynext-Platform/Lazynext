@@ -1,6 +1,6 @@
-# 💬 Discussion: AI-Driven Editing — End-to-End Chronos Pipeline
+# 💬 Discussion: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
-> **Feature**: `18` — AI-Driven Editing (End-to-End Chronos Pipeline)
+> **Feature**: `18` — AI-Driven Editing (End-to-End Lazynext AI Agent Pipeline)
 > **Status**: 🔴 STAGE 1 — Discuss
 > **Branch**: `feature/18-ai-driven-editing`
 > **Depends On**: #01 (Rust Core), #02 (Web Shell), #10 (Rust Hardening), #15 (AI Real API)
@@ -8,12 +8,12 @@
 
 ## Summary
 
-Make the Chronos Copilot's natural-language commands reliably produce real, visible timeline mutations on the web editor — end-to-end: "type or speak a command → LLM decomposes intent → tool execution → CRDT operation → React re-render." Verify every advertised editing feature (filler removal, transcript editing, auto-B-roll, smart reframe, color match, etc.) actually works rather than returning a plan that can't execute.
+Make the Lazynext AI Agent Copilot's natural-language commands reliably produce real, visible timeline mutations on the web editor — end-to-end: "type or speak a command → LLM decomposes intent → tool execution → CRDT operation → React re-render." Verify every advertised editing feature (filler removal, transcript editing, auto-B-roll, smart reframe, color match, etc.) actually works rather than returning a plan that can't execute.
 
 ## Functional Requirements
 
 - A user types or speaks a natural-language editing intent in the web editor's AI chat
-- Chronos (ai-agents `:8002`) receives it, decomposes the intent into tool calls, routes to the appropriate LLM provider
+- Lazynext AI Agent (ai-agents `:8002`) receives it, decomposes the intent into tool calls, routes to the appropriate LLM provider
 - Tool calls execute against real microservices (pre-processing `:8000`, generative-studio `:8001`, etc.) or against the WASM CRDT engine directly
 - The result produces genuine CRDT operations that mutate the timeline
 - The web editor's React state re-renders from the WASM entity graph (already wired via `syncTimelineFromEngine`)
@@ -39,7 +39,7 @@ Make the Chronos Copilot's natural-language commands reliably produce real, visi
 - **Error visibility**: when a tool fails (e.g. microservice down, missing API key, invalid operation), does the user get a meaningful error in the AI chat, or does it silently no-op?
 - **Streaming responses**: the web AI chat surface should show tool execution progress (e.g. "Transcribing track 1... ✓ / Removing 14 filler words... ✓") rather than a single final success/failure.
 - **Graceful degradation per tool**: some tools (like `generate_broll`, `style_transfer`) depend on rate-limited/paid external APIs. Each must gracefully fall back when keys are absent — not silently fail.
-- **Chronos → CRDT operation generation**: the orchestrator produces `OrchestrationStep.crdt_patches` (arrays of `{op, path, value}`). But do these generated patches actually match the Rust CRDT engine's expected operation schema? Needs verification.
+- **Lazynext AI Agent → CRDT operation generation**: the orchestrator produces `OrchestrationStep.crdt_patches` (arrays of `{op, path, value}`). But do these generated patches actually match the Rust CRDT engine's expected operation schema? Needs verification.
 - **Web AI chat UX polish**: the chat component should display tool names + progress, let users undo/redo AI operations, and show a diff preview before committing large timeline changes.
 
 ## Knowledge Gaps → Research Needed (Stage 2 Architecture)

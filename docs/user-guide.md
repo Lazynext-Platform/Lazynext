@@ -1,6 +1,6 @@
 # Lazynext User Guide
 
-Welcome to Lazynext — the AI-native video editor. Type what you want, and the Chronos Copilot builds it on your timeline.
+Welcome to Lazynext — the AI-native video editor. Type what you want, and the Lazynext AI Agent Copilot builds it on your timeline.
 
 ---
 
@@ -11,7 +11,7 @@ Welcome to Lazynext — the AI-native video editor. Type what you want, and the 
 3. **Import media** — drag-and-drop files or paste a URL
 4. **Open the Copilot** — press `Cmd+K` (macOS) or `Ctrl+K` (Windows/Linux)
 5. **Type your intent** — e.g., "Cut the silence and add a cinematic color grade"
-6. **Review the plan** — Chronos shows what it will do before executing
+6. **Review the plan** — Lazynext AI Agent shows what it will do before executing
 7. **Approve or refine** — tweak the plan or let it run
 8. **Export** — choose your format and deliver
 
@@ -19,7 +19,7 @@ Welcome to Lazynext — the AI-native video editor. Type what you want, and the 
 
 ## AI Copilot Commands Reference
 
-The Chronos Copilot understands natural language editing. Here are common command patterns:
+The Lazynext AI Agent Copilot understands natural language editing. Here are common command patterns:
 
 ### Timeline Editing
 
@@ -99,8 +99,8 @@ add a title card, and export as YouTube 4K"
 - **Be specific** — "Cut silence below -40dB" works better than "Make it sound better"
 - **Reference clips by position** — "Clip 3" or "the third clip" instead of "that one"
 - **Use confirmation mode** for complex edits — the default shows a plan before executing
-- **Iterate** — you can say "Actually, make the blur less intense" and Chronos will adjust
-- **Context matters** — Chronos reviews your timeline before suggesting operations
+- **Iterate** — you can say "Actually, make the blur less intense" and Lazynext AI Agent will adjust
+- **Context matters** — Lazynext AI Agent reviews your timeline before suggesting operations
 
 ---
 
@@ -262,7 +262,7 @@ All changes sync in real-time via CRDT (Conflict-free Replicated Data Types):
 
 | Shortcut | Action |
 |----------|--------|
-| `Cmd+K` / `Ctrl+K` | Open Chronos Copilot |
+| `Cmd+K` / `Ctrl+K` | Open Lazynext AI Agent Copilot |
 | `Cmd+S` / `Ctrl+S` | Save project |
 | `Cmd+Z` / `Ctrl+Z` | Undo |
 | `Cmd+Shift+Z` / `Ctrl+Shift+Z` | Redo |
@@ -336,7 +336,7 @@ A: Yes. Set `LLM_PROVIDER=ollama` to use local models via Ollama. The platform a
 ### Editing
 
 **Q: How does the AI understand my timeline?**
-A: When you send a command, Chronos reads your full timeline state — tracks, clips, durations, effects, metadata — and sends it as context to the LLM. It then generates a plan of specific CRDT operations.
+A: When you send a command, Lazynext AI Agent reads your full timeline state — tracks, clips, durations, effects, metadata — and sends it as context to the LLM. It then generates a plan of specific CRDT operations.
 
 **Q: Can I undo AI edits?**
 A: Yes. Every AI operation is a standard CRDT mutation that can be undone with `Cmd+Z`. You can also require confirmation mode so you see the plan before execution.

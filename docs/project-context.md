@@ -8,7 +8,7 @@
 
 ## What Is This Project?
 
-Lazynext is an enterprise-grade, multi-platform AI-native Non-Linear Video Editor (NLE). Rust owns all business logic — CRDT state management, GPU compositing, audio DSP, FFMPEG export encoding, and AI agent orchestration. Each app under `apps/` is a dumb rendering shell that imports Rust (via WASM on web, natively on desktop, via UniFFI on mobile). The Chronos Copilot translates natural language editing commands into CRDT operations on the timeline.
+Lazynext is an enterprise-grade, multi-platform AI-native Non-Linear Video Editor (NLE). Rust owns all business logic — CRDT state management, GPU compositing, audio DSP, FFMPEG export encoding, and AI agent orchestration. Each app under `apps/` is a dumb rendering shell that imports Rust (via WASM on web, natively on desktop, via UniFFI on mobile). The Lazynext AI Agent Copilot translates natural language editing commands into CRDT operations on the timeline.
 
 ## Project Type
 
@@ -88,7 +88,7 @@ lazynext/
 ├── services/                # Microservices (async offload)
 │   ├── pre-processing/      # Python FastAPI (:8000) — Whisper, SAM2
 │   ├── generative-studio/   # Python FastAPI (:8001) — AI gen
-│   ├── ai-agents/           # Node.js (:8002) — Chronos Copilot
+│   ├── ai-agents/           # Node.js (:8002) — Lazynext AI Agent Copilot
 │   ├── render-service/      # Node.js (:8003) — FFMPEG farm
 │   ├── collab-server/       # Rust (:8004) — CRDT sync + WebRTC
 │   └── analytics-service/   # Node.js (:8006) — Data ingestion
@@ -111,7 +111,7 @@ lazynext/
 | State sync | CRDTs (LWW-Register + CmRDT) | Conflict-free real-time multi-user editing |
 | GPU rendering | wgpu (custom compositor) | Single API for WebGPU/Vulkan/Metal/DX12 |
 | Export encoding | FFMPEG + type-safe filter graph | Avoids stringly-typed errors; supports 6+ formats |
-| AI orchestration | Chronos Copilot (pluggable LLM) | Natural language → CRDT operations |
+| AI orchestration | Lazynext AI Agent Copilot (pluggable LLM) | Natural language → CRDT operations |
 | Plugin system | VST3 host + shader SDK | Industry-standard audio; custom GPU effects |
 | Content authenticity | C2PA specification | Cryptographic provenance for every edit |
 | Graceful degradation | Local processing fallback | AI features work without API keys — no mock data |
@@ -170,7 +170,7 @@ bun run dev
 | `STORAGE_PROVIDER` | No | `local` | `local` or `azure` |
 | `LLM_PROVIDER` | No | — | `openai`, `anthropic`, `gemini`, or `ollama` |
 | `OPENAI_API_KEY` | No | — | Whisper + GPT-4o features |
-| `ANTHROPIC_API_KEY` | No | — | Claude-powered Chronos |
+| `ANTHROPIC_API_KEY` | No | — | Claude-powered Lazynext AI Agent |
 | `REPLICATE_API_TOKEN` | No | — | AI video generation |
 | `ELEVENLABS_API_KEY` | No | — | AI dubbing |
 | `NEXT_PUBLIC_*_URL` | No | localhost | Microservice URLs |

@@ -1,8 +1,8 @@
 /**
- * Basic Edit — Chronos Agent TypeScript SDK
+ * Basic Edit — Lazynext AI Agent Agent TypeScript SDK
  *
  * Demonstrates the streaming agent loop: a natural-language prompt is
- * sent to the Chronos agent, which translates it into CRDT timeline
+ * sent to the Lazynext AI Agent agent, which translates it into CRDT timeline
  * operations and yields events as they occur.
  *
  * ## Running the Example
@@ -15,13 +15,13 @@
  * @example
  */
 
-import { ChronosAgent } from "../src/index.js";
+import { Lazynext AI AgentAgent } from "../src/index.js";
 
 const AGENT_ENDPOINT =
 	process.env.LAZYNEXT_API_URL ?? "http://localhost:8005";
 
 async function main() {
-	const agent = new ChronosAgent({
+	const agent = new Lazynext AI AgentAgent({
 		apiEndpoint: AGENT_ENDPOINT,
 		mode: "auto_execute",
 	});

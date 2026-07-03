@@ -1,4 +1,4 @@
-# 📋 Tasks: AI-Driven Editing — End-to-End Chronos Pipeline
+# 📋 Tasks: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
 > **Feature**: `18` — AI-Driven Editing
 > **Branch**: `feature/18-ai-driven-editing`
@@ -10,7 +10,7 @@
 - [x] A.1 Audit each Tier 1 tool's microservice endpoint: call `GET /` on each pre-processing / generative-studio route the orchestrator references and record which return 200 vs. 404/500.
 - [x] A.2 Read `rust/core/src/nle_state.rs` `apply_operation()` to document the CRDT operation schema (path format, expected fields, validation rules).
 - [x] A.3 Compare orchestrator-generated patch paths against the engine schema from A.2. Document every mismatch. Prioritize the top 5 critical tools (transcribe, clean_audio, remove_filler_words, auto_reframe, color_match).
-- [x] A.4 Verify the `POST /api/chronos` web route exists and correctly forwards to ai-agents `:8002`.
+- [x] A.4 Verify the `POST /api/lazynext-ai` web route exists and correctly forwards to ai-agents `:8002`.
 
 ## Phase B — Orchestrator fixes
 

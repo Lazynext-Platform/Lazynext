@@ -1,5 +1,5 @@
 """
-Memory management for the Chronos Agent Python SDK.
+Memory management for the Lazynext AI Agent Agent Python SDK.
 
 Provides an in-process key-value store with summarisation capabilities,
 mirroring the TypeScript MemoryManager API.

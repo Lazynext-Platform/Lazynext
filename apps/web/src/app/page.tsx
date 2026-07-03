@@ -357,7 +357,7 @@ export default function Home() {
 									step: "02",
 									title: "AI understands",
 									description:
-										"Chronos, our AI copilot, analyzes your timeline, plans the edits, and shows you exactly what will change before executing anything.",
+										"Lazynext AI Agent, our AI copilot, analyzes your timeline, plans the edits, and shows you exactly what will change before executing anything.",
 									icon: Command,
 									gradient: "from-blue-500 to-purple-500",
 								},
@@ -488,7 +488,7 @@ export default function Home() {
 									</h3>
 									<p className="text-white/40 leading-relaxed text-lg">
 										Stop looking for B-Roll. The Visionary
-										and Chronos AI agents analyze your
+										and Lazynext AI Agent AI agents analyze your
 										timeline structure and proactively
 										orchestrate the Render Farm to
 										generate missing assets.

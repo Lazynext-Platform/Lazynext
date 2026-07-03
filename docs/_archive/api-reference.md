@@ -603,11 +603,11 @@ Cancel a queued or in-progress render job.
 
 ## AI Agents Service (Port 8002)
 
-Node.js (Bun) service for Chronos Copilot LLM orchestration and CRDT WebSocket sync. Base URL: `http://localhost:8002`
+Node.js (Bun) service for Lazynext AI Agent Copilot LLM orchestration and CRDT WebSocket sync. Base URL: `http://localhost:8002`
 
 ### POST /orchestrate
 
-Send a natural language editing command to the Chronos Copilot for autonomous timeline manipulation.
+Send a natural language editing command to the Lazynext AI Agent Copilot for autonomous timeline manipulation.
 
 **URL**: `POST /orchestrate`
 

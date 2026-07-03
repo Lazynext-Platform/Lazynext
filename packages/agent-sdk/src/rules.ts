@@ -1,8 +1,8 @@
 /**
- * Rules management for the Chronos Agent SDK.
+ * Rules management for the Lazynext AI Agent Agent SDK.
  *
  * Behavioural rules define constraints, preferences, and editing
- * conventions that the Chronos agent follows during every editing
+ * conventions that the Lazynext AI Agent agent follows during every editing
  * session.  Rules can be loaded from the filesystem (`.lazynext/rules/`
  * directory) or added programmatically at runtime.
  *
@@ -77,7 +77,7 @@ const FORMAT_VERSION = 1;
 // ── RulesManager ─────────────────────────────────────────────────────────────
 
 /**
- * Manages the behavioural rule set for a Chronos agent instance.
+ * Manages the behavioural rule set for a Lazynext AI Agent agent instance.
  *
  * Rules are evaluated in priority order (critical → high → medium → low).
  * When multiple rules match a given file path, all applicable rules are

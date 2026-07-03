@@ -107,7 +107,7 @@ open http://localhost:8005/swagger-ui
 │  ┌─────────────────────┴─────────────────────────────┐  │
 │  │                 Microservices                      │  │
 │  │  Pre-Processing │ Gen Studio │ AI Agents │ Render  │  │
-│  │  (Whisper,SAM2) │ (Diffusion)│ (Chronos) │(FFmpeg) │  │
+│  │  (Whisper,SAM2) │ (Diffusion)│ (Lazynext AI Agent) │(FFmpeg) │  │
 │  └───────────────────────────────────────────────────┘  │
 │                                                          │
 │  ┌─────────────┐  ┌──────────┐  ┌──────────────────┐   │
@@ -120,7 +120,7 @@ open http://localhost:8005/swagger-ui
 ### Data Flow
 
 ```
-User (type/speak) → Chronos Copilot → LLM (Anthropic/OpenAI/Gemini/Ollama)
+User (type/speak) → Lazynext AI Agent Copilot → LLM (Anthropic/OpenAI/Gemini/Ollama)
     → VideoIntent → AutonomousEditor → CRDT mutations
     → NLEState → GPU Compositor (wgpu) → Frame buffer
     → ExportPipeline (FFmpeg) → Final video file
@@ -134,7 +134,7 @@ User (type/speak) → Chronos Copilot → LLM (Anthropic/OpenAI/Gemini/Ollama)
 | 3001 | Grafana | — | Observability dashboards |
 | 8000 | Pre-Processing | Python | Whisper, SAM2, NeRF |
 | 8001 | Generative Studio | Python | Stable Diffusion, ElevenLabs, Demucs |
-| 8002 | AI Agents | TypeScript | Chronos Copilot, LLM orchestration |
+| 8002 | AI Agents | TypeScript | Lazynext AI Agent Copilot, LLM orchestration |
 | 8003 | Render Service | TypeScript | FFmpeg render farm |
 | 8004 | Collab Server | Rust | CRDT sync, WebRTC signaling |
 | 8005 | API Gateway | Rust | Axum REST + Swagger UI |

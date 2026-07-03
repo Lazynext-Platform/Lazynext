@@ -1,8 +1,8 @@
 /**
- * Type definitions for the Chronos Agent SDK.
+ * Type definitions for the Lazynext AI Agent Agent SDK.
  *
  * Every interface and type alias used by the SDK is declared here so
- * consumers can import them alongside the {@link ChronosAgent} class.
+ * consumers can import them alongside the {@link Lazynext AI AgentAgent} class.
  *
  * @module agent-sdk/types
  */
@@ -25,7 +25,7 @@ export interface RuleConfig {
 	priority?: RulePriority;
 }
 
-/** Options passed to the {@link ChronosAgent} constructor. */
+/** Options passed to the {@link Lazynext AI AgentAgent} constructor. */
 export interface AgentOptions {
 	/** Base URL of the Lazynext API Gateway (e.g. `http://localhost:8005`). */
 	apiEndpoint: string;

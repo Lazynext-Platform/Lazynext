@@ -1,4 +1,4 @@
-# 🧪 Testplan: AI-Driven Editing — End-to-End Chronos Pipeline
+# 🧪 Testplan: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
 > **Feature**: `18` — AI-Driven Editing
 

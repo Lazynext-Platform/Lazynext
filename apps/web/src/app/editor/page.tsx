@@ -1,5 +1,5 @@
 /**
- * Standalone agentic editor page — canvas preview + Chronos
+ * Standalone agentic editor page — canvas preview + Lazynext AI Agent
  * AI chat interface with playback controls.
  *
  * @page /editor
@@ -43,7 +43,7 @@ export default function EditorPage() {
 		{
 			role: "agent",
 			content:
-				"I am Chronos, your Autonomous Copilot. Tell me what you want to create or edit, and I'll handle the rest.",
+				"I am Lazynext AI Agent, your Autonomous Copilot. Tell me what you want to create or edit, and I'll handle the rest.",
 			status: "done",
 		},
 	]);
@@ -116,7 +116,7 @@ export default function EditorPage() {
 				const newChat = [...prev];
 				newChat[newChat.length - 1] = {
 					role: "agent",
-					content: "Chronos is currently offline. Start the API Gateway (port 8005) to enable AI-powered editing, or use the MCP server for agentic control.",
+					content: "Lazynext AI Agent is currently offline. Start the API Gateway (port 8005) to enable AI-powered editing, or use the MCP server for agentic control.",
 					status: "done",
 				};
 				return newChat;
@@ -223,7 +223,7 @@ export default function EditorPage() {
 							<Bot className="w-5 h-5 text-cyan-400" />
 						</div>
 						<div>
-							<h2 className="font-display font-bold text-lg text-foreground">Chronos Agent</h2>
+							<h2 className="font-display font-bold text-lg text-foreground">Lazynext AI Agent Agent</h2>
 							<p className="text-xs text-foreground/50">Autonomous Video Editor</p>
 						</div>
 					</div>

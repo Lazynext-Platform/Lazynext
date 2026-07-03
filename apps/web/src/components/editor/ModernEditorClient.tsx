@@ -51,7 +51,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 		{
 			role: "agent",
 			content:
-				"I am Chronos, your Autonomous Copilot. What are we building today?",
+				"I am Lazynext AI Agent, your Autonomous Copilot. What are we building today?",
 		},
 	]);
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -380,7 +380,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 					<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500"></div>
 					<div className="p-5 border-b border-border flex items-center gap-3">
 						<Bot className="w-6 h-6 text-cyan-400" />
-						<h2 className="font-display font-bold text-lg">Chronos Copilot</h2>
+						<h2 className="font-display font-bold text-lg">Lazynext AI Agent Copilot</h2>
 					</div>
 
 					<div className="flex-1 overflow-y-auto p-5 space-y-6">
@@ -424,7 +424,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSend()}
-								placeholder="Message Chronos..."
+								placeholder="Message Lazynext AI Agent..."
 								className="w-full bg-hover border border-border rounded-full py-3 pl-5 pr-12 text-sm text-foreground focus:outline-none focus:border-cyan-500/50 focus:bg-glass transition-all backdrop-blur-md"
 							/>
 							<button

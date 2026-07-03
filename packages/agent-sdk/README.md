@@ -1,6 +1,6 @@
-# Chronos Agent SDK
+# Lazynext AI Agent Agent SDK
 
-Programmatic SDK for the Lazynext Chronos AI Copilot — a reusable agent loop that translates natural language into CRDT timeline operations. Available in **TypeScript** and **Python**.
+Programmatic SDK for the Lazynext Lazynext AI Agent AI Copilot — a reusable agent loop that translates natural language into CRDT timeline operations. Available in **TypeScript** and **Python**.
 
 ## Quick Start
 
@@ -11,9 +11,9 @@ cd packages/agent-sdk
 ```
 
 ```ts
-import { ChronosAgent } from "@lazynext/agent-sdk";
+import { Lazynext AI AgentAgent } from "@lazynext/agent-sdk";
 
-const agent = new ChronosAgent({
+const agent = new Lazynext AI AgentAgent({
   apiEndpoint: "http://localhost:8005",
   mode: "auto_execute",
 });
@@ -32,10 +32,10 @@ pip install -e .
 
 ```python
 import asyncio
-from lazynext_agent import ChronosAgent
+from lazynext_agent import Lazynext AI AgentAgent
 
 async def main():
-    agent = ChronosAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
+    agent = Lazynext AI AgentAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
 
     async for event in agent.query("Add captions and remove silences"):
         print(f"[{event.type}]", event.data)
@@ -45,7 +45,7 @@ asyncio.run(main())
 
 ## API Reference
 
-### `ChronosAgent`
+### `Lazynext AI AgentAgent`
 
 | Method | Description |
 | --- | --- |
@@ -101,12 +101,12 @@ rules.addRule({ paths: ["audio/**"], content: "Normalize to -16 LUFS", priority:
 
 ```
 ┌─────────────────┐     HTTP/SSE      ┌──────────────────┐
-│  Chronos Agent  │ ◄──────────────► │  API Gateway     │
+│  Lazynext AI Agent Agent  │ ◄──────────────► │  API Gateway     │
 │  SDK (TS / Py)  │                   │  (Axum :8005)    │
 └─────────────────┘                   └────────┬─────────┘
                                                │
                                     ┌──────────┴──────────┐
-                                    │  Chronos AI Copilot │
+                                    │  Lazynext AI Agent AI Copilot │
                                     │  NL → CRDT Engine   │
                                     └─────────────────────┘
 ```

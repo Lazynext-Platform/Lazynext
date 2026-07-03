@@ -1,6 +1,6 @@
-# 🪞 Review: AI-Driven Editing — End-to-End Chronos Pipeline
+# 🪞 Review: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
-> **Feature**: `18` — AI-Driven Editing (End-to-End Chronos Pipeline)
+> **Feature**: `18` — AI-Driven Editing (End-to-End Lazynext AI Agent Pipeline)
 > **Branch**: `feature/18-ai-driven-editing`
 > **Merged**: 2026-06-30
 > **Time Spent**: ~5 hours across 3 sessions
@@ -11,7 +11,7 @@
 
 **Status**: ✅ Shipped
 
-**Summary**: Made the Chronos Copilot's natural-language commands produce real, visible timeline mutations on the web editor — end-to-end: "type or speak a command → LLM decomposes intent → tool execution → CRDT operation → React re-render." Discovered and fixed the critical CRDT patch format mismatch (orchestrator generated JSON-pointer patches, engine expected serde-tagged CrdtOperation), added graceful degradation for all 44 tools, wired SSE streaming progress to the AI chat UI, and added undo-AI-operation support.
+**Summary**: Made the Lazynext AI Agent Copilot's natural-language commands produce real, visible timeline mutations on the web editor — end-to-end: "type or speak a command → LLM decomposes intent → tool execution → CRDT operation → React re-render." Discovered and fixed the critical CRDT patch format mismatch (orchestrator generated JSON-pointer patches, engine expected serde-tagged CrdtOperation), added graceful degradation for all 44 tools, wired SSE streaming progress to the AI chat UI, and added undo-AI-operation support.
 
 ---
 
@@ -27,7 +27,7 @@
 
 ## What Went Wrong ❌
 
-- **CRDT patch format mismatch was the root gap**: The orchestrator generated `{op, path, value}` JSON-pointer patches, but the Rust engine expected serde-tagged `CrdtOperation` variants. Serde rejected them silently — the error was logged but no timeline mutation occurred. This was the single biggest reason why "Chronos produced plans that did nothing." **Impact**: every end-to-end NL command was a silent no-op. **Resolution**: added the patch adapter layer (C.1).
+- **CRDT patch format mismatch was the root gap**: The orchestrator generated `{op, path, value}` JSON-pointer patches, but the Rust engine expected serde-tagged `CrdtOperation` variants. Serde rejected them silently — the error was logged but no timeline mutation occurred. This was the single biggest reason why "Lazynext AI Agent produced plans that did nothing." **Impact**: every end-to-end NL command was a silent no-op. **Resolution**: added the patch adapter layer (C.1).
 - **Microservice endpoint illusion**: 44 tools were listed in the orchestrator's system prompt, but ~20 referenced microservice endpoints that don't exist in pre-processing or generative-studio. Each failed silently → orchestration plan halted mid-execution. **Impact**: tools the user reasonably expected to work (beat-sync, color-match, apply-lut, diarize, multicam, speed-ramp) were LLM-described fiction. **Resolution**: added local CRDT-patch fallbacks for every tool, removing the dependency on missing endpoints.
 - **CRDT engine limited to 3 of 8 operation variants**: EntityInsert, EntityDelete, and PropertyUpdate work; all clip/track-level operations silently no-op. **Impact**: operations that should create clips or rearrange tracks can't execute through the engine today. **Resolution**: documented the gap; engine-side fix deferred — out of scope for this feature but a blocker for advanced editing.
 - **D.2 and D.3 couldn't be smoke-tested**: Error visibility and undo-AI changes in `EditorClient.tsx` were written and type-checked, but manual verification requires running microservices. Coded with defensive patterns but runtime validation is pending.

@@ -9,7 +9,7 @@
 
 Commit `24f89301` — `feat(ai): wire web editor AI chat to real API + desktop AI + MCP tests + mobile tests`.
 
-- **Web editor AI chat**: connected the editor's Chronos Copilot chat surface to the real `/ai-agents` API instead of returning canned/placeholder responses.
+- **Web editor AI chat**: connected the editor's Lazynext AI Agent Copilot chat surface to the real `/ai-agents` API instead of returning canned/placeholder responses.
 - **Desktop AI**: wired the desktop shell's AI path so it dispatches through the same backend.
 - **MCP tests**: added protocol-conformance tests for the MCP server.
 - **Mobile tests**: added test coverage for the mobile bridge.

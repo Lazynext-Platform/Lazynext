@@ -1,6 +1,6 @@
 # 🧭 Feature Motto: AI-Driven Editing
 
-> **Feature**: `18` — End-to-End Chronos Pipeline
+> **Feature**: `18` — End-to-End Lazynext AI Agent Pipeline
 > **Applies during**: Stage 5 (Build)
 
 ## DO ✅

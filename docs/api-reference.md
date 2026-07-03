@@ -276,11 +276,11 @@ Delete a project and all associated media (Admin role required).
 
 ---
 
-## AI Copilot (Chronos)
+## AI Copilot (Lazynext AI Agent)
 
 ### `POST /api/v1/autonomous_edit`
 
-Send a natural language editing command to the Chronos AI Copilot.
+Send a natural language editing command to the Lazynext AI Agent AI Copilot.
 
 **Request**:
 ```json
@@ -969,7 +969,7 @@ Cancel a queued or in-progress job.
 
 ## AI Agents Service (Port 8002)
 
-Node.js (Bun) Chronos Copilot. Base URL: `http://localhost:8002`
+Node.js (Bun) Lazynext AI Agent Copilot. Base URL: `http://localhost:8002`
 
 ### `POST /orchestrate`
 
@@ -1173,7 +1173,7 @@ All error responses follow the format:
 | Endpoint | Protocol | Description |
 |----------|----------|-------------|
 | `ws://localhost:8004/ws/:project_id` | CRDT JSON | Real-time timeline sync |
-| `ws://localhost:8002/ws/:project_id` | CRDT JSON | Chronos AI streaming responses |
+| `ws://localhost:8002/ws/:project_id` | CRDT JSON | Lazynext AI Agent AI streaming responses |
 
 ---
 

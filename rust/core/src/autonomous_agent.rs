@@ -4,7 +4,7 @@
 //! This agent runs as a persistent background task that watches the NLE timeline
 //! for changes, periodically analyzes the composition, and either suggests or
 //! automatically executes improvements. It uses the same LLM providers as the
-//! Chronos Copilot (OpenAI, Anthropic, Gemini, Ollama) with local fallback.
+//! Lazynext AI Agent Copilot (OpenAI, Anthropic, Gemini, Ollama) with local fallback.
 //!
 //! # Modes
 //!

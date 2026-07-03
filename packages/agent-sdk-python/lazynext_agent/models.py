@@ -1,5 +1,5 @@
 """
-Pydantic models for the Chronos Agent Python SDK.
+Pydantic models for the Lazynext AI Agent Agent Python SDK.
 
 Every type shared between the agent and the API Gateway is
 defined here using Pydantic v2 for automatic validation and
@@ -29,7 +29,7 @@ class RuleConfig(BaseModel):
 
 
 class AgentOptions(BaseModel):
-    """Options passed to the ChronosAgent constructor."""
+    """Options passed to the Lazynext AI AgentAgent constructor."""
 
     api_endpoint: str
     api_key: str | None = None

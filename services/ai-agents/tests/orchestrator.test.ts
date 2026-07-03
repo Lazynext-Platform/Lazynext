@@ -1,4 +1,4 @@
-/** @module tests/orchestrator Test suite for Chronos intent decomposition and CRDT tool dispatch. */
+/** @module tests/orchestrator Test suite for Lazynext AI Agent intent decomposition and CRDT tool dispatch. */
 
 import { expect, test, describe, mock } from "bun:test";
 import { decomposeIntent } from "../src/orchestrator";

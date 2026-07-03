@@ -1,8 +1,8 @@
 """
-Basic Edit — Chronos Agent Python SDK
+Basic Edit — Lazynext AI Agent Agent Python SDK
 
 Demonstrates the streaming agent loop: a natural-language prompt is
-sent to the Chronos agent, which translates it into CRDT timeline
+sent to the Lazynext AI Agent agent, which translates it into CRDT timeline
 operations and yields events as they occur.
 
 ## Running the Example
@@ -16,13 +16,13 @@ python examples/basic-edit.py
 import asyncio
 import os
 
-from lazynext_agent import ChronosAgent
+from lazynext_agent import Lazynext AI AgentAgent
 
 AGENT_ENDPOINT = os.environ.get("LAZYNEXT_API_URL", "http://localhost:8005")
 
 
 async def main() -> None:
-    agent = ChronosAgent(
+    agent = Lazynext AI AgentAgent(
         api_endpoint=AGENT_ENDPOINT,
         mode="auto_execute",
     )

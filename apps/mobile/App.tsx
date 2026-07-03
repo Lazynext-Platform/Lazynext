@@ -202,7 +202,7 @@ function AIChatScreen() {
 	>([
 		{
 			role: "assistant",
-			text: "Hi! I'm Chronos Copilot. Ask me to edit your video, generate B-roll, add effects, or anything else.",
+			text: "Hi! I'm Lazynext AI Agent Copilot. Ask me to edit your video, generate B-roll, add effects, or anything else.",
 		},
 	]);
 	const [input, setInput] = useState("");
@@ -225,7 +225,7 @@ function AIChatScreen() {
 		<SafeAreaView style={[styles.container]}>
 			<StatusBar barStyle="light-content" backgroundColor="#050505" />
 			<View style={styles.chatHeader}>
-				<Text style={styles.chatHeaderTitle}>Chronos Copilot</Text>
+				<Text style={styles.chatHeaderTitle}>Lazynext AI Agent Copilot</Text>
 				<Text style={styles.chatHeaderSub}>AI Video Editor</Text>
 			</View>
 			<FlatList

@@ -1,5 +1,5 @@
 /**
- * Multi-step AI agent orchestrator for Chronos Copilot.
+ * Multi-step AI agent orchestrator for Lazynext AI Agent Copilot.
  *
  * Receives a high-level editing intent, decomposes it into tool calls
  * (via LLM or rule-based), executes each tool against the Lazynext

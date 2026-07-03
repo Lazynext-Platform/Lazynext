@@ -1,7 +1,7 @@
 """
-Chronos Agent Python SDK
+Lazynext AI Agent Agent Python SDK
 
-Programmatic access to the Chronos AI agent loop for NLE timeline
+Programmatic access to the Lazynext AI Agent AI agent loop for NLE timeline
 operations. Natural language prompts are translated into CRDT
 timeline mutations via the Lazynext API Gateway.
 
@@ -9,10 +9,10 @@ timeline mutations via the Lazynext API Gateway.
 
 ```python
 import asyncio
-from lazynext_agent import ChronosAgent
+from lazynext_agent import Lazynext AI AgentAgent
 
 async def main():
-    agent = ChronosAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
+    agent = Lazynext AI AgentAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
 
     async for event in agent.query("Add captions and remove silences"):
         print(f"[{event.type}]", event.data)
@@ -50,8 +50,8 @@ from .tools import (  # noqa: F401 — re-exported
 )
 
 
-class ChronosAgent:
-    """Primary entry point for the Chronos AI agent.
+class Lazynext AI AgentAgent:
+    """Primary entry point for the Lazynext AI Agent AI agent.
 
     Communicates with the Lazynext API Gateway to translate natural
     language into CRDT timeline operations.
@@ -81,7 +81,7 @@ class ChronosAgent:
             )
         if resp.status_code != 200:
             raise RuntimeError(
-                f"Chronos API error {resp.status_code} on GET {path}: {resp.text}"
+                f"Lazynext AI Agent API error {resp.status_code} on GET {path}: {resp.text}"
             )
         return resp.json()
 
@@ -94,7 +94,7 @@ class ChronosAgent:
             )
         if resp.status_code != 200:
             raise RuntimeError(
-                f"Chronos API error {resp.status_code} on POST {path}: {resp.text}"
+                f"Lazynext AI Agent API error {resp.status_code} on POST {path}: {resp.text}"
             )
         return resp.json()
 
@@ -110,7 +110,7 @@ class ChronosAgent:
                 if resp.status_code != 200:
                     text = await resp.aread()
                     raise RuntimeError(
-                        f"Chronos API error {resp.status_code} on POST {path}: {text.decode()}"
+                        f"Lazynext AI Agent API error {resp.status_code} on POST {path}: {text.decode()}"
                     )
                 async for line in resp.aiter_lines():
                     trimmed = line.strip()
@@ -128,7 +128,7 @@ class ChronosAgent:
         Returns an async iterator of :class:`AgentEvent` objects.
         """
         async for event in self._post_stream(
-            "/api/v1/chronos/stream",
+            "/api/v1/lazynext-ai/stream",
             {"prompt": prompt, "mode": self._mode, "tools": self._allowed_tools},
         ):
             yield event
@@ -138,17 +138,17 @@ class ChronosAgent:
 
         Returns a list of :class:`SearchResult` objects.
         """
-        data = await self._post("/api/v1/chronos/search", {"query": query})
+        data = await self._post("/api/v1/lazynext-ai/search", {"query": query})
         return [SearchResult(**item) for item in data]
 
     async def execute_slash_command(self, command: str) -> CommandResult:
         """Execute a slash command by name (e.g. ``/export``, ``/render``)."""
-        data = await self._post("/api/v1/chronos/slash", {"command": command})
+        data = await self._post("/api/v1/lazynext-ai/slash", {"command": command})
         return CommandResult(**data)
 
     async def get_memory(self) -> ConversationMemory:
         """Retrieve the agent's conversation memory for the current session."""
-        data = await self._get("/api/v1/chronos/memory")
+        data = await self._get("/api/v1/lazynext-ai/memory")
         return ConversationMemory(**data)
 
     def add_rule(self, rule: RuleConfig) -> None:
@@ -157,17 +157,17 @@ class ChronosAgent:
 
     async def get_suggestions(self) -> list[AgentSuggestion]:
         """Ask the agent to generate proactive suggestions."""
-        data = await self._get("/api/v1/chronos/suggestions")
+        data = await self._get("/api/v1/lazynext-ai/suggestions")
         return [AgentSuggestion(**item) for item in data]
 
     async def apply_suggestion(self, suggestion_id: str) -> bool:
         """Apply a previously-retrieved suggestion by its ``id``."""
         data = await self._post(
-            f"/api/v1/chronos/suggestions/{suggestion_id}/apply", {}
+            f"/api/v1/lazynext-ai/suggestions/{suggestion_id}/apply", {}
         )
         return bool(data.get("applied", False))
 
     async def run_audit(self) -> TimelineAudit:
         """Run a full audit of the current timeline."""
-        data = await self._post("/api/v1/chronos/audit", {})
+        data = await self._post("/api/v1/lazynext-ai/audit", {})
         return TimelineAudit(**data)

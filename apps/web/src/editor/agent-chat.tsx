@@ -1,5 +1,5 @@
 /**
- * Agent Chat panel for conversing with the Chronos AI Copilot.
+ * Agent Chat panel for conversing with the Lazynext AI Agent AI Copilot.
  *
  * Enhanced with suggested prompt chips, typing indicator, slash command
  * autocomplete, agent suggestion cards, and error retry buttons.
@@ -378,7 +378,7 @@ export function AgentChat({
 				<div className="flex items-center gap-2">
 					<div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]" />
 					<span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
-						Chronos Agent
+						Lazynext AI Agent Agent
 					</span>
 				</div>
 				{isLoading && (

@@ -1,5 +1,5 @@
 /**
- * Spotlight-style command interface for the Chronos AI Copilot.
+ * Spotlight-style command interface for the Lazynext AI Agent AI Copilot.
  *
  * Renders a full-screen glassmorphic overlay with a text prompt,
  * suggestion chips, and a live WGPU preview canvas. Submitted
@@ -13,7 +13,7 @@ import { useEditor } from "./use-editor";
 import { Bot, Sparkles, Command } from "lucide-react";
 
 /**
- * Premium command interface for conversing with the Chronos Copilot.
+ * Premium command interface for conversing with the Lazynext AI Agent Copilot.
  *
  * A full-screen glassmorphic overlay (activated via Cmd+K) that accepts
  * natural-language editing intents and previews the live editor canvas
@@ -62,7 +62,7 @@ export const PromptMode: React.FC = () => {
 								<Bot className="w-4 h-4 text-white" />
 							</div>
 							<span className="text-white font-medium tracking-wide">
-								Chronos Copilot
+								Lazynext AI Agent Copilot
 							</span>
 						</div>
 						<div className="flex items-center gap-2 text-xs text-white/40 font-mono">
@@ -76,7 +76,7 @@ export const PromptMode: React.FC = () => {
 								type="text"
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
-								placeholder="Ask Chronos to edit, cut, or style..."
+								placeholder="Ask Lazynext AI Agent to edit, cut, or style..."
 								className="w-full bg-transparent text-2xl text-white placeholder:text-white/20 focus:outline-none"
 								disabled={isAgentThinking}
 								// eslint-disable-next-line jsx-a11y/no-autofocus
