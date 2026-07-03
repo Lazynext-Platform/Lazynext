@@ -1,6 +1,6 @@
 //! Scheduled Routines Engine — cron-based background editing tasks.
 //!
-//! Inspired by Claude Code's Routines, this module lets users schedule
+//! Scheduled routines — lets users schedule recurring editing tasks.
 //! recurring editing prompts (e.g. "auto-export latest cut every night at
 //! 2am") that run through the autonomous editor automatically.
 //!

@@ -1,5 +1,5 @@
 //! Autonomous Background AI Agent — continuous timeline monitoring and proactive
-//! editing, inspired by Claude Code's agentic autonomy applied to video editing.
+//! editing for the Lazynext NLE platform.
 //!
 //! This agent runs as a persistent background task that watches the NLE timeline
 //! for changes, periodically analyzes the composition, and either suggests or
@@ -29,7 +29,7 @@
 //! questions (e.g., "I added captions. I notice the background music is loud —
 //! should I duck it by 15dB during speech?").
 
-use crate::claude_features::{ConversationMemory, MultiTurnManager};
+use crate::copilot_tools::{ConversationMemory, MultiTurnManager};
 use crate::nle_state::{Clip, NLEState, ProjectData};
 use serde::{Deserialize, Serialize};
 use state::keyframe::Easing;

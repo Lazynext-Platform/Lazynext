@@ -1,6 +1,6 @@
-//! Claude Code-like features for the Lazynext AI video editor.
+//! AI copilot tools for the Lazynext video editor.
 //!
-//! This module brings Claude Code's agentic workflow patterns to video editing:
+//! This module provides agentic workflow patterns for video editing:
 //! universal timeline search, slash commands, persistent conversation memory,
 //! multi-turn conversation state management, and revision history with rollback.
 //!

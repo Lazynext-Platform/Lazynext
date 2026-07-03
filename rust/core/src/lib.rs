@@ -46,7 +46,7 @@ pub mod autonomous;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod autonomous_agent;
 pub mod channels;
-pub mod claude_features;
+pub mod copilot_tools;
 pub mod engine;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ffmpeg_loader;
