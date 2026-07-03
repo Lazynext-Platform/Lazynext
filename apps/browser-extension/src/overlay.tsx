@@ -256,7 +256,7 @@ function OverlayEditor() {
         <TimelinePreview />
 
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "10px" }}>
-          <label style={{ fontSize: "14px", fontWeight: "600", color: "#00e5ff" }}>AI Copilot</label>
+          <label style={{ fontSize: "14px", fontWeight: "600", color: "#00e5ff" }}>Lazynext AI Agent</label>
           <div style={{ display: "flex", gap: "8px" }}>
             <input 
               type="text" 

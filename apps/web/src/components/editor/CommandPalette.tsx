@@ -206,7 +206,7 @@ export function CommandPalette() {
 			{
 				id: "ai-edit",
 				label: "AI Edit",
-				description: "Open the AI Copilot chat to describe your edit",
+				description: "Open the Lazynext AI Agent chat to describe your edit",
 				category: "AI",
 				icon: Wand2,
 				action: () => {

@@ -59,7 +59,7 @@ test.describe("2. Editor & Timeline", () => {
   });
 });
 
-test.describe("3. AI Copilot", () => {
+test.describe("3. Lazynext AI Agent", () => {
   test("sends prompt and receives response", async ({ page }) => {
     await bypassAuth(page);
     await page.goto(`${BASE_URL}/editor`);

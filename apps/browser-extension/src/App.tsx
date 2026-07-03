@@ -287,7 +287,7 @@ function App() {
             width: "100%",
           }}
         >
-          Launch AI Copilot (Overlay)
+          Launch Lazynext AI Agent (Overlay)
         </button>
       </div>
 

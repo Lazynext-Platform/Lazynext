@@ -673,7 +673,7 @@ impl Render for EditorShell {
                                             .text_sm()
                                             .font_weight(FontWeight::BOLD)
                                             .text_color(accent_color)
-                                            .child("AI Copilot"),
+                                            .child("Lazynext AI Agent"),
                                     )
                                     .child(
                                         // Clickable prompt display area — shows current prompt text
@@ -734,7 +734,7 @@ impl Render for EditorShell {
                                                         {
                                                             Ok(resp) => {
                                                                 if resp.status().is_success() {
-                                                                    log::info!("AI command executed successfully via API gateway");
+                                                                    log::info!("Lazynext AI Agent command executed successfully via API gateway");
                                                                 } else {
                                                                     log::warn!("API gateway returned: {}", resp.status());
                                                                 }

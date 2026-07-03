@@ -92,7 +92,7 @@ export const NativeBridge = {
 			return result || "I've processed your request.";
 		} catch (e) {
 			console.warn("NativeModule chat error:", e);
-			return "Lazynext AI Agent Copilot is currently offline.";
+			return "Lazynext AI Agent is currently offline.";
 		}
 	},
 

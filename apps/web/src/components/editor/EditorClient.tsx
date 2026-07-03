@@ -12297,7 +12297,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					</div>
 				))}
 
-			{/* Phase 31: AI Copilot Command Bar (Prompt-to-Edit Engine) */}
+			{/* Phase 31: Lazynext AI Agent Command Bar (Prompt-to-Edit Engine) */}
 			<div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[800px] max-w-[90vw] max-h-[50vh] bg-[var(--bg-panel)]/95 backdrop-blur-3xl border border-[var(--border-glass)] rounded-2xl shadow-[0_0_60px_rgba(1,243,254,0.15)] flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-4">
 				<div className="bg-[var(--accent-primary)]/10 border-b border-[var(--border-glass)] px-4 py-3 flex justify-between items-center relative overflow-hidden">
 					<div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)]/20 to-transparent blur-xl pointer-events-none" />

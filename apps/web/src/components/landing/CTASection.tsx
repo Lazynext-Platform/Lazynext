@@ -24,7 +24,7 @@ export function CTASection() {
 				</h2>
 				<p className="mx-auto mt-6 max-w-xl text-lg text-zinc-600 dark:text-muted">
 					Start editing at the speed of thought. Compile your edits instantly
-					using deterministic Rust and our AI Copilot.
+					using deterministic Rust and our Lazynext AI Agent.
 				</p>
 
 				<div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

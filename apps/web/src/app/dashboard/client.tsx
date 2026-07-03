@@ -3,7 +3,7 @@
  *
  * Displays AI credit balance, render node status, project count, and
  * storage telemetry cards. Provides quick-start actions to launch the
- * AI Copilot editor, browse projects, or manage billing/settings.
+ * Lazynext AI Agent editor, browse projects, or manage billing/settings.
  *
  * Redirects unauthenticated users to sign-in and shows a loading spinner
  * while session and project data resolve.
@@ -33,7 +33,7 @@ import {
 
 const QUICK_ACTIONS = [
 	{
-		label: "AI Copilot Editor",
+		label: "Lazynext AI Agent Editor",
 		href: "/editor",
 		icon: <Wand2 className="w-5 h-5 text-cyan-400" />,
 	},

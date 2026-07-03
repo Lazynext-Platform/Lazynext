@@ -312,7 +312,7 @@ export default function App() {
 					<Tab.Screen name="Dashboard" component={DashboardScreen} />
 					<Tab.Screen name="Camera" component={CameraScreen} />
 					<Tab.Screen name="Editor" component={TimelineScreen} />
-					<Tab.Screen name="AI Copilot" component={AIChatScreen} />
+					<Tab.Screen name="Lazynext AI Agent" component={AIChatScreen} />
 				</Tab.Navigator>
 			</NavigationContainer>
 		</GestureHandlerRootView>

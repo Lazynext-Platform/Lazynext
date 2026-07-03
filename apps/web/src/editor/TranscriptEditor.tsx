@@ -46,7 +46,7 @@ export function TranscriptEditor() {
 			<div className="flex flex-col gap-4">
 				{script.length === 0 ? (
 					<p className="text-gray-400 text-sm">
-						No transcript loaded. Use the AI Copilot to generate a transcript from your video.
+						No transcript loaded. Use the Lazynext AI Agent to generate a transcript from your video.
 					</p>
 				) : (
 					script.map((line) => (

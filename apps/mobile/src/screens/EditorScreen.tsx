@@ -84,7 +84,7 @@ export const EditorScreen = () => {
 		console.log("Import Media pressed — expo-image-picker not yet integrated.");
 		Alert.alert(
 			"Import Media",
-			"Media import will be available when expo-image-picker is integrated.\n\nYou can also use the Lazynext AI Agent Copilot tab to generate B-roll or add clips via natural language.",
+			"Media import will be available when expo-image-picker is integrated.\n\nYou can also use the Lazynext AI Agent tab to generate B-roll or add clips via natural language.",
 		);
 	};
 
