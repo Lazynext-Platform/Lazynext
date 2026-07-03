@@ -141,7 +141,7 @@ impl SdfPipeline {
     /// (init pass + log₂(max(w, h)) step passes) and returning the inside and
     /// outside distance field textures.
     ///
-    /// For batching, use [`compute_signed_distance_field_with_encoder`].
+    /// For batching, use [`compute_signed_distance_field_with_encoder()`](Self::compute_signed_distance_field_with_encoder).
     pub fn compute_signed_distance_field(
         &self,
         context: &GpuContext,

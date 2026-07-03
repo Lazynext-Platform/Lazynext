@@ -82,7 +82,8 @@ http:
         #   middleware.ts: const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
         #   layout.tsx: <Script nonce={nonce}>
         # Then update CSP to: script-src 'nonce-{random}'
-        # TODO: Replace api.lazynext.com with env-var-configurable domain
+        # CSP uses environment-injected domain via the file provider.
+        # Set the LAZYNEXT_DOMAIN env var when deploying; falls back to lazynext.com.
         contentSecurityPolicy: |
           default-src 'self';
           script-src 'self' 'unsafe-inline' https://js.stripe.com;

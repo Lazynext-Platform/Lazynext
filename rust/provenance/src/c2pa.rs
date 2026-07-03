@@ -4,7 +4,7 @@
 //! content provenance. Every exported video carries a signed manifest
 //! attesting to its origin, editing history, and creator identity.
 //!
-//! C2PA spec: https://c2pa.org/specifications/specifications/2.1/
+//! C2PA spec: <https://c2pa.org/specifications/specifications/2.1/>
 //!
 //! # Usage
 //! ```ignore
@@ -16,9 +16,9 @@
 //!
 //! # Certificate Requirements
 //! Production deployment requires a signing certificate from a C2PA-trusted CA:
-//!   - DigiCert: https://www.digicert.com/c2pa-content-authenticity
-//!   - GlobalSign: https://www.globalsign.com/en/c2pa
-//!   - Truepic: https://truepic.com (managed C2PA signing service)
+//!   - DigiCert: <https://www.digicert.com/c2pa-content-authenticity>
+//!   - GlobalSign: <https://www.globalsign.com/en/c2pa>
+//!   - Truepic: <https://truepic.com> (managed C2PA signing service)
 
 use serde::{Deserialize, Serialize};
 

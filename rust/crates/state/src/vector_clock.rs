@@ -45,8 +45,8 @@ impl VectorClock {
     }
 
     /// Returns true if this clock happens-before `other`.
-    /// Condition: ∀ peer: self[peer] <= other[peer] AND
-    ///             ∃ peer: self[peer] < other[peer]
+    /// Condition: ∀ `peer`: `self[peer]` &lt;= `other[peer]` AND
+    ///             ∃ `peer`: `self[peer]` &lt; `other[peer]`
     pub fn happens_before(&self, other: &VectorClock) -> bool {
         let mut strictly_less = false;
 

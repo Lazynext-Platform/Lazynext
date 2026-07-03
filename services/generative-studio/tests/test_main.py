@@ -25,7 +25,6 @@ def test_generate_video_no_key(monkeypatch):
     assert "Replicate API token not configured" in response.json()["detail"]
 
 def test_dub_video_no_key(monkeypatch):
-    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
     response = client.post("/dub", json={
         "clip_id": "clip_123",
         "target_language": "es",

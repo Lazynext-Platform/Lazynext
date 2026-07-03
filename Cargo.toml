@@ -12,7 +12,8 @@ members = [
     "rust/api-gateway",
     "rust/cli",
     "apps/desktop",
-    "services/collab-server"
+    "services/collab-server",
+    "rust/crates/rules"
 ]
 
 [patch.crates-io]

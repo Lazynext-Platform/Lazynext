@@ -1,9 +1,11 @@
 use crate::editor::EditorShell;
+use gpui::prelude::FluentBuilder;
 use gpui::*;
 use lazynext_core::NLEState;
 use lazynext_core::engine::CoreEngine;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -12,6 +14,9 @@ pub struct Dashboard {
     pub nle: Arc<Mutex<NLEState>>,
     pub engine: Arc<Mutex<CoreEngine>>,
     pub rt_handle: tokio::runtime::Handle,
+    pub recent_projects: Vec<String>,
+    pub recent_add_clicked: Rc<Cell<bool>>,
+    pub recent_add_path: Rc<Cell<Option<String>>>,
 }
 
 impl Dashboard {
@@ -20,12 +25,47 @@ impl Dashboard {
         engine: Arc<Mutex<CoreEngine>>,
         rt_handle: tokio::runtime::Handle,
     ) -> Self {
+        let recent_projects = Self::load_recent_projects();
         Self {
             version: "0.1.0".to_string(),
             nle,
             engine,
             rt_handle,
+            recent_projects,
+            recent_add_clicked: Rc::new(Cell::new(false)),
+            recent_add_path: Rc::new(Cell::new(None)),
         }
+    }
+
+    fn recent_projects_path() -> std::path::PathBuf {
+        let home = std::env::var("HOME")
+            .or_else(|_| std::env::var("USERPROFILE"))
+            .unwrap_or_else(|_| ".".to_string());
+        std::path::PathBuf::from(home).join(".lazynext").join("recent_projects.json")
+    }
+
+    fn load_recent_projects() -> Vec<String> {
+        let path = Self::recent_projects_path();
+        if let Ok(data) = std::fs::read_to_string(&path)
+            && let Ok(projects) = serde_json::from_str::<Vec<String>>(&data) {
+            return projects.iter().take(5).cloned().collect();
+        }
+        Vec::new()
+    }
+
+    fn save_recent_projects(&self) {
+        let path = Self::recent_projects_path();
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::write(&path, serde_json::to_string(&self.recent_projects).unwrap_or_default());
+    }
+
+    fn add_recent_project(&mut self, path: &str) {
+        self.recent_projects.retain(|p| p != path);
+        self.recent_projects.insert(0, path.to_string());
+        self.recent_projects.truncate(5);
+        self.save_recent_projects();
     }
 }
 
@@ -33,6 +73,14 @@ impl Render for Dashboard {
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let bg = rgb(0x1a1a1a);
         let accent = rgb(0x00d4df);
+
+        // Process recent project addition
+        if self.recent_add_clicked.get() {
+            self.recent_add_clicked.set(false);
+            if let Some(path) = self.recent_add_path.take() {
+                self.add_recent_project(&path);
+            }
+        }
 
         div()
             .flex()
@@ -101,6 +149,19 @@ impl Render for Dashboard {
                                                 play_clicked: Rc::new(Cell::new(false)),
                                                 prompt_focused: Rc::new(Cell::new(false)),
                                                 prompt_clicked: Rc::new(Cell::new(false)),
+                                                agent_active: Rc::new(Cell::new(false)),
+                                                agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                suggestions_expanded: false,
+                                                suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                selected_suggestion: None,
+                                                suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                suggestion_select_idx: 0,
+                                                frame_step_back5_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_back1_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+                                                exporting: Arc::new(AtomicBool::new(false)),
+                                                export_start_time: None,
                                             })
                                         },
                                     )
@@ -121,6 +182,8 @@ impl Render for Dashboard {
                                 let nle = self.nle.clone();
                                 let engine = self.engine.clone();
                                 let rt_handle = self.rt_handle.clone();
+                                let recent_clicked = self.recent_add_clicked.clone();
+                                let recent_path = self.recent_add_path.clone();
                                 move |_, _window, cx| {
                                     // Normally we would use rfd::AsyncFileDialog here
                                     let dialog = rfd::FileDialog::new()
@@ -137,6 +200,8 @@ impl Render for Dashboard {
                                             let mut state = nle.lock().await;
                                             state.load_project_data(pd);
                                         });
+                                        recent_path.set(Some(path.to_string_lossy().to_string()));
+                                        recent_clicked.set(true);
                                         log::info!("Project loaded from {}", path.display());
                                     }
 
@@ -166,6 +231,19 @@ impl Render for Dashboard {
                                                 play_clicked: Rc::new(Cell::new(false)),
                                                 prompt_focused: Rc::new(Cell::new(false)),
                                                 prompt_clicked: Rc::new(Cell::new(false)),
+                                                agent_active: Rc::new(Cell::new(false)),
+                                                agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                suggestions_expanded: false,
+                                                suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                selected_suggestion: None,
+                                                suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                suggestion_select_idx: 0,
+                                                frame_step_back5_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_back1_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
+                                                frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+                                                exporting: Arc::new(AtomicBool::new(false)),
+                                                export_start_time: None,
                                             })
                                         },
                                     )
@@ -174,6 +252,107 @@ impl Render for Dashboard {
                             }),
                     ),
             )
+            .when(!self.recent_projects.is_empty(), |el| {
+                el.child(
+                    div()
+                        .mt_10()
+                        .flex()
+                        .flex_col()
+                        .gap_3()
+                        .child(
+                            div()
+                                .text_sm()
+                                .font_weight(FontWeight::BOLD)
+                                .text_color(rgb(0x888888))
+                                .child("Recent Projects"),
+                        )
+                        .children(self.recent_projects.iter().map(|p| {
+                            let path = p.clone();
+                            div()
+                                .px_4()
+                                .py_2()
+                                .bg(rgb(0x252525))
+                                .border_1()
+                                .border_color(rgb(0x333333))
+                                .rounded_md()
+                                .cursor_pointer()
+                                .hover(|s| s.bg(rgb(0x2a2a2a)))
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(rgb(0xcccccc))
+                                        .child(
+                                            std::path::Path::new(&path)
+                                                .file_name()
+                                                .map(|n| n.to_string_lossy().to_string())
+                                                .unwrap_or_else(|| path.clone()),
+                                        ),
+                                )
+                                .on_mouse_down(gpui::MouseButton::Left, {
+                                    let nle = self.nle.clone();
+                                    let engine = self.engine.clone();
+                                    let rt_handle = self.rt_handle.clone();
+                                    let path_c = path.clone();
+                                    move |_, _window, cx| {
+                                        if let Ok(json) = std::fs::read_to_string(&path_c)
+                                            && let Ok(pd) =
+                                                serde_json::from_str::<
+                                                    lazynext_core::nle_state::ProjectData,
+                                                >(&json)
+                                        {
+                                            rt_handle.block_on(async {
+                                                let mut state = nle.lock().await;
+                                                state.load_project_data(pd);
+                                            });
+                                        }
+                                        let bounds = Bounds {
+                                            origin: point(px(0.0), px(0.0)),
+                                            size: size(px(1280.0), px(720.0)),
+                                        };
+                                        cx.open_window(
+                                            WindowOptions {
+                                                window_bounds: Some(WindowBounds::Windowed(bounds)),
+                                                titlebar: Some(TitlebarOptions {
+                                                    title: Some("Lazynext Editor".into()),
+                                                    appears_transparent: true,
+                                                    traffic_light_position: None,
+                                                }),
+                                                ..Default::default()
+                                            },
+                                            |_, cx| {
+                                                cx.new(|_| EditorShell {
+                                                    nle: nle.clone(),
+                                                    engine: engine.clone(),
+                                                    rt_handle: rt_handle.clone(),
+                                                    last_frame_data: None,
+                                                    current_frame: 0,
+                                                    is_playing: false,
+                                                    ai_prompt_text: String::new(),
+                                                    play_clicked: Rc::new(Cell::new(false)),
+                                                    prompt_focused: Rc::new(Cell::new(false)),
+                                                    prompt_clicked: Rc::new(Cell::new(false)),
+                                                    agent_active: Rc::new(Cell::new(false)),
+                                                    agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                    suggestions_expanded: false,
+                                                    suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                    selected_suggestion: None,
+                                                    suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                    suggestion_select_idx: 0,
+                                                    frame_step_back5_clicked: Rc::new(Cell::new(false)),
+                                                    frame_step_back1_clicked: Rc::new(Cell::new(false)),
+                                                    frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
+                                                    frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+                                                    exporting: Arc::new(AtomicBool::new(false)),
+                                                    export_start_time: None,
+                                                })
+                                            },
+                                        )
+                                        .unwrap();
+                                    }
+                                })
+                        })),
+                )
+            })
     }
 }
 

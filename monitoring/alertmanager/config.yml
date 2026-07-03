@@ -1,26 +1,79 @@
-# ── AlertManager Configuration ───────────────────────────────────
-# Routes alerts to Slack, email, and PagerDuty based on severity.
-# Apply: kubectl create secret generic alertmanager-config --from-file=config.yml -n monitoring
+# ── AlertManager Configuration (Enhanced) ─────────────────────────
+# Routes alerts to Slack, PagerDuty, and email based on severity.
 #
-# IMPORTANT: Before production deployment, Slack webhook, PagerDuty integration
-# key, and Resend API key must be set as environment variables (SLACK_WEBHOOK_URL,
-# PAGERDUTY_INTEGRATION_KEY, RESEND_API_KEY) via Kubernetes secrets or Vault.
-# The values below are development-only placeholders — never commit real secrets.
+# Secrets expected in environment or via Vault/K8s ExternalSecret:
+#   SLACK_WEBHOOK_URL          — Webhook for #lazynext-alerts-critical
+#   SLACK_WEBHOOK_URL_WARNING  — Webhook for #lazynext-alerts
+#   PAGERDUTY_INTEGRATION_KEY  — PagerDuty routing/integration key
+#   RESEND_API_KEY             — Email API key for alert notifications
+#   RESEND_ALERT_EMAIL_KEY     — Alternative email delivery key
+#
+# Template files: /etc/alertmanager/templates/*.tmpl
 
 global:
   resolve_timeout: 5m
   pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
+  slack_api_url: "http://localhost:9999/webhook"
 
 # ── Route Tree ───────────────────────────────────────────────────
 route:
   receiver: "slack-warnings"
-  group_by: ["alertname", "severity"]
+  group_by: ["alertname", "severity", "service"]
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 4h
 
   routes:
-    # Critical alerts → PagerDuty + Slack + Email (DBA)
+    # ── CRITICAL: API Gateway Down > 1min → PagerDuty + Slack ──
+    - match:
+        severity: critical
+        alertname: APIGatewayDown
+      receiver: "pagerduty-critical"
+      continue: true
+    - match:
+        severity: critical
+        alertname: APIGatewayDown
+      receiver: "slack-critical"
+      continue: false
+
+    # ── CRITICAL: Render Queue Backlog > 50 → Slack ─────────────
+    - match:
+        severity: critical
+        alertname: RenderQueueCriticalBacklog
+      receiver: "pagerduty-critical"
+      continue: true
+    - match:
+        severity: critical
+        alertname: RenderQueueCriticalBacklog
+      receiver: "slack-critical"
+      continue: false
+    - match:
+        severity: warning
+        alertname: RenderQueueBacklog
+      receiver: "slack-warnings"
+      continue: false
+
+    # ── CRITICAL: Database Connection Failures > 5/min → PagerDuty
+    - match:
+        severity: critical
+      match_re:
+        alertname: "Database.*|PostgreSQL.*"
+      receiver: "pagerduty-critical"
+      continue: true
+    - match:
+        severity: critical
+      match_re:
+        alertname: "Database.*|PostgreSQL.*"
+      receiver: "email-dba"
+      continue: true
+    - match:
+        severity: critical
+      match_re:
+        alertname: "Database.*|PostgreSQL.*"
+      receiver: "slack-critical"
+      continue: false
+
+    # ── CRITICAL (general): PagerDuty + Slack ───────────────────
     - match:
         severity: critical
       receiver: "pagerduty-critical"
@@ -28,76 +81,221 @@ route:
     - match:
         severity: critical
       receiver: "slack-critical"
-      continue: true
-    - match:
-        severity: critical
-      match_re:
-        alertname: "Database.*|PostgreSQL.*"
-      receiver: "email-dba"
       continue: false
 
-    # Warning alerts → Slack + Email (DBA if DB-related)
+    # ── WARNING: CPU > 80% for 5min → Slack ────────────────────
+    - match:
+        severity: warning
+      match_re:
+        alertname: ".*HighCPU.*|.*CPUThrottling.*"
+      receiver: "slack-warnings"
+      continue: true
+
+    # ── WARNING: Memory > 85% for 5min → Slack ──────────────────
+    - match:
+        severity: warning
+      match_re:
+        alertname: ".*HighMemory.*|.*OOMKilled.*"
+      receiver: "slack-warnings"
+      continue: true
+
+    # ── WARNING: Export Failure Rate > 5% → Slack ──────────────
+    - match:
+        severity: warning
+        alertname: HighRenderFailureRate
+      receiver: "slack-warnings"
+      continue: true
+
+    # ── WARNING: AI Agent Error Rate > 10% → Slack ─────────────
+    - match:
+        severity: warning
+      match_re:
+        alertname: ".*AI.*|.*Agent.*"
+      receiver: "slack-warnings"
+      continue: false
+
+    # ── WARNING (general): Slack ─────────────────────────────────
     - match:
         severity: warning
       receiver: "slack-warnings"
-      continue: true
+      continue: false
+
+    # ── INFO: New Deployment Detected → Slack ───────────────────
     - match:
-        severity: warning
-      match_re:
-        alertname: "Database.*|PostgreSQL.*"
-      receiver: "email-dba"
+        severity: info
+        alertname: NewDeployment
+      receiver: "slack-deployments"
+      continue: false
 
 # ── Receivers ────────────────────────────────────────────────────
 receivers:
+  # ── Slack: Critical Alerts ───────────────────────────────────
   - name: "slack-critical"
     slack_configs:
-      - api_url: "http://localhost:9093/dummy"
+      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
         channel: "#lazynext-alerts-critical"
-        title: "🚨 {{ .GroupLabels.alertname }}"
+        username: "Lazynext AlertManager"
+        icon_emoji: ":rotating_light:"
+        title: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
+        title_link: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
         text: |
-          *Severity:* {{ .CommonLabels.severity }}
+          *Severity:* `CRITICAL`
+          *Service:* `{{ .CommonLabels.service | default "unknown" }}`
+          *Status:* {{ .Status }}
           *Description:* {{ .CommonAnnotations.description }}
           *Summary:* {{ .CommonAnnotations.summary }}
+
           {{ range .Alerts }}
-          • {{ .Annotations.summary }} — {{ .Labels.instance }}
+          • *{{ .Annotations.summary }}* — `{{ .Labels.instance }}`
+            {{ if .Annotations.runbook_url }}Runbook: {{ .Annotations.runbook_url }}{{ end }}
           {{ end }}
         color: "danger"
         send_resolved: true
+        fallback: "CRITICAL: {{ .GroupLabels.alertname }}"
+        footer: "Lazynext Monitoring"
+        actions:
+          - type: button
+            text: "View in Grafana"
+            url: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
+          - type: button
+            text: "Runbook"
+            url: "https://lazynext.ai/docs/production-runbook"
 
+  # ── Slack: Warning Alerts ────────────────────────────────────
   - name: "slack-warnings"
     slack_configs:
-      - api_url: "http://localhost:9093/dummy"
+      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
         channel: "#lazynext-alerts"
-        title: "⚠️ {{ .GroupLabels.alertname }}"
+        username: "Lazynext AlertManager"
+        icon_emoji: ":warning:"
+        title: '⚠️ [WARNING] {{ .GroupLabels.alertname }}'
         text: |
-          *Severity:* {{ .CommonLabels.severity }}
+          *Severity:* `WARNING`
+          *Service:* `{{ .CommonLabels.service | default "unknown" }}`
+          *Status:* {{ .Status }}
           *Summary:* {{ .CommonAnnotations.summary }}
+          *Description:* {{ .CommonAnnotations.description }}
+
+          {{ range .Alerts.Firing }}
+          • {{ .Annotations.summary }} — `{{ .Labels.instance }}`
+          {{ end }}
+          {{ if .Alerts.Resolved }}
+          *Resolved:*
+          {{ range .Alerts.Resolved }}
+          ✅ {{ .Annotations.summary }} — `{{ .Labels.instance }}`
+          {{ end }}
+          {{ end }}
         color: "warning"
         send_resolved: true
+        fallback: "WARNING: {{ .GroupLabels.alertname }}"
+        actions:
+          - type: button
+            text: "View in Grafana"
+            url: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
 
+  # ── Slack: Deployment Notifications ──────────────────────────
+  - name: "slack-deployments"
+    slack_configs:
+      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
+        channel: "#lazynext-deployments"
+        username: "Lazynext Deploy"
+        icon_emoji: ":rocket:"
+        title: '🚀 {{ .CommonAnnotations.summary }}'
+        text: |
+          *Environment:* `{{ .CommonLabels.environment | default "production" }}`
+          *Version:* `{{ .CommonLabels.version }}`
+          *Commit:* `{{ .CommonLabels.commit }}`
+          *Timestamp:* {{ .CommonAnnotations.timestamp }}
+
+          {{ .CommonAnnotations.description }}
+        color: "good"
+        send_resolved: false
+
+  # ── PagerDuty: Critical Only ─────────────────────────────────
   - name: "pagerduty-critical"
     pagerduty_configs:
-      - routing_key: "dev-dummy-key"
+      - routing_key: "${PAGERDUTY_INTEGRATION_KEY}"
         severity: "critical"
-        description: "{{ .CommonAnnotations.description }}"
+        description: |
+          {{ .CommonAnnotations.description }}
+        source: '{{ .CommonLabels.service | default "unknown" }}'
+        component: "{{ .CommonLabels.instance }}"
+        group: "{{ .GroupLabels.alertname }}"
+        class: "{{ .CommonLabels.severity }}"
         client: "Lazynext Monitoring"
         client_url: "https://monitoring.lazynext.ai"
+        details:
+          service: "{{ .CommonLabels.service }}"
+          severity: "{{ .CommonLabels.severity }}"
+          alertname: "{{ .CommonLabels.alertname }}"
+          runbook: "{{ .CommonAnnotations.runbook_url }}"
+          grafana_url: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
+        links:
+          - href: "https://monitoring.lazynext.ai/grafana/d/lazynext-overview"
+            text: "Grafana Dashboard"
 
+  # ── Email: DBA Notifications ─────────────────────────────────
   - name: "email-dba"
     email_configs:
       - to: "dba@lazynext.ai"
         from: "alerts@lazynext.ai"
         smarthost: "smtp.resend.com:587"
         auth_username: "resend"
-        auth_password: "dev-dummy-key"
+        auth_password: "PLACEHOLDER"
+        require_tls: true
         headers:
-          Subject: "[Lazynext DB] {{ .GroupLabels.alertname }}"
+          Subject: "[Lazynext DB] {{ .GroupLabels.alertname }} — {{ .Status }}"
+        html: |
+          <h2>{{ .GroupLabels.alertname }}</h2>
+          <p><strong>Severity:</strong> {{ .CommonLabels.severity }}</p>
+          <p><strong>Status:</strong> {{ .Status }}</p>
+          <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+          <hr>
+          <h3>Alerts:</h3>
+          <ul>
+          {{ range .Alerts }}
+            <li>
+              <strong>{{ .Annotations.summary }}</strong><br>
+              Instance: {{ .Labels.instance }}<br>
+              <a href="{{ .Annotations.grafana_url }}">View in Grafana</a>
+            </li>
+          {{ end }}
+          </ul>
 
-# ── Inhibition Rules ────────────────────────────────────────────
+  # ── Webhook: Custom Integration (Optional) ───────────────────
+  - name: "webhook-custom"
+    webhook_configs:
+      - url: "https://webhook.site/PLACEHOLDER"
+        send_resolved: true
+        http_config:
+          authorization:
+            type: "Bearer"
+            credentials: "${CUSTOM_WEBHOOK_TOKEN}"
+
+# ── Inhibition Rules ─────────────────────────────────────────────
+# Prevents alert storms — if a critical alert fires for a service,
+# suppress its warning-level alerts to reduce noise.
 inhibit_rules:
-  # If a critical alert fires, suppress warnings for same service
+  # If critical alert fires, suppress warnings for the same service
   - source_match:
       severity: "critical"
     target_match:
       severity: "warning"
-    equal: ["alertname", "instance"]
+    equal: ["service"]
+
+  # If API Gateway is down, suppress downstream service alerts
+  - source_match:
+      severity: "critical"
+      alertname: "APIGatewayDown"
+    target_match_re:
+      alertname: ".*"
+    equal: []
+
+  # If database is down, suppress all app-level alerts
+  - source_match_re:
+      alertname: "Database.*"
+      severity: "critical"
+    target_match_re:
+      alertname: ".*"
+      service: "web|api-gateway|ai-agents|render|collab"
+    equal: []

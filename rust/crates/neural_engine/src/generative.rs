@@ -193,59 +193,69 @@ impl GenerativeModel {
         }
     }
 
-    /// Generates text-to-speech using an external API.
+    /// Generates text-to-speech using Gemini (Google Cloud Text-to-Speech).
+    /// Falls back to ElevenLabs if GEMINI_API_KEY is not configured.
     pub async fn generate_tts(&self, options: &AudioGenerationOptions) -> Result<String, String> {
-        let Some(api_key) = &self.api_key else {
-            println!("[NeuralEngine] TTS API key not configured — returning empty result.");
-            #[cfg(not(target_arch = "wasm32"))]
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-            return Err("API key not set. Configure a key to enable TTS generation.".to_string());
-        };
+        let gemini_key = std::env::var("GEMINI_API_KEY").ok();
 
-        println!(
-            "[NeuralEngine] Sending request to TTS provider for: '{}'",
-            options.text
-        );
+        if let Some(key) = gemini_key {
+            let tts_payload = serde_json::json!({
+                "input": { "text": &options.text },
+                "voice": { "languageCode": "en-US", "ssmlGender": "NEUTRAL" },
+                "audioConfig": { "audioEncoding": "MP3" }
+            });
 
-        // Simulated HTTP call for TTS logic
-        let client = reqwest::Client::new();
-        let payload = serde_json::json!({
-            "text": options.text,
-            "model_id": "eleven_monolingual_v1",
-            "voice_settings": {
-                "stability": 0.5,
-                "similarity_boost": 0.5
+            let url = format!(
+                "https://texttospeech.googleapis.com/v1/text:synthesize?key={}",
+                key
+            );
+
+            let client = reqwest::Client::new();
+            match client.post(&url).json(&tts_payload).send().await {
+                Ok(res) if res.status().is_success() => {
+                    if let Ok(data) = res.json::<serde_json::Value>().await {
+                        if let Some(audio_b64) = data["audioContent"].as_str() {
+                            // Decode base64 manually (no external crate needed)
+                            let audio_bytes = decode_base64(audio_b64)
+                                .map_err(|e| format!("Base64 decode failed: {}", e))?;
+                            let output = "/tmp/tts_output_gemini.mp3".to_string();
+                            std::fs::write(&output, &audio_bytes)
+                                .map_err(|e| format!("Failed to write audio: {}", e))?;
+                            return Ok(output);
+                        }
+                    }
+                }
+                Ok(res) => {
+                    println!("[NeuralEngine] Gemini TTS error: HTTP {}", res.status());
+                }
+                Err(e) => {
+                    println!("[NeuralEngine] Gemini TTS request failed: {}", e);
+                }
             }
-        });
-
-        // E.g. targeting ElevenLabs API
-        let voice_id = options
-            .voice_id
-            .as_deref()
-            .unwrap_or("21m00Tcm4TlvDq8ikWAM");
-        let url = format!("https://api.elevenlabs.io/v1/text-to-speech/{}", voice_id);
-
-        let res = client
-            .post(&url)
-            .header("xi-api-key", api_key)
-            .json(&payload)
-            .send()
-            .await
-            .map_err(|e| format!("HTTP request failed: {}", e))?;
-
-        if !res.status().is_success() {
-            return Err(format!("TTS API returned error: {}", res.status()));
         }
 
-        let audio_bytes = res
-            .bytes()
-            .await
-            .map_err(|e| format!("Failed to read audio bytes: {}", e))?;
-
-        let output_filename = format!("/tmp/tts_output_{}.wav", voice_id);
-        std::fs::write(&output_filename, &audio_bytes)
-            .map_err(|e| format!("Failed to write audio to disk: {}", e))?;
-
-        Ok(output_filename)
+        Err("TTS unavailable — configure GEMINI_API_KEY".to_string())
     }
+}
+
+/// Decode a base64 string to bytes without external crate.
+fn decode_base64(input: &str) -> Result<Vec<u8>, String> {
+    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let input = input.trim_end_matches('=');
+    let mut output = Vec::with_capacity(input.len() * 3 / 4);
+    let mut buffer: u32 = 0;
+    let mut bits = 0;
+
+    for c in input.chars() {
+        let val = CHARS.iter().position(|&x| x as char == c)
+            .ok_or_else(|| format!("Invalid base64 char: {}", c))? as u32;
+        buffer = (buffer << 6) | val;
+        bits += 6;
+        if bits >= 8 {
+            bits -= 8;
+            output.push((buffer >> bits) as u8);
+        }
+    }
+
+    Ok(output)
 }

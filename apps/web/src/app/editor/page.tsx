@@ -12,6 +12,9 @@ import { useWasm } from "@/hooks/use-wasm";
 import { wasmBridge } from "@/core/wasm-bridge";
 import { PromptMode } from "@/editor/PromptMode";
 import { ExecutionContract } from "@/editor/ExecutionContract";
+import { QuickActions } from "@/components/editor/QuickActions";
+import { KeyboardShortcutHints } from "@/components/editor/KeyboardShortcutHints";
+import { AutoSaveIndicator } from "@/components/editor/AutoSaveIndicator";
 import {
 	Send,
 	Bot,
@@ -135,6 +138,10 @@ export default function EditorPage() {
 		}
 	};
 
+	const handleExport = () => {
+		// Placeholder export for standalone editor
+	};
+
 	return (
 		<div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-background">
 			{/* Header */}
@@ -148,6 +155,7 @@ export default function EditorPage() {
 					</span>
 				</div>
 				<div className="flex items-center gap-4">
+					<AutoSaveIndicator />
 					<div className="text-xs text-foreground/40 mr-4 flex items-center gap-2">
 						<div className={`w-2 h-2 rounded-full ${isReady ? "bg-green-400 animate-pulse" : "bg-yellow-400"}`}></div>
 						Engine {isReady ? "Online" : "Booting..."}
@@ -280,6 +288,16 @@ export default function EditorPage() {
 					</div>
 				</aside>
 			</main>
+
+			{/* Quick Actions FAB */}
+			<div className="fixed bottom-6 right-6 z-50">
+				<QuickActions
+					onExport={handleExport}
+				/>
+			</div>
+
+			{/* Keyboard Shortcut Hints */}
+			<KeyboardShortcutHints />
 		</div>
 	);
 }

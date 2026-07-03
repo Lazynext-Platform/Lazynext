@@ -28,8 +28,12 @@
 
 #![allow(clippy::large_enum_variant)]
 #![allow(clippy::too_many_arguments)]
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod mixer;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod playback;
+
 pub mod spatial;
 pub mod vst;
 

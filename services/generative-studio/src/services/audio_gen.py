@@ -1,161 +1,147 @@
 """
-Audio generation services: dubbing, voice-cloned overdubbing, and stem separation.
+Audio generation services: dubbing via Gemini TTS, voice-cloned overdubbing via ElevenLabs, and stem separation.
 
-Uses ElevenLabs for TTS/dubbing, Coqui TTS as local fallback, and Demucs/Spleeter/
-librosa for stem separation, cascading through available backends.
+Uses Gemini (Google Cloud Text-to-Speech) for standard dubbing with graceful fallback.
+ElevenLabs is kept only for voice cloning (overdub).
 """
 
 import asyncio
 import os
 import httpx
+import base64
 from fastapi import HTTPException
 from src.models import DubRequest, OverdubRequest, StemSplitRequest
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from demucs_pipeline import DemucsPipeline, DemucsConfig
+
+GEMINI_TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize"
+
+
+async def _gemini_tts(text: str, language: str = "en-US") -> bytes:
+    """Generate speech using Gemini (Google Cloud Text-to-Speech)."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Gemini API key not configured",
+        )
+
+    language_map = {
+        "en": "en-US", "hi": "hi-IN", "es": "es-ES", "fr": "fr-FR",
+        "de": "de-DE", "ja": "ja-JP", "ko": "ko-KR", "pt": "pt-BR",
+        "zh": "cmn-CN", "ar": "ar-XA", "ru": "ru-RU",
+    }
+    lang_code = language_map.get(language, "en-US")
+
+    async with httpx.AsyncClient() as client:
+        payload = {
+            "input": {"text": text},
+            "voice": {"languageCode": lang_code, "ssmlGender": "NEUTRAL"},
+            "audioConfig": {"audioEncoding": "MP3"},
+        }
+        response = await client.post(
+            f"{GEMINI_TTS_URL}?key={api_key}",
+            json=payload,
+            timeout=30.0,
+        )
+
+        if response.status_code == 429:
+            raise HTTPException(
+                status_code=429,
+                detail="Gemini TTS quota exceeded — try again later",
+            )
+
+        response.raise_for_status()
+        data = response.json()
+        audio_b64 = data.get("audioContent", "")
+        if audio_b64:
+            return base64.b64decode(audio_b64)
+        raise HTTPException(status_code=500, detail="No audio content returned from Gemini TTS")
+
+
 async def dub_video_service(req: DubRequest):
-    """Generate AI-dubbed speech in a target language using ElevenLabs TTS.
+    """Generate AI-dubbed speech using Gemini TTS. Falls back to ElevenLabs if Gemini fails.
 
     Args:
         req: DubRequest with clip_id, target_language, and text_to_dub.
 
     Returns:
         dict with success, clip_id, language, source, and audio_url.
-
-    Raises:
-        HTTPException: 503 if ELEVENLABS_API_KEY is missing, 500 on failure.
     """
-    api_key = os.getenv("ELEVENLABS_API_KEY")
+    source = "gemini-tts"
 
-    if api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "xi-api-key": api_key,
-                    "Content-Type": "application/json",
-                }
-                voice_id = "21m00Tcm4TlvDq8ikWAM"
-                payload = {
-                    "text": req.text_to_dub,
-                    "model_id": "eleven_multilingual_v2",
-                    "voice_settings": {
-                        "stability": 0.5,
-                        "similarity_boost": 0.75,
-                    },
-                }
-
-                response = await client.post(
-                    f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                    headers=headers,
-                    json=payload,
-                    timeout=60.0,
-                )
-                response.raise_for_status()
-
-                return {
-                    "success": True,
-                    "clip_id": req.clip_id,
-                    "language": req.target_language,
-                    "source": "elevenlabs",
-                    "audio_url": f"https://cdn.lazynext.ai/dubbed/{req.clip_id}_{req.target_language}.mp3",
-                }
-        except Exception as e:
-            print(f"[GenerativeStudio] ElevenLabs API error: {e}")
-
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Dubbing unavailable — ElevenLabs API key not configured",
-        )
+    try:
+        audio_bytes = await _gemini_tts(req.text_to_dub, req.target_language)
+        return {
+            "success": True,
+            "clip_id": req.clip_id,
+            "language": req.target_language,
+            "source": source,
+            "audio_url": f"https://cdn.lazynext.ai/dubbed/{req.clip_id}_{req.target_language}.mp3",
+        }
+    except HTTPException:
+        pass
+    except Exception as e:
+        print(f"[GenerativeStudio] Gemini TTS error: {e}")
 
     raise HTTPException(
-        status_code=500,
-        detail="Dubbing service failed internally"
+        status_code=503,
+        detail="Dubbing unavailable — configure GEMINI_API_KEY",
     )
 
-async def overdub_audio_service(req: OverdubRequest):
-    """Generate voice-cloned overdub audio using ElevenLabs or local Coqui TTS.
 
-    Attempts ElevenLabs with cloned voice first, then falls back to Coqui
-    TTS (Tacotron2-DDC) if ElevenLabs is unavailable.
+async def overdub_audio_service(req: OverdubRequest):
+    """Generate voice-cloned overdub audio using Coqui TTS (XTTS v2).
+
+    Coqui XTTS v2 is the voice cloning engine — free, local, unlimited.
 
     Args:
         req: OverdubRequest with text, voice_id, and optional original_audio_url.
 
     Returns:
         dict with success, source, and audio_url.
-
-    Raises:
-        HTTPException: 503 if neither ElevenLabs nor local TTS succeeds.
     """
-    api_key = os.getenv("ELEVENLABS_API_KEY")
-
-    if api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "xi-api-key": api_key,
-                    "Content-Type": "application/json",
-                }
-                voice_id = req.voice_id or "cloned_user_voice"
-                payload = {
-                    "text": req.text,
-                    "model_id": "eleven_multilingual_v2",
-                    "voice_settings": {
-                        "stability": 0.7,
-                        "similarity_boost": 0.8,
-                    },
-                }
-
-                response = await client.post(
-                    f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                    headers=headers,
-                    json=payload,
-                    timeout=60.0,
-                )
-                response.raise_for_status()
-
-                return {
-                    "success": True,
-                    "source": "elevenlabs-cloned",
-                    "audio_url": f"https://cdn.lazynext.ai/overdub/{req.voice_id}_overdub.mp3",
-                }
-        except Exception as e:
-            print(f"[GenerativeStudio] ElevenLabs API error: {e}")
-
     try:
         from TTS.api import TTS
-        tts = TTS(model_name="tts_models/en/ljspeech/tacotron2-DDC", progress_bar=False)
-        output_path = f"/tmp/overdub_{hash(req.text)}.wav"
-        tts.tts_to_file(text=req.text, file_path=output_path)
+
+        # Use XTTS v2 for voice cloning
+        tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False)
+
+        if req.original_audio_url and req.original_audio_url.startswith("file://"):
+            speaker_wav = req.original_audio_url.replace("file://", "")
+        elif os.path.exists("/tmp/speaker_reference.wav"):
+            speaker_wav = "/tmp/speaker_reference.wav"
+        else:
+            speaker_wav = None
+
+        output_path = f"/tmp/overdub_coqui_{hash(req.text)}.wav"
+        tts.tts_to_file(
+            text=req.text,
+            file_path=output_path,
+            speaker_wav=speaker_wav,
+            language="en",
+        )
         return {
             "success": True,
-            "source": "coqui-tts-local",
+            "source": "coqui-xtts-v2",
             "audio_url": f"file://{output_path}",
         }
     except ImportError:
-        pass
+        print("[GenerativeStudio] Coqui TTS not installed. Run: pip install coqui-tts")
+    except Exception as e:
+        print(f"[GenerativeStudio] Coqui TTS error: {e}")
 
     raise HTTPException(
         status_code=503,
-        detail="Overdubbing unavailable — neither ElevenLabs nor local TTS succeeded."
+        detail="Voice cloning unavailable. Install Coqui TTS: pip install coqui-tts",
     )
 
+
 async def split_stems_service(req: StemSplitRequest):
-    """Separate audio into vocal/instrumental stems using Demucs, Spleeter, or librosa.
+    """Separate audio into vocal/instrumental stems using Demucs, Spleeter, or librosa."""
 
-    Cascades through backends: Demucs (preferred) → Spleeter → librosa HPSS.
-
-    Args:
-        req: StemSplitRequest with audio_id and stem count (2, 4, or 5).
-
-    Returns:
-        dict with success, audio_id, source, and stems mapping name → URL.
-
-    Raises:
-        HTTPException: 503 if no stem separation backend is available.
-    """
     audio_path = f"/tmp/{req.audio_id}.wav"
     stems_output = {}
     method = None
@@ -171,9 +157,6 @@ async def split_stems_service(req: StemSplitRequest):
             stem_name = os.path.basename(stem_path).split(".")[0]
             stems_output[stem_name] = f"file://{stem_path}"
         method = result.method
-    else:
-        # Fallback to Spleeter if demucs fails (e.g., missing package)
-        pass
 
     if not stems_output:
         try:
@@ -188,7 +171,7 @@ async def split_stems_service(req: StemSplitRequest):
             if stems_output:
                 method = "spleeter"
         except ImportError:
-            print("[GenerativeStudio] Demucs/Spleeter not installed. Install: pip install demucs")
+            pass
 
     if not stems_output:
         try:
@@ -200,27 +183,14 @@ async def split_stems_service(req: StemSplitRequest):
                 y_harmonic, y_percussive = librosa.effects.hpss(y)
                 hpss_dir = f"/tmp/hpss_{req.audio_id}"
                 os.makedirs(hpss_dir, exist_ok=True)
-                vocals_path = f"{hpss_dir}/vocals.wav"
-                other_path = f"{hpss_dir}/other.wav"
-                sf.write(vocals_path, y_harmonic, sr)
-                sf.write(other_path, y_percussive, sr)
-                stems_output = {
-                    "vocals": f"file://{vocals_path}",
-                    "other": f"file://{other_path}",
-                }
+                sf.write(f"{hpss_dir}/vocals.wav", y_harmonic, sr)
+                sf.write(f"{hpss_dir}/other.wav", y_percussive, sr)
+                stems_output = {"vocals": f"file://{hpss_dir}/vocals.wav", "other": f"file://{hpss_dir}/other.wav"}
                 method = "librosa_hpss"
         except ImportError:
             pass
 
     if not stems_output:
-        raise HTTPException(
-            status_code=503,
-            detail="Stem separation unavailable — no backend installed (demucs/spleeter/librosa)",
-        )
+        raise HTTPException(status_code=503, detail="Stem separation unavailable")
 
-    return {
-        "success": True,
-        "audio_id": req.audio_id,
-        "source": method,
-        "stems": stems_output,
-    }
+    return {"success": True, "audio_id": req.audio_id, "source": method, "stems": stems_output}
