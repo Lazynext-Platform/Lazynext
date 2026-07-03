@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cargo install cargo-chef --version 0.1.68
-RUN cargo install sccache --version 0.9.2
+RUN cargo install sccache --version 0.9.2 || cargo install sccache --version 0.7.7 || echo "sccache unavailable — continuing without cache"
 
 # mold: fast linker (x86_64 only; fallback to lld on aarch64)
 RUN set -eux; \
