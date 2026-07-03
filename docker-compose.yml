@@ -70,7 +70,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-SET_BETTER_AUTH_SECRET_ENV_VAR}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      - DODO_WEBHOOK_SECRET=${DODO_WEBHOOK_SECRET:-dwhsec_placeholder}
       - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-SET_MCP_API_KEY_ENV_VAR}
       - API_GATEWAY_URL=${API_GATEWAY_URL:-http://localhost:8005}
       - REDIS_URL=redis://redis:6379/
@@ -120,11 +120,10 @@ services:
       - NEXT_PUBLIC_SOCIAL_PUBLISH_URL=http://localhost:8007
       - NEXT_PUBLIC_POSTHOG_KEY=phc_dev
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
-      - NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=${NEXT_PUBLIC_STRIPE_PRO_PRICE_ID:-price_pro_placeholder}
-      - NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID=${NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID:-price_studio_placeholder}
+      - DODO_API_KEY=${DODO_API_KEY:-dp_test_placeholder}
+      - DODO_WEBHOOK_SECRET=${DODO_WEBHOOK_SECRET:-dwhsec_placeholder}
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${NEXT_PUBLIC_DODO_PRO_PRICE_ID:-pro_monthly}
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${NEXT_PUBLIC_DODO_STUDIO_PRICE_ID:-studio_monthly}
       - LAZYNEXT_WEBHOOK_URL=${LAZYNEXT_WEBHOOK_URL:-}
       - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-SET_MCP_API_KEY_ENV_VAR}
       - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}

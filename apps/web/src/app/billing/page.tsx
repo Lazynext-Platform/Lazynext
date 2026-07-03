@@ -16,13 +16,13 @@ export default function BillingPage() {
 	const handleUpgrade = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch("/api/stripe/checkout", {
+			const response = await fetch("/api/dodo/checkout", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
-					priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "price_12345",
+					priceId: process.env.NEXT_PUBLIC_DODO_PRO_PRICE_ID || "pro_monthly",
 				}),
 			});
 

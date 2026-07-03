@@ -155,17 +155,17 @@ spec:
                   name: lazynext-secrets
                   key: POSTHOG_KEY
                   optional: true
-            - name: STRIPE_SECRET_KEY
+            - name: DODO_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: STRIPE_SECRET_KEY
+                  key: DODO_API_KEY
                   optional: true
-            - name: STRIPE_WEBHOOK_SECRET
+            - name: DODO_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: STRIPE_WEBHOOK_SECRET
+                  key: DODO_WEBHOOK_SECRET
                   optional: true
             - name: RESEND_API_KEY
               valueFrom:

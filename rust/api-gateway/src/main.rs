@@ -32,8 +32,8 @@ use axum::{Extension, Json, Router};
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
 use lazynext_core::{
-    Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine,
-    RoutineScheduler, Task, TaskQueue,
+    Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine, RoutineScheduler, Task,
+    TaskQueue,
 };
 use serde::Serialize;
 use serde_json::{Value, json};
@@ -215,11 +215,11 @@ async fn main() {
     //   /health           → public (no auth)
     //   /api/v1/...       → authenticated (JWT required)
     //   /api/v1/admin/... → admin-only
-    //   /api/v1/stripe/...→ public (Stripe signs its own webhooks)
+    // /api/v1/dodo/...→ public (Dodo Payments signs its own webhooks)
     let public_routes = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
-        .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
+        .route("/api/v1/dodo/webhook", post(handle_dodo_webhook))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
@@ -257,10 +257,7 @@ async fn main() {
         )
         .route("/api/v1/social/reframe", post(handle_social_reframe))
         .route("/api/v1/social/publish", post(handle_social_publish))
-        .route(
-            "/api/v1/social/metadata",
-            post(handle_social_metadata),
-        )
+        .route("/api/v1/social/metadata", post(handle_social_metadata))
         .route("/api/v1/social/schedule", get(handle_social_schedule))
         // ── Scheduled Routines ──────────────────────────────────────
         .route("/api/v1/routines", post(handle_create_routine))
@@ -271,14 +268,8 @@ async fn main() {
             post(handle_execute_routine),
         )
         // ── Channels ────────────────────────────────────────────────
-        .route(
-            "/api/v1/channels/webhook",
-            post(handle_register_webhook),
-        )
-        .route(
-            "/api/v1/channels/event",
-            post(handle_channel_event),
-        )
+        .route("/api/v1/channels/webhook", post(handle_register_webhook))
+        .route("/api/v1/channels/event", post(handle_channel_event))
         .route("/api/v1/channels", get(handle_list_channels))
         // ── Background Tasks ─────────────────────────────────────────
         .route("/api/v1/tasks", post(handle_enqueue_task))
@@ -482,39 +473,32 @@ async fn handle_admin_dashboard(
     }
 }
 
-// ── Stripe Webhook ────────────────────────────────────────────────────────
+// ── Dodo Payments Webhook ───────────────────────────────────────────────────
 
-/// Maximum age (in seconds) of a webhook timestamp before we reject it.
-/// Stripe recommends a tolerance of ~5 minutes.
-const STRIPE_WEBHOOK_TOLERANCE_SECS: i64 = 300;
-
-async fn handle_stripe_webhook(
+async fn handle_dodo_webhook(
     State(state): State<AppState>,
     headers: HeaderMap,
     body: axum::body::Bytes,
 ) -> Json<Value> {
-    // ── 1. Verify Stripe signature ──────────────────────────────────────
-    let webhook_secret = match std::env::var("STRIPE_WEBHOOK_SECRET") {
+    // ── 1. Verify Dodo Payments signature ───────────────────────────────
+    let webhook_secret = match std::env::var("DODO_WEBHOOK_SECRET") {
         Ok(s) if !s.is_empty() => s,
         _ => {
-            tracing::error!("STRIPE_WEBHOOK_SECRET is not configured — rejecting webhook");
+            tracing::error!("DODO_WEBHOOK_SECRET is not configured — rejecting webhook");
             return Json(json!({ "error": "webhook secret not configured" }));
         }
     };
 
-    let sig_header = match headers
-        .get("stripe-signature")
-        .and_then(|v| v.to_str().ok())
-    {
+    let sig_header = match headers.get("dodo-signature").and_then(|v| v.to_str().ok()) {
         Some(h) => h.to_string(),
         None => {
-            tracing::warn!("Missing Stripe-Signature header");
+            tracing::warn!("Missing dodo-signature header");
             return Json(json!({ "error": "missing signature" }));
         }
     };
 
-    if let Err(e) = verify_stripe_signature(&sig_header, &body, &webhook_secret) {
-        tracing::warn!(%e, "Stripe webhook signature verification failed");
+    if let Err(e) = verify_dodo_signature(&sig_header, &body, &webhook_secret) {
+        tracing::warn!(%e, "Dodo Payments webhook signature verification failed");
         return Json(json!({ "error": format!("signature verification failed: {e}") }));
     }
 
@@ -522,39 +506,30 @@ async fn handle_stripe_webhook(
     let payload: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!(?e, "Failed to parse Stripe webhook JSON");
+            tracing::error!(?e, "Failed to parse Dodo Payments webhook JSON");
             return Json(json!({ "error": "invalid JSON" }));
         }
     };
 
     let event_type = payload["type"].as_str().unwrap_or("unknown");
-    info!(%event_type, "Received verified Stripe webhook");
+    info!(%event_type, "Received verified Dodo Payments webhook");
 
     match event_type {
-        "customer.subscription.updated" | "customer.subscription.created" => {
-            if let Some(sub_obj) = payload["data"]["object"].as_object() {
-                let sub_id = sub_obj["id"].as_str().unwrap_or("unknown");
-                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
-                let status = sub_obj["status"].as_str().unwrap_or("active");
-                let price_id = sub_obj["items"]["data"][0]["price"]["id"]
-                    .as_str()
-                    .unwrap_or("");
-                let period_end = sub_obj["current_period_end"].as_i64().unwrap_or(0);
+        "payment_link.completed" => {
+            if let Some(obj) = payload["data"].as_object() {
+                let sub_id = obj["id"].as_str().unwrap_or("unknown");
+                let customer_id = obj["customer_id"].as_str().unwrap_or("");
+                let price_id = obj["amount"].as_str().unwrap_or("");
+                let period_end = chrono::Utc::now() + chrono::Duration::days(30);
 
-                // Fetch user by Stripe customer ID
-                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
+                if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_id.to_string(),
                         user_id: user.id,
-                        stripe_subscription_id: sub_id.to_string(),
-                        stripe_price_id: price_id.to_string(),
-                        stripe_current_period_end: chrono::DateTime::from_timestamp(period_end, 0)
-                            .unwrap_or_else(chrono::Utc::now),
-                        tier: if status == "active" {
-                            "pro".to_string()
-                        } else {
-                            "free".to_string()
-                        },
+                        dodo_subscription_id: sub_id.to_string(),
+                        dodo_price_id: price_id.to_string(),
+                        dodo_current_period_end: period_end,
+                        tier: "pro".to_string(),
                         created_at: chrono::Utc::now(),
                         updated_at: chrono::Utc::now(),
                     };
@@ -564,107 +539,71 @@ async fn handle_stripe_webhook(
                 }
             }
         }
-        "customer.subscription.deleted" => {
-            // Handle cancellation
-            if let Some(sub_obj) = payload["data"]["object"].as_object() {
-                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
-                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
+        "payment_link.failed" | "payment_link.expired" => {
+            if let Some(obj) = payload["data"].as_object() {
+                let customer_id = obj["customer_id"].as_str().unwrap_or("");
+                if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
-                        id: sub_obj["id"].as_str().unwrap_or("").to_string(),
+                        id: obj["id"].as_str().unwrap_or("").to_string(),
                         user_id: user.id,
-                        stripe_subscription_id: String::new(),
-                        stripe_price_id: String::new(),
-                        stripe_current_period_end: chrono::Utc::now(),
+                        dodo_subscription_id: String::new(),
+                        dodo_price_id: String::new(),
+                        dodo_current_period_end: chrono::Utc::now(),
                         tier: "free".to_string(),
                         created_at: chrono::Utc::now(),
                         updated_at: chrono::Utc::now(),
                     };
                     if let Err(e) = state.db.upsert_subscription(&sub).await {
-                        tracing::error!(?e, "Failed to cancel subscription");
+                        tracing::error!(?e, "Failed to downgrade subscription");
                     }
                 }
             }
         }
         _ => {
-            info!(%event_type, "Unhandled Stripe event type");
+            info!(%event_type, "Unhandled Dodo Payments event type");
         }
     }
 
     Json(json!({ "received": true }))
 }
 
-/// Verifies a Stripe webhook signature (v1) using HMAC-SHA256.
+/// Verifies a Dodo Payments webhook signature using HMAC-SHA256.
 ///
-/// The `Stripe-Signature` header has the format:
-///   `t=<timestamp>,v1=<hex_signature>[,v0=...]`
-///
-/// The signed payload is `"<timestamp>.<raw_body>"`.
-fn verify_stripe_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<(), String> {
+/// The `dodo-signature` header contains the hex-encoded HMAC-SHA256
+/// of the raw request body using the webhook secret as the key.
+fn verify_dodo_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<(), String> {
     use hmac::{Hmac, Mac, digest::KeyInit};
     use sha2::Sha256;
 
     type HmacSha256 = Hmac<Sha256>;
 
-    let mut timestamp: Option<&str> = None;
-    let mut v1_signatures: Vec<&str> = Vec::new();
-
-    for part in sig_header.split(',') {
-        let part = part.trim();
-        if let Some(ts) = part.strip_prefix("t=") {
-            timestamp = Some(ts);
-        } else if let Some(sig) = part.strip_prefix("v1=") {
-            v1_signatures.push(sig);
-        }
-    }
-
-    let ts = timestamp.ok_or_else(|| "no timestamp in Stripe-Signature".to_string())?;
-    if v1_signatures.is_empty() {
-        return Err("no v1 signature in Stripe-Signature".to_string());
-    }
-
-    // Check timestamp freshness to prevent replay attacks
-    let ts_num: i64 = ts
-        .parse()
-        .map_err(|_| "invalid timestamp in Stripe-Signature".to_string())?;
-    let now = chrono::Utc::now().timestamp();
-    if (now - ts_num).abs() > STRIPE_WEBHOOK_TOLERANCE_SECS {
-        return Err(format!(
-            "webhook timestamp too old ({ts_num}), current time is {now}"
-        ));
-    }
-
-    // Compute expected signature: HMAC-SHA256(secret, "timestamp.body")
     let mut mac =
         HmacSha256::new_from_slice(secret.as_bytes()).map_err(|e| format!("HMAC init: {e}"))?;
-    mac.update(ts.as_bytes());
-    mac.update(b".");
     mac.update(body);
     let expected = hex::encode(mac.finalize().into_bytes());
 
-    // Constant-time comparison against all provided v1 signatures
-    if v1_signatures.iter().any(|sig| {
-        // Use constant-time comparison to prevent timing attacks
-        sig.len() == expected.len()
-            && sig
-                .as_bytes()
-                .iter()
-                .zip(expected.as_bytes())
-                .fold(0u8, |acc, (a, b)| acc | (a ^ b))
-                == 0
-    }) {
+    // Constant-time comparison to prevent timing attacks
+    if sig_header.len() == expected.len()
+        && sig_header
+            .as_bytes()
+            .iter()
+            .zip(expected.as_bytes())
+            .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+            == 0
+    {
         Ok(())
     } else {
         Err("signature mismatch".to_string())
     }
 }
 
-async fn find_user_by_stripe_customer(
+async fn find_user_by_dodo_customer(
     db: &DbStore,
     customer_id: &str,
 ) -> Result<Option<db::User>, sqlx::Error> {
     use sqlx::Row;
     let row = sqlx::query(
-        "SELECT id, email, name, email_verified, image, role, stripe_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE stripe_customer_id = $1",
+        "SELECT id, email, name, email_verified, image, role, dodo_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE dodo_customer_id = $1",
     )
     .bind(customer_id)
     .fetch_optional(db.pool_ref()?)
@@ -677,7 +616,7 @@ async fn find_user_by_stripe_customer(
         email_verified: r.get("email_verified"),
         image: r.get("image"),
         role: r.get("role"),
-        stripe_customer_id: r.get("stripe_customer_id"),
+        dodo_customer_id: r.get("dodo_customer_id"),
         ai_credits: r.get("ai_credits"),
         created_at: r.get("created_at"),
         updated_at: r.get("updated_at"),
@@ -1066,8 +1005,7 @@ async fn handle_integration_connect(
 // middleware) and rate limiting.
 
 fn social_publish_url() -> String {
-    std::env::var("SOCIAL_PUBLISH_URL")
-        .unwrap_or_else(|_| "http://localhost:8007".to_string())
+    std::env::var("SOCIAL_PUBLISH_URL").unwrap_or_else(|_| "http://localhost:8007".to_string())
 }
 
 /// POST /api/v1/social/reframe — Proxy auto-reframe to social-publish
@@ -1147,9 +1085,7 @@ async fn handle_social_metadata(
 }
 
 /// GET /api/v1/social/schedule — List scheduled posts from social-publish
-async fn handle_social_schedule(
-    Extension(claims): Extension<AuthClaims>,
-) -> Json<Value> {
+async fn handle_social_schedule(Extension(claims): Extension<AuthClaims>) -> Json<Value> {
     let base = social_publish_url();
     let client = reqwest::Client::new();
     match client.get(format!("{base}/schedule")).send().await {

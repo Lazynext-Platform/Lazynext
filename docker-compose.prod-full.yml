@@ -596,7 +596,7 @@ services:
       - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
       - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/3
-      - STRIPE_WEBHOOK_SECRET_FILE=/run/secrets/stripe_webhook_secret
+      - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
       - LAZYNEXT_MCP_API_KEY_FILE=/run/secrets/mcp_api_key
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=api-gateway
@@ -609,8 +609,8 @@ services:
     secrets:
       - source: lazynext_better_auth_secret
         target: better_auth_secret
-      - source: lazynext_stripe_webhook_secret
-        target: stripe_webhook_secret
+      - source: lazynext_dodo_webhook_secret
+        target: dodo_webhook_secret
       - source: lazynext_mcp_api_key
         target: mcp_api_key
     labels:
@@ -773,11 +773,10 @@ services:
       - NEXT_PUBLIC_RENDER_SERVICE_URL=https://api.${DOMAIN:-lazynext.com}/render
       - NEXT_PUBLIC_POSTHOG_KEY=${POSTHOG_KEY:-}
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-      - STRIPE_SECRET_KEY_FILE=/run/secrets/stripe_secret_key
-      - STRIPE_WEBHOOK_SECRET_FILE=/run/secrets/stripe_webhook_secret
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-}
-      - NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=${STRIPE_PRO_PRICE_ID:-}
-      - NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID=${STRIPE_STUDIO_PRICE_ID:-}
+      - DODO_API_KEY_FILE=/run/secrets/dodo_api_key
+      - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${DODO_PRO_PRICE_ID:-pro_monthly}
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${DODO_STUDIO_PRICE_ID:-studio_monthly}
       - RESEND_API_KEY_FILE=/run/secrets/resend_api_key
       - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
       - MARBLE_WORKSPACE_KEY_FILE=/run/secrets/marble_workspace_key
@@ -796,10 +795,10 @@ services:
     secrets:
       - source: lazynext_better_auth_secret
         target: better_auth_secret
-      - source: lazynext_stripe_secret_key
-        target: stripe_secret_key
-      - source: lazynext_stripe_webhook_secret
-        target: stripe_webhook_secret
+      - source: lazynext_dodo_api_key
+        target: dodo_api_key
+      - source: lazynext_dodo_webhook_secret
+        target: dodo_webhook_secret
       - source: lazynext_resend_api_key
         target: resend_api_key
       - source: lazynext_freesound_client_id
@@ -1233,9 +1232,9 @@ secrets:
     external: true
   lazynext_better_auth_secret:
     external: true
-  lazynext_stripe_secret_key:
+  lazynext_dodo_api_key:
     external: true
-  lazynext_stripe_webhook_secret:
+  lazynext_dodo_webhook_secret:
     external: true
   lazynext_resend_api_key:
     external: true

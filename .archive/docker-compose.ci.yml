@@ -123,9 +123,10 @@ services:
       - NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
       - NEXT_PUBLIC_POSTHOG_KEY=phc_ci
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-      - STRIPE_SECRET_KEY=sk_test_ci_placeholder
-      - STRIPE_WEBHOOK_SECRET=whsec_ci_placeholder
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_ci_placeholder
+      - DODO_API_KEY=dp_test_ci_placeholder
+      - DODO_WEBHOOK_SECRET=dwhsec_ci_placeholder
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=pro_monthly
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=studio_monthly
       - RESEND_API_KEY=re_ci_placeholder
       - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
       - MARBLE_WORKSPACE_KEY=ci-placeholder

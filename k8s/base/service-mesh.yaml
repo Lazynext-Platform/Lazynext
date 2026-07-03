@@ -796,18 +796,18 @@ spec:
 # ═══════════════════════════════════════════════════════════════════
 
 ---
-# Allow mesh workloads to reach Stripe API for payment processing
+# Allow mesh workloads to reach Dodo Payments API for payment processing
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
-  name: stripe-api
+  name: dodo-payments-api
   namespace: lazynext
   labels:
     app.kubernetes.io/part-of: lazynext
     app.kubernetes.io/managed-by: kustomize
 spec:
   hosts:
-    - api.stripe.com
+    - api.dodopayments.com
   ports:
     - number: 443
       name: https

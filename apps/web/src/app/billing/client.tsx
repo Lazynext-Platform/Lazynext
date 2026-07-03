@@ -1,6 +1,6 @@
 /**
  * BillingPageClient — SaaS billing portal with plan comparison cards,
- * current usage telemetry, and Stripe checkout integration.
+ * current usage telemetry, and Dodo Payments checkout integration.
  *
  * Renders three plan tiers (Hobby / Pro / Studio) and fetches live
  * AI credit + render hour usage from the server. Falls back gracefully
@@ -53,7 +53,7 @@ const PLANS = [
 			"50GB Cloud storage",
 		],
 		cta: "Upgrade to Pro",
-		priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID || "",
+		priceId: process.env.NEXT_PUBLIC_DODO_PRO_PRICE_ID || "",
 		highlight: true,
 	},
 	{
@@ -68,7 +68,7 @@ const PLANS = [
 			"Dedicated Render Node",
 		],
 		cta: "Upgrade to Studio",
-		priceId: process.env.NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID || "",
+		priceId: process.env.NEXT_PUBLIC_DODO_STUDIO_PRICE_ID || "",
 		highlight: false,
 	},
 ];
@@ -124,10 +124,10 @@ export function BillingPageClient() {
 			toast.loading(`Preparing checkout for ${planName}...`, {
 				id: "checkout",
 			});
-			const res = await fetch("/api/stripe/checkout", {
+			const res = await fetch("/api/dodo/checkout", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ priceId, mode: "subscription" }),
+				body: JSON.stringify({ priceId }),
 			});
 
 			if (!res.ok) {
@@ -142,7 +142,7 @@ export function BillingPageClient() {
 		} catch (error) {
 			console.error(error);
 			toast.error(
-				"Error connecting to Stripe. Did you add your STRIPE_SECRET_KEY?",
+				"Error connecting to Dodo Payments. Did you add your DODO_API_KEY?",
 				{ id: "checkout" },
 			);
 		}

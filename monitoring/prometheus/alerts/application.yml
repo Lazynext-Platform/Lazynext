@@ -18,7 +18,7 @@
 #   pre-processing:    whisper_inference_duration_seconds,
 #                      sam2_inference_duration_seconds
 #   collab-server:     websocket_connections_active, websocket_disconnects_total
-#   api-gateway:       stripe_webhook_total, stripe_webhook_errors_total
+#   api-gateway:       dodo_webhook_total, dodo_webhook_errors_total
 #   analytics-service: media_processing_queue_size
 
 groups:
@@ -220,9 +220,9 @@ groups:
       - alert: PaymentProcessingFailure
         expr: |
           (
-            sum(rate(stripe_webhook_errors_total[15m]))
+            sum(rate(dodo_webhook_errors_total[15m]))
             /
-            sum(rate(stripe_webhook_total[15m]))
+            sum(rate(dodo_webhook_total[15m]))
           ) > 0
           or
           sum(rate(http_requests_total{service="lazynext-web",path=~"/api/payments.*",status_code=~"5.."}[10m])) > 0
@@ -233,23 +233,23 @@ groups:
         annotations:
           summary: "Payment processing failure detected"
           description: |
-            Stripe payment webhooks or payment API endpoints are returning errors.
-            Revenue may be impacted. Check Stripe dashboard for outages and
+            Dodo Payments webhooks or payment API endpoints are returning errors.
+            Revenue may be impacted. Check Dodo Payments dashboard for outages and
             verify webhook secret configuration.
 
-      - alert: StripeWebhookMissing
+      - alert: DodoWebhookMissing
         expr: |
-          rate(stripe_webhook_total[1h]) == 0
+          rate(dodo_webhook_total[1h]) == 0
         for: 1h
         labels:
           severity: warning
           service: payments
         annotations:
-          summary: "No Stripe webhooks received in the last hour"
+          summary: "No Dodo Payments webhooks received in the last hour"
           description: |
-            Zero Stripe webhooks received in the last hour during active hours.
+            Zero Dodo Payments webhooks received in the last hour during active hours.
             This may indicate a webhook delivery failure or configuration issue.
-            Check Stripe Dashboard → Webhooks → Events.
+            Check Dodo Payments Dashboard → Webhooks → Events.
 
   # ── Database ────────────────────────────────────────────────────
   - name: lazynext-database

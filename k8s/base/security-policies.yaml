@@ -174,12 +174,12 @@ spec:
     - secretKey: ELEVENLABS_API_KEY
       remoteRef:
         key: elevenlabs--api--key
-    - secretKey: STRIPE_SECRET_KEY
+    - secretKey: DODO_API_KEY
       remoteRef:
-        key: stripe--secret--key
-    - secretKey: STRIPE_WEBHOOK_SECRET
+        key: dodo--api--key
+    - secretKey: DODO_WEBHOOK_SECRET
       remoteRef:
-        key: stripe--webhook--secret
+        key: dodo--webhook--secret
     - secretKey: RESEND_API_KEY
       remoteRef:
         key: resend--api--key

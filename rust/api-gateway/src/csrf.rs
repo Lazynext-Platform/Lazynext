@@ -43,8 +43,8 @@ pub async fn csrf_protection(req: Request, next: Next) -> Result<Response, Statu
         return Ok(next.run(req).await);
     }
 
-    // Skip CSRF for Stripe webhooks (Stripe signs its own requests)
-    if req.uri().path().starts_with("/api/v1/stripe/") {
+    // Skip CSRF for Dodo Payments webhooks (Dodo Payments signs its own requests)
+    if req.uri().path().starts_with("/api/v1/dodo/") {
         return Ok(next.run(req).await);
     }
 

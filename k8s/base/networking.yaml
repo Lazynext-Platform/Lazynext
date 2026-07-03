@@ -295,7 +295,7 @@ spec:
           protocol: TCP
 ---
 # Allow egress to external internet for API/LLM/registry access
-# Needed by web (Stripe, PostHog, Resend), sync (LLM APIs),
+# Needed by web (Dodo Payments, PostHog, Resend), sync (LLM APIs),
 # pre-processing/generative-studio (Replicate, ElevenLabs, HuggingFace),
 # and all pods for image pulls
 apiVersion: networking.k8s.io/v1

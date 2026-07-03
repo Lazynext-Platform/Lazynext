@@ -229,7 +229,7 @@ groups:
         expr: |
           sum(rate(
             {job="lazynext-web"}
-            |~ "(stripe.*error|payment.*fraud|chargeback|refund.*suspicious)"
+            |~ "(dodo.*error|payment.*fraud|chargeback|refund.*suspicious)"
             [5m]
           )) > 0
         for: 2m
@@ -240,5 +240,5 @@ groups:
         annotations:
           summary: "Payment anomaly detected in logs"
           description: |
-            Stripe error or suspicious payment activity detected.
-            Query: {job="lazynext-web"} |~ "stripe.*error|payment.*fraud|chargeback"
+            Dodo Payments error or suspicious payment activity detected.
+            Query: {job="lazynext-web"} |~ "dodo.*error|payment.*fraud|chargeback"

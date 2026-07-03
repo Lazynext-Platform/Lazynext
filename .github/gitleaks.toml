@@ -78,12 +78,12 @@ title = "Lazynext Gitleaks Config"
   tags = ["slack"]
 
 [[rules]]
-  id = "stripe-key"
-  description = "Stripe Secret Key"
-  regex = '''(?:sk_live_|sk_test_|rk_live_|rk_test_|whsec_)[0-9a-zA-Z]{24,}'''
+  id = "dodo-key"
+  description = "Dodo Payments API Key"
+  regex = '''(?:dp_live_|dp_test_|dwhsec_)[0-9a-zA-Z]{24,}'''
   [rules.allowlist]
-    regexes = ['''(?i)placeholder|sk_test_placeholder''']
-  tags = ["stripe"]
+    regexes = ['''(?i)placeholder|dp_test_placeholder''']
+  tags = ["dodo"]
 
 [[rules]]
   id = "jwt-secret"

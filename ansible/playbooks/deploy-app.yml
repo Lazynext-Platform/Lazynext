@@ -131,7 +131,7 @@
             DATABASE_URL_FILE: /run/secrets/postgres_password
             BETTER_AUTH_SECRET: "{{ vault_better_auth_secret | default(mandatory) }}"
             REDIS_URL: "{{ vault_redis_url | default(omit) }}"
-            STRIPE_SECRET_KEY: "{{ vault_stripe_secret_key | default('') }}"
+            DODO_API_KEY: "{{ vault_dodo_api_key | default('') }}"
             RESEND_API_KEY: "{{ vault_resend_api_key | default('') }}"
             AZURE_STORAGE_CONNECTION_STRING: "{{ vault_azure_storage_connection_string | default('') }}"
 

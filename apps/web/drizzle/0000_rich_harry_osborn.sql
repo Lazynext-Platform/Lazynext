@@ -65,9 +65,9 @@ CREATE TABLE "session" (
 CREATE TABLE "subscriptions" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
-	"stripe_subscription_id" text NOT NULL,
-	"stripe_price_id" text NOT NULL,
-	"stripe_current_period_end" timestamp NOT NULL,
+	"dodo_subscription_id" text NOT NULL,
+	"dodo_price_id" text NOT NULL,
+	"dodo_current_period_end" timestamp NOT NULL,
 	"tier" text DEFAULT 'free' NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL
@@ -98,7 +98,7 @@ CREATE TABLE "user" (
 	"email_verified" boolean NOT NULL,
 	"image" text,
 	"role" text DEFAULT 'user' NOT NULL,
-	"stripe_customer_id" text,
+	"dodo_customer_id" text,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp NOT NULL,
 	CONSTRAINT "user_email_unique" UNIQUE("email")
