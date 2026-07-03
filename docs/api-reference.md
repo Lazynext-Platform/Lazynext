@@ -280,7 +280,7 @@ Delete a project and all associated media (Admin role required).
 
 ### `POST /api/v1/autonomous_edit`
 
-Send a natural language editing command to the Lazynext AI Agent AI Copilot.
+Send a natural language editing command to the Lazynext AI Agent Copilot.
 
 **Request**:
 ```json
@@ -1173,7 +1173,7 @@ All error responses follow the format:
 | Endpoint | Protocol | Description |
 |----------|----------|-------------|
 | `ws://localhost:8004/ws/:project_id` | CRDT JSON | Real-time timeline sync |
-| `ws://localhost:8002/ws/:project_id` | CRDT JSON | Lazynext AI Agent AI streaming responses |
+| `ws://localhost:8002/ws/:project_id` | CRDT JSON | Lazynext AI Agent streaming responses |
 
 ---
 

@@ -1,7 +1,7 @@
 /**
  * Lazynext AI Agent Agent SDK — TypeScript
  *
- * Programmatic access to the Lazynext AI Agent AI agent loop for NLE timeline
+ * Programmatic access to the Lazynext AI Agent agent loop for NLE timeline
  * operations. Natural language prompts are translated into CRDT
  * timeline mutations via the Lazynext API Gateway.
  *
@@ -65,7 +65,7 @@ import type {
 // ── Lazynext AI AgentAgent ────────────────────────────────────────────────────────────
 
 /**
- * Primary entry point for the Lazynext AI Agent AI agent.
+ * Primary entry point for the Lazynext AI Agent agent.
  *
  * Communicates with the Lazynext API Gateway (default `http://localhost:8005`)
  * to translate natural language into CRDT timeline operations.

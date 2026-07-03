@@ -1,6 +1,6 @@
 # Lazynext AI Agent Agent SDK
 
-Programmatic SDK for the Lazynext Lazynext AI Agent AI Copilot — a reusable agent loop that translates natural language into CRDT timeline operations. Available in **TypeScript** and **Python**.
+Programmatic SDK for the Lazynext Lazynext AI Agent Copilot — a reusable agent loop that translates natural language into CRDT timeline operations. Available in **TypeScript** and **Python**.
 
 ## Quick Start
 
@@ -106,7 +106,7 @@ rules.addRule({ paths: ["audio/**"], content: "Normalize to -16 LUFS", priority:
 └─────────────────┘                   └────────┬─────────┘
                                                │
                                     ┌──────────┴──────────┐
-                                    │  Lazynext AI Agent AI Copilot │
+                                    │  Lazynext AI Agent Copilot │
                                     │  NL → CRDT Engine   │
                                     └─────────────────────┘
 ```

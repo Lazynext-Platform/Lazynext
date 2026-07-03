@@ -329,7 +329,7 @@ export default function EditorClient({ project }: { project: Project }) {
 		},
 	]);
 
-	// Phase 31: Lazynext AI Agent AI Copilot State
+	// Phase 31: Lazynext AI Agent Copilot State
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [copilotPrompt, setCopilotPrompt] = useState("");
 	const [isCopilotThinking, setIsCopilotThinking] = useState(false);
@@ -462,7 +462,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							})),
 						}));
 						setSelectedClipId(null);
-						toast.success("Lazynext AI Agent AI deleted the clip.");
+						toast.success("Lazynext AI Agent deleted the clip.");
 					} else if (call.name === "color_grade" && selectedClipId) {
 						const look = (call.input as any).look || "default";
 						setProjectData((prev) => ({
@@ -474,7 +474,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								),
 							})),
 						}));
-						toast.success(`Lazynext AI Agent AI applied color grade: ${look}`);
+						toast.success(`Lazynext AI Agent applied color grade: ${look}`);
 					}
 					// Expand with other mutations as needed...
 				}
@@ -515,13 +515,13 @@ export default function EditorClient({ project }: { project: Project }) {
 					}
 					return newProject;
 				});
-				toast.success(`Lazynext AI Agent AI applied ${data.crdt_patches.length} structural edits!`);
+				toast.success(`Lazynext AI Agent applied ${data.crdt_patches.length} structural edits!`);
 			}
 
 			setCopilotHistory((prev) => [...prev, aiMsg]);
 		} catch (err) {
 			console.error("Copilot Error:", err);
-			const errMsg = err instanceof Error ? err.message : "Lazynext AI Agent AI encountered an error.";
+			const errMsg = err instanceof Error ? err.message : "Lazynext AI Agent encountered an error.";
 			toast.error(errMsg);
 			setCopilotHistory((prev) => [
 				...prev,

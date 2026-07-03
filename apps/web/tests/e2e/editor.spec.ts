@@ -30,7 +30,7 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		await expect(copilot).toBeVisible();
 	});
 
-	test("should interact with Lazynext AI Agent AI Copilot", async ({ page }) => {
+	test("should interact with Lazynext AI Agent Copilot", async ({ page }) => {
 		await page.goto("/editor");
 
 		// Check for the AI chat input
@@ -43,7 +43,7 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		await expect(sendBtn.first()).toBeVisible();
 	});
 
-	test("should run a full Lazynext AI Agent AI orchestration round-trip", async ({ page }) => {
+	test("should run a full Lazynext AI Agent orchestration round-trip", async ({ page }) => {
 		await page.goto("/editor");
 
 		// Locate the Lazynext AI Agent chat input and send a command

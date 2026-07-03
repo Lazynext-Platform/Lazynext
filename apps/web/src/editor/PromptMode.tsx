@@ -1,5 +1,5 @@
 /**
- * Spotlight-style command interface for the Lazynext AI Agent AI Copilot.
+ * Spotlight-style command interface for the Lazynext AI Agent Copilot.
  *
  * Renders a full-screen glassmorphic overlay with a text prompt,
  * suggestion chips, and a live WGPU preview canvas. Submitted

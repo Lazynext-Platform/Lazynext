@@ -7,7 +7,7 @@
 #### All 7 formats — verified status
 | Format | Status | Evidence |
 |---|---|---|
-| Web | ✅ **live end-to-end** | auth, dashboard, editor, Lazynext AI Agent AI loop, 0 errors |
+| Web | ✅ **live end-to-end** | auth, dashboard, editor, Lazynext AI Agent loop, 0 errors |
 | CLI | ✅ **live** | full 2.000s H.264 render @ 49.5fps |
 | API Gateway | ✅ **live** | /health, swagger, OpenAPI, JWT+API key auth |
 | MCP Server | ✅ **live** | initialize handshake, auth enforced |

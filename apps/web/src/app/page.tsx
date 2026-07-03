@@ -488,7 +488,7 @@ export default function Home() {
 									</h3>
 									<p className="text-white/40 leading-relaxed text-lg">
 										Stop looking for B-Roll. The Visionary
-										and Lazynext AI Agent AI agents analyze your
+										and Lazynext AI Agent agents analyze your
 										timeline structure and proactively
 										orchestrate the Render Farm to
 										generate missing assets.

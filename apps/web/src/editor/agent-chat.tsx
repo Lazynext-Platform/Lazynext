@@ -1,5 +1,5 @@
 /**
- * Agent Chat panel for conversing with the Lazynext AI Agent AI Copilot.
+ * Agent Chat panel for conversing with the Lazynext AI Agent Copilot.
  *
  * Enhanced with suggested prompt chips, typing indicator, slash command
  * autocomplete, agent suggestion cards, and error retry buttons.
