@@ -6,7 +6,7 @@ The Lazynext MCP Server exposes the entire video editing platform as tools, reso
 
 ## What is MCP?
 
-The **Model Context Protocol** is an open standard by Anthropic that lets AI applications (Claude Desktop, Cursor, Cline, etc.) connect to external tools and data sources. Instead of building custom integrations, you configure your MCP client with a server that exposes a set of tools, resources, and prompts.
+The **Model Context Protocol** is an open standard that lets AI applications connect to external tools and data sources. Any MCP-compatible client can use Lazynext's server.
 
 With Lazynext's MCP server, an AI agent can read your timeline, apply edits, add effects, manage tracks, and export videos — all through natural language.
 
@@ -203,9 +203,9 @@ The key is passed in JSON-RPC params (`_api_key` field) for every authenticated 
 
 ## How to Connect
 
-### Claude Desktop
+### MCP Client Setup
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+Add to your MCP client's configuration file:
 
 ```json
 {
@@ -220,7 +220,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 }
 ```
 
-Restart Claude Desktop. The Lazynext tools will appear in the tools menu.
+Restart your MCP client. The Lazynext tools will appear in the tools menu.
 
 ### Cursor
 
