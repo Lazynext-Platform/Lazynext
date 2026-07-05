@@ -88,10 +88,10 @@ async fn handle_socket(
                 }
                 let mut stream = pubsub.on_message();
                 while let Some(msg) = stream.next().await {
-                    if let Ok(payload) = msg.get_payload::<String>() {
-                        if sender.send(Message::Text(payload.into())).await.is_err() {
-                            break;
-                        }
+                    if let Ok(payload) = msg.get_payload::<String>()
+                        && sender.send(Message::Text(payload.into())).await.is_err()
+                    {
+                        break;
                     }
                 }
             }
@@ -150,7 +150,7 @@ async fn handle_socket(
                         nle.apply_operation(op);
                         let project_data = nle.get_project_data();
                         let value =
-                            serde_json::to_value(&project_data).unwrap_or(serde_json::Value::Null);
+                            serde_json::to_value(project_data).unwrap_or(serde_json::Value::Null);
                         if let Err(e) = state.db.update_project_data(&project_id, &value).await {
                             error!("Failed to persist CRDT op to Postgres: {}", e);
                         }

@@ -75,10 +75,7 @@ fn resolve_command(_source: &Channel, message: &str) -> (String, String) {
     let msg_lower = message.to_lowercase();
 
     // Auto-color grade
-    if msg_lower.contains("grade")
-        || msg_lower.contains("color")
-        || msg_lower.contains("colour")
-    {
+    if msg_lower.contains("grade") || msg_lower.contains("color") || msg_lower.contains("colour") {
         return ("color_grade".into(), "Applying auto color grade".into());
     }
 
@@ -126,10 +123,7 @@ fn resolve_command(_source: &Channel, message: &str) -> (String, String) {
     }
 
     // Default — treat as autonomous edit
-    (
-        "autonomous_edit".into(),
-        format!("Processing: {message}"),
-    )
+    ("autonomous_edit".into(), format!("Processing: {message}"))
 }
 
 // ── Channel Manager ────────────────────────────────────────────────────────
@@ -146,12 +140,28 @@ impl ChannelManager {
     }
 
     /// Register a new webhook or messaging channel for push events.
+    /// Validates that the URL starts with http/https and the secret is non-empty.
     pub fn register_webhook(
         &mut self,
         channel: Channel,
         url: String,
         secret: String,
     ) -> ChannelRegistration {
+        let url = url.trim().to_string();
+        if !url.starts_with("http://") && !url.starts_with("https://") {
+            eprintln!(
+                "[ChannelManager] Warning: webhook URL must start with http:// or https:// — got: {}",
+                url
+            );
+        }
+        if url.len() > 4096 {
+            eprintln!("[ChannelManager] Warning: webhook URL exceeds 4096 character maximum");
+        }
+        if secret.is_empty() {
+            eprintln!(
+                "[ChannelManager] Warning: webhook secret is empty — HMAC validation will fail"
+            );
+        }
         let id = uuid::Uuid::new_v4().to_string();
         let reg = ChannelRegistration {
             id: id.clone(),
@@ -171,8 +181,7 @@ impl ChannelManager {
 
     /// List all registered channels.
     pub fn list_channels(&self) -> Vec<ChannelRegistration> {
-        let mut list: Vec<ChannelRegistration> =
-            self.channels.values().cloned().collect();
+        let mut list: Vec<ChannelRegistration> = self.channels.values().cloned().collect();
         list.sort_by(|a, b| a.created_at.cmp(&b.created_at));
         list
     }
@@ -190,8 +199,7 @@ impl ChannelManager {
         &self,
         event: ChannelEvent,
     ) -> Result<ChannelEventResult, String> {
-        let (command, action) =
-            resolve_command(&event.source, &event.message);
+        let (command, action) = resolve_command(&event.source, &event.message);
 
         Ok(ChannelEventResult {
             event_id: uuid::Uuid::new_v4().to_string(),
@@ -263,9 +271,7 @@ fn now_iso() -> String {
         }
         (m, d)
     };
-    format!(
-        "{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z"
-    )
+    format!("{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z")
 }
 
 #[cfg(test)]
@@ -274,33 +280,25 @@ mod tests {
 
     #[test]
     fn test_resolve_color_grade() {
-        let (cmd, _) =
-            resolve_command(&Channel::Telegram, "grade this video");
+        let (cmd, _) = resolve_command(&Channel::Telegram, "grade this video");
         assert_eq!(cmd, "color_grade");
     }
 
     #[test]
     fn test_resolve_export() {
-        let (cmd, _) = resolve_command(
-            &Channel::Slack,
-            "export the latest cut",
-        );
+        let (cmd, _) = resolve_command(&Channel::Slack, "export the latest cut");
         assert_eq!(cmd, "export");
     }
 
     #[test]
     fn test_resolve_status() {
-        let (cmd, _) = resolve_command(
-            &Channel::Discord,
-            "what's the status?",
-        );
+        let (cmd, _) = resolve_command(&Channel::Discord, "what's the status?");
         assert_eq!(cmd, "project_status");
     }
 
     #[test]
     fn test_resolve_unknown() {
-        let (cmd, _) =
-            resolve_command(&Channel::Webhook, "do something weird");
+        let (cmd, _) = resolve_command(&Channel::Webhook, "do something weird");
         assert_eq!(cmd, "autonomous_edit");
     }
 

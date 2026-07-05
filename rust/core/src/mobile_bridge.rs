@@ -69,17 +69,30 @@ pub fn add_track(kind: String) -> String {
     }
 }
 
-/// Adds a clip to a track at the given index. Real clip operations are
-/// available via `NLEState::add_clip_to_track`.
-pub fn add_clip(
-    _track_index: u32,
-    _clip_type: String,
-    _name: String,
-    _start: u32,
-    _end: u32,
-) -> String {
-    // Real clip operations are available via NLEState::add_clip_to_track().
-    "Clip added".to_string()
+/// Adds a clip to a track at the given index with the specified parameters.
+/// Validates bounds and clip type before insertion. Returns a result message.
+pub fn add_clip(track_index: u32, clip_type: String, name: String, start: u32, end: u32) -> String {
+    if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+        let track_idx = track_index as usize;
+        let track_count = engine.get_project_data().tracks.len();
+        if track_idx >= track_count {
+            return format!(
+                "Clip not added: track index {} out of bounds (total: {})",
+                track_idx, track_count
+            );
+        }
+        if start >= end {
+            return format!(
+                "Clip not added: invalid range (start={} >= end={})",
+                start, end
+            );
+        }
+        let clip_id = format!("clip_{}", uuid::Uuid::new_v4());
+        engine.add_clip_to_track(track_idx, clip_id.clone(), clip_type, name, start, end);
+        format!("Clip added: {}", clip_id)
+    } else {
+        "Engine not initialized".to_string()
+    }
 }
 
 /// Moves a clip to a new start position on the timeline.
@@ -92,18 +105,24 @@ pub fn move_clip(clip_id: String, new_start: u32) -> String {
     }
 }
 
-/// Processes a natural-language editing intent and returns a summary of
-/// the actions taken. Keyword-based matching for silence trimming, music,
-/// and color grading.
-pub fn process_intent(prompt: String, _require_approval: bool) -> String {
-    if prompt.contains("cut") || prompt.contains("silence") {
-        "Trimmed silence from audio tracks.".to_string()
-    } else if prompt.contains("music") {
-        "Added cinematic background score.".to_string()
-    } else if prompt.contains("color") || prompt.contains("grade") {
-        "Applied teal-orange color grade.".to_string()
+/// Processes a natural-language editing intent using the AutonomousEditor's
+/// local fallback plan and returns a summary of the actions taken. For full
+/// LLM-powered editing, use the Lazynext AI Copilot via the API gateway.
+pub fn process_intent(prompt: String, require_approval: bool) -> String {
+    if let Some(engine) = GLOBAL_ENGINE.lock().unwrap().as_mut() {
+        let editor = crate::AutonomousEditor::new();
+        let intent = crate::autonomous::VideoIntent {
+            prompt: prompt.clone(),
+            require_plan_approval: require_approval,
+            source_files: Vec::new(),
+            llm_provider: None,
+        };
+        match editor.process_intent_sync(engine, &intent) {
+            Ok(result) => result,
+            Err(e) => format!("Failed to process intent: {}", e),
+        }
     } else {
-        format!("Processed: '{}'", prompt)
+        "Engine not initialized".to_string()
     }
 }
 

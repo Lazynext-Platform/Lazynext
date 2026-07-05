@@ -6,8 +6,8 @@
 //!
 //! Persistence: All routines are saved to `~/.lazynext/routines.json`.
 
-use crate::autonomous::{AutonomousEditor, VideoIntent};
 use crate::NLEState;
+use crate::autonomous::{AutonomousEditor, VideoIntent};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -77,9 +77,20 @@ impl RoutineScheduler {
     fn load_from_disk(path: &PathBuf) -> HashMap<String, Routine> {
         match std::fs::read_to_string(path) {
             Ok(contents) => {
-                let list: Vec<Routine> =
-                    serde_json::from_str(&contents).unwrap_or_default();
-                list.into_iter().map(|r| (r.id.clone(), r)).collect()
+                match serde_json::from_str::<Vec<Routine>>(&contents) {
+                    Ok(list) => list.into_iter().map(|r| (r.id.clone(), r)).collect(),
+                    Err(e) => {
+                        eprintln!(
+                            "[RoutineScheduler] Failed to parse routines file '{}': {} — routines reset to empty. Previous routines file backed up.",
+                            path.display(),
+                            e
+                        );
+                        // Attempt to back up corrupted file
+                        let backup = format!("{}.corrupted.", path.display());
+                        let _ = std::fs::write(&backup, &contents);
+                        HashMap::new()
+                    }
+                }
             }
             Err(_) => HashMap::new(),
         }
@@ -156,9 +167,7 @@ impl RoutineScheduler {
     /// any that are due.
     pub fn start_scheduler(mut self) {
         tokio::spawn(async move {
-            let mut interval = tokio::time::interval(
-                tokio::time::Duration::from_secs(30),
-            );
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(30));
             loop {
                 interval.tick().await;
                 let due_ids: Vec<String> = self
@@ -170,9 +179,7 @@ impl RoutineScheduler {
 
                 for id in due_ids {
                     if let Err(e) = self.execute_routine(&id).await {
-                        eprintln!(
-                            "[RoutineScheduler] Routine {id} failed: {e}"
-                        );
+                        eprintln!("[RoutineScheduler] Routine {id} failed: {e}");
                     }
                 }
             }
@@ -228,11 +235,21 @@ fn parse_field(s: &str, min: u32, max: u32) -> Result<CronField, String> {
         let step: u32 = step_str
             .parse()
             .map_err(|_| format!("Invalid step: {step_str}"))?;
+        if step == 0 {
+            return Err(format!("Step value must not be zero: {s}"));
+        }
+        // Validate step against range
+        if step > max.saturating_sub(min) + 1 {
+            return Err(format!("Step {step} exceeds range [{min},{max}]"));
+        }
         let start: u32 = if base == "*" {
             min
         } else {
-            base.parse()
-                .map_err(|_| format!("Invalid base: {base}"))?
+            let parsed: u32 = base.parse().map_err(|_| format!("Invalid base: {base}"))?;
+            if parsed < min || parsed > max {
+                return Err(format!("Step base {parsed} out of bounds [{min},{max}]"));
+            }
+            parsed
         };
         return Ok(CronField::Step(start, step));
     }
@@ -279,7 +296,7 @@ fn field_matches(field: &CronField, current: u32) -> bool {
         CronField::Range(l, h) => current >= *l && current <= *h,
         CronField::Step(start, step) => {
             if current >= *start {
-                (current - start) % step == 0
+                (current - start).is_multiple_of(*step)
             } else {
                 false
             }
@@ -340,15 +357,11 @@ fn approx_year_and_doy(days: u64) -> (u64, u64) {
 }
 
 fn days_in_year(y: u64) -> i64 {
-    if is_leap(y) {
-        366
-    } else {
-        365
-    }
+    if is_leap(y) { 366 } else { 365 }
 }
 
 fn is_leap(y: u64) -> bool {
-    (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0)
+    (y.is_multiple_of(4) && !y.is_multiple_of(100)) || y.is_multiple_of(400)
 }
 
 fn doy_to_month_day(doy: u64, leap: bool) -> (u64, u64) {

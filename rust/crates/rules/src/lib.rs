@@ -37,37 +37,69 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+/// A single rule loaded from a `.lazynext/rules/*.md` file.
+///
+/// Rules combine YAML frontmatter (paths, priority, conditions) with
+/// markdown body content that is injected into the AI agent's context
+/// when the rule matches the current file and context.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Rule {
+    /// Comma-separated glob pattern(s) matching target file paths.
+    /// When `None`, the rule is global and applies to all files.
     pub paths: Option<String>,
+    /// Lower numbers = higher priority. Rules are sorted ascending.
     pub priority: i32,
+    /// Human-readable description of the rule.
     pub description: String,
+    /// Optional condition map filtering by context (e.g. `mode: "ai-editing"`).
     #[serde(default)]
     pub when: Option<HashMap<String, String>>,
+    /// The markdown body content injected into the AI context.
     #[serde(skip)]
     pub content: String,
+    /// Path to the source file this rule was loaded from.
     #[serde(skip)]
     pub source_file: PathBuf,
 }
 
+/// Contextual conditions used to filter rules by `when` clauses.
+///
+/// Only rules whose `when` conditions match the current context are
+/// returned by [`RuleSet::get_applicable_rules`]. All fields are
+/// optional — a `None` field never constrains the match.
 #[derive(Debug, Clone, Default)]
 pub struct RuleContext {
+    /// Current editor mode (e.g. `"ai-editing"`, `"export"`).
     pub mode: Option<String>,
+    /// What the user is editing (e.g. `"timeline"`, `"code"`).
     pub editing: Option<String>,
+    /// The current task type (e.g. `"refactor"`, `"fix"`).
     pub task: Option<String>,
+    /// The UI surface being used (e.g. `"web"`, `"native"`).
     pub surface: Option<String>,
 }
 
+/// A collection of [`Rule`]s loaded from a directory, sorted by priority.
+///
+/// Provides methods to query rules by file path glob patterns and
+/// contextual conditions. Rules without `paths` or `when` fields
+/// are treated as global and always match.
 #[derive(Debug, Clone, Default)]
 pub struct RuleSet {
     rules: Vec<Rule>,
 }
 
 impl RuleSet {
+    /// Create an empty rule set.
     pub fn new() -> Self {
         Self { rules: Vec::new() }
     }
 
+    /// Load all `.md` rule files from a directory, sorted by priority.
+    ///
+    /// Each file must have YAML frontmatter between `---` markers.
+    /// Files without frontmatter are skipped with a warning.
+    /// Returns an empty set if the directory does not exist.
     pub fn load_from_directory<P: AsRef<Path>>(dir: P) -> Result<Self, String> {
         let dir = dir.as_ref();
         if !dir.is_dir() {
@@ -87,9 +119,8 @@ impl RuleSet {
                 continue;
             }
 
-            let content = fs::read_to_string(&path).map_err(|e| {
-                format!("Failed to read rule file '{}': {}", path.display(), e)
-            })?;
+            let content = fs::read_to_string(&path)
+                .map_err(|e| format!("Failed to read rule file '{}': {}", path.display(), e))?;
 
             match parse_rule_file(&content, &path) {
                 Ok(rule) => rules.push(rule),
@@ -104,6 +135,9 @@ impl RuleSet {
         Ok(Self { rules })
     }
 
+    /// Return rules that have no path filter and no `when` conditions.
+    ///
+    /// These are applied to every file regardless of context.
     pub fn get_global_rules(&self) -> Vec<&Rule> {
         self.rules
             .iter()
@@ -111,6 +145,11 @@ impl RuleSet {
             .collect()
     }
 
+    /// Return rules matching the given file path and optional context.
+    ///
+    /// A rule matches when its `paths` glob matches `file_path` (or `paths`
+    /// is `None`) AND its `when` conditions match the context (or `when`
+    /// is `None`). Rules are returned in priority order (lowest first).
     pub fn get_applicable_rules(
         &self,
         file_path: &str,
@@ -124,15 +163,13 @@ impl RuleSet {
             .filter(|rule| {
                 let path_match = match &rule.paths {
                     None => true,
-                    Some(patterns) => {
-                        patterns.split(',').any(|pat| {
-                            let pat = pat.trim();
-                            match glob::Pattern::new(pat) {
-                                Ok(g) => g.matches(file_path),
-                                Err(_) => false,
-                            }
-                        })
-                    }
+                    Some(patterns) => patterns.split(',').any(|pat| {
+                        let pat = pat.trim();
+                        match glob::Pattern::new(pat) {
+                            Ok(g) => g.matches(file_path),
+                            Err(_) => false,
+                        }
+                    }),
                 };
 
                 let when_match = match &rule.when {
@@ -151,15 +188,18 @@ impl RuleSet {
             .collect()
     }
 
+    /// Add a rule to the set and re-sort by priority.
     pub fn add_rule(&mut self, rule: Rule) {
         self.rules.push(rule);
         self.rules.sort_by_key(|r| r.priority);
     }
 
+    /// Return the number of rules in the set.
     pub fn len(&self) -> usize {
         self.rules.len()
     }
 
+    /// Return `true` if the rule set contains no rules.
     pub fn is_empty(&self) -> bool {
         self.rules.is_empty()
     }
@@ -373,9 +413,11 @@ mod tests {
                 .len(),
             1
         );
-        assert!(ruleset
-            .get_applicable_rules("services/api/main.py", None)
-            .is_empty());
+        assert!(
+            ruleset
+                .get_applicable_rules("services/api/main.py", None)
+                .is_empty()
+        );
     }
 
     #[test]
@@ -392,9 +434,11 @@ mod tests {
                 .len(),
             1
         );
-        assert!(ruleset
-            .get_applicable_rules("src/utils/helpers.ts", None)
-            .is_empty());
+        assert!(
+            ruleset
+                .get_applicable_rules("src/utils/helpers.ts", None)
+                .is_empty()
+        );
     }
 
     #[test]

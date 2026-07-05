@@ -66,14 +66,25 @@ pub struct GpuContext {
 impl GpuContext {
     pub async fn new() -> Result<Self, GpuError> {
         #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+        // ── Device & Adapter Selection ──
+        // Native targets select the highest-performance GPU adapter; WASM targets
+        // attempt WebGPU first and fall back to WebGL2 via try_gl_fallback.
+        #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
         let (instance, adapter, device, queue, gl_canvas) = Self::acquire_device().await?;
         #[cfg(not(all(feature = "wasm", target_arch = "wasm32")))]
         let (instance, adapter, device, queue) = Self::acquire_device().await?;
+
+        // ── Texture Format Selection ──
+        // WebGL backends use RGBA8; all others use BGRA8 (which maps more
+        // efficiently to swapchain surfaces on Vulkan / Metal / DX12).
         let texture_format = if adapter.get_info().backend == wgpu::Backend::Gl {
             wgpu::TextureFormat::Rgba8Unorm
         } else {
             wgpu::TextureFormat::Bgra8Unorm
         };
+        // ── Fullscreen Quad Vertex Buffer ──
+        // A simple fullscreen quad (two triangles covering clip space [-1,1])
+        // used as the geometry for all blit and effect render passes.
         let fullscreen_quad = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("gpu-fullscreen-quad-buffer"),
             contents: bytemuck::cast_slice(&FULLSCREEN_QUAD_POSITIONS),
@@ -192,6 +203,9 @@ impl GpuContext {
         })
     }
 
+    // ── Device Acquisition ──
+
+    // WASM: Try WebGPU first, fall back to WebGL2 on failure.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     async fn acquire_device() -> Result<
         (
@@ -216,6 +230,7 @@ impl GpuContext {
         Ok((gl_instance, adapter, device, queue, Some(canvas)))
     }
 
+    // Native: same WebGPU-first strategy, but GL fallback returns an error.
     #[cfg(not(all(feature = "wasm", target_arch = "wasm32")))]
     async fn acquire_device()
     -> Result<(wgpu::Instance, wgpu::Adapter, wgpu::Device, wgpu::Queue), GpuError> {
@@ -230,6 +245,10 @@ impl GpuContext {
 
         Self::try_gl_fallback().await
     }
+
+    // ── GL Fallback (WASM) ──
+    // Creates a hidden 1×1 HTML canvas to obtain a WebGL context,
+    // then requests a GL-backed wgpu device through that surface.
 
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     async fn try_gl_fallback() -> Result<
@@ -269,6 +288,10 @@ impl GpuContext {
         Err(GpuError::AdapterUnavailable)
     }
 
+    // ── Shared Device Request ──
+    // Requests a high-performance adapter and device with WebGL2-compatible
+    // limits (so our shaders work uniformly across all backends).
+
     async fn try_request_device(
         instance: &wgpu::Instance,
         compatible_surface: Option<&wgpu::Surface<'_>>,
@@ -297,6 +320,7 @@ impl GpuContext {
         Ok((adapter, device, queue))
     }
 
+    /// Create a new renderable texture with the context's native format.
     pub fn create_render_texture(
         &self,
         width: u32,
@@ -322,22 +346,27 @@ impl GpuContext {
         })
     }
 
+    /// Reference to the wgpu instance.
     pub fn instance(&self) -> &wgpu::Instance {
         &self.instance
     }
 
+    /// Reference to the selected GPU adapter.
     pub fn adapter(&self) -> &wgpu::Adapter {
         &self.adapter
     }
 
+    /// Reference to the logical GPU device.
     pub fn device(&self) -> &wgpu::Device {
         &self.device
     }
 
+    /// Reference to the command queue used for GPU submission.
     pub fn queue(&self) -> &wgpu::Queue {
         &self.queue
     }
 
+    /// Upload RGBA pixel data to a GPU texture, converting to BGRA if needed.
     pub fn create_texture_from_rgba(
         &self,
         rgba: &[u8],
@@ -376,26 +405,32 @@ impl GpuContext {
         Ok(texture)
     }
 
+    /// The native texture format for this context (RGBA8 on WebGL, BGRA8 elsewhere).
     pub fn texture_format(&self) -> wgpu::TextureFormat {
         self.texture_format
     }
 
+    /// The fullscreen quad vertex buffer used for blit and effect passes.
     pub fn fullscreen_quad(&self) -> &wgpu::Buffer {
         &self.fullscreen_quad
     }
 
+    /// Linear-interpolation sampler, suitable for smooth texture filtering.
     pub fn linear_sampler(&self) -> &wgpu::Sampler {
         &self.linear_sampler
     }
 
+    /// Nearest-neighbor sampler, suitable for pixel-accurate texture reads.
     pub fn nearest_sampler(&self) -> &wgpu::Sampler {
         &self.nearest_sampler
     }
 
+    /// The bind group layout for texture + sampler binding at slot 0 and 1.
     pub fn texture_sampler_bind_group_layout(&self) -> &wgpu::BindGroupLayout {
         &self.texture_sampler_bind_group_layout
     }
 
+    /// The pre-compiled blit render pipeline (texture → surface fullscreen quad).
     pub fn blit_pipeline(&self) -> &wgpu::RenderPipeline {
         &self.blit_pipeline
     }
@@ -515,6 +550,9 @@ impl GpuContext {
         Ok(result)
     }
 
+    // ── Surface Rendering ──
+
+    /// Configure a surface and present a texture to it in one call.
     pub fn render_texture_to_surface(
         &self,
         texture: &wgpu::Texture,
@@ -526,6 +564,7 @@ impl GpuContext {
         self.present_texture_to_surface(texture, surface)
     }
 
+    /// Blit a texture directly to a surface's current frame (surface must already be configured).
     pub fn present_texture_to_surface(
         &self,
         texture: &wgpu::Texture,
@@ -546,6 +585,8 @@ impl GpuContext {
         Ok(())
     }
 
+    /// Configure a wgpu surface to use our preferred texture format, FIFO present mode,
+    /// and the device's default alpha mode.
     pub fn configure_surface(
         &self,
         surface: &wgpu::Surface<'_>,
@@ -557,6 +598,8 @@ impl GpuContext {
         Ok(())
     }
 
+    // Builds a surface configuration validated against the adapter's capabilities,
+    // selecting FIFO (vsync) present mode for smooth playback.
     fn build_surface_configuration(
         &self,
         surface: &wgpu::Surface<'_>,
@@ -584,6 +627,7 @@ impl GpuContext {
         })
     }
 
+    /// Acquire the next surface texture, handling all error/suboptimal states uniformly.
     pub fn acquire_surface_texture(
         &self,
         surface: &wgpu::Surface<'_>,
@@ -599,6 +643,10 @@ impl GpuContext {
         }
     }
 
+    // ── Blit Encoding ──
+
+    /// Encode a fullscreen-quad blit pass that draws the given texture into `target_view`.
+    /// Uses the linear sampler and the pre-compiled blit render pipeline.
     pub fn encode_texture_blit_to_view(
         &self,
         encoder: &mut wgpu::CommandEncoder,
@@ -644,6 +692,11 @@ impl GpuContext {
         render_pass.draw(0..6, 0..1);
     }
 
+    // ── WASM Canvas Interop ──
+
+    /// Import pixel data from an OffscreenCanvas into a GPU texture.
+    /// On WebGPU-capable browsers this uses `copyExternalImageToTexture`
+    /// for zero-copy import; on WebGL it falls back to Canvas2D pixel readback.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     pub fn import_offscreen_canvas_texture(
         &self,
@@ -721,6 +774,8 @@ impl GpuContext {
         texture
     }
 
+    /// Render a texture to an OffscreenCanvas. Uses direct surface rendering on
+    /// WebGPU; on WebGL it renders via the GL canvas and drawImages the result.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     pub fn render_texture_to_offscreen_canvas(
         &self,
@@ -739,6 +794,10 @@ impl GpuContext {
         self.render_texture_to_offscreen_canvas_via_gl_canvas(texture, canvas, width, height)
     }
 
+    // ── WebGL Offscreen Canvas Routing ──
+    // Renders to the internal GL canvas surface, then drawImages the result
+    // onto the target OffscreenCanvas. The only way to write to an
+    // OffscreenCanvas on WebGL without async buffer readback.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     fn render_texture_to_offscreen_canvas_via_gl_canvas(
         &self,
@@ -762,6 +821,9 @@ impl GpuContext {
         Ok(())
     }
 
+    /// Render a texture to the internal GL canvas surface.
+    /// Returns the canvas element so callers can drawImage it elsewhere.
+    /// Caches the surface and only reconfigures on size change.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     pub fn render_texture_to_gl_canvas_surface(
         &self,

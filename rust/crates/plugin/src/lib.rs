@@ -29,6 +29,11 @@ use std::rc::Rc;
 
 pub mod wasm_sandbox;
 
+/// Shared state facade exposing the editor timeline to JS plugins.
+///
+/// Scripts interact with the timeline exclusively through this API.
+/// The Rust host reads back the `current_time` field after script
+/// execution to update the actual timeline position.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditorAPI {
     pub timeline_duration: f64,
@@ -50,6 +55,11 @@ impl EditorAPI {
     }
 }
 
+/// An embedded JavaScript runtime for executing user-authored plugins.
+///
+/// Wraps a Boa engine with a sandboxed global context and shared
+/// [`EditorAPI`] state. Plugins can query and manipulate the timeline
+/// through injected host functions like `setTime(t)`.
 pub struct PluginRuntime {
     api: Rc<RefCell<EditorAPI>>,
     context: Context,
@@ -62,6 +72,11 @@ impl Default for PluginRuntime {
 }
 
 impl PluginRuntime {
+    /// Create a new plugin runtime with sandboxed Boa context.
+    ///
+    /// Initial state includes a `setTime(t)` JS function that writes
+    /// to a global `current_time` variable, which the Rust host reads
+    /// back after script execution.
     pub fn new() -> Self {
         let mut context = Context::default();
         let api = Rc::new(RefCell::new(EditorAPI::new()));
@@ -76,6 +91,12 @@ impl PluginRuntime {
         Self { api, context }
     }
 
+    /// Execute a JavaScript snippet in the sandboxed Boa engine.
+    ///
+    /// Reads the global `current_time` variable after execution and
+    /// writes it back to the [`EditorAPI`] state. Returns the script's
+    /// return value alongside the current timeline position, or an
+    /// error message if evaluation fails.
     pub fn execute_script(&mut self, script: &str) -> Result<String, String> {
         let source = Source::from_bytes(script);
         match self.context.eval(source) {

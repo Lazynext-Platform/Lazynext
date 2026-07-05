@@ -12,6 +12,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// A single memory entry with insight text, timestamp, optional context, and a reference counter.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryEntry {
     pub insight: String,
@@ -21,6 +22,7 @@ pub struct MemoryEntry {
 }
 
 impl MemoryEntry {
+    /// Creates a new memory entry with the current timestamp and reference count of 1.
     pub fn new(insight: &str, context: Option<&str>) -> Self {
         Self {
             insight: insight.to_string(),
@@ -30,6 +32,7 @@ impl MemoryEntry {
         }
     }
 
+    /// Returns the number of days since this memory entry was created.
     pub fn age_days(&self) -> u64 {
         let now = now_secs();
         now.saturating_sub(self.timestamp) / 86400
@@ -43,6 +46,8 @@ fn now_secs() -> u64 {
         .as_secs()
 }
 
+/// Persistent memory store that accumulates insights across editing sessions.
+/// Automatically decays entries older than 90 days with low reference counts.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AutoMemory {
     memories: Vec<MemoryEntry>,
@@ -51,6 +56,7 @@ pub struct AutoMemory {
 }
 
 impl AutoMemory {
+    /// Creates an empty memory store.
     pub fn new() -> Self {
         Self {
             memories: Vec::new(),
@@ -58,21 +64,34 @@ impl AutoMemory {
         }
     }
 
+    /// Records a new insight (or increments the reference count if already known).
     pub fn learn(&mut self, insight: &str) {
         self.learn_with_context(insight, None);
     }
 
+    /// Records an insight with optional context (e.g., "project_structure").
+    /// Truncates insights to 2 KB.
     pub fn learn_with_context(&mut self, insight: &str, context: Option<&str>) {
+        let insight = insight.trim();
+        if insight.is_empty() {
+            return;
+        }
+        // Truncate to 2KB to prevent memory bloat
+        let insight = if insight.len() > 2048 {
+            &insight[..2048]
+        } else {
+            insight
+        };
         if let Some(existing) = self.memories.iter_mut().find(|m| m.insight == insight) {
             existing.reference_count += 1;
             existing.timestamp = now_secs();
         } else {
-            self.memories
-                .push(MemoryEntry::new(insight, context));
+            self.memories.push(MemoryEntry::new(insight, context));
         }
         self.dirty = true;
     }
 
+    /// Generates a sorted Markdown summary of all memories, limited to 200 lines / 25 KB.
     pub fn summarize(&self) -> String {
         let mut summary = String::from("# Lazynext Memory\n\n");
         summary.push_str(&format!(
@@ -86,15 +105,13 @@ impl AutoMemory {
         let mut total_bytes = 0usize;
         let max_bytes = 25 * 1024;
         let max_lines = 200;
-        let mut line_count = 0;
 
-        for entry in entries {
+        for (line_count, entry) in entries.iter().enumerate() {
             if line_count >= max_lines || total_bytes >= max_bytes {
                 break;
             }
             let line = format!("- {}", entry.insight);
             total_bytes += line.len();
-            line_count += 1;
             summary.push_str(&line);
             summary.push('\n');
         }
@@ -102,6 +119,7 @@ impl AutoMemory {
         summary
     }
 
+    /// Returns up to 10 memories relevant to the query, scored by word overlap.
     pub fn get_relevant_memories(&self, query: &str) -> Vec<String> {
         let query_lower = query.to_lowercase();
         let query_words: Vec<&str> = query_lower.split_whitespace().collect();
@@ -113,8 +131,7 @@ impl AutoMemory {
         let mut scored: Vec<(usize, &MemoryEntry)> = self
             .memories
             .iter()
-            .enumerate()
-            .map(|(_idx, entry)| {
+            .map(|entry| {
                 let insight_lower = entry.insight.to_lowercase();
                 let score = query_words
                     .iter()
@@ -134,6 +151,7 @@ impl AutoMemory {
             .collect()
     }
 
+    /// Removes stale memories: entries older than 90 days with fewer than 3 references.
     pub fn decay(&mut self) {
         let before = self.memories.len();
         self.memories.retain(|m| {
@@ -148,6 +166,7 @@ impl AutoMemory {
         }
     }
 
+    /// Scans the project directory for known frameworks and auto-records insights.
     pub fn generate_project_insights(&mut self, project_dir: &str) {
         if let Ok(entries) = fs::read_dir(project_dir) {
             let mut has_react = false;
@@ -164,6 +183,14 @@ impl AutoMemory {
                     has_cargo = true;
                 }
                 if name_str == "package.json" {
+                    // Guard against reading massive files (max 1 MB)
+                    let metadata = match entry.metadata() {
+                        Ok(m) => m,
+                        Err(_) => continue,
+                    };
+                    if metadata.len() > 1_048_576 {
+                        continue;
+                    }
                     if let Ok(content) = fs::read_to_string(entry.path()) {
                         if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
                             if let Some(deps) = json.get("dependencies") {
@@ -185,43 +212,26 @@ impl AutoMemory {
                 }
             }
 
-            if let Ok(ws_toml) = fs::read_to_string(
-                PathBuf::from(project_dir).join("Cargo.toml"),
-            ) {
+            if let Ok(ws_toml) = fs::read_to_string(PathBuf::from(project_dir).join("Cargo.toml")) {
                 if ws_toml.contains("ffmpeg") {
                     has_ffmpeg = true;
                 }
             }
 
             if has_cargo {
-                self.learn_with_context(
-                    "Project is a Rust workspace",
-                    Some("project_structure"),
-                );
+                self.learn_with_context("Project is a Rust workspace", Some("project_structure"));
             }
             if has_react {
-                self.learn_with_context(
-                    "Project uses React",
-                    Some("project_structure"),
-                );
+                self.learn_with_context("Project uses React", Some("project_structure"));
             }
             if has_next {
-                self.learn_with_context(
-                    "Project uses Next.js",
-                    Some("project_structure"),
-                );
+                self.learn_with_context("Project uses Next.js", Some("project_structure"));
             }
             if has_tailwind {
-                self.learn_with_context(
-                    "Project uses TailwindCSS",
-                    Some("project_structure"),
-                );
+                self.learn_with_context("Project uses TailwindCSS", Some("project_structure"));
             }
             if has_python {
-                self.learn_with_context(
-                    "Project uses Python",
-                    Some("project_structure"),
-                );
+                self.learn_with_context("Project uses Python", Some("project_structure"));
             }
             if has_ffmpeg {
                 self.learn_with_context(
@@ -232,20 +242,20 @@ impl AutoMemory {
         }
     }
 
+    /// Persists the memory summary to `~/.lazynext/memory/MEMORY.md`.
     pub fn store_to_file(&self) -> Result<(), String> {
         let dir = memory_dir()?;
-        fs::create_dir_all(&dir)
-            .map_err(|e| format!("Failed to create memory dir: {}", e))?;
+        fs::create_dir_all(&dir).map_err(|e| format!("Failed to create memory dir: {}", e))?;
 
         let path = dir.join("MEMORY.md");
         let content = self.summarize();
 
-        fs::write(&path, content)
-            .map_err(|e| format!("Failed to write memory file: {}", e))?;
+        fs::write(&path, content).map_err(|e| format!("Failed to write memory file: {}", e))?;
 
         Ok(())
     }
 
+    /// Loads memories from `~/.lazynext/memory/MEMORY.md`, parsing bullet-pointed entries.
     pub fn load_from_file() -> Result<Self, String> {
         let dir = memory_dir()?;
         let path = dir.join("MEMORY.md");
@@ -254,8 +264,8 @@ impl AutoMemory {
             return Ok(Self::new());
         }
 
-        let content = fs::read_to_string(&path)
-            .map_err(|e| format!("Failed to read memory file: {}", e))?;
+        let content =
+            fs::read_to_string(&path).map_err(|e| format!("Failed to read memory file: {}", e))?;
 
         let mut memory = Self::new();
         for line in content.lines() {
@@ -268,18 +278,19 @@ impl AutoMemory {
         Ok(memory)
     }
 
+    /// Returns the number of stored memory entries.
     pub fn len(&self) -> usize {
         self.memories.len()
     }
 
+    /// Returns `true` if no memories are stored.
     pub fn is_empty(&self) -> bool {
         self.memories.is_empty()
     }
 }
 
 fn memory_dir() -> Result<PathBuf, String> {
-    let home = dirs_fallback()
-        .ok_or_else(|| "Cannot determine home directory".to_string())?;
+    let home = dirs_fallback().ok_or_else(|| "Cannot determine home directory".to_string())?;
     Ok(home.join(".lazynext").join("memory"))
 }
 
@@ -381,7 +392,12 @@ mod tests {
 
         let loaded = AutoMemory::load_from_file().unwrap();
         assert!(!loaded.is_empty());
-        assert!(loaded.memories.iter().any(|m| m.insight.contains("Test memory persistence")));
+        assert!(
+            loaded
+                .memories
+                .iter()
+                .any(|m| m.insight.contains("Test memory persistence"))
+        );
 
         // Clean up after test
         if let Ok(dir) = memory_dir() {

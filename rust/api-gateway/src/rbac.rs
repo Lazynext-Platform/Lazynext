@@ -71,38 +71,46 @@ impl WorkspaceRole {
 
 /// Lazily-initialized decoding key from `BETTER_AUTH_SECRET`.
 ///
-/// In development: falls back to a well-known dev secret.
-/// In production (`LAZYNEXT_ENV=production` or `NODE_ENV=production`): panics on startup
-/// if no secret is configured, preventing accidental insecure deployments.
+/// Reads from env var `BETTER_AUTH_SECRET`. Also supports `BETTER_AUTH_SECRET_FILE`
+/// for Docker secret mounting (reads first line of the file as the secret).
+///
+/// Always panics on startup if no secret is configured, preventing accidental
+/// insecure deployments in any environment. There is no dev fallback —
+/// developers must set `BETTER_AUTH_SECRET` explicitly.
 pub fn jwt_decoding_key() -> &'static DecodingKey {
     static KEY: LazyLock<DecodingKey> = LazyLock::new(|| {
-        let secret = std::env::var("BETTER_AUTH_SECRET").unwrap_or_else(|_| {
-            let is_prod = std::env::var("LAZYNEXT_ENV")
-                .map(|v| v == "production")
-                .unwrap_or_else(|_| {
-                    std::env::var("NODE_ENV")
-                        .map(|v| v == "production")
-                        .unwrap_or(false)
-                });
-
-            if is_prod {
-                panic!(
-                    "FATAL: BETTER_AUTH_SECRET must be set in production environments. \
-                     Set it to a 64-char random hex string. \
-                     Refusing to start with insecure dev fallback."
-                );
-            }
-
-            tracing::warn!(
-                "BETTER_AUTH_SECRET not set — using dev fallback. \
-                 This is safe only in local development. \
-                 In production, the server will refuse to start without this variable."
+        let secret = read_secret("BETTER_AUTH_SECRET", "BETTER_AUTH_SECRET_FILE");
+        if secret.len() < 32 {
+            panic!(
+                "FATAL: BETTER_AUTH_SECRET must be at least 32 characters long. \
+                 Set it to a 64-char random hex string (generate: openssl rand -hex 32). \
+                 Refusing to start with an insecure secret."
             );
-            "lazynext-dev-secret-key-for-auth-minimum-32".to_string()
-        });
+        }
         DecodingKey::from_secret(secret.as_bytes())
     });
     &KEY
+}
+
+fn read_secret(env_var: &str, file_var: &str) -> String {
+    if let Ok(secret) = std::env::var(env_var)
+        && !secret.is_empty()
+    {
+        return secret;
+    }
+    if let Ok(file_path) = std::env::var(file_var) {
+        if let Ok(content) = std::fs::read_to_string(&file_path) {
+            let trimmed = content.trim().to_string();
+            if !trimmed.is_empty() {
+                return trimmed;
+            }
+        }
+        panic!("FATAL: {file_var} is set to '{file_path}' but the file is empty or unreadable.");
+    }
+    panic!(
+        "FATAL: Neither {env_var} nor {file_var} is set. \
+         Set {env_var} to a 64-char random hex string."
+    );
 }
 
 pub fn jwt_validation() -> &'static Validation {
@@ -133,28 +141,25 @@ pub fn jwt_validation() -> &'static Validation {
 /// 5. On failure: returns 401 with a JSON error body.
 pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response, StatusCode> {
     // ── Internal API key path ─────────────────────────────────────────
-    if let Some(internal_key) = std::env::var("INTERNAL_API_KEY").ok() {
-        if !internal_key.is_empty() {
-            if let Some(req_key) = req
-                .headers()
-                .get("x-internal-api-key")
-                .and_then(|v| v.to_str().ok())
-            {
-                if req_key == internal_key {
-                    let claims = AuthClaims {
-                        sub: "internal".into(),
-                        email: "internal@lazynext.local".into(),
-                        name: Some("Internal Service".into()),
-                        role: Some("admin".into()),
-                        email_verified: Some(true),
-                        iat: 0,
-                        exp: u64::MAX,
-                    };
-                    req.extensions_mut().insert(claims);
-                    return Ok(next.run(req).await);
-                }
-            }
-        }
+    if let Ok(internal_key) = std::env::var("INTERNAL_API_KEY")
+        && !internal_key.is_empty()
+        && let Some(req_key) = req
+            .headers()
+            .get("x-internal-api-key")
+            .and_then(|v| v.to_str().ok())
+        && req_key == internal_key
+    {
+        let claims = AuthClaims {
+            sub: "internal".into(),
+            email: "internal@lazynext.local".into(),
+            name: Some("Internal Service".into()),
+            role: Some("admin".into()),
+            email_verified: Some(true),
+            iat: 0,
+            exp: u64::MAX,
+        };
+        req.extensions_mut().insert(claims);
+        return Ok(next.run(req).await);
     }
 
     // ── JWT path ─────────────────────────────────────────────────────
@@ -169,7 +174,6 @@ pub async fn authorize_request(mut req: Request, next: Next) -> Result<Response,
 
     tracing::debug!(
         sub = %claims.sub,
-        email = %claims.email,
         role = ?claims.role,
         "Authenticated request"
     );
@@ -188,22 +192,20 @@ fn extract_bearer_token(req: &Request) -> Option<String> {
         .headers()
         .get(header::AUTHORIZATION)
         .and_then(|h| h.to_str().ok())
+        && let Some(token) = raw.strip_prefix("Bearer ")
     {
-        if let Some(token) = raw.strip_prefix("Bearer ") {
-            return Some(token.trim().to_string());
-        }
+        return Some(token.trim().to_string());
     }
 
     // 2. Try query parameter (e.g., ?token=...)
     if let Some(query) = req.uri().query() {
         for pair in query.split('&') {
             let mut parts = pair.split('=');
-            if let Some(key) = parts.next() {
-                if key == "token" {
-                    if let Some(val) = parts.next() {
-                        return Some(val.to_string());
-                    }
-                }
+            if let Some(key) = parts.next()
+                && key == "token"
+                && let Some(val) = parts.next()
+            {
+                return Some(val.to_string());
             }
         }
     }

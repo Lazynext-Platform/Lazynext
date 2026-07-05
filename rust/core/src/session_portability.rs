@@ -17,6 +17,7 @@
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// A single chat message in the session's conversation history.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ChatMessage {
     pub role: String,
@@ -24,6 +25,7 @@ pub struct ChatMessage {
     pub timestamp: u64,
 }
 
+/// The user's current view state (panel, playhead, zoom, scroll).
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ViewState {
     pub active_panel: String,
@@ -32,6 +34,7 @@ pub struct ViewState {
     pub timeline_scroll_x: f64,
 }
 
+/// An item in the export queue with its current status and progress.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ExportQueueItem {
     pub id: String,
@@ -41,6 +44,7 @@ pub struct ExportQueueItem {
     pub progress_pct: u8,
 }
 
+/// Full session state snapshot suitable for cross-surface transfer.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SessionSnapshot {
     pub session_id: String,
@@ -56,6 +60,7 @@ pub struct SessionSnapshot {
 }
 
 impl SessionSnapshot {
+    /// Creates a new session snapshot with a random session ID and the current timestamp.
     pub fn new(project_id: &str, project_name: &str) -> Self {
         Self {
             session_id: uuid::Uuid::new_v4().to_string(),
@@ -67,6 +72,7 @@ impl SessionSnapshot {
     }
 }
 
+/// A session snapshot paired with a time-limited transfer code for cross-surface handoff.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionTransfer {
     pub snapshot: SessionSnapshot,
@@ -75,6 +81,7 @@ pub struct SessionTransfer {
 }
 
 impl SessionTransfer {
+    /// Creates a new transfer with a random LX- code valid for 24 hours.
     pub fn new(snapshot: SessionSnapshot) -> Self {
         let code = generate_transfer_code();
         let expires_at = now_secs() + 86400;
@@ -85,24 +92,36 @@ impl SessionTransfer {
         }
     }
 
+    /// Serializes this transfer to JSON bytes.
     pub fn serialize(&self) -> Result<Vec<u8>, String> {
-        serde_json::to_vec(self)
-            .map_err(|e| format!("Serialization failed: {}", e))
+        serde_json::to_vec(self).map_err(|e| format!("Serialization failed: {}", e))
     }
 
+    /// Deserializes a transfer from JSON bytes, rejecting payloads larger than 10 MB.
     pub fn deserialize(bytes: &[u8]) -> Result<Self, String> {
-        serde_json::from_slice(bytes)
-            .map_err(|e| format!("Deserialization failed: {}", e))
+        // Reject abnormally large session snapshots (> 10 MB) to prevent OOM
+        const MAX_SESSION_BYTES: usize = 10 * 1024 * 1024;
+        if bytes.len() > MAX_SESSION_BYTES {
+            return Err(format!(
+                "Session too large: {} bytes (max: {} bytes)",
+                bytes.len(),
+                MAX_SESSION_BYTES
+            ));
+        }
+        serde_json::from_slice(bytes).map_err(|e| format!("Deserialization failed: {}", e))
     }
 
+    /// Returns the transfer code string.
     pub fn transfer_code(&self) -> &str {
         &self.transfer_code
     }
 
+    /// Returns `true` if this transfer's 24-hour window has elapsed.
     pub fn is_expired(&self) -> bool {
         now_secs() > self.expires_at
     }
 
+    /// Resumes a session on a different surface. Validates expiry and updates the active surface.
     pub fn resume_on_other_surface(
         bytes: &[u8],
         target_surface: &str,
@@ -120,6 +139,7 @@ impl SessionTransfer {
     }
 }
 
+/// A deep link (URI + QR payload) for transferring a session between surfaces.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionLink {
     pub transfer_code: String,
@@ -128,6 +148,7 @@ pub struct SessionLink {
 }
 
 impl SessionLink {
+    /// Creates a new session link for the given transfer code.
     pub fn new(transfer_code: &str) -> Self {
         let uri = format!("lazynext://session/{}", transfer_code);
         Self {
@@ -137,10 +158,12 @@ impl SessionLink {
         }
     }
 
+    /// Creates a session link from an existing `SessionTransfer`.
     pub fn from_transfer(transfer: &SessionTransfer) -> Self {
         Self::new(&transfer.transfer_code)
     }
 
+    /// Returns a URL to a rendered QR code image for mobile scanning.
     pub fn generate_mobile_qr(&self) -> String {
         let encoded = simple_url_encode(&self.qr_payload);
         format!(
@@ -149,6 +172,7 @@ impl SessionLink {
         )
     }
 
+    /// Renders a pseudo-QR code as ASCII art for terminal display.
     pub fn to_terminal_qr(&self) -> String {
         let qr_width = 40;
         let mut result = String::new();
@@ -160,14 +184,14 @@ impl SessionLink {
         result.push_str("╗\n");
 
         for _ in 0..((qr_width as f64 * 0.6) as usize) {
-            result.push_str("║");
+            result.push('║');
             for _ in 0..qr_width {
                 result.push(if simple_rand_bool() { '█' } else { ' ' });
             }
             result.push_str("║\n");
         }
 
-        result.push_str("╚");
+        result.push('╚');
         for _ in 0..qr_width {
             result.push('═');
         }
@@ -181,37 +205,26 @@ impl SessionLink {
         result
     }
 
+    /// Returns the shell command to open this session on the desktop app.
     pub fn desktop_command(&self) -> String {
-        format!(
-            "open 'lazynext://session/{}'",
-            self.transfer_code
-        )
+        format!("open 'lazynext://session/{}'", self.transfer_code)
     }
 
+    /// Returns the CLI command to open this session on the mobile app.
     pub fn mobile_command(&self) -> String {
-        format!(
-            "lazynext mobile --session {}",
-            self.transfer_code
-        )
+        format!("lazynext mobile --session {}", self.transfer_code)
     }
 }
 
 fn generate_transfer_code() -> String {
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .subsec_nanos();
-    // Use subsec_nanos as a cheap PRNG seed-like value
     let hex_chars: [char; 16] = [
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
     ];
+    let uuid = uuid::Uuid::new_v4();
+    let bytes = uuid.as_bytes();
     let mut code = String::from("LX-");
-    let mut seed = nanos;
-    for _ in 0..4 {
-        let idx = (seed & 0xF) as usize;
-        code.push(hex_chars[idx & 0xF]);
-        seed = seed.wrapping_mul(1103515245).wrapping_add(12345);
+    for byte in bytes.iter().take(4) {
+        code.push(hex_chars[(byte & 0xF) as usize]);
     }
     code
 }
@@ -220,8 +233,7 @@ fn simple_url_encode(input: &str) -> String {
     input
         .bytes()
         .map(|b| match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9'
-            | b'-' | b'_' | b'.' | b'~' | b'/' | b':' => {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' | b'/' | b':' => {
                 String::from(b as char)
             }
             _ => format!("%{:02X}", b),
@@ -230,11 +242,7 @@ fn simple_url_encode(input: &str) -> String {
 }
 
 fn simple_rand_bool() -> bool {
-    let nanos = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .subsec_nanos();
-    (nanos & 1) == 1
+    (uuid::Uuid::new_v4().as_bytes()[0] & 1) == 1
 }
 
 fn now_secs() -> u64 {
@@ -310,9 +318,6 @@ mod tests {
     #[test]
     fn test_mobile_command() {
         let link = SessionLink::new("LX-4F2A");
-        assert_eq!(
-            link.mobile_command(),
-            "lazynext mobile --session LX-4F2A"
-        );
+        assert_eq!(link.mobile_command(), "lazynext mobile --session LX-4F2A");
     }
 }

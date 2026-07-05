@@ -194,15 +194,39 @@ impl C2PASigner {
             }
             _ => {
                 // Development mode: self-sign with HMAC
-                let secret = std::env::var("BETTER_AUTH_SECRET")
-                    .unwrap_or_else(|_| "lazynext-dev-signing-key".to_string());
-                use hmac::{Hmac, Mac, digest::KeyInit};
-                use sha2::Sha256;
-                type HmacSha256 = Hmac<Sha256>;
-                let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-                    .map_err(|e| format!("HMAC init: {e}"))?;
-                mac.update(content_hash.as_bytes());
-                Ok(hex::encode(mac.finalize().into_bytes()))
+                // In production, BETTER_AUTH_SECRET is required; without it we refuse to sign.
+                let secret = std::env::var("BETTER_AUTH_SECRET");
+                match secret {
+                    Ok(s) if s.len() >= 32 => {
+                        use hmac::{Hmac, Mac, digest::KeyInit};
+                        use sha2::Sha256;
+                        type HmacSha256 = Hmac<Sha256>;
+                        let mut mac = HmacSha256::new_from_slice(s.as_bytes())
+                            .map_err(|e| format!("HMAC init: {e}"))?;
+                        mac.update(content_hash.as_bytes());
+                        Ok(hex::encode(mac.finalize().into_bytes()))
+                    }
+                    _ => {
+                        let is_prod = std::env::var("LAZYNEXT_ENV")
+                            .map(|v| v == "production")
+                            .unwrap_or(false)
+                            || std::env::var("NODE_ENV")
+                                .map(|v| v == "production")
+                                .unwrap_or(false);
+                        if is_prod {
+                            Err("FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production for C2PA signing".into())
+                        } else {
+                            let key = "lazynext-dev-signing-key";
+                            use hmac::{Hmac, Mac, digest::KeyInit};
+                            use sha2::Sha256;
+                            type HmacSha256 = Hmac<Sha256>;
+                            let mut mac = HmacSha256::new_from_slice(key.as_bytes())
+                                .map_err(|e| format!("HMAC init: {e}"))?;
+                            mac.update(content_hash.as_bytes());
+                            Ok(hex::encode(mac.finalize().into_bytes()))
+                        }
+                    }
+                }
             }
         }
     }

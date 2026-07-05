@@ -152,8 +152,6 @@ impl DecklinkEngine {
     }
 
     /// Detect connected DeckLink devices.
-    /// Returns the number of devices found.
-    /// Detect connected DeckLink devices.
     ///
     /// Returns the number of devices found. In production (with the
     /// `decklink-sdk` feature) this iterates `IDeckLinkIterator`.
