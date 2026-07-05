@@ -1,12 +1,13 @@
 use crate::editor::EditorShell;
+use crate::theme::Theme;
 use gpui::prelude::FluentBuilder;
 use gpui::*;
 use lazynext_core::NLEState;
 use lazynext_core::engine::CoreEngine;
 use std::cell::Cell;
 use std::rc::Rc;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use tokio::sync::Mutex;
 
 pub struct Dashboard {
@@ -17,6 +18,8 @@ pub struct Dashboard {
     pub recent_projects: Vec<String>,
     pub recent_add_clicked: Rc<Cell<bool>>,
     pub recent_add_path: Rc<Cell<Option<String>>>,
+    #[allow(dead_code)]
+    pub theme: Arc<Theme>,
 }
 
 impl Dashboard {
@@ -24,6 +27,7 @@ impl Dashboard {
         nle: Arc<Mutex<NLEState>>,
         engine: Arc<Mutex<CoreEngine>>,
         rt_handle: tokio::runtime::Handle,
+        theme: Arc<Theme>,
     ) -> Self {
         let recent_projects = Self::load_recent_projects();
         Self {
@@ -34,6 +38,7 @@ impl Dashboard {
             recent_projects,
             recent_add_clicked: Rc::new(Cell::new(false)),
             recent_add_path: Rc::new(Cell::new(None)),
+            theme,
         }
     }
 
@@ -41,13 +46,16 @@ impl Dashboard {
         let home = std::env::var("HOME")
             .or_else(|_| std::env::var("USERPROFILE"))
             .unwrap_or_else(|_| ".".to_string());
-        std::path::PathBuf::from(home).join(".lazynext").join("recent_projects.json")
+        std::path::PathBuf::from(home)
+            .join(".lazynext")
+            .join("recent_projects.json")
     }
 
     fn load_recent_projects() -> Vec<String> {
         let path = Self::recent_projects_path();
         if let Ok(data) = std::fs::read_to_string(&path)
-            && let Ok(projects) = serde_json::from_str::<Vec<String>>(&data) {
+            && let Ok(projects) = serde_json::from_str::<Vec<String>>(&data)
+        {
             return projects.iter().take(5).cloned().collect();
         }
         Vec::new()
@@ -58,7 +66,10 @@ impl Dashboard {
         if let Some(parent) = path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        let _ = std::fs::write(&path, serde_json::to_string(&self.recent_projects).unwrap_or_default());
+        let _ = std::fs::write(
+            &path,
+            serde_json::to_string(&self.recent_projects).unwrap_or_default(),
+        );
     }
 
     fn add_recent_project(&mut self, path: &str) {
@@ -150,11 +161,17 @@ impl Render for Dashboard {
                                                 prompt_focused: Rc::new(Cell::new(false)),
                                                 prompt_clicked: Rc::new(Cell::new(false)),
                                                 agent_active: Rc::new(Cell::new(false)),
-                                                agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                agent_suggestions: Arc::new(
+                                                    tokio::sync::Mutex::new(Vec::new()),
+                                                ),
                                                 suggestions_expanded: false,
-                                                suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                suggestions_expand_clicked: Rc::new(Cell::new(
+                                                    false,
+                                                )),
                                                 selected_suggestion: None,
-                                                suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                suggestion_select_clicked: Rc::new(Cell::new(
+                                                    false,
+                                                )),
                                                 suggestion_select_idx: 0,
                                                 frame_step_back5_clicked: Rc::new(Cell::new(false)),
                                                 frame_step_back1_clicked: Rc::new(Cell::new(false)),
@@ -162,10 +179,12 @@ impl Render for Dashboard {
                                                 frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
                                                 exporting: Arc::new(AtomicBool::new(false)),
                                                 export_start_time: None,
+                                                error_message: None,
+                                                show_error: false,
                                             })
                                         },
                                     )
-                                    .unwrap();
+                                    .expect("Failed to open new project editor window");
                                 }
                             }),
                     )
@@ -232,11 +251,17 @@ impl Render for Dashboard {
                                                 prompt_focused: Rc::new(Cell::new(false)),
                                                 prompt_clicked: Rc::new(Cell::new(false)),
                                                 agent_active: Rc::new(Cell::new(false)),
-                                                agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                agent_suggestions: Arc::new(
+                                                    tokio::sync::Mutex::new(Vec::new()),
+                                                ),
                                                 suggestions_expanded: false,
-                                                suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                suggestions_expand_clicked: Rc::new(Cell::new(
+                                                    false,
+                                                )),
                                                 selected_suggestion: None,
-                                                suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                suggestion_select_clicked: Rc::new(Cell::new(
+                                                    false,
+                                                )),
                                                 suggestion_select_idx: 0,
                                                 frame_step_back5_clicked: Rc::new(Cell::new(false)),
                                                 frame_step_back1_clicked: Rc::new(Cell::new(false)),
@@ -244,10 +269,12 @@ impl Render for Dashboard {
                                                 frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
                                                 exporting: Arc::new(AtomicBool::new(false)),
                                                 export_start_time: None,
+                                                error_message: None,
+                                                show_error: false,
                                             })
                                         },
                                     )
-                                    .unwrap();
+                                    .expect("Failed to open new project editor window");
                                 }
                             }),
                     ),
@@ -278,15 +305,12 @@ impl Render for Dashboard {
                                 .cursor_pointer()
                                 .hover(|s| s.bg(rgb(0x2a2a2a)))
                                 .child(
-                                    div()
-                                        .text_sm()
-                                        .text_color(rgb(0xcccccc))
-                                        .child(
-                                            std::path::Path::new(&path)
-                                                .file_name()
-                                                .map(|n| n.to_string_lossy().to_string())
-                                                .unwrap_or_else(|| path.clone()),
-                                        ),
+                                    div().text_sm().text_color(rgb(0xcccccc)).child(
+                                        std::path::Path::new(&path)
+                                            .file_name()
+                                            .map(|n| n.to_string_lossy().to_string())
+                                            .unwrap_or_else(|| path.clone()),
+                                    ),
                                 )
                                 .on_mouse_down(gpui::MouseButton::Left, {
                                     let nle = self.nle.clone();
@@ -295,10 +319,11 @@ impl Render for Dashboard {
                                     let path_c = path.clone();
                                     move |_, _window, cx| {
                                         if let Ok(json) = std::fs::read_to_string(&path_c)
-                                            && let Ok(pd) =
-                                                serde_json::from_str::<
-                                                    lazynext_core::nle_state::ProjectData,
-                                                >(&json)
+                                            && let Ok(pd) = serde_json::from_str::<
+                                                lazynext_core::nle_state::ProjectData,
+                                            >(
+                                                &json
+                                            )
                                         {
                                             rt_handle.block_on(async {
                                                 let mut state = nle.lock().await;
@@ -332,22 +357,38 @@ impl Render for Dashboard {
                                                     prompt_focused: Rc::new(Cell::new(false)),
                                                     prompt_clicked: Rc::new(Cell::new(false)),
                                                     agent_active: Rc::new(Cell::new(false)),
-                                                    agent_suggestions: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+                                                    agent_suggestions: Arc::new(
+                                                        tokio::sync::Mutex::new(Vec::new()),
+                                                    ),
                                                     suggestions_expanded: false,
-                                                    suggestions_expand_clicked: Rc::new(Cell::new(false)),
+                                                    suggestions_expand_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
                                                     selected_suggestion: None,
-                                                    suggestion_select_clicked: Rc::new(Cell::new(false)),
+                                                    suggestion_select_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
                                                     suggestion_select_idx: 0,
-                                                    frame_step_back5_clicked: Rc::new(Cell::new(false)),
-                                                    frame_step_back1_clicked: Rc::new(Cell::new(false)),
-                                                    frame_step_fwd1_clicked: Rc::new(Cell::new(false)),
-                                                    frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
+                                                    frame_step_back5_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
+                                                    frame_step_back1_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
+                                                    frame_step_fwd1_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
+                                                    frame_step_fwd5_clicked: Rc::new(Cell::new(
+                                                        false,
+                                                    )),
                                                     exporting: Arc::new(AtomicBool::new(false)),
                                                     export_start_time: None,
+                                                    error_message: None,
+                                                    show_error: false,
                                                 })
                                             },
                                         )
-                                        .unwrap();
+                                        .expect("Failed to open new project editor window");
                                     }
                                 })
                         })),
@@ -375,7 +416,12 @@ mod tests {
         let rt_handle = tokio::runtime::Handle::current();
         let engine = Arc::new(Mutex::new(CoreEngine::init(nle.clone()).await.unwrap()));
 
-        let dashboard = Dashboard::new(nle, engine, rt_handle);
+        let dashboard = Dashboard::new(
+            nle,
+            engine,
+            rt_handle,
+            Arc::new(crate::theme::Theme::auto()),
+        );
         assert_eq!(dashboard.version, "0.1.0");
     }
 }

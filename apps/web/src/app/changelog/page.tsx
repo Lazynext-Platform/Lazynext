@@ -2,6 +2,7 @@
  * Changelog listing page — all releases in descending order.
  *
  * @page /changelog
+ * @module changelog/page
  */
 
 import type { Metadata } from "next";

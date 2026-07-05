@@ -5,18 +5,48 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Lazynext Extension</title>
 		<style>
+			:root {
+				--bg-main: #fcfcfc;
+				--bg-panel: rgba(255,255,255,0.7);
+				--bg-glass: rgba(255,255,255,0.4);
+				--bg-hover: rgba(0,0,0,0.03);
+				--accent-primary: #00e5ff;
+				--accent-secondary: #0033ff;
+				--text-primary: #09090b;
+				--text-secondary: #3f3f46;
+				--text-muted: #71717a;
+				--text-on-accent: #050505;
+				--border-glass: rgba(0,0,0,0.08);
+				color-scheme: light dark;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg-main: #050505;
+					--bg-panel: rgba(24,24,27,0.5);
+					--bg-glass: rgba(24,24,27,0.3);
+					--bg-hover: rgba(255,255,255,0.05);
+					--accent-primary: #00e5ff;
+					--accent-secondary: #0033ff;
+					--text-primary: #fafafa;
+					--text-secondary: #a1a1aa;
+					--text-muted: #52525b;
+					--text-on-accent: #050505;
+					--border-glass: rgba(255,255,255,0.08);
+				}
+			}
 			body {
-				width: 350px;
-				height: 500px;
+				max-width: 360px;
+				min-width: 320px;
+				min-height: 240px;
 				margin: 0;
 				font-family:
 					-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
 					Arial, sans-serif;
-				background-color: #1a1a1a;
-				color: #ffffff;
+				background-color: var(--bg-main);
+				color: var(--text-primary);
 			}
 		</style>
-		<script type="module" crossorigin src="/assets/popup-Bfc-V0sJ.js"></script>
+		<script type="module" crossorigin src="/assets/popup-DGjqZAIJ.js"></script>
 		<link rel="modulepreload" crossorigin href="/assets/jsx-runtime-QVf4iDAG.js">
 	</head>
 	<body>

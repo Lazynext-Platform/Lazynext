@@ -1,3 +1,5 @@
+/** @module Hook for selecting, deselecting, and toggling timeline element selection state */
+
 import { useCallback } from "react";
 import { useEditor } from "@/editor/use-editor";
 import type { ElementRef } from "@/timeline/types";

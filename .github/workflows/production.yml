@@ -14,6 +14,10 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
 env:
   ENVIRONMENT: production
   DOMAIN: lazynext.com
@@ -162,6 +166,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [domain-verify]
     if: always() && needs.domain-verify.result == 'success'
+    # Configure protection rules in repo Settings → Environments → production
+    environment: production
     steps:
       - uses: actions/checkout@v4
 

@@ -16,12 +16,11 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
+
 /// Generate a cryptographically random CSRF token (32 hex chars = 128 bits).
 fn generate_csrf_token() -> String {
-    use rand::RngExt;
-    let mut rng = rand::rng();
-    let bytes: [u8; 16] = rng.random();
-    hex::encode(bytes)
+    let uuid = uuid::Uuid::new_v4();
+    hex::encode(uuid.as_bytes())
 }
 
 /// Axum middleware that validates CSRF tokens on state-changing requests.

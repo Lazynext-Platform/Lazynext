@@ -229,7 +229,7 @@ export interface AutonomousEditRequest {
   /** Optional list of source file URLs to scope the edit. */
   source_files?: string[];
   /** LLM provider to use for intent parsing. */
-  llm_provider?: "openai" | "anthropic" | "gemini" | "ollama";
+  llm_provider?: "openai" | "anthropic" | "gemini" ;
 }
 
 /**

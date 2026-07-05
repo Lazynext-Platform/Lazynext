@@ -40,14 +40,14 @@ services:
       - NODE_ENV=development
     volumes:
       - ./services/pre-processing:/app:delegated
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
   generative-studio:
     environment:
       - NODE_ENV=development
     volumes:
       - ./services/generative-studio:/app:delegated
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+    command: ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
 
   db:
     ports:

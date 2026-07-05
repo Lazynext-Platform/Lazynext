@@ -8,6 +8,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth/server";
 import { headers } from "next/headers";
+import { dodoCheckoutSchema } from "@/lib/validation";
 
 const DODO_API_KEY = process.env.DODO_API_KEY || "";
 const DODO_API_BASE = "https://api.dodopayments.com/api/v1";
@@ -23,7 +24,17 @@ export async function POST(req: Request) {
 			return new NextResponse("Unauthorized", { status: 401 });
 		}
 
-		const { priceId } = await req.json();
+		const rawBody = await req.json();
+		const parsed = dodoCheckoutSchema.safeParse(rawBody);
+
+		if (!parsed.success) {
+			return NextResponse.json(
+				{ error: "Invalid priceId" },
+				{ status: 400 },
+			);
+		}
+
+		const { priceId } = parsed.data;
 
 		// Map price IDs to amounts (in paise/cents)
 		const priceMap: Record<string, number> = {

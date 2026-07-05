@@ -1,3 +1,5 @@
+/** @module Solid color palette data for the color picker component */
+
 export const colors = [
 	"#ffffff",
 	"#000000",

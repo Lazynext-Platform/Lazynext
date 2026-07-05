@@ -1,3 +1,7 @@
+/**
+ * @module Live player — Playback control component providing play/pause
+ * buttons and frame navigation for the video editor preview panel.
+ */
 import React from "react";
 
 /**

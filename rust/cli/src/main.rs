@@ -16,14 +16,18 @@
 //! the prompt, outputs the result, and exits — no interactive mode.
 
 use clap::Parser;
-use lazynext_core::nle_state::ProjectData;
 use lazynext_core::NLEState;
 use lazynext_core::engine::AssetLoader;
 use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
-use lazynext_rules::{RuleSet, RuleContext};
+use lazynext_core::nle_state::ProjectData;
+use lazynext_rules::{RuleContext, RuleSet};
 use serde::Serialize;
 use std::io::{self, Read};
 
+/// Top-level CLI arguments for the Lazynext headless renderer.
+///
+/// Supports subcommands (`edit`, `render`, `batch-render`, `ingest`) and a
+/// pipe mode (`-p`) for non-interactive stdin/stdout workflows.
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -45,14 +49,15 @@ struct Args {
     #[arg(short, long)]
     file: Option<String>,
 
-    /// Provider for LLM (openai, anthropic, gemini, ollama)
-    #[arg(long, default_value = "ollama")]
+    /// Provider for LLM (openai, anthropic, gemini)
+    #[arg(long, default_value = "gemini")]
     llm_provider: String,
 
     #[command(subcommand)]
     command: Option<Commands>,
 }
 
+/// CLI subcommands for the Lazynext headless tool.
 #[derive(clap::Subcommand, Debug)]
 enum Commands {
     /// Natural language prompt for AI-powered editing
@@ -64,8 +69,8 @@ enum Commands {
         #[arg(short, long)]
         file: Option<String>,
 
-        /// Provider for LLM (openai, anthropic, gemini, ollama)
-        #[arg(long, default_value = "ollama")]
+        /// Provider for LLM (openai, anthropic, gemini)
+        #[arg(long, default_value = "gemini")]
         llm_provider: String,
     },
     /// Render a project
@@ -147,6 +152,7 @@ async fn main() {
     };
 
     match command {
+        // ── Edit ──────────────────────────────────────────────────────────
         Commands::Edit {
             prompt,
             file,
@@ -210,6 +216,7 @@ async fn main() {
                 Err(e) => eprintln!("❌ Failed: {}", e),
             }
         }
+        // ── Batch Render ─────────────────────────────────────────────────
         Commands::BatchRender {
             projects: batch,
             format,
@@ -251,6 +258,7 @@ async fn main() {
                 failed
             );
         }
+        // ── Render ───────────────────────────────────────────────────────
         Commands::Render {
             project,
             format,
@@ -275,11 +283,14 @@ async fn main() {
                 Err(e) => eprintln!("❌ Export failed: {}", e),
             }
         }
+        // ── Ingest ───────────────────────────────────────────────────────
         Commands::Ingest { file, project_id } => {
             cmd_ingest(file, project_id);
         }
     }
 }
+
+// ── Pipe Mode ──────────────────────────────────────────────────────────────
 
 /// Run the CLI in non-interactive pipe mode.
 ///
@@ -312,7 +323,10 @@ async fn run_pipe_mode(prompt: &str, args: &Args) {
 
     // Build the full prompt with context
     let full_prompt = if !stdin_content.is_empty() {
-        format!("{}\n\nAdditional context from stdin:\n{}", prompt, stdin_content)
+        format!(
+            "{}\n\nAdditional context from stdin:\n{}",
+            prompt, stdin_content
+        )
     } else {
         prompt.to_string()
     };
@@ -336,17 +350,17 @@ async fn run_pipe_mode(prompt: &str, args: &Args) {
         println!();
 
         let editor = lazynext_core::autonomous::AutonomousEditor::new();
+        let provider = std::env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string());
         let intent = lazynext_core::autonomous::VideoIntent {
-            prompt: full_prompt,
+            prompt: prompt.to_string(),
             require_plan_approval: false,
             source_files: vec![],
-            llm_provider: Some(args.llm_provider.clone()),
+            llm_provider: Some(provider),
         };
 
         let mut engine = if let Some(ref path) = args.file {
             if std::path::Path::new(path).exists() {
-                let content =
-                    std::fs::read_to_string(path).expect("Failed to read project file");
+                let content = std::fs::read_to_string(path).expect("Failed to read project file");
                 let project_data: ProjectData =
                     serde_json::from_str(&content).expect("Failed to parse project JSON");
                 let mut eng = NLEState::new(
@@ -376,19 +390,30 @@ async fn run_pipe_mode(prompt: &str, args: &Args) {
     }
 }
 
-/// Stream output using SSE-style events (text/event-stream).
+/// Stream output using SSE-style events (`text/event-stream`).
+///
+/// Emits status events (`received`, `processing`, `complete`, `error`) as
+/// Server-Sent Events, terminated by `[DONE]`.
 async fn run_stream_output(prompt: &str) {
-    println!("data: {{\"status\": \"received\", \"prompt\": \"{}\"}}", escape_json(prompt));
+    println!(
+        "data: {{\"status\": \"received\", \"prompt\": \"{}\"}}",
+        escape_json(prompt)
+    );
     println!();
 
     let editor = lazynext_core::autonomous::AutonomousEditor::new();
+    let provider = std::env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string());
     let intent = lazynext_core::autonomous::VideoIntent {
         prompt: prompt.to_string(),
         require_plan_approval: false,
         source_files: vec![],
-        llm_provider: Some("ollama".to_string()),
+        llm_provider: Some(provider),
     };
-    let mut engine = NLEState::new("stream_session".to_string(), "Stream Session".to_string(), 24);
+    let mut engine = NLEState::new(
+        "stream_session".to_string(),
+        "Stream Session".to_string(),
+        24,
+    );
 
     println!("data: {{\"status\": \"processing\"}}");
     println!();
@@ -402,25 +427,32 @@ async fn run_stream_output(prompt: &str) {
             );
         }
         Err(e) => {
-            println!("data: {{\"status\": \"error\", \"message\": \"{}\"}}", escape_json(&e));
+            println!(
+                "data: {{\"status\": \"error\", \"message\": \"{}\"}}",
+                escape_json(&e)
+            );
         }
     }
     println!();
     println!("data: [DONE]");
 }
 
-/// Output results as JSON for machine consumption.
+/// Output results as pretty-printed JSON for machine consumption.
+///
+/// Runs the autonomous editor against the prompt and serializes the result
+/// (success, message, track count, stdin bytes, rules loaded) as JSON.
 async fn run_json_output(
     prompt: &str,
     applicable_rules: &[&lazynext_rules::Rule],
     stdin_context: &str,
 ) {
     let editor = lazynext_core::autonomous::AutonomousEditor::new();
+    let provider = std::env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string());
     let intent = lazynext_core::autonomous::VideoIntent {
         prompt: prompt.to_string(),
         require_plan_approval: false,
         source_files: vec![],
-        llm_provider: Some("ollama".to_string()),
+        llm_provider: Some(provider),
     };
     let mut engine = NLEState::new("json_session".to_string(), "JSON Session".to_string(), 24);
 
@@ -460,10 +492,8 @@ async fn run_json_output(
 
     println!(
         "{}",
-        serde_json::to_string_pretty(&output).unwrap_or_else(|e| format!(
-            "{{\"error\": \"JSON serialization failed: {}\"}}",
-            e
-        ))
+        serde_json::to_string_pretty(&output)
+            .unwrap_or_else(|e| format!("{{\"error\": \"JSON serialization failed: {}\"}}", e))
     );
 }
 
@@ -476,7 +506,12 @@ fn escape_json(s: &str) -> String {
         .replace('\t', "\\t")
 }
 
+// ── Render Engine ─────────────────────────────────────────────────────────
+
 /// Arguments controlling the output of a single render job.
+///
+/// Specifies the output format, resolution, framerate, duration, bitrate,
+/// and whether to display a progress bar.
 struct RenderArgs {
     format: String,
     width: u32,
@@ -560,7 +595,20 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
 
     engine.set_dimensions(args.width, args.height);
 
-    let total_frames = args.framerate * args.duration;
+    let total_frames = (args.framerate as u64)
+        .checked_mul(args.duration as u64)
+        .unwrap_or(0);
+    if total_frames == 0 || total_frames > 10_000_000 {
+        eprintln!(
+            "⚠️  Invalid frame count: {} (framerate={} * duration={}). Using default of 240.",
+            total_frames, args.framerate, args.duration
+        );
+    }
+    let total_frames = if total_frames > 0 && total_frames <= 10_000_000 {
+        total_frames as u32
+    } else {
+        240
+    };
 
     println!(
         "🎬 Rendering {}x{} @ {}fps ({}s, {} frames, {:?}) → {}",
@@ -676,6 +724,8 @@ async fn render_single(project: &str, args: &RenderArgs) -> Result<String, Strin
     Ok(out_path)
 }
 
+// ── Media Ingest ──────────────────────────────────────────────────────────
+
 /// Ingest a media file into a project, probing metadata with ffprobe
 /// and saving the updated project JSON.
 fn cmd_ingest(file: &str, project_id: &str) {
@@ -710,11 +760,10 @@ fn cmd_ingest(file: &str, project_id: &str) {
             eprintln!("❌ Failed to read project file: {}", e);
             std::process::exit(1);
         });
-        let project_data: ProjectData = serde_json::from_str(&content)
-            .unwrap_or_else(|e| {
-                eprintln!("❌ Failed to parse project JSON: {}", e);
-                std::process::exit(1);
-            });
+        let project_data: ProjectData = serde_json::from_str(&content).unwrap_or_else(|e| {
+            eprintln!("❌ Failed to parse project JSON: {}", e);
+            std::process::exit(1);
+        });
         let mut eng = NLEState::new(
             project_data.id.clone(),
             project_data.name.clone(),
@@ -741,7 +790,7 @@ fn cmd_ingest(file: &str, project_id: &str) {
         .unwrap_or(&name)
         .to_string();
     let framerate = engine.get_project_data().framerate;
-    let total_frames = (duration * framerate as f64) as u32;
+    let total_frames = ((duration * framerate as f64) as u64).min(1_000_000) as u32;
     engine.add_clip_to_track(
         track_idx,
         format!("clip_{}", uuid::Uuid::new_v4()),
@@ -750,10 +799,10 @@ fn cmd_ingest(file: &str, project_id: &str) {
         0,
         total_frames.max(1),
     );
-    if let Some(track) = engine.get_project_data_mut().tracks.get_mut(track_idx) {
-        if let Some(clip) = track.clips.last_mut() {
-            clip.media_id = Some(asset_id.clone());
-        }
+    if let Some(track) = engine.get_project_data_mut().tracks.get_mut(track_idx)
+        && let Some(clip) = track.clips.last_mut()
+    {
+        clip.media_id = Some(asset_id.clone());
     }
 
     let project_json = serde_json::to_string_pretty(engine.get_project_data())
@@ -768,7 +817,10 @@ fn cmd_ingest(file: &str, project_id: &str) {
 }
 
 /// Probe a media file with ffprobe to extract duration, resolution, and type.
+/// Uses `--` separator before the path to prevent flag injection.
 fn probe_media(path: &str) -> (f64, u32, u32, String) {
+    use lazynext_core::ffmpeg_loader::sanitize_media_path;
+    let sanitized = sanitize_media_path(path);
     let output = std::process::Command::new("ffprobe")
         .arg("-v")
         .arg("quiet")
@@ -776,7 +828,8 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
         .arg("json")
         .arg("-show_format")
         .arg("-show_streams")
-        .arg(path)
+        .arg("--")
+        .arg(&sanitized)
         .output();
 
     match output {
@@ -838,7 +891,10 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
     }
 }
 
-/// Upload a test pattern texture when no real media is available.
+/// Upload a test pattern texture as fallback when no real media is available.
+///
+/// Reads `tests/assets/test_pattern.png` and uploads it as a static texture
+/// to the GPU compositor so rendering can proceed without source media.
 async fn test_pattern_fallback(
     engine: &mut lazynext_core::engine::CoreEngine,
 ) -> Result<(), String> {

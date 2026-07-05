@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import { authMiddleware } from "@lazynext/api-client/auth-middleware";
 
 const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
 const RENDER_TIMEOUT_MS = parseInt(process.env.RENDER_TIMEOUT_MS || "300000", 10); // 5 min default
@@ -25,6 +26,83 @@ const RENDER_TIMEOUT_MS = parseInt(process.env.RENDER_TIMEOUT_MS || "300000", 10
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", async (_req: Request, res: Response) => {
+  try {
+    const ok = await ensureRedis();
+    let counts = null;
+    if (ok) {
+      const q = await getQueue();
+      counts = await Promise.race([
+        q.getJobCounts(),
+        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
+      ]);
+    }
+    res.json({
+			status: "ok",
+			service: "render-service",
+      queue_size: counts ? counts.waiting + counts.active : 0,
+      ffmpeg_available: true,
+      redis_available: ok,
+    });
+  } catch {
+    res.json({
+			status: "ok",
+			service: "render-service",
+      queue_size: 0,
+      ffmpeg_available: true,
+      redis_available: false,
+    });
+  }
+});
+
+app.use(authMiddleware);
+
+function getC2PASecret(): string {
+	const secret = process.env.C2PA_SIGNING_SECRET || process.env.BETTER_AUTH_SECRET;
+	if (secret && secret.length >= 16) return secret;
+	if (process.env.NODE_ENV === "production") {
+		throw new Error("FATAL: C2PA_SIGNING_SECRET or BETTER_AUTH_SECRET must be set in production");
+	}
+	// Dev fallback only — uses a random value per process, not a static secret
+	return require("crypto").randomBytes(32).toString("hex");
+}
+
+function getAllowedDownloadOrigins(): string[] {
+	return [
+		process.env.AZURE_STORAGE_ACCOUNT
+			? `${process.env.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net`
+			: null,
+		process.env.CDN_DOMAIN || null,
+		"lazynext.com",
+		"media.lazynext.com",
+	].filter(Boolean) as string[];
+}
+
+async function* convertToAsyncIterable(
+	body: ReadableStream<Uint8Array> | NodeJS.ReadableStream,
+): AsyncIterable<Buffer> {
+	// Handle Node.js Readable streams
+	if ("read" in body || "on" in body) {
+		const stream = body as NodeJS.ReadableStream;
+		for await (const chunk of stream) {
+			yield chunk as Buffer;
+		}
+		return;
+	}
+	// Handle Web ReadableStream
+	const webStream = body as ReadableStream<Uint8Array>;
+	const reader = webStream.getReader();
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			if (value) yield Buffer.from(value);
+		}
+	} finally {
+		reader.releaseLock();
+	}
+}
 
 interface RenderJob {
 	id: string;
@@ -197,16 +275,35 @@ app.post("/api/v1/export", async (req: Request, res: Response) => {
 	// No timelineData: the browser will stream RGBA frames to /frames. The job
 	// lives in-memory here; encoding runs on /frames/end.
 	if (!timelineData && width && height && totalFrames) {
+		const parsedWidth = Number(width);
+		const parsedHeight = Number(height);
+		const parsedFramerate = Number(framerate);
+		const parsedTotalFrames = Number(totalFrames);
+
+		// Reject NaN or non-positive values
+		if (
+			!Number.isFinite(parsedWidth) || parsedWidth <= 0 ||
+			!Number.isFinite(parsedHeight) || parsedHeight <= 0 ||
+			!Number.isFinite(parsedFramerate) || parsedFramerate <= 0 ||
+			!Number.isFinite(parsedTotalFrames) || parsedTotalFrames <= 0
+		) {
+			return res.status(400).json({ error: "Invalid frame-stream dimensions" });
+		}
+
+		if (parsedWidth > 16384 || parsedHeight > 16384 || parsedTotalFrames > 10000000) {
+			return res.status(400).json({ error: "Dimension or frame count exceeds maximum" });
+		}
+
 		const jobId = uuidv4();
 		createFrameJob({
 			jobId,
 			projectId,
 			format: (format as ExportFormatId) || "mp4",
 			bitrateKbps: Number(bitrate_kbps) || 8000,
-			width: Number(width),
-			height: Number(height),
-			framerate: Number(framerate),
-			totalFrames: Number(totalFrames),
+			width: parsedWidth,
+			height: parsedHeight,
+			framerate: parsedFramerate,
+			totalFrames: parsedTotalFrames,
 		});
 		console.log(
 			`[Frame Export] Created awaiting-frames job ${jobId} (${width}x${height}@${framerate}fps, ${totalFrames} frames, ${format})`,
@@ -553,8 +650,9 @@ function buildFfmpegArgs(
 			const audioInputs: string[] = [];
 			for (const clip of audioClips) {
 				const clipDuration = clip.end - clip.start;
-				audioInputs.push(`-i`, clip.url!);
+				args.push(`-i`, clip.url!);
 				args.push("-ss", "0", "-t", String(clipDuration));
+				audioInputs.push(`-i`, clip.url!);
 			}
 			// Mix all audio streams
 			const amixInputs = audioClips.map((_, i) => `[${inputIdx + i}:a]`).join("");
@@ -674,7 +772,7 @@ async function signWithC2PA(
   const signature = {
     algorithm: "ES256",
     value: crypto
-      .createHmac("sha256", process.env.BETTER_AUTH_SECRET || "lazynext-dev")
+      .createHmac("sha256", getC2PASecret())
       .update(JSON.stringify(manifestContent))
       .digest("base64"),
     issuer: process.env.C2PA_SIGNING_CERT_ISSUER || "Lazynext Development CA",
@@ -745,6 +843,10 @@ app.get("/api/v1/jobs/:jobId/stream", async (req: Request, res: Response) => {
  * Body: { video_url, platform?, description?, title?, tags? }
  * Downloads the video if a URL is provided, then publishes to each
  * requested platform independently.
+ *
+ * Security: Only allows downloads from trusted origins (Azure Blob,
+ * configured CDN, and local filesystem paths). Arbitrary URLs are
+ * rejected to prevent SSRF.
  */
 app.post("/api/v1/publish", async (req: Request, res: Response) => {
 	const { video_url, platform = "tiktok", description, title, tags } = req.body;
@@ -754,17 +856,38 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 	}
 
 	try {
-		// Download video if it's a URL, otherwise use local path
+		const MAX_DOWNLOAD_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB max
 		let videoPath = video_url;
 		if (video_url.startsWith("http://") || video_url.startsWith("https://")) {
+			const allowedOrigins = getAllowedDownloadOrigins();
+			const urlObj = new URL(video_url);
+			if (!allowedOrigins.some((origin) => urlObj.hostname.endsWith(origin))) {
+				return res.status(400).json({
+					error: `Download from '${urlObj.hostname}' is not allowed. Only trusted storage origins are permitted.`,
+				});
+			}
+
 			const downloadResp = await fetch(video_url);
 			if (!downloadResp.ok) throw new Error(`Download failed: ${downloadResp.status}`);
+
+			let totalBytes = 0;
+			const chunks: Buffer[] = [];
+			const reader = downloadResp.body;
+			if (!reader) throw new Error("No response body");
+
+			for await (const chunk of convertToAsyncIterable(reader)) {
+				totalBytes += chunk.length;
+				if (totalBytes > MAX_DOWNLOAD_BYTES) {
+					throw new Error(`Video exceeds maximum size of ${MAX_DOWNLOAD_BYTES} bytes`);
+				}
+				chunks.push(chunk);
+			}
+
 			const tmpDir = "/tmp/lazynext/render";
 			await fs.promises.mkdir(tmpDir, { recursive: true });
-			const ext = path.extname(new URL(video_url).pathname) || ".mp4";
+			const ext = path.extname(urlObj.pathname) || ".mp4";
 			videoPath = path.join(tmpDir, `${uuidv4()}${ext}`);
-			const buf = await downloadResp.arrayBuffer();
-			await fs.promises.writeFile(videoPath, Buffer.from(buf));
+			await fs.promises.writeFile(videoPath, Buffer.concat(chunks));
 		}
 
 		const platforms = Array.isArray(platform)
@@ -800,36 +923,6 @@ app.post("/api/v1/publish", async (req: Request, res: Response) => {
 			error: err.message,
 		});
 	}
-});
-
-/**
- * Health check endpoint for K8s/Container Apps probes.
- */
-app.get("/health", async (_req: Request, res: Response) => {
-  try {
-    const ok = await ensureRedis();
-    let counts = null;
-    if (ok) {
-      const q = await getQueue();
-      counts = await Promise.race([
-        q.getJobCounts(),
-        new Promise<null>((_, reject) => setTimeout(() => reject(new Error("timeout")), 3000))
-      ]);
-    }
-    res.json({
-      status: "ok",
-      queue_size: counts ? counts.waiting + counts.active : 0,
-      ffmpeg_available: true,
-      redis_available: ok,
-    });
-  } catch {
-    res.json({
-      status: "ok",
-      queue_size: 0,
-      ffmpeg_available: true,
-      redis_available: false,
-    });
-  }
 });
 
 const PORT = process.env.PORT || 8003;

@@ -31,7 +31,7 @@ CMD ["sh", "-c", "\
     exit 1; \
   fi; \
   echo 'Running database migrations...'; \
-  cd apps/web && bun run db:migrate 2>&1; \
+  bun run db:migrate 2>&1; \
   EXIT_CODE=$?; \
   if [ $EXIT_CODE -eq 0 ]; then \
     echo 'Migrations completed successfully.'; \

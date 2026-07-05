@@ -2,6 +2,7 @@
  * Projects layout — auth guard that redirects unauthenticated users.
  *
  * @layout /projects
+ * @module projects/layout
  */
 
 import { headers } from "next/headers";

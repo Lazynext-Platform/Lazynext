@@ -5,8 +5,8 @@
 //! background worker processes tasks continuously by priority order.
 
 use serde::{Deserialize, Serialize};
-use std::collections::BinaryHeap;
 use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -92,8 +92,7 @@ struct PrioritizedTask {
 
 impl PartialEq for PrioritizedTask {
     fn eq(&self, other: &Self) -> bool {
-        self.task.priority == other.task.priority
-            && self.enqueue_order == other.enqueue_order
+        self.task.priority == other.task.priority && self.enqueue_order == other.enqueue_order
     }
 }
 
@@ -173,9 +172,7 @@ impl TaskQueue {
             Some(task) => {
                 let result = Self::execute_task(&task);
                 // Update status in all_tasks
-                if let Some(t) =
-                    self.all_tasks.iter_mut().find(|t| t.id == task.id)
-                {
+                if let Some(t) = self.all_tasks.iter_mut().find(|t| t.id == task.id) {
                     t.status = if result.success {
                         TaskStatus::Completed
                     } else {
@@ -277,8 +274,7 @@ impl TaskQueue {
         tokio::spawn(async move {
             loop {
                 if self.heap.is_empty() {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(1))
-                        .await;
+                    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                     continue;
                 }
 
@@ -294,8 +290,7 @@ impl TaskQueue {
                     }
                 }
 
-                tokio::time::sleep(tokio::time::Duration::from_secs(1))
-                    .await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
             }
         });
     }
@@ -322,20 +317,18 @@ fn now_iso() -> String {
     let mut year = 1970i64;
     let mut remaining_days = days as i64;
     loop {
-        let dys =
-            if (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0) {
-                366
-            } else {
-                365
-            };
+        let dys = if (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0) {
+            366
+        } else {
+            365
+        };
         if remaining_days < dys {
             break;
         }
         remaining_days -= dys;
         year += 1;
     }
-    let leap =
-        (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+    let leap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     let mdays = if leap {
         [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     } else {
@@ -354,9 +347,7 @@ fn now_iso() -> String {
         }
         (m, d)
     };
-    format!(
-        "{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z"
-    )
+    format!("{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z")
 }
 
 #[cfg(test)]

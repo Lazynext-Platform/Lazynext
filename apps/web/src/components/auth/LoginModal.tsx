@@ -1,6 +1,5 @@
 /**
- * Login modal — dialog with sign-in form, social auth options,
- * and animated background.
+ * Login modal — dialog with sign-in form and social auth options.
  *
  * @module components/auth/LoginModal
  */
@@ -8,40 +7,67 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Mail, Lock, Check } from "lucide-react";
-import { authClient } from "@/lib/auth-client"; // We need to create this!
+import { X, Mail, Lock } from "lucide-react";
+import { signIn, signUp } from "@/auth/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import Link from "next/link";
 
 export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
 	const [isLogin, setIsLogin] = useState(true);
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [name, setName] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setIsLoading(true);
+		if (!email || !password) return;
 
+		setIsLoading(true);
 		try {
 			if (isLogin) {
-				const { data, error } = await authClient.signIn.email({ email, password });
-				if (error) throw error;
+				const { error } = await signIn.email({
+					email,
+					password,
+					rememberMe: true,
+				});
+				if (error) {
+					toast.error(error.message ?? "Invalid email or password");
+					return;
+				}
+				toast.success("Signed in successfully!");
 			} else {
-				const { data, error } = await authClient.signUp.email({ email, password, name: email.split("@")[0] });
-				if (error) throw error;
+				if (password.length < 8) {
+					toast.error("Password must be at least 8 characters");
+					setIsLoading(false);
+					return;
+				}
+				const { error } = await signUp.email({
+					email,
+					password,
+					name: name || email.split("@")[0],
+				});
+				if (error) {
+					toast.error(error.message ?? "Sign up failed");
+					return;
+				}
+				toast.success("Account created successfully!");
 			}
 			onClose();
 		} catch (err) {
-			console.error("Auth error:", err);
-			alert("Authentication failed.");
+			toast.error(
+				err instanceof Error
+					? err.message
+					: "Authentication failed — server may be unreachable",
+			);
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
-	const handleGithubAuth = async () => {
-		setIsLoading(true);
-		await authClient.signIn.social({ provider: "github" });
+	const toggleMode = () => {
+		setIsLogin(!isLogin);
 		setIsLoading(false);
 	};
 
@@ -49,7 +75,6 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 		<AnimatePresence>
 			{isOpen && (
 				<div className="fixed inset-0 z-[9999] flex items-center justify-center">
-					{/* Backdrop */}
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
@@ -58,7 +83,6 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 						className="absolute inset-0 bg-black/60 backdrop-blur-sm"
 					/>
 
-					{/* Modal */}
 					<motion.div
 						initial={{ scale: 0.95, opacity: 0, y: 10 }}
 						animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -84,6 +108,21 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 						</div>
 
 						<form onSubmit={handleSubmit} className="space-y-4">
+							{!isLogin && (
+								<div className="space-y-2">
+									<label className="text-sm font-medium text-white/80">Name</label>
+									<input
+										type="text"
+										value={name}
+										onChange={(e) => setName(e.target.value)}
+										required
+										autoComplete="name"
+										className="w-full px-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
+										placeholder="Your name"
+									/>
+								</div>
+							)}
+
 							<div className="space-y-2">
 								<label className="text-sm font-medium text-white/80">Email</label>
 								<div className="relative">
@@ -93,6 +132,7 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
 										required
+										autoComplete="email"
 										className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
 										placeholder="editor@lazynext.com"
 									/>
@@ -108,11 +148,25 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 										value={password}
 										onChange={(e) => setPassword(e.target.value)}
 										required
+										minLength={8}
+										autoComplete={isLogin ? "current-password" : "new-password"}
 										className="w-full pl-10 pr-4 py-2 bg-black/40 border border-white/10 rounded-lg focus:outline-none focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 transition-all text-sm"
 										placeholder="••••••••"
 									/>
 								</div>
 							</div>
+
+							{isLogin && (
+								<div className="text-right">
+									<Link
+										href="/forgot-password"
+										onClick={onClose}
+										className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+									>
+										Forgot password?
+									</Link>
+								</div>
+							)}
 
 							<button
 								type="submit"
@@ -129,27 +183,10 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 							</button>
 						</form>
 
-						<div className="mt-6 flex items-center gap-4">
-							<div className="flex-1 h-px bg-white/10" />
-							<span className="text-xs text-muted font-medium uppercase tracking-wider">
-								Or continue with
-							</span>
-							<div className="flex-1 h-px bg-white/10" />
-						</div>
-
-						<button
-							onClick={handleGithubAuth}
-							disabled={isLoading}
-							className="mt-6 w-full py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm text-white/90"
-						>
-							<span className="w-5 h-5 flex items-center justify-center">G</span>
-							<span>Continue with GitHub</span>
-						</button>
-
 						<div className="mt-6 text-center text-sm text-muted">
 							{isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
 							<button
-								onClick={() => setIsLogin(!isLogin)}
+								onClick={toggleMode}
 								className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
 							>
 								{isLogin ? "Sign up" : "Sign in"}

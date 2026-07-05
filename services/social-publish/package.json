@@ -7,6 +7,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+    "@lazynext/api-client": "workspace:*",
 		"cors": "^2.8.6",
 		"express": "^5.2.1",
 		"uuid": "^14.0.1"

@@ -69,7 +69,7 @@ services:
   # ═══════════════════════════════════════════════════════════════
 
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     restart: unless-stopped
     <<: [*logging, *deploy-defaults]
     deploy:
@@ -405,7 +405,7 @@ services:
       - "traefik.http.routers.generative.middlewares=api-rate-limit@file,secure-headers@file"
       - "traefik.http.services.generative.loadbalancer.server.port=8001"
 
-  # ── 3. AI Agents (Chronos Copilot + WebSocket Sync) ───────────
+  # ── 3. AI Agents (Lazynext AI Copilot + WebSocket Sync) ───────────
   #     Port: 8002
   ai-agents:
     build:
@@ -671,8 +671,8 @@ services:
   #     Port: 8007
   social-publish:
     build:
-      context: ./services/social-publish
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/social-publish/Dockerfile
     <<: [*logging, *deploy-defaults, *security]
     deploy:
       replicas: 1
@@ -775,8 +775,8 @@ services:
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
       - DODO_API_KEY_FILE=/run/secrets/dodo_api_key
       - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
-      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${DODO_PRO_PRICE_ID:-pro_monthly}
-      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${DODO_STUDIO_PRICE_ID:-studio_monthly}
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${NEXT_PUBLIC_DODO_PRO_PRICE_ID:-pro_monthly}
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${NEXT_PUBLIC_DODO_STUDIO_PRICE_ID:-studio_monthly}
       - RESEND_API_KEY_FILE=/run/secrets/resend_api_key
       - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
       - MARBLE_WORKSPACE_KEY_FILE=/run/secrets/marble_workspace_key

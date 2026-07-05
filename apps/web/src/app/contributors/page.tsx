@@ -2,6 +2,7 @@
  * Contributors page — community contributors with GitHub contribution CTA.
  *
  * @page /contributors
+ * @module contributors/page
  */
 
 import type { Metadata } from "next";

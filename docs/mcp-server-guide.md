@@ -14,48 +14,93 @@ With Lazynext's MCP server, an AI agent can read your timeline, apply edits, add
 
 ---
 
-## Available Tools (14 Tools)
+## Available Tools (47 Tools)
+
+> **Note**: Updated 2026-07-05. Feature #35 expanded the MCP server from 14 to 47 tools. Full list below.
 
 The MCP server exposes all editing capabilities as callable tools:
 
-### Core Editing
+### Core Editing (8 tools)
 
 | Tool | Description |
 |------|-------------|
 | `run_lazynext_command` | Execute an AI-powered video editing intent on the CRDT timeline |
+| `autonomous_edit` | Alias for `run_lazynext_command` — agent-friendly variant |
+| `dry_run_edit` | Preview CRDT operations without applying them |
 | `get_timeline_state` | Return the full CRDT timeline state as JSON |
 | `get_project_info` | Return project metadata: name, framerate, resolution, track/clip counts |
 | `apply_crdt_operation` | Apply a serialized CRDT operation to the timeline |
+| `undo_operation` | Undo the last CRDT operation |
+| `redo_operation` | Redo the last undone CRDT operation |
 
-### Track Management
+### Track Management (8 tools)
 
 | Tool | Description |
 |------|-------------|
 | `add_track` | Add a new track (video, audio, text, effect) to the timeline |
 | `remove_track` | Remove a track by its index |
 | `manage_tracks` | Bulk operations: reorder, mute, unmute, solo, unsolo, lock, unlock |
+| `mute_track` | Mute a specific track by index |
+| `unmute_track` | Unmute a specific track by index |
+| `solo_track` | Solo a track (mute all others) |
+| `lock_track` | Lock a track to prevent editing |
+| `unlock_track` | Unlock a previously locked track |
 
-### Clip Operations
+### Clip Operations (6 tools)
 
 | Tool | Description |
 |------|-------------|
 | `add_clip` | Add a clip to a track (video, audio, text, image) |
 | `remove_clip` | Remove a clip from a specific track |
+| `trim_clip` | Trim a clip's in/out points |
+| `split_clip` | Split a clip at a given frame |
+| `move_clip` | Move a clip to a different track or position |
+| `duplicate_clip` | Duplicate a clip with optional offset |
 
-### Effects & Keyframes
+### Effects & Keyframes (8 tools)
 
 | Tool | Description |
 |------|-------------|
 | `apply_effect` | Apply a video or audio effect to a specific clip |
+| `remove_effect` | Remove an effect from a clip |
 | `set_keyframe` | Set a keyframe on an animated property (opacity, scale, rotation, position) |
+| `remove_keyframe` | Remove a keyframe at a specific frame |
+| `set_effect_parameter` | Set an effect's parameter value |
+| `animate_effect` | Add keyframe animation to an effect parameter |
+| `apply_color_grade` | Apply a color grade LUT or preset to a clip |
+| `reset_color_grade` | Remove color grading from a clip |
 
-### Export & Media
+### Export & Media (8 tools)
 
 | Tool | Description |
 |------|-------------|
-| `export_project` | Export timeline to video file (MP4, ProRes, DCP, AAF) |
+| `export_project` | Export timeline to video file (MP4, ProRes, DCP, AAF, MOV, GIF) |
+| `export_frame` | Export a single frame at a given timecode |
 | `analyze_media` | Analyze media file for editing recommendations |
 | `import_media` | Import multiple media files into the project bin |
+| `list_media` | List all media in the project bin with metadata |
+| `remove_media` | Remove media from the project bin |
+| `transcribe_media` | Transcribe audio from a media file (Whisper) |
+| `detect_scenes` | Run scene detection on a video clip |
+
+### Audio Tools (4 tools)
+
+| Tool | Description |
+|------|-------------|
+| `adjust_audio_level` | Set clip volume level (0.0–2.0) |
+| `apply_audio_effect` | Apply EQ, compressor, or reverb to a clip |
+| `duck_audio` | Auto-duck audio under speech with sidechain compression |
+| `separate_stems` | Separate audio into stems (vocals, drums, bass, other) |
+
+### AI Tools (5 tools)
+
+| Tool | Description |
+|------|-------------|
+| `ai_generate_broll` | Generate B-roll footage via AI (Replicate/runway) |
+| `ai_generate_voiceover` | Generate AI voiceover (ElevenLabs) |
+| `ai_filler_removal` | Remove filler words (um, uh, like) from audio |
+| `ai_auto_reframe` | Auto-reframe video for different aspect ratios |
+| `ai_caption` | Generate styled captions from transcript
 
 ### Tool Signatures
 

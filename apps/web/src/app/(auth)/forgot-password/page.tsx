@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { toast } from "sonner";
 import Link from "next/link";
-import { forgetPassword } from "@/auth/client";
+import { requestPasswordReset } from "@/auth/client";
 
 export default function ForgotPasswordPage() {
 	const [email, setEmail] = useState("");
@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
 		e.preventDefault();
 		setLoading(true);
 		try {
-			const { error } = await forgetPassword({
+			const { error } = await requestPasswordReset({
 				email,
 				redirectTo: "/reset-password",
 			});
@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
 				toast.error(error.message || "Failed to send reset email");
 			}
 		} catch {
-			toast.error("An error occurred");
+			toast.error("An error occurred. Please try again.");
 		} finally {
 			setLoading(false);
 		}
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
 				<div className="text-center">
 					<Link
 						href="/sign-in"
-						className="text-sm text-blue-400 hover:text-blue-300"
+						className="text-sm text-[var(--accent-secondary)] hover:underline"
 					>
 						Back to Sign In
 					</Link>
@@ -67,18 +67,21 @@ export default function ForgotPasswordPage() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="you@example.com"
 				/>
 				<button
 					type="submit"
 					disabled={loading}
-					className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground hover:bg-blue-500 disabled:opacity-50"
+					className="w-full rounded-lg bg-[var(--accent-secondary)] py-2.5 text-sm font-semibold text-foreground hover:bg-[var(--accent-secondary)]/80 disabled:opacity-50"
 				>
 					{loading ? "Sending..." : "Send Reset Link"}
 				</button>
 				<p className="text-center text-xs text-muted">
-					<Link href="/sign-in" className="text-blue-400 hover:text-blue-300">
+					<Link
+						href="/sign-in"
+						className="text-[var(--accent-secondary)] hover:underline"
+					>
 						Back to Sign In
 					</Link>
 				</p>

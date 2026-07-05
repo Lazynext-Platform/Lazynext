@@ -1,3 +1,10 @@
+/**
+ * @module Canvas interaction hooks — React hook that initializes and manages a
+ * Fabric.js canvas instance. Exposes builders for adding, removing, resizing,
+ * and reordering elements, plus handles selection, movement, and axis-lock
+ * events for interactive editing.
+ */
+
 import { useCallback, useRef, useState } from "react";
 import {
 	Canvas as FabricCanvas,

@@ -11,13 +11,19 @@ export async function POST(req: Request) {
 		const signature = req.headers.get("dodo-signature");
 
 		if (!webhookSecret) {
-			console.warn("DODO_WEBHOOK_SECRET not configured — webhook not verified");
-			return NextResponse.json({ received: true, verified: false }, { status: 200 });
+			console.error("DODO_WEBHOOK_SECRET not configured — rejecting webhook");
+			return NextResponse.json(
+				{ error: "Webhook secret not configured" },
+				{ status: 500 },
+			);
 		}
 
 		if (!DODO_API_KEY) {
-			console.warn("DODO_API_KEY not configured — webhook not verified");
-			return NextResponse.json({ received: true, verified: false }, { status: 200 });
+			console.error("DODO_API_KEY not configured — rejecting webhook");
+			return NextResponse.json(
+				{ error: "API key not configured" },
+				{ status: 500 },
+			);
 		}
 
 		if (!signature) {

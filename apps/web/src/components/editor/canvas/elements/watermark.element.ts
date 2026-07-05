@@ -1,3 +1,10 @@
+/**
+ * @module Watermark element handler — Implements the CanvasElementHandler
+ * contract for watermark overlays. Supports text and image watermarks,
+ * persisting position, rotation, opacity, and scale changes via the
+ * WATERMARK_UPDATED canvas operation.
+ */
+
 import type { CanvasElementHandler, WatermarkUpdatePayload } from "../types";
 import { addTextElement, addImageElement } from "../components/elements";
 import { convertToVideoPosition } from "../helpers/canvas.util";

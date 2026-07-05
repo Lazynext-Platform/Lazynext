@@ -1,3 +1,7 @@
+/**
+ * @module Timeline track — Core Track class with element management,
+ * validation, serialization, and deserialization for the editor timeline.
+ */
 import { ElementJSON, TrackJSON } from "../../types";
 import { TRACK_TYPES } from "../../utils/constants";
 import { generateShortUuid } from "../../utils/timeline.utils";

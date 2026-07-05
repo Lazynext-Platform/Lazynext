@@ -1,3 +1,12 @@
+"""
+SAM2 rotoscoping extraction pipeline.
+
+Provides an end-to-end pipeline for extracting alpha masks from video
+using the Meta Segment Anything Model 2 (SAM2). Uses ONNX Runtime for
+inference with a rembg/u2net fallback for environments without a SAM2
+ONNX model.
+"""
+
 import os
 import cv2
 import numpy as np

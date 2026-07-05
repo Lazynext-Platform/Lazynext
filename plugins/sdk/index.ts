@@ -1,4 +1,25 @@
-// @lazynext/plugin-sdk API interfaces
+/**
+ * @module @lazynext/plugin-sdk
+ *
+ * Plugin SDK API interfaces for building Lazynext plugins.
+ * Plugins are WASM-compiled modules that implement the {@link WasmPlugin}
+ * interface and are loaded by the Rust `wasm_sandbox` runtime.
+ *
+ * @example
+ * ```ts
+ * import { WasmPlugin, registerPlugin } from "@lazynext/plugin-sdk";
+ *
+ * const myEffect: WasmPlugin = {
+ *   id: "my-effect",
+ *   processFrame(buffer, width, height) {
+ *     // Apply effect to RGBA pixel buffer
+ *     return buffer;
+ *   },
+ * };
+ *
+ * registerPlugin(myEffect);
+ * ```
+ */
 
 /** Top-level timeline model exposed to plugins via the SDK. */
 export interface Timeline {
@@ -35,8 +56,14 @@ export interface WasmPlugin {
 
 /**
  * Register a plugin with the Lazynext engine.
+ *
+ * The plugin's `processFrame` method will be called by the Rust
+ * `wasm_sandbox` runtime for each frame that has this effect applied.
+ * The plugin ID must be unique across all loaded plugins.
+ *
+ * @param plugin - Plugin instance implementing the WasmPlugin interface
  */
 export function registerPlugin(plugin: WasmPlugin) {
-    console.log(`Registered Lazynext plugin: ${plugin.id}`);
-    // FFI call to Rust `wasm_sandbox.rs` happens here
+	console.log(`Registered Lazynext plugin: ${plugin.id}`);
+	// FFI call to Rust `wasm_sandbox.rs` happens here
 }

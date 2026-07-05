@@ -1,11 +1,31 @@
-/** @module Preview coordinate conversion between viewport and video coordinate spaces */
+/**
+ * @module Preview coordinate conversion between viewport and video coordinate spaces.
+ *
+ * The preview viewport renders the compositor output at an arbitrary zoom/pan state.
+ * This module converts between three coordinate spaces:
+ * - **Screen space**: DOM pixel coordinates (mouse events)
+ * - **Viewport space**: Canvas-local coordinates (origin at top-left of canvas element)
+ * - **Canvas space**: Video-resolution coordinates (origin at center, scaled by zoom)
+ *
+ * The `PreviewViewportGeometry` struct captures the current zoom/pan/scale state
+ * and is used by all conversion functions to map between spaces.
+ */
+
+/** Current viewport geometry: canvas size, zoom scale, and pan offset. */
 export interface PreviewViewportGeometry {
+	/** Total canvas element height in CSS pixels */
 	canvasHeight: number;
+	/** Total canvas element width in CSS pixels */
 	canvasWidth: number;
+	/** Pan center X in canvas-space units */
 	centerX: number;
+	/** Pan center Y in canvas-space units */
 	centerY: number;
+	/** Zoom scale factor (1.0 = 100%) */
 	scale: number;
+	/** Viewport container height in CSS pixels */
 	viewportHeight: number;
+	/** Viewport container width in CSS pixels */
 	viewportWidth: number;
 }
 

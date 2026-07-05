@@ -149,6 +149,7 @@ impl Div<i64> for MediaTime {
     }
 }
 
+/// WASM-ABI input options for converting seconds to `MediaTime`.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -157,6 +158,7 @@ pub struct MediaTimeFromSecondsOptions {
     pub seconds: f64,
 }
 
+/// Converts floating-point seconds to a `MediaTime`, returning `None` for non-finite inputs.
 #[export]
 pub fn media_time_from_seconds(
     MediaTimeFromSecondsOptions { seconds }: MediaTimeFromSecondsOptions,
@@ -164,6 +166,7 @@ pub fn media_time_from_seconds(
     MediaTime::from_seconds_f64(seconds)
 }
 
+/// WASM-ABI input options for converting `MediaTime` to seconds.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -172,11 +175,13 @@ pub struct MediaTimeToSecondsOptions {
     pub time: MediaTime,
 }
 
+/// Converts a `MediaTime` to floating-point seconds.
 #[export]
 pub fn media_time_to_seconds(MediaTimeToSecondsOptions { time }: MediaTimeToSecondsOptions) -> f64 {
     time.to_seconds_f64()
 }
 
+/// WASM-ABI input options for creating a `MediaTime` from a frame number and rate.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -186,6 +191,7 @@ pub struct MediaTimeFromFrameOptions {
     pub rate: FrameRate,
 }
 
+/// Converts a frame number at the given rate to a `MediaTime`.
 #[export]
 pub fn media_time_from_frame(
     MediaTimeFromFrameOptions { frame, rate }: MediaTimeFromFrameOptions,
@@ -193,6 +199,7 @@ pub fn media_time_from_frame(
     MediaTime::from_frame(frame, rate)
 }
 
+/// WASM-ABI input options for rounding a `MediaTime` to the nearest frame.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -202,6 +209,7 @@ pub struct MediaTimeToFrameOptions {
     pub rate: FrameRate,
 }
 
+/// Rounds a `MediaTime` to the nearest frame index at the given rate.
 #[export]
 pub fn media_time_to_frame(
     MediaTimeToFrameOptions { time, rate }: MediaTimeToFrameOptions,
@@ -209,6 +217,7 @@ pub fn media_time_to_frame(
     time.to_frame_round(rate)
 }
 
+/// WASM-ABI input options for rounding a `MediaTime` to the nearest frame boundary.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -218,6 +227,7 @@ pub struct RoundToFrameOptions {
     pub rate: FrameRate,
 }
 
+/// Rounds a `MediaTime` to the nearest frame-aligned time.
 #[export]
 pub fn round_to_frame(
     RoundToFrameOptions { time, rate }: RoundToFrameOptions,
@@ -225,6 +235,7 @@ pub fn round_to_frame(
     time.round_to_frame(rate)
 }
 
+/// WASM-ABI input options for flooring a `MediaTime` to a frame boundary.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -234,6 +245,7 @@ pub struct FloorToFrameOptions {
     pub rate: FrameRate,
 }
 
+/// Floors a `MediaTime` down to the previous frame boundary.
 #[export]
 pub fn floor_to_frame(
     FloorToFrameOptions { time, rate }: FloorToFrameOptions,
@@ -241,6 +253,7 @@ pub fn floor_to_frame(
     time.floor_to_frame(rate)
 }
 
+/// WASM-ABI input options for checking frame alignment.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -250,6 +263,7 @@ pub struct IsFrameAlignedOptions {
     pub rate: FrameRate,
 }
 
+/// Returns `true` if the `MediaTime` is exactly aligned to a frame boundary.
 #[export]
 pub fn is_frame_aligned(
     IsFrameAlignedOptions { time, rate }: IsFrameAlignedOptions,
@@ -257,6 +271,7 @@ pub fn is_frame_aligned(
     time.is_frame_aligned(rate)
 }
 
+/// WASM-ABI input options for computing the last frame time within a duration.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -266,6 +281,7 @@ pub struct LastFrameTimeOptions {
     pub rate: FrameRate,
 }
 
+/// Returns the start time of the last full frame within a duration.
 #[export]
 pub fn last_frame_time(
     LastFrameTimeOptions { duration, rate }: LastFrameTimeOptions,
@@ -273,6 +289,7 @@ pub fn last_frame_time(
     duration.last_frame_time(rate)
 }
 
+/// WASM-ABI input options for computing a snapped seek time.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -283,6 +300,7 @@ pub struct SnappedSeekTimeOptions {
     pub rate: FrameRate,
 }
 
+/// Rounds a seek time to the nearest frame and clamps it within `[0, duration]`.
 #[export]
 pub fn snapped_seek_time(
     SnappedSeekTimeOptions {
@@ -294,6 +312,7 @@ pub fn snapped_seek_time(
     time.snapped_seek_time(duration, rate)
 }
 
+/// WASM-ABI input options for adding two `MediaTime` values.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -303,11 +322,13 @@ pub struct MediaTimeAddOptions {
     pub rhs: MediaTime,
 }
 
+/// Adds two `MediaTime` values. Exported for the WASM bridge.
 #[export]
 pub fn media_time_add(MediaTimeAddOptions { lhs, rhs }: MediaTimeAddOptions) -> MediaTime {
     lhs + rhs
 }
 
+/// WASM-ABI input options for subtracting two `MediaTime` values.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -317,11 +338,13 @@ pub struct MediaTimeSubOptions {
     pub rhs: MediaTime,
 }
 
+/// Subtracts `rhs` from `lhs` and returns the result.
 #[export]
 pub fn media_time_sub(MediaTimeSubOptions { lhs, rhs }: MediaTimeSubOptions) -> MediaTime {
     lhs - rhs
 }
 
+/// WASM-ABI input options for the minimum of two `MediaTime` values.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -331,11 +354,13 @@ pub struct MediaTimeMinOptions {
     pub rhs: MediaTime,
 }
 
+/// Returns the smaller of two `MediaTime` values.
 #[export]
 pub fn media_time_min(MediaTimeMinOptions { lhs, rhs }: MediaTimeMinOptions) -> MediaTime {
     lhs.min(rhs)
 }
 
+/// WASM-ABI input options for the maximum of two `MediaTime` values.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -345,11 +370,13 @@ pub struct MediaTimeMaxOptions {
     pub rhs: MediaTime,
 }
 
+/// Returns the larger of two `MediaTime` values.
 #[export]
 pub fn media_time_max(MediaTimeMaxOptions { lhs, rhs }: MediaTimeMaxOptions) -> MediaTime {
     lhs.max(rhs)
 }
 
+/// WASM-ABI input options for clamping a `MediaTime` between min and max.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi))]
 #[derive(Deserialize)]
@@ -360,6 +387,7 @@ pub struct MediaTimeClampOptions {
     pub max: MediaTime,
 }
 
+/// Clamps a `MediaTime` to the inclusive range `[min, max]`.
 #[export]
 pub fn media_time_clamp(
     MediaTimeClampOptions { time, min, max }: MediaTimeClampOptions,

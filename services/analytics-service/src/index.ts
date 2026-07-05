@@ -14,9 +14,24 @@ import crypto from "crypto";
 import { Database } from "bun:sqlite";
 import path from "path";
 import { connectKafka, sendToKafka } from "./kafka";
+import { authMiddleware } from "@lazynext/api-client/auth-middleware";
 
 const app = express();
 app.use(express.json());
+
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({
+    status: "ok",
+    service: "analytics-service",
+    uptime: process.uptime(),
+    kafka: kafkaAvailable ? "connected" : "buffer_only",
+    clickhouse: clickhouseAvailable ? "connected" : "unavailable",
+    buffered_events: eventBuffer.length,
+    active_sessions: activeSessions.size,
+  });
+});
+
+app.use(authMiddleware);
 
 const PORT = process.env.PORT || 8006;
 
@@ -25,7 +40,7 @@ const PORT = process.env.PORT || 8006;
 // The in-memory buffer remains as a hot cache for /api/v1/metrics queries.
 
 const DB_PATH = process.env.ANALYTICS_DB_PATH || path.resolve("analytics.db");
-let db: Database;
+let db: Database | null;
 
 try {
   db = new Database(DB_PATH);
@@ -47,7 +62,7 @@ try {
   console.log(`[Analytics] SQLite persistence enabled at ${DB_PATH}`);
 } catch (err) {
   console.warn(`[Analytics] SQLite unavailable (${err}) — events will not survive restarts`);
-  db = null as any;
+  db = null;
 }
 
 function persistEvent(userId: string, eventType: string, metadata: Record<string, unknown>, sessionId: string, timestamp: number): void {
@@ -98,8 +113,16 @@ let clickhouseAvailable = false;
 async function queryClickHouse(_query: string): Promise<any[]> {
   if (process.env.CLICKHOUSE_URL) {
     try {
+      const headers: Record<string, string> = {};
+      const chUser = process.env.CLICKHOUSE_USER;
+      const chPassword = process.env.CLICKHOUSE_PASSWORD;
+      if (chUser && chPassword) {
+        const auth = Buffer.from(`${chUser}:${chPassword}`).toString("base64");
+        headers["Authorization"] = `Basic ${auth}`;
+      }
       const resp = await fetch(`${process.env.CLICKHOUSE_URL}?default_format=JSONEachRow`, {
         method: "POST",
+        headers,
         body: _query,
       });
       if (resp.ok) {
@@ -141,23 +164,6 @@ function trackSession(userId: string, sessionId: string): void {
   }
 }
 
-// ── Routes ──────────────────────────────────────────────────────────────
-
-/**
- * GET /health — Health check with Kafka/ClickHouse connectivity status.
- */
-app.get("/health", (_req: Request, res: Response) => {
-  res.json({
-    status: "ok",
-    service: "analytics-service",
-    uptime: process.uptime(),
-    kafka: kafkaAvailable ? "connected" : "buffer_only",
-    clickhouse: clickhouseAvailable ? "connected" : "unavailable",
-    buffered_events: eventBuffer.length,
-    active_sessions: activeSessions.size,
-  });
-});
-
 /**
  * High-velocity telemetry ingestion endpoint.
  * Accepts user action events from the Next.js frontend or native apps.
@@ -165,6 +171,38 @@ app.get("/health", (_req: Request, res: Response) => {
  * Event types: page_view, timeline_edit, export_started, export_completed,
  *              ai_prompt, collaboration_join, payment_initiated, etc.
  */
+const VALID_EVENT_TYPES = new Set([
+  "page_view", "timeline_edit", "clip_added", "track_added",
+  "export_started", "export_completed", "ai_prompt_sent",
+  "ai_response_received", "payment_completed", "subscription_changed",
+  "login", "signup", "session_start", "session_end",
+  "collaboration_joined", "asset_uploaded", "plugin_used",
+]);
+
+const MAX_METADATA_KEYS = 50;
+const MAX_METADATA_VALUE_LENGTH = 1000;
+
+function sanitizeMetadata(metadata: unknown): Record<string, unknown> {
+  if (typeof metadata !== "object" || metadata === null) {
+    return {};
+  }
+  const record = metadata as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = {};
+  let keyCount = 0;
+  for (const [key, value] of Object.entries(record)) {
+    if (keyCount >= MAX_METADATA_KEYS) break;
+    if (typeof key !== "string" || key.length > 256) continue;
+    if (value === null || value === undefined) continue;
+    if (typeof value === "string" && value.length > MAX_METADATA_VALUE_LENGTH) {
+      sanitized[key] = value.substring(0, MAX_METADATA_VALUE_LENGTH) + "...";
+    } else {
+      sanitized[key] = value;
+    }
+    keyCount++;
+  }
+  return sanitized;
+}
+
 app.post("/api/v1/events", async (req: Request, res: Response) => {
   try {
     const {
@@ -174,40 +212,58 @@ app.post("/api/v1/events", async (req: Request, res: Response) => {
       timestamp,
       sessionId,
     } = req.body as {
-      userId?: string;
-      eventType?: string;
-      metadata?: Record<string, unknown>;
-      timestamp?: number;
-      sessionId?: string;
+      userId?: unknown;
+      eventType?: unknown;
+      metadata?: unknown;
+      timestamp?: unknown;
+      sessionId?: unknown;
     };
 
-    if (!userId || !eventType) {
+    // Strict type validation
+    if (typeof userId !== "string" || userId.trim().length === 0 || userId.length > 256) {
+      return res.status(400).json({ error: "Invalid userId: must be a non-empty string (max 256 chars)" });
+    }
+    if (typeof eventType !== "string" || eventType.trim().length === 0) {
+      return res.status(400).json({ error: "Missing eventType" });
+    }
+    if (!VALID_EVENT_TYPES.has(eventType)) {
       return res.status(400).json({
-        error: "Missing required fields: userId and eventType",
+        error: `Invalid eventType '${eventType}'. Must be one of: ${[...VALID_EVENT_TYPES].join(", ")}`
       });
     }
+    if (timestamp !== undefined && typeof timestamp !== "number") {
+      return res.status(400).json({ error: "timestamp must be a number" });
+    }
+    if (sessionId !== undefined && typeof sessionId !== "string") {
+      return res.status(400).json({ error: "sessionId must be a string" });
+    }
 
-    const ts = timestamp || Date.now();
-    const sid = sessionId || crypto.randomUUID();
+    const cleanMetadata = sanitizeMetadata(metadata);
+    const ts = typeof timestamp === "number" && timestamp > 0 ? timestamp : Date.now();
+    const sid = typeof sessionId === "string" && sessionId.trim().length > 0
+      ? sessionId.trim()
+      : crypto.randomUUID();
+    const cleanUserId = userId.trim();
+    const cleanEventType = eventType.trim();
 
     // Buffer in-memory for /api/v1/metrics queries
-    eventBuffer.push({ userId, eventType, metadata, timestamp: ts, sessionId: sid });
+    eventBuffer.push({ userId: cleanUserId, eventType: cleanEventType, metadata: cleanMetadata, timestamp: ts, sessionId: sid });
     if (eventBuffer.length > MAX_BUFFERED_EVENTS) {
       eventBuffer.shift();
     }
 
     // Persist to SQLite for durability across restarts
-    persistEvent(userId, eventType, metadata, sid, ts);
+    persistEvent(cleanUserId, cleanEventType, cleanMetadata, sid, ts);
 
     // Track session
-    trackSession(userId, sid);
+    trackSession(cleanUserId, sid);
 
     // Push to Kafka if available
     if (kafkaAvailable) {
       await kafkaProducer.send("lazynext.user.events", [
         {
-          key: userId,
-          value: JSON.stringify({ userId, eventType, metadata, timestamp: ts, sessionId: sid }),
+          key: cleanUserId,
+          value: JSON.stringify({ userId: cleanUserId, eventType: cleanEventType, metadata: cleanMetadata, timestamp: ts, sessionId: sid }),
         },
       ]);
     }
@@ -311,7 +367,13 @@ async function start() {
   // Attempt ClickHouse connection check
   if (process.env.CLICKHOUSE_URL) {
     try {
-      const resp = await fetch(`${process.env.CLICKHOUSE_URL}?query=SELECT%201`);
+      const headers: Record<string, string> = {};
+      const chUser = process.env.CLICKHOUSE_USER;
+      const chPassword = process.env.CLICKHOUSE_PASSWORD;
+      if (chUser && chPassword) {
+        headers["Authorization"] = `Basic ${Buffer.from(`${chUser}:${chPassword}`).toString("base64")}`;
+      }
+      const resp = await fetch(`${process.env.CLICKHOUSE_URL}?query=SELECT%201`, { headers });
       if (resp.ok) {
         (clickhouseAvailable as boolean) = true;
         console.log("[Analytics] ClickHouse connected.");

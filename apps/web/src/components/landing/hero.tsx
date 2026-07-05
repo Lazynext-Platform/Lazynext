@@ -27,7 +27,7 @@ export function Hero() {
 			<div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center items-center z-10">
 				<div className="inline-block text-6xl font-extrabold tracking-tighter md:text-[6.5rem] leading-[1.1] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100 drop-shadow-2xl">
 					<h1 className="text-foreground">The open source</h1>
-					<div className="bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent py-2">
+					<div className="bg-gradient-to-r from-[var(--text-primary)] via-[var(--text-secondary)] to-[var(--text-muted)] bg-clip-text text-transparent py-2">
 						<Handlebars>Video editor</Handlebars>
 					</div>
 				</div>
@@ -43,7 +43,7 @@ export function Hero() {
 					<Link href="/projects" className="w-full sm:w-auto">
 						<Button
 							size="lg"
-							className="w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-white text-black hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(255,255,255,0.4)] rounded-2xl group"
+							className="w-full sm:w-auto h-14 px-8 text-lg font-semibold bg-[var(--accent-primary)] text-[var(--text-on-accent)] hover:bg-[var(--accent-primary)]/80 transition-all hover:scale-105 active:scale-95 shadow-[var(--accent-glow)] rounded-2xl group"
 						>
 							Launch Editor
 							<ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

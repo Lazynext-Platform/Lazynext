@@ -1,3 +1,4 @@
+/** @module Web fallback implementation of the Lazynext native module — provides demo project data when the API gateway is unreachable during web preview. */
 import { registerWebModule, NativeModule } from "expo";
 
 class MyModule extends NativeModule<{}> {

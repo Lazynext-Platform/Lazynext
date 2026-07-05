@@ -11,6 +11,8 @@ use tokio::sync::Mutex;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlCanvasElement;
 
+/// WASM-accessible wrapper around the core NLE engine, providing project lifecycle,
+/// track/clip management, media pool, and canvas rendering.
 #[wasm_bindgen]
 pub struct WasmEngine {
     engine: Arc<Mutex<NLEState>>,
@@ -19,6 +21,7 @@ pub struct WasmEngine {
 
 #[wasm_bindgen]
 impl WasmEngine {
+    /// Initializes a new engine with the given project ID, name, and framerate.
     #[wasm_bindgen(constructor)]
     pub async fn new(
         project_id: String,
@@ -40,6 +43,7 @@ impl WasmEngine {
         })
     }
 
+    /// Renders a specific frame to the given HTML canvas element.
     #[wasm_bindgen]
     pub async fn render_to_canvas(
         &self,
@@ -63,6 +67,7 @@ impl WasmEngine {
         Ok(())
     }
 
+    /// Adds a sample video track and clip for testing.
     #[wasm_bindgen]
     pub async fn add_test_clip(&self) {
         let mut state = self.engine.lock().await;
@@ -77,6 +82,7 @@ impl WasmEngine {
         );
     }
 
+    /// Adds a media asset to the project's media pool.
     #[wasm_bindgen(js_name = "addMedia")]
     pub async fn add_media(
         &self,
@@ -101,6 +107,7 @@ impl WasmEngine {
         state.get_project_data_mut().media_pool.insert(id, asset);
     }
 
+    /// Adds a new track to the timeline (kind: "video" or "audio").
     #[wasm_bindgen(js_name = "addTrack")]
     pub async fn add_track(&self, kind: String) {
         let mut state = self.engine.lock().await;
@@ -108,6 +115,7 @@ impl WasmEngine {
         state.add_track(track_name, kind);
     }
 
+    /// Returns the full timeline state as a pretty-printed JSON string.
     #[wasm_bindgen(js_name = "getTimelineState")]
     pub async fn get_timeline_state(&self) -> String {
         let state = self.engine.lock().await;

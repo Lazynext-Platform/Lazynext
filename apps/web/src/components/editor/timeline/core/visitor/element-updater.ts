@@ -1,3 +1,8 @@
+/**
+ * @module Element updater visitor — Visitor pattern implementation for updating
+ * and replacing typed elements in timeline tracks using the Friend Class Pattern
+ * for controlled access to track internals.
+ */
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

@@ -107,9 +107,9 @@ async function getAIProviderMetrics(): Promise<AIProviderMetric[]> {
       status: "Unknown",
     },
     {
-      name: "Local Llama 3",
-      provider: "Ollama",
-      colorHex: "#f97316",
+      name: "Google Gemini",
+      provider: "Gemini",
+      colorHex: "#4285F4",
       requestsPerMin: null,
       avgLatencyMs: null,
       status: "Unknown",

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lazynext-auth"
+version = "0.1.0"
+description = "Shared JWT auth module for Lazynext Python services"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.138.0",
+    "pyjwt>=2.10.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]

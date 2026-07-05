@@ -12,20 +12,23 @@ import { useRouter } from "next/navigation";
 import { signUp } from "@/auth/client";
 import { toast } from "sonner";
 import Link from "next/link";
-import { MailCheck } from "lucide-react";
 
 export function SignUpForm() {
 	const router = useRouter();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [emailSent, setEmailSent] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (password.length < 8) {
 			toast.error("Password must be at least 8 characters");
+			return;
+		}
+		if (password !== confirmPassword) {
+			toast.error("Passwords do not match");
 			return;
 		}
 		setLoading(true);
@@ -39,7 +42,7 @@ export function SignUpForm() {
 			if (error) {
 				toast.error(error.message ?? "Sign up failed");
 			} else {
-				toast.success("Account created!");
+				toast.success("Account created successfully!");
 				router.push("/dashboard");
 			}
 		} catch (err) {
@@ -52,30 +55,6 @@ export function SignUpForm() {
 			setLoading(false);
 		}
 	};
-
-	if (emailSent) {
-		return (
-			<div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
-				<div className="rounded-full bg-blue-500/20 p-4 text-blue-400">
-					<MailCheck className="size-10" />
-				</div>
-				<h3 className="text-xl font-medium text-foreground">
-					Check your inbox
-				</h3>
-				<p className="text-sm text-muted max-w-[280px]">
-					We just sent a verification link to{" "}
-					<strong className="text-foreground">{email}</strong>. Please click the
-					link to activate your account.
-				</p>
-				<button
-					onClick={() => setEmailSent(false)}
-					className="mt-4 text-xs text-muted hover:text-foreground transition-colors"
-				>
-					Used the wrong email? Go back
-				</button>
-			</div>
-		);
-	}
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +71,8 @@ export function SignUpForm() {
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					required
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					autoComplete="name"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="Your name"
 				/>
 			</div>
@@ -109,7 +89,8 @@ export function SignUpForm() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					autoComplete="email"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="you@example.com"
 				/>
 			</div>
@@ -127,20 +108,40 @@ export function SignUpForm() {
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					minLength={8}
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					autoComplete="new-password"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="Min. 8 characters"
+				/>
+			</div>
+			<div>
+				<label
+					htmlFor="confirmPassword"
+					className="mb-1 block text-xs font-medium text-muted"
+				>
+					Confirm Password
+				</label>
+				<input
+					id="confirmPassword"
+					type="password"
+					value={confirmPassword}
+					onChange={(e) => setConfirmPassword(e.target.value)}
+					required
+					minLength={8}
+					autoComplete="new-password"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
+					placeholder="Re-enter your password"
 				/>
 			</div>
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-blue-500 disabled:opacity-50"
+				className="w-full rounded-lg bg-[var(--accent-secondary)] py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--accent-secondary)]/80 disabled:opacity-50"
 			>
 				{loading ? "Creating account..." : "Create Account"}
 			</button>
 			<p className="text-center text-xs text-muted">
 				Already have an account?{" "}
-				<Link href="/sign-in" className="text-blue-400 hover:text-blue-300">
+				<Link href="/sign-in" className="text-[var(--accent-secondary)] hover:underline">
 					Sign In
 				</Link>
 			</p>

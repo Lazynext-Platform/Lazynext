@@ -1,3 +1,5 @@
+/** @module Brand SVG icon components (Vercel, Marble, and other third-party logos) */
+
 import type { IconProps } from "./types";
 
 export function OcVercelIcon({ className }: IconProps) {

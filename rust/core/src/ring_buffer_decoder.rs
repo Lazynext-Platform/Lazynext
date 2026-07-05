@@ -14,6 +14,15 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use tokio::sync::Mutex;
 use tokio::sync::mpsc;
 
+/// Sanitize a media path to prevent path traversal and flag injection.
+fn sanitize_media_path(path: &str) -> String {
+    path.trim_start_matches('-')
+        .trim()
+        .replace("../", "")
+        .replace("..\\", "")
+        .to_string()
+}
+
 struct DecodeStream {
     _media_path: String,
     _width: u32,
@@ -27,17 +36,30 @@ struct DecodeStream {
 
 impl DecodeStream {
     fn new(media_path: String, width: u32, height: u32) -> Self {
+        let width = width.max(1);
+        let height = height.max(1);
         let current_frame = Arc::new(AtomicU32::new(0));
         let recent_frames = Arc::new(Mutex::new(LruCache::new(NonZeroUsize::new(120).unwrap())));
         let (seek_tx, mut seek_rx) = mpsc::channel::<u32>(10);
 
-        let stream_path = media_path.clone();
+        let stream_path = sanitize_media_path(&media_path);
         let cur_frame_ref = current_frame.clone();
         let frames_ref = recent_frames.clone();
 
         tokio::task::spawn_blocking(move || {
             let mut ffmpeg_child: Option<std::process::Child> = None;
-            let expected_size = (width * height * 4) as usize;
+            // Use checked multiplication to prevent overflow
+            let expected_size = (width as usize)
+                .checked_mul(height as usize)
+                .and_then(|s| s.checked_mul(4))
+                .unwrap_or(0);
+            if expected_size == 0 {
+                eprintln!(
+                    "[RingBufferDecoder] Invalid dimensions: {}x{} — stream disabled",
+                    width, height
+                );
+                return;
+            }
 
             let mut start_frame = 0;
 

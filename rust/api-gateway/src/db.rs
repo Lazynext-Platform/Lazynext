@@ -59,6 +59,7 @@ pub struct AdminMetrics {
     pub monthly_recurring_revenue: i64,
 }
 
+/// PostgreSQL-backed data store with connection pooling, CRUD operations, and dev-mode fallback.
 #[derive(Clone)]
 pub struct DbStore {
     pool: Option<PgPool>,
@@ -88,24 +89,29 @@ impl DbStore {
         }
     }
 
+    /// Returns `true` if a database connection pool is configured.
     pub fn has_db(&self) -> bool {
         self.pool.is_some()
     }
+    /// Returns `true` if running in dev mode without a database.
     pub fn is_dev(&self) -> bool {
         self.is_dev_mode
     }
 
+    /// Returns a reference to the connection pool, or an error if in dev mode.
     pub fn pool_ref(&self) -> Result<&PgPool, sqlx::Error> {
         self.pool
             .as_ref()
             .ok_or_else(|| sqlx::Error::Protocol("No database — running in dev mode".into()))
     }
 
+    /// Executes a `SELECT 1` health check against the database.
     pub async fn health_check(&self) -> Result<(), sqlx::Error> {
         sqlx::query("SELECT 1").execute(self.pool_ref()?).await?;
         Ok(())
     }
 
+    /// Fetches a user by ID. Returns `None` if not found.
     pub async fn get_user(&self, user_id: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
             .bind(user_id)

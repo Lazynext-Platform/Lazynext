@@ -15,6 +15,10 @@ variable "TAG" {
   default = "latest"
 }
 
+variable "GIT_SHA" {
+  default = ""
+}
+
 variable "PLATFORMS" {
   default = "linux/amd64"
 }
@@ -132,6 +136,15 @@ target "pre-processing-gpu" {
   dockerfile = "Dockerfile.gpu"
   platforms  = ["linux/amd64"]
   tags       = ["${REGISTRY}/lazynext-pre-processing:${TAG}-gpu"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-pre-processing:buildcache-gpu"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-pre-processing:buildcache-gpu,mode=max"]
+  args = {
+    BUILDKIT_INLINE_CACHE = "1"
+  }
+  annotations = [
+    "org.opencontainers.image.source=https://github.com/lazynext-platform/lazynext",
+    "org.opencontainers.image.revision=${GIT_SHA}",
+  ]
 }
 
 target "generative-studio-gpu" {
@@ -139,6 +152,15 @@ target "generative-studio-gpu" {
   dockerfile = "Dockerfile.gpu"
   platforms  = ["linux/amd64"]
   tags       = ["${REGISTRY}/lazynext-generative-studio:${TAG}-gpu"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-generative-studio:buildcache-gpu"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-generative-studio:buildcache-gpu,mode=max"]
+  args = {
+    BUILDKIT_INLINE_CACHE = "1"
+  }
+  annotations = [
+    "org.opencontainers.image.source=https://github.com/lazynext-platform/lazynext",
+    "org.opencontainers.image.revision=${GIT_SHA}",
+  ]
 }
 
 target "tensorflow-serving" {
@@ -146,4 +168,13 @@ target "tensorflow-serving" {
   dockerfile = "Dockerfile.tensorflow"
   platforms  = ["linux/amd64"]
   tags       = ["${REGISTRY}/lazynext-tf-serving:${TAG}"]
+  cache-from = ["type=registry,ref=${REGISTRY}/lazynext-tf-serving:buildcache"]
+  cache-to   = ["type=registry,ref=${REGISTRY}/lazynext-tf-serving:buildcache,mode=max"]
+  args = {
+    BUILDKIT_INLINE_CACHE = "1"
+  }
+  annotations = [
+    "org.opencontainers.image.source=https://github.com/lazynext-platform/lazynext",
+    "org.opencontainers.image.revision=${GIT_SHA}",
+  ]
 }

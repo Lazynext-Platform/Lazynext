@@ -15,6 +15,44 @@ pub struct ExportConfig {
     pub output_path: String,
 }
 
+impl ExportConfig {
+    /// Validates the config fields and returns a sanitized ExportConfig.
+    /// Clamps dimensions, framerate, and bitrate to sensible defaults.
+    /// Returns an error if the output path is empty.
+    pub fn validated(self) -> Result<Self, String> {
+        let output_path = self.output_path.trim().to_string();
+        if output_path.is_empty() {
+            return Err("Output path must not be empty".to_string());
+        }
+        // Prevent path traversal in output
+        let output_path = output_path.replace("../", "").replace("..\\", "");
+        let width = self.width.clamp(1, 16384);
+        let height = self.height.clamp(1, 16384);
+        let framerate = self.framerate.clamp(1, 240);
+        let bitrate_kbps = self.bitrate_kbps.min(1_000_000);
+        if self.width == 0 || self.height == 0 {
+            eprintln!(
+                "[ExportEncoder] Zero dimensions clamped: {}x{} -> {}x{}",
+                self.width, self.height, width, height
+            );
+        }
+        if self.framerate == 0 {
+            eprintln!(
+                "[ExportEncoder] Zero framerate clamped: {} -> {}",
+                self.framerate, framerate
+            );
+        }
+        Ok(Self {
+            format: self.format,
+            width,
+            height,
+            framerate,
+            bitrate_kbps,
+            output_path,
+        })
+    }
+}
+
 /// Supported export container and codec combinations.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ExportFormat {
@@ -125,7 +163,13 @@ impl ExportEncoder {
             args.push(format!("{}k", config.bitrate_kbps));
         }
 
-        args.push(config.output_path.clone());
+        // Sanitize output path before passing to ffmpeg
+        let safe_path = config
+            .output_path
+            .trim()
+            .replace("../", "")
+            .replace("..\\", "");
+        args.push(safe_path);
         args
     }
 

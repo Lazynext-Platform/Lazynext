@@ -1,3 +1,5 @@
+/** @module Grid guide configuration constants (min/max values, default grid config) */
+
 export const GRID_MIN = 1;
 export const GRID_MAX = 24;
 

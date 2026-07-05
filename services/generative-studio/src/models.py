@@ -1,59 +1,73 @@
 """Pydantic request/response models for the Generative Studio service."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
 
 class DiffusionRequest(BaseModel):
     """Stable Video Diffusion generation request (via Replicate)."""
-    prompt: str
-    width: int = 1024
-    height: int = 576
-    num_frames: int = 24
+    prompt: str = Field(..., min_length=1, max_length=4000)
+    width: int = Field(default=1024, ge=64, le=2048, multiple_of=8)
+    height: int = Field(default=576, ge=64, le=2048, multiple_of=8)
+    num_frames: int = Field(default=24, ge=1, le=240)
+
 
 class DubRequest(BaseModel):
     """AI dubbing: generate speech in a target language for a clip."""
-    clip_id: str
-    target_language: str
-    text_to_dub: str = "This is a placeholder text to dub."
+    clip_id: str = Field(..., min_length=1, max_length=255)
+    target_language: str = Field(..., min_length=1, max_length=50)
+    text_to_dub: str = Field(default="This is a placeholder text to dub.", max_length=5000)
+
 
 class OverdubRequest(BaseModel):
     """Voice-cloned overdubbing: replace or insert speech segments."""
-    text: str
-    voice_id: str = "default_voice"
-    original_audio_url: str | None = None
+    text: str = Field(..., min_length=1, max_length=5000)
+    voice_id: str = Field(default="default_voice", min_length=1, max_length=100)
+    original_audio_url: str | None = Field(default=None, max_length=4096)
+
 
 class StyleTransferRequest(BaseModel):
     """Apply a generative visual style to a video (e.g. anime, claymation)."""
-    video_id: str
-    style_prompt: str = "anime style, Studio Ghibli, 4k"
+    video_id: str = Field(..., min_length=1, max_length=255)
+    style_prompt: str = Field(default="anime style, Studio Ghibli, 4k", min_length=1, max_length=500)
+
 
 class GenerativeFillRequest(BaseModel):
     """Inpaint or add objects in video frames using generative AI."""
-    video_id: str
-    prompt: str = "add a spaceship"
-    mask_coordinates: list[float] = [100.0, 100.0, 200.0, 200.0]
+    video_id: str = Field(..., min_length=1, max_length=255)
+    prompt: str = Field(default="add a spaceship", min_length=1, max_length=500)
+    mask_coordinates: list[float] = Field(
+        default=[100.0, 100.0, 200.0, 200.0],
+        min_length=4,
+        max_length=4
+    )
+
 
 class AvatarRequest(BaseModel):
     """Generate a lip-synced digital human avatar from a text script."""
-    script: str
-    voice_id: str = "default_avatar_voice"
-    avatar_model: str = "realistic_human_1"
+    script: str = Field(..., min_length=1, max_length=10000)
+    voice_id: str = Field(default="default_avatar_voice", min_length=1, max_length=100)
+    avatar_model: str = Field(default="realistic_human_1", min_length=1, max_length=100)
+
 
 class NeRFRequest(BaseModel):
     """NeRF 3D reconstruction request (redirects to pre-processing)."""
-    video_id: str
+    video_id: str = Field(..., min_length=1, max_length=255)
+
 
 class StemSplitRequest(BaseModel):
     """Separate audio into vocal/instrumental stems (2, 4, or 5 stems)."""
-    audio_id: str
-    stems: int = 4  # 2, 4, or 5
+    audio_id: str = Field(..., min_length=1, max_length=255)
+    stems: int = Field(default=4, ge=2, le=5)
+
 
 class UpscaleRequest(BaseModel):
     """Upscale video resolution using RealESRGAN (2x or 4x)."""
-    video_id: str
-    scale: int = 2  # 2x or 4x
+    video_id: str = Field(..., min_length=1, max_length=255)
+    scale: int = Field(default=2, ge=2, le=4, multiple_of=2)
+
 
 class InpaintRequest(BaseModel):
     """Inpaint a masked region in a video using Stable Diffusion."""
-    video_id: str
-    mask_url: str
-    prompt: str
+    video_id: str = Field(..., min_length=1, max_length=255)
+    mask_url: str = Field(..., min_length=1, max_length=4096)
+    prompt: str = Field(..., min_length=1, max_length=500)

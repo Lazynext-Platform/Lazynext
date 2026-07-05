@@ -13,6 +13,7 @@
 
 import React from "react";
 import ModernEditorClient from "@/components/editor/ModernEditorClient";
+import { MobileGate } from "@/components/editor/mobile-gate";
 import { CommandPalette } from "@/components/editor/CommandPalette";
 import { QuickActions } from "@/components/editor/QuickActions";
 import { KeyboardShortcutHints } from "@/components/editor/KeyboardShortcutHints";
@@ -31,7 +32,29 @@ interface EditorUIClientProps {
 export function EditorUIClient({ project, projectId, projectName }: EditorUIClientProps) {
 	const { setShowCommandPalette } = useEditorState();
 
+	const handleExport = () => {
+		setShowCommandPalette(true);
+		toast.success("Export", {
+			description: "Use the command palette to configure and export your project",
+		});
+	};
+
+	const handleAddText = () => {
+		setShowCommandPalette(true);
+		toast("Add Text", {
+			description: "Use the command palette or AI prompt to add text overlays",
+		});
+	};
+
+	const handleAddTransition = () => {
+		setShowCommandPalette(true);
+		toast("Add Transition", {
+			description: "Use the command palette or AI to apply transitions between clips",
+		});
+	};
+
 	return (
+		<MobileGate>
 		<>
 			{/* Header */}
 			<header className="flex h-14 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-6 shadow-sm z-50 shrink-0">
@@ -69,15 +92,9 @@ export function EditorUIClient({ project, projectId, projectName }: EditorUIClie
 				<div className="absolute bottom-6 right-6 z-50">
 					<QuickActions
 						onAiEdit={() => setShowCommandPalette(true)}
-						onExport={() => {
-							toast.info("Export", { description: "Export panel coming soon" });
-						}}
-						onAddText={() => {
-							toast.info("Text", { description: "Text overlay feature coming soon" });
-						}}
-						onAddTransition={() => {
-							toast.info("Transition", { description: "Transition panel coming soon" });
-						}}
+						onExport={handleExport}
+						onAddText={handleAddText}
+						onAddTransition={handleAddTransition}
 					/>
 				</div>
 			</div>
@@ -88,5 +105,6 @@ export function EditorUIClient({ project, projectId, projectName }: EditorUIClie
 			{/* Keyboard Shortcut Hints — toggle with "/" key */}
 			<KeyboardShortcutHints />
 		</>
+		</MobileGate>
 	);
 }

@@ -107,6 +107,8 @@ struct MaskUniformBuffer {
     _padding: [f32; 3],
 }
 
+// ── Pipeline Initialization ──
+
 impl Compositor {
     /// Creates a new `Compositor` with all pipelines, bind group layouts,
     /// and sub-pipelines (effects, masks, MSDF) initialized.
@@ -316,6 +318,8 @@ impl Compositor {
         }
     }
 
+    // ── Frame Rendering (public API) ──
+
     /// Inserts or updates a texture in the compositor's texture store by ID.
     pub fn upsert_texture(&mut self, id: String, texture: wgpu::Texture) {
         self.textures.upsert(id, texture);
@@ -491,6 +495,17 @@ impl Compositor {
         Ok(())
     }
 
+    // ── Layer Rendering (private) ──
+
+    /// Renders an MSDF text layer into the scene.
+    ///
+    /// First renders the text glyphs using the MSDF pipeline into a cleared
+    /// intermediate texture, then wraps it as a `LayerDescriptor` to apply
+    /// transforms and color grading through `render_layer`. The result is
+    /// blended onto the scene with Normal blend mode. The intermediate
+    /// rasterized texture is cleaned up after blending.
+    ///
+    /// Returns the updated scene texture with the text composited in.
     fn render_text_layer(
         &mut self,
         context: &GpuContext,
@@ -573,6 +588,18 @@ impl Compositor {
         Ok(result)
     }
 
+    /// Renders a single source layer through the full compositor pipeline.
+    ///
+    /// This is the core layer rendering entry point. It:
+    /// 1. Acquires the source texture from the store.
+    /// 2. Renders it through the layer shader (`render_source_to_texture`),
+    ///    which applies transform, opacity, flip, color grading, crop,
+    ///    border radius, and shadow in one GPU pass.
+    /// 3. Chains any effect pass groups through `apply_effect_groups`.
+    /// 4. Applies an optional mask (with or without feathering) via
+    ///    `apply_mask`.
+    ///
+    /// Returns the fully processed layer texture.
     fn render_layer(
         &mut self,
         context: &GpuContext,
@@ -651,6 +678,17 @@ impl Compositor {
         Ok(current)
     }
 
+    // ── Effect Application ──
+
+    /// Chains one or more effect pass groups onto a source texture.
+    ///
+    /// Copies the source to leave the original intact, then processes each
+    /// group sequentially: maps `EffectPassDescriptor` entries to GPU
+    /// `EffectPass` values via `map_effect_passes`, and applies them through
+    /// the effect pipeline. Each group is applied to the cumulative result
+    /// of the previous group.
+    ///
+    /// Returns the final processed texture.
     fn apply_effect_groups(
         &mut self,
         context: &GpuContext,
@@ -677,6 +715,13 @@ impl Compositor {
         Ok(current)
     }
 
+    /// Acquires a texture from the pool and clears it to the given color.
+    ///
+    /// Used to initialize the scene canvas before compositing begins, and as
+    /// scratch textures for intermediate operations (e.g. MSDF rasterization).
+    /// The clear is performed in a single render pass with `LoadOp::Clear`.
+    ///
+    /// Returns the cleared texture ready for further rendering.
     fn create_cleared_texture(
         &mut self,
         context: &GpuContext,
@@ -715,6 +760,14 @@ impl Compositor {
         texture
     }
 
+    /// Copies texture data from a source to a new texture from the pool.
+    ///
+    /// Acquires a fresh texture at the given dimensions and blits the source
+    /// into it via `blit_texture`. This is a raw GPU-side copy with no shader
+    /// processing — used when the source must be preserved for subsequent
+    /// compositing steps (e.g. before effect application or masking).
+    ///
+    /// Returns the new texture containing a copy of the source.
     fn copy_texture(
         &mut self,
         context: &GpuContext,
@@ -730,6 +783,15 @@ impl Compositor {
         texture
     }
 
+    /// Renders a source image onto a target texture through the layer shader.
+    ///
+    /// Packs all layer properties (transform, opacity, flip, color grading,
+    /// crop, border radius, shadow) into a `LayerUniformBuffer` and dispatches
+    /// a fullscreen-quad draw using the layer render pipeline. The target is
+    /// cleared to transparent before rendering. The source texture is sampled
+    /// via the context's linear sampler.
+    ///
+    /// This is the single GPU pass that applies the full layer styling stack.
     fn render_source_to_texture(
         &self,
         context: &GpuContext,
@@ -871,6 +933,16 @@ impl Compositor {
         }
     }
 
+    // ── Mask Application ──
+
+    /// Applies a mask texture to a layer texture using the mask shader.
+    ///
+    /// Multiplexes each pixel of the layer by the corresponding mask pixel's
+    /// alpha value, optionally inverting the mask. Supports feathering through
+    /// the separate `MaskFeatherPipeline` (applied before this pass).
+    /// Produces a new texture from the pool with the mask applied.
+    ///
+    /// `inverted`: when `true`, the mask alpha is inverted before multiplying.
     fn apply_mask(
         &mut self,
         context: &GpuContext,
@@ -969,6 +1041,17 @@ impl Compositor {
         target
     }
 
+    // ── Blending & Blitting ──
+
+    /// Blends a layer texture onto a base texture using the specified blend mode.
+    ///
+    /// Dispatches a fullscreen-quad draw with the blend shader, which receives
+    /// both the base and layer textures along with a `BlendUniformBuffer`
+    /// encoding the blend mode integer code and optional luma key parameters.
+    /// Supports all 17 blend modes (Normal, Multiply, Screen, etc.) and luma
+    /// keying for green-screen / color-key effects.
+    ///
+    /// Returns the blended result in a new texture acquired from the pool.
     fn blend_texture(
         &mut self,
         context: &GpuContext,
@@ -1070,6 +1153,12 @@ impl Compositor {
         Ok(target)
     }
 
+    /// Blits (raw-copies) a source texture to a target texture.
+    ///
+    /// Uses the context's built-in texture blit encoder — no shader is
+    /// involved. This is the fastest path for GPU-side texture copies and
+    /// is used by `copy_texture` and other internal paths that need a
+    /// pure data transfer with zero processing overhead.
     fn blit_texture(
         &self,
         context: &GpuContext,
@@ -1082,6 +1171,12 @@ impl Compositor {
     }
 }
 
+/// Converts a slice of `EffectPassDescriptor` into GPU-ready `EffectPass` values.
+///
+/// Bridges the frame descriptor domain (which uses `EffectUniformValueDescriptor`
+/// for serialization-friendly numeric and vector representations) to the effect
+/// pipeline domain (which consumes typed `UniformValue` enums). Called for each
+/// effect pass group during `apply_effect_groups`.
 fn map_effect_passes(passes: &[EffectPassDescriptor]) -> Vec<EffectPass> {
     passes
         .iter()

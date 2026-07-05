@@ -603,7 +603,7 @@ export default function Home() {
 				</section>
 
 				{/* ──────────────── CTA ──────────────── */}
-				<section className="py-32 px-6 relative z-10 bg-black">
+				<section className="py-32 px-6 relative z-10 bg-black overflow-hidden">
 					<div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
 					{/* Dramatic Center Gradient Burst */}

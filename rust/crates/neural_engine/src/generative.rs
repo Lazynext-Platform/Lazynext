@@ -213,16 +213,16 @@ impl GenerativeModel {
             let client = reqwest::Client::new();
             match client.post(&url).json(&tts_payload).send().await {
                 Ok(res) if res.status().is_success() => {
-                    if let Ok(data) = res.json::<serde_json::Value>().await {
-                        if let Some(audio_b64) = data["audioContent"].as_str() {
-                            // Decode base64 manually (no external crate needed)
-                            let audio_bytes = decode_base64(audio_b64)
-                                .map_err(|e| format!("Base64 decode failed: {}", e))?;
-                            let output = "/tmp/tts_output_gemini.mp3".to_string();
-                            std::fs::write(&output, &audio_bytes)
-                                .map_err(|e| format!("Failed to write audio: {}", e))?;
-                            return Ok(output);
-                        }
+                    if let Ok(data) = res.json::<serde_json::Value>().await
+                        && let Some(audio_b64) = data["audioContent"].as_str()
+                    {
+                        // Decode base64 manually (no external crate needed)
+                        let audio_bytes = decode_base64(audio_b64)
+                            .map_err(|e| format!("Base64 decode failed: {}", e))?;
+                        let output = "/tmp/tts_output_gemini.mp3".to_string();
+                        std::fs::write(&output, &audio_bytes)
+                            .map_err(|e| format!("Failed to write audio: {}", e))?;
+                        return Ok(output);
                     }
                 }
                 Ok(res) => {
@@ -247,7 +247,9 @@ fn decode_base64(input: &str) -> Result<Vec<u8>, String> {
     let mut bits = 0;
 
     for c in input.chars() {
-        let val = CHARS.iter().position(|&x| x as char == c)
+        let val = CHARS
+            .iter()
+            .position(|&x| x as char == c)
             .ok_or_else(|| format!("Invalid base64 char: {}", c))? as u32;
         buffer = (buffer << 6) | val;
         bits += 6;

@@ -1,0 +1,117 @@
+# ── TensorFlow Serving Compose ────────────────────────────────────────────
+# Runs the TensorFlow Serving model server for ML inference.
+# Provides GPU-accelerated inference for:
+#   - Whisper (speech-to-text)
+#   - SAM2 (segmentation/masking)
+#   - Real-ESRGAN (super-resolution upscaling)
+#   - MobileNetV2 (scene classification)
+#
+# Usage:
+#   docker compose -f docker-compose.tensorflow.yml up -d
+#
+# Models are downloaded by scripts/tf-model-download.sh at deploy time.
+# Mount the models directory after download:
+#   docker compose -f docker-compose.tensorflow.yml up -d
+#
+# For K8s deployment, see k8s/base/model-warmup.yaml and k8s/base/gpu.yaml.
+#
+# GPU support requires nvidia-container-toolkit:
+#   https://docs.nvidia.com/datacenter/cloud-native/container-toolkit
+
+services:
+  # ── TensorFlow Model Server ──────────────────────────────────────────
+  tensorflow-serving:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile.tensorflow
+    image: ghcr.io/lazynext-platform/lazynext-tf-serving:latest
+    container_name: lazynext-tf-serving
+    restart: unless-stopped
+    ports:
+      - "8500:8500"  # gRPC
+      - "8501:8501"  # REST
+    environment:
+      MODEL_NAME: lazynext_models
+      MODEL_BASE_PATH: /models
+      OMP_NUM_THREADS: "4"
+      TF_CPP_MIN_LOG_LEVEL: "1"
+      TF_ENABLE_GPU: "true"
+    volumes:
+      - ./tensorflow/models:/models:ro
+      - ./services/pre-processing/model_config.conf:/models/model_config.conf:ro
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8501/v1/models/whisper"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu
+
+  # ── Model Warmup Sidecar ─────────────────────────────────────────────
+  # Sends a warmup request to pre-load models into GPU memory after
+  # the server starts. Prevents cold-start latency on first request.
+  model-warmup:
+    image: curlimages/curl:latest
+    container_name: lazynext-model-warmup
+    depends_on:
+      tensorflow-serving:
+        condition: service_healthy
+    networks:
+      - lazynext-network
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "Waiting for TF Serving to fully initialize..."
+        sleep 15
+        MODELS="whisper sam2 realesrgan mobilenet_v2"
+        for model in $$MODELS; do
+          echo "Warming up $$model..."
+          status=$$(curl -s -o /dev/null -w "%{http_code}" \
+            "http://tensorflow-serving:8501/v1/models/$$model" 2>/dev/null || echo "000")
+          if [ "$$status" = "200" ]; then
+            echo "  [OK] $$model is ready"
+          else
+            echo "  [WARN] $$model returned HTTP $$status"
+          fi
+        done
+        echo "Warmup complete."
+    profiles:
+      - gpu
+
+  # ── Model Download Init (one-shot) ───────────────────────────────────
+  # Downloads models from HuggingFace before TF Serving starts.
+  # Run once before starting the stack:
+  #   docker compose -f docker-compose.tensorflow.yml run --rm model-download
+  model-download:
+    image: python:3.13-slim
+    container_name: lazynext-model-download
+    working_dir: /app
+    volumes:
+      - ./tensorflow/models:/models
+      - ./scripts/tf-model-download.sh:/app/tf-model-download.sh:ro
+      - ./services/pre-processing/tf_models/model_registry.yaml:/app/model_registry.yaml:ro
+    environment:
+      MODEL_BASE_PATH: /models
+      HF_HOME: /tmp/huggingface
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        pip install --quiet pyyaml requests numpy
+        chmod +x /app/tf-model-download.sh
+        /app/tf-model-download.sh --filter all
+    profiles:
+      - setup
+
+networks:
+  lazynext-network:
+    external: true

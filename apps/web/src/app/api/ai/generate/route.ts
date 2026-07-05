@@ -1,4 +1,9 @@
+/** @module API route for proxying AI generation requests to the Rust API Gateway */
+
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
+import { aiGenerateSchema } from "@/lib/validation";
 
 const RUST_API_GATEWAY_URL =
   process.env.RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
@@ -6,21 +11,32 @@ const RUST_API_GATEWAY_URL =
 /**
  * Proxy AI generation requests to the Rust API Gateway.
  * The gateway handles LLM orchestration for AI-powered video/audio generation.
+ * Requires authentication.
  *
  * POST /api/ai/generate { prompt, type }
  * → Rust Gateway POST /api/v1/ai/generate
  */
 export async function POST(request: Request) {
-  let body = { prompt: "", type: "video" };
+  let body: { prompt: string; type: string } = { prompt: "", type: "video" };
   try {
-    body = await request.json();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!body.prompt) {
+    const rawBody = await request.json();
+    const parsed = aiGenerateSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Missing prompt" },
+        { error: parsed.error.issues[0]?.message || "Invalid input" },
         { status: 400 },
       );
     }
+
+    body = parsed.data;
 
     const res = await fetch(`${RUST_API_GATEWAY_URL}/api/v1/ai/generate`, {
       method: "POST",

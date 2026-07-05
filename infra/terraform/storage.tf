@@ -9,8 +9,8 @@ resource "azurerm_storage_account" "media" {
   account_kind             = "StorageV2"
   min_tls_version          = "TLS1_2"
 
-  # Block public access (management via shared key)
-  public_network_access_enabled = true
+  # Deny public access — all traffic must come through the private endpoint
+  public_network_access_enabled = var.storage_public_network_access_enabled
   shared_access_key_enabled     = true
 
   blob_properties {

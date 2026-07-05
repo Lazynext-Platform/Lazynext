@@ -87,8 +87,15 @@ export const NativeBridge = {
 	},
 
 	async sendChatMessage(message: string): Promise<string> {
+		const trimmed = message?.trim() || "";
+		if (!trimmed) {
+			return "Please enter a message to send.";
+		}
+		if (trimmed.length > 50000) {
+			return "Message is too long. Please keep it under 50,000 characters.";
+		}
 		try {
-			const result = await MyModule.processIntent(message, true);
+			const result = await MyModule.processIntent(trimmed, true);
 			return result || "I've processed your request.";
 		} catch (e) {
 			console.warn("NativeModule chat error:", e);
@@ -98,9 +105,16 @@ export const NativeBridge = {
 
 	async moveClip(clipId: string, newStart: number): Promise<void> {
 		try {
+			if (!clipId || clipId.trim().length === 0) {
+				throw new Error("clipId must not be empty");
+			}
+			if (newStart < 0 || !Number.isFinite(newStart)) {
+				throw new Error("newStart must be a non-negative finite number");
+			}
 			await MyModule.moveClip(clipId, newStart);
 		} catch (e) {
 			console.warn("NativeModule moveClip error:", e);
+			throw e; // Propagate error so callers can handle it
 		}
 	},
 

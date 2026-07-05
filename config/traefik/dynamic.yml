@@ -110,7 +110,7 @@ http:
     auth-dashboard:
       basicAuth:
         users:
-          - "${TRAEFIK_DASHBOARD_USER:-admin}:${TRAEFIK_DASHBOARD_PASSWORD_HASH:-$$2y$$10$$placeholder}"
+          - "${TRAEFIK_DASHBOARD_USER:-admin}:${TRAEFIK_DASHBOARD_PASSWORD_HASH:-$$2y$$10$$disabled}"
 
     # ── Allowlist: only internal/VPN IPs can reach the dashboard
     internal-ip:

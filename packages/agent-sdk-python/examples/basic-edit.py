@@ -16,13 +16,13 @@ python examples/basic-edit.py
 import asyncio
 import os
 
-from lazynext_agent import Lazynext AI AgentAgent
+from lazynext_agent import LazynextAgent
 
 AGENT_ENDPOINT = os.environ.get("LAZYNEXT_API_URL", "http://localhost:8005")
 
 
 async def main() -> None:
-    agent = Lazynext AI AgentAgent(
+    agent = LazynextAgent(
         api_endpoint=AGENT_ENDPOINT,
         mode="auto_execute",
     )

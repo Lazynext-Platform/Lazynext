@@ -154,14 +154,18 @@ impl FilterGraph {
     }
 
     /// Build an audio normalization preset using the volume filter.
+    /// target_db is clamped to [-70, 24] for safety. Converts dB to linear
+    /// before passing to the volume filter which expects a linear multiplier.
     pub fn preset_audio_normalize(target_db: f32) -> Self {
+        let target_db = target_db.clamp(-70.0, 24.0);
+        let linear_factor = 10.0_f32.powf(target_db / 20.0);
         let vol_label = PadLabels {
             input: "a".to_string(),
             output: "out".to_string(),
         };
 
         Self::new().add_input(0, "a").add_filter({
-            let mut f = Filter::volume(vol_label, target_db);
+            let mut f = Filter::volume(vol_label, linear_factor);
             f.inputs.push("0:a".to_string());
             f.as_output()
         })

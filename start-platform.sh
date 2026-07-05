@@ -44,7 +44,7 @@ if command -v $PYTHON_EXEC &>/dev/null; then
     $PYTHON_EXEC -m venv venv
     export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
     venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt fastapi uvicorn pydantic
-    venv/bin/python main.py
+    venv/bin/python src/main.py
 else
     echo "Python 3 not found, skipping pre-processing service."
 fi
@@ -64,7 +64,7 @@ if command -v $PYTHON_EXEC &>/dev/null; then
         echo -e "fastapi\nuvicorn\npydantic" > requirements.txt
     fi
     venv/bin/python -m pip install --disable-pip-version-check -r requirements.txt
-    venv/bin/python main.py
+    venv/bin/python src/main.py
 else
     echo "Python 3 not found, skipping generative studio."
 fi

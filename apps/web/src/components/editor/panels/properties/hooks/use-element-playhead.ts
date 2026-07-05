@@ -1,3 +1,5 @@
+/** @module Hook for computing the playhead position relative to a timeline element's local time range */
+
 import { useEditor } from "@/editor/use-editor";
 import { getElementLocalTime } from "@/animation";
 import { addMediaTime, mediaTime, type MediaTime } from "@/wasm";

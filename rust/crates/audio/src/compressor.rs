@@ -22,16 +22,19 @@ pub struct Compressor {
 }
 
 impl Compressor {
-    /// Create a new compressor.
+    /// Create a new compressor with validated parameters.
     ///
     /// # Arguments
-    /// * `threshold_db` — Level above which compression begins (e.g. -20.0)
-    /// * `ratio` — Compression ratio (e.g. 4.0 = 4:1)
-    /// * `knee_width_db` — Soft-knee width in dB (e.g. 3.0)
-    /// * `attack_ms` — Attack time in milliseconds
-    /// * `release_ms` — Release time in milliseconds
-    /// * `makeup_gain_db` — Make-up gain in dB to compensate for gain reduction
-    /// * `sample_rate` — Sample rate in Hz
+    /// * `threshold_db` — Level above which compression begins (e.g. -20.0). Must be <= 0.0.
+    /// * `ratio` — Compression ratio (e.g. 4.0 = 4:1). Must be >= 1.0.
+    /// * `knee_width_db` — Soft-knee width in dB (e.g. 3.0). Must be >= 0.0.
+    /// * `attack_ms` — Attack time in milliseconds. Must be > 0.0.
+    /// * `release_ms` — Release time in milliseconds. Must be > 0.0.
+    /// * `makeup_gain_db` — Make-up gain in dB. Clamped to [-24, 24].
+    /// * `sample_rate` — Sample rate in Hz. Must be > 0.
+    ///
+    /// Invalid parameters are clamped to safe defaults rather than rejected,
+    /// ensuring the compressor always produces valid audio.
     pub fn new(
         threshold_db: f64,
         ratio: f64,
@@ -41,6 +44,13 @@ impl Compressor {
         makeup_gain_db: f64,
         sample_rate: u32,
     ) -> Self {
+        let threshold_db = threshold_db.min(0.0);
+        let ratio = ratio.max(1.0);
+        let knee_width_db = knee_width_db.max(0.0);
+        let attack_ms = attack_ms.max(0.01);
+        let release_ms = release_ms.max(0.01);
+        let makeup_gain_db = makeup_gain_db.clamp(-24.0, 24.0);
+        let sample_rate = sample_rate.max(1);
         let attack_coeff = (-1.0 / (attack_ms / 1000.0 * sample_rate as f64)).exp();
         let release_coeff = (-1.0 / (release_ms / 1000.0 * sample_rate as f64)).exp();
         let makeup_gain_linear = 10.0_f64.powf(makeup_gain_db / 20.0);

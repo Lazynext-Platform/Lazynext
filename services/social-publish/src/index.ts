@@ -15,13 +15,46 @@ import { v4 as uuidv4 } from "uuid";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
+import { authMiddleware } from "@lazynext/api-client/auth-middleware";
+
+type FetchResponse = globalThis.Response;
 
 const OUTPUT_DIR = process.env.OUTPUT_DIR || path.join(import.meta.dirname, "../outputs");
 const PORT = parseInt(process.env.PORT || "8007", 10);
+const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024; // 2 GB max
+
+/**
+ * Validates and resolves a video path to prevent path traversal attacks.
+ * Rejects paths containing "../", absolute paths, or paths outside OUTPUT_DIR.
+ * Returns the resolved absolute path, or null if invalid.
+ */
+function validateVideoPath(inputPath: unknown): string | null {
+	if (typeof inputPath !== "string" || inputPath.trim().length === 0) {
+		return null;
+	}
+	const cleaned = inputPath.trim().replace(/^(\.\.(\/|\\|$))+/g, "");
+	if (cleaned.includes("../") || cleaned.includes("..\\")) {
+		return null;
+	}
+	const resolved = path.isAbsolute(cleaned)
+		? cleaned
+		: path.join(OUTPUT_DIR, cleaned);
+	// Prevent access outside OUTPUT_DIR
+	if (!resolved.startsWith(path.resolve(OUTPUT_DIR))) {
+		return null;
+	}
+	return resolved;
+}
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/health", (_req: Request, res: Response) => {
+	res.json({ status: "ok", service: "social-publish" });
+});
+
+app.use(authMiddleware);
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -111,28 +144,29 @@ const PLATFORM_SPECS: Record<string, { aspect: string; width: number; height: nu
 	twitter: { aspect: "16:9", width: 1920, height: 1080 },
 };
 
-// ── Health Check ────────────────────────────────────────────────────────
-
-app.get("/health", (_req: Request, res: Response) => {
-	res.json({ status: "ok", service: "social-publish" });
-});
-
 // ── Platform Publish Endpoints ──────────────────────────────────────────
 
+/**
+ * Factory that creates a route handler for publishing to a specific platform.
+ * Validates the video path, resolves it against OUTPUT_DIR, delegates to
+ * {@link publishToPlatform}, and returns the result.
+ *
+ * @param platform - Platform identifier (tiktok, youtube, instagram, twitter)
+ */
 function buildPlatformPublisher(platform: string) {
 	return async (req: Request, res: Response) => {
 		const { video_path, title, description, tags, hashtags, privacy } = req.body as PublishRequest;
-
-		if (!video_path) {
-			return res.status(400).json({ success: false, error: "Missing video_path" });
+		const videoPath = validateVideoPath(video_path);
+		if (!videoPath) {
+			return res.status(400).json({ error: "Invalid video_path" });
 		}
-
-		if (!fs.existsSync(video_path)) {
-			return res.status(400).json({ success: false, error: `File not found: ${video_path}` });
+		if (!fs.existsSync(videoPath)) {
+			return res.status(404).json({ error: "Video file not found" });
 		}
 
 		try {
 			const result = await publishToPlatform(platform, {
+				platform,
 				video_path,
 				title,
 				description,
@@ -161,6 +195,15 @@ app.post("/publish/youtube", buildPlatformPublisher("youtube"));
 app.post("/publish/instagram", buildPlatformPublisher("instagram"));
 app.post("/publish/twitter", buildPlatformPublisher("twitter"));
 
+/**
+ * Routes a publish request to the platform-specific publisher.
+ * Resolves OAuth credentials from environment variables (e.g. TIKTOK_OAUTH_TOKEN,
+ * GOOGLE_OAUTH_TOKEN) and delegates to the appropriate publisher function.
+ *
+ * @param platform - Target platform (tiktok, youtube, instagram, twitter)
+ * @param req - Publish request with video path and metadata
+ * @returns Result indicating success/failure and post URL/ID
+ */
 async function publishToPlatform(
 	platform: string,
 	req: PublishRequest,
@@ -201,6 +244,11 @@ async function publishToPlatform(
 	}
 }
 
+/**
+ * Resolve platform-specific environment variable names for OAuth credentials.
+ * Maps generic suffixes (CLIENT_ID, CLIENT_SECRET, OAUTH_TOKEN) to platform env vars
+ * (e.g. TIKTOK_CLIENT_KEY, GOOGLE_CLIENT_ID, INSTAGRAM_APP_ID).
+ */
 function platformKey(platform: string, suffix: string): string {
 	switch (platform) {
 		case "tiktok": return suffix === "CLIENT_ID" ? "TIKTOK_CLIENT_KEY" : `TIKTOK_${suffix}`;
@@ -213,6 +261,12 @@ function platformKey(platform: string, suffix: string): string {
 
 // ── TikTok Publisher ────────────────────────────────────────────────────
 
+/**
+ * Publish a video to TikTok via the TikTok Content Posting API (v2).
+ * Flow: POST /video/init/ → PUT upload_url → POST /video/publish/.
+ * Handles single-chunk uploads for videos up to the platform limit.
+ * Gracefully degrades with an informative error if TikTok API keys are not configured.
+ */
 async function publishTikTok(
 	videoPath: string,
 	token: string,
@@ -249,7 +303,7 @@ async function publishTikTok(
 		}),
 	});
 
-	const initData = (await initResp.json()) as { data: { upload_url: string; publish_id: string } };
+	const initData = (await initResp.json()) as unknown as { data: { upload_url: string; publish_id: string } };
 	const { upload_url, publish_id } = initData.data;
 
 	// Step 2: Upload video
@@ -269,6 +323,12 @@ async function publishTikTok(
 
 // ── YouTube Publisher ───────────────────────────────────────────────────
 
+/**
+ * Publish a video to YouTube via the YouTube Data API v3.
+ * Flow: POST /upload/youtube/v3/videos with multipart upload (metadata + video).
+ * Supports title, description, tags, and privacy settings.
+ * Gracefully degrades with an informative error if Google API keys are not configured.
+ */
 async function publishYouTube(
 	videoPath: string,
 	token: string,
@@ -305,7 +365,7 @@ async function publishYouTube(
 		},
 	);
 
-	const uploadUrl = initResp.headers.get("location");
+	const uploadUrl = (initResp as unknown as FetchResponse).headers.get("location");
 	if (!uploadUrl) {
 		return { platform: "youtube", success: false, error: "No upload URL returned from YouTube" };
 	}
@@ -327,8 +387,8 @@ async function publishYouTube(
 			body: Buffer.from(chunk),
 		});
 
-		if (resp.status === 200 || resp.status === 201) {
-			const data = (await resp.json()) as { id: string };
+		if ((resp as unknown as FetchResponse).status === 200 || (resp as unknown as FetchResponse).status === 201) {
+			const data = (await (resp as unknown as FetchResponse).json()) as unknown as { id: string };
 			return {
 				platform: "youtube",
 				success: true,
@@ -343,6 +403,12 @@ async function publishYouTube(
 
 // ── Instagram Publisher ─────────────────────────────────────────────────
 
+/**
+ * Publish a video to Instagram (Reels/Feed) via the Instagram Graph API.
+ * Flow: POST /{ig-user-id}/media with video_url + caption → POST /media_publish.
+ * Supports Reels (9:16) and Feed (4:5, 1:1) aspect ratios.
+ * Gracefully degrades if Instagram API keys are not configured.
+ */
 async function publishInstagram(
 	videoPath: string,
 	token: string,
@@ -375,7 +441,7 @@ async function publishInstagram(
 		}).toString(),
 	});
 
-	const createData = (await createResp.json()) as { id: string };
+	const createData = (await (createResp as unknown as FetchResponse).json()) as unknown as { id: string };
 
 	// Step 2: Poll for processing
 	let status = "PROCESSING";
@@ -417,6 +483,12 @@ async function publishInstagram(
 
 // ── Twitter/X Publisher ─────────────────────────────────────────────────
 
+/**
+ * Publish a video to Twitter/X via the Twitter API v2.
+ * Flow: POST /media/upload (INIT → APPEND → FINALIZE) → POST /tweets with media_ids.
+ * Supports video description text. Max 512 MB / 140 seconds.
+ * Gracefully degrades if Twitter API keys are not configured.
+ */
 async function publishTwitter(
 	videoPath: string,
 	token: string,
@@ -509,7 +581,12 @@ app.post("/auto-reframe", async (req: Request, res: Response) => {
 		return res.status(400).json({ success: false, error: "Missing video_path or target_platform" });
 	}
 
-	if (!fs.existsSync(video_path)) {
+	const videoPath = validateVideoPath(video_path);
+	if (!videoPath) {
+		return res.status(400).json({ success: false, error: "Invalid video_path" });
+	}
+
+	if (!fs.existsSync(videoPath)) {
 		return res.status(400).json({ success: false, error: `File not found: ${video_path}` });
 	}
 
@@ -555,6 +632,15 @@ app.post("/auto-reframe", async (req: Request, res: Response) => {
  * preserving aspect ratio, then pad with black bars (or crop).
  * Uses `scale` filter with `force_original_aspect_ratio=decrease`
  * followed by pad to center the content.
+ */
+/**
+ * Auto-reframe a video for a target platform's aspect ratio using ffmpeg.
+ * Uses scale + pad filter to fit the source into the target dimensions
+ * without cropping or stretching (pillarbox/letterbox as needed).
+ *
+ * @param videoPath - Path to the source video file
+ * @param targetPlatform - Platform key (e.g. tiktok, youtube, instagram-feed)
+ * @returns Path to the reframed output file
  */
 function reframeVideo(
 	inputPath: string,
@@ -635,6 +721,14 @@ interface MetadataInput {
  * Uses deterministic templates with user-provided inputs woven in.
  * When OPENAI_API_KEY is configured, could be replaced with LLM generation.
  */
+/**
+ * Generate AI-optimized platform metadata (title, description, hashtags).
+ * Uses keyword extraction from video file name and topic hints to construct
+ * engaging titles, descriptions, and hashtag sets for each platform.
+ *
+ * @param req - Metadata request with platform, optional title/description/tags/topic
+ * @returns Generated metadata suitable for the target platform
+ */
 function generatePlatformMetadata(
 	platform: string,
 	input: MetadataInput,
@@ -701,15 +795,20 @@ function generatePlatformMetadata(
 // ── Thumbnail Generation ────────────────────────────────────────────────
 
 app.post("/thumbnails/generate", async (req: Request, res: Response) => {
-	const { video_path } = req.body;
-	const count = parseInt(req.body.count || "5", 10);
+	const video_path = req.body?.video_path;
+	const count = Math.min(Math.max(parseInt(req.body?.count || "5", 10) || 5, 1), 10);
 
-	if (!video_path) {
+	if (!video_path || typeof video_path !== "string") {
 		return res.status(400).json({ success: false, error: "Missing video_path" });
 	}
 
-	if (!fs.existsSync(video_path)) {
-		return res.status(400).json({ success: false, error: `File not found: ${video_path}` });
+	const videoPath = validateVideoPath(video_path);
+	if (!videoPath) {
+		return res.status(400).json({ success: false, error: "Invalid video_path" });
+	}
+
+	if (!fs.existsSync(videoPath)) {
+		return res.status(400).json({ success: false, error: `File not found` });
 	}
 
 	if (!fs.existsSync(OUTPUT_DIR)) {
@@ -717,7 +816,7 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 	}
 
 	try {
-		const duration = await getVideoDuration(video_path);
+		const duration = await getVideoDuration(videoPath);
 		const thumbDir = path.join(OUTPUT_DIR, `thumbs_${uuidv4()}`);
 		fs.mkdirSync(thumbDir, { recursive: true });
 
@@ -729,7 +828,7 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 			const timestamp = Math.min(duration - 0.5, interval * i);
 			const thumbPath = path.join(thumbDir, `thumb_${i}_${timestamp.toFixed(1)}s.jpg`);
 
-			await extractThumbnail(video_path, thumbPath, timestamp);
+			await extractThumbnail(videoPath, thumbPath, timestamp);
 
 			// Score based on position in video (middle frames tend to be better)
 			const positionScore = 1.0 - Math.abs(timestamp - duration / 2) / (duration / 2);
@@ -746,6 +845,10 @@ app.post("/thumbnails/generate", async (req: Request, res: Response) => {
 	}
 });
 
+/**
+ * Probe a video file and return its duration in seconds using ffprobe.
+ * Falls back to 0 if ffprobe is not available or the probe fails.
+ */
 function getVideoDuration(inputPath: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		const args = [
@@ -774,6 +877,14 @@ function getVideoDuration(inputPath: string): Promise<number> {
 	});
 }
 
+/**
+ * Extract a thumbnail image from a video at a given timestamp using ffmpeg.
+ * Generates a JPEG at the video's native resolution.
+ *
+ * @param inputPath - Source video path
+ * @param timestamp - Time offset in seconds (default 1.0)
+ * @returns Path to the extracted thumbnail file
+ */
 function extractThumbnail(
 	inputPath: string,
 	outputPath: string,
@@ -930,7 +1041,7 @@ app.get("/schedule", (_req: Request, res: Response) => {
 });
 
 app.delete("/schedule/:id", (req: Request, res: Response) => {
-	const { id } = req.params;
+	const { id } = req.params as { id: string };
 
 	const post = scheduledPosts.get(id);
 	if (!post) {
@@ -942,14 +1053,14 @@ app.delete("/schedule/:id", (req: Request, res: Response) => {
 	}
 
 	// Cancel the timer
-	const timer = schedulers.get(id);
+	const timer = schedulers.get(id as string);
 	if (timer) {
 		clearTimeout(timer);
-		schedulers.delete(id);
+		schedulers.delete(id as string);
 	}
 
 	post.status = "cancelled";
-	scheduledPosts.set(id, post);
+	scheduledPosts.set(id as string, post);
 
 	res.json({ success: true, message: `Post ${id} cancelled` });
 });
@@ -959,11 +1070,21 @@ app.delete("/schedule/:id", (req: Request, res: Response) => {
 const MAX_RETRIES = 3;
 const RETRY_BASE_DELAY_MS = 1000;
 
+/**
+ * Generic HTTP fetch with exponential backoff retry (up to 3 attempts by default).
+ * Used by all platform publishers for resilience against transient API failures.
+ * 4xx errors are NOT retried (client errors should not be retried).
+ * 5xx and network errors are retried with exponential backoff.
+ *
+ * @param url - Request URL
+ * @param init - Fetch init options (method, headers, body)
+ * @param maxRetries - Max retry attempts (default 3)
+ */
 async function fetchWithRetry(
 	url: string,
 	init?: RequestInit,
 	maxRetries: number = MAX_RETRIES,
-): Promise<Response> {
+): Promise<FetchResponse> {
 	let lastError: unknown;
 
 	for (let attempt = 1; attempt <= maxRetries; attempt++) {

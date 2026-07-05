@@ -63,7 +63,7 @@ on:
     - cron: "17 3 * * *"  # 3:17 AM UTC daily
 
 concurrency:
-  group: ml-model-sync-${{ github.ref }}
+  group: ml-model-sync-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:

@@ -1,3 +1,4 @@
+/** @module Computes on-screen handle positions, cursor styles, and overlay geometry for mask manipulation handles in the preview viewport. */
 import { FEATHER_HANDLE_SCALE } from "@/masks/feather";
 import type { ElementBounds } from "@/preview/element-bounds";
 import type {

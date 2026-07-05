@@ -1,3 +1,4 @@
+/** @module Core mask type definitions — shapes, parameters, overlays, and builtin mask type discriminants for the NLE compositor mask system. */
 import type { ElementBounds } from "@/preview/element-bounds";
 import type { SnapLine } from "@/preview/preview-snap";
 import type { ParamDefinition } from "@/params";

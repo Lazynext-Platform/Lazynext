@@ -1,6 +1,6 @@
 # ── Core ─────────────────────────────────────────────────────────────────
 location     = "eastus2"
-environment  = "prod"
+environment  = "production"
 app_domain   = "lazynext.com"
 domain_name  = "lazynext.com"
 create_dns_zone = true

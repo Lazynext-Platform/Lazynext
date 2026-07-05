@@ -251,6 +251,18 @@ export function AgentChat({
 
 	const handleSend = async () => {
 		if (!input.trim() || isLoading) return;
+		if (input.trim().length > 50000) {
+			setMessages((prev) => [
+				...prev,
+				{
+					id: Date.now(),
+					role: "system" as const,
+					content: "Prompt exceeds maximum length of 50,000 characters",
+					timestamp: Date.now(),
+				},
+			]);
+			return;
+		}
 		const currentInput = input;
 		setInput("");
 		setIsLoading(true);

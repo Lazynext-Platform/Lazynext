@@ -62,6 +62,7 @@ async fn process_mcp_request(
     let id = req.get("id").cloned().unwrap_or(Value::Null);
 
     match method {
+        // ── Tool Discovery ───────────────────────────────────────────────
         "tools/list" => json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -248,14 +249,39 @@ async fn process_mcp_request(
             }
         }),
 
+        // ── Tool Execution ──────────────────────────────────────────────
         "tools/call" => {
             let tool_name = req["params"]["name"].as_str().unwrap_or("");
             match tool_name {
+                // ── AI / Autonomous ──────────────────────────────────
                 "run_lazynext_command" | "autonomous_edit" => {
                     let prompt = req["params"]["arguments"]["prompt"]
                         .as_str()
                         .unwrap_or("")
+                        .to_string()
+                        .trim()
                         .to_string();
+
+                    if prompt.is_empty() {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": "Error: Prompt must not be empty"}],
+                                "isError": true
+                            }
+                        });
+                    }
+                    if prompt.len() > 50000 {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": "Error: Prompt exceeds maximum length of 50,000 characters"}],
+                                "isError": true
+                            }
+                        });
+                    }
                     let require_plan_approval = req["params"]["arguments"]
                         .get("require_plan_approval")
                         .and_then(|v| v.as_bool())
@@ -288,6 +314,7 @@ async fn process_mcp_request(
                     }
                 }
 
+                // ── Core / State ──────────────────────────────────────
                 "get_timeline_state" => {
                     let data = nle.get_project_data();
                     let state_json = serde_json::to_string_pretty(data).unwrap_or_default();
@@ -355,6 +382,7 @@ async fn process_mcp_request(
                     })
                 }
 
+                // ── Tracks & Clips ───────────────────────────────────
                 "add_track" => {
                     let kind = req["params"]["arguments"]["kind"]
                         .as_str()
@@ -428,6 +456,16 @@ async fn process_mcp_request(
                         .as_u64()
                         .unwrap_or(0) as usize;
                     let clip_id = req["params"]["arguments"]["clip_id"].as_str().unwrap_or("");
+                    if clip_id.is_empty() {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": "Error: clip_id must not be empty"}],
+                                "isError": true
+                            }
+                        });
+                    }
                     let ok = nle.remove_clip_from_track(track_idx, clip_id);
                     json!({
                         "jsonrpc": "2.0",
@@ -439,6 +477,7 @@ async fn process_mcp_request(
                     })
                 }
 
+                // ── Keyframes ────────────────────────────────────────
                 "set_keyframe" => {
                     let track_idx = req["params"]["arguments"]["track_idx"]
                         .as_u64()
@@ -475,10 +514,28 @@ async fn process_mcp_request(
                     })
                 }
 
+                // ── Export ───────────────────────────────────────────
                 "export_project" => {
                     let format = req["params"]["arguments"]["format"]
                         .as_str()
                         .unwrap_or("mp4");
+                    // Validate export format
+                    const VALID_EXPORT_FORMATS: &[&str] =
+                        &["mp4", "prores", "dcp", "aaf", "mov", "gif"];
+                    if !VALID_EXPORT_FORMATS.contains(&format) {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": format!(
+                                    "Error: Unsupported export format '{}'. Valid formats: {}",
+                                    format,
+                                    VALID_EXPORT_FORMATS.join(", ")
+                                )}],
+                                "isError": true
+                            }
+                        });
+                    }
                     let output_path = req["params"]["arguments"]["output_path"]
                         .as_str()
                         .unwrap_or("./out/export.mp4");
@@ -489,6 +546,31 @@ async fn process_mcp_request(
                     let framerate = req["params"]["arguments"]["framerate"]
                         .as_u64()
                         .unwrap_or(30) as u32;
+                    // Validate dimensions
+                    if width == 0 || height == 0 || width > 16384 || height > 16384 {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": format!(
+                                    "Error: Invalid dimensions {}x{} (must be between 1x1 and 16384x16384)", width, height
+                                )}],
+                                "isError": true
+                            }
+                        });
+                    }
+                    if framerate == 0 || framerate > 240 {
+                        return json!({
+                            "jsonrpc": "2.0",
+                            "id": id,
+                            "result": {
+                                "content": [{"type": "text", "text": format!(
+                                    "Error: Invalid framerate {} (must be between 1 and 240)", framerate
+                                )}],
+                                "isError": true
+                            }
+                        });
+                    }
                     let total_frames = framerate * 10;
 
                     let export_result: Option<Value>;
@@ -576,6 +658,7 @@ async fn process_mcp_request(
                     }))
                 }
 
+                // ── Audio / Analysis ─────────────────────────────────
                 "analyze_media" => {
                     let file_path = req["params"]["arguments"]["file_path"]
                         .as_str()
@@ -591,9 +674,11 @@ async fn process_mcp_request(
                         })
                     } else {
                         let sample_rate = 44100;
+                        use lazynext_core::ffmpeg_loader::sanitize_media_path;
+                        let safe_path = sanitize_media_path(file_path);
                         let output = std::process::Command::new("ffmpeg")
                             .arg("-i")
-                            .arg(file_path)
+                            .arg(&safe_path)
                             .arg("-f")
                             .arg("f32le")
                             .arg("-ac")
@@ -648,6 +733,7 @@ async fn process_mcp_request(
                     }
                 }
 
+                // ── Track Management ─────────────────────────────────
                 "manage_tracks" => {
                     let op = req["params"]["arguments"]["operation"]
                         .as_str()
@@ -765,6 +851,7 @@ async fn process_mcp_request(
                     }
                 }
 
+                // ── Media Import ─────────────────────────────────────
                 "import_media" => {
                     let paths = req["params"]["arguments"]["file_paths"].as_array();
                     let mut imported = Vec::new();
@@ -825,6 +912,7 @@ async fn process_mcp_request(
                     })
                 }
 
+                // ── Effects ──────────────────────────────────────────
                 "apply_effect" => {
                     let effect_name = req["params"]["arguments"]["effect_name"]
                         .as_str()
@@ -898,6 +986,7 @@ async fn process_mcp_request(
             }
         }
 
+        // ── Resource Discovery ───────────────────────────────────────────
         "resources/list" => json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -931,6 +1020,7 @@ async fn process_mcp_request(
             }
         }),
 
+        // ── Resource Reading ─────────────────────────────────────────────
         "resources/read" => {
             let uri = req["params"]["uri"].as_str().unwrap_or("");
             let content = match uri {
@@ -974,6 +1064,7 @@ async fn process_mcp_request(
             })
         }
 
+        // ── Prompt Discovery ─────────────────────────────────────────────
         "prompts/list" => json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -1015,6 +1106,7 @@ async fn process_mcp_request(
             }
         }),
 
+        // ── Prompt Resolution ────────────────────────────────────────────
         "prompts/get" => {
             let prompt_name = req["params"]["name"].as_str().unwrap_or("");
             let args = &req["params"]["arguments"];
@@ -1071,6 +1163,7 @@ async fn process_mcp_request(
             })
         }
 
+        // ── Handshake ────────────────────────────────────────────────────
         "initialize" => json!({
             "jsonrpc": "2.0",
             "id": id,
@@ -1096,14 +1189,42 @@ async fn process_mcp_request(
     }
 }
 
-/// SSE transport: shared application state
+// ── SSE Transport ────────────────────────────────────────────────────────────
+
+/// Shared application state for the SSE (HTTP) transport.
+///
+/// Holds the NLE engine and editor behind a `Mutex` so the Axum handlers
+/// can safely mutate state across concurrent SSE requests.
 struct SseAppState {
     nle: Mutex<NLEState>,
     editor: AutonomousEditor,
     api_key: String,
 }
 
+/// Starts the MCP server in SSE (HTTP) transport mode on port 9000.
+///
+/// Exposes two endpoints:
+/// - `POST /mcp/message` — accept JSON-RPC requests
+/// - `GET  /mcp/events` — SSE keep-alive event stream
+///
+/// Enforces `LAZYNEXT_MCP_API_KEY` in production environments.
 async fn run_sse_server() {
+    let is_prod = std::env::var("LAZYNEXT_ENV")
+        .map(|v| v == "production")
+        .unwrap_or(false)
+        || std::env::var("NODE_ENV")
+            .map(|v| v == "production")
+            .unwrap_or(false);
+    let api_key = std::env::var("LAZYNEXT_MCP_API_KEY");
+    if is_prod && api_key.is_err() {
+        eprintln!(
+            "FATAL: LAZYNEXT_MCP_API_KEY must be set in production environments. \
+             Refusing to start MCP SSE server with insecure default."
+        );
+        std::process::exit(1);
+    }
+    let api_key = api_key.unwrap_or_else(|_| "default_test_key".to_string());
+
     let state = Arc::new(SseAppState {
         nle: Mutex::new(NLEState::new(
             "mcp_sse_session".to_string(),
@@ -1111,8 +1232,7 @@ async fn run_sse_server() {
             60,
         )),
         editor: AutonomousEditor::new(),
-        api_key: std::env::var("LAZYNEXT_MCP_API_KEY")
-            .unwrap_or_else(|_| "default_test_key".to_string()),
+        api_key,
     });
 
     let app = Router::new()
@@ -1132,6 +1252,10 @@ async fn run_sse_server() {
     axum::serve(listener, app).await.unwrap();
 }
 
+/// Handles a single JSON-RPC request via HTTP POST.
+///
+/// Locks the NLE state, dispatches through `process_mcp_request`, and
+/// returns the JSON-RPC response.
 async fn handle_sse_message(
     State(state): State<Arc<SseAppState>>,
     Json(req): Json<Value>,
@@ -1141,6 +1265,10 @@ async fn handle_sse_message(
     Json(response)
 }
 
+/// SSE keep-alive event stream for the MCP SSE transport.
+///
+/// Emits a `comment: keep-alive` event every 15 seconds to maintain the
+/// SSE connection.
 async fn handle_sse_events()
 -> axum::response::sse::Sse<impl Stream<Item = Result<axum::response::sse::Event, Infallible>>> {
     use tokio_stream::StreamExt;
@@ -1150,6 +1278,17 @@ async fn handle_sse_events()
     axum::response::sse::Sse::new(stream).keep_alive(axum::response::sse::KeepAlive::default())
 }
 
+// ── Stdio Transport / Main Loop ──────────────────────────────────────────────
+
+/// MCP server entry point.
+///
+/// Chooses between two transports:
+/// - **Stdio** (default): reads JSON-RPC lines from stdin, writes responses
+///   to stdout — suitable for Claude Desktop, Cursor, and other MCP hosts.
+/// - **SSE** (`--sse`): starts an HTTP server on port 9000.
+///
+/// On startup, the server initializes the NLE state and autonomous editor,
+/// validates the API key in production, and enters the read-print loop.
 #[tokio::main]
 async fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -1172,9 +1311,22 @@ async fn main() {
         60,
     );
 
-    // Basic API Key auth (expected in environment for testing)
-    let expected_api_key =
-        std::env::var("LAZYNEXT_MCP_API_KEY").unwrap_or_else(|_| "default_test_key".to_string());
+    // Basic API Key auth (required in production)
+    let expected_api_key = std::env::var("LAZYNEXT_MCP_API_KEY");
+    let is_prod = std::env::var("LAZYNEXT_ENV")
+        .map(|v| v == "production")
+        .unwrap_or(false)
+        || std::env::var("NODE_ENV")
+            .map(|v| v == "production")
+            .unwrap_or(false);
+    if is_prod && expected_api_key.is_err() {
+        eprintln!(
+            "FATAL: LAZYNEXT_MCP_API_KEY must be set in production environments. \
+             Refusing to start with insecure default."
+        );
+        std::process::exit(1);
+    }
+    let expected_api_key = expected_api_key.unwrap_or_else(|_| "default_test_key".to_string());
 
     let stdin = io::stdin();
     for line in stdin.lock().lines() {
@@ -1204,6 +1356,8 @@ async fn main() {
     }
 }
 
+// ── Export Helpers ──────────────────────────────────────────────────────────
+
 /// Generate a test pattern frame for export when the GPU compositor
 /// is not available (MCP server runs over stdio, no GPU context).
 fn generate_test_pattern(frame_idx: u32, total_frames: u32, width: u32, height: u32) -> Vec<u8> {
@@ -1226,9 +1380,14 @@ fn generate_test_pattern(frame_idx: u32, total_frames: u32, width: u32, height: 
     pixels
 }
 
+// ── Media Probe ─────────────────────────────────────────────────────────────
+
 /// Probe a media file with ffprobe to extract duration, resolution, and type.
 /// Falls back to sensible defaults if ffprobe is not available.
+/// Uses sanitize_media_path to prevent path/flag injection.
 fn probe_media(path: &str) -> (f64, u32, u32, String) {
+    use lazynext_core::ffmpeg_loader::sanitize_media_path;
+    let safe_path = sanitize_media_path(path);
     let output = std::process::Command::new("ffprobe")
         .arg("-v")
         .arg("quiet")
@@ -1236,7 +1395,8 @@ fn probe_media(path: &str) -> (f64, u32, u32, String) {
         .arg("json")
         .arg("-show_format")
         .arg("-show_streams")
-        .arg(path)
+        .arg("--")
+        .arg(&safe_path)
         .output();
 
     match output {

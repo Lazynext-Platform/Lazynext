@@ -1,3 +1,5 @@
+/** @module TypeScript type definitions for subtitle styling, placement, and per-chunk style overrides */
+
 import type { TextBackground } from "@/text/background";
 import type {
 	TextAlign,

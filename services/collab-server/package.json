@@ -1,0 +1,8 @@
+{
+	"name": "@lazynext/collab-server",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"test": "cargo test --manifest-path Cargo.toml"
+	}
+}

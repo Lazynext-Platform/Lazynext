@@ -6,6 +6,7 @@ for noise reduction, compression, and EQ enhancement.
 """
 
 import asyncio
+import base64
 import os
 import httpx
 from fastapi import HTTPException
@@ -47,7 +48,7 @@ async def transcribe_audio_service(req: VideoRequest):
                 f"{tf_serving_url}/v1/models/whisper:predict",
                 json={
                     "instances": [{
-                        "audio_b64": httpx._compat.base64.b64encode(audio_bytes).decode("utf-8"),
+                        "audio_b64": base64.b64encode(audio_bytes).decode("utf-8"),
                         "language": getattr(req, "language", None),
                         "response_format": "verbose_json",
                         "timestamp_granularities": ["word"],
@@ -126,11 +127,6 @@ async def transcribe_audio_service(req: VideoRequest):
     raise HTTPException(
         status_code=503,
         detail="Transcription service unavailable — no Whisper API key configured and TF Serving unreachable"
-    )
-    
-    raise HTTPException(
-        status_code=500,
-        detail="Transcription service failed internally"
     )
 async def enhance_audio_service(req: EnhanceAudioRequest):
     """Enhance audio quality using a DSP pipeline (high-pass, gate, compressor, EQ).

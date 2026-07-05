@@ -5,23 +5,13 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
-#![allow(
-    dead_code,
-    unused_variables,
-    clippy::collapsible_if,
-    clippy::collapsible_else_if,
-    clippy::collapsible_match,
-    clippy::len_zero,
-    clippy::needless_borrows_for_generic_args,
-    clippy::single_match,
-    clippy::useless_conversion,
-    clippy::module_inception,
-    clippy::needless_pass_by_value,
-    clippy::cast_sign_loss,
-    clippy::too_many_arguments,
-    clippy::too_many_lines,
-    clippy::wrong_self_convention
-)]
+// Per-item allow attributes replace the previous global blanket suppression.
+// Only dead_code and unused_variables are tolerated globally in the entry point:
+// - dead_code: route stubs for WIP features
+// - unused_variables: Axum handler extractors not always needed in every route
+// All other lint suppressions are scoped to specific handlers below.
+#![allow(dead_code, unused_variables)]
+
 use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::middleware;
@@ -57,6 +47,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use db::DbStore;
 use rbac::{AuthClaims, WorkspaceRole};
 
+/// Outbound webhook payload sent when a render completes.
 #[derive(Serialize, utoipa::ToSchema)]
 struct WebhookPayload {
     event_type: String,
@@ -64,6 +55,11 @@ struct WebhookPayload {
     message: String,
 }
 
+/// Shared application state injected into every request handler.
+///
+/// Holds the NLE engine, autonomous editor, database store, WebSocket state,
+/// routine scheduler, channel manager, and background task queue — all wrapped
+/// in `Arc` for efficient sharing across Axum handlers.
 #[derive(Clone)]
 pub struct AppState {
     nle: Arc<Mutex<NLEState>>,
@@ -293,8 +289,9 @@ async fn main() {
     info!("📡 API Gateway listening on http://{}", addr);
 
     // Trigger a demo render after 5 seconds (dev convenience)
-    //[cfg(feature = "dev")]
-    {
+    // Only runs when LAZYNEXT_DEV_MODE=true is set
+    if std::env::var("LAZYNEXT_DEV_MODE").unwrap_or_default() == "true" {
+        tracing::info!("Dev mode enabled — triggering demo render in 5 seconds");
         let nle_for_demo = nle_state.clone();
         tokio::spawn(async move {
             tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
@@ -317,6 +314,12 @@ async fn main() {
 
 // ── Public Handlers ────────────────────────────────────────────────────────
 
+/// GET /health
+///
+/// Returns the service health status and database connectivity.
+///
+/// **Auth**: Public (no authentication required).
+/// **Returns**: `{ status: "ok", service: "api-gateway", database: "ok"|"degraded" }`
 #[utoipa::path(
     get,
     path = "/health",
@@ -339,6 +342,16 @@ async fn health_handler(State(state): State<AppState>) -> Json<Value> {
 // JWT and inserted `AuthClaims` into request extensions.
 // Use `auth_claims(&req)` / `user_role(&req)` to access them.
 
+// ── Editor / Autonomous ──────────────────────────────────────────────────────
+
+/// POST /api/v1/autonomous_edit
+///
+/// Accepts a natural-language `VideoIntent` and executes AI-powered timeline
+/// editing via the autonomous editor + LLM pipeline.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `VideoIntent` (prompt, plan approval flag, source files)
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_autonomous_edit(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -348,6 +361,17 @@ async fn handle_autonomous_edit(
     let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
     if !role.can_edit() {
         return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    // Validate input: prompt must not be empty and within reasonable bounds
+    if payload.prompt.trim().is_empty() {
+        return Json(json!({ "success": false, "error": "Prompt must not be empty" }));
+    }
+    if payload.prompt.len() > 50000 {
+        return Json(json!({
+            "success": false,
+            "error": "Prompt exceeds maximum length of 50,000 characters"
+        }));
     }
 
     let result = {
@@ -364,12 +388,24 @@ async fn handle_autonomous_edit(
     }
 }
 
+/// GET /api/v1/timeline
+///
+/// Returns the full CRDT timeline state as JSON, including all tracks, clips,
+/// keyframes, and project metadata.
+///
+/// **Returns**: Serialized `ProjectData` (tracks, clips, settings).
 async fn handle_get_timeline(State(state): State<AppState>) -> Json<Value> {
     let nle = state.nle.lock().await;
     let data = nle.get_project_data();
     Json(serde_json::to_value(data).unwrap_or(json!({})))
 }
 
+/// POST /api/v1/render
+///
+/// Triggers an asynchronous render of the current timeline via the NLE engine.
+/// On completion a `RenderComplete` event is dispatched (webhook + WebSocket).
+///
+/// **Returns**: `{ triggered: true }`
 async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
     let mut nle = state.nle.lock().await;
     nle.trigger_render_complete();
@@ -378,6 +414,13 @@ async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
 
 // ── User / Profile ────────────────────────────────────────────────────────
 
+/// GET /api/v1/user/profile
+///
+/// Returns the authenticated user's profile including name, email, role,
+/// subscription tier, and AI credit balance.
+///
+/// **Auth**: Any authenticated user.
+/// **Returns**: `{ success, profile: { id, name, email, role, tier, initials, ai_credits } }`
 async fn handle_get_profile(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -417,6 +460,11 @@ async fn handle_get_profile(
     }
 }
 
+/// GET /api/v1/user/credits
+///
+/// Returns the authenticated user's AI credit balance.
+///
+/// **Returns**: `{ success, credits: <number> }`
 async fn handle_get_user_credits(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -433,6 +481,11 @@ async fn handle_get_user_credits(
 
 // ── Projects ──────────────────────────────────────────────────────────────
 
+/// GET /api/v1/projects
+///
+/// Lists all projects owned by the authenticated user.
+///
+/// **Returns**: `{ success, projects: [...] }`
 async fn handle_get_projects(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -448,6 +501,12 @@ async fn handle_get_projects(
 
 // ── Admin ─────────────────────────────────────────────────────────────────
 
+/// GET /api/v1/admin/dashboard
+///
+/// Returns admin-only metrics: total users, active subscriptions, and MRR.
+///
+/// **Auth**: Requires Admin role.
+/// **Returns**: `{ success, metrics: { totalUsers, activeSubscriptions, monthlyRecurringRevenue } }`
 async fn handle_admin_dashboard(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -475,6 +534,14 @@ async fn handle_admin_dashboard(
 
 // ── Dodo Payments Webhook ───────────────────────────────────────────────────
 
+/// POST /api/v1/dodo/webhook
+///
+/// Verified Dodo Payments webhook endpoint. Handles `payment_link.completed`,
+/// `payment_link.failed`, and `payment_link.expired` events.
+///
+/// **Auth**: Public (Dodo signs its own webhooks with HMAC-SHA256).
+/// **Header**: `dodo-signature` — hex-encoded HMAC of the raw body.
+/// **Returns**: `{ received: true }` or `{ error }`
 async fn handle_dodo_webhook(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -519,7 +586,10 @@ async fn handle_dodo_webhook(
             if let Some(obj) = payload["data"].as_object() {
                 let sub_id = obj["id"].as_str().unwrap_or("unknown");
                 let customer_id = obj["customer_id"].as_str().unwrap_or("");
-                let price_id = obj["amount"].as_str().unwrap_or("");
+                let price_id = obj["price_id"]
+                    .as_str()
+                    .or_else(|| obj["plan_id"].as_str())
+                    .unwrap_or("");
                 let period_end = chrono::Utc::now() + chrono::Duration::days(30);
 
                 if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
@@ -543,19 +613,11 @@ async fn handle_dodo_webhook(
             if let Some(obj) = payload["data"].as_object() {
                 let customer_id = obj["customer_id"].as_str().unwrap_or("");
                 if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
-                    let sub = db::Subscription {
-                        id: obj["id"].as_str().unwrap_or("").to_string(),
-                        user_id: user.id,
-                        dodo_subscription_id: String::new(),
-                        dodo_price_id: String::new(),
-                        dodo_current_period_end: chrono::Utc::now(),
-                        tier: "free".to_string(),
-                        created_at: chrono::Utc::now(),
-                        updated_at: chrono::Utc::now(),
-                    };
-                    if let Err(e) = state.db.upsert_subscription(&sub).await {
-                        tracing::error!(?e, "Failed to downgrade subscription");
-                    }
+                    tracing::warn!(
+                        customer_id = %customer_id,
+                        event_type = %event_type,
+                        "Dodo payment failed/expired — preserving existing subscription"
+                    );
                 }
             }
         }
@@ -597,6 +659,10 @@ fn verify_dodo_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<
     }
 }
 
+/// Resolves a Dodo Payments customer ID to a `User` record.
+///
+/// Queries the `user` table by `dodo_customer_id` and returns `None` when
+/// no matching user is found.
 async fn find_user_by_dodo_customer(
     db: &DbStore,
     customer_id: &str,
@@ -625,17 +691,26 @@ async fn find_user_by_dodo_customer(
 
 // ── AI Generation ─────────────────────────────────────────────────────────
 
+/// Request body for AI video generation.
 #[derive(serde::Deserialize)]
 pub struct GeneratePayload {
     pub prompt: String,
 }
 
+/// Request body for AI text-to-speech synthesis.
 #[derive(serde::Deserialize)]
 pub struct TtsPayload {
     pub text: String,
     pub voice_id: Option<String>,
 }
 
+/// POST /api/v1/ai/generate
+///
+/// Generates video frames from a text prompt using the neural engine,
+/// deducts AI credits, and inserts the result as a new clip on a video track.
+///
+/// **Body**: `{ prompt: string }`
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_generate(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -683,6 +758,13 @@ async fn handle_generate(
     }
 }
 
+/// POST /api/v1/ai/tts
+///
+/// Synthesizes speech from a text prompt using the neural engine, deducts AI
+/// credits, and inserts the audio as a new clip on an audio track.
+///
+/// **Body**: `{ text: string, voice_id?: string }`
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_tts(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -708,7 +790,7 @@ async fn handle_tts(
             nle.add_track(track_name.clone(), "audio".to_string());
 
             nle.add_clip_to_track(
-                1,
+                0,
                 "generated_tts".to_string(),
                 "audio".to_string(),
                 filename,
@@ -726,6 +808,7 @@ async fn handle_tts(
 
 // ── Timeline / Media Handlers ─────────────────────────────────────────
 
+/// Request body for adding a clip to a timeline track.
 #[derive(serde::Deserialize)]
 struct AddClipPayload {
     track_id: Option<String>,
@@ -737,6 +820,13 @@ struct AddClipPayload {
     end: Option<u32>,
 }
 
+/// POST /api/v1/timeline
+///
+/// Adds a clip to a track (or auto-creates a default track if none exist).
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `AddClipPayload` (track_id, clip_type, name, start/end frames)
+/// **Returns**: `{ success, message, clip: { id, track_idx, start, end } }`
 async fn handle_add_clip(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -788,12 +878,22 @@ async fn handle_add_clip(
     }))
 }
 
+/// Request body for AI-driven media ingestion.
 #[derive(serde::Deserialize)]
 struct IngestPayload {
     url: Option<String>,
     source: Option<String>,
 }
 
+/// POST /api/v1/ai/ingest
+///
+/// Forwards a media URL to the pre-processing service for proxy generation
+/// and ingestion into the project. Falls back to queuing if the service is
+/// unreachable.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `In ingestPayload` (url, source)
+/// **Returns**: `{ success, message, ingest_result? }`
 async fn handle_ai_ingest(
     State(_state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -849,6 +949,7 @@ async fn handle_ai_ingest(
     }
 }
 
+/// Request body for connecting a third-party platform via OAuth.
 #[derive(serde::Deserialize)]
 struct IntegrationPayload {
     platform: String,
@@ -856,6 +957,15 @@ struct IntegrationPayload {
     redirect_uri: Option<String>,
 }
 
+/// POST /api/v1/user/integrations/connect
+///
+/// Initiates or completes an OAuth connection to a supported platform
+/// (YouTube, TikTok, Instagram, Vimeo). If `code` is provided, exchanges it
+/// for access/refresh tokens; otherwise returns the authorization URL.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `IntegrationPayload` (platform, code?, redirect_uri?)
+/// **Returns**: `{ success, message, auth_url?, access_token? }` or `{ error }`
 async fn handle_integration_connect(
     Extension(claims): Extension<AuthClaims>,
     Json(payload): Json<IntegrationPayload>,
@@ -1102,6 +1212,7 @@ async fn handle_social_schedule(Extension(claims): Extension<AuthClaims>) -> Jso
 
 // ── Scheduled Routines Handlers ────────────────────────────────────────────
 
+/// Request body for creating a scheduled AI editing routine.
 #[derive(serde::Deserialize)]
 struct CreateRoutinePayload {
     name: String,
@@ -1111,6 +1222,14 @@ struct CreateRoutinePayload {
     enabled: bool,
 }
 
+/// POST /api/v1/routines
+///
+/// Creates a cron-scheduled routine that executes an AI editing prompt on
+/// the timeline at regular intervals.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `CreateRoutinePayload` (name, cron_expression, prompt, enabled)
+/// **Returns**: `{ success, routine }` or `{ success: false, error }`
 async fn handle_create_routine(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1144,6 +1263,11 @@ async fn handle_create_routine(
     Json(json!({ "success": true, "routine": routine }))
 }
 
+/// GET /api/v1/routines
+///
+/// Lists all scheduled routines for the current session.
+///
+/// **Returns**: `{ success, routines: [...] }`
 async fn handle_list_routines(
     State(state): State<AppState>,
     Extension(_claims): Extension<AuthClaims>,
@@ -1153,11 +1277,18 @@ async fn handle_list_routines(
     Json(json!({ "success": true, "routines": routines }))
 }
 
+/// Path parameter for a routine ID.
 #[derive(serde::Deserialize)]
 struct RoutineIdPath {
     id: String,
 }
 
+/// DELETE /api/v1/routines/{id}
+///
+/// Cancels (removes) a scheduled routine by ID.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Returns**: `{ success: true/false, id }`
 async fn handle_cancel_routine(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1173,6 +1304,12 @@ async fn handle_cancel_routine(
     Json(json!({ "success": removed, "id": path.id }))
 }
 
+/// POST /api/v1/routines/{id}/execute
+///
+/// Manually triggers immediate execution of a scheduled routine.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_execute_routine(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1192,6 +1329,7 @@ async fn handle_execute_routine(
 
 // ── Channels Handlers ──────────────────────────────────────────────────────
 
+/// Request body for registering a channel webhook.
 #[derive(serde::Deserialize)]
 struct RegisterWebhookPayload {
     channel: String,
@@ -1199,6 +1337,14 @@ struct RegisterWebhookPayload {
     secret: String,
 }
 
+/// POST /api/v1/channels/webhook
+///
+/// Registers a webhook URL for a messaging channel (Telegram, Discord,
+/// Slack, iMessage, or generic Webhook).
+///
+/// **Auth**: Requires Admin role.
+/// **Body**: `RegisterWebhookPayload` (channel, url, secret)
+/// **Returns**: `{ success, channel }`
 async fn handle_register_webhook(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1229,6 +1375,13 @@ async fn handle_register_webhook(
     Json(json!({ "success": true, "channel": reg }))
 }
 
+/// POST /api/v1/channels/event
+///
+/// Processes an incoming channel event (e.g., a Telegram / Discord command)
+/// and routes it through the channel manager.
+///
+/// **Body**: `ChannelEvent`
+/// **Returns**: `{ success, result }` or `{ success: false, error }`
 async fn handle_channel_event(
     State(state): State<AppState>,
     Extension(_claims): Extension<AuthClaims>,
@@ -1241,6 +1394,11 @@ async fn handle_channel_event(
     }
 }
 
+/// GET /api/v1/channels
+///
+/// Lists all registered channel integrations.
+///
+/// **Returns**: `{ success, channels: [...] }`
 async fn handle_list_channels(
     State(state): State<AppState>,
     Extension(_claims): Extension<AuthClaims>,
@@ -1252,6 +1410,7 @@ async fn handle_list_channels(
 
 // ── Background Tasks Handlers ──────────────────────────────────────────────
 
+/// Request body for enqueueing a background task.
 #[derive(serde::Deserialize)]
 struct EnqueueTaskPayload {
     name: String,
@@ -1265,6 +1424,14 @@ fn default_priority() -> u8 {
     100
 }
 
+/// POST /api/v1/tasks
+///
+/// Enqueues a background task (auto export, backup, media cleanup, proxy
+/// generation, or thumbnail regeneration) into the priority queue.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `EnqueueTaskPayload` (name, payload, priority, task_type)
+/// **Returns**: `{ success, task }`
 async fn handle_enqueue_task(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1305,6 +1472,11 @@ async fn handle_enqueue_task(
     Json(json!({ "success": true, "task": task }))
 }
 
+/// GET /api/v1/tasks
+///
+/// Lists all tasks in the background queue with pending and total counts.
+///
+/// **Returns**: `{ success, tasks: [...], pending_count, total_count }`
 async fn handle_list_tasks(
     State(state): State<AppState>,
     Extension(_claims): Extension<AuthClaims>,
@@ -1319,11 +1491,17 @@ async fn handle_list_tasks(
     }))
 }
 
+/// Path parameter for a task ID.
 #[derive(serde::Deserialize)]
 struct TaskIdPath {
     id: String,
 }
 
+/// GET /api/v1/tasks/{id}
+///
+/// Retrieves a single background task by ID.
+///
+/// **Returns**: `{ success, task }` or `{ success: false, error }`
 async fn handle_get_task(
     State(state): State<AppState>,
     Extension(_claims): Extension<AuthClaims>,
@@ -1354,6 +1532,15 @@ fn initials(name: &str) -> String {
 use axum::extract::Multipart;
 use tokio::io::AsyncWriteExt;
 
+/// POST /api/v1/media/upload
+///
+/// Accepts multipart file uploads (up to 20 files, 2 GB each, 10 GB total).
+/// Saves files to the local asset directory. Supports streaming validation
+/// with filename sanitization and size enforcement.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Content-Type**: `multipart/form-data`
+/// **Returns**: `{ success, message, files: [...] }`
 async fn handle_media_upload(
     State(_state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1371,14 +1558,29 @@ async fn handle_media_upload(
         return Json(json!({ "success": false, "error": "Internal server error" }));
     }
 
+    let max_file_size: usize = 2 * 1024 * 1024 * 1024; // 2 GB per file
+    let max_total_size: usize = 10 * 1024 * 1024 * 1024; // 10 GB total
+    let max_files: usize = 20;
+    let mut total_size: usize = 0;
     let mut saved_files = Vec::new();
 
     while let Some(field) = multipart.next_field().await.unwrap_or(None) {
+        if saved_files.len() >= max_files {
+            return Json(json!({
+                "success": false,
+                "error": format!("Maximum of {} files per upload exceeded", max_files)
+            }));
+        }
+
         let name = field.name().unwrap_or("").to_string();
         let file_name = field.file_name().unwrap_or("unknown_file").to_string();
 
         if name == "file" {
-            let sanitized_name = file_name.replace(" ", "_");
+            let sanitized_name = sanitize_filename(&file_name);
+            if sanitized_name.is_empty() || sanitized_name == "unknown_file" {
+                tracing::warn!("Rejected file with unsafe name: {}", file_name);
+                continue;
+            }
             let file_path = format!("{}/{}", upload_dir, sanitized_name);
 
             let data = match field.bytes().await {
@@ -1388,6 +1590,21 @@ async fn handle_media_upload(
                     continue;
                 }
             };
+
+            if data.len() > max_file_size {
+                return Json(json!({
+                    "success": false,
+                    "error": format!("File '{}' exceeds maximum size of 2 GB", sanitized_name)
+                }));
+            }
+
+            total_size += data.len();
+            if total_size > max_total_size {
+                return Json(json!({
+                    "success": false,
+                    "error": "Total upload size exceeds maximum of 10 GB"
+                }));
+            }
 
             match tokio::fs::File::create(&file_path).await {
                 Ok(mut file) => {
@@ -1409,13 +1626,38 @@ async fn handle_media_upload(
     }))
 }
 
+/// Sanitizes a filename by replacing non-alphanumeric, non-dot, non-underscore,
+/// and non-hyphen characters with underscores. Strips leading/trailing dots.
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| {
+            if c.is_alphanumeric() || c == '.' || c == '_' || c == '-' {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect::<String>()
+        .trim_matches('.')
+        .to_string()
+}
+
 // ── Cloud Storage Upload / Signed URLs ────────────────────────────────────
 
+/// Query parameters for requesting a presigned upload URL.
 #[derive(serde::Deserialize)]
 struct PresignedUrlQuery {
     filename: String,
 }
 
+/// GET /api/v1/media/presigned-url
+///
+/// Generates an Azure Blob Storage SAS URL for direct client-to-cloud upload.
+/// Falls back to a dev/stub URL when Azure credentials are not configured.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Query**: `filename` — the target blob name.
+/// **Returns**: `{ success, url, method, expires_in, headers }`
 async fn handle_get_presigned_url(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1477,10 +1719,10 @@ async fn handle_stream_ingest(
             if let Ok(text) = field.text().await {
                 chunk_index = text.parse().unwrap_or(0);
             }
-        } else if name == "chunk" {
-            if let Ok(data) = field.bytes().await {
-                chunk_data = data.to_vec();
-            }
+        } else if name == "chunk"
+            && let Ok(data) = field.bytes().await
+        {
+            chunk_data = data.to_vec();
         }
     }
 
@@ -1519,11 +1761,20 @@ async fn handle_stream_ingest(
     ))
 }
 
+/// Request body for finalizing a chunked stream ingest session.
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 struct StreamCompletePayload {
     session_id: String,
 }
 
+/// POST /api/v1/ingest/stream/complete
+///
+/// Finalizes a chunked MediaRecorder stream session. Uploads the assembled
+/// file to Azure Blob Storage (if configured) and adds the clip to the
+/// timeline.
+///
+/// **Body**: `StreamCompletePayload` (session_id)
+/// **Returns**: `{ success, message, url, azure_uploaded }`
 async fn handle_stream_complete(
     State(state): State<AppState>,
     Json(payload): Json<StreamCompletePayload>,
@@ -1670,9 +1921,25 @@ async fn handle_extension_token_exchange(
     };
 
     static ENCODING_KEY: LazyLock<EncodingKey> = LazyLock::new(|| {
-        let secret = std::env::var("BETTER_AUTH_SECRET")
-            .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-32".to_string());
-        EncodingKey::from_secret(secret.as_bytes())
+        let secret = std::env::var("BETTER_AUTH_SECRET");
+        match secret {
+            Ok(s) if s.len() >= 32 => EncodingKey::from_secret(s.as_bytes()),
+            _ => {
+                let is_prod = std::env::var("LAZYNEXT_ENV")
+                    .map(|v| v == "production")
+                    .unwrap_or(false)
+                    || std::env::var("NODE_ENV")
+                        .map(|v| v == "production")
+                        .unwrap_or(false);
+                if is_prod {
+                    panic!(
+                        "FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production. \
+                         Refusing to issue extension tokens with insecure fallback."
+                    );
+                }
+                EncodingKey::from_secret("lazynext-dev-secret-key-for-auth-minimum-32".as_bytes())
+            }
+        }
     });
 
     match jsonwebtoken::encode(

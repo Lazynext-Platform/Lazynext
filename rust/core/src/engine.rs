@@ -101,7 +101,6 @@ impl PlaybackLoop {
             // but we can pause it to prevent desync until a new stream is started.
             audio.pause();
         }
-        let _ = frame;
     }
 
     pub fn is_playing(&self) -> bool {

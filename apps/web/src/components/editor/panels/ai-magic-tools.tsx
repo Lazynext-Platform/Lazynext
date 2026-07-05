@@ -35,10 +35,17 @@ export function AIMagicTools() {
 
 			const data = await response.json();
 
+			// Validate API response to prevent XSS via malicious URLs
+			const validUrl = typeof data.url === "string" &&
+				(data.url.startsWith("http://") || data.url.startsWith("https://") || data.url.startsWith("blob:"));
+			if (!validUrl) {
+				throw new Error("Invalid media URL received from API");
+			}
+
 			const newAsset = {
 				id: `asset-${Date.now()}`,
-				name: data.name,
-				type: data.type,
+				name: typeof data.name === "string" ? data.name.slice(0, 200) : "Untitled",
+				type: typeof data.type === "string" ? data.type : "unknown",
 				url: data.url,
 			};
 
@@ -117,6 +124,7 @@ export function AIMagicTools() {
 						</label>
 						<textarea
 							value={prompt}
+							maxLength={5000}
 							onChange={(e) => setPrompt(e.target.value)}
 							placeholder={
 								activeTab === "video"

@@ -1,3 +1,5 @@
+/** @module ProjectManager - project lifecycle management including CRUD, export, settings, and scene management */
+
 import type { EditorCore } from "@/core";
 import type {
 	TProject,

@@ -2,6 +2,7 @@
  * Blog post page — renders a single article by slug with prose styling.
  *
  * @page /blog/[slug]
+ * @module blog/slug/page
  */
 
 import type { Metadata } from "next";

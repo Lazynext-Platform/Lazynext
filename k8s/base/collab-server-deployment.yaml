@@ -19,7 +19,7 @@ spec:
       serviceAccountName: lazynext-sa
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
+        runAsUser: 1001
       containers:
         - name: collab-server
           image: ghcr.io/lazynext-platform/lazynext-collab-server:latest

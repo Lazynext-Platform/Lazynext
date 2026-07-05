@@ -1,8 +1,9 @@
 //! Autonomous AI editor that translates natural language intents into NLE timeline
-//! operations. Supports multiple LLM providers (OpenAI, Anthropic, Gemini, Ollama)
+//! operations. Supports multiple LLM providers (OpenAI, Anthropic, Gemini)
 //! with deterministic local fallback when no API key is available.
 
 use crate::NLEState;
+use crate::nle_state::VALID_CLIP_TYPES;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -87,7 +88,7 @@ impl AutonomousEditor {
     /// Asynchronously modifies the NLEState by making a real LLM API call.
     ///
     /// Provider selection via env vars:
-    ///   LLM_PROVIDER = openai | anthropic | gemini | ollama (default)
+    ///   LLM_PROVIDER = openai | anthropic | gemini (default)
     ///   OPENAI_API_KEY / ANTHROPIC_API_KEY / GEMINI_API_KEY
     ///
     /// Falls back to a deterministic local plan if no API key is available
@@ -103,7 +104,7 @@ impl AutonomousEditor {
         let provider = intent
             .llm_provider
             .clone()
-            .unwrap_or_else(|| env::var("LLM_PROVIDER").unwrap_or_else(|_| "ollama".to_string()));
+            .unwrap_or_else(|| env::var("LLM_PROVIDER").unwrap_or_else(|_| "gemini".to_string()));
         let (api_url, api_key, model) = match provider.as_str() {
             "openai" => (
                 "https://api.openai.com/v1/chat/completions".to_string(),
@@ -163,7 +164,7 @@ impl AutonomousEditor {
         let actions: Value;
 
         // 3. Attempt real API call; fall back to local plan on failure
-        if !api_key.is_empty() || provider == "ollama" {
+        if !api_key.is_empty() || provider == "gemini" {
             match self
                 .call_llm(&api_url, &api_key, &model, &system_prompt, &intent.prompt)
                 .await
@@ -191,255 +192,275 @@ impl AutonomousEditor {
             actions = Self::local_fallback_plan(&intent.prompt);
         }
 
-        // 4. Apply the plan to the NLE state
-        if let Some(actions_array) = actions.as_array() {
-            for action in actions_array {
-                if let Some(action_type) = action["action"].as_str() {
-                    match action_type {
-                        "add_track" => {
-                            let kind = action["kind"].as_str().unwrap_or("video").to_string();
-                            let id = action["id"].as_str().unwrap_or("Track").to_string();
-                            nle_state.add_track(id, kind);
-                        }
-                        "add_clip" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            let id = action["id"].as_str().unwrap_or("clip").to_string();
-                            let clip_type =
-                                action["clip_type"].as_str().unwrap_or("video").to_string();
-                            let name = action["name"].as_str().unwrap_or("media").to_string();
-                            let start = action["start"].as_u64().unwrap_or(0) as u32;
-                            let end = action["end"].as_u64().unwrap_or(100) as u32;
-                            nle_state.add_clip_to_track(track_idx, id, clip_type, name, start, end);
-                        }
-                        "trim_silence" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            nle_state.auto_trim_silence(track_idx);
+        // 4. Apply the plan to the NLE state with validation
+        self.apply_validated_actions(nle_state, &actions);
 
-                            let client = self.client.clone();
-                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
-                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
-                            let clip_ids: Vec<String> = nle_state
-                                .get_project_data()
-                                .tracks
-                                .get(track_idx)
-                                .map(|t| t.clips.iter().map(|c| c.id.clone()).collect())
-                                .unwrap_or_default();
-                            tokio::spawn(async move {
-                                let resp = client
-                                    .post(format!("{}/process", preproc_url))
-                                    .json(&json!({
-                                        "video_id": clip_ids.first().cloned().unwrap_or_default(),
-                                        "action": "detect_silence"
-                                    }))
-                                    .timeout(std::time::Duration::from_secs(300))
-                                    .send()
-                                    .await;
-                                match resp {
-                                    Ok(r) if r.status().is_success() => {
-                                        println!(
-                                            "✅ Silence analysis dispatched for track {}",
-                                            track_idx
-                                        );
-                                    }
-                                    Ok(r) => {
-                                        eprintln!("❌ Silence analysis failed: HTTP {}", r.status())
-                                    }
-                                    Err(e) => {
-                                        eprintln!("❌ Silence analysis request failed: {}", e)
-                                    }
-                                }
-                            });
-                        }
-                        "mcp_call" => {
-                            let server = action["server"].as_str().unwrap_or("unknown");
-                            let tool = action["tool"].as_str().unwrap_or("unknown");
-                            println!(
-                                "🔌 [MCP Client] Calling tool '{}' on server '{}'...",
-                                tool, server
-                            );
-                            match server {
-                                "context7" => println!("   -> Fetched deep context from Context7."),
-                                "firecrawl" => {
-                                    println!("   -> Scraped script/context using Firecrawl.")
-                                }
-                                "playwright" => {
-                                    println!("   -> Recorded UI automation using Playwright.");
-                                    nle_state.add_track(
-                                        "Playwright_V1".to_string(),
-                                        "video".to_string(),
-                                    );
-                                    nle_state.add_clip_to_track(
-                                        0,
-                                        "pw_rec_01".to_string(),
-                                        "video".to_string(),
-                                        "browser_recording.mp4".to_string(),
-                                        0,
-                                        300,
-                                    );
-                                }
-                                _ => println!("⚠️  [MCP Client] Unknown server: {}", server),
+        Ok("Autonomously planned and executed your edit.".to_string())
+    }
+
+    /// Validates and applies actions from the LLM response or local fallback.
+    /// Each action is validated against the current NLE state before application.
+    fn apply_validated_actions(&self, nle_state: &mut NLEState, actions: &Value) {
+        let actions_array = match actions.as_array() {
+            Some(arr) => arr,
+            None => {
+                eprintln!("[AI Engine] Actions payload is not an array, skipping");
+                return;
+            }
+        };
+
+        for action in actions_array {
+            let Some(action_type) = action["action"].as_str() else {
+                eprintln!("[AI Engine] Action has no 'action' field, skipping");
+                continue;
+            };
+
+            match action_type {
+                "add_track" => {
+                    let kind = action["kind"].as_str().unwrap_or("video").to_string();
+                    let id = action["id"].as_str().unwrap_or("Track").to_string();
+                    nle_state.add_track(id, kind);
+                }
+                "add_clip" => {
+                    let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
+                    let track_count = nle_state.get_project_data().tracks.len();
+                    if track_idx >= track_count {
+                        eprintln!(
+                            "[AI Engine] Skipping add_clip: track_idx {} >= track_count {}",
+                            track_idx, track_count
+                        );
+                        continue;
+                    }
+                    let id = action["id"].as_str().unwrap_or("clip").to_string();
+                    let clip_type = action["clip_type"].as_str().unwrap_or("video").to_string();
+                    if !VALID_CLIP_TYPES.contains(&clip_type.as_str()) {
+                        eprintln!(
+                            "[AI Engine] Skipping add_clip: unknown clip_type '{}'. Valid: {:?}",
+                            clip_type, VALID_CLIP_TYPES
+                        );
+                        continue;
+                    }
+                    let name = action["name"].as_str().unwrap_or("media").to_string();
+                    let start = action["start"].as_u64().unwrap_or(0) as u32;
+                    let end = action["end"].as_u64().unwrap_or(100) as u32;
+                    if start >= end {
+                        eprintln!(
+                            "[AI Engine] Skipping add_clip: invalid range start={} >= end={}",
+                            start, end
+                        );
+                        continue;
+                    }
+                    nle_state.add_clip_to_track(track_idx, id, clip_type, name, start, end);
+                }
+                "trim_silence" => {
+                    let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
+                    let track_count = nle_state.get_project_data().tracks.len();
+                    if track_idx >= track_count {
+                        eprintln!(
+                            "[AI Engine] Skipping trim_silence: track_idx {} >= track_count {}",
+                            track_idx, track_count
+                        );
+                        continue;
+                    }
+                    nle_state.auto_trim_silence(track_idx);
+
+                    let client = self.client.clone();
+                    let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                        .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                    let clip_ids: Vec<String> = nle_state
+                        .get_project_data()
+                        .tracks
+                        .get(track_idx)
+                        .map(|t| t.clips.iter().map(|c| c.id.clone()).collect())
+                        .unwrap_or_default();
+                    tokio::spawn(async move {
+                        let resp = client
+                            .post(format!("{}/process", preproc_url))
+                            .json(&json!({
+                                "video_id": clip_ids.first().cloned().unwrap_or_default(),
+                                "action": "detect_silence"
+                            }))
+                            .timeout(std::time::Duration::from_secs(300))
+                            .send()
+                            .await;
+                        match resp {
+                            Ok(r) if r.status().is_success() => {
+                                println!("✅ Silence analysis dispatched for track {}", track_idx);
+                            }
+                            Ok(r) => {
+                                eprintln!("❌ Silence analysis failed: HTTP {}", r.status())
+                            }
+                            Err(e) => {
+                                eprintln!("❌ Silence analysis request failed: {}", e)
                             }
                         }
-                        "color_grade" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let preset = action["preset"].as_str().unwrap_or("cinematic");
-                            println!(
-                                "🎨 [AI Engine] Applied color grade '{}' to clip '{}' on track {}",
-                                preset, clip_id, track_idx
-                            );
-                            nle_state.update_clip_property(clip_id, "color_grade", 1.0); // Simple proxy property
+                    });
+                }
+                "mcp_call" => {
+                    let server = action["server"].as_str().unwrap_or("unknown");
+                    let tool = action["tool"].as_str().unwrap_or("unknown");
+                    println!(
+                        "🔌 [MCP Client] Calling tool '{}' on server '{}'...",
+                        tool, server
+                    );
+                    match server {
+                        "context7" => println!("   -> Fetched deep context from Context7."),
+                        "firecrawl" => {
+                            println!("   -> Scraped script/context using Firecrawl.")
                         }
-                        "add_effect" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let effect = action["effect"].as_str().unwrap_or("blur");
-                            println!(
-                                "✨ [AI Engine] Added effect '{}' to clip '{}' on track {}",
-                                effect, clip_id, track_idx
-                            );
-                            nle_state.update_clip_property(
-                                clip_id,
-                                &format!("effect_{}", effect),
-                                1.0,
-                            );
-                        }
-                        "speed_ramp" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let speed = action["speed_factor"].as_f64().unwrap_or(1.0);
-                            println!(
-                                "⏩ [AI Engine] Applied speed ramp ({}x) to clip '{}' on track {}",
-                                speed, clip_id, track_idx
-                            );
-                            nle_state.update_clip_property(clip_id, "speed", speed as f32);
-                        }
-                        "add_transition" => {
-                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
-                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
-                            let transition =
-                                action["transition_type"].as_str().unwrap_or("crossfade");
-                            println!(
-                                "🔄 [AI Engine] Added transition '{}' to clip '{}' on track {}",
-                                transition, clip_id, track_idx
-                            );
-                            nle_state.update_clip_property(
-                                clip_id,
-                                &format!("transition_{}", transition),
-                                1.0,
+                        "playwright" => {
+                            println!("   -> Recorded UI automation using Playwright.");
+                            nle_state.add_track("Playwright_V1".to_string(), "video".to_string());
+                            let pw_track_idx = nle_state.get_project_data().tracks.len() - 1;
+                            nle_state.add_clip_to_track(
+                                pw_track_idx,
+                                "pw_rec_01".to_string(),
+                                "video".to_string(),
+                                "browser_recording.mp4".to_string(),
+                                0,
+                                300,
                             );
                         }
-                        "rotoscope_clip" => {
-                            let clip_id =
-                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
-                            let prompt = action["prompt"].as_str().unwrap_or("subject").to_string();
-                            println!(
-                                "🎯 [AI Engine] Dispatching SAM2 Rotoscoping for clip '{}' with prompt '{}'",
-                                clip_id, prompt
-                            );
-                            let client = self.client.clone();
-                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
-                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
-                            tokio::spawn(async move {
-                                match client
-                                    .post(format!("{}/rotoscope", preproc_url))
-                                    .json(&json!({"video_id": clip_id, "object_prompt": prompt}))
-                                    .timeout(std::time::Duration::from_secs(300))
-                                    .send()
-                                    .await
-                                {
-                                    Ok(resp) => {
-                                        if resp.status().is_success() {
-                                            println!("✅ Rotoscoping completed for clip");
-                                        } else {
-                                            eprintln!(
-                                                "❌ Rotoscoping failed: HTTP {}",
-                                                resp.status()
-                                            );
-                                        }
-                                    }
-                                    Err(e) => eprintln!("❌ Rotoscoping request failed: {}", e),
-                                }
-                            });
-                        }
-                        "extract_nerf" => {
-                            let clip_id =
-                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
-                            let method = action["method"]
-                                .as_str()
-                                .unwrap_or("gaussian-splatting")
-                                .to_string();
-                            println!(
-                                "🧊 [AI Engine] Dispatching NeRF Extraction for clip '{}' (method: {})",
-                                clip_id, method
-                            );
-                            let client = self.client.clone();
-                            let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
-                                .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
-                            tokio::spawn(async move {
-                                match client
-                                    .post(format!("{}/nerf-extract", preproc_url))
-                                    .json(&json!({"video_id": clip_id, "method": method}))
-                                    .timeout(std::time::Duration::from_secs(600))
-                                    .send()
-                                    .await
-                                {
-                                    Ok(resp) => {
-                                        if resp.status().is_success() {
-                                            println!("✅ NeRF extraction completed for clip");
-                                        } else {
-                                            eprintln!(
-                                                "❌ NeRF extraction failed: HTTP {}",
-                                                resp.status()
-                                            );
-                                        }
-                                    }
-                                    Err(e) => eprintln!("❌ NeRF extraction request failed: {}", e),
-                                }
-                            });
-                        }
-                        "separate_stems" => {
-                            let clip_id =
-                                action["clip_id"].as_str().unwrap_or("unknown").to_string();
-                            let stems = action["stems"].as_u64().unwrap_or(4) as u32;
-                            println!(
-                                "🎵 [AI Engine] Dispatching Demucs Stem Separation ({} stems) for clip '{}'",
-                                stems, clip_id
-                            );
-                            let client = self.client.clone();
-                            let gen_studio_url = env::var("GENERATIVE_STUDIO_URL")
-                                .unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
-                            tokio::spawn(async move {
-                                match client
-                                    .post(format!("{}/split-stems", gen_studio_url))
-                                    .json(&json!({"video_id": clip_id, "stems": stems}))
-                                    .timeout(std::time::Duration::from_secs(600))
-                                    .send()
-                                    .await
-                                {
-                                    Ok(resp) => {
-                                        if resp.status().is_success() {
-                                            println!("✅ Stem separation completed for clip");
-                                        } else {
-                                            eprintln!(
-                                                "❌ Stem separation failed: HTTP {}",
-                                                resp.status()
-                                            );
-                                        }
-                                    }
-                                    Err(e) => eprintln!("❌ Stem separation request failed: {}", e),
-                                }
-                            });
-                        }
-                        _ => {
-                            println!("⚠️  [AI Engine] Unknown action: {}", action_type);
-                        }
+                        _ => println!("⚠️  [MCP Client] Unknown server: {}", server),
                     }
+                }
+                "color_grade" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                    let preset = action["preset"].as_str().unwrap_or("cinematic");
+                    println!(
+                        "🎨 [AI Engine] Applied color grade '{}' to clip '{}'",
+                        preset, clip_id
+                    );
+                    nle_state.update_clip_property(clip_id, "color_grade", 1.0);
+                }
+                "add_effect" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                    let effect = action["effect"].as_str().unwrap_or("blur");
+                    println!(
+                        "✨ [AI Engine] Added effect '{}' to clip '{}'",
+                        effect, clip_id
+                    );
+                    nle_state.update_clip_property(clip_id, &format!("effect_{}", effect), 1.0);
+                }
+                "speed_ramp" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                    let speed = action["speed_factor"].as_f64().unwrap_or(1.0);
+                    // Clamp speed factor to reasonable range [0.125x, 8.0x]
+                    let speed = speed.clamp(0.125, 8.0);
+                    println!(
+                        "⏩ [AI Engine] Applied speed ramp ({}x) to clip '{}'",
+                        speed, clip_id
+                    );
+                    nle_state.update_clip_property(clip_id, "speed", speed as f32);
+                }
+                "add_transition" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                    let transition = action["transition_type"].as_str().unwrap_or("crossfade");
+                    println!(
+                        "🔄 [AI Engine] Added transition '{}' to clip '{}'",
+                        transition, clip_id
+                    );
+                    nle_state.update_clip_property(
+                        clip_id,
+                        &format!("transition_{}", transition),
+                        1.0,
+                    );
+                }
+                "rotoscope_clip" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                    let prompt = action["prompt"].as_str().unwrap_or("subject").to_string();
+                    println!(
+                        "🎯 [AI Engine] Dispatching SAM2 Rotoscoping for clip '{}' with prompt '{}'",
+                        clip_id, prompt
+                    );
+                    let client = self.client.clone();
+                    let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                        .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                    tokio::spawn(async move {
+                        match client
+                            .post(format!("{}/rotoscope", preproc_url))
+                            .json(&json!({"video_id": clip_id, "object_prompt": prompt}))
+                            .timeout(std::time::Duration::from_secs(300))
+                            .send()
+                            .await
+                        {
+                            Ok(resp) => {
+                                if resp.status().is_success() {
+                                    println!("✅ Rotoscoping completed for clip");
+                                } else {
+                                    eprintln!("❌ Rotoscoping failed: HTTP {}", resp.status());
+                                }
+                            }
+                            Err(e) => eprintln!("❌ Rotoscoping request failed: {}", e),
+                        }
+                    });
+                }
+                "extract_nerf" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                    let method = action["method"]
+                        .as_str()
+                        .unwrap_or("gaussian-splatting")
+                        .to_string();
+                    println!(
+                        "🧊 [AI Engine] Dispatching NeRF Extraction for clip '{}' (method: {})",
+                        clip_id, method
+                    );
+                    let client = self.client.clone();
+                    let preproc_url = env::var("PREPROCESSING_SERVICE_URL")
+                        .unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+                    tokio::spawn(async move {
+                        match client
+                            .post(format!("{}/nerf-extract", preproc_url))
+                            .json(&json!({"video_id": clip_id, "method": method}))
+                            .timeout(std::time::Duration::from_secs(600))
+                            .send()
+                            .await
+                        {
+                            Ok(resp) => {
+                                if resp.status().is_success() {
+                                    println!("✅ NeRF extraction completed for clip");
+                                } else {
+                                    eprintln!("❌ NeRF extraction failed: HTTP {}", resp.status());
+                                }
+                            }
+                            Err(e) => eprintln!("❌ NeRF extraction request failed: {}", e),
+                        }
+                    });
+                }
+                "separate_stems" => {
+                    let clip_id = action["clip_id"].as_str().unwrap_or("unknown").to_string();
+                    let stems = action["stems"].as_u64().unwrap_or(4) as u32;
+                    println!(
+                        "🎵 [AI Engine] Dispatching Demucs Stem Separation ({} stems) for clip '{}'",
+                        stems, clip_id
+                    );
+                    let client = self.client.clone();
+                    let gen_studio_url = env::var("GENERATIVE_STUDIO_URL")
+                        .unwrap_or_else(|_| "http://127.0.0.1:8001".to_string());
+                    tokio::spawn(async move {
+                        match client
+                            .post(format!("{}/split-stems", gen_studio_url))
+                            .json(&json!({"video_id": clip_id, "stems": stems}))
+                            .timeout(std::time::Duration::from_secs(600))
+                            .send()
+                            .await
+                        {
+                            Ok(resp) => {
+                                if resp.status().is_success() {
+                                    println!("✅ Stem separation completed for clip");
+                                } else {
+                                    eprintln!("❌ Stem separation failed: HTTP {}", resp.status());
+                                }
+                            }
+                            Err(e) => eprintln!("❌ Stem separation request failed: {}", e),
+                        }
+                    });
+                }
+                _ => {
+                    println!("⚠️  [AI Engine] Unknown action: {}", action_type);
                 }
             }
         }
-
-        Ok("Autonomously planned and executed your edit.".to_string())
     }
 
     /// Make the actual HTTP call to an LLM provider and parse the JSON actions.
@@ -544,7 +565,7 @@ impl AutonomousEditor {
                 .unwrap_or("{}")
                 .to_string()
         } else {
-            // OpenAI / Ollama
+            // OpenAI
             body["choices"]
                 .as_array()
                 .and_then(|choices| choices.first())
@@ -573,46 +594,218 @@ impl AutonomousEditor {
     }
 
     /// Deterministic local fallback when no LLM is available.
+    /// Matches user intent via keywords to produce useful CRDT timeline actions.
     fn local_fallback_plan(prompt: &str) -> Value {
         let lower = prompt.to_lowercase();
 
-        if lower.contains("silence") || lower.contains("trim") {
+        // Silence / trimming
+        if lower.contains("silence")
+            || lower.contains("trim")
+            || lower.contains("cut")
+            || lower.contains("gap")
+            || lower.contains("um")
+            || lower.contains("uh")
+        {
             json!([
                 {"action": "add_track", "kind": "audio", "id": "A1"},
                 {"action": "trim_silence", "track_idx": 0}
             ])
-        } else if lower.contains("caption") || lower.contains("subtitle") {
+        }
+        // Music / audio
+        else if lower.contains("music")
+            || lower.contains("soundtrack")
+            || lower.contains("bgm")
+            || lower.contains("score")
+            || lower.contains("beat")
+            || lower.contains("audio")
+        {
             json!([
+                {"action": "add_track", "kind": "audio", "id": "A1"},
                 {"action": "add_track", "kind": "video", "id": "V1"},
-                {"action": "add_clip", "track_idx": 0, "id": "cap_01", "clip_type": "text", "name": "Captions", "start": 0, "end": 500}
+                {"action": "add_clip", "track_idx": 0, "id": "music_01",
+                    "clip_type": "audio", "name": "background_music.mp3",
+                    "start": 0, "end": 500}
             ])
-        } else {
+        }
+        // Text / captions
+        else if lower.contains("caption")
+            || lower.contains("subtitle")
+            || lower.contains("text")
+            || lower.contains("title")
+            || lower.contains("label")
+            || lower.contains("lower third")
+        {
             json!([
                 {"action": "add_track", "kind": "video", "id": "V1"},
-                {"action": "add_clip", "track_idx": 0, "id": "ai_gen_01", "clip_type": "video", "name": "ai_generated_broll.mp4", "start": 0, "end": 250}
+                {"action": "add_clip", "track_idx": 0, "id": "text_01",
+                    "clip_type": "text", "name": "Text Overlay",
+                    "start": 0, "end": 500}
+            ])
+        }
+        // Color grading
+        else if lower.contains("color")
+            || lower.contains("grade")
+            || lower.contains("warm")
+            || lower.contains("cool")
+            || lower.contains("vintage")
+            || lower.contains("cinematic")
+        {
+            let preset = if lower.contains("warm") {
+                "warm"
+            } else if lower.contains("cool") {
+                "cool"
+            } else if lower.contains("vintage") {
+                "vintage"
+            } else {
+                "cinematic"
+            };
+            json!([
+                {"action": "add_track", "kind": "video", "id": "V1"},
+                {"action": "color_grade", "track_idx": 0, "clip_id": "main", "preset": preset}
+            ])
+        }
+        // Transitions
+        else if lower.contains("transition")
+            || lower.contains("crossfade")
+            || lower.contains("fade")
+            || lower.contains("dissolve")
+            || lower.contains("dip")
+        {
+            let transition = if lower.contains("dip") {
+                "dip_to_black"
+            } else {
+                "crossfade"
+            };
+            json!([
+                {"action": "add_track", "kind": "video", "id": "V1"},
+                {"action": "add_transition", "track_idx": 0, "clip_id": "main", "transition_type": transition}
+            ])
+        }
+        // Speed
+        else if lower.contains("speed")
+            || lower.contains("slow")
+            || lower.contains("fast")
+            || lower.contains("ramp")
+            || lower.contains("speed up")
+            || lower.contains("slow down")
+        {
+            let factor: f64 = if lower.contains("slow") {
+                0.5
+            } else if lower.contains("fast") {
+                2.0
+            } else {
+                1.5
+            };
+            json!([
+                {"action": "add_track", "kind": "video", "id": "V1"},
+                {"action": "speed_ramp", "track_idx": 0, "clip_id": "main", "speed_factor": factor}
+            ])
+        }
+        // Effects
+        else if lower.contains("effect")
+            || lower.contains("blur")
+            || lower.contains("glitch")
+            || lower.contains("zoom")
+            || lower.contains("vignette")
+        {
+            let effect = if lower.contains("glitch") {
+                "glitch"
+            } else if lower.contains("zoom") {
+                "zoom"
+            } else if lower.contains("vignette") {
+                "vignette"
+            } else {
+                "blur"
+            };
+            json!([
+                {"action": "add_track", "kind": "video", "id": "V1"},
+                {"action": "add_effect", "track_idx": 0, "clip_id": "main", "effect": effect}
+            ])
+        }
+        // Default: generic clip
+        else {
+            json!([
+                {"action": "add_track", "kind": "video", "id": "V1"},
+                {"action": "add_clip", "track_idx": 0, "id": "ai_gen_01",
+                    "clip_type": "video", "name": "ai_generated_broll.mp4",
+                    "start": 0, "end": 250}
             ])
         }
     }
 
-    /// Synchronous fallback for backwards compatibility.
+    /// Synchronous fallback — processes intent with keyword matching.
     pub fn process_intent_sync(
         &self,
         nle_state: &mut NLEState,
-        _intent: &VideoIntent,
+        intent: &VideoIntent,
     ) -> Result<String, String> {
         println!(
-            "⚠️  [AI Engine] process_intent_sync — using local fallback (no LLM call). \
-            Consider upgrading to process_intent_with_llm for full agentic capabilities."
+            "🧠 [AI Engine] process_intent_sync — processing: {}",
+            intent.prompt
         );
-        nle_state.add_track("V1".to_string(), "video".to_string());
-        nle_state.add_clip_to_track(
-            0,
-            "ai_generated_clip".to_string(),
-            "video".to_string(),
-            "B-Roll Footage".to_string(),
-            0,
-            200,
-        );
-        Ok("Synchronous fallback processed.".to_string())
+
+        let actions = Self::local_fallback_plan(&intent.prompt);
+
+        if let Some(actions_array) = actions.as_array() {
+            for action in actions_array {
+                if let Some(action_type) = action["action"].as_str() {
+                    match action_type {
+                        "add_track" => {
+                            let kind = action["kind"].as_str().unwrap_or("video").to_string();
+                            let id = action["id"].as_str().unwrap_or("Track").to_string();
+                            nle_state.add_track(id, kind);
+                        }
+                        "add_clip" => {
+                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
+                            let id = action["id"].as_str().unwrap_or("clip").to_string();
+                            let clip_type =
+                                action["clip_type"].as_str().unwrap_or("video").to_string();
+                            let name = action["name"].as_str().unwrap_or("media").to_string();
+                            let start = action["start"].as_u64().unwrap_or(0) as u32;
+                            let end = action["end"].as_u64().unwrap_or(100) as u32;
+                            nle_state.add_clip_to_track(track_idx, id, clip_type, name, start, end);
+                        }
+                        "trim_silence" => {
+                            let track_idx = action["track_idx"].as_u64().unwrap_or(0) as usize;
+                            nle_state.auto_trim_silence(track_idx);
+                        }
+                        "color_grade" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            nle_state.update_clip_property(clip_id, "color_grade", 1.0);
+                        }
+                        "add_effect" => {
+                            let effect = action["effect"].as_str().unwrap_or("blur");
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            nle_state.update_clip_property(
+                                clip_id,
+                                &format!("effect_{}", effect),
+                                1.0,
+                            );
+                        }
+                        "speed_ramp" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let speed = action["speed_factor"].as_f64().unwrap_or(1.0);
+                            nle_state.update_clip_property(clip_id, "speed", speed as f32);
+                        }
+                        "add_transition" => {
+                            let clip_id = action["clip_id"].as_str().unwrap_or("unknown");
+                            let transition =
+                                action["transition_type"].as_str().unwrap_or("crossfade");
+                            nle_state.update_clip_property(
+                                clip_id,
+                                &format!("transition_{}", transition),
+                                1.0,
+                            );
+                        }
+                        _ => {}
+                    }
+                }
+            }
+        }
+
+        Ok(format!(
+            "Processed intent via fallback ({} actions).",
+            actions.as_array().map(|a| a.len()).unwrap_or(0)
+        ))
     }
 }

@@ -237,6 +237,7 @@ export function finalizeFrameJob(
 		const stdin = ffmpeg.stdin;
 		if (!stdin) {
 			job.status = "failed";
+			ffmpeg.kill();
 			return reject(new Error("Failed to open ffmpeg stdin"));
 		}
 
@@ -256,10 +257,19 @@ export function finalizeFrameJob(
 			reject(err);
 		});
 
-		// Write all buffered frames in order, then close stdin → ffmpeg encodes.
-		for (const frame of job.frames) {
-			stdin.write(frame);
-		}
-		stdin.end();
+		// Write all buffered frames with backpressure handling.
+		let frameIdx = 0;
+		const nextFrame = () => {
+			while (frameIdx < job.frames.length) {
+				const ok = stdin.write(job.frames[frameIdx]);
+				frameIdx++;
+				if (!ok) {
+					stdin.once("drain", nextFrame);
+					return;
+				}
+			}
+			stdin.end();
+		};
+		nextFrame();
 	});
 }

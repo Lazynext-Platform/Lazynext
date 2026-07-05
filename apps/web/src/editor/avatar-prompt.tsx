@@ -25,7 +25,12 @@ export function AvatarPrompt() {
 	const [status, setStatus] = useState<string | null>(null);
 
 	const handleGenerate = async () => {
-		if (!script.trim()) return;
+		const trimmed = script.trim();
+		if (!trimmed) return;
+		if (trimmed.length > 10000) {
+			setStatus("Script exceeds maximum length of 10,000 characters");
+			return;
+		}
 
 		setIsGenerating(true);
 		setStatus("Contacting AI avatar studio...");
@@ -64,6 +69,7 @@ export function AvatarPrompt() {
 
 			<textarea
 				value={script}
+				maxLength={10000}
 				onChange={(e) => setScript(e.target.value)}
 				placeholder="Type the script for your AI avatar to read..."
 				className="w-full h-24 bg-panel text-foreground p-2 rounded border border-border focus:border-purple-500 text-sm"

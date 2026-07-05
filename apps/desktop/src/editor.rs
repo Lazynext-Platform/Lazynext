@@ -1,3 +1,4 @@
+use crate::auth::load_auth_token;
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;
@@ -5,13 +6,14 @@ use lazynext_core::engine::AssetLoader;
 use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use std::cell::Cell;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 use tokio::sync::Mutex;
 
 #[derive(Clone)]
 pub struct AgentSuggestion {
+    #[allow(dead_code)]
     pub id: String,
     pub title: String,
     pub description: String,
@@ -41,6 +43,8 @@ pub struct EditorShell {
     pub frame_step_fwd5_clicked: Rc<Cell<bool>>,
     pub exporting: Arc<AtomicBool>,
     pub export_start_time: Option<Instant>,
+    pub error_message: Option<String>,
+    pub show_error: bool,
 }
 
 impl EditorShell {
@@ -136,19 +140,19 @@ impl Render for EditorShell {
             // Auto-upload video textures from media_pool on first render
             for track in &pd.tracks {
                 for clip in &track.clips {
-                    if let Some(media_id) = &clip.media_id {
-                        if let Some(asset) = pd.media_pool.get(media_id) {
-                            let path = &asset.path_or_url;
-                            let is_video = ["mp4", "mov", "mkv", "avi", "webm"]
-                                .iter()
-                                .any(|e| path.to_lowercase().ends_with(e));
-                            if is_video {
-                                let loader = CliFfmpegLoader::new(pd.width, pd.height);
-                                if let Ok(rgba) = loader.load_frame(path, 0).await {
-                                    let _ = engine
-                                        .upload_texture(&clip.id, &rgba, pd.width, pd.height)
-                                        .await;
-                                }
+                    if let Some(media_id) = &clip.media_id
+                        && let Some(asset) = pd.media_pool.get(media_id)
+                    {
+                        let path = &asset.path_or_url;
+                        let is_video = ["mp4", "mov", "mkv", "avi", "webm"]
+                            .iter()
+                            .any(|e| path.to_lowercase().ends_with(e));
+                        if is_video {
+                            let loader = CliFfmpegLoader::new(pd.width, pd.height);
+                            if let Ok(rgba) = loader.load_frame(path, 0).await {
+                                let _ = engine
+                                    .upload_texture(&clip.id, &rgba, pd.width, pd.height)
+                                    .await;
                             }
                         }
                     }
@@ -312,8 +316,8 @@ impl Render for EditorShell {
                                     .bg(rgb(0x0a0a0a))
                                     .child(
                                         div()
-                                            .w(px(800.0))
-                                            .h(px(450.0))
+                                            .w_full()
+                                            .h_full()
                                             .bg(rgb(0x000000))
                                             .border_1()
                                             .border_color(rgb(0x333333))
@@ -713,24 +717,37 @@ impl Render for EditorShell {
                                                 let prompt_focused = self.prompt_focused.clone();
                                                 move |_, _, _cx| {
                                                     prompt_focused.set(false);
-                                                    let prompt = if text.is_empty() {
+                                                    let raw_prompt = if text.is_empty() {
                                                         "Apply cinematic color grade and remove silences".to_string()
                                                     } else {
                                                         text.clone()
                                                     };
+                                                    // Validate and sanitize prompt before sending
+                                                    let prompt = raw_prompt.trim().to_string();
+                                                    if prompt.is_empty() {
+                                                        log::warn!("AI Command rejected: empty prompt");
+                                                        return;
+                                                    }
+                                                    if prompt.len() > 50000 {
+                                                        log::warn!("AI Command rejected: prompt exceeds 50,000 characters");
+                                                        return;
+                                                    }
                                                     log::info!("AI Command triggered: {}", prompt);
                                                     let gateway = std::env::var("RUST_API_GATEWAY_URL")
                                                         .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
                                                     tokio::spawn(async move {
+                                                        let auth_header = load_auth_token();
                                                         let client = reqwest::Client::new();
-                                                        match client
+                                                        let mut req = client
                                                             .post(format!("{}/api/v1/autonomous_edit", gateway))
                                                             .json(&serde_json::json!({
                                                                 "prompt": prompt,
                                                                 "require_plan_approval": false,
-                                                            }))
-                                                            .send()
-                                                            .await
+                                                            }));
+                                                        if let Some(auth) = auth_header {
+                                                            req = req.header("Authorization", auth);
+                                                        }
+                                                        match req.send().await
                                                         {
                                                             Ok(resp) => {
                                                                 if resp.status().is_success() {
@@ -787,16 +804,23 @@ impl Render for EditorShell {
                                                             tokio::spawn(async move {
                                                                 let gateway = std::env::var("RUST_API_GATEWAY_URL")
                                                                     .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                                                                let auth_header = load_auth_token();
                                                                 let client = reqwest::Client::new();
                                                                 if currently {
-                                                                    let _ = client
-                                                                        .post(format!("{}/api/v1/agent/stop", gateway))
-                                                                        .send().await;
+                                                                    let mut req = client
+                                                                        .post(format!("{}/api/v1/agent/stop", gateway));
+                                                                    if let Some(ref auth) = auth_header {
+                                                                        req = req.header("Authorization", auth);
+                                                                    }
+                                                                    let _ = req.send().await;
                                                                     suggestions.lock().await.clear();
                                                                 } else {
-                                                                    let _ = client
-                                                                        .post(format!("{}/api/v1/agent/start", gateway))
-                                                                        .send().await;
+                                                                    let mut req = client
+                                                                        .post(format!("{}/api/v1/agent/start", gateway));
+                                                                    if let Some(ref auth) = auth_header {
+                                                                        req = req.header("Authorization", auth);
+                                                                    }
+                                                                    let _ = req.send().await;
                                                                 }
                                                             });
                                                         }
@@ -838,10 +862,14 @@ impl Render for EditorShell {
                                                             tokio::spawn(async move {
                                                                 let gateway = std::env::var("RUST_API_GATEWAY_URL")
                                                                     .unwrap_or_else(|_| "http://127.0.0.1:8005".to_string());
+                                                                let auth_header = load_auth_token();
                                                                 let client = reqwest::Client::new();
-                                                                if let Ok(resp) = client
-                                                                    .get(format!("{}/api/v1/agent/suggestions", gateway))
-                                                                    .send().await
+                                                                let mut req = client
+                                                                    .get(format!("{}/api/v1/agent/suggestions", gateway));
+                                                                if let Some(ref auth) = auth_header {
+                                                                    req = req.header("Authorization", auth);
+                                                                }
+                                                                if let Ok(resp) = req.send().await
                                                                     && let Ok(body) = resp.text().await
                                                                     && let Ok(json) = serde_json::from_str::<serde_json::Value>(&body) {
                                                                     let mut guard = suggestions.lock().await;
@@ -970,6 +998,48 @@ impl Render for EditorShell {
                         ),
                 )
             })
+            // Error banner — displayed when an error has occurred
+            .when(self.show_error, |el| {
+                let error_text = self.error_message.clone().unwrap_or_else(|| "An unknown error occurred".to_string());
+                el.child(
+                    div()
+                        .h(px(32.0))
+                        .flex()
+                        .items_center()
+                        .justify_between()
+                        .px_4()
+                        .bg(rgb(0x3a1a1a))
+                        .border_t_1()
+                        .border_color(rgb(0xff4444))
+                        .child(
+                            div()
+                                .flex()
+                                .items_center()
+                                .gap_2()
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(rgb(0xff8888))
+                                        .child("⚠")
+                                )
+                                .child(
+                                    div()
+                                        .text_sm()
+                                        .text_color(rgb(0xff8888))
+                                        .child(error_text)
+                                ),
+                        )
+                        .child(
+                            div()
+                                .text_sm()
+                                .text_color(rgb(0x888888))
+                                .cursor_pointer()
+                                .hover(|s| s.text_color(rgb(0xffffff)))
+                                .child("Dismiss")
+                                .on_mouse_down(gpui::MouseButton::Left, move |_, _, _| {})
+                        ),
+                )
+            })
     }
 }
 
@@ -1016,6 +1086,8 @@ mod tests {
             frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
             exporting: Arc::new(AtomicBool::new(false)),
             export_start_time: None,
+            error_message: None,
+            show_error: false,
         };
 
         assert!(!editor.is_playing);
@@ -1058,6 +1130,8 @@ mod tests {
             frame_step_fwd5_clicked: Rc::new(Cell::new(false)),
             exporting: Arc::new(AtomicBool::new(false)),
             export_start_time: None,
+            error_message: None,
+            show_error: false,
         };
 
         assert!(!editor.is_playing);

@@ -1,3 +1,14 @@
+/**
+ * @module Compute visual bounding boxes for timeline elements in canvas space.
+ *
+ * Resolves each element's position, size, and rotation at a given playback
+ * time by evaluating keyframe animations, measuring text dimensions, and
+ * looking up source resolutions for stickers, graphics, images, and video.
+ * The resulting {@link ElementBounds} include center position (cx, cy),
+ * rendered dimensions (width, height), and rotation angle — all in
+ * canvas-space coordinates ready for hit-testing and rendering.
+ */
+
 import type { SceneTracks, TimelineElement } from "@/timeline";
 import type { MediaAsset } from "@/media/types";
 import { STICKER_INTRINSIC_SIZE_FALLBACK } from "@/stickers/intrinsic-size";
@@ -7,18 +18,29 @@ import { getElementLocalTime } from "@/animation";
 import { resolveTransformAtTime } from "@/animation/values";
 import { buildTransformFromParams } from "@/rendering";
 
+/** Bounding box for an element in canvas-space coordinates. */
 export interface ElementBounds {
+	/** Center X in canvas space */
 	cx: number;
+	/** Center Y in canvas space */
 	cy: number;
+	/** Rendered width in canvas space */
 	width: number;
+	/** Rendered height in canvas space */
 	height: number;
+	/** Rotation angle in degrees */
 	rotation: number;
 }
 
+/** A timeline element with its computed visual bounds. */
 export interface ElementWithBounds {
+	/** Track ID this element belongs to */
 	trackId: string;
+	/** Unique element identifier */
 	elementId: string;
+	/** The timeline element definition */
 	element: TimelineElement;
+	/** Computed visual bounds in canvas space */
 	bounds: ElementBounds;
 }
 

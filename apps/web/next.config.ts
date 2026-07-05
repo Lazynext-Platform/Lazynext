@@ -37,10 +37,25 @@ const nextConfig: NextConfig = {
 					{ key: "X-Content-Type-Options", value: "nosniff" },
 					{ key: "X-XSS-Protection", value: "1; mode=block" },
 					{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-					{
-						key: "Permissions-Policy",
-						value: "camera=(), microphone=(), geolocation=()",
-					},
+			{
+				key: "Permissions-Policy",
+				value: "camera=(), microphone=(), geolocation=()",
+			},
+			{
+				key: "Content-Security-Policy",
+				value:
+					"default-src 'self'; " +
+					"script-src 'self' 'wasm-unsafe-eval' 'inline-speculation-rules' https://app.posthog.com https://eu-assets.i.posthog.com; " +
+					"style-src 'self' 'unsafe-inline'; " +
+					"img-src 'self' data: blob: https:; " +
+					"font-src 'self'; " +
+					"connect-src 'self' https://app.posthog.com https://eu.i.posthog.com https://api.marblecms.com wss: ws:; " +
+					"media-src 'self' blob:; " +
+					"worker-src 'self' blob:; " +
+					"frame-src 'self'; " +
+					"base-uri 'self'; " +
+					"form-action 'self';",
+			},
 				],
 			},
 		];

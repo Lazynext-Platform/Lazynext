@@ -9,10 +9,10 @@ timeline mutations via the Lazynext API Gateway.
 
 ```python
 import asyncio
-from lazynext_agent import Lazynext AI AgentAgent
+from lazynext_agent import LazynextAiAgent
 
 async def main():
-    agent = Lazynext AI AgentAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
+    agent = LazynextAiAgent(api_endpoint="http://localhost:8005", mode="auto_execute")
 
     async for event in agent.query("Add captions and remove silences"):
         print(f"[{event.type}]", event.data)
@@ -50,7 +50,7 @@ from .tools import (  # noqa: F401 — re-exported
 )
 
 
-class Lazynext AI AgentAgent:
+class LazynextAiAgent:
     """Primary entry point for the Lazynext AI Agent agent.
 
     Communicates with the Lazynext API Gateway to translate natural

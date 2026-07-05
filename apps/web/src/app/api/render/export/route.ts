@@ -1,22 +1,24 @@
 /**
  * @module Render export endpoint — dispatches render jobs to the
- * render-service microservice, falling back to a local job ID when the
- * service is unreachable.
+ * render-service microservice. Requires authentication.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
 const RENDER_SERVICE_URL =
 	process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
-/**
- * POST /api/render/export
- * Queues a render job for the given project and returns a job ID plus a
- * status-polling endpoint. Falls back to a local job ID if the render
- * microservice is not running.
- */
 export async function POST(request: Request) {
 	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		if (!session || !session.user) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
 		const { projectId, timelineData, renderSettings } = await request.json();
 
 		if (!projectId || !timelineData) {
@@ -28,7 +30,6 @@ export async function POST(request: Request) {
 
 		console.log(`[API] Dispatching render job for project: ${projectId}`);
 
-		// Forward to the render-service microservice
 		try {
 			const response = await fetch(`${RENDER_SERVICE_URL}/api/v1/jobs`, {
 				method: "POST",
@@ -58,7 +59,6 @@ export async function POST(request: Request) {
 			);
 		}
 
-		// Fallback: generate a local job ID (render service not running)
 		const jobId = `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 
 		return NextResponse.json({

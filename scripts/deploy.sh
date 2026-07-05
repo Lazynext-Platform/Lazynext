@@ -12,6 +12,9 @@
 #   - wasm-pack, Fastlane, and Apple Developer credentials (for full deploy)
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 echo "🚀 Starting Lazynext Platform Deployment..."
 
 # 1. Verify Azure CLI Authentication
@@ -38,15 +41,15 @@ fi
 
 export TF_VAR_location=$AZURE_REGION
 
-cd infra/terraform
+cd "$ROOT_DIR/infra/terraform"
 terraform init
 terraform apply -auto-approve
-cd ../../
+cd "$ROOT_DIR"
 echo "✅ Azure Infrastructure Provisioned."
 
 # 3. Build WebAssembly (Web Platform)
 echo "🕸️ Building Rust Core to WebAssembly..."
-./build-wasm.sh
+"$ROOT_DIR/build-wasm.sh"
 echo "✅ WASM Built. Push to GitHub to trigger the Next.js deployment to Vercel/Azure Static Web Apps."
 
 # 4. Build Mobile Apps (Fastlane)

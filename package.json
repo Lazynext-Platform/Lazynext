@@ -6,6 +6,7 @@
 	"workspaces": [
 		"apps/*",
 		"services/*",
+		"packages/*",
 		"rust/wasm/pkg"
 	],
 	"scripts": {
@@ -33,6 +34,6 @@
 		"typescript-eslint": "^8.62.1"
 	},
 	"dependencies": {
-		"turbo": "^2.10.2"
+		"turbo": "^2.10.3"
 	}
 }

@@ -2,6 +2,7 @@
  * Superadmin analytics — charts, metrics, and usage dashboards.
  *
  * @page /superadmin/analytics
+ * @module superadmin/analytics/page
  */
 
 "use client";

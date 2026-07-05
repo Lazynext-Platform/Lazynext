@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user
+RUN useradd --system --uid 1001 --create-home --shell /bin/false svcpublish
+
 # Copy only this service's files (isolated from workspace)
 COPY services/social-publish/package.json ./
 # Force standalone install — no workspace resolution
@@ -17,7 +20,9 @@ RUN bun install --production
 COPY services/social-publish/tsconfig.json ./
 COPY services/social-publish/src/ src/
 
-RUN mkdir -p /tmp/social-outputs
+RUN mkdir -p /tmp/social-outputs && chown -R svcpublish:svcpublish /tmp/social-outputs /app
+
+USER svcpublish
 
 ENV NODE_ENV=production
 ENV PORT=8007

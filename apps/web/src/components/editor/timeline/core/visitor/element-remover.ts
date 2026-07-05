@@ -1,3 +1,8 @@
+/**
+ * @module Element remover visitor — Visitor pattern implementation for removing
+ * typed elements from timeline tracks using the Friend Class Pattern for
+ * controlled access to track internals.
+ */
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

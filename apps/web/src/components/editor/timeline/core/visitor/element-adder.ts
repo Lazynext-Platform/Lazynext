@@ -1,3 +1,8 @@
+/**
+ * @module Element adder visitor — Visitor pattern implementation for adding
+ * typed elements (video, audio, text, image, effects, etc.) to timeline tracks
+ * with automatic start/end time calculation.
+ */
 import { ElementVisitor } from "./element-visitor";
 import { VideoElement } from "../elements/video.element";
 import { AudioElement } from "../elements/audio.element";

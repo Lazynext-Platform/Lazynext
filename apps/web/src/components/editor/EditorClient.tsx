@@ -486,7 +486,7 @@ export default function EditorClient({ project }: { project: Project }) {
 			// Apply direct CRDT timeline patches from the AI orchestrator
 			if (data.crdt_patches && Array.isArray(data.crdt_patches)) {
 				setProjectData((prev) => {
-					let newProject = { ...prev };
+					const newProject = { ...prev };
 					for (const patch of data.crdt_patches) {
 						// Extremely basic implementation of JSON patch for demonstration
 						// In production, we'd use 'fast-json-patch' or similar CRDT library.

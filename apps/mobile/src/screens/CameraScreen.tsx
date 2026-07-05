@@ -16,8 +16,8 @@ import { CameraView, useCameraPermissions, useMicrophonePermissions } from "expo
 import * as MediaLibrary from "expo-media-library";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { NativeBridge } from "../NativeBridge";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const { width, height } = Dimensions.get("window");
 const RECORDING_MAX_MS = 300000;
 
 export function CameraScreen() {

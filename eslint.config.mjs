@@ -97,7 +97,6 @@ export default [
 			"react-hooks/immutability": "warn",
 			"react-hooks/set-state-in-effect": "warn",
 			"react-hooks/refs": "warn",
-			"preserve-caught-error": "warn",
 			"jsx-a11y/no-noninteractive-element-interactions": "warn",
 
 			// `react/prop-types` is for the JS-era React workflow where runtime
@@ -109,7 +108,7 @@ export default [
 		},
 	},
 	scopeToWebFiles(eslintConfigPrettier),
-	{
+	scopeToWebFiles({
 		rules: {
 			"prefer-const": "warn",
 			"no-useless-catch": "warn",
@@ -117,7 +116,6 @@ export default [
 			"react-hooks/immutability": "warn",
 			"react-hooks/set-state-in-effect": "warn",
 			"react-hooks/refs": "warn",
-			"preserve-caught-error": "warn",
 			"jsx-a11y/no-noninteractive-element-interactions": "warn",
 			"no-empty": "warn",
 			"jsx-a11y/media-has-caption": "warn",
@@ -126,5 +124,5 @@ export default [
 			"@next/next/no-html-link-for-pages": "warn",
 			"jsx-a11y/anchor-is-valid": "warn",
 		},
-	},
+	}),
 ];

@@ -2,7 +2,7 @@
 
 > **Project**: Lazynext
 > **Version**: 1.0.0 (Production)
-> **Last Updated**: 2026-07-01
+> **Last Updated**: 2026-07-05
 
 ---
 
@@ -168,7 +168,7 @@ bun run dev
 | `DATABASE_URL` | Yes | — | PostgreSQL connection string |
 | `BETTER_AUTH_SECRET` | Yes | — | Auth secret (64 chars) |
 | `STORAGE_PROVIDER` | No | `local` | `local` or `azure` |
-| `LLM_PROVIDER` | No | — | `openai`, `anthropic`, `gemini`, or `ollama` |
+| `LLM_PROVIDER` | No | — | `openai`, `anthropic`, or `gemini` |
 | `OPENAI_API_KEY` | No | — | Whisper + GPT-4o features |
 | `ANTHROPIC_API_KEY` | No | — | Claude-powered Lazynext AI Agent |
 | `REPLICATE_API_TOKEN` | No | — | AI video generation |
@@ -193,7 +193,7 @@ bun run dev
 - Plugin SDK (VST3 audio, custom shaders)
 - REST API Gateway (Axum, JWT, RBAC, rate limiting, OpenAPI/Swagger UI)
 - Headless CLI renderer (Clap-based, all formats, batch mode)
-- MCP server (17 tools, 4 resources, 4 prompts, auth)
+- MCP server (47 tools, 4 resources, 4 prompts, auth)
 - Kafka analytics pipeline (kafkajs, SASL/SSL, in-mem fallback)
 - collab-server with PostgreSQL CRDT persistence (sqlx)
 - P2P mesh networking (UDP broadcast + TCP CRDT delta exchange)
@@ -212,7 +212,7 @@ bun run dev
 - WASM bridge limits Rust-JS throughput for high-res real-time preview
 - wgpu maturity on mobile browsers is limited
 - GPUI (Zed framework) is not a stable 1.0 dependency
-- Platform is code-complete (~98%) — remaining work is operational (deployment, profiling, hardening)
+- Platform is code-complete (100%) — remaining work is operational (deployment, profiling, hardening)
 
 ## Team & Roles
 

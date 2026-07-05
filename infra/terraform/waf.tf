@@ -451,14 +451,13 @@ resource "azurerm_application_gateway" "main" {
     frontend_port_name             = "port-https"
     protocol                       = "Https"
     host_name                      = var.app_domain
-    # SSL certificate must be uploaded to Key Vault before apply:
+    # SSL certificate: import to Key Vault before production apply:
     #   az keyvault certificate import --vault-name lazynext-kv-${var.environment} \
     #     --name lazynext-tls --file lazynext.pfx
-    # Then uncomment the ssl_certificate block below with the secret ID:
-    # ssl_certificate {
-    #   name                = "ssl-lazynext"
-    #   key_vault_secret_id = "<key-vault-cert-secret-id>"
-    # }
+    ssl_certificate {
+      name                = "ssl-lazynext-${var.environment}"
+      key_vault_secret_id = var.ssl_cert_secret_id
+    }
   }
 
   # ── Request Routing Rules ─────────────────────────────────────────────
