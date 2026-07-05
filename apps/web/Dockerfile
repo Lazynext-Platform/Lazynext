@@ -45,17 +45,14 @@ COPY apps/web/package.json apps/web/package.json
 COPY biome.json .
 COPY eslint.config.mjs .
 
-# Copy pre-built WASM package from repo
-COPY rust/wasm/pkg /app/rust/wasm/pkg
+# Remove file: dep from web package.json and wasm workspace from root to avoid resolution errors
+RUN cd apps/web && bun -e "const p=require('./package.json'); delete p.dependencies['lazynext-wasm']; require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2))"
+RUN bun -e "const p=require('./package.json'); p.workspaces=p.workspaces.filter(w=>w!=='rust/wasm/pkg'); require('fs').writeFileSync('./package.json', JSON.stringify(p, null, 2))"
 
 RUN bun install
 
-# Copy WASM directly into node_modules for Next.js/Turbopack resolution
-RUN mkdir -p /app/node_modules/lazynext-wasm && \
-    mkdir -p /app/apps/web/node_modules/lazynext-wasm && \
-    cp -r /app/rust/wasm/pkg/* /app/node_modules/lazynext-wasm/ && \
-    rm -rf /app/apps/web/node_modules/lazynext-wasm && \
-    ln -s /app/node_modules/lazynext-wasm /app/apps/web/node_modules/lazynext-wasm
+# Copy WASM directly into node_modules (real directory, not symlink)
+COPY rust/wasm/pkg /app/node_modules/lazynext-wasm
 
 # Copy source
 COPY apps/web/ apps/web/
