@@ -4,13 +4,13 @@ FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 
 # Layer 1: Dependencies
-COPY package.json ./
+COPY services/ai-agents/package.json ./
 # Monorepo — lockfile at root level. Use --no-lockfile for service-only build.
 RUN bun install --no-lockfile
 
 # Layer 2: Source
-COPY tsconfig.json ./
-COPY src/ src/
+COPY services/ai-agents/tsconfig.json ./
+COPY services/ai-agents/src/ src/
 
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 

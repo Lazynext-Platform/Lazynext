@@ -14,7 +14,7 @@ RUN useradd --system --uid 1001 --create-home --shell /bin/false svcpublish
 
 # Copy only this service's files (isolated from workspace)
 COPY services/social-publish/package.json ./
-# Force standalone install — no workspace resolution
+COPY packages/ packages/
 RUN bun install --production
 
 COPY services/social-publish/tsconfig.json ./

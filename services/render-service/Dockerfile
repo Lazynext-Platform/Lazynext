@@ -4,12 +4,12 @@ FROM oven/bun:1.3 AS builder
 WORKDIR /app
 
 # Layer 1: Dependencies
-COPY package.json ./
+COPY services/render-service/package.json ./
 RUN bun install --no-lockfile
 
 # Layer 2: Source
-COPY tsconfig.json ./
-COPY src/ src/
+COPY services/render-service/tsconfig.json ./
+COPY services/render-service/src/ src/
 
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 

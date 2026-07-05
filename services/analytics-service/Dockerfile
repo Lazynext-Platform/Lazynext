@@ -3,11 +3,11 @@ FROM oven/bun:1.3.14-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
+COPY services/analytics-service/package.json ./
 RUN bun install --no-lockfile
 
-COPY tsconfig.json ./
-COPY src/ src/
+COPY services/analytics-service/tsconfig.json ./
+COPY services/analytics-service/src/ src/
 
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
