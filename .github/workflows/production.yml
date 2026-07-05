@@ -115,6 +115,8 @@ jobs:
           context: .
           file: ${{ matrix.service == 'web' && 'apps/web/Dockerfile' || matrix.service == 'api-gateway' && 'rust/api-gateway/Dockerfile' || format('services/{0}/Dockerfile', matrix.service) }}
           push: true
+          build-args: |
+            ${{ matrix.service == 'web' && 'SKIP_WASM_BUILD=1' || '' }}
           tags: |
             ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:latest
             ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:${{ github.sha }}

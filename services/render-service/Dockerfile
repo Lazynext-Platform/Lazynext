@@ -4,6 +4,8 @@ FROM oven/bun:1.3 AS builder
 WORKDIR /app
 
 # Layer 1: Dependencies
+COPY package.json bun.lock ./
+COPY packages/ packages/
 COPY services/render-service/package.json ./
 RUN bun install --no-lockfile
 
