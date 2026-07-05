@@ -1,3 +1,10 @@
+/**
+ * @module Canvas elements — Factory functions that create and configure Fabric.js
+ * objects (text, image, video, rect, circle, caption) for placement on the
+ * Twick compositor canvas. Each function handles position conversion, styling,
+ * interactive controls, and z-ordering.
+ */
+
 import {
 	Canvas as FabricCanvas,
 	Textbox,

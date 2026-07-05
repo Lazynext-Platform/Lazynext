@@ -1,3 +1,5 @@
+/** @module Keybinding serialization and persistence with migration support for stored shortcut maps */
+
 import type { ShortcutKey } from "@/actions/keybinding";
 import { isShortcutKey } from "@/actions/keybinding";
 import type { TActionWithOptionalArgs } from "@/actions";

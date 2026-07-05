@@ -25,48 +25,55 @@ router = APIRouter()
 
 @router.get("/")
 def read_root():
-    return {"status": "ok", "service": "generative-studio"}
-
-@router.get("/health")
-def health_check():
+    """Health check endpoint returning service status."""
     return {"status": "ok", "service": "generative-studio"}
 
 @router.post("/generate-video")
 async def generate_video(req: DiffusionRequest):
+    """Generate a video from a text prompt via diffusion model."""
     return await generate_video_service(req)
 
 @router.post("/inpaint")
 async def inpaint_video(req: InpaintRequest):
+    """Inpaint masked regions of a video using generative fill."""
     return await inpaint_video_service(req)
 
 @router.post("/dub")
 async def dub_video(req: DubRequest):
+    """Dub video audio into a target language with voice cloning."""
     return await dub_video_service(req)
 
 @router.post("/overdub")
 async def overdub_audio(req: OverdubRequest):
+    """Overdub a new audio track onto an existing video."""
     return await overdub_audio_service(req)
 
 @router.post("/split-stems")
 async def split_stems(req: StemSplitRequest):
+    """Split audio into isolated stems (vocals, drums, bass, etc.)."""
     return await split_stems_service(req)
 
 @router.post("/upscale")
 async def upscale_video(req: UpscaleRequest):
+    """Upscale video resolution using AI super-resolution."""
     return await upscale_video_service(req)
 
 @router.post("/nerf-extract")
 async def extract_nerf(req: NeRFRequest):
+    """Extract a NeRF or 3D Gaussian Splat from input video frames."""
     return await extract_nerf_service(req)
 
 @router.post("/style-transfer")
 async def style_transfer(req: StyleTransferRequest):
+    """Apply artistic style transfer to a video."""
     return await style_transfer_service(req)
 
 @router.post("/generative-fill")
 async def generative_fill(req: GenerativeFillRequest):
+    """Fill masked regions of an image or video with AI-generated content."""
     return await generative_fill_service(req)
 
 @router.post("/generate-avatar")
 async def generate_avatar(req: AvatarRequest):
+    """Generate a talking-head avatar from an image and audio."""
     return await generate_avatar_service(req)

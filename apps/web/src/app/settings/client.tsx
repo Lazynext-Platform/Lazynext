@@ -43,12 +43,21 @@ export function SettingsPageClient() {
 
 	const handleSave = async (e: React.FormEvent) => {
 		e.preventDefault();
+		const trimmed = name.trim();
+		if (!trimmed) {
+			toast.error("Name must not be empty");
+			return;
+		}
+		if (trimmed.length > 200) {
+			toast.error("Name must be under 200 characters");
+			return;
+		}
 		setSaving(true);
 		try {
 			const res = await fetch("/api/user/profile", {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ name }),
+				body: JSON.stringify({ name: trimmed }),
 			});
 			if (res.ok) {
 				toast.success("Settings saved!");
@@ -81,7 +90,7 @@ export function SettingsPageClient() {
 
 				<div className="mt-8 space-y-8">
 					{/* Profile Section */}
-					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[0_0_20px_rgba(1,243,254,0.05)]">
+					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[var(--accent-glow)]">
 						<h2 className="text-lg font-bold text-[var(--text-primary)]">
 							Profile
 						</h2>
@@ -96,6 +105,7 @@ export function SettingsPageClient() {
 								<input
 									type="text"
 									value={name}
+									maxLength={200}
 									onChange={(e) => setName(e.target.value)}
 									className="w-full rounded-lg border border-[var(--border-glass)] bg-[var(--bg-main)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-primary)] transition-colors"
 									placeholder="Your display name"
@@ -118,7 +128,7 @@ export function SettingsPageClient() {
 							<button
 								type="submit"
 								disabled={saving}
-								className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-[#050505] hover:opacity-90 disabled:opacity-50 transition-all shadow-[0_0_15px_rgba(1,243,254,0.4)]"
+								className="rounded-lg bg-[var(--accent-primary)] px-4 py-2 text-sm font-bold text-[var(--text-on-accent)] hover:opacity-90 disabled:opacity-50 transition-all shadow-[var(--accent-glow)]"
 							>
 								{saving ? "Saving..." : "Save Changes"}
 							</button>
@@ -126,7 +136,7 @@ export function SettingsPageClient() {
 					</section>
 
 					{/* Preferences Section */}
-					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[0_0_20px_rgba(1,243,254,0.05)]">
+					<section className="rounded-xl border border-[var(--border-glass)] bg-[var(--bg-panel)] p-6 shadow-[var(--accent-glow)]">
 						<h2 className="text-lg font-bold text-[var(--text-primary)]">
 							Preferences
 						</h2>

@@ -1,4 +1,7 @@
-/** Default assets shown in the media pool when no project media is loaded. */
+/**
+ * @module Editor defaults — Default media assets and initial values for the
+ * editor media pool, shown when no project media has been loaded.
+ */
 export const INITIAL_ASSETS = [
 	{
 		id: "asset-1",

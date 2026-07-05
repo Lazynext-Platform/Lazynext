@@ -1,3 +1,5 @@
+/** @module Parameter system types and utilities for editor parameters (color, stroke, scalar channels, etc.) */
+
 import { converter, formatHex, formatHex8, parse } from "culori";
 import { clamp, snapToStep } from "@/utils/math";
 

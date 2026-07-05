@@ -1,3 +1,10 @@
+/**
+ * @module Media color filters — Applies brightness, contrast, saturation,
+ * hue‑rotation, blur, grayscale, sepia, and custom color‑matrix filters to
+ * Fabric.js image objects. Includes a safe 2D‑backend filter pipeline for
+ * reliable rendering across mixed image sources.
+ */
+
 import {
 	Canvas2dFilterBackend,
 	FabricImage,

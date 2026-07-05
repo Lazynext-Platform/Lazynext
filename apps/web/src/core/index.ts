@@ -1,3 +1,5 @@
+/** @module Core EditorCore singleton that orchestrates all editor managers (timeline, playback, media, renderer, etc.) */
+
 import { PlaybackManager } from "./managers/playback-manager";
 import { TimelineManager } from "./managers/timeline-manager";
 import { ScenesManager } from "./managers/scenes-manager";

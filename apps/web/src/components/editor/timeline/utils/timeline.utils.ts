@@ -1,3 +1,8 @@
+/**
+ * @module Timeline utilities — Pure utility functions for timeline calculations
+ * including duration measurement, UUID generation, decimal rounding, audio
+ * extraction/stitching, and track-to-JSON serialization.
+ */
 import { extractAudio, stitchAudio } from "@twick/media-utils";
 import { TrackElement } from "../core/elements/base.element";
 import { VideoElement } from "../core/elements/video.element";

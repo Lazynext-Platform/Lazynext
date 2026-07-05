@@ -1,3 +1,10 @@
+/**
+ * @module Line element handler — Implements the CanvasElementHandler contract
+ * for line segments. Renders a line as a thin rectangle with configurable
+ * stroke color, thickness, length, and corner rounding. Maps Fabric.js
+ * transforms back to video‑space coordinates on update.
+ */
+
 import type { CanvasElementHandler } from "../types";
 import { addRectElement } from "../components/elements";
 import {

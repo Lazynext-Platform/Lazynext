@@ -38,13 +38,14 @@ def assert_ok(condition, msg):
 
 
 def test_sam2_pipeline():
+    """Test SAM2 rotoscoping pipeline instantiation and basic inference."""
     print("\n── SAM2 Rotoscoping Pipeline ──")
     try:
         from sam2_pipeline import Sam2Pipeline, Sam2Config
         config = Sam2Config()
         pipeline = Sam2Pipeline(config)
         assert_ok(pipeline is not None, "Sam2Pipeline instantiated")
-        assert_ok(pipeline.session is not None, "rembg u2net session loaded")
+        assert_ok(pipeline._rembg_session is not None, "rembg u2net session loaded")
 
         # Test with a synthetic frame
         import numpy as np
@@ -64,6 +65,7 @@ def test_sam2_pipeline():
 
 
 def test_demucs_pipeline():
+    """Test Demucs stem separation pipeline instantiation and basic inference."""
     print("\n── Demucs Stem Separation Pipeline ──")
     try:
         from demucs_pipeline import DemucsPipeline, DemucsConfig
@@ -100,6 +102,7 @@ def test_demucs_pipeline():
 
 
 def test_nerf_pipeline():
+    """Test NeRF/Gaussian Splatting pipeline instantiation and COLMAP check."""
     print("\n── NeRF/Gaussian Splatting Pipeline ──")
     try:
         from nerf_pipeline import NerfPipeline, NerfConfig
@@ -119,6 +122,7 @@ def test_nerf_pipeline():
 
 
 def test_audio_processing():
+    """Test audio DSP module imports successfully."""
     print("\n── Audio Processing (DSP) ──")
     try:
         import numpy as np
@@ -128,7 +132,7 @@ def test_audio_processing():
         signal = np.sin(2 * np.pi * 440 * t).astype(np.float64)
 
         # Enhance audio service
-        from services.audio_analysis import enhance_audio_service
+        from src.services.audio_analysis import enhance_audio_service
         result = asyncio.run(
             enhance_audio_service_impl(signal.tolist(), sr)
         )
@@ -138,15 +142,17 @@ def test_audio_processing():
 
 
 def test_video_generation():
+    """Test that video generation service is callable."""
     print("\n── Video Generation ──")
     try:
-        from services.video_gen import generate_video_service
+        from src.services.video_gen import generate_video_service
         assert_ok(callable(generate_video_service), "generate_video_service is callable")
     except ImportError as e:
         print(f"  ⚠️  SKIP: {e}")
 
 
 def test_upscale_pipeline():
+    """Test upscale pipeline instantiation."""
     print("\n── Upscale Pipeline ──")
     try:
         from upscale_pipeline import UpscalePipeline, UpscaleConfig
@@ -160,6 +166,7 @@ def test_upscale_pipeline():
 
 
 def test_imports():
+    """Test that all pipeline modules and their key classes are importable."""
     print("\n── Module Import Tests ──")
     modules = [
         ("sam2_pipeline", ["Sam2Pipeline", "Sam2Config"]),

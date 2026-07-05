@@ -1,3 +1,7 @@
+/**
+ * @module Timeline context — React context provider that manages timeline state,
+ * track CRUD operations, undo/redo history, and analytics integration.
+ */
 import {
 	createContext,
 	useCallback,

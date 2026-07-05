@@ -1,3 +1,11 @@
+"""
+Demucs stem separation pipeline.
+
+Provides an end-to-end pipeline for audio source separation using the
+Demucs API, decomposing audio into stems such as vocals, drums, bass,
+and other instruments. Supports native Demucs models including htdemucs.
+"""
+
 import os
 from dataclasses import dataclass, field
 from typing import Optional, List

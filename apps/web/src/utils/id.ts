@@ -1,3 +1,4 @@
+/** @module UUID generation utility — produces RFC 4122 v4 identifiers using crypto.randomUUID with a manual fallback. */
 export function generateUUID(): string {
 	if (
 		typeof crypto !== "undefined" &&

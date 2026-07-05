@@ -2,6 +2,7 @@
  * Superadmin panel — system monitoring, user management, and analytics.
  *
  * @page /superadmin
+ * @module superadmin/page
  */
 
 import { Header } from "@/components/header";

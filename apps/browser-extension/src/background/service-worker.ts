@@ -30,8 +30,22 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 		const mediaUrl = info.srcUrl || info.linkUrl;
 		if (!mediaUrl) return;
 
-		const sourceName = new URL(mediaUrl).pathname.split("/").pop() || mediaUrl;
-		console.log(`Sending media to Lazynext: ${mediaUrl}`);
+		// Validate URL: only accept http/https URLs to media content
+		if (!mediaUrl.startsWith("http://") && !mediaUrl.startsWith("https://")) {
+			console.warn(`Rejected non-http URL: ${mediaUrl}`);
+			return;
+		}
+		// Block internal/private IPs (SSRF prevention)
+		try {
+			const u = new URL(mediaUrl);
+			if (u.hostname === "localhost" || u.hostname === "127.0.0.1" || u.hostname === "[::1]") {
+				console.warn(`Rejected localhost URL: ${mediaUrl}`);
+				return;
+			}
+		} catch {
+			console.warn(`Invalid URL: ${mediaUrl}`);
+			return;
+		}
 
 		try {
 			const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -66,7 +80,7 @@ chrome.contextMenus.onClicked.addListener(async (info, _tab) => {
 				type: "basic",
 				iconUrl: "icons/icon48.png",
 				title: "Sent to Lazynext",
-				message: `"${sourceName}" added to your timeline.`,
+				message: `Media added to your timeline.`,
 			});
 		} catch (error) {
 			console.error("Failed to reach Lazynext API Gateway:", error);

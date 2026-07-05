@@ -1,3 +1,4 @@
+/** @module Redirect server for Auto Editor documentation — maps legacy URL paths to the current external documentation domain. */
 import express from "express";
 import { exec } from "node:child_process";
 import * as path from "path";

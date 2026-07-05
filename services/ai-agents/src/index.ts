@@ -14,11 +14,34 @@ import { setupSyncServer, broadcastCrdtPatch } from "./sync";
 import { decomposeIntent, executePlan, executePlanStreaming } from "./orchestrator";
 import { generateBroll, generateDub } from "./generative";
 import { setupMcpServers } from "./mcp";
+import { authMiddleware } from "@lazynext/api-client/auth-middleware";
 
 const app = express();
 const port = process.env.PORT || 8002;
 
 app.use(express.json());
+
+app.get("/health", (_req, res) => {
+	res.json({
+		status: "ok",
+		service: "ai-agents",
+		routing: "intelligent-multi-provider",
+		providers: {
+			openai: !!process.env.OPENAI_API_KEY,
+			anthropic: !!process.env.ANTHROPIC_API_KEY,
+			gemini: "available",
+		},
+		services: {
+			pre_processing: process.env.PRE_PROCESSING_URL || "http://localhost:8000",
+			generative_studio:
+				process.env.GENERATIVE_STUDIO_URL || "http://localhost:8001",
+			render_service:
+				process.env.RENDER_SERVICE_URL || "http://localhost:8003",
+		},
+	});
+});
+
+app.use(authMiddleware);
 
 app.get("/", (_req, res) => {
   res.json({ status: "ok", service: "ai-agents" });
@@ -39,11 +62,17 @@ app.post("/generative/dub", generateDub);
  * otherwise falls back to rule-based planning.
  */
 app.post("/orchestrate", async (req, res) => {
-  const { prompt, projectId } = req.body as { prompt?: string; projectId?: string };
+  const { prompt: rawPrompt, projectId } = req.body as { prompt?: unknown; projectId?: string };
 
-  if (!prompt) {
-    return res.status(400).json({ error: "Missing prompt" });
+  if (typeof rawPrompt !== "string" || rawPrompt.trim().length === 0) {
+    return res.status(400).json({ error: "Missing or invalid prompt" });
   }
+
+  if (rawPrompt.length > 50000) {
+    return res.status(400).json({ error: "Prompt exceeds maximum length of 50,000 characters" });
+  }
+
+  const prompt = rawPrompt.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").trim();
 
   console.log(`[AI-Agents] Orchestrating: "${prompt}" for project: ${projectId || "unknown"}`);
 
@@ -93,12 +122,18 @@ app.post("/orchestrate", async (req, res) => {
  * events as they arrive.
  */
 app.get("/orchestrate/stream", async (req, res) => {
-  const prompt = (req.query.prompt as string) || "";
+  const rawPrompt = (req.query.prompt as string) || "";
+  const prompt = rawPrompt.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "").trim();
   const projectId = (req.query.projectId as string) || "";
   const dryRun = req.query.dryRun === "1" || req.query.dryRun === "true";
 
   if (!prompt) {
     res.status(400).json({ error: "Missing prompt query parameter" });
+    return;
+  }
+
+  if (prompt.length > 50000) {
+    res.status(400).json({ error: "Prompt exceeds maximum length" });
     return;
   }
 
@@ -121,10 +156,13 @@ app.get("/orchestrate/stream", async (req, res) => {
     const plan = await decomposeIntent(prompt);
     const result = await executePlanStreaming(plan, (event) => {
       if ((event.type === "done" || event.type === "error") && !dryRun) {
-        if (projectId) {
-          for (const r of result.results) {
-            if (r.crdt_patches && r.crdt_patches.length > 0) {
-              broadcastCrdtPatch(projectId, r.crdt_patches);
+        if (projectId && event.data) {
+          const results = (event.data as { results?: Array<{ crdt_patches?: unknown[] }> }).results;
+          if (results) {
+            for (const r of results) {
+              if (r.crdt_patches && r.crdt_patches.length > 0) {
+                broadcastCrdtPatch(projectId, r.crdt_patches);
+              }
             }
           }
         }
@@ -138,28 +176,6 @@ app.get("/orchestrate/stream", async (req, res) => {
     sendEvent("error", { error: String(err) });
     res.end();
   }
-});
-
-/**
- * Health check with intelligent routing capabilities info.
- */
-app.get("/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    routing: "intelligent-multi-provider",
-    providers: {
-      openai: !!process.env.OPENAI_API_KEY,
-      anthropic: !!process.env.ANTHROPIC_API_KEY,
-      ollama: "available-locally"
-    },
-    services: {
-      pre_processing: process.env.PRE_PROCESSING_URL || "http://localhost:8000",
-      generative_studio:
-        process.env.GENERATIVE_STUDIO_URL || "http://localhost:8001",
-      render_service:
-        process.env.RENDER_SERVICE_URL || "http://localhost:8003",
-    },
-  });
 });
 
 const httpServer = createServer(app);

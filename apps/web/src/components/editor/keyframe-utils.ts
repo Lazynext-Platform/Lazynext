@@ -1,7 +1,7 @@
 /**
- * Keyframe interpolation utilities extracted from EditorClient.
- * Types: See timeline/types.ts for Clip/Keyframe data structures.
- * WASM migration: animation/interpolation.ts delegates to Rust via @/wasm.
+ * @module Keyframe utilities — Keyframe interpolation utilities for the editor,
+ * including cubic bezier evaluation, sorted keyframe caching, and expression-based
+ * property animation with WASM-accelerated fallback for heavy computation.
  */
 import { solveCubicBezier } from "@/utils/math";
 

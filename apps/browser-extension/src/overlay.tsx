@@ -14,6 +14,26 @@ interface TimelineClip {
   duration?: number;
 }
 
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const result = (await chrome.storage.local.get("authToken")) as {
+      authToken?: string;
+    };
+    return result.authToken || null;
+  } catch {
+    return null;
+  }
+}
+
+async function authHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = await getAuthToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 function TimelinePreview() {
   const [clips, setClips] = useState<TimelineClip[]>([]);
 
@@ -103,8 +123,9 @@ function OverlayEditor() {
           })()
         : Promise.resolve('http://localhost:8005');
 
-    gatewayUrl.then((baseUrl) => {
-      fetch(`${baseUrl}/api/v1/projects`)
+    gatewayUrl.then(async (baseUrl) => {
+      const headers = await authHeaders();
+      fetch(`${baseUrl}/api/v1/projects`, { headers })
         .then((res) => res.json())
         .then((data) => {
           if (data?.projects) {
@@ -120,27 +141,40 @@ function OverlayEditor() {
         });
     });
 
-    // Connect WebSocket to Desktop / API Gateway
-    const socket = new WebSocket("ws://localhost:8005/ws/extension");
-    socket.onopen = () => {
-      console.log("[Extension] Connected to Lazynext WebSocket");
+    // Connect WebSocket to API Gateway with auth token
+    let socketActive = true;
+    const connectWs = async () => {
+      const token = await getAuthToken();
+      if (!socketActive) return;
+      const wsUrl = token
+        ? `ws://localhost:8005/ws/extension?token=${encodeURIComponent(token)}`
+        : "ws://localhost:8005/ws/extension";
+      const socket = new WebSocket(wsUrl);
+      socket.onopen = () => {
+        console.log("[Extension] Connected to Lazynext WebSocket");
+      };
+      socket.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "SYNC_STATUS") {
+            setStatus("Synced with Desktop.");
+          }
+        } catch(e) {}
+      };
+      socket.onerror = () => {
+        console.warn("[Extension] WebSocket connection failed. Using fallback REST APIs.");
+      };
+      setWs(socket);
     };
-    socket.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data);
-        if (msg.type === "SYNC_STATUS") {
-          setStatus("Synced with Desktop.");
-        }
-      } catch(e) {}
-    };
-    socket.onerror = () => {
-      console.warn("[Extension] WebSocket connection failed. Using fallback REST APIs.");
-    };
-    setWs(socket);
+    connectWs();
 
     return () => {
-      socket.close();
+      socketActive = false;
+      if (ws) {
+        ws.close();
+      }
     };
+
   }, []);
 
   const handleRecord = () => {
@@ -149,7 +183,7 @@ function OverlayEditor() {
     setStatus("Recording started...");
     
     // Send message to content script to start recording
-    window.parent.postMessage({ type: "RECORD_VIDEO", projectId: selectedProjectId }, "*");
+    window.parent.postMessage({ type: "RECORD_VIDEO", projectId: selectedProjectId }, "https://lazynext.com");
     
     // Auto-stop recording after 10s for demo
     setTimeout(() => {
@@ -166,7 +200,7 @@ function OverlayEditor() {
   };
 
   const handleExtract = () => {
-    window.parent.postMessage({ type: "EXTRACT_VIDEO" }, "*");
+    window.parent.postMessage({ type: "EXTRACT_VIDEO" }, "https://lazynext.com");
     setStatus("Extracting video assets from page...");
     
     // Simulate sending an edit intent over WebSocket
@@ -192,7 +226,7 @@ function OverlayEditor() {
           Lazynext Extension
         </h3>
         <button 
-          onClick={() => window.parent.postMessage({ type: "CLOSE_OVERLAY" }, "*")}
+          onClick={() => window.parent.postMessage({ type: "CLOSE_OVERLAY" }, "https://lazynext.com")}
           style={{ background: "transparent", border: "none", color: "#888", cursor: "pointer", fontSize: "16px", padding: "4px 8px" }}>
           ✕
         </button>
@@ -276,9 +310,10 @@ function OverlayEditor() {
                 try {
                   const gatewayUrl = await chrome.storage.local.get("apiGatewayUrl")
                     .then(r => r.apiGatewayUrl || "http://localhost:8005");
+                  const headers = await authHeaders();
                   const resp = await fetch(`${gatewayUrl}/api/v1/autonomous_edit`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers,
                     body: JSON.stringify({ prompt, require_plan_approval: false }),
                   });
                   const data = await resp.json();

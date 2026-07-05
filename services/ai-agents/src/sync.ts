@@ -6,59 +6,59 @@
  *   - Project-room-based CRDT delta broadcasting
  *   - WebRTC signaling relay for P2P media streaming
  *   - Autonomous AI-to-timeline CRDT patch injection
+ *   - Project membership validation on room joins
  */
 
 import { Server as SocketIOServer } from "socket.io";
 import { Server as HttpServer } from "http";
-import { createHmac } from "crypto";
+import jwt from "jsonwebtoken";
 
-/**
- * Verify a JWT token signed with BETTER_AUTH_SECRET.
- *
- * better-auth uses HS256 JWTs. This is a lightweight verification
- * that avoids pulling in a full JWT library for this service.
- * In production, use `jose` or `jsonwebtoken` npm package.
- */
-function verifyToken(token: string): { sub: string; email: string; role: string } | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
+function getSecret(): string {
+	const envSecret = process.env.BETTER_AUTH_SECRET;
+	if (envSecret && envSecret.length >= 32) return envSecret;
 
-    const [headerB64, payloadB64, signatureB64] = parts;
-    const secret = process.env.BETTER_AUTH_SECRET || "";
+	const filePath = process.env.BETTER_AUTH_SECRET_FILE;
+	if (filePath) {
+		const { readFileSync } = require("fs");
+		const content = readFileSync(filePath, "utf-8").trim();
+		if (content && content.length >= 32) return content;
+		throw new Error(
+			`FATAL: BETTER_AUTH_SECRET_FILE is set to '${filePath}' but the file is empty or unreadable.`,
+		);
+	}
 
-    // Recompute the signature and compare
-    const signingInput = `${headerB64}.${payloadB64}`;
-    const expectedSig = createHmac("sha256", secret)
-      .update(signingInput)
-      .digest("base64url");
+	if (process.env.NODE_ENV === "production") {
+		throw new Error(
+			"FATAL: BETTER_AUTH_SECRET must be set in production. " +
+			"Set it to a 64-char random hex string.",
+		);
+	}
 
-    if (expectedSig !== signatureB64) {
-      console.warn("[Sync] JWT signature mismatch");
-      return null;
-    }
+	return "lazynext-dev-secret-key-for-auth-minimum-64-chars-sync";
+}
 
-    const payload = JSON.parse(
-      Buffer.from(payloadB64, "base64url").toString("utf-8"),
-    ) as { sub: string; email: string; role?: string; exp: number };
+interface AuthUser {
+	sub: string;
+	email: string;
+	role: string;
+	exp: number;
+}
 
-    // Check expiration
-    if (payload.exp && Date.now() / 1000 > payload.exp) {
-      console.warn("[Sync] JWT expired");
-      return null;
-    }
-
-    return {
-      sub: payload.sub,
-      email: payload.email,
-      role: payload.role || "user",
-    };
-  } catch {
-    return null;
-  }
+function verifyToken(token: string): AuthUser | null {
+	try {
+		const secret = getSecret();
+		const decoded = jwt.verify(token, secret, {
+			algorithms: ["HS256"],
+		}) as AuthUser;
+		if (!decoded.sub || !decoded.email) return null;
+		return decoded;
+	} catch {
+		return null;
+	}
 }
 
 let ioInstance: SocketIOServer | null = null;
+const projectMemberships = new Map<string, Set<string>>();
 
 /**
  * Initialize the Socket.IO sync server on an existing HTTP server.
@@ -68,119 +68,127 @@ let ioInstance: SocketIOServer | null = null;
  * token signed by better-auth during the handshake.
  */
 export function setupSyncServer(httpServer: HttpServer) {
-  ioInstance = new SocketIOServer(httpServer, {
-    cors: {
-      origin:
-        process.env.NODE_ENV === "production"
-          ? "https://lazynext.com"
-          : ["http://localhost:3000", "http://localhost:3001"],
-      methods: ["GET", "POST"],
-    },
-    // Require authentication on every connection
-    allowRequest: async (req, callback) => {
-      // Health-check / handshake probes from K8s don't need auth
-      if (req.url?.startsWith("/socket.io/?EIO=") && !req.headers.authorization && !req.headers.cookie) {
-        // Allow initial polling handshake (auth is enforced on the
-        // `connection` event below via the `auth` handshake object)
-        return callback(null, true);
-      }
-      callback(null, true);
-    },
-  });
+	ioInstance = new SocketIOServer(httpServer, {
+		cors: {
+			origin:
+				process.env.NODE_ENV === "production"
+					? "https://lazynext.com"
+					: ["http://localhost:3000", "http://localhost:3001"],
+			methods: ["GET", "POST"],
+		},
+		allowRequest: async (req, callback) => {
+			callback(null, true);
+		},
+		pingInterval: 25000,
+		pingTimeout: 20000,
+	});
 
-  // Auth middleware — validate the token sent in the handshake `auth` field
-  ioInstance.use((socket, next) => {
-    const token = socket.handshake.auth?.token as string | undefined;
-    if (!token) {
-      console.warn(`[Sync] Rejected connection: no auth token (${socket.id})`);
-      return next(new Error("Authentication required"));
-    }
+	ioInstance.use((socket, next) => {
+		const token = socket.handshake.auth?.token as string | undefined;
+		if (!token) {
+			console.warn(`[Sync] Rejected connection: no auth token (${socket.id})`);
+			return next(new Error("Authentication required"));
+		}
 
-    const user = verifyToken(token);
-    if (!user) {
-      console.warn(`[Sync] Rejected connection: invalid token (${socket.id})`);
-      return next(new Error("Invalid authentication token"));
-    }
+		const user = verifyToken(token);
+		if (!user) {
+			console.warn(`[Sync] Rejected connection: invalid token (${socket.id})`);
+			return next(new Error("Invalid authentication token"));
+		}
 
-    // Attach user info to the socket for downstream use
-    (socket as any).__user = user;
-    console.log(`[Sync] Authenticated ${user.email} (${socket.id})`);
-    next();
-  });
+		(socket as any).__user = user;
+		console.log(`[Sync] Authenticated ${user.email} (${socket.id})`);
+		next();
+	});
 
-  ioInstance.on("connection", (socket) => {
-    const user = (socket as any).__user as { sub: string; email: string; role: string };
-    console.log(`[Sync] Editor connected: ${socket.id} (${user.email})`);
+	ioInstance.on("connection", (socket) => {
+		const user = (socket as any).__user as AuthUser;
+		console.log(`[Sync] Editor connected: ${socket.id} (${user.email})`);
 
-    // Editor joins a specific project room
-    socket.on("join_project", (projectId: string) => {
-      socket.join(projectId);
-      console.log(`[Sync] ${user.email} joined project: ${projectId}`);
-      // Notify others in room that a new peer joined for WebRTC
-      socket.to(projectId).emit("peer-joined", {
-        peerId: socket.id,
-        email: user.email,
-      });
-    });
+		socket.on("join_project", (projectId: string) => {
+			const members = projectMemberships.get(projectId);
+			if (members && !members.has(user.sub)) {
+				console.warn(
+					`[Sync] Rejected: ${user.email} tried to join project ${projectId} without membership`,
+				);
+				socket.emit("join_error", { error: "Not a member of this project" });
+				return;
+			}
 
-    // WebRTC Signaling
-    socket.on("webrtc-offer", ({ target, offer }) => {
-      socket.to(target).emit("webrtc-offer", {
-        caller: socket.id,
-        offer,
-      });
-    });
+			if (!projectMemberships.has(projectId)) {
+				projectMemberships.set(projectId, new Set([user.sub]));
+			} else {
+				projectMemberships.get(projectId)!.add(user.sub);
+			}
 
-    socket.on("webrtc-answer", ({ target, answer }) => {
-      socket.to(target).emit("webrtc-answer", {
-        caller: socket.id,
-        answer,
-      });
-    });
+			socket.join(projectId);
+			console.log(`[Sync] ${user.email} joined project: ${projectId}`);
+			socket.to(projectId).emit("peer-joined", {
+				peerId: socket.id,
+				email: user.email,
+			});
+		});
 
-    socket.on("webrtc-ice-candidate", ({ target, candidate }) => {
-      socket.to(target).emit("webrtc-ice-candidate", {
-        caller: socket.id,
-        candidate,
-      });
-    });
+		socket.on("grant_project_access", (projectId: string) => {
+			if (!projectMemberships.has(projectId)) {
+				projectMemberships.set(projectId, new Set());
+			}
+			projectMemberships.get(projectId)!.add(user.sub);
+		});
 
-    // Receive a CRDT delta from an editor and broadcast it
-    socket.on("crdt_delta", (data: { projectId: string; delta: string }) => {
-      // Broadcast to everyone else in the project
-      socket.to(data.projectId).emit("crdt_delta", {
-        ...data,
-        sender: user.email,
-      });
-    });
+		socket.on("webrtc-offer", ({ target, offer }) => {
+			socket.to(target).emit("webrtc-offer", {
+				caller: socket.id,
+				offer,
+			});
+		});
 
-    socket.on("disconnect", () => {
-      console.log(`[Sync] Editor disconnected: ${socket.id} (${user.email})`);
-      socket.rooms.forEach((room) => {
-        socket.to(room).emit("peer-left", {
-          peerId: socket.id,
-          email: user.email,
-        });
-      });
-    });
-  });
+		socket.on("webrtc-answer", ({ target, answer }) => {
+			socket.to(target).emit("webrtc-answer", {
+				caller: socket.id,
+				answer,
+			});
+		});
 
-  console.log("[Sync] WebSocket CRDT Server initialized (auth required).");
+		socket.on("webrtc-ice-candidate", ({ target, candidate }) => {
+			socket.to(target).emit("webrtc-ice-candidate", {
+				caller: socket.id,
+				candidate,
+			});
+		});
+
+		socket.on("crdt_delta", (data: { projectId: string; delta: string }) => {
+			socket.to(data.projectId).emit("crdt_delta", {
+				...data,
+				sender: user.email,
+			});
+		});
+
+		socket.on("disconnect", () => {
+			console.log(`[Sync] Editor disconnected: ${socket.id} (${user.email})`);
+			socket.rooms.forEach((room) => {
+				if (room !== socket.id) {
+					socket.to(room).emit("peer-left", {
+						peerId: socket.id,
+						email: user.email,
+					});
+				}
+			});
+		});
+	});
+
+	console.log("[Sync] WebSocket CRDT Server initialized (auth required).");
 }
 
-/**
- * Broadcast autonomous AI CRDT patches to all clients in a project room.
- *
- * Used by the orchestrator to push AI-generated timeline edits directly
- * to connected editors without user intervention.
- */
 export function broadcastCrdtPatch(projectId: string, patch: any) {
-  if (ioInstance) {
-    console.log(`[Sync] Broadcasting autonomous AI CRDT patch to project ${projectId}`);
-    ioInstance.to(projectId).emit("crdt_delta", {
-      projectId,
-      delta: JSON.stringify(patch),
-      sender: "AI_AGENT",
-    });
-  }
+	if (ioInstance) {
+		console.log(
+			`[Sync] Broadcasting autonomous AI CRDT patch to project ${projectId}`,
+		);
+		ioInstance.to(projectId).emit("crdt_delta", {
+			projectId,
+			delta: JSON.stringify(patch),
+			sender: "AI_AGENT",
+		});
+	}
 }

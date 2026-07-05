@@ -15,13 +15,13 @@
  * @example
  */
 
-import { Lazynext AI AgentAgent } from "../src/index.js";
+import { LazynextAgent } from "../src/index.js";
 
 const AGENT_ENDPOINT =
 	process.env.LAZYNEXT_API_URL ?? "http://localhost:8005";
 
 async function main() {
-	const agent = new Lazynext AI AgentAgent({
+	const agent = new LazynextAgent({
 		apiEndpoint: AGENT_ENDPOINT,
 		mode: "auto_execute",
 	});

@@ -5,7 +5,7 @@
 //! optional fetch on load.
 
 use serde_json::Value;
-use sqlx::{PgPool, postgres::PgPoolOptions};
+use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::env;
 
 /// Persistent store for project collaboration states.
@@ -18,7 +18,7 @@ impl DbStore {
     /// the `collab_states` table exists.
     pub async fn new() -> Result<Self, sqlx::Error> {
         let database_url = env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/lazynext".to_string());
+            .unwrap_or_else(|_| "postgres://lazynext:changeme@localhost:5432/lazynext".to_string());
 
         let pool = PgPoolOptions::new()
             .max_connections(10)

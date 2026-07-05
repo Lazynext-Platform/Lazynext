@@ -1,3 +1,5 @@
+/** @module React composable hook that listens for keyboard events and invokes bound actions based on keybindings */
+
 import { useEffect } from "react";
 import { invokeAction } from "@/actions";
 import { useEditor } from "@/editor/use-editor";

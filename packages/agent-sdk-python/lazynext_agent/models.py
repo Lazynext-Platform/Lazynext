@@ -8,7 +8,7 @@ serialisation.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -58,7 +58,7 @@ class AgentEvent(BaseModel):
 
     type: AgentEventType
     data: dict = Field(default_factory=dict)
-    timestamp: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
+    timestamp: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 # ── Search ──────────────────────────────────────────────────────────────

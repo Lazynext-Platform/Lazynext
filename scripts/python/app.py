@@ -26,6 +26,12 @@ except Exception as e:
     transcriber = None
 
 class VideoRequest(BaseModel):
+    """Request payload for video processing operations.
+
+    Attributes:
+        video_id: Unique identifier for the video asset.
+        file_path: Filesystem path to the video file.
+    """
     video_id: str
     file_path: str = ""
 
@@ -47,6 +53,7 @@ def process_transcription(video_id: str, file_path: str):
 
 @app.post("/transcribe")
 async def transcribe_video(req: VideoRequest, background_tasks: BackgroundTasks):
+    """Start Whisper transcription as a background task."""
     print(f"Received transcription request for {req.video_id}")
     
     background_tasks.add_task(process_transcription, req.video_id, req.file_path)
@@ -59,6 +66,7 @@ async def transcribe_video(req: VideoRequest, background_tasks: BackgroundTasks)
 
 @app.post("/auto-edit")
 async def auto_edit_video(req: VideoRequest):
+    """Trim silences from a video via Lazynext-Editor."""
     print(f"Received Lazynext-Editor request for {req.video_id}")
     # Here we would call the Lazynext-Editor python module to trim silences
     # e.g., os.system(f"Lazynext-Editor {req.file_path}")

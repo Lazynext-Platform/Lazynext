@@ -1,3 +1,5 @@
+/** @module Custom SVG cursor definitions for the preview editor (pen tool, etc.) */
+
 function svgCursor({
 	svg,
 	hotspotX,

@@ -1,3 +1,5 @@
+/** @module API route for collecting Core Web Vitals analytics (LCP, FID, CLS, INP, TTFB) */
+
 import { NextResponse } from "next/server";
 
 interface VitalsPayload {

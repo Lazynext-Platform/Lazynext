@@ -1262,51 +1262,13 @@ const RESOURCES: McpResource[] = [
 function resolveResourceContent(uri: string): string {
   switch (uri) {
     case "project://current/assets":
-      return JSON.stringify({
-        assets: [
-          { id: "asset_001", name: "interview_main.mp4", type: "video", duration: 342.5, resolution: "3840x2160", codec: "h264", status: "online" },
-          { id: "asset_002", name: "broll_city.mp4", type: "video", duration: 45.2, resolution: "1920x1080", codec: "prores", status: "online" },
-          { id: "asset_003", name: "background_music.wav", type: "audio", duration: 180.0, sampleRate: 48000, channels: 2, status: "online" },
-          { id: "asset_004", name: "logo.png", type: "image", resolution: "1024x512", format: "png", status: "online" },
-          { id: "asset_005", name: "aerial_drone.mp4", type: "video", duration: 120.8, resolution: "4096x2160", codec: "h265", status: "offline" },
-        ],
-        totalCount: 5,
-        totalDuration: 688.5,
-        storageUsed: "24.8 GB",
-      }, null, 2);
-
     case "project://current/effects":
-      return JSON.stringify({
-        effects: [
-          { id: "fx_001", clipId: "clip_003", type: "color_grade", name: "Cinematic Teal/Orange", params: { intensity: 0.8, lutRef: "teal_orange_v3" } },
-          { id: "fx_002", clipId: "clip_001", type: "transform", name: "Scale & Position", params: { scale: 1.1, x: 120, y: -45, rotation: 0 } },
-          { id: "fx_003", clipId: "clip_002", type: "blur", name: "Gaussian Blur", params: { radius: 8, mode: "background" } },
-          { id: "fx_004", clipId: "clip_004", type: "audio", name: "Parametric EQ", params: { lowGain: 2.5, midGain: -1.2, highGain: 3.0 } },
-          { id: "fx_005", clipId: "clip_005", type: "stylize", name: "Film Grain", params: { amount: 0.15, size: 2, monochrome: false } },
-        ],
-        totalCount: 5,
-      }, null, 2);
-
     case "project://current/stats":
       return JSON.stringify({
-        projectId: "proj_current",
-        name: "My Video Project",
-        duration: 342.5,
-        clipCount: 24,
-        trackCount: 8,
-        resolution: "3840x2160",
-        frameRate: 29.97,
-        pixelAspect: "square",
-        bitDepth: 10,
-        colorSpace: "rec2020",
-        audioChannels: 6,
-        audioSampleRate: 48000,
-        effectsCount: 5,
-        markersCount: 12,
-        keyframesCount: 347,
-        renderQueueItems: 0,
-        lastSaved: "2026-07-02T10:45:00Z",
-        projectSize: "2.3 GB",
+        message: "Connect a live project session to view real-time project data",
+        uri,
+        available: false,
+        hint: "Open a project in the Lazynext web editor, then reconnect the MCP server for live resource access.",
       }, null, 2);
 
     case "presets://effects":
@@ -2054,9 +2016,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     // All other tools: forward to orchestrator with tool name as intent
-    const toolPrompt = `${name} ${Object.entries(args || {})
-      .map(([k, v]) => `${k}: ${v}`)
-      .join(", ")}`;
+    // Sanitize: truncate each value to prevent prompt injection via oversized args
+    const argsEntries = Object.entries(args || {}).slice(0, 100).map(([k, v]) => {
+      const val = String(v ?? "");
+      return `${k}: ${val.slice(0, 1000)}`;
+    });
+    const toolPrompt = `${name} ${argsEntries.join(", ")}`.slice(0, 10000);
 
     const resp = await fetch(`${AI_AGENTS_URL}/orchestrate`, {
       method: "POST",

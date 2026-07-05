@@ -8,9 +8,9 @@
  * ## Quick Start
  *
  * ```ts
- * import { Lazynext AI AgentAgent } from "@lazynext/agent-sdk";
+ * import { LazynextAgent } from "@lazynext/agent-sdk";
  *
- * const agent = new Lazynext AI AgentAgent({
+ * const agent = new LazynextAgent({
  *   apiEndpoint: "http://localhost:8005",
  *   mode: "auto_execute",
  * });
@@ -50,7 +50,7 @@ export {
 export { MemoryManager } from "./memory";
 export { RulesManager, type Rule } from "./rules";
 
-// ── Internal imports for the Lazynext AI AgentAgent class ─────────────────────────────
+// ── Internal imports for the LazynextAgent class ─────────────────────────────
 import type {
 	AgentOptions,
 	AgentEvent,
@@ -62,7 +62,7 @@ import type {
 	RuleConfig,
 } from "./types";
 
-// ── Lazynext AI AgentAgent ────────────────────────────────────────────────────────────
+// ── LazynextAgent ────────────────────────────────────────────────────────────
 
 /**
  * Primary entry point for the Lazynext AI Agent agent.
@@ -90,7 +90,7 @@ import type {
  * | `agent.applySuggestion()`  | `POST /api/v1/lazynext-ai/suggestions/:id/apply`|
  * | `agent.runAudit()`         | `POST /api/v1/lazynext-ai/audit`               |
  */
-export class Lazynext AI AgentAgent {
+export class LazynextAgent {
 	private readonly apiEndpoint: string;
 	private readonly apiKey?: string;
 	private readonly mode: string;

@@ -1,3 +1,4 @@
+/** @module ESLint rule that enforces a single destructured object parameter over multiple positional parameters for improved readability and type safety. */
 export default {
 	meta: {
 		type: "suggestion",

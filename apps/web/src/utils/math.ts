@@ -1,3 +1,5 @@
+/** @module General-purpose math utilities (clamp, snap, interpolation, linear, rounding) */
+
 export function clamp({
 	value,
 	min,

@@ -1,3 +1,5 @@
+/** @module Grid overlay guide definition with configurable rows/cols and canvas-rendered grid lines */
+
 import {
 	GridTableIcon,
 	LayoutThreeColumnIcon,

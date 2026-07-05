@@ -16,6 +16,12 @@ import uvicorn
 app = FastAPI(title="Lazynext Pre-processing API")
 
 class VideoRequest(BaseModel):
+    """Request payload for video processing operations.
+
+    Attributes:
+        video_id: Unique identifier for the video asset.
+        file_path: Filesystem path to the video file.
+    """
     video_id: str
     file_path: str
 
@@ -31,6 +37,7 @@ def process_auto_editor(video_id: str, file_path: str):
 
 @app.post("/clip")
 async def auto_clip(req: VideoRequest, background_tasks: BackgroundTasks):
+    """Run Lazynext-Editor silence removal as a background task."""
     print(f"Received request to clip using Auto-Editor: {req.video_id}")
     if not os.path.exists(req.file_path):
         raise HTTPException(status_code=404, detail="Video file not found")

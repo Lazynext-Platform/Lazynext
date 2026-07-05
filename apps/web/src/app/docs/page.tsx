@@ -2,6 +2,7 @@
  * API documentation page with generated SEO metadata.
  *
  * @page /docs
+ * @module docs/page
  */
 
 import { generateMetadata } from "@/seo/metadata";

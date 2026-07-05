@@ -1,7 +1,21 @@
-/** @module Hit-testing utilities for determining which element is at a given viewport position */
+/**
+ * @module Hit-testing utilities for determining which element is at a given viewport position.
+ *
+ * Performs point-in-element tests for the canvas preview, accounting for
+ * element rotation (via inverse rotation of the test point) and z-ordering
+ * (front-to-back traversal). Used by the selection system to determine
+ * which element the user clicked on.
+ */
+
 import type { ElementWithBounds } from "./element-bounds";
 import type { ElementRef } from "@/timeline/types";
 
+/**
+ * Test if a point (in element-local space, after inverse-rotating the
+ * viewport point) falls within an axis-aligned bounding rectangle.
+ * Uses inverse rotation of the test point rather than rotating the rect,
+ * which is cheaper and avoids shearing artifacts.
+ */
 function pointInRotatedRect({
 	px,
 	py,
