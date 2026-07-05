@@ -102,8 +102,10 @@ jobs:
 
       - name: Install deps + build Next.js
         if: matrix.service == 'web'
+        env:
+          SKIP_WASM_BUILD: '1'
         run: |
-          bun install
+          bun install --ignore-scripts
           cd apps/web && bun run build
 
       - name: Azure OIDC Login
