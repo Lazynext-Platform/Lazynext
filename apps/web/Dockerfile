@@ -61,7 +61,6 @@ COPY rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
 WORKDIR /app/apps/web
 
 ENV SKIP_ENV_VALIDATION=1
-ENV NEXT_TURBOPACK=0
 ENV NODE_PATH=/app/node_modules
 ENV MARBLE_WORKSPACE_KEY=ci-placeholder
 ENV FREESOUND_CLIENT_ID=ci-placeholder
