@@ -39,11 +39,11 @@ export class DeleteElementsCommand extends Command {
 		const editor = EditorCore.getInstance();
 		this.savedState = editor.scenes.getActiveScene().tracks;
 
-		// lazynext-wasm is a file:-linked WASM package. Use a dynamic
-		// require to avoid Turbopack static resolution during Next.js build.
+		// lazynext-wasm is a file:-linked WASM package whose generated ESM
+		// types resist named-import resolution under this project's tsconfig
+		// (TS2614), so we resolve it at runtime. See AGENTS.md / build-wasm.sh.
 		// eslint-disable-next-line @typescript-eslint/no-require-imports
-		const wasm = eval("require")("lazynext-wasm");
-		const { deleteElements } = wasm;
+		const { deleteElements } = require("lazynext-wasm");
 
 		const updatedTracks = deleteElements(
 			this.savedState,
