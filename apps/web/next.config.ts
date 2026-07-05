@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
 		resolveAlias: {
 			"lazynext-wasm": "../../node_modules/lazynext-wasm",
 		},
-	} as any,
+	},
 
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
