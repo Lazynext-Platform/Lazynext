@@ -50,10 +50,12 @@ COPY rust/wasm/pkg /app/rust/wasm/pkg
 
 RUN bun install
 
-# Ensure WASM module is linked in node_modules for Next.js resolution
-RUN mkdir -p /app/apps/web/node_modules && \
-    ln -sf /app/rust/wasm/pkg /app/node_modules/lazynext-wasm && \
-    ln -sf /app/rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
+# Copy WASM directly into node_modules for Next.js/Turbopack resolution
+RUN mkdir -p /app/node_modules/lazynext-wasm && \
+    mkdir -p /app/apps/web/node_modules/lazynext-wasm && \
+    cp -r /app/rust/wasm/pkg/* /app/node_modules/lazynext-wasm/ && \
+    rm -rf /app/apps/web/node_modules/lazynext-wasm && \
+    ln -s /app/node_modules/lazynext-wasm /app/apps/web/node_modules/lazynext-wasm
 
 # Copy source
 COPY apps/web/ apps/web/
