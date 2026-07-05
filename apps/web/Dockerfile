@@ -45,21 +45,15 @@ COPY apps/web/package.json apps/web/package.json
 COPY biome.json .
 COPY eslint.config.mjs .
 
-# Copy pre-built WASM package from repo
-COPY rust/wasm/pkg /app/rust/wasm/pkg
-
 RUN bun install
 
 # Copy source
 COPY apps/web/ apps/web/
 COPY .env.example apps/web/.env.local
 
-# Copy WASM as real directory into node_modules (after source COPY to avoid overwrite)
-RUN ls -la /app/rust/wasm/pkg/ && \
-    mkdir -p /app/node_modules/lazynext-wasm && \
-    cp /app/rust/wasm/pkg/lazynext_wasm.js /app/rust/wasm/pkg/lazynext_wasm_bg.wasm /app/rust/wasm/pkg/lazynext_wasm_bg.wasm.d.ts /app/rust/wasm/pkg/lazynext_wasm.d.ts /app/rust/wasm/pkg/package.json /app/node_modules/lazynext-wasm/ && \
-    mkdir -p /app/apps/web/node_modules/lazynext-wasm && \
-    cp /app/rust/wasm/pkg/lazynext_wasm.js /app/rust/wasm/pkg/lazynext_wasm_bg.wasm /app/rust/wasm/pkg/lazynext_wasm_bg.wasm.d.ts /app/rust/wasm/pkg/lazynext_wasm.d.ts /app/rust/wasm/pkg/package.json /app/apps/web/node_modules/lazynext-wasm/
+# Copy pre-built WASM package directly into node_modules (after bun install + source COPY)
+COPY rust/wasm/pkg /app/node_modules/lazynext-wasm
+COPY rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
 
 WORKDIR /app/apps/web
 
