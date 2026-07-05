@@ -87,11 +87,16 @@ const nextConfig: NextConfig = {
 		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["lazynext-wasm"],
+	transpilePackages: ["lazynext-wasm"],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,
 			asyncWebAssembly: true,
 		};
+		config.externals = [
+			...(Array.isArray(config.externals) ? config.externals : []),
+			{ "lazynext-wasm": "commonjs lazynext-wasm" },
+		];
 		return config;
 	},
 	images: {
