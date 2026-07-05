@@ -84,7 +84,7 @@ ENV NEXT_PUBLIC_GENERATIVE_STUDIO_URL=$NEXT_PUBLIC_GENERATIVE_STUDIO_URL
 ENV NEXT_PUBLIC_AI_AGENTS_URL=$NEXT_PUBLIC_AI_AGENTS_URL
 ENV NEXT_PUBLIC_RENDER_SERVICE_URL=$NEXT_PUBLIC_RENDER_SERVICE_URL
 
-RUN bunx next build
+RUN bunx next build --no-turbo
 
 # Bundle the migration script so it doesn't rely on Next.js standalone node_modules
 RUN bun build migrate.ts --target=bun --outfile=migrate.js

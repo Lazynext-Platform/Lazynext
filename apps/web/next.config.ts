@@ -87,10 +87,18 @@ const nextConfig: NextConfig = {
 		ignoreBuildErrors: false,
 	},
 	serverExternalPackages: ["lazynext-wasm"],
+	transpilePackages: ["lazynext-wasm"],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,
 			asyncWebAssembly: true,
+		};
+		config.resolve = {
+			...config.resolve,
+			alias: {
+				...(config.resolve?.alias || {}),
+				"lazynext-wasm": "/app/rust/wasm/pkg",
+			},
 		};
 		return config;
 	},
