@@ -804,12 +804,11 @@ impl EffectPipeline {
                     },
                 ],
             });
-            {
-
-                // Fullscreen-quad draw: vertex shader positions the quad,
-                // fragment shader applies the effect. Bind group 0 = input
-                // texture, bind group 1 = per-pass uniform data.
-                let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        {
+            // Fullscreen-quad draw: vertex shader positions the quad,
+            // fragment shader applies the effect. Bind group 0 = input
+            // texture, bind group 1 = per-pass uniform data.
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("effects-lut-render-pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &output_view,
@@ -910,7 +909,7 @@ impl EffectPipeline {
                             },
                             wgpu::BindGroupEntry {
                                 binding: 1,
-                        resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
+                                resource: wgpu::BindingResource::Sampler(context.linear_sampler()),
                             },
                         ],
                     });
