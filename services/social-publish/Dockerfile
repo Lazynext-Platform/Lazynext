@@ -17,7 +17,7 @@ COPY package.json bun.lock ./
 COPY packages/ packages/
 COPY services/social-publish/ services/social-publish/
 RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
-RUN bun install --production
+RUN bun install --no-lockfile
 
 # Set working dir to service
 WORKDIR /app/services/social-publish
