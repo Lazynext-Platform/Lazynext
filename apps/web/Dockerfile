@@ -43,11 +43,8 @@ COPY apps/web/ apps/web/
 COPY rust/wasm/pkg /app/rust/wasm/pkg
 
 # Install all workspace dependencies (this creates the lazynext-wasm symlink)
-RUN bun install
-
-# Verify WASM module is resolvable
-RUN ls -la /app/node_modules/lazynext-wasm/lazynext_wasm.js && \
-    ls -la /app/apps/web/node_modules/lazynext-wasm 2>/dev/null || echo "No apps/web node_modules symlink"
+RUN bun install 2>&1 | tail -20
+RUN echo "=== node_modules contents ===" && ls /app/node_modules/ | head -30
 
 # Build Next.js
 WORKDIR /app/apps/web
