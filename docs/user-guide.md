@@ -331,7 +331,7 @@ A: Yes. The desktop app works fully offline. AI features gracefully degrade to l
 A: MP4, MOV, MKV, WebM, AVI, WAV, MP3, FLAC, PNG, JPEG, WebP, GIF, TIFF, and more. Almost anything FFmpeg can read.
 
 **Q: Can I use my own AI models?**
-A: Yes. Set `LLM_PROVIDER=ollama` to use local models via Ollama. The platform also supports OpenAI, Anthropic, and Google Gemini with your own API keys.
+A: Yes. Set `LLM_PROVIDER=gemini` to use Google Gemini (add your GEMINI_API_KEY). The platform also supports OpenAI and Anthropic with your own API keys.
 
 ### Editing
 

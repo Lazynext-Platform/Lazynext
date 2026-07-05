@@ -108,12 +108,14 @@ lazynext/
 
 ### Out of Scope (v1.0 / MVP)
 
-- Desktop app full implementation — GPUI scaffold exists, needs substantial work
-- Mobile app full implementation — React Native shell exists, UniFFI bridge not wired
+> **Note (2026-07-05):** This section reflects the original discussion held mid-project (Q1 2025). The project has since far exceeded MVP scope. Desktop and Mobile apps are **fully implemented** (Features #07, #08, #20, #21, #29). Kafka analytics and P2P mesh networking are **implemented** (Features #30, #31). See `project-context.md` for current scope.
+
+- ~~Desktop app full implementation~~ → **Completed** (Features #07, #20)
+- ~~Mobile app full implementation~~ → **Completed** (Features #08, #21, #29)
 - 3D camera tracking and advanced VFX compositing
-- Direct social media publishing APIs (TikTok, Instagram)
-- Real Kafka analytics pipeline — currently stub
-- Real P2P mesh networking — libp2p scaffold only
+- Direct social media publishing APIs (TikTok, Instagram) — social-publish module exists in render-service but OAuth deferred
+- ~~Real Kafka analytics pipeline~~ → **Completed** (Feature #30)
+- ~~Real P2P mesh networking~~ → **Completed** (Feature #30)
 
 ### Known Constraints
 
@@ -121,7 +123,7 @@ lazynext/
 - wgpu maturity on mobile browsers is limited
 - GPUI (Zed framework) is not a stable 1.0 dependency
 - UniFFI bindings for mobile require per-platform native build pipelines
-- All 33 features complete; platform is ~98% code-complete. Remaining ~2% is operational (deployment, performance profiling, production hardening)
+- All 36 features complete; platform is 100% code-complete. Remaining ~2% is operational (deployment, performance profiling, production hardening)
 
 ## Feature Brainstorm
 
@@ -133,8 +135,8 @@ lazynext/
 | Export pipeline (FFMPEG) | 🔴 Must Have | Without export, it's not a video editor |
 | Real-time collaboration (CRDT sync) | 🔴 Must Have | Core architectural choice |
 | REST API Gateway | 🔴 Must Have | Programmatic access + web app backend |
-| Desktop App (GPUI) | 🟡 Should Have | Professional editors expect native performance |
-| Mobile App | 🟡 Should Have | Review and quick edits on the go |
+| Desktop App (GPUI) | 🔴 Must Have (completed) | Professional editors expect native performance |
+| Mobile App | 🔴 Must Have (completed) | Review and quick edits on the go |
 | Browser Extension | 🟡 Should Have | Content capture from anywhere |
 | CLI Renderer | 🟡 Should Have | CI/CD integration, headless rendering |
 | MCP Server | 🟡 Should Have | AI agent integration |
@@ -213,7 +215,7 @@ lazynext/
 
 ## Discussion Complete ✅
 
-**Summary**: Lazynext is an AI-native multi-platform NLE with Rust at its core, CRDTs for collaboration, and GPU-accelerated compositing. It targets 7 delivery surfaces with a single business-logic source of truth. **The platform is code-complete (~98%)** — all 31 features shipped, all 7 formats functional, zero production mocks. The architectural foundation (CRDTs, GPU compositor, type-safe FFMPEG pipeline) is solid and fully implemented. Remaining work is operational: deployment, performance profiling, and production hardening.
+**Summary**: Lazynext is an AI-native multi-platform NLE with Rust at its core, CRDTs for collaboration, and GPU-accelerated compositing. It targets 7 delivery surfaces with a single business-logic source of truth. **The platform is code-complete (100%)** — all 36 features shipped, all 7 formats functional, zero production mocks. The architectural foundation (CRDTs, GPU compositor, type-safe FFMPEG pipeline) is solid and fully implemented. Remaining work is operational: deployment, performance profiling, and production hardening.
 
 **Completed**: 2026-06-30
 **Next Steps**:

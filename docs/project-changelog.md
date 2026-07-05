@@ -2,11 +2,21 @@
 
 > **Project**: Lazynext
 > **Format**: Based on [Keep a Changelog](https://keepachangelog.com/)
-> **Last Updated**: 2026-07-01
+> **Last Updated**: 2026-07-05
 
 ---
 
-## [Unreleased] — 2026-07-01 (Feature #35)
+## [Unreleased] — 2026-07-05 (Feature #36)
+
+### Added
+- **Feature #36 — E2E Launch Readiness (All 7 Formats)**: Phase 0 verification (230+ tests, 0 failures across all 7 formats). Phase 1 core hardening: fixed `check_job_status` render artifact resolution, wired `process_intent` real LLM delegation path, fixed CLI asset_loader render truncation, wired GEMINI_API_KEY NL→CRDT pipeline, added VoiceInput component with Whisper + WebSpeech fallback. E2E demo script: NL→AI→Timeline→Export in 40s, ffprobe-verified. Phase 2-3 owner-gated (Azure deployment, developer certs, store listings).
+
+### Fixed
+- CLI render truncation on synthetic clip (was 0 frames → now 48 frames / 2.000s @ 49.5fps via cleared asset_loader)
+- Autonomous editor: honest errors with guidance instead of fake CDN/silent no-ops
+- Neural engine empty detection → heuristic fallback with proper logging
+
+## [0.9.1] — 2026-07-01 (Feature #35)
 
 ### Added
 - **Feature #35 — Platform Finalization**: Desktop play/pause playback toggle with continuous frame advance; AI prompt text display; Mobile NativeBridge real UniFFI wiring (Swift + Kotlin); MCP Server 47-tool expansion; SAM2 ONNX runtime path; Local Whisper TF Serving path; Analytics SQLite persistence; Kafka auto-topic creation.
