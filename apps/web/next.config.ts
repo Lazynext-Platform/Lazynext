@@ -86,7 +86,7 @@ const nextConfig: NextConfig = {
 		// TypeScript errors fail the build — fix them, don't bypass
 		ignoreBuildErrors: false,
 	},
-	serverExternalPackages: [],
+	serverExternalPackages: ["lazynext-wasm"],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,
