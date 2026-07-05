@@ -54,9 +54,13 @@ RUN bun install
 COPY apps/web/ apps/web/
 COPY .env.example apps/web/.env.local
 
-# Copy pre-built WASM package directly into node_modules (after bun install + source COPY)
-COPY rust/wasm/pkg /app/node_modules/lazynext-wasm
-COPY rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
+# Copy pre-built WASM package so bun can create workspace symlink
+COPY rust/wasm/pkg /app/rust/wasm/pkg
+RUN bun install
+# After bun install, symlink exists at node_modules/lazynext-wasm -> rust/wasm/pkg
+# Verify and make real copy for Turbopack
+RUN rm -rf /app/node_modules/lazynext-wasm && cp -r /app/rust/wasm/pkg /app/node_modules/lazynext-wasm && \
+    mkdir -p /app/apps/web/node_modules && rm -rf /app/apps/web/node_modules/lazynext-wasm && cp -r /app/rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
 
 WORKDIR /app/apps/web
 
