@@ -3,10 +3,11 @@ FROM oven/bun:1.3.14-alpine AS builder
 
 WORKDIR /app
 
-# Layer 1: Workspace dependencies (root package.json + packages)
+# Layer 1: Workspace dependencies (root package.json + packages + stub wasm)
 COPY package.json bun.lock ./
 COPY packages/ packages/
 COPY services/analytics-service/ services/analytics-service/
+RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
 RUN bun install --no-lockfile
 
 # Build the service

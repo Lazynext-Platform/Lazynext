@@ -12,10 +12,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create non-root user
 RUN useradd --system --uid 1001 --create-home --shell /bin/false svcpublish
 
-# Copy workspace root + packages + service
+# Copy workspace root + packages + service + stub wasm
 COPY package.json bun.lock ./
 COPY packages/ packages/
 COPY services/social-publish/ services/social-publish/
+RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
 RUN bun install --production
 
 # Set working dir to service
