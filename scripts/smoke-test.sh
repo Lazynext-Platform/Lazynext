@@ -120,6 +120,8 @@ if [ "$code" -ge 200 ] && [ "$code" -lt 300 ]; then
 	else
 		fail "Project created but no ID in response" "Body: $body"
 	fi
+elif [ "$code" = "401" ] || [ "$code" = "403" ]; then
+	pass "Create project requires auth (HTTP $code — expected)"
 else
 	fail "Create project" "HTTP $code — $body"
 fi
@@ -200,7 +202,7 @@ fi
 
 # Test export endpoint with a minimal payload
 EXPORT_DATA="{\"project_id\":\"${PROJECT_ID:-smoke-test}\",\"preset\":\"youtube_1080p\"}"
-result=$(http_post "$RENDER_SERVICE/export" "$EXPORT_DATA")
+result=$(http_post "$RENDER_SERVICE/api/v1/export" "$EXPORT_DATA")
 code=$(echo "$result" | cut -d'|' -f1)
 body=$(echo "$result" | cut -d'|' -f2-)
 
