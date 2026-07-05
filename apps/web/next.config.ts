@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
 	// Turbopack: tell it where to find the WASM module
 	turbopack: {
 		resolveAlias: {
-			"lazynext-wasm": "/app/node_modules/lazynext-wasm",
+			"lazynext-wasm": "../../node_modules/lazynext-wasm",
 		},
 	} as any,
 
