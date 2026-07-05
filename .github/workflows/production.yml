@@ -91,9 +91,20 @@ jobs:
           - generative-studio
           - collab-server
           - analytics-service
-          - social-publish
+           - social-publish
     steps:
       - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.service == 'web'
+        with:
+          bun-version: latest
+
+      - name: Install deps + build Next.js
+        if: matrix.service == 'web'
+        run: |
+          bun install
+          cd apps/web && bun run build
 
       - name: Azure OIDC Login
         uses: azure/login@v2
@@ -113,7 +124,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.service == 'web' && 'apps/web/Dockerfile' || matrix.service == 'api-gateway' && 'rust/api-gateway/Dockerfile' || format('services/{0}/Dockerfile', matrix.service) }}
+          file: ${{ matrix.service == 'web' && 'apps/web/Dockerfile.prebuilt' || matrix.service == 'api-gateway' && 'rust/api-gateway/Dockerfile' || format('services/{0}/Dockerfile', matrix.service) }}
           push: true
           build-args: |
             ${{ matrix.service == 'web' && 'SKIP_WASM_BUILD=1' || '' }}
