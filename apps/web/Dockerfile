@@ -42,9 +42,13 @@ COPY apps/web/ apps/web/
 # Copy pre-built WASM package (mirrors local dev structure)
 COPY rust/wasm/pkg /app/rust/wasm/pkg
 
-# Install all workspace dependencies (this creates the lazynext-wasm symlink)
-RUN bun install 2>&1 | tail -20
-RUN echo "=== node_modules contents ===" && ls /app/node_modules/ | head -30
+# Install all workspace dependencies
+RUN bun install 2>&1 | tail -5
+
+# Manually create WASM symlink (bun workspace resolution doesn't work in Docker)
+RUN mkdir -p /app/apps/web/node_modules && \
+    ln -sf ../rust/wasm/pkg /app/node_modules/lazynext-wasm && \
+    ln -sf ../../rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
 
 # Build Next.js
 WORKDIR /app/apps/web
