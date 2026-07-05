@@ -50,6 +50,9 @@ COPY rust/wasm/pkg /app/rust/wasm/pkg
 
 RUN bun install
 
+# Re-install to ensure WASM workspace is properly linked
+RUN bun install
+
 # Copy source
 COPY apps/web/ apps/web/
 COPY .env.example apps/web/.env.local
