@@ -63,6 +63,8 @@ RUN mkdir -p /app/node_modules/lazynext-wasm && \
 WORKDIR /app/apps/web
 
 ENV SKIP_ENV_VALIDATION=1
+ENV NEXT_TURBOPACK=0
+ENV NODE_PATH=/app/node_modules
 ENV MARBLE_WORKSPACE_KEY=ci-placeholder
 ENV FREESOUND_CLIENT_ID=ci-placeholder
 ENV FREESOUND_API_KEY=ci-placeholder
@@ -84,7 +86,7 @@ ENV NEXT_PUBLIC_GENERATIVE_STUDIO_URL=$NEXT_PUBLIC_GENERATIVE_STUDIO_URL
 ENV NEXT_PUBLIC_AI_AGENTS_URL=$NEXT_PUBLIC_AI_AGENTS_URL
 ENV NEXT_PUBLIC_RENDER_SERVICE_URL=$NEXT_PUBLIC_RENDER_SERVICE_URL
 
-RUN bunx next build --no-turbo
+RUN bunx next build
 
 # Bundle the migration script so it doesn't rely on Next.js standalone node_modules
 RUN bun build migrate.ts --target=bun --outfile=migrate.js
