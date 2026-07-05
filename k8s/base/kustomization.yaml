@@ -27,6 +27,8 @@ resources:
   - collab-server-networkpolicy.yaml
   - collab-server-ingress.yaml
   - analytics-service-networkpolicy.yaml
+  - api-gateway-deployment.yaml
+  - social-publish-deployment.yaml
 
 labels:
   - pairs:
@@ -58,6 +60,15 @@ images:
     newTag: latest
   - name: ghcr.io/lazynext-platform/lazynext-collab-server
     newName: lazynextacrdevlmblwn.azurecr.io/lazynext-collab-server
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-api-gateway
+    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-api-gateway
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-db-migrate
+    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-db-migrate
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-social-publish
+    newName: lazynextacrdevlmblwn.azurecr.io/lazynext-social-publish
     newTag: latest
 
 # Strategic merge patches for init containers

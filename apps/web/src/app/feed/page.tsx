@@ -83,14 +83,14 @@ export default function FeedPage() {
 		<div className="w-full h-[calc(100vh-73px)] flex overflow-hidden bg-transparent pt-10">
 			{/* Desktop Sidebar Navigation */}
 			<div className="hidden lg:flex flex-col gap-8 w-[250px] ml-6 h-[calc(100%-40px)] glass-panel p-6 shadow-2xl relative z-10">
-				<h1 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-black to-black/70 dark:from-white dark:to-white/70">
-					LAZYNEXT<span className="text-cyan-500">.</span>
+				<h1 className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-primary)]/70">
+					LAZYNEXT<span className="text-[var(--accent-primary)]">.</span>
 				</h1>
 
 				<nav className="flex flex-col gap-4">
 					<Link
 						href="/feed"
-						className="flex items-center gap-4 text-cyan-400 font-bold text-lg p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_15px_rgba(0,212,223,0.1)]"
+						className="flex items-center gap-4 text-[var(--accent-primary)] font-bold text-lg p-3 rounded-xl bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 shadow-[var(--accent-glow)]"
 					>
 						<Compass className="w-6 h-6" /> Explore
 					</Link>
@@ -118,7 +118,7 @@ export default function FeedPage() {
 				{/* Navigation Overlay */}
 				<div className="absolute top-0 left-0 w-full p-6 z-50 flex justify-between items-start pointer-events-none">
 					<Link href="/" className="pointer-events-auto">
-						<div className="p-3 bg-glass backdrop-blur-xl border border-white/20 rounded-full text-foreground hover:bg-white/20 hover:scale-105 transition-all shadow-lg">
+						<div className="p-3 bg-glass backdrop-blur-xl border border-[var(--border-glass)] rounded-full text-foreground hover:bg-hover hover:scale-105 transition-all shadow-lg">
 							<ArrowLeft className="w-5 h-5" />
 						</div>
 					</Link>
@@ -126,7 +126,7 @@ export default function FeedPage() {
 						<div className="px-5 py-2 text-foreground/60 font-semibold text-sm hover:text-foreground transition-colors cursor-pointer rounded-full">
 							Following
 						</div>
-						<div className="px-5 py-2 bg-gradient-to-tr from-cyan-400 to-blue-500 text-black font-bold text-sm rounded-full shadow-[0_0_20px_rgba(0,212,223,0.4)]">
+						<div className="px-5 py-2 bg-gradient-to-tr from-[var(--accent-primary)] to-[var(--accent-secondary)] text-[var(--text-on-accent)] font-bold text-sm rounded-full shadow-[var(--accent-glow)]">
 							For You
 						</div>
 					</div>

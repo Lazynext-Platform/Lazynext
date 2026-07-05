@@ -30,6 +30,10 @@ on:
       - 'services/**/Dockerfile'
       - 'rust/**/Dockerfile'
 
+concurrency:
+  group: deploy-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   packages: read

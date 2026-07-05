@@ -1,34 +1,41 @@
 /**
  * @module AI chat endpoint — forwards natural-language edit prompts to the
  * Rust API Gateway's autonomous_edit endpoint and returns the result.
+ * Requires authentication.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
+import { chatSchema } from "@/lib/validation";
 
-/**
- * POST /api/chat
- * Accepts a JSON body with a `prompt` field and proxies it to the Rust
- * API Gateway for autonomous timeline editing.
- */
 export async function POST(req: Request) {
 	try {
-		const { prompt } = await req.json();
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		if (!session || !session.user) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
 
-		if (!prompt || typeof prompt !== "string") {
+		const rawBody = await req.json();
+		const parsed = chatSchema.safeParse(rawBody);
+
+		if (!parsed.success) {
 			return NextResponse.json(
-				{ error: "Prompt is required" },
+				{ error: parsed.error.issues[0]?.message || "Invalid input" },
 				{ status: 400 },
 			);
 		}
 
-		// Proxy the intent to the centralized Rust API Gateway
+		const { prompt } = parsed.data;
+
 		const rustGatewayUrl = process.env.RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
-		
+
 		const response = await fetch(`${rustGatewayUrl}/api/v1/autonomous_edit`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				// Pass along any auth tokens here if needed
 			},
 			body: JSON.stringify({
 				prompt,

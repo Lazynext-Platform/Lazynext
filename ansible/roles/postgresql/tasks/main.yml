@@ -305,7 +305,7 @@
   become_user: postgres
   community.postgresql.postgresql_user:
     name: postgres_exporter
-    password: "{{ vault_postgres_exporter_password | default('REPLACE_ME_EXPORTER_PASSWORD') }}"
+    password: "{{ vault_postgres_exporter_password | default('disabled') }}"
     encrypted: yes
     state: present
   no_log: true
@@ -346,7 +346,7 @@
   ansible.builtin.copy:
     dest: /etc/default/postgres_exporter
     content: |
-      DATA_SOURCE_NAME="postgresql://postgres_exporter:{{ vault_postgres_exporter_password | default('{{ vault_postgres_exporter_password | default('REPLACE_ME_EXPORTER_PASSWORD') }}') }}@localhost:{{ postgresql_port }}/lazynext?sslmode=disable"
+      DATA_SOURCE_NAME="postgresql://postgres_exporter:{{ vault_postgres_exporter_password | default('disabled') }}@localhost:{{ postgresql_port }}/lazynext?sslmode=disable"
     owner: root
     group: postgres
     mode: "0640"

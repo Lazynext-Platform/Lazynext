@@ -145,8 +145,8 @@ locals {
     "gemini-api-key",
     "replicate-api-token",
     "elevenlabs-api-key",
-    "stripe-secret-key",
-    "stripe-webhook-secret",
+    "dodo-api-key",
+    "dodo-webhook-secret",
     "resend-api-key",
   ]
 }

@@ -40,9 +40,25 @@ resource "azurerm_role_assignment" "github_acr_push" {
   principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
 }
 
-# Grant Contributor on Resource Group to GitHub Actions
-resource "azurerm_role_assignment" "github_rg_contributor" {
-  scope                = azurerm_resource_group.rg.id
+# Grant Contributor on Container Apps Environment to GitHub Actions
+# TODO: This should be further scoped — ideally a custom role with only the
+#       permissions needed for deploying container app revisions (e.g.
+#       Microsoft.App/containerApps/write, /revisions/write, etc.) rather
+#       than blanket Contributor on the environment.
+resource "azurerm_role_assignment" "github_cappenv_contributor" {
+  scope                = azurerm_container_app_environment.main.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
+}
+
+# Grant Contributor on each Container App to GitHub Actions
+# This should be further scoped — a custom role with just the minimum
+# permissions for deploying (write registry, update revision, swap traffic)
+# would be more secure than Contributor on every container app.
+resource "azurerm_role_assignment" "github_container_app_contributor" {
+  for_each = local.container_apps
+
+  scope                = local.container_app_ids[each.key]
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
 }

@@ -213,7 +213,7 @@ export function BillingPageClient() {
 							key={plan.name}
 							className={`relative rounded-3xl p-8 flex flex-col transition-all duration-300 ${
 								plan.highlight
-									? "border border-[var(--accent-primary)] bg-[var(--accent-primary)]/5 shadow-[0_0_40px_rgba(1,243,254,0.15)] scale-105 z-10"
+									? "border border-[var(--accent-primary)] bg-[var(--accent-primary)]/5 shadow-[var(--accent-glow)] scale-105 z-10"
 									: "border border-[var(--border-glass)] bg-[var(--bg-panel)]"
 							}`}
 						>

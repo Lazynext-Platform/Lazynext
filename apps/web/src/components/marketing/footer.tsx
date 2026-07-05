@@ -44,7 +44,7 @@ export function MarketingFooter() {
 						<li>
 							<Link
 								href="#features"
-								className="hover:text-cyan-400 transition-colors"
+								className="hover:text-[var(--accent-primary)] transition-colors"
 							>
 								Features
 							</Link>
@@ -52,7 +52,7 @@ export function MarketingFooter() {
 						<li>
 							<Link
 								href="/billing"
-								className="hover:text-cyan-400 transition-colors"
+								className="hover:text-[var(--accent-primary)] transition-colors"
 							>
 								Pricing
 							</Link>
@@ -60,7 +60,7 @@ export function MarketingFooter() {
 						<li>
 							<Link
 								href="/changelog"
-								className="hover:text-cyan-400 transition-colors"
+								className="hover:text-[var(--accent-primary)] transition-colors"
 							>
 								Changelog
 							</Link>
@@ -74,7 +74,7 @@ export function MarketingFooter() {
 						<li>
 							<Link
 								href="/privacy"
-								className="hover:text-cyan-400 transition-colors"
+								className="hover:text-[var(--accent-primary)] transition-colors"
 							>
 								Privacy Policy
 							</Link>
@@ -82,7 +82,7 @@ export function MarketingFooter() {
 						<li>
 							<Link
 								href="/terms"
-								className="hover:text-cyan-400 transition-colors"
+								className="hover:text-[var(--accent-primary)] transition-colors"
 							>
 								Terms of Service
 							</Link>

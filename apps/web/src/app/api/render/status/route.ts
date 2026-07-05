@@ -1,26 +1,30 @@
 /**
  * @module Render job status polling — checks the render-service first, then
  * falls back to an in-memory "offline" state when the service is unreachable.
+ * Requires authentication.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
 const RENDER_SERVICE_URL =
 	process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
-// Track local-fallback jobs (in-memory; reset on server restart)
 const localJobs = new Map<
 	string,
 	{ progress: number; status: string; createdAt: number }
 >();
 
-/**
- * GET /api/render/status?jobId=...
- * Polls the current status and progress of a render job. Proxies the render
- * service when available; returns offline status for locally-tracked jobs.
- */
 export async function GET(request: Request) {
 	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		if (!session || !session.user) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
 		const { searchParams } = new URL(request.url);
 		const jobId = searchParams.get("jobId");
 
@@ -31,7 +35,6 @@ export async function GET(request: Request) {
 			);
 		}
 
-		// Try polling the render-service first
 		try {
 			const response = await fetch(
 				`${RENDER_SERVICE_URL}/api/v1/jobs/${jobId}`,
@@ -59,11 +62,9 @@ export async function GET(request: Request) {
 				}
 			}
 		} catch {
-			// Render service unreachable — use local tracking for fallback jobs
+			// Render service unreachable
 		}
 
-		// Local fallback: job was created without render-service running.
-		// Return "offline" status — no simulated progress.
 		let localJob = localJobs.get(jobId);
 		if (!localJob) {
 			localJob = {

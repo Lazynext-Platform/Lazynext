@@ -77,7 +77,6 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=api-gateway
       - SOCIAL_PUBLISH_URL=http://social-publish:8007
-      - DISABLE_CSRF=1
     depends_on:
       db:
         condition: service_healthy
@@ -157,7 +156,7 @@ services:
       retries: 3
       start_period: 30s
 
-  # ── AI Agents (Chronos Copilot + WebSocket Sync) ──────────────
+  # ── AI Agents (Lazynext AI Copilot + WebSocket Sync) ──────────────
   ai-agents:
     build:
       context: ./services/ai-agents
@@ -171,7 +170,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-lazynext-internal-dev-key}
       - GENERATIVE_STUDIO_URL=http://generative-studio:8001
       - PRE_PROCESSING_URL=http://pre-processing:8000
       - RENDER_SERVICE_URL=http://render-service:8003
@@ -202,7 +202,7 @@ services:
       - FFPROBE_PATH=/usr/bin/ffprobe
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-dev}
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
-      - UPSTASH_REDIS_REST_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379
     networks:
       - lazynext-network
     restart: unless-stopped
@@ -302,6 +302,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8006
+      - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
     networks:
       - lazynext-network
     restart: unless-stopped
@@ -393,9 +394,9 @@ services:
     volumes:
       - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
     environment:
-      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/PLACEHOLDER}
-      - SLACK_WEBHOOK_URL_WARNING=${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/PLACEHOLDER}
-      - CUSTOM_WEBHOOK_URL=${CUSTOM_WEBHOOK_URL:-https://webhook.site/PLACEHOLDER}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/disabled}
+      - SLACK_WEBHOOK_URL_WARNING=${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/disabled}
+      - CUSTOM_WEBHOOK_URL=${CUSTOM_WEBHOOK_URL:-https://webhook.site/disabled}
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'

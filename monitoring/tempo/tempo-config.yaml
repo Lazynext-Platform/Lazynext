@@ -32,3 +32,21 @@ storage:
       path: /tmp/tempo/traces
     wal:
       path: /tmp/tempo/wal
+
+compactor:
+  compaction:
+    block_retention: 720h
+
+metrics_generator:
+  ring:
+    kvstore:
+      store: inmemory
+  processor:
+    span_metrics: {}
+
+ingester:
+  max_block_bytes: 100000000
+  max_block_duration: 30m
+
+querier:
+  max_concurrent_queries: 20

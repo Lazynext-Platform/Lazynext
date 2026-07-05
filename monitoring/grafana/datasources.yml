@@ -63,7 +63,7 @@ datasources:
     secureJsonData:
       password: "${DB_PASSWORD}"
     jsonData:
-      sslmode: "disable"
+      sslmode: "${DB_SSLMODE:-require}"
       postgresVersion: 1700  # Requires Grafana >= 10.4
       timescaledb: false
     editable: false

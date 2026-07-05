@@ -16,21 +16,33 @@ import {
 } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
 	GestureHandlerRootView,
-	GestureDetector,
-	Gesture,
 } from "react-native-gesture-handler";
-import Animated, {
-	useSharedValue,
-	useAnimatedStyle,
-	withSpring,
-} from "react-native-reanimated";
 
 import { NativeBridge } from "./src/NativeBridge";
 import { TimelineScreen } from "./src/Timeline";
 import { CameraScreen } from "./src/screens/CameraScreen";
-import { EditorScreen } from "./src/screens/EditorScreen";
+import { SignInScreen } from "./src/screens/SignInScreen";
+import { SignUpScreen } from "./src/screens/SignUpScreen";
+import { ForgotPasswordScreen } from "./src/screens/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "./src/screens/ResetPasswordScreen";
+import { ThemeProvider, useTheme } from "./src/theme";
+import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+
+const AuthStack = createNativeStackNavigator();
+
+function AuthNavigator() {
+	return (
+		<AuthStack.Navigator screenOptions={{ headerShown: false }}>
+			<AuthStack.Screen name="SignIn" component={SignInScreen} />
+			<AuthStack.Screen name="SignUp" component={SignUpScreen} />
+			<AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+			<AuthStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+		</AuthStack.Navigator>
+	);
+}
 
 function DashboardScreen() {
 	const [projectName, setProjectName] = useState("Loading...");
@@ -294,33 +306,76 @@ function AIChatScreen() {
 
 const Tab = createBottomTabNavigator();
 
+function MainTabs() {
+	const { theme } = useTheme();
+
+	return (
+		<Tab.Navigator
+			screenOptions={{
+				headerShown: false,
+				tabBarStyle: {
+					backgroundColor: theme.bgMain,
+					borderTopColor: theme.borderGlass,
+				},
+				tabBarActiveTintColor: theme.accentPrimary,
+				tabBarInactiveTintColor: theme.textMuted,
+			}}
+		>
+			<Tab.Screen name="Dashboard" component={DashboardScreen} />
+			<Tab.Screen name="Camera" component={CameraScreen} />
+			<Tab.Screen name="Editor" component={TimelineScreen} />
+			<Tab.Screen name="Lazynext AI Agent" component={AIChatScreen} />
+		</Tab.Navigator>
+	);
+}
+
+function AppContent() {
+	const { session, isLoading } = useAuth();
+
+	if (isLoading) {
+		return (
+			<SafeAreaView style={styles.container}>
+				<View style={styles.loadingContainer}>
+					<ActivityIndicator size="large" color="#00e5ff" />
+				</View>
+			</SafeAreaView>
+		);
+	}
+
+	return (
+		<NavigationContainer>
+			{session ? <MainTabs /> : <AuthNavigator />}
+		</NavigationContainer>
+	);
+}
+
+function ThemedApp() {
+	const { theme } = useTheme();
+
+	return (
+		<GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.bgMain }}>
+			<StatusBar
+				barStyle={theme.statusBarStyle}
+				backgroundColor={theme.bgMain}
+			/>
+			<AppContent />
+		</GestureHandlerRootView>
+	);
+}
+
 export default function App() {
 	return (
-		<GestureHandlerRootView style={{ flex: 1 }}>
-			<NavigationContainer>
-				<Tab.Navigator
-					screenOptions={{
-						headerShown: false,
-						tabBarStyle: {
-							backgroundColor: "#050505",
-							borderTopColor: "rgba(255,255,255,0.08)",
-						},
-						tabBarActiveTintColor: "#00e5ff",
-						tabBarInactiveTintColor: "rgba(255,255,255,0.5)",
-					}}
-				>
-					<Tab.Screen name="Dashboard" component={DashboardScreen} />
-					<Tab.Screen name="Camera" component={CameraScreen} />
-					<Tab.Screen name="Editor" component={TimelineScreen} />
-					<Tab.Screen name="Lazynext AI Agent" component={AIChatScreen} />
-				</Tab.Navigator>
-			</NavigationContainer>
-		</GestureHandlerRootView>
+		<ThemeProvider>
+			<AuthProvider>
+				<ThemedApp />
+			</AuthProvider>
+		</ThemeProvider>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: { flex: 1, backgroundColor: "#050505" },
+	loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 	header: {
 		padding: 24,
 		alignItems: "center",
@@ -424,10 +479,8 @@ const styles = StyleSheet.create({
 	},
 	buttonDisabled: { opacity: 0.4 },
 	buttonText: { color: "#050505", fontWeight: "bold", fontSize: 16 },
-	// Chat styles
 	chatHeader: {
 		padding: 24,
-		paddingTop: 48,
 		borderBottomWidth: 1,
 		borderBottomColor: "rgba(255,255,255,0.08)",
 	},

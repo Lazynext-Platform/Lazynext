@@ -1,0 +1,16 @@
+# TensorFlow Serving Model Directory
+#
+# Models are downloaded at deploy time by scripts/tf-model-download.sh.
+# They are NOT committed to git due to size (4 models ≈ 15 GB total).
+#
+# Models served:
+#   - whisper/1/        OpenAI Whisper Large-v3 (ASR, ~10 GB GPU)
+#   - sam2/1/           Meta SAM2 Hiera-Large (segmentation, ~7.5 GB GPU)
+#   - realesrgan/1/     Real-ESRGAN 4x (super-resolution, ~5 GB GPU)
+#   - mobilenet_v2/1/   MobileNetV2 1.0-224 (classification, ~0.5 GB)
+#
+# To download models:
+#   ./scripts/tf-model-download.sh
+#   or: docker compose -f docker-compose.tensorflow.yml run --rm model-download
+#
+# Model registry: services/pre-processing/tf_models/model_registry.yaml

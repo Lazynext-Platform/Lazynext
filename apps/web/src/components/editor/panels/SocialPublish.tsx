@@ -126,13 +126,18 @@ export function SocialPublish({
 	// ── Auto Reframe ───────────────────────────────────────────────
 
 	const handleAutoReframe = useCallback(async () => {
+		const exportPath = projectData?.exportPath;
+		if (!exportPath) {
+			toast.error("Please export your project first before reframing");
+			return;
+		}
 		setIsReframing(true);
 		try {
 			const res = await fetch(`${SOCIAL_PUBLISH_URL}/auto-reframe`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					video_path: projectData?.exportPath || "/tmp/demo.mp4",
+					video_path: exportPath,
 					target_platform: selectedPlatform.id,
 				}),
 			});
@@ -190,7 +195,7 @@ export function SocialPublish({
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					video_path: projectData?.exportPath || "/tmp/demo.mp4",
+					video_path: projectData?.exportPath || "",
 					count: 5,
 				}),
 			});
@@ -257,7 +262,7 @@ export function SocialPublish({
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					video_path: projectData?.exportPath || "/tmp/demo.mp4",
+					video_path: projectData?.exportPath || "",
 					platform: selectedPlatform.id,
 					title,
 					description,
@@ -288,7 +293,7 @@ export function SocialPublish({
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					video_path: projectData?.exportPath || "/tmp/demo.mp4",
+					video_path: projectData?.exportPath || "",
 					platform: selectedPlatform.id,
 					title,
 					description,

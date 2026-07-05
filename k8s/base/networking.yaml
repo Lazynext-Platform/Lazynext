@@ -216,7 +216,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: lazynext-pre-processing-gpu
+      app: lazynext-pre-processing
   policyTypes:
     - Ingress
   ingress:
@@ -237,7 +237,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: lazynext-generative-studio-gpu
+      app: lazynext-generative-studio
   policyTypes:
     - Ingress
   ingress:

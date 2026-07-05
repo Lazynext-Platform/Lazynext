@@ -65,7 +65,7 @@ datasources:
     database: lazynext
     editable: true
     secureJsonData:
-      password: "{{ vault_postgres_exporter_password | default('REPLACE_ME_EXPORTER_PASSWORD') }}"
+      password: "{{ vault_postgres_exporter_password | default('disabled') }}"
     jsonData:
       sslmode: disable
       postgresVersion: 1700

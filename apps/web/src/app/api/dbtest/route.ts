@@ -2,13 +2,27 @@
  * GET /api/dbtest
  *
  * Diagnostic endpoint — connects to the database and returns the
- * list of public tables.
+ * list of public tables. Requires admin authentication.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
 export async function GET() {
 	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		if (!session?.user) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
+		const userRole = (session.user as { role?: string }).role;
+		if (userRole !== "admin" && userRole !== "superadmin") {
+			return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+		}
+
 		const { Pool } = await import("pg");
 		const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 		const tables = await pool.query(

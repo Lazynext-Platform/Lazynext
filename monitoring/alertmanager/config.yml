@@ -13,7 +13,8 @@
 global:
   resolve_timeout: 5m
   pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
-  slack_api_url: "http://localhost:9999/webhook"
+  # slack_api_url removed — set per-receiver in route configs
+  # slack_api_url: "http://localhost:9999/webhook"
 
 # ── Route Tree ───────────────────────────────────────────────────
 route:
@@ -21,7 +22,7 @@ route:
   group_by: ["alertname", "severity", "service"]
   group_wait: 30s
   group_interval: 5m
-  repeat_interval: 4h
+  repeat_interval: 3h
 
   routes:
     # ── CRITICAL: API Gateway Down > 1min → PagerDuty + Slack ──
@@ -132,8 +133,7 @@ receivers:
   # ── Slack: Critical Alerts ───────────────────────────────────
   - name: "slack-critical"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
-        channel: "#lazynext-alerts-critical"
+      - api_url: "${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/disabled-critical}"
         username: "Lazynext AlertManager"
         icon_emoji: ":rotating_light:"
         title: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
@@ -164,8 +164,7 @@ receivers:
   # ── Slack: Warning Alerts ────────────────────────────────────
   - name: "slack-warnings"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
-        channel: "#lazynext-alerts"
+      - api_url: "${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/disabled-warning}"
         username: "Lazynext AlertManager"
         icon_emoji: ":warning:"
         title: '⚠️ [WARNING] {{ .GroupLabels.alertname }}'
@@ -196,8 +195,7 @@ receivers:
   # ── Slack: Deployment Notifications ──────────────────────────
   - name: "slack-deployments"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/PLACEHOLDER/PLACEHOLDER/PLACEHOLDER"
-        channel: "#lazynext-deployments"
+      - api_url: "${SLACK_WEBHOOK_URL_DEPLOY:-https://hooks.slack.com/services/disabled-deploy}"
         username: "Lazynext Deploy"
         icon_emoji: ":rocket:"
         title: '🚀 {{ .CommonAnnotations.summary }}'
@@ -241,7 +239,7 @@ receivers:
         from: "alerts@lazynext.ai"
         smarthost: "smtp.resend.com:587"
         auth_username: "resend"
-        auth_password: "PLACEHOLDER"
+        auth_password: "${RESEND_API_KEY:-disabled}"
         require_tls: true
         headers:
           Subject: "[Lazynext DB] {{ .GroupLabels.alertname }} — {{ .Status }}"
@@ -265,7 +263,7 @@ receivers:
   # ── Webhook: Custom Integration (Optional) ───────────────────
   - name: "webhook-custom"
     webhook_configs:
-      - url: "https://webhook.site/PLACEHOLDER"
+      - url: "${CUSTOM_WEBHOOK_URL:-https://webhook.site/disabled}"
         send_resolved: true
         http_config:
           authorization:

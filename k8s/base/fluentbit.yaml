@@ -178,15 +178,17 @@ data:
         HTTP_User                 loki
         HTTP_Passwd               ${LOKI_PASSWORD}
         # Retry on failure
-        Retry_Limit               3
+        Retry_Limit               5
         # Compression: use snappy for network efficiency
         Compress                  snappy
         # Line format: JSON for structured parsing in Loki
         Line_Format               json
         # Drop single key fields to reduce noise
         Drop_Single_Key           Off
+        storage.total_limit_size  1G
         # Connection TLS
-        Tls                       Off
+        Tls                       On
+        Tls.verify                On
 
     # ── Output: Systemd logs → Loki ─────────────────────────────────
     [OUTPUT]
@@ -200,6 +202,9 @@ data:
         Remove_Keys               _
         Line_Format               json
         Retry_Limit               2
+        storage.total_limit_size  1G
+        Tls                       On
+        Tls.verify                On
 
     # ── Output: Monitoring namespace logs → Loki ───────────────────
     [OUTPUT]
@@ -213,6 +218,9 @@ data:
         Auto_Kubernetes_Labels    On
         Line_Format               json
         Retry_Limit               2
+        storage.total_limit_size  1G
+        Tls                       On
+        Tls.verify                On
 
   # ── Custom Parsers ──────────────────────────────────────────────
   parsers-custom.conf: |
@@ -563,7 +571,7 @@ spec:
             type: DirectoryOrCreate
         - name: flb-storage
           hostPath:
-            path: /var/lib/fluent-bit
+            path: /var/log/flb-storage
             type: DirectoryOrCreate
         - name: config
           configMap:

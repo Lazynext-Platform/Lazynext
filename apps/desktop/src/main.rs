@@ -7,7 +7,9 @@ use tokio::sync::Mutex;
 mod dashboard;
 use dashboard::Dashboard;
 
+mod auth;
 mod editor;
+mod theme;
 
 // GPUI takes over the main thread, so we run a standard main function.
 fn main() {
@@ -41,10 +43,13 @@ fn main() {
     })));
 
     log::info!("Entering native event loop...");
+    let theme = Arc::new(theme::Theme::auto());
+    log::info!("Theme: {:?}", theme.mode);
 
     let nle_clone = nle.clone();
     let engine_clone = engine.clone();
     let rt_handle = rt.handle().clone();
+    let theme_clone = theme.clone();
 
     Application::new().run(move |cx: &mut App| {
         let bounds = Bounds {
@@ -61,7 +66,7 @@ fn main() {
                 }),
                 ..Default::default()
             },
-            |_, cx| cx.new(|_cx| Dashboard::new(nle_clone, engine_clone, rt_handle)),
+            |_, cx| cx.new(|_cx| Dashboard::new(nle_clone, engine_clone, rt_handle, theme_clone)),
         );
     });
 }

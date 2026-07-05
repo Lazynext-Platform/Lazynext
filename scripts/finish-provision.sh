@@ -12,7 +12,7 @@
 #   - GitHub CLI authenticated (gh auth login)
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TF_DIR="$SCRIPT_DIR/../terraform/azure"
+TF_DIR="$SCRIPT_DIR/../infra/terraform"
 
 echo "========================================="
 echo " Step 1: Fix storage account key access"

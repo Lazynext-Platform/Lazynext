@@ -25,6 +25,39 @@ spec:
         component: ml
     spec:
       terminationGracePeriodSeconds: 300
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-db -p 5432 -U lazynext -d lazynext; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
       nodeSelector:
         accelerator: nvidia
       tolerations:
@@ -121,6 +154,45 @@ spec:
       port: 8000
       targetPort: 8000
 ---
+# Pre-Processing GPU PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-pre-processing-gpu-pdb
+  namespace: lazynext
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-pre-processing-gpu
+---
+# Pre-Processing GPU HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lazynext-pre-processing-gpu-hpa
+  namespace: lazynext
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-pre-processing-gpu
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
 # GPU-accelerated Generative Studio (Diffusion, RealESRGAN, Demucs)
 apiVersion: apps/v1
 kind: Deployment
@@ -143,6 +215,39 @@ spec:
         component: ml
     spec:
       terminationGracePeriodSeconds: 300
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-db -p 5432 -U lazynext -d lazynext; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
       nodeSelector:
         accelerator: nvidia
       tolerations:
@@ -243,6 +348,45 @@ spec:
       protocol: TCP
       port: 8001
       targetPort: 8001
+---
+# Generative Studio GPU PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-generative-studio-gpu-pdb
+  namespace: lazynext
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-generative-studio-gpu
+---
+# Generative Studio GPU HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lazynext-generative-studio-gpu-hpa
+  namespace: lazynext
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-generative-studio-gpu
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ---
 # Persistent Volume Claim for ML Model Cache
 apiVersion: v1

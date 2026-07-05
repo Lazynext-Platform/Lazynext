@@ -422,3 +422,35 @@ resource "azurerm_monitor_diagnostic_setting" "container_app_env" {
     category = "AllMetrics"
   }
 }
+
+# ── Diagnostic Settings: PostgreSQL → Log Analytics ─────────────────────────
+
+resource "azurerm_monitor_diagnostic_setting" "postgres" {
+  name                       = "lazynext-diag-postgres-${var.environment}"
+  target_resource_id         = azurerm_postgresql_flexible_server.postgres.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
+
+  enabled_log {
+    category = "PostgreSQLLogs"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
+}
+
+# ── Diagnostic Settings: Key Vault → Log Analytics ──────────────────────────
+
+resource "azurerm_monitor_diagnostic_setting" "keyvault" {
+  name                       = "lazynext-diag-keyvault-${var.environment}"
+  target_resource_id         = azurerm_key_vault.secrets.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
+
+  enabled_log {
+    category = "AuditEvent"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
+}

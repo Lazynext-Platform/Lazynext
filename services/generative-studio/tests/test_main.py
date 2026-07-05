@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 import os
 
-from main import app
+from src.main import app
 
 client = TestClient(app)
 
@@ -31,7 +31,7 @@ def test_dub_video_no_key(monkeypatch):
         "text_to_dub": "Hola mundo"
     })
     assert response.status_code == 503
-    assert "ElevenLabs API key not configured" in response.json()["detail"]
+    assert "Dubbing unavailable" in response.json()["detail"]
 
 def test_split_stems_unavailable(monkeypatch):
     # This will fail unless demucs/spleeter is installed locally in the testing environment
