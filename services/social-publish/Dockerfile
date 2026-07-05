@@ -12,13 +12,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create non-root user
 RUN useradd --system --uid 1001 --create-home --shell /bin/false svcpublish
 
-# Copy only this service's files (isolated from workspace)
-COPY services/social-publish/package.json ./
+# Copy workspace root + packages + service
+COPY package.json bun.lock ./
 COPY packages/ packages/
+COPY services/social-publish/ services/social-publish/
 RUN bun install --production
 
-COPY services/social-publish/tsconfig.json ./
-COPY services/social-publish/src/ src/
+# Set working dir to service
+WORKDIR /app/services/social-publish
 
 RUN mkdir -p /tmp/social-outputs && chown -R svcpublish:svcpublish /tmp/social-outputs /app
 

@@ -3,16 +3,14 @@ FROM oven/bun:1.3 AS builder
 
 WORKDIR /app
 
-# Layer 1: Dependencies
+# Layer 1: Workspace dependencies (root package.json + packages)
 COPY package.json bun.lock ./
 COPY packages/ packages/
-COPY services/render-service/package.json ./
+COPY services/render-service/ services/render-service/
 RUN bun install --no-lockfile
 
-# Layer 2: Source
-COPY services/render-service/tsconfig.json ./
-COPY services/render-service/src/ src/
-
+# Build the service
+WORKDIR /app/services/render-service
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
 # ── Stage 2: Runtime ──
@@ -29,10 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs renderer
 
-# Copy production deps + source
+# Copy production deps + source from builder
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/src ./src
+COPY --from=builder /app/services/render-service/package.json ./
+COPY --from=builder /app/services/render-service/src/ ./src
 
 # Create temp directory for FFmpeg processing
 RUN mkdir -p /tmp/renders && chown -R renderer:nodejs /tmp/renders
