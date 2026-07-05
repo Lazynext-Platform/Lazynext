@@ -50,13 +50,15 @@ COPY rust/wasm/pkg /app/rust/wasm/pkg
 
 RUN bun install
 
-# Copy WASM as real directory into node_modules (Docker symlinks can break)
-RUN mkdir -p /app/node_modules/lazynext-wasm && \
-    cp -r /app/rust/wasm/pkg/* /app/node_modules/lazynext-wasm/
-
 # Copy source
 COPY apps/web/ apps/web/
 COPY .env.example apps/web/.env.local
+
+# Copy WASM as real directory into node_modules (after source COPY to avoid overwrite)
+RUN mkdir -p /app/node_modules/lazynext-wasm && \
+    cp -r /app/rust/wasm/pkg/* /app/node_modules/lazynext-wasm/ && \
+    mkdir -p /app/apps/web/node_modules/lazynext-wasm && \
+    cp -r /app/rust/wasm/pkg/* /app/apps/web/node_modules/lazynext-wasm/
 
 WORKDIR /app/apps/web
 
