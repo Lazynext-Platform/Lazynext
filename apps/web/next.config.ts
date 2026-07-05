@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
 			process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com",
 	},
 
+	// Turbopack: tell it where to find the WASM module
+	turbopack: {
+		resolveAlias: {
+			"lazynext-wasm": "/app/node_modules/lazynext-wasm",
+		},
+	} as any,
+
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
 	},
