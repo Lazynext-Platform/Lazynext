@@ -269,7 +269,9 @@ jobs:
           fi
 
       - name: Slack Notification
-        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         uses: slackapi/slack-github-action@v2
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -313,7 +315,9 @@ jobs:
             }
 
       - name: Discord Notification
-        if: ${{ secrets.DISCORD_WEBHOOK_URL != '' }}
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
