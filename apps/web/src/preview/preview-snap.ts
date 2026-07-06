@@ -1,3 +1,5 @@
+/** @module Snap-to-grid and edge snapping logic for the preview canvas viewport */
+
 export interface SnapLine {
 	type: "horizontal" | "vertical";
 	position: number;

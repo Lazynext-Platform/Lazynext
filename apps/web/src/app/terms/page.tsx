@@ -2,6 +2,7 @@
  * Terms of service page — accordion-layout legal content.
  *
  * @page /terms
+ * @module terms/page
  */
 
 import type { Metadata } from "next";

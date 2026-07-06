@@ -21,6 +21,7 @@
     deployment_timeout: 300
     smoke_test_retries: 12
     smoke_test_delay: 5
+    kubeconfig_path: "{{ lookup('env', 'KUBECONFIG') | default(ansible_env.HOME + '/.kube/config', true) }}"
 
   pre_tasks:
     # ──────────────────────────────────────────────────────────────
@@ -131,7 +132,7 @@
             DATABASE_URL_FILE: /run/secrets/postgres_password
             BETTER_AUTH_SECRET: "{{ vault_better_auth_secret | default(mandatory) }}"
             REDIS_URL: "{{ vault_redis_url | default(omit) }}"
-            STRIPE_SECRET_KEY: "{{ vault_stripe_secret_key | default('') }}"
+            DODO_API_KEY: "{{ vault_dodo_api_key | default('') }}"
             RESEND_API_KEY: "{{ vault_resend_api_key | default('') }}"
             AZURE_STORAGE_CONNECTION_STRING: "{{ vault_azure_storage_connection_string | default('') }}"
 
@@ -250,9 +251,13 @@
         api_gateway_endpoint: "{{ gateway_ip.stdout | default('localhost') }}"
         api_gateway_port: "{{ 8005 if target_environment == 'staging' else 443 }}"
 
+    - name: Set API Gateway protocol
+      ansible.builtin.set_fact:
+        api_gateway_protocol: "{{ 'https' if (api_gateway_port | int) == 443 else 'http' }}"
+
     - name: Smoke test — API Gateway health endpoint
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:{{ api_gateway_port }}/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:{{ api_gateway_port }}/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -265,7 +270,7 @@
 
     - name: Smoke test — Web app health endpoint
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:{{ api_gateway_port }}/api/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:{{ api_gateway_port }}/api/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -278,7 +283,7 @@
 
     - name: Smoke test — Pre-processing service
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8000/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8000/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -291,7 +296,7 @@
 
     - name: Smoke test — Generative Studio service
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8001/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8001/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -304,7 +309,7 @@
 
     - name: Smoke test — AI Agents / Sync server
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8002/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8002/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -317,7 +322,7 @@
 
     - name: Smoke test — Render service
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8003/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8003/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -330,7 +335,7 @@
 
     - name: Smoke test — Collab server
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8004/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8004/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -343,7 +348,7 @@
 
     - name: Smoke test — Analytics service
       ansible.builtin.uri:
-        url: "http://{{ api_gateway_endpoint }}:8006/health"
+        url: "{{ api_gateway_protocol }}://{{ api_gateway_endpoint }}:8006/health"
         method: GET
         validate_certs: false
         return_content: yes
@@ -389,11 +394,21 @@
           One or more critical services failed smoke tests:
           API Gateway: {{ smoke_test_results.api_gateway }}
           Web App: {{ smoke_test_results.web_app }}
+          Pre-processing: {{ smoke_test_results.pre_processing }}
+          Generative Studio: {{ smoke_test_results.generative_studio }}
           AI Agents: {{ smoke_test_results.ai_agents }}
+          Render Service: {{ smoke_test_results.render_service }}
+          Collab Server: {{ smoke_test_results.collab_server }}
+          Analytics Service: {{ smoke_test_results.analytics_service }}
       when:
         - smoke_test_results.api_gateway == 'FAIL'
            or smoke_test_results.web_app == 'FAIL'
+           or smoke_test_results.pre_processing == 'FAIL'
+           or smoke_test_results.generative_studio == 'FAIL'
            or smoke_test_results.ai_agents == 'FAIL'
+           or smoke_test_results.render_service == 'FAIL'
+           or smoke_test_results.collab_server == 'FAIL'
+           or smoke_test_results.analytics_service == 'FAIL'
 
   post_tasks:
     # ──────────────────────────────────────────────────────────────

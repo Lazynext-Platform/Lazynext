@@ -370,7 +370,7 @@ lazynext/
 | [Platform Assessment](PLATFORM_ASSESSMENT.md) | Current per-format completion % and gap analysis |
 | [Contributing](CONTRIBUTING.md) | Development workflow, code style, PR process |
 | [AGENTS.md](AGENTS.md) | AI agent orientation |
-| [CLAUDE.md](CLAUDE.md) | Developer / agent quick-reference |
+| [AGENTS.md](AGENTS.md) | Developer / agent quick-reference |
 
 ### Per-feature docs
 

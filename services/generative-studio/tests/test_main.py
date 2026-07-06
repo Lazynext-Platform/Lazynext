@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 import os
 
-from main import app
+from src.main import app
 
 client = TestClient(app)
 
@@ -25,14 +25,13 @@ def test_generate_video_no_key(monkeypatch):
     assert "Replicate API token not configured" in response.json()["detail"]
 
 def test_dub_video_no_key(monkeypatch):
-    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
     response = client.post("/dub", json={
         "clip_id": "clip_123",
         "target_language": "es",
         "text_to_dub": "Hola mundo"
     })
     assert response.status_code == 503
-    assert "ElevenLabs API key not configured" in response.json()["detail"]
+    assert "Dubbing unavailable" in response.json()["detail"]
 
 def test_split_stems_unavailable(monkeypatch):
     # This will fail unless demucs/spleeter is installed locally in the testing environment

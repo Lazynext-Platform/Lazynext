@@ -4,7 +4,7 @@ Async offload services for AI inference, rendering, collaboration, and analytics
 
 | Service | Language | Port | Purpose |
 |---------|----------|------|---------|
-| `ai-agents/` | TypeScript (Bun) | 8002 | Chronos Copilot orchestrator + CRDT sync |
+| `ai-agents/` | TypeScript (Bun) | 8002 | Lazynext AI Agent Copilot orchestrator + CRDT sync |
 | `render-service/` | TypeScript (Bun) | 8003 | FFmpeg render farm |
 | `collab-server/` | Rust | 8004 | CRDT WebSocket sync + WebRTC signaling |
 | `pre-processing/` | Python | 8000 | Whisper, SAM2, NeRF, scene detection |

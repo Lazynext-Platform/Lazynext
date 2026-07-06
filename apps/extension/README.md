@@ -1,4 +1,7 @@
-# Lazynext Capture Extension (Chrome MV3)
+# Lazynext Capture Extension (Chrome MV3) ⚠️ LEGACY
+
+> **This extension is superseded by `apps/browser-extension/`** which provides the canonical, maintained implementation with TypeScript, React, Vite, and full AI Copilot integration.
+> This legacy version is preserved for historical reference only. Do not add new features here.
 
 Lightweight Chrome extension for capturing active tab video/audio and streaming directly into a Lazynext project.
 

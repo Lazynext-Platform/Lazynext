@@ -9,7 +9,9 @@
 
 import { createAuthClient } from "better-auth/react";
 
-/** Singleton Better Auth client used across the application. */
-export const authClient = createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
-});
+const baseURL =
+	typeof window !== "undefined"
+		? window.location.origin
+		: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+export const authClient = createAuthClient({ baseURL });

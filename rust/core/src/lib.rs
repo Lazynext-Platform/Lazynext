@@ -40,7 +40,13 @@
     clippy::collapsible_if
 )]
 pub mod ai_client;
+pub mod auto_memory;
+#[cfg(not(target_arch = "wasm32"))]
 pub mod autonomous;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod autonomous_agent;
+pub mod channels;
+pub mod copilot_tools;
 pub mod engine;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ffmpeg_loader;
@@ -51,12 +57,23 @@ pub mod nle_state;
 pub mod plugin_manager;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod ring_buffer_decoder;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod scheduled_routines;
+pub mod session_portability;
+pub mod task_queue;
 pub mod timeline;
 
+pub use auto_memory::AutoMemory;
+#[cfg(not(target_arch = "wasm32"))]
 pub use autonomous::*;
+pub use channels::*;
 pub use engine::*;
 #[cfg(not(target_arch = "wasm32"))]
 pub use mobile_bridge::*;
 pub use nle_state::*;
 pub use plugin_manager::*;
+#[cfg(not(target_arch = "wasm32"))]
+pub use scheduled_routines::*;
+pub use session_portability::*;
+pub use task_queue::*;
 pub use timeline::*;

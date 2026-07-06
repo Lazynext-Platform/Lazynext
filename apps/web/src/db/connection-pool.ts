@@ -495,6 +495,28 @@ export function getPoolManager(): PoolManager {
 		throw new Error("DATABASE_URL environment variable is required for pool manager");
 	}
 
+	// Skip real DB connection when using placeholder/skip URLs (dev/staging/Azure cold start)
+	const isSkipUrl = databaseUrl.includes("skip:skip@") || databaseUrl.includes("placeholder");
+	if (isSkipUrl) {
+		console.log("[PoolManager] DATABASE_URL is a placeholder — operating in degraded mode (no DB)");
+		_poolManager = new PoolManager({
+			writer: {
+				maxConnections: 0,
+				connectionString: databaseUrl,
+				idleTimeoutSeconds: 0,
+				connectTimeoutSeconds: 1,
+				maxLifetimeSeconds: 0,
+			},
+			reader: null,
+			retryOptions: { ...DEFAULT_RETRY_OPTIONS, maxRetries: 0 },
+			circuitBreakerThreshold: 1,
+			circuitBreakerResetTimeoutMs: 1000,
+			enableReaderPool: false,
+		});
+		_poolManager["initialized"] = true;
+		return _poolManager;
+	}
+
 	const readerUrl =
 		process.env.DATABASE_READER_URL ?? databaseUrl; // fall back to writer
 

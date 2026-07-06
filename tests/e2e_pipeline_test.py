@@ -40,9 +40,8 @@ async def test_full_pipeline_e2e():
         # Note: Depending on the API Gateway routing, we might hit the pre-processing directly if Gateway isn't fully mocked.
         # We will hit pre-processing endpoints through gateway for e2e.
         ingest_payload = {
-            "video_id": test_video_id,
-            "url": "https://example.com/sample.mp4",
-            "metadata": {"source": "e2e_test"}
+            "file_path": "https://example.com/sample.mp4",
+            "project_id": "test_project"
         }
         # In a real environment, this goes through the gateway -> pre-processing /ingest
         # We assume the gateway forwards /api/v1/pre-processing/* to the pre-processing service.
@@ -57,8 +56,7 @@ async def test_full_pipeline_e2e():
 
         # Step 3: Transcription Request
         transcribe_payload = {
-            "video_id": test_video_id,
-            "s3_key": f"uploads/{test_video_id}.mp4"
+            "video_id": test_video_id
         }
         try:
             trans_res = await client.post("/api/v1/pre-processing/transcribe", json=transcribe_payload, timeout=10.0)
@@ -70,8 +68,9 @@ async def test_full_pipeline_e2e():
         # Step 4: Rotoscoping Request
         roto_payload = {
             "video_id": test_video_id,
-            "s3_key": f"uploads/{test_video_id}.mp4",
-            "object_prompt": "main subject"
+            "object_prompt": "main subject",
+            "frame_start": 0,
+            "frame_end": 100
         }
         try:
             roto_res = await client.post("/api/v1/pre-processing/rotoscope", json=roto_payload, timeout=10.0)

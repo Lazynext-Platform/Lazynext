@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 import os
 
-from main import app
+from src.main import app
 
 client = TestClient(app)
 
@@ -25,7 +25,7 @@ def test_transcribe_audio_production_no_key(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
     assert response.status_code == 503
-    assert "Whisper API key not configured" in response.json()["detail"]
+    assert "Transcription service unavailable" in response.json()["detail"]
 
 def test_process_video():
     response = client.post("/process", json={

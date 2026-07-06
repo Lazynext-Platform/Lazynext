@@ -329,7 +329,7 @@ export default function EditorClient({ project }: { project: Project }) {
 		},
 	]);
 
-	// Phase 31: Chronos AI Copilot State
+	// Phase 31: Lazynext AI Agent Copilot State
 	const [isChatOpen, setIsChatOpen] = useState(false);
 	const [copilotPrompt, setCopilotPrompt] = useState("");
 	const [isCopilotThinking, setIsCopilotThinking] = useState(false);
@@ -462,7 +462,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							})),
 						}));
 						setSelectedClipId(null);
-						toast.success("Chronos AI deleted the clip.");
+						toast.success("Lazynext AI Agent deleted the clip.");
 					} else if (call.name === "color_grade" && selectedClipId) {
 						const look = (call.input as any).look || "default";
 						setProjectData((prev) => ({
@@ -474,7 +474,7 @@ export default function EditorClient({ project }: { project: Project }) {
 								),
 							})),
 						}));
-						toast.success(`Chronos AI applied color grade: ${look}`);
+						toast.success(`Lazynext AI Agent applied color grade: ${look}`);
 					}
 					// Expand with other mutations as needed...
 				}
@@ -486,7 +486,7 @@ export default function EditorClient({ project }: { project: Project }) {
 			// Apply direct CRDT timeline patches from the AI orchestrator
 			if (data.crdt_patches && Array.isArray(data.crdt_patches)) {
 				setProjectData((prev) => {
-					let newProject = { ...prev };
+					const newProject = { ...prev };
 					for (const patch of data.crdt_patches) {
 						// Extremely basic implementation of JSON patch for demonstration
 						// In production, we'd use 'fast-json-patch' or similar CRDT library.
@@ -515,13 +515,13 @@ export default function EditorClient({ project }: { project: Project }) {
 					}
 					return newProject;
 				});
-				toast.success(`Chronos AI applied ${data.crdt_patches.length} structural edits!`);
+				toast.success(`Lazynext AI Agent applied ${data.crdt_patches.length} structural edits!`);
 			}
 
 			setCopilotHistory((prev) => [...prev, aiMsg]);
 		} catch (err) {
 			console.error("Copilot Error:", err);
-			const errMsg = err instanceof Error ? err.message : "Chronos AI encountered an error.";
+			const errMsg = err instanceof Error ? err.message : "Lazynext AI Agent encountered an error.";
 			toast.error(errMsg);
 			setCopilotHistory((prev) => [
 				...prev,
@@ -12297,7 +12297,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					</div>
 				))}
 
-			{/* Phase 31: AI Copilot Command Bar (Prompt-to-Edit Engine) */}
+			{/* Phase 31: Lazynext AI Agent Command Bar (Prompt-to-Edit Engine) */}
 			<div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[100] w-[800px] max-w-[90vw] max-h-[50vh] bg-[var(--bg-panel)]/95 backdrop-blur-3xl border border-[var(--border-glass)] rounded-2xl shadow-[0_0_60px_rgba(1,243,254,0.15)] flex flex-col pointer-events-auto overflow-hidden animate-in fade-in slide-in-from-bottom-4">
 				<div className="bg-[var(--accent-primary)]/10 border-b border-[var(--border-glass)] px-4 py-3 flex justify-between items-center relative overflow-hidden">
 					<div className="absolute inset-0 bg-gradient-to-r from-[var(--accent-primary)]/20 to-transparent blur-xl pointer-events-none" />
@@ -12345,7 +12345,7 @@ export default function EditorClient({ project }: { project: Project }) {
 							{msg.role === "ai" && (
 								<>
 									<div className="text-[var(--accent-primary)] text-[10px] font-bold mb-1 flex items-center gap-1">
-										<Sparkles className="w-3 h-3" /> CHRONOS
+										<Sparkles className="w-3 h-3" /> LAZYNEXT AI AGENT
 									</div>
 									<div className="bg-[var(--bg-main)] border border-[var(--border-glass)] p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
 										<div className="absolute inset-0 bg-[var(--accent-primary)]/5 pointer-events-none" />
@@ -12379,7 +12379,7 @@ export default function EditorClient({ project }: { project: Project }) {
 					{isCopilotThinking && (
 						<div className="flex flex-col gap-1">
 							<div className="text-[var(--accent-primary)] text-[10px] font-bold mb-1 flex items-center gap-1">
-								<Sparkles className="w-3 h-3" /> CHRONOS
+								<Sparkles className="w-3 h-3" /> LAZYNEXT AI AGENT
 							</div>
 							<div className="bg-[var(--bg-main)] border border-[var(--border-glass)] p-3 rounded-lg flex flex-col gap-2 relative overflow-hidden">
 								<div className="absolute inset-0 bg-[var(--accent-primary)]/5 pointer-events-none" />
@@ -12397,7 +12397,7 @@ export default function EditorClient({ project }: { project: Project }) {
 						<div className="absolute -inset-0.5 bg-gradient-to-r from-[var(--accent-primary)] to-purple-600 rounded-xl opacity-20 group-hover:opacity-40 blur transition duration-500" />
 						<input
 							type="text"
-							placeholder="Ask Chronos to edit..."
+							placeholder="Ask Lazynext AI Agent to edit..."
 							value={copilotPrompt}
 							onChange={(e) => setCopilotPrompt(e.target.value)}
 							onKeyDown={(e) => {

@@ -1,0 +1,205 @@
+---
+# Social Publish Service (Node.js) — Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-social-publish
+  namespace: lazynext
+  labels:
+    app: lazynext-social-publish
+    component: backend
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: lazynext-social-publish
+  template:
+    metadata:
+      labels:
+        app: lazynext-social-publish
+        component: backend
+    spec:
+      serviceAccountName: lazynext-sa
+      priorityClassName: lazynext-low
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-db -p 5432 -U lazynext -d lazynext; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: lazynext-social-publish
+          image: ghcr.io/lazynext-platform/lazynext-social-publish:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 8007
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8007
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8007
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          env:
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NODE_ENV
+            - name: YT_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: YT_CLIENT_ID
+                  optional: true
+            - name: YT_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: YT_CLIENT_SECRET
+                  optional: true
+            - name: TIKTOK_CLIENT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TIKTOK_CLIENT_KEY
+                  optional: true
+            - name: TIKTOK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TIKTOK_CLIENT_SECRET
+                  optional: true
+            - name: INSTAGRAM_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: INSTAGRAM_ACCESS_TOKEN
+                  optional: true
+            - name: TWITTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TWITTER_API_KEY
+                  optional: true
+            - name: TWITTER_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TWITTER_API_SECRET
+                  optional: true
+            - name: TWITTER_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TWITTER_ACCESS_TOKEN
+                  optional: true
+            - name: TWITTER_ACCESS_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: TWITTER_ACCESS_SECRET
+                  optional: true
+            - name: REDIS_URL
+              value: "redis://redis-db:6379/5"
+          volumeMounts:
+            - name: social-tmp
+              mountPath: /tmp/social-publish
+      volumes:
+        - name: social-tmp
+          emptyDir:
+            sizeLimit: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-social-publish
+  namespace: lazynext
+  labels:
+    app: lazynext-social-publish
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-social-publish
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8007
+      targetPort: 8007
+---
+# Prometheus ServiceMonitor — Social Publish
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lazynext-social-publish
+  namespace: lazynext
+  labels:
+    app: lazynext-social-publish
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: lazynext-social-publish
+  endpoints:
+    - port: http
+      path: /health
+      interval: 30s
+      scrapeTimeout: 10s

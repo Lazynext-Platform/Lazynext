@@ -16,8 +16,8 @@
 # Secrets expected under /run/secrets/:
 #   lazynext_postgres_password
 #   lazynext_better_auth_secret
-#   lazynext_stripe_secret_key
-#   lazynext_stripe_webhook_secret
+#   lazynext_dodo_api_key
+#   lazynext_dodo_webhook_secret
 #   lazynext_resend_api_key
 #   lazynext_openai_api_key
 #   lazynext_anthropic_api_key
@@ -208,10 +208,10 @@ services:
     secrets:
       - source: lazynext_better_auth_secret
         target: better_auth_secret
-      - source: lazynext_stripe_secret_key
-        target: stripe_secret_key
-      - source: lazynext_stripe_webhook_secret
-        target: stripe_webhook_secret
+      - source: lazynext_dodo_api_key
+        target: dodo_api_key
+      - source: lazynext_dodo_webhook_secret
+        target: dodo_webhook_secret
       - source: lazynext_resend_api_key
         target: resend_api_key
       - source: lazynext_freesound_client_id
@@ -225,7 +225,7 @@ services:
     environment:
       - NODE_ENV=production
       - STORAGE_PROVIDER=azure
-      - DATABASE_URL_FILE=/run/secrets/postgres_password
+      - DATABASE_URL=postgresql://lazynext:${DB_PASSWORD}@db:5432/lazynext
       - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
       - BETTER_AUTH_URL=https://lazynext.com
       - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
@@ -241,8 +241,8 @@ services:
       - NEXT_PUBLIC_RENDER_SERVICE_URL=https://api.lazynext.com/render
       - NEXT_PUBLIC_POSTHOG_KEY=phc_prod
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-      - STRIPE_SECRET_KEY_FILE=/run/secrets/stripe_secret_key
-      - STRIPE_WEBHOOK_SECRET_FILE=/run/secrets/stripe_webhook_secret
+      - DODO_API_KEY_FILE=/run/secrets/dodo_api_key
+      - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
       - RESEND_API_KEY_FILE=/run/secrets/resend_api_key
       - FREESOUND_CLIENT_ID_FILE=/run/secrets/freesound_client_id
       - FREESOUND_API_KEY_FILE=/run/secrets/freesound_api_key
@@ -289,7 +289,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8002
-      - DATABASE_URL_FILE=/run/secrets/postgres_password
+      - DATABASE_URL=postgresql://lazynext:${DB_PASSWORD}@db:5432/lazynext
       - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
       - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
       - GEMINI_API_KEY_FILE=/run/secrets/gemini_api_key
@@ -374,6 +374,7 @@ services:
       - source: lazynext_better_auth_secret
         target: better_auth_secret
     environment:
+      - DATABASE_URL=postgresql://lazynext:${DB_PASSWORD}@db:5432/lazynext
       - COLLAB_PORT=8004
       - RUST_LOG=info
       - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
@@ -704,9 +705,9 @@ secrets:
     external: true
   lazynext_better_auth_secret:
     external: true
-  lazynext_stripe_secret_key:
+  lazynext_dodo_api_key:
     external: true
-  lazynext_stripe_webhook_secret:
+  lazynext_dodo_webhook_secret:
     external: true
   lazynext_resend_api_key:
     external: true

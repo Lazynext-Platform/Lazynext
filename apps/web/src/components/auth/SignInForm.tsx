@@ -8,30 +8,37 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/auth/client";
 import { toast } from "sonner";
 import Link from "next/link";
 
 export function SignInForm() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const redirectTo = searchParams.get("redirect") || "/dashboard";
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
+		if (!email || !password) {
+			toast.error("Please enter your email and password");
+			return;
+		}
 		setLoading(true);
 		try {
 			const result = await signIn.email({
 				email,
 				password,
+				rememberMe: true,
 			});
 			if (result.error) {
-				toast.error(result.error.message ?? "Sign in failed");
+				toast.error(result.error.message ?? "Invalid email or password");
 			} else {
 				toast.success("Signed in successfully!");
-				router.push("/dashboard");
+				router.push(redirectTo);
 			}
 		} catch (err) {
 			toast.error(
@@ -59,7 +66,8 @@ export function SignInForm() {
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					required
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					autoComplete="email"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="you@example.com"
 				/>
 			</div>
@@ -73,7 +81,7 @@ export function SignInForm() {
 					</label>
 					<Link
 						href="/forgot-password"
-						className="text-xs text-blue-400 hover:text-blue-300"
+						className="text-xs text-[var(--accent-secondary)] hover:underline"
 					>
 						Forgot password?
 					</Link>
@@ -85,20 +93,21 @@ export function SignInForm() {
 					onChange={(e) => setPassword(e.target.value)}
 					required
 					minLength={8}
-					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-zinc-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					autoComplete="current-password"
+					className="w-full rounded-lg border border-border bg-panel px-3 py-2 text-sm text-foreground placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent-secondary)] focus:ring-1 focus:ring-[var(--accent-secondary)]"
 					placeholder="••••••••"
 				/>
 			</div>
 			<button
 				type="submit"
 				disabled={loading}
-				className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-blue-500 disabled:opacity-50"
+				className="w-full rounded-lg bg-[var(--accent-secondary)] py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-[var(--accent-secondary)]/80 disabled:opacity-50"
 			>
 				{loading ? "Signing in..." : "Sign In"}
 			</button>
 			<p className="text-center text-xs text-muted">
 				Don&apos;t have an account?{" "}
-				<Link href="/sign-up" className="text-blue-400 hover:text-blue-300">
+				<Link href="/sign-up" className="text-[var(--accent-secondary)] hover:underline">
 					Sign Up
 				</Link>
 			</p>

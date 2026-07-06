@@ -1,14 +1,15 @@
 /**
  * Project-specific editor page — loads a project by ID, wraps the
- * modern editor client with state provider and error boundary.
+ * modern editor client with state provider, error boundary, command
+ * palette, keyboard hints, and quick actions FAB.
  *
  * @page /editor/[id]
  */
 
 import ModernEditorClient from "@/components/editor/ModernEditorClient";
-import ExportButton from "@/components/editor/export-button";
 import { EditorErrorBoundary } from "@/components/editor/EditorErrorBoundary";
 import { EditorStateProvider } from "@/components/editor/useEditorState";
+import { EditorUIClient } from "./editor-ui-client";
 import { getProject } from "@/actions/project";
 import { notFound } from "next/navigation";
 
@@ -26,7 +27,6 @@ export default async function EditorPage({
 		notFound();
 	}
 
-	// Ensure JSON payload has correct defaults
 	const tracks = project.timeline?.tracks || [];
 	const maxClipEnd = tracks.reduce(
 		(
@@ -50,35 +50,15 @@ export default async function EditorPage({
 		height: project.timeline?.height || 1080,
 		fps: project.timeline?.framerate || 60,
 		duration_frames: maxClipEnd || 120,
-		bg_color: [0.09, 0.09, 0.11, 1.0],
+		bg_color: [0.09, 0.09, 0.11, 1.0] as [number, number, number, number],
 		tracks,
 	};
 
 	return (
 		<div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground selection:bg-blue-500/30">
-			{/* Header */}
-			<header className="flex h-14 w-full items-center justify-between border-b border-border bg-background/80 backdrop-blur-md px-6 shadow-sm z-50">
-				<div className="flex items-center gap-6">
-					<span className="font-extrabold tracking-tight bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-						Lazynext
-					</span>
-					<div className="h-4 w-px bg-glass" />
-					<span className="text-sm font-medium text-foreground">
-						{project.name}
-					</span>
-				</div>
-				<ExportButton projectId={project.id} />
-			</header>
-
-			{/* Main Body — wrapped in state provider + error boundary */}
 			<EditorStateProvider initialProject={projectJson}>
 				<EditorErrorBoundary section="Editor">
-					<div className="flex flex-1 overflow-hidden relative">
-						<div className="absolute inset-0 z-0 bg-[url('/noise.png')] opacity-5 pointer-events-none" />
-						<div className="relative z-10 flex flex-1 w-full h-full">
-							<ModernEditorClient project={projectJson} />
-						</div>
-					</div>
+					<EditorUIClient project={projectJson} projectId={project.id} projectName={project.name} />
 				</EditorErrorBoundary>
 			</EditorStateProvider>
 		</div>

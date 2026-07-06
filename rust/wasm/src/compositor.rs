@@ -33,6 +33,18 @@ thread_local! {
 
 #[wasm_bindgen(js_name = initCompositor)]
 pub fn init_compositor(width: u32, height: u32) -> Result<(), JsValue> {
+    if width == 0 || height == 0 {
+        return Err(JsValue::from_str(&format!(
+            "Invalid compositor dimensions: {}x{} (must be > 0)",
+            width, height
+        )));
+    }
+    if width > 16384 || height > 16384 {
+        return Err(JsValue::from_str(&format!(
+            "Compositor dimensions exceed GPU limits: {}x{} (max 16384x16384)",
+            width, height
+        )));
+    }
     with_gpu_runtime(|gpu_runtime| {
         if COMPOSITOR_RUNTIME.with(|runtime| runtime.borrow().is_some()) {
             return resize_compositor(width, height);
@@ -125,6 +137,13 @@ pub fn upload_texture(options: JsValue) -> Result<(), JsValue> {
         width,
         height,
     } = parse_upload_texture_options(options)?;
+
+    if width == 0 || height == 0 {
+        return Err(JsValue::from_str(&format!(
+            "Invalid texture dimensions for '{}': {}x{} (must be > 0)",
+            id, width, height
+        )));
+    }
 
     with_gpu_runtime(|gpu_runtime| {
         COMPOSITOR_RUNTIME.with(|runtime| {

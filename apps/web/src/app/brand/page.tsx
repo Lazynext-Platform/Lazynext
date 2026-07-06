@@ -2,6 +2,7 @@
  * Brand assets page — logos, colors, typography, and brand guidelines.
  *
  * @page /brand
+ * @module brand/page
  */
 
 "use client";

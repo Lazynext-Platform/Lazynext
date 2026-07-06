@@ -34,7 +34,7 @@ then surgically fix only what is actually broken or cosmetic.
 
 ## Data Flow (unchanged, re-verified)
 ```
-User (type/speak) ─▶ Chronos orchestrator ─▶ LLM (Gemini) ─▶ VideoIntent
+User (type/speak) ─▶ Lazynext AI Agent orchestrator ─▶ LLM (Gemini) ─▶ VideoIntent
    ─▶ AutonomousEditor ─▶ CRDT mutation (NLEState) ─▶ GPU compositor (wgpu)
    ─▶ ExportPipeline (ffmpeg) ─▶ MP4 ─▶ check_job_status (FIX: real URL)
 ```

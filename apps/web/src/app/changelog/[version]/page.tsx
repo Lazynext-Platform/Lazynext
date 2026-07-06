@@ -2,6 +2,7 @@
  * Changelog version page — single release detail with navigation.
  *
  * @page /changelog/[version]
+ * @module changelog/version/page
  */
 
 import type { Metadata } from "next";

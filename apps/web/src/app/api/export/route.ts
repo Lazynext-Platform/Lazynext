@@ -3,10 +3,14 @@
  * job on the render-service and returns the endpoint URLs the browser uses
  * to stream RGBA frames (WYSIWYG compositor rendered). Falls back to
  * local WebCodecs encoding when the service is offline.
+ * Requires authentication.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 import { getProject } from "@/actions/project";
+import { exportSchema } from "@/lib/validation";
 
 const RENDER_SERVICE_URL =
 	process.env.RENDER_SERVICE_URL || "http://localhost:8003";
@@ -22,17 +26,22 @@ const RENDER_SERVICE_URL =
  */
 export async function POST(request: Request) {
 	try {
-		const {
-			projectId,
-			format = "mp4",
-			bitrate_kbps = 8000,
-		} = await request.json();
-		if (!projectId) {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		if (!session || !session.user) {
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+		}
+
+		const rawBody = await request.json();
+		const parsed = exportSchema.safeParse(rawBody);
+		if (!parsed.success) {
 			return NextResponse.json(
-				{ error: "Missing projectId" },
+				{ error: parsed.error.issues[0]?.message || "Invalid input" },
 				{ status: 400 },
 			);
 		}
+		const { projectId, format, bitrate_kbps } = parsed.data;
 
 		// 1. Fetch project data to derive export dimensions / duration
 		const project = await getProject(projectId);

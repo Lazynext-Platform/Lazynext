@@ -108,7 +108,22 @@ output "tenant_id" {
 # ── Redis Cache ─────────────────────────────────────────────────────────────
 # Redis managed via Upstash (UPSTASH_REDIS_URL) — no Azure Redis provisioned
 
-# ── CDN / Front Door ────────────────────────────────────────────────────────
+# ── DNS Zone ─────────────────────────────────────────────────────────────────
+
+output "dns_zone_name" {
+  description = "Azure DNS zone name"
+  value       = var.create_dns_zone ? azurerm_dns_zone.primary[0].name : null
+}
+
+output "dns_zone_name_servers" {
+  description = "Azure DNS zone name servers (configure at your registrar: Spaceship)"
+  value       = var.create_dns_zone ? azurerm_dns_zone.primary[0].name_servers : null
+}
+
+output "dns_zone_id" {
+  description = "Azure DNS zone resource ID (for Front Door custom domain validation)"
+  value       = var.create_dns_zone ? azurerm_dns_zone.primary[0].id : null
+}
 
 output "cdn_endpoint_hostname" {
   description = "Azure Front Door endpoint hostname"

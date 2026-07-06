@@ -37,7 +37,7 @@
 - **"Stub" assessments compound over time**: The PLATFORM_ASSESSMENT's desktop claim deterred investment in a working application. The lesson: never accept a status classification ("1%", "stub") without reading the actual files. One read of `main.rs` + `editor.rs` would have revealed the truth.
 - **GPUI's RenderImage path is production-grade**: The `engine.render_frame() → RGBA → image::RgbaImage → GPUI RenderImage` pipeline works now. It's the same compositor frames that the web and CLI paths render. The desktop path doesn't need a new renderer — it needs playback controls to drive the existing one.
 - **DeckLink is already wired on init**: `engine.enable_decklink()` is called at startup. SDI output is gated on hardware availability, not on code implementation. This is a meaningful differentiator that was invisible to the assessment.
-- **The AI Copilot integration in desktop mirrors the web path**: `POST api-gateway:8005/api/v1/autonomous_edit` — same endpoint, same pattern. Desktop gets Chronos for free because the API gateway is shared.
+- **The AI Copilot integration in desktop mirrors the web path**: `POST api-gateway:8005/api/v1/autonomous_edit` — same endpoint, same pattern. Desktop gets Lazynext AI Agent for free because the API gateway is shared.
 
 ---
 

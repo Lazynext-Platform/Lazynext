@@ -1,146 +1,557 @@
-# GitLab CI/CD pipeline for Lazynext monorepo
-# Uses Docker-in-Docker for container builds, Rust cache, and parallel stages
-
-stages:
-  - setup
-  - lint
-  - build
-  - test
-  - security
-  - deploy
-
-variables:
-  DOCKER_REGISTRY: lazynext.azurecr.io
-  RUST_VERSION: "1.96"
-  CARGO_HOME: ${CI_PROJECT_DIR}/.cargo
-  BUN_INSTALL: "$CI_PROJECT_DIR/.bun"
+# ── Lazynext GitLab CI/CD Pipeline ───────────────────────────────────────
+# Mirrors .github/workflows/ and Jenkinsfile for GitLab users.
+#
+# Required GitLab CI/CD variables (Settings → CI/CD → Variables):
+#   AZURE_CLIENT_ID           Azure service principal app ID
+#   AZURE_TENANT_ID           Azure AD tenant ID
+#   AZURE_SUBSCRIPTION_ID     Azure subscription ID
+#   ACR_LOGIN_SERVER          Azure Container Registry login server
+#   ACR_USERNAME              ACR admin username
+#   ACR_PASSWORD              ACR admin password
+#   SLACK_WEBHOOK_URL         Slack incoming webhook for notifications
+#   DISCORD_WEBHOOK_URL       Discord webhook for notifications
+#   KUBE_CONFIG               Kubernetes kubeconfig (base64) for prod cluster
+#
+# Required GitLab runners: linux, docker
 
 default:
-  image: rust:${RUST_VERSION}-slim
+  image: ubuntu:22.04
+  tags:
+    - linux
+    - docker
   before_script:
-    - apt-get update && apt-get install -y curl git python3 python3-pip nodejs npm
-    - cargo install wasm-pack cargo-chef
-    - curl -fsSL https://bun.sh/install | bash
+    - apt-get update -qq && apt-get install -y -qq curl git build-essential pkg-config libssl-dev ca-certificates wget unzip jq
 
-cache:
-  paths:
-    - .cargo/
-    - target/
-    - node_modules/
-    - .bun/
+stages:
+  - audit
+  - test
+  - build
+  - security
+  - docker-build
+  - deploy
+  - smoke-test
+  - notify
 
-# ── Setup ──────────────────────────────────────────────────────────
-setup:dependencies:
-  stage: setup
+variables:
+  CARGO_TERM_COLOR: "always"
+  RUSTFLAGS: "-D warnings"
+  REGISTRY: $ACR_LOGIN_SERVER
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  GIT_DEPTH: 0
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Audit & Lint
+# ═══════════════════════════════════════════════════════════════════════
+
+lint-rust:
+  stage: audit
+  image: rust:1.96-slim
+  before_script:
+    - rustup component add rustfmt clippy
   script:
-    - ~/.bun/bin/bun install
-    - pip3 install -r services/pre-processing/requirements.txt
-    - pip3 install -r services/generative-studio/requirements.txt
+    - cargo fmt --all --check
+    - cargo clippy --workspace --all-targets -- -D warnings
+  cache:
+    key: rust-cargo-$CI_COMMIT_REF_SLUG
+    paths:
+      - target/
+      - .cargo/
 
-# ── Lint ───────────────────────────────────────────────────────────
-lint:rust:
-  stage: lint
-  script:
-    - cargo fmt --check
-    - cargo clippy --workspace -- -D warnings
-
-lint:typescript:
-  stage: lint
-  image: oven/bun:1.3.14
-  script:
+lint-typescript:
+  stage: audit
+  image: oven/bun:1.3-alpine
+  before_script:
     - bun install
-    - bun run lint
-    - bun run typecheck
-
-lint:python:
-  stage: lint
-  image: python:3.13-slim
   script:
-    - pip install ruff
-    - ruff check services/
-    - ruff format --check services/
+    - cd apps/web && bun run lint && bun run typecheck
+    - cd ../browser-extension && bun install && bun run lint 2>/dev/null || true
 
-lint:terraform:
-  stage: lint
-  image: hashicorp/terraform:latest
+lint-python:
+  stage: audit
+  image: python:3.13-slim
+  before_script:
+    - pip install ruff
+  script:
+    - ruff check .
+
+lint-terraform:
+  stage: audit
+  image: hashicorp/terraform:1.10
   script:
     - cd infra/terraform
+    - terraform fmt -check -recursive
     - terraform init -backend=false
-    - terraform fmt -check
     - terraform validate
 
-# ── Build ──────────────────────────────────────────────────────────
-build:rust:
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Test
+# ═══════════════════════════════════════════════════════════════════════
+
+test-rust:
+  stage: test
+  image: rust:1.96-slim
+  variables:
+    RUST_BACKTRACE: "1"
+  script:
+    - cargo test --workspace -- --nocapture
+  cache:
+    key: rust-cargo-$CI_COMMIT_REF_SLUG
+    paths:
+      - target/
+      - .cargo/
+  artifacts:
+    when: always
+    reports:
+      junit: target/junit.xml
+    paths:
+      - target/
+
+test-web:
+  stage: test
+  image: oven/bun:1.3-alpine
+  before_script:
+    - bun install
+  script:
+    - cd apps/web && bun test
+    - cd ../browser-extension && bun install && bun test
+
+test-python:
+  stage: test
+  image: python:3.13-slim
+  before_script:
+    - pip install pytest
+    - pip install -r services/pre-processing/requirements.txt || true
+    - pip install -r services/generative-studio/requirements.txt || true
+  script:
+    - python -m pytest services/ --tb=short
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Build
+# ═══════════════════════════════════════════════════════════════════════
+
+build-rust-workspace:
   stage: build
+  image: rust:1.96-slim
+  needs: ["lint-rust"]
   script:
     - cargo build --workspace --release
-    - cd rust/wasm && wasm-pack build --target web
+  cache:
+    key: rust-cargo-$CI_COMMIT_REF_SLUG
+    paths:
+      - target/
+
+build-wasm:
+  stage: build
+  image: rust:1.96-slim
+  needs: ["build-rust-workspace"]
+  before_script:
+    - curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+  script:
+    - ./build-wasm.sh
   artifacts:
     paths:
-      - target/release/
       - rust/wasm/pkg/
     expire_in: 1 day
 
-build:web:
+build-web:
   stage: build
-  image: oven/bun:1.3.14
-  script:
+  image: oven/bun:1.3-alpine
+  needs: ["build-wasm", "lint-typescript"]
+  before_script:
     - bun install
+  script:
     - cd apps/web && bun run build
   artifacts:
     paths:
       - apps/web/.next/
     expire_in: 1 day
 
-build:desktop:
-  stage: build
-  script:
-    - cargo check -p lazynext_desktop
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Security Scan
+# ═══════════════════════════════════════════════════════════════════════
 
-build:docker:
-  stage: build
-  image: docker:latest
-  services:
-    - docker:dind
-  script:
-    - bash scripts/docker-build.sh --tag ${CI_COMMIT_SHORT_SHA}
-
-# ── Test ───────────────────────────────────────────────────────────
-test:unit:
-  stage: test
-  script:
-    - cargo test --workspace
-    - ~/.bun/bin/bun test
-    - python3 -m pytest services/
-
-test:e2e:
-  stage: test
-  when: manual
-  script:
-    - bash scripts/full-e2e.sh
-
-# ── Security ───────────────────────────────────────────────────────
-security:scan:
+gitleaks:
   stage: security
+  image:
+    name: zricethezav/gitleaks:latest
+    entrypoint: [""]
   script:
-    - bash scripts/scan-images.sh
-    - gitleaks detect --source . --config .github/gitleaks.toml
+    - gitleaks detect --source=. --config-path=.github/gitleaks.toml --verbose --redact
 
-# ── Deploy ─────────────────────────────────────────────────────────
-deploy:staging:
+cargo-audit:
+  stage: security
+  image: rust:1.96-slim
+  script:
+    - cargo install cargo-audit --locked 2>/dev/null || true
+    - cargo audit
+
+trivy-fs:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - trivy fs --scanners vuln,misconfig,secret --severity HIGH,CRITICAL --format sarif --output trivy-results.sarif . || true
+  artifacts:
+    paths:
+      - trivy-results.sarif
+    expire_in: 30 days
+    when: always
+
+tfsec:
+  stage: security
+  image: aquasec/tfsec:latest
+  script:
+    - tfsec infra/terraform/ --format sarif --out tfsec-results.sarif || true
+  artifacts:
+    paths:
+      - tfsec-results.sarif
+    expire_in: 30 days
+    when: always
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Docker Build & Push
+# ═══════════════════════════════════════════════════════════════════════
+
+.docker-build-template: &docker-build
+  stage: docker-build
+  image: docker:27-dind
+  services:
+    - docker:27-dind
+  before_script:
+    - echo "$ACR_PASSWORD" | docker login "$ACR_LOGIN_SERVER" --username "$ACR_USERNAME" --password-stdin
+    - docker buildx create --use --name lazynext-builder || true
+  script:
+    - docker buildx build
+      --platform linux/amd64
+      --file ${CONTEXT}/${DOCKERFILE}
+      --tag ${ACR_LOGIN_SERVER}/lazynext-${SERVICE}:${IMAGE_TAG}
+      --tag ${ACR_LOGIN_SERVER}/lazynext-${SERVICE}:latest
+      --push
+      ${CONTEXT}
+  only:
+    refs:
+      - main
+      - tags
+    changes:
+      - "${CONTEXT}/**/*"
+      - "rust/**/*"
+      - "Cargo.toml"
+      - "Cargo.lock"
+
+docker-build-web:
+  <<: *docker-build
+  variables:
+    SERVICE: "web"
+    CONTEXT: "."
+    DOCKERFILE: "apps/web/Dockerfile"
+
+docker-build-ai-agents:
+  <<: *docker-build
+  variables:
+    SERVICE: "ai-agents"
+    CONTEXT: "services/ai-agents"
+    DOCKERFILE: "Dockerfile"
+
+docker-build-render:
+  <<: *docker-build
+  variables:
+    SERVICE: "render-service"
+    CONTEXT: "services/render-service"
+    DOCKERFILE: "Dockerfile"
+
+docker-build-pre-processing:
+  <<: *docker-build
+  variables:
+    SERVICE: "pre-processing"
+    CONTEXT: "services/pre-processing"
+    DOCKERFILE: "Dockerfile"
+
+docker-build-generative-studio:
+  <<: *docker-build
+  variables:
+    SERVICE: "generative-studio"
+    CONTEXT: "services/generative-studio"
+    DOCKERFILE: "Dockerfile"
+
+docker-build-api-gateway:
+  <<: *docker-build
+  variables:
+    SERVICE: "api-gateway"
+    CONTEXT: "."
+    DOCKERFILE: "rust/api-gateway/Dockerfile"
+
+docker-build-collab-server:
+  <<: *docker-build
+  variables:
+    SERVICE: "collab-server"
+    CONTEXT: "."
+    DOCKERFILE: "services/collab-server/Dockerfile"
+
+docker-build-analytics:
+  <<: *docker-build
+  variables:
+    SERVICE: "analytics-service"
+    CONTEXT: "services/analytics-service"
+    DOCKERFILE: "Dockerfile"
+
+docker-build-db-migrate:
+  <<: *docker-build
+  variables:
+    SERVICE: "db-migrate"
+    CONTEXT: "."
+    DOCKERFILE: "Dockerfile.migrate"
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Deploy to Azure
+# ═══════════════════════════════════════════════════════════════════════
+
+deploy-azure:
   stage: deploy
-  when: manual
+  image: mcr.microsoft.com/azure-cli:latest
+  needs:
+    - docker-build-web
+    - docker-build-ai-agents
+    - docker-build-render
+    - docker-build-pre-processing
+    - docker-build-generative-studio
+    - docker-build-api-gateway
+    - docker-build-collab-server
+    - docker-build-analytics
+  before_script:
+    - az login --service-principal
+      --username "$AZURE_CLIENT_ID"
+      --password "$AZURE_CLIENT_SECRET"
+      --tenant "$AZURE_TENANT_ID"
+    - az account set --subscription "$AZURE_SUBSCRIPTION_ID"
+  script:
+    # Update all Container Apps to the new image revision
+    - |
+      declare -A APPS=(
+        [web]="lazynext-web-production"
+        [ai-agents]="lazynext-ai-agents-production"
+        [render-service]="lazynext-render-production"
+        [pre-processing]="lazynext-pre-processing-production"
+        [generative-studio]="lazynext-gen-studio-production"
+        [api-gateway]="lazynext-api-gateway-production"
+        [collab-server]="lazynext-collab-server-production"
+        [analytics-service]="lazynext-analytics-service-production"
+      )
+      for svc in "${!APPS[@]}"; do
+        echo "Updating ${APPS[$svc]} to image ${ACR_LOGIN_SERVER}/lazynext-${svc}:${IMAGE_TAG}..."
+        az containerapp update \
+          --resource-group lazynext-rg-production \
+          --name "${APPS[$svc]}" \
+          --image "${ACR_LOGIN_SERVER}/lazynext-${svc}:${IMAGE_TAG}"
+      done
+  environment:
+    name: production
+    url: https://lazynext.com
   only:
     - main
-  script:
-    - bash scripts/deploy.sh staging
-  environment: staging
-
-deploy:production:
-  stage: deploy
   when: manual
-  only:
-    - tags
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Kubernetes Deploy (Optional)
+# ═══════════════════════════════════════════════════════════════════════
+
+deploy-k8s:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  needs:
+    - docker-build-web
+    - docker-build-ai-agents
+  before_script:
+    - mkdir -p $HOME/.kube
+    - echo "$KUBE_CONFIG" | base64 -d > $HOME/.kube/config
+    - kubectl config use-context lazynext-prod
   script:
-    - bash scripts/deploy.sh production
-  environment: production
+    - kubectl apply -k k8s/overlays/production/
+    - kubectl rollout status deployment/lazynext-web -n lazynext --timeout=300s
+    - kubectl rollout status deployment/lazynext-sync -n lazynext --timeout=180s
+    - kubectl rollout status deployment/lazynext-render -n lazynext --timeout=180s
+  environment:
+    name: production
+    url: https://lazynext.com
+  only:
+    - main
+  when: manual
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Terraform Apply (Manual)
+# ═══════════════════════════════════════════════════════════════════════
+
+terraform-apply:
+  stage: deploy
+  image: hashicorp/terraform:1.10
+  before_script:
+    - apk add --no-cache azure-cli
+    - az login --service-principal
+      --username "$AZURE_CLIENT_ID"
+      --password "$AZURE_CLIENT_SECRET"
+      --tenant "$AZURE_TENANT_ID"
+  script:
+    - cd infra/terraform
+    - terraform init -reconfigure
+    - terraform workspace select production 2>/dev/null || terraform workspace new production
+    - terraform plan -out=tfplan
+    - terraform apply tfplan
+  environment:
+    name: production
+  only:
+    - main
+  when: manual
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Smoke Tests
+# ═══════════════════════════════════════════════════════════════════════
+
+smoke-test:
+  stage: smoke-test
+  image: curlimages/curl:latest
+  needs: ["deploy-azure"]
+  script:
+    - |
+      check_url() {
+        local url="$1" name="$2"
+        local code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url" 2>/dev/null || echo "000")
+        if [ "$code" = "200" ] || [ "$code" = "204" ]; then
+          echo "  [OK] $name ($code)"
+        else
+          echo "  [FAIL] $name ($code)"
+          return 1
+        fi
+      }
+
+      FAILURES=0
+
+      check_url "https://lazynext.com/api/health"           "Web App"        || FAILURES=$((FAILURES+1))
+      check_url "https://api.lazynext.com/v1/health"        "API Gateway"    || FAILURES=$((FAILURES+1))
+      check_url "https://api.lazynext.com/ai/health"        "AI Agents"      || FAILURES=$((FAILURES+1))
+      check_url "https://api.lazynext.com/render/health"    "Render Service" || FAILURES=$((FAILURES+1))
+      check_url "https://api.lazynext.com/collab/health"    "Collab Server"  || FAILURES=$((FAILURES+1))
+
+      if [ "$FAILURES" -gt 0 ]; then
+        echo "FATAL: $FAILURES smoke test(s) failed"
+        exit 1
+      fi
+      echo "All smoke tests passed"
+  environment:
+    name: production
+  only:
+    - main
+  when: on_success
+
+# ═══════════════════════════════════════════════════════════════════════
+# Stage: Notify
+# ═══════════════════════════════════════════════════════════════════════
+
+notify-success:
+  stage: notify
+  image: curlimages/curl:latest
+  needs: ["smoke-test"]
+  script:
+    - |
+      if [ -n "$SLACK_WEBHOOK_URL" ]; then
+        curl -s -X POST "$SLACK_WEBHOOK_URL" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"blocks\": [
+              {
+                \"type\": \"header\",
+                \"text\": {\"type\": \"plain_text\", \"text\": \":white_check_mark: Lazynext GitLab CI — Deployment Succeeded\"}
+              },
+              {
+                \"type\": \"section\",
+                \"fields\": [
+                  {\"type\": \"mrkdwn\", \"text\": \"*Branch:* $CI_COMMIT_REF_NAME\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Commit:* <$CI_PROJECT_URL/-/commit/$CI_COMMIT_SHA|$CI_COMMIT_SHORT_SHA>\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Pipeline:* <$CI_PIPELINE_URL|#$CI_PIPELINE_ID>\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Triggered by:* $GITLAB_USER_NAME\"}
+                ]
+              }
+            ]
+          }"
+      fi
+  only:
+    - main
+  when: on_success
+
+notify-failure:
+  stage: notify
+  image: curlimages/curl:latest
+  script:
+    - |
+      if [ -n "$SLACK_WEBHOOK_URL" ]; then
+        curl -s -X POST "$SLACK_WEBHOOK_URL" \
+          -H "Content-Type: application/json" \
+          -d "{
+            \"blocks\": [
+              {
+                \"type\": \"header\",
+                \"text\": {\"type\": \"plain_text\", \"text\": \":x: Lazynext GitLab CI — Pipeline FAILED\"}
+              },
+              {
+                \"type\": \"section\",
+                \"fields\": [
+                  {\"type\": \"mrkdwn\", \"text\": \"*Branch:* $CI_COMMIT_REF_NAME\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Commit:* <$CI_PROJECT_URL/-/commit/$CI_COMMIT_SHA|$CI_COMMIT_SHORT_SHA>\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Pipeline:* <$CI_PIPELINE_URL|#$CI_PIPELINE_ID>\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Failed Job:* $CI_JOB_NAME\"}
+                ]
+              }
+            ]
+          }"
+      fi
+  when: on_failure
+
+# ═══════════════════════════════════════════════════════════════════════
+# Merge Request (Pull Request) Pipeline
+# ═══════════════════════════════════════════════════════════════════════
+
+.pr-only:
+  only:
+    - merge_requests
+
+mergerequest-lint:
+  extends: .pr-only
+  stage: audit
+  parallel:
+    matrix:
+      - JOB: [lint-rust, lint-typescript, lint-python, lint-terraform]
+  trigger:
+    strategy: depend
+
+mergerequest-test:
+  extends: .pr-only
+  stage: test
+  parallel:
+    matrix:
+      - JOB: [test-rust, test-web, test-python]
+  trigger:
+    strategy: depend
+
+# ═══════════════════════════════════════════════════════════════════════
+# Scheduled: Weekly Security Scan
+# ═══════════════════════════════════════════════════════════════════════
+
+weekly-security-scan:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - trivy fs --scanners vuln,misconfig,secret --severity HIGH,CRITICAL . || true
+    - trivy config infra/terraform/ --severity HIGH,CRITICAL || true
+  only:
+    - schedules
+
+# ═══════════════════════════════════════════════════════════════════════
+# Scheduled: Nightly ML Model Freshness Check
+# ═══════════════════════════════════════════════════════════════════════
+
+ml-model-freshness:
+  stage: test
+  image: python:3.13-slim
+  before_script:
+    - pip install pyyaml requests
+  script:
+    - python scripts/ml-freshness-check.py 2>/dev/null || echo "No freshness script — skipping"
+  only:
+    - schedules

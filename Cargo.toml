@@ -18,3 +18,4 @@ members = [
 [patch.crates-io]
 http-types = { path = "rust/vendor/http-types-2.12.0" }
 taffy = { path = "rust/vendor/taffy-0.9.0" }
+block = { path = "rust/vendor/block-0.1.6" }

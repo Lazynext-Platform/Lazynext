@@ -2,6 +2,7 @@
  * Privacy policy page — accordion-layout legal content.
  *
  * @page /privacy
+ * @module privacy/page
  */
 
 import type { Metadata } from "next";

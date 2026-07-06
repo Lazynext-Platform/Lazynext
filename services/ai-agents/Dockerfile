@@ -3,15 +3,15 @@ FROM oven/bun:1.3-alpine AS builder
 
 WORKDIR /app
 
-# Layer 1: Dependencies
-COPY package.json ./
-# Monorepo — lockfile at root level. Use --no-lockfile for service-only build.
+# Layer 1: Workspace dependencies (root package.json + packages + stub wasm)
+COPY package.json bun.lock ./
+COPY packages/ packages/
+COPY services/ai-agents/ services/ai-agents/
+RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
 RUN bun install --no-lockfile
 
-# Layer 2: Source
-COPY tsconfig.json ./
-COPY src/ src/
-
+# Build the service
+WORKDIR /app/services/ai-agents
 RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
 
 # ── Stage 2: Runtime ──
@@ -24,10 +24,10 @@ RUN apk add --no-cache npm
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 -G nodejs
 
-# Copy production deps only
+# Copy production deps + source
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/src ./src
+COPY --from=builder /app/services/ai-agents/package.json ./
+COPY --from=builder /app/services/ai-agents/src/ ./src
 
 USER nodejs
 

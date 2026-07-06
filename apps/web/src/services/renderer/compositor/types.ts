@@ -1,3 +1,5 @@
+/** @module TypeScript type definitions for compositor frame descriptors, texture descriptors, and render items */
+
 import type { BlendMode } from "@/primitives/blend-mode";
 import type { EffectPass } from "@/effects/types";
 

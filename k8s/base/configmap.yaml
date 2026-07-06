@@ -17,7 +17,7 @@ data:
   COLLAB_SERVER_URL: "http://collab-server:8004"
   ANALYTICS_SERVICE_URL: "http://lazynext-analytics-service:8006"
   MCP_SERVER_URL: "http://lazynext-mcp:5173"
-  # API_GATEWAY_URL: "http://lazynext-api-gateway:8005"  # Rust API gateway not yet deployed in K8s
+  API_GATEWAY_URL: "http://lazynext-api-gateway:8005"
 
   # Public-facing URLs
   BETTER_AUTH_URL: "https://lazynext.ai"

@@ -2,6 +2,7 @@
  * Blog listing page — all published articles sorted by date.
  *
  * @page /blog
+ * @module blog/page
  */
 
 import type { Metadata } from "next";

@@ -2,6 +2,7 @@
  * API documentation page with generated SEO metadata.
  *
  * @page /docs
+ * @module docs/page
  */
 
 import { generateMetadata } from "@/seo/metadata";
@@ -9,7 +10,7 @@ import { generateMetadata } from "@/seo/metadata";
 export const metadata = generateMetadata({
 	title: "API Documentation",
 	description:
-		"Complete API reference for Lazynext. 15 endpoints, AI agent chat, Stripe checkout, user profile, FFMPEG filter engine. REST API with Better Auth.",
+		"Complete API reference for Lazynext. 15 endpoints, AI agent chat, Dodo Payments checkout, user profile, FFMPEG filter engine. REST API with Better Auth.",
 	path: "/docs",
 });
 
@@ -20,7 +21,7 @@ const ENDPOINTS = [
 	{ m: "POST", p: "/api/chat", d: "AI agent prompt", a: true },
 	{ m: "GET", p: "/api/projects", d: "List projects", a: true },
 	{ m: "POST", p: "/api/projects", d: "Create project", a: true },
-	{ m: "POST", p: "/api/stripe/checkout", d: "Stripe checkout", a: true },
+	{ m: "POST", p: "/api/dodo/checkout", d: "Dodo Payments checkout", a: true },
 	{ m: "POST", p: "/api/auth/forgot-password", d: "Password reset request" },
 	{ m: "POST", p: "/api/auth/reset-password", d: "Reset password" },
 ];

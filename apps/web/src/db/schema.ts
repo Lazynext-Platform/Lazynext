@@ -19,7 +19,7 @@ export const user = pgTable("user", {
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   role: text("role").notNull().default("user"),
-  stripeCustomerId: text("stripe_customer_id"),
+  dodoCustomerId: text("dodo_customer_id"),
   aiCredits: integer("ai_credits").notNull().default(50),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
@@ -78,9 +78,9 @@ export const subscriptions = pgTable("subscriptions", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
-  stripeSubscriptionId: text("stripe_subscription_id").notNull(),
-  stripePriceId: text("stripe_price_id").notNull(),
-  stripeCurrentPeriodEnd: timestamp("stripe_current_period_end").notNull(),
+  dodoSubscriptionId: text("dodo_subscription_id").notNull(),
+  dodoPriceId: text("dodo_price_id").notNull(),
+  dodoCurrentPeriodEnd: timestamp("dodo_current_period_end").notNull(),
   tier: text("tier").notNull().default("free"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),

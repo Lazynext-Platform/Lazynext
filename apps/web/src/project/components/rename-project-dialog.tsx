@@ -58,10 +58,14 @@ export function RenameProjectDialog({
 					<Input
 						value={name}
 						onChange={(e) => setName(e.target.value)}
+						maxLength={200}
 						onKeyDown={(e) => {
 							if (e.key === "Enter") {
 								e.preventDefault();
-								onConfirm(name);
+								const trimmed = name.trim();
+								if (trimmed.length > 0) {
+									onConfirm(trimmed);
+								}
 							}
 						}}
 						placeholder="Enter a new name"
@@ -79,7 +83,16 @@ export function RenameProjectDialog({
 					>
 						Cancel
 					</Button>
-					<Button onClick={() => onConfirm(name)}>Rename</Button>
+					<Button
+						onClick={() => {
+							const trimmed = name.trim();
+							if (trimmed.length > 0) {
+								onConfirm(trimmed);
+							}
+						}}
+					>
+						Rename
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>

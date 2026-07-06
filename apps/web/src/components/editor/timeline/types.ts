@@ -1,4 +1,8 @@
-// Basic Types
+/**
+ * @module Timeline type definitions — Core TypeScript interfaces and types for
+ * timeline elements, tracks, keyframes, transitions, frame data, and project
+ * serialization structures.
+ */
 export interface Position {
 	x: number;
 	y: number;

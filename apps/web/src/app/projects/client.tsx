@@ -573,7 +573,7 @@ function NewProjectButton() {
 	return (
 		<Button
 			size="lg"
-			className="flex px-5 md:px-6 bg-[var(--accent-primary)] text-[#050505] hover:opacity-90 shadow-[0_0_15px_rgba(1,243,254,0.4)]"
+			className="flex px-5 md:px-6 bg-[var(--accent-primary)] text-[var(--text-on-accent)] hover:opacity-90 shadow-[var(--accent-glow)]"
 			onClick={handleCreateProject}
 		>
 			<span className="text-sm font-bold hidden md:block">New project</span>
@@ -633,7 +633,7 @@ function ProjectItem({
 	};
 
 	const gridContent = (
-		<Card className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-glass)] overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[0_0_30px_-5px_rgba(1,243,254,0.15)] group rounded-2xl">
+		<Card 				className="bg-[var(--bg-panel)] backdrop-blur-xl border border-[var(--border-glass)] overflow-hidden p-0 transition-all duration-300 hover:scale-[1.02] hover:border-[var(--accent-primary)] hover:shadow-[var(--accent-glow)] group rounded-2xl">
 			<div className="bg-panel/50 relative aspect-video overflow-hidden">
 				<div className="absolute inset-0 transition-transform duration-500 group-hover:scale-105">
 					{project.thumbnail ? (
@@ -645,11 +645,11 @@ function ProjectItem({
 						/>
 					) : (
 						<div className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--bg-main)] to-[var(--bg-panel)]">
-							<OcVideoIcon className="text-zinc-600 size-12 shrink-0 group-hover:text-[var(--accent-primary)]/50 transition-colors" />
+							<OcVideoIcon className="text-[var(--text-muted)] size-12 shrink-0 group-hover:text-[var(--accent-primary)]/50 transition-colors" />
 						</div>
 					)}
 					{/* Glassmorphism overlay on hover */}
-					<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+					<div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-main)]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 				</div>
 
 				{durationLabel && (

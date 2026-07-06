@@ -22,10 +22,9 @@ base64 = "0.22"
 hmac = "0.13"
 sha2 = "0.11"
 hex = "0.4"
-rand = "0.8"
 futures = "0.3.32"
 redis = { version = "0.25", features = ["tokio-comp"] }
-azure_core = "0.21.0"
+azure_core = "1.0.0"
 azure_storage = "0.21.0"
 azure_storage_blobs = "0.21.0"
 utoipa = { version = "5.5.0", features = ["axum_extras"] }

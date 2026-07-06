@@ -182,19 +182,19 @@ resource "azurerm_private_endpoint" "blob" {
 # it in production after validating private endpoint access works for
 # Container Apps, CI/CD runners, and any other blob clients.
 
-# resource "azurerm_storage_account_network_rules" "media" {
-#   storage_account_id = azurerm_storage_account.media.id
-#   default_action     = "Deny"
-#
-#   bypass = ["AzureServices", "Logging", "Metrics"]
-#
-#   # Allow only from the VNet
-#   virtual_network_subnet_ids = [
-#     azurerm_subnet.container_apps.id,
-#     azurerm_subnet.private_endpoints.id,
-#   ]
-#
-#   depends_on = [
-#     azurerm_private_endpoint.blob,
-#   ]
-# }
+resource "azurerm_storage_account_network_rules" "media" {
+  storage_account_id = azurerm_storage_account.media.id
+  default_action     = "Deny"
+
+  bypass = ["AzureServices", "Logging", "Metrics"]
+
+  # Allow only from the VNet
+  virtual_network_subnet_ids = [
+    azurerm_subnet.container_apps.id,
+    azurerm_subnet.private_endpoints.id,
+  ]
+
+  depends_on = [
+    azurerm_private_endpoint.blob,
+  ]
+}

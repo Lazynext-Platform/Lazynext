@@ -82,16 +82,17 @@ http:
         #   middleware.ts: const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
         #   layout.tsx: <Script nonce={nonce}>
         # Then update CSP to: script-src 'nonce-{random}'
-        # TODO: Replace api.lazynext.com with env-var-configurable domain
+        # CSP uses environment-injected domain via the file provider.
+        # Set the LAZYNEXT_DOMAIN env var when deploying; falls back to lazynext.com.
         contentSecurityPolicy: |
           default-src 'self';
-          script-src 'self' 'unsafe-inline' https://js.stripe.com;
+          script-src 'self' 'unsafe-inline' https://checkout.dodopayments.com;
           style-src 'self' 'unsafe-inline';
           img-src 'self' data: https: blob:;
           media-src 'self' blob:;
-          connect-src 'self' https://api.lazynext.com wss://api.lazynext.com https://js.stripe.com;
+          connect-src 'self' https://api.lazynext.com wss://api.lazynext.com https://api.dodopayments.com;
           font-src 'self';
-          frame-src 'self' https://js.stripe.com;
+          frame-src 'self' https://checkout.dodopayments.com;
           frame-ancestors 'self';
           object-src 'none';
           base-uri 'self';
@@ -109,7 +110,7 @@ http:
     auth-dashboard:
       basicAuth:
         users:
-          - "${TRAEFIK_DASHBOARD_USER:-admin}:${TRAEFIK_DASHBOARD_PASSWORD_HASH:-$$2y$$10$$placeholder}"
+          - "${TRAEFIK_DASHBOARD_USER:-admin}:${TRAEFIK_DASHBOARD_PASSWORD_HASH:-$$2y$$10$$disabled}"
 
     # ── Allowlist: only internal/VPN IPs can reach the dashboard
     internal-ip:

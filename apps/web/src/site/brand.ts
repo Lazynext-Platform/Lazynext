@@ -1,3 +1,5 @@
+/** @module Site-wide brand constants (URL, metadata, Open Graph, favicon, logo) */
+
 export const SITE_URL = "https://lazynext.com";
 
 export const SITE_INFO = {

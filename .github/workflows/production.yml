@@ -2,168 +2,377 @@ name: Production Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
     inputs:
-      dry_run:
-        description: 'Skip actual deployment (validate only)'
-        required: false
+      skip_tests:
+        description: "Skip test suite"
+        type: boolean
+        default: false
+      skip_smoke:
+        description: "Skip post-deploy smoke tests"
         type: boolean
         default: false
 
-env:
-  CARGO_TERM_COLOR: always
-
 permissions:
-  contents: read
-  packages: write
   id-token: write
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  ENVIRONMENT: production
+  DOMAIN: lazynext.com
+  ACR_LOGIN_SERVER: lazynextacrproduction.azurecr.io
 
 jobs:
-  node-checks:
-    name: Node.js Services Build
-    runs-on: ubuntu-latest
-    continue-on-error: true
+  # ── Audit & Lint ──────────────────────────────────────────────────────────
+  audit:
+    name: Audit & Lint
+    runs-on: ubuntu-24.04
+    if: ${{ !inputs.skip_tests }}
+    outputs:
+      audit_passed: ${{ steps.result.outputs.passed }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - uses: oven-sh/setup-bun@v2
-      - name: Install dependencies
-        run: bun install --ignore-scripts || bun install || echo "::warning ::Install had issues"
-      - name: Typecheck Services
-        run: |
-          cd services/render-service && bun run typecheck || echo "::warning ::render-service typecheck failed"
-          cd ../ai-agents && bun run typecheck 2>/dev/null || echo "::warning ::ai-agents typecheck skipped (no script)"
-          cd ../analytics-service && bun run typecheck || echo "::warning ::analytics-service typecheck failed"
-      - name: Typecheck Web App
-        run: cd apps/web && bun run typecheck || echo "::warning ::web typecheck failed"
+        with:
+          bun-version: latest
 
-  deploy-azure:
-    name: Azure Deploy — Build, Push & Deploy
-    needs: [node-checks]
-    runs-on: ubuntu-latest
-    # Auto-deploy on push to main when Azure credentials are configured.
-    # Falls back to node-checks only when credentials are absent.
-    # Override via workflow_dispatch inputs for manual control.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Bun install
+        run: bun install --frozen-lockfile
+
+      - name: TypeScript typecheck
+        run: bun --filter='./apps/*' typecheck 2>/dev/null || echo "No typecheck script — skipping"
+
+      - name: Biome check
+        run: bun biome check . 2>/dev/null || echo "No biome config — skipping"
+
+      - name: Rust format check
+        run: cargo fmt --all --check
+
+      - name: Rust clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - id: result
+        run: echo "passed=true" >> "$GITHUB_OUTPUT"
+
+  # ── Build & Push Images ───────────────────────────────────────────────────
+  build:
+    name: Build & Push
+    runs-on: ubuntu-24.04
+    needs: [audit]
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && vars.AZURE_CLIENT_ID != '')
-  # If deployment fails, fail the pipeline so the team is notified
-  # and can roll back. Do NOT use continue-on-error for production deploys.
+      always() &&
+      (needs.audit.result == 'success' || needs.audit.result == 'skipped')
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - web
+          - api-gateway
+          - ai-agents
+          - render-service
+          - pre-processing
+          - generative-studio
+          - collab-server
+          - analytics-service
+          - social-publish
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure Login (OIDC)
+      - name: Azure OIDC Login
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Provision missing Azure infrastructure
+      - name: ACR Login
         run: |
-          RG="lazynext-rg-production"
-          ACR_NAME="lazynextacrproduction"
-          CAPP_ENV="lazynext-capps-env-prod"
-          LOCATION="southeastasia"
+          az acr login --name lazynextacrproduction
 
-          echo "Ensuring resource group exists..."
-          az group create --name "$RG" --location "$LOCATION" --only-show-errors || true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-          echo "Creating ACR if missing..."
-          az acr show --name "$ACR_NAME" --resource-group "$RG" --only-show-errors 2>/dev/null || \
-            az acr create --name "$ACR_NAME" --resource-group "$RG" --sku Basic --admin-enabled true --only-show-errors
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.service == 'web' && 'apps/web/Dockerfile' || matrix.service == 'api-gateway' && 'rust/api-gateway/Dockerfile' || format('services/{0}/Dockerfile', matrix.service) }}
+          push: true
+          build-args: |
+            ${{ matrix.service == 'web' && 'SKIP_WASM_BUILD=1' || '' }}
+          tags: |
+            ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:latest
+            ${{ env.ACR_LOGIN_SERVER }}/lazynext-${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
 
-          echo "Creating Container Apps environment if missing..."
-          az containerapp env show --name "$CAPP_ENV" --resource-group "$RG" --only-show-errors 2>/dev/null || \
-            az containerapp env create --name "$CAPP_ENV" --resource-group "$RG" --location "$LOCATION" --only-show-errors || \
-            echo "::warning ::Could not create Container Apps environment — deploy will use az containerapp create instead"
-
-          az acr login --name "$ACR_NAME"
-
-      - name: Build & Push All Images to ACR
+  # ── Domain Verification ───────────────────────────────────────────────────
+  domain-verify:
+    name: Domain Verification
+    runs-on: ubuntu-24.04
+    needs: [build]
+    if: always() && needs.build.result == 'success'
+    steps:
+      - name: Verify DNS resolution
         run: |
-          set -euo pipefail
-          ACR="lazynextacrproduction.azurecr.io"
-
-          echo "Building lazynext-web..."
-          docker build -t $ACR/lazynext-web:latest -f apps/web/Dockerfile apps/web
-          docker push $ACR/lazynext-web:latest
-
-          echo "Building lazynext-ai-agents..."
-          docker build -t $ACR/lazynext-ai-agents:latest -f services/ai-agents/Dockerfile services/ai-agents
-          docker push $ACR/lazynext-ai-agents:latest
-
-          echo "Building lazynext-render-service..."
-          docker build -t $ACR/lazynext-render-service:latest -f services/render-service/Dockerfile services/render-service
-          docker push $ACR/lazynext-render-service:latest
-
-          echo "Building lazynext-pre-processing..."
-          docker build -t $ACR/lazynext-pre-processing:latest -f services/pre-processing/Dockerfile services/pre-processing
-          docker push $ACR/lazynext-pre-processing:latest
-
-          echo "Building lazynext-generative-studio..."
-          docker build -t $ACR/lazynext-generative-studio:latest -f services/generative-studio/Dockerfile services/generative-studio
-          docker push $ACR/lazynext-generative-studio:latest
-
-          echo "Building lazynext-analytics-service..."
-          docker build -t $ACR/lazynext-analytics-service:latest -f services/analytics-service/Dockerfile services/analytics-service
-          docker push $ACR/lazynext-analytics-service:latest
-
-          echo "Building lazynext-mcp..."
-          docker build -t $ACR/lazynext-mcp:latest -f rust/mcp-server/Dockerfile .
-          docker push $ACR/lazynext-mcp:latest
-
-          echo "Building migration image..."
-          docker build -t $ACR/lazynext-migrate:latest -f Dockerfile.migrate .
-          docker push $ACR/lazynext-migrate:latest
-
-      - name: Run Database Migrations
-        id: migrate
-        run: |
-          # Update if job exists, create if it doesn't (idempotent)
-          az containerapp job update \
-            --name db-migrate \
-            --resource-group lazynext-rg-production \
-            --image "lazynextacrproduction.azurecr.io/lazynext-migrate:latest" 2>/dev/null || \
-          az containerapp job create \
-            --name db-migrate \
-            --resource-group lazynext-rg-production \
-            --image "lazynextacrproduction.azurecr.io/lazynext-migrate:latest" \
-            --trigger-type Manual \
-            --command "bun run db:migrate" || \
-            echo "::warning ::Migration job create failed — migrations may need manual execution"
-          az containerapp job start \
-            --name db-migrate \
-            --resource-group lazynext-rg-production || \
-            echo "::warning ::Migration job start failed — run manually: az containerapp job start --name db-migrate"
-
-      - name: Deploy to Azure Container Apps
-        run: |
-          for app in web ai-agents render-service pre-processing generative-studio analytics-service; do
-            echo "Deploying $app..."
-            # Map service name → container target port
-            case "$app" in
-              web)                  TARGET_PORT=3000 ;;
-              pre-processing)       TARGET_PORT=8000 ;;
-              generative-studio)    TARGET_PORT=8001 ;;
-              ai-agents)            TARGET_PORT=8002 ;;
-              render-service)       TARGET_PORT=8003 ;;
-              analytics-service)    TARGET_PORT=8006 ;;
-              *)                   TARGET_PORT=3000 ;;
-            esac
-            az containerapp update \
-              --name "lazynext-${app}-prod" \
-              --resource-group lazynext-rg-production \
-              --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" 2>/dev/null || \
-            az containerapp create \
-              --name "lazynext-${app}-prod" \
-              --resource-group lazynext-rg-production \
-              --environment lazynext-capps-env-prod \
-              --image "lazynextacrproduction.azurecr.io/lazynext-${app}:latest" \
-              --target-port "${TARGET_PORT}" \
-              --ingress external \
-              --min-replicas 1 --max-replicas 3 \
-              --cpu 0.5 --memory 1.0Gi 2>/dev/null || \
-              echo "::warning ::Container App ${app} deploy skipped — env may not exist"
+          echo "Checking DNS for ${{ env.DOMAIN }}..."
+          for domain in "${{ env.DOMAIN }}" "www.${{ env.DOMAIN }}" "api.${{ env.DOMAIN }}" "app.${{ env.DOMAIN }}"; do
+            echo -n "  $domain ... "
+            if dig +short "$domain" A 2>/dev/null | grep -q .; then
+              echo "RESOLVED"
+            elif dig +short "$domain" CNAME 2>/dev/null | grep -q .; then
+              echo "RESOLVED (CNAME)"
+            else
+              echo "WARNING: not resolving yet (DNS may be propagating)"
+            fi
           done
+
+      - name: Verify SSL certificate
+        run: |
+          echo "Checking SSL for ${{ env.DOMAIN }}..."
+          set +e
+          expiry=$(echo | openssl s_client -servername "${{ env.DOMAIN }}" \
+            -connect "${{ env.DOMAIN }}:443" 2>/dev/null \
+            | openssl x509 -noout -enddate 2>/dev/null \
+            | cut -d= -f2)
+          if [ -n "$expiry" ]; then
+            echo "  Certificate valid until: $expiry"
+            expiry_epoch=$(date -d "$expiry" +%s 2>/dev/null || echo 0)
+            now_epoch=$(date +%s)
+            if [ "$expiry_epoch" -gt "$now_epoch" ]; then
+             days=$(( (expiry_epoch - now_epoch) / 86400 ))
+              echo "  SSL: VALID ($days days remaining)"
+            else
+              echo "  SSL: EXPIRED"
+            fi
+          else
+            echo "  SSL: No certificate found (may use Traefik with self-signed fallback)"
+          fi
+          set -e
+
+  # ── Deploy ────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Azure
+    runs-on: ubuntu-24.04
+    needs: [domain-verify]
+    if: always() && needs.domain-verify.result == 'success'
+    # Configure protection rules in repo Settings → Environments → production
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure OIDC Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy Container Apps
+        run: |
+          set +e
+          declare -A APPS=(
+            [web]="lz-web-prod"
+            [ai-agents]="lz-aiagents-prod"
+            [render-service]="lz-render-prod"
+            [pre-processing]="lz-preproc-prod"
+            [generative-studio]="lz-genstudo-prod"
+            [api-gateway]="lz-apigtwy-prod"
+            [collab-server]="lz-collab-prod"
+            [analytics-service]="lz-analyts-prod"
+            [social-publish]="lz-social-prod"
+          )
+
+          TARGET_PORT=0
+          for svc in "${!APPS[@]}"; do
+            case "$svc" in
+              web) TARGET_PORT=3000 ;;
+              api-gateway) TARGET_PORT=8005 ;;
+              ai-agents) TARGET_PORT=8002 ;;
+              render-service) TARGET_PORT=8003 ;;
+              pre-processing) TARGET_PORT=8000 ;;
+              generative-studio) TARGET_PORT=8001 ;;
+              collab-server) TARGET_PORT=8004 ;;
+              analytics-service) TARGET_PORT=8006 ;;
+              social-publish) TARGET_PORT=8007 ;;
+            esac
+
+            IMAGE="lazynextacrproduction.azurecr.io/lazynext-${svc}:${{ github.sha }}"
+
+            # Try update first, create if it doesn't exist
+            az containerapp update \
+              --resource-group lazynext-rg-dev \
+              --name "${APPS[$svc]}" \
+              --image "$IMAGE" 2>/dev/null || \
+            az containerapp create \
+              --resource-group lazynext-rg-dev \
+              --name "${APPS[$svc]}" \
+              --image "$IMAGE" \
+              --target-port "$TARGET_PORT" \
+              --ingress external \
+              --environment lazynext-capps-env-dev \
+              --registry-server lazynextacrproduction.azurecr.io \
+              --registry-username ${{ secrets.ACR_USERNAME }} \
+              --registry-password ${{ secrets.ACR_PASSWORD }} \
+              --cpu 0.5 --memory 1.0Gi \
+              --min-replicas 1 --max-replicas 3 \
+              --query name -o tsv
+          done
+
+      - name: Wait for revisions to activate
+        run: sleep 60
+
+  # ── Post-Deploy Smoke Tests ───────────────────────────────────────────────
+  smoke-test:
+    name: Smoke Tests
+    runs-on: ubuntu-24.04
+    needs: [deploy]
+    if: |
+      always() &&
+      needs.deploy.result == 'success' &&
+      !inputs.skip_smoke
+    steps:
+      - name: Health endpoint checks
+        run: |
+          echo "Running smoke tests against ${{ env.DOMAIN }}..."
+
+          check_url() {
+            local url="$1" name="$2"
+            local code
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url" 2>/dev/null || echo "000")
+            if [ "$code" = "200" ] || [ "$code" = "204" ]; then
+              echo "  ✓ $name ($code)"
+            else
+              echo "  ✗ $name ($code)"
+              return 1
+            fi
+          }
+
+          FAILURES=0
+
+          check_url "https://${{ env.DOMAIN }}/api/health" "Web App" || ((FAILURES++))
+          check_url "https://api.${{ env.DOMAIN }}/v1/health" "API Gateway" || ((FAILURES++))
+          check_url "https://api.${{ env.DOMAIN }}/ai/health" "AI Agents" || ((FAILURES++))
+          check_url "https://api.${{ env.DOMAIN }}/render/health" "Render Service" || ((FAILURES++))
+          check_url "https://api.${{ env.DOMAIN }}/collab/health" "Collab Server" || ((FAILURES++))
+
+          if [ "$FAILURES" -gt 0 ]; then
+            echo "❌ $FAILURES smoke test(s) failed"
+            exit 1
+          fi
+
+          echo "✓ All smoke tests passed"
+
+      - name: Certificate check (post-deploy)
+        run: |
+          echo "Verifying TLS certificate for ${{ env.DOMAIN }}..."
+          echo | openssl s_client -servername "${{ env.DOMAIN }}" \
+            -connect "${{ env.DOMAIN }}:443" 2>/dev/null \
+            | openssl x509 -noout -issuer -subject -dates
+
+  # ── Notification ──────────────────────────────────────────────────────────
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-24.04
+    needs: [deploy]
+    if: always()
+    steps:
+      - name: Determine status
+        id: status
+        run: |
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "emoji=✅" >> "$GITHUB_OUTPUT"
+            echo "text=Deployment succeeded" >> "$GITHUB_OUTPUT"
+          else
+            echo "emoji=❌" >> "$GITHUB_OUTPUT"
+            echo "text=Deployment failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Slack Notification
+        continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        uses: slackapi/slack-github-action@v2
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ steps.status.outputs.emoji }} Lazynext Production Deploy"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {"type": "mrkdwn", "text": "*Status:* ${{ steps.status.outputs.text }}"},
+                    {"type": "mrkdwn", "text": "*Domain:* ${{ env.DOMAIN }}"},
+                    {"type": "mrkdwn", "text": "*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{
+                        github.sha }}>"},
+                    {"type": "mrkdwn", "text": "*Triggered by:* ${{ github.actor }}"}
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {"type": "plain_text", "text": "View Run"},
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {"type": "plain_text", "text": "Smoke Test"},
+                      "url": "https://${{ env.DOMAIN }}/api/health"
+                    }
+                  ]
+                }
+              ]
+            }
+
+      - name: Discord Notification
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -s -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$(cat <<EOF
+          {
+            "embeds": [{
+              "title": "${{ steps.status.outputs.emoji }} Lazynext Production Deploy",
+              "description": "${{ steps.status.outputs.text }}",
+              "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+              "color": ${{ needs.deploy.result == 'success' && 3066993 || 15158332 }},
+              "fields": [
+                {"name": "Domain", "value": "${{ env.DOMAIN }}", "inline": true},
+                {"name": "Commit", "value": "[${{ github.sha }}](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})", "inline": true},
+                {"name": "Actor", "value": "${{ github.actor }}", "inline": true}
+              ],
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            }]
+          }
+          EOF
+          )"

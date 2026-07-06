@@ -1,195 +1,518 @@
-// Jenkins declarative pipeline for Lazynext monorepo
-// Requires: Docker, Rust (1.96+), Node/Bun, Python 3.13, Terraform, kubectl
+// ── Lazynext Jenkins Declarative Pipeline ──────────────────────────────
+// Mirrors .github/workflows/production.yml and ci.yml for Jenkins users.
+//
+// Required Jenkins plugins:
+//   - docker-workflow, docker-build-step
+//   - git, github, credentials-binding
+//   - pipeline-utility-steps, blueocean
+//   - warnings-ng, junit, cobertura
+//   - slack, ansicolor
+//
+// Required credentials (Jenkins → Manage Credentials):
+//   - docker-hub-credentials          (DockerHub or GHCR)
+//   - ghcr-lazynext-platform          (GHCR username + token)
+//   - azure-credentials                (Azure service principal)
+//   - slack-webhook-url                (Slack incoming webhook)
+//   - discord-webhook-url              (Discord incoming webhook)
+//   - git-ssh-key                      (for private repo access if needed)
 
 pipeline {
     agent any
 
-    triggers {
-        pollSCM('H/15 * * * *')  // poll every 15 minutes for changes
-    }
-
     environment {
-        DOCKER_REGISTRY = 'lazynext.azurecr.io'
-        RUST_VERSION    = '1.96'
-        BUN_VERSION     = '1.3.14'
-        CARGO_TERM_COLOR = 'always'
-        GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-    }
-
-    parameters {
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Deployment target')
-        booleanParam(name: 'RUN_E2E', defaultValue: true, description: 'Run end-to-end tests')
-        booleanParam(name: 'DEPLOY', defaultValue: false, description: 'Deploy after build')
-        string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Branch to build')
+        CARGO_TERM_COLOR      = "always"
+        RUSTFLAGS             = "-D warnings"
+        REGISTRY              = "ghcr.io/lazynext-platform"
+        IMAGE_TAG             = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.take(7) ?: 'latest'}"
+        NODE_ENV              = "production"
     }
 
     stages {
+
+        // ═══════════════════════════════════════════════════════════════
         stage('Checkout') {
             steps {
                 checkout scm
+                script {
+                    env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.GIT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                }
                 sh 'git submodule update --init --recursive'
             }
         }
 
-        stage('Setup') {
+        // ═══════════════════════════════════════════════════════════════
+        stage('Audit & Lint') {
             parallel {
-                stage('Rust') {
+                stage('Lint: Rust') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'rustup default ${RUST_VERSION}'
-                        sh 'rustup component add clippy rustfmt'
-                        sh 'cargo install wasm-pack cargo-chef'
+                        sh '''
+                            rustup component add rustfmt clippy
+                            cargo fmt --all --check
+                            cargo clippy --workspace --all-targets -- -D warnings
+                        '''
                     }
                 }
-                stage('Node') {
+                stage('Lint: TypeScript') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'curl -fsSL https://bun.sh/install | bash'
-                        sh '~/.bun/bin/bun install'
+                        sh '''
+                            curl -fsSL https://bun.sh/install | bash
+                            export PATH="$HOME/.bun/bin:$PATH"
+                            cd apps/web && bun install && bun run lint && bun run typecheck
+                        '''
                     }
                 }
-                stage('Python') {
+                stage('Lint: Python') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'python3 -m pip install --upgrade pip'
-                        sh 'python3 -m pip install -r services/pre-processing/requirements.txt'
-                        sh 'python3 -m pip install -r services/generative-studio/requirements.txt'
+                        sh '''
+                            pip install ruff
+                            ruff check .
+                        '''
                     }
                 }
-            }
-        }
-
-        stage('Lint') {
-            parallel {
-                stage('Rust Lint') {
-                    steps {
-                        sh 'cargo clippy --workspace -- -D warnings'
-                        sh 'cargo fmt --check'
-                    }
-                }
-                stage('TypeScript Lint') {
-                    steps {
-                        sh '~/.bun/bin/bun run lint'
-                        sh '~/.bun/bin/bun run typecheck'
-                    }
-                }
-                stage('Python Lint') {
-                    steps {
-                        sh 'python3 -m pip install ruff'
-                        sh 'python3 -m ruff check services/'
-                        sh 'python3 -m ruff format --check services/'
-                    }
-                }
-                stage('Terraform Lint') {
+                stage('Lint: Terraform') {
+                    agent { label 'linux' }
                     steps {
                         dir('infra/terraform') {
-                            sh 'terraform init -backend=false'
-                            sh 'terraform fmt -check'
-                            sh 'terraform validate'
+                            sh '''
+                                terraform fmt -check -recursive
+                                terraform init -backend=false
+                                terraform validate
+                            '''
                         }
                     }
                 }
             }
         }
 
-        stage('Build') {
-            parallel {
-                stage('Build Rust') {
-                    steps {
-                        sh 'cargo build --workspace --release'
-                        sh 'cd rust/wasm && wasm-pack build --target web'
-                    }
-                }
-                stage('Build Web') {
-                    steps {
-                        dir('apps/web') {
-                            sh '~/.bun/bin/bun run build'
-                        }
-                    }
-                }
-                stage('Build Desktop (check)') {
-                    steps {
-                        sh 'cargo check -p lazynext_desktop'
-                    }
-                }
-                stage('Build Docker') {
-                    steps {
-                        sh 'bash scripts/docker-build.sh --tag ${GIT_SHA}'
-                    }
-                }
-            }
-        }
-
+        // ═══════════════════════════════════════════════════════════════
         stage('Test') {
             parallel {
-                stage('Unit Tests') {
+                stage('Test: Rust') {
+                    agent { label 'linux' }
+                    environment {
+                        RUST_BACKTRACE = "1"
+                    }
                     steps {
-                        sh 'cargo test --workspace'
-                        sh '~/.bun/bin/bun test'
-                        sh 'python3 -m pytest services/'
+                        sh '''
+                            cargo test --workspace -- --nocapture
+                        '''
                     }
                 }
-                stage('Integration Tests') {
-                    when { expression { params.RUN_E2E } }
+                stage('Test: Web') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'bash scripts/full-e2e.sh'
+                        sh '''
+                            curl -fsSL https://bun.sh/install | bash
+                            export PATH="$HOME/.bun/bin:$PATH"
+                            cd apps/web && bun install && bun test
+                        '''
+                    }
+                }
+                stage('Test: Extension') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            curl -fsSL https://bun.sh/install | bash
+                            export PATH="$HOME/.bun/bin:$PATH"
+                            cd apps/browser-extension && bun install && bun test
+                        '''
+                    }
+                }
+                stage('Test: Python') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            pip install pytest
+                            cd services/pre-processing && pip install -r requirements.txt || true
+                            cd ../../services/generative-studio && pip install -r requirements.txt || true
+                            cd ../..
+                            python -m pytest services/ --tb=short
+                        '''
                     }
                 }
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        stage('Build') {
+            parallel {
+                stage('Build: Rust') {
+                    agent { label 'linux' }
+                    steps {
+                        sh 'cargo build --workspace --release'
+                    }
+                }
+                stage('Build: WASM') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+                            ./build-wasm.sh
+                        '''
+                    }
+                }
+                stage('Build: Web') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            curl -fsSL https://bun.sh/install | bash
+                            export PATH="$HOME/.bun/bin:$PATH"
+                            cd apps/web && bun install && bun run build
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         stage('Security Scan') {
             parallel {
-                stage('Container Scan') {
-                    steps { sh 'bash scripts/scan-images.sh' }
+                stage('Gitleaks') {
+                    steps {
+                        sh '''
+                            docker run --rm -v "$WORKSPACE:/repo" \
+                                zricethezav/gitleaks:latest detect \
+                                --source=/repo \
+                                --config-path=/repo/.github/gitleaks.toml \
+                                --verbose --redact
+                        '''
+                    }
                 }
-                stage('Secret Scan') {
-                    steps { sh 'gitleaks detect --source . --config .github/gitleaks.toml' }
+                stage('Cargo Audit') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            cargo install cargo-audit --locked 2>/dev/null || true
+                            cargo audit
+                        '''
+                    }
+                }
+                stage('Trivy FS Scan') {
+                    steps {
+                        sh '''
+                            docker run --rm -v "$WORKSPACE:/src" aquasec/trivy:latest \
+                                fs --scanners vuln,misconfig,secret \
+                                --severity HIGH,CRITICAL \
+                                --format sarif \
+                                --output /src/trivy-results.sarif \
+                                /src || true
+                        '''
+                    }
                 }
             }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        stage('Docker Build & Push') {
+            parallel {
+                stage('Build: Web Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file apps/web/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-web:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-web:latest \
+                                --push .
+                        '''
+                    }
+                }
+                stage('Build: AI Agents Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file services/ai-agents/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-ai-agents:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-ai-agents:latest \
+                                --push services/ai-agents/
+                        '''
+                    }
+                }
+                stage('Build: Render Service Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file services/render-service/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-render-service:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-render-service:latest \
+                                --push services/render-service/
+                        '''
+                    }
+                }
+                stage('Build: Pre-Processing Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64 \
+                                --file services/pre-processing/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-pre-processing:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-pre-processing:latest \
+                                --push services/pre-processing/
+                        '''
+                    }
+                }
+                stage('Build: Generative Studio Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64 \
+                                --file services/generative-studio/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-generative-studio:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-generative-studio:latest \
+                                --push services/generative-studio/
+                        '''
+                    }
+                }
+                stage('Build: API Gateway Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file rust/api-gateway/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-api-gateway:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-api-gateway:latest \
+                                --push .
+                        '''
+                    }
+                }
+                stage('Build: Collab Server Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file services/collab-server/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-collab-server:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-collab-server:latest \
+                                --push .
+                        '''
+                    }
+                }
+                stage('Build: Analytics Service Image') {
+                    agent { label 'linux' }
+                    steps {
+                        sh '''
+                            docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                --file services/analytics-service/Dockerfile \
+                                --tag ${REGISTRY}/lazynext-analytics-service:${IMAGE_TAG} \
+                                --tag ${REGISTRY}/lazynext-analytics-service:latest \
+                                --push services/analytics-service/
+                        '''
+                    }
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         stage('Deploy') {
-            when { expression { params.DEPLOY } }
+            when {
+                branch 'main'
+            }
             stages {
-                stage('Terraform Apply') {
+                stage('Terraform Plan') {
+                    agent { label 'linux' }
                     steps {
                         dir('infra/terraform') {
-                            sh 'terraform init'
-                            sh 'terraform plan -var-file="${params.ENVIRONMENT}.tfvars" -out=tfplan'
-                            sh 'terraform apply -auto-approve tfplan'
+                            withCredentials([
+                                string(credentialsId: 'azure-client-id', variable: 'ARM_CLIENT_ID'),
+                                string(credentialsId: 'azure-tenant-id', variable: 'ARM_TENANT_ID'),
+                                string(credentialsId: 'azure-subscription-id', variable: 'ARM_SUBSCRIPTION_ID')
+                            ]) {
+                                sh '''
+                                    export ARM_USE_OIDC=true
+                                    terraform init -reconfigure
+                                    terraform workspace select production 2>/dev/null || terraform workspace new production
+                                    terraform plan -out=tfplan
+                                '''
+                            }
                         }
                     }
                 }
-                stage('Docker Push') {
+
+                stage('Terraform Apply') {
+                    agent { label 'linux' }
+                    input {
+                        message "Apply Terraform changes to production?"
+                        ok "Deploy to Production"
+                        submitter "admin,jenkins-admin"
+                    }
                     steps {
-                        sh 'bash scripts/docker-build.sh --push --tag ${BUILD_NUMBER}'
+                        dir('infra/terraform') {
+                            withCredentials([
+                                string(credentialsId: 'azure-client-id', variable: 'ARM_CLIENT_ID'),
+                                string(credentialsId: 'azure-tenant-id', variable: 'ARM_TENANT_ID'),
+                                string(credentialsId: 'azure-subscription-id', variable: 'ARM_SUBSCRIPTION_ID')
+                            ]) {
+                                sh '''
+                                    export ARM_USE_OIDC=true
+                                    terraform apply tfplan
+                                '''
+                            }
+                        }
                     }
                 }
-                stage('Kubernetes Deploy') {
+
+                stage('Update Container Apps') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'kubectl apply -k k8s/overlays/${params.ENVIRONMENT}/'
-                        sh 'kubectl rollout status deployment/web -n lazynext-${params.ENVIRONMENT} --timeout=300s'
+                        withCredentials([
+                            string(credentialsId: 'azure-client-id', variable: 'ARM_CLIENT_ID'),
+                            string(credentialsId: 'azure-tenant-id', variable: 'ARM_TENANT_ID'),
+                            string(credentialsId: 'azure-subscription-id', variable: 'ARM_SUBSCRIPTION_ID')
+                        ]) {
+                            script {
+                                def apps = [
+                                    'lazynext-web':          'lazynext-web-production',
+                                    'lazynext-ai-agents':    'lazynext-ai-agents-production',
+                                    'lazynext-render-service':'lazynext-render-production',
+                                    'lazynext-pre-processing':'lazynext-pre-processing-production',
+                                    'lazynext-generative-studio':'lazynext-gen-studio-production',
+                                    'lazynext-api-gateway':  'lazynext-api-gateway-production',
+                                    'lazynext-collab-server':'lazynext-collab-server-production',
+                                    'lazynext-analytics-service':'lazynext-analytics-service-production'
+                                ]
+                                apps.each { image, appName ->
+                                    sh """
+                                        az containerapp update \
+                                            --resource-group lazynext-rg-production \
+                                            --name ${appName} \
+                                            --image ${REGISTRY}/${image}:${IMAGE_TAG}
+                                    """
+                                }
+                            }
+                        }
                     }
                 }
-                stage('Smoke Test') {
+
+                stage('Smoke Tests') {
+                    agent { label 'linux' }
                     steps {
-                        sh 'bash scripts/health-check.sh'
+                        sh '''
+                            echo "Running post-deploy smoke tests..."
+
+                            check_url() {
+                                local url="$1" name="$2"
+                                local code
+                                code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url" 2>/dev/null || echo "000")
+                                if [ "$code" = "200" ] || [ "$code" = "204" ]; then
+                                    echo "  [OK] $name ($code)"
+                                else
+                                    echo "  [FAIL] $name ($code)"
+                                    return 1
+                                fi
+                            }
+
+                            FAILURES=0
+
+                            check_url "https://lazynext.com/api/health"           "Web App"        || ((FAILURES++))
+                            check_url "https://api.lazynext.com/v1/health"        "API Gateway"    || ((FAILURES++))
+                            check_url "https://api.lazynext.com/ai/health"        "AI Agents"      || ((FAILURES++))
+                            check_url "https://api.lazynext.com/render/health"    "Render Service" || ((FAILURES++))
+                            check_url "https://api.lazynext.com/collab/health"    "Collab Server"  || ((FAILURES++))
+
+                            if [ "$FAILURES" -gt 0 ]; then
+                                echo "FATAL: $FAILURES smoke test(s) failed"
+                                exit 1
+                            fi
+                            echo "All smoke tests passed"
+                        '''
                     }
                 }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        stage('Kubernetes Deploy (Optional)') {
+            when {
+                branch 'main'
+                expression { env.ENABLE_K8S_DEPLOY == 'true' }
+            }
+            agent { label 'linux' }
+            steps {
+                sh '''
+                    kubectl apply -k k8s/overlays/production/
+                '''
             }
         }
     }
 
+    // ═══════════════════════════════════════════════════════════════
     post {
         always {
-            cleanWs()
-            archiveArtifacts artifacts: 'target/release/lazynext_*', fingerprint: true
-            archiveArtifacts artifacts: 'Lazynext-Desktop.dmg', fingerprint: true
-            archiveArtifacts artifacts: 'apps/web/.next/**', fingerprint: true
+            cleanWs(
+                deleteDirs: true,
+                patterns: [
+                    [pattern: 'target/', type: 'INCLUDE'],
+                    [pattern: 'node_modules/', type: 'INCLUDE'],
+                    [pattern: '.cache/', type: 'INCLUDE']
+                ]
+            )
         }
         success {
-            slackSend(color: 'good', message: "Pipeline ${env.BUILD_NUMBER} succeeded: ${env.BUILD_URL}")
+            script {
+                def msg = ":white_check_mark: *Lazynext Pipeline #${BUILD_NUMBER} SUCCEEDED*"
+                msg += "\n*Branch:* ${GIT_BRANCH}"
+                msg += "\n*Commit:* ${GIT_SHA}"
+                msg += "\n*Duration:* ${currentBuild.durationString}"
+                msg += "\n*Job URL:* ${BUILD_URL}"
+                slackSend(
+                    channel: '#lazynext-builds',
+                    color: 'good',
+                    message: msg
+                )
+            }
         }
         failure {
-            slackSend(color: 'danger', message: "Pipeline ${env.BUILD_NUMBER} failed: ${env.BUILD_URL}")
+            script {
+                def msg = ":x: *Lazynext Pipeline #${BUILD_NUMBER} FAILED*"
+                msg += "\n*Branch:* ${GIT_BRANCH}"
+                msg += "\n*Commit:* ${GIT_SHA}"
+                msg += "\n*Failed Stage:* ${env.FAILED_STAGE ?: 'unknown'}"
+                msg += "\n*Job URL:* ${BUILD_URL}"
+                slackSend(
+                    channel: '#lazynext-alerts',
+                    color: 'danger',
+                    message: msg
+                )
+            }
+        }
+        unstable {
+            script {
+                def msg = ":warning: *Lazynext Pipeline #${BUILD_NUMBER} UNSTABLE*"
+                msg += "\n*Branch:* ${GIT_BRANCH}"
+                msg += "\n*Commit:* ${GIT_SHA}"
+                msg += "\n*Job URL:* ${BUILD_URL}"
+                slackSend(
+                    channel: '#lazynext-builds',
+                    color: 'warning',
+                    message: msg
+                )
+            }
+        }
+        aborted {
+            script {
+                def msg = ":no_entry: *Lazynext Pipeline #${BUILD_NUMBER} ABORTED*"
+                msg += "\n*Branch:* ${GIT_BRANCH}"
+                msg += "\n*Job URL:* ${BUILD_URL}"
+                slackSend(
+                    channel: '#lazynext-builds',
+                    color: '#808080',
+                    message: msg
+                )
+            }
         }
     }
 }

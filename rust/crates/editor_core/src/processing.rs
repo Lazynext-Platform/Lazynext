@@ -26,7 +26,11 @@ pub fn extract_silence(
     }
 
     // Convert dB threshold to linear amplitude
-    let threshold_linear = 10.0_f64.powf(threshold_db / 20.0);
+    let threshold_linear = if threshold_db.is_finite() {
+        10.0_f64.powf(threshold_db.clamp(-96.0, 0.0) / 20.0)
+    } else {
+        10.0_f64.powf(-40.0 / 20.0) // Default to -40dB
+    };
 
     // Window size: 10ms worth of samples
     let window_size = (sample_rate as f64 * 0.01) as usize;
@@ -105,6 +109,9 @@ pub fn lossless_trim(start_frame: u32, end_frame: u32, gop_size: u32) -> (u32, u
 ///
 /// Each frame buffer is `width * height * 4` RGBA bytes.
 /// Returns the frame indices where a scene cut was detected.
+///
+/// `threshold` should be in range [0.001, 1.0]; values outside this range
+/// are clamped. `width` and `height` must be non-zero.
 pub fn detect_scene_changes(
     frames: &[Vec<u8>],
     width: u32,
@@ -115,7 +122,13 @@ pub fn detect_scene_changes(
         return Vec::new();
     }
 
-    let pixel_count = (width * height) as usize;
+    let width = width.max(1);
+    let height = height.max(1);
+    let threshold = threshold.clamp(0.001, 1.0);
+    let pixel_count = (width as usize).checked_mul(height as usize).unwrap_or(0);
+    if pixel_count == 0 {
+        return Vec::new();
+    }
     let stride = 4; // RGBA
     let mut cuts = Vec::new();
 

@@ -6,14 +6,18 @@
 //!   - WebRTC signaling relay for P2P media streaming
 //!   - In-memory state via DashMap (production: PostgreSQL-backed)
 
+use std::collections::HashMap;
+
 use axum::{
-    Extension, Json, Router,
     extract::{
-        Path,
         ws::{Message, WebSocket, WebSocketUpgrade},
+        Path,
     },
+    http::{Request, StatusCode},
+    middleware::{self, Next},
     response::IntoResponse,
     routing::{get, post},
+    Extension, Json, Router,
 };
 use dashmap::DashMap;
 use opentelemetry_otlp::WithExportConfig;
@@ -98,10 +102,12 @@ struct AppState {
 
 /// Verify a JWT token signed with BETTER_AUTH_SECRET using HS256.
 /// Returns the `sub` claim on success, or an error string on failure.
+///
+/// Reads from `BETTER_AUTH_SECRET` or `BETTER_AUTH_SECRET_FILE` (Docker secrets).
+/// Panics on startup if no secret is set — no dev fallback allowed.
 fn verify_token(token: &str) -> Result<String, String> {
-    let secret = std::env::var("BETTER_AUTH_SECRET")
-        .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-64-chars-here".to_string());
-    use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode};
+    use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
+    let secret = get_auth_secret();
     let mut validation = Validation::new(Algorithm::HS256);
     validation.validate_exp = true;
     validation.set_required_spec_claims(&["exp", "sub"]);
@@ -114,6 +120,27 @@ fn verify_token(token: &str) -> Result<String, String> {
         .and_then(|v| v.as_str())
         .unwrap_or("anonymous")
         .to_string())
+}
+
+fn get_auth_secret() -> String {
+    if let Ok(s) = std::env::var("BETTER_AUTH_SECRET") {
+        if !s.is_empty() {
+            return s;
+        }
+    }
+    if let Ok(path) = std::env::var("BETTER_AUTH_SECRET_FILE") {
+        if let Ok(content) = std::fs::read_to_string(&path) {
+            let trimmed = content.trim().to_string();
+            if !trimmed.is_empty() {
+                return trimmed;
+            }
+        }
+        panic!("FATAL: BETTER_AUTH_SECRET_FILE is set but the file is empty or unreadable");
+    }
+    panic!(
+        "FATAL: Neither BETTER_AUTH_SECRET nor BETTER_AUTH_SECRET_FILE is set. \
+         Set BETTER_AUTH_SECRET to a 64-char random hex string."
+    );
 }
 
 /// Serialize a ServerMessage to a JSON string (infallible).
@@ -218,26 +245,26 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
             ClientMessage::WebRtcOffer {
                 target_peer, sdp, ..
             } => {
-                if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value())
-                {
-                    let _ = tx.send(send_msg(&ServerMessage::WebRtcOffer {
-                        sender_peer: peer_id.clone(),
-                        sdp,
-                    }));
+                if let Some(rid) = state.peer_rooms.get(&target_peer) {
+                    if let Some(tx) = state.rooms.get(rid.value()) {
+                        let _ = tx.send(send_msg(&ServerMessage::WebRtcOffer {
+                            sender_peer: peer_id.clone(),
+                            sdp,
+                        }));
+                    }
                 }
             }
 
             ClientMessage::WebRtcAnswer {
                 target_peer, sdp, ..
             } => {
-                if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value())
-                {
-                    let _ = tx.send(send_msg(&ServerMessage::WebRtcAnswer {
-                        sender_peer: peer_id.clone(),
-                        sdp,
-                    }));
+                if let Some(rid) = state.peer_rooms.get(&target_peer) {
+                    if let Some(tx) = state.rooms.get(rid.value()) {
+                        let _ = tx.send(send_msg(&ServerMessage::WebRtcAnswer {
+                            sender_peer: peer_id.clone(),
+                            sdp,
+                        }));
+                    }
                 }
             }
 
@@ -246,13 +273,13 @@ async fn handle_socket(mut socket: WebSocket, state: Arc<AppState>) {
                 candidate,
                 ..
             } => {
-                if let Some(rid) = state.peer_rooms.get(&target_peer)
-                    && let Some(tx) = state.rooms.get(rid.value())
-                {
-                    let _ = tx.send(send_msg(&ServerMessage::WebRtcIce {
-                        sender_peer: peer_id.clone(),
-                        candidate,
-                    }));
+                if let Some(rid) = state.peer_rooms.get(&target_peer) {
+                    if let Some(tx) = state.rooms.get(rid.value()) {
+                        let _ = tx.send(send_msg(&ServerMessage::WebRtcIce {
+                            sender_peer: peer_id.clone(),
+                            candidate,
+                        }));
+                    }
                 }
             }
         }
@@ -322,6 +349,26 @@ async fn load_state(
     }
 }
 
+/// Axum middleware — validates JWT Bearer token on REST endpoints.
+async fn auth_middleware(
+    req: Request<axum::body::Body>,
+    next: Next,
+) -> Result<impl IntoResponse, StatusCode> {
+    let auth_header = req
+        .headers()
+        .get("Authorization")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.strip_prefix("Bearer "));
+
+    match auth_header {
+        Some(token) => match verify_token(token) {
+            Ok(_) => Ok(next.run(req).await),
+            Err(_) => Err(StatusCode::UNAUTHORIZED),
+        },
+        None => Err(StatusCode::UNAUTHORIZED),
+    }
+}
+
 #[tokio::main]
 async fn main() {
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()
@@ -383,8 +430,13 @@ async fn main() {
     let app = Router::new()
         .route("/ws", get(ws_handler))
         .route("/health", get(|| async { "OK" }))
-        .route("/api/save", post(save_state))
-        .route("/api/load/{project_id}", get(load_state))
+        .nest(
+            "/api",
+            Router::new()
+                .route("/save", post(save_state))
+                .route("/load/{project_id}", get(load_state))
+                .route_layer(middleware::from_fn(auth_middleware)),
+        )
         .layer(Extension(state));
 
     let port: u16 = std::env::var("COLLAB_PORT")
@@ -412,9 +464,7 @@ async fn main() {
 //
 // This dramatically reduces latency and server load for large projects.
 
-use std::collections::HashMap;
-
-/// Active WebRTC signaling sessions.
+// For production deployment, add a STUN/TURN server configuration:
 #[allow(dead_code)]
 struct SignalingState {
     /// offer_id → (offering_peer, target_peer, sdp)

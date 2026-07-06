@@ -1,0 +1,1270 @@
+# ── Lazynext Production Docker Compose (Consolidated) ────────────
+# Usage:
+#   docker compose -f docker-compose.prod-full.yml --env-file .env.production up -d
+#
+# ALL 8 application services + infrastructure + monitoring in one file.
+# Designed for single-host production deployments.
+# For multi-host / Kubernetes, see k8s/ and terraform/ directories.
+#
+# ⚠️  Before deploying:
+#   1. Copy .env.production.example → .env.production and fill in values
+#   2. Create Docker secrets:
+#        echo "your-secret" | docker secret create lazynext_postgres_password -
+#   3. Ensure /data/* directories exist with correct permissions
+
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "5"
+      compress: "true"
+      tag: "{% raw %}{{.Name}}{% endraw %}"
+
+x-deploy-defaults: &deploy-defaults
+  deploy:
+    mode: replicated
+    replicas: 1
+    update_config:
+      parallelism: 1
+      delay: 10s
+      failure_action: rollback
+      monitor: 30s
+      max_failure_ratio: 0.3
+      order: start-first
+    rollback_config:
+      parallelism: 1
+      delay: 5s
+      failure_action: pause
+      monitor: 30s
+    restart_policy:
+      condition: unless-stopped
+      delay: 10s
+      max_attempts: 5
+      window: 120s
+
+x-security: &security
+  cap_drop: [ALL]
+  cap_add: [NET_BIND_SERVICE]
+  read_only: true
+  init: true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=128M
+
+x-healthcheck-http: &healthcheck-http
+  interval: 15s
+  timeout: 5s
+  retries: 3
+  start_period: 20s
+
+x-healthcheck-fast: &healthcheck-fast
+  interval: 5s
+  timeout: 3s
+  retries: 3
+  start_period: 10s
+
+services:
+  # ═══════════════════════════════════════════════════════════════
+  # DATABASE LAYER
+  # ═══════════════════════════════════════════════════════════════
+
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    <<: [*logging, *deploy-defaults]
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+        reservations:
+          cpus: "1"
+          memory: 2G
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      POSTGRES_USER: ${DB_USER:-lazynext}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-lazynext}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /data/postgresql:/var/lib/postgresql/data
+      - /data/postgresql-backups:/backups
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-lazynext} -d ${POSTGRES_DB:-lazynext}"]
+    secrets:
+      - source: lazynext_postgres_password
+        target: postgres_password
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    read_only: false
+    command: >
+      postgres
+      -c shared_buffers=2GB
+      -c effective_cache_size=6GB
+      -c max_connections=200
+      -c wal_level=replica
+      -c max_wal_senders=5
+      -c max_replication_slots=5
+      -c wal_keep_size=1GB
+      -c checkpoint_timeout=15min
+      -c max_wal_size=4GB
+      -c min_wal_size=1GB
+      -c log_min_duration_statement=2000
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+      -c log_statement=ddl
+      -c log_checkpoints=on
+      -c log_connections=on
+      -c log_disconnections=on
+      -c log_lock_waits=on
+      -c log_temp_files=0
+      -c log_autovacuum_min_duration=0
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c maintenance_work_mem=512MB
+      -c work_mem=64MB
+      -c autovacuum_vacuum_scale_factor=0.01
+      -c autovacuum_analyze_scale_factor=0.005
+      -c autovacuum_max_workers=4
+      -c autovacuum_naptime=30s
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    <<: [*logging, *deploy-defaults]
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    volumes:
+      - /data/redis:/data
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "redis-cli", "ping"]
+    cap_drop: [ALL]
+    cap_add: [SETGID, SETUID]
+    read_only: false
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 2gb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --lazyfree-lazy-eviction yes
+      --lazyfree-lazy-expire yes
+      --lazyfree-lazy-server-del yes
+      --replica-lazy-flush yes
+      --lfu-log-factor 10
+      --lfu-decay-time 1
+      --active-defrag-threshold-lower 10
+      --active-defrag-threshold-upper 100
+      --active-defrag-cycle-min 5
+      --active-defrag-cycle-max 75
+      --rename-command CONFIG ""
+      --rename-command DEBUG ""
+      --rename-command FLUSHDB ""
+      --rename-command FLUSHALL ""
+      --rename-command KEYS ""
+      --requirepass ${REDIS_PASSWORD:-}
+
+  # ═══════════════════════════════════════════════════════════════
+  # REVERSE PROXY (Traefik v3)
+  # ═══════════════════════════════════════════════════════════════
+
+  traefik:
+    image: traefik:v3.3.5
+    restart: unless-stopped
+    <<: [*logging, *deploy-defaults]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - lazynext-prod
+      - traefik-public
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64M
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    environment:
+      CF_API_EMAIL: ${CF_API_EMAIL:-ops@lazynext.ai}
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:-}
+      TRAEFIK_LOG_LEVEL: "${TRAEFIK_LOG_LEVEL:-INFO}"
+      TRAEFIK_ACCESSLOG: "true"
+      TRAEFIK_ACCESSLOG_FORMAT: json
+      ACME_EMAIL: ${ACME_EMAIL:-ops@lazynext.ai}
+      LETSENCRYPT_STAGING: "${LETSENCRYPT_STAGING:-false}"
+    command:
+      # Entry Points
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.certresolver=cloudflare
+      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN:-lazynext.com}
+      - --entrypoints.websecure.http.tls.domains[0].sans=*.${DOMAIN:-lazynext.com}
+      - --entrypoints.websecure.http.tls.options=modern@file
+      # Dashboard (internal)
+      - --entrypoints.traefik.address=:8080
+      # Providers
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=lazynext-prod
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --providers.file.watch=true
+      # Let's Encrypt
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      - --certificatesresolvers.cloudflare.acme.email=${ACME_EMAIL:-ops@lazynext.ai}
+      - --certificatesresolvers.cloudflare.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.cloudflare.acme.caserver=${LETSENCRYPT_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}
+      # Metrics
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entrypoint=traefik
+      - --metrics.prometheus.addrouterslabels=true
+      - --metrics.prometheus.addserviceslabels=true
+      # Tracing
+      - --tracing.otlp=true
+      - --tracing.otlp.grpc.endpoint=tempo:4317
+      - --tracing.otlp.grpc.insecure=true
+    volumes:
+      - /data/traefik:/letsencrypt
+      - ./config/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - ./config/traefik/tls.yml:/etc/traefik/tls.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN:-lazynext.internal}`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth-dashboard@file,internal-ip@file"
+
+  # ═══════════════════════════════════════════════════════════════
+  # APPLICATION SERVICES
+  # ═══════════════════════════════════════════════════════════════
+
+  # ── 1. Pre-Processing (Python: Whisper, SAM2, NeRF) ───────────
+  #     Port: 8000
+  pre-processing:
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+        reservations:
+          cpus: "1"
+          memory: 4G
+      restart_policy:
+        condition: unless-stopped
+        delay: 15s
+        max_attempts: 5
+        window: 300s
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OMP_NUM_THREADS=2
+      - MKL_NUM_THREADS=2
+      - NUMBA_CACHE_DIR=/tmp
+      - HF_HOME=/tmp/huggingface
+      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
+      - REPLICATE_API_TOKEN_FILE=/run/secrets/replicate_api_token
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=pre-processing
+      - OTEL_ENABLED=true
+    volumes:
+      - /data/models:/models:ro
+      - /data/pre-processing-temp:/tmp/processing
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      start_period: 120s
+      timeout: 10s
+      retries: 5
+    secrets:
+      - source: lazynext_openai_api_key
+        target: openai_api_key
+      - source: lazynext_replicate_api_token
+        target: replicate_api_token
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.preprocessing.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/preprocessing`)"
+      - "traefik.http.routers.preprocessing.entrypoints=websecure"
+      - "traefik.http.routers.preprocessing.tls=true"
+      - "traefik.http.routers.preprocessing.tls.certresolver=cloudflare"
+      - "traefik.http.routers.preprocessing.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.preprocessing.loadbalancer.server.port=8000"
+      - "traefik.http.services.preprocessing.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.preprocessing.loadbalancer.healthcheck.interval=15s"
+
+  # ── 2. Generative Studio (Python: Diffusion, Dubbing, Upscale)
+  #     Port: 8001
+  generative-studio:
+    build:
+      context: ./services/generative-studio
+      dockerfile: Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "4"
+          memory: 12G
+        reservations:
+          cpus: "1"
+          memory: 6G
+      restart_policy:
+        condition: unless-stopped
+        delay: 15s
+        max_attempts: 5
+        window: 300s
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HF_HOME=/tmp/huggingface
+      - TRANSFORMERS_CACHE=/tmp/huggingface
+      - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
+      - REPLICATE_API_TOKEN_FILE=/run/secrets/replicate_api_token
+      - ELEVENLABS_API_KEY_FILE=/run/secrets/elevenlabs_api_key
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=generative-studio
+      - OTEL_ENABLED=true
+    volumes:
+      - /data/models:/models:ro
+      - /data/generative-temp:/tmp/processing
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+      start_period: 180s
+      timeout: 10s
+      retries: 5
+    secrets:
+      - source: lazynext_elevenlabs_api_key
+        target: elevenlabs_api_key
+      - source: lazynext_replicate_api_token
+        target: replicate_api_token
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.generative.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/generative`)"
+      - "traefik.http.routers.generative.entrypoints=websecure"
+      - "traefik.http.routers.generative.tls=true"
+      - "traefik.http.routers.generative.tls.certresolver=cloudflare"
+      - "traefik.http.routers.generative.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.generative.loadbalancer.server.port=8001"
+
+  # ── 3. AI Agents (Lazynext AI Copilot + WebSocket Sync) ───────────
+  #     Port: 8002
+  ai-agents:
+    build:
+      context: ./services/ai-agents
+      dockerfile: Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - NODE_ENV=production
+      - PORT=8002
+      - NODE_OPTIONS=--max-old-space-size=1792
+      - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - OPENAI_API_KEY_FILE=/run/secrets/openai_api_key
+      - ANTHROPIC_API_KEY_FILE=/run/secrets/anthropic_api_key
+      - GEMINI_API_KEY_FILE=/run/secrets/gemini_api_key
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - GENERATIVE_STUDIO_URL=http://generative-studio:8001
+      - PRE_PROCESSING_URL=http://pre-processing:8000
+      - RENDER_SERVICE_URL=http://render-service:8003
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=ai-agents
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+    secrets:
+      - source: lazynext_openai_api_key
+        target: openai_api_key
+      - source: lazynext_anthropic_api_key
+        target: anthropic_api_key
+      - source: lazynext_gemini_api_key
+        target: gemini_api_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ai-agents.rule=Host(`api.${DOMAIN:-lazynext.com}`) && (PathPrefix(`/ai`) || PathPrefix(`/ws`))"
+      - "traefik.http.routers.ai-agents.entrypoints=websecure"
+      - "traefik.http.routers.ai-agents.tls=true"
+      - "traefik.http.routers.ai-agents.tls.certresolver=cloudflare"
+      - "traefik.http.routers.ai-agents.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.ai-agents.loadbalancer.server.port=8002"
+      - "traefik.http.services.ai-agents.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.ai-agents.loadbalancer.sticky.cookie.name=lazynext_ws"
+
+  # ── 4. Render Service (FFmpeg Render Farm) ────────────────────
+  #     Port: 8003
+  render-service:
+    build:
+      context: ./services/render-service
+      dockerfile: Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "4"
+          memory: 6G
+        reservations:
+          cpus: "1"
+          memory: 2G
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - NODE_ENV=production
+      - PORT=8003
+      - NODE_OPTIONS=--max-old-space-size=3584
+      - RENDER_PARALLELISM=${RENDER_PARALLELISM:-4}
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-prod}
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=render-service
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:8003/health"]
+    volumes:
+      - /data/render-jobs:/app/jobs:rw
+      - /data/render-temp:/tmp/render:rw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.render.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/render`)"
+      - "traefik.http.routers.render.entrypoints=websecure"
+      - "traefik.http.routers.render.tls=true"
+      - "traefik.http.routers.render.tls.certresolver=cloudflare"
+      - "traefik.http.routers.render.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.render.loadbalancer.server.port=8003"
+      - "traefik.http.services.render.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.render.loadbalancer.healthcheck.interval=15s"
+
+  # ── 5. Collab Server (Native Rust CRDT Sync + WebRTC Signaling)
+  #     Port: 8004
+  collab-server:
+    build:
+      context: .
+      dockerfile: services/collab-server/Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - COLLAB_PORT=8004
+      - RUST_LOG=${COLLAB_LOG_LEVEL:-info}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/2
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=collab-server
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "curl", "-sf", "http://localhost:8004/health"]
+    secrets:
+      - source: lazynext_better_auth_secret
+        target: better_auth_secret
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.collab.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/collab`)"
+      - "traefik.http.routers.collab.entrypoints=websecure"
+      - "traefik.http.routers.collab.tls=true"
+      - "traefik.http.routers.collab.tls.certresolver=cloudflare"
+      - "traefik.http.routers.collab.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.collab.loadbalancer.server.port=8004"
+      - "traefik.http.services.collab.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.collab.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.collab.loadbalancer.sticky.cookie=true"
+
+  # ── 6. API Gateway (Rust) ─────────────────────────────────────
+  #     Port: 8005
+  api-gateway:
+    build:
+      context: .
+      dockerfile: rust/api-gateway/Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "3"
+          memory: 4G
+        reservations:
+          cpus: "1"
+          memory: 1G
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - RUST_LOG=${API_GATEWAY_LOG_LEVEL:-info}
+      - DISABLE_CSRF=false
+      - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/3
+      - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
+      - LAZYNEXT_MCP_API_KEY_FILE=/run/secrets/mcp_api_key
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=api-gateway
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-fast
+      test: ["CMD", "curl", "-sf", "http://localhost:8005/health"]
+    secrets:
+      - source: lazynext_better_auth_secret
+        target: better_auth_secret
+      - source: lazynext_dodo_webhook_secret
+        target: dodo_webhook_secret
+      - source: lazynext_mcp_api_key
+        target: mcp_api_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-gateway.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/v1`)"
+      - "traefik.http.routers.api-gateway.entrypoints=websecure"
+      - "traefik.http.routers.api-gateway.tls=true"
+      - "traefik.http.routers.api-gateway.tls.certresolver=cloudflare"
+      - "traefik.http.routers.api-gateway.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.api-gateway.loadbalancer.server.port=8005"
+      - "traefik.http.services.api-gateway.loadbalancer.healthcheck.path=/health"
+      - "traefik.http.services.api-gateway.loadbalancer.healthcheck.interval=10s"
+
+  # ── 7. Analytics Service (Node.js/Kafka) ──────────────────────
+  #     Port: 8006
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - NODE_ENV=production
+      - PORT=8006
+      - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/4
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=analytics-service
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:8006/health"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.analytics.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/analytics`)"
+      - "traefik.http.routers.analytics.entrypoints=websecure"
+      - "traefik.http.routers.analytics.tls=true"
+      - "traefik.http.routers.analytics.tls.certresolver=cloudflare"
+      - "traefik.http.routers.analytics.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.analytics.loadbalancer.server.port=8006"
+
+  # ── 8. Social Publish Service (Node.js) ───────────────────────
+  #     Port: 8007
+  social-publish:
+    build:
+      context: .
+      dockerfile: services/social-publish/Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "1"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    environment:
+      - NODE_ENV=production
+      - PORT=8007
+      - YT_CLIENT_ID=${YT_CLIENT_ID:-}
+      - YT_CLIENT_SECRET_FILE=/run/secrets/yt_client_secret
+      - TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY:-}
+      - TIKTOK_CLIENT_SECRET_FILE=/run/secrets/tiktok_client_secret
+      - INSTAGRAM_ACCESS_TOKEN_FILE=/run/secrets/instagram_access_token
+      - TWITTER_API_KEY=${TWITTER_API_KEY:-}
+      - TWITTER_API_SECRET_FILE=/run/secrets/twitter_api_secret
+      - TWITTER_ACCESS_TOKEN_FILE=/run/secrets/twitter_access_token
+      - TWITTER_ACCESS_SECRET_FILE=/run/secrets/twitter_access_secret
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/5
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
+      - OTEL_SERVICE_NAME=social-publish
+      - OTEL_ENABLED=true
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:8007/health"]
+    secrets:
+      - source: lazynext_yt_client_secret
+        target: yt_client_secret
+      - source: lazynext_tiktok_client_secret
+        target: tiktok_client_secret
+      - source: lazynext_instagram_access_token
+        target: instagram_access_token
+      - source: lazynext_twitter_api_secret
+        target: twitter_api_secret
+      - source: lazynext_twitter_access_token
+        target: twitter_access_token
+      - source: lazynext_twitter_access_secret
+        target: twitter_access_secret
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.social-publish.rule=Host(`api.${DOMAIN:-lazynext.com}`) && PathPrefix(`/publish`)"
+      - "traefik.http.routers.social-publish.entrypoints=websecure"
+      - "traefik.http.routers.social-publish.tls=true"
+      - "traefik.http.routers.social-publish.tls.certresolver=cloudflare"
+      - "traefik.http.routers.social-publish.middlewares=api-rate-limit@file,secure-headers@file"
+      - "traefik.http.services.social-publish.loadbalancer.server.port=8007"
+
+  # ── Web App (Next.js) ─────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+    environment:
+      - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=1792
+      - NEXT_TELEMETRY_DISABLED=1
+      - STORAGE_PROVIDER=${STORAGE_PROVIDER:-azure}
+      - AZURE_STORAGE_ACCOUNT=${AZURE_STORAGE_ACCOUNT:-lazynextmediaprod}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://lazynext:${DB_PASSWORD}@postgres:5432/lazynext}
+      - BETTER_AUTH_SECRET_FILE=/run/secrets/better_auth_secret
+      - BETTER_AUTH_URL=https://${DOMAIN:-lazynext.com}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/6
+      - RENDER_SERVICE_URL=http://render-service:8003
+      - GENERATIVE_STUDIO_URL=http://generative-studio:8001
+      - PRE_PROCESSING_URL=http://pre-processing:8000
+      - AI_AGENTS_URL=http://ai-agents:8002
+      - COLLAB_SERVER_URL=http://collab-server:8004
+      - NEXT_PUBLIC_SITE_URL=https://${DOMAIN:-lazynext.com}
+      - NEXT_PUBLIC_PREPROCESSING_URL=https://api.${DOMAIN:-lazynext.com}/preprocessing
+      - NEXT_PUBLIC_GENERATIVE_STUDIO_URL=https://api.${DOMAIN:-lazynext.com}/generative
+      - NEXT_PUBLIC_AI_AGENTS_URL=https://api.${DOMAIN:-lazynext.com}/ai
+      - NEXT_PUBLIC_RENDER_SERVICE_URL=https://api.${DOMAIN:-lazynext.com}/render
+      - NEXT_PUBLIC_POSTHOG_KEY=${POSTHOG_KEY:-}
+      - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+      - DODO_API_KEY_FILE=/run/secrets/dodo_api_key
+      - DODO_WEBHOOK_SECRET_FILE=/run/secrets/dodo_webhook_secret
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${NEXT_PUBLIC_DODO_PRO_PRICE_ID:-pro_monthly}
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${NEXT_PUBLIC_DODO_STUDIO_PRICE_ID:-studio_monthly}
+      - RESEND_API_KEY_FILE=/run/secrets/resend_api_key
+      - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
+      - MARBLE_WORKSPACE_KEY_FILE=/run/secrets/marble_workspace_key
+      - FREESOUND_CLIENT_ID_FILE=/run/secrets/freesound_client_id
+      - FREESOUND_API_KEY_FILE=/run/secrets/freesound_api_key
+      - LAZYNEXT_WEBHOOK_URL=${LAZYNEXT_WEBHOOK_URL:-}
+      - LAZYNEXT_MCP_API_KEY_FILE=/run/secrets/mcp_api_key
+    networks:
+      - lazynext-prod
+    healthcheck:
+      <<: *healthcheck-http
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/api/health"]
+      start_period: 30s
+    volumes:
+      - /data/web-cache:/app/apps/web/.next/cache
+    secrets:
+      - source: lazynext_better_auth_secret
+        target: better_auth_secret
+      - source: lazynext_dodo_api_key
+        target: dodo_api_key
+      - source: lazynext_dodo_webhook_secret
+        target: dodo_webhook_secret
+      - source: lazynext_resend_api_key
+        target: resend_api_key
+      - source: lazynext_freesound_client_id
+        target: freesound_client_id
+      - source: lazynext_freesound_api_key
+        target: freesound_api_key
+      - source: lazynext_marble_workspace_key
+        target: marble_workspace_key
+      - source: lazynext_mcp_api_key
+        target: mcp_api_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`${DOMAIN:-lazynext.com}`) || Host(`www.${DOMAIN:-lazynext.com}`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=cloudflare"
+      - "traefik.http.routers.web.middlewares=web-rate-limit@file,web-circuit-breaker@file,secure-headers@file,compress@file"
+      - "traefik.http.services.web.loadbalancer.server.port=3000"
+      - "traefik.http.services.web.loadbalancer.healthcheck.path=/api/health"
+      - "traefik.http.services.web.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.web.loadbalancer.sticky.cookie.name=lazynext_sid"
+
+  # ═══════════════════════════════════════════════════════════════
+  # OBSERVABILITY STACK
+  # ═══════════════════════════════════════════════════════════════
+
+  prometheus:
+    image: prom/prometheus:v3.3.1
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/rules.yml:/etc/prometheus/rules.yml:ro
+      - ./monitoring/prometheus/alerts:/etc/prometheus/alerts:ro
+      - /data/prometheus:/prometheus:rw
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.retention.size=100GB
+      - --storage.tsdb.wal-compression
+      - --web.enable-lifecycle
+      - --web.enable-admin-api
+      - --query.max-concurrency=20
+      - --query.max-samples=50000000
+      - --web.console.templates=/etc/prometheus/consoles
+      - --web.console.libraries=/etc/prometheus/console_libraries
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  grafana:
+    image: grafana/grafana:11.5.1
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: warn
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ALERTING_ENABLED: "true"
+      GF_SMTP_ENABLED: "true"
+      GF_SMTP_HOST: "smtp-relay:1025"
+      GF_SMTP_FROM_ADDRESS: "grafana@${DOMAIN:-lazynext.ai}"
+      GF_SMTP_FROM_NAME: "Lazynext Grafana"
+      GF_SMTP_SKIP_VERIFY: "true"
+      GF_SERVER_ROOT_URL: "https://monitoring.${DOMAIN:-lazynext.internal}/grafana"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./monitoring/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - /data/grafana:/var/lib/grafana:rw
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  loki:
+    image: grafana/loki:3.7.2
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - ./monitoring/loki/rules.yml:/loki/rules/rules.yml:ro
+      - /data/loki:/loki:rw
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    user: root
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    volumes:
+      - ./monitoring/tempo/tempo-config.yaml:/etc/tempo/tempo-config.yaml:ro
+      - /data/tempo:/tmp/tempo:rw
+    command: -config.file=/etc/tempo/tempo-config.yaml
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 60s
+    volumes:
+      - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml:ro
+      - /data/alertmanager:/alertmanager:rw
+    command:
+      - --config.file=/etc/alertmanager/config.yml
+      - --storage.path=/alertmanager
+      - --cluster.listen-address=
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9093/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Exporters ─────────────────────────────────────────────────
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.0
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/lazynext?sslmode=disable"
+      DATA_SOURCE_USER: ${DB_USER:-lazynext}
+      DATA_SOURCE_PASS_FILE: /run/secrets/postgres_password
+      PG_EXPORTER_AUTO_DISCOVER_DATABASES: "true"
+      PG_EXPORTER_EXTEND_QUERY_PATH: /etc/postgres-exporter/queries.yml
+      PG_EXPORTER_LOG_FORMAT: json
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9187/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.80.0
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 64M
+        reservations:
+          cpus: "0.05"
+          memory: 16M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    environment:
+      REDIS_ADDR: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_EXPORTER_LOG_FORMAT: json
+      REDIS_EXPORTER_CHECK_KEYS: "lazynext:*"
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9121/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:v1.9.1
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 32M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc|run)($$|/)
+      - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9100/metrics"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── SMTP Relay (Mailpit) ──────────────────────────────────────
+  smtp-relay:
+    image: axllent/mailpit:v1.23.0
+    <<: [*logging, *deploy-defaults]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    networks:
+      - lazynext-prod
+    environment:
+      MP_MAX_MESSAGES: 50000
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_DATABASE: /data/mailpit.db
+    volumes:
+      - /data/mailpit:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8025/api/v1/info"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  blackbox-exporter:
+    image: quay.io/prometheus/blackbox-exporter:v0.26.0
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    volumes:
+      - ./monitoring/blackbox/blackbox.yml:/etc/blackbox/blackbox.yml:ro
+    command:
+      - --config.file=/etc/blackbox/blackbox.yml
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9115/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  alloy:
+    image: grafana/alloy:v1.17.0
+    <<: [*logging, *deploy-defaults, *security]
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+      restart_policy:
+        condition: unless-stopped
+        delay: 10s
+        max_attempts: 3
+        window: 30s
+    volumes:
+      - ./monitoring/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    networks:
+      - lazynext-prod
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12345/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# ═══════════════════════════════════════════════════════════════
+# NETWORKS
+# ═══════════════════════════════════════════════════════════════
+
+networks:
+  lazynext-prod:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.0.0/16
+  traefik-public:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+
+# ═══════════════════════════════════════════════════════════════
+# VOLUMES
+# ═══════════════════════════════════════════════════════════════
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
+  tempo_data:
+    driver: local
+  alertmanager_data:
+    driver: local
+
+# ═══════════════════════════════════════════════════════════════
+# SECRETS (must be created before deploy)
+# ═══════════════════════════════════════════════════════════════
+
+secrets:
+  lazynext_postgres_password:
+    external: true
+  lazynext_better_auth_secret:
+    external: true
+  lazynext_dodo_api_key:
+    external: true
+  lazynext_dodo_webhook_secret:
+    external: true
+  lazynext_resend_api_key:
+    external: true
+  lazynext_openai_api_key:
+    external: true
+  lazynext_anthropic_api_key:
+    external: true
+  lazynext_gemini_api_key:
+    external: true
+  lazynext_elevenlabs_api_key:
+    external: true
+  lazynext_replicate_api_token:
+    external: true
+  lazynext_freesound_client_id:
+    external: true
+  lazynext_freesound_api_key:
+    external: true
+  lazynext_marble_workspace_key:
+    external: true
+  lazynext_mcp_api_key:
+    external: true
+  lazynext_yt_client_secret:
+    external: true
+  lazynext_tiktok_client_secret:
+    external: true
+  lazynext_instagram_access_token:
+    external: true
+  lazynext_twitter_api_secret:
+    external: true
+  lazynext_twitter_access_token:
+    external: true
+  lazynext_twitter_access_secret:
+    external: true

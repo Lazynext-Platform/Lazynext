@@ -18,7 +18,7 @@ src/
 |-----|--------|-------------|
 | Dashboard | `DashboardScreen` | Project stats (tracks/clips), quick-action chips, natural-language intent input |
 | Editor | `TimelineScreen` | Gesture-driven timeline editor with clip manipulation via Reanimated |
-| AI Copilot | `AIChatScreen` | Chat interface with Chronos Copilot for conversational video editing |
+| AI Copilot | `AIChatScreen` | Chat interface with Lazynext AI Agent Copilot for conversational video editing |
 
 ## Native Bridge
 

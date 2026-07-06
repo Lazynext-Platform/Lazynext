@@ -88,7 +88,7 @@ These tools focus on speed, virality, and zero-friction content creation.
 ---
 
 ## How this translates to Lazynext's "Prompt-Based" Vision:
-Instead of manual menus, these features will be executed via **Chronos Copilot**. 
+Instead of manual menus, these features will be executed via **Lazynext AI Agent Copilot**. 
 
 **Examples:**
 *   *Instead of Color Wheels:* "Make this clip look like the Matrix, crush the blacks, and add a green tint."

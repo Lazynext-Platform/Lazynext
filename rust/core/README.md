@@ -8,7 +8,7 @@ Single source of truth for all business logic. Contains the NLE state machine, C
 |------|---------|
 | `nle_state.rs` | NLE state machine: tracks, clips, keyframes, undo/redo via snapshot |
 | `engine.rs` | CoreEngine: connects CRDT state, GPU compositor, asset loader, DeckLink |
-| `autonomous.rs` | Chronos AI Copilot: LLM-driven autonomous editing |
+| `autonomous.rs` | Lazynext AI Agent Copilot: LLM-driven autonomous editing |
 | `ffmpeg_loader.rs` | CliFfmpegLoader: real video frame decode via ffmpeg CLI |
 | `frame_cache.rs` | LRU frame cache for playback |
 | `ai_client.rs` | Multi-provider AI client (OpenAI, Anthropic, Gemini, Ollama) |

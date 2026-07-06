@@ -3,6 +3,19 @@
 //! VHS, CRT, glow, vignette, and 3D LUT) to textures via wgpu
 //! render passes. Supports chained effect passes with per-pass
 //! uniform parameters and batching with external command encoders.
+//!
+//! ## Architecture
+//!
+//! The [`EffectPipeline`] compiles all 10 built-in effect shaders into
+//! individual wgpu render pipelines at construction time. Each pipeline
+//! shares a common fullscreen-quad vertex shader and differs only in its
+//! fragment shader. Uniforms are packed into a single [`EffectUniformBuffer`]
+//! per pass and bound alongside the input texture.
+//!
+//! Effects are applied as a **chain** — each pass reads the output of the
+//! previous pass (or the original source on the first pass), rendering into
+//! a fresh intermediate texture via a fullscreen-quad draw call. The final
+//! intermediate texture is returned as the output.
 
 use std::collections::HashMap;
 
@@ -12,6 +25,10 @@ use thiserror::Error;
 use wgpu::util::DeviceExt;
 
 use crate::{EffectPass, UniformValue};
+
+// ── Shader IDs & Sources ──
+// Each effect has a string ID (used as a key in the pipeline map) and
+// the corresponding WGSL fragment shader source inlined at compile time.
 
 const GAUSSIAN_BLUR_SHADER_ID: &str = "gaussian-blur";
 const GAUSSIAN_BLUR_SHADER_SOURCE: &str = include_str!("shaders/gaussian_blur.wgsl");
@@ -45,6 +62,8 @@ const VIGNETTE_SHADER_SOURCE: &str = include_str!("shaders/vignette.wgsl");
 
 const LUT_3D_SHADER_SOURCE: &str = include_str!("shaders/lut_3d.wgsl");
 
+// ── Input / Output Types ──
+
 /// Input parameters for applying a chain of effects passes.
 pub struct ApplyEffectsOptions<'a> {
     /// The source texture to read from.
@@ -57,6 +76,8 @@ pub struct ApplyEffectsOptions<'a> {
     pub passes: &'a [EffectPass],
 }
 
+// ── Effect Pipeline State ──
+
 /// GPU pipeline that applies post-processing effects via compute shaders.
 pub struct EffectPipeline {
     uniform_bind_group_layout: wgpu::BindGroupLayout,
@@ -64,6 +85,8 @@ pub struct EffectPipeline {
     pipelines: HashMap<String, wgpu::RenderPipeline>,
     lut3d_pipeline: wgpu::RenderPipeline,
 }
+
+// ── Error Types ──
 
 #[derive(Debug, Error)]
 pub enum EffectsError {
@@ -87,6 +110,11 @@ pub enum EffectsError {
     UnsupportedUniform { shader: String, uniform: String },
 }
 
+// ── GPU Uniform Buffer ──
+// All per-pass parameters are packed into this single uniform struct.
+// Each shader reads the slots it needs; unused slots are zeroed.
+// Layout: resolution (vec2) | direction (vec2) | scalars (vec4) |
+// chroma_color (vec4) | chroma_thresholds (vec4)
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct EffectUniformBuffer {
@@ -97,9 +125,17 @@ struct EffectUniformBuffer {
     chroma_thresholds: [f32; 4],
 }
 
+// ── Pipeline Construction ──
+// Compiles all 10 built-in effect shaders into wgpu render pipelines.
+// Each pipeline shares a common fullscreen-quad vertex shader and a shared
+// pipeline layout (texture bind group + uniform bind group).
+
 impl EffectPipeline {
     /// Create a new effect pipeline, compiling all built-in effect shaders.
     pub fn new(context: &GpuContext) -> Self {
+        // Two bind group layouts are created:
+        // 1. uniform_bind_group_layout — for per-pass uniform buffers (binding 0)
+        // 2. lut3d_bind_group_layout — for the 3D LUT texture + sampler (bindings 0, 1)
         let uniform_bind_group_layout =
             context
                 .device()
@@ -141,6 +177,8 @@ impl EffectPipeline {
                         },
                     ],
                 });
+
+        // The shared fullscreen-quad vertex shader — every effect pipeline reuses it.
         let vertex_shader_module =
             context
                 .device()
@@ -155,6 +193,8 @@ impl EffectPipeline {
                     label: Some("effects-gaussian-blur-shader"),
                     source: wgpu::ShaderSource::Wgsl(GAUSSIAN_BLUR_SHADER_SOURCE.into()),
                 });
+        // The shared pipeline layout: texture+sampler at group 0, uniform buffer at group 1.
+        // Every built-in effect pipeline (except LUT) uses this layout.
         let pipeline_layout =
             context
                 .device()
@@ -167,6 +207,10 @@ impl EffectPipeline {
                     immediate_size: 0,
                 });
 
+        // ── Per-Effect Shader Modules ──
+        // All fragment shader modules are compiled upfront. The gaussian blur
+        // module was compiled above; the remaining 9 follow below.
+
         let lut3d_pipeline_layout =
             context
                 .device()
@@ -178,6 +222,7 @@ impl EffectPipeline {
                     ],
                     immediate_size: 0,
                 });
+
         let chroma_key_shader_module =
             context
                 .device()
@@ -249,6 +294,10 @@ impl EffectPipeline {
                     label: Some("effects-lut3d-shader"),
                     source: wgpu::ShaderSource::Wgsl(LUT_3D_SHADER_SOURCE.into()),
                 });
+
+        // ── Per-Effect Render Pipelines ──
+        // Each pipeline combines the shared vertex shader with its unique
+        // fragment shader under the shared pipeline layout.
 
         let gaussian_blur_pipeline =
             context
@@ -633,6 +682,8 @@ impl EffectPipeline {
             (VIGNETTE_SHADER_ID.to_string(), vignette_pipeline),
         ]);
 
+        // LUT pipeline uses a separate layout (lut3d_pipeline_layout) because it
+        // binds the lookup-table texture at group 1 instead of uniform data.
         let lut3d_pipeline =
             context
                 .device()
@@ -690,6 +741,8 @@ pub struct ApplyLutOptions<'a> {
     /// The 3D lookup-table texture.
     pub lut_texture: &'a wgpu::Texture,
 }
+
+// ── LUT Application ──
 
 impl EffectPipeline {
     /// Apply a 3D LUT color grade to the source texture, returning the output texture.
@@ -751,8 +804,10 @@ impl EffectPipeline {
                     },
                 ],
             });
-
         {
+            // Fullscreen-quad draw: vertex shader positions the quad,
+            // fragment shader applies the effect. Bind group 0 = input
+            // texture, bind group 1 = per-pass uniform data.
             let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("effects-lut-render-pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -779,6 +834,8 @@ impl EffectPipeline {
         context.queue().submit([encoder.finish()]);
         Ok(output_texture)
     }
+
+    // ── Chained Effect Application ──
 
     /// Apply a chain of effects to the source texture, encoding and submitting GPU work.
     /// Returns the final output texture.
@@ -825,6 +882,10 @@ impl EffectPipeline {
             passes,
         }: ApplyEffectsOptions<'_>,
     ) -> Result<wgpu::Texture, EffectsError> {
+        // The effect chain uses a "ping-pong" approach: each pass reads the
+        // output of the previous pass (or the source texture on the first
+        // iteration) and renders into a fresh intermediate texture. The last
+        // intermediate texture is returned as the final output.
         let mut current_texture: Option<wgpu::Texture> = None;
 
         for pass in passes {
@@ -833,6 +894,8 @@ impl EffectPipeline {
                 context.create_render_texture(width, height, "effects-pass-output");
             let input_view = input_texture.create_view(&wgpu::TextureViewDescriptor::default());
             let output_view = output_texture.create_view(&wgpu::TextureViewDescriptor::default());
+
+            // Bind group 0: the input texture (previous pass's output) + linear sampler.
             let texture_bind_group =
                 context
                     .device()
@@ -850,6 +913,8 @@ impl EffectPipeline {
                             },
                         ],
                     });
+
+            // Pack the pass's uniform parameters into a GPU buffer and bind at group 1.
             let uniform_buffer =
                 context
                     .device()
@@ -869,6 +934,7 @@ impl EffectPipeline {
                             resource: uniform_buffer.as_entire_binding(),
                         }],
                     });
+            // Look up the pre-compiled render pipeline for this shader id.
             let pipeline = self.pipelines.get(&pass.shader).ok_or_else(|| {
                 EffectsError::UnknownEffectShader {
                     shader: pass.shader.clone(),
@@ -905,6 +971,14 @@ impl EffectPipeline {
         current_texture.ok_or(EffectsError::MissingEffectPasses)
     }
 }
+
+// ── Uniform Packing ──
+// Translates per-pass EffectPass parameters into an EffectUniformBuffer
+// that matches the WGSL layout. Each shader reads a subset of the fields;
+// unused fields are zeroed.
+//
+// The `#[allow]` is needed because VHS and CRT both read `u_intensity` + `u_time`,
+// causing Clippy to flag the branches as identical across all time-dependent shaders.
 
 #[allow(clippy::if_same_then_else)]
 fn pack_effect_uniforms(
@@ -962,6 +1036,10 @@ fn pack_effect_uniforms(
         chroma_thresholds: [similarity, smoothness, 0.0, 0.0],
     })
 }
+
+// ── Uniform Value Readers ──
+// Type-safe helpers for extracting numeric and vec2/vec4 uniform values
+// from the generic EffectPass::uniforms HashMap.
 
 fn read_number_uniform(pass: &EffectPass, uniform: &str) -> Result<f32, EffectsError> {
     let Some(value) = pass.uniforms.get(uniform) else {

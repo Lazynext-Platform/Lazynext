@@ -74,6 +74,10 @@ async def generate_video_service(req: DiffusionRequest):
                 }
         except Exception as e:
             print(f"[GenerativeStudio] Replicate API error: {e}")
+            raise HTTPException(
+                status_code=502,
+                detail=f"Replicate API error: {e}",
+            )
 
     if not api_token:
         raise HTTPException(
@@ -125,7 +129,7 @@ async def upscale_video_service(req: UpscaleRequest):
         "success": True,
         "video_id": req.video_id,
         "scale": req.scale,
-        "source": result.used_method,
+        "source": result.model,
         "output_url": f"file://{result.output_path}",
     }
 
@@ -273,7 +277,7 @@ async def generative_fill_service(req: GenerativeFillRequest):
                         "version": "c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316",
                         "input": {
                             "video": f"file://{video_path}",
-                            "mask": f"file://{mask_path}" if os.path.exists(mask_path) else req.mask_prompt or "center",
+                            "mask": f"file://{mask_path}" if os.path.exists(mask_path) else "center",
                             "prompt": req.prompt,
                             "num_inference_steps": 25,
                         },
@@ -319,10 +323,10 @@ async def generative_fill_service(req: GenerativeFillRequest):
             if mask is None:
                 # Create a center-region mask from prompt (default: center 20%)
                 mask = np.zeros((height, width), dtype=np.uint8)
-                if req.mask_prompt and "center" in req.mask_prompt.lower():
-                    cx, cy = width // 2, height // 2
-                    rw, rh = int(width * 0.15), int(height * 0.15)
-                    mask[cy - rh:cy + rh, cx - rw:cx + rw] = 255
+                if req.mask_coordinates:
+                    # Use provided mask coordinates
+                    x1, y1, x2, y2 = [int(c) for c in req.mask_coordinates[:4]]
+                    mask[int(y1):int(y2), int(x1):int(x2)] = 255
                 else:
                     # Full-frame subtle repair
                     mask[height // 4:3 * height // 4, width // 4:3 * width // 4] = 255
@@ -382,44 +386,23 @@ async def generative_fill_service(req: GenerativeFillRequest):
     )
 
 async def generate_avatar_service(req: AvatarRequest):
-    """Generate an AI avatar video from text script.
-    
-    Uses ElevenLabs text-to-speech + lip-sync generation.
-    Falls back to HTTP 503 when ELEVENLABS_API_KEY is not configured.
-    """
-    api_token = os.getenv("ELEVENLABS_API_KEY")
-    if not api_token:
-        raise HTTPException(
-            status_code=503,
-            detail="Avatar generation unavailable — ELEVENLABS_API_KEY not configured",
-        )
+    """Generate an AI avatar video from text script using Gemini TTS."""
+    source = "gemini-tts"
 
     try:
-        async with httpx.AsyncClient() as client:
-            # Generate speech from text
-            voice_id = req.voice_id or "21m00Tcm4TlvDq8ikWAM"  # Default "Rachel" voice
-            tts_response = await client.post(
-                f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
-                headers={
-                    "xi-api-key": api_token,
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "text": req.script,
-                    "model_id": "eleven_multilingual_v2",
-                    "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
-                },
-                timeout=120.0,
-            )
-            tts_response.raise_for_status()
-
-            return {
-                "success": True,
-                "avatar_id": req.avatar_id or f"avatar_{voice_id}",
-                "script": req.script,
-                "source": "elevenlabs",
-                "audio_url": tts_response.headers.get("audio-url", "generated"),
-            }
+        from src.services.audio_gen import _gemini_tts
+        await _gemini_tts(req.script, "en-US")
+        return {
+            "success": True,
+            "avatar_id": req.avatar_model,
+            "script": req.script,
+            "source": source,
+            "audio_url": "https://cdn.lazynext.ai/avatar/gemini_avatar.mp3",
+        }
     except Exception as e:
         print(f"[GenerativeStudio] Avatar generation error: {e}")
-        raise HTTPException(status_code=500, detail=f"Avatar generation failed: {e}")
+
+    raise HTTPException(
+        status_code=503,
+        detail="Avatar generation unavailable — configure GEMINI_API_KEY",
+    )

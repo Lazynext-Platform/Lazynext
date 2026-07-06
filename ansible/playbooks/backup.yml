@@ -12,7 +12,7 @@
 #     -e 'retention_days=30'
 
 - name: Lazynext Automated Backups
-  hosts: masters,workers
+  hosts: masters
   gather_facts: yes
   vars:
     backup_type: "{{ backup_type | default('full') }}"          # full | incremental
@@ -48,7 +48,7 @@
 
     - name: Check available disk space for backups
       ansible.builtin.shell: |
-        df -BG {{ backup_base_dir | dirname }} | awk 'NR==2{print $4}' | tr -d 'G'
+        df -BG "{{ backup_base_dir }}" | awk 'NR==2{print $4}' | tr -d 'G'
       register: available_disk_gb
       changed_when: false
 
@@ -117,7 +117,8 @@
       become_user: postgres
       ansible.builtin.shell: |
         set -euo pipefail
-        export PGPASSWORD="{{ postgresql_admin_password }}"
+        echo "localhost:{{ postgresql_port }}:*:{{ postgresql_admin_user }}:{{ postgresql_admin_password }}" > ~/.pgpass
+        chmod 0600 ~/.pgpass
 
         # List all non-template databases
         psql -h localhost -p {{ postgresql_port }} -U {{ postgresql_admin_user }} \
@@ -133,6 +134,8 @@
               -f "{{ backup_work_dir }}/postgresql/${db}_${backup_timestamp}.dump" \
               "$db"
           done
+
+        rm -f ~/.pgpass
       register: pg_dump_result
       changed_when: true
       when: "'masters' in group_names"
@@ -142,7 +145,8 @@
       become_user: postgres
       ansible.builtin.shell: |
         set -euo pipefail
-        export PGPASSWORD="{{ postgresql_admin_password }}"
+        echo "localhost:{{ postgresql_port }}:*:{{ postgresql_admin_user }}:{{ postgresql_admin_password }}" > ~/.pgpass
+        chmod 0600 ~/.pgpass
         pg_dumpall \
           -h localhost \
           -p {{ postgresql_port }} \
@@ -150,6 +154,7 @@
           --globals-only \
           --no-role-passwords \
           -f "{{ backup_work_dir }}/postgresql/globals_${backup_timestamp}.sql"
+        rm -f ~/.pgpass
       register: pg_globals_result
       changed_when: true
       when: "'masters' in group_names"
@@ -180,7 +185,9 @@
     # ──────────────────────────────────────────────────────────────
 
     - name: Trigger Redis BGSAVE
-      ansible.builtin.command: "redis-cli -a '{{ redis_password }}' --no-auth-warning BGSAVE"
+      ansible.builtin.command: "redis-cli -h localhost --no-auth-warning BGSAVE"
+      environment:
+        REDISCLI_AUTH: "{{ redis_password }}"
       register: redis_bgsave
       changed_when: false
       when: "'masters' in group_names"
@@ -189,7 +196,7 @@
     - name: Wait for Redis BGSAVE to complete
       ansible.builtin.shell: |
         for i in $(seq 1 60); do
-          state=$(redis-cli -a '{{ redis_password }}' --no-auth-warning INFO persistence 2>/dev/null | grep rdb_bgsave_in_progress | cut -d: -f2 | tr -d '\r')
+          state=$(redis-cli -h localhost --no-auth-warning INFO persistence 2>/dev/null | grep rdb_bgsave_in_progress | cut -d: -f2 | tr -d '\r')
           if [ "$state" = "0" ]; then
             echo "BGSAVE completed"
             exit 0
@@ -198,6 +205,8 @@
         done
         echo "BGSAVE timeout"
         exit 1
+      environment:
+        REDISCLI_AUTH: "{{ redis_password }}"
       register: redis_bgsave_wait
       changed_when: false
       when: "'masters' in group_names"

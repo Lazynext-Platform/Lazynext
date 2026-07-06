@@ -15,6 +15,19 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-web
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-web
   selector:
     matchLabels:
       app: lazynext-web
@@ -155,17 +168,17 @@ spec:
                   name: lazynext-secrets
                   key: POSTHOG_KEY
                   optional: true
-            - name: STRIPE_SECRET_KEY
+            - name: DODO_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: STRIPE_SECRET_KEY
+                  key: DODO_API_KEY
                   optional: true
-            - name: STRIPE_WEBHOOK_SECRET
+            - name: DODO_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: STRIPE_WEBHOOK_SECRET
+                  key: DODO_WEBHOOK_SECRET
                   optional: true
             - name: RESEND_API_KEY
               valueFrom:
@@ -207,6 +220,19 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-sync
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-sync
   selector:
     matchLabels:
       app: lazynext-sync
@@ -317,6 +343,19 @@ spec:
     rollingUpdate:
       maxUnavailable: 1
       maxSurge: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-render
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-render
   selector:
     matchLabels:
       app: lazynext-render
@@ -416,6 +455,19 @@ metadata:
     component: ml
 spec:
   replicas: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-pre-processing
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-pre-processing
   selector:
     matchLabels:
       app: lazynext-pre-processing
@@ -513,6 +565,19 @@ metadata:
     component: ml
 spec:
   replicas: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-generative-studio
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-generative-studio
   selector:
     matchLabels:
       app: lazynext-generative-studio
@@ -681,6 +746,33 @@ spec:
       protocol: TCP
       port: 5173
       targetPort: 5173
+---
+# MCP Server HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lazynext-mcp-hpa
+  namespace: lazynext
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-mcp
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
 ---
 # DB Migration Job
 apiVersion: batch/v1

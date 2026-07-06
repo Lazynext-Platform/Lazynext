@@ -1,3 +1,4 @@
+/** @module Media time utilities bridged from lazynext-wasm — branded integer-tick time type, frame rounding, timecode parsing, and frame-accurate seek operations. */
 import {
 	lastFrameTime as _lastFrameTime,
 	parseTimecode as _parseTimecode,

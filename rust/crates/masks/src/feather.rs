@@ -183,13 +183,17 @@ impl MaskFeatherPipeline {
     pub fn apply_mask_feather(
         &self,
         context: &GpuContext,
-        ApplyMaskFeatherOptions {
-            mask,
-            width,
-            height,
-            feather,
-        }: ApplyMaskFeatherOptions<'_>,
+        options_raw: ApplyMaskFeatherOptions<'_>,
     ) -> wgpu::Texture {
+        // Sanitize inputs: clamp feather, ensure positive dimensions
+        let feather = if options_raw.feather.is_finite() && options_raw.feather > 0.0 {
+            options_raw.feather.min(1000.0)
+        } else {
+            0.0
+        };
+        let width = options_raw.width.max(1);
+        let height = options_raw.height.max(1);
+
         let mut encoder =
             context
                 .device()
@@ -200,7 +204,7 @@ impl MaskFeatherPipeline {
             context,
             &mut encoder,
             ApplyMaskFeatherOptions {
-                mask,
+                mask: options_raw.mask,
                 width,
                 height,
                 feather,

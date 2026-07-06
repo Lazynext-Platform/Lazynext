@@ -163,3 +163,12 @@ images:
   - name: ghcr.io/lazynext-platform/lazynext-collab-server
     newName: lazynextacrproduction.azurecr.io/lazynext-collab-server
     newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-api-gateway
+    newName: lazynextacrproduction.azurecr.io/lazynext-api-gateway
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-db-migrate
+    newName: lazynextacrproduction.azurecr.io/lazynext-db-migrate
+    newTag: latest
+  - name: ghcr.io/lazynext-platform/lazynext-social-publish
+    newName: lazynextacrproduction.azurecr.io/lazynext-social-publish
+    newTag: latest

@@ -1,3 +1,4 @@
+/** @module Toggle Mask Inverted command — flips the inverted property on a mask for a timeline element within the editor command system. */
 import { EditorCore } from "@/core";
 import { Command, type CommandResult } from "@/commands/base-command";
 import { isMaskableElement, updateElementInSceneTracks } from "@/timeline";

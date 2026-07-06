@@ -1,8 +1,42 @@
 //! Peer-to-peer mesh networking for real-time CRDT collaboration.
 //!
-//! Discovers peers on the local network via UDP broadcast, maintains a TCP
-//! mesh for CRDT delta exchange, and broadcasts NLE events to all connected
-//! peers. Supports mDNS service discovery and WebRTC data channels in production.
+//! # Architecture
+//!
+//! The P2P mesh connects editor instances across a local network:
+//!
+//! ```text
+//! ┌──────────┐     UDP broadcast    ┌──────────┐
+//! │  Peer A  │ ◄──────────────────► │  Peer B  │
+//! └────┬─────┘      (port 9001)     └────┬─────┘
+//!      │            Discovery            │
+//!      │◄──────── TCP mesh ─────────────►│
+//!      │        CRDT delta exchange      │
+//!      │         (configurable port)     │
+//!      ▼                                  ▼
+//! ┌──────────┐                      ┌──────────┐
+//! │ NLEState │                      │ NLEState │
+//! └──────────┘                      └──────────┘
+//! ```
+//!
+//! # Discovery
+//!
+//! Peers discover each other via UDP broadcast on common LAN subnets
+//! (192.168.x.255, 10.0.0.255, 255.255.255.255) on port 9001. Each peer
+//! announces its display name, capabilities, and local TCP port in a JSON
+//! payload.
+//!
+//! # Sync
+//!
+//! Once discovered, peers establish TCP connections for CRDT delta exchange.
+//! Messages are length-prefixed (4-byte big-endian) and carry CRDT operations
+//! with Lamport clock timestamps for causal ordering.
+//!
+//! # Production extensions
+//!
+//! In production, this is extended with:
+//! - mDNS (`_lazynext._tcp.local`) for zero-config service discovery
+//! - WebRTC data channels for NAT traversal
+//! - libp2p for DHT-based peer routing and relay
 
 #![allow(clippy::while_let_loop)]
 use lazynext_core::NLEEvent;
@@ -236,7 +270,20 @@ fn hostname() -> String {
 
 /// Broadcast a JSON message to all known peers via TCP.
 async fn broadcast_to_peers(peers: &[Peer], message: &serde_json::Value) {
-    let payload = serde_json::to_vec(message).unwrap_or_default();
+    let payload = match serde_json::to_vec(message) {
+        Ok(p) => p,
+        Err(e) => {
+            debug!("Failed to serialize broadcast message: {}", e);
+            return;
+        }
+    };
+    if payload.len() > 65536 {
+        debug!(
+            "Broadcast message too large ({} bytes), skipping",
+            payload.len()
+        );
+        return;
+    }
     for peer in peers {
         match tokio::net::TcpStream::connect(peer.addr).await {
             Ok(mut stream) => {
@@ -257,6 +304,11 @@ async fn broadcast_to_peers(peers: &[Peer], message: &serde_json::Value) {
 }
 
 /// Spawn a TCP listener to accept incoming peer connections.
+///
+/// ⚠️ This accepts ALL incoming connections. In production, add:
+///   - Peer token verification (first message must contain a signed token)
+///   - mTLS for mutual authentication
+///   - IP allowlisting or network policy restrictions
 fn spawn_tcp_listener(port: u16, _peer_id: String) {
     tokio::spawn(async move {
         let addr = format!("0.0.0.0:{}", port);
@@ -285,8 +337,9 @@ fn spawn_tcp_listener(port: u16, _peer_id: String) {
                             match stream.read_exact(&mut len_buf).await {
                                 Ok(_) => {
                                     let len = u32::from_be_bytes(len_buf) as usize;
-                                    let mut payload = vec![0u8; len.min(65536)];
-                                    if stream.read_exact(&mut payload[..len]).await.is_ok() {
+                                    let capped = len.min(65536);
+                                    let mut payload = vec![0u8; capped];
+                                    if stream.read_exact(&mut payload[..capped]).await.is_ok() {
                                         debug!(
                                             "📨 [P2P] Received {} bytes from {}",
                                             len, peer_addr

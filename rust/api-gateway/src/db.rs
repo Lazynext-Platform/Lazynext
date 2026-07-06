@@ -17,7 +17,7 @@ pub struct User {
     pub email_verified: bool,
     pub image: Option<String>,
     pub role: String,
-    pub stripe_customer_id: Option<String>,
+    pub dodo_customer_id: Option<String>,
     pub ai_credits: i32,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -43,9 +43,9 @@ pub struct Project {
 pub struct Subscription {
     pub id: String,
     pub user_id: String,
-    pub stripe_subscription_id: String,
-    pub stripe_price_id: String,
-    pub stripe_current_period_end: DateTime<Utc>,
+    pub dodo_subscription_id: String,
+    pub dodo_price_id: String,
+    pub dodo_current_period_end: DateTime<Utc>,
     pub tier: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -59,6 +59,7 @@ pub struct AdminMetrics {
     pub monthly_recurring_revenue: i64,
 }
 
+/// PostgreSQL-backed data store with connection pooling, CRUD operations, and dev-mode fallback.
 #[derive(Clone)]
 pub struct DbStore {
     pool: Option<PgPool>,
@@ -88,24 +89,29 @@ impl DbStore {
         }
     }
 
+    /// Returns `true` if a database connection pool is configured.
     pub fn has_db(&self) -> bool {
         self.pool.is_some()
     }
+    /// Returns `true` if running in dev mode without a database.
     pub fn is_dev(&self) -> bool {
         self.is_dev_mode
     }
 
+    /// Returns a reference to the connection pool, or an error if in dev mode.
     pub fn pool_ref(&self) -> Result<&PgPool, sqlx::Error> {
         self.pool
             .as_ref()
             .ok_or_else(|| sqlx::Error::Protocol("No database — running in dev mode".into()))
     }
 
+    /// Executes a `SELECT 1` health check against the database.
     pub async fn health_check(&self) -> Result<(), sqlx::Error> {
         sqlx::query("SELECT 1").execute(self.pool_ref()?).await?;
         Ok(())
     }
 
+    /// Fetches a user by ID. Returns `None` if not found.
     pub async fn get_user(&self, user_id: &str) -> Result<Option<User>, sqlx::Error> {
         sqlx::query_as("SELECT * FROM \"user\" WHERE id = $1")
             .bind(user_id)
@@ -117,7 +123,7 @@ impl DbStore {
     /// app and the gateway needs to cache their profile).
     pub async fn upsert_user(&self, user: &User) -> Result<(), sqlx::Error> {
         sqlx::query(
-            "INSERT INTO \"user\" (id, email, name, email_verified, image, role, stripe_customer_id, ai_credits, created_at, updated_at)
+            "INSERT INTO \"user\" (id, email, name, email_verified, image, role, dodo_customer_id, ai_credits, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
              ON CONFLICT (id) DO UPDATE SET
                email = EXCLUDED.email,
@@ -125,7 +131,7 @@ impl DbStore {
                email_verified = EXCLUDED.email_verified,
                image = EXCLUDED.image,
                role = EXCLUDED.role,
-               stripe_customer_id = EXCLUDED.stripe_customer_id,
+               dodo_customer_id = EXCLUDED.dodo_customer_id,
                ai_credits = EXCLUDED.ai_credits,
                updated_at = EXCLUDED.updated_at",
         )
@@ -135,7 +141,7 @@ impl DbStore {
         .bind(user.email_verified)
         .bind(&user.image)
         .bind(&user.role)
-        .bind(&user.stripe_customer_id)
+        .bind(&user.dodo_customer_id)
         .bind(user.ai_credits)
         .bind(user.created_at)
         .bind(user.updated_at)
@@ -184,22 +190,22 @@ impl DbStore {
         .await
     }
 
-    /// Update (or create) a subscription record after a Stripe webhook.
+    /// Update (or create) a subscription record after a Dodo Payments webhook.
     pub async fn upsert_subscription(&self, sub: &Subscription) -> Result<(), sqlx::Error> {
         sqlx::query(
-            "INSERT INTO subscriptions (id, user_id, stripe_subscription_id, stripe_price_id, stripe_current_period_end, tier, created_at, updated_at)
+            "INSERT INTO subscriptions (id, user_id, dodo_subscription_id, dodo_price_id, dodo_current_period_end, tier, created_at, updated_at)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              ON CONFLICT (id) DO UPDATE SET
-               stripe_price_id = EXCLUDED.stripe_price_id,
-               stripe_current_period_end = EXCLUDED.stripe_current_period_end,
+               dodo_price_id = EXCLUDED.dodo_price_id,
+               dodo_current_period_end = EXCLUDED.dodo_current_period_end,
                tier = EXCLUDED.tier,
                updated_at = EXCLUDED.updated_at",
         )
         .bind(&sub.id)
         .bind(&sub.user_id)
-        .bind(&sub.stripe_subscription_id)
-        .bind(&sub.stripe_price_id)
-        .bind(sub.stripe_current_period_end)
+        .bind(&sub.dodo_subscription_id)
+        .bind(&sub.dodo_price_id)
+        .bind(sub.dodo_current_period_end)
         .bind(&sub.tier)
         .bind(sub.created_at)
         .bind(sub.updated_at)

@@ -1,3 +1,4 @@
+/** @module Sticker ID parser — splits "provider:value" formatted sticker identifiers into their constituent parts with validation. */
 export function parseStickerId({ stickerId }: { stickerId: string }): {
 	providerId: string;
 	providerValue: string;

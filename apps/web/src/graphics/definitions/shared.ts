@@ -1,3 +1,5 @@
+/** @module Shared graphic parameter definitions (stroke align) used across graphic element types */
+
 import type { ParamDefinition } from "@/params";
 
 export type GraphicStrokeAlign = "inside" | "center" | "outside";

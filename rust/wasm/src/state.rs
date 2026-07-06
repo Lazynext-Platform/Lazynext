@@ -8,6 +8,7 @@ use serde_wasm_bindgen::{from_value, to_value};
 use state::{ProjectData, Track};
 use wasm_bindgen::prelude::*;
 
+/// WASM-accessible NLE state wrapper providing track/clip CRUD and playback controls.
 #[wasm_bindgen]
 pub struct NLEState {
     project: ProjectData,
@@ -17,6 +18,8 @@ pub struct NLEState {
 
 #[wasm_bindgen]
 impl NLEState {
+    /// Creates a new NLE state with the given project ID, name, and frame rate.
+    /// Defaults to 1280x720 resolution.
     #[wasm_bindgen(constructor)]
     pub fn new(id: String, name: String, fps: f64) -> Self {
         console_error_panic_hook::set_once();
@@ -27,6 +30,7 @@ impl NLEState {
         }
     }
 
+    /// Adds a new track with the given name and type (e.g., "video", "audio").
     #[wasm_bindgen(js_name = "addTrack")]
     pub fn add_track(&mut self, name: String, track_type: String) {
         let track = Track {
@@ -38,6 +42,7 @@ impl NLEState {
         self.project.add_track(track);
     }
 
+    /// Adds a clip to the specified track by index.
     #[wasm_bindgen(js_name = "addClip")]
     pub fn add_clip(
         &mut self,
@@ -62,11 +67,13 @@ impl NLEState {
         }
     }
 
+    /// Returns the full project data serialized as a `JsValue`.
     #[wasm_bindgen(js_name = "getProjectData")]
     pub fn get_project_data(&self) -> JsValue {
         to_value(&self.project).unwrap_or(JsValue::NULL)
     }
 
+    /// Loads project data from a JSON `JsValue`.
     #[wasm_bindgen(js_name = "loadProjectData")]
     pub fn load_project_data(&mut self, json_val: JsValue) -> Result<(), JsValue> {
         let project: ProjectData = from_value(json_val)?;
@@ -74,31 +81,37 @@ impl NLEState {
         Ok(())
     }
 
+    /// Starts playback.
     #[wasm_bindgen]
     pub fn play(&mut self) {
         self.is_playing = true;
     }
 
+    /// Pauses playback.
     #[wasm_bindgen]
     pub fn pause(&mut self) {
         self.is_playing = false;
     }
 
+    /// Sets the current playhead frame.
     #[wasm_bindgen(js_name = "setFrame")]
     pub fn set_frame(&mut self, frame: i32) {
         self.frame = frame;
     }
 
+    /// Returns the current playhead frame.
     #[wasm_bindgen(js_name = "getFrame")]
     pub fn get_frame(&self) -> i32 {
         self.frame
     }
 
+    /// Returns whether playback is currently active.
     #[wasm_bindgen(js_name = "getIsPlaying")]
     pub fn get_is_playing(&self) -> bool {
         self.is_playing
     }
 
+    /// Updates a clip's start frame or disabled state. Returns `true` if the clip was found.
     #[wasm_bindgen(js_name = "updateClip")]
     pub fn update_clip(
         &mut self,
@@ -109,6 +122,7 @@ impl NLEState {
         self.project.update_clip(&clip_id, start_frame, is_disabled)
     }
 
+    /// Splits a clip at the given frame, creating two clips from the original.
     #[wasm_bindgen(js_name = "splitClip")]
     pub fn split_clip(&mut self, clip_id: String, at_frame: i32) {
         for track in &mut self.project.tracks {
@@ -142,6 +156,7 @@ impl NLEState {
         }
     }
 
+    /// Trims a clip to a new start frame and duration.
     #[wasm_bindgen(js_name = "trimClip")]
     pub fn trim_clip(&mut self, clip_id: String, new_start: i32, new_duration: i32) {
         for track in &mut self.project.tracks {
@@ -155,6 +170,8 @@ impl NLEState {
         }
     }
 
+    /// Inserts a cut across all overlapping clips at the given time range (ms).
+    /// Converts milliseconds to frames using the project frame rate.
     #[wasm_bindgen(js_name = "insertCutFromScript")]
     pub fn insert_cut_from_script(&mut self, start_ms: f64, end_ms: f64) {
         // Convert ms to frames using project FPS
@@ -179,6 +196,7 @@ impl NLEState {
         }
     }
 
+    /// Cuts out a region by splitting and disabling the middle segment.
     #[wasm_bindgen(js_name = "deleteCutFromScript")]
     pub fn delete_cut_from_script(&mut self, start_ms: f64, end_ms: f64) {
         // Convert ms to frames using project FPS
@@ -206,6 +224,7 @@ impl NLEState {
         }
     }
 
+    /// Splits a multicam clip at the current frame (used for live switching between camera angles).
     #[wasm_bindgen(js_name = "triggerLiveCut")]
     pub fn trigger_live_cut(&mut self, _camera_angle: i32, current_frame: i32) {
         // Find the active multicam clip

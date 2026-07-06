@@ -14,7 +14,7 @@ All notable changes to the Lazynext project are documented in this file.
 ### Web Application (`apps/web`)
 
 - **Next.js 16**: App Router architecture with React 19, TailwindCSS, and Premium Glassmorphism UI components (shadcn/ui derivatives).
-- **Chronos Copilot AI Editor**: LLM-orchestrated autonomous editing agent with smart bins, clip tagging, and natural-language timeline manipulation.
+- **Lazynext AI Agent Copilot AI Editor**: LLM-orchestrated autonomous editing agent with smart bins, clip tagging, and natural-language timeline manipulation.
 - **Real-time collaboration**: WebSocket-based CRDT sync server enabling multi-user simultaneous editing.
 - **Timeline rendering**: Canvas-based timeline with drag-drop, resize, playhead, zoom, and snap-to-grid/element controllers.
 - **Preview canvas**: Fabric.js-powered composition preview with interactive transform handles.
@@ -52,7 +52,7 @@ All notable changes to the Lazynext project are documented in this file.
 
 - **Pre-processing** (Python FastAPI, port 8000): Whisper transcription, SAM2 rotoscoping, NeRF extraction.
 - **Generative Studio** (Python FastAPI, port 8001): Stable Video Diffusion, ElevenLabs dubbing, Demucs stem separation.
-- **AI Agents** (Node.js/Bun, port 8002): Chronos Copilot LLM orchestration and CRDT WebSocket sync server.
+- **AI Agents** (Node.js/Bun, port 8002): Lazynext AI Agent Copilot LLM orchestration and CRDT WebSocket sync server.
 - **Render Service** (Node.js/Bun, port 8003): FFMPEG render farm with SSE progress streaming.
 - **API Gateway** (Rust/Axum, port 8005): Centralized REST gateway for all microservices.
 - **Collab Server** (Rust/Axum, port 8004): Native CRDT sync server with WebRTC signaling for real-time collaboration.

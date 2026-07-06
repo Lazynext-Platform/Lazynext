@@ -1,4 +1,4 @@
-# 📝 Changelog: AI-Driven Editing — End-to-End Chronos Pipeline
+# 📝 Changelog: AI-Driven Editing — End-to-End Lazynext AI Agent Pipeline
 
 > **Feature**: `18` — AI-Driven Editing
 > **Branch**: `feature/18-ai-driven-editing`
@@ -12,7 +12,7 @@
 - **Worked On**: Remaining 6 tasks for Feature #18 completion (D.2, D.3, F.1-F.3).
 - **Completed Tasks**: D.2, D.3, F.1, F.2, F.3
 - **Built**:
-  - D.2 (error visibility): EditorClient.tsx now shows per-tool errors in the chat (⚠️ prefixed) and specific error messages in toasts instead of the generic "Chronos AI encountered an error." Error responses from the API propagate verbatim.
+  - D.2 (error visibility): EditorClient.tsx now shows per-tool errors in the chat (⚠️ prefixed) and specific error messages in toasts instead of the generic "Lazynext AI Agent encountered an error." Error responses from the API propagate verbatim.
   - D.3 (undo AI): EditorClient.tsx saves a projectData snapshot before each AI operation; after a successful AI edit, an "Undo last AI edit" button appears below the copilot input bar. Clicking it restores the pre-AI snapshot and logs a system message.
   - F.1 (prompt cleanup): verified all 44 tools have case handlers with graceful degradation (local CRDT patches when backend unavailable); no prompt changes needed.
   - F.2 (changelog): project-changelog.md + feature changelog updated.

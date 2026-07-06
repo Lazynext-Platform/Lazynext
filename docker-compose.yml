@@ -338,7 +338,7 @@ services:
       - lazynext-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8007/health"]
+      test: ["CMD", "wget", "-qO-", "http://localhost:8007/health"]
       interval: 20s
       timeout: 5s
       retries: 3

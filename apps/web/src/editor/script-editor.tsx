@@ -47,7 +47,7 @@ export function ScriptEditor() {
 			<div className="flex flex-col gap-4">
 				{script.length === 0 ? (
 					<p className="text-gray-400 text-sm p-4">
-						Transcribe your video via AI Copilot to populate the script editor.
+						Transcribe your video via Lazynext AI Agent to populate the script editor.
 					</p>
 				) : (
 					script.map((line) => (

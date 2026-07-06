@@ -6,7 +6,7 @@ global:
   smtp_smarthost: "{{ vault_alertmanager_smtp_smarthost | default('smtp.mailgun.org:587') }}"
   smtp_from: "{{ vault_alertmanager_smtp_from | default('alerts@lazynext.io') }}"
   smtp_auth_username: "{{ vault_alertmanager_smtp_auth_username | default('alerts@lazynext.io') }}"
-  smtp_auth_password: "{{ vault_alertmanager_smtp_auth_password | default('CHANGEME') }}"
+  smtp_auth_password: "{{ vault_alertmanager_smtp_auth_password | default('disabled') }}"
   smtp_require_tls: true
   slack_api_url: "{{ alertmanager_slack_webhook_url }}"
 

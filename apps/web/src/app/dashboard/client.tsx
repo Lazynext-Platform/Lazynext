@@ -3,7 +3,7 @@
  *
  * Displays AI credit balance, render node status, project count, and
  * storage telemetry cards. Provides quick-start actions to launch the
- * AI Copilot editor, browse projects, or manage billing/settings.
+ * Lazynext AI Agent editor, browse projects, or manage billing/settings.
  *
  * Redirects unauthenticated users to sign-in and shows a loading spinner
  * while session and project data resolve.
@@ -33,9 +33,9 @@ import {
 
 const QUICK_ACTIONS = [
 	{
-		label: "AI Copilot Editor",
+		label: "Lazynext AI Agent Editor",
 		href: "/editor",
-		icon: <Wand2 className="w-5 h-5 text-cyan-400" />,
+		icon: <Wand2 className="w-5 h-5 text-[var(--accent-primary)]" />,
 	},
 	{
 		label: "My Projects",
@@ -110,7 +110,7 @@ export function DashboardClient() {
 	if (isPending || isLoading) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-transparent">
-				<Loader2 className="w-10 h-10 text-cyan-400 animate-spin" />
+				<Loader2 className="w-10 h-10 text-[var(--accent-primary)] animate-spin" />
 			</div>
 		);
 	}
@@ -129,7 +129,7 @@ export function DashboardClient() {
 					<div>
 						<h1 className="text-5xl font-display font-black tracking-tight mb-2">
 							Mission{" "}
-							<span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+							<span className="bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] bg-clip-text text-transparent">
 								Control
 							</span>
 						</h1>
@@ -147,11 +147,11 @@ export function DashboardClient() {
 						className="btn-primary px-8 py-4 flex items-center justify-center shadow-[0_0_30px_rgba(0,212,223,0.3)] hover:shadow-[0_0_40px_rgba(0,212,223,0.5)]"
 					>
 						{isCreating ? (
-							<Loader2 className="w-5 h-5 mr-3 animate-spin text-black" />
+							<Loader2 className="w-5 h-5 mr-3 animate-spin text-[var(--text-on-accent)]" />
 						) : (
-							<Sparkles className="w-5 h-5 mr-3 text-black" />
+							<Sparkles className="w-5 h-5 mr-3 text-[var(--text-on-accent)]" />
 						)}
-						<span className="text-lg font-bold text-black">
+						<span className="text-lg font-bold text-[var(--text-on-accent)]">
 							Start AI Project
 						</span>
 					</button>
@@ -159,12 +159,12 @@ export function DashboardClient() {
 
 				{/* Telemetry Stats (Glassmorphism) */}
 				<div className="mb-16 grid grid-cols-1 md:grid-cols-4 gap-6">
-					<div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[#00e5ff]/50 hover:bg-hover transition-all">
+					<div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[var(--accent-primary)]/50 hover:bg-hover transition-all">
 						<div className="flex items-center justify-between mb-4 relative z-10">
 							<span className="text-foreground/50 text-xs font-bold uppercase tracking-widest font-display">
 								AI Credits
 							</span>
-							<div className="p-2 rounded-lg bg-[#00e5ff]/10 text-[#00e5ff]">
+							<div className="p-2 rounded-lg bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]">
 								<Zap className="w-4 h-4" />
 							</div>
 						</div>
@@ -210,12 +210,12 @@ export function DashboardClient() {
 						</div>
 					</div>
 
-					<div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[#0033ff]/50 hover:bg-hover transition-all">
+					<div className="glass-panel p-6 flex flex-col relative overflow-hidden group hover:border-[var(--accent-secondary)]/50 hover:bg-hover transition-all">
 						<div className="flex items-center justify-between mb-4 relative z-10">
 							<span className="text-foreground/50 text-xs font-bold uppercase tracking-widest font-display">
 								Storage
 							</span>
-							<div className="p-2 rounded-lg bg-[#0033ff]/10 text-[#00e5ff]">
+							<div className="p-2 rounded-lg bg-[var(--accent-secondary)]/10 text-[var(--accent-primary)]">
 								<FileText className="w-4 h-4" />
 							</div>
 						</div>
@@ -237,7 +237,7 @@ export function DashboardClient() {
 						<Link
 							key={a.label}
 							href={a.href}
-							className="glass-panel flex items-center justify-center gap-3 px-5 py-5 text-sm font-bold transition-all hover:scale-105 hover:border-[#00e5ff]/40 hover:bg-glass"
+							className="glass-panel flex items-center justify-center gap-3 px-5 py-5 text-sm font-bold transition-all hover:scale-105 hover:border-[var(--accent-primary)]/40 hover:bg-glass"
 						>
 							{a.icon}
 							<span>{a.label}</span>
@@ -253,7 +253,7 @@ export function DashboardClient() {
 						{projects.length > 0 && (
 							<Link
 								href="/projects"
-								className="text-sm font-semibold text-cyan-400 hover:text-cyan-300 hover:underline"
+								className="text-sm font-semibold text-[var(--accent-primary)] hover:underline"
 							>
 								View all
 							</Link>
@@ -275,7 +275,7 @@ export function DashboardClient() {
 							<button
 								onClick={handleCreateProject}
 								disabled={isCreating}
-								className="btn-premium inline-flex items-center px-8 py-3 text-cyan-400 hover:text-cyan-300"
+								className="btn-premium inline-flex items-center px-8 py-3 text-[var(--accent-primary)]"
 							>
 								{isCreating ? (
 									<Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -291,13 +291,13 @@ export function DashboardClient() {
 								<Link
 									key={p.id}
 									href={`/editor/${p.id}`}
-									className="glass-panel group p-4 hover:border-[#00e5ff]/50 hover:shadow-[0_8px_30px_rgba(0,229,255,0.15)] transition-all duration-300"
+									className="glass-panel group p-4 hover:border-[var(--accent-primary)]/50 hover:shadow-[0_8px_30px_var(--accent-glow)] transition-all duration-300"
 								>
 									<div className="aspect-video w-full rounded-xl bg-background/50 mb-4 flex items-center justify-center relative overflow-hidden border border-border">
 										<Video className="w-8 h-8 text-foreground/20 transition-transform duration-500 group-hover:scale-110" />
 										<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
 										<div className="absolute bottom-3 left-3 flex items-center gap-2">
-											<div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(0,212,223,0.8)]" />
+											<div className="w-2 h-2 rounded-full bg-[var(--accent-primary)] shadow-[0_0_8px_var(--accent-glow)]" />
 											<span className="text-xs font-semibold text-foreground">
 												Rendered
 											</span>

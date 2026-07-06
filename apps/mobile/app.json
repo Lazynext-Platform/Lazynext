@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,17 +16,45 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.lazynextmobile"
+      "bundleIdentifier": "com.anonymous.lazynextmobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Lazynext uses the camera to record video clips for your editing projects.",
+        "NSMicrophoneUsageDescription": "Lazynext uses the microphone to capture audio with your video recordings.",
+        "NSPhotoLibraryUsageDescription": "Lazynext saves recorded clips to your photo library and imports media for editing.",
+        "NSPhotoLibraryAddUsageDescription": "Lazynext needs write access to save recorded video clips to your photo library."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#09090b"
       },
-      "package": "com.anonymous.lazynextmobile"
+      "package": "com.anonymous.lazynextmobile",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Lazynext to access your camera for video recording."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Lazynext to access your photos for importing media.",
+          "savePhotosPermission": "Allow Lazynext to save recorded clips to your photo library.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ]
+    ]
   }
 }

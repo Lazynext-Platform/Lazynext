@@ -6,7 +6,7 @@ Welcome to Lazynext — a multi-platform video editing ecosystem. This guide wal
 
 ## 1. What is Lazynext?
 
-Lazynext is an **AI-native video editor** that replaces manual timeline operations with natural-language commands. A user types "add Hormozi captions, speed ramp this clip, publish to TikTok" and the Chronos Copilot translates intent into CRDT state patches that drive the rendering engine.
+Lazynext is an **AI-native video editor** that replaces manual timeline operations with natural-language commands. A user types "add Hormozi captions, speed ramp this clip, publish to TikTok" and the Lazynext AI Agent Copilot translates intent into CRDT state patches that drive the rendering engine.
 
 The codebase follows one non-negotiable principle: **Rust owns all business logic.** Every application under `apps/` is a dumb rendering shell that calls into Rust — via WASM on the web, natively on desktop. Logic is never duplicated between apps.
 
@@ -105,7 +105,7 @@ Open **http://localhost:3000**. You should see the Lazynext editor.
 ./start-platform.sh
 
 # Or manually:
-cd services/ai-agents && bun run start          # :8002 — Chronos Copilot + CRDT sync
+cd services/ai-agents && bun run start          # :8002 — Lazynext AI Agent Copilot + CRDT sync
 cd services/render-service && bun run start     # :8003 — FFMPEG render farm
 cd services/pre-processing && uvicorn main:app --port 8000   # :8000 — Whisper / SAM2
 cd services/generative-studio && uvicorn main:app --port 8001 # :8001 — Diffusion / TTS
@@ -178,7 +178,7 @@ services/* (AI, rendering, transcription)
 |---------|-----|-------|------|---------|
 | **Pre-Processing** | `services/pre-processing` | Python FastAPI | 8000 | Whisper transcription, SAM2 rotoscoping, NeRF |
 | **Generative Studio** | `services/generative-studio` | Python FastAPI | 8001 | Stable Video Diffusion, ElevenLabs dubbing, Demucs |
-| **AI Agents** | `services/ai-agents` | Bun + Node.js | 8002 | Chronos Copilot LLM orchestration, CRDT WebSocket sync |
+| **AI Agents** | `services/ai-agents` | Bun + Node.js | 8002 | Lazynext AI Agent Copilot LLM orchestration, CRDT WebSocket sync |
 | **Render Service** | `services/render-service` | Bun | 8003 | FFMPEG render farm with SSE progress streaming |
 
 ### 4.5 Key data flow: how a timeline edit works
@@ -378,7 +378,7 @@ Lazynext/
 ├── services/
 │   ├── pre-processing/         # Python FastAPI: Whisper, SAM2, NeRF (:8000)
 │   ├── generative-studio/      # Python FastAPI: Diffusion, TTS, Demucs (:8001)
-│   ├── ai-agents/              # Bun: Chronos Copilot + CRDT WebSocket (:8002)
+│   ├── ai-agents/              # Bun: Lazynext AI Agent Copilot + CRDT WebSocket (:8002)
 │   ├── render-service/         # Bun: FFMPEG render farm + SSE (:8003)
 │   ├── analytics-service/      # Analytics pipeline
 │   └── collab-server/          # WebSocket collaboration server

@@ -1,3 +1,4 @@
+/** @module Generative B-roll video generation — Express route handler that proxies requests to the generative-studio service with mock fallback. */
 import { Request, Response } from "express";
 
 const GENERATIVE_STUDIO_URL =
@@ -45,14 +46,14 @@ export const generateBroll = async (req: Request, res: Response) => {
     console.warn(`[Generative] Generative studio unreachable: ${err}. Using mock fallback.`);
   }
 
-  // Mock fallback when service is unreachable
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  res.json({
-    success: true,
-    assetUrl: `https://generative.lazynext.ai/assets/broll_${Date.now()}.mp4`,
+  // Degrade gracefully: return an honest error instead of fake data
+  console.warn(`[Generative] Generative studio unreachable — cannot generate b-roll.`);
+  res.status(503).json({
+    success: false,
+    error: "Generative studio service unreachable",
     prompt,
     duration,
-    metadata: { provider: "Mock", fps: 30 },
+    hint: "Start the generative-studio service or configure GENERATIVE_STUDIO_URL",
   });
 };
 
@@ -96,13 +97,13 @@ export const generateDub = async (req: Request, res: Response) => {
     console.warn(`[Generative] Generative studio unreachable: ${err}. Using mock fallback.`);
   }
 
-  // Mock fallback when service is unreachable
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  res.json({
-    success: true,
-    assetUrl: `https://generative.lazynext.ai/assets/dub_${Date.now()}.wav`,
+  // Degrade gracefully: return an honest error instead of fake data
+  console.warn(`[Generative] Generative studio unreachable — cannot generate dub.`);
+  res.status(503).json({
+    success: false,
+    error: "Generative studio service unreachable",
     script,
     voice,
-    metadata: { provider: "Mock", length_seconds: Math.max(script.length / 15, 1.0) },
+    hint: "Start the generative-studio service or configure GENERATIVE_STUDIO_URL",
   });
 };

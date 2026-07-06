@@ -1,0 +1,355 @@
+# ── Lazynext CI-Optimized Docker Compose ──────────────────────────
+# Purpose: Ephemeral test environment for CI pipelines.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml up --abort-on-container-exit
+#
+# Characteristics:
+#   • No persistent volumes — everything is ephemeral
+#   • Faster health checks — shorter intervals and start periods
+#   • No resource limits — CI runners manage their own resources
+#   • No restart policies — containers exit, CI handles lifecycle
+#   • Port mapping only for test access (no public exposure needed)
+#   • Build caching disabled (CI uses registry cache via docker-bake.hcl)
+#   • In-memory database where possible (no durability needed)
+#   • Services depend on each other with shorter healthcheck timeouts
+
+x-logging: &ci-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "1"
+
+services:
+  # ── Database (ephemeral, no volume) ──────────────────────────────
+  db:
+    logging: *ci-logging
+    restart: "no"
+    environment:
+      POSTGRES_USER: lazynext
+      POSTGRES_PASSWORD: test-password
+      POSTGRES_DB: lazynext
+    ports:
+      - "5434:5432"
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lazynext -d lazynext"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+      start_period: 5s
+    tmpfs:
+      - /var/lib/postgresql/data
+    command: >
+      postgres
+      -c shared_buffers=128MB
+      -c fsync=off
+      -c synchronous_commit=off
+      -c full_page_writes=off
+      -c max_wal_size=1GB
+      -c wal_level=minimal
+      -c max_connections=50
+
+  # ── Redis (ephemeral, no volume) ─────────────────────────────────
+  redis:
+    logging: *ci-logging
+    restart: "no"
+    ports:
+      - "6379:6379"
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 3s
+    command: redis-server --save "" --appendonly no --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  # ── Redis HTTP Proxy ─────────────────────────────────────────────
+  redis-proxy:
+    logging: *ci-logging
+    restart: "no"
+    ports:
+      - "8079:80"
+    environment:
+      SRH_MODE: env
+      SRH_CONNECTION_STRING: redis://redis:6379
+      SRH_TOKEN: test-upstash-token
+    networks:
+      - lazynext-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+
+  # ── Web App ──────────────────────────────────────────────────────
+  web:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        SKIP_WASM_BUILD: "1"
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        NEXT_PUBLIC_PREPROCESSING_URL: http://localhost:8000
+        NEXT_PUBLIC_GENERATIVE_STUDIO_URL: http://localhost:8001
+        NEXT_PUBLIC_AI_AGENTS_URL: http://localhost:8002
+        NEXT_PUBLIC_RENDER_SERVICE_URL: http://localhost:8003
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=test
+      - STORAGE_PROVIDER=local
+      - DATABASE_URL=postgresql://lazynext:test-password@db:5432/lazynext
+      - BETTER_AUTH_SECRET=ci-test-secret-at-least-64-characters-long-for-ci-pipeline
+      - BETTER_AUTH_URL=http://localhost:3000
+      - UPSTASH_REDIS_REST_URL=http://redis-proxy:80
+      - UPSTASH_REDIS_REST_TOKEN=test-upstash-token
+      - RENDER_SERVICE_URL=http://render-service:8003
+      - GENERATIVE_STUDIO_URL=http://generative-studio:8001
+      - PRE_PROCESSING_URL=http://pre-processing:8000
+      - AI_AGENTS_URL=http://ai-agents:8002
+      - NEXT_PUBLIC_SITE_URL=http://localhost:3000
+      - NEXT_PUBLIC_PREPROCESSING_URL=http://localhost:8000
+      - NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
+      - NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
+      - NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
+      - NEXT_PUBLIC_POSTHOG_KEY=phc_ci
+      - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+      - DODO_API_KEY=dp_test_ci_placeholder
+      - DODO_WEBHOOK_SECRET=dwhsec_ci_placeholder
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=pro_monthly
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=studio_monthly
+      - RESEND_API_KEY=re_ci_placeholder
+      - NEXT_PUBLIC_MARBLE_API_URL=https://api.marblecms.com
+      - MARBLE_WORKSPACE_KEY=ci-placeholder
+      - FREESOUND_CLIENT_ID=ci-placeholder
+      - FREESOUND_API_KEY=ci-placeholder
+      - SKIP_ENV_VALIDATION=1
+      - NEXT_TELEMETRY_DISABLED=1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis-proxy:
+        condition: service_healthy
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  # ── AI Agents ────────────────────────────────────────────────────
+  ai-agents:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: ./services/ai-agents
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - NODE_ENV=test
+      - PORT=8002
+      - DATABASE_URL=postgresql://lazynext:test-password@db:5432/lazynext
+      - OPENAI_API_KEY=
+      - ANTHROPIC_API_KEY=
+      - GEMINI_API_KEY=
+      - LLM_PROVIDER=ollama
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8002/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── Render Service ───────────────────────────────────────────────
+  render-service:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: ./services/render-service
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - NODE_ENV=test
+      - PORT=8003
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - MEDIA_BUCKET=lazynext-media-test
+      - STORAGE_PROVIDER=local
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8003/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── Collab Server ────────────────────────────────────────────────
+  collab-server:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: .
+      dockerfile: services/collab-server/Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - COLLAB_PORT=8004
+      - RUST_LOG=debug
+      - BETTER_AUTH_SECRET=ci-test-secret-at-least-64-characters-long-for-ci-pipeline
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8004/health"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+
+  # ── Pre-Processing (Python) ──────────────────────────────────────
+  pre-processing:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: ./services/pre-processing
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - OPENAI_API_KEY=
+      - REPLICATE_API_TOKEN=
+      - MEDIA_BUCKET=lazynext-media-test
+      - OMP_NUM_THREADS=2
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Generative Studio (Python) ───────────────────────────────────
+  generative-studio:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: ./services/generative-studio
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REPLICATE_API_TOKEN=
+      - ELEVENLABS_API_KEY=
+      - HF_HOME=/tmp/huggingface
+      - TRANSFORMERS_CACHE=/tmp/huggingface
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Analytics Service ────────────────────────────────────────────
+  analytics-service:
+    logging: *ci-logging
+    restart: "no"
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    ports:
+      - "8006:8006"
+    environment:
+      - NODE_ENV=test
+      - PORT=8006
+    networks:
+      - lazynext-network
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8006/health"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
+
+  # ── Test Runner (ephemeral, exits after tests) ────────────────────
+  test-runner:
+    image: oven/bun:1.3-slim
+    logging: *ci-logging
+    restart: "no"
+    working_dir: /app
+    volumes:
+      - ./:/app:ro
+      - /app/node_modules
+    networks:
+      - lazynext-network
+    environment:
+      - NODE_ENV=test
+      - DATABASE_URL=postgresql://lazynext:test-password@db:5432/lazynext
+      - CI=true
+    depends_on:
+      web:
+        condition: service_healthy
+      ai-agents:
+        condition: service_healthy
+      render-service:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        echo "==> Running unit tests..."
+        bun test --timeout 30000 || exit 1
+        echo "==> All tests passed."
+
+  # ── E2E Test Runner ──────────────────────────────────────────────
+  e2e-runner:
+    image: mcr.microsoft.com/playwright:v1.52.0-jammy
+    logging: *ci-logging
+    restart: "no"
+    working_dir: /app
+    ipc: host
+    volumes:
+      - ./apps/web:/app/apps/web:ro
+      - ./apps/web/playwright.config.ts:/app/playwright.config.ts:ro
+      - /app/node_modules
+    networks:
+      - lazynext-network
+    environment:
+      - CI=true
+      - PLAYWRIGHT_BASE_URL=http://web:3000
+    depends_on:
+      web:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        echo "==> Installing Playwright..."
+        cd /app/apps/web && bun install --frozen-lockfile
+        echo "==> Running E2E tests..."
+        bun run test:e2e -- --workers=2

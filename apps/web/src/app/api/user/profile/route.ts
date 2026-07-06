@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { updateProfileSchema } from "@/lib/validation";
 
 export async function PATCH(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
@@ -15,10 +16,17 @@ export async function PATCH(request: Request) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
-	const { name } = (await request.json()) as { name?: string };
-	if (!name || typeof name !== "string") {
-		return NextResponse.json({ error: "Name is required" }, { status: 400 });
+	const rawBody = await request.json();
+	const parsed = updateProfileSchema.safeParse(rawBody);
+
+	if (!parsed.success) {
+		return NextResponse.json(
+			{ error: parsed.error.issues[0]?.message || "Invalid name" },
+			{ status: 400 },
+		);
 	}
+
+	const { name } = parsed.data;
 
 	await db.update(user).set({ name }).where(eq(user.id, session.user.id));
 

@@ -1,3 +1,4 @@
+/** @module Native module declaration for the Lazynext mobile bridge — exposes project and timeline operations to React Native. */
 import { NativeModule, requireNativeModule } from 'expo';
 
 declare class MyModule extends NativeModule<{}> {

@@ -1,15 +1,28 @@
 /**
  * GET /api/authtest
  *
- * Diagnostic endpoint that returns sanitised info about the
- * DATABASE_URL environment variable.
+ * Diagnostic endpoint — returns sanitised info about the DATABASE_URL.
+ * Requires admin authentication to prevent information disclosure.
  */
 
 import { NextResponse } from "next/server";
+import { auth } from "@/auth/server";
+import { headers } from "next/headers";
 
 export async function GET() {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+	if (!session?.user) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
+
+	const userRole = (session.user as { role?: string }).role;
+	if (userRole !== "admin" && userRole !== "superadmin") {
+		return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+	}
+
 	const url = process.env.DATABASE_URL || "NOT SET";
-	// Safe: show prefix and length, not full URL
 	return NextResponse.json({
 		url_prefix: url.substring(0, 30),
 		url_length: url.length,

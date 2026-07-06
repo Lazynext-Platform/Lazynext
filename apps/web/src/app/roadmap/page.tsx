@@ -2,6 +2,7 @@
  * Roadmap page — feature planning with status badges and contribution CTA.
  *
  * @page /roadmap
+ * @module roadmap/page
  */
 
 import type { Metadata } from "next";

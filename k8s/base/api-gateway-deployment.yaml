@@ -1,0 +1,224 @@
+---
+# API Gateway (Rust) — Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lazynext-api-gateway
+  namespace: lazynext
+  labels:
+    app: lazynext-api-gateway
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-api-gateway
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app: lazynext-api-gateway
+  selector:
+    matchLabels:
+      app: lazynext-api-gateway
+  template:
+    metadata:
+      labels:
+        app: lazynext-api-gateway
+        component: backend
+    spec:
+      serviceAccountName: lazynext-sa
+      priorityClassName: lazynext-high
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-db -p 5432 -U lazynext -d lazynext; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready."
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "64Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+      containers:
+        - name: lazynext-api-gateway
+          image: ghcr.io/lazynext-platform/lazynext-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 8005
+              protocol: TCP
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          env:
+            - name: RUST_LOG
+              value: "info"
+            - name: DISABLE_CSRF
+              value: "false"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: lazynext-config
+                  key: NODE_ENV
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: DATABASE_URL
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: DODO_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: DODO_WEBHOOK_SECRET
+                  optional: true
+            - name: LAZYNEXT_MCP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lazynext-secrets
+                  key: MCP_API_KEY
+                  optional: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lazynext-api-gateway
+  namespace: lazynext
+  labels:
+    app: lazynext-api-gateway
+spec:
+  type: ClusterIP
+  selector:
+    app: lazynext-api-gateway
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8005
+      targetPort: 8005
+---
+# API Gateway HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lazynext-api-gateway-hpa
+  namespace: lazynext
+  labels:
+    app: lazynext-api-gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lazynext-api-gateway
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+# API Gateway PDB
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: lazynext-api-gateway-pdb
+  namespace: lazynext
+  labels:
+    app: lazynext-api-gateway
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: lazynext-api-gateway
+---
+# Prometheus ServiceMonitor — API Gateway
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lazynext-api-gateway
+  namespace: lazynext
+  labels:
+    app: lazynext-api-gateway
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: lazynext-api-gateway
+  endpoints:
+    - port: http
+      path: /health
+      interval: 30s
+      scrapeTimeout: 10s

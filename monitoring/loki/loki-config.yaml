@@ -40,9 +40,9 @@ compactor:
   retention_enabled: true
   compaction_interval: 10m
   working_directory: /loki/compactor
-  delete_request_store: filesystem
 
-ingester: {}
+ingester:
+  max_transfer_retries: 10
 
 ruler:
   alertmanager_url: http://alertmanager:9093

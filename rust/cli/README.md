@@ -6,7 +6,7 @@ Clap-based CLI for headless video rendering and AI-powered editing.
 
 | Command | Description |
 |---------|------------|
-| `edit` | AI-powered editing via Chronos Copilot |
+| `edit` | AI-powered editing via Lazynext AI Agent Copilot |
 | `render` | GPU-accelerated rendering (compositor → ffmpeg) |
 | `batch-render` | Batch render multiple projects |
 | `ingest` | Media ingestion with ffprobe probing |

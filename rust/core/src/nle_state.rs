@@ -17,12 +17,54 @@
 use lazynext_provenance::generate_state_fingerprint;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use thiserror::Error;
 use tokio::sync::mpsc::Sender;
 
 pub use state::keyframe::{Easing, Keyframe, ScalarAnimationChannel};
 pub use state::operations::{CrdtClock, CrdtOperation, CrdtOperationLog};
 pub use state::tombstone::TombstoneMap;
 pub use state::vector_clock::VectorClock;
+
+// ── NLE errors ──
+
+/// Typed errors for NLE state operations.
+#[derive(Debug, Error)]
+pub enum NLEError {
+    #[error("Track index {0} out of bounds (total: {1})")]
+    TrackIndexOutOfBounds(usize, usize),
+
+    #[error("Clip start ({start}) must be less than end ({end})")]
+    ClipRangeInvalid { start: u32, end: u32 },
+
+    #[error("Clip with id '{0}' not found")]
+    ClipNotFound(String),
+
+    #[error("Track with id '{0}' not found")]
+    TrackNotFound(String),
+
+    #[error("Invalid track kind: '{0}'. Expected 'video', 'audio', 'mask', 'text', or '3d'")]
+    InvalidTrackKind(String),
+
+    #[error("Invalid clip type: '{0}'")]
+    InvalidClipType(String),
+
+    #[error(
+        "Invalid media asset type: '{0}'. Expected: 'video', 'audio', 'image', 'mask_sequence', 'gaussian_splat'"
+    )]
+    InvalidAssetType(String),
+
+    #[error("Track is locked: '{0}'")]
+    TrackLocked(String),
+
+    #[error("Media asset duration must be >= 0")]
+    InvalidDuration,
+
+    #[error("Canvas dimensions must be > 0 ({width}x{height})")]
+    InvalidDimensions { width: u32, height: u32 },
+
+    #[error("Framerate must be > 0")]
+    InvalidFramerate,
+}
 
 // ── NLE Event ──
 
@@ -35,22 +77,57 @@ pub enum NLEEvent {
 
 // ── Core domain types ──
 
+/// Known and valid asset types within the media pool.
+pub const VALID_ASSET_TYPES: &[&str] =
+    &["video", "audio", "image", "mask_sequence", "gaussian_splat"];
+
+/// Known and valid track kinds within the timeline.
+pub const VALID_TRACK_KINDS: &[&str] = &["video", "audio", "mask", "text", "3d"];
+
+/// Known and valid clip types within a track.
+pub const VALID_CLIP_TYPES: &[&str] = &["video", "audio", "mask", "text", "image", "3d"];
+
 /// A source media file (video, audio, or image) referenced by clips in the
 /// timeline.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaAsset {
     pub id: String,
     pub name: String,
     pub path_or_url: String,
-    pub asset_type: String, // "video", "audio", "image"
+    pub asset_type: String,
     pub duration: f64,
     pub width: u32,
     pub height: u32,
 }
 
+impl MediaAsset {
+    /// Validates the asset fields and returns an error for invalid data.
+    pub fn validate(&self) -> Result<(), NLEError> {
+        if self.id.is_empty() {
+            return Err(NLEError::InvalidAssetType("empty id".into()));
+        }
+        if !VALID_ASSET_TYPES.contains(&self.asset_type.as_str()) {
+            return Err(NLEError::InvalidAssetType(self.asset_type.clone()));
+        }
+        if self.duration < 0.0 {
+            return Err(NLEError::InvalidDuration);
+        }
+        if self.width == 0 || self.height == 0 {
+            // Allow 0x0 for audio-only assets
+            if self.asset_type != "audio" {
+                return Err(NLEError::InvalidDimensions {
+                    width: self.width,
+                    height: self.height,
+                });
+            }
+        }
+        Ok(())
+    }
+}
+
 /// A timeline clip with media reference, trim range, and per-property
 /// animation channels (opacity, scale, rotation, volume, etc.).
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Clip {
     pub id: String,
     pub clip_type: String,
@@ -64,6 +141,30 @@ pub struct Clip {
 }
 
 impl Clip {
+    /// Validates the clip's structural integrity before insertion.
+    pub fn validate(&self) -> Result<(), NLEError> {
+        if self.id.is_empty() {
+            return Err(NLEError::InvalidClipType("empty id".into()));
+        }
+        if !VALID_CLIP_TYPES.contains(&self.clip_type.as_str()) {
+            return Err(NLEError::InvalidClipType(self.clip_type.clone()));
+        }
+        if self.start >= self.end {
+            return Err(NLEError::ClipRangeInvalid {
+                start: self.start,
+                end: self.end,
+            });
+        }
+        // Guard against absurdly long clips (> 24 hours at 120fps ≈ 10M frames)
+        if self.end - self.start > 10_368_000 {
+            return Err(NLEError::ClipRangeInvalid {
+                start: self.start,
+                end: self.end,
+            });
+        }
+        Ok(())
+    }
+
     /// Evaluate an animated property at a given frame.
     /// Falls back to `default_value` if no channel exists for that property.
     pub fn get_animated_value(&self, property: &str, frame: u32, default_value: f64) -> f64 {
@@ -96,7 +197,7 @@ impl Clip {
 
 /// A timeline track containing a sequence of clips with mute, solo, and
 /// lock flags.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Track {
     pub id: String,
     pub kind: String,
@@ -111,7 +212,7 @@ pub struct Track {
 
 /// The full project state: tracks, dimensions, framerate, media pool, and
 /// background color.
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectData {
     pub id: String,
     pub name: String,
@@ -225,19 +326,33 @@ impl NLEState {
 
     /// Applies a rotoscope mask sequence to a clip by creating a new mask
     /// track and populating it with a mask clip and media asset.
+    ///
+    /// Searches for the video clip by ID to inherit its duration and frame range.
+    /// Falls back to the project dimensions if the clip is not found.
     pub fn apply_rotoscope_mask(
         &mut self,
-        _video_clip_id: &str,
+        video_clip_id: &str,
         mask_sequence_url: &str,
     ) -> Result<String, String> {
-        // Create a new mask track and clip
+        // Resolve the video clip to inherit its duration and frame range
+        let (clip_start, clip_end, clip_duration) = {
+            let payload = self.find_clip(video_clip_id);
+            if let Some(cp) = payload {
+                let duration_secs =
+                    (cp.end.saturating_sub(cp.start)) as f64 / self.data.framerate.max(1) as f64;
+                (cp.start, cp.end, duration_secs)
+            } else {
+                // Fall back to sensible defaults when clip is not found
+                (0, 300, 10.0)
+            }
+        };
+
         let mask_track_id = format!("track_mask_{}", uuid::Uuid::new_v4());
         self.add_track(mask_track_id.clone(), "mask".to_string());
 
         let mask_clip_id = format!("clip_mask_{}", uuid::Uuid::new_v4());
         let mask_media_id = format!("media_mask_{}", uuid::Uuid::new_v4());
 
-        // Add media asset
         self.data.media_pool.insert(
             mask_media_id.clone(),
             MediaAsset {
@@ -245,22 +360,26 @@ impl NLEState {
                 name: "Rotoscope Mask Sequence".to_string(),
                 path_or_url: mask_sequence_url.to_string(),
                 asset_type: "mask_sequence".to_string(),
-                duration: 10.0, // Should inherit from video clip
+                duration: clip_duration,
                 width: self.data.width,
                 height: self.data.height,
             },
         );
 
-        // Add mask clip
         let clip = Clip {
             id: mask_clip_id.clone(),
             clip_type: "mask".to_string(),
             media_id: Some(mask_media_id),
             name: "Rotoscope Mask".to_string(),
-            start: 0, // Should match video clip start
-            end: 100, // Should match video clip end
+            start: clip_start,
+            end: clip_end,
             animations: HashMap::new(),
         };
+
+        // Validate the clip before insertion
+        if let Err(e) = clip.validate() {
+            return Err(format!("Invalid mask clip: {}", e));
+        }
 
         self.add_clip_struct(&mask_track_id, clip)?;
         Ok(mask_clip_id)
@@ -356,9 +475,17 @@ impl NLEState {
         }
     }
 
-    /// Adds a new track to the timeline with the given ID and kind
-    /// ("video", "audio", etc.). Records the operation for undo/redo.
+    /// Adds a new track to the timeline with the given ID and kind ("video",
+    /// "audio", "mask", "text", "3d"). Records the operation for undo/redo.
+    /// Silently rejects invalid track kinds by logging a warning.
     pub fn add_track(&mut self, id: String, kind: String) {
+        if !VALID_TRACK_KINDS.contains(&kind.as_str()) {
+            eprintln!(
+                "[NLE] Warning: ignoring add_track with unknown kind '{}'. Valid kinds: {:?}",
+                kind, VALID_TRACK_KINDS
+            );
+            return;
+        }
         let snapshot = self.data.clone();
         let op = CrdtOperation::TrackInsert {
             track_id: id.clone(),
@@ -485,14 +612,23 @@ impl NLEState {
     }
 
     /// Add a media asset to the project pool.
+    /// Validates the asset before insertion; logs a warning for invalid assets.
     pub fn add_media_asset(&mut self, asset: MediaAsset) {
+        if let Err(e) = asset.validate() {
+            eprintln!(
+                "[NLE] Warning: rejecting invalid media asset '{}': {}",
+                asset.id, e
+            );
+            return;
+        }
         self.data.media_pool.insert(asset.id.clone(), asset);
     }
 
     // ── Clip operations ──
 
     /// Adds a new clip to the track at the given index with the specified
-    /// type, name, and frame range. Records the operation for undo/redo.
+    /// type, name, and frame range. Validates bounds before insertion and logs
+    /// warnings for out-of-range parameters. Records the operation for undo/redo.
     pub fn add_clip_to_track(
         &mut self,
         track_idx: usize,
@@ -502,6 +638,29 @@ impl NLEState {
         start: u32,
         end: u32,
     ) {
+        if start >= end {
+            eprintln!(
+                "[NLE] Warning: rejecting clip '{}' with invalid range (start={} >= end={})",
+                id, start, end
+            );
+            return;
+        }
+        if track_idx >= self.data.tracks.len() {
+            eprintln!(
+                "[NLE] Warning: rejecting clip '{}' — track index {} out of bounds (total: {})",
+                id,
+                track_idx,
+                self.data.tracks.len()
+            );
+            return;
+        }
+        if !VALID_CLIP_TYPES.contains(&clip_type.as_str()) {
+            eprintln!(
+                "[NLE] Warning: rejecting clip '{}' with unknown clip_type '{}'. Valid types: {:?}",
+                id, clip_type, VALID_CLIP_TYPES
+            );
+            return;
+        }
         let snapshot = self.data.clone();
         if let Some(track) = self.data.tracks.get_mut(track_idx) {
             let op = CrdtOperation::ClipInsert {
@@ -525,7 +684,6 @@ impl NLEState {
                 end,
                 animations: HashMap::new(),
             });
-            // Drop track borrow before calling apply_and_record
             self.apply_and_record(op, snapshot);
         }
     }

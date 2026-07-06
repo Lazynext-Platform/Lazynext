@@ -26,11 +26,11 @@ data:
     admin_users = lazynext_admin
     stats_users = lazynext_admin
     pool_mode = transaction
-    max_client_conn = 500
+    max_client_conn = 200
     default_pool_size = 25
     reserve_pool_size = 5
     reserve_pool_timeout = 3
-    max_db_connections = 100
+    max_db_connections = 80
     max_user_connections = 100
     server_round_robin = 1
     ignore_startup_parameters = extra_float_digits,search_path
@@ -39,10 +39,10 @@ data:
     server_check_delay = 30
     client_login_timeout = 15
     server_lifetime = 3600
-    server_idle_timeout = 600
+    server_idle_timeout = 300
     server_connect_timeout = 15
-    query_timeout = 120
-    query_wait_timeout = 120
+    query_timeout = 30
+    query_wait_timeout = 15
     log_connections = 1
     log_disconnections = 1
     log_pooler_errors = 1
@@ -54,8 +54,8 @@ data:
   # the placeholder values below must be updated via ExternalSecret or similar.
   userlist.txt: |
     # Passwords injected via ExternalSecret or SealedSecret
-    "lazynext" "REPLACE_ME_PGBOUNCER_PASSWORD"
-    "lazynext_admin" "REPLACE_ME_PGBOUNCER_ADMIN_PASSWORD"
+    "lazynext" "disabled"
+    "lazynext_admin" "disabled"
 
 ---
 apiVersion: apps/v1

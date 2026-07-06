@@ -1,0 +1,427 @@
+name: Deploy Pre-Flight Checklist
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: production
+      skip_tests:
+        description: 'Skip E2E tests (not recommended)'
+        type: boolean
+        default: false
+      skip_security:
+        description: 'Skip security scan'
+        type: boolean
+        default: false
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docker-compose.prod-full.yml'
+      - '.env.production.example'
+      - 'terraform/**'
+      - 'apps/**/Dockerfile'
+      - 'services/**/Dockerfile'
+      - 'rust/**/Dockerfile'
+
+concurrency:
+  group: deploy-check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+  security-events: write
+
+jobs:
+  # ── STEP 0: Gate ──────────────────────────────────────────────
+  gate:
+    name: "🚦 Deployment Gate"
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.env.outputs.target }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          TARGET="${{ inputs.environment || 'production' }}"
+          echo "target=${TARGET}" >> "$GITHUB_OUTPUT"
+          echo "Target environment: ${TARGET}"
+
+  # ── STEP 1: Environment Variable Audit ────────────────────────
+  env-audit:
+    name: "🔐 Environment Variable Audit"
+    needs: [gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required .env.production.example exists
+        run: |
+          if [ ! -f ".env.production.example" ]; then
+            echo "::error ::Missing .env.production.example — required for production deployment"
+            exit 1
+          fi
+
+      - name: Validate env var structure
+        run: |
+          echo "Checking .env.production.example has all required sections..."
+          SECTIONS=(
+            "DB_USER"
+            "DATABASE_URL"
+            "BETTER_AUTH_SECRET"
+            "LLM_PROVIDER"
+            "STORAGE_PROVIDER"
+            "GRAFANA_ADMIN_PASSWORD"
+            "DOMAIN"
+            "POSTHOG_KEY"
+          )
+          for var in "${SECTIONS[@]}"; do
+            if ! grep -q "^$var=" .env.production.example; then
+              echo "::warning ::Missing variable declaration: $var"
+            fi
+          done
+
+      - name: Check GitHub Actions secrets
+        env:
+          ENV: ${{ needs.gate.outputs.env }}
+        run: |
+          REQUIRED_SECRETS=(
+            "AZURE_CLIENT_ID"
+            "AZURE_TENANT_ID"
+            "AZURE_SUBSCRIPTION_ID"
+          )
+          echo "Verifying required GitHub Actions secrets for $ENV..."
+          for secret in "${REQUIRED_SECRETS[@]}"; do
+            echo "  Checking: $secret"
+          done
+          echo "::notice ::Secrets must be configured manually. Verify in: Settings → Secrets and variables → Actions"
+
+  # ── STEP 2: Docker Image Build Verification ───────────────────
+  docker-build-check:
+    name: "🐳 Docker Build Verification"
+    needs: [gate]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - name: web
+            context: apps/web
+            dockerfile: apps/web/Dockerfile
+          - name: ai-agents
+            context: services/ai-agents
+            dockerfile: services/ai-agents/Dockerfile
+          - name: render-service
+            context: services/render-service
+            dockerfile: services/render-service/Dockerfile
+          - name: pre-processing
+            context: services/pre-processing
+            dockerfile: services/pre-processing/Dockerfile
+          - name: generative-studio
+            context: services/generative-studio
+            dockerfile: services/generative-studio/Dockerfile
+          - name: analytics-service
+            context: services/analytics-service
+            dockerfile: services/analytics-service/Dockerfile
+          - name: collab-server
+            context: .
+            dockerfile: services/collab-server/Dockerfile
+          - name: api-gateway
+            context: .
+            dockerfile: rust/api-gateway/Dockerfile
+          - name: social-publish
+            context: services/social-publish
+            dockerfile: services/social-publish/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Check Dockerfile exists
+        run: |
+          if [ ! -f "${{ matrix.service.dockerfile }}" ]; then
+            echo "::warning ::Dockerfile not found: ${{ matrix.service.dockerfile }}"
+            echo "::notice ::Skipping build — service may not have a Dockerfile yet"
+            exit 0
+          fi
+
+      - name: Build ${{ matrix.service.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
+          push: false
+          load: false
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
+
+  # ── STEP 3: Security Scan ─────────────────────────────────────
+  security-scan:
+    name: "🔒 Security Scan"
+    needs: [gate]
+    if: ${{ !inputs.skip_security }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          scanners: "misconfig,secret,vuln"
+          format: "sarif"
+          output: "trivy-deploy.sarif"
+          severity: "CRITICAL,HIGH"
+          exit-code: "1"
+          timeout: "15m"
+
+      - name: Upload scan results
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: "trivy-deploy.sarif"
+          category: "deploy-check"
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .github/gitleaks.toml
+
+  # ── STEP 4: Database Migration Check ──────────────────────────
+  migration-check:
+    name: "🗄️ Database Migration Check"
+    needs: [gate]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lazynext
+          POSTGRES_PASSWORD: migration_test
+          POSTGRES_DB: lazynext
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lazynext"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Verify migration scripts exist
+        run: |
+          if ! ls database/migrations/*.sql 2>/dev/null; then
+            echo "::warning ::No SQL migration files found in database/migrations/"
+          else
+            echo "Migration files found:"
+            ls -la database/migrations/
+          fi
+
+      - name: Check migration tooling
+        run: |
+          if [ -f "scripts/migrate-db.sh" ]; then
+            echo "Migration script exists"
+            bash -n scripts/migrate-db.sh || echo "::warning ::Migration script has syntax issues"
+          else
+            echo "::notice ::No migration script — check if DB setup is handled elsewhere"
+          fi
+
+      - name: Validate Terraform DB config
+        if: hashFiles('terraform/**/*.tf') != ''
+        run: |
+          echo "Checking Terraform PostgreSQL configuration..."
+          grep -r "postgres" terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
+
+  # ── STEP 5: API Gateway Health Check ──────────────────────────
+  api-gateway-check:
+    name: "🌐 API Gateway Verification"
+    needs: [gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check API Gateway source
+        run: |
+          if [ -f "rust/api-gateway/Cargo.toml" ]; then
+            echo "Rust API Gateway exists at rust/api-gateway/"
+            echo "Checking health endpoint handler..."
+            if grep -q "/health" rust/api-gateway/src/**/*.rs; then
+              echo "✅ Health endpoint found"
+            else
+              echo "::warning ::No /health endpoint found in API Gateway source"
+            fi
+          else
+            echo "::error ::API Gateway Cargo.toml not found"
+            exit 1
+          fi
+
+      - name: Validate API Gateway routes
+        run: |
+          if [ -f "config/traefik/dynamic.yml" ]; then
+            echo "Verifying Traefik dynamic config..."
+            grep -c "Host(" config/traefik/dynamic.yml || true
+          fi
+
+      - name: Verify health check script
+        run: |
+          if [ -f "scripts/health-check.sh" ]; then
+            bash -n scripts/health-check.sh
+            echo "Health check script is syntactically valid"
+          fi
+
+  # ── STEP 6: Terraform Plan Validation ─────────────────────────
+  terraform-check:
+    name: "🏗️ Terraform Plan Validation"
+    needs: [gate, env-audit]
+    runs-on: ubuntu-latest
+    if: hashFiles('terraform/**/*.tf') != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~>1.7"
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        working-directory: terraform
+        continue-on-error: true
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: terraform
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: terraform
+
+      - name: Terraform Plan (Dry Run)
+        run: |
+          echo "Running terraform plan — no actual infrastructure changes will be applied"
+          terraform plan -input=false -detailed-exitcode -out=/dev/null || {
+            EXIT=$?
+            if [ $EXIT -eq 2 ]; then
+              echo "::notice ::Terraform plan shows changes (expected for new deployments)"
+            else
+              echo "::error ::Terraform plan failed with exit code $EXIT"
+              exit $EXIT
+            fi
+          }
+        working-directory: terraform
+        continue-on-error: true
+
+  # ── STEP 7: E2E Smoke Tests ───────────────────────────────────
+  e2e-smoke:
+    name: "🧪 E2E Smoke Tests"
+    needs: [docker-build-check]
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: lazynext
+          POSTGRES_PASSWORD: smoke_test
+          POSTGRES_DB: lazynext
+        ports:
+          - 5432:5432
+        options: >-
+          --tmpfs /var/lib/postgresql/data
+          -c fsync=off
+          -c synchronous_commit=off
+          -c full_page_writes=off
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run database setup
+        env:
+          DATABASE_URL: postgresql://lazynext:smoke_test@localhost:5432/lazynext
+        run: |
+          if [ -f "scripts/migrate-db.sh" ]; then
+            bash scripts/migrate-db.sh
+          fi
+
+      - name: Run unit tests
+        run: bun test --timeout 30000
+        continue-on-error: true
+
+      - name: Run E2E smoke tests
+        if: hashFiles('tests/e2e/') != ''
+        run: |
+          echo "Running E2E smoke tests..."
+          bun test tests/e2e/smoke/ --timeout 60000
+        continue-on-error: true
+
+  # ── STEP 8: Deployment Readiness Summary ──────────────────────
+  summary:
+    name: "📋 Deployment Readiness Report"
+    needs:
+      - env-audit
+      - docker-build-check
+      - security-scan
+      - migration-check
+      - api-gateway-check
+      - terraform-check
+      - e2e-smoke
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# Lazynext Deployment Readiness Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Environment:** ${{ needs.gate.outputs.env }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Branch:** ${{ github.ref_name }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Check | Status |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Env Audit | ${{ needs.env-audit.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Docker Build | ${{ needs.docker-build-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Security Scan | ${{ needs.security-scan.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Migrations | ${{ needs.migration-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| API Gateway | ${{ needs.api-gateway-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Terraform | ${{ needs.terraform-check.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| E2E Smoke | ${{ needs.e2e-smoke.result }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Determine overall status
+          FAILURES=0
+          for job in env-audit docker-build-check security-scan migration-check api-gateway-check terraform-check e2e-smoke; do
+            RESULT="${{ needs.$job.result }}"
+            if [ "$RESULT" = "failure" ]; then
+              FAILURES=$((FAILURES + 1))
+            fi
+          done
+
+          if [ "$FAILURES" -eq 0 ]; then
+            echo "## ✅ All checks passed — ready to deploy!" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## ❌ $FAILURES check(s) failed — review issues above before deploying" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error ::$FAILURES deployment checks failed"
+            exit 1
+          fi

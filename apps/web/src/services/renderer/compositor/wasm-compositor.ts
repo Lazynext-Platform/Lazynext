@@ -1,3 +1,5 @@
+/** @module WASM bridge for the GPU compositor — orchestrates texture upload, frame rendering, and lifecycle management */
+
 import {
 	getCompositorCanvas,
 	getLastFrameProfile,

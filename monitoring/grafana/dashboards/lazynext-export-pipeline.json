@@ -1,0 +1,662 @@
+{
+  "dashboard": {
+    "uid": "lazynext-export-pipeline",
+    "title": "Lazynext — Export Pipeline",
+    "tags": ["lazynext", "export", "render", "production"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "15s",
+    "time": {
+      "from": "now-3h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Render Queue Depth",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "avg(render_queue_size)",
+            "legendFormat": "Queue Size",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 10, "color": "blue"},
+                {"value": 25, "color": "yellow"},
+                {"value": 50, "color": "orange"},
+                {"value": 100, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Render Workers",
+        "type": "gauge",
+        "gridPos": {"x": 6, "y": 0, "w": 6, "h": 6},
+        "targets": [
+          {
+            "expr": "sum(render_workers_active)",
+            "legendFormat": "Workers",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 3,
+        "title": "Jobs Completed (last 5m)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_completed_total[5m]))",
+            "legendFormat": "Completed",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "green"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 4,
+        "title": "Job Failure Rate",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(rate(render_jobs_failed_total[15m])) / sum(rate(render_jobs_total[15m])) * 100",
+            "legendFormat": "Failure Rate",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "yellow"},
+                {"value": 5, "color": "orange"},
+                {"value": 10, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 5,
+        "title": "Avg Queue Wait Time",
+        "type": "stat",
+        "gridPos": {"x": 20, "y": 0, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "avg_over_time(render_queue_wait_seconds[15m])",
+            "legendFormat": "Wait",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 60, "color": "yellow"},
+                {"value": 300, "color": "orange"},
+                {"value": 600, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 6,
+        "title": "Jobs Started (last 5m)",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 3, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_started_total[5m]))",
+            "legendFormat": "Started",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "blue"},
+                {"value": 1, "color": "green"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "value"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Jobs Failed (last 5m)",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 3, "w": 4, "h": 3},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_failed_total[5m]))",
+            "legendFormat": "Failed",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "orange"},
+                {"value": 5, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": {"calcs": ["lastNotNull"]},
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 8,
+        "title": "Render Throughput (jobs/min)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(render_jobs_total[1m])) by (status) * 60",
+            "legendFormat": "{{status}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "cpm",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15,
+              "spanNulls": true
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {"id": "byName", "options": "failed"},
+              "properties": [{"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}}]
+            }
+          ]
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 9,
+        "title": "Render Duration Distribution (p50/p95/p99)",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(render_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(render_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(render_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "p99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10,
+              "spanNulls": true
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 10,
+        "title": "Render Duration Heatmap",
+        "type": "heatmap",
+        "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(render_duration_seconds_bucket[5m])) by (le)",
+            "legendFormat": "{{le}}s",
+            "refId": "A",
+            "format": "heatmap"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {"scaleDistribution": {"type": "log"}}
+          }
+        },
+        "options": {
+          "calculate": true,
+          "yAxis": {"format": "s"},
+          "color": {"mode": "opacity", "exponent": 0.5}
+        }
+      },
+      {
+        "id": 11,
+        "title": "Jobs by Output Format (volume, last 1h)",
+        "type": "piechart",
+        "gridPos": {"x": 12, "y": 14, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_completed_total[1h])) by (format)",
+            "legendFormat": "{{format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "displayLabels": ["name", "percent"],
+          "legend": {"displayMode": "table", "placement": "right"},
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 12,
+        "title": "Failure Rate by Format",
+        "type": "barchart",
+        "gridPos": {"x": 18, "y": 14, "w": 6, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(render_jobs_failed_total[15m])) by (format) / sum(rate(render_jobs_total[15m])) by (format) * 100",
+            "legendFormat": "{{format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 5, "color": "yellow"},
+                {"value": 10, "color": "red"}
+              ]
+            },
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 13,
+        "title": "Render Duration p95 by Format",
+        "type": "barchart",
+        "gridPos": {"x": 0, "y": 22, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(render_duration_seconds_bucket[1h])) by (le, format))",
+            "legendFormat": "{{format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 300, "color": "yellow"},
+                {"value": 900, "color": "orange"},
+                {"value": 1800, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 14,
+        "title": "FFmpeg Process Count",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 22, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "count(ffmpeg_process_info) by (output_format, instance)",
+            "legendFormat": "{{instance}} {{output_format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "stepAfter",
+              "fillOpacity": 20,
+              "spanNulls": false
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true},
+          "tooltip": {"mode": "multi", "sort": "desc"}
+        }
+      },
+      {
+        "id": 15,
+        "title": "FFmpeg CPU Usage",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 22, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "avg(ffmpeg_cpu_percent) by (output_format)",
+            "legendFormat": "{{output_format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      },
+      {
+        "id": 16,
+        "title": "GPU Utilization During Renders",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 29, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "avg(render_gpu_utilization_percent) by (gpu_device)",
+            "legendFormat": "{{gpu_device}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      },
+      {
+        "id": 17,
+        "title": "GPU Memory During Renders",
+        "type": "timeseries",
+        "gridPos": {"x": 8, "y": 29, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "avg(render_gpu_memory_used_bytes) by (gpu_device) / (1024 * 1024 * 1024)",
+            "legendFormat": "{{gpu_device}} Used",
+            "refId": "A"
+          },
+          {
+            "expr": "avg(render_gpu_memory_total_bytes) by (gpu_device) / (1024 * 1024 * 1024)",
+            "legendFormat": "{{gpu_device}} Total",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decgbytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      },
+      {
+        "id": 18,
+        "title": "NVENC / GPU Encoder Utilization",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 29, "w": 8, "h": 7},
+        "targets": [
+          {
+            "expr": "avg(render_gpu_encoder_utilization_percent) by (encoder_type)",
+            "legendFormat": "{{encoder_type}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "fillOpacity": 15
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      },
+      {
+        "id": 19,
+        "title": "Failure Reasons (last 1h)",
+        "type": "barchart",
+        "gridPos": {"x": 0, "y": 36, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "sum(increase(render_jobs_failed_total[1h])) by (error_reason)",
+            "legendFormat": "{{error_reason}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 5, "color": "orange"},
+                {"value": 20, "color": "red"}
+              ]
+            },
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "options": {
+          "orientation": "horizontal",
+          "showValue": "auto",
+          "legend": {"displayMode": "list", "placement": "bottom"}
+        }
+      },
+      {
+        "id": 20,
+        "title": "FFmpeg Memory Usage per Process",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 36, "w": 12, "h": 7},
+        "targets": [
+          {
+            "expr": "avg(ffmpeg_memory_bytes) by (output_format)",
+            "legendFormat": "{{output_format}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {"displayMode": "table", "placement": "bottom", "showLegend": true}
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "environment",
+          "type": "query",
+          "label": "Environment",
+          "query": "label_values(up, environment)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        },
+        {
+          "name": "format",
+          "type": "query",
+          "label": "Output Format",
+          "query": "label_values(render_jobs_total, format)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        },
+        {
+          "name": "instance",
+          "type": "query",
+          "label": "Render Instance",
+          "query": "label_values(render_jobs_total, instance)",
+          "multi": true,
+          "includeAll": true,
+          "current": {"text": "All", "value": "$__all"}
+        }
+      ]
+    }
+  }
+}

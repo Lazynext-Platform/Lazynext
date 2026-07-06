@@ -163,19 +163,16 @@ impl WasmPluginRuntime {
         Ok(plugin_id)
     }
 
-    /// Check if a plugin with the given ID is loaded.
     /// Check whether a plugin with the given ID has been loaded.
     pub fn has_plugin(&self, plugin_id: &str) -> bool {
         self.plugins.contains_key(plugin_id)
     }
 
-    /// Get metadata for all loaded plugins.
     /// Return metadata for every currently loaded plugin.
     pub fn list_plugins(&self) -> Vec<&WasmPluginMetadata> {
         self.plugins.values().collect()
     }
 
-    /// Unload a plugin by ID.
     /// Remove a loaded plugin from the runtime by its ID.
     pub fn unload_plugin(&mut self, plugin_id: &str) {
         self.plugins.remove(plugin_id);

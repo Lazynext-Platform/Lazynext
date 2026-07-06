@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsndfile1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY services/generative-studio/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu \
     && pip install --no-cache-dir -r requirements.txt
@@ -46,7 +46,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 ENV HF_HOME=/tmp/huggingface
 ENV TRANSFORMERS_CACHE=/tmp/huggingface
 
-COPY . .
+COPY services/generative-studio/ ./
 
 RUN mkdir -p /tmp/generative /tmp/huggingface && chown -R mlrunner:python /tmp/generative /tmp/huggingface
 

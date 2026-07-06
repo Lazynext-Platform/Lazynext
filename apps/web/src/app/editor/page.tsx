@@ -1,5 +1,5 @@
 /**
- * Standalone agentic editor page — canvas preview + Chronos
+ * Standalone agentic editor page — canvas preview + Lazynext AI Agent
  * AI chat interface with playback controls.
  *
  * @page /editor
@@ -12,6 +12,11 @@ import { useWasm } from "@/hooks/use-wasm";
 import { wasmBridge } from "@/core/wasm-bridge";
 import { PromptMode } from "@/editor/PromptMode";
 import { ExecutionContract } from "@/editor/ExecutionContract";
+import { QuickActions } from "@/components/editor/QuickActions";
+import { KeyboardShortcutHints } from "@/components/editor/KeyboardShortcutHints";
+import { AutoSaveIndicator } from "@/components/editor/AutoSaveIndicator";
+import { MobileGate } from "@/components/editor/mobile-gate";
+import { VoiceInput } from "@/components/editor/VoiceInput";
 import {
 	Send,
 	Bot,
@@ -40,7 +45,7 @@ export default function EditorPage() {
 		{
 			role: "agent",
 			content:
-				"I am Chronos, your Autonomous Copilot. Tell me what you want to create or edit, and I'll handle the rest.",
+				"I am Lazynext AI Agent, your Autonomous Copilot. Tell me what you want to create or edit, and I'll handle the rest.",
 			status: "done",
 		},
 	]);
@@ -63,8 +68,9 @@ export default function EditorPage() {
 
 	const handleSend = async () => {
 		if (!prompt.trim() || isProcessing) return;
+		if (prompt.trim().length > 50000) return;
 
-		const userMessage = prompt;
+		const userMessage = prompt.trim();
 		setPrompt("");
 		setIsProcessing(true);
 
@@ -113,7 +119,7 @@ export default function EditorPage() {
 				const newChat = [...prev];
 				newChat[newChat.length - 1] = {
 					role: "agent",
-					content: "Chronos is currently offline. Start the API Gateway (port 8005) to enable AI-powered editing, or use the MCP server for agentic control.",
+					content: "Lazynext AI Agent is currently offline. Start the API Gateway (port 8005) to enable AI-powered editing, or use the MCP server for agentic control.",
 					status: "done",
 				};
 				return newChat;
@@ -135,7 +141,41 @@ export default function EditorPage() {
 		}
 	};
 
+	const handleExport = () => {
+		// Export: opens API gateway export via fetch
+		const rustGatewayUrl =
+			process.env.NEXT_PUBLIC_RUST_API_GATEWAY_URL || "http://127.0.0.1:8005";
+		fetch(`${rustGatewayUrl}/api/v1/export`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ format: "mp4" }),
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				setChat((prev) => [
+					...prev,
+					{
+						role: "agent" as const,
+						content: data.message || "Export job created. Check your render queue.",
+						status: "done" as const,
+					},
+				]);
+			})
+			.catch(() => {
+				setChat((prev) => [
+					...prev,
+					{
+						role: "agent" as const,
+						content:
+							"Export is currently unavailable. Ensure the API Gateway is running on port 8005.",
+						status: "done" as const,
+					},
+				]);
+			});
+	};
+
 	return (
+		<MobileGate>
 		<div className="min-h-screen flex flex-col font-sans relative overflow-hidden bg-background">
 			{/* Header */}
 			<header className="px-6 py-4 glass-panel border-b-0 rounded-none border-b border-border flex items-center justify-between sticky top-0 z-50">
@@ -148,6 +188,7 @@ export default function EditorPage() {
 					</span>
 				</div>
 				<div className="flex items-center gap-4">
+					<AutoSaveIndicator />
 					<div className="text-xs text-foreground/40 mr-4 flex items-center gap-2">
 						<div className={`w-2 h-2 rounded-full ${isReady ? "bg-green-400 animate-pulse" : "bg-yellow-400"}`}></div>
 						Engine {isReady ? "Online" : "Booting..."}
@@ -215,7 +256,7 @@ export default function EditorPage() {
 							<Bot className="w-5 h-5 text-cyan-400" />
 						</div>
 						<div>
-							<h2 className="font-display font-bold text-lg text-foreground">Chronos Agent</h2>
+							<h2 className="font-display font-bold text-lg text-foreground">Lazynext AI Agent Agent</h2>
 							<p className="text-xs text-foreground/50">Autonomous Video Editor</p>
 						</div>
 					</div>
@@ -257,22 +298,29 @@ export default function EditorPage() {
 					</div>
 
 					<div className="p-6 border-t border-border/50 bg-background/50 backdrop-blur-xl">
-						<div className="relative flex items-center group">
-							<input
-								type="text"
-								value={prompt}
-								onChange={(e) => setPrompt(e.target.value)}
-								onKeyDown={(e) => e.key === "Enter" && handleSend()}
-								placeholder="e.g. Turn this into 3 viral TikTok clips..."
-								className="w-full bg-black/40 border border-border/50 rounded-full py-4 pl-6 pr-14 text-sm text-foreground focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner placeholder:text-foreground/30"
+						<div className="flex items-center gap-2">
+							<VoiceInput
+								onTranscription={(text) => {
+									setPrompt((prev) => prev ? prev + " " + text : text);
+								}}
 							/>
-							<button
-								onClick={handleSend}
-								disabled={!prompt.trim() || isProcessing}
-								className="absolute right-2 w-10 h-10 bg-cyan-400 text-black rounded-full flex items-center justify-center hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_15px_rgba(0,212,223,0.4)] group-focus-within:shadow-[0_0_20px_rgba(0,212,223,0.6)]"
-							>
-								<Sparkles className="w-5 h-5" />
-							</button>
+							<div className="relative flex items-center group flex-1">
+								<input
+									type="text"
+									value={prompt}
+									onChange={(e) => setPrompt(e.target.value)}
+									onKeyDown={(e) => e.key === "Enter" && handleSend()}
+									placeholder="e.g. Turn this into 3 viral TikTok clips..."
+									className="w-full bg-black/40 border border-border/50 rounded-full py-4 pl-6 pr-14 text-sm text-foreground focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-inner placeholder:text-foreground/30"
+								/>
+								<button
+									onClick={handleSend}
+									disabled={!prompt.trim() || isProcessing}
+									className="absolute right-2 w-10 h-10 bg-cyan-400 text-black rounded-full flex items-center justify-center hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_15px_rgba(0,212,223,0.4)] group-focus-within:shadow-[0_0_20px_rgba(0,212,223,0.6)]"
+								>
+									<Sparkles className="w-5 h-5" />
+								</button>
+							</div>
 						</div>
 						<p className="text-center text-[10px] text-foreground/30 mt-3 font-medium uppercase tracking-widest">
 							Powered by Livecore API
@@ -280,6 +328,17 @@ export default function EditorPage() {
 					</div>
 				</aside>
 			</main>
+
+			{/* Quick Actions FAB */}
+			<div className="fixed bottom-6 right-6 z-50">
+				<QuickActions
+					onExport={handleExport}
+				/>
+			</div>
+
+			{/* Keyboard Shortcut Hints */}
+			<KeyboardShortcutHints />
 		</div>
+		</MobileGate>
 	);
 }

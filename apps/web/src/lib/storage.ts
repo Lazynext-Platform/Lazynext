@@ -20,6 +20,17 @@ import path from "path";
  * In production (Azure), this interface uploads files to Azure Blob Storage.
  */
 
+function sanitizeStoragePath(filePath: string): string {
+	const clean = path.normalize(filePath).replace(/^\.\.(\/|\\)/, "");
+	if (clean.includes("..")) {
+		throw new Error(`Path traversal blocked: ${filePath}`);
+	}
+	return clean;
+}
+
+const STORAGE_ROOT = process.env.STORAGE_ROOT
+	|| path.join(process.cwd(), ".storage");
+
 /** Common interface for file-system-like storage backends. */
 export interface StorageAdapter {
 	writeFile(filePath: string, data: string | Buffer): Promise<void>;
@@ -30,16 +41,22 @@ export interface StorageAdapter {
 // ── Local Filesystem Adapter ──────────────────────────────────────────────
 
 class LocalStorageAdapter implements StorageAdapter {
+	private resolve(filePath: string): string {
+		return path.join(STORAGE_ROOT, sanitizeStoragePath(filePath));
+	}
+
 	async writeFile(filePath: string, data: string | Buffer): Promise<void> {
-		await fs.writeFile(filePath, data);
+		const safePath = this.resolve(filePath);
+		await fs.mkdir(path.dirname(safePath), { recursive: true });
+		await fs.writeFile(safePath, data);
 	}
 
 	async readFile(filePath: string): Promise<Buffer> {
-		return await fs.readFile(filePath);
+		return await fs.readFile(this.resolve(filePath));
 	}
 
 	async ensureDirectory(dirPath: string): Promise<void> {
-		await fs.mkdir(dirPath, { recursive: true });
+		await fs.mkdir(this.resolve(dirPath), { recursive: true });
 	}
 }
 

@@ -1,3 +1,5 @@
+/** @module Admin dashboard stat card component for displaying metrics with optional trend and icon */
+
 import React from "react";
 
 interface StatCardProps {

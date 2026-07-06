@@ -1,12 +1,12 @@
 /**
- * Multi-step AI agent orchestrator for Chronos Copilot.
+ * Multi-step AI agent orchestrator for Lazynext AI Agent Copilot.
  *
  * Receives a high-level editing intent, decomposes it into tool calls
  * (via LLM or rule-based), executes each tool against the Lazynext
  * microservices, and returns a structured execution plan with results.
  *
  * Features:
- *   - Intelligent multi-provider routing (OpenAI / Anthropic / Ollama)
+ *   - Intelligent multi-provider routing (OpenAI / Anthropic / Gemini)
  *   - Agentic Repair Loop with automatic retry on tool failures
  *   - SSE streaming for real-time plan execution progress
  *   - CRDT patch generation for autonomous timeline edits
@@ -50,14 +50,16 @@ const GENERATIVE_STUDIO_URL =
 const RENDER_SERVICE_URL =
   process.env.RENDER_SERVICE_URL || "http://localhost:8003";
 
+const ALLOWED_MCP_SERVERS = new Set(["playwright", "firecrawl", "context7"]);
+
 /**
  * Determine the most efficient provider based on prompt characteristics.
  */
-function routePromptToProvider(prompt: string): "openai" | "anthropic" | "ollama" {
+function routePromptToProvider(prompt: string): "openai" | "anthropic"  | "gemini" {
   const lower = prompt.toLowerCase();
   
   if (lower.includes("private") || lower.includes("local") || lower.includes("secure") || lower.includes("confidential")) {
-    return "ollama";
+    return "gemini";
   }
   
   if (lower.includes("write") || lower.includes("story") || lower.includes("draft") || lower.includes("creative") || prompt.length > 2000) {
@@ -68,15 +70,42 @@ function routePromptToProvider(prompt: string): "openai" | "anthropic" | "ollama
 }
 
 /**
+ * Validates and sanitizes a user prompt before processing.
+ * Rejects empty, excessively long, or potentially malicious prompts.
+ */
+function sanitizePrompt(prompt: unknown): { prompt: string; error?: string } {
+  if (typeof prompt !== "string") {
+    return { prompt: "", error: "Prompt must be a string" };
+  }
+  const trimmed = prompt.trim();
+  if (trimmed.length === 0) {
+    return { prompt: "", error: "Prompt must not be empty" };
+  }
+  if (trimmed.length > 50000) {
+    return { prompt: "", error: "Prompt exceeds maximum length of 50,000 characters" };
+  }
+  // Strip null bytes and other control characters except newlines/tabs
+  const sanitized = trimmed.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "");
+  return { prompt: sanitized };
+}
+
+/**
  * Decompose a natural language editing intent into a structured plan.
  *
  * Automatically routes prompts to the most efficient provider 
- * (OpenAI for logic, Anthropic for long-context, Ollama for privacy).
+ * (OpenAI for logic, Anthropic for long-context, Gemini for speed).
  */
 export async function decomposeIntent(
   prompt: string,
 ): Promise<OrchestrationPlan> {
-  const provider = routePromptToProvider(prompt);
+  const { prompt: sanitized, error } = sanitizePrompt(prompt);
+  if (error) {
+    return {
+      steps: [],
+      reasoning: `Invalid prompt: ${error}`,
+    };
+  }
+  const provider = routePromptToProvider(sanitized);
   const openaiKey = process.env.OPENAI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
@@ -85,14 +114,11 @@ export async function decomposeIntent(
 
   try {
     if (provider === "openai" && openaiKey) {
-      return await decomposeWithLLM(prompt, openaiKey, "openai", mcpTools);
+      return await decomposeWithLLM(sanitized, openaiKey, "openai", mcpTools);
     } else if (provider === "anthropic" && anthropicKey) {
-      // In a full implementation, this would call Anthropic's Claude API.
-      // For now, we reuse the OpenAI-compatible logic if Claude exposes a compatible endpoint or fallback.
-      return await decomposeWithLLM(prompt, anthropicKey, "anthropic", mcpTools);
-    } else if (provider === "ollama") {
-      // Local ollama integration
-      return await decomposeWithLLM(prompt, "ollama-local", "ollama", mcpTools);
+      return await decomposeWithLLM(sanitized, anthropicKey, "anthropic", mcpTools);
+    } else if (provider === "gemini") {
+      return await decomposeWithLLM(sanitized, "gemini-local", "gemini", mcpTools);
     }
   } catch (err) {
     console.warn(
@@ -100,7 +126,7 @@ export async function decomposeIntent(
     );
   }
 
-  return decomposeRuleBased(prompt);
+  return decomposeRuleBased(sanitized);
 }
 
 /**
@@ -113,7 +139,7 @@ async function decomposeWithLLM(
   mcpTools: any[] = []
 ): Promise<OrchestrationPlan> {
   let mcpToolsText = mcpTools.length > 0 
-    ? mcpTools.map(t => `- mcp__${t.server}__${t.name}: ${t.description || 'No description'}`).join("\\n")
+    ? mcpTools.map(t => `- mcp__${t.server}__${t.name}: ${t.description || 'No description'}`).join("\n")
     : "";
 
   const systemPrompt = `You are the Lazynext AI Orchestrator. You decompose video editing intents into tool calls.
@@ -228,13 +254,13 @@ Respond ONLY with a JSON object:
       };
     }
 
-    // OpenAI-compatible path (OpenAI, Ollama)
+    // OpenAI-compatible path (OpenAI, Gemini via compatible endpoint)
     let endpoint = "https://api.openai.com/v1/chat/completions";
     let modelName = process.env.OPENAI_MODEL || "gpt-4o";
 
-    if (provider === "ollama") {
-      endpoint = `${process.env.OLLAMA_HOST || "http://localhost:11434"}/v1/chat/completions`;
-      modelName = process.env.OLLAMA_MODEL || "llama3";
+    if (provider === "gemini") {
+      endpoint = `${process.env.GEMINI_API_BASE || "https://generativelanguage.googleapis.com/v1beta/openai"}/chat/completions`;
+      modelName = process.env.GEMINI_MODEL || "gemini-2.5-flash";
     }
 
     const response = await fetch(endpoint, {
@@ -841,6 +867,11 @@ async function executeToolCall(
     const parts = tool.split("__");
     const serverName = parts[1];
     const toolName = parts[2];
+
+    if (!ALLOWED_MCP_SERVERS.has(serverName)) {
+      return { success: false, error: `MCP server '${serverName}' is not in the allowed list` };
+    }
+
     try {
       const result = await callMcpTool(serverName, toolName, args);
       return { success: true, result };
@@ -1569,7 +1600,7 @@ async function executeToolCall(
       return {
           success: true,
           crdt_patches: [],
-          message: `Successfully published to ${publishResult.platform}. URL: ${publishResult.post_url}`
+          message: `Successfully published to ${publishResult.platform}. URL: ${publishResult.results?.[0]?.post_url || ""}`
       };
 
     case "apply_auto_ducking":
@@ -1674,9 +1705,19 @@ async function callService(
   body: Record<string, unknown>,
 ): Promise<unknown> {
   try {
+    const apiKey = process.env.INTERNAL_API_KEY;
+    if (process.env.NODE_ENV === "production" && !apiKey) {
+      throw new Error("INTERNAL_API_KEY must be set in production for service-to-service auth");
+    }
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (apiKey) {
+      headers["X-Internal-API-Key"] = apiKey;
+    }
     const response = await fetch(url, {
       method,
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(body),
     });
 

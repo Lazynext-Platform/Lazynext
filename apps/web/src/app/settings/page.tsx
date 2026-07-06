@@ -2,6 +2,7 @@
  * Settings page — user profile, preferences, and account management.
  *
  * @page /settings
+ * @module settings/page
  */
 
 import type { Metadata } from "next";

@@ -4,7 +4,7 @@
 //! content provenance. Every exported video carries a signed manifest
 //! attesting to its origin, editing history, and creator identity.
 //!
-//! C2PA spec: https://c2pa.org/specifications/specifications/2.1/
+//! C2PA spec: <https://c2pa.org/specifications/specifications/2.1/>
 //!
 //! # Usage
 //! ```ignore
@@ -16,9 +16,9 @@
 //!
 //! # Certificate Requirements
 //! Production deployment requires a signing certificate from a C2PA-trusted CA:
-//!   - DigiCert: https://www.digicert.com/c2pa-content-authenticity
-//!   - GlobalSign: https://www.globalsign.com/en/c2pa
-//!   - Truepic: https://truepic.com (managed C2PA signing service)
+//!   - DigiCert: <https://www.digicert.com/c2pa-content-authenticity>
+//!   - GlobalSign: <https://www.globalsign.com/en/c2pa>
+//!   - Truepic: <https://truepic.com> (managed C2PA signing service)
 
 use serde::{Deserialize, Serialize};
 
@@ -194,15 +194,39 @@ impl C2PASigner {
             }
             _ => {
                 // Development mode: self-sign with HMAC
-                let secret = std::env::var("BETTER_AUTH_SECRET")
-                    .unwrap_or_else(|_| "lazynext-dev-signing-key".to_string());
-                use hmac::{Hmac, Mac, digest::KeyInit};
-                use sha2::Sha256;
-                type HmacSha256 = Hmac<Sha256>;
-                let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-                    .map_err(|e| format!("HMAC init: {e}"))?;
-                mac.update(content_hash.as_bytes());
-                Ok(hex::encode(mac.finalize().into_bytes()))
+                // In production, BETTER_AUTH_SECRET is required; without it we refuse to sign.
+                let secret = std::env::var("BETTER_AUTH_SECRET");
+                match secret {
+                    Ok(s) if s.len() >= 32 => {
+                        use hmac::{Hmac, Mac, digest::KeyInit};
+                        use sha2::Sha256;
+                        type HmacSha256 = Hmac<Sha256>;
+                        let mut mac = HmacSha256::new_from_slice(s.as_bytes())
+                            .map_err(|e| format!("HMAC init: {e}"))?;
+                        mac.update(content_hash.as_bytes());
+                        Ok(hex::encode(mac.finalize().into_bytes()))
+                    }
+                    _ => {
+                        let is_prod = std::env::var("LAZYNEXT_ENV")
+                            .map(|v| v == "production")
+                            .unwrap_or(false)
+                            || std::env::var("NODE_ENV")
+                                .map(|v| v == "production")
+                                .unwrap_or(false);
+                        if is_prod {
+                            Err("FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production for C2PA signing".into())
+                        } else {
+                            let key = "lazynext-dev-signing-key";
+                            use hmac::{Hmac, Mac, digest::KeyInit};
+                            use sha2::Sha256;
+                            type HmacSha256 = Hmac<Sha256>;
+                            let mut mac = HmacSha256::new_from_slice(key.as_bytes())
+                                .map_err(|e| format!("HMAC init: {e}"))?;
+                            mac.update(content_hash.as_bytes());
+                            Ok(hex::encode(mac.finalize().into_bytes()))
+                        }
+                    }
+                }
             }
         }
     }

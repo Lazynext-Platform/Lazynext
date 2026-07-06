@@ -51,7 +51,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 		{
 			role: "agent",
 			content:
-				"I am Chronos, your Autonomous Copilot. What are we building today?",
+				"I am Lazynext AI Agent, your Autonomous Copilot. What are we building today?",
 		},
 	]);
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -60,9 +60,16 @@ export default function ModernEditorClient({ project }: { project: any }) {
 	const activeProject = ctxProject || project;
 
 	const handleSend = async () => {
-		if (!prompt.trim()) return;
+		const trimmed = prompt.trim();
+		if (!trimmed) return;
+		if (trimmed.length > 50000) {
+			toast.error("Prompt too long", {
+				description: "Maximum prompt length is 50,000 characters",
+			});
+			return;
+		}
 
-		const newChat = [...chat, { role: "user" as const, content: prompt }];
+		const newChat = [...chat, { role: "user" as const, content: trimmed }];
 		setChat(newChat);
 		setPrompt("");
 		setIsProcessing(true);
@@ -73,7 +80,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 			const response = await fetch("/api/ai/generate", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ prompt, type: "video" }),
+				body: JSON.stringify({ prompt: trimmed, type: "video" }),
 			});
 
 			if (!response.ok) {
@@ -234,7 +241,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 			<main className="flex-1 flex gap-4 p-4 overflow-hidden h-[calc(100vh-73px)] w-full">
 				{/* Left Toolbar */}
 				<aside className="w-16 glass-panel flex flex-col items-center py-6 gap-6 h-full shadow-2xl shrink-0 border-r border-border/50">
-					<label className="p-3 rounded-xl hover:bg-glass text-cyan-400 cursor-pointer transition-all hover:scale-105 shadow-[0_0_15px_rgba(0,212,223,0.2)]">
+					<label className="p-3 rounded-xl hover:bg-glass text-[var(--accent-primary)] cursor-pointer transition-all hover:scale-105 shadow-[var(--accent-glow)]">
 						<Upload className="w-6 h-6" />
 						<input
 							type="file"
@@ -244,13 +251,13 @@ export default function ModernEditorClient({ project }: { project: any }) {
 						/>
 					</label>
 					<div className="w-8 h-px bg-border/50 my-2"></div>
-					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-cyan-400 transition-all">
+					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-[var(--accent-primary)] transition-all">
 						<Scissors className="w-6 h-6" />
 					</button>
-					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-cyan-400 transition-all">
+					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-[var(--accent-primary)] transition-all">
 						<Type className="w-6 h-6" />
 					</button>
-					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-cyan-400 transition-all">
+					<button className="p-3 rounded-xl hover:bg-glass text-foreground/70 hover:text-[var(--accent-primary)] transition-all">
 						<Layers className="w-6 h-6" />
 					</button>
 				</aside>
@@ -278,7 +285,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 									key={asset.id}
 									draggable
 									onDragStart={(e) => handleDragStart(e, asset)}
-									className="group relative flex flex-col p-2 bg-background/50 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-cyan-500/50 hover:bg-background transition-all shadow-sm"
+									className="group relative flex flex-col p-2 bg-background/50 rounded-lg border border-border/50 cursor-grab active:cursor-grabbing hover:border-[var(--accent-primary)]/50 hover:bg-background transition-all shadow-sm"
 								>
 									{asset.type === "video" || asset.type === "image" ? (
 										<div className="w-full aspect-video bg-background rounded overflow-hidden mb-2 border border-border/50 relative">
@@ -296,7 +303,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 											)}
 											<div className="absolute top-1 right-1 bg-background/80 p-1 rounded">
 												{asset.type === "video" ? (
-													<FileVideo className="w-3 h-3 text-cyan-400" />
+													<FileVideo className="w-3 h-3 text-[var(--accent-primary)]" />
 												) : (
 													<ImageIcon className="w-3 h-3 text-indigo-400" />
 												)}
@@ -336,7 +343,7 @@ export default function ModernEditorClient({ project }: { project: any }) {
 							</button>
 							<button
 								onClick={togglePlayback}
-								className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-[0_0_15px_rgba(255,255,255,0.4)]"
+								className="w-10 h-10 rounded-full bg-[var(--accent-primary)] text-[var(--text-on-accent)] flex items-center justify-center hover:scale-105 transition-transform shadow-[var(--accent-glow)]"
 							>
 								{isPlaying ? (
 									<Pause className="w-5 h-5 fill-current" />
@@ -377,10 +384,10 @@ export default function ModernEditorClient({ project }: { project: any }) {
 
 				{/* Right Copilot Panel */}
 				<aside className="w-96 glass-panel flex flex-col shadow-2xl relative overflow-hidden shrink-0">
-					<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-500"></div>
+					<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]"></div>
 					<div className="p-5 border-b border-border flex items-center gap-3">
-						<Bot className="w-6 h-6 text-cyan-400" />
-						<h2 className="font-display font-bold text-lg">Chronos Copilot</h2>
+						<Bot className="w-6 h-6 text-[var(--accent-primary)]" />
+						<h2 className="font-display font-bold text-lg">Lazynext AI Agent Copilot</h2>
 					</div>
 
 					<div className="flex-1 overflow-y-auto p-5 space-y-6">
@@ -390,10 +397,10 @@ export default function ModernEditorClient({ project }: { project: any }) {
 								className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
 							>
 								<div
-									className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "agent" ? "bg-cyan-500/20" : "bg-glass"}`}
+									className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "agent" ? "bg-[var(--accent-primary)]/20" : "bg-glass"}`}
 								>
 									{msg.role === "agent" ? (
-										<Bot className="w-4 h-4 text-cyan-400" />
+										<Bot className="w-4 h-4 text-[var(--accent-primary)]" />
 									) : (
 										<User className="w-4 h-4 text-foreground/60" />
 									)}
@@ -407,8 +414,8 @@ export default function ModernEditorClient({ project }: { project: any }) {
 						))}
 						{isProcessing && (
 							<div className="flex gap-4">
-								<div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0">
-									<Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+								<div className="w-8 h-8 rounded-full bg-[var(--accent-primary)]/20 flex items-center justify-center shrink-0">
+									<Loader2 className="w-4 h-4 text-[var(--accent-primary)] animate-spin" />
 								</div>
 								<div className="bg-background/40 border border-border rounded-2xl p-4 text-sm text-foreground/50 rounded-tl-none">
 									Orchestrating timeline edits...
@@ -424,13 +431,13 @@ export default function ModernEditorClient({ project }: { project: any }) {
 								value={prompt}
 								onChange={(e) => setPrompt(e.target.value)}
 								onKeyDown={(e) => e.key === "Enter" && handleSend()}
-								placeholder="Message Chronos..."
-								className="w-full bg-hover border border-border rounded-full py-3 pl-5 pr-12 text-sm text-foreground focus:outline-none focus:border-cyan-500/50 focus:bg-glass transition-all backdrop-blur-md"
+								placeholder="Message Lazynext AI Agent..."
+								className="w-full bg-hover border border-border rounded-full py-3 pl-5 pr-12 text-sm text-foreground focus:outline-none focus:border-[var(--accent-primary)]/50 focus:bg-glass transition-all backdrop-blur-md"
 							/>
 							<button
 								onClick={handleSend}
 								disabled={!prompt.trim() || isProcessing}
-								className="absolute right-2 w-8 h-8 bg-cyan-400 text-black rounded-full flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_15px_rgba(0,212,223,0.4)]"
+								className="absolute right-2 w-8 h-8 bg-[var(--accent-primary)] text-[var(--text-on-accent)] rounded-full flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100 shadow-[var(--accent-glow)]"
 							>
 								<Send className="w-4 h-4 ml-0.5" />
 							</button>

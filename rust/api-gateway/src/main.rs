@@ -5,33 +5,26 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
-#![allow(
-    dead_code,
-    unused_variables,
-    clippy::collapsible_if,
-    clippy::collapsible_else_if,
-    clippy::collapsible_match,
-    clippy::len_zero,
-    clippy::needless_borrows_for_generic_args,
-    clippy::single_match,
-    clippy::useless_conversion,
-    clippy::module_inception,
-    clippy::needless_pass_by_value,
-    clippy::cast_sign_loss,
-    clippy::too_many_arguments,
-    clippy::too_many_lines,
-    clippy::wrong_self_convention
-)]
-use axum::extract::State;
+// Per-item allow attributes replace the previous global blanket suppression.
+// Only dead_code and unused_variables are tolerated globally in the entry point:
+// - dead_code: route stubs for WIP features
+// - unused_variables: Axum handler extractors not always needed in every route
+// All other lint suppressions are scoped to specific handlers below.
+#![allow(dead_code, unused_variables)]
+
+use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::middleware;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::{Extension, Json, Router};
 // Note: axum 0.8 retains `Extension` as an extractor.
 // AuthClaims are inserted in `rbac::authorize_request` and
 // extracted by handlers via `Extension(claims): Extension<AuthClaims>`.`
 use lazynext_core::autonomous::{AutonomousEditor, VideoIntent};
-use lazynext_core::{NLEEvent, NLEState};
+use lazynext_core::{
+    Channel, ChannelEvent, ChannelManager, NLEEvent, NLEState, Routine, RoutineScheduler, Task,
+    TaskQueue,
+};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::net::SocketAddr;
@@ -54,6 +47,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use db::DbStore;
 use rbac::{AuthClaims, WorkspaceRole};
 
+/// Outbound webhook payload sent when a render completes.
 #[derive(Serialize, utoipa::ToSchema)]
 struct WebhookPayload {
     event_type: String,
@@ -61,12 +55,20 @@ struct WebhookPayload {
     message: String,
 }
 
+/// Shared application state injected into every request handler.
+///
+/// Holds the NLE engine, autonomous editor, database store, WebSocket state,
+/// routine scheduler, channel manager, and background task queue — all wrapped
+/// in `Arc` for efficient sharing across Axum handlers.
 #[derive(Clone)]
 pub struct AppState {
     nle: Arc<Mutex<NLEState>>,
     editor: Arc<AutonomousEditor>,
     db: Arc<DbStore>,
     ws_state: Arc<ws::WsState>,
+    scheduler: Arc<Mutex<RoutineScheduler>>,
+    channel_manager: Arc<Mutex<ChannelManager>>,
+    task_queue: Arc<Mutex<TaskQueue>>,
 }
 
 #[tokio::main]
@@ -172,11 +174,21 @@ async fn main() {
     let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let ws_state = Arc::new(ws::WsState::new(redis_client));
 
+    let scheduler = Arc::new(Mutex::new(RoutineScheduler::new(
+        nle_state.clone(),
+        Arc::new(AutonomousEditor::new()),
+    )));
+    let channel_manager = Arc::new(Mutex::new(ChannelManager::new()));
+    let task_queue = Arc::new(Mutex::new(TaskQueue::new()));
+
     let state = AppState {
         nle: nle_state.clone(),
         editor: Arc::new(AutonomousEditor::new()),
         db: db_arc,
         ws_state: ws_state.clone(),
+        scheduler,
+        channel_manager,
+        task_queue,
     };
 
     #[derive(OpenApi)]
@@ -199,11 +211,11 @@ async fn main() {
     //   /health           → public (no auth)
     //   /api/v1/...       → authenticated (JWT required)
     //   /api/v1/admin/... → admin-only
-    //   /api/v1/stripe/...→ public (Stripe signs its own webhooks)
+    // /api/v1/dodo/...→ public (Dodo Payments signs its own webhooks)
     let public_routes = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
         .route("/health", get(health_handler))
-        .route("/api/v1/stripe/webhook", post(handle_stripe_webhook))
+        .route("/api/v1/dodo/webhook", post(handle_dodo_webhook))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             ratelimit::rate_limit,
@@ -239,6 +251,26 @@ async fn main() {
             "/api/v1/auth/extension-token",
             post(handle_extension_token_exchange),
         )
+        .route("/api/v1/social/reframe", post(handle_social_reframe))
+        .route("/api/v1/social/publish", post(handle_social_publish))
+        .route("/api/v1/social/metadata", post(handle_social_metadata))
+        .route("/api/v1/social/schedule", get(handle_social_schedule))
+        // ── Scheduled Routines ──────────────────────────────────────
+        .route("/api/v1/routines", post(handle_create_routine))
+        .route("/api/v1/routines", get(handle_list_routines))
+        .route("/api/v1/routines/{id}", delete(handle_cancel_routine))
+        .route(
+            "/api/v1/routines/{id}/execute",
+            post(handle_execute_routine),
+        )
+        // ── Channels ────────────────────────────────────────────────
+        .route("/api/v1/channels/webhook", post(handle_register_webhook))
+        .route("/api/v1/channels/event", post(handle_channel_event))
+        .route("/api/v1/channels", get(handle_list_channels))
+        // ── Background Tasks ─────────────────────────────────────────
+        .route("/api/v1/tasks", post(handle_enqueue_task))
+        .route("/api/v1/tasks", get(handle_list_tasks))
+        .route("/api/v1/tasks/{id}", get(handle_get_task))
         .layer(middleware::from_fn(rbac::authorize_request))
         .layer(middleware::from_fn(csrf::csrf_protection))
         .layer(middleware::from_fn_with_state(
@@ -257,8 +289,9 @@ async fn main() {
     info!("📡 API Gateway listening on http://{}", addr);
 
     // Trigger a demo render after 5 seconds (dev convenience)
-    //[cfg(feature = "dev")]
-    {
+    // Only runs when LAZYNEXT_DEV_MODE=true is set
+    if std::env::var("LAZYNEXT_DEV_MODE").unwrap_or_default() == "true" {
+        tracing::info!("Dev mode enabled — triggering demo render in 5 seconds");
         let nle_for_demo = nle_state.clone();
         tokio::spawn(async move {
             tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
@@ -281,6 +314,12 @@ async fn main() {
 
 // ── Public Handlers ────────────────────────────────────────────────────────
 
+/// GET /health
+///
+/// Returns the service health status and database connectivity.
+///
+/// **Auth**: Public (no authentication required).
+/// **Returns**: `{ status: "ok", service: "api-gateway", database: "ok"|"degraded" }`
 #[utoipa::path(
     get,
     path = "/health",
@@ -303,6 +342,16 @@ async fn health_handler(State(state): State<AppState>) -> Json<Value> {
 // JWT and inserted `AuthClaims` into request extensions.
 // Use `auth_claims(&req)` / `user_role(&req)` to access them.
 
+// ── Editor / Autonomous ──────────────────────────────────────────────────────
+
+/// POST /api/v1/autonomous_edit
+///
+/// Accepts a natural-language `VideoIntent` and executes AI-powered timeline
+/// editing via the autonomous editor + LLM pipeline.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `VideoIntent` (prompt, plan approval flag, source files)
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_autonomous_edit(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -312,6 +361,17 @@ async fn handle_autonomous_edit(
     let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
     if !role.can_edit() {
         return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    // Validate input: prompt must not be empty and within reasonable bounds
+    if payload.prompt.trim().is_empty() {
+        return Json(json!({ "success": false, "error": "Prompt must not be empty" }));
+    }
+    if payload.prompt.len() > 50000 {
+        return Json(json!({
+            "success": false,
+            "error": "Prompt exceeds maximum length of 50,000 characters"
+        }));
     }
 
     let result = {
@@ -328,12 +388,24 @@ async fn handle_autonomous_edit(
     }
 }
 
+/// GET /api/v1/timeline
+///
+/// Returns the full CRDT timeline state as JSON, including all tracks, clips,
+/// keyframes, and project metadata.
+///
+/// **Returns**: Serialized `ProjectData` (tracks, clips, settings).
 async fn handle_get_timeline(State(state): State<AppState>) -> Json<Value> {
     let nle = state.nle.lock().await;
     let data = nle.get_project_data();
     Json(serde_json::to_value(data).unwrap_or(json!({})))
 }
 
+/// POST /api/v1/render
+///
+/// Triggers an asynchronous render of the current timeline via the NLE engine.
+/// On completion a `RenderComplete` event is dispatched (webhook + WebSocket).
+///
+/// **Returns**: `{ triggered: true }`
 async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
     let mut nle = state.nle.lock().await;
     nle.trigger_render_complete();
@@ -342,6 +414,13 @@ async fn handle_trigger_render(State(state): State<AppState>) -> Json<Value> {
 
 // ── User / Profile ────────────────────────────────────────────────────────
 
+/// GET /api/v1/user/profile
+///
+/// Returns the authenticated user's profile including name, email, role,
+/// subscription tier, and AI credit balance.
+///
+/// **Auth**: Any authenticated user.
+/// **Returns**: `{ success, profile: { id, name, email, role, tier, initials, ai_credits } }`
 async fn handle_get_profile(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -381,6 +460,11 @@ async fn handle_get_profile(
     }
 }
 
+/// GET /api/v1/user/credits
+///
+/// Returns the authenticated user's AI credit balance.
+///
+/// **Returns**: `{ success, credits: <number> }`
 async fn handle_get_user_credits(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -397,6 +481,11 @@ async fn handle_get_user_credits(
 
 // ── Projects ──────────────────────────────────────────────────────────────
 
+/// GET /api/v1/projects
+///
+/// Lists all projects owned by the authenticated user.
+///
+/// **Returns**: `{ success, projects: [...] }`
 async fn handle_get_projects(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -412,6 +501,12 @@ async fn handle_get_projects(
 
 // ── Admin ─────────────────────────────────────────────────────────────────
 
+/// GET /api/v1/admin/dashboard
+///
+/// Returns admin-only metrics: total users, active subscriptions, and MRR.
+///
+/// **Auth**: Requires Admin role.
+/// **Returns**: `{ success, metrics: { totalUsers, activeSubscriptions, monthlyRecurringRevenue } }`
 async fn handle_admin_dashboard(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -437,39 +532,40 @@ async fn handle_admin_dashboard(
     }
 }
 
-// ── Stripe Webhook ────────────────────────────────────────────────────────
+// ── Dodo Payments Webhook ───────────────────────────────────────────────────
 
-/// Maximum age (in seconds) of a webhook timestamp before we reject it.
-/// Stripe recommends a tolerance of ~5 minutes.
-const STRIPE_WEBHOOK_TOLERANCE_SECS: i64 = 300;
-
-async fn handle_stripe_webhook(
+/// POST /api/v1/dodo/webhook
+///
+/// Verified Dodo Payments webhook endpoint. Handles `payment_link.completed`,
+/// `payment_link.failed`, and `payment_link.expired` events.
+///
+/// **Auth**: Public (Dodo signs its own webhooks with HMAC-SHA256).
+/// **Header**: `dodo-signature` — hex-encoded HMAC of the raw body.
+/// **Returns**: `{ received: true }` or `{ error }`
+async fn handle_dodo_webhook(
     State(state): State<AppState>,
     headers: HeaderMap,
     body: axum::body::Bytes,
 ) -> Json<Value> {
-    // ── 1. Verify Stripe signature ──────────────────────────────────────
-    let webhook_secret = match std::env::var("STRIPE_WEBHOOK_SECRET") {
+    // ── 1. Verify Dodo Payments signature ───────────────────────────────
+    let webhook_secret = match std::env::var("DODO_WEBHOOK_SECRET") {
         Ok(s) if !s.is_empty() => s,
         _ => {
-            tracing::error!("STRIPE_WEBHOOK_SECRET is not configured — rejecting webhook");
+            tracing::error!("DODO_WEBHOOK_SECRET is not configured — rejecting webhook");
             return Json(json!({ "error": "webhook secret not configured" }));
         }
     };
 
-    let sig_header = match headers
-        .get("stripe-signature")
-        .and_then(|v| v.to_str().ok())
-    {
+    let sig_header = match headers.get("dodo-signature").and_then(|v| v.to_str().ok()) {
         Some(h) => h.to_string(),
         None => {
-            tracing::warn!("Missing Stripe-Signature header");
+            tracing::warn!("Missing dodo-signature header");
             return Json(json!({ "error": "missing signature" }));
         }
     };
 
-    if let Err(e) = verify_stripe_signature(&sig_header, &body, &webhook_secret) {
-        tracing::warn!(%e, "Stripe webhook signature verification failed");
+    if let Err(e) = verify_dodo_signature(&sig_header, &body, &webhook_secret) {
+        tracing::warn!(%e, "Dodo Payments webhook signature verification failed");
         return Json(json!({ "error": format!("signature verification failed: {e}") }));
     }
 
@@ -477,39 +573,33 @@ async fn handle_stripe_webhook(
     let payload: Value = match serde_json::from_slice(&body) {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!(?e, "Failed to parse Stripe webhook JSON");
+            tracing::error!(?e, "Failed to parse Dodo Payments webhook JSON");
             return Json(json!({ "error": "invalid JSON" }));
         }
     };
 
     let event_type = payload["type"].as_str().unwrap_or("unknown");
-    info!(%event_type, "Received verified Stripe webhook");
+    info!(%event_type, "Received verified Dodo Payments webhook");
 
     match event_type {
-        "customer.subscription.updated" | "customer.subscription.created" => {
-            if let Some(sub_obj) = payload["data"]["object"].as_object() {
-                let sub_id = sub_obj["id"].as_str().unwrap_or("unknown");
-                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
-                let status = sub_obj["status"].as_str().unwrap_or("active");
-                let price_id = sub_obj["items"]["data"][0]["price"]["id"]
+        "payment_link.completed" => {
+            if let Some(obj) = payload["data"].as_object() {
+                let sub_id = obj["id"].as_str().unwrap_or("unknown");
+                let customer_id = obj["customer_id"].as_str().unwrap_or("");
+                let price_id = obj["price_id"]
                     .as_str()
+                    .or_else(|| obj["plan_id"].as_str())
                     .unwrap_or("");
-                let period_end = sub_obj["current_period_end"].as_i64().unwrap_or(0);
+                let period_end = chrono::Utc::now() + chrono::Duration::days(30);
 
-                // Fetch user by Stripe customer ID
-                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
+                if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     let sub = db::Subscription {
                         id: sub_id.to_string(),
                         user_id: user.id,
-                        stripe_subscription_id: sub_id.to_string(),
-                        stripe_price_id: price_id.to_string(),
-                        stripe_current_period_end: chrono::DateTime::from_timestamp(period_end, 0)
-                            .unwrap_or_else(chrono::Utc::now),
-                        tier: if status == "active" {
-                            "pro".to_string()
-                        } else {
-                            "free".to_string()
-                        },
+                        dodo_subscription_id: sub_id.to_string(),
+                        dodo_price_id: price_id.to_string(),
+                        dodo_current_period_end: period_end,
+                        tier: "pro".to_string(),
                         created_at: chrono::Utc::now(),
                         updated_at: chrono::Utc::now(),
                     };
@@ -519,107 +609,67 @@ async fn handle_stripe_webhook(
                 }
             }
         }
-        "customer.subscription.deleted" => {
-            // Handle cancellation
-            if let Some(sub_obj) = payload["data"]["object"].as_object() {
-                let customer_id = sub_obj["customer"].as_str().unwrap_or("");
-                if let Ok(Some(user)) = find_user_by_stripe_customer(&state.db, customer_id).await {
-                    let sub = db::Subscription {
-                        id: sub_obj["id"].as_str().unwrap_or("").to_string(),
-                        user_id: user.id,
-                        stripe_subscription_id: String::new(),
-                        stripe_price_id: String::new(),
-                        stripe_current_period_end: chrono::Utc::now(),
-                        tier: "free".to_string(),
-                        created_at: chrono::Utc::now(),
-                        updated_at: chrono::Utc::now(),
-                    };
-                    if let Err(e) = state.db.upsert_subscription(&sub).await {
-                        tracing::error!(?e, "Failed to cancel subscription");
-                    }
+        "payment_link.failed" | "payment_link.expired" => {
+            if let Some(obj) = payload["data"].as_object() {
+                let customer_id = obj["customer_id"].as_str().unwrap_or("");
+                if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
+                    tracing::warn!(
+                        customer_id = %customer_id,
+                        event_type = %event_type,
+                        "Dodo payment failed/expired — preserving existing subscription"
+                    );
                 }
             }
         }
         _ => {
-            info!(%event_type, "Unhandled Stripe event type");
+            info!(%event_type, "Unhandled Dodo Payments event type");
         }
     }
 
     Json(json!({ "received": true }))
 }
 
-/// Verifies a Stripe webhook signature (v1) using HMAC-SHA256.
+/// Verifies a Dodo Payments webhook signature using HMAC-SHA256.
 ///
-/// The `Stripe-Signature` header has the format:
-///   `t=<timestamp>,v1=<hex_signature>[,v0=...]`
-///
-/// The signed payload is `"<timestamp>.<raw_body>"`.
-fn verify_stripe_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<(), String> {
+/// The `dodo-signature` header contains the hex-encoded HMAC-SHA256
+/// of the raw request body using the webhook secret as the key.
+fn verify_dodo_signature(sig_header: &str, body: &[u8], secret: &str) -> Result<(), String> {
     use hmac::{Hmac, Mac, digest::KeyInit};
     use sha2::Sha256;
 
     type HmacSha256 = Hmac<Sha256>;
 
-    let mut timestamp: Option<&str> = None;
-    let mut v1_signatures: Vec<&str> = Vec::new();
-
-    for part in sig_header.split(',') {
-        let part = part.trim();
-        if let Some(ts) = part.strip_prefix("t=") {
-            timestamp = Some(ts);
-        } else if let Some(sig) = part.strip_prefix("v1=") {
-            v1_signatures.push(sig);
-        }
-    }
-
-    let ts = timestamp.ok_or_else(|| "no timestamp in Stripe-Signature".to_string())?;
-    if v1_signatures.is_empty() {
-        return Err("no v1 signature in Stripe-Signature".to_string());
-    }
-
-    // Check timestamp freshness to prevent replay attacks
-    let ts_num: i64 = ts
-        .parse()
-        .map_err(|_| "invalid timestamp in Stripe-Signature".to_string())?;
-    let now = chrono::Utc::now().timestamp();
-    if (now - ts_num).abs() > STRIPE_WEBHOOK_TOLERANCE_SECS {
-        return Err(format!(
-            "webhook timestamp too old ({ts_num}), current time is {now}"
-        ));
-    }
-
-    // Compute expected signature: HMAC-SHA256(secret, "timestamp.body")
     let mut mac =
         HmacSha256::new_from_slice(secret.as_bytes()).map_err(|e| format!("HMAC init: {e}"))?;
-    mac.update(ts.as_bytes());
-    mac.update(b".");
     mac.update(body);
     let expected = hex::encode(mac.finalize().into_bytes());
 
-    // Constant-time comparison against all provided v1 signatures
-    if v1_signatures.iter().any(|sig| {
-        // Use constant-time comparison to prevent timing attacks
-        sig.len() == expected.len()
-            && sig
-                .as_bytes()
-                .iter()
-                .zip(expected.as_bytes())
-                .fold(0u8, |acc, (a, b)| acc | (a ^ b))
-                == 0
-    }) {
+    // Constant-time comparison to prevent timing attacks
+    if sig_header.len() == expected.len()
+        && sig_header
+            .as_bytes()
+            .iter()
+            .zip(expected.as_bytes())
+            .fold(0u8, |acc, (a, b)| acc | (a ^ b))
+            == 0
+    {
         Ok(())
     } else {
         Err("signature mismatch".to_string())
     }
 }
 
-async fn find_user_by_stripe_customer(
+/// Resolves a Dodo Payments customer ID to a `User` record.
+///
+/// Queries the `user` table by `dodo_customer_id` and returns `None` when
+/// no matching user is found.
+async fn find_user_by_dodo_customer(
     db: &DbStore,
     customer_id: &str,
 ) -> Result<Option<db::User>, sqlx::Error> {
     use sqlx::Row;
     let row = sqlx::query(
-        "SELECT id, email, name, email_verified, image, role, stripe_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE stripe_customer_id = $1",
+        "SELECT id, email, name, email_verified, image, role, dodo_customer_id, ai_credits, created_at, updated_at FROM \"user\" WHERE dodo_customer_id = $1",
     )
     .bind(customer_id)
     .fetch_optional(db.pool_ref()?)
@@ -632,7 +682,7 @@ async fn find_user_by_stripe_customer(
         email_verified: r.get("email_verified"),
         image: r.get("image"),
         role: r.get("role"),
-        stripe_customer_id: r.get("stripe_customer_id"),
+        dodo_customer_id: r.get("dodo_customer_id"),
         ai_credits: r.get("ai_credits"),
         created_at: r.get("created_at"),
         updated_at: r.get("updated_at"),
@@ -641,17 +691,26 @@ async fn find_user_by_stripe_customer(
 
 // ── AI Generation ─────────────────────────────────────────────────────────
 
+/// Request body for AI video generation.
 #[derive(serde::Deserialize)]
 pub struct GeneratePayload {
     pub prompt: String,
 }
 
+/// Request body for AI text-to-speech synthesis.
 #[derive(serde::Deserialize)]
 pub struct TtsPayload {
     pub text: String,
     pub voice_id: Option<String>,
 }
 
+/// POST /api/v1/ai/generate
+///
+/// Generates video frames from a text prompt using the neural engine,
+/// deducts AI credits, and inserts the result as a new clip on a video track.
+///
+/// **Body**: `{ prompt: string }`
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_generate(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -699,6 +758,13 @@ async fn handle_generate(
     }
 }
 
+/// POST /api/v1/ai/tts
+///
+/// Synthesizes speech from a text prompt using the neural engine, deducts AI
+/// credits, and inserts the audio as a new clip on an audio track.
+///
+/// **Body**: `{ text: string, voice_id?: string }`
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
 async fn handle_tts(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -724,7 +790,7 @@ async fn handle_tts(
             nle.add_track(track_name.clone(), "audio".to_string());
 
             nle.add_clip_to_track(
-                1,
+                0,
                 "generated_tts".to_string(),
                 "audio".to_string(),
                 filename,
@@ -742,6 +808,7 @@ async fn handle_tts(
 
 // ── Timeline / Media Handlers ─────────────────────────────────────────
 
+/// Request body for adding a clip to a timeline track.
 #[derive(serde::Deserialize)]
 struct AddClipPayload {
     track_id: Option<String>,
@@ -753,6 +820,13 @@ struct AddClipPayload {
     end: Option<u32>,
 }
 
+/// POST /api/v1/timeline
+///
+/// Adds a clip to a track (or auto-creates a default track if none exist).
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `AddClipPayload` (track_id, clip_type, name, start/end frames)
+/// **Returns**: `{ success, message, clip: { id, track_idx, start, end } }`
 async fn handle_add_clip(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -804,12 +878,22 @@ async fn handle_add_clip(
     }))
 }
 
+/// Request body for AI-driven media ingestion.
 #[derive(serde::Deserialize)]
 struct IngestPayload {
     url: Option<String>,
     source: Option<String>,
 }
 
+/// POST /api/v1/ai/ingest
+///
+/// Forwards a media URL to the pre-processing service for proxy generation
+/// and ingestion into the project. Falls back to queuing if the service is
+/// unreachable.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `In ingestPayload` (url, source)
+/// **Returns**: `{ success, message, ingest_result? }`
 async fn handle_ai_ingest(
     State(_state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -865,6 +949,7 @@ async fn handle_ai_ingest(
     }
 }
 
+/// Request body for connecting a third-party platform via OAuth.
 #[derive(serde::Deserialize)]
 struct IntegrationPayload {
     platform: String,
@@ -872,6 +957,15 @@ struct IntegrationPayload {
     redirect_uri: Option<String>,
 }
 
+/// POST /api/v1/user/integrations/connect
+///
+/// Initiates or completes an OAuth connection to a supported platform
+/// (YouTube, TikTok, Instagram, Vimeo). If `code` is provided, exchanges it
+/// for access/refresh tokens; otherwise returns the authorization URL.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `IntegrationPayload` (platform, code?, redirect_uri?)
+/// **Returns**: `{ success, message, auth_url?, access_token? }` or `{ error }`
 async fn handle_integration_connect(
     Extension(claims): Extension<AuthClaims>,
     Json(payload): Json<IntegrationPayload>,
@@ -1010,6 +1104,419 @@ async fn handle_integration_connect(
     }
 }
 
+// ── Social Publish Proxy Handlers ────────────────────────────────────────
+//
+// These handlers forward requests to the social-publish microservice
+// (running on port 8007). The social-publish service handles platform-
+// specific uploads, reframing, metadata generation, and scheduling.
+//
+// Each handler forwards the incoming JSON body and returns the upstream
+// response. The gateway adds authentication (JWT validated by RBAC
+// middleware) and rate limiting.
+
+fn social_publish_url() -> String {
+    std::env::var("SOCIAL_PUBLISH_URL").unwrap_or_else(|_| "http://localhost:8007".to_string())
+}
+
+/// POST /api/v1/social/reframe — Proxy auto-reframe to social-publish
+async fn handle_social_reframe(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let client = reqwest::Client::new();
+    let base = social_publish_url();
+    match client
+        .post(format!("{base}/auto-reframe"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// POST /api/v1/social/publish — Proxy publish to social-publish
+async fn handle_social_publish(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let platform = payload
+        .get("platform")
+        .and_then(|v| v.as_str())
+        .unwrap_or("tiktok");
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client
+        .post(format!("{base}/publish/{platform}"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// POST /api/v1/social/metadata — Proxy metadata generation to social-publish
+async fn handle_social_metadata(
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<Value>,
+) -> Json<Value> {
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client
+        .post(format!("{base}/generate-metadata"))
+        .json(&payload)
+        .send()
+        .await
+    {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+/// GET /api/v1/social/schedule — List scheduled posts from social-publish
+async fn handle_social_schedule(Extension(claims): Extension<AuthClaims>) -> Json<Value> {
+    let base = social_publish_url();
+    let client = reqwest::Client::new();
+    match client.get(format!("{base}/schedule")).send().await {
+        Ok(resp) => {
+            let body: Value = resp.json().await.unwrap_or(json!({}));
+            Json(body)
+        }
+        Err(e) => Json(json!({
+            "success": false,
+            "error": format!("Social publish service unreachable: {e}")
+        })),
+    }
+}
+
+// ── Scheduled Routines Handlers ────────────────────────────────────────────
+
+/// Request body for creating a scheduled AI editing routine.
+#[derive(serde::Deserialize)]
+struct CreateRoutinePayload {
+    name: String,
+    cron_expression: String,
+    prompt: String,
+    #[serde(default)]
+    enabled: bool,
+}
+
+/// POST /api/v1/routines
+///
+/// Creates a cron-scheduled routine that executes an AI editing prompt on
+/// the timeline at regular intervals.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `CreateRoutinePayload` (name, cron_expression, prompt, enabled)
+/// **Returns**: `{ success, routine }` or `{ success: false, error }`
+async fn handle_create_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<CreateRoutinePayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    if RoutineScheduler::parse_cron(&payload.cron_expression).is_err() {
+        return Json(json!({
+            "success": false,
+            "error": "Invalid cron expression"
+        }));
+    }
+
+    let routine = Routine {
+        id: uuid::Uuid::new_v4().to_string(),
+        name: payload.name,
+        cron_expression: payload.cron_expression,
+        prompt: payload.prompt,
+        enabled: payload.enabled,
+        last_run: None,
+        created_at: chrono::Utc::now().to_rfc3339(),
+    };
+
+    let mut scheduler = state.scheduler.lock().await;
+    scheduler.schedule_routine(routine.clone());
+
+    Json(json!({ "success": true, "routine": routine }))
+}
+
+/// GET /api/v1/routines
+///
+/// Lists all scheduled routines for the current session.
+///
+/// **Returns**: `{ success, routines: [...] }`
+async fn handle_list_routines(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let scheduler = state.scheduler.lock().await;
+    let routines = scheduler.list_routines();
+    Json(json!({ "success": true, "routines": routines }))
+}
+
+/// Path parameter for a routine ID.
+#[derive(serde::Deserialize)]
+struct RoutineIdPath {
+    id: String,
+}
+
+/// DELETE /api/v1/routines/{id}
+///
+/// Cancels (removes) a scheduled routine by ID.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Returns**: `{ success: true/false, id }`
+async fn handle_cancel_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Path(path): Path<RoutineIdPath>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let mut scheduler = state.scheduler.lock().await;
+    let removed = scheduler.cancel_routine(&path.id);
+    Json(json!({ "success": removed, "id": path.id }))
+}
+
+/// POST /api/v1/routines/{id}/execute
+///
+/// Manually triggers immediate execution of a scheduled routine.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Returns**: `{ success, message }` or `{ success: false, error }`
+async fn handle_execute_routine(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Path(path): Path<RoutineIdPath>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let mut scheduler = state.scheduler.lock().await;
+    match scheduler.execute_routine(&path.id).await {
+        Ok(msg) => Json(json!({ "success": true, "message": msg })),
+        Err(e) => Json(json!({ "success": false, "error": e })),
+    }
+}
+
+// ── Channels Handlers ──────────────────────────────────────────────────────
+
+/// Request body for registering a channel webhook.
+#[derive(serde::Deserialize)]
+struct RegisterWebhookPayload {
+    channel: String,
+    url: String,
+    secret: String,
+}
+
+/// POST /api/v1/channels/webhook
+///
+/// Registers a webhook URL for a messaging channel (Telegram, Discord,
+/// Slack, iMessage, or generic Webhook).
+///
+/// **Auth**: Requires Admin role.
+/// **Body**: `RegisterWebhookPayload` (channel, url, secret)
+/// **Returns**: `{ success, channel }`
+async fn handle_register_webhook(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<RegisterWebhookPayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_admin() {
+        return Json(json!({ "success": false, "error": "Admin access required" }));
+    }
+
+    let channel_enum = match payload.channel.to_lowercase().as_str() {
+        "telegram" => Channel::Telegram,
+        "discord" => Channel::Discord,
+        "slack" => Channel::Slack,
+        "imessage" => Channel::IMessage,
+        "webhook" => Channel::Webhook,
+        _ => {
+            return Json(json!({
+                "success": false,
+                "error": format!("Unknown channel type: {}", payload.channel)
+            }));
+        }
+    };
+
+    let mut mgr = state.channel_manager.lock().await;
+    let reg = mgr.register_webhook(channel_enum, payload.url, payload.secret);
+
+    Json(json!({ "success": true, "channel": reg }))
+}
+
+/// POST /api/v1/channels/event
+///
+/// Processes an incoming channel event (e.g., a Telegram / Discord command)
+/// and routes it through the channel manager.
+///
+/// **Body**: `ChannelEvent`
+/// **Returns**: `{ success, result }` or `{ success: false, error }`
+async fn handle_channel_event(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+    Json(payload): Json<ChannelEvent>,
+) -> Json<Value> {
+    let mgr = state.channel_manager.lock().await;
+    match mgr.process_incoming_event(payload) {
+        Ok(result) => Json(json!({ "success": true, "result": result })),
+        Err(e) => Json(json!({ "success": false, "error": e })),
+    }
+}
+
+/// GET /api/v1/channels
+///
+/// Lists all registered channel integrations.
+///
+/// **Returns**: `{ success, channels: [...] }`
+async fn handle_list_channels(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let mgr = state.channel_manager.lock().await;
+    let channels = mgr.list_channels();
+    Json(json!({ "success": true, "channels": channels }))
+}
+
+// ── Background Tasks Handlers ──────────────────────────────────────────────
+
+/// Request body for enqueueing a background task.
+#[derive(serde::Deserialize)]
+struct EnqueueTaskPayload {
+    name: String,
+    payload: String,
+    #[serde(default = "default_priority")]
+    priority: u8,
+    task_type: String,
+}
+
+fn default_priority() -> u8 {
+    100
+}
+
+/// POST /api/v1/tasks
+///
+/// Enqueues a background task (auto export, backup, media cleanup, proxy
+/// generation, or thumbnail regeneration) into the priority queue.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Body**: `EnqueueTaskPayload` (name, payload, priority, task_type)
+/// **Returns**: `{ success, task }`
+async fn handle_enqueue_task(
+    State(state): State<AppState>,
+    Extension(claims): Extension<AuthClaims>,
+    Json(payload): Json<EnqueueTaskPayload>,
+) -> Json<Value> {
+    let role = WorkspaceRole::from_claim(claims.role.as_deref().unwrap_or("user"));
+    if !role.can_edit() {
+        return Json(json!({ "success": false, "error": "Insufficient permissions" }));
+    }
+
+    let task_type = match payload.task_type.to_lowercase().as_str() {
+        "auto_export" => lazynext_core::TaskType::AutoExport,
+        "auto_backup" => lazynext_core::TaskType::AutoBackup,
+        "media_cleanup" => lazynext_core::TaskType::MediaCleanup,
+        "proxy_generation" => lazynext_core::TaskType::ProxyGeneration,
+        "thumbnail_regeneration" => lazynext_core::TaskType::ThumbnailRegeneration,
+        _ => {
+            return Json(json!({
+                "success": false,
+                "error": format!("Unknown task type: {}", payload.task_type)
+            }));
+        }
+    };
+
+    let task = Task {
+        id: String::new(),
+        name: payload.name,
+        payload: payload.payload,
+        priority: payload.priority,
+        status: lazynext_core::TaskStatus::Pending,
+        created_at: String::new(),
+        task_type,
+    };
+
+    let mut queue = state.task_queue.lock().await;
+    let task = queue.enqueue(task);
+
+    Json(json!({ "success": true, "task": task }))
+}
+
+/// GET /api/v1/tasks
+///
+/// Lists all tasks in the background queue with pending and total counts.
+///
+/// **Returns**: `{ success, tasks: [...], pending_count, total_count }`
+async fn handle_list_tasks(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+) -> Json<Value> {
+    let queue = state.task_queue.lock().await;
+    let tasks = queue.list_tasks();
+    Json(json!({
+        "success": true,
+        "tasks": tasks,
+        "pending_count": queue.pending_count(),
+        "total_count": queue.total_count(),
+    }))
+}
+
+/// Path parameter for a task ID.
+#[derive(serde::Deserialize)]
+struct TaskIdPath {
+    id: String,
+}
+
+/// GET /api/v1/tasks/{id}
+///
+/// Retrieves a single background task by ID.
+///
+/// **Returns**: `{ success, task }` or `{ success: false, error }`
+async fn handle_get_task(
+    State(state): State<AppState>,
+    Extension(_claims): Extension<AuthClaims>,
+    Path(path): Path<TaskIdPath>,
+) -> Json<Value> {
+    let queue = state.task_queue.lock().await;
+    match queue.get_task(&path.id) {
+        Some(task) => Json(json!({ "success": true, "task": task })),
+        None => Json(json!({
+            "success": false,
+            "error": "Task not found"
+        })),
+    }
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 
 /// Extract initials from a full name: "Avas Patel" → "AP".
@@ -1025,6 +1532,15 @@ fn initials(name: &str) -> String {
 use axum::extract::Multipart;
 use tokio::io::AsyncWriteExt;
 
+/// POST /api/v1/media/upload
+///
+/// Accepts multipart file uploads (up to 20 files, 2 GB each, 10 GB total).
+/// Saves files to the local asset directory. Supports streaming validation
+/// with filename sanitization and size enforcement.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Content-Type**: `multipart/form-data`
+/// **Returns**: `{ success, message, files: [...] }`
 async fn handle_media_upload(
     State(_state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1042,14 +1558,29 @@ async fn handle_media_upload(
         return Json(json!({ "success": false, "error": "Internal server error" }));
     }
 
+    let max_file_size: usize = 2 * 1024 * 1024 * 1024; // 2 GB per file
+    let max_total_size: usize = 10 * 1024 * 1024 * 1024; // 10 GB total
+    let max_files: usize = 20;
+    let mut total_size: usize = 0;
     let mut saved_files = Vec::new();
 
     while let Some(field) = multipart.next_field().await.unwrap_or(None) {
+        if saved_files.len() >= max_files {
+            return Json(json!({
+                "success": false,
+                "error": format!("Maximum of {} files per upload exceeded", max_files)
+            }));
+        }
+
         let name = field.name().unwrap_or("").to_string();
         let file_name = field.file_name().unwrap_or("unknown_file").to_string();
 
         if name == "file" {
-            let sanitized_name = file_name.replace(" ", "_");
+            let sanitized_name = sanitize_filename(&file_name);
+            if sanitized_name.is_empty() || sanitized_name == "unknown_file" {
+                tracing::warn!("Rejected file with unsafe name: {}", file_name);
+                continue;
+            }
             let file_path = format!("{}/{}", upload_dir, sanitized_name);
 
             let data = match field.bytes().await {
@@ -1059,6 +1590,21 @@ async fn handle_media_upload(
                     continue;
                 }
             };
+
+            if data.len() > max_file_size {
+                return Json(json!({
+                    "success": false,
+                    "error": format!("File '{}' exceeds maximum size of 2 GB", sanitized_name)
+                }));
+            }
+
+            total_size += data.len();
+            if total_size > max_total_size {
+                return Json(json!({
+                    "success": false,
+                    "error": "Total upload size exceeds maximum of 10 GB"
+                }));
+            }
 
             match tokio::fs::File::create(&file_path).await {
                 Ok(mut file) => {
@@ -1080,13 +1626,38 @@ async fn handle_media_upload(
     }))
 }
 
+/// Sanitizes a filename by replacing non-alphanumeric, non-dot, non-underscore,
+/// and non-hyphen characters with underscores. Strips leading/trailing dots.
+fn sanitize_filename(name: &str) -> String {
+    name.chars()
+        .map(|c| {
+            if c.is_alphanumeric() || c == '.' || c == '_' || c == '-' {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect::<String>()
+        .trim_matches('.')
+        .to_string()
+}
+
 // ── Cloud Storage Upload / Signed URLs ────────────────────────────────────
 
+/// Query parameters for requesting a presigned upload URL.
 #[derive(serde::Deserialize)]
 struct PresignedUrlQuery {
     filename: String,
 }
 
+/// GET /api/v1/media/presigned-url
+///
+/// Generates an Azure Blob Storage SAS URL for direct client-to-cloud upload.
+/// Falls back to a dev/stub URL when Azure credentials are not configured.
+///
+/// **Auth**: Requires Editor role or higher.
+/// **Query**: `filename` — the target blob name.
+/// **Returns**: `{ success, url, method, expires_in, headers }`
 async fn handle_get_presigned_url(
     State(state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
@@ -1148,10 +1719,10 @@ async fn handle_stream_ingest(
             if let Ok(text) = field.text().await {
                 chunk_index = text.parse().unwrap_or(0);
             }
-        } else if name == "chunk" {
-            if let Ok(data) = field.bytes().await {
-                chunk_data = data.to_vec();
-            }
+        } else if name == "chunk"
+            && let Ok(data) = field.bytes().await
+        {
+            chunk_data = data.to_vec();
         }
     }
 
@@ -1190,11 +1761,20 @@ async fn handle_stream_ingest(
     ))
 }
 
+/// Request body for finalizing a chunked stream ingest session.
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 struct StreamCompletePayload {
     session_id: String,
 }
 
+/// POST /api/v1/ingest/stream/complete
+///
+/// Finalizes a chunked MediaRecorder stream session. Uploads the assembled
+/// file to Azure Blob Storage (if configured) and adds the clip to the
+/// timeline.
+///
+/// **Body**: `StreamCompletePayload` (session_id)
+/// **Returns**: `{ success, message, url, azure_uploaded }`
 async fn handle_stream_complete(
     State(state): State<AppState>,
     Json(payload): Json<StreamCompletePayload>,
@@ -1341,9 +1921,25 @@ async fn handle_extension_token_exchange(
     };
 
     static ENCODING_KEY: LazyLock<EncodingKey> = LazyLock::new(|| {
-        let secret = std::env::var("BETTER_AUTH_SECRET")
-            .unwrap_or_else(|_| "lazynext-dev-secret-key-for-auth-minimum-32".to_string());
-        EncodingKey::from_secret(secret.as_bytes())
+        let secret = std::env::var("BETTER_AUTH_SECRET");
+        match secret {
+            Ok(s) if s.len() >= 32 => EncodingKey::from_secret(s.as_bytes()),
+            _ => {
+                let is_prod = std::env::var("LAZYNEXT_ENV")
+                    .map(|v| v == "production")
+                    .unwrap_or(false)
+                    || std::env::var("NODE_ENV")
+                        .map(|v| v == "production")
+                        .unwrap_or(false);
+                if is_prod {
+                    panic!(
+                        "FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production. \
+                         Refusing to issue extension tokens with insecure fallback."
+                    );
+                }
+                EncodingKey::from_secret("lazynext-dev-secret-key-for-auth-minimum-32".as_bytes())
+            }
+        }
     });
 
     match jsonwebtoken::encode(

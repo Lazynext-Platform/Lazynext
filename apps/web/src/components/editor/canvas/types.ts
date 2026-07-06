@@ -1,3 +1,9 @@
+/**
+ * @module Canvas type definitions — TypeScript types for canvas props, metadata,
+ * element models, caption properties, frame effects, and element handler
+ * contracts shared across the Twick canvas system.
+ */
+
 import { Dimensions } from "@twick/media-utils";
 
 declare module "fabric" {

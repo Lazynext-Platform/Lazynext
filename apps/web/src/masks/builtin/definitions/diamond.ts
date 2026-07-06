@@ -1,3 +1,4 @@
+/** @module Built-in diamond mask definition — computes diamond-shaped SVG path geometry using shared box-like mask utilities. */
 import type { MaskDefinition } from "@/masks/types";
 import {
 	BOX_LIKE_MASK_PARAMS,

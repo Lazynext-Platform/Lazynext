@@ -53,10 +53,11 @@
 
 		--text-primary: #09090b;
 		--text-secondary: #3f3f46;
-		--text-muted: #71717a;
+	--text-muted: #71717a;
+	--text-on-accent: #050505;
 
-		--border-glass: rgba(0, 0, 0, 0.08);
-	}
+	--border-glass: rgba(0, 0, 0, 0.08);
+}
 
 	.dark {
 		/* Deep Charcoal / Dark Theme */
@@ -71,10 +72,11 @@
 
 		--text-primary: #fafafa;
 		--text-secondary: #a1a1aa;
-		--text-muted: #52525b;
+	--text-muted: #52525b;
+	--text-on-accent: #050505;
 
-		--border-glass: rgba(255, 255, 255, 0.08);
-	}
+	--border-glass: rgba(255, 255, 255, 0.08);
+}
 }
 
 body {

@@ -16,7 +16,7 @@
 #
 # Multi-arch: pass --platform linux/amd64,linux/arm64 for cross-arch builds.
 
-# ── Stage 0: Cargo Chef Plan ────────────────────────────────
+# ── Stage 0: Base Chef Image ────────────────────────────────
 FROM rust:1.96-slim AS chef
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -29,24 +29,27 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN cargo install cargo-chef --version 0.1.68
-RUN cargo install sccache --version 0.9.2
+RUN cargo install sccache --version 0.9.2 || cargo install sccache --version 0.7.7 || echo "sccache unavailable — continuing without cache"
 
-# mold: fast linker (x86_64 only; fallback to lld on aarch64)
-RUN set -eux; \
-    arch="$(uname -m)"; \
-    if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then \
-        curl -fsSL https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-$(uname -m)-linux.tar.gz \
-            | tar -xz -C /usr/local --strip-components=1; \
+# Set RUSTC_WRAPPER if sccache was installed
+RUN if command -v sccache >/dev/null 2>&1; then \
+      echo "RUSTC_WRAPPER=sccache" >> /build.env; \
+    else \
+      echo "# sccache not installed — RUSTC_WRAPPER unset" >> /build.env; \
     fi
 
-# musl target for static linking of CLI/MCP server
-RUN rustup target add wasm32-unknown-unknown x86_64-unknown-linux-musl aarch64-unknown-linux-musl
-
-ENV RUSTC_WRAPPER=sccache
-ENV SCCACHE_CACHE_SIZE=2G
-ENV CARGO_INCREMENTAL=0
+# ── Stage 1: Chef Planner (compute dependency recipe) ────────
+FROM chef AS chef-planner
 
 WORKDIR /build
+
+# Load the conditional env from the chef stage
+COPY --from=chef /build.env /tmp/build.env
+RUN set -a && . /tmp/build.env && set +a
+
+ENV RUSTC_WRAPPER=${RUSTC_WRAPPER:-}
+ENV SCCACHE_CACHE_SIZE=2G
+ENV CARGO_INCREMENTAL=0
 
 # Copy only dependency manifests for caching
 COPY rust/ rust/
@@ -54,18 +57,18 @@ COPY rust/ rust/
 # Run cargo-chef on the entire workspace to compute a dependency plan
 RUN cargo chef prepare --recipe-path recipe.json
 
-# ── Stage 1: Build Dependencies (cached layer) ───────────────
+# ── Stage 2: Build Dependencies (cached layer) ───────────────
 FROM chef AS builder-deps
 
 WORKDIR /build
-COPY --from=chef /build/recipe.json recipe.json
+COPY --from=chef-planner /build/recipe.json recipe.json
 
 # Build all dependencies; this is the heavy cached layer
 RUN cargo chef cook --release --recipe-path recipe.json \
     --target wasm32-unknown-unknown \
     --target x86_64-unknown-linux-musl
 
-# ── Stage 2: WASM Build ─────────────────────────────────────
+# ── Stage 3: WASM Build ─────────────────────────────────────
 FROM builder-deps AS wasm-builder
 
 # Install wasm-pack
@@ -84,7 +87,7 @@ RUN cd rust/wasm && \
 RUN mkdir -p /out/wasm && \
     cp -r /build/rust/wasm/pkg/* /out/wasm/
 
-# ── Stage 3: Native Binary Build (CLI + MCP) ────────────────
+# ── Stage 4: Native Binary Build (CLI + MCP + Gateway) ───────
 FROM builder-deps AS native-builder
 
 WORKDIR /build
@@ -124,7 +127,7 @@ RUN mkdir -p /out/bin && \
     cp /build/target/x86_64-unknown-linux-musl/release/lazynext_api_gateway /out/bin/lazynext-api-gateway && \
     strip /out/bin/lazynext-cli /out/bin/lazynext-mcp-server /out/bin/lazynext-api-gateway
 
-# ── Stage 4: Testing (optional — run with --target test) ────
+# ── Stage 5: Testing (optional — run with --target test) ────
 FROM builder-deps AS tester
 
 WORKDIR /build
@@ -136,7 +139,7 @@ RUN cargo test --workspace --release -- --test-threads=$(nproc)
 # Clippy lint check
 RUN cargo clippy --workspace --all-targets --all-features -- -D warnings
 
-# ── Stage 5: Final Artifact Assembly ────────────────────────
+# ── Stage 6: Final Artifact Assembly ────────────────────────
 FROM scratch AS artifacts
 
 COPY --from=wasm-builder /out/wasm /out/wasm

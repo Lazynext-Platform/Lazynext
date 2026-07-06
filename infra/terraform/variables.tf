@@ -14,15 +14,27 @@ variable "environment" {
   default     = "dev"
 
   validation {
-    condition     = contains(["dev", "staging", "production"], var.environment)
-    error_message = "Environment must be one of: dev, staging, production."
+    condition     = contains(["dev", "staging", "prod", "production"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod, production."
   }
 }
 
 variable "app_domain" {
-  description = "The public domain of the Lazynext web app"
+  description = "The public domain of the Lazynext web app (primary domain)"
   type        = string
-  default     = "lazynext.ai"
+  default     = "lazynext.com"
+}
+
+variable "domain_name" {
+  description = "Primary domain for DNS zone and TLS certificates"
+  type        = string
+  default     = "lazynext.com"
+}
+
+variable "create_dns_zone" {
+  description = "Provision an Azure DNS zone for the domain (set false if using external DNS)"
+  type        = bool
+  default     = false
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -95,7 +107,7 @@ variable "openai_api_key" {
 }
 
 variable "anthropic_api_key" {
-  description = "API key for Anthropic (Claude — Chronos Copilot)"
+  description = "API key for Anthropic (Claude — Lazynext AI Copilot)"
   type        = string
   sensitive   = true
   default     = "UNSET_SECRET"
@@ -108,15 +120,15 @@ variable "gemini_api_key" {
   default     = "UNSET_SECRET"
 }
 
-variable "stripe_secret_key" {
-  description = "Stripe secret key for payment processing"
+variable "dodo_api_key" {
+  description = "Dodo Payments API key for payment processing"
   type        = string
   sensitive   = true
   default     = "UNSET_SECRET"
 }
 
-variable "stripe_webhook_secret" {
-  description = "Stripe webhook signing secret"
+variable "dodo_webhook_secret" {
+  description = "Dodo Payments webhook signing secret"
   type        = string
   sensitive   = true
   default     = "UNSET_SECRET"
@@ -129,18 +141,24 @@ variable "resend_api_key" {
   default     = "UNSET_SECRET"
 }
 
+variable "ssl_cert_secret_id" {
+  description = "Key Vault secret ID for the TLS/SSL certificate (HTTPS). Set before production deploy."
+  type        = string
+  default     = ""
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # LLM Configuration
 # ─────────────────────────────────────────────────────────────────────────────
 
 variable "llm_provider" {
-  description = "Default LLM provider for the Chronos Copilot"
+  description = "Default LLM provider for the Lazynext AI Copilot"
   type        = string
   default     = "anthropic"
 
   validation {
-    condition     = contains(["openai", "anthropic", "gemini", "ollama"], var.llm_provider)
-    error_message = "LLM provider must be one of: openai, anthropic, gemini, ollama."
+    condition     = contains(["openai", "anthropic", "gemini"], var.llm_provider)
+    error_message = "LLM provider must be one of: openai, anthropic, gemini."
   }
 }
 
@@ -163,6 +181,16 @@ variable "redis_sku_name" {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Storage
+# ─────────────────────────────────────────────────────────────────────────────
+
+variable "storage_public_network_access_enabled" {
+  description = "Allow public network access to the storage account. Set to false when private endpoints are provisioned."
+  type        = bool
+  default     = false
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # CDN / Front Door
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -182,7 +210,7 @@ variable "cdn_sku_name" {
 variable "media_custom_domain" {
   description = "Custom domain for the media CDN endpoint"
   type        = string
-  default     = "media.lazynext.ai"
+  default     = "media.lazynext.com"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

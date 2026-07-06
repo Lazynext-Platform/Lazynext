@@ -38,10 +38,10 @@ test.describe("1. Authentication Flow", () => {
 });
 
 test.describe("2. Editor & Timeline", () => {
-  test("editor loads with Chronos Copilot", async ({ page }) => {
+  test("editor loads with Lazynext AI Agent Copilot", async ({ page }) => {
     await bypassAuth(page);
     await page.goto(`${BASE_URL}/editor`);
-    await expect(page.locator("text=Chronos")).toBeVisible({ timeout: 15000 });
+    await expect(page.locator("text=Lazynext AI Agent")).toBeVisible({ timeout: 15000 });
   });
 
   test("timeline renders tracks", async ({ page }) => {
@@ -59,7 +59,7 @@ test.describe("2. Editor & Timeline", () => {
   });
 });
 
-test.describe("3. AI Copilot", () => {
+test.describe("3. Lazynext AI Agent", () => {
   test("sends prompt and receives response", async ({ page }) => {
     await bypassAuth(page);
     await page.goto(`${BASE_URL}/editor`);

@@ -2,6 +2,7 @@
  * Projects list page — displays all projects for the authenticated user.
  *
  * @page /projects
+ * @module projects/page
  */
 
 import { getAllProjects } from "@/actions/project";

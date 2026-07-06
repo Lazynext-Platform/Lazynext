@@ -2,9 +2,11 @@
 # Copy to terraform.tfvars and fill in actual values.
 
 # ── Core ─────────────────────────────────────────────────────────────────
-location     = "southeastasia"
+location     = "eastus2"
 environment  = "dev"                 # dev | staging | production
-app_domain   = "lazynext.ai"
+app_domain   = "lazynext.com"
+domain_name  = "lazynext.com"
+create_dns_zone = false              # Set true to create Azure DNS zone (recommended for production)
 
 # ── AKS ──────────────────────────────────────────────────────────────────
 kubernetes_version = "1.32"
@@ -44,9 +46,10 @@ redis_capacity  = 1                # Number of shards
 # Standard_AzureFrontDoor = global anycast, basic WAF, no private link
 # Premium_AzureFrontDoor  = adds private link, advanced WAF, bot protection
 cdn_sku_name            = "Standard_AzureFrontDoor"
-media_custom_domain     = "media.lazynext.ai"
+media_custom_domain     = "media.lazynext.com"
 # Azure DNS Zone resource ID (for automatic custom domain validation).
 # Leave empty to manage DNS CNAME record manually.
+# If create_dns_zone = true, use the output: terraform output dns_zone_id
 cdn_dns_zone_id         = ""
 
 # ── Monitoring / Alerts ──────────────────────────────────────────────────

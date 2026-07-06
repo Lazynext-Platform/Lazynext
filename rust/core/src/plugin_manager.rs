@@ -36,12 +36,21 @@ impl PluginManager {
     }
 
     /// Execute a plugin on a frame buffer.
+    /// Validates the time parameter and returns an error if the plugin is
+    /// not loaded. Frame buffer dimensions and data integrity should be
+    /// verified by the caller before invoking this method.
     pub fn execute_plugin(
         &self,
         plugin_id: &str,
         frame: &mut FrameBuffer,
         time: f64,
     ) -> Result<(), String> {
+        if !time.is_finite() {
+            return Err(format!(
+                "Invalid time value for plugin '{}': {} (must be finite)",
+                plugin_id, time
+            ));
+        }
         if let Some(plugin) = self.loaded_plugins.get(plugin_id) {
             plugin.process_frame(frame, time);
             Ok(())

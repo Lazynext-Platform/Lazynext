@@ -2,6 +2,7 @@
  * Sponsors page — current project sponsors and sponsorship info.
  *
  * @page /sponsors
+ * @module sponsors/page
  */
 
 import type { Metadata } from "next";

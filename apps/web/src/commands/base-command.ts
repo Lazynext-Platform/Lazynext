@@ -1,3 +1,4 @@
+/** @module Base command abstractions for the editor undo/redo system — defines the Command interface and selection result utilities. */
 import type { EditorSelectionPatch } from "@/selection/editor-selection";
 import type { ElementRef } from "@/timeline/types";
 

@@ -16,12 +16,11 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
+
 /// Generate a cryptographically random CSRF token (32 hex chars = 128 bits).
 fn generate_csrf_token() -> String {
-    use rand::Rng;
-    let mut rng = rand::thread_rng();
-    let bytes: [u8; 16] = rng.r#gen();
-    hex::encode(bytes)
+    let uuid = uuid::Uuid::new_v4();
+    hex::encode(uuid.as_bytes())
 }
 
 /// Axum middleware that validates CSRF tokens on state-changing requests.
@@ -43,8 +42,8 @@ pub async fn csrf_protection(req: Request, next: Next) -> Result<Response, Statu
         return Ok(next.run(req).await);
     }
 
-    // Skip CSRF for Stripe webhooks (Stripe signs its own requests)
-    if req.uri().path().starts_with("/api/v1/stripe/") {
+    // Skip CSRF for Dodo Payments webhooks (Dodo Payments signs its own requests)
+    if req.uri().path().starts_with("/api/v1/dodo/") {
         return Ok(next.run(req).await);
     }
 

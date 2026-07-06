@@ -573,8 +573,8 @@ resource "azurerm_container_app" "api_gateway" {
         secret_name = "better-auth-secret"
       }
       env {
-        name        = "STRIPE_WEBHOOK_SECRET"
-        secret_name = "stripe-webhook-secret"
+        name        = "DODO_WEBHOOK_SECRET"
+        secret_name = "dodo-webhook-secret"
       }
     }
 
@@ -603,8 +603,8 @@ resource "azurerm_container_app" "api_gateway" {
     value = var.better_auth_secret
   }
   secret {
-    name  = "stripe-webhook-secret"
-    value = var.stripe_webhook_secret
+    name  = "dodo-webhook-secret"
+    value = var.dodo_webhook_secret
   }
   secret {
     name  = "acr-password"

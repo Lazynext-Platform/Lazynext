@@ -213,41 +213,32 @@ fn test_csrf_tokens_differ() {
     assert_ne!(token1, token2);
 }
 
-// ── Stripe Webhook Signature Verification ─────────────────────────────────
+// ── Dodo Payments Webhook Signature Verification ──────────────────────────
 
 #[test]
-fn test_stripe_signature_parsing() {
-    let sig_header = "t=1492774577,v1=5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd,v0=6ffbb59b2300aae63f272406069a9788598b792a944a07aba816edb039989a39";
-    let parts: Vec<&str> = sig_header.split(',').collect();
-    assert!(parts.len() >= 2);
-
-    let has_timestamp = parts.iter().any(|p| p.trim().starts_with("t="));
-    let has_v1 = parts.iter().any(|p| p.trim().starts_with("v1="));
-    assert!(has_timestamp);
-    assert!(has_v1);
+fn test_dodo_signature_parsing() {
+    let sig_header = "5257a869e7ecebeda32affa62cdca3fa51cad7e77a0e56ff536d0ce8e108d8bd";
+    // Dodo Payments signature is a single hex-encoded HMAC-SHA256
+    assert!(sig_header.len() == 64);
+    assert!(sig_header.chars().all(|c| c.is_ascii_hexdigit()));
 }
 
 #[test]
-fn test_hmac_signature_verification() {
+fn test_dodo_hmac_signature_verification() {
     use hmac::{Hmac, Mac, digest::KeyInit};
     use sha2::Sha256;
 
     type HmacSha256 = Hmac<Sha256>;
 
-    let secret = "whsec_test_secret";
-    let timestamp = "1492774577";
-    let body = b"{\"type\": \"checkout.session.completed\"}";
+    let secret = "dwhsec_test_secret";
+    let body = b"{\"type\": \"payment_link.completed\"}";
 
     let mut mac = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
-    mac.update(timestamp.as_bytes());
-    mac.update(b".");
     mac.update(body);
     let signature = hex::encode(mac.finalize().into_bytes());
 
     // Verify the signature
     let mut mac2 = HmacSha256::new_from_slice(secret.as_bytes()).unwrap();
-    mac2.update(timestamp.as_bytes());
-    mac2.update(b".");
     mac2.update(body);
     let expected = hex::encode(mac2.finalize().into_bytes());
 

@@ -25,16 +25,16 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		const header = page.locator("text=Lazynext Editor");
 		await expect(header).toBeVisible();
 
-		// Expect the Chronos Copilot sidebar to be present
-		const copilot = page.locator("text=Chronos Copilot");
+		// Expect the Lazynext AI Agent Copilot sidebar to be present
+		const copilot = page.locator("text=Lazynext AI Agent Copilot");
 		await expect(copilot).toBeVisible();
 	});
 
-	test("should interact with Chronos AI Copilot", async ({ page }) => {
+	test("should interact with Lazynext AI Agent Copilot", async ({ page }) => {
 		await page.goto("/editor");
 
 		// Check for the AI chat input
-		const chatInput = page.getByPlaceholder(/Message Chronos.../i);
+		const chatInput = page.getByPlaceholder(/Message Lazynext AI Agent.../i);
 		await expect(chatInput).toBeVisible();
 
 		// Check that we can type and send
@@ -43,11 +43,11 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		await expect(sendBtn.first()).toBeVisible();
 	});
 
-	test("should run a full Chronos AI orchestration round-trip", async ({ page }) => {
+	test("should run a full Lazynext AI Agent orchestration round-trip", async ({ page }) => {
 		await page.goto("/editor");
 
-		// Locate the Chronos chat input and send a command
-		const chatInput = page.getByPlaceholder(/Message Chronos.../i);
+		// Locate the Lazynext AI Agent chat input and send a command
+		const chatInput = page.getByPlaceholder(/Message Lazynext AI Agent.../i);
 		await chatInput.fill("add viral captions to this video");
 		// Press Enter to submit
 		await chatInput.press("Enter");
@@ -63,12 +63,12 @@ test.describe("Lazynext E2E - Editor Workspace", () => {
 		await expect(successToast.first()).toBeVisible({ timeout: 30_000 });
 	});
 
-	test("should show an error when Chronos encounters an unknown tool", async ({ page }) => {
+	test("should show an error when Lazynext AI Agent encounters an unknown tool", async ({ page }) => {
 		await page.goto("/editor");
 
 		// The orchestrator's default case rejects unknown tools — test that
 		// an error is surfaced rather than silently swallowed
-		const chatInput = page.getByPlaceholder(/Message Chronos.../i);
+		const chatInput = page.getByPlaceholder(/Message Lazynext AI Agent.../i);
 		await chatInput.fill("do something that does not match any tool");
 		await chatInput.press("Enter");
 

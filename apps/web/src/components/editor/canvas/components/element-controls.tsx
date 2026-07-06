@@ -1,3 +1,9 @@
+/**
+ * @module Element controls — Custom Fabric.js controls for canvas objects:
+ * a disabled (no‑op) control for visual corner indicators and a rotation
+ * control with angle‑snapping behavior.
+ */
+
 import { Control, controlsUtils } from "fabric";
 
 /**

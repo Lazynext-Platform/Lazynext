@@ -1,3 +1,5 @@
+/** @module Timeline zoom hook with mouse wheel, pinch-to-zoom, and animated zoom-to-fit support */
+
 import {
 	type WheelEvent as ReactWheelEvent,
 	type RefObject,

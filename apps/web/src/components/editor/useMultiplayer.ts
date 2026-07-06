@@ -16,9 +16,23 @@ export function useMultiplayer({
 	const [connected, setConnected] = useState(false);
 
 	useEffect(() => {
+		// Skip WebSocket in test/SSR environments where no server is available
+		if (
+			typeof window === "undefined" ||
+			typeof WebSocket === "undefined" ||
+			process.env.NODE_ENV === "test"
+		) {
+			return;
+		}
+
 		// Connect to the API Gateway WebSocket
 		const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/ws";
-		const ws = new WebSocket(wsUrl);
+		let ws: WebSocket;
+		try {
+			ws = new WebSocket(wsUrl);
+		} catch {
+			return; // WebSocket not available (test/SSR)
+		}
 		wsRef.current = ws;
 
 		ws.onopen = () => {

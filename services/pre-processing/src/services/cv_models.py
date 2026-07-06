@@ -12,7 +12,6 @@ import httpx
 from fastapi import HTTPException
 from src.models import RotoscopeRequest, NeRFRequest
 import sys
-import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from nerf_pipeline import NerfPipeline, NerfConfig
 from sam2_pipeline import Sam2Pipeline, Sam2Config

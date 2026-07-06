@@ -37,6 +37,7 @@ pub struct PlaybackLoop {
     is_playing: bool,
     current_frame: u32,
     _framerate: u32,
+    #[cfg(not(target_arch = "wasm32"))]
     audio: Option<audio::playback::AudioPlayback>,
     #[cfg(not(target_arch = "wasm32"))]
     decklink: Option<decklink::DecklinkEngine>,
@@ -44,6 +45,7 @@ pub struct PlaybackLoop {
 
 impl PlaybackLoop {
     pub fn new(framerate: u32) -> Self {
+        #[cfg(not(target_arch = "wasm32"))]
         let audio = audio::playback::AudioPlayback::new().ok();
         #[cfg(not(target_arch = "wasm32"))]
         let mut decklink = Some(decklink::DecklinkEngine::new());
@@ -60,6 +62,7 @@ impl PlaybackLoop {
             is_playing: false,
             current_frame: 0,
             _framerate: framerate,
+            #[cfg(not(target_arch = "wasm32"))]
             audio,
             #[cfg(not(target_arch = "wasm32"))]
             decklink,
@@ -68,6 +71,7 @@ impl PlaybackLoop {
 
     pub fn play(&mut self) {
         self.is_playing = true;
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(audio) = &self.audio {
             audio.resume();
         }
@@ -79,6 +83,7 @@ impl PlaybackLoop {
 
     pub fn pause(&mut self) {
         self.is_playing = false;
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(audio) = &self.audio {
             audio.pause();
         }
@@ -90,6 +95,7 @@ impl PlaybackLoop {
 
     pub fn seek(&mut self, frame: u32) {
         self.current_frame = frame;
+        #[cfg(not(target_arch = "wasm32"))]
         if let Some(audio) = &self.audio {
             // Seek isn't cleanly supported in rodio on simple buffers without recreating the source,
             // but we can pause it to prevent desync until a new stream is started.

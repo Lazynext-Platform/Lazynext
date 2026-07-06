@@ -133,7 +133,7 @@ receivers:
   # ── Slack: Critical Alerts ───────────────────────────────────
   - name: "slack-critical"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/disabled-critical"
+      - api_url: "${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/disabled-critical}"
         username: "Lazynext AlertManager"
         icon_emoji: ":rotating_light:"
         title: '🚨 [CRITICAL] {{ .GroupLabels.alertname }}'
@@ -164,7 +164,7 @@ receivers:
   # ── Slack: Warning Alerts ────────────────────────────────────
   - name: "slack-warnings"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/disabled-warning"
+      - api_url: "${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/disabled-warning}"
         username: "Lazynext AlertManager"
         icon_emoji: ":warning:"
         title: '⚠️ [WARNING] {{ .GroupLabels.alertname }}'
@@ -195,7 +195,7 @@ receivers:
   # ── Slack: Deployment Notifications ──────────────────────────
   - name: "slack-deployments"
     slack_configs:
-      - api_url: "https://hooks.slack.com/services/disabled-deploy"
+      - api_url: "${SLACK_WEBHOOK_URL_DEPLOY:-https://hooks.slack.com/services/disabled-deploy}"
         username: "Lazynext Deploy"
         icon_emoji: ":rocket:"
         title: '🚀 {{ .CommonAnnotations.summary }}'
@@ -212,7 +212,7 @@ receivers:
   # ── PagerDuty: Critical Only ─────────────────────────────────
   - name: "pagerduty-critical"
     pagerduty_configs:
-      - routing_key: "disabled"
+      - routing_key: "${PAGERDUTY_INTEGRATION_KEY}"
         severity: "critical"
         description: |
           {{ .CommonAnnotations.description }}
@@ -239,7 +239,7 @@ receivers:
         from: "alerts@lazynext.ai"
         smarthost: "smtp.resend.com:587"
         auth_username: "resend"
-        auth_password: "disabled"
+        auth_password: "${RESEND_API_KEY:-disabled}"
         require_tls: true
         headers:
           Subject: "[Lazynext DB] {{ .GroupLabels.alertname }} — {{ .Status }}"
@@ -263,12 +263,12 @@ receivers:
   # ── Webhook: Custom Integration (Optional) ───────────────────
   - name: "webhook-custom"
     webhook_configs:
-      - url: "https://webhook.site/disabled"
+      - url: "${CUSTOM_WEBHOOK_URL:-https://webhook.site/disabled}"
         send_resolved: true
         http_config:
           authorization:
             type: "Bearer"
-            credentials: "disabled"
+            credentials: "${CUSTOM_WEBHOOK_TOKEN}"
 
 # ── Inhibition Rules ─────────────────────────────────────────────
 # Prevents alert storms — if a critical alert fires for a service,

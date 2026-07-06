@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   description: |
     REST API for the Lazynext AI video editing platform.
-    All endpoints except /health and /api/v1/stripe/webhook require JWT authentication.
+    All endpoints except /health and /api/v1/dodo/webhook require JWT authentication.
     Use the Better Auth endpoint to obtain a token.
 servers:
   - url: http://localhost:8005
@@ -44,7 +44,7 @@ paths:
                 prompt: { type: string, description: "Natural language editing intent" }
                 require_plan_approval: { type: boolean, default: true }
                 source_files: { type: array, items: { type: string } }
-                llm_provider: { type: string, enum: [openai, anthropic, gemini, ollama] }
+                llm_provider: { type: string, enum: [openai, anthropic, gemini, gemini] }
       responses:
         '200':
           description: Edit applied successfully
@@ -185,9 +185,9 @@ paths:
         '200': { description: Admin metrics }
         '403': { description: Admin access required }
 
-  /api/v1/stripe/webhook:
+  /api/v1/dodo/webhook:
     post:
-      summary: Stripe webhook endpoint (HMAC-SHA256 verified)
+      summary: Dodo Payments webhook endpoint (HMAC-SHA256 verified)
       tags: [Billing]
       security: []
       requestBody:

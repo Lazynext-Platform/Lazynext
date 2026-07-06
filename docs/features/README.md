@@ -1,6 +1,6 @@
 # Features
 
-Each subdirectory documents a Lazynext feature. Features 01–17 are retroactive summaries (completed before Mastery adoption); features 18–31 have full lifecycle docs (discussion → architecture → tasks → testplan → motto → changelog → review).
+Each subdirectory documents a Lazynext feature. Features 01–17 are retroactive summaries (completed before Mastery adoption); features 18–36 have full lifecycle docs (discussion → architecture → tasks → testplan → motto → changelog → review).
 
 | # | Feature | Status | Type |
 |---|---------|--------|------|
@@ -24,12 +24,21 @@ Each subdirectory documents a Lazynext feature. Features 01–17 are retroactive
 | 18 | AI-Driven Editing | Complete | Full lifecycle |
 | 19 | GPU Rendering & WASM Hardening | Complete | Full lifecycle |
 | 20 | Desktop GPUI Editor Completion | Complete | Full lifecycle |
-| 21 | Mobile App Completion | Complete | Partial |
+| 21 | Mobile App Completion | Complete | Full lifecycle |
 | 22 | Real Export Pipeline | Complete | Full lifecycle |
+| 23 | JS→WASM Port (verified) | Complete | Verified complete |
 | 24 | Browser Extension Import | Complete | Lightweight |
+| 25 | CLI Completion (verified) | Complete | Verified complete |
+| 26 | MCP Server Expansion (verified) | Complete | Verified complete |
+| 27 | API Gateway Completion (verified) | Complete | Verified complete |
+| 28 | Desktop Audio (verified) | Complete | Verified complete |
 | 29 | Mobile AI Copilot | Complete | Lightweight |
+| 30 | Backend Depth (verified) | Complete | Verified complete |
+| 31 | Observability + E2E (verified) | Complete | Verified complete |
 | 32 | Remaining Production Gaps | Complete | Retroactive summary |
 | 33 | Production Hardening — All 7 Formats | Complete | Full lifecycle |
 | 34 | Real Video Playback Pipeline | Complete | Full lifecycle |
+| 35 | Platform Finalization — All 7 Formats | Complete | Full lifecycle |
+| 36 | E2E Launch Readiness | Complete | Full lifecycle |
 
 See `docs/project-roadmap.md` for dependency ordering and current status.
