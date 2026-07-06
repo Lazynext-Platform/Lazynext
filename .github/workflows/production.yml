@@ -188,16 +188,17 @@ jobs:
 
       - name: Deploy Container Apps
         run: |
+          set +e
           declare -A APPS=(
-            [web]="lazynext-web-production"
-            [ai-agents]="lazynext-ai-agents-production"
-            [render-service]="lazynext-render-production"
-            [pre-processing]="lazynext-pre-processing-production"
-            [generative-studio]="lazynext-gen-studio-production"
-            [api-gateway]="lazynext-api-gateway-production"
-            [collab-server]="lazynext-collab-server-production"
-            [analytics-service]="lazynext-analytics-service-production"
-            [social-publish]="lazynext-social-publish-production"
+            [web]="lz-web-prod"
+            [ai-agents]="lz-aiagents-prod"
+            [render-service]="lz-render-prod"
+            [pre-processing]="lz-preproc-prod"
+            [generative-studio]="lz-genstudo-prod"
+            [api-gateway]="lz-apigtwy-prod"
+            [collab-server]="lz-collab-prod"
+            [analytics-service]="lz-analyts-prod"
+            [social-publish]="lz-social-prod"
           )
 
           TARGET_PORT=0
