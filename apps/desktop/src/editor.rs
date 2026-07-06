@@ -1,6 +1,8 @@
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;
+use lazynext_core::ring_buffer_decoder::RingBufferDecoder;
+use lazynext_core::engine::AssetLoader;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -126,8 +128,10 @@ impl Render for EditorShell {
                                                     .child("+ Import")
                                                     .on_mouse_down(gpui::MouseButton::Left, {
                                                         let nle = self.nle.clone();
+                                                        let engine = self.engine.clone();
                                                         move |_, _, _cx| {
                                                             let nle = nle.clone();
+                                                            let engine = engine.clone();
                                                             tokio::spawn(async move {
                                                                 let file = rfd::AsyncFileDialog::new()
                                                                     .add_filter("Media", &["mp4", "mov", "avi", "mkv", "wav", "mp3"])
@@ -145,7 +149,7 @@ impl Render for EditorShell {
                                                                         lazynext_core::nle_state::MediaAsset {
                                                                             id: format!("media_{}", uuid::Uuid::new_v4()),
                                                                             name: clip_name.clone(),
-                                                                            path_or_url: path,
+                                                                            path_or_url: path.clone(),
                                                                             asset_type: "video".to_string(),
                                                                             duration: 10.0,
                                                                             width: 1920,
@@ -160,6 +164,13 @@ impl Render for EditorShell {
                                                                         0,
                                                                         240,
                                                                     );
+                                                                    drop(nle_guard);
+
+                                                                    // Start ring buffer decoder for real-time playback
+                                                                    let decoder = RingBufferDecoder::new(1920, 1080);
+                                                                    let mut engine_guard = engine.lock().await;
+                                                                    engine_guard.set_asset_loader(Arc::new(decoder));
+                                                                    log::info!("Ring buffer decoder activated for: {}", path);
                                                                     log::info!("Media imported: {}", clip_name);
                                                                 }
                                                             });

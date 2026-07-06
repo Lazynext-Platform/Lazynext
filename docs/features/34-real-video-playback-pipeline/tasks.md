@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/34-real-video-playback-pipeline`
 > **Status**: 🟡 IN PROGRESS
-> **Progress**: 18/20 tasks complete
+> **Progress**: 19/20 tasks complete
 
 ---
 
@@ -35,13 +35,13 @@
 
 ## Phase B — Desktop Real Preview
 
-- [ ] **B.1** — Start ring_buffer_decoder on file import
-  - On +Import button click, spawn decoder thread. Fill ring buffer with decoded frames.
+- [x] **B.1** — Start ring_buffer_decoder on file import
+  - "+ Import" button (editor.rs L127): opens native file dialog → creates MediaAsset + clip in NLEState → creates `RingBufferDecoder::new(1920, 1080)` and registers via `engine.set_asset_loader(Arc::new(decoder))` for real-time frame decoding.
 - [x] **B.2** — Feed decoded frames to compositor
-  - Already implemented: `EditorShell::render()` calls `engine.render_frame(self.current_frame)` (editor.rs L39). CoreEngine renders via compositor.
+  - Already implemented: `EditorShell::render()` calls `engine.render_frame(self.current_frame)`. CoreEngine uses asset_loader to fetch frames, uploads textures, composites.
 - [x] **B.3** — Display real preview in GPUI
-  - Already implemented: GPUI preview (editor.rs L114-148) renders `last_frame_data` as `gpui::RenderImage` from decoded RGBA frames.
-- [ ] 📍 **Checkpoint B** — Desktop shows real video preview
+  - Already implemented: GPUI preview renders `last_frame_data` as `gpui::RenderImage` from decoded RGBA frames.
+- [x] 📍 **Checkpoint B** — Desktop shows real video preview
 
 ---
 
