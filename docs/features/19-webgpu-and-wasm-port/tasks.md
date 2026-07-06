@@ -16,7 +16,7 @@
 
 ## Phase C — Documentation
 
-- [ ] C.1 Update `PLATFORM_ASSESSMENT.md` to remove the false claims "`gpu-renderer.ts` is a stub" and "all rendering goes through CPU canvas." Replace with reference to this feature's architecture doc.
-- [ ] C.2 Update `docs/project-roadmap.md` — mark Feature #19 as 🟢 Complete and update the *Remaining Work* section to remove the "Port animation/command/mask JS" item (verified: animation already delegates to WASM; commands are UI dispatch).
-- [ ] C.3 Log all changes in `changelog.md` with session notes.
-- [ ] C.4 Run cross-check (architecture ↔ code, tasks ↔ checkboxes).
+- [x] C.1 Update `PLATFORM_ASSESSMENT.md` to remove the false claims "`gpu-renderer.ts` is a stub" and "all rendering goes through CPU canvas." Replace with reference to this feature's architecture doc.
+- [x] C.2 Update `docs/project-roadmap.md` — mark Feature #19 as 🟢 Complete and update the *Remaining Work* section to remove the "Port animation/command/mask JS" item (verified: animation already delegates to WASM; commands are UI dispatch).
+- [x] C.3 Log all changes in `changelog.md` with session notes.
+- [x] C.4 Run cross-check (architecture ↔ code, tasks ↔ checkboxes).
