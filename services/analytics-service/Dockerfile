@@ -1,40 +1,30 @@
-# ── Stage 1: Build ──
-FROM oven/bun:1.3.14-alpine AS builder
+FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
 
-# Layer 1: Workspace dependencies (root package.json + packages + stub wasm)
-COPY package.json bun.lock ./
-COPY packages/ packages/
-COPY services/analytics-service/ services/analytics-service/
-RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
-RUN bun install --no-lockfile
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg curl && rm -rf /var/lib/apt/lists/*
 
-# Build the service
-WORKDIR /app/services/analytics-service
-RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
+RUN groupadd --system --gid 1001 nodejs \
+    && useradd --system --uid 1001 --gid nodejs runner
 
-# ── Stage 2: Runtime ──
-FROM oven/bun:1.3.14-alpine AS runner
+COPY packages/api-client/ ./packages/api-client/
+COPY services/analytics-service/src/ ./src/
+COPY services/analytics-service/package.json ./
 
-WORKDIR /app
+RUN sed -i 's/"workspace:\*"/"file:.\/packages\/api-client"/g' package.json && \
+    bun install --production 2>&1 | tail -3
 
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 -G nodejs
+RUN mkdir -p /tmp/output && chown -R runner:nodejs /tmp/output /app
 
-# Copy production deps + source
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/services/analytics-service/package.json ./
-COPY --from=builder /app/services/analytics-service/src/ ./src
-
-USER nodejs
+USER runner
 
 ENV NODE_ENV=production
 ENV PORT=8006
 
 EXPOSE 8006
 
-# oven/bun:alpine ships with wget (via BusyBox)
-HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8006/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -sf http://localhost:8006/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]
