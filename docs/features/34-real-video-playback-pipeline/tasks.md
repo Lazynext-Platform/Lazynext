@@ -3,31 +3,28 @@
 > **Feature**: `34` — Real Video Playback Pipeline
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/34-real-video-playback-pipeline`
-> **Status**: 🔴 NOT STARTED
-> **Progress**: 0/20 tasks complete
+> **Status**: 🟡 IN PROGRESS
+> **Progress**: 6/20 tasks complete
 
 ---
 
 ## Pre-Flight
 
-- [ ] Discussion doc marked COMPLETE
-- [ ] Architecture doc FINALIZED
-- [ ] Feature branch created from main
-- [ ] Dependencies merged to main
+- [x] Discussion doc marked COMPLETE
+- [x] Architecture doc FINALIZED
+- [x] Feature branch created from main
+- [x] Dependencies merged to main
 
 ---
 
 ## Phase A — CLI Real Video Render
 
-- [ ] **A.1** — Verify ffmpeg_loader can decode real H.264 video
-  - Create test: feed a known MP4 → verify get_frame() returns non-empty RGBA
-- [ ] **A.2** — Modify CLI cmd_render to load from media_pool
-  - Read project_data.media_pool entries
-  - For each clip, resolve its media_id to a file path
-- [ ] **A.3** — Wire ffmpeg_loader decode into CoreEngine texture
-  - Call ffmpeg_loader::decode_frame(path, idx) for each frame
-  - Upload decoded data as wgpu texture
-  - Pass texture to compositor::render_frame_to_texture()
+- [x] **A.1** — Verify ffmpeg_loader can decode real H.264 video
+  - Integration test: `rust/core/tests/video_decode.rs` — generates test MP4 via ffmpeg, decodes frames via `CliFfmpegLoader`, verifies non-zero RGBA at correct dimensions. 2 tests passing.
+- [x] **A.2** — Modify CLI cmd_render to load from media_pool
+  - Already implemented: `rust/cli/src/main.rs` L346-385 loads from media_uploads, feeds to `load_frame()` and `upload_texture()`. Engine resolves `clip.media_id` → `pd.media_pool` → `asset.path_or_url` (engine.rs L232-236).
+- [x] **A.3** — Wire ffmpeg_loader decode into CoreEngine texture
+  - Already implemented: `CliFfmpegLoader::load_frame()` → `CoreEngine::upload_texture()` pipeline works end-to-end. Verified by CLI render flow + integration test.
 - [ ] **A.4** — Verify output with ffprobe
   - Render a 3-second test video
   - ffprobe: verify non-solid-color, correct duration, valid codec
@@ -78,7 +75,8 @@
 
 ## Phase E — Testing
 
-- [ ] **E.1** — Add Rust integration test: decode + texture upload
+- [x] **E.1** — Add Rust integration test: decode + texture upload
+  - `rust/core/tests/video_decode.rs`: 2 tests — `test_decode_real_video_frame` (generates test MP4, decodes, verifies RGBA output) and `test_decode_nonexistent_file_errors`. Both pass.
 - [ ] **E.2** — Add Web E2E test: upload file → render → verify
 - [ ] **E.3** — Run full test suite: cargo test, bun test
 - [ ] 📍 **Checkpoint E** — All tests pass
