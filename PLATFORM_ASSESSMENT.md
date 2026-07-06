@@ -1,59 +1,60 @@
 # Lazynext Platform: Complete Assessment
 
-**Date:** 2026-07-03 (post Feature #36 Quality Hardening)
-**Scope:** Entire repository — all 7 formats, Rust crates, microservices, infrastructure. All 36 features complete. Latest: async AI job API real, SCRFD ONNX face detection real, API Gateway CSRF fixed.
+**Date:** 2026-06-30 (revised)
+**Scope:** Entire repository — all 7 formats, Rust crates, microservices, infrastructure
 
 ---
 
 ## The "7 Formats" (Deployment Targets)
 
-Based on actual code verification (`cargo check --workspace`, `cargo test` — 200+ tests, 0 failures), the 7 platform formats are:
+Based on actual code verification (`cargo check --workspace`, `tsc --noEmit`, `bun run build`, `cargo test`), the 7 platform formats are:
 
 | # | Format | Type | Current Completion |
 |---|--------|------|-------------------|
-| 1 | **Web App** | Next.js 16 + WASM | **99%** |
-| 2 | **Desktop App** | GPUI native | **99%** |
-| 3 | **Mobile App** | React Native + UniFFI | **99%** |
-| 4 | **Browser Extension** | Chrome Manifest V3 | **99%** |
-| 5 | **CLI** | Rust headless renderer | **99%** |
-| 6 | **API Gateway** | Axum REST server | **98%** |
-| 7 | **MCP Server** | MCP protocol server | **99%** |
+| 1 | **Web App** | Next.js 16 + WASM | **~85%** |
+| 2 | **Desktop App** | GPUI native | **~55%** |
+| 3 | **Mobile App** | React Native + UniFFI | **~55%** |
+| 4 | **Browser Extension** | Chrome Manifest V3 | **~55%** |
+| 5 | **CLI** | Rust headless renderer | **~75%** |
+| 6 | **API Gateway** | Axum REST server | **~80%** |
+| 7 | **MCP Server** | MCP protocol server | **~75%** |
 
-Supporting these are **7 microservices** (all ~95-98%), **15 Rust crates** (100%), and **full infrastructure** (~90%).
+Supporting these are **7 microservices** (pre-processing ~75%, generative-studio ~70%, ai-agents ~55%, render-service ~80%, analytics-service ~5%, collab-server ~40%, mcp-server ~30%), **15 Rust crates** (~75% avg), and **full infrastructure** (~80%).
 
 ---
 
-## Overall Platform Completion: **99%**
+## Overall Platform Completion: **~70%**
 
-All 36 features complete. Feature #35 (2026-07-01) closed the final 8 wiring gaps:
-- Desktop: Play/pause playback toggle wired with continuous frame advance; AI prompt text input displays actual user text
-- Mobile: Native modules now call real UniFFI bindings (getProjectInfo, processIntent, moveClip) with graceful degradation
-- MCP Server: Expanded from 1 tool to 47 tools with full schema registry and intelligent routing
-- SAM2: Real ONNX runtime path added; rembg as fallback
-- Whisper: Local TF Serving path added; OpenAI API as fallback
-- Analytics: SQLite persistence via bun:sqlite; Kafka auto-topic creation
-
-Key facts:
-- All 7 formats compile with zero errors.
-- All 36 features verified complete.
-- 230+ Rust tests pass, 0 failures.
-- Zero `todo!()`/`unimplemented!()`/FIXME blocks remain in non-vendor Rust code.
-- Zero production mock/stub/placeholder blocks remain.
-- Async AI job API (`process_intent` + `check_job_status`) is now real (tokio::spawn with LLM routing + job store).
-- SCRFD ONNX face detection post-processing is now real (anchor decode + NMS) with heuristic fallback.
-- `process_intent_sync` uses intelligent keyword-based fallback (6 categories).
-- Only remaining work: operational deployment to Azure (owner-gated credentials).
+The platform has progressed significantly since the original assessment (2026-06-28). Major corrections:
+- Desktop app is a **real GPUI application** with Dashboard, Editor, NLEState, CoreEngine, and DeckLink — not a 25-line stub.
+- API Gateway uses **real JWT auth** (HS256, BETTER_AUTH_SECRET), PostgreSQL (DATABASE_URL), RBAC/CSRF/rate-limiting, Stripe HMAC verification, and OpenAPI — not hardcoded tokens or SQLite.
+- CoreEngine `render_frame()` is a **real GPU compositor pipeline** building FrameDescriptor from timeline state, evaluating animated properties, and rendering via wgpu — not a mock red pixel.
+- ACES color pipeline has **real IDT/ODT matrices**, Not mock.
+- Optical flow (effects crate) is a **real implementation** with pyramid block matching, GPU compute shader, and 5 tests.
+- Sidechain auto-ducking is **real** in the audio compressor crate.
+- MCP server has **14 tools, 4 resources, 4 prompts** — not the originally claimed 3 tools.
+- 3D LUT (.cube) management is now implemented with **4 built-in presets** and trilinear interpolation.
+- Effects shaders expanded to **11** (added glow and vignette).
+- Pre-processing microservice refactored to **92% real endpoints** (extract_hook, auto_reframe, generate_proxies now real).
+- All 7 formats **compile and build with zero errors**.
 
 ---
 
 ## Complete Gap Analysis: What Needs to Be Done
 
-> ⚠️ **SNAPSHOT NOTICE (2026-07-01):** The per-format tables below are the
-> **pre-hardening baseline** (2026-06-28). **ALL items are now resolved** via
-> Features #09–#31. The authoritative current status is in the **Summary Table**
-> (above) and `docs/project-roadmap.md` (all 36 features 🟢 Complete). The
-> "Current State" paragraphs and task rows below are retained as historical
-> reference of what was resolved.
+> ⚠️ **SNAPSHOT NOTICE (2026-06-30):** The per-format tables below are the
+> **pre-hardening baseline** (2026-06-28). Much of this was resolved by the
+> Feature #09–#17 hardening pass. Treat the **Summary Table** (below) and the
+> *Remaining Work* section of `docs/project-roadmap.md` as the authoritative
+> current status. Items verified resolved since this snapshot: compositor
+> `render_frame` is real (C1), SAM2 ONNX path wired (C5), VST3 `libloading`
+> host active (C6), ACES matrices real (C7), all production mock/stub blocks
+> removed (1.7), Kysely dropped in favour of Drizzle (1.8), browser overlay
+> non-URL crash fixed (4.4), API Gateway uses real JWT + PostgreSQL
+> (FORMAT 6), desktop is a real GPUI app (FORMAT 2), mobile has a real
+> Android native module (FORMAT 3). The percentages in each header below have
+> been updated to match the Summary Table; the task rows remain as the
+> historical pre-hardening reference.
 
 ### FORMAT 1: Web App (`apps/web`) — 85% → 100%
 
@@ -78,7 +79,7 @@ Key facts:
 | 1.3 | **Port mask system to Rust** — 17 files in `apps/web/src/masks/` (geometry, feather, handles) duplicate `rust/crates/masks/` (GPU pipeline only). | ⬚ Reduced scope — GPU mask pipeline is real; JS files are UI geometry + GPU bridge calls. | Large |
 | 1.4 | **Wire real CRDT sync end-to-end** — `syncTimelineFromEngine()` is an empty function. React state is not driven by WASM CRDT engine. Collaboration only works as a relay, not a true CRDT merge. | ✅ Done — `syncTimelineFromEngine()` reads entity graph from WASM engine, hydrates scenes, and updates React via `EditorCore`. | Large |
 | 1.5 | **Implement GPU renderer** — `gpu-renderer.ts` is a stub. All rendering goes through CPU canvas. WebGPU path must be activated. | ✅ Done — GPU renderer is real (calls WASM applyEffectPasses/applyMaskFeatherWasm). Full WasmCompositor class. | Medium |
-| 1.6 | **Wire real export encoding** — Export UI/types exist but actual video encoding delegates entirely to WASM. The export pipeline (compositor → ffmpeg) needs to flow through real frames. | ✅ Done — Feature #22. Export pipeline was already real on the Rust path (`ExportPipeline` + `CoreEngine::render_frame`); wired the **web** path to stream compositor RGBA frames → render-service → ffmpeg (WYSIWYG), fixed `total_frames`/format/bitrate passthrough, added frame-stream endpoints. Real ffmpeg integration test (ffprobe-validated) green. | Large |
+| 1.6 | **Wire real export encoding** — Export UI/types exist but actual video encoding delegates entirely to WASM. The export pipeline (compositor → ffmpeg) needs to flow through real frames. | High | Large |
 | 1.7 | **Replace mock server actions** — Project CRUD actions return hardcoded data instead of querying Drizzle/PostgreSQL. | High | Medium |
 | 1.8 | **Complete database migration** — Dual schema present (Kysely + Drizzle). Migrate fully to Drizzle, remove Kysely. | Medium | Medium |
 | 1.9 | **Add integration tests** — Only 42 test files, mostly storage migrations. Core editor, collaboration, timeline, and preview have minimal tests. | High | Large |
@@ -88,40 +89,40 @@ Key facts:
 
 ### FORMAT 2: Desktop App (`apps/desktop`) — 55% → 100%
 
-**Current State:** *(Updated 2026-07-01)* Full GPUI application (632 lines): Dashboard + Editor with real frame rendering, timeline with real clip data, playback controls, AI Copilot. Native audio I/O via rodio/cpal (CoreAudio/WASAPI). DeckLink I/O wired. Native file system access via rfd. 2 unit tests.
+**Current State:** *(Updated 2026-06-30)* A real GPUI application with Dashboard, Editor, NLEState, CoreEngine, and DeckLink wiring — no longer the 25-line stub described in the original audit. AI Copilot "Run Command" path wired (Feature #12). Full editor windows + native compositor surface still pending.
 
 **What Must Be Done:**
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 2.1 | **Uncomment and activate GPUI** — Restore GPUI dependency in Cargo.toml, set up the Zed framework. This is a significant dependency (Zed's monorepo). | ✅ Done — GPUI 0.2.2 active, real Application::new() event loop in main.rs. | Large |
-| 2.2 | **Build Dashboard window** — GPUI views for project listing, creation, settings. | ✅ Done — 193-line Dashboard with New/Open Project, FileDialog, NLEState init. | Large |
-| 2.3 | **Build Editor window** — GPUI view wrapping the Rust NLE engine with native wgpu rendering. | ✅ Done — 439-line Editor with toolbar, canvas, real frame rendering, timeline, inspector, AI Copilot. | Huge |
-| 2.4 | **Wire native compositor** — The GPU compositor (`rust/crates/compositor/`) renders directly to native surfaces via wgpu, no WASM bridge needed. | ✅ Done — compositor + wgpu in Cargo.toml; engine.render_frame() renders to GPUI canvas. | Large |
-| 2.5 | **Wire DeckLink I/O** — The `rust/crates/decklink/` crate exists as a CXX scaffold. Finish it with real Blackmagic SDK integration for SDI monitoring. | ✅ Done — engine.enable_decklink() in main.rs; DeckLink crate wired. | Large |
-| 2.6 | **Native file system access** — Direct filesystem I/O for media import/export, project files. | ✅ Done — rfd::FileDialog for .lazynext project files; serde deserialization. | Medium |
-| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | ✅ Done — rodio/cpal provides native audio I/O. | Medium |
-| 2.8 | **Add tests** — Currently zero tests. | ✅ Done — 2 tests (dashboard creation + editor playback toggle). | Medium |
+| 2.1 | **Uncomment and activate GPUI** — Restore GPUI dependency in Cargo.toml, set up the Zed framework. This is a significant dependency (Zed's monorepo). | Critical | Large |
+| 2.2 | **Build Dashboard window** — GPUI views for project listing, creation, settings. | Critical | Large |
+| 2.3 | **Build Editor window** — GPUI view wrapping the Rust NLE engine with native wgpu rendering. | Critical | Huge |
+| 2.4 | **Wire native compositor** — The GPU compositor (`rust/crates/compositor/`) renders directly to native surfaces via wgpu, no WASM bridge needed. | Critical | Large |
+| 2.5 | **Wire DeckLink I/O** — The `rust/crates/decklink/` crate exists as a CXX scaffold. Finish it with real Blackmagic SDK integration for SDI monitoring. | High | Large |
+| 2.6 | **Native file system access** — Direct filesystem I/O for media import/export, project files. | High | Medium |
+| 2.7 | **Native audio I/O** — Direct CoreAudio/WASAPI for low-latency monitoring. | Medium | Medium |
+| 2.8 | **Add tests** — Currently zero tests. | High | Medium |
 
 ---
 
 ### FORMAT 3: Mobile App (`apps/mobile`) — 55% → 100%
 
-**Current State:** *(Updated 2026-06-30, post-Feature #21)* Full React Native app with real NativeBridge (51 lines calling native module APIs: getProjectInfo, processIntent, moveClip). EditorScreen (150 lines) wired to NativeBridge.fetchProject() — no more mock data. App.tsx (325 lines) with full Expo navigation. iOS and Android native projects with UniFFI-generated bindings. Native bridge test (47 lines). Mobile app is functional; remaining depth: timeline viewer UX polish, AI Copilot chat surface.
+**Current State:** *(Updated 2026-06-30)* Expo/React Native shell with a Dashboard screen and AI Copilot screen. The JavaScript mock bridge has been replaced by a real Android Kotlin native module (`MyModule.kt`) plus a real web-target bridge (Feature #13), and UniFFI wiring landed in Feature #16. Full editor UI/screens and iOS parity still pending.
 
 **What Must Be Done:**
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
-| 3.1 | **Implement UniFFI bridge** — Add `uniffi` dependency to `rust/core`, define `.udl` file, generate Kotlin/Swift bindings, build native modules. `rust/core/src/mobile_bridge.rs` has the struct defined but it's not wired. | ✅ Done — UniFFI-generated bindings exist for iOS (lazynext_mobile.swift, FFI.h) and Android (lazynext_mobile.kt). | Huge |
-| 3.2 | **Build native project scaffolding** — Generate `android/` and `ios/` directories with native module linking. | ✅ Done — Full Xcode project + Gradle project with Expo native modules. | Large |
-| 3.3 | **Replace JavaScript mock bridge** — Connect the real UniFFI-generated bindings so AI prompts actually call the Rust engine. | ✅ Done — NativeBridge.ts calls real MyModule APIs (getProjectInfo, processIntent, moveClip). EditorScreen wired via fetchProject(). | Large |
-| 3.4 | **Build AI Copilot screen** — Mobile chat interface with streaming AI responses. | ✅ Done — Feature #29; AIChatScreen wired to real API. | Medium |
-| 3.5 | **Build timeline viewer** — Mobile-optimized timeline view for reviewing/scrubbing projects. | ✅ Done — EditorScreen.tsx (150 lines) with timeline, playhead, real clip data from NativeBridge. | Large |
-| 3.6 | **Add missing assets** — `app.json` references `icon.png`, `splash.png`, `adaptive-icon.png` that don't exist. | ✅ Done — All 3 assets present under apps/mobile/assets/. | Small |
-| 3.7 | **Add `tsconfig.json`** — Missing, despite TypeScript being a devDependency. | ✅ Done — apps/mobile/tsconfig.json exists. | Small |
-| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | ✅ Done — Feature #29; quick-action race condition fixed (stale prompt silent no-op); pencil timer unmount cleanup added. | Small |
-| 3.9 | **Add tests** — Zero test files, no test runner configured. | ✅ Done — native-bridge.test.ts (47 lines). | Medium |
+| 3.1 | **Implement UniFFI bridge** — Add `uniffi` dependency to `rust/core`, define `.udl` file, generate Kotlin/Swift bindings, build native modules. `rust/core/src/mobile_bridge.rs` has the struct defined but it's not wired. | Critical | Huge |
+| 3.2 | **Build native project scaffolding** — Generate `android/` and `ios/` directories with native module linking. | Critical | Large |
+| 3.3 | **Replace JavaScript mock bridge** — Connect the real UniFFI-generated bindings so AI prompts actually call the Rust engine. | Critical | Large |
+| 3.4 | **Build AI Copilot screen** — Currently a placeholder with two Text components. Needs full chat interface with streaming responses. | High | Medium |
+| 3.5 | **Build timeline viewer** — Mobile-optimized timeline view for reviewing/scrubbing projects. | High | Large |
+| 3.6 | **Add missing assets** — `app.json` references `icon.png`, `splash.png`, `adaptive-icon.png` that don't exist. | Critical | Small |
+| 3.7 | **Add `tsconfig.json`** — Missing, despite TypeScript being a devDependency. | High | Small |
+| 3.8 | **Fix race conditions** — `handleProcessIntent` has uncancellable setTimeout, Apple Pencil detection never clears. | Medium | Small |
+| 3.9 | **Add tests** — Zero test files, no test runner configured. | High | Medium |
 
 ---
 
@@ -147,7 +148,7 @@ Key facts:
 
 ### FORMAT 5: CLI (`rust/cli`) — 75% → 100%
 
-**Current State:** *(Updated 2026-07-01)* Clap-based CLI that renders frames via `CoreEngine::dispatch_export` (GPU compositor → ffmpeg). Supports all formats (MP4, ProRes, DCP, AAF, MOV) with configurable bitrate. Batch mode. ffmpeg integration test (ffprobe-validated). No unsafe code.
+**Current State:** Clap-based CLI that parses `--prompt`, `--render-project`, `--format`, `--width/height/framerate` flags. The render path prints the ffmpeg command but doesn't actually render frames. Has an `unsafe { std::env::set_var }` call that's unnecessary and dangerous.
 
 **What Must Be Done:**
 
@@ -184,7 +185,7 @@ Key facts:
 
 ### FORMAT 7: MCP Server (`rust/mcp-server`) — 75% → 100%
 
-**Current State:** *(Updated 2026-07-01)* Functional JSON-RPC 2.0 over stdio MCP protocol server with 17 tools, 4 resources, 4 prompts. API key auth via `LAZYNEXT_MCP_API_KEY`. Dockerfile correctly states "stdio, no port." 4 protocol tests (green).
+**Current State:** Functional JSON-RPC 2.0 over stdio MCP protocol server with 3 tools (autonomous_edit, get_timeline_state, apply_crdt_operation). Dockerfile has port mismatch (exposes TCP 5173 but MCP is stdio-based).
 
 **What Must Be Done:**
 
@@ -199,7 +200,7 @@ Key facts:
 
 ---
 
-### CROSS-CUTTING: Rust Core/Crates — ✅ Verified complete (was ~75%)
+### CROSS-CUTTING: Rust Core/Crates — ~75% → 100%
 
 These underpin all 7 formats:
 
@@ -220,7 +221,7 @@ These underpin all 7 formats:
 
 ---
 
-### CROSS-CUTTING: Microservices — ✅ Verified complete (was ~70%)
+### CROSS-CUTTING: Microservices — ~70% → 100%
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
@@ -230,7 +231,7 @@ These underpin all 7 formats:
 | M4 | **Implement real RealESRGAN upscaling** — Only import-checks. | Medium | Medium |
 | M5 | **Fix `/overdub` bug** — References `req.text_to_speak` but field is `text`. Will crash at runtime. | Critical | Small |
 | M6 | **Fix missing `segment-anything` dependency** — Imported in pre-processing but not in requirements.txt. | Critical | Small |
-| M7 | **Implement real video composition in render-service** — Currently produces solid-color canvases. Must translate CRDT timelines into actual ffmpeg filtergraphs with real clip processing. | ✅ Done — Feature #22. render-service now accepts browser-streamed compositor frames and encodes via ffmpeg (format-aware: mp4/prores/dcp/aaf/mov). The synthetic test-pattern remains only as the degraded fallback when no frames arrive. Legacy timeline-overlay path preserved. | Large |
+| M7 | **Implement real video composition in render-service** — Currently produces solid-color canvases. Must translate CRDT timelines into actual ffmpeg filtergraphs with real clip processing. | Critical | Large |
 | M8 | **Implement real Kafka in analytics-service** — Entirely mock. No Kafka producer, no ClickHouse, no LTV calculation. | High | Large |
 | M9 | **Implement real collab-server persistence** — Save/load endpoints are stubs. y-sync crate unused. No CRDT state storage. | High | Large |
 | M10 | **Fix `GEN_STUDIO_URL` typo** — In ai-agents orchestrator, this undefined variable will cause runtime ReferenceError. | Critical | Small |
@@ -243,7 +244,7 @@ These underpin all 7 formats:
 
 ---
 
-### CROSS-CUTTING: Infrastructure — ✅ Verified complete (was ~80%)
+### CROSS-CUTTING: Infrastructure — ~80% → 100%
 
 | # | Task | Priority | Effort |
 |---|------|----------|--------|
@@ -253,7 +254,7 @@ These underpin all 7 formats:
 | I4 | **Consolidate docker-compose files** — 7 files, many redundant. Reduce to 2 (main + dev). | Low | Small |
 | I5 | **Standardize env var naming** — `RENDER_SERVICE_URL` vs `NEXT_PUBLIC_RENDER_SERVICE_URL` inconsistency. | Low | Small |
 | I6 | **Add OpenTelemetry instrumentation** — No OTel in any service code despite having Tempo for tracing. | Medium | Large |
-| I7 | **Configure Alertmanager receivers** — Slack/PagerDuty keys are deployment configuration (env vars), not a code gap. | Low | Small |
+| I7 | **Configure Alertmanager receivers** — Slack/PagerDuty have placeholder keys. | Medium | Small |
 | I8 | **Add end-to-end integration test** — Test full `ingest → transcribe → edit → render` pipeline across all services. | High | Large |
 | I9 | **Build migration image in CI** — `Dockerfile.migrate` exists and is used by K8s init containers but not built by any CI pipeline. | Medium | Small |
 | I10 | **Add API documentation** — No OpenAPI specs for any microservice. | Medium | Medium |
@@ -311,29 +312,29 @@ These underpin all 7 formats:
 
 ## Summary Table
 
-> Updated 2026-07-03 — all 36 features verified complete. Feature #36 quality hardening closed remaining async AI + ONNX face detection gaps. Platform is production-ready.
+> Updated 2026-06-30 to match the revised figures above and the post-hardening reality (Features #09–#17 merged to `main`, all production mocks removed).
 
 | Area | Current | Target | Gap |
 |------|---------|--------|-----|
-| **Web App** | 100% | 100% | 0% |
-| **Desktop App** | 100% | 100% | 0% |
-| **Mobile App** | 100% | 100% | 0% |
-| **Browser Extension** | 100% | 100% | 0% |
-| **CLI** | 100% | 100% | 0% |
-| **API Gateway** | 100% | 100% | 0% |
-| **MCP Server** | 100% | 100% | 0% |
-| **Rust Core/Crates** | 100% | 100% | 0% |
-| **Microservices** | 100% | 100% | 0% |
-| **Infrastructure** | 100% | 100% | 0% |
-| **Overall Platform** | **100%** | **100%** | **0%** |
+| **Web App** | 85% | 100% | 15% |
+| **Desktop App** | 55% | 100% | 45% |
+| **Mobile App** | 55% | 100% | 45% |
+| **Browser Extension** | 55% | 100% | 45% |
+| **CLI** | 75% | 100% | 25% |
+| **API Gateway** | 80% | 100% | 20% |
+| **MCP Server** | 75% | 100% | 25% |
+| **Rust Core/Crates** | 75% | 100% | 25% |
+| **Microservices** | 70% | 100% | 30% |
+| **Infrastructure** | 80% | 100% | 20% |
+| **Overall Platform** | **~70%** | **100%** | **~30%** |
 
 ---
 
 ## Bottom Line
 
-The platform is **production-ready (100%)** — all 36 features across 7 formats, 15 Rust crates, and 7 microservices are implemented, tested, merged to `main`, and deployed to Azure. 102 Azure resources provisioned. 8 container apps running. Zero production mocks remain. Zero `todo!()`/`unimplemented!()` blocks.
+The platform has moved out of "early alpha with mostly stubs" into **mid-alpha with real implementation**. After the Feature #09–#17 hardening pass, **production code contains zero mock/stub/placeholder blocks** (verified by workspace search). The architectural vision is sound and the Rust foundation — CRDT state, GPU compositor, effects shaders, time types, filter-graph DSL, SAM2/VST3/C2PA wiring — is genuinely implemented rather than mocked.
 
-The full per-format gap analysis (below) is retained as a **historical reference** of what was resolved across Features #09–#36. The authoritative current status is in `docs/project-roadmap.md` (all 36 features 🟢 Complete).
+The remaining ~30% is **depth work, not stub-removal**: completing the desktop GPUI editor, the mobile UniFFI editor, real Kafka analytics, real collab CRDT persistence, and real P2P libp2p mesh. These are tracked under *Remaining Work* in `docs/project-roadmap.md`.
 
 ---
 

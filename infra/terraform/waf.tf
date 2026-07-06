@@ -454,10 +454,7 @@ resource "azurerm_application_gateway" "main" {
     # SSL certificate: import to Key Vault before production apply:
     #   az keyvault certificate import --vault-name lazynext-kv-${var.environment} \
     #     --name lazynext-tls --file lazynext.pfx
-    ssl_certificate {
-      name                = "ssl-lazynext-${var.environment}"
-      key_vault_secret_id = var.ssl_cert_secret_id
-    }
+    ssl_certificate_name = "ssl-lazynext-${var.environment}"
   }
 
   # ── Request Routing Rules ─────────────────────────────────────────────
@@ -486,9 +483,6 @@ resource "azurerm_application_gateway" "main" {
 
   lifecycle {
     ignore_changes = [
-      # SSL certificates are managed outside Terraform
-      ssl_certificate,
-      # Allow Azure Policy to update tags
       tags,
     ]
   }

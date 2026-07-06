@@ -1,8 +1,8 @@
 # ── Core ─────────────────────────────────────────────────────────────────
-location     = "eastus2"
-environment  = "production"
-app_domain   = "lazynext.com"
-domain_name  = "lazynext.com"
+location        = "eastus2"
+environment     = "production"
+app_domain      = "lazynext.com"
+domain_name     = "lazynext.com"
 create_dns_zone = true
 
 # ── AKS ──────────────────────────────────────────────────────────────────
@@ -38,15 +38,15 @@ cdn_sku_name        = "Premium_AzureFrontDoor"
 media_custom_domain = "media.lazynext.com"
 
 # ── Monitoring / Alerts ──────────────────────────────────────────────────
-alert_email_address           = "alerts@lazynext.ai"
-alert_slack_webhook_url       = ""
+alert_email_address             = "alerts@lazynext.ai"
+alert_slack_webhook_url         = ""
 alert_pagerduty_integration_key = ""
 
 # ── Application Gateway / WAF ────────────────────────────────────────────
-app_gateway_sku_tier   = "WAF_v2"
-app_gateway_capacity   = 3
+app_gateway_sku_tier      = "WAF_v2"
+app_gateway_capacity      = 3
 app_gateway_subnet_prefix = ["10.0.1.0/24"]
 
 # ── Backup ───────────────────────────────────────────────────────────────
-backup_retention_days  = 90
-backup_policy_time     = "02:00"
+backup_retention_days = 90
+backup_policy_time    = "02:00"

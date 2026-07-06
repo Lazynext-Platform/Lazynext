@@ -1,39 +1,32 @@
-# 📝 Changelog: Desktop GPUI Editor Completion
+# Changelog: Desktop GPUI Editor Completion
 
 > **Feature**: `20` — Desktop GPUI Editor Completion
 > **Branch**: `feature/20-desktop-gpui-editor`
-> **Started**: 2026-06-30
-> **Completed**: 2026-07-01
 
----
+## Session Note — 2026-06-30 (commit `9f007dba`)
 
-## Session Notes
+**Author**: Avas Patel
+**Context**: Stages 1-5 shipped for Feature #20.
 
-### Session Note — 2026-06-30
-- **Who**: AI Agent (opencode)
-- **Duration**: ~2 hours
-- **Worked On**: Replaced mock timeline data with real clip data from `track.clips`. Added playback controls (Play/Pause). Assessment corrected from "55% stub" to real GPUI app.
-- **Stopped At**: All tasks complete. 2 editor tests added.
-- **Blockers**: None
-- **Next Steps**: Merge to main.
+### Completed
 
----
+- **A.1** — Replaced hardcoded mock clip positions with real `track.clips` data (clip.start/end → px positions).
+- **A.2** — Fixed playhead from `frame * 2.0` to `TIMELINE_PX_PER_FRAME` scaling.
+- **B.1** — Added `is_playing` state, `toggle_playback()`, Play/Pause transport bar.
+- **C.1** — Added 2 unit tests: `test_editor_shell_creation` and `test_editor_playback_toggle`.
+- **C.2** — Corrected PLATFORM_ASSESSMENT.md FORMAT 2 section: all 8 tasks now marked Done except audio I/O.
+- **C.3** — Updated roadmap: #07 moved On Hold→Complete, #20 added as Complete.
 
-## Log
+### Deferred
 
-### 2026-06-30
+- **B.2** — Seek bar interaction on timeline ruler (playhead visible but not interactive — requires GPUI interactive model refactor).
 
-#### Phase A — Timeline
-- **[Changed]**: `apps/desktop/src/editor.rs` — Replaced hardcoded mock clip positions with real `track.clips` data
-- **[Changed]**: Clip left/width derived from `start`/`duration` frames and timeline zoom scale
-- **[Changed]**: Playhead uses `current_frame` scaled against visible timeline range (was hardcoded `* 2.0`)
+## Session Note — 2026-07-07 (Agent: opencode)
 
-#### Phase B — Playback
-- **[Added]**: Play/Pause buttons in editor toolbar
-- **[Added]**: Play loop increments `current_frame` and calls `engine.render_frame()` each tick via `cx.notify()`
-- **[Added]**: Play/pause toggle via `Rc<Cell<bool>>` closure
+**Context**: Finalized tasks.md checkboxes for already-implemented work. Created this changelog.
 
-#### Phase C — Tests + Docs
-- **[Added]**: Unit test for `EditorShell` — instantiates with mock NLEState, verifies frame data renders
-- **[Fixed]**: `PLATFORM_ASSESSMENT.md` FORMAT 2 section — corrected "1% / 25-line stub" claim
-- **[Added]**: Roadmap updated — Feature #20 marked 🟢 Complete
+### Completed
+
+- Verified A.1, A.2, B.1, C.1, C.2, C.3 all implemented in code.
+- Checked off tasks in tasks.md.
+- B.2 marked deferred (playhead visible, interaction requires GPUI model architecture refactor).
