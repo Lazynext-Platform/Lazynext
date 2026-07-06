@@ -90,8 +90,8 @@ jobs:
           - pre-processing
           - generative-studio
           - collab-server
-          - analytics-service
-           - social-publish
+           - analytics-service
+          - social-publish
     steps:
       - uses: actions/checkout@v4
 
