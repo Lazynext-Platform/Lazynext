@@ -229,7 +229,8 @@ jobs:
               --ingress external \
               --environment lazynext-capps-env-dev \
               --registry-server lazynextacrproduction.azurecr.io \
-              --registry-identity system \
+              --registry-username ${{ secrets.ACR_USERNAME }} \
+              --registry-password ${{ secrets.ACR_PASSWORD }} \
               --cpu 0.5 --memory 1.0Gi \
               --min-replicas 1 --max-replicas 3 \
               --query name -o tsv
