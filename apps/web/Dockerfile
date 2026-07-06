@@ -19,9 +19,20 @@ COPY rust/wasm/pkg /app/rust/wasm/pkg
 # Install dependencies
 RUN bun install 2>&1 | tail -3
 
+# Debug: check what bun install created
+RUN echo "=== After bun install ===" && \
+    ls -la /app/node_modules/lazynext-wasm 2>&1 && \
+    echo "=== && file node_modules/lazynext-wasm/lazynext_wasm.js 2>&1 || echo 'FILE NOT FOUND'" && \
+    file /app/node_modules/lazynext-wasm/lazynext_wasm.js 2>&1 || echo "FILE NOT FOUND"
+
 # Copy pre-built WASM package directly into node_modules (Docker COPY for real dirs)
 COPY rust/wasm/pkg/ /app/node_modules/lazynext-wasm/
 COPY rust/wasm/pkg/ /app/apps/web/node_modules/lazynext-wasm/
+
+# Debug: check after COPY
+RUN echo "=== After COPY ===" && \
+    ls -la /app/node_modules/lazynext-wasm/ 2>&1 && \
+    file /app/node_modules/lazynext-wasm/lazynext_wasm.js 2>&1 || echo "FILE NOT FOUND"
 
 # Build Next.js
 WORKDIR /app/apps/web
