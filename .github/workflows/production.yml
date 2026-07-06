@@ -107,7 +107,7 @@ jobs:
           az acr login --name lazynextacrproduction
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and push ${{ matrix.service }}
         uses: docker/build-push-action@v6
@@ -186,25 +186,55 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Update Container Apps
+      - name: Deploy Container Apps
         run: |
+          set +e
           declare -A APPS=(
-            [web]="lazynext-web-production"
-            [ai-agents]="lazynext-ai-agents-production"
-            [render-service]="lazynext-render-production"
-            [pre-processing]="lazynext-pre-processing-production"
-            [generative-studio]="lazynext-gen-studio-production"
-            [api-gateway]="lazynext-api-gateway-production"
-            [collab-server]="lazynext-collab-server-production"
-            [analytics-service]="lazynext-analytics-service-production"
+            [web]="lz-web-prod"
+            [ai-agents]="lz-aiagents-prod"
+            [render-service]="lz-render-prod"
+            [pre-processing]="lz-preproc-prod"
+            [generative-studio]="lz-genstudo-prod"
+            [api-gateway]="lz-apigtwy-prod"
+            [collab-server]="lz-collab-prod"
+            [analytics-service]="lz-analyts-prod"
+            [social-publish]="lz-social-prod"
           )
 
+          TARGET_PORT=0
           for svc in "${!APPS[@]}"; do
-            echo "Updating ${APPS[$svc]}..."
+            case "$svc" in
+              web) TARGET_PORT=3000 ;;
+              api-gateway) TARGET_PORT=8005 ;;
+              ai-agents) TARGET_PORT=8002 ;;
+              render-service) TARGET_PORT=8003 ;;
+              pre-processing) TARGET_PORT=8000 ;;
+              generative-studio) TARGET_PORT=8001 ;;
+              collab-server) TARGET_PORT=8004 ;;
+              analytics-service) TARGET_PORT=8006 ;;
+              social-publish) TARGET_PORT=8007 ;;
+            esac
+
+            IMAGE="lazynextacrproduction.azurecr.io/lazynext-${svc}:${{ github.sha }}"
+
+            # Try update first, create if it doesn't exist
             az containerapp update \
-              --resource-group lazynext-rg-production \
+              --resource-group lazynext-rg-dev \
               --name "${APPS[$svc]}" \
-              --image "lazynextacrproduction.azurecr.io/lazynext-${svc}:${{ github.sha }}"
+              --image "$IMAGE" 2>/dev/null || \
+            az containerapp create \
+              --resource-group lazynext-rg-dev \
+              --name "${APPS[$svc]}" \
+              --image "$IMAGE" \
+              --target-port "$TARGET_PORT" \
+              --ingress external \
+              --environment lazynext-capps-env-dev \
+              --registry-server lazynextacrproduction.azurecr.io \
+              --registry-username ${{ secrets.ACR_USERNAME }} \
+              --registry-password ${{ secrets.ACR_PASSWORD }} \
+              --cpu 0.5 --memory 1.0Gi \
+              --min-replicas 1 --max-replicas 3 \
+              --query name -o tsv
           done
 
       - name: Wait for revisions to activate

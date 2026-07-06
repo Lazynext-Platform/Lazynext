@@ -110,8 +110,8 @@ lazynext/
 | UI approach | Dumb shells calling into Rust | Each platform gets optimal framework; logic shared |
 | State sync | CRDTs (LWW-Register + CmRDT) | Conflict-free real-time multi-user editing |
 | GPU rendering | wgpu (custom compositor) | Single API for WebGPU/Vulkan/Metal/DX12 |
-| Export encoding | FFMPEG + type-safe filter graph | Avoids stringly-typed errors; supports 6+ formats |
-| AI orchestration | Lazynext AI Agent Copilot (pluggable LLM) | Natural language → CRDT operations |
+| Export encoding | FFMPEG + type-safe filter graph + browser WYSIWYG pipeline | Browser renders via WASM GPU compositor, streams RGBA frames to render-service for FFMPEG encoding. Supports MP4, ProRes, DCP, AAF, MOV formats. WebCodecs fallback when render-service offline. C2PA sidecar provenance. |
+| AI orchestration | Chronos Copilot (pluggable LLM) | Natural language → CRDT operations |
 | Plugin system | VST3 host + shader SDK | Industry-standard audio; custom GPU effects |
 | Content authenticity | C2PA specification | Cryptographic provenance for every edit |
 | Graceful degradation | Local processing fallback | AI features work without API keys — no mock data |

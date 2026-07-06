@@ -14,7 +14,7 @@ dashmap = "6"
 jsonwebtoken = "10"
 base64 = "0.22"
 uuid = { version = "1.0", features = ["v4"] }
-sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-rustls", "uuid", "json", "macros"] }
+sqlx = { version = "0.9", features = ["postgres", "runtime-tokio", "tls-rustls", "uuid", "json", "macros"] }
 dotenvy = "0.15"
 opentelemetry = "0.32.0"
 opentelemetry_sdk = { version = "0.32.1", features = ["rt-tokio"] }
