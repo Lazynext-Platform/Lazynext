@@ -66,8 +66,3 @@ scripts
 
 # Logs
 *.log
-
-# Explicitly include pre-built WASM package (Docker COPY needs these)
-!rust/wasm/pkg/*.wasm
-!rust/wasm/pkg/*.js
-!rust/wasm/pkg/*.d.ts

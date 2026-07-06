@@ -95,13 +95,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify WASM files in workspace
-        run: |
-          echo "=== WASM pkg contents ==="
-          ls -la rust/wasm/pkg/
-          wc -c rust/wasm/pkg/lazynext_wasm_bg.wasm
-          du -sh rust/wasm/pkg/
-
       - name: Azure OIDC Login
         uses: azure/login@v2
         with:
