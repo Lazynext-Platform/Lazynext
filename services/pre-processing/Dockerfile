@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps
+ARG CACHE_DATE=0
 COPY services/pre-processing/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
@@ -50,8 +51,11 @@ RUN mkdir -p /tmp/preprocessing && chown -R mlrunner:python /tmp/preprocessing
 
 USER mlrunner
 
+# Runtime fix: disable numba JIT for Python 3.13 compatibility
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV NUMBA_CACHE_DIR=/tmp
+ENV NUMBA_DISABLE_JIT=1
 ENV PORT=8000
 
 EXPOSE 8000
