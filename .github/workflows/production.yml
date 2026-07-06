@@ -218,11 +218,11 @@ jobs:
 
             # Try update first, create if it doesn't exist
             az containerapp update \
-              --resource-group rg-lazynext-prod \
+              --resource-group lazynext-rg-dev \
               --name "${APPS[$svc]}" \
               --image "$IMAGE" 2>/dev/null || \
             az containerapp create \
-              --resource-group rg-lazynext-prod \
+              --resource-group lazynext-rg-dev \
               --name "${APPS[$svc]}" \
               --image "$IMAGE" \
               --target-port "$TARGET_PORT" \
