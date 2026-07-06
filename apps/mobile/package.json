@@ -19,7 +19,7 @@
     "expo-face-detector": "~13.0.2",
     "expo-gl": "~15.0.4",
     "expo-media-library": "~18.0.3",
-    "expo-status-bar": "~56.0.4",
+    "expo-status-bar": "~57.0.0",
     "react": "19.2.7",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "^3.0.2",
