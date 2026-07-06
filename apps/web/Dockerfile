@@ -25,6 +25,10 @@ RUN echo "=== After bun install ===" && \
     echo "=== && file node_modules/lazynext-wasm/lazynext_wasm.js 2>&1 || echo 'FILE NOT FOUND'" && \
     file /app/node_modules/lazynext-wasm/lazynext_wasm.js 2>&1 || echo "FILE NOT FOUND"
 
+# Debug: copy and check what's in the wasm package
+COPY rust/wasm/pkg/ /tmp/wasm-check/
+RUN echo "=== Build context ===" && ls -la /tmp/wasm-check/ && wc -c /tmp/wasm-check/lazynext_wasm_bg.wasm
+
 # Copy pre-built WASM package directly into node_modules (Docker COPY for real dirs)
 COPY rust/wasm/pkg/ /app/node_modules/lazynext-wasm/
 COPY rust/wasm/pkg/ /app/apps/web/node_modules/lazynext-wasm/
