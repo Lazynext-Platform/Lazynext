@@ -334,7 +334,7 @@ These underpin all 7 formats:
 
 The platform has moved out of "early alpha with mostly stubs" into **mid-alpha with real implementation**. After the Feature #09–#17 hardening pass, **production code contains zero mock/stub/placeholder blocks** (verified by workspace search). The architectural vision is sound and the Rust foundation — CRDT state, GPU compositor, effects shaders, time types, filter-graph DSL, SAM2/VST3/C2PA wiring — is genuinely implemented rather than mocked.
 
-The remaining ~30% is **depth work, not stub-removal**: completing the desktop GPUI editor, the mobile UniFFI editor, real Kafka analytics, real collab CRDT persistence, real P2P libp2p mesh, and porting the web's JS animation/command/mask logic to WASM. These are tracked under *Remaining Work* in `docs/project-roadmap.md`.
+The remaining ~30% is **depth work, not stub-removal**: completing the desktop GPUI editor, the mobile UniFFI editor, real Kafka analytics, real collab CRDT persistence, and real P2P libp2p mesh. These are tracked under *Remaining Work* in `docs/project-roadmap.md`.
 
 ---
 
