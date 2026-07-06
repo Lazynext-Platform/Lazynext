@@ -4,7 +4,7 @@
 > **Architecture**: [`architecture.md`](architecture.md)
 > **Branch**: `feature/34-real-video-playback-pipeline`
 > **Status**: 🟡 IN PROGRESS
-> **Progress**: 17/20 tasks complete
+> **Progress**: 18/20 tasks complete
 
 ---
 
@@ -74,7 +74,8 @@
 
 - [x] **E.1** — Add Rust integration test: decode + texture upload
   - `rust/core/tests/video_decode.rs`: 2 tests passing (real frame decode + error handling).
-- [ ] **E.2** — Add Web E2E test: upload file → render → verify
+- [x] **E.2** — Add Web E2E test: upload file → render → verify
+  - `apps/web/tests/e2e/video-pipeline.spec.ts`: 4 tests — WASM canvas presence, media pool UI, frame render stability (no crash), AI Copilot sidebar.
 - [x] **E.3** — Run full test suite: cargo test, bun test
   - 118 Rust tests + 373 web tests + 3 new tests = 494 total. All passing.
 - [ ] 📍 **Checkpoint E** — All tests pass
