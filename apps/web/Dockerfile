@@ -1,59 +1,33 @@
-# ── Stage 1: Build WASM (skipped in CI) ──
-FROM oven/bun:1.3 AS wasm-builder
-WORKDIR /wasm
-ARG SKIP_WASM_BUILD=0
-COPY build-wasm.sh /wasm/
-RUN if [ "$SKIP_WASM_BUILD" = "1" ]; then \
-      mkdir -p /wasm/rust/wasm/pkg && \
-      echo "Skipping WASM build — using pre-built artifact from CI."; \
-    else \
-      apt-get update && apt-get install -y --no-install-recommends curl build-essential ca-certificates && \
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal && \
-      . $HOME/.cargo/env && \
-      cargo install wasm-pack && \
-      rm -rf /var/lib/apt/lists/*; \
-    fi
-COPY rust/ /wasm/rust/
-RUN if [ "$SKIP_WASM_BUILD" != "1" ]; then \
-      cd /wasm && ./build-wasm.sh; \
-    else \
-      echo "Verifying pre-built WASM package..."; \
-      ls -la /wasm/rust/wasm/pkg/ 2>/dev/null || echo "WARNING: No pre-built WASM files found"; \
-      [ -f /wasm/rust/wasm/pkg/package.json ] || echo '{"name":"lazynext-wasm","version":"0.0.0","private":true,"main":"lazynext_wasm.js","types":"lazynext_wasm.d.ts"}' > /wasm/rust/wasm/pkg/package.json; \
-    fi
-
-# ── Stage 2: Build Next.js (mirrors local dev environment) ──
+# ── Build Next.js ──
 FROM oven/bun:1.3 AS builder
 
 WORKDIR /app
-
-ARG SKIP_WASM_BUILD=0
 
 # Copy workspace root config
 COPY package.json bun.lock bunfig.toml ./
 COPY biome.json ./
 COPY eslint.config.mjs ./
 
-# Copy all workspace members (needed for dependency resolution)
+# Copy workspace members
 COPY packages/ packages/
 COPY services/ services/
 COPY apps/web/ apps/web/
 
-# Copy pre-built WASM package (mirrors local dev structure)
+# Copy pre-built WASM package (real files from repo)
 COPY rust/wasm/pkg /app/rust/wasm/pkg
 
-# Install all workspace dependencies
-RUN bun install 2>&1 | tail -5
+# Install dependencies
+RUN bun install 2>&1 | tail -3
 
-# Manually create WASM symlink (bun workspace resolution doesn't work in Docker)
-RUN mkdir -p /app/apps/web/node_modules && \
-    ln -sf ../rust/wasm/pkg /app/node_modules/lazynext-wasm && \
-    ln -sf ../../rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
+# Create WASM symlink (bun workspace resolution fails in Docker)
+RUN rm -rf /app/node_modules/lazynext-wasm && \
+    ln -s ../rust/wasm/pkg /app/node_modules/lazynext-wasm && \
+    mkdir -p /app/apps/web/node_modules && \
+    rm -rf /app/apps/web/node_modules/lazynext-wasm && \
+    ln -s ../../rust/wasm/pkg /app/apps/web/node_modules/lazynext-wasm
 
 # Build Next.js
 WORKDIR /app/apps/web
-
-COPY --from=wasm-builder /wasm/rust/wasm/pkg /app/rust/wasm/pkg
 
 ENV SKIP_ENV_VALIDATION=1
 ENV MARBLE_WORKSPACE_KEY=ci-placeholder
@@ -81,7 +55,7 @@ RUN bunx next build
 
 RUN bun build migrate.ts --target=bun --outfile=migrate.js
 
-# ── Stage 3: Production runtime ──
+# ── Production runtime ──
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
