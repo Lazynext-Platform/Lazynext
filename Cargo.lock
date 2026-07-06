@@ -4833,7 +4833,7 @@ dependencies = [
  "state",
  "tokio",
  "tokio-stream",
- "tower-http 0.6.11",
+ "tower-http 0.7.0",
  "uuid",
 ]
 
