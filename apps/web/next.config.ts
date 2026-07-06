@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
 			process.env.NEXT_PUBLIC_SITE_URL || "https://lazynext.com",
 	},
 
+	// Turbopack: tell it where to find the WASM module
+	turbopack: {
+		resolveAlias: {
+			"lazynext-wasm": "../../node_modules/lazynext-wasm",
+		},
+	},
+
 	compiler: {
 		removeConsole: process.env.NODE_ENV === "production",
 	},
@@ -37,10 +44,25 @@ const nextConfig: NextConfig = {
 					{ key: "X-Content-Type-Options", value: "nosniff" },
 					{ key: "X-XSS-Protection", value: "1; mode=block" },
 					{ key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-					{
-						key: "Permissions-Policy",
-						value: "camera=(), microphone=(), geolocation=()",
-					},
+			{
+				key: "Permissions-Policy",
+				value: "camera=(), microphone=(), geolocation=()",
+			},
+			{
+				key: "Content-Security-Policy",
+				value:
+					"default-src 'self'; " +
+					"script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' 'inline-speculation-rules' https://app.posthog.com https://eu-assets.i.posthog.com; " +
+					"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+					"img-src 'self' data: blob: https:; " +
+					"font-src 'self' https://fonts.gstatic.com; " +
+					"connect-src 'self' https://app.posthog.com https://eu.i.posthog.com https://api.marblecms.com wss: ws:; " +
+					"media-src 'self' blob:; " +
+					"worker-src 'self' blob:; " +
+					"frame-src 'self'; " +
+					"base-uri 'self'; " +
+					"form-action 'self';",
+			},
 				],
 			},
 		];
@@ -71,11 +93,17 @@ const nextConfig: NextConfig = {
 		// TypeScript errors fail the build — fix them, don't bypass
 		ignoreBuildErrors: false,
 	},
-	serverExternalPackages: [],
 	webpack(config) {
 		config.experiments = {
 			...config.experiments,
 			asyncWebAssembly: true,
+		};
+		config.resolve = {
+			...config.resolve,
+			alias: {
+				...(config.resolve?.alias || {}),
+				"lazynext-wasm": "/app/rust/wasm/pkg",
+			},
 		};
 		return config;
 	},

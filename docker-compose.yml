@@ -70,12 +70,13 @@ services:
     environment:
       - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
       - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:-SET_BETTER_AUTH_SECRET_ENV_VAR}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
+      - DODO_WEBHOOK_SECRET=${DODO_WEBHOOK_SECRET:-dwhsec_placeholder}
       - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-SET_MCP_API_KEY_ENV_VAR}
       - API_GATEWAY_URL=${API_GATEWAY_URL:-http://localhost:8005}
       - REDIS_URL=redis://redis:6379/
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318/v1/traces
       - OTEL_SERVICE_NAME=api-gateway
+      - SOCIAL_PUBLISH_URL=http://social-publish:8007
     depends_on:
       db:
         condition: service_healthy
@@ -115,13 +116,13 @@ services:
       - NEXT_PUBLIC_GENERATIVE_STUDIO_URL=http://localhost:8001
       - NEXT_PUBLIC_AI_AGENTS_URL=http://localhost:8002
       - NEXT_PUBLIC_RENDER_SERVICE_URL=http://localhost:8003
+      - NEXT_PUBLIC_SOCIAL_PUBLISH_URL=http://localhost:8007
       - NEXT_PUBLIC_POSTHOG_KEY=phc_dev
       - NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
-      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_placeholder}
-      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}
-      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_placeholder}
-      - NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=${NEXT_PUBLIC_STRIPE_PRO_PRICE_ID:-price_pro_placeholder}
-      - NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID=${NEXT_PUBLIC_STRIPE_STUDIO_PRICE_ID:-price_studio_placeholder}
+      - DODO_API_KEY=${DODO_API_KEY:-dp_test_placeholder}
+      - DODO_WEBHOOK_SECRET=${DODO_WEBHOOK_SECRET:-dwhsec_placeholder}
+      - NEXT_PUBLIC_DODO_PRO_PRICE_ID=${NEXT_PUBLIC_DODO_PRO_PRICE_ID:-pro_monthly}
+      - NEXT_PUBLIC_DODO_STUDIO_PRICE_ID=${NEXT_PUBLIC_DODO_STUDIO_PRICE_ID:-studio_monthly}
       - LAZYNEXT_WEBHOOK_URL=${LAZYNEXT_WEBHOOK_URL:-}
       - LAZYNEXT_MCP_API_KEY=${LAZYNEXT_MCP_API_KEY:-SET_MCP_API_KEY_ENV_VAR}
       - RESEND_API_KEY=${RESEND_API_KEY:-re_placeholder}
@@ -143,6 +144,8 @@ services:
         condition: service_started
       ai-agents:
         condition: service_started
+      social-publish:
+        condition: service_started
     networks:
       - lazynext-network
     restart: unless-stopped
@@ -153,7 +156,7 @@ services:
       retries: 3
       start_period: 30s
 
-  # ── AI Agents (Chronos Copilot + WebSocket Sync) ──────────────
+  # ── AI Agents (Lazynext AI Copilot + WebSocket Sync) ──────────────
   ai-agents:
     build:
       context: ./services/ai-agents
@@ -167,7 +170,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - LLM_PROVIDER=${LLM_PROVIDER:-anthropic}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY:-lazynext-internal-dev-key}
       - GENERATIVE_STUDIO_URL=http://generative-studio:8001
       - PRE_PROCESSING_URL=http://pre-processing:8000
       - RENDER_SERVICE_URL=http://render-service:8003
@@ -198,7 +202,7 @@ services:
       - FFPROBE_PATH=/usr/bin/ffprobe
       - MEDIA_BUCKET=${MEDIA_BUCKET:-lazynext-media-dev}
       - STORAGE_PROVIDER=${STORAGE_PROVIDER:-local}
-      - UPSTASH_REDIS_REST_URL=redis://redis:6379
+      - REDIS_URL=redis://redis:6379
     networks:
       - lazynext-network
     restart: unless-stopped
@@ -298,11 +302,43 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=8006
+      - DATABASE_URL=postgresql://${DB_USER:-lazynext}:${DB_PASSWORD:-changeme}@db:5432/lazynext
     networks:
       - lazynext-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8006/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ── Social Publish Service ──────────────────────────────────────
+  social-publish:
+    build:
+      context: .
+      dockerfile: services/social-publish/Dockerfile
+    ports:
+      - "8007:8007"
+    environment:
+      - NODE_ENV=production
+      - PORT=8007
+      - FFMPEG_PATH=/usr/bin/ffmpeg
+      - FFPROBE_PATH=/usr/bin/ffprobe
+      - TIKTOK_CLIENT_KEY=${TIKTOK_CLIENT_KEY:-}
+      - TIKTOK_CLIENT_SECRET=${TIKTOK_CLIENT_SECRET:-}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
+      - INSTAGRAM_APP_ID=${INSTAGRAM_APP_ID:-}
+      - INSTAGRAM_APP_SECRET=${INSTAGRAM_APP_SECRET:-}
+      - TWITTER_CLIENT_ID=${TWITTER_CLIENT_ID:-}
+      - TWITTER_CLIENT_SECRET=${TWITTER_CLIENT_SECRET:-}
+      - INSTAGRAM_USER_ID=${INSTAGRAM_USER_ID:-}
+    networks:
+      - lazynext-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8007/health"]
       interval: 20s
       timeout: 5s
       retries: 3
@@ -357,6 +393,10 @@ services:
       - "9093:9093"
     volumes:
       - ./monitoring/alertmanager/config.yml:/etc/alertmanager/config.yml
+    environment:
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-https://hooks.slack.com/services/disabled}
+      - SLACK_WEBHOOK_URL_WARNING=${SLACK_WEBHOOK_URL_WARNING:-https://hooks.slack.com/services/disabled}
+      - CUSTOM_WEBHOOK_URL=${CUSTOM_WEBHOOK_URL:-https://webhook.site/disabled}
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
