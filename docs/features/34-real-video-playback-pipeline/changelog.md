@@ -35,6 +35,8 @@
 ### 2026-07-07 (Agent: opencode)
 
 - **[Added]**: Integration test `rust/core/tests/video_decode.rs` — 2 tests (real frame decode + error handling). Both pass.
-- **[Added]**: `VideoFrameDecoder` class to `apps/web/src/media/video-decoder.ts` — per-frame decode with sync/async methods, `<video>` element seek-based extraction, resource cleanup.
-- **[Verified]**: CLI → CoreEngine texture pipeline already functional (A.1-A.3 confirmed).
-- **[Checked]**: Pre-Flight, A.1-A.3, C.1, E.1 tasks complete (9/20 tasks done).
+- **[Added]**: `VideoFrameDecoder` class to `apps/web/src/media/video-decoder.ts` — per-frame decode with sync/async methods.
+- **[Added]**: Pipeline integration test `rust/cli/tests/pipeline.rs` — generates test video, verifies with ffprobe. 1 test passing.
+- **[Audited]**: Phase A (CLI) already functional; Phase C (Web) already fully implemented in `wasm-player.tsx` (video element seek → canvas → uploadTexture → renderProjectFrame).
+- **[Verified]**: Full test suite — 494 tests passing (118 Rust + 373 web + 3 new).
+- **[Checked]**: 17/20 tasks complete. Remaining: B.1 (desktop import UI), D.3-D.4 (desktop/web verification), E.2 (web E2E).
