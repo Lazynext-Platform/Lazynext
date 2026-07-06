@@ -11,7 +11,7 @@ torchvision>=0.27.1
 scikit-image>=0.26.0
 # Audio Processing
 scipy>=1.15.0
-soundfile>=0.13.0
+soundfile>=0.14.0
 # NeRF/Rotoscoping
 rembg>=2.0.76
 onnxruntime>=1.18.0
