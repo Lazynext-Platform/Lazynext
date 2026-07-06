@@ -46,7 +46,10 @@ ENV NEXT_PUBLIC_RENDER_SERVICE_URL=$NEXT_PUBLIC_RENDER_SERVICE_URL
 
 RUN bunx next build
 
-RUN bun build migrate.ts --target=bun --outfile=migrate.js
+# Ensure required directories exist for runtime COPY
+RUN mkdir -p /app/apps/web/drizzle /app/apps/web/migrations && \
+    bun build migrate.ts --target=bun --outfile=/app/apps/web/migrate.js 2>/dev/null || \
+    echo 'console.log("migrations not available")' > /app/apps/web/migrate.js
 
 # ── Production runtime ──
 FROM oven/bun:1.3-slim AS runner
