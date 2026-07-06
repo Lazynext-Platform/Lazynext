@@ -3,38 +3,38 @@ FROM oven/bun:1.3 AS builder
 
 WORKDIR /app
 
-# Layer 1: Workspace dependencies (root package.json + packages + stub wasm)
-COPY package.json bun.lock ./
-COPY packages/ packages/
-COPY services/render-service/ services/render-service/
-RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
-RUN bun install --no-lockfile
+# Copy root workspace config
+COPY package.json bun.lock bunfig.toml ./
 
-# Build the service
-WORKDIR /app/services/render-service
-RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
+# Copy packages needed by render-service (must be in packages/ for workspace:* resolution)
+COPY packages/ packages/
+
+# Copy the service itself
+COPY services/render-service/ services/render-service/
+
+# Create stub for wasm (render-service doesn't need it but bun.lock references it)
+RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
+
+# Install with workspace support
+RUN bun install --filter=lazynext-render-service --production 2>&1 | tail -5
+
+# Copy source
+COPY services/render-service/src/ services/render-service/src/
 
 # ── Stage 2: Runtime ──
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
 
-# Install FFmpeg (only runtime dep beyond Bun)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ffmpeg \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    ffmpeg curl && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs renderer
 
-# Copy production deps + source from builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/services/render-service/package.json ./
-COPY --from=builder /app/services/render-service/src/ ./src
+COPY --from=builder /app/services/render-service/ ./
 
-# Create temp directory for FFmpeg processing
-RUN mkdir -p /tmp/renders && chown -R renderer:nodejs /tmp/renders
+RUN mkdir -p /tmp/renders && chown -R renderer:nodejs /tmp/renders /app
 
 USER renderer
 
