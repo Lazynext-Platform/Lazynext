@@ -1,8 +1,8 @@
 # ── Core ─────────────────────────────────────────────────────────────────
-location     = "southeastasia"
-environment  = "dev"
-app_domain   = "lazynext.ai"
-domain_name  = "lazynext.com"
+location        = "southeastasia"
+environment     = "dev"
+app_domain      = "lazynext.ai"
+domain_name     = "lazynext.com"
 create_dns_zone = false
 
 # ── AKS ──────────────────────────────────────────────────────────────────
