@@ -4,7 +4,8 @@ uvicorn==0.50.2
 pydantic==2.13.4
 httpx>=0.28.1
 # AI Video/Audio (import-checked for production path)
-numpy>=2.5.1
+numpy>=2.2,<2.5
+numba>=0.62.0
 torch>=2.12.1
 torchaudio>=2.11.0
 diffusers>=0.38.0
@@ -25,6 +26,6 @@ opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
 opentelemetry-exporter-otlp-proto-grpc
 # Computer Vision
-opencv-python>=5.0.0.93
+opencv-python>=4.13.0.92,<5
 # Optional audio separation (requires legacy numpy/librosa - install in separate venv if needed)
 # spleeter>=2.1.0
