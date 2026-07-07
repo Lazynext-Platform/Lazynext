@@ -18,7 +18,7 @@
     "expo-camera": "~17.0.5",
     "expo-face-detector": "~13.0.2",
     "expo-gl": "~57.0.1",
-    "expo-media-library": "~18.0.3",
+    "expo-media-library": "~57.0.1",
     "expo-status-bar": "~57.0.0",
     "react": "19.2.7",
     "react-native": "0.86.0",
