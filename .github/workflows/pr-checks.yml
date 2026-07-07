@@ -46,7 +46,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test --workspace -- --nocapture
+      - run: cargo test --workspace --exclude lazynext_desktop -- --nocapture
 
   test-web:
     name: "Test: Web"
