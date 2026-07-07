@@ -9,7 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-navigation/bottom-tabs": "^7.18.2",
     "@react-navigation/native": "^7.3.3",
@@ -17,9 +17,9 @@
     "expo": "~56.0.12",
     "expo-camera": "~57.0.0",
     "expo-face-detector": "~13.0.2",
-    "expo-gl": "~15.0.4",
+    "expo-gl": "~57.0.1",
     "expo-media-library": "~18.0.3",
-    "expo-status-bar": "~56.0.4",
+    "expo-status-bar": "~57.0.0",
     "react": "19.2.7",
     "react-native": "0.86.0",
     "react-native-gesture-handler": "^3.0.2",
@@ -28,7 +28,7 @@
     "react-native-screens": "^4.25.2"
   },
   "devDependencies": {
-    "@babel/core": "7",
+    "@babel/core": "8",
     "@react-native-community/cli": "^20.2.0",
     "@types/react": "~19.2.17",
     "@types/jest": "^29.5.0",

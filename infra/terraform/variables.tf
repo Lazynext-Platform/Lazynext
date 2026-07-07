@@ -207,6 +207,12 @@ variable "cdn_sku_name" {
   }
 }
 
+variable "cdn_enabled" {
+  description = "Enable Azure Front Door CDN (disabled for Free Trial accounts)"
+  type        = bool
+  default     = true
+}
+
 variable "media_custom_domain" {
   description = "Custom domain for the media CDN endpoint"
   type        = string
