@@ -1,42 +1,30 @@
-# ── Stage 1: Build ──
-FROM oven/bun:1.3-alpine AS builder
+FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
 
-# Layer 1: Workspace dependencies (root package.json + packages + stub wasm)
-COPY package.json bun.lock ./
-COPY packages/ packages/
-COPY services/ai-agents/ services/ai-agents/
-RUN mkdir -p rust/wasm/pkg && echo '{"name":"lazynext-wasm","version":"0.0.0","private":true}' > rust/wasm/pkg/package.json
-RUN bun install --no-lockfile
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg curl && rm -rf /var/lib/apt/lists/*
 
-# Build the service
-WORKDIR /app/services/ai-agents
-RUN bun run build 2>/dev/null || echo "No build step (JS entrypoint)"
+RUN groupadd --system --gid 1001 nodejs \
+    && useradd --system --uid 1001 --gid nodejs runner
 
-# ── Stage 2: Runtime ──
-FROM oven/bun:1.3-alpine AS runner
+COPY packages/api-client/ ./packages/api-client/
+COPY services/ai-agents/src/ ./src/
+COPY services/ai-agents/package.json ./
 
-WORKDIR /app
+RUN sed -i 's/"workspace:\*"/"file:.\/packages\/api-client"/g' package.json && \
+    bun install --production 2>&1 | tail -3
 
-# Install npm/npx for MCP server support
-RUN apk add --no-cache npm
+RUN mkdir -p /tmp/output && chown -R runner:nodejs /tmp/output /app
 
-RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 -G nodejs
-
-# Copy production deps + source
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/services/ai-agents/package.json ./
-COPY --from=builder /app/services/ai-agents/src/ ./src
-
-USER nodejs
+USER runner
 
 ENV NODE_ENV=production
 ENV PORT=8002
 
 EXPOSE 8002
 
-HEALTHCHECK --interval=20s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget -qO- http://localhost:8002/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD curl -sf http://localhost:8002/health || exit 1
 
 CMD ["bun", "run", "src/index.ts"]

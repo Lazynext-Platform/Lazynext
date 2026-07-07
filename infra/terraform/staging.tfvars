@@ -1,8 +1,8 @@
 # ── Core ─────────────────────────────────────────────────────────────────
-location     = "eastus2"
-environment  = "staging"
-app_domain   = "lazynext.com"
-domain_name  = "lazynext.com"
+location        = "eastus2"
+environment     = "staging"
+app_domain      = "lazynext.com"
+domain_name     = "lazynext.com"
 create_dns_zone = false
 
 # ── AKS ──────────────────────────────────────────────────────────────────
