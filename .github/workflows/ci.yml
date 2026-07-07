@@ -157,7 +157,6 @@ jobs:
     name: "Build: Web"
     runs-on: ubuntu-latest
     needs: [lint-ts]
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -170,6 +169,8 @@ jobs:
         run: cp .env.example apps/web/.env.production
       - run: bun run build
         working-directory: apps/web
+        env:
+          SKIP_ENV_VALIDATION: "true"
 
   # build-desktop skipped on Linux CI (GPUI requires macOS)
   # build-desktop:
