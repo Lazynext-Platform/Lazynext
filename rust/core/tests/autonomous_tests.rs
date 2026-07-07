@@ -1,3 +1,8 @@
+//! Integration tests for the autonomous editor agent.
+//!
+//! Covers intent processing, job status handling, synchronous editing,
+//! serialization round-trips, and graceful degradation without API keys.
+
 use lazynext_core::NLEState;
 use lazynext_core::autonomous::{AutonomousEditor, JobStatus, VideoIntent};
 

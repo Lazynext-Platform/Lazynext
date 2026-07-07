@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_plugin_cyber_glitch"
+description = "Cyber-glitch video effect plugin: scanlines, chromatic aberration, and RGB shift"
 version = "1.0.0"
 edition = "2021"
 

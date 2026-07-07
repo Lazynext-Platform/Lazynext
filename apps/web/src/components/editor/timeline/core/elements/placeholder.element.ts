@@ -1,3 +1,5 @@
+/** @module timeline/core/elements Placeholder track element — renders a drag target for media insertion on empty tracks. */
+
 import { Size } from "../../types";
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";

@@ -1,2 +1,3 @@
+# Bun configuration — test preload for web app test setup.
 [test]
 preload = ["apps/web/setupTests.ts"]

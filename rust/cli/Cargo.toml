@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_cli"
+description = "Headless CLI renderer and automation tool for Lazynext NLE"
 version = "0.1.0"
 edition = "2024"
 

@@ -16,7 +16,9 @@ from pydantic import BaseModel, Field
 
 # ── Agent Configuration ─────────────────────────────────────────────────
 
+# Execution modes for the agent copilot.
 AgentMode = Literal["auto_execute", "plan_only", "suggest"]
+# Priority levels for behavioural rules (lowest to highest severity).
 RulePriority = Literal["low", "medium", "high", "critical"]
 
 
@@ -40,6 +42,9 @@ class AgentOptions(BaseModel):
 
 # ── Streaming Events ────────────────────────────────────────────────────
 
+# ── Streaming Events ────────────────────────────────────────────────────
+
+# Event types emitted during the streaming agent loop.
 AgentEventType = Literal[
     "thinking",
     "plan",
@@ -93,9 +98,11 @@ class CommandResult(BaseModel):
 
 # ── Suggestions ─────────────────────────────────────────────────────────
 
+# Categories of proactive suggestions the agent can offer.
 SuggestionCategory = Literal[
     "optimization", "continuity", "audio", "export", "accessibility"
 ]
+# Risk level assigned to each suggestion.
 SuggestionRisk = Literal["low", "medium", "high"]
 
 
@@ -128,7 +135,9 @@ class ConversationMemory(BaseModel):
 
 # ── Audit ───────────────────────────────────────────────────────────────
 
+# Severity levels for audit findings.
 AuditSeverity = Literal["info", "warning", "error"]
+# Estimated effort required to resolve an audit finding.
 AuditEffort = Literal["low", "medium", "high"]
 
 

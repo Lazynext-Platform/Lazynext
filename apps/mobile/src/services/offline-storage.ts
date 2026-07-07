@@ -20,6 +20,7 @@ interface CrdtOperation {
 	projectId: string;
 }
 
+/** Offline-first project storage: AsyncStorage-backed CRUD, CRDT operation queue, and sync manager. */
 export const OfflineStorage = {
 	// ── Project Storage ──
 

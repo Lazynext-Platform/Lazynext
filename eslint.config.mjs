@@ -1,3 +1,5 @@
+/** @module eslint.config ESLint flat configuration — Next.js + React + TypeScript strict + custom rules. */
+
 import js from "@eslint/js";
 import next from "@next/eslint-plugin-next";
 import eslintConfigPrettier from "eslint-config-prettier/flat";

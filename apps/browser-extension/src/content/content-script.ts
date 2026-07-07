@@ -1,5 +1,6 @@
 /** @module content/content-script Content script for browser extension video detection */
 
+/** Retrieve the stored JWT token from extension storage, or null if not authenticated. */
 async function getAuthToken(): Promise<string | null> {
 	try {
 		const result = (await chrome.storage.local.get("authToken")) as {
@@ -11,6 +12,7 @@ async function getAuthToken(): Promise<string | null> {
 	}
 }
 
+/** Build request headers with the stored auth token for API Gateway calls. */
 async function authHeaders(): Promise<Record<string, string>> {
 	const headers: Record<string, string> = { "Content-Type": "application/json" };
 	const token = await getAuthToken();

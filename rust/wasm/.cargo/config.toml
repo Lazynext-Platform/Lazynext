@@ -1,2 +1,3 @@
+# Cargo build configuration for the WASM package — enables web_sys unstable APIs.
 [build]
 rustflags = ["--cfg=web_sys_unstable_apis"]

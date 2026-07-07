@@ -1,3 +1,6 @@
+# ── Grafana Dashboard Provisioning ────────────────────────────────
+# Auto-loads dashboard JSON from dashboards/ on startup.
+# No manual import needed — dashboards appear automatically.
 apiVersion: 1
 
 providers:

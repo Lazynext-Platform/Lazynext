@@ -1,3 +1,6 @@
+# ── Loki Local Development Configuration ──────────────────────────
+# Minimal single-node config for local log aggregation during development.
+# No authentication, no clustering — simple out-of-the-box log storage.
 auth_enabled: false
 
 server:

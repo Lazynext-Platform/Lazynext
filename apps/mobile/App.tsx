@@ -363,6 +363,7 @@ function ThemedApp() {
 	);
 }
 
+/** Root mobile application: auth-gated navigation, dashboard, and editor shell. */
 export default function App() {
 	return (
 		<ThemeProvider>

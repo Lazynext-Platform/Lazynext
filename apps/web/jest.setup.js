@@ -1,8 +1,13 @@
-// Optional: configure or set up a testing framework before each test.
-// If you delete this file, remove `setupFilesAfterEnv` from `jest.config.js`
+/**
+ * @module jest.setup
+ * @description Test environment setup for Jest.
+ *
+ * Configures @testing-library/jest-dom matchers and polyfills
+ * window.matchMedia for components that query media breakpoints.
+ *
+ * If you delete this file, remove `setupFilesAfterEnv` from `jest.config.js`.
+ */
 
-// Used for __tests__/testing-library.js
-// Learn more: https://github.com/Lazynext-Corporation/jest-dom
 import "@testing-library/jest-dom";
 
 // Mock matchMedia

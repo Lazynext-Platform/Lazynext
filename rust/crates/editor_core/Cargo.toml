@@ -1,5 +1,6 @@
 [package]
 name = "editor_core"
+description = "Editor core: WASM-exported CRDT timeline, color grading, silence detection, and processing pipeline"
 version = "0.1.0"
 edition = "2024"
 

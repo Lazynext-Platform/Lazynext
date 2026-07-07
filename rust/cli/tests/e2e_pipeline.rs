@@ -1,3 +1,8 @@
+//! End-to-end CLI pipeline tests.
+//!
+//! Verifies the full edit→render→ffprobe round-trip, pipe mode, batch
+//! rendering, and ingest subcommand — all with graceful skip-on-missing.
+
 use std::process::Command;
 
 /// Test that the CLI renders a valid MP4 file from the edit pipeline.

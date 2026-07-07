@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 // @ts-ignore — native module available only on device; JS fallback below
 import MyModule from "../modules/lazynext-native/src/MyModule";
 
+/** Apple Pencil pressure, tilt, and azimuth state pushed from the native layer. */
 export interface ApplePencilState {
 	pressure: number;
 	tilt: { x: number; y: number };
@@ -20,6 +21,7 @@ interface PencilCapabilities {
 type PencilCallback = (state: ApplePencilState) => void;
 type ConnectivityCallback = (isConnected: boolean) => void;
 
+/** Bridge to native module: project CRUD, AI intent processing, chat, and clip manipulation. */
 export const NativeBridge = {
   async fetchProject(): Promise<{
     name: string;

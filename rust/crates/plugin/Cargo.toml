@@ -1,5 +1,6 @@
 [package]
 name = "plugin"
+description = "Third-party plugin host: Boa JavaScript runtime, WASM sandbox, compositor integration"
 version = "0.1.0"
 edition = "2024"
 

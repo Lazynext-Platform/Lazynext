@@ -1,3 +1,5 @@
+/** @module storage/migrations Transform v13 project records to v14 format — additive migration only, preserves old fields. */
+
 import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";
 

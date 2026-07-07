@@ -1,3 +1,4 @@
+/** @module panels/properties Property param field — renders number, color, boolean, and select controls for effect parameters. */
 "use client";
 
 import type {

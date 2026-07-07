@@ -1,3 +1,6 @@
+// MainApplication.kt — Lazynext Android application class.
+// Registers Expo modules, handles dark-mode configuration, and initialises React Native.
+
 package com.anonymous.lazynextmobile
 
 import android.app.Application

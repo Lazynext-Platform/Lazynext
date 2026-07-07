@@ -1,3 +1,9 @@
+//! GPUI desktop application entry point.
+//!
+//! Initialises the CoreEngine, sets up the main window with the
+//! dashboard, and starts the native event loop.  All business logic
+//! lives in `rust/core/`; this file is a thin rendering shell.
+
 use gpui::prelude::*;
 use gpui::*;
 use lazynext_core::NLEState;

@@ -1,3 +1,10 @@
+/**
+ * Database column migration script.
+ *
+ * Adds the "order" column to the tracks table. Reads DB credentials
+ * interactively from environment and tries multiple auth combinations.
+ */
+
 const { Client } = require("pg");
 
 async function tryAuth(user, pass, dbName) {

@@ -43,6 +43,7 @@ const PRESET_FILTERS: FilterItem[] = [
 	{ id: "bg_neon", label: "Neon BG", type: "background" },
 ];
 
+/** AR face filter preview with real-time background replacement and filter carousel. */
 export function ARPreview() {
 	const [activeFilter, setActiveFilter] = useState<string>("none");
 	const [faces, setFaces] = useState<FaceBounds[]>([]);

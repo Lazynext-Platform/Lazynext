@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_p2p_sync"
+description = "P2P sync engine: mDNS discovery, CRDT state exchange, project import/export over LAN"
 version = "0.1.0"
 edition = "2024"
 

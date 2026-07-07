@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_mcp_server"
+description = "MCP server: exposes NLE tools, timeline search, slash commands, and project management to AI agents"
 version = "0.1.0"
 edition = "2024"
 

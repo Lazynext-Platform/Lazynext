@@ -11,6 +11,7 @@ interface UseApplePencilResult {
 	supported: boolean;
 }
 
+/** React hook that subscribes to Apple Pencil pressure, tilt, and azimuth events via NativeBridge. */
 export function useApplePencil(): UseApplePencilResult {
 	const [state, setState] = useState<ApplePencilState>({
 		pressure: 0,

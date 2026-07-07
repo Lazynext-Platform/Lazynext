@@ -1,3 +1,9 @@
+//! Orchestrator → CRDT round-trip integration tests.
+//!
+//! Verifies that orchestraor-style JSON patches normalised by the TS
+//! adapter (EntityInsert/EntityDelete/PropertyUpdate) deserialize and
+//! apply correctly to the entity graph.
+
 #[cfg(test)]
 mod orchestrator_crdt_tests {
     use serde_json::json;

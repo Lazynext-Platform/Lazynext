@@ -1,3 +1,10 @@
+# ── Lazynext Workspace ─────────────────────────────────────────────────
+# Enterprise-grade, multi-platform AI-native Non-Linear Video Editor (NLE).
+# Rust owns all business logic; every app is a dumb rendering shell.
+# Monorepo root: managed with Cargo workspaces (Rust) + Bun (TypeScript).
+# See AGENTS.md for conventions and docs/mastery.md for the AI agent protocol.
+# ────────────────────────────────────────────────────────────────────────
+
 [workspace]
 resolver = "2"
 members = [

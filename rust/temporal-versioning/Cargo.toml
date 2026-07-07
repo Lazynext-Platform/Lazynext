@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_temporal_versioning"
+description = "Temporal versioning: multiverse branching/merging, timeline forks, and CRDT-based history replay"
 version = "0.1.0"
 edition = "2024"
 

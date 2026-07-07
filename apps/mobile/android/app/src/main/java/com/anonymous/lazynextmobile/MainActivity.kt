@@ -1,3 +1,6 @@
+// MainActivity.kt — Lazynext Android launcher activity.
+// Handles deep links, edge-to-edge rendering, and initial props configuration.
+
 package com.anonymous.lazynextmobile
 
 import android.os.Build

@@ -1,5 +1,6 @@
 [package]
 name = "bridge"
+description = "Proc-macro bridge: enforces Rust↔JS field alignment, derive macros, and FFI glue"
 version = "0.1.0"
 edition = "2024"
 

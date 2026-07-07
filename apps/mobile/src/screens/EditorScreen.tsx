@@ -28,6 +28,7 @@ interface MaskPoint {
 	pressure: number;
 }
 
+/** Full editor screen with timeline, mask drawing, and voice control. */
 export const EditorScreen = () => {
 	const [clips, setClips] = useState<Clip[]>([]);
 	const [currentFrame, setCurrentFrame] = useState(0);

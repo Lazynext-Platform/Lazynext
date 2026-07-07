@@ -1,6 +1,6 @@
 # Features
 
-Each subdirectory documents a Lazynext feature. Features 01–17 are retroactive summaries (completed before Mastery adoption); features 18–36 have full lifecycle docs (discussion → architecture → tasks → testplan → motto → changelog → review).
+Each subdirectory documents a Lazynext feature. Features 01–17 are mostly retroactive summaries (completed before Mastery adoption) with the exception of #09 which has full lifecycle docs. Features 18–36 have full lifecycle docs (discussion → architecture → tasks → testplan → motto → changelog → review).
 
 | # | Feature | Status | Type |
 |---|---------|--------|------|

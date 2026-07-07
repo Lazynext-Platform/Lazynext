@@ -1,3 +1,6 @@
+// AppDelegate.swift — Lazynext iOS application entry point.
+// Initialises Expo modules and React Native, forwards URL schemes and universal links.
+
 internal import Expo
 import React
 import ReactAppDependencyProvider

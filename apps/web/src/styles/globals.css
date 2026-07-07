@@ -1,3 +1,5 @@
+/* Lazynext Design System — CSS custom properties for light/dark themes, spacing, radii, and shadows. */
+
 :root {
   --bg-primary: #0a0a0c;
   --bg-secondary: rgba(25, 25, 30, 0.65);

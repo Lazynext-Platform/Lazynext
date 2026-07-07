@@ -1,3 +1,10 @@
+/**
+ * Resend Email Test — v2
+ *
+ * Sends a verification email via the Resend API.
+ * Same as test-email.js but uses a hardcoded sender domain.
+ */
+
 const { Resend } = require("resend");
 require("dotenv").config({ path: ".env.local" });
 

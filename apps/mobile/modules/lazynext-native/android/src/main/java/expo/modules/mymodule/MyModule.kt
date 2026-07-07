@@ -1,3 +1,7 @@
+// MyModule.kt — Lazynext Android native bridge.
+// Exposes project info, AI intent processing, and clip CRUD to React Native
+// via Expo Modules.  Delegates to the Rust UniFFI bindings for core logic.
+
 package expo.modules.mymodule
 
 import expo.modules.kotlin.modules.Module

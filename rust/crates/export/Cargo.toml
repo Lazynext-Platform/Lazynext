@@ -1,5 +1,6 @@
 [package]
 name = "lazynext-export"
+description = "Export pipeline: MP4, ProRes, DCP, AAF encoding; async frame rendering with FFMPEG backend"
 version = "0.1.0"
 edition = "2024"
 

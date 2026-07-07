@@ -13,6 +13,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 
+/** Resolve the Better Auth HS256 secret from env, Docker secret file, or dev fallback. */
 function getSecret(): string {
 	const envSecret = process.env.BETTER_AUTH_SECRET;
 	if (envSecret && envSecret.length >= 32) return envSecret;
@@ -44,6 +45,7 @@ interface AuthUser {
 	exp: number;
 }
 
+/** Verify a JWT token and return parsed claims, or null on failure. */
 function verifyToken(token: string): AuthUser | null {
 	try {
 		const secret = getSecret();

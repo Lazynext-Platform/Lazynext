@@ -1,6 +1,7 @@
 /** @module Native module declaration for the Lazynext mobile bridge — exposes project and timeline operations to React Native. */
 import { NativeModule, requireNativeModule } from 'expo';
 
+/** Expo native module: project info, AI intent processing, and clip CRUD. */
 declare class MyModule extends NativeModule<{}> {
   getProjectInfo(): Promise<string>;
   processIntent(prompt: string, isChat: boolean): Promise<string>;

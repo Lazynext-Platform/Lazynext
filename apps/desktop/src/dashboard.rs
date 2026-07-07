@@ -1,3 +1,8 @@
+//! Project dashboard shell.
+//!
+//! Renders the project list, recent files, create/delete buttons,
+//! and hands off to the EditorShell when a project is opened.
+
 use crate::editor::EditorShell;
 use crate::theme::Theme;
 use gpui::prelude::FluentBuilder;

@@ -1,3 +1,11 @@
+/**
+ * Ethereal Email Test Script
+ *
+ * Creates a disposable Ethereal test account and sends a verification
+ * email through it. Open the preview URL to inspect the rendered email
+ * without delivering to a real inbox.
+ */
+
 import nodemailer from "nodemailer";
 async function main() {
 	const account = await nodemailer.createTestAccount();

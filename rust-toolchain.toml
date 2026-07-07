@@ -1,3 +1,5 @@
+# Rust toolchain override — pins the workspace to a known-good version
+# with all required components (rustfmt, clippy, rust-analyzer, rust-src).
 [toolchain]
 channel = "1.96.0"
 components = [ "rustfmt", "clippy", "rust-analyzer", "rust-src" ]

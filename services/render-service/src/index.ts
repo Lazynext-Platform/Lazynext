@@ -58,6 +58,7 @@ app.get("/health", async (_req: Request, res: Response) => {
 
 app.use(authMiddleware);
 
+/** Resolve the C2PA signing secret from env, Docker secret, or generate a dev fallback. */
 function getC2PASecret(): string {
 	const secret = process.env.C2PA_SIGNING_SECRET || process.env.BETTER_AUTH_SECRET;
 	if (secret && secret.length >= 16) return secret;
@@ -68,6 +69,7 @@ function getC2PASecret(): string {
 	return require("crypto").randomBytes(32).toString("hex");
 }
 
+/** Build the allowlist of download origins (Azure Blob, CDN, lazynext domains). */
 function getAllowedDownloadOrigins(): string[] {
 	return [
 		process.env.AZURE_STORAGE_ACCOUNT
@@ -79,6 +81,7 @@ function getAllowedDownloadOrigins(): string[] {
 	].filter(Boolean) as string[];
 }
 
+/** Normalise a Web ReadableStream or Node.js Readable stream into an async iterable of Buffers. */
 async function* convertToAsyncIterable(
 	body: ReadableStream<Uint8Array> | NodeJS.ReadableStream,
 ): AsyncIterable<Buffer> {

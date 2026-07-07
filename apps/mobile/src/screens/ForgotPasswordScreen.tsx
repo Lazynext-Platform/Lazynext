@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
+/** Forgot password screen — requests a password reset email via the auth service. */
 export function ForgotPasswordScreen({ navigation }: { navigation: any }) {
 	const { requestPasswordReset } = useAuth();
 	const [email, setEmail] = useState("");

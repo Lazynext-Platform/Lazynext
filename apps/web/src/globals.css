@@ -1,3 +1,5 @@
+/* Lazynext Design System — global styles, Tailwind v4 directives, and custom CSS variables. */
+
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap");
 @import "tailwindcss";
 @source "./**/*.{js,ts,jsx,tsx,mdx}";

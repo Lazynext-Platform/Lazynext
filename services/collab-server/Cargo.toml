@@ -1,5 +1,6 @@
 [package]
 name = "collab-server"
+description = "WebSocket collaboration server: JWT rooms, CRDT broadcasting, WebRTC signaling"
 version = "0.1.0"
 edition = "2021"
 

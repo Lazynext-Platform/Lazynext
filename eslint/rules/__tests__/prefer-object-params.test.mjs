@@ -1,3 +1,5 @@
+/** @module eslint/rules/__tests__ Test suite for the prefer-object-params custom ESLint rule. */
+
 import { afterAll, describe, it } from "bun:test";
 import { RuleTester } from "eslint";
 import tseslint from "typescript-eslint";

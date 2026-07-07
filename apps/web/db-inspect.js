@@ -1,3 +1,10 @@
+/**
+ * Database inspection script.
+ *
+ * Connects to PostgreSQL via DATABASE_URL (supports Unix sockets),
+ * lists all tables with row counts, and inspects user/project records.
+ */
+
 // Quick database inspection script
 const { Pool } = require("pg");
 
