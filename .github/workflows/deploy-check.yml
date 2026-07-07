@@ -194,8 +194,6 @@ jobs:
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # ── STEP 4: Database Migration Check ──────────────────────────
   migration-check:
