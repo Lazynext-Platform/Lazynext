@@ -6,7 +6,6 @@
  *
  * @module app/api/authtest/route
  */
- */
 
 import { NextResponse } from "next/server";
 import { auth } from "@/auth/server";

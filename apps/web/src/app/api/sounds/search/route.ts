@@ -3,10 +3,9 @@
  *
  * Proxies sound searches to the Freesound API with rate limiting,
  * parameter validation, filter presets for songs/effects, and
+ * response transformation.
  *
  * @module app/api/sounds/search/route
- */
- * response transformation.
  */
 
 import { webEnv } from "@/env/web";

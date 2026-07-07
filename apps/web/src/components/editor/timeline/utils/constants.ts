@@ -5,13 +5,6 @@
  * @example
  * @module components/editor/timeline/utils/constants
  */
- * ```js
- * import { TRACK_TYPES } from '@twick/timeline';
- *
- * editor.addTrack("Video", TRACK_TYPES.VIDEO);
- * const captionsTrack = editor.getCaptionsTrack(); // first track with type TRACK_TYPES.CAPTION
- * ```
- */
 export const TRACK_TYPES = {
 	/** Video track – video clips */
 	VIDEO: "video",

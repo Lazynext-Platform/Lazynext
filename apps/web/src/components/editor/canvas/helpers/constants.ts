@@ -5,17 +5,6 @@
  * @example
  * @module components/editor/canvas/helpers/constants
  */
- * ```js
- * import { DEFAULT_TEXT_PROPS } from '@twick/canvas';
- *
- * const textElement = {
- *   ...DEFAULT_TEXT_PROPS,
- *   text: "Hello World",
- *   x: 100,
- *   y: 100
- * };
- * ```
- */
 export const DEFAULT_TEXT_PROPS = {
 	/** Font family for text elements */
 	family: "Poppins",
