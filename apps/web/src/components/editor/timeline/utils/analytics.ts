@@ -5,14 +5,6 @@
  * @example
  * @module components/editor/timeline/utils/analytics
  */
- * ```typescript
- * // Disable analytics via environment variable
- * // VITE_TWICK_ANALYTICS_ENABLED=false
- *
- * // Or via config
- * <TimelineProvider analytics={{ enabled: false }} />
- * ```
- */
 
 import { PostHog } from "posthog-js";
 import { getPackageVersion, getPackageName } from "./version";

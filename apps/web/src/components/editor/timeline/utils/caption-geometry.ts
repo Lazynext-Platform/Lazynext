@@ -6,7 +6,6 @@
  *
  * @module components/editor/timeline/utils/caption-geometry
  */
- */
 
 import { CAPTION_STYLE } from "./constants";
 

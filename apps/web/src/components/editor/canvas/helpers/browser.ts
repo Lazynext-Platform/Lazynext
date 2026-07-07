@@ -5,15 +5,6 @@
  * @example
  * @module components/editor/canvas/helpers/browser
  */
- * ```js
- * import { isBrowser } from '@twick/canvas';
- *
- * if (isBrowser) {
- *   // Browser-specific code
- *   console.log('Running in browser');
- * }
- * ```
- */
 export const isBrowser = typeof window !== "undefined";
 
 /**
