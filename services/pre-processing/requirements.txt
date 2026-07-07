@@ -4,7 +4,7 @@ uvicorn==0.49.0
 pydantic==2.13.4
 httpx==0.28.1
 # ML/Computer Vision
-numpy>=2.0.0
+numpy>=2.5.1
 opencv-python>=4.13.0.92
 torch>=2.12.1
 torchvision>=0.27.1
@@ -14,13 +14,13 @@ scipy>=1.15.0
 soundfile>=0.14.0
 # NeRF/Rotoscoping
 rembg>=2.0.76
-onnxruntime>=1.18.0
+onnxruntime>=1.27.0
 pillow>=12.2.0
 # Security: transitive dependency minimums
 urllib3>=2.7.0
 requests>=2.34.2
 jinja2>=3.1.6
-filelock>=3.29.4
+filelock>=3.29.5
 idna>=3.18
 # Observability
 opentelemetry-api

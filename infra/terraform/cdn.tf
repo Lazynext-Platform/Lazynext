@@ -1,6 +1,7 @@
 # ── Azure Front Door CDN (Media Delivery) ──────────────────────────────────
 # Global anycast CDN fronted by a WAF policy. Serves media blobs from the
 # Lazynext storage account at media.lazynext.ai with managed TLS.
+# Disabled in dev (set cdn_enabled = false in tfvars) — Free Trial restriction.
 
 # ── Front Door Profile ──────────────────────────────────────────────────────
 
