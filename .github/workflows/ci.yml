@@ -163,22 +163,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: jetli/wasm-pack-action@v0.4.0
       - run: ./build-wasm.sh
+      - name: Setup build env
+        run: cp .env.docker apps/web/.env.production
       - run: bun run build
         working-directory: apps/web
-        env:
-          DATABASE_URL: postgresql://lazynext:placeholder@localhost:5432/lazynext
-          BETTER_AUTH_SECRET: ci-build-placeholder-64-chars-minimum-xxxxxxxxxxxxxxxxxxxxxxx
-          DODO_API_KEY: dp_ci_test_key
-          DODO_WEBHOOK_SECRET: dwhsec_ci_test_key
-          RESEND_API_KEY: re_ci_test_key
-          UPSTASH_REDIS_REST_URL: http://localhost:8079
-          UPSTASH_REDIS_REST_TOKEN: mock-token
-          NEXT_PUBLIC_POSTHOG_KEY: phc_ci_test
-          NEXT_PUBLIC_POSTHOG_HOST: https://app.posthog.com
-          NEXT_PUBLIC_APP_URL: http://localhost:3000
-          STORAGE_PROVIDER: local
-          LLM_PROVIDER: gemini
-          GEMINI_API_KEY: ci-test-key
 
   # build-desktop skipped on Linux CI (GPUI requires macOS)
   # build-desktop:
