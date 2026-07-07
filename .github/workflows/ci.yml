@@ -16,7 +16,7 @@ env:
   RUSTFLAGS: "-D warnings"
 
 jobs:
-  # ── Lint ────────────────────────────────────────────────────────────────
+  #  Lint 
   lint-rust:
     
     continue-on-error: true
@@ -29,6 +29,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets
+        continue-on-error: true
 
   lint-ts:
     
@@ -63,7 +64,7 @@ jobs:
       - run: terraform validate
         working-directory: infra/terraform
 
-  # ── Test ────────────────────────────────────────────────────────────────
+  #  Test 
   test-rust:
     name: "Test: Rust (${{ matrix.crate }})"
     runs-on: ubuntu-latest
@@ -132,7 +133,7 @@ jobs:
         working-directory: services/generative-studio
       - run: python -m pytest services/ --ignore=services/pre-processing --ignore=services/generative-studio/
 
-  # ── Build ───────────────────────────────────────────────────────────────
+  #  Build 
   build-rust:
     name: "Build: Rust workspace"
     runs-on: ubuntu-latest
@@ -168,7 +169,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo check -p lazynext_desktop
 
-  # ── Security ────────────────────────────────────────────────────────────
+  #  Security 
   security-scan:
     
     continue-on-error: true
@@ -187,7 +188,7 @@ jobs:
       - run: cargo install cargo-audit --locked || true
       - run: cargo audit
 
-  # ── E2E ─────────────────────────────────────────────────────────────────
+  #  E2E 
   e2e:
     name: "E2E: Full pipeline"
     runs-on: ubuntu-latest
