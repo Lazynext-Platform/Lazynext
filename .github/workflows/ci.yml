@@ -165,6 +165,8 @@ jobs:
       - run: ./build-wasm.sh
       - run: bun run build
         working-directory: apps/web
+        env:
+          DATABASE_URL: postgresql://lazynext:placeholder@localhost:5432/lazynext
 
   # build-desktop skipped on Linux CI (GPUI requires macOS)
   # build-desktop:
