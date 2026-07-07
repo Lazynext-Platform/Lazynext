@@ -1,6 +1,6 @@
 # ── Deploy Pre-Flight Checklist ──────────────────────────────────────────
-# Runs before deployment to validate: changelog format, migration readiness,
-# env var presence, and required GitHub secrets are configured.
+# Runs manually before deployment to validate: changelog format, migration
+# readiness, env var presence, and required GitHub secrets are configured.
 name: Deploy Pre-Flight Checklist
 
 on:
@@ -22,16 +22,6 @@ on:
         description: 'Skip security scan'
         type: boolean
         default: false
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'docker-compose.prod-full.yml'
-      - '.env.production.example'
-      - 'terraform/**'
-      - 'apps/**/Dockerfile'
-      - 'services/**/Dockerfile'
-      - 'rust/**/Dockerfile'
 
 concurrency:
   group: deploy-check-${{ github.event.pull_request.number || github.ref }}

@@ -5,8 +5,6 @@
 name: Production Deploy
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       skip_tests:
