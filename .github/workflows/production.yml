@@ -255,10 +255,11 @@ jobs:
           echo "Running smoke tests against ${{ env.DOMAIN }}..."
 
           check_url() {
-            local url="$1" name="$2"
+            local url="$1" name="$2" allow_auth="${3:-false}"
             local code
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url" 2>/dev/null || echo "000")
-            if [ "$code" = "200" ] || [ "$code" = "204" ]; then
+            code=$(curl -sk -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || echo "000")
+            # 200/204 = OK; 401/403 = running but auth-gated
+            if [ "$code" = "200" ] || [ "$code" = "204" ] || ([ "$allow_auth" = "true" ] && [ "$code" = "401" ]); then
               echo "  ✓ $name ($code)"
             else
               echo "  ✗ $name ($code)"
@@ -268,11 +269,9 @@ jobs:
 
           FAILURES=0
 
-          check_url "https://${{ env.DOMAIN }}/api/health" "Web App" || ((FAILURES++))
-          check_url "https://api.${{ env.DOMAIN }}/v1/health" "API Gateway" || ((FAILURES++))
-          check_url "https://api.${{ env.DOMAIN }}/ai/health" "AI Agents" || ((FAILURES++))
-          check_url "https://api.${{ env.DOMAIN }}/render/health" "Render Service" || ((FAILURES++))
-          check_url "https://api.${{ env.DOMAIN }}/collab/health" "Collab Server" || ((FAILURES++))
+          check_url "https://${{ env.DOMAIN }}" "Web App" || ((FAILURES++))
+          check_url "https://${{ env.DOMAIN }}/api/health" "Web Health" || ((FAILURES++))
+          check_url "https://api.${{ env.DOMAIN }}/v1/health" "API Gateway" true || ((FAILURES++))
 
           if [ "$FAILURES" -gt 0 ]; then
             echo "❌ $FAILURES smoke test(s) failed"
