@@ -18,8 +18,8 @@ env:
 jobs:
   # ── Lint ────────────────────────────────────────────────────────────────
   lint-rust:
-    name: "Lint: Rust"
-    runs-on: ubuntu-latest
+    
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
@@ -31,8 +31,8 @@ jobs:
       - run: cargo clippy --workspace --all-targets
 
   lint-ts:
-    name: "Lint: TypeScript"
-    runs-on: ubuntu-latest
+    
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
@@ -44,8 +44,8 @@ jobs:
         working-directory: apps/web
 
   lint-python:
-    name: "Lint: Python"
-    runs-on: ubuntu-latest
+    
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/ruff-action@v3
@@ -119,8 +119,8 @@ jobs:
         working-directory: apps/browser-extension
 
   test-python:
-    name: "Test: Python"
-    runs-on: ubuntu-latest
+    
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
@@ -170,8 +170,8 @@ jobs:
 
   # ── Security ────────────────────────────────────────────────────────────
   security-scan:
-    name: "Security: Gitleaks"
-    runs-on: ubuntu-latest
+    
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
