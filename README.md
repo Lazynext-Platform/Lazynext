@@ -6,6 +6,8 @@
     <a href="https://github.com/Lazynext-Platform/Lazynext/actions"><img src="https://img.shields.io/github/actions/workflow/status/Lazynext-Platform/Lazynext/ci.yml?branch=main&label=CI" alt="CI"></a>
     <a href="https://github.com/Lazynext-Platform/Lazynext/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License"></a>
     <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="Contributions"></a>
+    <a href="https://lazynext.com"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
+    <a href="https://lazynext.com"><img src="https://img.shields.io/badge/status-live-green" alt="Status"></a>
   </p>
 </div>
 

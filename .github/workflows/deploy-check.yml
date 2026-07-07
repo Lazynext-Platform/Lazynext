@@ -144,7 +144,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Check Dockerfile exists
         run: |
@@ -193,7 +193,7 @@ jobs:
           category: "deploy-check"
 
       - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         with:
           config-path: .github/gitleaks.toml
 
