@@ -1,3 +1,16 @@
+// Blend compositor — 17 Photoshop-compatible blend modes on GPU.
+//
+// Samples a base texture layer and an overlay blend layer, then applies
+// the blend mode selected by `uniforms.blend_mode`. Supports luma keying
+// via `luma_key_threshold` / `luma_key_tolerance`. Uses standard
+// separable blend functions (lum/sat/clip_color/set_lum/set_sat) derived
+// from the W3C Compositing & Blending Level 1 spec.
+//
+// Blend modes:
+//   0=Normal  1=Darken  2=Multiply  3=Color Burn  4=Lighten  5=Screen
+//   6=Add     7=Color Dodge  8=Overlay  9=Soft Light  10=Hard Light
+//   11=Difference  12=Exclusion  13=Hue  14=Saturation  15=Color  16=Luminosity
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

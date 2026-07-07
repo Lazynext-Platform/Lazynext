@@ -1,3 +1,11 @@
+// VHS tape degradation effect shader.
+//
+// Combines chromatic aberration (R/G/B channel displacement),
+// horizontal scanlines modulated by a sine wave, and temporal
+// pseudo-random noise. Intensity scales all three artifacts.
+// Time is used as a seed for the noise hash, creating animated
+// static that drifts frame-to-frame.
+
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,

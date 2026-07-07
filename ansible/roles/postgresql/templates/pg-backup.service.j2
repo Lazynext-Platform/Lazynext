@@ -1,3 +1,6 @@
+# ── PostgreSQL Daily Backup Service (systemd unit) ───────────────────
+# Runs pg_dump with gzip compression and uploads to Azure Blob Storage.
+# Triggered by pg-backup.timer at 02:00 UTC daily.
 [Unit]
 Description=Lazynext PostgreSQL Daily Backup
 After=network.target postgresql@{{ postgresql_version }}-main.service

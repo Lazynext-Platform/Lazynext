@@ -1,4 +1,7 @@
 /**
+ * Admin data tests — unit tests for admin dashboard data aggregation
+ * and metrics calculations.
+ *
  * @module lib/admin-data.test
  */
 

@@ -1,3 +1,6 @@
+# ── Performance Benchmark ────────────────────────────────────────────────
+# Runs on PRs labeled 'perf': cargo bench for Rust crates, Lighthouse CI
+# for web app, and GPU render throughput benchmarks with historical tracking.
 name: Performance Benchmark
 
 on:

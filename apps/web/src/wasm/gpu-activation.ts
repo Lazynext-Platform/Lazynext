@@ -3,6 +3,8 @@
  *
  * Activates the WebGPU compositor when the browser supports it.
  * This replaces the CPU canvas rendering path with GPU-accelerated
+ *
+ * @module wasm/gpu-activation
  * compositing using the Rust WASM wgpu pipeline.
  *
  * Prerequisites: WebGPU support (Chrome 113+, Edge 113+, Opera 99+)

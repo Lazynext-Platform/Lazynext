@@ -3,6 +3,9 @@
  *
  * Creates a Dodo Payments payment link for the authenticated user.
  * Requires a valid Better Auth session.
+ *
+ * @module app/api/dodo/checkout/route
+ */
  */
 
 import { NextResponse } from "next/server";

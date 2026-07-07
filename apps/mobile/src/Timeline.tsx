@@ -14,6 +14,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 
 
 import { NativeBridge } from "./NativeBridge";
 
+/** Draggable clip component with spring-based pan gesture and animated style. */
 const DraggableClip = ({ clip, track, onMoveClip }: { clip: any, track: any, onMoveClip: (id: string, newStart: number) => void }) => {
   const isVideo = track.trackType === "video";
   const startX = (clip.start / 30) * 10;

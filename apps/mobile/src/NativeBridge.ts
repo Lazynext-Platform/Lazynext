@@ -21,8 +21,9 @@ interface PencilCapabilities {
 type PencilCallback = (state: ApplePencilState) => void;
 type ConnectivityCallback = (isConnected: boolean) => void;
 
-/** Bridge to native module: project CRUD, AI intent processing, chat, and clip manipulation. */
+/** Bridge to native module: project CRUD, AI intent processing, chat, clip manipulation, Apple Pencil events, and offline connectivity. */
 export const NativeBridge = {
+  /** Fetch the current project metadata, tracks, and clips from the Rust core via native bridge. */
   async fetchProject(): Promise<{
     name: string;
     tracks: Array<{ id: string; name: string; trackType: string; clips: Array<{ id: string; name: string; start: number; duration: number }> }>;
@@ -51,6 +52,7 @@ export const NativeBridge = {
 		}
 	},
 
+  /** Send a natural language editing intent to the Rust Chronos AI copilot for CRDT-based timeline mutation. */
 	async processIntent(prompt: string): Promise<string> {
 		try {
 			const result = await MyModule.processIntent(prompt, false);
@@ -61,6 +63,7 @@ export const NativeBridge = {
 		}
 	},
 
+  /** Send a chat message to the Lazynext AI Agent Copilot for natural language video editing assistance. */
 	async sendChatMessage(message: string): Promise<string> {
 		const trimmed = message?.trim() || "";
 		if (!trimmed) {
@@ -78,6 +81,7 @@ export const NativeBridge = {
 		}
 	},
 
+  /** Move a clip on the timeline to a new start position in frames via the native CRDT engine. */
 	async moveClip(clipId: string, newStart: number): Promise<void> {
 		try {
 			if (!clipId || clipId.trim().length === 0) {
@@ -95,6 +99,7 @@ export const NativeBridge = {
 
 	// ── Apple Pencil Support ──
 
+	/** Query the native module for Apple Pencil hardware capabilities (pressure, tilt support). */
 	getPencilCapabilities(): Promise<PencilCapabilities> {
 		return new Promise((resolve) => {
 			if (Platform.OS !== "ios") {
@@ -128,6 +133,7 @@ export const NativeBridge = {
 		});
 	},
 
+  /** Subscribe to Apple Pencil state updates (pressure, tilt, azimuth). Returns an unsubscribe function. */
 	subscribeToPencilEvents(callback: PencilCallback): () => void {
 		pencilSubscribers.add(callback);
 		return () => {
@@ -163,6 +169,7 @@ export const NativeBridge = {
 
 	// ── Connectivity / Offline ──
 
+	/** Check network connectivity via the native module, falling back to true if unavailable. */
 	async isOnline(): Promise<boolean> {
 		try {
 			// @ts-ignore — runtime method on native module
@@ -173,6 +180,7 @@ export const NativeBridge = {
 		}
 	},
 
+  /** Subscribe to connectivity changes via NetInfo. Returns an unsubscribe function. */
 	onConnectivityChange(callback: ConnectivityCallback): () => void {
 		connectivitySubscribers.add(callback);
 

@@ -1,3 +1,5 @@
+# Pull Request Template
+
 ⚠️ READ BEFORE SUBMITTING ⚠️
 
 We are not currently accepting PRs except for critical bugs.

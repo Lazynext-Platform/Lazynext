@@ -3,6 +3,9 @@
  *
  * Proxies sound searches to the Freesound API with rate limiting,
  * parameter validation, filter presets for songs/effects, and
+ *
+ * @module app/api/sounds/search/route
+ */
  * response transformation.
  */
 

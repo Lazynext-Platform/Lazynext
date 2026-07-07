@@ -3,6 +3,8 @@
  * Returns true if window object is available, false otherwise.
  *
  * @example
+ * @module components/editor/canvas/helpers/browser
+ */
  * ```js
  * import { isBrowser } from '@twick/canvas';
  *

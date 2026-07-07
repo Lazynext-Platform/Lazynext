@@ -1,3 +1,7 @@
+# ── Production Deploy ────────────────────────────────────────────────────
+# Triggers on push to main: builds all Docker images, pushes to ACR, runs
+# database migrations (safely with backup), updates Azure Container Apps
+# revisions, and runs deployment verification.
 name: Production Deploy
 
 on:

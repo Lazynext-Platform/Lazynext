@@ -1,4 +1,5 @@
 /**
+ * @module components/editor/timeline
  * @twick/timeline - Timeline Package
  *
  * A comprehensive timeline management system for the Twick video platform.

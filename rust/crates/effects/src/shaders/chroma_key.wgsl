@@ -1,3 +1,11 @@
+// Chroma key (green screen) removal shader.
+//
+// Converts each pixel from RGB to YCbCr color space, then computes
+// the Euclidean distance in the chrominance (Cb, Cr) plane from a
+// target key color (e.g. green). Pixels within `similarity` distance
+// are made transparent via smoothstep feathering (`similarity +
+// smoothness`). Preserves original alpha for compositing.
+
 @group(0) @binding(0) var source_texture: texture_2d<f32>;
 @group(0) @binding(1) var source_sampler: sampler;
 

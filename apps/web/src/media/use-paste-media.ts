@@ -1,4 +1,7 @@
 /**
+ * Paste media hook — React hook that listens for clipboard paste events
+ * to directly import images/video into the Lazynext timeline.
+ *
  * @module media/use-paste-media
  */
 

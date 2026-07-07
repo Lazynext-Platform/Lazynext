@@ -1,3 +1,6 @@
+# ── Automated Dependency Updates ─────────────────────────────────────────
+# Runs weekly via Dependabot-like logic to open PRs for outdated npm, pip,
+# and cargo dependencies with a maximum of 5 PRs per run.
 name: Automated Dependency Updates
 
 on:

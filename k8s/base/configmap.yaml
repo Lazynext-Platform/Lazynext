@@ -1,3 +1,5 @@
+# ── Lazynext Global ConfigMap ────────────────────────────────────────────
+# Shared configuration values injected into all services via envFrom.
 apiVersion: v1
 kind: ConfigMap
 metadata:

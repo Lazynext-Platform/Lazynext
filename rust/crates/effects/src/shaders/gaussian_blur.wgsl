@@ -1,3 +1,12 @@
+// Gaussian blur — separable two-pass GPU blur.
+//
+// Applies a 1D Gaussian-weighted convolution along `uniforms.direction`
+// (horizontal or vertical). Sigma and step size are driven by
+// `uniforms.scalars.x` and `.y`. Uses a 61-tap kernel for high-
+// quality blur suitable for depth-of-field, background defocus,
+// and bloom pre-passes. The two-pass design reduces complexity
+// from O(N²) to O(2N).
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

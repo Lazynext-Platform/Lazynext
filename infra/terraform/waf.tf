@@ -1,3 +1,7 @@
+# ── Azure Application Gateway v2 with WAF ──────────────────────────────────
+# Provisions Application Gateway v2 with WAF policy (OWASP 3.2 managed
+# ruleset), public IP, backend pools, HTTP settings, probes, listeners,
+# and routing rules for the Lazynext platform front-end.
 # ── Application Gateway v2 Subnet ──────────────────────────────────────────
 
 resource "azurerm_subnet" "app_gateway" {

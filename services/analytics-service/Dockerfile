@@ -1,3 +1,6 @@
+# ── Analytics Service (Bun) ──────────────────────────────────────────────
+# Processes Kafka event streams into SQLite for business analytics: user
+# engagement, render minutes, feature adoption, and billing events.
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app

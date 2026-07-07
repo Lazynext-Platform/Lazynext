@@ -1,3 +1,5 @@
+# ── Lazynext Docker Role Handlers ────────────────────────────────────────
+# Restart containerd after Docker daemon config changes.
 ---
 - name: restart containerd
   ansible.builtin.systemd:

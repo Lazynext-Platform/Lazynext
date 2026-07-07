@@ -1,3 +1,13 @@
+// Layer transform & image adjustment on GPU.
+//
+// Applies 2D affine transforms (translate, rotate, scale, flip, crop)
+// to an input texture. Runs a full adjustment pipeline: brightness,
+// contrast, saturation, grayscale, sepia, invert, hue rotation,
+// pixelation, and edge detection. Also renders a soft SDF-based
+// drop shadow with configurable distance, angle, blur, and color.
+// Border-radius clipping uses signed-distance-field math for
+// anti-aliased rounded corners.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

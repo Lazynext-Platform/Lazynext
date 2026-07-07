@@ -1,3 +1,6 @@
+# ── Staging Overlay Kustomization ────────────────────────────────────────
+# Patches the base k8s manifests with staging config: moderate replicas,
+# staging DB endpoints, staging certificates, and feature flags.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 

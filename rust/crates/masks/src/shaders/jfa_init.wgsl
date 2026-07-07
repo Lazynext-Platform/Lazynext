@@ -1,3 +1,12 @@
+// Jump Flood Algorithm — initialization pass for seed detection.
+//
+// Identifies "seed" pixels (foreground or background based on mask
+// threshold and invert flag) and encodes their 2D pixel coordinates
+// into a 4-channel RGBA texture using a split-byte encoding scheme.
+// Non-seed pixels are set to white (no-seed sentinel). This texture
+// seeds the iterative JFA step passes that compute a Voronoi diagram
+// for mask distance-field generation.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

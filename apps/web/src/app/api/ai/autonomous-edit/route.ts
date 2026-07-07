@@ -1,6 +1,8 @@
 /**
  * Proxy: POST /api/ai/autonomous-edit → Rust API Gateway.
  * Server-side (no CORS), authenticated via internal API key.
+ *
+ * @module app/api/ai/autonomous-edit/route
  */
 import { NextResponse } from "next/server";
 import { auth } from "@/auth/server";

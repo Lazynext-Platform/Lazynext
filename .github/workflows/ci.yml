@@ -1,3 +1,6 @@
+# ── CI Pipeline ──────────────────────────────────────────────────────────
+# Runs on every push and PR: Rust (test, clippy, fmt), TypeScript (typecheck,
+# lint, build), WASM build, and Docker image builds for all 9 services.
 name: CI
 
 on:

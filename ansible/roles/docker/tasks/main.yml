@@ -1,3 +1,7 @@
+# ── Lazynext Docker Role Tasks ──────────────────────────────────────────
+# Installs Docker Engine, containerd, and Docker Compose from official
+# apt repos. Configures daemon.json, systemd cgroup driver, and
+# log rotation for production worker nodes.
 ---
 - name: Create directory for Docker GPG key
   file:

@@ -1,3 +1,9 @@
+// Simple GPU blit / texture copy via a full-screen quad.
+//
+// Passes through a texture sample without modification. Used for
+// copying framebuffers, intermediate render targets, and as the
+// baseline pipeline binding test for all GPU operations.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

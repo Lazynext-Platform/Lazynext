@@ -1,3 +1,11 @@
+// CRT monitor emulation shader.
+//
+// Simulates a curved CRT display with barrel distortion (via `curve_uv`),
+// a vignette darkening toward corners, and chromatic aberration at edges.
+// Intensity controls both the curve radius and vignette strength.
+// Out-of-bounds pixels from curvature are rendered black, mimicking
+// the bezel shadow of a real CRT tube.
+
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) tex_coords: vec2<f32>,

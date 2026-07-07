@@ -1,3 +1,10 @@
+// GPU compositor — vertex + fragment pipeline for layer composition.
+//
+// Vertex shader passes through 2D quad positions and UVs. Fragment
+// shader samples a diffuse texture and applies opacity with
+// pre-multiplied alpha from the transform uniform. Used as the
+// base layer rendering pass before blend and effect pipelines.
+
 struct VertexInput {
     @location(0) position: vec2<f32>,
     @location(1) uv: vec2<f32>,

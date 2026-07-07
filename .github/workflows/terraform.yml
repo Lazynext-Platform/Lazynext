@@ -1,3 +1,7 @@
+# ── Terraform — Infrastructure Provisioning ──────────────────────────────
+# Runs terraform plan on PRs and terraform apply on merge to main. Manages
+# the full Azure infrastructure: AKS, PostgreSQL, Redis, Storage, Key Vault,
+# CDN, DNS, WAF, and Container Apps.
 name: Terraform — Infrastructure Provisioning
 
 on:

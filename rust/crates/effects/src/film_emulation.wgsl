@@ -1,3 +1,12 @@
+// Film emulation — gate weave jitter and halation.
+//
+// Simulates two analog film artifacts: (1) Gate weave — sub-pixel
+// random jitter in X/Y from sprocket instability, driven by a
+// time-varying noise function. (2) Halation — red-channel scatter
+// around highlights (luma > 0.8), sampled from neighboring pixels
+// to approximate light bleeding through the film emulsion layer.
+// Intensity is push-constant driven.
+
 @group(0) @binding(0) var t_diffuse: texture_2d<f32>;
 @group(0) @binding(1) var s_diffuse: sampler;
 

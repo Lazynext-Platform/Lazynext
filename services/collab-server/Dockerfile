@@ -1,3 +1,6 @@
+# ── Collab Server (Rust Axum) ────────────────────────────────────────────
+# Real-time WebSocket collaboration server with CRDT state sync, presence
+# tracking, and peer discovery. Built with Axum and Rust CRDT crates.
 FROM rust:1.96-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config libssl-dev libasound2-dev curl \

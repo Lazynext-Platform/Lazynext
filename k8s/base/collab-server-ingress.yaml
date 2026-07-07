@@ -1,3 +1,6 @@
+# ── Lazynext Collab Server Ingress ───────────────────────────────────────
+# Routes WebSocket traffic to the collab-server with TLS termination
+# via cert-manager and session affinity for sticky connections.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

@@ -1,3 +1,6 @@
+# ── Weekly Security Scan ─────────────────────────────────────────────────
+# Runs Trivy vulnerability scans on all Docker images, CodeQL analysis on
+# Rust/TS/Python codebases, and Gitleaks secret detection. Blocks on CRITICAL.
 name: Weekly Security Scan
 
 on:

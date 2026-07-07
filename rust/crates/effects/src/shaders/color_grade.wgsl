@@ -1,3 +1,11 @@
+// Color grading — exposure, contrast, saturation, and white balance.
+//
+// Applies a four-stage color pipeline: (1) multiplicative exposure via
+// exp2(), (2) contrast pivot around 0.5, (3) luminance-preserving
+// saturation with Rec.709 weights, and (4) basic warm/cool white balance
+// tint. Scalars [exposure, contrast, saturation, temperature] are
+// packed in uniforms.scalars.
+
 struct Uniforms {
     resolution: vec2<f32>,
     direction: vec2<f32>,

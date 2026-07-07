@@ -1,3 +1,6 @@
+# ── Prometheus Redis Exporter (systemd unit) ───────────────────────────
+# Exposes Redis metrics (memory, connections, commands/sec) on :9121
+# for Prometheus scraping.
 [Unit]
 Description=Prometheus Redis Exporter
 After=network.target redis-server.service

@@ -1,3 +1,11 @@
+// Multi-channel Signed Distance Field (MSDF) text renderer.
+//
+// Renders glyphs from a pre-computed MSDF atlas texture. The median
+// of the R, G, B channels provides the signed distance to the glyph
+// edge, which is used for subpixel-accurate anti-aliasing. Supports
+// fill color, outline with configurable width, and a soft drop shadow
+// with offset and blur. Based on the technique by Viktor Chlumsky.
+
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,

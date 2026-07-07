@@ -3,6 +3,9 @@
  *
  * Diagnostic endpoint — returns sanitised info about the DATABASE_URL.
  * Requires admin authentication to prevent information disclosure.
+ *
+ * @module app/api/authtest/route
+ */
  */
 
 import { NextResponse } from "next/server";

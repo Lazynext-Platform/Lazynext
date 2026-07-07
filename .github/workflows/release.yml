@@ -1,3 +1,6 @@
+# ── Release ──────────────────────────────────────────────────────────────
+# Creates GitHub Releases with auto-generated changelogs. Tags Docker images,
+# publishes npm packages, crates.io releases, and signs artifacts with Cosign.
 name: Release
 
 on:

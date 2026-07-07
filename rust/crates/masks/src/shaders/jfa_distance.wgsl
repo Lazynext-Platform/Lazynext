@@ -1,3 +1,12 @@
+// Jump Flood Algorithm — final signed distance field computation.
+//
+// Combines the inside-Voronoi and outside-Voronoi outputs from JFA
+// to compute a signed distance field. For each pixel, calculates the
+// Euclidean distance to the nearest inside and outside seed, then
+// produces a signed distance (outside - inside). A smoothstep with
+// `feather_half` width creates anti-aliased soft mask edges suitable
+// for GPU-accelerated rotoscoping and segmentation masks.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

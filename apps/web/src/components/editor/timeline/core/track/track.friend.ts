@@ -3,7 +3,9 @@ import { Track } from "./track";
 
 /**
  * Friend class that provides explicit access to Track's protected methods
- * This implements the Friend Class Pattern for better encapsulation control
+ * and properties for testing and internal tooling.
+ *
+ * @module components/editor/timeline/core/track/track.friend
  */
 export class TrackFriend {
 	constructor(private track: Track) {}
