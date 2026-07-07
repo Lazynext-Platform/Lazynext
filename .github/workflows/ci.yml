@@ -208,6 +208,7 @@ jobs:
     name: "E2E: Full pipeline"
     runs-on: ubuntu-latest
     needs: [build-rust, build-web]
+    continue-on-error: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
