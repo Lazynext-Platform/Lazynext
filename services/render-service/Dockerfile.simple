@@ -1,4 +1,4 @@
-# ── Standalone render-service (local deps only) ──
+# ── Standalone render-service Dockerfile ──
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app
@@ -9,16 +9,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupadd --system --gid 1001 nodejs \
     && useradd --system --uid 1001 --gid nodejs renderer
 
-# Copy api-client package
+# Copy only what this service needs
+COPY services/render-service/package.json ./
+COPY services/render-service/src/ ./src
 COPY packages/api-client/ ./packages/api-client/
 
-# Copy service source
-COPY services/render-service/src/ ./src/
-COPY services/render-service/package.json ./
-
-# Replace workspace protocol with file: for local resolution
-RUN sed -i 's/"workspace:\*"/"file:.\/packages\/api-client"/g' package.json && \
-    bun install --production 2>&1 | tail -5
+# Install deps directly (no workspace)
+RUN bun install --production
 
 RUN mkdir -p /tmp/renders && chown -R renderer:nodejs /tmp/renders /app
 
