@@ -164,7 +164,7 @@ jobs:
       - uses: jetli/wasm-pack-action@v0.4.0
       - run: ./build-wasm.sh
       - name: Setup build env
-        run: cp .env.docker apps/web/.env.production
+        run: cp .env.example apps/web/.env.production
       - run: bun run build
         working-directory: apps/web
 
