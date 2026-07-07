@@ -3,6 +3,9 @@
  *
  * Diagnostic endpoint — connects to the database and returns the
  * list of public tables. Requires admin authentication.
+ *
+ * @module app/api/dbtest/route
+ */
  */
 
 import { NextResponse } from "next/server";

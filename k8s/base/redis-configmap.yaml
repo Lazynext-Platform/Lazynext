@@ -1,3 +1,5 @@
+# ── Lazynext Redis ConfigMap ─────────────────────────────────────────────
+# Redis connection details for Upstash or self-hosted Redis instances.
 apiVersion: v1
 kind: ConfigMap
 metadata:

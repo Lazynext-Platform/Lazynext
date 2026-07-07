@@ -1,3 +1,6 @@
+# ── Prometheus PostgreSQL Exporter (systemd unit) ─────────────────────
+# Exposes PostgreSQL metrics (connections, locks, replication lag) on
+# :9187 for Prometheus scraping.
 [Unit]
 Description=Prometheus PostgreSQL Exporter
 After=network.target postgresql@{{ postgresql_version }}-main.service

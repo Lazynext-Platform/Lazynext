@@ -1,3 +1,8 @@
+# ── Lazynext K8s Worker Role Tasks ──────────────────────────────────────
+# Installs kubeadm, kubelet, and kubectl on worker nodes. Sets up the
+# required kernel modules (overlay, br_netfilter) and sysctl params
+# for container networking. Joins the node to the control-plane after
+# provisioning.
 ---
 - name: Create directory for K8s GPG key
   file:

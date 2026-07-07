@@ -33,6 +33,7 @@ import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 
 const AuthStack = createNativeStackNavigator();
 
+/** Auth flow navigator: sign-in, sign-up, forgot password, and reset password screens. */
 function AuthNavigator() {
 	return (
 		<AuthStack.Navigator screenOptions={{ headerShown: false }}>
@@ -44,6 +45,10 @@ function AuthNavigator() {
 	);
 }
 
+	);
+}
+
+/** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
 	const [projectName, setProjectName] = useState("Loading...");
 	const [trackCount, setTrackCount] = useState(0);
@@ -208,6 +213,10 @@ function DashboardScreen() {
 	);
 }
 
+	);
+}
+
+/** AI chat screen: conversation UI for the Lazynext AI Agent Copilot. */
 function AIChatScreen() {
 	const [messages, setMessages] = useState<
 		Array<{ role: "user" | "assistant"; text: string }>
@@ -306,6 +315,7 @@ function AIChatScreen() {
 
 const Tab = createBottomTabNavigator();
 
+/** Main tab navigator: Dashboard, Camera, Editor, and AI Chat tabs. */
 function MainTabs() {
 	const { theme } = useTheme();
 
@@ -329,6 +339,7 @@ function MainTabs() {
 	);
 }
 
+/** Renders auth screens if not logged in, or the main tab navigator if authenticated. */
 function AppContent() {
 	const { session, isLoading } = useAuth();
 
@@ -349,6 +360,7 @@ function AppContent() {
 	);
 }
 
+/** Theme-aware shell wrapping the app in GestureHandlerRootView with dynamic status bar. */
 function ThemedApp() {
 	const { theme } = useTheme();
 

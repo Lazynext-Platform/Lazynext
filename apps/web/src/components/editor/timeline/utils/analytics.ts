@@ -3,6 +3,8 @@
  * Provides a safe wrapper around PostHog that respects opt-out preferences.
  *
  * @example
+ * @module components/editor/timeline/utils/analytics
+ */
  * ```typescript
  * // Disable analytics via environment variable
  * // VITE_TWICK_ANALYTICS_ENABLED=false

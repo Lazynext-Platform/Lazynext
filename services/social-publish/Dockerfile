@@ -1,3 +1,6 @@
+# ── Social Publish Service (Bun) ──────────────────────────────────────────
+# Publishes rendered exports to YouTube, TikTok, Instagram, and X/Twitter
+# via platform OAuth APIs. Runs on Bun with platform SDK dependencies.
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app

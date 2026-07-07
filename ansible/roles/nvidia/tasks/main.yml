@@ -1,3 +1,7 @@
+# ── Lazynext NVIDIA GPU Role Tasks ──────────────────────────────────────
+# Installs NVIDIA CUDA drivers, container toolkit, and runtime config
+# on GPU-equipped worker nodes for hardware-accelerated rendering,
+# AI inference (Whisper, SAM2), and Neural Engine compute shaders.
 ---
 # tasks file for nvidia
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "bun:test";
 
 /**
+ * @module components/editor/__tests__/editor-state-provider.test
  * EditorStateProvider context tests — validates exports and provider shape.
  * Full rendering tests require jsdom/browser environment.
  */

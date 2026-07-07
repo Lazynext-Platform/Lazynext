@@ -1,4 +1,7 @@
 /**
+ * Upload toast notifications — toast messages for media upload progress,
+ * completion, and error states using the Sonner toast library.
+ *
  * @module media/upload-toast
  */
 

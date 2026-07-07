@@ -1,3 +1,10 @@
+// Full-screen quad vertex shader.
+//
+// Generates a clip-space quad from NDC positions (-1 to +1) and
+// maps them to [0, 1] UV coordinates. Used as the vertex stage
+// for all full-screen post-processing passes (blit, bloom, blur,
+// color grading, etc.). No uniforms or textures needed.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

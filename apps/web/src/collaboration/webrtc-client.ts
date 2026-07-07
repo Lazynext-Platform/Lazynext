@@ -4,6 +4,8 @@
  * Establishes direct peer-to-peer connections between editors for
  * low-latency CRDT delta exchange without server hops.
  *
+ * @module collaboration/webrtc-client
+ *
  * Architecture:
  *   1. Peer A creates an RTCPeerConnection with a data channel
  *   2. Peer A generates an SDP offer and sends it to Peer B via the collab server

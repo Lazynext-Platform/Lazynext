@@ -38,9 +38,7 @@ export const EditorScreen = () => {
 	const [maskPoints, setMaskPoints] = useState<MaskPoint[]>([]);
 	const [isMaskDrawing, setIsMaskDrawing] = useState(false);
 
-	const pencil = useApplePencil();
-	const editorAreaRef = useRef<View>(null);
-
+	/** Subscribe to project, offline status, and connectivity changes on mount. */
 	useEffect(() => {
 		NativeBridge.fetchProject().then((project) => {
 			setProjectName(project.name);
@@ -81,6 +79,7 @@ export const EditorScreen = () => {
 		};
 	}, []);
 
+  /** Shows an alert with a prompt to integrate expo-image-picker for media import. */
 	const handleImportMedia = () => {
 		console.log("Import Media pressed — expo-image-picker not yet integrated.");
 		Alert.alert(

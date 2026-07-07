@@ -1,3 +1,6 @@
+# ── Lazynext Common Worker Tasks ────────────────────────────────────────
+# Base system configuration: essential packages, kernel tuning, security
+# hardening (SSH, AppArmor), and monitoring agents.
 ---
 - name: Update apt cache
   ansible.builtin.apt:

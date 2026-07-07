@@ -1,4 +1,6 @@
 {
+	// ── Lazynext VS Code Workspace Settings ───────────────────────────
+	// Prettier as default formatter, Biome for linting per-file auto-fix.
 	"[javascript][typescript][javascriptreact][typescriptreact][json][jsonc][css][graphql]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	},

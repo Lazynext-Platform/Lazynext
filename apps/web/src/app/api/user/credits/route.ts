@@ -1,4 +1,7 @@
 /**
+ * User credits API route — returns the current user's render minutes
+ * and export quota from the billing service.
+ *
  * @module app/api/user/credits
  */
 

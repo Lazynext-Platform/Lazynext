@@ -1,3 +1,6 @@
+# ── Debug SSL ────────────────────────────────────────────────────────────
+# Manual workflow to test SSL/TLS certificate configuration, verify DNS
+# propagation, and debug HTTPS issues in staging/production environments.
 name: Debug SSL
 on:
   workflow_dispatch:

@@ -1,3 +1,6 @@
+# ── Scheduled E2E — Full Matrix ──────────────────────────────────────────
+# Runs nightly across all platform combinations: macOS/Windows/Linux ×
+# Chrome/Firefox/Safari. Tests the full ingest→transcribe→edit→render pipeline.
 name: Scheduled E2E — Full Matrix
 
 on:

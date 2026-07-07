@@ -1,3 +1,6 @@
+# ── Database Backup Verification ─────────────────────────────────────────
+# Runs weekly to verify PostgreSQL backup integrity by restoring the latest
+# backup, running migrations, and validating data consistency.
 name: Database Backup Verification
 
 on:

@@ -1,4 +1,8 @@
 /**
+ * File upload hook — React hook providing drag-and-drop and file input
+ * upload with progress tracking, multiple file support, and MIME
+ * validation for the Lazynext media pipeline.
+ *
  * @module media/use-file-upload
  */
 

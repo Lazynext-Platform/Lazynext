@@ -1,3 +1,6 @@
+# ── Stale Issue & PR Hygiene ─────────────────────────────────────────────
+# Automatically closes issues/PRs after 60 days of inactivity with a warning
+# label at 30 days. Excludes pinned issues and security-labeled items.
 name: Stale Issue & PR Hygiene
 
 on:

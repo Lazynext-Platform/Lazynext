@@ -1,3 +1,7 @@
+# ── Build Mobile UniFFI (iOS/Android) ────────────────────────────────────
+# Cross-compiles the Rust core for aarch64-apple-ios, x86_64-apple-ios,
+# aarch64-linux-android, and x86_64-linux-android targets. Generates
+# Kotlin and Swift bindings via uniffi-bindgen for React Native.
 name: Build Mobile UniFFI (iOS/Android)
 
 on:

@@ -1,4 +1,10 @@
 /**
+ * Canvas package — React-based canvas component for the Lazynext editor.
+ *
+ * Provides advanced canvas manipulation with multi-layer compositing,
+ * WebGL rendering, and GPU-accelerated transforms.
+ *
+ * @module components/editor/canvas
  * @twick/canvas - Canvas Package
  *
  * A comprehensive React-based canvas component for the Twick platform.

@@ -3,6 +3,8 @@
  * Provides consistent styling defaults for text elements added to the canvas.
  *
  * @example
+ * @module components/editor/canvas/helpers/constants
+ */
  * ```js
  * import { DEFAULT_TEXT_PROPS } from '@twick/canvas';
  *

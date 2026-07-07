@@ -1,3 +1,5 @@
+# ── Lazynext Collab Server Deployment ────────────────────────────────────
+# Rust Axum WebSocket server for real-time CRDT collaboration.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -80,7 +82,9 @@ metadata:
   namespace: lazynext
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
+# ── Lazynext Collab Server Deployment ────────────────────────────────────
+# Rust Axum WebSocket server for real-time CRDT collaboration.
+apiVersion: apps/v1
     kind: Deployment
     name: collab-server
   minReplicas: 2

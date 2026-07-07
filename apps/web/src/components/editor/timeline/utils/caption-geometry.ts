@@ -3,6 +3,9 @@
  *
  * These helpers are intentionally lightweight and numeric-only so they can be
  * safely shared between timeline, Studio, workflow, canvas, and visualizer.
+ *
+ * @module components/editor/timeline/utils/caption-geometry
+ */
  */
 
 import { CAPTION_STYLE } from "./constants";

@@ -1,3 +1,6 @@
+# ── Deploy Pre-Flight Checklist ──────────────────────────────────────────
+# Runs before deployment to validate: changelog format, migration readiness,
+# env var presence, and required GitHub secrets are configured.
 name: Deploy Pre-Flight Checklist
 
 on:

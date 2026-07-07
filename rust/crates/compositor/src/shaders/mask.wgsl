@@ -1,3 +1,11 @@
+// Alpha mask application on GPU.
+//
+// Multiplies the alpha channel of a layer texture by the alpha channel
+// of a mask texture sampled at the same UV coordinate. Supports
+// inversion via `uniforms.inverted`, allowing the mask to cut out
+// or reveal the layer. Used for rotoscoping, vignettes, and
+// shape-driven mattes.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

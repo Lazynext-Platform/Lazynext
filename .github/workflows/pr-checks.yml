@@ -1,3 +1,6 @@
+# ── PR Checks ────────────────────────────────────────────────────────────
+# Runs on every PR: lint, typecheck, test, and build across all affected
+# services. Requires passing status before merge.
 name: PR Checks
 
 on:

@@ -1,3 +1,7 @@
+# ── Azure Container Apps & Managed Identity ────────────────────────────────
+# Creates the Container Apps Environment, user-assigned managed identity,
+# and all 5 Container App definitions: ai-agents, render, pre-processing,
+# generative-studio, and web. Configures ingress, scaling, and secrets.
 # ── Managed Identity for Container Apps ─────────────────────────────────────
 
 resource "azurerm_user_assigned_identity" "container_apps" {

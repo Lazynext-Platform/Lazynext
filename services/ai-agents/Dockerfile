@@ -1,3 +1,6 @@
+# ── AI Agents Service (Bun) ──────────────────────────────────────────────
+# Chronos AI Copilot backend: natural language → CRDT timeline operations.
+# Orchestrates LLM calls, video understanding, and agentic editing workflows.
 FROM oven/bun:1.3-slim AS runner
 
 WORKDIR /app

@@ -3,6 +3,8 @@
  *
  * Lazily loads the lazynext-wasm WebAssembly module on first use, initializes
  * a global {@link NLEState} instance, and polls the Rust engine every animation
+ *
+ * @module hooks/use-wasm
  * frame to keep React UI state in sync with the native timeline.
  *
  * The WASM module is cached globally — subsequent calls reuse the same instance.

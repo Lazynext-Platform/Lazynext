@@ -1,4 +1,7 @@
 /**
+ * MediaBunny integration — upload, transcode, and stream media assets
+ * via the MediaBunny CDN and encoding pipeline.
+ *
  * @module media/mediabunny
  */
 

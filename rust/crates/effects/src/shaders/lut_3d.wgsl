@@ -1,3 +1,11 @@
+// 3D Look-Up Table (LUT) color transformation shader.
+//
+// Maps each source pixel's RGB value as a 3D coordinate into a
+// pre-computed color LUT texture. The LUT is sampled via hardware
+// trilinear interpolation (texture_3d). Enables complex film
+// emulation, creative grades, and camera profiles in a single pass
+// without per-pixel math. Preserves source alpha.
+
 @group(0) @binding(0) var source_texture: texture_2d<f32>;
 @group(0) @binding(1) var source_sampler: sampler;
 

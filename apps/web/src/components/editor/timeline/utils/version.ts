@@ -3,6 +3,8 @@
  * Imports version directly from package.json
  *
  * @example
+ * @module components/editor/timeline/utils/version
+ */
  * ```typescript
  * import { getPackageVersion } from './utils/version';
  * console.log(getPackageVersion()); // "0.14.11"

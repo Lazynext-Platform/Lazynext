@@ -1,3 +1,6 @@
+# ── Lazynext Analytics Service NetworkPolicy ─────────────────────────────
+# Restricts ingress to analytics-service: only from api-gateway and
+# Kafka brokers. The analytics service has no direct external access.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

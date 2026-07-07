@@ -1,4 +1,7 @@
 /**
+ * Waveform summary — Web Audio API-based waveform rendering and analysis
+ * for the audio track preview strip in the timeline.
+ *
  * @module media/waveform-summary
  */
 

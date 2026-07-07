@@ -1,3 +1,11 @@
+// Jump Flood Algorithm — iterative flood step for Voronoi propagation.
+//
+// For each pixel, samples the 8 neighbors (±1 in x/y) at a distance
+// of `step_size` texels. Pixels propagate the closest seed coordinate
+// found so far. The step size is halved each iteration (e.g., maxDim/2,
+// maxDim/4, ... 1), converging to a per-pixel closest-seed assignment
+// in O(log n) passes. Stores encoded seed coords in the RGBA output.
+
 struct VertexOutput {
     @builtin(position) position: vec4f,
     @location(0) tex_coord: vec2f,

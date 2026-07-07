@@ -3,6 +3,8 @@
  * Use these instead of raw strings for type safety and consistency.
  *
  * @example
+ * @module components/editor/timeline/utils/constants
+ */
  * ```js
  * import { TRACK_TYPES } from '@twick/timeline';
  *

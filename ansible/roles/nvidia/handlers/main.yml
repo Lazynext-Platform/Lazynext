@@ -1,3 +1,5 @@
+# ── Lazynext NVIDIA GPU Role Handlers ────────────────────────────────────
+# Restart Docker daemon after NVIDIA container toolkit installation.
 ---
 - name: Restart Docker
   systemd:

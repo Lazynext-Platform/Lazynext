@@ -35,6 +35,7 @@ export function CameraScreen() {
 	const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const recordingStartRef = useRef<number>(0);
 
+	/** Request camera, microphone, and media library permissions on mount. */
 	useEffect(() => {
 		if (!cameraPermission?.granted) {
 			requestCameraPermission();
@@ -47,6 +48,7 @@ export function CameraScreen() {
 		}
 	}, []);
 
+	/** Start/stop elapsed timer when recording state changes. */
 	useEffect(() => {
 		if (recording) {
 			timerRef.current = setInterval(() => {
@@ -60,6 +62,7 @@ export function CameraScreen() {
 		};
 	}, [recording]);
 
+	/** Begin video recording with a max duration of 300s. Vibrates on start. */
 	const handleStartRecording = useCallback(async () => {
 		if (!cameraRef.current || recording) return;
 		try {
@@ -80,12 +83,14 @@ export function CameraScreen() {
 		}
 	}, [recording]);
 
+	/** Stop the active recording session. */
 	const handleStopRecording = useCallback(async () => {
 		if (cameraRef.current) {
 			await cameraRef.current.stopRecording();
 		}
 	}, []);
 
+  /** Present a post-recording action sheet: edit with AI or save to camera roll. */
 	const showPostRecordingActions = (uri: string) => {
 		Alert.alert("Recording Complete", "What would you like to do?", [
 			{
@@ -111,8 +116,10 @@ export function CameraScreen() {
 		]);
 	};
 
+  /** Toggle between front and back camera. */
 	const toggleFacing = () => setFacing((f) => (f === "back" ? "front" : "back"));
 
+  /** Cycle flash mode: off → on → auto → off. */
 	const toggleFlash = () => {
 		setFlash((f) => {
 			if (f === "off") return "on";
@@ -121,6 +128,7 @@ export function CameraScreen() {
 		});
 	};
 
+  /** Format a millisecond duration as MM:SS. */
 	const formatTime = (ms: number): string => {
 		const totalSec = Math.floor(ms / 1000);
 		const min = Math.floor(totalSec / 60);

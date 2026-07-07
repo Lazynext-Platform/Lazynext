@@ -1,4 +1,7 @@
 /**
+ * Thumbnail generation — extracts a single-frame JPEG thumbnail from
+ * video files using canvas-based rendering for the media library grid.
+ *
  * @module media/thumbnail
  */
 

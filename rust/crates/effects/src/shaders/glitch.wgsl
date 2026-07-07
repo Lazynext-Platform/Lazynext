@@ -1,3 +1,11 @@
+// Glitch / digital corruption effect shader.
+//
+// Simulates analog/digital signal degradation with chromatic aberration
+// offsets, horizontal scanlines, and pseudo-random noise driven by
+// a time-varying hash function. Intensity controls the strength of
+// red/blue channel displacement and scanline depth. Used for cyberpunk,
+// VHS, and tech-glitch aesthetics.
+
 struct Uniforms {
     resolution: vec2<f32>,
     direction: vec2<f32>, // unused for glitch, kept for uniform buffer alignment

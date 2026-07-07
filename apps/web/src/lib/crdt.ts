@@ -3,6 +3,8 @@
  *
  * In a fully realized implementation, this file wraps Yjs (yjs.dev) and y-webrtc.
  * It broadcasts incremental JSON patches of the `projectData` state to all connected peers
+ *
+ * @module lib/crdt
  * in real-time, allowing Figma-style multi-user collaborative editing on the same timeline.
  */
 
