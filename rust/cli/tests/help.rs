@@ -1,3 +1,7 @@
+//! Integration tests for the CLI's help output.
+//!
+//! Verifies that `--help` subcommands render correctly without crashes.
+
 use std::process::Command;
 
 #[test]

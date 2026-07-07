@@ -16,13 +16,14 @@ python examples/basic-edit.py
 import asyncio
 import os
 
-from lazynext_agent import LazynextAgent
+from lazynext_agent import LazynextAiAgent
 
 AGENT_ENDPOINT = os.environ.get("LAZYNEXT_API_URL", "http://localhost:8005")
 
 
 async def main() -> None:
-    agent = LazynextAgent(
+    """Run the basic-edit demo: send a natural-language prompt and stream agent events."""
+    agent = LazynextAiAgent(
         api_endpoint=AGENT_ENDPOINT,
         mode="auto_execute",
     )

@@ -1,6 +1,8 @@
-// Theme system — dark/light/system mode for the GPUI desktop app.
-// Reads LAZYNEXT_THEME env var ("dark", "light", "system").
-// When "system", detects OS preference via window/appearance queries.
+//! Theme system — dark/light/system mode for the GPUI desktop app.
+//!
+//! Reads `LAZYNEXT_THEME` env var (`"dark"`, `"light"`, `"system"`).
+//! When `"system"`, detects the OS preference via window/appearance
+//! queries.  Exports `ThemeMode`, `Theme`, and colour constants.
 
 use gpui::Rgba as GpuiRgba;
 use std::env;

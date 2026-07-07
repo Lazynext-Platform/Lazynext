@@ -1,6 +1,7 @@
 /** @module Web fallback implementation of the Lazynext native module — provides demo project data when the API gateway is unreachable during web preview. */
 import { registerWebModule, NativeModule } from "expo";
 
+/** Web fallback: returns mock project data so the editor works without a device. */
 class MyModule extends NativeModule<{}> {
   async fetchProject(): Promise<string> {
     try {

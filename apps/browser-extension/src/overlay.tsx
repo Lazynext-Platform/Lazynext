@@ -34,6 +34,7 @@ async function authHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
+/** Compact timeline preview showing current project clips with drag-and-drop reordering. */
 function TimelinePreview() {
   const [clips, setClips] = useState<TimelineClip[]>([]);
 
@@ -105,6 +106,7 @@ function TimelinePreview() {
   );
 }
 
+/** Primary overlay editor: project selection, clip capture, and gateway submission. */
 function OverlayEditor() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");

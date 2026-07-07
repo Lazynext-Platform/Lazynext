@@ -1,3 +1,5 @@
+/** @module typography Text rendering constants for font sizing and color defaults. */
+
 export const MIN_FONT_SIZE = 5;
 export const MAX_FONT_SIZE = 300;
 export const DEFAULT_TEXT_COLOR = "#000000";

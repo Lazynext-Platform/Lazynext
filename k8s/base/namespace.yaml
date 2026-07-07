@@ -1,3 +1,6 @@
+# ── Lazynext Namespace ────────────────────────────────────────────
+# Isolates all Lazynext resources. Enforces the restricted Pod Security
+# Standard (v1.24+) with audit and warn modes for baseline violations.
 apiVersion: v1
 kind: Namespace
 metadata:

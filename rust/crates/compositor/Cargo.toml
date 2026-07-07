@@ -1,5 +1,6 @@
 [package]
 name = "compositor"
+description = "GPU compositor with 17 blend modes, ACES color, LUTs, MSDF text, stereoscopic, and 3D transforms"
 version = "0.1.0"
 edition = "2024"
 

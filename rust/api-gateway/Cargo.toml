@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_api_gateway"
+description = "Axum REST gateway with JWT auth, RBAC, rate limiting, WebSocket sync, and OpenAPI docs"
 version = "0.1.0"
 edition = "2024"
 

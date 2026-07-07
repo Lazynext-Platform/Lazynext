@@ -1,10 +1,12 @@
+//! End-to-end integration tests for the Lazynext platform.
+//!
+//! These tests verify API contracts, serialization formats, and
+//! integration logic without requiring running servers.
+//! Full server-based E2E tests are in `apps/web/tests/e2e/`.
+
 use serde_json::json;
 
-/// E2E integration tests for the Lazynext platform.
-///
-/// These tests verify API contracts, serialization formats, and
-/// integration logic without requiring running servers.
-/// Full server-based E2E tests are in apps/web/tests/e2e/.
+/// Verify the autonomous edit API request/response format.
 
 /// Verify the autonomous edit API request/response format.
 #[test]

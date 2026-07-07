@@ -20,6 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const RECORDING_MAX_MS = 300000;
 
+/** Camera capture screen with grid overlay, recording controls, and media library integration. */
 export function CameraScreen() {
 	const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 	const [micPermission, requestMicPermission] = useMicrophonePermissions();

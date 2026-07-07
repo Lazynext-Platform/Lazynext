@@ -1,3 +1,5 @@
+/** @module timeline/hooks Hook that scrolls the timeline viewport to the bottom on initial render. */
+
 import { type RefObject, useLayoutEffect, useRef } from "react";
 
 interface UseInitialScrollBottomProps {

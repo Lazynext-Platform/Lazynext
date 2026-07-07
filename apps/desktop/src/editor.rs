@@ -1,3 +1,9 @@
+//! Full editor shell for the GPUI desktop app.
+//!
+//! Wires up the compositor viewport, timeline, AI prompt bar, import
+//! button, and export flow.  Delegates all editing logic to CoreEngine
+//! and renders frames via the GPU compositor texture store.
+
 use crate::auth::load_auth_token;
 use gpui::prelude::*;
 use gpui::*;

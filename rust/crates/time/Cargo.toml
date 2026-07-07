@@ -1,5 +1,6 @@
 [package]
 name = "time"
+description = "Media time primitives: timecode, frame rate, captions (SRT/VTT), multicam sync, CRDT timeline ops"
 version = "0.1.0"
 edition = "2024"
 

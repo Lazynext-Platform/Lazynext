@@ -1,3 +1,8 @@
+//! CRDT sync integration tests.
+//!
+//! Verifies that remote CRDT operations (clip insert/delete, track
+//! insert) are properly applied and that LWW semantics are idempotent.
+
 use lazynext_core::NLEState;
 use state::operations::{ClipPayload, CrdtOperation};
 

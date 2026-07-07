@@ -1,3 +1,8 @@
+//! Temporal versioning merge integration tests.
+//!
+//! Verifies branch isolation, merge semantics (track addition), and
+//! guards against the data-corruption bug where clips leak to track 0.
+
 use lazynext_core::NLEState;
 use lazynext_temporal_versioning::MultiverseManager;
 

@@ -1,3 +1,4 @@
+/** @module panels/assets Background settings panel — color picker and transparency controls for the editor canvas. */
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";

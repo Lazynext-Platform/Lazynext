@@ -1,5 +1,6 @@
 [package]
 name = "gpu"
+description = "WebGPU context management, compute shaders, waveform/vectorscope scopes, WASM fallbacks"
 version = "0.1.0"
 edition = "2024"
 

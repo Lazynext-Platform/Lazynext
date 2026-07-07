@@ -62,6 +62,7 @@ const DraggableClip = ({ clip, track, onMoveClip }: { clip: any, track: any, onM
   );
 };
 
+/** Interactive timeline with draggable clips, mask gestures, and integration with NativeBridge. */
 export function TimelineScreen() {
   const [projectName, setProjectName] = useState("Loading...");
   const [tracks, setTracks] = useState<Array<{ id: string; name: string; trackType: string; clips: Array<{ id: string; name: string; start: number; duration: number }> }>>([]);

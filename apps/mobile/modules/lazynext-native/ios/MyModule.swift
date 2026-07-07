@@ -1,3 +1,7 @@
+// MyModule.swift — Lazynext iOS native bridge.
+// Exposes project info, AI intent processing, and clip CRUD to React Native
+// via Expo Modules.  Delegates to the Rust UniFFI bindings for core logic.
+
 import ExpoModulesCore
 
 public class MyModule: Module {

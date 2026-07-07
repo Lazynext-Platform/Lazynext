@@ -1,3 +1,10 @@
+/**
+ * Quick database connectivity test.
+ *
+ * Connects to PostgreSQL using DATABASE_URL, runs SELECT 1,
+ * and prints timing and version info. Exits with code 1 on failure.
+ */
+
 const { Pool } = require('pg');
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {

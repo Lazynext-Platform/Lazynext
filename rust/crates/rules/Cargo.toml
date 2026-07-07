@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_rules"
+description = "Markdown/YAML rule engine: glob-scoped rules with YAML frontmatter for AI copilot guidance"
 version = "0.1.0"
 edition = "2024"
 

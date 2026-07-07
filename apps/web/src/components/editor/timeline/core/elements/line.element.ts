@@ -1,3 +1,5 @@
+/** @module timeline/core/elements Time indicator line element — renders the vertical playhead line across all tracks. */
+
 import { LineProps, Size } from "../../types";
 import { TrackElement } from "./base.element";
 import type { ElementVisitor } from "../visitor/element-visitor";

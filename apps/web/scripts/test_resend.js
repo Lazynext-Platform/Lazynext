@@ -1,3 +1,10 @@
+/**
+ * Resend Email Test — v3
+ *
+ * Sends a verification email via the Resend API using credentials
+ * from .env.local.  Includes verbose logging of the API key status.
+ */
+
 const { Resend } = require("resend");
 require("dotenv").config({ path: ".env.local" });
 

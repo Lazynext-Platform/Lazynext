@@ -1,3 +1,8 @@
+# ── Lazynext Development Stack ──────────────────────────────────────
+# Starts all core services: PostgreSQL, Redis, MinIO (S3-compatible),
+# and optional TensorFlow Serving for ML inference.
+# Use `docker compose up -d` for a full local development environment.
+# ─────────────────────────────────────────────────────────────────────
 services:
   # ── Database ──────────────────────────────────────────────────
   db:

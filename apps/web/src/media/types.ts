@@ -1,5 +1,4 @@
-/**
- * Media asset type definitions for the Lazynext web editor.
+/** @module media/types Media asset type definitions for the Lazynext web editor.
  *
  * Defines the shape of media assets as they appear in the frontend, extending the
  * backend {@link MediaAssetData} type with browser-native `File` handles for local

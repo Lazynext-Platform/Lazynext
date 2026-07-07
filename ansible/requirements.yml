@@ -1,3 +1,6 @@
+# ── Lazynext Ansible Galaxy Requirements ──────────────────────────
+# Install required collections and roles before running playbooks:
+#   ansible-galaxy install -r requirements.yml
 ---
 collections:
   - name: community.general

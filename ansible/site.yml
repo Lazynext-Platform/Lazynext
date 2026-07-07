@@ -1,3 +1,7 @@
+# ── Lazynext Ansible Site Playbook ─────────────────────────────────
+# Entry point that orchestrates all bare-metal provisioning roles:
+# common → docker → nvidia → postgresql → redis → k8s → monitoring.
+# Run with: ansible-playbook -i inventory.ini site.yml
 ---
 - name: Setup Lazynext Bare-Metal Nodes
   hosts: all

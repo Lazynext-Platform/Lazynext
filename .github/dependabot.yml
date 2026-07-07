@@ -1,3 +1,5 @@
+# Dependabot configuration — keeps npm and cargo dependencies
+# up-to-date with weekly PRs across all services and packages.
 version: 2
 updates:
   - package-ecosystem: "npm"

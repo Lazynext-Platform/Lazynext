@@ -1,5 +1,6 @@
 {
   "name": "@lazynext/agent-sdk",
+  "description": "TypeScript SDK for building AI agents that control the Lazynext NLE via natural language",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",

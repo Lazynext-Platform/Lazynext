@@ -54,6 +54,7 @@ const AuthContext = createContext<AuthContextValue>({
 	resetPassword: async () => ({ error: { message: "Auth not initialized" } }),
 });
 
+/** Provides auth state (user, session, token) to the component tree via React context. */
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -123,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	);
 }
 
+/** Hook to access the current auth context (user, session, loading, signIn, signOut, signUp). */
 export function useAuth(): AuthContextValue {
 	return useContext(AuthContext);
 }

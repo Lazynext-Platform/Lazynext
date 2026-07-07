@@ -22,6 +22,7 @@ import path from "path";
 
 // ── Types ─────────────────────────────────────────────────────────────
 
+/** Metadata attached to a social media post (caption, hashtags, thumbnail, etc.) */
 interface PlatformMetadata {
   caption?: string;
   hashtags?: string[];
@@ -32,6 +33,7 @@ interface PlatformMetadata {
   privacyStatus?: "public" | "private" | "unlisted";
 }
 
+/** Result of a single platform publish attempt. */
 interface PublishResult {
   platform: string;
   success: boolean;
@@ -40,6 +42,7 @@ interface PublishResult {
   error?: string;
 }
 
+/** OAuth 2.0 token bundle stored per-platform after user authorization. */
 interface OAuthTokens {
   accessToken: string;
   refreshToken?: string;

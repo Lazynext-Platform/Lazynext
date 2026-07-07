@@ -16,6 +16,7 @@ interface Config {
 	apiGatewayUrl?: string;
 }
 
+/** Read the CLI config file from ~/.lazynext/config.json, returning defaults if missing. */
 function loadConfig(): Config {
 	try {
 		if (fs.existsSync(CONFIG_FILE)) {
@@ -27,6 +28,7 @@ function loadConfig(): Config {
 	return {};
 }
 
+/** Write config to disk, creating the directory and setting restrictive permissions (0600). */
 function saveConfig(config: Config) {
 	if (!fs.existsSync(CONFIG_DIR)) {
 		fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -35,11 +37,13 @@ function saveConfig(config: Config) {
 	fs.chmodSync(CONFIG_FILE, 0o600);
 }
 
+/** Load the stored JWT token from the CLI config, or null if not authenticated. */
 function getToken(): string | null {
 	const config = loadConfig();
 	return config.token || null;
 }
 
+/** Send a JSON POST to the auth service and return either data or an error message. */
 async function authFetch(
 	path: string,
 	body: Record<string, unknown>,

@@ -18,6 +18,7 @@ import {
 } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
 
+/** Reset password screen — accepts a new password and token from the reset link. */
 export function ResetPasswordScreen({
 	navigation,
 	route,

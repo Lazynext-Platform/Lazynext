@@ -47,6 +47,13 @@ async def process_video_service(req: ProcessRequest):
         if op == "auto_editor":
             if audio_samples is not None:
                 import numpy as np
+                # ── RMS Silence Detection ──────────────────────────────
+                # Split audio into small windows (default 10 ms) and compute
+                # root-mean-square power per window.  Any window whose RMS
+                # falls below the noise-floor threshold (default -40 dBFS via
+                # 10^(threshold_db/20)) is considered silent.  Consecutive
+                # silent windows exceeding min_silence_ms (default 500 ms)
+                # are emitted as a silence region for removal.
                 window_ms = 10
                 window_samples = int(sample_rate * window_ms / 1000)
                 threshold_db = -40.0

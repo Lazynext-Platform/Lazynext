@@ -1,5 +1,6 @@
 [package]
 name = "masks"
+description = "Alpha mask engine: SAM2 rotoscoping, SDF jump-flood feathering, GPU-freeform shapes"
 version = "0.1.0"
 edition = "2024"
 

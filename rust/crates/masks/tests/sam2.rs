@@ -1,3 +1,8 @@
+//! Integration tests for the SAM2 rotoscoping mask engine.
+//!
+//! Verifies engine initialization, point-based mask generation,
+//! empty-click handling, and bounding-box mask delegation.
+
 use masks::{BoundingBox, Coordinate, Sam2MaskEngine};
 
 #[test]

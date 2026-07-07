@@ -26,6 +26,7 @@ function safeDisplayName(src: string): string {
   }
 }
 
+/** Root app: detects video elements on the current page, offers import to Lazynext. */
 function App() {
   const [detectedVideos, setDetectedVideos] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);

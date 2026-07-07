@@ -1,5 +1,6 @@
 [package]
 name = "effects"
+description = "11 GPU effect shaders: film physics, optical flow, grain, vignette, and pipeline orchestrator"
 version = "0.1.0"
 edition = "2024"
 

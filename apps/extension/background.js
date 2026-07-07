@@ -1,4 +1,6 @@
 // background.js — Lazynext Capture extension service worker
+// Handles tab capture, chunked upload to the API gateway,
+// and auth token management via chrome.storage.
 
 let activeRecorder = null;
 let currentStream = null;
@@ -20,6 +22,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 	}
 });
 
+/** Build auth headers for API Gateway requests, including the stored JWT token. */
 function authHeaders() {
 	const headers = { "Content-Type": "application/json" };
 	if (authToken) {

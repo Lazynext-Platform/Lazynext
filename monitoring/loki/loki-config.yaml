@@ -1,3 +1,6 @@
+# ── Loki Production Configuration ──────────────────────────────────
+# Multi-tenant log aggregation with S3/GCS object storage, auth,
+# and memberlist clustering for high availability.
 auth_enabled: true
 
 server:

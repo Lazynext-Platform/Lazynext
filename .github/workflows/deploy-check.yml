@@ -194,8 +194,8 @@ jobs:
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v3
-        with:
-          config-path: .github/gitleaks.toml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ── STEP 4: Database Migration Check ──────────────────────────
   migration-check:

@@ -18,7 +18,7 @@ lazynext/
 │   └── api-gateway/         # Axum REST gateway
 ├── services/                # Microservices (Python FastAPI, Node.js Bun)
 ├── packages/                # Shared packages
-├── terraform/               # Azure infrastructure as code
+├── infra/                   # Infrastructure as code: Terraform, K8s manifests
 └── docs/                    # Mastery documentation framework
 ```
 

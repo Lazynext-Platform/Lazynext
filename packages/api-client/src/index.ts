@@ -101,41 +101,59 @@ export class LazynextClient {
     return resp.json();
   }
 
+  /** Gateway health-check endpoint. */
   health = { check: () => this.request<{ status: string }>("GET", "/health") };
 
+  /** Editor commands: autonomous AI edits and render trigger. */
   editor = {
+    /** Submit a natural-language editing prompt to the Chronos AI copilot. */
     autonomousEdit: (prompt: string, opts?: { requirePlanApproval?: boolean; llmProvider?: string }) =>
       this.request("POST", "/api/v1/autonomous_edit", {
         prompt, require_plan_approval: opts?.requirePlanApproval ?? true,
         source_files: [], llm_provider: opts?.llmProvider,
       }),
+    /** Trigger a render of the current timeline state. */
     triggerRender: () => this.request("POST", "/api/v1/render"),
   };
 
+  /** Timeline CRDT operations: read current state and insert clips. */
   timeline = {
+    /** Fetch the current CRDT timeline snapshot. */
     get: () => this.request<any>("GET", "/api/v1/timeline"),
+    /** Insert a new clip onto the timeline. */
     addClip: (clip: { trackId?: string; clipType?: string; name?: string; start?: number; end?: number }) =>
       this.request("POST", "/api/v1/timeline", clip),
   };
 
+  /** Project listing. */
   projects = { list: () => this.request<{ projects: any[] }>("GET", "/api/v1/projects") };
 
+  /** Authenticated user profile and credit balance. */
   user = {
+    /** Fetch the current user's profile. */
     profile: () => this.request<any>("GET", "/api/v1/user/profile"),
+    /** Fetch the current user's credit balance. */
     credits: () => this.request<{ credits: number }>("GET", "/api/v1/user/credits"),
   };
 
+  /** AI generation: text-to-video, TTS, and media ingestion. */
   ai = {
+    /** Generate video from a text prompt. */
     generate: (prompt: string) => this.request("POST", "/api/v1/ai/generate", { prompt }),
+    /** Convert text to speech with optional voice selection. */
     tts: (text: string, voiceId?: string) => this.request("POST", "/api/v1/ai/tts", { text, voice_id: voiceId }),
+    /** Ingest media from an external URL. */
     ingest: (url: string, source?: string) => this.request("POST", "/api/v1/ai/ingest", { url, source }),
   };
 
+  /** Third-party platform integrations (TikTok, YouTube, Instagram). */
   integrations = {
+    /** Connect a social platform via OAuth 2.0. */
     connect: (platform: string, code?: string, redirectUri?: string) =>
       this.request("POST", "/api/v1/user/integrations/connect", { platform, code, redirect_uri: redirectUri }),
   };
 
+  /** Admin dashboard (requires admin role). */
   admin = { dashboard: () => this.request<any>("GET", "/api/v1/admin/dashboard") };
 }
 

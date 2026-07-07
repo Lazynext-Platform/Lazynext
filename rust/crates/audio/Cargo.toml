@@ -1,5 +1,6 @@
 [package]
 name = "audio"
+description = "DSP engine: EQ, compressor, VST3 host, FFT analysis, spatial audio, and timeline sync"
 version = "0.1.0"
 edition = "2024"
 

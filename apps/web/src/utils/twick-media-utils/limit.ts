@@ -1,3 +1,5 @@
+/** @module utils/twick-media-utils/limit Concurrency limiter — caps the number of simultaneously running promises. */
+
 // Maximum number of concurrent promises allowed to run
 const concurrencyLimit = 5;
 

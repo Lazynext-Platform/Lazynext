@@ -1,3 +1,9 @@
+"""End-to-end test suite for the auto-editor pipeline.
+
+Tests the full edit→render→ffprobe round-trip against reference
+outputs, with tolerance-based comparison to handle encoder variance.
+"""
+
 import argparse
 import concurrent.futures
 import hashlib

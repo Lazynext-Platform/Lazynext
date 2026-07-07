@@ -1,3 +1,7 @@
+// popup.js — Lazynext Capture extension popup UI
+// Handles video capture start/stop via the active tab's content script.
+// For simplicity, we send messages and handle state statelessly.
+
 document.addEventListener('DOMContentLoaded', () => {
   const captureBtn = document.getElementById('captureBtn');
   const statusDiv = document.getElementById('status');

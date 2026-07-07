@@ -1,5 +1,8 @@
-/// Tests for the MCP server's JSON-RPC 2.0 protocol handling.
-/// The MCP server communicates over stdio using JSON-RPC 2.0.
+//! MCP server protocol conformance tests.
+//!
+//! Verifies JSON-RPC 2.0 initialize, tools/list, error responses,
+//! and prompt template structures — all follow the MCP specification.
+
 use serde_json::json;
 
 /// Verify initialize response follows MCP protocol.

@@ -1,3 +1,10 @@
+/**
+ * Jest configuration for the Next.js web app.
+ *
+ * Uses next/jest to auto-configure SWC transforms, module resolution,
+ * and CSS/image mocking from next.config.js and .env files.
+ */
+
 const nextJest = require("next/jest");
 
 const createJestConfig = nextJest({

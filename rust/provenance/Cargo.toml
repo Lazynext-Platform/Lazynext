@@ -1,5 +1,6 @@
 [package]
 name = "lazynext_provenance"
+description = "Media provenance: C2PA 2.1 content authentication, cryptographic fingerprinting, and chain-of-custody"
 version = "0.1.0"
 edition = "2024"
 

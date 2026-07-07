@@ -1,3 +1,4 @@
+/** @module animation/curve-bridge Bridges WASM easing-curve evaluation to the TS animation system. */
 
 import type {
 	CurveHandle,

@@ -1,5 +1,6 @@
 {
   "name": "@lazynext/api-client",
+  "description": "TypeScript API client for Lazynext REST gateway — health, editor, timeline, projects, AI, and admin endpoints",
   "version": "0.1.0",
   "private": true,
   "main": "src/index.ts",

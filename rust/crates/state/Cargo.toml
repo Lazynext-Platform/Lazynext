@@ -1,5 +1,6 @@
 [package]
 name = "state"
+description = "CRDT state management: LWW registers, entity graph, keyframes, vector clocks, tombstones"
 version = "0.1.0"
 edition = "2024"
 

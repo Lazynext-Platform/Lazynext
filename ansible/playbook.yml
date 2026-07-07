@@ -1,3 +1,6 @@
+# ── Lazynext Ansible Worker Playbook ──────────────────────────────
+# Configures worker nodes with FFmpeg, GPU drivers, and runtime deps.
+# Run with: ansible-playbook -i inventory.ini playbook.yml
 ---
 - name: Configure Lazynext Worker Nodes
   hosts: all

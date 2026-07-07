@@ -1,3 +1,4 @@
+# Patterns excluded from Tokei line-count analysis.
 *.json
 *.svg
 *.xml

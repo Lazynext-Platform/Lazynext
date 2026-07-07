@@ -1,3 +1,8 @@
+# ── Prometheus Configuration ──────────────────────────────────────
+# Scrapes all Lazynext services (API Gateway, render, analytics,
+# collab, MCP, generative studio, pre-processing) plus Node Exporter
+# and Blackbox probes.  Rule files define alerting thresholds and
+# recording rules for SLO dashboards.
 global:
   scrape_interval: 15s
   evaluation_interval: 15s

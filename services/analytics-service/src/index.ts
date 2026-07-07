@@ -65,6 +65,7 @@ try {
   db = null;
 }
 
+/** Persist an analytics event to SQLite for durability across restarts. No-op if DB is unavailable. */
 function persistEvent(userId: string, eventType: string, metadata: Record<string, unknown>, sessionId: string, timestamp: number): void {
   if (!db) return;
   try {
@@ -109,7 +110,7 @@ const kafkaProducer = {
 // ── ClickHouse Client (used for dashboards and LTV queries) ────────────
 let clickhouseAvailable = false;
 
-/** Query ClickHouse via HTTP, returning rows as parsed JSON objects. */
+/** Query ClickHouse via HTTP for OLAP dashboards and LTV metrics. Returns rows as parsed JSON objects. Falls back to empty array when ClickHouse is unavailable. */
 async function queryClickHouse(_query: string): Promise<any[]> {
   if (process.env.CLICKHOUSE_URL) {
     try {
