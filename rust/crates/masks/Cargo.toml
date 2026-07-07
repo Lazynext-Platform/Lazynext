@@ -12,7 +12,7 @@ crate-type = ["rlib"]
 bytemuck = { version = "1.25.0", features = ["derive"] }
 gpu = { version = "0.1.0", path = "../gpu" }
 neural_engine = { version = "0.1.0", path = "../neural_engine" }
-wgpu = "29.0.1"
+wgpu = "30.0.0"
 
 [features]
 default = []
