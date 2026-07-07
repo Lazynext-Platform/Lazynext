@@ -279,6 +279,13 @@ resource "azurerm_application_gateway" "main" {
     ]
   }
 
+  backend_address_pool {
+    name = "pool-api-gateway"
+    fqdns = [
+      azurerm_container_app.api_gateway.latest_revision_fqdn,
+    ]
+  }
+
   # ── Backend HTTP Settings ─────────────────────────────────────────────
 
   backend_http_settings {
@@ -361,6 +368,22 @@ resource "azurerm_application_gateway" "main" {
     }
   }
 
+  backend_http_settings {
+    name                  = "http-settings-api-gateway"
+    cookie_based_affinity = "Disabled"
+    port                  = 443
+    protocol              = "Https"
+    request_timeout       = 120
+    probe_name            = "probe-api-gateway"
+
+    pick_host_name_from_backend_address = true
+
+    connection_draining {
+      enabled           = true
+      drain_timeout_sec = 30
+    }
+  }
+
   # ── Health Probes ─────────────────────────────────────────────────────
 
   probe {
@@ -433,6 +456,20 @@ resource "azurerm_application_gateway" "main" {
     }
   }
 
+  probe {
+    name                = "probe-api-gateway"
+    protocol            = "Https"
+    path                = "/health"
+    host                = azurerm_container_app.api_gateway.latest_revision_fqdn
+    interval            = 30
+    timeout             = 30
+    unhealthy_threshold = 3
+
+    match {
+      status_code = ["200-399"]
+    }
+  }
+
   # ── HTTP Listeners ────────────────────────────────────────────────────
 
   # Port 80 listeners (HTTP)
@@ -457,6 +494,26 @@ resource "azurerm_application_gateway" "main" {
     ssl_certificate_name = "ssl-lazynext-${var.environment}"
   }
 
+  # ── API Subdomain Listener ──────────────────────────────────────────
+  # Routes api.lazynext.com → API Gateway Container App
+
+  http_listener {
+    name                           = "listener-api-https"
+    frontend_ip_configuration_name = "lazynext-agw-feip-public-${var.environment}"
+    frontend_port_name             = "port-https"
+    protocol                       = "Https"
+    host_name                      = "api.${var.app_domain}"
+    ssl_certificate_name           = "ssl-lazynext-${var.environment}"
+  }
+
+  http_listener {
+    name                           = "listener-api-http"
+    frontend_ip_configuration_name = "lazynext-agw-feip-public-${var.environment}"
+    frontend_port_name             = "port-http"
+    protocol                       = "Http"
+    host_name                      = "api.${var.app_domain}"
+  }
+
   # ── Request Routing Rules ─────────────────────────────────────────────
 
   # Web App (HTTP — dev/staging; HTTPS for production)
@@ -477,6 +534,27 @@ resource "azurerm_application_gateway" "main" {
     http_listener_name         = "listener-web-http"
     backend_address_pool_name  = "pool-web"
     backend_http_settings_name = "http-settings-web"
+  }
+
+  # ── API Subdomain Routing ───────────────────────────────────────────
+  # Routes api.lazynext.com → API Gateway Container App
+
+  request_routing_rule {
+    name                       = "rule-api-https"
+    rule_type                  = "Basic"
+    priority                   = 120
+    http_listener_name         = "listener-api-https"
+    backend_address_pool_name  = "pool-api-gateway"
+    backend_http_settings_name = "http-settings-api-gateway"
+  }
+
+  request_routing_rule {
+    name                       = "rule-api-http"
+    rule_type                  = "Basic"
+    priority                   = 130
+    http_listener_name         = "listener-api-http"
+    backend_address_pool_name  = "pool-api-gateway"
+    backend_http_settings_name = "http-settings-api-gateway"
   }
 
   # ── Lifecycle ─────────────────────────────────────────────────────────
