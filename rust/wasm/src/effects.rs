@@ -18,26 +18,39 @@ use crate::gpu::{
 };
 
 struct ApplyEffectPassesOptions {
+    /// Source canvas to process.
     source: wgpu::web_sys::OffscreenCanvas,
+    /// Canvas width in pixels.
     width: u32,
+    /// Canvas height in pixels.
     height: u32,
+    /// Ordered effect passes to apply.
     passes: Vec<EffectPassInput>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EffectPassInput {
+    /// Shader identifier for the pass.
     shader: String,
+    /// Uniform values supplied to the shader.
     uniforms: Vec<EffectUniformInput>,
 }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct EffectUniformInput {
+    /// Uniform name.
     name: String,
+    /// Uniform value components.
     value: Vec<f32>,
 }
 
+/// Applies a chain of GPU effect passes (custom shaders) to a source canvas.
+///
+/// The `options` object carries `{ source, width, height, passes }`, where
+/// each pass names a shader and its uniform values. Returns a new offscreen
+/// canvas with the processed result.
 #[wasm_bindgen(js_name = applyEffectPasses)]
 pub fn apply_effect_passes(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let ApplyEffectPassesOptions {
@@ -72,6 +85,7 @@ pub fn apply_effect_passes(options: JsValue) -> Result<wgpu::web_sys::OffscreenC
     })
 }
 
+// Converts JS effect pass inputs into GPU-ready effect passes.
 fn map_effect_passes(effect_passes: Vec<EffectPassInput>) -> Vec<EffectPass> {
     effect_passes
         .into_iter()
@@ -93,6 +107,7 @@ fn map_effect_passes(effect_passes: Vec<EffectPassInput>) -> Vec<EffectPass> {
         .collect()
 }
 
+// Parses the JS options object for `applyEffectPasses`.
 fn parse_apply_effect_passes_options(value: JsValue) -> Result<ApplyEffectPassesOptions, JsValue> {
     let object: Object = value
         .dyn_into()
@@ -110,13 +125,23 @@ use effects::ApplyLutOptions;
 
 #[allow(dead_code)]
 struct ApplyLutOptionsJs {
+    /// Source canvas to grade.
     source: wgpu::web_sys::OffscreenCanvas,
+    /// Canvas width in pixels.
     width: u32,
+    /// Canvas height in pixels.
     height: u32,
+    /// Flat RGBA LUT cube data.
     lut_data: Vec<f32>,
+    /// Side length of the LUT cube.
     lut_size: u32,
 }
 
+/// Applies a 3D color LUT to a source canvas using trilinear interpolation.
+///
+/// The `options` object carries `{ source, width, height, lutData, lutSize }`
+/// where `lutData` is a flat RGBA `f32` cube of side `lutSize` (default 32).
+/// Returns a new offscreen canvas with the graded result.
 #[wasm_bindgen(js_name = apply3DLut)]
 pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let options = parse_apply_lut_options(options)?;
@@ -193,6 +218,7 @@ pub fn apply_3d_lut(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, 
     })
 }
 
+// Parses the JS options object for `apply3DLut`.
 fn parse_apply_lut_options(value: JsValue) -> Result<ApplyLutOptionsJs, JsValue> {
     let object: Object = value
         .dyn_into()
@@ -210,14 +236,26 @@ fn parse_apply_lut_options(value: JsValue) -> Result<ApplyLutOptionsJs, JsValue>
 }
 
 struct ApplyChromaKeyOptions {
+    /// Source canvas to key.
     source: wgpu::web_sys::OffscreenCanvas,
+    /// Canvas width in pixels.
     width: u32,
+    /// Canvas height in pixels.
     height: u32,
+    /// RGB key color to remove.
     key_color: Vec<f32>, // [r, g, b]
+    /// Keying color similarity tolerance.
     similarity: f32,
+    /// Edge softness of the key.
     smoothness: f32,
 }
 
+/// Applies chroma-key (green-screen) removal to a source canvas.
+///
+/// The `options` object carries `{ source, width, height, keyColor,
+/// similarity, smoothness }` — `keyColor` is the RGB key to remove, with
+/// `similarity`/`smoothness` controlling the keying tolerance and edge
+/// softness. Returns a new offscreen canvas with the keyed result.
 #[wasm_bindgen(js_name = applyChromaKey)]
 pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let options = parse_apply_chroma_key_options(options)?;
@@ -268,6 +306,7 @@ pub fn apply_chroma_key(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanv
     })
 }
 
+// Parses the JS options object for `applyChromaKey`.
 fn parse_apply_chroma_key_options(value: JsValue) -> Result<ApplyChromaKeyOptions, JsValue> {
     let object: Object = value
         .dyn_into()

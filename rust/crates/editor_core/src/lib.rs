@@ -27,11 +27,18 @@ pub mod timeline;
 use state::crdt::CRDTTimeline;
 use wasm_bindgen::prelude::*;
 
+/// Performs one-time editor-core setup and prints a startup diagnostic.
 #[wasm_bindgen]
 pub fn initialize_editor() {
     println!("Lazynext Editor Core Initialized with Multiplayer CRDT");
 }
 
+/// Merges a CRDT `delta_state` into `current_state` and returns the merged
+/// timeline as a JSON string.
+///
+/// Both arguments are JSON-serialized [`CRDTTimeline`] values. This is the
+/// core sync primitive used by the web frontend's `crdt-sync.ts`. Errors if
+/// either input fails to deserialize.
 #[wasm_bindgen]
 pub fn apply_crdt_delta(current_state: &str, delta_state: &str) -> Result<String, JsValue> {
     let mut current: CRDTTimeline =

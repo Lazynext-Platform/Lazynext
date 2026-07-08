@@ -11,13 +11,21 @@ use tokio::sync::Mutex;
 /// In a full production environment, this struct dispatches tasks to an FFmpeg subprocess
 /// or a WebGL/WGPU context for hardware-accelerated frame rendering.
 pub struct CoreEngine {
+    /// Shared CRDT NLE project state.
     project: Arc<Mutex<NLEState>>,
+    /// GPU context owning the device, queue, and render resources.
     gpu_ctx: Arc<gpu::GpuContext>,
+    /// GPU compositor that renders timeline frames.
     compositor: Arc<tokio::sync::Mutex<compositor::Compositor>>,
+    /// Optional loader used to fetch media frames on demand.
     asset_loader: Option<Arc<dyn AssetLoader>>,
+    /// Whether hardware-accelerated rendering is in use.
     pub is_hardware_accelerated: bool,
+    /// Output width in pixels.
     pub width: u32,
+    /// Output height in pixels.
     pub height: u32,
+    /// Optional DeckLink SDI output engine.
     #[cfg(not(target_arch = "wasm32"))]
     pub decklink: tokio::sync::Mutex<Option<decklink::DecklinkEngine>>,
 }
@@ -34,16 +42,22 @@ pub trait AssetLoader: Send + Sync {
 
 /// Real-time loop that increments the playhead and dispatches render events.
 pub struct PlaybackLoop {
+    /// Whether playback is currently active.
     is_playing: bool,
+    /// The current playhead frame index.
     current_frame: u32,
+    /// Playback framerate in frames per second.
     _framerate: u32,
+    /// Optional audio playback output.
     #[cfg(not(target_arch = "wasm32"))]
     audio: Option<audio::playback::AudioPlayback>,
+    /// Optional DeckLink SDI output engine.
     #[cfg(not(target_arch = "wasm32"))]
     decklink: Option<decklink::DecklinkEngine>,
 }
 
 impl PlaybackLoop {
+    /// Creates a new playback loop with the given framerate, initializing audio and DeckLink output.
     pub fn new(framerate: u32) -> Self {
         #[cfg(not(target_arch = "wasm32"))]
         let audio = audio::playback::AudioPlayback::new().ok();
@@ -69,6 +83,7 @@ impl PlaybackLoop {
         }
     }
 
+    /// Starts playback and resumes audio/SDI output.
     pub fn play(&mut self) {
         self.is_playing = true;
         #[cfg(not(target_arch = "wasm32"))]
@@ -81,6 +96,7 @@ impl PlaybackLoop {
         }
     }
 
+    /// Pauses playback and halts audio/SDI output.
     pub fn pause(&mut self) {
         self.is_playing = false;
         #[cfg(not(target_arch = "wasm32"))]
@@ -93,6 +109,7 @@ impl PlaybackLoop {
         }
     }
 
+    /// Jumps the playhead to the given frame index.
     pub fn seek(&mut self, frame: u32) {
         self.current_frame = frame;
         #[cfg(not(target_arch = "wasm32"))]
@@ -103,12 +120,14 @@ impl PlaybackLoop {
         }
     }
 
+    /// Returns whether playback is currently active.
     pub fn is_playing(&self) -> bool {
         self.is_playing
     }
 }
 
 impl CoreEngine {
+    /// Initializes the GPU context, compositor, and asset loader for a given project.
     pub async fn init(project: Arc<Mutex<NLEState>>) -> Result<Self, String> {
         println!("[CoreEngine] Initializing GPU Context...");
 
@@ -162,6 +181,7 @@ impl CoreEngine {
         self.asset_loader = None;
     }
 
+    /// Enables SDI output via DeckLink hardware if not already active.
     #[cfg(not(target_arch = "wasm32"))]
     pub async fn enable_decklink(&self) {
         let mut dl_guard = self.decklink.lock().await;
@@ -330,6 +350,7 @@ impl CoreEngine {
         }
     }
 
+    /// Renders a frame directly to a WebGL canvas (WASM target only).
     #[cfg(target_arch = "wasm32")]
     pub async fn render_frame_to_target(
         &self,

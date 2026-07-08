@@ -24,8 +24,11 @@ import { toast } from "sonner";
 import { Sparkles } from "lucide-react";
 
 interface EditorUIClientProps {
+	/** Serialized project data. */
 	project: Record<string, unknown>;
+	/** Project identifier. */
 	projectId: string;
+	/** Project display name. */
 	projectName: string;
 }
 

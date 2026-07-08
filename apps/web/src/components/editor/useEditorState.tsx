@@ -53,40 +53,67 @@ export type Workspace =
 
 interface EditorState {
 	// Core
+	/** Current project data, or null if none loaded. */
 	projectData: Project | null;
+	/** Sets the current project data. */
 	setProjectData: (data: Project | null) => void;
+	/** Media assets available in the project. */
 	assets: Asset[];
+	/** State setter for the assets list. */
 	setAssets: React.Dispatch<React.SetStateAction<Asset[]>>;
 	// Playback
+	/** Current playhead time in seconds. */
 	currentTime: number;
+	/** State setter for the current time. */
 	setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+	/** Whether playback is active. */
 	isPlaying: boolean;
+	/** State setter for the playing flag. */
 	setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 	// Tools
+	/** Currently active editing tool. */
 	activeTool: ActiveTool;
+	/** State setter for the active tool. */
 	setActiveTool: React.Dispatch<React.SetStateAction<ActiveTool>>;
 	// Selection
+	/** ID of the primary selected clip, or null. */
 	selectedClipId: string | null;
+	/** Sets the primary selected clip ID. */
 	setSelectedClipId: (id: string | null) => void;
+	/** IDs of all selected clips. */
 	selectedClipIds: string[];
+	/** State setter for the selected clip IDs. */
 	setSelectedClipIds: React.Dispatch<React.SetStateAction<string[]>>;
 	// Viewport
+	/** Timeline zoom level. */
 	zoomLevel: number;
+	/** State setter for the zoom level. */
 	setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
+	/** Whether snapping is enabled. */
 	isSnappingEnabled: boolean;
+	/** State setter for the snapping flag. */
 	setIsSnappingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 	// Command Palette
+	/** Whether the command palette is visible. */
 	showCommandPalette: boolean;
+	/** State setter for command palette visibility. */
 	setShowCommandPalette: React.Dispatch<React.SetStateAction<boolean>>;
 	// Workspace
+	/** Currently active workspace tab. */
 	activeWorkspace: Workspace;
+	/** State setter for the active workspace. */
 	setActiveWorkspace: React.Dispatch<React.SetStateAction<Workspace>>;
 	// Markers & Clipboard
+	/** Timeline markers in the project. */
 	markers: TimelineMarker[];
+	/** State setter for the markers list. */
 	setMarkers: React.Dispatch<React.SetStateAction<TimelineMarker[]>>;
+	/** Clip currently on the clipboard, or null. */
 	clipboard: Clip | null;
+	/** Sets the clipboard clip. */
 	setClipboard: (data: Clip | null) => void;
 	// WASM
+	/** Loaded WASM core module, or null if not yet loaded. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	wasmCore: any | null;
 }

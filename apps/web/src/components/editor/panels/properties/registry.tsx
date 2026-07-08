@@ -64,18 +64,25 @@ const TEXT_PARAM_KEYS = [
 ] as const;
 
 export type TabContentProps = {
+	/** ID of the track containing the selected element. */
 	trackId: string;
 };
 
 export type PropertiesTabDef = {
+	/** Unique tab identifier. */
 	id: string;
+	/** Tab label. */
 	label: string;
+	/** Tab icon element. */
 	icon: ReactNode;
+	/** Renders the tab content for a given track. */
 	content: (props: TabContentProps) => ReactNode;
 };
 
 export type ElementPropertiesConfig = {
+	/** ID of the default selected tab. */
 	defaultTab: string;
+	/** Available property tabs. */
 	tabs: PropertiesTabDef[];
 };
 

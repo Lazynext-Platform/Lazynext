@@ -5,6 +5,7 @@ use anyhow::Result;
 
 /// An export pipeline that renders compositor frames and pipes them to ffmpeg.
 pub struct ExportPipeline {
+    /// Encoder configuration (dimensions, output path, codec settings).
     config: ExportConfig,
 }
 

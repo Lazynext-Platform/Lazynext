@@ -3,12 +3,19 @@ import type { MigrationResult, ProjectRecord } from "./types";
 import { getProjectId, isRecord } from "./utils";
 
 interface FreeformPathPoint {
+	/** Unique point identifier. */
 	id: string;
+	/** X coordinate of the point. */
 	x: number;
+	/** Y coordinate of the point. */
 	y: number;
+	/** X coordinate of the incoming control handle. */
 	inX: number;
+	/** Y coordinate of the incoming control handle. */
 	inY: number;
+	/** X coordinate of the outgoing control handle. */
 	outX: number;
+	/** Y coordinate of the outgoing control handle. */
 	outY: number;
 }
 

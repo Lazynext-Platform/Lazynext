@@ -53,6 +53,7 @@ struct Args {
     #[arg(long, default_value = "gemini")]
     llm_provider: String,
 
+    /// The subcommand to run, if any.
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -127,6 +128,7 @@ enum Commands {
     },
 }
 
+// CLI entry point: parses arguments and dispatches to pipe mode or a subcommand.
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
@@ -460,12 +462,19 @@ async fn run_json_output(
 
     #[derive(Serialize)]
     struct JsonOutput {
+        /// Whether the edit succeeded.
         success: bool,
+        /// The prompt that was processed.
         prompt: String,
+        /// Number of bytes read from stdin.
         stdin_bytes: usize,
+        /// Number of applicable rules loaded.
         rules_loaded: usize,
+        /// Success message, if any.
         message: Option<String>,
+        /// Error message, if the edit failed.
         error: Option<String>,
+        /// Resulting track count.
         tracks: usize,
     }
 
@@ -513,12 +522,19 @@ fn escape_json(s: &str) -> String {
 /// Specifies the output format, resolution, framerate, duration, bitrate,
 /// and whether to display a progress bar.
 struct RenderArgs {
+    /// Output container/codec format (e.g. "mp4", "prores").
     format: String,
+    /// Output width in pixels.
     width: u32,
+    /// Output height in pixels.
     height: u32,
+    /// Export framerate in frames per second.
     framerate: u32,
+    /// Export duration in seconds.
     duration: u32,
+    /// Video bitrate in kbps.
     bitrate: u32,
+    /// Whether to display a progress bar.
     progress: bool,
 }
 

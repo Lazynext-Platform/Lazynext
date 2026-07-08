@@ -1,5 +1,6 @@
 {
   "name": "lazynext-mobile",
+  "description": "Lazynext mobile app — Expo/React Native shell binding to the Rust NLE core via UniFFI native modules.",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {

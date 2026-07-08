@@ -16,17 +16,24 @@ import { CameraView } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 
 interface FaceBounds {
+	/** Normalized origin of the detected face (0–1 fraction of screen). */
 	origin: { x: number; y: number };
+	/** Normalized size of the detected face (0–1 fraction of screen). */
 	size: { width: number; height: number };
 }
 
 const { width, height } = Dimensions.get("window");
 
 interface FilterItem {
+	/** Unique filter identifier. */
 	id: string;
+	/** Human-readable filter label. */
 	label: string;
+	/** Filter type category. */
 	type: "sunglasses" | "hat" | "beauty" | "background";
+	/** Optional asset URI for the filter overlay. */
 	asset?: string;
+	/** Optional tint color for the filter overlay. */
 	color?: string;
 }
 

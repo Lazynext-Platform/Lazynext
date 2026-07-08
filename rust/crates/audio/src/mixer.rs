@@ -17,8 +17,11 @@ use std::path::Path;
 /// playback and raw sample buffer injection. Supports basic transport controls
 /// (play, pause, resume, stop) and per-sink volume control.
 pub struct Mixer {
+    /// The platform-native output stream (kept alive for playback).
     _stream: OutputStream,
+    /// Handle to the output stream.
     _stream_handle: OutputStreamHandle,
+    /// The audio sink that queues and plays sources.
     sink: Sink,
 }
 

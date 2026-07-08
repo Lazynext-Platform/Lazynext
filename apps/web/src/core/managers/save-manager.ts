@@ -7,6 +7,7 @@
 import type { EditorCore } from "@/core";
 
 type SaveManagerOptions = {
+	/** Debounce interval in milliseconds before triggering a save. */
 	debounceMs?: number;
 };
 

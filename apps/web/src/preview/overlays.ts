@@ -31,31 +31,45 @@ export type PreviewOverlayMount =
 export type PreviewOverlayPlane = "under-interaction" | "over-interaction";
 
 export interface PreviewOverlayRenderContext {
+	/** Scene height in pixels. */
 	sceneHeight: number;
+	/** Scene width in pixels. */
 	sceneWidth: number;
 }
 
 export interface PreviewOverlayInstance {
+	/** Unique instance identifier. */
 	id: string;
+	/** Mount position definition. */
 	mount: PreviewOverlayMount;
+	/** Rendering plane priority. */
 	plane?: PreviewOverlayPlane;
+	/** Pointer event mode. */
 	pointerEvents?: "none" | "auto";
+	/** Z-index for layering. */
 	zIndex?: number;
+	/** Render function returning React nodes. */
 	render: (context: PreviewOverlayRenderContext) => ReactNode;
 }
 
 export interface PreviewOverlayDefinition {
+	/** Unique definition identifier. */
 	id: string;
+	/** Human-readable overlay label. */
 	label: string;
+	/** Whether visible by default. */
 	defaultVisible?: boolean;
 }
 
 export interface PreviewOverlayControl extends PreviewOverlayDefinition {
+	/** Current visibility state. */
 	isVisible: boolean;
 }
 
 export interface PreviewOverlaySourceResult {
+	/** Overlay definitions contributed by this source. */
 	definitions: PreviewOverlayDefinition[];
+	/** Overlay instances contributed by this source. */
 	instances: PreviewOverlayInstance[];
 }
 

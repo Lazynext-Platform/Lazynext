@@ -24,9 +24,13 @@ fn sanitize_media_path(path: &str) -> String {
 }
 
 struct DecodeStream {
+    /// Path of the media file this stream decodes.
     _media_path: String,
+    /// Output frame width in pixels.
     _width: u32,
+    /// Output frame height in pixels.
     _height: u32,
+    /// Index of the most recently decoded frame.
     current_frame: Arc<AtomicU32>,
     /// Frame cache for the recent frames pulled from this stream
     recent_frames: Arc<Mutex<LruCache<u32, Vec<u8>>>>,
@@ -35,6 +39,7 @@ struct DecodeStream {
 }
 
 impl DecodeStream {
+    // Spawn a decode stream that runs ffmpeg in a background thread, filling the LRU frame cache.
     fn new(media_path: String, width: u32, height: u32) -> Self {
         let width = width.max(1);
         let height = height.max(1);
@@ -139,6 +144,7 @@ impl DecodeStream {
         }
     }
 
+    // Return the requested frame from cache, triggering a seek and polling if not yet decoded.
     async fn get_frame(&self, frame_idx: u32) -> Result<Vec<u8>, String> {
         // Check if it's in the cache
         {
@@ -175,8 +181,11 @@ impl DecodeStream {
 /// `DecodeStream` that runs in a background thread, pre-decoding frames into
 /// a ring buffer for low-latency scrubbing.
 pub struct RingBufferDecoder {
+    /// Output frame width in pixels.
     width: u32,
+    /// Output frame height in pixels.
     height: u32,
+    /// Active decode streams keyed by media id.
     streams: Arc<Mutex<HashMap<String, Arc<DecodeStream>>>>,
 }
 
@@ -193,6 +202,7 @@ impl RingBufferDecoder {
 }
 
 impl AssetLoader for RingBufferDecoder {
+    // Returns a frame from the media's decode stream, creating one if needed.
     fn load_frame(
         &self,
         media_id: &str,
@@ -224,8 +234,11 @@ impl AssetLoader for RingBufferDecoder {
 /// scaling to the requested output resolution.
 #[cfg(feature = "native-ffmpeg")]
 pub struct NativeFfmpegDecoder {
+    /// Path of the media file to decode.
     media_path: String,
+    /// Output frame width in pixels.
     width: u32,
+    /// Output frame height in pixels.
     height: u32,
 }
 

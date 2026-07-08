@@ -12,6 +12,7 @@ import { cloneAnimations } from "@/animation";
 import type { MediaTime } from "@/wasm";
 
 interface DuplicateElementsParams {
+	/** Track-element pairs identifying the elements to duplicate. */
 	elements: { trackId: string; elementId: string }[];
 }
 

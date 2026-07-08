@@ -17,40 +17,66 @@ export type TextFontStyle = "normal" | "italic";
 export type TextDecoration = "none" | "underline" | "line-through";
 
 export interface TextLayoutParams {
+	/** Raw text content to render. */
 	content: string;
+	/** Font size in app coordinate units. */
 	fontSize: number;
+	/** CSS font-family string. */
 	fontFamily: string;
+	/** Font weight (normal or bold). */
 	fontWeight: TextFontWeight;
+	/** Font style (normal or italic). */
 	fontStyle: TextFontStyle;
+	/** Horizontal text alignment. */
 	textAlign: TextAlign;
+	/** Text decoration style. */
 	textDecoration?: TextDecoration;
+	/** Additional spacing between characters in pixels. */
 	letterSpacing?: number;
+	/** Line height as a multiplier of font size. */
 	lineHeight?: number;
 }
 
 export interface ResolvedTextLayout {
+	/** Font size scaled to canvas height. */
 	scaledFontSize: number;
+	/** CSS font shorthand string for canvas rendering. */
 	fontString: string;
+	/** Letter spacing in pixels. */
 	letterSpacing: number;
+	/** Line height in pixels. */
 	lineHeightPx: number;
+	/** Ratio of original font size to reference (15px). */
 	fontSizeRatio: number;
+	/** Horizontal text alignment. */
 	textAlign: TextAlign;
+	/** Text decoration style. */
 	textDecoration: TextDecoration;
 }
 
 export interface MeasuredTextLayout extends ResolvedTextLayout {
+	/** Lines of text after word-wrapping. */
 	lines: string[];
+	/** Per-line TextMetrics from canvas measureText. */
 	lineMetrics: TextMetrics[];
+	/** Aggregate block measurement (width, height, offsets). */
 	block: TextBlockMeasurement;
 }
 
 export interface ResolvedTextBackgroundLike {
+	/** Whether the background box is enabled. */
 	enabled: boolean;
+	/** Background fill color. */
 	color: string;
+	/** Horizontal padding in pixels. */
 	paddingX: number;
+	/** Vertical padding in pixels. */
 	paddingY: number;
+	/** Horizontal offset from text position. */
 	offsetX: number;
+	/** Vertical offset from text position. */
 	offsetY: number;
+	/** Corner radius of the background box. */
 	cornerRadius: number;
 }
 

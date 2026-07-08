@@ -16,11 +16,17 @@ import {
 import type { SnapPoint } from "@/timeline/snapping";
 
 interface UseElementInteractionProps {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Ref to the tracks container DOM element. */
 	tracksContainerRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: RefObject<HTMLDivElement | null>;
+	/** Optional ref to the tracks header element. */
 	headerRef?: RefObject<HTMLElement | null>;
+	/** Whether snapping is enabled. */
 	snappingEnabled: boolean;
+	/** Called when snap point changes. */
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 

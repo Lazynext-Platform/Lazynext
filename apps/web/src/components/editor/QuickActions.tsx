@@ -21,19 +21,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/utils/ui";
 
 interface QuickAction {
+	/** Unique action identifier. */
 	id: string;
+	/** Display label. */
 	label: string;
+	/** Lucide icon component. */
 	icon: React.ElementType;
+	/** Keyboard shortcut hint. */
 	shortcut?: string;
+	/** Tailwind color classes. */
 	color: string;
+	/** Click handler. */
 	action: () => void;
 }
 
 interface QuickActionsProps {
+	/** Handler for AI Edit action. */
 	onAiEdit?: () => void;
+	/** Handler for Export action. */
 	onExport?: () => void;
+	/** Handler for Add Text action. */
 	onAddText?: () => void;
+	/** Handler for Add Transition action. */
 	onAddTransition?: () => void;
+	/** Additional CSS classes. */
 	className?: string;
 }
 

@@ -9,8 +9,18 @@ type GradientType =
 	| "radial-gradient"
 	| "repeating-radial-gradient";
 
-type DirectionalOrientation = { type: "directional"; value: string };
-type AngularOrientation = { type: "angular"; value: string };
+type DirectionalOrientation = {
+	/** Discriminator for directional orientation. */
+	type: "directional";
+	/** Direction keyword (e.g. "to right"). */
+	value: string;
+};
+type AngularOrientation = {
+	/** Discriminator for angular orientation. */
+	type: "angular";
+	/** Angle value (e.g. "90deg"). */
+	value: string;
+};
 type LinearOrientation = DirectionalOrientation | AngularOrientation;
 
 type Distance =
@@ -20,20 +30,44 @@ type Distance =
 	| { type: "px"; value: string }
 	| { type: "em"; value: string };
 
-type PositionValue = { x?: Distance; y?: Distance };
-type Position = { type: "position"; value: PositionValue };
+type PositionValue = {
+	/** Horizontal distance from origin. */
+	x?: Distance;
+	/** Vertical distance from origin. */
+	y?: Distance;
+};
+type Position = {
+	/** Discriminator for position type. */
+	type: "position";
+	/** Position coordinate value. */
+	value: PositionValue;
+};
 
-type ExtentKeyword = { type: "extent-keyword"; value: string };
+type ExtentKeyword = {
+	/** Discriminator for extent keyword. */
+	type: "extent-keyword";
+	/** Keyword value (e.g. "closest-side"). */
+	value: string;
+};
 
 type ShapeValue = "circle" | "ellipse";
 type Shape = {
+	/** Discriminator for shape type. */
 	type: "shape";
+	/** Shape geometry kind. */
 	value: ShapeValue;
+	/** Optional sizing or extent style. */
 	style?: Distance | ExtentKeyword | Position;
+	/** Optional position of the shape center. */
 	at?: Position;
 };
 
-type DefaultRadial = { type: "default-radial"; at: Position };
+type DefaultRadial = {
+	/** Discriminator for default radial. */
+	type: "default-radial";
+	/** Position of the radial center. */
+	at: Position;
+};
 
 type RadialOrientation =
 	| Shape
@@ -54,36 +88,64 @@ export type Color =
 export type ColorStop = Color & { length?: Distance };
 
 export type GradientAst = {
+	/** Gradient kind: linear, radial, or repeating variants. */
 	type: GradientType;
+	/** Optional orientation/angle/shape for the gradient. */
 	orientation: GradientOrientation | undefined;
+	/** Ordered list of color-stop definitions. */
 	colorStops: Array<ColorStop>;
 };
 
 type Tokens = {
+	/** Matches linear-gradient function. */
 	linearGradient: RegExp;
+	/** Matches repeating-linear-gradient function. */
 	repeatingLinearGradient: RegExp;
+	/** Matches radial-gradient function. */
 	radialGradient: RegExp;
+	/** Matches repeating-radial-gradient function. */
 	repeatingRadialGradient: RegExp;
+	/** Matches directional side-or-corner syntax. */
 	sideOrCorner: RegExp;
+	/** Matches extent keywords (closest-side, farthest-corner, etc.). */
 	extentKeywords: RegExp;
+	/** Matches position keywords (left, center, right, top, bottom). */
 	positionKeywords: RegExp;
+	/** Matches pixel length value. */
 	pixelValue: RegExp;
+	/** Matches percentage length value. */
 	percentageValue: RegExp;
+	/** Matches em length value. */
 	emValue: RegExp;
+	/** Matches degree angle value. */
 	angleValue: RegExp;
+	/** Matches radian angle value. */
 	radianValue: RegExp;
+	/** Matches opening parenthesis. */
 	startCall: RegExp;
+	/** Matches closing parenthesis. */
 	endCall: RegExp;
+	/** Matches comma separator. */
 	comma: RegExp;
+	/** Matches hex color values (e.g. #fff, #a1b2c3). */
 	hexColor: RegExp;
+	/** Matches named literal color values. */
 	literalColor: RegExp;
+	/** Matches rgb() color function. */
 	rgbColor: RegExp;
+	/** Matches rgba() color function. */
 	rgbaColor: RegExp;
+	/** Matches var() CSS variable function. */
 	varColor: RegExp;
+	/** Matches calc() CSS function. */
 	calcValue: RegExp;
+	/** Matches CSS custom property names (--name). */
 	variableName: RegExp;
+	/** Matches numeric values. */
 	number: RegExp;
+	/** Matches hsl() color function. */
 	hslColor: RegExp;
+	/** Matches hsla() color function. */
 	hslaColor: RegExp;
 };
 

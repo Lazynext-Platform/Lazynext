@@ -49,7 +49,21 @@ async def get_auth_claims(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> dict:
-    """Validate JWT token and return claims. Raises 401 on failure."""
+    """Validate the request's JWT and return its decoded claims.
+
+    Accepts the token from the ``Authorization: Bearer`` header or, as a
+    fallback, a ``token`` query parameter (for SSE/WebSocket clients).
+
+    Args:
+        request: The incoming FastAPI request.
+        credentials: Bearer credentials extracted by the security scheme.
+
+    Returns:
+        The decoded JWT claims as a dict.
+
+    Raises:
+        HTTPException: 401 if the token is missing, expired, or invalid.
+    """
     token = None
 
     if credentials:
@@ -73,7 +87,15 @@ async def optional_auth(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
 ) -> Optional[dict]:
-    """Optional auth — returns claims if valid token present, None otherwise."""
+    """Validate auth if present, without requiring it.
+
+    Args:
+        request: The incoming FastAPI request.
+        credentials: Bearer credentials extracted by the security scheme.
+
+    Returns:
+        The decoded JWT claims if a valid token is present, otherwise ``None``.
+    """
     try:
         return await get_auth_claims(request, credentials)
     except HTTPException:

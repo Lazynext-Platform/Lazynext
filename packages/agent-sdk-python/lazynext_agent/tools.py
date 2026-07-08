@@ -1276,10 +1276,21 @@ TOOL_REGISTRY: list[ToolDefinition] = [
 
 
 def get_available_tools() -> list[ToolDefinition]:
-    """Return the full list of 90 MCP tools available to the Lazynext AI Agent agent."""
+    """Return the full list of MCP tools available to the Lazynext AI Agent agent.
+
+    Returns:
+        A copy of the complete tool registry (list of :class:`ToolDefinition`).
+    """
     return list(TOOL_REGISTRY)
 
 
 def get_tools_by_category(category: ToolCategory) -> list[ToolDefinition]:
-    """Return tools filtered by a specific domain category."""
+    """Return tools filtered by a specific domain category.
+
+    Args:
+        category: The :class:`ToolCategory` to filter by.
+
+    Returns:
+        The tools whose ``category`` matches ``category``.
+    """
     return [t for t in TOOL_REGISTRY if t["category"] == category.value]

@@ -13,52 +13,95 @@ import { useOptionalEditorState } from "./useEditorState";
 // ── Props ──
 
 interface FeatureToolbarProps {
-	// State values
+	/** Whether 3D workspace mode is active. */
 	is3DWorkspace: boolean;
+	/** Whether spatial editor mode is active. */
 	isSpatialEditorMode: boolean;
+	/** Whether autonomous director AI is active. */
 	isAutonomousDirector: boolean;
+	/** Whether bio-responsive UI is active. */
 	isBioResponsive: boolean;
+	/** Current system stress percentage. */
 	systemStress: number;
+	/** Whether omni voice orb is active. */
 	isOmniOrbActive: boolean;
+	/** Whether agent swarm is active. */
 	isSwarmActive: boolean;
+	/** Whether generative dreaming is active. */
 	isGenerativeDreamingActive: boolean;
+	/** Whether god mode is active. */
 	isGodMode: boolean;
+	/** Whether singularity mode is active. */
 	isSingularity: boolean;
+	/** Whether quantum superposition is active. */
 	isQuantumSuperposition: boolean;
+	/** Whether neural cinematography AI is active. */
 	isCinematographyAI: boolean;
+	/** Whether asset forge panel is open. */
 	isAssetForgeOpen: boolean;
+	/** Whether sentient color panel is open. */
 	isSentientColorOpen: boolean;
+	/** Whether audio mixer panel is open. */
 	isAudioMixerOpen: boolean;
+	/** Whether color scopes panel is open. */
 	isColorScopesOpen: boolean;
+	/** Whether auto-captioning is active. */
 	isAutoCaptioning: boolean;
+	/** Whether beat sync is active. */
 	hasBeatSync: boolean;
+	/** Whether multiplayer mode is active. */
 	isMultiplayer: boolean;
+	/** Whether chat panel is open. */
 	isChatOpen: boolean;
 	// State setters
+	/** Sets 3D workspace mode. */
 	setIs3DWorkspace: (v: boolean) => void;
+	/** Sets spatial editor mode. */
 	setIsSpatialEditorMode: (v: boolean) => void;
+	/** Sets autonomous director AI. */
 	setIsAutonomousDirector: (v: boolean) => void;
+	/** Sets bio-responsive UI. */
 	setIsBioResponsive: (v: boolean) => void;
+	/** Sets omni voice orb. */
 	setIsOmniOrbActive: (v: boolean) => void;
+	/** Sets agent swarm. */
 	setIsSwarmActive: (v: boolean) => void;
+	/** Sets generative dreaming. */
 	setIsGenerativeDreamingActive: (v: boolean) => void;
+	/** Sets god mode. */
 	setIsGodMode: (v: boolean) => void;
+	/** Sets singularity mode. */
 	setIsSingularity: (v: boolean) => void;
+	/** Sets quantum superposition. */
 	setIsQuantumSuperposition: (v: boolean) => void;
+	/** Sets cinematography AI. */
 	setIsCinematographyAI: (v: boolean) => void;
+	/** Sets asset forge panel open state. */
 	setIsAssetForgeOpen: (v: boolean) => void;
+	/** Sets sentient color panel open state. */
 	setIsSentientColorOpen: (v: boolean) => void;
+	/** Sets audio mixer panel open state. */
 	setIsAudioMixerOpen: (v: boolean) => void;
+	/** Sets color scopes panel open state. */
 	setIsColorScopesOpen: (v: boolean) => void;
+	/** Sets auto-captioning. */
 	setIsAutoCaptioning: (v: boolean) => void;
+	/** Sets auto-caption progress. */
 	setAutoCaptionProgress: (v: number) => void;
+	/** Sets beat sync. */
 	setHasBeatSync: (v: boolean) => void;
+	/** Sets multiplayer mode. */
 	setIsMultiplayer: (v: boolean) => void;
+	/** Sets chat panel open state. */
 	setIsChatOpen: (v: boolean) => void;
 	// Actions
+	/** Activates god mode. */
 	activateGodMode: () => void;
+	/** Opens the developer console. */
 	handleOpenDevConsole: () => void;
+	/** Triggers canvas annotation. */
 	handleCanvasAnnotation: () => void;
+	/** Attaches text/sticker to a tracked object. */
 	handleAttachToObject?: () => void;
 }
 

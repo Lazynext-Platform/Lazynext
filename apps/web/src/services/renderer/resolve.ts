@@ -47,7 +47,9 @@ import type {
 } from "./nodes/visual-node";
 
 type ResolveContext = {
+	/** Canvas renderer instance. */
 	renderer: CanvasRenderer;
+	/** Current timeline time in seconds. */
 	time: number;
 };
 

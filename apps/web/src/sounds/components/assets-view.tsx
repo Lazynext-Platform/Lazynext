@@ -481,8 +481,11 @@ function SavedSoundsView() {
 }
 
 interface AudioItemProps {
+	/** Sound effect to display. */
 	sound: SoundEffect;
+	/** Whether this sound is currently playing. */
 	isPlaying: boolean;
+	/** Callback to play or pause the sound. */
 	onPlay: ({ sound }: { sound: SoundEffect }) => void;
 }
 

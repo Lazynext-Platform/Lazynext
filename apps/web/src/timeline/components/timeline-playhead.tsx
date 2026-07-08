@@ -29,13 +29,21 @@ import { TIMELINE_SCROLLBAR_SIZE_PX } from "./layout";
 import { TIMELINE_LAYERS } from "./layers";
 
 interface TimelinePlayheadProps {
+	/** Current zoom level. */
 	zoomLevel: number;
+	/** Whether a horizontal scrollbar is visible. */
 	hasHorizontalScrollbar: boolean;
+	/** Ref to the ruler container. */
 	rulerRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the ruler scroll container. */
 	rulerScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the outer timeline container. */
 	timelineRef: React.RefObject<HTMLDivElement | null>;
+	/** Optional external playhead ref. */
 	playheadRef?: React.RefObject<HTMLDivElement | null>;
+	/** Whether snap-to-playhead mode is active. */
 	isSnappingToPlayhead?: boolean;
 }
 

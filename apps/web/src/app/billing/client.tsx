@@ -21,12 +21,19 @@ import { Check, Zap, Server } from "lucide-react";
 
 // Organization type (until real DB integration is wired)
 type Organization = {
+	/** Organization unique identifier. */
 	id: string;
+	/** Organization display name. */
 	name: string;
+	/** Current member count. */
 	memberCount: number;
+	/** Maximum allowed members. */
 	maxMembers: number;
+	/** Render hours used this billing cycle. */
 	renderHoursUsed: number;
+	/** AI credits used this billing cycle. */
 	aiCreditsUsed: number;
+	/** Organization members list. */
 	members: any[];
 };
 

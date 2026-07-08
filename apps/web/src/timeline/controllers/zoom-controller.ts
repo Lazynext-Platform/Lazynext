@@ -17,21 +17,32 @@ type ZoomUpdater = number | ((prev: number) => number);
 
 /** Configuration bag provided by the React host. */
 export interface ZoomConfig {
+	/** Minimum allowed zoom level. */
 	minZoom: number;
+	/** Returns the container DOM element. */
 	getContainerEl: () => HTMLDivElement | null;
+	/** Returns the tracks scrollable element. */
 	getTracksScrollEl: () => HTMLDivElement | null;
+	/** Returns the ruler scrollable element. */
 	getRulerScrollEl: () => HTMLDivElement | null;
+	/** Returns the current playhead time. */
 	getCurrentPlayheadTime: () => MediaTime;
+	/** Seeks the playhead to a given time. */
 	seek: (time: MediaTime) => void;
+	/** Persists the timeline view state. */
 	setTimelineViewState: (viewState: {
+		/** Current zoom level */
 		zoomLevel: number;
+		/** Horizontal scroll offset */
 		scrollLeft: number;
+		/** Current playhead position */
 		playheadTime: MediaTime;
 	}) => void;
 }
 
 /** Ref wrapper so the controller always reads the latest config. */
 export interface ZoomConfigRef {
+	/** Current zoom configuration snapshot. */
 	readonly current: ZoomConfig;
 }
 

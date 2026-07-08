@@ -18,6 +18,7 @@ init_telemetry(app)
 # Health check — no auth required
 @app.get("/health")
 async def health():
+    """Liveness probe — returns service status without requiring auth."""
     return {"status": "ok", "service": "generative-studio"}
 
 app.include_router(router, dependencies=[Depends(get_auth_claims)])

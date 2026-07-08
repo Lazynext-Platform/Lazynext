@@ -9,8 +9,11 @@ use serde::{Deserialize, Serialize};
 /// A frame buffer passed to plugin `process_frame` calls.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct FrameBuffer {
+    /// Frame width in pixels.
     pub width: u32,
+    /// Frame height in pixels.
     pub height: u32,
+    /// RGBA pixel data (width × height × 4 bytes).
     pub data: Vec<u8>,
 }
 
@@ -55,11 +58,17 @@ pub trait VideoEffect {
 /// A configurable parameter exposed by a plugin.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct PluginParameter {
+    /// Unique parameter identifier.
     pub id: String,
+    /// Human-readable parameter name.
     pub name: String,
+    /// Default value.
     pub default: f64,
+    /// Minimum allowed value.
     pub min: f64,
+    /// Maximum allowed value.
     pub max: f64,
+    /// Increment step for the parameter.
     pub step: f64,
 }
 
@@ -96,9 +105,13 @@ pub struct PluginParameter {
 /// Metadata extracted from a loaded WASM plugin module.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WasmPluginMetadata {
+    /// Unique plugin identifier.
     pub plugin_id: String,
+    /// Human-readable plugin name.
     pub name: String,
+    /// Plugin semantic version (major, minor, patch).
     pub version: (u32, u32, u32),
+    /// Raw compiled WASM module bytes.
     pub wasm_bytes: Vec<u8>,
 }
 
@@ -180,6 +193,7 @@ impl WasmPluginRuntime {
 }
 
 impl Default for WasmPluginRuntime {
+    // Returns an empty WASM plugin runtime.
     fn default() -> Self {
         Self::new()
     }

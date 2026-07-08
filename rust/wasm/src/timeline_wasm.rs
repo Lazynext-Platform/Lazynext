@@ -14,22 +14,33 @@ use lazynext_core::timeline::placement::types::{
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+/// A `(trackId, elementId)` pair identifying an element to delete.
 #[derive(Deserialize)]
 pub struct TargetElement {
+    /// ID of the track containing the element.
     #[serde(rename = "trackId")]
     pub track_id: String,
+    /// ID of the element within the track.
     #[serde(rename = "elementId")]
     pub element_id: String,
 }
 
+/// Result of applying a placement: the updated tracks and the track the
+/// elements landed on.
 #[derive(Serialize, Deserialize)]
 pub struct WasmApplyPlacementResult {
+    /// The full set of tracks after the placement was applied.
     #[serde(rename = "updatedTracks")]
     pub updated_tracks: SceneTracks,
+    /// ID of the track the elements were placed on.
     #[serde(rename = "targetTrackId")]
     pub target_track_id: String,
 }
 
+/// Resolves where elements should be placed without mutating the timeline.
+///
+/// Returns the serialized [`PlacementResult`], or JS `null` if no valid
+/// placement exists for the given subject, time spans, and strategy.
 #[wasm_bindgen(js_name = resolveTrackPlacement)]
 pub fn wasm_resolve_track_placement(
     tracks_js: JsValue,
@@ -49,6 +60,11 @@ pub fn wasm_resolve_track_placement(
     Ok(JsValue::NULL)
 }
 
+/// Applies a previously resolved placement to the tracks, inserting the
+/// given elements.
+///
+/// Returns the updated tracks and target track ID, or JS `null` if the
+/// placement could not be applied.
 #[wasm_bindgen(js_name = applyPlacement)]
 pub fn wasm_apply_placement(
     tracks_js: JsValue,
@@ -75,6 +91,11 @@ pub fn wasm_apply_placement(
     Ok(JsValue::NULL)
 }
 
+/// Resolves placement and applies it in one call — the common path for
+/// dropping new elements onto the timeline.
+///
+/// Returns the updated tracks and target track ID, or JS `null` if no valid
+/// placement exists or it could not be applied.
 #[wasm_bindgen(js_name = placeElementsOnTimeline)]
 pub fn place_elements_on_timeline(
     tracks_js: JsValue,
@@ -110,6 +131,8 @@ pub fn place_elements_on_timeline(
     Ok(JsValue::NULL)
 }
 
+/// Removes the given target elements from the main, overlay, and audio
+/// tracks, returning the updated [`SceneTracks`].
 #[wasm_bindgen(js_name = deleteElements)]
 pub fn wasm_delete_elements(tracks_js: JsValue, elements_js: JsValue) -> Result<JsValue, JsValue> {
     let mut tracks: SceneTracks = serde_wasm_bindgen::from_value(tracks_js)?;

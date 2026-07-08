@@ -2,7 +2,9 @@
 import type { MigrationResult, ProjectRecord } from "./transformers/types";
 
 export interface StorageMigrationRunArgs {
+	/** Identifier of the project being migrated. */
 	projectId: string;
+	/** The project record to migrate. */
 	project: ProjectRecord;
 }
 

@@ -19,10 +19,15 @@ import {
 type SeekSource = "ruler" | "tracks";
 
 interface PendingSeekSession {
+	/** Session state discriminant. */
 	kind: "pending";
+	/** Source of the seek (ruler or tracks). */
 	source: SeekSource;
+	/** Client X at pointer down. */
 	downX: number;
+	/** Client Y at pointer down. */
 	downY: number;
+	/** Timestamp at pointer down. */
 	downTime: number;
 }
 
@@ -30,25 +35,40 @@ type Session = { kind: "idle" } | PendingSeekSession;
 
 /** Configuration for the seek controller. */
 export interface SeekConfig {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Total timeline duration in media ticks. */
 	duration: MediaTime;
+	/** Whether a box-select is active. */
 	isSelecting: boolean;
+	/** Returns the playhead DOM element. */
 	getPlayheadEl: () => HTMLDivElement | null;
+	/** Returns the track labels DOM element. */
 	getTrackLabelsEl: () => HTMLDivElement | null;
+	/** Returns the ruler scroll container. */
 	getRulerScrollEl: () => HTMLDivElement | null;
+	/** Returns the tracks scroll container. */
 	getTracksScrollEl: () => HTMLDivElement | null;
+	/** Returns the active project's frame rate. */
 	getActiveProjectFps: () => FrameRate | null;
+	/** Clears all selected elements. */
 	clearSelectedElements: () => void;
+	/** Seeks the playhead to the given time. */
 	seek: (time: MediaTime) => void;
+	/** Persists the current timeline view state. */
 	setTimelineViewState: (viewState: {
+		/** Current zoom level to persist. */
 		zoomLevel: number;
+		/** Current horizontal scroll offset. */
 		scrollLeft: number;
+		/** Current playhead time to persist. */
 		playheadTime: MediaTime;
 	}) => void;
 }
 
 /** Ref wrapper for seek config. */
 export interface SeekConfigRef {
+	/** Current seek configuration. */
 	readonly current: SeekConfig;
 }
 

@@ -45,6 +45,11 @@ struct JsDiscreteAnimationKey {
     value: String,
 }
 
+/// Evaluates a scalar animation channel at `time_ticks`.
+///
+/// Parses a JS channel (linear / step / bezier keyframes), rebuilds the
+/// native [`ScalarAnimationChannel`], and returns the interpolated value.
+/// Returns `default_value` if the channel JSON is invalid.
 #[wasm_bindgen(js_name = "evaluateScalarChannel")]
 pub fn evaluate_scalar_channel(channel_json: JsValue, time_ticks: f64, default_value: f64) -> f64 {
     let js_channel: Result<JsScalarAnimationChannel, _> = from_value(channel_json);
@@ -113,6 +118,10 @@ pub fn evaluate_scalar_channel(channel_json: JsValue, time_ticks: f64, default_v
     rust_channel.evaluate_at(time_ticks as u32, default_value)
 }
 
+/// Evaluates a discrete (stepped) animation channel at `time_ticks`.
+///
+/// Returns the value of the last keyframe whose time is `<= time_ticks`, or
+/// `default_value` if the channel is empty or the JSON is invalid.
 #[wasm_bindgen(js_name = "evaluateDiscreteChannel")]
 pub fn evaluate_discrete_channel(
     channel_json: JsValue,

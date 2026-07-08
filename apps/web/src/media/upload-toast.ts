@@ -8,7 +8,9 @@
 import { toast } from "sonner";
 
 export interface MediaUploadToastResult {
+	/** Number of assets successfully uploaded. */
 	uploadedCount: number;
+	/** Names of the uploaded assets. */
 	assetNames?: string[];
 }
 

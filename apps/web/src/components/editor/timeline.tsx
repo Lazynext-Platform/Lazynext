@@ -16,53 +16,98 @@ import { motion } from "framer-motion";
 import AudioWaveform from "./AudioWaveform";
 
 interface TimelineProps {
+	/** Project data object. */
 	project: any;
+	/** Current playhead frame index. */
 	frame: number;
+	/** Called when the playhead moves to a new frame. */
 	onChangeFrame: (f: number) => void;
+	/** Called for intermediate project state updates (live preview). */
 	onProjectUpdate: (p: any) => void;
+	/** Called to commit a final project state change. */
 	onCommitUpdate: (p: any) => void;
+	/** Currently selected clip ID (single select). */
 	selectedClipId: string | null;
+	/** Set of selected clip IDs (multi-select). */
 	selectedClipIds?: string[];
+	/** Callback to split a clip at a frame. */
 	onSplitClip?: (clipId: string, frame: number) => void;
+	/** Callback for trim operations on a clip. */
 	onTrimClip?: (clipId: string, newStart: number, newDuration: number) => void;
+	/** Select a single clip by ID. */
 	onSelectClip?: (id: string | null) => void;
+	/** Toggle a clip in the multi-select set. */
 	onToggleSelectClip?: (id: string) => void;
+	/** Add a new track to the timeline. */
 	onAddTrack?: () => void;
+	/** Add a marker at the given frame. */
 	onAddMarker?: (frame: number, color: string, label: string) => void;
+	/** Update an existing marker. */
 	onUpdateMarker?: (id: string, updates: Partial<any>) => void;
+	/** Delete a marker by ID. */
 	onDeleteMarker?: (id: string) => void;
+	/** Rename a track at the given index. */
 	onRenameTrack?: (trackIdx: number, newName: string) => void;
+	/** Move a clip to a different track and start frame. */
 	onMoveClip?: (
+		/** ID of the clip to move. */
 		clipId: string,
+		/** Target track ID to move the clip to. */
 		targetTrackId: string,
+		/** New start frame position. */
 		startFrame: number,
 	) => void;
+	/** Pixels per frame (zoom level). */
 	pxPerFrame?: number;
+	/** Toggle track lock state. */
 	onToggleTrackLock?: (idx: number) => void;
+	/** Toggle track visibility. */
 	onToggleTrackHide?: (idx: number) => void;
+	/** Toggle track mute. */
 	onToggleTrackMute?: (idx: number) => void;
+	/** Toggle track solo. */
 	onToggleTrackSolo?: (idx: number) => void;
+	/** Available media assets for thumbnails and waveforms. */
 	assets?: any[];
+	/** Whether snap-to-grid is active. */
 	isSnappingEnabled?: boolean;
+	/** Reorder a track from one index to another. */
 	onMoveTrack?: (fromIdx: number, toIdx: number) => void;
+	/** Whether the timeline is currently playing. */
 	isPlaying?: boolean;
+	/** Timeline marker positions. */
 	markers?: { frame: number; label: string; color?: string }[];
+	/** Cloud-synced review comments. */
 	cloudComments?: {
+		/** Frame position of the comment. */
 		frame: number;
+		/** Comment text content. */
 		text: string;
+		/** Name of the comment author. */
 		author: string;
+		/** URL to the author's avatar image. */
 		avatar: string;
+		/** Unix timestamp when the comment was created. */
 		timestamp: number;
 	}[];
+	/** Context menu handler for clips. */
 	onContextMenuClip?: (e: React.MouseEvent, clipId: string) => void;
+	/** Context menu handler for tracks. */
 	onContextMenuTrack?: (e: React.MouseEvent, trackIdx: number) => void;
+	/** Currently active editing tool. */
 	activeTool?: "select" | "razor" | "slip" | "ripple" | "slide" | "roll";
+	/** Click handler for clips (used by razor tool). */
 	onClickClip?: (
+		/** React mouse event from the click. */
 		e: React.MouseEvent,
+		/** ID of the clip that was clicked. */
 		clipId: string,
+		/** Frame index at the click position, relative to the clip. */
 		frameAtClick?: number,
 	) => void;
+	/** Track row height preset. */
 	trackHeight?: "sm" | "md" | "lg";
+	/** Whether quantum superposition visual effect is active. */
 	isQuantumSuperposition?: boolean;
 }
 

@@ -43,9 +43,12 @@ pub enum TimeCodeFormat {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FormatTimecodeOptions {
+    /// Media time to format.
     pub time: MediaTime,
+    /// Target display format (defaults to HH:MM:SS:CS).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub format: Option<TimeCodeFormat>,
+    /// Frame rate, required for frame-based formats.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rate: Option<FrameRate>,
 }
@@ -56,9 +59,12 @@ pub struct FormatTimecodeOptions {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ParseTimecodeOptions {
+    /// Timecode string to parse.
     pub time_code: String,
+    /// Expected display format (defaults to HH:MM:SS:CS).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub format: Option<TimeCodeFormat>,
+    /// Frame rate, required for frame-based formats.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rate: Option<FrameRate>,
 }
@@ -69,6 +75,7 @@ pub struct ParseTimecodeOptions {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GuessTimecodeFormatOptions {
+    /// Timecode string whose format should be detected.
     pub time_code: String,
 }
 

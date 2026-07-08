@@ -16,46 +16,71 @@ use tokio::sync::Mutex;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+/// A scheduled editing routine with a cron expression and autonomous prompt.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Routine {
+    /// Unique routine identifier.
     pub id: String,
+    /// Human-readable routine name.
     pub name: String,
+    /// Cron expression controlling when the routine runs.
     pub cron_expression: String,
+    /// Autonomous editor prompt to execute.
     pub prompt: String,
+    /// Whether the routine is currently active.
     pub enabled: bool,
+    /// ISO 8601 timestamp of the last execution, if any.
     pub last_run: Option<String>,
+    /// ISO 8601 timestamp of when the routine was created.
     pub created_at: String,
 }
 
 /// Parsed cron expression → five fields.
 #[derive(Debug, Clone)]
 pub struct CronSchedule {
+    /// Minute field (0–59).
     pub minute: CronField,
+    /// Hour field (0–23).
     pub hour: CronField,
+    /// Day-of-month field (1–31).
     pub day_of_month: CronField,
+    /// Month field (1–12).
     pub month: CronField,
+    /// Day-of-week field (0–6, Sunday = 0).
     pub day_of_week: CronField,
 }
 
+/// A single field in a cron expression, supporting wildcards, lists, ranges, and steps.
 #[derive(Debug, Clone, PartialEq)]
 pub enum CronField {
+    /// Matches every value.
     Any,
+    /// Matches exactly this value.
     Single(u32),
+    /// Matches any value in the list.
     List(Vec<u32>),
+    /// Matches any value in the inclusive range.
     Range(u32, u32),
+    /// Matches values starting from a base with a step interval.
     Step(u32, u32), // start, step (e.g. */5)
 }
 
 // ── Scheduler ──────────────────────────────────────────────────────────────
 
+/// Manages scheduled routines, persisting them to disk and executing them on cron ticks.
 pub struct RoutineScheduler {
+    /// Registered routines keyed by routine ID.
     routines: HashMap<String, Routine>,
+    /// Path to the persisted `routines.json` file.
     storage_path: PathBuf,
+    /// Shared NLE state the routines operate on.
     nle: Arc<Mutex<NLEState>>,
+    /// Autonomous editor used to execute routine prompts.
     editor: Arc<AutonomousEditor>,
 }
 
 impl RoutineScheduler {
+    /// Creates a new scheduler, loading any persisted routines from disk.
     pub fn new(nle: Arc<Mutex<NLEState>>, editor: Arc<AutonomousEditor>) -> Self {
         let home = dirs_fallback();
         let dir = home.join(".lazynext");
@@ -74,6 +99,7 @@ impl RoutineScheduler {
 
     // ── Persistence ────────────────────────────────────────────────────
 
+    // Loads persisted routines from disk, backing up any corrupted file.
     fn load_from_disk(path: &PathBuf) -> HashMap<String, Routine> {
         match std::fs::read_to_string(path) {
             Ok(contents) => {
@@ -96,6 +122,7 @@ impl RoutineScheduler {
         }
     }
 
+    // Serializes all routines to disk as pretty-printed JSON.
     fn save_to_disk(&self) {
         let list: Vec<&Routine> = self.routines.values().collect();
         if let Ok(json) = serde_json::to_string_pretty(&list) {
@@ -105,11 +132,13 @@ impl RoutineScheduler {
 
     // ── Public API ─────────────────────────────────────────────────────
 
+    /// Registers a new routine and saves to disk.
     pub fn schedule_routine(&mut self, routine: Routine) {
         self.routines.insert(routine.id.clone(), routine);
         self.save_to_disk();
     }
 
+    /// Removes a routine by ID; returns true if it existed.
     pub fn cancel_routine(&mut self, id: &str) -> bool {
         let removed = self.routines.remove(id).is_some();
         if removed {
@@ -118,12 +147,14 @@ impl RoutineScheduler {
         removed
     }
 
+    /// Returns all routines sorted by creation time.
     pub fn list_routines(&self) -> Vec<Routine> {
         let mut list: Vec<Routine> = self.routines.values().cloned().collect();
         list.sort_by(|a, b| a.created_at.cmp(&b.created_at));
         list
     }
 
+    /// Returns the routine with the given ID, if it exists.
     pub fn get_routine(&self, id: &str) -> Option<Routine> {
         self.routines.get(id).cloned()
     }
@@ -188,6 +219,7 @@ impl RoutineScheduler {
 
     // ── Cron Helpers ───────────────────────────────────────────────────
 
+    /// Parses a five-field cron expression into a `CronSchedule`.
     pub fn parse_cron(expr: &str) -> Result<CronSchedule, String> {
         let parts: Vec<&str> = expr.split_whitespace().collect();
         if parts.len() != 5 {
@@ -225,6 +257,7 @@ impl RoutineScheduler {
 
 // ── Cron Field Parsing ─────────────────────────────────────────────────────
 
+// Parses a single cron field, validating it against the [min, max] range.
 fn parse_field(s: &str, min: u32, max: u32) -> Result<CronField, String> {
     if s == "*" {
         return Ok(CronField::Any);
@@ -288,6 +321,7 @@ fn parse_field(s: &str, min: u32, max: u32) -> Result<CronField, String> {
     Ok(CronField::Single(v))
 }
 
+// Returns whether a cron field matches the given current value.
 fn field_matches(field: &CronField, current: u32) -> bool {
     match field {
         CronField::Any => true,
@@ -308,13 +342,19 @@ fn field_matches(field: &CronField, current: u32) -> bool {
 
 #[derive(Debug)]
 struct TimeComponents {
+    /// Minute of the hour (0–59).
     minute: u32,
+    /// Hour of the day (0–23).
     hour: u32,
+    /// Day of the month (1–31).
     day: u32,
+    /// Month of the year (1–12).
     month: u32,
+    /// Day of the week (0 = Sunday).
     weekday: u32, // 0 = Sunday
 }
 
+// Computes the current time broken into cron-matchable components.
 fn now_components() -> TimeComponents {
     // Use chrono if available; fall back to a simple epoch-based calc
     #[allow(unused_imports)]
@@ -346,6 +386,7 @@ fn now_components() -> TimeComponents {
     }
 }
 
+// Converts days-since-epoch into a (year, 1-based day-of-year) pair.
 fn approx_year_and_doy(days: u64) -> (u64, u64) {
     let mut year = 1970u64;
     let mut remaining = days as i64;
@@ -356,14 +397,17 @@ fn approx_year_and_doy(days: u64) -> (u64, u64) {
     (year, remaining as u64 + 1) // day-of-year is 1-based
 }
 
+// Returns the number of days in the given year.
 fn days_in_year(y: u64) -> i64 {
     if is_leap(y) { 366 } else { 365 }
 }
 
+// Returns whether the given year is a leap year.
 fn is_leap(y: u64) -> bool {
     (y.is_multiple_of(4) && !y.is_multiple_of(100)) || y.is_multiple_of(400)
 }
 
+// Converts a day-of-year into a (month, day) pair.
 fn doy_to_month_day(doy: u64, leap: bool) -> (u64, u64) {
     let days_per_month = if leap {
         [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -380,6 +424,7 @@ fn doy_to_month_day(doy: u64, leap: bool) -> (u64, u64) {
     (12, 31)
 }
 
+// Returns the current UTC time as an ISO 8601 string.
 fn now_iso() -> String {
     #[allow(unused_imports)]
     use std::time::SystemTime;
@@ -399,6 +444,7 @@ fn now_iso() -> String {
     )
 }
 
+// Resolves the user's home directory, falling back to the current directory.
 fn dirs_fallback() -> PathBuf {
     std::env::var("HOME")
         .or_else(|_| std::env::var("USERPROFILE"))

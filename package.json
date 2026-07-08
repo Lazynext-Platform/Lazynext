@@ -1,5 +1,6 @@
 {
 	"name": "lazynext-workspace",
+	"description": "Monorepo root for Lazynext — the AI-native, real-time collaborative non-linear video editor (Rust core + multi-platform shells).",
 	"version": "1.0.0",
 	"private": true,
 	"packageManager": "bun@1.3.14",

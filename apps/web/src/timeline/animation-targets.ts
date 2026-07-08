@@ -37,11 +37,17 @@ import { isVisualElement } from "@/timeline/element-utils";
  * numeric ranges, and how to read/write the base param value.
  */
 export interface AnimationPathDescriptor {
+	/** Channel layout (leaf or composite) for this property path. */
 	channelLayout: ParamChannelLayout;
+	/** Default interpolation mode when adding keyframes. */
 	defaultInterpolation: AnimationInterpolation;
+	/** Per-component numeric range constraints. */
 	numericRanges?: Partial<Record<string, NumericSpec>>;
+	/** Coerce an incoming value into a valid ParamValue. */
 	coerceValue: ({ value }: { value: ParamValue }) => ParamValue | null;
+	/** Read the current base value for this property path. */
 	getBaseValue: () => ParamValue | null;
+	/** Write a new base value and return the updated element. */
 	setBaseValue: ({ value }: { value: ParamValue }) => TimelineElement;
 }
 

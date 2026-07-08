@@ -9,6 +9,7 @@ import type {
 	TInvocationTrigger,
 } from "./types";
 
+/** Internal action handler signature receiving optional args and invocation trigger. */
 type ActionHandler = (arg: unknown, trigger?: TInvocationTrigger) => void;
 const boundActions: Partial<Record<TAction, ActionHandler[]>> = {};
 
@@ -28,6 +29,9 @@ export function bindAction<A extends TAction>(
 }
 
 // eslint-disable-next-line lazynext/prefer-object-params -- action registries read best as (action, handler).
+/**
+ * Unregister a handler from an action so it no longer receives invocations.
+ */
 export function unbindAction<A extends TAction>(
 	action: A,
 	handler: TActionFunc<A>,
@@ -44,15 +48,24 @@ export function unbindAction<A extends TAction>(
 	}
 }
 
+/** Overloaded invoke function type dispatching actions with or without required args. */
 type InvokeActionFunc = {
+	/** Invoke an action that takes no required arguments. */
 	(
+		/** Action to invoke (optional-args variant). */
 		action: TActionWithOptionalArgs,
+		/** No arguments required. */
 		args?: undefined,
+		/** Source that triggered the invocation. */
 		trigger?: TInvocationTrigger,
 	): void;
+	/** Invoke an action that requires typed arguments. */
 	<A extends TActionWithArgs>(
+		/** Action to invoke (required-args variant). */
 		action: A,
+		/** Typed arguments for the action. */
 		args: TActionArgsMap[A],
+		/** Source that triggered the invocation. */
 		trigger?: TInvocationTrigger,
 	): void;
 };

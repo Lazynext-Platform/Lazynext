@@ -7,13 +7,17 @@
 use gpui::Rgba as GpuiRgba;
 use std::env;
 
+/// The active colour scheme: dark or light.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ThemeMode {
+    /// Dark colour scheme.
     Dark,
+    /// Light colour scheme.
     Light,
 }
 
 impl ThemeMode {
+    /// Resolve the theme mode from `LAZYNEXT_THEME`, falling back to OS appearance.
     pub fn from_env() -> Self {
         match env::var("LAZYNEXT_THEME").as_deref() {
             Ok("light") => ThemeMode::Light,
@@ -39,26 +43,40 @@ impl ThemeMode {
     }
 }
 
+/// A resolved set of UI colours plus the active theme mode.
 #[derive(Clone)]
 #[allow(dead_code)]
 pub struct Theme {
+    /// Main window background colour.
     pub bg_main: GpuiRgba,
+    /// Panel background colour.
     pub bg_panel: GpuiRgba,
+    /// Background colour for hovered elements.
     pub bg_hover: GpuiRgba,
+    /// Primary accent colour.
     pub accent_primary: GpuiRgba,
+    /// Secondary accent colour.
     pub accent_secondary: GpuiRgba,
+    /// Primary text colour.
     pub text_primary: GpuiRgba,
+    /// Secondary text colour.
     pub text_secondary: GpuiRgba,
+    /// Muted text colour.
     pub text_muted: GpuiRgba,
+    /// Border colour.
     pub border: GpuiRgba,
+    /// Timeline playhead colour.
     #[allow(dead_code)]
     pub playhead: GpuiRgba,
+    /// Timeline background colour.
     #[allow(dead_code)]
     pub timeline_bg: GpuiRgba,
+    /// The active theme mode.
     pub mode: ThemeMode,
 }
 
 impl Theme {
+    /// Build the default dark theme palette.
     pub fn dark() -> Self {
         Theme {
             bg_main: rgb(0x05, 0x05, 0x05),
@@ -76,6 +94,7 @@ impl Theme {
         }
     }
 
+    /// Build the default light theme palette.
     pub fn light() -> Self {
         Theme {
             bg_main: rgb(0xfc, 0xfc, 0xfc),
@@ -93,6 +112,7 @@ impl Theme {
         }
     }
 
+    /// Build a theme by resolving the mode from the environment/OS.
     pub fn auto() -> Self {
         match ThemeMode::from_env() {
             ThemeMode::Dark => Theme::dark(),
@@ -101,6 +121,7 @@ impl Theme {
     }
 }
 
+// Construct an opaque GPUI colour from 8-bit RGB components.
 fn rgb(r: u8, g: u8, b: u8) -> GpuiRgba {
     GpuiRgba {
         r: r as f32 / 255.0,

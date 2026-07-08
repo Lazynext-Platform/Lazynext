@@ -11,7 +11,9 @@ import { useRef, useEffect, useState } from "react";
 import type { ScopeType } from "@/types/editor";
 
 interface VideoScopesProps {
+	/** Whether playback is active. */
 	isPlaying: boolean;
+	/** Current frame index. */
 	frame: number;
 }
 

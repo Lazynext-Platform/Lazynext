@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface ThemeToggleProps {
+	/** Additional CSS class for the button. */
 	className?: string;
+	/** Additional CSS class for the icon. */
 	iconClassName?: string;
 }
 

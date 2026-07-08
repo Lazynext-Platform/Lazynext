@@ -66,20 +66,34 @@ function sanitizeRecentStickers({
 type ViewMode = "search" | "browse";
 
 interface StickersStore {
+	/** Current search query string. */
 	searchQuery: string;
+	/** Selected sticker category filter. */
 	selectedCategory: StickerCategory;
+	/** Current view mode (search or browse). */
 	viewMode: ViewMode;
+	/** Search results from the last query. */
 	searchResults: StickerSearchResult | null;
+	/** Browse content for the current category. */
 	browseContent: StickerBrowseResult | null;
+	/** Persisted list of recently used sticker IDs. */
 	recentStickers: string[];
+	/** Whether a search is in progress. */
 	isSearching: boolean;
+	/** Whether a browse operation is in progress. */
 	isBrowsing: boolean;
 
+	/** Update the search query and trigger search if non-empty. */
 	setSearchQuery: ({ query }: { query: string }) => void;
+	/** Change the selected category and refresh browse results. */
 	setSelectedCategory: ({ category }: { category: StickerCategory }) => void;
+	/** Execute a sticker search across providers. */
 	searchStickers: ({ query }: { query: string }) => Promise<void>;
+	/** Load browse content for the current category. */
 	browseStickers: () => Promise<void>;
+	/** Add a sticker to the recent stickers list. */
 	addToRecentStickers: ({ stickerId }: { stickerId: string }) => void;
+	/** Clear the entire recent stickers list. */
 	clearRecentStickers: () => void;
 }
 

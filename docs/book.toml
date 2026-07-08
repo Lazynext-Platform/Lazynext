@@ -1,0 +1,23 @@
+[book]
+title = "Lazynext Documentation"
+description = "Enterprise-grade, multi-platform AI-native Non-Linear Video Editor — architecture, API, and developer guides."
+authors = ["Lazynext"]
+language = "en"
+src = "."
+
+[build]
+# Only render the files listed in SUMMARY.md; ignore the rest of the repo.
+create-missing = false
+
+[output.html]
+default-theme = "navy"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/Lazynext-Platform/Lazynext"
+edit-url-template = "https://github.com/Lazynext-Platform/Lazynext/edit/main/docs/{path}"
+
+[output.html.fold]
+enable = true
+level = 1
+
+[output.html.search]
+enable = true

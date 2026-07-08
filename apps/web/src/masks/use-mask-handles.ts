@@ -20,24 +20,40 @@ import { isMaskableElement } from "@/timeline/element-utils";
 import { registerCanceller } from "@/editor/cancel-interaction";
 
 interface DragState {
+	/** Track ID of the mask element. */
 	trackId: string;
+	/** Element ID of the mask element. */
 	elementId: string;
+	/** Handle being dragged. */
 	handleId: MaskHandleId;
+	/** Canvas X at drag start. */
 	startCanvasX: number;
+	/** Canvas Y at drag start. */
 	startCanvasY: number;
+	/** Mask params at drag start. */
 	startParams: Mask["params"];
 }
 
 interface PendingSegmentInsertState {
+	/** Track ID of the mask element. */
 	trackId: string;
+	/** Element ID of the mask element. */
 	elementId: string;
+	/** Mask ID. */
 	maskId: string;
+	/** Segment index being clicked. */
 	segmentIndex: number;
+	/** Client X at pointer down. */
 	startClientX: number;
+	/** Client Y at pointer down. */
 	startClientY: number;
+	/** Canvas X at pointer down. */
 	startCanvasX: number;
+	/** Canvas Y at pointer down. */
 	startCanvasY: number;
+	/** Mask params at pointer down. */
 	startParams: Mask["params"];
+	/** Element bounds for coordinate mapping. */
 	bounds: ElementBounds;
 }
 

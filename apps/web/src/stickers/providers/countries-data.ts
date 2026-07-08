@@ -45,10 +45,15 @@ export const REGION_GROUPS: Partial<Record<string, RegionId[]>> = {
 
 /** A single country record with flag metadata. */
 export interface CountryRecord {
+	/** Country display name. */
 	name: string;
+	/** ISO country code. */
 	code: string;
+	/** Official or common languages. */
 	languages?: string[];
+	/** Dominant colors in the country's flag. */
 	flag_colors?: string[];
+	/** Geographic region the country belongs to. */
 	region?: RegionId;
 }
 

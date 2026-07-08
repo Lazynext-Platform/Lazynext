@@ -18,11 +18,17 @@ import type { TimelineElement } from "@/timeline";
 import type { MediaTime } from "@/wasm";
 
 export interface KeyframedParamPropertyResult {
+	/** Whether the property has any keyframes. */
 	hasAnimatedKeyframes: boolean;
+	/** Whether a keyframe exists at the current time. */
 	isKeyframedAtTime: boolean;
+	/** Identifier of the keyframe at the current time, if any. */
 	keyframeIdAtTime: string | null;
+	/** Previews a value change. */
 	onPreview: (value: number | string | boolean) => void;
+	/** Commits the pending preview. */
 	onCommit: () => void;
+	/** Toggles a keyframe at the current time. */
 	toggleKeyframe: () => void;
 }
 

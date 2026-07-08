@@ -15,7 +15,9 @@ use web_sys::HtmlCanvasElement;
 /// track/clip management, media pool, and canvas rendering.
 #[wasm_bindgen]
 pub struct WasmEngine {
+    /// Shared, lockable NLE state for the project.
     engine: Arc<Mutex<NLEState>>,
+    /// Shared core engine driving rendering and export.
     core: Arc<CoreEngine>,
 }
 

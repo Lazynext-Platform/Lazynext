@@ -36,37 +36,64 @@ pub mod tombstone;
 pub mod vector_clock;
 use serde::{Deserialize, Serialize};
 
+/// A single media placement on a track, measured in frames.
+///
+/// This is the Serde-serializable snapshot form of a clip. For CRDT-aware
+/// editing use [`crdt::CRDTClip`], which wraps each mutable field in an
+/// LWW register.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Clip {
+    /// Stable unique identifier for the clip.
     pub id: String,
+    /// Human-readable clip label shown in the UI.
     pub name: String,
+    /// Timeline start position, in frames.
     pub start_frame: i32,
+    /// Clip length, in frames.
     pub duration_frames: i32,
+    /// Identifier of the source media asset this clip references.
     pub media_id: String,
+    /// Whether the clip is muted/hidden (excluded from rendering).
     pub is_disabled: bool,
 }
 
+/// An ordered lane of clips of a single kind (video or audio).
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Track {
+    /// Stable unique identifier for the track.
     pub id: String,
+    /// Human-readable track label shown in the UI.
     pub name: String,
+    /// Track kind — either `"video"` or `"audio"`.
     pub track_type: String, // "video" | "audio"
+    /// Clips placed on this track, in timeline order.
     pub clips: Vec<Clip>,
 }
 
+/// A complete project snapshot: canvas settings plus all tracks and clips.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProjectData {
+    /// Stable unique identifier for the project.
     pub id: String,
+    /// Human-readable project name.
     pub name: String,
+    /// Playback rate in frames per second.
     pub fps: f64,
+    /// Output canvas width in pixels.
     pub width: u32,
+    /// Output canvas height in pixels.
     pub height: u32,
+    /// Background clear color as linear RGBA in `[0.0, 1.0]`.
     pub bg_color: [f32; 4],
+    /// Total timeline length, in frames.
     pub duration_frames: i32,
+    /// All tracks in the project.
     pub tracks: Vec<Track>,
 }
 
 impl ProjectData {
+    /// Creates an empty project with default black background and a
+    /// 1000-frame duration.
     pub fn new(id: String, name: String, fps: f64, width: u32, height: u32) -> Self {
         Self {
             id,
@@ -80,10 +107,15 @@ impl ProjectData {
         }
     }
 
+    /// Appends a track to the end of the track list.
     pub fn add_track(&mut self, track: Track) {
         self.tracks.push(track);
     }
 
+    /// Updates a clip's `start_frame` and/or `is_disabled` fields in place.
+    ///
+    /// Searches every track for a clip matching `clip_id`. Returns `true`
+    /// if the clip was found and updated, `false` otherwise.
     pub fn update_clip(
         &mut self,
         clip_id: &str,

@@ -7,11 +7,17 @@
 /// Configuration for an export job.
 #[derive(Clone, Debug)]
 pub struct ExportConfig {
+    /// Target container and codec combination.
     pub format: ExportFormat,
+    /// Output width in pixels.
     pub width: u32,
+    /// Output height in pixels.
     pub height: u32,
+    /// Output frame rate in frames per second.
     pub framerate: u32,
+    /// Target video bitrate in kilobits per second.
     pub bitrate_kbps: u32,
+    /// Destination file path for the encoded output.
     pub output_path: String,
 }
 

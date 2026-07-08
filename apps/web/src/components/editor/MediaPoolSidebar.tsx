@@ -11,43 +11,80 @@ import React from "react";
 import { toast } from "sonner";
 
 interface MediaPoolSidebarProps {
+	/** Additional arbitrary props passed through. */
 	[extra: string]: any;
+	/** Media assets available in the pool. */
 	assets: any;
+	/** Current playhead frame. */
 	frame: any;
+	/** Handler to generate an AI voiceover. */
 	handleAiVoiceover: any;
+	/** Handler to auto-generate a subtitle track. */
 	handleAutoSubtitleTrack: any;
+	/** Handler to create a multicam sequence. */
 	handleCreateMulticam: any;
+	/** Handler for file upload input. */
 	handleFileUpload: any;
+	/** Handler to restore a ripple-deleted word. */
 	handleRestoreRippleWord: any;
+	/** Handler to run a diffusion (text-to-video) prompt. */
 	handleDiffusionPrompt: any;
+	/** Handler to create a telepathic link. */
 	handleTelepathicLink: any;
+	/** Setter for the installed plugins list. */
 	setInstalledPlugins: any;
+	/** Handler invoked when dragging an asset begins. */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	handleDragStart: (e: React.DragEvent, asset: any) => void;
+	/** Setter for the media assets list. */
 	setAssets: any;
+	/** Handler to add a node to the fusion graph. */
 	handleAddNodeToGraph: any;
+	/** Handler to open the visual debugger. */
 	handleVisualDebugger: any;
+	/** Handler to transcribe audio. */
 	handleTranscribeAudio: any;
+	/** Handler to morph lips to dubbed audio. */
 	handleMorphLips: any;
+	/** Handler to dub a voice track. */
 	handleDubVoiceTrack: any;
+	/** Handler to run scene cut detection. */
 	handleSceneCutDetection: any;
+	/** Handler to auto-sync audio and video. */
 	handleSyncAudioVideo: any;
+	/** Whether emotion heatmap mode is active. */
 	isEmotionHeatmapMode: any;
+	/** Setter for emotion heatmap mode. */
 	setIsEmotionHeatmapMode: any;
+	/** Timeline markers. */
 	markers: any;
+	/** Setter for the current playhead frame. */
 	setFrame: (f: number) => void;
+	/** List of installed plugins. */
 	installedPlugins: any;
+	/** Active media type filter. */
 	mediaFilter: any;
+	/** Media pool floating position state. */
 	mediaPoolPos: any;
+	/** Current media search query. */
 	mediaSearchQuery: any;
+	/** Current project data. */
 	projectData: any;
+	/** Setter for the media type filter. */
 	setMediaFilter: any;
+	/** Setter for the media pool position. */
 	setMediaPoolPos: any;
+	/** Setter for the media search query. */
 	setMediaSearchQuery: any;
+	/** Setter for the active sidebar tab. */
 	setSidebarTab: any;
+	/** Setter for the split-audio-video-on-import option. */
 	setSplitAudioVideoOnImport: any;
+	/** Currently active sidebar tab. */
 	sidebarTab: any;
+	/** Sidebar width in pixels. */
 	sidebarWidth: any;
+	/** Whether to split audio and video on import. */
 	splitAudioVideoOnImport: any;
 }
 

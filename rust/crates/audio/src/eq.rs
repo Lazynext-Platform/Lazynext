@@ -14,10 +14,15 @@
 /// Biquad filter coefficients for parametric EQ.
 #[derive(Clone, Debug)]
 pub struct BiquadCoeffs {
+    /// Feed-forward coefficient b0 (direct path).
     pub b0: f64,
+    /// Feed-forward coefficient b1 (1-sample delay path).
     pub b1: f64,
+    /// Feed-forward coefficient b2 (2-sample delay path).
     pub b2: f64,
+    /// Feed-back coefficient a1 (1-sample delay path).
     pub a1: f64,
+    /// Feed-back coefficient a2 (2-sample delay path).
     pub a2: f64,
 }
 
@@ -45,10 +50,15 @@ pub enum FilterType {
 /// Each instance maintains the previous two input and output samples for the
 /// direct-form I transposed topology.
 pub struct BiquadFilter {
+    /// The biquad filter coefficients.
     coeffs: BiquadCoeffs,
+    /// Input sample delayed by one step.
     x1: f64,
+    /// Input sample delayed by two steps.
     x2: f64,
+    /// Output sample delayed by one step.
     y1: f64,
+    /// Output sample delayed by two steps.
     y2: f64,
 }
 
@@ -230,8 +240,11 @@ fn design_biquad(
 /// A three-band parametric EQ (low, mid, high).
 #[allow(clippy::large_enum_variant)]
 pub struct ParametricEq {
+    /// Low-frequency shelf band.
     low_shelf: BiquadFilter,
+    /// Mid-frequency peaking band.
     mid_peaking: BiquadFilter,
+    /// High-frequency shelf band.
     high_shelf: BiquadFilter,
 }
 

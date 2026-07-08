@@ -16,8 +16,11 @@ const sectionExpandedCache = new Map<string, boolean>();
 const mountedSectionKeys = new Set<string>();
 
 interface SectionContext {
+	/** Whether the section is expanded. */
 	isOpen: boolean;
+	/** Toggles the section open state. */
 	toggle: () => void;
+	/** Whether the section can be collapsed. */
 	collapsible: boolean;
 }
 
@@ -28,12 +31,19 @@ function useSectionContext() {
 }
 
 interface SectionProps {
+	/** Section content. */
 	children: React.ReactNode;
+	/** Whether the section can be collapsed. */
 	collapsible?: boolean;
+	/** Whether the section starts expanded. */
 	defaultOpen?: boolean;
+	/** Cache key for persisting expanded state. */
 	sectionKey?: string;
+	/** Additional CSS classes. */
 	className?: string;
+	/** Whether to render a top border. */
 	showTopBorder?: boolean;
+	/** Whether to render a bottom border. */
 	showBottomBorder?: boolean;
 }
 
@@ -88,11 +98,17 @@ export function Section({
 }
 
 interface SectionHeaderProps {
+	/** Header content. */
 	children?: React.ReactNode;
+	/** Content rendered on the trailing side. */
 	trailing?: React.ReactNode;
+	/** Content rendered on the leading side. */
 	leading?: React.ReactNode;
+	/** Action controls rendered after trailing content. */
 	actions?: React.ReactNode;
+	/** Click handler for the header. */
 	onClick?: () => void;
+	/** Additional CSS classes. */
 	className?: string;
 }
 

@@ -21,12 +21,14 @@ struct JfaStepUniforms {
 @group(0) @binding(1) var input_sampler: sampler;
 @group(1) @binding(0) var<uniform> uniforms: JfaStepUniforms;
 
+// Decodes a seed's 2D pixel coordinate from its split-byte RGBA encoding.
 fn decode_seed(encoded: vec4f) -> vec2f {
     let x = floor(encoded.r * 255.0 + 0.5) * 256.0 + floor(encoded.g * 255.0 + 0.5);
     let y = floor(encoded.b * 255.0 + 0.5) * 256.0 + floor(encoded.a * 255.0 + 0.5);
     return vec2f(x, y);
 }
 
+// Encodes a seed's 2D pixel coordinate into split-byte RGBA channels.
 fn encode_seed(seed: vec2f) -> vec4f {
     let x_hi = floor(seed.x / 256.0);
     let x_lo = seed.x - (x_hi * 256.0);
@@ -35,6 +37,7 @@ fn encode_seed(seed: vec2f) -> vec4f {
     return vec4f(x_hi / 255.0, x_lo / 255.0, y_hi / 255.0, y_lo / 255.0);
 }
 
+// True if the texel is the white no-seed sentinel (no nearest seed yet).
 fn is_no_seed(encoded: vec4f) -> bool {
     return encoded.r > 0.99 && encoded.g > 0.99 && encoded.b > 0.99 && encoded.a > 0.99;
 }

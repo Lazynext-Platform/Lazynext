@@ -10,8 +10,11 @@ import { useState, useRef } from "react";
 import { useEditor } from "@/editor/use-editor";
 
 interface UseFileUploadOptions {
+	/** MIME type filter for the file input (e.g. "video/*"). */
 	accept?: string;
+	/** Whether to allow selecting multiple files. */
 	multiple?: boolean;
+	/** Callback invoked with the selected files. */
 	onFilesSelected?: (files: File[]) => void;
 }
 

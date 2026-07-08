@@ -15,14 +15,23 @@ import {
 import type { MediaTime } from "@/wasm";
 
 interface UseTimelineSeekProps {
+	/** Ref to the playhead DOM element. */
 	playheadRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the track labels DOM element. */
 	trackLabelsRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the ruler scroll container. */
 	rulerScrollRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: RefObject<HTMLDivElement | null>;
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Total timeline duration in media ticks. */
 	duration: MediaTime;
+	/** Whether a box-select is active. */
 	isSelecting: boolean;
+	/** Clears all selected elements. */
 	clearSelectedElements: () => void;
+	/** Seeks the playhead to the given time. */
 	seek: (time: MediaTime) => void;
 }
 

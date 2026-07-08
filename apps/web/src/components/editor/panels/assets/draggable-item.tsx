@@ -17,18 +17,31 @@ import { cn } from "@/utils/ui";
 import type { MediaTime } from "@/wasm";
 
 export interface DraggableItemProps {
+	/** Display name of the asset. */
 	name: string;
+	/** Preview element to render as the thumbnail. */
 	preview: ReactNode;
+	/** Drag data payload for timeline drop. */
 	dragData: TimelineDragData;
+	/** Optional callback when dragging starts. */
 	onDragStart?: ({ e }: { e: React.DragEvent }) => void;
+	/** Optional callback to add the item at the current playhead. */
 	onAddToTimeline?: ({ currentTime }: { currentTime: MediaTime }) => void;
+	/** Aspect ratio of the preview thumbnail. */
 	aspectRatio?: number;
+	/** Additional CSS class for the item. */
 	className?: string;
+	/** Additional CSS class for the container. */
 	containerClassName?: string;
+	/** Whether to show the plus icon during drag. */
 	shouldShowPlusOnDrag?: boolean;
+	/** Whether to show the label below the preview. */
 	shouldShowLabel?: boolean;
+	/** Whether the preview has rounded corners. */
 	isRounded?: boolean;
+	/** Display variant (card or compact list item). */
 	variant?: "card" | "compact";
+	/** Whether the item is draggable. */
 	isDraggable?: boolean;
 }
 

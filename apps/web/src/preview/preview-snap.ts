@@ -1,7 +1,9 @@
 /** @module Snap-to-grid and edge snapping logic for the preview canvas viewport */
 
 export interface SnapLine {
+	/** Orientation of the snap line. */
 	type: "horizontal" | "vertical";
+	/** Position of the line in canvas coordinates. */
 	position: number;
 }
 
@@ -11,16 +13,22 @@ export const MIN_SCALE = 0.01;
 export const SNAP_THRESHOLD_SCREEN_PIXELS = 8;
 
 export interface SnapResult {
+	/** Position after snapping was applied. */
 	snappedPosition: { x: number; y: number };
+	/** Snap lines that are currently active. */
 	activeLines: SnapLine[];
 }
 
 type ScaleEdge = "left" | "right" | "top" | "bottom";
 
 export interface ScaleEdgePreference {
+	/** Prefer snapping the left edge. */
 	left?: boolean;
+	/** Prefer snapping the right edge. */
 	right?: boolean;
+	/** Prefer snapping the top edge. */
 	top?: boolean;
+	/** Prefer snapping the bottom edge. */
 	bottom?: boolean;
 }
 
@@ -186,7 +194,9 @@ export function snapPosition({
 }
 
 export interface ScaleSnapResult {
+	/** Scale value after snapping. */
 	snappedScale: number;
+	/** Snap lines that are currently active. */
 	activeLines: SnapLine[];
 }
 
@@ -369,9 +379,11 @@ export function snapScale({
 }
 
 export interface AxisSnapResult {
+	/** Scale value after snapping. */
 	snappedScale: number;
 	/** Infinity when no snap candidate was within threshold */
 	snapDistance: number;
+	/** Snap lines that are currently active. */
 	activeLines: SnapLine[];
 }
 
@@ -557,7 +569,9 @@ export function snapScaleAxes({
 }
 
 export interface RotationSnapResult {
+	/** Rotation value after snapping, in degrees. */
 	snappedRotation: number;
+	/** Whether the rotation was snapped. */
 	isSnapped: boolean;
 }
 

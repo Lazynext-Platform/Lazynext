@@ -25,10 +25,15 @@ export interface StreamProgress {
 }
 
 export interface StreamFramesOptions {
+	/** Endpoint for uploading individual frames. */
 	frameEndpoint: string;
+	/** Endpoint for finalizing the frame stream. */
 	endEndpoint: string;
+	/** Total number of frames to stream. */
 	totalFrames: number;
+	/** Frame width in pixels. */
 	width: number;
+	/** Frame height in pixels. */
 	height: number;
 	/**
 	 * Renders frame `index` to the compositor canvas and returns its RGBA
@@ -36,9 +41,13 @@ export interface StreamFramesOptions {
 	 * editor's existing render path).
 	 */
 	captureFrame: (index: number) => Promise<Uint8Array>;
+	/** Progress callback invoked after each frame. */
 	onProgress?: (progress: StreamProgress) => void;
+	/** Signal to abort the stream. */
 	signal?: AbortSignal;
+	/** Soft cap on frame size in bytes. */
 	maxFrameBytes?: number;
+	/** Maximum retry attempts per frame. */
 	maxRetries?: number;
 }
 
@@ -111,10 +120,15 @@ export async function streamFramesToRenderService(
 }
 
 interface UploadFrameArgs {
+	/** Endpoint for uploading the frame. */
 	frameEndpoint: string;
+	/** Sequence index of the frame. */
 	index: number;
+	/** RGBA pixel data for the frame. */
 	rgba: Uint8Array;
+	/** Maximum retry attempts. */
 	maxRetries: number;
+	/** Signal to abort the upload. */
 	signal?: AbortSignal;
 }
 

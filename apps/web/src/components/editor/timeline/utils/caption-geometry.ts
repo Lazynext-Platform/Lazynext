@@ -22,6 +22,7 @@ export interface CaptionGeometry {
 	 * in a backwards-compatible way.
 	 */
 	rectProps: {
+		/** Horizontal gap between words in pixels. */
 		gap: number;
 	};
 }

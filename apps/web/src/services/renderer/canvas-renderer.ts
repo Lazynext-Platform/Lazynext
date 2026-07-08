@@ -3,8 +3,11 @@ import { wasmBridge } from "@/core/wasm-bridge";
 import type { FrameRate } from "lazynext-wasm";
 
 export type CanvasRendererParams = {
+	/** Output width in pixels. */
 	width: number;
+	/** Output height in pixels. */
 	height: number;
+	/** Project frame rate. */
 	fps: FrameRate;
 };
 

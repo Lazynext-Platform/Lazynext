@@ -8,9 +8,13 @@
 import React, { useState } from "react";
 
 interface MediaAsset {
+  /** Unique asset identifier. */
   id: string;
+  /** Asset file name. */
   name: string;
+  /** Asset media type. */
   type: 'video' | 'audio' | 'image';
+  /** URL of the asset thumbnail. */
   thumbnailUrl: string;
 }
 

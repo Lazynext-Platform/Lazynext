@@ -14,7 +14,9 @@ const JFA_STEP_SHADER_SOURCE: &str = include_str!("shaders/jfa_step.wgsl");
 /// Pair of textures containing the inside and outside signed distance fields
 /// for a mask, used by downstream feathering and effect passes.
 pub struct SignedDistanceFieldTextures {
+    /// Distance field texture for the interior of the mask.
     pub inside_texture: wgpu::Texture,
+    /// Distance field texture for the exterior of the mask.
     pub outside_texture: wgpu::Texture,
 }
 
@@ -23,9 +25,13 @@ pub struct SignedDistanceFieldTextures {
 /// Runs an init pass followed by log₂(max(width, height)) step passes
 /// in a ping-pong texture configuration.
 pub struct SdfPipeline {
+    /// Bind group layout for the input texture and its sampler.
     texture_bind_group_layout: wgpu::BindGroupLayout,
+    /// Bind group layout for the per-pass uniform buffer.
     uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline for the JFA initialization pass.
     init_pipeline: wgpu::RenderPipeline,
+    /// Render pipeline for each JFA step pass.
     step_pipeline: wgpu::RenderPipeline,
 }
 
@@ -33,8 +39,11 @@ pub struct SdfPipeline {
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct JfaInitUniformBuffer {
+    /// Texture resolution as `[width, height]` in pixels.
     resolution: [f32; 2],
+    /// Non-zero to invert the mask (compute the exterior field).
     invert: f32,
+    /// Padding to satisfy uniform buffer alignment.
     _padding: f32,
 }
 
@@ -42,8 +51,11 @@ struct JfaInitUniformBuffer {
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct JfaStepUniformBuffer {
+    /// Texture resolution as `[width, height]` in pixels.
     resolution: [f32; 2],
+    /// Current jump step size in pixels for this pass.
     step_size: f32,
+    /// Padding to satisfy uniform buffer alignment.
     _padding: f32,
 }
 
@@ -185,6 +197,7 @@ impl SdfPipeline {
         }
     }
 
+    // Run the full JFA (init + ping-pong step passes) and return the resulting distance field texture.
     fn run_jfa(
         &self,
         context: &GpuContext,
@@ -246,6 +259,7 @@ impl SdfPipeline {
         }
     }
 
+    // Execute a single fullscreen render pass writing from input into output with the given uniforms.
     fn run_pass(
         &self,
         context: &GpuContext,
@@ -318,6 +332,7 @@ impl SdfPipeline {
     }
 }
 
+// Build a fullscreen-quad render pipeline pairing the given vertex and fragment shaders.
 fn create_pipeline(
     device: &wgpu::Device,
     label: &'static str,

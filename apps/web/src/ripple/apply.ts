@@ -9,8 +9,11 @@ import { rippleShiftElements } from "./shift";
 
 /** Describes a single ripple operation on a track. */
 export interface RippleAdjustment {
+	/** Target track ID. */
 	trackId: string;
+	/** Elements after this time are shifted. */
 	afterTime: number;
+	/** Amount to shift in media ticks (negative = earlier). */
 	shiftAmount: number;
 }
 

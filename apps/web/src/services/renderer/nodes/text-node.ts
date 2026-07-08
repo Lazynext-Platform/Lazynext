@@ -8,20 +8,32 @@ import { drawMeasuredTextLayout } from "@/text/primitives";
 import type { MeasuredTextElement } from "@/text/measure-element";
 
 export type TextNodeParams = TextElement & {
+	/** Resolved transform for the text node. */
 	transform: Transform;
+	/** Opacity of the text (0–1). */
 	opacity: number;
+	/** Optional blend mode for compositing. */
 	blendMode?: BlendMode;
+	/** Center point of the canvas in pixels. */
 	canvasCenter: { x: number; y: number };
+	/** Canvas height in pixels. */
 	canvasHeight: number;
+	/** Optional canvas text baseline. */
 	textBaseline?: CanvasTextBaseline;
 };
 
 export interface ResolvedTextNodeState {
+	/** Resolved transform for rendering. */
 	transform: Transform;
+	/** Resolved opacity (0–1). */
 	opacity: number;
+	/** Resolved text fill color. */
 	textColor: string;
+	/** Resolved background color. */
 	backgroundColor: string;
+	/** Effect passes to apply, grouped per stage. */
 	effectPasses: EffectPass[][];
+	/** Measured text layout for drawing. */
 	measuredText: MeasuredTextElement;
 }
 

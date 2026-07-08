@@ -43,6 +43,7 @@ struct LayerUniforms {
 @group(0) @binding(1) var source_sampler: sampler;
 @group(1) @binding(0) var<uniform> uniforms: LayerUniforms;
 
+// Rotates a point by `-angle` (inverse rotation) about the origin.
 fn rotate_inverse(point: vec2f, angle: f32) -> vec2f {
     let c = cos(angle);
     let s = sin(angle);

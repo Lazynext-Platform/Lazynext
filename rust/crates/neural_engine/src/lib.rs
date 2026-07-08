@@ -31,36 +31,51 @@ pub mod generative;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// An axis-aligned bounding box in normalized (0–1) frame coordinates.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BoundingBox {
+    /// Left edge, normalized to frame width.
     pub x: f32,
+    /// Top edge, normalized to frame height.
     pub y: f32,
+    /// Box width, normalized to frame width.
     pub width: f32,
+    /// Box height, normalized to frame height.
     pub height: f32,
 }
 
+/// A single detected face with an actor id, confidence, and location.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FaceDetection {
+    /// Identifier assigned to the detected person.
     pub actor_id: String,
+    /// Detection confidence in the range 0–1.
     pub confidence: f32,
+    /// Location of the face within the frame.
     pub bounding_box: BoundingBox,
 }
 
 /// A tag assigned to footage by the neural engine.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct FootageTag {
+    /// Tag label text.
     pub label: String,
+    /// Confidence score in the range 0–1.
     pub confidence: f32,
 }
 
 /// A smart bin grouping clips by a shared tag.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SmartBin {
+    /// Shared tag label for the grouped clips.
     pub label: String,
+    /// Identifiers of clips in this bin.
     pub clip_ids: Vec<String>,
 }
 
+/// Face-detection model, backed by ONNX inference or a heuristic fallback.
 pub struct FacialRecognitionModel {
+    /// Whether the model has been loaded and is ready for inference.
     pub is_loaded: bool,
     /// Path to ONNX model directory (for future ort/tract integration).
     #[allow(dead_code)]
@@ -68,16 +83,19 @@ pub struct FacialRecognitionModel {
 }
 
 impl Default for FacialRecognitionModel {
+    // Returns a face-detection model using the default model directory.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl FacialRecognitionModel {
+    /// Create a model loading from the default `rust/models` directory.
     pub fn new() -> Self {
         Self::new_with_dir("rust/models")
     }
 
+    /// Create a model loading from the given model directory.
     pub fn new_with_dir(model_dir: &str) -> Self {
         println!(
             "[NeuralEngine] Initializing from model directory: {}",
@@ -180,6 +198,7 @@ impl FacialRecognitionModel {
     }
 
     #[cfg(feature = "onnx")]
+    // Runs SCRFD/YOLO-face ONNX inference, falling back to the heuristic on failure.
     fn detect_faces_onnx(&self, frame_data: &[u8], width: u32, height: u32) -> Vec<FaceDetection> {
         println!("[NeuralEngine] Running hardware-accelerated ONNX facial detection...");
 
@@ -394,13 +413,16 @@ impl FacialRecognitionModel {
 /// A WebGPU-based pipeline for running tensor operations (e.g. background removal, edge detection)
 /// directly on local GPU hardware via compute shaders.
 pub struct NeuralComputePipeline {
+    /// Compute pipeline running the tensor-operation shader.
     #[allow(dead_code)]
     pipeline: wgpu::ComputePipeline,
+    /// Bind group layout for the compute shader's input/output/uniform buffers.
     #[allow(dead_code)]
     bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl NeuralComputePipeline {
+    /// Create the neural compute pipeline, compiling the compute shader.
     pub fn new(device: &wgpu::Device) -> Self {
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("neural-compute-shader"),
@@ -584,6 +606,7 @@ fn scrfd_decode_boxes(
     // Try to extract the score and bbox tensors as 4D: [1, C, H, W]
     // SCRFD raw output shape is typically [1, num_anchors*2, H, W] for scores
     // and [1, num_anchors*4, H, W] for boxes
+    // Extract a tensor's dimensions as a 4-tuple, promoting 3D `[C, H, W]` to `[1, C, H, W]`.
     fn extract_4d(
         t: &ndarray::ArrayBase<impl ndarray::RawData, ndarray::Dim<impl ndarray::Dimension>>,
     ) -> Option<(usize, usize, usize, usize)> {

@@ -13,7 +13,9 @@ import { cn } from "@/utils/ui";
 import { toast } from "sonner";
 
 interface ShareButtonProps {
+	/** ID of the project to share. */
 	projectId: string;
+	/** Additional CSS class names. */
 	className?: string;
 }
 

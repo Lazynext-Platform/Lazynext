@@ -15,29 +15,44 @@
 import { getAllMcpTools, callMcpTool } from "./mcp";
 
 interface ToolCall {
+  /** Tool action name. */
   action: string;
+  /** Parameter map for the tool call. */
   params: Record<string, unknown>;
 }
 
 interface OrchestrationStep {
+  /** Tool name to execute. */
   tool: string;
+  /** Arguments for the tool. */
   args: Record<string, unknown>;
+  /** Human-readable description of the step. */
   description: string;
+  /** Optional CRDT patches produced by this step. */
   crdt_patches?: Array<{ op: string; path: string; value: any }>;
 }
 
 interface OrchestrationPlan {
+  /** Ordered execution steps. */
   steps: OrchestrationStep[];
+  /** LLM reasoning behind the plan. */
   reasoning: string;
 }
 
 interface OrchestrationResult {
+  /** Whether all steps succeeded. */
   success: boolean;
+  /** The executed plan. */
   plan: OrchestrationStep[];
+  /** Individual step results. */
   results: Array<{
+    /** Name of the tool that was executed. */
     tool: string;
+    /** Whether the step succeeded. */
     success: boolean;
+    /** Output produced by the step. */
     output: unknown;
+    /** CRDT patches produced by the tool. */
     crdt_patches?: Array<{ op: string; path: string; value: any }>;
   }>;
 }
@@ -769,7 +784,9 @@ export async function executePlan(
 
 /** Event emitted by the streaming version of executePlan. */
 export interface StreamEvent {
+  /** Event type for SSE dispatching. */
   type: "plan" | "step:start" | "step:result" | "step:error" | "done" | "error";
+  /** Event payload. */
   data: Record<string, unknown>;
 }
 

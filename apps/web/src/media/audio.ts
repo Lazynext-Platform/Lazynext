@@ -41,14 +41,23 @@ const EXPORT_SAMPLE_RATE = 44100;
 
 /** Decoded audio element ready for timeline mixing. */
 export interface CollectedAudioElement {
+	/** Timeline element reference. */
 	timelineElement: AudioCapableElement;
+	/** Decoded audio buffer. */
 	buffer: AudioBuffer;
+	/** Start time in seconds. */
 	startTime: number;
+	/** Duration in seconds. */
 	duration: number;
+	/** Trim start offset in seconds. */
 	trimStart: number;
+	/** Trim end offset in seconds. */
 	trimEnd: number;
+	/** Playback volume gain. */
 	volume: number;
+	/** Whether this element is muted. */
 	muted: boolean;
+	/** Optional retime configuration. */
 	retime?: RetimeConfig;
 }
 
@@ -68,7 +77,9 @@ export function createAudioContext({
 
 /** Mono-downmixed Float32 PCM samples with their native sample rate. */
 export interface DecodedAudio {
+	/** Mono Float32 sample data. */
 	samples: Float32Array;
+	/** Native sample rate in Hz. */
 	sampleRate: number;
 }
 
@@ -102,7 +113,9 @@ export async function decodeAudioToFloat32({
 
 /** A timeline element paired with its resolved media asset, eligible for audio processing. */
 export interface AudibleElementCandidate {
+	/** Timeline element reference. */
 	element: AudioElement | VideoElement;
+	/** Resolved media asset or null. */
 	mediaAsset: MediaAsset | null;
 }
 
@@ -357,28 +370,47 @@ async function resolveAudioBufferForAsset({
 }
 
 interface AudioMixSource {
+	/** Timeline element reference. */
 	timelineElement: AudioCapableElement;
+	/** Audio source file. */
 	file: File;
+	/** Start time in seconds. */
 	startTime: number;
+	/** Duration in seconds. */
 	duration: number;
+	/** Trim start offset in seconds. */
 	trimStart: number;
+	/** Trim end offset in seconds. */
 	trimEnd: number;
+	/** Playback volume gain. */
 	volume: number;
+	/** Optional retime configuration. */
 	retime?: RetimeConfig;
 }
 
 /** Lightweight clip descriptor for the audio waveform/scrubbing UI. */
 export interface AudioClipSource {
+	/** Timeline element reference. */
 	timelineElement: AudioCapableElement;
+	/** Unique clip identifier. */
 	id: string;
+	/** Source lookup key. */
 	sourceKey: string;
+	/** Audio source file. */
 	file: File;
+	/** Start time in seconds. */
 	startTime: number;
+	/** Duration in seconds. */
 	duration: number;
+	/** Trim start offset in seconds. */
 	trimStart: number;
+	/** Trim end offset in seconds. */
 	trimEnd: number;
+	/** Playback volume gain. */
 	volume: number;
+	/** Whether this clip is muted. */
 	muted: boolean;
+	/** Optional retime configuration. */
 	retime?: RetimeConfig;
 }
 

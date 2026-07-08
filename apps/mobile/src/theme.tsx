@@ -12,17 +12,29 @@ import { Appearance } from "react-native";
 export type ThemeMode = "dark" | "light" | "system";
 
 export interface Theme {
+	/** Main background color. */
 	bgMain: string;
+	/** Panel/surface background color. */
 	bgPanel: string;
+	/** Glass-morphism translucent background. */
 	bgGlass: string;
+	/** Hover state background color. */
 	bgHover: string;
+	/** Primary accent color. */
 	accentPrimary: string;
+	/** Secondary accent color. */
 	accentSecondary: string;
+	/** Primary text color. */
 	textPrimary: string;
+	/** Secondary/muted text color. */
 	textSecondary: string;
+	/** Subtle/muted text color. */
 	textMuted: string;
+	/** Text color rendered on accent backgrounds. */
 	textOnAccent: string;
+	/** Glass-effect border color. */
 	borderGlass: string;
+	/** Status bar content style (light or dark). */
 	statusBarStyle: "light-content" | "dark-content";
 }
 
@@ -57,8 +69,11 @@ const lightTheme: Theme = {
 };
 
 interface ThemeContextValue {
+	/** Currently active theme colours. */
 	theme: Theme;
+	/** Current theme mode. */
 	mode: ThemeMode;
+	/** Set a new theme mode. */
 	setMode: (mode: ThemeMode) => void;
 }
 

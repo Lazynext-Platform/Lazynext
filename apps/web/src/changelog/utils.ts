@@ -1,12 +1,20 @@
 /** @module Changelog utilities for grouping, sorting, and filtering releases */
 import { allChangelogs } from "content-collections";
 
-export type Change = { type: string; text: string };
+export type Change = {
+	/** Change category type. */
+	type: string;
+	/** Human-readable change description. */
+	text: string;
+};
 export type Release = (typeof allChangelogs)[number];
 
 type ChangeSectionConfig = {
+	/** Display title for the section. */
 	title: string;
+	/** Sort order of the section. */
 	order: number;
+	/** Whether the section is collapsible. */
 	collapsible?: boolean;
 };
 

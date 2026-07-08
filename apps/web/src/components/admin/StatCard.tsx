@@ -3,9 +3,13 @@
 import React from "react";
 
 interface StatCardProps {
+	/** Card title / metric label. */
 	title: string;
+	/** Metric value to display. */
 	value: string | number;
+	/** Optional trend indicator text. */
 	trend?: string;
+	/** Optional icon element. */
 	icon?: React.ReactNode;
 }
 

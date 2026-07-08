@@ -24,22 +24,33 @@ export type ExportFormat = (typeof EXPORT_FORMAT_VALUES)[number];
 export type ExportQuality = (typeof EXPORT_QUALITY_VALUES)[number];
 
 export interface ExportOptions {
+	/** Export container format (mp4 or webm). */
 	format: ExportFormat;
+	/** Export quality preset. */
 	quality: ExportQuality;
+	/** Target frame rate (falls back to project fps). */
 	fps?: FrameRate;
+	/** Whether to include the audio track. */
 	includeAudio?: boolean;
 }
 
 export interface ExportResult {
+	/** Whether the export completed successfully. */
 	success: boolean;
+	/** Rendered video buffer on success. */
 	buffer?: ArrayBuffer;
+	/** Error message on failure. */
 	error?: string;
+	/** Whether the export was cancelled by the user. */
 	cancelled?: boolean;
 }
 
 export interface ExportState {
+	/** Whether an export is currently in progress. */
 	isExporting: boolean;
+	/** Export progress in range [0, 1]. */
 	progress: number;
+	/** Final export result, set when complete. */
 	result: ExportResult | null;
 }
 

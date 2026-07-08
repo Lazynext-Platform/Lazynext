@@ -24,6 +24,7 @@ struct VertexOutput {
     @location(0) tex_coords: vec2<f32>,
 };
 
+// Converts linear RGB to YCbCr, used to compare chroma against the key color.
 fn rgb2ycbcr(color: vec3<f32>) -> vec3<f32> {
     let y = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
     let cb = 128.0/255.0 - 0.168736 * color.r - 0.331264 * color.g + 0.5 * color.b;

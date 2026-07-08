@@ -2,7 +2,9 @@
 export type PersistedKeybindingConfig = Record<string, string | undefined>;
 
 export interface PersistedKeybindingsState {
+	/** Map of key combination to action ID. */
 	keybindings: PersistedKeybindingConfig;
+	/** Whether the user has customized the default bindings. */
 	isCustomized: boolean;
 }
 

@@ -16,12 +16,22 @@ use crate::gpu::{
 };
 
 struct ApplyMaskFeatherOptions {
+    /// Source mask canvas.
     mask: wgpu::web_sys::OffscreenCanvas,
+    /// Canvas width in pixels.
     width: u32,
+    /// Canvas height in pixels.
     height: u32,
+    /// Blur radius applied to the mask alpha.
     feather: f32,
 }
 
+/// Feathers a mask by applying a Gaussian blur to its alpha channel on the
+/// GPU.
+///
+/// The `options` object carries `{ mask, width, height, feather }`, where
+/// `feather` is the blur radius. Returns a new offscreen canvas with the
+/// softened mask.
 #[wasm_bindgen(js_name = applyMaskFeather)]
 pub fn apply_mask_feather(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let ApplyMaskFeatherOptions {
@@ -52,6 +62,7 @@ pub fn apply_mask_feather(options: JsValue) -> Result<wgpu::web_sys::OffscreenCa
     })
 }
 
+// Parses the JS options object for `applyMaskFeather`.
 fn parse_apply_mask_feather_options(value: JsValue) -> Result<ApplyMaskFeatherOptions, JsValue> {
     let object: Object = value
         .dyn_into()
@@ -67,13 +78,23 @@ fn parse_apply_mask_feather_options(value: JsValue) -> Result<ApplyMaskFeatherOp
 
 #[allow(dead_code)]
 struct ApplyPolygonMaskOptions {
+    /// Existing mask canvas to intersect.
     mask: wgpu::web_sys::OffscreenCanvas,
+    /// Canvas width in pixels.
     width: u32,
+    /// Canvas height in pixels.
     height: u32,
+    /// Polygon vertex X coordinates.
     points_x: Vec<f64>,
+    /// Polygon vertex Y coordinates.
     points_y: Vec<f64>,
 }
 
+/// Intersects an existing mask with a polygon defined by point arrays.
+///
+/// The `options` object carries `{ mask, width, height, points_x, points_y }`.
+/// The polygon is filled and composited with `destination-in` so only the
+/// overlapping region survives. Returns a new offscreen canvas.
 #[wasm_bindgen(js_name = applyPolygonMask)]
 pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCanvas, JsValue> {
     let opts = parse_apply_polygon_mask_options(options)?;
@@ -109,6 +130,7 @@ pub fn apply_polygon_mask(options: JsValue) -> Result<wgpu::web_sys::OffscreenCa
     Ok(canvas)
 }
 
+// Parses the JS options object for `applyPolygonMask`.
 fn parse_apply_polygon_mask_options(value: JsValue) -> Result<ApplyPolygonMaskOptions, JsValue> {
     let object: Object = value
         .dyn_into()

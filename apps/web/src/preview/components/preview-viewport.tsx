@@ -26,58 +26,92 @@ const IS_AT_FIT_EPSILON = 0.001;
 const IS_AT_ACTUAL_SIZE_EPSILON = 0.01;
 
 interface PreviewViewportContextValue {
+	/** Whether the viewport can currently be panned. */
 	canPan: boolean;
+	/** Whether the viewport is at fit-to-screen zoom. */
 	isAtFit: boolean;
+	/** Whether the viewport is at actual (100%) size. */
 	isAtActualSize: boolean;
+	/** Whether a pan gesture is in progress. */
 	isPanning: boolean;
+	/** Rendered scene height in pixels. */
 	sceneHeight: number;
+	/** Rendered scene left offset in pixels. */
 	sceneLeft: number;
+	/** Rendered scene top offset in pixels. */
 	sceneTop: number;
+	/** Rendered scene width in pixels. */
 	sceneWidth: number;
+	/** Current zoom level as a percentage. */
 	zoomPercent: number;
+	/** Converts canvas coordinates to overlay coordinates. */
 	canvasToOverlay: ({
 		canvasX,
 		canvasY,
 	}: {
+		/** Canvas X coordinate */
 		canvasX: number;
+		/** Canvas Y coordinate */
 		canvasY: number;
 	}) => { x: number; y: number };
+	/** Resets zoom and pan to fit the screen. */
 	fitToScreen: () => void;
+	/** Returns the current display scale factors. */
 	getDisplayScale: () => { x: number; y: number };
+	/** Handles pointer down for panning; returns whether handled. */
 	handlePanPointerDown: ({ event }: { event: React.PointerEvent }) => boolean;
+	/** Handles pointer move for panning; returns whether handled. */
 	handlePanPointerMove: ({ event }: { event: React.PointerEvent }) => boolean;
+	/** Handles pointer up for panning; returns whether handled. */
 	handlePanPointerUp: ({ event }: { event: React.PointerEvent }) => boolean;
+	/** Converts element position to overlay coordinates. */
 	positionToOverlay: ({
 		positionX,
 		positionY,
 	}: {
+		/** Element X position in canvas space */
 		positionX: number;
+		/** Element Y position in canvas space */
 		positionY: number;
 	}) => { x: number; y: number };
+	/** Pans the viewport by a screen-space delta. */
 	panByScreenDelta: ({
 		deltaX,
 		deltaY,
 	}: {
+		/** Horizontal delta in screen pixels */
 		deltaX: number;
+		/** Vertical delta in screen pixels */
 		deltaY: number;
 	}) => void;
+	/** Resets the pan to center. */
 	resetPan: () => void;
+	/** Multiplies zoom by the given factor. */
 	scaleZoom: ({ factor }: { factor: number }) => void;
+	/** Converts a screen-pixel threshold to logical canvas units. */
 	screenPixelsToLogicalThreshold: ({
 		screenPixels,
 	}: {
+		/** Threshold in screen pixels */
 		screenPixels: number;
 	}) => { x: number; y: number };
+	/** Converts screen coordinates to canvas coordinates. */
 	screenToCanvas: ({
 		clientX,
 		clientY,
 	}: {
+		/** Client X coordinate in screen space */
 		clientX: number;
+		/** Client Y coordinate in screen space */
 		clientY: number;
 	}) => { x: number; y: number } | null;
+	/** Sets zoom to actual (100%) size. */
 	setActualSize: () => void;
+	/** Sets zoom to the given percentage. */
 	setViewportPercent: ({ percent }: { percent: number }) => void;
+	/** Increases zoom by one step. */
 	zoomIn: () => void;
+	/** Decreases zoom by one step. */
 	zoomOut: () => void;
 }
 
@@ -85,23 +119,35 @@ const PreviewViewportContext =
 	createContext<PreviewViewportContextValue | null>(null);
 
 interface PreviewViewportProviderProps {
+	/** Child nodes rendered within the provider. */
 	children: React.ReactNode;
+	/** Viewport context value to provide. */
 	value: PreviewViewportContextValue;
 }
 
 interface PreviewViewportStateOptions {
+	/** Canvas height in logical units. */
 	canvasHeight: number;
+	/** Canvas width in logical units. */
 	canvasWidth: number;
+	/** Viewport height in pixels. */
 	viewportHeight: number;
+	/** Ref to the viewport DOM element. */
 	viewportRef: React.RefObject<HTMLDivElement | null>;
+	/** Viewport width in pixels. */
 	viewportWidth: number;
 }
 
 interface PanSession {
+	/** Viewport center x at pan start. */
 	centerX: number;
+	/** Viewport center y at pan start. */
 	centerY: number;
+	/** Pointer client x at pan start. */
 	clientX: number;
+	/** Pointer client y at pan start. */
 	clientY: number;
+	/** Identifier of the panning pointer. */
 	pointerId: number;
 }
 

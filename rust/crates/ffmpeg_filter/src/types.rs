@@ -9,14 +9,18 @@ use serde::{Deserialize, Serialize};
 /// Input/output pad labels for filter connections.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PadLabels {
+    /// Label for the input pad.
     pub input: String,
+    /// Label for the output pad.
     pub output: String,
 }
 
 /// A single input stream reference for a filter.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InputSpec {
+    /// Index of the source stream.
     pub stream_index: usize,
+    /// Label identifying this input.
     pub label: String,
 }
 
@@ -60,6 +64,7 @@ impl Resolution {
 }
 
 impl std::fmt::Display for Resolution {
+    // Formats the resolution as "widthxheight".
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}x{}", self.width(), self.height())
     }
@@ -81,6 +86,7 @@ pub enum FrameRate {
 }
 
 impl std::fmt::Display for FrameRate {
+    // Formats the frame rate as its numeric value.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FrameRate::Fps24 => write!(f, "24"),
@@ -110,6 +116,7 @@ pub enum PixelFormat {
 }
 
 impl std::fmt::Display for PixelFormat {
+    // Formats the pixel format as its FFMPEG name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             PixelFormat::Yuv420p => "yuv420p",
@@ -137,6 +144,7 @@ pub enum SampleFormat {
 }
 
 impl std::fmt::Display for SampleFormat {
+    // Formats the sample format as its FFMPEG name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             SampleFormat::S16 => "s16",
@@ -160,6 +168,7 @@ pub enum SampleRate {
 }
 
 impl std::fmt::Display for SampleRate {
+    // Formats the sample rate as its value in Hz.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             SampleRate::Hz44100 => write!(f, "44100"),
@@ -183,6 +192,7 @@ pub enum ScaleAlgorithm {
 }
 
 impl std::fmt::Display for ScaleAlgorithm {
+    // Formats the scaling algorithm as its FFMPEG name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
             ScaleAlgorithm::Bilinear => "bilinear",

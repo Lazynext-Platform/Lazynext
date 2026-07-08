@@ -16,23 +16,35 @@ const deepClone = <T,>(obj: T): T => {
 };
 
 interface UndoRedoState {
+	/** Past states for undo. */
 	past: ProjectJSON[];
+	/** Current project state. */
 	present: ProjectJSON | null;
+	/** Future states for redo. */
 	future: ProjectJSON[];
 }
 
 interface UndoRedoContextType {
 	// State
+	/** Whether an undo operation is available. */
 	canUndo: boolean;
+	/** Whether a redo operation is available. */
 	canRedo: boolean;
+	/** Current project state. */
 	present: ProjectJSON | null;
 	// Actions
+	/** Record a new present state, pushing the previous onto the undo stack. */
 	setPresent: (data: ProjectJSON) => void;
+	/** Undo to the previous state and return it. */
 	undo: () => ProjectJSON | null;
+	/** Redo to the next state and return it. */
 	redo: () => ProjectJSON | null;
+	/** Clear all undo/redo history. */
 	resetHistory: () => void;
+	/** Return the last persisted present state, if any. */
 	getLastPersistedState: () => ProjectJSON | null;
 	// Configuration
+	/** Disable and clear localStorage persistence. */
 	disablePersistence: () => void;
 }
 
@@ -69,8 +81,11 @@ const loadFromStorage = (key: string): UndoRedoState | null => {
 };
 
 export interface UndoRedoProviderProps {
+	/** Child components wrapped by the provider. */
 	children: React.ReactNode;
+	/** Key used to persist history to localStorage. */
 	persistenceKey?: string;
+	/** Maximum number of history entries to retain. */
 	maxHistorySize?: number;
 }
 

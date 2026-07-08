@@ -3,8 +3,11 @@
 import { type RefObject, useLayoutEffect, useRef } from "react";
 
 interface UseInitialScrollBottomProps {
+	/** Ref to the tracks scroll viewport. */
 	tracksScrollRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the track labels scroll viewport. */
 	trackLabelsScrollRef: RefObject<HTMLDivElement | null>;
+	/** Callback invoked after the initial scroll. */
 	onAfterScroll?: () => void;
 	/** Defers the scroll until there is at least one track to measure against. */
 	isReady: boolean;

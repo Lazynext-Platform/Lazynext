@@ -21,9 +21,13 @@ use crate::gpu::{
 use crate::perf;
 
 struct CompositorRuntime {
+    /// The HTML canvas the compositor renders into.
     canvas: web_sys::HtmlCanvasElement,
+    /// The underlying GPU compositor engine.
     compositor: Compositor,
+    /// The GPU surface bound to the canvas.
     surface: wgpu::Surface<'static>,
+    /// Current configured surface size as `(width, height)`.
     surface_size: (u32, u32),
 }
 
@@ -31,6 +35,11 @@ thread_local! {
     static COMPOSITOR_RUNTIME: RefCell<Option<CompositorRuntime>> = const { RefCell::new(None) };
 }
 
+/// Initializes the per-thread compositor runtime against a new WebGPU/WebGL
+/// surface of the given size.
+///
+/// If a runtime already exists it is resized instead. Returns an error for
+/// zero dimensions or sizes exceeding the 16384×16384 GPU limit.
 #[wasm_bindgen(js_name = initCompositor)]
 pub fn init_compositor(width: u32, height: u32) -> Result<(), JsValue> {
     if width == 0 || height == 0 {
@@ -92,6 +101,10 @@ pub fn init_compositor(width: u32, height: u32) -> Result<(), JsValue> {
     })
 }
 
+/// Resizes the compositor canvas and reconfigures its GPU surface.
+///
+/// No-ops if the size is unchanged. Errors if the compositor has not been
+/// initialized via [`init_compositor`].
 #[wasm_bindgen(js_name = resizeCompositor)]
 pub fn resize_compositor(width: u32, height: u32) -> Result<(), JsValue> {
     with_gpu_runtime(|gpu_runtime| {
@@ -116,6 +129,8 @@ pub fn resize_compositor(width: u32, height: u32) -> Result<(), JsValue> {
     })
 }
 
+/// Returns the HTML canvas element the compositor renders into, so the UI
+/// can mount it directly.
 #[wasm_bindgen(js_name = getCompositorCanvas)]
 pub fn get_compositor_canvas() -> Result<web_sys::HtmlCanvasElement, JsValue> {
     COMPOSITOR_RUNTIME.with(|runtime| {
@@ -129,6 +144,10 @@ pub fn get_compositor_canvas() -> Result<web_sys::HtmlCanvasElement, JsValue> {
     })
 }
 
+/// Uploads a JS image source into a GPU texture cached under the given ID.
+///
+/// The `options` object carries `{ id, source, width, height }`. Errors on
+/// zero dimensions or if the compositor is not initialized.
 #[wasm_bindgen(js_name = uploadTexture)]
 pub fn upload_texture(options: JsValue) -> Result<(), JsValue> {
     let UploadTextureOptions {
@@ -167,6 +186,7 @@ pub fn upload_texture(options: JsValue) -> Result<(), JsValue> {
     })
 }
 
+/// Releases the cached GPU texture with the given ID, freeing its memory.
 #[wasm_bindgen(js_name = releaseTexture)]
 pub fn release_texture(id: String) -> Result<(), JsValue> {
     COMPOSITOR_RUNTIME.with(|runtime| {
@@ -181,6 +201,11 @@ pub fn release_texture(id: String) -> Result<(), JsValue> {
     })
 }
 
+/// Renders a single composited frame from a JS frame descriptor to the GPU
+/// surface, recording per-stage timings via [`perf`].
+///
+/// The `options` object describes the layers, transforms, and effects for
+/// this frame. Errors if the compositor is not initialized.
 #[wasm_bindgen(js_name = renderFrame)]
 pub fn render_frame(options: JsValue) -> Result<(), JsValue> {
     perf::reset();
@@ -250,12 +275,17 @@ pub fn render_frame(options: JsValue) -> Result<(), JsValue> {
 
 #[derive(Debug)]
 struct UploadTextureOptions {
+    /// Cache identifier for the uploaded texture.
     id: String,
+    /// Source image supplied as an offscreen canvas.
     source: wgpu::web_sys::OffscreenCanvas,
+    /// Texture width in pixels.
     width: u32,
+    /// Texture height in pixels.
     height: u32,
 }
 
+// Parse the JS `uploadTexture` options object into a typed struct.
 fn parse_upload_texture_options(value: JsValue) -> Result<UploadTextureOptions, JsValue> {
     let object: Object = value
         .dyn_into()
@@ -281,143 +311,210 @@ use std::hash::{Hash, Hasher};
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipTransform {
+    /// Horizontal offset from center, in pixels.
     x: f32,
+    /// Vertical offset from center, in pixels.
     y: f32,
+    /// Uniform scale factor.
     scale: f32,
+    /// Rotation in degrees.
     rotation: f32,
+    /// Opacity in the range 0–1.
     opacity: f32,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipFilters {
+    /// Brightness multiplier.
     brightness: Option<f32>,
+    /// Contrast multiplier.
     contrast: Option<f32>,
+    /// Saturation multiplier.
     saturation: Option<f32>,
+    /// Grayscale amount in the range 0–1.
     grayscale: Option<f32>,
+    /// Sepia amount in the range 0–1.
     sepia: Option<f32>,
+    /// Color inversion amount in the range 0–1.
     invert: Option<f32>,
+    /// Hue rotation in degrees.
     hue_rotate: Option<f32>,
+    /// Pixelation amount.
     pixelate: Option<f32>,
+    /// Edge-detection amount.
     edge_detect: Option<f32>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipCrop {
+    /// Left crop inset.
     left: f32,
+    /// Top crop inset.
     top: f32,
+    /// Right crop inset.
     right: f32,
+    /// Bottom crop inset.
     bottom: f32,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipShadow {
     color: Option<String>, // e.g. "rgba(0,0,0,0.5)"
+    /// Shadow offset distance in pixels.
     distance: Option<f32>,
+    /// Shadow direction angle in degrees.
     angle: Option<f32>,
+    /// Shadow blur radius.
     blur: Option<f32>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipTransition {
     #[serde(rename = "type")]
+    /// Transition type identifier.
     type_: String,
+    /// Transition duration in frames.
     duration_frames: u32,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipTransitions {
     #[serde(rename = "in", default)]
+    /// Incoming transition applied at the clip start.
     in_: Option<ClipTransition>,
     #[serde(default)]
+    /// Outgoing transition applied at the clip end.
     out: Option<ClipTransition>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipKeyframe {
+    /// Frame position of the keyframe.
     frame: u32,
+    /// Name of the animated property.
     property: String,
+    /// Property value at this keyframe.
     value: f32,
     #[serde(default)]
+    /// Optional easing curve name for interpolation.
     easing: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipEffectConfig {
+    /// Unique effect identifier.
     id: String,
     #[serde(rename = "type")]
+    /// Effect type identifier (e.g. "chroma_key").
     type_: String,
     #[serde(default)]
+    /// Named scalar effect parameters.
     properties: std::collections::HashMap<String, f32>,
     #[serde(default)]
+    /// Optional color parameter for the effect.
     color: Option<Vec<f32>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ClipConfig {
+    /// Unique clip identifier.
     id: String,
     #[serde(rename = "type")]
+    /// Clip type ("video", "image", "text", etc.).
     type_: String,
+    /// Display name of the clip.
     name: String,
+    /// Timeline start frame.
     start_frame: u32,
+    /// Duration in frames.
     duration_frames: u32,
     #[serde(default)]
+    /// Spatial transform (position, scale, rotation, opacity).
     transform: Option<ClipTransform>,
     #[serde(default)]
+    /// Color/effect filters applied to the clip.
     filters: Option<ClipFilters>,
     #[serde(default)]
+    /// Crop insets for the clip.
     crop: Option<ClipCrop>,
     #[serde(default)]
+    /// Drop-shadow configuration.
     shadow: Option<ClipShadow>,
     #[serde(default)]
+    /// Corner radius in pixels.
     border_radius: Option<f32>,
     #[serde(default)]
+    /// Blend mode name for compositing.
     blend_mode: Option<String>,
     #[serde(default)]
+    /// In/out transitions for the clip.
     transitions: Option<ClipTransitions>,
     #[serde(default)]
+    /// Property animation keyframes.
     keyframes: Option<Vec<ClipKeyframe>>,
     #[serde(default)]
+    /// Text content for text clips.
     text_content: Option<String>,
     #[serde(default)]
+    /// Font size in pixels for text clips.
     font_size: Option<f32>,
     #[serde(default)]
+    /// Font family for text clips.
     font_family: Option<String>,
     #[serde(default)]
+    /// Foreground/text color.
     color: Option<String>,
     #[serde(default)]
+    /// Text background color.
     bg_color: Option<String>,
     #[serde(default)]
+    /// Padding around the text background.
     bg_padding: Option<f32>,
     #[serde(default)]
+    /// Text stroke (outline) color.
     text_stroke_color: Option<String>,
     #[serde(default)]
+    /// Text stroke (outline) width.
     text_stroke_width: Option<f32>,
     #[serde(default)]
+    /// Additional spacing between letters.
     letter_spacing: Option<f32>,
     #[serde(default)]
+    /// Text alignment ("left", "center", "right").
     text_align: Option<String>,
     #[serde(default)]
+    /// GPU effect passes to apply to the clip.
     effects: Option<Vec<ClipEffectConfig>>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct TrackConfig {
+    /// Unique track identifier.
     id: String,
+    /// Display name of the track.
     name: String,
+    /// Clips contained in this track.
     clips: Vec<ClipConfig>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
 struct ProjectConfig {
+    /// Project output width in pixels.
     width: u32,
+    /// Project output height in pixels.
     height: u32,
+    /// Project frame rate.
     fps: f32,
+    /// Total project duration in frames.
     duration_frames: u32,
+    /// Background clear color as RGBA.
     bg_color: [f32; 4],
     #[serde(default)]
+    /// Tracks comprising the project timeline.
     tracks: Vec<TrackConfig>,
 }
 
+// Derive a deterministic RGBA placeholder color from a clip name via hashing.
 fn get_color_for_name(name: &str) -> [u8; 4] {
     let mut hasher = DefaultHasher::new();
     name.hash(&mut hasher);
@@ -430,6 +527,7 @@ fn get_color_for_name(name: &str) -> [u8; 4] {
     ]
 }
 
+// Create a GPU texture filled with a single solid color.
 fn create_solid_texture(
     gpu_context: &gpu::GpuContext,
     color: [u8; 4],
@@ -469,6 +567,12 @@ fn create_solid_texture(
     texture
 }
 
+/// Renders frame `frame_idx` of a full project described by `project_json`.
+///
+/// Parses the JSON project (tracks, clips, transforms, keyframes, text, and
+/// effects), evaluates animated properties at the requested frame, and
+/// composites the result to the GPU surface. Errors on invalid JSON or if
+/// the compositor is not initialized.
 #[wasm_bindgen(js_name = renderProjectFrame)]
 pub fn render_project_frame(project_json: &str, frame_idx: u32) -> Result<(), JsValue> {
     let project: ProjectConfig = serde_json::from_str(project_json)
@@ -483,6 +587,7 @@ pub fn render_project_frame(project_json: &str, frame_idx: u32) -> Result<(), Js
                 ));
             };
 
+            // Rasterize text (with optional background, stroke, and alignment) into a GPU texture.
             fn create_text_texture(
                 context: &gpu::GpuContext,
                 text: &str,
@@ -624,6 +729,7 @@ pub fn render_project_frame(project_json: &str, frame_idx: u32) -> Result<(), Js
                 }
             }
 
+            // Interpolate a property's animated value at the current frame from its keyframes.
             fn get_keyframed_value(
                 keyframes: &Option<Vec<ClipKeyframe>>,
                 property: &str,

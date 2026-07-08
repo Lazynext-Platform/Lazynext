@@ -10,9 +10,13 @@ import type {
 import type { CaptionChunk } from "@/transcription/types";
 
 export interface SubtitlePlacementStyle {
+	/** Vertical alignment relative to the canvas. */
 	verticalAlign?: "top" | "middle" | "bottom";
+	/** Left margin as a ratio of canvas width. */
 	marginLeftRatio?: number;
+	/** Right margin as a ratio of canvas width. */
 	marginRightRatio?: number;
+	/** Top/bottom margin as a ratio of canvas height. */
 	marginVerticalRatio?: number;
 }
 
@@ -30,25 +34,39 @@ export interface SubtitleStyleOverrides {
 	 * Takes precedence over fontSize when both are present.
 	 */
 	fontSizeRatioOfPlayHeight?: number;
+	/** CSS font-family string. */
 	fontFamily?: string;
+	/** Text fill color. */
 	color?: string;
+	/** Text background styling overrides. */
 	background?: Pick<TextBackground, "enabled" | "color"> &
 		Partial<Omit<TextBackground, "enabled" | "color">>;
+	/** Horizontal text alignment. */
 	textAlign?: TextAlign;
+	/** Font weight (normal or bold). */
 	fontWeight?: TextFontWeight;
+	/** Font style (normal or italic). */
 	fontStyle?: TextFontStyle;
+	/** Text decoration style. */
 	textDecoration?: TextDecoration;
+	/** Additional spacing between characters. */
 	letterSpacing?: number;
+	/** Line height as a multiplier of font size. */
 	lineHeight?: number;
+	/** Subtitle placement and margin overrides. */
 	placement?: SubtitlePlacementStyle;
 }
 
 export interface SubtitleCue extends CaptionChunk {
+	/** Optional style overrides for this cue. */
 	style?: SubtitleStyleOverrides;
 }
 
 export interface ParseSubtitleResult {
+	/** Parsed subtitle cues. */
 	captions: SubtitleCue[];
+	/** Number of cues skipped during parsing. */
 	skippedCueCount: number;
+	/** Non-fatal parse warnings. */
 	warnings: string[];
 }

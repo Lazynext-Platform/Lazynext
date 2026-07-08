@@ -24,12 +24,14 @@ struct DistanceUniforms {
 @group(1) @binding(1) var outside_sampler: sampler;
 @group(2) @binding(0) var<uniform> uniforms: DistanceUniforms;
 
+// Decodes a seed's 2D pixel coordinate from its split-byte RGBA encoding.
 fn decode_seed(encoded: vec4f) -> vec2f {
     let x = floor(encoded.r * 255.0 + 0.5) * 256.0 + floor(encoded.g * 255.0 + 0.5);
     let y = floor(encoded.b * 255.0 + 0.5) * 256.0 + floor(encoded.a * 255.0 + 0.5);
     return vec2f(x, y);
 }
 
+// True if the texel is the white no-seed sentinel (no nearest seed found).
 fn is_no_seed(encoded: vec4f) -> bool {
     return encoded.r > 0.99 && encoded.g > 0.99 && encoded.b > 0.99 && encoded.a > 0.99;
 }

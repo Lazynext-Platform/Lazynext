@@ -17,6 +17,8 @@ use crate::timeline::placement::types::{
 
 const ZERO_MEDIA_TIME: f64 = 0.0;
 
+// Builds a placement result targeting an existing track, adjusting the start
+// time to enforce main-track constraints when necessary.
 fn build_existing_track_result(
     track: &TimelineTrack,
     track_index: usize,
@@ -44,6 +46,7 @@ fn build_existing_track_result(
     }
 }
 
+// Builds a placement result requesting creation of a new track.
 fn build_new_track_result(
     track_type: String,
     insert_index: usize,
@@ -56,6 +59,7 @@ fn build_new_track_result(
     }
 }
 
+// Finds the index of the first compatible track that can hold the time spans.
 fn find_first_available_track_index(
     ordered_tracks: &[&TimelineTrack],
     track_type: &str,
@@ -66,6 +70,7 @@ fn find_first_available_track_index(
     })
 }
 
+// Resolves a new-track placement at the given position ("highest" or default).
 fn resolve_always_new_track(
     tracks: &SceneTracks,
     track_type: &str,
@@ -80,6 +85,8 @@ fn resolve_always_new_track(
     build_new_track_result(track_type.to_string(), insert_index, None)
 }
 
+// Determines the insert direction ("above"/"below") from hover and vertical
+// drag directions, preferring the drag direction when present.
 fn get_insert_direction<'a>(
     hover_direction: &'a str,
     vertical_drag_direction: Option<&'a str>,

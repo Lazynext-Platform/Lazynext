@@ -28,13 +28,21 @@ import { toast } from "sonner";
 const SOCIAL_PUBLISH_URL = process.env.NEXT_PUBLIC_SOCIAL_PUBLISH_URL || "http://localhost:8007";
 
 interface PlatformConfig {
+	/** Platform identifier. */
 	id: string;
+	/** Display label for the platform. */
 	label: string;
+	/** Icon component for the platform. */
 	icon: React.ElementType;
+	/** Brand color hex code. */
 	color: string;
+	/** Target aspect ratio string. */
 	aspect: string;
+	/** Target output width in pixels. */
 	width: number;
+	/** Target output height in pixels. */
 	height: number;
+	/** Safe zone insets in pixels. */
 	safeZone: { top: number; bottom: number; left: number; right: number };
 }
 
@@ -82,17 +90,26 @@ const PLATFORMS: PlatformConfig[] = [
 ];
 
 interface ThumbnailCandidate {
+	/** Path to the thumbnail image. */
 	path: string;
+	/** Timestamp in the video the thumbnail was taken from. */
 	timestamp: number;
+	/** Base score for the candidate. */
 	score: number;
+	/** Estimated visual appeal score. */
 	appeal_score?: number;
+	/** Estimated click-through score. */
 	click_score?: number;
 }
 
 interface GeneratedMetadata {
+	/** Generated title. */
 	title: string;
+	/** Generated description. */
 	description: string;
+	/** Generated hashtag list. */
 	hashtags: string[];
+	/** Recommended posting time. */
 	suggested_posting_time: string;
 }
 

@@ -22,9 +22,13 @@ import type {
 const SHAPES_PROVIDER_ID = "shapes";
 
 type ShapeGraphicPreset = {
+	/** Unique key identifying the shape. */
 	shapeKey: string;
+	/** Human-readable name. */
 	name: string;
+	/** Graphics registry definition ID. */
 	definitionId: string;
+	/** Optional override parameters. */
 	params?: ParamValues;
 };
 

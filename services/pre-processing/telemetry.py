@@ -46,19 +46,25 @@ class Metrics:
         self.ffmpeg_count = 0
 
     def record_request(self):
+        """Increment the total request counter."""
         self.request_count += 1
 
     def record_error(self):
+        """Increment the total error counter."""
         self.error_count += 1
 
     def record_inference(self, duration_ms: float):
+        """Record one ML inference and add its duration to the running total."""
         self.inference_count += 1
         self.inference_total_ms += duration_ms
 
     def record_ffmpeg(self):
+        """Increment the FFmpeg-invocation counter."""
         self.ffmpeg_count += 1
 
     def snapshot(self) -> dict:
+        """Return a plain-dict snapshot of all counters and the average
+        inference time (in ms) for the `/metrics` endpoint."""
         return {
             "requests": self.request_count,
             "errors": self.error_count,
@@ -122,8 +128,11 @@ def setup_telemetry(service_name: str = "pre-processing") -> bool:
 def traced(span_name: str, attributes: dict = None):
     """Decorator to trace a function with a named span."""
     def decorator(func):
+        """Wrap `func` with either an async or sync tracing wrapper."""
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
+            """Async span wrapper — traces the call, records duration and
+            errors, and re-raises on failure."""
             if not _initialized or not _tracer:
                 return await func(*args, **kwargs)
 
@@ -146,6 +155,8 @@ def traced(span_name: str, attributes: dict = None):
 
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
+            """Sync span wrapper — traces the call, records duration and
+            errors, and re-raises on failure."""
             if not _initialized or not _tracer:
                 return func(*args, **kwargs)
 

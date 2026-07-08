@@ -216,11 +216,17 @@ function buildBlurBackgroundNodes({
 }
 
 export type BuildSceneParams = {
+	/** Canvas dimensions. */
 	canvasSize: TCanvasSize;
+	/** Scene tracks to render. */
 	tracks: SceneTracks;
+	/** Available media assets. */
 	mediaAssets: MediaAsset[];
+	/** Total scene duration. */
 	duration: number;
+	/** Scene background configuration. */
 	background: TBackground;
+	/** Whether building for preview (uses reduced image sizes). */
 	isPreview?: boolean;
 };
 

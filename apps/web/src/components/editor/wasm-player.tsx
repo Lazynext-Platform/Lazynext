@@ -20,11 +20,15 @@ import { ensureWasmInitialized } from "@/wasm/init";
 interface WasmPlayerProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	project: any;
+	/** Current frame number to render. */
 	frame: number;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	assets?: any[];
+	/** Optional external canvas ref for rendering. */
 	canvasRef?: React.RefObject<HTMLCanvasElement | null>;
+	/** Whether to show title-safe margins. */
 	showSafeMargins?: boolean;
+	/** Render quality preset (full, half, or quarter resolution). */
 	renderQuality?: "full" | "half" | "quarter";
 }
 

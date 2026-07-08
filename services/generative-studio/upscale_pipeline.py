@@ -80,7 +80,19 @@ class UpscalePipeline:
         )
     
     def upscale(self, video_path: str, output_path: Optional[str] = None) -> UpscaleResult:
-        """Upscale a video file."""
+        """Upscale a video file.
+
+        Tries RealESRGAN+ONNX first, then falls back as configured.
+
+        Args:
+            video_path: Path to the input video file.
+            output_path: Destination path; defaults to a derived path next to
+                the input when omitted.
+
+        Returns:
+            An :class:`UpscaleResult` with ``success``, the ``scale`` and
+            ``model`` used, the output path, and any error message.
+        """
         if not os.path.exists(video_path):
             return UpscaleResult(
                 success=False, scale=self.config.scale,
@@ -302,6 +314,8 @@ class UpscalePipeline:
         
         # Add batch dimension and normalize
         def process_tile(tile_img):
+            """Normalize a single tile to CHW float, run the ONNX model, and
+            return the upscaled tile as uint8 HWC."""
             blob = tile_img.astype(np.float32) / 255.0
             blob = np.transpose(blob, (2, 0, 1))[np.newaxis, ...]
             output = session.run(None, {'input': blob})[0]

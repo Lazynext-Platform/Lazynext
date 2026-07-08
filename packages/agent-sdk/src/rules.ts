@@ -67,7 +67,9 @@ export interface Rule {
 
 /** JSON-serialisable representation of the full rule set. */
 interface SerialisedRules {
+	/** Serialisation format version. */
 	version: 1;
+	/** Array of serialised rules. */
 	rules: Rule[];
 }
 

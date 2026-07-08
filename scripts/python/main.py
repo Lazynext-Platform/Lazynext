@@ -26,6 +26,9 @@ class VideoRequest(BaseModel):
     file_path: str
 
 def process_auto_editor(video_id: str, file_path: str):
+    """Run the Auto-Editor CLI to strip silence from a video and export a
+    Resolve-compatible timeline. Intended to run as a background task;
+    failures are logged, not raised."""
     print(f"[{video_id}] Starting Auto-Editor silence removal on {file_path}...")
     try:
         # Run Lazynext-Editor CLI natively

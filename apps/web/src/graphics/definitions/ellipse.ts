@@ -5,9 +5,13 @@ import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";
 import type { GraphicDefinition } from "../types";
 
 interface EllipseParams {
+	/** Fill color. */
 	fill: string;
+	/** Stroke color. */
 	stroke: string;
+	/** Stroke width in pixels. */
 	strokeWidth: number;
+	/** Stroke alignment (inside, center, outside). */
 	strokeAlign: GraphicStrokeAlign;
 }
 

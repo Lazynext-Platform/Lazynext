@@ -22,6 +22,7 @@ use tracing::{debug, error, info};
 /// Query parameters for WebSocket upgrade requests.
 #[derive(Deserialize)]
 pub struct WsQuery {
+    /// Project ID to join the collaboration room for.
     pub project_id: String,
     // The token is handled by the rbac middleware.
 }
@@ -42,15 +43,18 @@ pub enum WsMessage {
 
 /// Shared WebSocket state holding the Redis client for pub/sub messaging.
 pub struct WsState {
+    /// Redis client used for pub/sub messaging between peers.
     pub redis_client: redis::Client,
 }
 
 impl WsState {
+    /// Creates a new WebSocket state with the given Redis client.
     pub fn new(redis_client: redis::Client) -> Self {
         Self { redis_client }
     }
 }
 
+/// Upgrades an HTTP connection to WebSocket and joins the project's Redis pub/sub room.
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
     Query(query): Query<WsQuery>,
@@ -67,6 +71,7 @@ pub async fn ws_handler(
     ws.on_upgrade(move |socket| handle_socket(socket, state, ws_state, query.project_id, claims))
 }
 
+// Drive a single client's WebSocket: relay Redis pub/sub to the peer and process incoming messages.
 async fn handle_socket(
     socket: WebSocket,
     state: AppState,

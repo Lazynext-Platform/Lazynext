@@ -11,7 +11,9 @@
  */
 
 export interface DecodedFrame {
+	/** Frame timestamp. */
 	timestamp: number;
+	/** RGBA pixel data. */
 	imageData: ImageData;
 }
 

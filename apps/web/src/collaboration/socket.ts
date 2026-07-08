@@ -13,13 +13,21 @@ type CrdtDeltaHandler = (delta: Uint8Array) => void;
 type PresenceHandler = (presence: PresenceUpdate) => void;
 
 export interface PresenceUpdate {
+	/** Unique peer connection ID. */
 	peerId: string;
+	/** Authenticated user ID. */
 	userId: string;
+	/** Display name of the user. */
 	userName: string;
+	/** Color assigned to this peer's cursor. */
 	color: string;
+	/** Cursor X position on the canvas. */
 	cursorX: number;
+	/** Cursor Y position on the canvas. */
 	cursorY: number;
+	/** Optional viewport state snapshot. */
 	viewportState?: Record<string, unknown>;
+	/** IDs of the user's currently selected elements. */
 	selection?: string[];
 }
 

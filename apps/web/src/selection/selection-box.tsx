@@ -4,6 +4,7 @@
 import type { SelectionBoxBounds } from "@/selection/types";
 
 interface SelectionBoxProps {
+	/** Bounds of the selection box, or null when inactive. */
 	bounds: SelectionBoxBounds | null;
 }
 

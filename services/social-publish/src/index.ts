@@ -59,71 +59,116 @@ app.use(authMiddleware);
 // ── Types ───────────────────────────────────────────────────────────────
 
 interface PublishRequest {
+	/** Path to the video file to publish. */
 	video_path: string;
+	/** Target platform identifier. */
 	platform: string;
+	/** Optional post title. */
 	title?: string;
+	/** Optional post description/caption. */
 	description?: string;
+	/** Optional metadata tags. */
 	tags?: string[];
+	/** Optional hashtags to append. */
 	hashtags?: string[];
+	/** Optional visibility setting. */
 	privacy?: "public" | "private" | "unlisted";
 }
 
 interface PublishResult {
+	/** Platform the result pertains to. */
 	platform: string;
+	/** Whether the publish succeeded. */
 	success: boolean;
+	/** Identifier of the created post. */
 	postId?: string;
+	/** URL of the created post. */
 	postUrl?: string;
+	/** Error message if the publish failed. */
 	error?: string;
 }
 
 interface ReframeRequest {
+	/** Path to the source video file. */
 	video_path: string;
+	/** Platform to reframe the video for. */
 	target_platform: string;
 }
 
 interface ReframeResult {
+	/** Whether the reframe succeeded. */
 	success: boolean;
+	/** Path to the reframed output file. */
 	output_path?: string;
+	/** Platform the video was reframed for. */
 	platform: string;
+	/** Target aspect ratio. */
 	aspect_ratio: string;
+	/** Output resolution as a WxH string. */
 	resolution: string;
 }
 
 interface MetadataRequest {
+	/** Optional base title to build from. */
 	title?: string;
+	/** Optional base description to build from. */
 	description?: string;
+	/** Target platform identifier. */
 	platform: string;
+	/** Optional tags to incorporate. */
 	tags?: string[];
+	/** Optional topic hint for the video. */
 	video_topic?: string;
 }
 
 interface MetadataResult {
+	/** Whether metadata generation succeeded. */
 	success: boolean;
+	/** Platform the metadata targets. */
 	platform: string;
+	/** Generated title. */
 	title: string;
+	/** Generated description. */
 	description: string;
+	/** Generated hashtag list. */
 	hashtags: string[];
+	/** Recommended posting time. */
 	suggested_posting_time: string;
 }
 
 interface ThumbnailCandidate {
+	/** Path to the thumbnail image. */
 	path: string;
+	/** Timestamp in the video the thumbnail was taken from. */
 	timestamp: number;
+	/** Base score for the candidate. */
 	score: number;
+	/** Estimated visual appeal score. */
 	appeal_score?: number;
+	/** Estimated click-through score. */
 	click_score?: number;
 }
 
 interface ScheduledPost {
+	/** Unique scheduled post identifier. */
 	id: string;
+	/** Target platform identifier. */
 	platform: string;
+	/** Path to the video file to publish. */
 	video_path: string;
+	/** Optional post title. */
 	title?: string;
+	/** Optional post description/caption. */
 	description?: string;
+	/** Optional metadata tags. */
 	tags?: string[];
+	/** Optional hashtags to append. */
 	hashtags?: string[];
+	/** ISO timestamp for when to publish. */
 	scheduled_at: string;
+	/** Current status of the scheduled post. */
 	status: "scheduled" | "published" | "failed" | "cancelled";
+	/** ISO timestamp of when the post was scheduled. */
 	created_at: string;
 }
 
@@ -708,9 +753,13 @@ app.post("/generate-metadata", async (req: Request, res: Response) => {
 });
 
 interface MetadataInput {
+	/** Optional base title to build from. */
 	baseTitle?: string;
+	/** Optional base description to build from. */
 	baseDescription?: string;
+	/** Tags to incorporate into metadata. */
 	tags: string[];
+	/** Optional topic hint for the video. */
 	videoTopic?: string;
 }
 

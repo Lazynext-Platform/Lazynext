@@ -80,34 +80,66 @@ pub struct ApplyEffectsOptions<'a> {
 
 /// GPU pipeline that applies post-processing effects via compute shaders.
 pub struct EffectPipeline {
+    /// Bind group layout for per-pass uniform buffers.
     uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Bind group layout for the 3D LUT texture and sampler.
     lut3d_bind_group_layout: wgpu::BindGroupLayout,
+    /// Compiled render pipelines keyed by shader id.
     pipelines: HashMap<String, wgpu::RenderPipeline>,
+    /// Dedicated render pipeline for 3D LUT application.
     lut3d_pipeline: wgpu::RenderPipeline,
 }
 
 // ── Error Types ──
 
+/// Errors that can occur while validating or applying effect passes.
 #[derive(Debug, Error)]
 pub enum EffectsError {
+    /// No effect passes were supplied to apply.
     #[error("At least one effect pass is required")]
     MissingEffectPasses,
+    /// The requested shader id has no registered pipeline.
     #[error("Unknown effect shader '{shader}'")]
-    UnknownEffectShader { shader: String },
+    UnknownEffectShader {
+        /// Identifier of the unknown shader.
+        shader: String,
+    },
+    /// A required uniform was not provided for the shader.
     #[error("Missing uniform '{uniform}' for shader '{shader}'")]
-    MissingUniform { shader: String, uniform: String },
+    MissingUniform {
+        /// Shader that expected the uniform.
+        shader: String,
+        /// Name of the missing uniform.
+        uniform: String,
+    },
+    /// A uniform expected to be a number was of the wrong type.
     #[error("Uniform '{uniform}' for shader '{shader}' must be a number")]
-    InvalidNumberUniform { shader: String, uniform: String },
+    InvalidNumberUniform {
+        /// Shader that expected the uniform.
+        shader: String,
+        /// Name of the invalid uniform.
+        uniform: String,
+    },
+    /// A uniform expected to be a vector was missing or of the wrong length.
     #[error(
         "Uniform '{uniform}' for shader '{shader}' must be a vector of length {expected_length}"
     )]
     InvalidVectorUniform {
+        /// Shader that expected the uniform.
         shader: String,
+        /// Name of the invalid uniform.
         uniform: String,
+        /// Required vector length.
         expected_length: usize,
     },
+    /// The shader does not accept the provided uniform.
     #[error("Shader '{shader}' does not support uniform '{uniform}'")]
-    UnsupportedUniform { shader: String, uniform: String },
+    UnsupportedUniform {
+        /// Shader that received the unsupported uniform.
+        shader: String,
+        /// Name of the unsupported uniform.
+        uniform: String,
+    },
 }
 
 // ── GPU Uniform Buffer ──
@@ -118,10 +150,15 @@ pub enum EffectsError {
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct EffectUniformBuffer {
+    /// Output resolution in pixels (width, height).
     resolution: [f32; 2],
+    /// Blur/sampling direction vector.
     direction: [f32; 2],
+    /// Generic scalar parameters read per shader.
     scalars: [f32; 4],
+    /// Chroma-key target color (RGBA).
     chroma_color: [f32; 4],
+    /// Chroma-key thresholds (similarity, smoothness, unused, unused).
     chroma_thresholds: [f32; 4],
 }
 
@@ -1041,6 +1078,7 @@ fn pack_effect_uniforms(
 // Type-safe helpers for extracting numeric and vec2/vec4 uniform values
 // from the generic EffectPass::uniforms HashMap.
 
+// Reads a required numeric uniform, erroring if missing or non-numeric.
 fn read_number_uniform(pass: &EffectPass, uniform: &str) -> Result<f32, EffectsError> {
     let Some(value) = pass.uniforms.get(uniform) else {
         return Err(EffectsError::MissingUniform {
@@ -1057,6 +1095,7 @@ fn read_number_uniform(pass: &EffectPass, uniform: &str) -> Result<f32, EffectsE
     }
 }
 
+// Reads a required vec2 uniform, erroring if missing or not a length-2 vector.
 fn read_vec2_uniform(pass: &EffectPass, uniform: &str) -> Result<[f32; 2], EffectsError> {
     let Some(value) = pass.uniforms.get(uniform) else {
         return Err(EffectsError::MissingUniform {
@@ -1081,6 +1120,7 @@ fn read_vec2_uniform(pass: &EffectPass, uniform: &str) -> Result<[f32; 2], Effec
     Ok([values[0], values[1]])
 }
 
+// Reads an optional vec4 (or vec3 + implied alpha) uniform, falling back to a default.
 fn read_vec4_uniform(
     pass: &EffectPass,
     uniform: &str,
@@ -1107,6 +1147,7 @@ fn read_vec4_uniform(
     Ok([values[0], values[1], values[2], a])
 }
 
+// Reads an optional numeric uniform, falling back to the given default.
 fn read_number_uniform_with_default(
     pass: &EffectPass,
     uniform: &str,

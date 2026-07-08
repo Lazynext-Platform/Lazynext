@@ -1,7 +1,10 @@
 /** @module Selection scope tracking for managing multiple selection contexts */
 export type ScopeEntry = {
+	/** Returns true when the scope has an active selection. */
 	hasSelection: () => boolean;
+	/** Clears the selection in this scope. */
 	clear: () => void;
+	/** Optionally clears the active item without clearing selection. */
 	clearActive?: () => void;
 };
 

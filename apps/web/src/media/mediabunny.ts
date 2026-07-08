@@ -19,13 +19,21 @@ import { TICKS_PER_SECOND } from "@/wasm";
 import { renderThumbnailDataUrl } from "./thumbnail";
 
 export type VideoFileData = {
+	/** Duration of the video in seconds. */
 	duration: number;
+	/** Display width in pixels. */
 	width: number;
+	/** Display height in pixels. */
 	height: number;
+	/** Frames per second. */
 	fps: number;
+	/** Whether the file contains an audio track. */
 	hasAudio: boolean;
+	/** Video codec used, or null if unrecognized. */
 	codec: VideoCodec | null;
+	/** Whether the codec can be decoded by the browser. */
 	canDecode: boolean;
+	/** Thumbnail data URL for the first frame. */
 	thumbnailUrl: string | null;
 };
 

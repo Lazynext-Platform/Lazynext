@@ -10,6 +10,7 @@
 import React from "react";
 
 interface NeuralCinemaOverlayProps {
+	/** Whether the neural cinema overlay is visible. */
 	isActive: boolean;
 }
 

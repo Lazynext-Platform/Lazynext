@@ -7,10 +7,12 @@ use std::collections::HashMap;
 /// The PluginManager is responsible for safely executing third-party WASM code
 /// within the Lazynext core engine sandbox.
 pub struct PluginManager {
+    /// Loaded effect plugins keyed by their plugin ID.
     loaded_plugins: HashMap<String, Box<dyn VideoEffect>>,
 }
 
 impl Default for PluginManager {
+    // Returns a plugin manager with no loaded plugins.
     fn default() -> Self {
         Self::new()
     }

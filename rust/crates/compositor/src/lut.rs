@@ -26,7 +26,9 @@ pub struct Lut3D {
 
 /// A named LUT preset instantiated from a file or built-in recipe.
 pub struct LutPreset {
+    /// Human-readable name for the LUT preset.
     pub name: String,
+    /// The 3D LUT data.
     pub lut: Lut3D,
     /// Whether this preset was loaded from a file or generated
     pub source: LutSource,

@@ -19,11 +19,14 @@ pub fn sanitize_media_path(path: &str) -> String {
 
 /// An `AssetLoader` that fetches video frames by calling the `ffmpeg` CLI binary.
 pub struct CliFfmpegLoader {
+    /// Target frame width in pixels.
     width: u32,
+    /// Target frame height in pixels.
     height: u32,
 }
 
 impl CliFfmpegLoader {
+    /// Creates a new CLI-backed FFmpeg loader for the given frame dimensions.
     pub fn new(width: u32, height: u32) -> Self {
         // Clamp to valid dimensions
         let width = width.max(1);
@@ -41,6 +44,7 @@ impl CliFfmpegLoader {
 }
 
 impl AssetLoader for CliFfmpegLoader {
+    // Decodes a single RGBA frame at the given index via the ffmpeg CLI.
     fn load_frame(
         &self,
         media_id: &str,

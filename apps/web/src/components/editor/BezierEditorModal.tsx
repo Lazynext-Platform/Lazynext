@@ -10,20 +10,30 @@
 import React from "react";
 
 interface BezierEditorState {
+	/** Whether the modal is open. */
 	isOpen: boolean;
+	/** Track index of the active keyframe. */
 	trackIdx?: number;
+	/** Clip index of the active keyframe. */
 	clipIdx?: number;
+	/** Keyframe property name. */
 	property?: string;
+	/** Keyframe frame number. */
 	frame?: number;
+	/** Curve control points [x1, y1, x2, y2]. */
 	curve: number[];
 }
 
 interface BezierEditorModalProps {
+	/** Current bezier editor state (null when closed). */
 	bezierEditor: BezierEditorState | null;
+	/** State setter for the bezier editor. */
 	setBezierEditor: React.Dispatch<
 		React.SetStateAction<BezierEditorState | null>
 	>;
+	/** Full project data for saving curves. */
 	projectData: any;
+	/** Commits state changes to the editor. */
 	commitState: (data: any) => void;
 }
 

@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 const STORAGE_KEY = "mobile-acknowledged";
 
 interface MobileGateProps {
+	/** Content to render when the viewport is supported. */
 	children: React.ReactNode;
 }
 

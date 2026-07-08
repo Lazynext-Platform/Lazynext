@@ -12,10 +12,12 @@ pub struct WasmSandbox {
     // engine: wasmtime::Engine,
     // module: wasmtime::Module,
     // store: wasmtime::Store<()>,
+    /// Whether a plugin module has been loaded.
     is_initialized: bool,
 }
 
 impl Default for WasmSandbox {
+    // Returns a new, uninitialized WebAssembly sandbox.
     fn default() -> Self {
         Self::new()
     }

@@ -6,13 +6,18 @@ import {
 } from "./visual-node";
 
 export interface ImageNodeParams extends VisualNodeParams {
+	/** Source image URL. */
 	url: string;
+	/** Maximum source dimension for downscaling. */
 	maxSourceSize?: number;
 }
 
 export interface CachedImageSource {
+	/** Decoded image source. */
 	source: HTMLImageElement | OffscreenCanvas;
+	/** Source width in pixels. */
 	width: number;
+	/** Source height in pixels. */
 	height: number;
 }
 

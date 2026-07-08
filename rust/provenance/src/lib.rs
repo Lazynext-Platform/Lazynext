@@ -36,6 +36,7 @@ pub enum FingerprintError {
 }
 
 impl std::fmt::Display for FingerprintError {
+    // Formats the fingerprint error as a human-readable message.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FingerprintError::Serialization(e) => write!(f, "Serialization failed: {}", e),

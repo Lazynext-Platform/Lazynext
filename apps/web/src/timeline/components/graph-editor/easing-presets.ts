@@ -10,9 +10,13 @@ import type { NormalizedCubicBezier } from "@/animation/types";
 export const PRESET_MATCH_TOLERANCE = 0.02;
 
 export interface EasingPreset {
+	/** Unique preset identifier. */
 	id: string;
+	/** Human-readable preset label. */
 	label: string;
+	/** Normalized cubic-bezier control points [x1, y1, x2, y2]. */
 	value: NormalizedCubicBezier;
+	/** Whether this is a user-defined custom preset. */
 	isCustom?: boolean;
 }
 

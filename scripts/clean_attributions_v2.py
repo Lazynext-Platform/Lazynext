@@ -41,6 +41,8 @@ GITHUB_URL_PATTERN = re.compile(
 
 
 def clean_file(filepath: str) -> None:
+    """Apply attribution + known-repo URL normalization to a single file,
+    rewriting it in place only if the content actually changed."""
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -55,6 +57,8 @@ def clean_file(filepath: str) -> None:
 
     # Normalize known Lazynext-Corporation GitHub URLs (lowercase repo name)
     def normalize_github_url(match: re.Match) -> str:
+        """Lowercase the repo segment only for known Lazynext-Corporation
+        repos; leave any other GitHub URL untouched."""
         repo = match.group(1)
         if repo.lower() in {r.lower() for r in KNOWN_LAZYNEXT_REPOS}:
             return f'https://github.com/Lazynext-Corporation/{repo.lower()}'
@@ -69,6 +73,8 @@ def clean_file(filepath: str) -> None:
 
 
 def main() -> None:
+    """Walk the repo (skipping VCS/dep/build dirs) and clean every
+    supported source file in place."""
     for root, dirs, files in os.walk('.'):
         # Skip VCS, dependency, and build directories
         if any(skip in root for skip in ('.git', 'node_modules', 'target', '__pycache__', '.terraform')):

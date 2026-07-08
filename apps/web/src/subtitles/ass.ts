@@ -29,32 +29,56 @@ const ALIGNMENT_MAP: Record<
 };
 
 interface AssScriptInfo {
+	/** Playback resolution X from Script Info. */
 	playResX: number;
+	/** Playback resolution Y from Script Info. */
 	playResY: number;
 }
 
 interface AssStyleRecord {
+	/** Style name. */
 	name: string;
+	/** Font family name. */
 	fontname?: string;
+	/** Font size. */
 	fontsize?: string;
+	/** Primary text color (ABGR hex). */
 	primarycolour?: string;
+	/** Secondary/karaoke color (ABGR hex). */
 	secondarycolour?: string;
+	/** Outline color (ABGR hex). */
 	outlinecolour?: string;
+	/** Background/shadow color (ABGR hex). */
 	backcolour?: string;
+	/** Bold flag (-1 for true). */
 	bold?: string;
+	/** Italic flag (-1 for true). */
 	italic?: string;
+	/** Underline flag (-1 for true). */
 	underline?: string;
+	/** Strikeout flag (-1 for true). */
 	strikeout?: string;
+	/** Horizontal scale percentage. */
 	scalex?: string;
+	/** Vertical scale percentage. */
 	scaley?: string;
+	/** Letter spacing. */
 	spacing?: string;
+	/** Rotation angle. */
 	angle?: string;
+	/** Border style (1=outline+shadow, 3=opaque box). */
 	borderstyle?: string;
+	/** Outline thickness. */
 	outline?: string;
+	/** Shadow depth. */
 	shadow?: string;
+	/** NumPad alignment (1-9). */
 	alignment?: string;
+	/** Left margin. */
 	marginl?: string;
+	/** Right margin. */
 	marginr?: string;
+	/** Vertical margin. */
 	marginv?: string;
 }
 

@@ -15,8 +15,11 @@ use std::path::Path;
 /// mixes multiple audio sources. Supports file playback, raw sample
 /// injection, and standard transport controls.
 pub struct AudioPlayback {
+    /// The platform audio output stream; kept alive for playback duration.
     _stream: OutputStream,
+    /// Handle to the output stream used to create sinks.
     _stream_handle: OutputStreamHandle,
+    /// Sink that queues and mixes audio sources for playback.
     sink: Sink,
 }
 

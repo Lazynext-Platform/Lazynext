@@ -13,7 +13,9 @@ import { useOptionalEditorState } from "./useEditorState";
 // ── Shared drag-to-move hook ──
 
 interface Position {
+	/** Horizontal coordinate in pixels. */
 	x: number;
+	/** Vertical coordinate in pixels. */
 	y: number;
 }
 
@@ -43,36 +45,55 @@ function useDragMove(
 interface ExperimentalPanelsProps {
 	// Spatial Editor
 	isSpatialEditorMode: boolean;
+	/** Current position of the spatial editor panel. */
 	spatialEditorPos: Position;
+	/** Set the position of the spatial editor panel. */
 	setSpatialEditorPos: (p: Position) => void;
+	/** Toggle spatial editor mode on/off. */
 	setIsSpatialEditorMode: (v: boolean) => void;
+	/** Whether review mode is active in the spatial editor. */
 	isReviewMode: boolean;
+	/** Toggle review mode on/off. */
 	setIsReviewMode: (v: boolean) => void;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	selectedClip: any;
 	// Omni Orb
 	isOmniOrbActive: boolean;
+	/** Toggle Omni Orb voice assistant on/off. */
 	setIsOmniOrbActive: (v: boolean) => void;
 	// Swarm
 	isSwarmActive: boolean;
 	// Generative Synthesis
 	isGenerativeDreamingActive: boolean;
+	/** Toggle generative dreaming on/off. */
 	setIsGenerativeDreamingActive: (v: boolean) => void;
+	/** Prompt text for the generative synthesis model. */
 	generativePrompt: string;
+	/** Update the generative prompt string. */
 	setGenerativePrompt: (v: string) => void;
+	/** Whether the model is currently generating. */
 	isDreaming: boolean;
+	/** Set the generative dreaming state. */
 	setIsDreaming: (v: boolean) => void;
 	// Director Terminal
 	isAutonomousDirector: boolean;
+	/** Toggle autonomous director on/off. */
 	setIsAutonomousDirector: (v: boolean) => void;
+	/** Current position of the director terminal panel. */
 	directorPos: Position;
+	/** Set the position of the director terminal panel. */
 	setDirectorPos: (p: Position) => void;
+	/** Log entries for the autonomous director terminal. */
 	directorLogs: string[];
 	// Color Scopes & Auto Caption
 	isColorScopesOpen: boolean;
+	/** Toggle color scopes panel on/off. */
 	setIsColorScopesOpen: (v: boolean) => void;
+	/** Whether the project is currently playing. */
 	isPlaying: boolean;
+	/** Whether auto-captioning is in progress. */
 	isAutoCaptioning: boolean;
+	/** Auto-caption progress percentage (0-100). */
 	autoCaptionProgress: number;
 }
 

@@ -8,9 +8,13 @@ import {
 } from "@/media/waveform-summary";
 
 interface GetSourceWaveformSummaryArgs {
+	/** Unique key identifying the audio source. */
 	sourceKey: string;
+	/** Optional decoded audio buffer. */
 	audioBuffer?: AudioBuffer;
+	/** Optional source file to decode. */
 	sourceFile?: File;
+	/** Optional URL to fetch the audio from. */
 	audioUrl?: string;
 }
 

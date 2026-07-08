@@ -6,15 +6,22 @@ const BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"] as const;
 export const STORAGE_HEADROOM_RESERVE_BYTES = 50 * 1024 * 1024;
 
 export interface StorageQuotaStatus {
+	/** Total quota in bytes. */
 	quotaBytes: number | null;
+	/** Current usage in bytes. */
 	usageBytes: number | null;
+	/** Raw headroom (quota minus usage) in bytes. */
 	headroomBytes: number | null;
+	/** Available bytes after safety reserve. */
 	availableBytes: number | null;
 }
 
 export interface StorageCapacityCheckResult {
+	/** Whether the required data can be stored. */
 	canStore: boolean;
+	/** Reason for the capacity result. */
 	reason: "enough-space" | "insufficient-space" | "estimate-unavailable";
+	/** Available bytes after check. */
 	availableBytes: number | null;
 }
 

@@ -12,6 +12,7 @@ pub type PeerId = String;
 /// A vector clock that tracks logical time per peer for causal ordering.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct VectorClock {
+    /// Per-peer logical tick counts.
     inner: HashMap<PeerId, u64>,
 }
 
@@ -94,6 +95,7 @@ impl VectorClock {
 }
 
 impl Default for VectorClock {
+    // Returns a new vector clock with no peer entries.
     fn default() -> Self {
         Self::new()
     }

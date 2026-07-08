@@ -50,17 +50,29 @@ function sampleGainAtClipTime({
 }
 
 interface AudioWaveformProps {
+	/** Unique key for waveform cache lookup. */
 	sourceKey: string;
+	/** Source audio file for upload-based elements. */
 	sourceFile?: File;
+	/** Source audio URL for library-based elements. */
 	audioUrl?: string;
+	/** Decoded audio buffer for immediate rendering. */
 	audioBuffer?: AudioBuffer;
+	/** Gain envelope samples across the clip. */
 	gainSamples?: number[];
+	/** Current pixels-per-second scale. */
 	pixelsPerSecond: number;
+	/** Clip duration in seconds. */
 	clipDurationSec: number;
+	/** Optional retime configuration. */
 	retime?: RetimeConfig;
+	/** Source start offset in seconds. */
 	sourceStartSec: number;
+	/** Waveform bar color. */
 	color?: string;
+	/** Burn indicator color for clipping. */
 	burnColor?: string;
+	/** Optional CSS class name. */
 	className?: string;
 }
 

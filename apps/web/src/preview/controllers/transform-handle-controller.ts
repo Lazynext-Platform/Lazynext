@@ -40,50 +40,86 @@ type CanvasSize = { readonly width: number; readonly height: number };
 type HandleType = Corner | Edge | "rotation";
 
 interface CapturedPointerState {
+	/** Identifier of the captured pointer. */
 	readonly pointerId: number;
+	/** Element holding the pointer capture. */
 	readonly captureTarget: HTMLElement;
 }
 
 interface CornerScaleSession extends CapturedPointerState {
+	/** Discriminant marking a corner-scale session. */
 	readonly kind: "corner-scale";
+	/** Corner handle being dragged. */
 	readonly corner: Corner;
+	/** Track containing the element being scaled. */
 	readonly trackId: string;
+	/** Element being scaled. */
 	readonly elementId: string;
+	/** Transform captured at drag start. */
 	readonly initialTransform: Transform;
+	/** Parameter values captured at drag start. */
 	readonly initialParams: ParamValues;
+	/** Pointer distance from center at drag start. */
 	readonly initialDistance: number;
+	/** Bounds center x at drag start. */
 	readonly initialBoundsCx: number;
+	/** Bounds center y at drag start. */
 	readonly initialBoundsCy: number;
+	/** Unscaled element width. */
 	readonly baseWidth: number;
+	/** Unscaled element height. */
 	readonly baseHeight: number;
+	/** Whether scale keyframe animation should be cleared. */
 	readonly shouldClearScaleAnimation: boolean;
+	/** Animations with scale channels removed, if applicable. */
 	readonly animationsWithoutScale: ElementAnimations | undefined;
 }
 
 interface EdgeScaleSession extends CapturedPointerState {
+	/** Discriminant marking an edge-scale session. */
 	readonly kind: "edge-scale";
+	/** Edge handle being dragged. */
 	readonly edge: Edge;
+	/** Track containing the element being scaled. */
 	readonly trackId: string;
+	/** Element being scaled. */
 	readonly elementId: string;
+	/** Transform captured at drag start. */
 	readonly initialTransform: Transform;
+	/** Parameter values captured at drag start. */
 	readonly initialParams: ParamValues;
+	/** Bounds center x at drag start. */
 	readonly initialBoundsCx: number;
+	/** Bounds center y at drag start. */
 	readonly initialBoundsCy: number;
+	/** Unscaled element width. */
 	readonly baseWidth: number;
+	/** Unscaled element height. */
 	readonly baseHeight: number;
+	/** Element rotation in radians. */
 	readonly rotationRad: number;
+	/** Whether scale keyframe animation should be cleared. */
 	readonly shouldClearScaleAnimation: boolean;
+	/** Animations with scale channels removed, if applicable. */
 	readonly animationsWithoutScale: ElementAnimations | undefined;
 }
 
 interface RotationSession extends CapturedPointerState {
+	/** Discriminant marking a rotation session. */
 	readonly kind: "rotation";
+	/** Track containing the element being rotated. */
 	readonly trackId: string;
+	/** Element being rotated. */
 	readonly elementId: string;
+	/** Transform captured at drag start. */
 	readonly initialTransform: Transform;
+	/** Parameter values captured at drag start. */
 	readonly initialParams: ParamValues;
+	/** Pointer angle from center at drag start. */
 	readonly initialAngle: number;
+	/** Bounds center x at drag start. */
 	readonly initialBoundsCx: number;
+	/** Bounds center y at drag start. */
 	readonly initialBoundsCy: number;
 }
 
@@ -96,65 +132,94 @@ type TransformSession =
 const IDLE_SESSION: TransformSession = { kind: "idle" };
 
 interface VisualSelectionContext {
+	/** Track containing the selected element. */
 	readonly trackId: string;
+	/** Selected element identifier. */
 	readonly elementId: string;
+	/** The selected visual element. */
 	readonly element: VisualElement;
+	/** Computed bounds of the element. */
 	readonly bounds: ElementBounds;
+	/** Transform resolved at the current time. */
 	readonly resolvedTransform: Transform;
 }
 
 export interface PreviewViewportAdapter {
+	/** Converts screen coordinates to canvas coordinates. */
 	screenToCanvas: ({
 		clientX,
 		clientY,
 	}: {
+		/** Screen X coordinate (client). */
 		clientX: number;
+		/** Screen Y coordinate (client). */
 		clientY: number;
 	}) => Point | null;
+	/** Converts a screen-pixel threshold to logical canvas units. */
 	screenPixelsToLogicalThreshold: ({
 		screenPixels,
 	}: {
+		/** Threshold distance in screen pixels. */
 		screenPixels: number;
 	}) => Point;
 }
 
 export interface InputAdapter {
+	/** Returns whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
 export interface SceneReader {
+	/** Returns the currently selected element references. */
 	getSelectedElements: () => readonly ElementRef[];
+	/** Returns the scene's tracks. */
 	getTracks: () => SceneTracks;
+	/** Returns the current playback time. */
 	getCurrentTime: () => number;
+	/** Returns the available media assets. */
 	getMediaAssets: () => MediaAsset[];
+	/** Returns the canvas size. */
 	getCanvasSize: () => CanvasSize;
 }
 
 export interface TimelinePreviewUpdate {
+	/** Track containing the element to update. */
 	readonly trackId: string;
+	/** Element to update. */
 	readonly elementId: string;
+	/** Partial element changes to preview. */
 	readonly updates: Partial<TimelineElement>;
 }
 
 export interface TimelineOps {
+	/** Applies preview updates to elements. */
 	previewElements: (updates: readonly TimelinePreviewUpdate[]) => void;
+	/** Commits the active preview. */
 	commitPreview: () => void;
+	/** Discards the active preview. */
 	discardPreview: () => void;
 }
 
 export interface PreviewOptions {
+	/** Callback invoked when active snap lines change. */
 	onSnapLinesChange?: (lines: SnapLine[]) => void;
 }
 
 export interface TransformHandleDeps {
+	/** Viewport coordinate adapter. */
 	viewport: PreviewViewportAdapter;
+	/** Input state adapter. */
 	input: InputAdapter;
+	/** Scene data reader. */
 	scene: SceneReader;
+	/** Timeline operations. */
 	timeline: TimelineOps;
+	/** Preview options. */
 	preview: PreviewOptions;
 }
 
 export interface TransformHandleDepsRef {
+	/** Current dependency values. */
 	readonly current: TransformHandleDeps;
 }
 

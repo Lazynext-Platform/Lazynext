@@ -41,15 +41,22 @@ function computePeakBuckets({
 }
 
 export interface SampleBucket {
+	/** Start sample index (inclusive). */
 	bucketStart: number;
+	/** End sample index (exclusive). */
 	bucketEnd: number;
 }
 
 export interface SourceWaveformSummary {
+	/** Unique key identifying the source (e.g. "media:abc123"). */
 	sourceKey: string;
+	/** Audio sample rate in Hz. */
 	sampleRate: number;
+	/** Total number of samples in the source buffer. */
 	totalSamples: number;
+	/** Number of samples per amplitude bucket. */
 	bucketSize: number;
+	/** Pre-computed peak amplitudes per bucket. */
 	amplitudes: Float32Array;
 }
 

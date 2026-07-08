@@ -17,16 +17,23 @@ export type SnapPointType =
 
 /** A single snap point at a specific timeline time. */
 export interface SnapPoint {
+	/** Snap point time. */
 	time: MediaTime;
+	/** Snap point origin type. */
 	type: SnapPointType;
+	/** Optional element identifier. */
 	elementId?: string;
+	/** Optional track identifier. */
 	trackId?: string;
 }
 
 /** The result of a snap resolution — the snapped time and distance. */
 export interface SnapResult {
+	/** Resolved snapped time. */
 	snappedTime: MediaTime;
+	/** Source snap point or null. */
 	snapPoint: SnapPoint | null;
+	/** Distance in ticks from target to snap. */
 	snapDistance: number;
 }
 

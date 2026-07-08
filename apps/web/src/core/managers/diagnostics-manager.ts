@@ -8,6 +8,7 @@ import type { EditorCore } from "@/core";
 import type { DiagnosticDefinition } from "@/diagnostics/types";
 
 interface DiagnosticRegistration extends DiagnosticDefinition {
+	/** Predicate evaluating whether the diagnostic is active. */
 	check: (editor: EditorCore) => boolean;
 }
 

@@ -19,10 +19,15 @@ pub struct OperationMeta {
 /// Serializable clip payload embedded in operations.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ClipPayload {
+    /// Unique clip identifier.
     pub id: String,
+    /// Kind of clip (e.g. "video", "audio").
     pub clip_type: String,
+    /// Human-readable clip name.
     pub name: String,
+    /// Clip start position in frames.
     pub start: u32,
+    /// Clip end position in frames.
     pub end: u32,
 }
 
@@ -31,55 +36,90 @@ pub struct ClipPayload {
 pub enum CrdtOperation {
     /// Insert a clip at a specific position on a track.
     ClipInsert {
+        /// Identifier of the clip being inserted.
         clip_id: String,
+        /// Track that receives the clip.
         track_id: String,
+        /// Insertion index within the track.
         position: usize,
+        /// Clip data to insert.
         clip: ClipPayload,
     },
     /// Remove a clip from a track.
-    ClipDelete { clip_id: String, track_id: String },
+    ClipDelete {
+        /// Identifier of the clip to remove.
+        clip_id: String,
+        /// Track the clip belongs to.
+        track_id: String,
+    },
     /// Move a clip from one track to another at a new position.
     ClipMove {
+        /// Identifier of the clip being moved.
         clip_id: String,
+        /// Source track identifier.
         from_track: String,
+        /// Destination track identifier.
         to_track: String,
+        /// Target index within the destination track.
         new_position: usize,
     },
     /// Trim a clip by adjusting its start and end points.
     ClipTrim {
+        /// Identifier of the clip being trimmed.
         clip_id: String,
+        /// New start position in frames.
         new_start: u32,
+        /// New end position in frames.
         new_end: u32,
     },
     /// Split a clip into two at the given point, producing a new clip ID.
     ClipSplit {
+        /// Identifier of the clip being split.
         clip_id: String,
+        /// Frame position at which to split.
         split_point: u32,
+        /// Identifier assigned to the new clip.
         new_clip_id: String,
     },
     /// Insert a new track of a given kind at a specific position.
     TrackInsert {
+        /// Identifier of the new track.
         track_id: String,
+        /// Track kind (e.g. "video", "audio").
         kind: String,
+        /// Insertion index within the timeline.
         position: usize,
     },
     /// Remove a track from the timeline.
-    TrackDelete { track_id: String },
+    TrackDelete {
+        /// Identifier of the track to remove.
+        track_id: String,
+    },
     /// Update a named property on a target entity, optionally preserving the old value for undo.
     PropertyUpdate {
+        /// Identifier of the entity whose property changes.
         target_id: String,
+        /// Name of the property being updated.
         property: String,
+        /// New property value.
         value: serde_json::Value,
+        /// Previous value, retained for undo.
         old_value: Option<serde_json::Value>,
     },
     /// Insert a generic entity (e.g. marker, keyframe) into the state.
     EntityInsert {
+        /// Identifier of the new entity.
         entity_id: String,
+        /// Entity kind.
         entity_type: String,
+        /// Serialized entity data.
         data: serde_json::Value,
     },
     /// Remove a generic entity from the state.
-    EntityDelete { entity_id: String },
+    EntityDelete {
+        /// Identifier of the entity to remove.
+        entity_id: String,
+    },
 }
 
 impl CrdtOperation {
@@ -143,6 +183,7 @@ impl CrdtOperation {
 /// A monotonic Lamport clock for partial ordering of operations.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CrdtClock {
+    /// Monotonically increasing tick count.
     counter: u64,
 }
 
@@ -172,6 +213,7 @@ impl CrdtClock {
 }
 
 impl Default for CrdtClock {
+    // Returns a new clock starting at zero.
     fn default() -> Self {
         Self::new()
     }
@@ -180,6 +222,7 @@ impl Default for CrdtClock {
 /// An append-only log of CRDT operations.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CrdtOperationLog {
+    /// Operations in the order they were appended.
     operations: Vec<CrdtOperation>,
 }
 
@@ -196,14 +239,17 @@ impl CrdtOperationLog {
         self.operations.push(op);
     }
 
+    /// Iterate over the operations in log order.
     pub fn iter(&self) -> impl Iterator<Item = &CrdtOperation> {
         self.operations.iter()
     }
 
+    /// Number of operations in the log.
     pub fn len(&self) -> usize {
         self.operations.len()
     }
 
+    /// Whether the log contains no operations.
     pub fn is_empty(&self) -> bool {
         self.operations.is_empty()
     }
@@ -220,6 +266,7 @@ impl CrdtOperationLog {
 }
 
 impl Default for CrdtOperationLog {
+    // Returns a new, empty operation log.
     fn default() -> Self {
         Self::new()
     }

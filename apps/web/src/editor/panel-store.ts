@@ -16,10 +16,15 @@ import { PANEL_CONFIG } from "@/panels/layout";
  * Pixel dimensions for each resizable editor panel.
  */
 export interface PanelSizes {
+	/** Width of the tools panel in pixels. */
 	tools: number;
+	/** Width of the preview panel in pixels. */
 	preview: number;
+	/** Width of the properties panel in pixels. */
 	properties: number;
+	/** Width of the main content area in pixels. */
 	mainContent: number;
+	/** Height of the timeline panel in pixels. */
 	timeline: number;
 }
 
@@ -27,9 +32,13 @@ export interface PanelSizes {
 export type PanelId = keyof PanelSizes;
 
 interface PanelState {
+	/** Current pixel sizes for each panel. */
 	panels: PanelSizes;
+	/** Update the size of a single panel. */
 	setPanel: (args: { panel: PanelId; size: number }) => void;
+	/** Partially update multiple panel sizes at once. */
 	setPanels: (sizes: Partial<PanelSizes>) => void;
+	/** Reset all panel sizes to defaults. */
 	resetPanels: () => void;
 }
 

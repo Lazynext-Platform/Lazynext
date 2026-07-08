@@ -44,55 +44,79 @@ const MOUSE_BUTTON_RIGHT = 2;
 // --- Config ---
 
 export interface ViewportAdapter {
+	/** Returns the current timeline zoom level. */
 	getZoomLevel: () => number;
+	/** Returns the scrollable tracks container element. */
 	getTracksScrollEl: () => HTMLDivElement | null;
+	/** Returns the tracks content container element. */
 	getTracksContainerEl: () => HTMLDivElement | null;
+	/** Returns the timeline header element. */
 	getHeaderEl: () => HTMLElement | null;
 }
 
 export interface InputAdapter {
+	/** Whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
 export interface SceneReader {
+	/** Returns the current scene tracks. */
 	getTracks: () => SceneTracks;
+	/** Returns the active frame rate, or null if unset. */
 	getActiveFps: () => FrameRate | null;
 }
 
 export interface ElementSelectionApi {
+	/** Returns the currently selected element references. */
 	getSelected: () => readonly ElementRef[];
+	/** Whether the given element reference is selected. */
 	isSelected: (ref: ElementRef) => boolean;
+	/** Selects the given element reference. */
 	select: (ref: ElementRef) => void;
+	/** Handles a selection click, optionally multi-select. */
 	handleClick: (args: ElementRef & { isMultiKey: boolean }) => void;
+	/** Clears any keyframe selection. */
 	clearKeyframeSelection: () => void;
 }
 
 export interface PlaybackReader {
+	/** Returns the current playhead time. */
 	getCurrentTime: () => MediaTime;
 }
 
 export interface TimelineOps {
+	/** Commits a group move of elements to the timeline. */
 	moveElements: (args: Pick<GroupMoveResult, "moves" | "createTracks">) => void;
 }
 
 export interface SnapConfig {
+	/** Whether snapping is currently enabled. */
 	isEnabled: () => boolean;
+	/** Called when the active snap point changes. */
 	onChange?: (snapPoint: SnapPoint | null) => void;
 }
 
 /** Dependency-injection interfaces for the controller. */
 export interface ElementInteractionDeps {
+	/** Viewport adapter for zoom and DOM access. */
 	viewport: ViewportAdapter;
+	/** Input adapter for keyboard modifier state. */
 	input: InputAdapter;
+	/** Scene reader for tracks and frame rate. */
 	scene: SceneReader;
+	/** Selection API for element selection. */
 	selection: ElementSelectionApi;
+	/** Playback reader for the current time. */
 	playback: PlaybackReader;
+	/** Timeline operations for committing moves. */
 	timeline: TimelineOps;
+	/** Snap configuration and callbacks. */
 	snap: SnapConfig;
 }
 
 /** Ref wrapper for interaction deps. */
 export interface ElementInteractionDepsRef {
+	/** Current interaction dependencies. */
 	readonly current: ElementInteractionDeps;
 }
 
@@ -101,15 +125,22 @@ export interface ElementInteractionDepsRef {
 type Point = { readonly x: number; readonly y: number };
 
 interface MousedownSnapshot {
+	/** Mouse origin point at mousedown. */
 	readonly origin: Point;
+	/** ID of the element under the cursor. */
 	readonly elementId: string;
+	/** ID of the track containing the element. */
 	readonly trackId: string;
+	/** Start time of the element at mousedown. */
 	readonly startElementTime: MediaTime;
+	/** Time offset from the element start to the click point. */
 	readonly clickOffsetTime: MediaTime;
+	/** Elements selected at mousedown. */
 	readonly selectedElements: readonly ElementRef[];
 }
 
 interface DragProgress {
+	/** The group of elements being moved. */
 	moveGroup: MoveGroup;
 	// Pre-minted per member so the identity of any "new track" created by
 	// this drag stays stable across mousemove-driven drop-target recomputes.
@@ -118,10 +149,15 @@ interface DragProgress {
 	// indicator, drop-line, commit path) see the same entity every frame
 	// instead of a churning UUID.
 	reservedNewTrackIds: readonly string[];
+	/** Current snapped anchor time during the drag. */
 	currentTime: MediaTime;
+	/** Current mouse X coordinate. */
 	currentMouseX: number;
+	/** Current mouse Y coordinate. */
 	currentMouseY: number;
+	/** Latest resolved group move result, or null. */
 	groupMoveResult: GroupMoveResult | null;
+	/** Current drop target, or null. */
 	dropTarget: DropTarget | null;
 }
 

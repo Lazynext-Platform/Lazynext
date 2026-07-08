@@ -2,10 +2,14 @@
  * Audio segment interface for stitching
  */
 export interface AudioSegment {
+	/** Source URL of the audio file. */
 	src: string;
-	s: number; // start time in seconds
-	e: number; // end time in seconds
-	volume?: number; // volume level (0-1), defaults to 1, 0 = muted
+	/** Start time in seconds. */
+	s: number;
+	/** End time in seconds. */
+	e: number;
+	/** Volume level (0-1), defaults to 1, 0 = muted. */
+	volume?: number;
 }
 
 /**

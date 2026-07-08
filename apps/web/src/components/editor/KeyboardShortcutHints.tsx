@@ -14,8 +14,11 @@ import { X } from "lucide-react";
 import { cn } from "@/utils/ui";
 
 interface ShortcutHint {
+	/** Human-readable action label. */
 	label: string;
+	/** Key combination strings. */
 	keys: string[];
+	/** Shortcut category for grouping. */
 	category: "Playback" | "Timeline" | "Edit" | "Navigation";
 }
 

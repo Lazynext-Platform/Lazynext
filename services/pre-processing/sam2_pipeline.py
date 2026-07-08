@@ -155,6 +155,10 @@ class Sam2Pipeline:
             video_path: Path to the input MP4/MOV file
             object_prompt: Text prompt describing the object to mask
             output_dir: Output directory for mask images
+
+        Returns:
+            A :class:`Sam2Result` with ``success``, the ``method`` used
+            (``onnx``, ``rembg``, or ``none``), output paths, and any error.
         """
         if not os.path.exists(video_path):
             return Sam2Result(success=False, method="none", error=f"Video file not found: {video_path}")

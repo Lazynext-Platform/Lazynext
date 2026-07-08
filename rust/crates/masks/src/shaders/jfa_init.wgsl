@@ -22,6 +22,7 @@ struct JfaInitUniforms {
 @group(0) @binding(1) var input_sampler: sampler;
 @group(1) @binding(0) var<uniform> uniforms: JfaInitUniforms;
 
+// Encodes a seed's 2D pixel coordinate into split-byte RGBA channels.
 fn encode_seed(seed: vec2f) -> vec4f {
     let x_hi = floor(seed.x / 256.0);
     let x_lo = seed.x - (x_hi * 256.0);

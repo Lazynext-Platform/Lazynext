@@ -10,8 +10,11 @@ import type { MediaTime } from "@/wasm";
 
 /** A contiguous time range an element should occupy on the timeline. */
 export interface PlacementTimeSpan {
+	/** Start time of the placement window. */
 	startTime: MediaTime;
+	/** Duration of the placement window. */
 	duration: MediaTime;
+	/** Optional element ID to exclude from conflict checks. */
 	excludeElementId?: string;
 }
 

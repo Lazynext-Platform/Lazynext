@@ -39,9 +39,13 @@ function getSecret(): string {
 }
 
 interface AuthUser {
+	/** Subject (user) identifier. */
 	sub: string;
+	/** User email address. */
 	email: string;
+	/** User role. */
 	role: string;
+	/** Token expiry timestamp. */
 	exp: number;
 }
 

@@ -6,13 +6,16 @@
 use plugin::PluginRuntime;
 use wasm_bindgen::prelude::*;
 
+/// JS-facing handle to a sandboxed [`PluginRuntime`].
 #[wasm_bindgen]
 pub struct WasmPluginRuntime {
+    /// The wrapped sandboxed plugin runtime.
     runtime: PluginRuntime,
 }
 
 #[wasm_bindgen]
 impl WasmPluginRuntime {
+    /// Creates a new plugin runtime and installs the panic hook.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         console_error_panic_hook::set_once();
@@ -21,6 +24,8 @@ impl WasmPluginRuntime {
         }
     }
 
+    /// Executes a plugin `script` in the sandbox, returning its string
+    /// result or a JS error on failure.
     #[wasm_bindgen]
     pub fn execute_script(&mut self, script: &str) -> Result<String, JsValue> {
         match self.runtime.execute_script(script) {

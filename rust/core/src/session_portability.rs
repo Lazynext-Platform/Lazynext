@@ -20,42 +20,64 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// A single chat message in the session's conversation history.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ChatMessage {
+    /// Message sender role: "user" or "agent".
     pub role: String,
+    /// Message body text.
     pub content: String,
+    /// Timestamp of the message in seconds since UNIX epoch.
     pub timestamp: u64,
 }
 
 /// The user's current view state (panel, playhead, zoom, scroll).
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ViewState {
+    /// Currently active editor panel.
     pub active_panel: String,
+    /// Current playhead position in frames.
     pub playhead_frame: i64,
+    /// Current timeline zoom level.
     pub zoom_level: f64,
+    /// Horizontal scroll position of the timeline.
     pub timeline_scroll_x: f64,
 }
 
 /// An item in the export queue with its current status and progress.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ExportQueueItem {
+    /// Unique identifier for this export job.
     pub id: String,
+    /// Output format (e.g., "mp4", "mov").
     pub format: String,
+    /// Output resolution (e.g., "1920x1080").
     pub resolution: String,
+    /// Current status of the export job.
     pub status: String,
+    /// Export progress as a percentage (0–100).
     pub progress_pct: u8,
 }
 
 /// Full session state snapshot suitable for cross-surface transfer.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct SessionSnapshot {
+    /// Unique session identifier.
     pub session_id: String,
+    /// Project identifier.
     pub project_id: String,
+    /// Human-readable project name.
     pub project_name: String,
+    /// Timestamp when the snapshot was created, in seconds.
     pub created_at: u64,
+    /// Serialized CRDT timeline state.
     pub crdt_state: String,
+    /// Chat conversation history.
     pub chat_history: Vec<ChatMessage>,
+    /// Agent memory entries.
     pub agent_memory: Vec<String>,
+    /// Current editor view state.
     pub view_state: ViewState,
+    /// Items in the export queue.
     pub export_queue: Vec<ExportQueueItem>,
+    /// Name of the currently active surface (e.g., "desktop", "mobile").
     pub active_surface: String,
 }
 
@@ -75,8 +97,11 @@ impl SessionSnapshot {
 /// A session snapshot paired with a time-limited transfer code for cross-surface handoff.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionTransfer {
+    /// The full session snapshot being transferred.
     pub snapshot: SessionSnapshot,
+    /// Time-limited transfer code (e.g., "LX-4F2A").
     pub transfer_code: String,
+    /// Expiration timestamp in seconds since UNIX epoch.
     pub expires_at: u64,
 }
 
@@ -142,8 +167,11 @@ impl SessionTransfer {
 /// A deep link (URI + QR payload) for transferring a session between surfaces.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SessionLink {
+    /// Transfer code for the session.
     pub transfer_code: String,
+    /// Deep link URI for the session.
     pub uri: String,
+    /// Payload for generating a QR code.
     pub qr_payload: String,
 }
 
@@ -216,6 +244,7 @@ impl SessionLink {
     }
 }
 
+// Generates a random `LX-XXXX` transfer code from the first 4 UUID bytes.
 fn generate_transfer_code() -> String {
     let hex_chars: [char; 16] = [
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
@@ -229,6 +258,7 @@ fn generate_transfer_code() -> String {
     code
 }
 
+// Percent-encodes a string, preserving unreserved URL characters.
 fn simple_url_encode(input: &str) -> String {
     input
         .bytes()
@@ -241,10 +271,12 @@ fn simple_url_encode(input: &str) -> String {
         .collect()
 }
 
+// Returns a pseudo-random boolean derived from a fresh UUID byte.
 fn simple_rand_bool() -> bool {
     (uuid::Uuid::new_v4().as_bytes()[0] & 1) == 1
 }
 
+// Returns the current time in seconds since the UNIX epoch.
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)

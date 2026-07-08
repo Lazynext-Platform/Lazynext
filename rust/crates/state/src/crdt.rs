@@ -16,12 +16,16 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// A simple Last-Writer-Wins (LWW) Register for CRDT Synchronization
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct LWWRegister<T> {
+    /// The current registered value.
     pub value: T,
+    /// Wall-clock timestamp (ms since epoch) of the last write.
     pub timestamp: u64,
+    /// Identifier of the client that made the last write.
     pub client_id: String,
 }
 
 impl<T: Clone> LWWRegister<T> {
+    /// Create a new LWW register stamped with the current time and client id.
     pub fn new(value: T, client_id: String) -> Self {
         Self {
             value,
@@ -48,13 +52,18 @@ impl<T: Clone> LWWRegister<T> {
 /// A CRDT representation of a Clip
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct CRDTClip {
+    /// Unique clip identifier.
     pub id: String,
+    /// Clip start position in frames.
     pub start_frame: LWWRegister<i32>,
+    /// Clip duration in frames.
     pub duration_frames: LWWRegister<i32>,
+    /// Whether the clip is disabled (muted/hidden).
     pub is_disabled: LWWRegister<bool>,
 }
 
 impl CRDTClip {
+    /// Build a CRDT clip from a plain clip, wrapping each field in an LWW register.
     pub fn from_clip(clip: &Clip, client_id: &str) -> Self {
         Self {
             id: clip.id.clone(),
@@ -69,17 +78,21 @@ impl CRDTClip {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[allow(clippy::large_enum_variant)]
 pub struct CRDTTimeline {
+    /// CRDT clips keyed by clip id.
     pub clips: HashMap<String, CRDTClip>,
+    /// Entity graph capturing timeline entities and their links.
     pub entity_graph: crate::entity_graph::EntityGraph,
 }
 
 impl Default for CRDTTimeline {
+    // Returns a new, empty CRDT timeline.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl CRDTTimeline {
+    /// Create a new, empty CRDT timeline.
     pub fn new() -> Self {
         Self {
             clips: HashMap::new(),

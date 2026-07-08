@@ -30,21 +30,31 @@ import type { Bookmark } from "@/timeline";
 import { roundFrameTime, type MediaTime, ZERO_MEDIA_TIME } from "@/wasm";
 
 export interface BookmarkDragState {
+	/** Whether a bookmark drag is in progress. */
 	isDragging: boolean;
+	/** Time of the bookmark being dragged, if any. */
 	bookmarkTime: MediaTime | null;
+	/** Current drag time. */
 	currentTime: MediaTime;
 }
 
 interface PendingBookmarkDrag {
+	/** Time of the bookmark pending drag. */
 	bookmarkTime: MediaTime;
+	/** Mouse x at drag start. */
 	startMouseX: number;
+	/** Mouse y at drag start. */
 	startMouseY: number;
 }
 
 interface UseBookmarkDragProps {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Ref to the scroll container element. */
 	scrollRef: RefObject<HTMLElement | null>;
+	/** Whether snapping is enabled. */
 	snappingEnabled: boolean;
+	/** Callback when the active snap point changes. */
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 

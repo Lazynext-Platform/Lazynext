@@ -1,3 +1,10 @@
+// decklink_api.cc — Mock implementation of the DeckLink SDI bridge.
+//
+// Provides a stand-in for the Blackmagic DeckLink SDK so the crate builds
+// and links on machines without the hardware/SDK present. Each call logs
+// what the real SDK path would do (device init, frame scheduling) and
+// returns success. Replace the mock bodies with IDeckLinkOutput calls for
+// production SDI output.
 #include "decklink/src/decklink_api.h"
 #include <iostream>
 

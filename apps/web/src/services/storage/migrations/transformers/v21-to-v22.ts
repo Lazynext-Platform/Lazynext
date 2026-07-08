@@ -9,9 +9,13 @@ type LegacyInterpolation = "linear" | "hold";
 const toRgb = converter("rgb");
 
 interface LinearRgba {
+	/** Red channel in linear space [0, 1]. */
 	r: number;
+	/** Green channel in linear space [0, 1]. */
 	g: number;
+	/** Blue channel in linear space [0, 1]. */
 	b: number;
+	/** Alpha channel [0, 1]. */
 	a: number;
 }
 
@@ -41,32 +45,47 @@ function parseColorToLinearRgba({
 }
 
 interface LegacyScalarKeyframe {
+	/** Unique keyframe identifier. */
 	id: string;
+	/** Keyframe time in ticks. */
 	time: number;
+	/** Numeric value at this keyframe. */
 	value: number;
+	/** Interpolation mode (linear or hold). */
 	interpolation: LegacyInterpolation;
 }
 
 interface LegacyDiscreteKeyframe {
+	/** Unique keyframe identifier. */
 	id: string;
+	/** Keyframe time in ticks. */
 	time: number;
+	/** Discrete value (string or boolean). */
 	value: string | boolean;
 }
 
 interface LegacyVectorValue {
+	/** X component of the vector. */
 	x: number;
+	/** Y component of the vector. */
 	y: number;
 }
 
 interface LegacyVectorKeyframe {
+	/** Unique keyframe identifier. */
 	id: string;
+	/** Keyframe time in ticks. */
 	time: number;
+	/** Vector value at this keyframe. */
 	value: LegacyVectorValue;
+	/** Interpolation mode (linear or hold). */
 	interpolation: LegacyInterpolation;
 }
 
 interface MigratedAnimationChannel {
+	/** The binding descriptor for this channel. */
 	binding: ProjectRecord;
+	/** Sub-channels keyed by channel ID. */
 	channels: Record<string, ProjectRecord>;
 }
 

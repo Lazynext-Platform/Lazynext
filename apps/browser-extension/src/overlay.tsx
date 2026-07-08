@@ -3,14 +3,20 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 
 interface Project {
+  /** Unique project identifier. */
   id: string;
+  /** Display name of the project. */
   name: string;
 }
 
 interface TimelineClip {
+  /** Unique clip identifier. */
   id: string;
+  /** Clip media type. */
   type: string;
+  /** Clip source reference. */
   source: string;
+  /** Clip duration in seconds. */
   duration?: number;
 }
 

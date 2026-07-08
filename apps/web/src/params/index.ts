@@ -12,23 +12,35 @@ export type ChannelValueKind = "scalar" | "discrete";
 export type ChannelEasingMode = "independent" | "shared";
 
 export interface LinearRgba {
+	/** Red channel in linear space [0, 1]. */
 	r: number;
+	/** Green channel in linear space [0, 1]. */
 	g: number;
+	/** Blue channel in linear space [0, 1]. */
 	b: number;
+	/** Alpha channel [0, 1]. */
 	a: number;
 }
 
 export interface ChannelComponentDefinition<TKey extends string = string> {
+	/** Component key (e.g. "value", "r", "g", "b", "a"). */
 	key: TKey;
+	/** Whether this component holds scalar or discrete values. */
 	valueKind: ChannelValueKind;
+	/** Default interpolation mode for new keyframes. */
 	defaultInterpolation: "linear" | "hold";
 }
 
 export interface LeafChannelLayout<TValue extends ParamValue = ParamValue> {
+	/** Discriminator for leaf channel layout. */
 	kind: "leaf";
+	/** Single component definition for this leaf channel. */
 	component: ChannelComponentDefinition<"value">;
+	/** Easing mode (always independent for leaf channels). */
 	easingMode: "independent";
+	/** Decompose a value into its component mapping. */
 	decompose: (value: TValue) => { value: TValue };
+	/** Compose a value from component values. */
 	compose: (components: { value?: TValue }) => TValue | null;
 }
 
@@ -36,10 +48,15 @@ export interface CompositeChannelLayout<
 	TValue extends ParamValue = ParamValue,
 	TComponents extends object = Record<string, ParamValue>,
 > {
+	/** Discriminator for composite channel layout. */
 	kind: "composite";
+	/** Component definitions for each sub-channel. */
 	components: Array<ChannelComponentDefinition<keyof TComponents & string>>;
+	/** Easing mode (independent or shared across components). */
 	easingMode: ChannelEasingMode;
+	/** Decompose a value into its component mapping. */
 	decompose: (value: TValue) => TComponents | null;
+	/** Compose a value from partial component values. */
 	compose: (components: Partial<TComponents>) => TValue | null;
 }
 
@@ -172,10 +189,15 @@ export const COLOR_CHANNEL_LAYOUT: CompositeChannelLayout<string, LinearRgba> =
 	};
 
 interface BaseParamDefinition<TKey extends string = string> {
+	/** Unique parameter key. */
 	key: TKey;
+	/** Human-readable label for UI display. */
 	label: string;
+	/** Optional logical group for organization. */
 	group?: ParamGroup;
+	/** Whether this parameter supports keyframe animation. */
 	keyframable?: boolean;
+	/** Dependencies on other parameter values. */
 	dependencies?: Array<{ param: string; equals: ParamValue }>;
 }
 
@@ -185,8 +207,11 @@ export interface NumberParamDefinition<
 	type: "number";
 	default: number;
 	channels?: LeafChannelLayout<number>;
+	/** Minimum allowed value. */
 	min: number;
+	/** Maximum allowed value. */
 	max?: number;
+	/** Step increment for slider controls. */
 	step: number;
 	/** When set, min/max/step are in display space. display = stored * displayMultiplier. */
 	displayMultiplier?: number;
@@ -200,6 +225,7 @@ export interface BooleanParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
 	type: "boolean";
+	/** Default boolean value. */
 	default: boolean;
 	channels?: LeafChannelLayout<boolean>;
 }
@@ -208,6 +234,7 @@ export interface ColorParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
 	type: "color";
+	/** Default color value as a CSS color string. */
 	default: string;
 	channels?: ChannelLayout<string, LinearRgba>;
 }
@@ -216,8 +243,10 @@ export interface SelectParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
 	type: "select";
+	/** Default selected option value. */
 	default: string;
 	channels?: LeafChannelLayout<string>;
+	/** Available selectable options. */
 	options: Array<{ value: string; label: string }>;
 }
 
@@ -225,6 +254,7 @@ export interface TextParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
 	type: "text";
+	/** Default text string. */
 	default: string;
 	channels?: LeafChannelLayout<string>;
 }
@@ -233,6 +263,7 @@ export interface FontParamDefinition<
 	TKey extends string = string,
 > extends BaseParamDefinition<TKey> {
 	type: "font";
+	/** Default font family string. */
 	default: string;
 	channels?: LeafChannelLayout<string>;
 }

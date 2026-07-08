@@ -1,4 +1,13 @@
 #!/bin/bash
+# ── Lazynext Desktop — macOS code-signing & notarization prep ─────────
+# Signs the built .app bundle (frameworks, inner binaries, then the bundle
+# itself) with a Developer ID identity + hardened runtime, verifies the
+# signature, and zips the app for notarization via `xcrun notarytool`.
+#
+# Prerequisites:
+#   - Built bundle at target/release/bundle/osx/Lazynext.app
+#   - scripts/entitlements.plist present
+#   - SIGN_IDENTITY set to a valid "Developer ID Application" certificate
 set -e
 
 APP_NAME="Lazynext"

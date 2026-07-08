@@ -17,13 +17,21 @@ import { useScrollPosition } from "@/timeline/hooks/use-scroll-position";
 import { TimelineTick } from "./timeline-tick";
 
 interface TimelineRulerProps {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Total timeline width in pixels. */
 	dynamicTimelineWidth: number;
+	/** Ref to the ruler element. */
 	rulerRef: React.Ref<HTMLDivElement>;
+	/** Ref to the tracks scroll element. */
 	tracksScrollRef: React.RefObject<HTMLElement | null>;
+	/** Wheel event handler. */
 	handleWheel: (e: React.WheelEvent) => void;
+	/** Handler for clicks on the timeline content. */
 	handleTimelineContentClick: (e: React.MouseEvent) => void;
+	/** Handler for ruler scrub-tracking mouse down. */
 	handleRulerTrackingMouseDown: (e: React.MouseEvent) => void;
+	/** Handler for ruler mouse down. */
 	handleRulerMouseDown: (e: React.MouseEvent) => void;
 }
 

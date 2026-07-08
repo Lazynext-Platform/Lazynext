@@ -17,10 +17,15 @@ export interface VideoFrameExtractorOptions {
 }
 
 interface VideoElementState {
+	/** The managed video element. */
 	video: HTMLVideoElement;
+	/** Whether the video has loaded metadata. */
 	isReady: boolean;
+	/** Whether the video is currently loading. */
 	isLoading: boolean;
+	/** Pending load promise. */
 	loadPromise: Promise<void> | null;
+	/** Last usage timestamp for LRU eviction. */
 	lastUsed: number;
 }
 

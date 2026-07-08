@@ -10,11 +10,17 @@ import {
 } from "@/utils/platform";
 
 export interface KeyboardShortcut {
+	/** Unique action identifier. */
 	id: string;
+	/** Human-readable key combination strings. */
 	keys: string[];
+	/** Description of the shortcut action. */
 	description: string;
+	/** Category for grouping. */
 	category: string;
+	/** Associated action type. */
 	action: TActionWithOptionalArgs;
+	/** Optional icon element. */
 	icon?: React.ReactNode;
 }
 

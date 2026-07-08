@@ -30,38 +30,49 @@ pub use state::vector_clock::VectorClock;
 /// Typed errors for NLE state operations.
 #[derive(Debug, Error)]
 pub enum NLEError {
+    /// A track index exceeded the number of tracks present.
     #[error("Track index {0} out of bounds (total: {1})")]
     TrackIndexOutOfBounds(usize, usize),
 
+    /// A clip's start frame was not strictly less than its end frame.
     #[error("Clip start ({start}) must be less than end ({end})")]
     ClipRangeInvalid { start: u32, end: u32 },
 
+    /// No clip exists with the given id.
     #[error("Clip with id '{0}' not found")]
     ClipNotFound(String),
 
+    /// No track exists with the given id.
     #[error("Track with id '{0}' not found")]
     TrackNotFound(String),
 
+    /// The track kind string was not one of the recognized kinds.
     #[error("Invalid track kind: '{0}'. Expected 'video', 'audio', 'mask', 'text', or '3d'")]
     InvalidTrackKind(String),
 
+    /// The clip type string was not recognized.
     #[error("Invalid clip type: '{0}'")]
     InvalidClipType(String),
 
+    /// The media asset type string was not recognized.
     #[error(
         "Invalid media asset type: '{0}'. Expected: 'video', 'audio', 'image', 'mask_sequence', 'gaussian_splat'"
     )]
     InvalidAssetType(String),
 
+    /// The target track is locked and cannot be edited.
     #[error("Track is locked: '{0}'")]
     TrackLocked(String),
 
+    /// A media asset duration was negative.
     #[error("Media asset duration must be >= 0")]
     InvalidDuration,
 
+    /// Canvas width or height was zero.
     #[error("Canvas dimensions must be > 0 ({width}x{height})")]
     InvalidDimensions { width: u32, height: u32 },
 
+    /// The project framerate was zero or negative.
     #[error("Framerate must be > 0")]
     InvalidFramerate,
 }
@@ -71,7 +82,9 @@ pub enum NLEError {
 /// Broadcast events emitted when clips are added or renders complete.
 #[derive(Clone, Debug)]
 pub enum NLEEvent {
+    /// A clip was added to the timeline.
     ClipAdded(String),
+    /// A render completed with the project content hash.
     RenderComplete(String, String),
 }
 
@@ -91,12 +104,19 @@ pub const VALID_CLIP_TYPES: &[&str] = &["video", "audio", "mask", "text", "image
 /// timeline.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaAsset {
+    /// Unique identifier for this media asset.
     pub id: String,
+    /// Human-readable name of the asset.
     pub name: String,
+    /// File path or URL pointing to the source media.
     pub path_or_url: String,
+    /// Type of media: "video", "audio", "image", etc.
     pub asset_type: String,
+    /// Duration of the media in seconds.
     pub duration: f64,
+    /// Width of the media in pixels.
     pub width: u32,
+    /// Height of the media in pixels.
     pub height: u32,
 }
 
@@ -129,11 +149,17 @@ impl MediaAsset {
 /// animation channels (opacity, scale, rotation, volume, etc.).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Clip {
+    /// Unique identifier for this clip.
     pub id: String,
+    /// Type of clip: "video", "audio", "text", etc.
     pub clip_type: String,
+    /// ID of the media asset this clip references, if any.
     pub media_id: Option<String>,
+    /// Human-readable name for this clip.
     pub name: String,
+    /// Start frame of the clip on the timeline.
     pub start: u32,
+    /// End frame of the clip on the timeline.
     pub end: u32,
     /// Per-property animation channels (opacity, scale_x, scale_y, rotation, volume, etc.)
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
@@ -199,13 +225,19 @@ impl Clip {
 /// lock flags.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Track {
+    /// Unique identifier for this track.
     pub id: String,
+    /// Track kind: "video", "audio", "mask", "text", or "3d".
     pub kind: String,
+    /// Ordered list of clips on this track.
     pub clips: Vec<Clip>,
+    /// Whether this track is muted.
     #[serde(default)]
     pub muted: bool,
+    /// Whether this track is soloed.
     #[serde(default)]
     pub soloed: bool,
+    /// Whether this track is locked against edits.
     #[serde(default)]
     pub locked: bool,
 }
@@ -214,13 +246,21 @@ pub struct Track {
 /// background color.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectData {
+    /// Unique project identifier.
     pub id: String,
+    /// Human-readable project name.
     pub name: String,
+    /// Frames per second for the project timeline.
     pub framerate: u32,
+    /// Canvas width in pixels.
     pub width: u32,
+    /// Canvas height in pixels.
     pub height: u32,
+    /// Background color as [R, G, B, A] with normalized 0.0–1.0 values.
     pub bg_color: [f32; 4],
+    /// Ordered list of tracks in the timeline.
     pub tracks: Vec<Track>,
+    /// Pool of media assets referenced by clips in this project.
     #[serde(default, skip_serializing_if = "HashMap::is_empty")]
     pub media_pool: HashMap<String, MediaAsset>,
 }
@@ -231,7 +271,9 @@ pub struct ProjectData {
 /// tombstone map, project data, and snapshot-based undo/redo stacks.
 #[derive(Clone)]
 pub struct NLEState {
+    /// The full project data (tracks, media pool, dimensions, framerate).
     data: ProjectData,
+    /// Optional channel for broadcasting NLE events to subscribers.
     dispatcher: Option<Sender<NLEEvent>>,
     /// CRDT operation log for undo/redo and sync
     pub op_log: CrdtOperationLog,
@@ -466,6 +508,7 @@ impl NLEState {
         Ok(())
     }
 
+    // Pushes a clip onto the named track, erroring if the track is not found.
     fn add_clip_struct(&mut self, track_id: &str, clip: Clip) -> Result<(), String> {
         if let Some(track) = self.data.tracks.iter_mut().find(|t| t.id == track_id) {
             track.clips.push(clip);
@@ -976,6 +1019,7 @@ impl NLEState {
 
     // ── Internal ──
 
+    // Records an operation in the log and undo stack, clearing the redo stack.
     fn apply_and_record(&mut self, op: CrdtOperation, pre_snapshot: ProjectData) {
         self.clock.tick();
         self.op_log.push(op.clone());
@@ -1086,12 +1130,14 @@ impl NLEState {
         self.op_log.push(op);
     }
 
+    // Builds a vector clock advanced once for this peer, tagging an operation.
     fn clock_for_op(&self) -> state::vector_clock::VectorClock {
         let mut vc = state::vector_clock::VectorClock::new();
         vc.increment(&self.peer_id);
         vc
     }
 
+    // Searches all tracks for a clip by ID, returning its payload if found.
     fn find_clip(&self, clip_id: &str) -> Option<state::operations::ClipPayload> {
         for track in &self.get_project_data().tracks {
             for clip in &track.clips {

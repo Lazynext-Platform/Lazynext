@@ -15,17 +15,25 @@ use wasm_bindgen::prelude::*;
 /// WASM-facing CRDT engine for collaborative editing.
 #[wasm_bindgen]
 pub struct CrdtEngine {
+    /// Append-only log of applied operations.
     log: CrdtOperationLog,
+    /// Map of tombstones for deleted entities.
     tombstones: TombstoneMap,
+    /// This peer's vector clock.
     clock: VectorClock,
+    /// Unique identifier for this peer.
     peer_id: String,
+    /// Graph of entities and their values.
     entity_graph: EntityGraph,
+    /// Stack of operations available to undo.
     undo_stack: Vec<CrdtOperation>,
+    /// Stack of operations available to redo.
     redo_stack: Vec<CrdtOperation>,
 }
 
 #[wasm_bindgen]
 impl CrdtEngine {
+    /// Create a new CRDT engine for the given peer id.
     #[wasm_bindgen(constructor)]
     pub fn new(peer_id: String) -> Self {
         console_error_panic_hook::set_once();

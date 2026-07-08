@@ -19,10 +19,15 @@ import {
 import type { MediaTime } from "@/wasm";
 
 interface UseTimelinePlayheadProps {
+	/** Current zoom level for pixel/time conversion. */
 	zoomLevel: number;
+	/** Ref to the ruler DOM element. */
 	rulerRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the ruler scroll container. */
 	rulerScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Optional ref to the playhead indicator element. */
 	playheadRef?: React.RefObject<HTMLDivElement | null>;
 }
 

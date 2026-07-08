@@ -38,33 +38,51 @@ const PRIMARY_POINTER_BUTTON = 0;
 type Point = { readonly x: number; readonly y: number };
 
 interface CapturedPointerState {
+	/** Identifier of the captured pointer. */
 	readonly pointerId: number;
+	/** Element holding the pointer capture. */
 	readonly captureTarget: HTMLElement;
 }
 
 interface PendingGesture extends CapturedPointerState {
+	/** Discriminant marking a pending gesture. */
 	readonly kind: "pending";
+	/** Pointer position where the gesture started. */
 	readonly origin: Point;
+	/** Topmost element under the pointer, if any. */
 	readonly topmostHit: ElementWithBounds | null;
+	/** Preferred hit among selected elements, if any. */
 	readonly selectedHit: ElementWithBounds | null;
+	/** Elements selected when the gesture started. */
 	readonly selectedElements: readonly ElementRef[];
 }
 
 interface DragElementSnapshot {
+	/** Track containing the dragged element. */
 	readonly trackId: string;
+	/** Dragged element identifier. */
 	readonly elementId: string;
+	/** Transform captured at drag start. */
 	readonly initialTransform: Transform;
+	/** Parameter values captured at drag start. */
 	readonly initialParams: ParamValues;
 }
 
 interface DraggingGesture extends CapturedPointerState {
+	/** Discriminant marking an active drag gesture. */
 	readonly kind: "dragging";
+	/** Pointer position where the drag started. */
 	readonly origin: Point;
+	/** Bounds of the primary dragged element. */
 	readonly bounds: {
+		/** Element width. */
 		readonly width: number;
+		/** Element height. */
 		readonly height: number;
+		/** Element rotation in degrees. */
 		readonly rotation: number;
 	};
+	/** Snapshots of all dragged elements. */
 	readonly elements: readonly DragElementSnapshot[];
 }
 
@@ -76,81 +94,117 @@ type GestureSession =
 const IDLE_GESTURE: GestureSession = { kind: "idle" };
 
 export interface EditingTextState {
+	/** Track containing the text element being edited. */
 	readonly trackId: string;
+	/** Text element identifier. */
 	readonly elementId: string;
+	/** The text element being edited. */
 	readonly element: TextElement;
 }
 
 export interface PreviewViewportAdapter {
+	/** Converts screen coordinates to canvas coordinates. */
 	screenToCanvas: ({
 		clientX,
 		clientY,
 	}: {
+		/** Screen X coordinate (client). */
 		clientX: number;
+		/** Screen Y coordinate (client). */
 		clientY: number;
 	}) => Point | null;
+	/** Converts a screen-pixel threshold to logical canvas units. */
 	screenPixelsToLogicalThreshold: ({
 		screenPixels,
 	}: {
+		/** Threshold distance in screen pixels. */
 		screenPixels: number;
 	}) => Point;
 }
 
 export interface InputAdapter {
+	/** Returns whether the shift key is currently held. */
 	isShiftHeld: () => boolean;
 }
 
 export interface SceneReader {
+	/** Returns the scene's tracks. */
 	getTracks: () => SceneTracks;
+	/** Returns the current playback time. */
 	getCurrentTime: () => number;
+	/** Returns the available media assets. */
 	getMediaAssets: () => MediaAsset[];
+	/** Returns the canvas size. */
 	getCanvasSize: () => TCanvasSize;
 }
 
 export interface SelectionApi {
+	/** Returns the currently selected element references. */
 	getSelected: () => readonly ElementRef[];
+	/** Sets the selected element references. */
 	setSelected: (elements: readonly ElementRef[]) => void;
+	/** Clears the current selection. */
 	clearSelection: () => void;
 }
 
 export interface TimelinePreviewUpdate {
+	/** Track containing the element to update. */
 	readonly trackId: string;
+	/** Element to update. */
 	readonly elementId: string;
+	/** Partial element changes to preview. */
 	readonly updates: Partial<TimelineElement>;
 }
 
 export interface TimelineOps {
+	/** Resolves elements together with their owning tracks. */
 	getElementsWithTracks: ({
 		elements,
 	}: {
+		/** Element references to resolve. */
 		elements: readonly ElementRef[];
 	}) => Array<{ track: TimelineTrack; element: TimelineElement }>;
+	/** Applies preview updates to elements. */
 	previewElements: (updates: readonly TimelinePreviewUpdate[]) => void;
+	/** Commits the active preview. */
 	commitPreview: () => void;
+	/** Discards the active preview. */
 	discardPreview: () => void;
 }
 
 export interface PlaybackApi {
+	/** Returns whether playback is currently active. */
 	getIsPlaying: () => boolean;
+	/** Subscribes to playback state changes. */
 	subscribe: (listener: () => void) => () => void;
 }
 
 export interface PreviewOptions {
+	/** Returns whether mask editing mode is active. */
 	isMaskMode: () => boolean;
+	/** Callback invoked when active snap lines change. */
 	onSnapLinesChange?: (lines: SnapLine[]) => void;
 }
 
 export interface PreviewInteractionDeps {
+	/** Viewport coordinate adapter. */
 	viewport: PreviewViewportAdapter;
+	/** Input state adapter. */
 	input: InputAdapter;
+	/** Scene data reader. */
 	scene: SceneReader;
+	/** Selection operations. */
 	selection: SelectionApi;
+	/** Timeline operations. */
 	timeline: TimelineOps;
+	/** Playback state access. */
 	playback: PlaybackApi;
+	/** Preview options. */
 	preview: PreviewOptions;
 }
 
 export interface PreviewInteractionDepsRef {
+	/** Current dependency values. */
 	readonly current: PreviewInteractionDeps;
 }
 

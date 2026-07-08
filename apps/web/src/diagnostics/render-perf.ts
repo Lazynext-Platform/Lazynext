@@ -15,11 +15,14 @@
 type SpanSample = number;
 
 type SpanStats = {
+	/** Recorded duration samples in milliseconds. */
 	samples: SpanSample[];
 };
 
 type CounterStats = {
+	/** Cumulative counter total. */
 	total: number;
+	/** Number of frames the counter was recorded over. */
 	frames: number;
 };
 
@@ -33,6 +36,7 @@ let framesSinceFlush = 0;
 
 declare global {
 	interface Window {
+		/** Runtime toggle for render performance instrumentation. */
 		__renderPerf?: boolean;
 	}
 }

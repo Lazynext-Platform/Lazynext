@@ -33,9 +33,13 @@ function getChannelFallbackValue({ channel }: { channel: AnimationChannel }) {
 }
 
 interface ChannelKeyframeMatch {
+	/** Component key within channel data. */
 	componentKey: string;
+	/** Index of the component for disambiguation. */
 	componentIndex: number;
+	/** Animation channel reference. */
 	channel: AnimationChannel;
+	/** Matched keyframe entry. */
 	keyframe: AnimationChannel["keys"][number];
 }
 

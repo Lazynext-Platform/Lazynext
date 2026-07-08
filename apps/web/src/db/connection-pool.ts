@@ -35,51 +35,84 @@ export interface PoolConfig {
 
 /** Snapshot of pool metrics at a point in time */
 export interface PoolMetrics {
+	/** Pool identifier. */
 	poolName: "writer" | "reader";
+	/** Number of active connections. */
 	active: number;
+	/** Number of idle connections. */
 	idle: number;
+	/** Number of waiting clients. */
 	waiting: number;
+	/** Total number of connections ever created. */
 	total: number;
+	/** Maximum allowed connections. */
 	max: number;
+	/** Cumulative error count. */
 	errors: number;
+	/** Last recorded error message. */
 	lastError: string | null;
+	/** Timestamp of the last error. */
 	lastErrorAt: number | null;
+	/** Pool uptime in milliseconds. */
 	uptimeMs: number;
 }
 
 export interface CircuitBreakerState {
+	/** Current circuit state. */
 	state: "closed" | "open" | "half-open";
+	/** Number of consecutive failures. */
 	failureCount: number;
+	/** Timestamp of the last failure. */
 	lastFailureTime: number | null;
+	/** Timestamp of the last success. */
 	lastSuccessTime: number | null;
+	/** Timestamp when the circuit was opened. */
 	openedAt: number | null;
 }
 
 export interface RetryOptions {
+	/** Maximum number of retry attempts. */
 	maxRetries: number;
+	/** Base delay between retries in milliseconds. */
 	baseDelayMs: number;
+	/** Maximum delay between retries in milliseconds. */
 	maxDelayMs: number;
-	factor: number; // exponential backoff factor
+	/** Exponential backoff factor. */
+	factor: number;
 }
 
 export interface HealthCheckResult {
+	/** Whether the pool is healthy. */
 	healthy: boolean;
+	/** Latency of the health check in milliseconds. */
 	latencyMs: number;
+	/** Error message if unhealthy. */
 	error?: string;
+	/** Metrics for each pool. */
 	poolMetrics: {
+		/** Writer pool metrics */
 		writer: PoolMetrics;
+		/** Reader pool metrics, or null if disabled */
 		reader: PoolMetrics | null;
 	};
+	/** Circuit breaker state. */
 	circuitBreaker: CircuitBreakerState;
+	/** ISO 8601 timestamp of the check. */
 	timestamp: string;
 }
 
 export interface PoolManagerConfig {
+	/** Writer pool configuration. */
 	writer: PoolConfig;
+	/** Reader pool configuration (null if disabled). */
 	reader: PoolConfig | null;
+	/** Retry behavior options. */
 	retryOptions: RetryOptions;
+	/** Failure threshold before circuit opens. */
 	circuitBreakerThreshold: number;
+	/** Time in ms before circuit attempts half-open. */
 	circuitBreakerResetTimeoutMs: number;
+	/** Whether to use a separate reader pool. */
 	enableReaderPool: boolean;
 }
 

@@ -47,8 +47,11 @@ export type DiscreteValue = boolean | string;
 
 /** Min/max/step constraints for numeric sliders. */
 export interface NumericSpec {
+	/** Minimum allowed value. */
 	min?: number;
+	/** Maximum allowed value. */
 	max?: number;
+	/** Step increment for slider controls. */
 	step?: number;
 }
 
@@ -81,22 +84,30 @@ export type ChannelExtrapolationMode = "hold" | "linear";
 
 /** A single tangent handle (time delta + value delta). */
 export interface CurveHandle {
+	/** Time delta in ticks. */
 	dt: MediaTime;
+	/** Value delta. */
 	dv: number;
 }
 
 interface BaseAnimationKeyframe<TValue extends ParamValue> {
+	/** Unique keyframe identifier. */
 	id: string;
 	/** Relative to element start time. */
 	time: MediaTime;
+	/** Keyframe value at this point in time. */
 	value: TValue;
 }
 
 /** A single keyframe in a scalar (numeric) animation channel. */
 export interface ScalarAnimationKey extends BaseAnimationKeyframe<number> {
+	/** Incoming tangent handle. */
 	leftHandle?: CurveHandle;
+	/** Outgoing tangent handle. */
 	rightHandle?: CurveHandle;
+	/** Segment interpolation from this key to the next. */
 	segmentToNext: ScalarSegmentType;
+	/** Tangent handle mode for the bezier curve. */
 	tangentMode: TangentMode;
 }
 
@@ -113,15 +124,20 @@ export type Keyframe<TValue extends ParamValue = ParamValue> =
 
 /** A scalar (numeric) animation channel with optional extrapolation settings. */
 export interface ScalarChannel {
+	/** Ordered list of scalar keyframes. */
 	keys: ScalarAnimationKey[];
+	/** Optional extrapolation behaviour before/after the keyframe range. */
 	extrapolation?: {
+		/** Behaviour before the first keyframe. */
 		before: ChannelExtrapolationMode;
+		/** Behaviour after the last keyframe. */
 		after: ChannelExtrapolationMode;
 	};
 }
 
 /** A discrete animation channel (hold-only keyframes). */
 export interface DiscreteChannel {
+	/** Ordered list of discrete keyframes. */
 	keys: DiscreteAnimationKey[];
 }
 
@@ -152,49 +168,70 @@ export interface ElementAnimations {
 export type NormalizedCubicBezier = [number, number, number, number];
 
 export interface ScalarGraphChannelTarget {
+	/** Animation property path. */
 	propertyPath: AnimationPath;
+	/** Sub-component key within the property. */
 	componentKey: string;
 }
 
 /** A scalar channel with its metadata, suitable for graph editors. */
 export interface ScalarGraphChannel extends ScalarGraphChannelTarget {
+	/** The underlying scalar animation channel. */
 	channel: ScalarAnimationChannel;
 }
 
 /** A reference to a specific keyframe within a scalar graph channel. */
 export interface ScalarGraphKeyframeRef extends ScalarGraphChannelTarget {
+	/** Unique keyframe identifier. */
 	keyframeId: string;
 }
 
 /** Full context for a keyframe in the scalar graph: the key itself plus neighbours. */
 export interface ScalarGraphKeyframeContext extends ScalarGraphChannel {
+	/** The selected keyframe. */
 	keyframe: ScalarAnimationKey;
+	/** Index of this keyframe within the channel. */
 	keyframeIndex: number;
+	/** Preceding keyframe, if any. */
 	previousKey: ScalarAnimationKey | null;
+	/** Following keyframe, if any. */
 	nextKey: ScalarAnimationKey | null;
 }
 
 /** A partial update to a keyframe's curve handles and segment type. */
 export interface ScalarCurveKeyframePatch {
+	/** Updated incoming tangent handle. */
 	leftHandle?: CurveHandle | null;
+	/** Updated outgoing tangent handle. */
 	rightHandle?: CurveHandle | null;
+	/** Updated segment interpolation type. */
 	segmentToNext?: ScalarSegmentType;
+	/** Updated tangent handle mode. */
 	tangentMode?: TangentMode;
 }
 
 /** A flattened representation of a single keyframe for the timeline UI. */
 export interface ElementKeyframe {
+	/** Animation property path. */
 	propertyPath: AnimationPath;
+	/** Unique keyframe identifier. */
 	id: string;
+	/** Keyframe time relative to element start. */
 	time: MediaTime;
+	/** Keyframe value. */
 	value: ParamValue;
+	/** Interpolation mode for this keyframe. */
 	interpolation: AnimationInterpolation;
 }
 
 /** Identifies a selected keyframe by its track, element, path, and keyframe ID. */
 export interface SelectedKeyframeRef {
+	/** Track identifier. */
 	trackId: string;
+	/** Element identifier. */
 	elementId: string;
+	/** Animation property path. */
 	propertyPath: AnimationPath;
+	/** Unique keyframe identifier. */
 	keyframeId: string;
 }

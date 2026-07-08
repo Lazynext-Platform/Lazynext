@@ -26,26 +26,41 @@ export type AgentMode = "SuggestOnly" | "AutoExecute";
 export type AgentStatus = "Active" | "Stopped";
 
 export interface AgentSuggestion {
+	/** Unique suggestion identifier. */
 	id: string;
+	/** Category of the suggested change. */
 	category: SuggestionCategory;
+	/** Short title describing the suggestion. */
 	title: string;
+	/** Detailed description of the suggestion. */
 	description: string;
+	/** Risk level of applying the suggestion. */
 	riskLevel: RiskLevel;
 }
 
 export interface AgentState {
+	/** Current agent status. */
 	status: AgentStatus;
+	/** Current agent operating mode. */
 	mode: AgentMode;
 }
 
 interface UseAgentSuggestionsReturn {
+	/** Current list of agent suggestions. */
 	suggestions: AgentSuggestion[];
+	/** Current agent state, or null if unknown. */
 	status: AgentState | null;
+	/** Whether an initial load is in progress. */
 	isLoading: boolean;
+	/** Latest error message, or null. */
 	error: string | null;
+	/** Executes the suggestion with the given ID. */
 	executeSuggestion: (id: string) => Promise<void>;
+	/** Dismisses the suggestion with the given ID. */
 	dismissSuggestion: (id: string) => Promise<void>;
+	/** Starts the agent. */
 	startAgent: () => Promise<void>;
+	/** Stops the agent. */
 	stopAgent: () => Promise<void>;
 }
 

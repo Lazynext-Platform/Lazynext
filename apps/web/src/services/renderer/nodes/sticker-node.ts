@@ -7,14 +7,20 @@ import {
 } from "./visual-node";
 
 export interface StickerNodeParams extends VisualNodeParams {
+	/** Identifier for the sticker in the sticker registry. */
 	stickerId: string;
+	/** Override the intrinsic width of the sticker. */
 	intrinsicWidth?: number;
+	/** Override the intrinsic height of the sticker. */
 	intrinsicHeight?: number;
 }
 
 interface CachedStickerSource {
+	/** Loaded image element. */
 	source: HTMLImageElement;
+	/** Natural width of the loaded image. */
 	width: number;
+	/** Natural height of the loaded image. */
 	height: number;
 }
 

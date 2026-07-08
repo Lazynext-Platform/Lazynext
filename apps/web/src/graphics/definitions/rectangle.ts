@@ -5,10 +5,15 @@ import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";
 import type { GraphicDefinition } from "../types";
 
 interface RectangleParams {
+	/** Fill color. */
 	fill: string;
+	/** Stroke color. */
 	stroke: string;
+	/** Stroke width in pixels. */
 	strokeWidth: number;
+	/** Stroke alignment. */
 	strokeAlign: GraphicStrokeAlign;
+	/** Corner radius as a percentage (0-50). */
 	cornerRadius: number;
 }
 

@@ -74,31 +74,49 @@ impl RiskLevel {
 /// Category of an agent suggestion for filtering and prioritization.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SuggestionCategory {
+    /// Detect and remove silent gaps between clips.
     SilenceRemoval,
+    /// Detect and remove filler words (um, uh, etc.).
     FillerRemoval,
+    /// Correct color balance and exposure inconsistencies.
     ColorCorrection,
+    /// Normalize and level audio across clips.
     AudioLeveling,
+    /// Adjust clip pacing and rhythm.
     PacingAdjustment,
+    /// Suggest or add transition effects between clips.
     TransitionAddition,
+    /// Generate captions from audio transcription.
     CaptionGeneration,
+    /// Sync cuts and transitions to an audio beat.
     BeatSync,
+    /// Detect corrupt or missing clip media references.
     ClipHealth,
+    /// Catch-all for uncategorized suggestions.
     Other(String),
 }
 
 /// Configuration for the background autonomous agent.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentConfig {
+    /// AI provider to use (e.g., "openai", "anthropic", "local").
     pub provider: String,
+    /// Operating mode for the autonomous agent.
     pub mode: AgentMode,
+    /// Interval between timeline analysis checks, in seconds.
     pub check_interval_secs: u64,
+    /// Minimum number of timeline changes before triggering analysis.
     pub min_changes_for_analysis: u32,
+    /// Suppress agent output when true.
     pub silent: bool,
+    /// Minimum silence duration (seconds) to flag as a gap.
     pub silence_threshold_secs: f64,
+    /// Maximum audio level deviation (dB) before flagging.
     pub audio_level_tolerance_db: f64,
 }
 
 impl Default for AgentConfig {
+    // Returns the default agent configuration.
     fn default() -> Self {
         Self {
             provider: "local".to_string(),
@@ -117,47 +135,74 @@ impl Default for AgentConfig {
 /// A comprehensive audit finding from proactive timeline analysis.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AuditFinding {
+    /// Unique identifier for this finding.
     pub id: String,
+    /// Short title summarizing the finding.
     pub title: String,
+    /// Human-readable description of the issue.
     pub description: String,
+    /// Classification of the audit finding.
     pub category: AuditCategory,
+    /// Severity level of the finding.
     pub severity: AuditSeverity,
+    /// Track IDs relevant to this finding.
     pub track_ids: Vec<String>,
+    /// Clip IDs relevant to this finding.
     pub clip_ids: Vec<String>,
+    /// Suggested action to resolve the finding.
     pub suggested_fix: String,
 }
 
 /// Classification of an audit finding.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AuditCategory {
+    /// Missing intro or outro sequence.
     MissingIntroOutro,
+    /// Color inconsistency between clips.
     ColorInconsistency,
+    /// Missing lower-thirds text overlays.
     MissingLowerThirds,
+    /// Opportunity for speed-ramping effect.
     SpeedRampOpportunity,
+    /// Audio levels nearing or at peaking/clipping.
     AudioPeaking,
+    /// Missing transitions between adjacent clips.
     MissingTransitions,
+    /// Extended silence gap detected.
     SilenceGap,
+    /// Abnormally short clip that may be a cutting error.
     ShortClip,
 }
 
 /// Severity level of an audit finding.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AuditSeverity {
+    /// Informational finding, no action required.
     Info,
+    /// Non-critical issue that should be reviewed.
     Warning,
+    /// Critical issue requiring immediate attention.
     Critical,
 }
 
 /// Results of a full timeline audit. Contains all findings and a summary.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimelineAudit {
+    /// Project identifier.
     pub project_id: String,
+    /// All findings from the audit analysis.
     pub findings: Vec<AuditFinding>,
+    /// Total number of issues detected.
     pub total_issues: u32,
+    /// Number of critical-severity issues.
     pub critical_issues: u32,
+    /// Number of warning-severity issues.
     pub warning_issues: u32,
+    /// Number of informational issues.
     pub info_issues: u32,
+    /// Timestamp of the audit in milliseconds since UNIX epoch.
     pub audit_timestamp_ms: u64,
+    /// Human-readable summary of audit results.
     pub summary: String,
 }
 
@@ -533,16 +578,27 @@ impl TimelineAudit {
 /// A concrete suggestion from the agent with risk, category, and tracking metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentSuggestion {
+    /// Unique suggestion identifier.
     pub id: String,
+    /// Short title describing the suggestion.
     pub title: String,
+    /// Detailed description of the suggestion.
     pub description: String,
+    /// Category of the suggestion.
     pub category: SuggestionCategory,
+    /// Risk level for auto-execution.
     pub risk: RiskLevel,
+    /// Why the agent believes this suggestion is warranted.
     pub reasoning: String,
+    /// Track IDs this suggestion applies to.
     pub track_ids: Vec<String>,
+    /// Clip IDs this suggestion applies to.
     pub clip_ids: Vec<String>,
+    /// Whether this suggestion has been auto-executed.
     pub executed: bool,
+    /// Whether the user has dismissed this suggestion.
     pub dismissed: bool,
+    /// Timestamp when the suggestion was created, in milliseconds.
     pub timestamp_ms: u64,
 }
 
@@ -551,14 +607,23 @@ pub struct AgentSuggestion {
 /// Live status snapshot of the background agent, emitted via events.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentStatus {
+    /// Whether the agent monitor loop is running.
     pub is_running: bool,
+    /// Whether the agent is currently performing analysis.
     pub is_analyzing: bool,
+    /// Current operating mode of the agent.
     pub mode: AgentMode,
+    /// Name of the AI provider currently in use.
     pub provider: String,
+    /// Number of suggestions currently pending user review.
     pub active_suggestions: u32,
+    /// Total number of suggestions ever generated.
     pub total_suggestions_made: u64,
+    /// Total number of suggestions auto-executed.
     pub total_auto_executed: u64,
+    /// Timestamp of the last analysis, in milliseconds.
     pub last_analysis_at: Option<u64>,
+    /// Most recent error message, if any.
     pub last_error: Option<String>,
 }
 
@@ -567,18 +632,24 @@ pub struct AgentStatus {
 /// Events emitted by the background agent for UI consumption.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum AgentEvent {
+    /// A batch of suggestions is ready for review.
     SuggestionsReady(Vec<AgentSuggestion>),
+    /// Result of an individual suggestion execution.
     SuggestionExecuted {
         suggestion_id: String,
         success: bool,
         error: Option<String>,
     },
+    /// Analysis cycle has started.
     AnalysisStarted,
+    /// Analysis cycle has completed.
     AnalysisCompleted {
         suggestions_count: u32,
         auto_executed_count: u32,
     },
+    /// Live status snapshot of the agent.
     StatusUpdate(AgentStatus),
+    /// An error occurred in the agent.
     Error(String),
 }
 
@@ -587,9 +658,13 @@ pub enum AgentEvent {
 /// A message in the agent conversation loop.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConversationMessage {
+    /// Message sender: "user" or "agent".
     pub role: String, // "user" or "agent"
+    /// Message body text.
     pub content: String,
+    /// Timestamp of the message in milliseconds.
     pub timestamp_ms: u64,
+    /// Whether this message is a proactive follow-up question.
     pub is_follow_up: bool,
 }
 
@@ -653,6 +728,7 @@ impl UserPreferenceStore {
         Ok(())
     }
 
+    // Default path to the on-disk preferences file (`~/.lazynext/preferences.json`).
     fn default_path() -> PathBuf {
         let home = std::env::var("HOME")
             .or_else(|_| std::env::var("USERPROFILE"))
@@ -721,6 +797,7 @@ impl UserPreferenceStore {
 }
 
 impl Default for UserPreferenceStore {
+    // Returns an empty preference store.
     fn default() -> Self {
         Self::new()
     }
@@ -903,6 +980,7 @@ impl ConversationContext {
 }
 
 impl Default for ConversationContext {
+    // Returns a new conversation context with proactive follow-ups enabled.
     fn default() -> Self {
         Self::new()
     }
@@ -913,16 +991,27 @@ impl Default for ConversationContext {
 /// Persistent background agent that monitors the NLE timeline, generates
 /// suggestions, and optionally auto-executes improvements.
 pub struct BackgroundAgent {
+    /// Shared NLE state the agent monitors and edits.
     nle: Arc<tokio::sync::Mutex<NLEState>>,
+    /// Runtime-updatable agent configuration.
     config: Arc<RwLock<AgentConfig>>,
+    /// Channel for emitting agent events to the UI.
     event_tx: mpsc::UnboundedSender<AgentEvent>,
+    /// Whether the monitor loop is currently running.
     is_running: Arc<AtomicBool>,
+    /// Whether an analysis cycle is currently in progress.
     is_analyzing: Arc<AtomicBool>,
+    /// Total suggestions generated over the agent's lifetime.
     total_suggestions: Arc<AtomicU64>,
+    /// Total suggestions auto-executed over the agent's lifetime.
     total_auto_executed: Arc<AtomicU64>,
+    /// Timestamp (ms) of the last completed analysis.
     last_analysis: Arc<RwLock<Option<u64>>>,
+    /// Most recent error encountered, if any.
     last_error: Arc<RwLock<Option<String>>>,
+    /// Currently pending suggestions awaiting review.
     active_suggestions: Arc<RwLock<Vec<AgentSuggestion>>>,
+    /// HTTP client for calling LLM providers.
     client: reqwest::Client,
     /// Conversation context for multi-turn agent interactions
     pub conversation: Arc<RwLock<ConversationContext>>,
@@ -1330,6 +1419,7 @@ impl BackgroundAgent {
 
 // ── Analysis Logic ──
 
+// Run all detectors against the current timeline and collect their suggestions.
 async fn analyze_timeline(
     nle: &Arc<tokio::sync::Mutex<NLEState>>,
     _client: &reqwest::Client,
@@ -1360,6 +1450,7 @@ async fn analyze_timeline(
     Ok(suggestions)
 }
 
+// Flag inter-clip gaps longer than the silence threshold as removable silence.
 fn detect_silence_issues(
     project: &crate::nle_state::ProjectData,
     threshold_secs: f64,
@@ -1403,6 +1494,7 @@ fn detect_silence_issues(
     suggestions
 }
 
+// Flag audio clips whose estimated level deviates from the track average beyond tolerance.
 fn detect_audio_leveling_issues(
     project: &crate::nle_state::ProjectData,
     tolerance_db: f64,
@@ -1464,6 +1556,7 @@ fn detect_audio_leveling_issues(
     suggestions
 }
 
+// Flag abnormally short clips that may be accidental cuts.
 fn detect_pacing_issues(
     project: &crate::nle_state::ProjectData,
     now_ms: u64,
@@ -1502,6 +1595,7 @@ fn detect_pacing_issues(
     suggestions
 }
 
+// Flag media pool assets with empty paths that would fail to render.
 fn detect_clip_health_issues(
     project: &crate::nle_state::ProjectData,
     now_ms: u64,
@@ -1536,6 +1630,7 @@ fn detect_clip_health_issues(
 
 // ── Suggestion Execution ──
 
+// Apply a suggestion's edit to the timeline and emit an execution result event.
 async fn execute_suggestion_impl(
     nle: &Arc<tokio::sync::Mutex<NLEState>>,
     suggestion: &AgentSuggestion,
@@ -1584,6 +1679,7 @@ async fn execute_suggestion_impl(
 // ── Helpers ──
 
 #[allow(clippy::too_many_arguments)]
+// Assemble a status snapshot from the agent's shared atomics and locks.
 async fn build_status(
     config: &Arc<RwLock<AgentConfig>>,
     is_analyzing: &Arc<AtomicBool>,

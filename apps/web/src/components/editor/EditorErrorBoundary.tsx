@@ -13,13 +13,16 @@ import { Button } from "@/components/ui/button";
 interface EditorErrorBoundaryProps {
 	/** Label shown in the error message to identify which section crashed. */
 	section: string;
+	/** Child content to render and guard. */
 	children: React.ReactNode;
 	/** Optional fallback render — overrides the default error card. */
 	fallback?: React.ReactNode;
 }
 
 interface EditorErrorBoundaryState {
+	/** Whether an error has been caught. */
 	hasError: boolean;
+	/** The caught error, or null. */
 	error: Error | null;
 }
 

@@ -17,41 +17,68 @@ import { isKey } from "@/actions/keybinding";
 import { runMigrations, CURRENT_VERSION } from "./keybindings/migrations";
 
 export interface KeybindingConflict {
+	/** Shortcut key causing the conflict. */
 	key: ShortcutKey;
+	/** Currently bound action. */
 	existingAction: TActionWithOptionalArgs;
+	/** New action attempting to bind. */
 	newAction: TActionWithOptionalArgs;
 }
 
 interface KeybindingsState {
+	/** Map of shortcut keys to actions. */
 	keybindings: Map<ShortcutKey, TActionWithOptionalArgs>;
+	/** Whether keybindings have been customized. */
 	isCustomized: boolean;
+	/** Current overlay stacking depth. */
 	overlayDepth: number;
+	/** Ordered list of active overlay IDs. */
 	openOverlayIds: string[];
+	/** Whether a project is currently loading. */
 	isLoadingProject: boolean;
+	/** Whether shortcut recording mode is active. */
 	isRecording: boolean;
 
+	/** Updates the keybinding mapping for a given shortcut to a new action. */
 	updateKeybinding: (params: {
+		/** Shortcut key to bind. */
 		key: ShortcutKey;
+		/** Action to trigger when the shortcut is pressed. */
 		action: TActionWithOptionalArgs;
 	}) => void;
+	/** Removes the keybinding for a given shortcut key. */
 	removeKeybinding: (key: ShortcutKey) => void;
+	/** Resets all keybindings to factory defaults. */
 	resetToDefaults: () => void;
+	/** Imports keybindings from an external configuration. */
 	importKeybindings: (config: KeybindingConfig) => void;
+	/** Exports the current keybindings as a plain object. */
 	exportKeybindings: () => Record<string, TActionWithOptionalArgs>;
+	/** Opens an overlay, incrementing the overlay stack. */
 	openOverlay: (overlayId: string) => void;
+	/** Closes an overlay, decrementing the overlay stack. */
 	closeOverlay: (overlayId: string) => void;
+	/** Sets whether a project is currently loading. */
 	setLoadingProject: (loading: boolean) => void;
+	/** Sets whether shortcut recording mode is active. */
 	setIsRecording: (isRecording: boolean) => void;
+	/** Validates whether a keybinding can be assigned without conflict, returning the conflict if any. */
 	validateKeybinding: (params: {
+		/** Shortcut key to validate. */
 		key: ShortcutKey;
+		/** Action attempting to bind. */
 		action: TActionWithOptionalArgs;
 	}) => KeybindingConflict | null;
+	/** Returns all shortcut keys bound to the given action. */
 	getKeybindingsForAction: (action: TActionWithOptionalArgs) => ShortcutKey[];
+	/** Converts a KeyboardEvent to a ShortcutKey string. */
 	getKeybindingString: (ev: KeyboardEvent) => ShortcutKey | null;
 }
 
 type PersistedState = {
+	/** Map of shortcut keys to actions for persistence. */
 	keybindings: Record<string, TActionWithOptionalArgs>;
+	/** Whether keybindings have been customized. */
 	isCustomized: boolean;
 };
 

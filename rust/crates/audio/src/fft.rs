@@ -11,11 +11,14 @@ use rustfft::{FftPlanner, num_complex::Complex};
 /// Designed for extracting low, mid, and high frequencies for audio-reactive WebGPU shaders.
 #[allow(dead_code)]
 pub struct AudioAnalyzer {
+    /// Audio sample rate in Hz.
     sample_rate: u32,
+    /// FFT window size in samples.
     fft_size: usize,
 }
 
 impl AudioAnalyzer {
+    /// Create a new analyzer for the given sample rate and FFT window size.
     pub fn new(sample_rate: u32, fft_size: usize) -> Self {
         Self {
             sample_rate,

@@ -6,8 +6,11 @@ import {
 } from "./visual-node";
 
 export interface VideoNodeParams extends VisualNodeParams {
+	/** Source URL for the video asset. */
 	url: string;
+	/** Blob File reference for decoding. */
 	file: File;
+	/** Unique media asset identifier. */
 	mediaId: string;
 }
 

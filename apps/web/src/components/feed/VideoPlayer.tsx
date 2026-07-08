@@ -13,13 +13,21 @@ import {
 import { toast } from "sonner";
 
 interface VideoProps {
+	/** Unique video/project identifier. */
 	id: string;
+	/** Source URL of the video. */
 	url: string;
+	/** Author username. */
 	author: string;
+	/** Video description text. */
 	description: string;
+	/** Name of the background song. */
 	songName: string;
+	/** Number of likes. */
 	likes: number;
+	/** Number of comments. */
 	comments: number;
+	/** Whether this video is the active/visible one. */
 	isActive: boolean;
 }
 

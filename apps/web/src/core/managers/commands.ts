@@ -10,8 +10,11 @@ import { applyRippleAdjustments, computeRippleAdjustments } from "@/ripple";
 import type { SceneTracks } from "@/timeline/types";
 
 interface CommandHistoryEntry {
+	/** The executed command. */
 	command: Command;
+	/** Selection snapshot before execution. */
 	previousSelection: EditorSelectionSnapshot;
+	/** Optional selection state to restore after undo. */
 	selectionOverride?: EditorSelectionSnapshot;
 }
 

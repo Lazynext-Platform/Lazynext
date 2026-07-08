@@ -6,17 +6,26 @@ const QUEUE_KEY = "@lazynext/crdt_queue";
 const LAST_SYNC_KEY = "@lazynext/last_sync";
 
 interface LocalProject {
+	/** Unique project identifier. */
 	id: string;
+	/** Project display name. */
 	name: string;
+	/** ISO 8601 timestamp of last update. */
 	updatedAt: string;
+	/** Serialized project data. */
 	data: Record<string, unknown>;
 }
 
 interface CrdtOperation {
+	/** Unique operation identifier. */
 	id: string;
+	/** Unix timestamp of the operation. */
 	timestamp: number;
+	/** Operation type discriminant. */
 	type: string;
+	/** Operation payload. */
 	payload: Record<string, unknown>;
+	/** Project this operation belongs to. */
 	projectId: string;
 }
 

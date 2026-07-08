@@ -44,11 +44,17 @@ const API_GATEWAY_URL = process.env.API_GATEWAY_URL || "http://localhost:8005";
  * Each tool has a name, description, input schema, and execution handler.
  */
 interface McpTool {
+  /** Tool name identifier. */
   name: string;
+  /** Human-readable tool description. */
   description: string;
+  /** JSON Schema input definition. */
   inputSchema: {
+    /** JSON Schema type. */
     type: "object";
+    /** Input property definitions. */
     properties: Record<string, { type: string; description: string }>;
+    /** Required property names. */
     required?: string[];
   };
 }
@@ -1190,9 +1196,13 @@ const TOOLS: McpTool[] = [
 // ═════════════════════════════════════════════════════════════════
 
 interface McpResource {
+  /** Resource URI. */
   uri: string;
+  /** Human-readable resource name. */
   name: string;
+  /** Resource description. */
   description: string;
+  /** MIME type of the resource content. */
   mimeType: string;
 }
 
@@ -1506,12 +1516,18 @@ function resolveResourceContent(uri: string): string {
 // ═════════════════════════════════════════════════════════════════
 
 interface McpPrompt {
+  /** Prompt name identifier. */
   name: string;
+  /** Human-readable prompt description. */
   description: string;
+  /** Argument definitions accepted by the prompt. */
   arguments?: {
-    name: string;
-    description: string;
-    required?: boolean;
+	/** Argument name. */
+	name: string;
+	/** Human-readable argument description. */
+	description: string;
+	/** Whether the argument is required. */
+	required?: boolean;
   }[];
 }
 

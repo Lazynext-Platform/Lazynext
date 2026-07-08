@@ -23,24 +23,35 @@
 
 /** Top-level timeline model exposed to plugins via the SDK. */
 export interface Timeline {
+    /** Unique project/timeline identifier. */
     id: string;
+    /** Ordered list of tracks. */
     tracks: Track[];
+    /** Frames per second. */
     fps: number;
+    /** Total timeline duration in frames. */
     durationFrames: number;
 }
 
 /** A single track on the timeline, containing ordered clips of a specific media type. */
 export interface Track {
+    /** Unique track identifier. */
     id: string;
+    /** Media type for this track. */
     type: 'video' | 'audio' | 'effect';
+    /** Ordered clips on this track. */
     clips: Clip[];
 }
 
 /** A clip on a track, referencing an asset by ID with start/end frame boundaries. */
 export interface Clip {
+    /** Unique clip identifier. */
     id: string;
+    /** Referenced asset identifier. */
     assetId: string;
+    /** Start frame of the clip on the timeline. */
     startFrame: number;
+    /** End frame of the clip on the timeline. */
     endFrame: number;
 }
 

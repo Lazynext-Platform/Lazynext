@@ -61,7 +61,9 @@ export type TimelineContextType = {
 	changeLog: number;
 	/** Current timeline action being performed */
 	timelineAction: {
+		/** Action type identifier. */
 		type: string;
+		/** Action payload data. */
 		payload: any;
 	};
 	/** Resolution of the video */
@@ -78,6 +80,7 @@ export type TimelineContextType = {
 	setSelectedItem: (item: Track | TrackElement | null) => void;
 	/** Function to update selection (multi-select) */
 	setSelection: (
+		/** Set of IDs to select, or updater function receiving the previous set. */
 		ids: Set<string> | ((prev: Set<string>) => Set<string>),
 	) => void;
 	/** Function to set timeline actions */

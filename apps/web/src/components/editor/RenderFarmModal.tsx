@@ -10,13 +10,18 @@
 import React from "react";
 
 interface FarmNode {
+	/** Node identifier. */
 	node: string;
+	/** Current render status text. */
 	status: string;
+	/** Render progress percentage. */
 	progress: number;
 }
 
 interface RenderFarmModalProps {
+	/** Whether the modal is visible. */
 	isOpen: boolean;
+	/** Array of farm node statuses. */
 	farmProgress: FarmNode[];
 }
 

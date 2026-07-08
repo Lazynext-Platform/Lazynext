@@ -26,18 +26,30 @@ import {
 } from "../services/auth";
 
 interface AuthContextValue {
+	/** Current session data or null. */
 	session: Session | null;
+	/** Whether auth is initializing. */
 	isLoading: boolean;
+	/** Signs in with email and password. */
 	signIn: (email: string, password: string) => Promise<AuthResponse>;
+	/** Signs up a new account. */
 	signUp: (
+		/** Display name for the new account. */
 		name: string,
+		/** Account email address. */
 		email: string,
+		/** Account password. */
 		password: string,
 	) => Promise<AuthResponse>;
+	/** Signs out the current session. */
 	signOut: () => Promise<void>;
+	/** Requests a password reset email. */
 	requestPasswordReset: (email: string) => Promise<AuthResponse>;
+	/** Resets the password with a token. */
 	resetPassword: (
+		/** The new password to set. */
 		newPassword: string,
+		/** Password-reset token from the reset email. */
 		token: string,
 	) => Promise<AuthResponse>;
 }

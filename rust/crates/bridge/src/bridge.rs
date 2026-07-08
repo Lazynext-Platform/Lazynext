@@ -32,6 +32,13 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{FnArg, Item, ItemConst, ItemFn, parse_macro_input};
 
+/// Attribute macro that exports a `fn` or `const` to JavaScript following
+/// Lazynext's WASM interop conventions.
+///
+/// Functions are re-emitted with a `#[wasm_bindgen(js_name = ...)]` whose
+/// name is the camelCase form of the Rust identifier, and are required to
+/// take at most one (options-struct) argument. Constants are exported as a
+/// getter function. Any other item kind produces a compile error.
 #[proc_macro_attribute]
 pub fn export(_attr: TokenStream, item: TokenStream) -> TokenStream {
     match parse_macro_input!(item as Item) {
@@ -43,6 +50,8 @@ pub fn export(_attr: TokenStream, item: TokenStream) -> TokenStream {
     }
 }
 
+// Re-emits a function with a camelCase `#[wasm_bindgen(js_name)]`, rejecting
+// multiple positional arguments.
 fn export_fn(function: ItemFn) -> TokenStream {
     let param_count = function
         .sig
@@ -70,6 +79,7 @@ fn export_fn(function: ItemFn) -> TokenStream {
     .into()
 }
 
+// Emits the constant plus a WASM getter function that returns its value as f64.
 fn export_const(constant: ItemConst) -> TokenStream {
     let js_name = constant.ident.to_string();
     let const_ident = &constant.ident;
@@ -90,6 +100,7 @@ fn export_const(constant: ItemConst) -> TokenStream {
     .into()
 }
 
+// Converts a snake_case identifier to camelCase.
 fn snake_to_camel(name: &str) -> String {
     let mut camel = String::with_capacity(name.len());
     let mut should_uppercase_next = false;

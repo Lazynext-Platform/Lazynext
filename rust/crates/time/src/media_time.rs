@@ -13,27 +13,37 @@ use serde::{Deserialize, Serialize};
 
 use crate::frame_rate::FrameRate;
 
+/// Number of internal time ticks per second (120,000 — divisible by all
+/// common frame rates and audio sample rates for exact frame alignment).
 #[export]
 pub const TICKS_PER_SECOND: i64 = 120_000;
 const TICKS_PER_SECOND_F64: f64 = TICKS_PER_SECOND as f64;
 
+/// A point (or duration) in media time, stored as an integer count of
+/// [`TICKS_PER_SECOND`] ticks for exact, drift-free arithmetic.
 #[cfg_attr(feature = "wasm", derive(tsify_next::Tsify))]
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi, into_wasm_abi))]
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MediaTime(i64);
 
 impl MediaTime {
+    /// Zero time (the timeline origin).
     pub const ZERO: Self = Self(0);
+    /// The smallest representable positive time (one tick).
     pub const ONE_TICK: Self = Self(1);
 
+    /// Constructs a `MediaTime` from a raw tick count.
     pub const fn from_ticks(ticks: i64) -> Self {
         Self(ticks)
     }
 
+    /// Returns the raw tick count.
     pub const fn as_ticks(self) -> i64 {
         self.0
     }
 
+    /// Converts floating-point seconds to `MediaTime`, rounding to the
+    /// nearest tick. Returns `None` for non-finite or out-of-range inputs.
     pub fn from_seconds_f64(seconds: f64) -> Option<Self> {
         if !seconds.is_finite() {
             return None;
@@ -43,15 +53,19 @@ impl MediaTime {
         Some(Self(ticks))
     }
 
+    /// Converts this time to floating-point seconds.
     pub fn to_seconds_f64(self) -> f64 {
         self.0.to_f64().unwrap_or(0.0) / TICKS_PER_SECOND_F64
     }
 
+    /// Builds a `MediaTime` from a frame index at the given rate. Returns
+    /// `None` if the rate is invalid or the result overflows.
     pub fn from_frame(frame: i64, rate: FrameRate) -> Option<Self> {
         let ticks_per_frame = rate.ticks_per_frame()?;
         Some(Self(frame.checked_mul(ticks_per_frame)?))
     }
 
+    /// Returns the nearest frame index at the given rate (round half up).
     pub fn to_frame_round(self, rate: FrameRate) -> Option<i64> {
         let ticks_per_frame = rate.ticks_per_frame()?;
         let remainder = self.0.rem_euclid(ticks_per_frame);
@@ -63,25 +77,31 @@ impl MediaTime {
         }
     }
 
+    /// Returns the frame index containing this time (round down).
     pub fn to_frame_floor(self, rate: FrameRate) -> Option<i64> {
         let ticks_per_frame = rate.ticks_per_frame()?;
         Some(self.0.div_euclid(ticks_per_frame))
     }
 
+    /// Snaps this time to the nearest frame-aligned `MediaTime`.
     pub fn round_to_frame(self, rate: FrameRate) -> Option<Self> {
         Self::from_frame(self.to_frame_round(rate)?, rate)
     }
 
+    /// Snaps this time down to the start of its containing frame.
     pub fn floor_to_frame(self, rate: FrameRate) -> Option<Self> {
         let ticks_per_frame = rate.ticks_per_frame()?;
         Some(Self(self.0.div_euclid(ticks_per_frame) * ticks_per_frame))
     }
 
+    /// Returns whether this time falls exactly on a frame boundary.
     pub fn is_frame_aligned(self, rate: FrameRate) -> Option<bool> {
         let ticks_per_frame = rate.ticks_per_frame()?;
         Some(self.0.rem_euclid(ticks_per_frame) == 0)
     }
 
+    /// Returns the start time of the last full frame that fits within `self`
+    /// treated as a duration (clamped to `ZERO`).
     pub fn last_frame_time(self, rate: FrameRate) -> Option<Self> {
         if self <= Self::ZERO {
             return Some(Self::ZERO);
@@ -91,19 +111,24 @@ impl MediaTime {
         Self::from_ticks(last_inclusive_tick).floor_to_frame(rate)
     }
 
+    /// Rounds this seek time to the nearest frame and clamps it within
+    /// `[ZERO, duration]`.
     pub fn snapped_seek_time(self, duration: Self, rate: FrameRate) -> Option<Self> {
         let snapped = self.round_to_frame(rate)?;
         Some(snapped.clamp(Self::ZERO, duration))
     }
 
+    /// Clamps this time to the inclusive range `[min, max]`.
     pub fn clamp(self, min: Self, max: Self) -> Self {
         Self(self.0.clamp(min.0, max.0))
     }
 
+    /// Returns the smaller of `self` and `other`.
     pub fn min(self, other: Self) -> Self {
         Self(self.0.min(other.0))
     }
 
+    /// Returns the larger of `self` and `other`.
     pub fn max(self, other: Self) -> Self {
         Self(self.0.max(other.0))
     }
@@ -112,6 +137,7 @@ impl MediaTime {
 impl Add for MediaTime {
     type Output = Self;
 
+    // Adds two media-time values.
     fn add(self, rhs: Self) -> Self::Output {
         Self(self.0 + rhs.0)
     }
@@ -120,6 +146,7 @@ impl Add for MediaTime {
 impl Sub for MediaTime {
     type Output = Self;
 
+    // Subtracts one media-time value from another.
     fn sub(self, rhs: Self) -> Self::Output {
         Self(self.0 - rhs.0)
     }
@@ -128,6 +155,7 @@ impl Sub for MediaTime {
 impl Neg for MediaTime {
     type Output = Self;
 
+    // Negates a media-time value.
     fn neg(self) -> Self::Output {
         Self(-self.0)
     }
@@ -136,6 +164,7 @@ impl Neg for MediaTime {
 impl Mul<i64> for MediaTime {
     type Output = Self;
 
+    // Multiplies a media-time value by an integer scalar.
     fn mul(self, rhs: i64) -> Self::Output {
         Self(self.0 * rhs)
     }
@@ -144,6 +173,7 @@ impl Mul<i64> for MediaTime {
 impl Div<i64> for MediaTime {
     type Output = Self;
 
+    // Divides a media-time value by an integer scalar.
     fn div(self, rhs: i64) -> Self::Output {
         Self(self.0 / rhs)
     }
@@ -155,6 +185,7 @@ impl Div<i64> for MediaTime {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeFromSecondsOptions {
+    /// Time value in floating-point seconds.
     pub seconds: f64,
 }
 
@@ -172,6 +203,7 @@ pub fn media_time_from_seconds(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeToSecondsOptions {
+    /// Media time to convert to seconds.
     pub time: MediaTime,
 }
 
@@ -187,7 +219,9 @@ pub fn media_time_to_seconds(MediaTimeToSecondsOptions { time }: MediaTimeToSeco
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeFromFrameOptions {
+    /// Frame index to convert.
     pub frame: i64,
+    /// Frame rate used for the conversion.
     pub rate: FrameRate,
 }
 
@@ -205,7 +239,9 @@ pub fn media_time_from_frame(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeToFrameOptions {
+    /// Media time to convert to a frame index.
     pub time: MediaTime,
+    /// Frame rate used for the conversion.
     pub rate: FrameRate,
 }
 
@@ -223,7 +259,9 @@ pub fn media_time_to_frame(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RoundToFrameOptions {
+    /// Media time to round.
     pub time: MediaTime,
+    /// Frame rate defining the frame boundaries.
     pub rate: FrameRate,
 }
 
@@ -241,7 +279,9 @@ pub fn round_to_frame(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FloorToFrameOptions {
+    /// Media time to floor.
     pub time: MediaTime,
+    /// Frame rate defining the frame boundaries.
     pub rate: FrameRate,
 }
 
@@ -259,7 +299,9 @@ pub fn floor_to_frame(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct IsFrameAlignedOptions {
+    /// Media time to test for frame alignment.
     pub time: MediaTime,
+    /// Frame rate defining the frame boundaries.
     pub rate: FrameRate,
 }
 
@@ -277,7 +319,9 @@ pub fn is_frame_aligned(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LastFrameTimeOptions {
+    /// Duration within which to find the last full frame.
     pub duration: MediaTime,
+    /// Frame rate defining the frame boundaries.
     pub rate: FrameRate,
 }
 
@@ -295,8 +339,11 @@ pub fn last_frame_time(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SnappedSeekTimeOptions {
+    /// Requested seek time.
     pub time: MediaTime,
+    /// Total duration used to clamp the result.
     pub duration: MediaTime,
+    /// Frame rate defining the frame boundaries.
     pub rate: FrameRate,
 }
 
@@ -318,7 +365,9 @@ pub fn snapped_seek_time(
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeAddOptions {
+    /// Left-hand operand.
     pub lhs: MediaTime,
+    /// Right-hand operand.
     pub rhs: MediaTime,
 }
 
@@ -334,7 +383,9 @@ pub fn media_time_add(MediaTimeAddOptions { lhs, rhs }: MediaTimeAddOptions) -> 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeSubOptions {
+    /// Left-hand operand (minuend).
     pub lhs: MediaTime,
+    /// Right-hand operand (subtrahend).
     pub rhs: MediaTime,
 }
 
@@ -350,7 +401,9 @@ pub fn media_time_sub(MediaTimeSubOptions { lhs, rhs }: MediaTimeSubOptions) -> 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeMinOptions {
+    /// Left-hand operand.
     pub lhs: MediaTime,
+    /// Right-hand operand.
     pub rhs: MediaTime,
 }
 
@@ -366,7 +419,9 @@ pub fn media_time_min(MediaTimeMinOptions { lhs, rhs }: MediaTimeMinOptions) -> 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeMaxOptions {
+    /// Left-hand operand.
     pub lhs: MediaTime,
+    /// Right-hand operand.
     pub rhs: MediaTime,
 }
 
@@ -382,8 +437,11 @@ pub fn media_time_max(MediaTimeMaxOptions { lhs, rhs }: MediaTimeMaxOptions) -> 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaTimeClampOptions {
+    /// Media time to clamp.
     pub time: MediaTime,
+    /// Inclusive lower bound.
     pub min: MediaTime,
+    /// Inclusive upper bound.
     pub max: MediaTime,
 }
 

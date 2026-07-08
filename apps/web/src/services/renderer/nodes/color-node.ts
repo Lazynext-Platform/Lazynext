@@ -2,6 +2,7 @@
 import { BaseNode } from "./base-node";
 
 export type ColorNodeParams = {
+	/** CSS color string. */
 	color: string;
 };
 

@@ -28,6 +28,7 @@ pub fn prepare_export_manifest(
     to_value(&config).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
+// Builds the ffmpeg command string with format-specific codec and pixel format.
 fn build_ffmpeg_command_str(
     format: &str,
     width: u32,

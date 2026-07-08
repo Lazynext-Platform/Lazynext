@@ -13,12 +13,16 @@ export type TActionCategory =
 	| "assets";
 
 export interface TActionBaseDefinition {
+	/** Human-readable action description. */
 	description: string;
+	/** Action category for grouping. */
 	category: TActionCategory;
+	/** Optional argument schema. */
 	args?: Record<string, unknown>;
 }
 
 export interface TActionDefinition extends TActionBaseDefinition {
+	/** Default keyboard shortcuts. */
 	defaultShortcuts?: readonly ShortcutKey[];
 }
 

@@ -4,6 +4,10 @@ Welcome to the Lazynext documentation. Lazynext is an enterprise-grade, multi-pl
 
 **Quick links**: [User Guide](user-guide.md) · [API Reference](api-reference.md) · [Developer Guide](developer-guide.md) · [MCP Server](mcp-server-guide.md) · [Agent SDK](agent-sdk-guide.md)
 
+> **Documentation site**: This folder is also an [mdBook](https://rust-lang.github.io/mdBook/). Run `mdbook serve docs` (from the repo root) to browse it locally at `http://localhost:3000`, or `mdbook build docs` to render static HTML into `docs/book/`. The site is auto-built and deployed to GitHub Pages on every push to `main` via `.github/workflows/docs-site.yml`. Navigation is defined in [`SUMMARY.md`](SUMMARY.md).
+>
+> The Rust API reference (rustdoc) is generated separately with `cargo doc --workspace --no-deps --open`.
+
 ---
 
 ## For Users
@@ -24,6 +28,14 @@ Welcome to the Lazynext documentation. Lazynext is an enterprise-grade, multi-pl
 | [**MCP Server Guide**](mcp-server-guide.md) | MCP protocol overview, 14 tools reference, 4 resources, 4 prompts, connecting Claude Desktop/Cursor/Zed, example workflows |
 | [**Agent SDK Guide**](agent-sdk-guide.md) | TypeScript and Python SDK quick start, streaming queries, search and slash commands, memory and rules, example use cases |
 | [**CONTRIBUTING.md**](../CONTRIBUTING.md) | Contribution guidelines, code style, commit conventions, PR process, testing requirements |
+
+### Architecture Deep-Dives
+
+| Document | Description |
+|----------|-------------|
+| [**CRDT Collaboration Model**](references/architecture-crdt.md) | LWW registers, vector clocks, tombstones, operation log, convergence guarantees, sync flow |
+| [**GPU Compositor Pipeline**](references/architecture-compositor.md) | FrameDescriptor, render pipeline, blend modes, effects, masks, color management, surface targets |
+| [**System Data Flow**](references/architecture-data-flow.md) | Cross-process map: interactive edits, collaboration, AI copilot, pre-processing, export, persistence |
 
 ---
 

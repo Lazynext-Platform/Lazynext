@@ -2,8 +2,12 @@
 export type DiagnosticSeverity = "caution" | "error";
 
 export interface DiagnosticDefinition {
+	/** Unique diagnostic identifier. */
 	id: string;
+	/** Diagnostic scope category. */
 	scope: string;
+	/** Severity level. */
 	severity: DiagnosticSeverity;
+	/** Human-readable diagnostic message. */
 	message: string;
 }

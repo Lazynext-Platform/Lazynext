@@ -11,9 +11,13 @@ import React, { useEffect, useState } from "react";
 import { useEditor } from "./use-editor";
 
 interface CrdtOperation {
+	/** Unique operation identifier. */
 	id: string;
+	/** Operation type name. */
 	type: string;
+	/** Operation arguments. */
 	args: Record<string, any>;
+	/** Execution status. */
 	status: "pending" | "verified" | "failed" | "reused";
 }
 

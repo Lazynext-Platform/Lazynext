@@ -9,7 +9,9 @@ use std::collections::HashMap;
 /// A single GPU effect pass — a named shader with uniform parameters.
 #[derive(Clone, Debug)]
 pub struct EffectPass {
+    /// Name of the shader to run for this pass.
     pub shader: String,
+    /// Uniform parameters passed to the shader, keyed by name.
     pub uniforms: HashMap<String, UniformValue>,
 }
 

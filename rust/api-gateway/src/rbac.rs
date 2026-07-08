@@ -40,8 +40,11 @@ pub struct AuthClaims {
 /// Role hierarchy for workspace authorization.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum WorkspaceRole {
+    /// Read-only access to the project timeline.
     Viewer,
+    /// Can view and edit the project timeline.
     Editor,
+    /// Full administrative access including settings and billing.
     Admin,
 }
 
@@ -92,6 +95,8 @@ pub fn jwt_decoding_key() -> &'static DecodingKey {
     &KEY
 }
 
+// Reads a secret from an env var, falling back to a file path env var; panics
+// if neither yields a non-empty value.
 fn read_secret(env_var: &str, file_var: &str) -> String {
     if let Ok(secret) = std::env::var(env_var)
         && !secret.is_empty()
@@ -113,6 +118,7 @@ fn read_secret(env_var: &str, file_var: &str) -> String {
     );
 }
 
+/// Returns a static JWT validation config for HS256 tokens.
 pub fn jwt_validation() -> &'static Validation {
     static VALIDATION: LazyLock<Validation> = LazyLock::new(|| {
         let mut v = Validation::new(Algorithm::HS256);

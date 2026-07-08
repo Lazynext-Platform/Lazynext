@@ -40,6 +40,7 @@ pub struct C2PAConfig {
 }
 
 impl Default for C2PAConfig {
+    // Returns the default C2PA signing configuration.
     fn default() -> Self {
         Self {
             cert_path: None,
@@ -92,6 +93,7 @@ pub struct C2PAOperation {
 
 /// C2PA signer that generates and signs provenance manifests.
 pub struct C2PASigner {
+    /// Signing configuration (certificate paths, organization, agent metadata).
     config: C2PAConfig,
 }
 

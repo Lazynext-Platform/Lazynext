@@ -108,8 +108,11 @@ const PixelsPerSecondContext = createContext<number | null>(null);
 const THUMBNAIL_ASPECT_RATIO = 16 / 9;
 
 interface KeyframeIndicator {
+	/** Time of the indicator's keyframes. */
 	time: MediaTime;
+	/** Pixel offset from the element's left edge. */
 	offsetPx: number;
+	/** Keyframe references co-located at this time. */
 	keyframes: SelectedKeyframeRef[];
 }
 
@@ -211,25 +214,42 @@ export function getDisplayShortcut({ action }: { action: TAction }) {
 }
 
 interface TimelineElementProps {
+	/** The element to render. */
 	element: TimelineElementType;
+	/** Track owning the element. */
 	track: TimelineTrack;
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Whether the element is selected. */
 	isSelected: boolean;
+	/** Callback when a resize handle drag begins. */
 	onResizeStart: (params: {
+		/** Mouse event that initiated the resize */
 		event: React.MouseEvent;
+		/** Element being resized */
 		element: TimelineElementType;
+		/** Track owning the element */
 		track: TimelineTrack;
+		/** Side being dragged (left or right handle) */
 		side: "left" | "right";
 	}) => void;
+	/** Callback when the element receives mouse down. */
 	onElementMouseDown: (params: {
+		/** Mouse event for the press */
 		event: React.MouseEvent;
+		/** Element receiving the mouse down */
 		element: TimelineElementType;
 	}) => void;
+	/** Callback when the element is clicked. */
 	onElementClick: (params: {
+		/** Mouse event for the click */
 		event: React.MouseEvent;
+		/** Element that was clicked */
 		element: TimelineElementType;
 	}) => void;
+	/** Current drag view state. */
 	dragView: ElementDragView;
+	/** Whether the element is an active drop target. */
 	isDropTarget?: boolean;
 }
 
@@ -915,7 +935,9 @@ function ExpandedKeyframeLanes({
 }
 
 interface ElementContentProps {
+	/** The element to render content for. */
 	element: TimelineElementType;
+	/** Track owning the element. */
 	track: TimelineTrack;
 }
 

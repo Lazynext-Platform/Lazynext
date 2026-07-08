@@ -136,9 +136,13 @@ function migrateElementPosition({ element }: { element: unknown }): unknown {
 }
 
 interface ScalarKeyframe {
+	/** Unique keyframe identifier. */
 	id: string;
+	/** Time in seconds. */
 	time: number;
+	/** Scalar value at this time. */
 	value: number;
+	/** Interpolation mode. */
 	interpolation: string;
 }
 

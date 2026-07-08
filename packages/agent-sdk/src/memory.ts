@@ -20,7 +20,9 @@
 
 /** A single entry in the in-memory store. */
 interface MemoryEntry {
+	/** Stored value. */
 	value: unknown;
+	/** Milliseconds timestamp of when stored. */
 	timestamp: number;
 }
 

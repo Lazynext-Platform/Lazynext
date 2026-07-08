@@ -8,16 +8,22 @@
 
 /// An audio source positioned in 3D space.
 pub struct AudioObject {
+    /// Unique identifier for this audio object.
     pub id: String,
     // 3D coordinates representing where the sound exists in a physical room hemisphere
+    /// Horizontal position: -1.0 (left) to 1.0 (right).
     pub x: f32, // -1.0 (Left) to 1.0 (Right)
+    /// Front-to-back position: -1.0 (rear) to 1.0 (front).
     pub y: f32, // -1.0 (Rear) to 1.0 (Front)
+    /// Vertical position: 0.0 (floor) to 1.0 (ceiling).
     pub z: f32, // 0.0 (Floor) to 1.0 (Ceiling)
 
+    /// Volume level in decibels (0.0 = unity gain).
     pub volume_db: f32,
 }
 
 impl AudioObject {
+    /// Create a new audio object at the default front-center position.
     pub fn new(id: &str) -> Self {
         Self {
             id: id.to_string(),
@@ -50,12 +56,16 @@ impl AudioObject {
 /// Converts 3D monaural sound sources into a Binaural (2-channel stereo) output
 /// that tricks the human brain into perceiving accurate 3D spatial positioning using standard headphones.
 pub struct HRTFProcessor {
+    /// Audio sample rate in Hz.
     pub sample_rate: u32,
+    /// Typical human head radius in meters (~0.0875).
     pub head_radius_meters: f32, // Typical human head ~ 0.0875m
-    pub speed_of_sound: f32,     // ~ 343.0 m/s
+    /// Speed of sound in meters per second (~343.0).
+    pub speed_of_sound: f32, // ~ 343.0 m/s
 }
 
 impl HRTFProcessor {
+    /// Create a new HRTF processor with default human head parameters.
     pub fn new(sample_rate: u32) -> Self {
         Self {
             sample_rate,

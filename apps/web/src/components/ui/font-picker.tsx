@@ -42,8 +42,11 @@ const MAX_LIST_HEIGHT = 288;
 const OVERSCAN = 15;
 
 interface FontPickerProps {
+	/** Currently selected font family. */
 	defaultValue?: string;
+	/** Callback when the selected font changes. */
 	onValueChange?: (value: string) => void;
+	/** Additional CSS classes. */
 	className?: string;
 }
 
@@ -223,9 +226,13 @@ function FontSpritePreview({ entry }: { entry: FontAtlasEntry }) {
 }
 
 type FontRowProps = {
+	/** Font atlas providing sprite metadata. */
 	atlas: FontAtlas;
+	/** Filtered list of font names. */
 	filteredFonts: string[];
+	/** Currently selected font, if any. */
 	selectedFont: string | undefined;
+	/** Callback when a font is selected. */
 	onFontSelect: (params: { family: string }) => void;
 };
 

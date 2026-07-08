@@ -17,12 +17,19 @@ import { cn } from "@/utils/ui";
 import { parseMediaTimecode, snapSeekMediaTime, type MediaTime } from "@/wasm";
 
 interface EditableTimecodeProps {
+	/** Current timeline time. */
 	time: MediaTime;
+	/** Total timeline duration. */
 	duration: MediaTime;
+	/** Timecode display format. */
 	format?: TimeCodeFormat;
+	/** Project frame rate. */
 	fps: FrameRate;
+	/** Called when user confirms a new time. */
 	onTimeChange?: ({ time }: { time: MediaTime }) => void;
+	/** Optional CSS class. */
 	className?: string;
+	/** Whether the input is disabled. */
 	disabled?: boolean;
 }
 

@@ -8,32 +8,53 @@ import type { GridConfig } from "@/guides/types";
 type PreviewOverlaysState = Record<string, boolean>;
 
 interface PersistedPreviewState {
+	/** Persisted active guide identifier. */
 	activeGuide?: string | null;
+	/** Legacy persisted layout guide settings. */
 	layoutGuide?: {
+		/** Persisted platform identifier. */
 		platform?: string | null;
 	};
+	/** Persisted overlay visibility map. */
 	overlays?: PreviewOverlaysState;
+	/** Persisted grid configuration. */
 	gridConfig?: GridConfig;
+	/** Persisted custom guide lines. */
 	customLines?: Array<{ axis: "x" | "y"; percent: number }>;
 }
 
 interface PreviewState {
+	/** Currently active guide, if any. */
 	activeGuide: GuideId | null;
+	/** Overlay visibility state by overlay id. */
 	overlays: PreviewOverlaysState;
+	/** Current grid configuration. */
 	gridConfig: GridConfig;
+	/** Custom guide lines. */
 	customLines: Array<{ axis: "x" | "y"; percent: number }>;
+	/** Toggles the given guide on or off. */
 	toggleGuide: (guideId: GuideId) => void;
+	/** Merges partial grid configuration. */
 	setGridConfig: (config: Partial<GridConfig>) => void;
+	/** Adds a custom guide line. */
 	addCustomLine: (axis: "x" | "y", percent: number) => void;
+	/** Removes all custom guide lines. */
 	clearCustomLines: () => void;
+	/** Sets visibility of an overlay. */
 	setOverlayVisibility: ({
 		overlayId,
 		isVisible,
 	}: {
+		/** Identifier of the overlay to set. */
 		overlayId: string;
+		/** Whether the overlay should be visible. */
 		isVisible: boolean;
 	}) => void;
-	toggleOverlayVisibility: ({ overlayId }: { overlayId: string }) => void;
+	/** Toggles visibility of an overlay. */
+	toggleOverlayVisibility: ({ overlayId }: {
+		/** Identifier of the overlay to toggle. */
+		overlayId: string;
+	}) => void;
 }
 
 const DEFAULT_PREVIEW_OVERLAYS: PreviewOverlaysState = {};
