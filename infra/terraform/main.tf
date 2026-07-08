@@ -45,7 +45,7 @@ data "azurerm_client_config" "current" {}
 
 resource "azurerm_resource_group" "rg" {
   name     = "lazynext-rg-${var.environment}"
-  location = var.location
+  location = local.region
 
   tags = {
     Environment = var.environment
@@ -63,6 +63,16 @@ locals {
     dev        = "dev"
     staging    = "stg"
     production = "prod"
+  }[var.environment]
+
+  # Per-environment Azure region. Production uses a DIFFERENT region from dev
+  # so it can create its own Container App Environment — "Azure for Students"
+  # subscriptions allow only one Container App Environment per region, and dev
+  # already occupies Southeast Asia.
+  region = {
+    dev        = var.location
+    staging    = var.location
+    production = "eastus2"
   }[var.environment]
 
   # Container App resource configurations
