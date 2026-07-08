@@ -60,9 +60,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: uniffi-bindings
-        path: |
-          rust/core/generated/kotlin/
-          rust/core/generated/swift/
+        # Upload the whole generated/ dir so the kotlin/ and swift/
+        # subdirectories are preserved under a single, predictable root.
+        path: rust/core/generated/
+        if-no-files-found: error
 
   build-ios:
     needs: generate-bindings
