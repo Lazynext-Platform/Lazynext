@@ -42,6 +42,24 @@ resource "azurerm_key_vault_access_policy" "container_apps" {
   ]
 }
 
+# Grant the deploying principal (the service principal / user running
+# Terraform) full secret management so it can create/update the secrets
+# below. Without this, `azurerm_key_vault_secret` writes fail with 403.
+resource "azurerm_key_vault_access_policy" "deployer" {
+  key_vault_id = azurerm_key_vault.secrets.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = [
+    "Get",
+    "List",
+    "Set",
+    "Delete",
+    "Purge",
+    "Recover",
+  ]
+}
+
 # ── Key Vault Secrets ───────────────────────────────────────────────────────
 
 resource "azurerm_key_vault_secret" "all" {
@@ -51,6 +69,9 @@ resource "azurerm_key_vault_secret" "all" {
   value        = "UNSET_SECRET"               # Managed externally via az CLI
   key_vault_id = azurerm_key_vault.secrets.id
   content_type = "text/plain"
+
+  # The deployer access policy must exist before secrets can be written.
+  depends_on = [azurerm_key_vault_access_policy.deployer]
 
   # Values should be set after creation:
   # az keyvault secret set --vault-name lazynext-kv-{env} --name "{name}" --value "{value}"
@@ -66,6 +87,9 @@ resource "azurerm_key_vault_secret" "database_url" {
   value        = "postgresql://lazynext_app:${var.db_password}@${azurerm_postgresql_flexible_server.postgres.fqdn}:5432/lazynext?sslmode=require"
   key_vault_id = azurerm_key_vault.secrets.id
   content_type = "text/plain"
+
+  # The deployer access policy must exist before secrets can be written.
+  depends_on = [azurerm_key_vault_access_policy.deployer]
 
   lifecycle {
     ignore_changes = [value]
