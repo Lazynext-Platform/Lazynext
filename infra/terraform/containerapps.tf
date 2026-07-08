@@ -361,7 +361,8 @@ resource "azurerm_container_app" "render_service" {
 
 # Pre-Processing
 resource "azurerm_container_app" "pre_processing" {
-  name                         = "lazynext-pre-processing-${var.environment}"
+  # Azure Container App names must be <= 32 chars; keep short across all envs.
+  name                         = "lazynext-preprocess-${var.environment}"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = azurerm_resource_group.rg.name
   revision_mode                = "Single"
@@ -630,7 +631,8 @@ resource "azurerm_container_app" "api_gateway" {
 
 # Collab Server (CRDT sync + WebRTC)
 resource "azurerm_container_app" "collab_server" {
-  name                         = "lazynext-collab-server-${var.environment}"
+  # Azure Container App names must be <= 32 chars; keep short across all envs.
+  name                         = "lazynext-collab-${var.environment}"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = azurerm_resource_group.rg.name
   revision_mode                = "Single"
@@ -712,7 +714,8 @@ resource "azurerm_container_app" "collab_server" {
 
 # Analytics Service
 resource "azurerm_container_app" "analytics_service" {
-  name                         = "lazynext-analytics-service-${var.environment}"
+  # Azure Container App names must be <= 32 chars; keep short across all envs.
+  name                         = "lazynext-analytics-${var.environment}"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = azurerm_resource_group.rg.name
   revision_mode                = "Single"

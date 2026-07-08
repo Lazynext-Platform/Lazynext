@@ -61,10 +61,18 @@ jobs:
 
       - name: Terraform Plan
         working-directory: infra/terraform
+        env:
+          TF_DB_PASSWORD: ${{ secrets.TF_DB_PASSWORD }}
         run: |
+          if [ -z "${TF_DB_PASSWORD}" ]; then
+            echo "::error ::Repository secret TF_DB_PASSWORD is not set. Add it under" \
+                 "Settings → Secrets and variables → Actions (min 16 chars) before running" \
+                 "terraform plan/apply."
+            exit 1
+          fi
           terraform plan \
             -var="environment=${{ inputs.environment }}" \
-            -var="db_password=${{ secrets.TF_DB_PASSWORD }}" \
+            -var="db_password=${TF_DB_PASSWORD}" \
             -out=tfplan
 
       - name: Terraform Apply
