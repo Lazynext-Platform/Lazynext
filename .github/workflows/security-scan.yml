@@ -96,12 +96,16 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
+          # paths-ignore is a top-level input; passing it via an inline
+          # `config:` block with no other keys is rejected as a config error.
           config: |
             paths-ignore:
-              - "**/target/**"
-              - "**/node_modules/**"
-              - "**/dist/**"
-              - "**/outputs/**"
+              - '**/target/**'
+              - '**/node_modules/**'
+              - '**/dist/**'
+              - '**/outputs/**'
+              - '**/.venv/**'
+              - '**/vendor/**'
 
       - name: Install Dependencies (JS/TS)
         if: matrix.language == 'javascript-typescript'
