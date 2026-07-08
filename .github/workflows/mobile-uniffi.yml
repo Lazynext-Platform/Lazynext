@@ -104,7 +104,7 @@ jobs:
 
     - name: Package with Swift headers
       run: |
-        cp rust/core/generated/swift/*.swift build/ios/
+        find rust/core/generated/swift -name '*.swift' -exec cp {} build/ios/ \;
         cd build/ios && zip -r ../../lazynext-ios-sdk.zip .
 
     - name: Upload iOS SDK
@@ -147,7 +147,9 @@ jobs:
         cp target/x86_64-linux-android/release/*.so build/android/jniLibs/x86_64/
         cp target/i686-linux-android/release/*.so build/android/jniLibs/x86/
         mkdir -p build/android/kotlin
-        cp rust/core/generated/kotlin/*.kt build/android/kotlin/
+        # uniffi-bindgen may emit .kt files inside a nested package dir, so
+        # copy recursively rather than a flat glob.
+        find rust/core/generated/kotlin -name '*.kt' -exec cp {} build/android/kotlin/ \;
         cd build/android && zip -r ../../lazynext-android-sdk.zip .
 
     - name: Upload Android SDK
