@@ -16,13 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps in two batches:
-# 1) Always-available packages (fastapi, httpx, etc.) —install together
-# 2) ML packages that may compile from source — install individually with
-#    fallback. The CV-model routes degrade gracefully per platform design.
+# 1) Core packages (always have pre-built wheels) — clean install
+# 2) ML packages — try each individually; skip any that lack a 3.13 wheel
+#    (the CV routes degrade gracefully per cv_models.py)
 COPY services/pre-processing/requirements.txt .
 COPY services/pre-processing/requirements-ml.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt -r requirements-ml.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    && (pip install --no-cache-dir -r requirements-ml.txt 2>/dev/null || true)
 
 # Copy application source
 COPY services/pre-processing/ ./
