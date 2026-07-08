@@ -232,10 +232,13 @@ jobs:
           fi
 
       - name: Validate Terraform DB config
-        if: hashFiles('terraform/**/*.tf') != ''
         run: |
-          echo "Checking Terraform PostgreSQL configuration..."
-          grep -r "postgres" terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
+          if [ -d "infra/terraform" ]; then
+            echo "Checking Terraform PostgreSQL configuration..."
+            grep -r "postgres" infra/terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
+          else
+            echo "::notice ::No infra/terraform directory found"
+          fi
 
   # ── STEP 5: API Gateway Health Check ──────────────────────────
   api-gateway-check:
@@ -279,28 +282,42 @@ jobs:
     name: "🏗️ Terraform Plan Validation"
     needs: [gate, env-audit]
     runs-on: ubuntu-latest
-    if: hashFiles('terraform/**/*.tf') != ''
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for Terraform config
+        id: tf
+        run: |
+          if [ -d "infra/terraform" ] && ls infra/terraform/*.tf >/dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice ::No Terraform config at infra/terraform — skipping"
+          fi
+
       - uses: hashicorp/setup-terraform@v3
+        if: steps.tf.outputs.present == 'true'
         with:
           terraform_version: "~>1.7"
 
       - name: Terraform Format Check
+        if: steps.tf.outputs.present == 'true'
         run: terraform fmt -check -recursive
-        working-directory: terraform
+        working-directory: infra/terraform
         continue-on-error: true
 
       - name: Terraform Init
+        if: steps.tf.outputs.present == 'true'
         run: terraform init -backend=false
-        working-directory: terraform
+        working-directory: infra/terraform
 
       - name: Terraform Validate
+        if: steps.tf.outputs.present == 'true'
         run: terraform validate
-        working-directory: terraform
+        working-directory: infra/terraform
 
       - name: Terraform Plan (Dry Run)
+        if: steps.tf.outputs.present == 'true'
         run: |
           echo "Running terraform plan — no actual infrastructure changes will be applied"
           terraform plan -input=false -detailed-exitcode -out=/dev/null || {
@@ -312,7 +329,7 @@ jobs:
               exit $EXIT
             fi
           }
-        working-directory: terraform
+        working-directory: infra/terraform
         continue-on-error: true
 
   # ── STEP 7: E2E Smoke Tests ───────────────────────────────────
