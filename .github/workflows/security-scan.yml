@@ -1,6 +1,7 @@
 # ── Weekly Security Scan ─────────────────────────────────────────────────
-# Runs Trivy vulnerability scans on all Docker images, CodeQL analysis on
-# Rust/TS/Python codebases, and Gitleaks secret detection. Blocks on CRITICAL.
+# Runs Trivy vulnerability/config scans, Terraform scanning, Kubernetes
+# manifest checks, and secret detection (TruffleHog + Gitleaks). CodeQL is
+# handled separately by GitHub's default code-scanning setup.
 name: Weekly Security Scan
 
 on:
@@ -68,59 +69,11 @@ jobs:
           license-check: false
           allow-dependencies-licenses: "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense"
 
-  codeql:
-    name: CodeQL (Rust + Actions)
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ["javascript-typescript", "python", "actions"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Bun
-        if: matrix.language == 'javascript-typescript'
-        uses: oven-sh/setup-bun@v2
-
-      - name: Set up Python
-        if: matrix.language == 'python'
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-          # paths-ignore is a top-level input; passing it via an inline
-          # `config:` block with no other keys is rejected as a config error.
-          config: |
-            paths-ignore:
-              - '**/target/**'
-              - '**/node_modules/**'
-              - '**/dist/**'
-              - '**/outputs/**'
-              - '**/.venv/**'
-              - '**/vendor/**'
-
-      - name: Install Dependencies (JS/TS)
-        if: matrix.language == 'javascript-typescript'
-        run: bun install --frozen-lockfile || bun install
-
-      - name: Install Dependencies (Python)
-        if: matrix.language == 'python'
-        run: |
-          pip install -r services/pre-processing/requirements.txt || true
-          pip install -r services/generative-studio/requirements.txt || true
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{ matrix.language }}"
+  # NOTE: CodeQL analysis is handled by GitHub's *default* code-scanning setup
+  # (repo Settings → Code security → Code scanning). A workflow-based
+  # ("advanced") CodeQL job cannot coexist with default setup — GitHub rejects
+  # the upload with "analyses from advanced configurations cannot be processed
+  # when the default setup is enabled". It is intentionally omitted here.
 
   tfsec:
     name: Terraform Security Scan
