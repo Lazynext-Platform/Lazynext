@@ -16,11 +16,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python deps (heavy ML packages excluded — Python 3.13 has
-# incomplete wheel support for scipy >= 1.18 and opencv-python 5.x).
-# ML routes degrade gracefully per platform design.
+# incomplete wheel support for scipy, opencv-python, torch, etc.).
+# --only-binary :all: prevents pip from falling back to source builds
+# (which fail without a C compiler in the slim image). ML routes degrade
+# gracefully per platform design.
 COPY services/pre-processing/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --only-binary :all: -r requirements.txt
 
 # Copy application source
 COPY services/pre-processing/ ./
