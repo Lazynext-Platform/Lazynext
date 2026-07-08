@@ -94,12 +94,10 @@ resource "azurerm_web_application_firewall_policy" "main" {
       }
       operator           = "GeoMatch"
       negation_condition = true
+      # Azure Front Door limits each match condition to 10 match values.
+      # Allow the primary served markets; expand via additional rules if needed.
       match_values = [
-        "US", "CA",
-        "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",
-        "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL",
-        "PL", "PT", "RO", "SK", "SI", "ES", "SE",
-        "IS", "LI", "NO", "CH", "GB",
+        "US", "CA", "GB", "DE", "FR", "NL", "SE", "ES", "IT", "IE",
       ]
     }
   }

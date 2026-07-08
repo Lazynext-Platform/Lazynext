@@ -1,7 +1,9 @@
 # ── Azure Blob Storage (Media Bucket) ───────────────────────────────────────
 
 resource "azurerm_storage_account" "media" {
-  name                     = "lazynextmedia${var.environment}${random_string.storage_suffix.result}"
+  # Storage account names must be 3-24 lowercase alphanumeric chars.
+  # "lznxmedia" + env_short(<=4) + 6-char suffix = <= 19 chars.
+  name                     = "lznxmedia${local.env_short}${random_string.storage_suffix.result}"
   resource_group_name      = azurerm_resource_group.rg.name
   location                 = azurerm_resource_group.rg.location
   account_tier             = "Standard"

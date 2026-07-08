@@ -57,6 +57,14 @@ resource "azurerm_resource_group" "rg" {
 # ── Locals ──────────────────────────────────────────────────────────────────
 
 locals {
+  # Short environment abbreviation for length-constrained resource names
+  # (Azure Storage Account and Key Vault names are limited to 24 chars).
+  env_short = {
+    dev        = "dev"
+    staging    = "stg"
+    production = "prod"
+  }[var.environment]
+
   # Container App resource configurations
   container_apps = {
     web = {
