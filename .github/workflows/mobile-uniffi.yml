@@ -60,9 +60,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: uniffi-bindings
-        path: |
-          rust/core/generated/kotlin/
-          rust/core/generated/swift/
+        # Upload the whole generated/ dir so the kotlin/ and swift/
+        # subdirectories are preserved under a single, predictable root.
+        path: rust/core/generated/
+        if-no-files-found: error
 
   build-ios:
     needs: generate-bindings
@@ -77,12 +78,17 @@ jobs:
       run: rustup target add aarch64-apple-ios x86_64-apple-ios
 
     - name: Download bindings
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         name: uniffi-bindings
         path: rust/core/generated/
 
     - name: Build iOS static libs
+      env:
+        # Match a modern deployment target so transitive C deps (e.g.
+        # aws-lc-sys via rustls) link against the same iOS version they
+        # were compiled for, avoiding "symbol(s) not found for arm64".
+        IPHONEOS_DEPLOYMENT_TARGET: "13.0"
       run: |
         cd rust/core
         cargo build --target aarch64-apple-ios --release
@@ -92,13 +98,13 @@ jobs:
       run: |
         mkdir -p build/ios
         xcodebuild -create-xcframework \
-          -library rust/core/target/aarch64-apple-ios/release/liblazynext_core.a \
-          -library rust/core/target/x86_64-apple-ios/release/liblazynext_core.a \
+          -library target/aarch64-apple-ios/release/liblazynext_core.a \
+          -library target/x86_64-apple-ios/release/liblazynext_core.a \
           -output build/ios/LazynextCore.xcframework
 
     - name: Package with Swift headers
       run: |
-        cp rust/core/generated/swift/*.swift build/ios/
+        find rust/core/generated/swift -name '*.swift' -exec cp {} build/ios/ \;
         cd build/ios && zip -r ../../lazynext-ios-sdk.zip .
 
     - name: Upload iOS SDK
@@ -123,7 +129,7 @@ jobs:
       run: cargo install cargo-ndk
 
     - name: Download bindings
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         name: uniffi-bindings
         path: rust/core/generated/
@@ -135,13 +141,15 @@ jobs:
 
     - name: Package AAR
       run: |
-        mkdir -p build/android/jniLibs
-        cp -r rust/core/target/aarch64-linux-android/release build/android/jniLibs/arm64-v8a
-        cp -r rust/core/target/armv7-linux-androideabi/release build/android/jniLibs/armeabi-v7a
-        cp -r rust/core/target/x86_64-linux-android/release build/android/jniLibs/x86_64
-        cp -r rust/core/target/i686-linux-android/release build/android/jniLibs/x86
+        mkdir -p build/android/jniLibs/arm64-v8a build/android/jniLibs/armeabi-v7a build/android/jniLibs/x86_64 build/android/jniLibs/x86
+        cp target/aarch64-linux-android/release/*.so build/android/jniLibs/arm64-v8a/
+        cp target/armv7-linux-androideabi/release/*.so build/android/jniLibs/armeabi-v7a/
+        cp target/x86_64-linux-android/release/*.so build/android/jniLibs/x86_64/
+        cp target/i686-linux-android/release/*.so build/android/jniLibs/x86/
         mkdir -p build/android/kotlin
-        cp rust/core/generated/kotlin/*.kt build/android/kotlin/
+        # uniffi-bindgen may emit .kt files inside a nested package dir, so
+        # copy recursively rather than a flat glob.
+        find rust/core/generated/kotlin -name '*.kt' -exec cp {} build/android/kotlin/ \;
         cd build/android && zip -r ../../lazynext-android-sdk.zip .
 
     - name: Upload Android SDK
@@ -155,12 +163,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Download iOS SDK
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         name: lazynext-ios-sdk
 
     - name: Download Android SDK
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v4
       with:
         name: lazynext-android-sdk
 

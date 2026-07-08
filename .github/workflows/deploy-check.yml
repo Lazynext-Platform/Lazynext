@@ -107,22 +107,22 @@ jobs:
       matrix:
         service:
           - name: web
-            context: apps/web
+            context: .
             dockerfile: apps/web/Dockerfile
           - name: ai-agents
-            context: services/ai-agents
+            context: .
             dockerfile: services/ai-agents/Dockerfile
           - name: render-service
-            context: services/render-service
+            context: .
             dockerfile: services/render-service/Dockerfile
           - name: pre-processing
-            context: services/pre-processing
+            context: .
             dockerfile: services/pre-processing/Dockerfile
           - name: generative-studio
-            context: services/generative-studio
+            context: .
             dockerfile: services/generative-studio/Dockerfile
           - name: analytics-service
-            context: services/analytics-service
+            context: .
             dockerfile: services/analytics-service/Dockerfile
           - name: collab-server
             context: .
@@ -131,7 +131,7 @@ jobs:
             context: .
             dockerfile: rust/api-gateway/Dockerfile
           - name: social-publish
-            context: services/social-publish
+            context: .
             dockerfile: services/social-publish/Dockerfile
     steps:
       - uses: actions/checkout@v4
@@ -232,10 +232,13 @@ jobs:
           fi
 
       - name: Validate Terraform DB config
-        if: hashFiles('terraform/**/*.tf') != ''
         run: |
-          echo "Checking Terraform PostgreSQL configuration..."
-          grep -r "postgres" terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
+          if [ -d "infra/terraform" ]; then
+            echo "Checking Terraform PostgreSQL configuration..."
+            grep -r "postgres" infra/terraform/ --include="*.tf" -l || echo "::notice ::No PostgreSQL Terraform config found"
+          else
+            echo "::notice ::No infra/terraform directory found"
+          fi
 
   # ── STEP 5: API Gateway Health Check ──────────────────────────
   api-gateway-check:
@@ -279,28 +282,42 @@ jobs:
     name: "🏗️ Terraform Plan Validation"
     needs: [gate, env-audit]
     runs-on: ubuntu-latest
-    if: hashFiles('terraform/**/*.tf') != ''
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for Terraform config
+        id: tf
+        run: |
+          if [ -d "infra/terraform" ] && ls infra/terraform/*.tf >/dev/null 2>&1; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice ::No Terraform config at infra/terraform — skipping"
+          fi
+
       - uses: hashicorp/setup-terraform@v3
+        if: steps.tf.outputs.present == 'true'
         with:
-          terraform_version: "~>1.7"
+          terraform_version: "~>1.10"
 
       - name: Terraform Format Check
+        if: steps.tf.outputs.present == 'true'
         run: terraform fmt -check -recursive
-        working-directory: terraform
+        working-directory: infra/terraform
         continue-on-error: true
 
       - name: Terraform Init
+        if: steps.tf.outputs.present == 'true'
         run: terraform init -backend=false
-        working-directory: terraform
+        working-directory: infra/terraform
 
       - name: Terraform Validate
+        if: steps.tf.outputs.present == 'true'
         run: terraform validate
-        working-directory: terraform
+        working-directory: infra/terraform
 
       - name: Terraform Plan (Dry Run)
+        if: steps.tf.outputs.present == 'true'
         run: |
           echo "Running terraform plan — no actual infrastructure changes will be applied"
           terraform plan -input=false -detailed-exitcode -out=/dev/null || {
@@ -312,7 +329,7 @@ jobs:
               exit $EXIT
             fi
           }
-        working-directory: terraform
+        working-directory: infra/terraform
         continue-on-error: true
 
   # ── STEP 7: E2E Smoke Tests ───────────────────────────────────
@@ -374,6 +391,7 @@ jobs:
   summary:
     name: "📋 Deployment Readiness Report"
     needs:
+      - gate
       - env-audit
       - docker-build-check
       - security-scan
@@ -404,8 +422,14 @@ jobs:
 
           # Determine overall status
           FAILURES=0
-          for job in env-audit docker-build-check security-scan migration-check api-gateway-check terraform-check e2e-smoke; do
-            RESULT="${{ needs.$job.result }}"
+          for RESULT in \
+            "${{ needs.env-audit.result }}" \
+            "${{ needs.docker-build-check.result }}" \
+            "${{ needs.security-scan.result }}" \
+            "${{ needs.migration-check.result }}" \
+            "${{ needs.api-gateway-check.result }}" \
+            "${{ needs.terraform-check.result }}" \
+            "${{ needs.e2e-smoke.result }}"; do
             if [ "$RESULT" = "failure" ]; then
               FAILURES=$((FAILURES + 1))
             fi
