@@ -1,7 +1,9 @@
 # ── Azure Key Vault ────────────────────────────────────────────────────────
 
 resource "azurerm_key_vault" "secrets" {
-  name                       = "lazynext-kv-${var.environment}-${random_string.storage_suffix.result}"
+  # Key Vault names must be 3-24 chars. "lznx-kv-" + env_short(<=4) + "-" +
+  # 6-char suffix = <= 19 chars.
+  name                       = "lznx-kv-${local.env_short}-${random_string.storage_suffix.result}"
   location                   = azurerm_resource_group.rg.location
   resource_group_name        = azurerm_resource_group.rg.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
