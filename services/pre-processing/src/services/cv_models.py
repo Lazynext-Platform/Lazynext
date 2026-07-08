@@ -1,6 +1,6 @@
 """
 Computer Vision model services: SAM2 rotoscoping and NeRF 3D reconstruction.
-
+ 
 Orchestrates ONNX inference pipelines for Segment Anything 2 (rotoscoping)
 and Neural Radiance Fields (3D extraction), with TensorFlow Serving fallback
 for SAM2 when ONNX is unavailable.
@@ -13,8 +13,25 @@ from fastapi import HTTPException
 from src.models import RotoscopeRequest, NeRFRequest
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-from nerf_pipeline import NerfPipeline, NerfConfig
-from sam2_pipeline import Sam2Pipeline, Sam2Config
+
+# Gracefully degrade: CV pipelines need scipy/opencv/onnx which have no
+# Python 3.13 wheel yet. When unavailable the /rotoscope and /nerf-extract
+# endpoints respond 503 instead of crashing the service on import.
+try:
+    from nerf_pipeline import NerfPipeline, NerfConfig
+    NERF_AVAILABLE = True
+except ImportError:
+    NerfPipeline = None  # type: ignore
+    NerfConfig = None  # type: ignore
+    NERF_AVAILABLE = False
+
+try:
+    from sam2_pipeline import Sam2Pipeline, Sam2Config
+    SAM2_AVAILABLE = True
+except ImportError:
+    Sam2Pipeline = None  # type: ignore
+    Sam2Config = None  # type: ignore
+    SAM2_AVAILABLE = False
 
 TF_SERVING_URL = os.getenv("TF_SERVING_URL", "http://tensorflow-serving:8501")
 
@@ -31,8 +48,14 @@ async def rotoscope_service(req: RotoscopeRequest):
         dict with success, video_id, object, source (ONNX/TF), and mask_sequence_url.
 
     Raises:
-        HTTPException: 503 if both ONNX and TF Serving are unavailable.
+        HTTPException: 503 if SAM2 is not installed or inference fails.
     """
+    if not SAM2_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Rotoscoping unavailable: scipy/opencv/onnx are not installed (Python 3.13 wheel gap).",
+        )
+
     video_path = f"/tmp/{req.video_id}.mp4"
     mask_dir = f"/tmp/masks_{req.video_id}"
     os.makedirs(mask_dir, exist_ok=True)
@@ -84,8 +107,14 @@ async def extract_nerf_service(req: NeRFRequest):
         dict with success, video_id, method, source, mesh_url, and point_cloud_url.
 
     Raises:
-        HTTPException: 503 if NeRF extraction fails.
+        HTTPException: 503 if NeRF extraction is unavailable.
     """
+    if not NERF_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="NeRF extraction unavailable: scipy/opencv/onnx are not installed (Python 3.13 wheel gap).",
+        )
+
     video_path = f"/tmp/{req.video_id}.mp4"
     output_dir = f"/tmp/nerf_{req.video_id}"
 
