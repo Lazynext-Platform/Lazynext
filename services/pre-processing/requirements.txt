@@ -3,26 +3,19 @@ pyjwt>=2.13.0
 uvicorn==0.50.2
 pydantic==2.13.4
 httpx==0.28.1
-# ML/Computer Vision
-numpy>=2.5.1
-opencv-python>=5.0.0.93
-torch>=2.12.1
-torchvision>=0.27.1
 # Audio Processing
-scipy>=1.14,<1.15
 soundfile>=0.13.0
-# NeRF/Rotoscoping
-rembg>=2.0.76
-onnxruntime>=1.20,<1.21
-pillow>=12.3.0
-# Security: transitive dependency minimums
-urllib3>=2.7.0
-requests>=2.34.2
-jinja2>=3.1.6
-filelock>=3.29.5
-idna>=3.18
 # Observability
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-instrumentation-fastapi
 opentelemetry-exporter-otlp-proto-grpc
+# Core deps (always have wheels)
+pillow>=12.3.0
+numpy>=2.5.1
+# Security transitive minimums
+urllib3>=2.7.0
+requests>=2.34.2
+jinja2>=3.1.6
+filelock>=3.29.5
+idna>=3.18
