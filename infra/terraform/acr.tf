@@ -5,9 +5,10 @@ resource "azurerm_container_registry" "acr" {
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   sku                 = "Premium"
-  # Managed identity replaces admin credentials — ACR pulls are authenticated
-  # via the Container Apps user-assigned managed identity (AcrPull role).
-  admin_enabled = false
+  # Admin credentials are enabled so Container Apps can authenticate to ACR
+  # without a managed-identity AcrPull role assignment (role assignments are
+  # gated behind var.enable_role_assignments, which needs elevated perms).
+  admin_enabled = true
 
   tags = {
     Environment = var.environment
