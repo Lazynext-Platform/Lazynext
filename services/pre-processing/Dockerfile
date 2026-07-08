@@ -15,13 +15,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps
+# Install Python deps (heavy ML packages excluded — Python 3.13 has
+# incomplete wheel support for scipy >= 1.18 and opencv-python 5.x).
+# ML routes degrade gracefully per platform design.
 COPY services/pre-processing/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt \
-    # numba does not support Python 3.13; install if possible, skip on failure
-    && pip install --no-cache-dir numba llvmlite 2>/dev/null || true
+    && pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
 COPY services/pre-processing/ ./
