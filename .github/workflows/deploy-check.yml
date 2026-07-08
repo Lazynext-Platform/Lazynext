@@ -107,22 +107,22 @@ jobs:
       matrix:
         service:
           - name: web
-            context: apps/web
+            context: .
             dockerfile: apps/web/Dockerfile
           - name: ai-agents
-            context: services/ai-agents
+            context: .
             dockerfile: services/ai-agents/Dockerfile
           - name: render-service
-            context: services/render-service
+            context: .
             dockerfile: services/render-service/Dockerfile
           - name: pre-processing
-            context: services/pre-processing
+            context: .
             dockerfile: services/pre-processing/Dockerfile
           - name: generative-studio
-            context: services/generative-studio
+            context: .
             dockerfile: services/generative-studio/Dockerfile
           - name: analytics-service
-            context: services/analytics-service
+            context: .
             dockerfile: services/analytics-service/Dockerfile
           - name: collab-server
             context: .
@@ -131,7 +131,7 @@ jobs:
             context: .
             dockerfile: rust/api-gateway/Dockerfile
           - name: social-publish
-            context: services/social-publish
+            context: .
             dockerfile: services/social-publish/Dockerfile
     steps:
       - uses: actions/checkout@v4
