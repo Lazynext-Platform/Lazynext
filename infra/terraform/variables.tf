@@ -291,3 +291,38 @@ variable "backup_policy_time" {
   type        = string
   default     = "02:00"
 }
+
+variable "enable_backup" {
+  description = <<-EOT
+    Whether to provision the Azure Backup stack (Recovery Services Vault,
+    Data Protection Backup Vault, backup policies/instances, and their role
+    assignments). Disabled by default because it requires elevated
+    (roleAssignments/write) permissions and a backup vault that conflicts
+    with region moves via soft-delete. Enable once the subscription/service
+    principal supports it.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "enable_cdn" {
+  description = <<-EOT
+    Whether to provision Azure Front Door / CDN + WAF. Disabled by default
+    because Azure Front Door is not available on Free/Student subscriptions.
+    Enable on a Pay-As-You-Go (or higher) subscription.
+  EOT
+  type        = bool
+  default     = false
+}
+
+variable "enable_role_assignments" {
+  description = <<-EOT
+    Whether to create Azure role assignments (ACR pull, blob access, etc.).
+    Requires the deploying service principal to have
+    'Microsoft.Authorization/roleAssignments/write' (User Access
+    Administrator or Owner). Disabled by default for least-privilege
+    service principals; Container Apps fall back to ACR admin credentials.
+  EOT
+  type        = bool
+  default     = false
+}

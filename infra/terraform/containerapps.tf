@@ -17,6 +17,7 @@ resource "azurerm_user_assigned_identity" "container_apps" {
 
 # Grant ACR pull to Container Apps
 resource "azurerm_role_assignment" "acr_pull" {
+  count                = var.enable_role_assignments ? 1 : 0
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.container_apps.principal_id
@@ -24,6 +25,7 @@ resource "azurerm_role_assignment" "acr_pull" {
 
 # Grant Storage Blob Data Contributor to Container Apps
 resource "azurerm_role_assignment" "blob_access" {
+  count                = var.enable_role_assignments ? 1 : 0
   scope                = azurerm_storage_account.media.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.container_apps.principal_id

@@ -35,6 +35,7 @@ resource "azurerm_federated_identity_credential" "github_pr" {
 
 # Grant ACR push/pull to GitHub Actions
 resource "azurerm_role_assignment" "github_acr_push" {
+  count                = var.enable_role_assignments ? 1 : 0
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPush"
   principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
@@ -46,6 +47,7 @@ resource "azurerm_role_assignment" "github_acr_push" {
 #       Microsoft.App/containerApps/write, /revisions/write, etc.) rather
 #       than blanket Contributor on the environment.
 resource "azurerm_role_assignment" "github_cappenv_contributor" {
+  count                = var.enable_role_assignments ? 1 : 0
   scope                = azurerm_container_app_environment.main.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.github_actions.principal_id
@@ -56,7 +58,7 @@ resource "azurerm_role_assignment" "github_cappenv_contributor" {
 # permissions for deploying (write registry, update revision, swap traffic)
 # would be more secure than Contributor on every container app.
 resource "azurerm_role_assignment" "github_container_app_contributor" {
-  for_each = local.container_apps
+  for_each = var.enable_role_assignments ? local.container_apps : {}
 
   scope                = local.container_app_ids[each.key]
   role_definition_name = "Contributor"

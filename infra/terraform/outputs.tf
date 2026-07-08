@@ -127,12 +127,12 @@ output "dns_zone_id" {
 
 output "cdn_endpoint_hostname" {
   description = "Azure Front Door endpoint hostname"
-  value       = azurerm_cdn_frontdoor_endpoint.media.host_name
+  value       = var.enable_cdn ? azurerm_cdn_frontdoor_endpoint.media[0].host_name : null
 }
 
 output "cdn_profile_name" {
   description = "Azure Front Door profile name"
-  value       = azurerm_cdn_frontdoor_profile.media.name
+  value       = var.enable_cdn ? azurerm_cdn_frontdoor_profile.media[0].name : null
 }
 
 output "media_cdn_fqdn" {
@@ -166,17 +166,17 @@ output "waf_policy_id" {
 
 output "recovery_services_vault_name" {
   description = "Recovery Services Vault name"
-  value       = azurerm_recovery_services_vault.main.name
+  value       = var.enable_backup ? azurerm_recovery_services_vault.main[0].name : null
 }
 
 output "backup_vault_name" {
   description = "Data Protection Backup Vault name"
-  value       = azurerm_data_protection_backup_vault.main.name
+  value       = var.enable_backup ? azurerm_data_protection_backup_vault.main[0].name : null
 }
 
 output "backup_vault_id" {
   description = "Data Protection Backup Vault resource ID"
-  value       = azurerm_data_protection_backup_vault.main.id
+  value       = var.enable_backup ? azurerm_data_protection_backup_vault.main[0].id : null
 }
 
 # ── Monitoring ──────────────────────────────────────────────────────────────

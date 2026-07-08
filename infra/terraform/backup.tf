@@ -2,10 +2,16 @@
 # Data Protection Backup Vault for PostgreSQL long-term retention (beyond the
 # built-in 30-day backup). Recovery Services Vault for future VM / File Share
 # protection. Storage blob operational backup and Key Vault backup config.
+#
+# The entire backup stack is gated behind var.enable_backup (default false):
+# it requires roleAssignments/write permission and a Data Protection Backup
+# Vault whose soft-delete conflicts with region migrations. Enable it once the
+# subscription/service principal supports it.
 
 # ── Recovery Services Vault (VMs, File Shares, SQL in VM) ───────────────────
 
 resource "azurerm_recovery_services_vault" "main" {
+  count               = var.enable_backup ? 1 : 0
   name                = "lazynext-rsv-${var.environment}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -25,6 +31,7 @@ resource "azurerm_recovery_services_vault" "main" {
 # ── Data Protection Backup Vault (PostgreSQL, Blob, Disk) ───────────────────
 
 resource "azurerm_data_protection_backup_vault" "main" {
+  count               = var.enable_backup ? 1 : 0
   name                = "lazynext-bv-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
@@ -48,23 +55,26 @@ resource "azurerm_data_protection_backup_vault" "main" {
 
 # Contributor on Resource Group (needed for PostgreSQL backup operations)
 resource "azurerm_role_assignment" "backup_vault_rg" {
+  count                = var.enable_backup ? 1 : 0
   scope                = azurerm_resource_group.rg.id
   role_definition_name = "Contributor"
-  principal_id         = azurerm_data_protection_backup_vault.main.identity[0].principal_id
+  principal_id         = azurerm_data_protection_backup_vault.main[0].identity[0].principal_id
 }
 
 # Storage Blob Data Contributor on media storage (backup data destination)
 resource "azurerm_role_assignment" "backup_vault_storage" {
+  count                = var.enable_backup ? 1 : 0
   scope                = azurerm_storage_account.media.id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_data_protection_backup_vault.main.identity[0].principal_id
+  principal_id         = azurerm_data_protection_backup_vault.main[0].identity[0].principal_id
 }
 
 # Key Vault access policy for Backup Vault (read secrets for backup)
 resource "azurerm_key_vault_access_policy" "backup_vault" {
+  count        = var.enable_backup ? 1 : 0
   key_vault_id = azurerm_key_vault.secrets.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_data_protection_backup_vault.main.identity[0].principal_id
+  object_id    = azurerm_data_protection_backup_vault.main[0].identity[0].principal_id
 
   secret_permissions = [
     "Get",
@@ -83,8 +93,9 @@ resource "azurerm_key_vault_access_policy" "backup_vault" {
 # Daily at 02:00 UTC, retained for 30 days.
 
 resource "azurerm_data_protection_backup_policy_postgresql_flexible_server" "main" {
+  count    = var.enable_backup ? 1 : 0
   name     = "lazynext-pg-daily-0200-${var.environment}"
-  vault_id = azurerm_data_protection_backup_vault.main.id
+  vault_id = azurerm_data_protection_backup_vault.main[0].id
 
   # Daily backup at 2:00 AM UTC, ISO 8601 recurring time expression
   backup_repeating_time_intervals = [
@@ -103,11 +114,12 @@ resource "azurerm_data_protection_backup_policy_postgresql_flexible_server" "mai
 # ── PostgreSQL Flexible Server Backup Instance ──────────────────────────────
 
 resource "azurerm_data_protection_backup_instance_postgresql_flexible_server" "main" {
+  count            = var.enable_backup ? 1 : 0
   name             = "lazynext-pg-backup-instance-${var.environment}"
-  location         = azurerm_data_protection_backup_vault.main.location
-  vault_id         = azurerm_data_protection_backup_vault.main.id
+  location         = azurerm_data_protection_backup_vault.main[0].location
+  vault_id         = azurerm_data_protection_backup_vault.main[0].id
   server_id        = azurerm_postgresql_flexible_server.postgres.id
-  backup_policy_id = azurerm_data_protection_backup_policy_postgresql_flexible_server.main.id
+  backup_policy_id = azurerm_data_protection_backup_policy_postgresql_flexible_server.main[0].id
 }
 
 # ── Storage Account Blob Operational Backup ─────────────────────────────────
@@ -115,18 +127,20 @@ resource "azurerm_data_protection_backup_instance_postgresql_flexible_server" "m
 # Managed at the storage account level — no additional backup schedule needed.
 
 resource "azurerm_data_protection_backup_policy_blob_storage" "media" {
+  count    = var.enable_backup ? 1 : 0
   name     = "lazynext-blob-backup-policy-${var.environment}"
-  vault_id = azurerm_data_protection_backup_vault.main.id
+  vault_id = azurerm_data_protection_backup_vault.main[0].id
 
   operational_default_retention_duration = "P${var.backup_retention_days}D"
 }
 
 resource "azurerm_data_protection_backup_instance_blob_storage" "media" {
+  count              = var.enable_backup ? 1 : 0
   name               = "lazynext-blob-backup-instance-${var.environment}"
-  location           = azurerm_data_protection_backup_vault.main.location
-  vault_id           = azurerm_data_protection_backup_vault.main.id
+  location           = azurerm_data_protection_backup_vault.main[0].location
+  vault_id           = azurerm_data_protection_backup_vault.main[0].id
   storage_account_id = azurerm_storage_account.media.id
-  backup_policy_id   = azurerm_data_protection_backup_policy_blob_storage.media.id
+  backup_policy_id   = azurerm_data_protection_backup_policy_blob_storage.media[0].id
 }
 
 # ── Key Vault Backup ───────────────────────────────────────────────────────

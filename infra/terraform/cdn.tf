@@ -6,6 +6,7 @@
 # ── Front Door Profile ──────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_profile" "media" {
+  count               = var.enable_cdn ? 1 : 0
   name                = "lazynext-cdn-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   sku_name            = var.cdn_sku_name
@@ -23,8 +24,9 @@ resource "azurerm_cdn_frontdoor_profile" "media" {
 # ── Front Door Endpoint ─────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_endpoint" "media" {
+  count                    = var.enable_cdn ? 1 : 0
   name                     = "lazynext-media-ep-${var.environment}"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media[0].id
 
   tags = {
     Environment = var.environment
@@ -35,8 +37,9 @@ resource "azurerm_cdn_frontdoor_endpoint" "media" {
 # ── Origin Group & Origin → Storage Account ─────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_origin_group" "media" {
+  count                    = var.enable_cdn ? 1 : 0
   name                     = "lazynext-media-og-${var.environment}"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media[0].id
 
   session_affinity_enabled = false
 
@@ -54,8 +57,9 @@ resource "azurerm_cdn_frontdoor_origin_group" "media" {
 }
 
 resource "azurerm_cdn_frontdoor_origin" "media" {
+  count                         = var.enable_cdn ? 1 : 0
   name                          = "lazynext-media-origin-${var.environment}"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.media.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.media[0].id
 
   enabled = true
 
@@ -73,10 +77,11 @@ resource "azurerm_cdn_frontdoor_origin" "media" {
 # ── Route ───────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_route" "media" {
+  count                         = var.enable_cdn ? 1 : 0
   name                          = "lazynext-media-route-${var.environment}"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.media.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.media.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.media.id]
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.media[0].id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.media[0].id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.media[0].id]
 
   patterns_to_match          = ["/*"]
   forwarding_protocol        = "HttpsOnly"
@@ -89,8 +94,9 @@ resource "azurerm_cdn_frontdoor_route" "media" {
 # ── Custom Domain: media.lazynext.ai ────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_custom_domain" "media" {
+  count                    = var.enable_cdn ? 1 : 0
   name                     = "lazynext-media-domain-${var.environment}"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media[0].id
   host_name                = var.media_custom_domain
 
   # When using Premium SKU, set dns_zone_id for automatic DNS validation.
@@ -104,13 +110,15 @@ resource "azurerm_cdn_frontdoor_custom_domain" "media" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain_association" "media" {
-  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.media.id
-  cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.media.id]
+  count                          = var.enable_cdn ? 1 : 0
+  cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.media[0].id
+  cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.media[0].id]
 }
 
 # ── Front Door WAF Policy ───────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_firewall_policy" "media" {
+  count               = var.enable_cdn ? 1 : 0
   name                = "lazynextcdnwaf${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   sku_name            = "Premium_AzureFrontDoor"
@@ -182,16 +190,17 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "media" {
 # ── WAF Policy → Front Door Association ─────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_security_policy" "media" {
+  count                    = var.enable_cdn ? 1 : 0
   name                     = "lazynext-cdn-secpol-${var.environment}"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.media[0].id
 
   security_policies {
     firewall {
-      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.media.id
+      cdn_frontdoor_firewall_policy_id = azurerm_cdn_frontdoor_firewall_policy.media[0].id
 
       association {
         domain {
-          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.media.id
+          cdn_frontdoor_domain_id = azurerm_cdn_frontdoor_custom_domain.media[0].id
         }
         patterns_to_match = ["/*"]
       }
