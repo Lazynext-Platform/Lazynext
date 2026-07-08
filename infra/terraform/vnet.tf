@@ -21,6 +21,9 @@ resource "azurerm_subnet" "container_apps" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.8.0/23"]
 
+  # Required so the storage account network ACL can allow this subnet.
+  service_endpoints = ["Microsoft.Storage"]
+
   delegation {
     name = "delegation"
     service_delegation {
@@ -56,6 +59,9 @@ resource "azurerm_subnet" "private_endpoints" {
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.5.0/24"]
+
+  # Required so the storage account network ACL can allow this subnet.
+  service_endpoints = ["Microsoft.Storage"]
 }
 
 # ── Network Security Groups ────────────────────────────────────────────────

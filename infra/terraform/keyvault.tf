@@ -1,9 +1,19 @@
 # ── Azure Key Vault ────────────────────────────────────────────────────────
 
+# Dedicated random suffix for the Key Vault name. Key Vault names are globally
+# unique AND soft-deleted names stay reserved (and can't be purged on some
+# subscription tiers). Using a separate suffix lets us mint a fresh, unused
+# name if a prior name is stuck in a soft-deleted state.
+resource "random_string" "kv_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
+
 resource "azurerm_key_vault" "secrets" {
   # Key Vault names must be 3-24 chars. "lznx-kv-" + env_short(<=4) + "-" +
   # 6-char suffix = <= 19 chars.
-  name                       = "lznx-kv-${local.env_short}-${random_string.storage_suffix.result}"
+  name                       = "lznx-kv-${local.env_short}-${random_string.kv_suffix.result}"
   location                   = azurerm_resource_group.rg.location
   resource_group_name        = azurerm_resource_group.rg.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
