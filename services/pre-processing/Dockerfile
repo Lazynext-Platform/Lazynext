@@ -15,14 +15,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps (heavy ML packages excluded — Python 3.13 has
-# incomplete wheel support for scipy, opencv-python, torch, etc.).
-# --only-binary :all: prevents pip from falling back to source builds
-# (which fail without a C compiler in the slim image). ML routes degrade
-# gracefully per platform design.
+# Install Python deps. Several ML packages (scipy, opencv-python, torch)
+# have no pre-built wheel for Python 3.13 yet. We install what we can and
+# skip what we can't; the CV-model routes degrade gracefully per platform
+# design (see cv_models.py).
 COPY services/pre-processing/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --only-binary :all: -r requirements.txt
+    && (pip install --no-cache-dir -r requirements.txt || pip install --no-cache-dir \
+         --only-binary :all: -r requirements.txt) \
+    # These need a source-build chain (meson/gcc) unavailable in slim;
+    # try individually and skip on failure so the service still boots.
+    && pip install --no-cache-dir scipy 2>/dev/null || true \
+    && pip install --no-cache-dir opencv-python 2>/dev/null || true
 
 # Copy application source
 COPY services/pre-processing/ ./
