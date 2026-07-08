@@ -19,7 +19,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY services/pre-processing/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    # numba does not support Python 3.13; install if possible, skip on failure
+    && pip install --no-cache-dir numba llvmlite 2>/dev/null || true
 
 # Copy application source
 COPY services/pre-processing/ ./
