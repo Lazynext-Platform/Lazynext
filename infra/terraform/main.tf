@@ -68,11 +68,13 @@ locals {
   # Per-environment Azure region. Production uses a DIFFERENT region from dev
   # so it can create its own Container App Environment — "Azure for Students"
   # subscriptions allow only one Container App Environment per region, and dev
-  # already occupies Southeast Asia.
+  # already occupies Southeast Asia. Central India is an allowed region under
+  # the subscription's region-restriction policy (eastus2 is not) and has no
+  # existing Container App Environment.
   region = {
     dev        = var.location
     staging    = var.location
-    production = "eastus2"
+    production = "centralindia"
   }[var.environment]
 
   # Container App resource configurations
