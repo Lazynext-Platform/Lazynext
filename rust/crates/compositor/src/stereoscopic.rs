@@ -26,7 +26,9 @@ pub enum StereoMode {
 /// Defines left/right eye clip sources, interocular distance, convergence
 /// plane, and the current output mode.
 pub struct StereoscopicCamera {
+    /// Media clip ID for the left eye view.
     pub left_eye_clip_id: String,
+    /// Media clip ID for the right eye view.
     pub right_eye_clip_id: String,
     /// Distance between virtual cameras in scene units (default 6.5cm)
     pub interocular_distance: f32,
@@ -37,6 +39,7 @@ pub struct StereoscopicCamera {
 }
 
 impl StereoscopicCamera {
+    /// Create a new stereoscopic camera in anaglyph mode with default IO/convergence.
     pub fn new(left_id: &str, right_id: &str) -> Self {
         Self {
             left_eye_clip_id: left_id.to_string(),

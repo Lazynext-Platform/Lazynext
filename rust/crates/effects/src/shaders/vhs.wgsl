@@ -24,6 +24,7 @@ struct Uniforms {
 
 @group(1) @binding(0) var<uniform> uniforms: Uniforms;
 
+// Hash-based pseudo-random value in [0, 1) from a 2D coordinate.
 fn rand(n: vec2<f32>) -> f32 {
     return fract(sin(dot(n, vec2<f32>(12.9898, 4.1414))) * 43758.5453);
 }

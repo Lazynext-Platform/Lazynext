@@ -15,9 +15,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 /// A single memory entry with insight text, timestamp, optional context, and a reference counter.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemoryEntry {
+    /// The learned insight text.
     pub insight: String,
+    /// Unix timestamp (seconds) of the last update.
     pub timestamp: u64,
+    /// Optional context label for the insight.
     pub context: Option<String>,
+    /// Number of times this insight has been referenced.
     pub reference_count: u32,
 }
 
@@ -39,6 +43,7 @@ impl MemoryEntry {
     }
 }
 
+// Returns the current time in seconds since the UNIX epoch.
 fn now_secs() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -50,7 +55,9 @@ fn now_secs() -> u64 {
 /// Automatically decays entries older than 90 days with low reference counts.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AutoMemory {
+    /// Accumulated memory entries, persisted across sessions.
     memories: Vec<MemoryEntry>,
+    /// Whether there are unsaved changes (not serialized).
     #[serde(skip)]
     dirty: bool,
 }
@@ -289,11 +296,13 @@ impl AutoMemory {
     }
 }
 
+// Returns the `~/.lazynext/memory` directory path.
 fn memory_dir() -> Result<PathBuf, String> {
     let home = dirs_fallback().ok_or_else(|| "Cannot determine home directory".to_string())?;
     Ok(home.join(".lazynext").join("memory"))
 }
 
+// Resolves the user's home directory across platforms via environment variables.
 fn dirs_fallback() -> Option<PathBuf> {
     std::env::var("HOME")
         .or_else(|_| std::env::var("USERPROFILE"))

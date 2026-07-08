@@ -4,16 +4,24 @@ import type { MigrationResult, ProjectRecord } from "./types";
 import { isRecord } from "./utils";
 
 interface V1Scene {
+	/** Unique scene identifier. */
 	id: string;
+	/** Scene display name. */
 	name: string;
+	/** Whether this is the main scene. */
 	isMain: boolean;
+	/** Tracks contained in the scene. */
 	tracks: unknown[];
+	/** Bookmarks in the scene. */
 	bookmarks: unknown[];
+	/** ISO creation timestamp. */
 	createdAt: string;
+	/** ISO last-updated timestamp. */
 	updatedAt: string;
 }
 
 export interface TransformV0ToV1Options {
+	/** Timestamp to use for created/updated fields. */
 	now?: Date;
 }
 

@@ -9,11 +9,13 @@ from src.main import app
 client = TestClient(app)
 
 def test_read_root():
+    """Root endpoint returns the service health payload."""
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "service": "pre-processing"}
 
 def test_transcribe_audio_missing_file(monkeypatch):
+    """/transcribe returns 404 when the referenced video file is absent."""
     monkeypatch.setenv("APP_ENV", "development")
     monkeypatch.setenv("OPENAI_API_KEY", "dummy")
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
@@ -21,6 +23,7 @@ def test_transcribe_audio_missing_file(monkeypatch):
     assert "Video file not found" in response.json()["detail"]
 
 def test_transcribe_audio_production_no_key(monkeypatch):
+    """/transcribe returns 503 in production when no OpenAI key is set."""
     monkeypatch.setenv("APP_ENV", "production")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     response = client.post("/transcribe", json={"video_id": "test_video_123"})
@@ -28,6 +31,8 @@ def test_transcribe_audio_production_no_key(monkeypatch):
     assert "Transcription service unavailable" in response.json()["detail"]
 
 def test_process_video():
+    """/process runs the requested operations and reports each result,
+    flagging unrecognized operations as `unknown_operation`."""
     response = client.post("/process", json={
         "video_id": "vid_456",
         "operations": ["auto_editor", "scene_detect", "unknown"]
@@ -49,6 +54,7 @@ def test_process_video():
     assert ops["unknown"]["status"] == "unknown_operation"
 
 def test_rotoscope_video_unavailable(monkeypatch):
+    """/rotoscope returns 503 when TF-serving and local SAM2 are both down."""
     monkeypatch.setenv("APP_ENV", "development")
     response = client.post("/rotoscope", json={
         "video_id": "vid_789",
@@ -59,6 +65,7 @@ def test_rotoscope_video_unavailable(monkeypatch):
     assert "Rotoscoping unavailable" in response.json()["detail"]
 
 def test_nerf_extract_unavailable(monkeypatch):
+    """/nerf-extract returns 503 when nerfstudio is not installed."""
     monkeypatch.setenv("APP_ENV", "development")
     response = client.post("/nerf-extract", json={
         "video_id": "vid_nerf",

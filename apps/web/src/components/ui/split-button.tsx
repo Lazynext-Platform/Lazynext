@@ -6,11 +6,14 @@ import { type ReactNode, forwardRef } from "react";
 import { cn } from "@/utils/ui";
 
 interface SplitButtonProps {
+	/** Button content children. */
 	children: ReactNode;
+	/** Optional CSS class. */
 	className?: string;
 }
 
 interface SplitButtonSideProps extends Omit<ButtonProps, "variant" | "size"> {
+	/** Button content children. */
 	children: ReactNode;
 }
 

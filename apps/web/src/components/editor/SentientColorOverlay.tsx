@@ -10,6 +10,7 @@
 import React from "react";
 
 interface SentientColorOverlayProps {
+	/** Whether the color overlay is currently active. */
 	isActive: boolean;
 }
 

@@ -19,13 +19,21 @@ import path from "path";
 export type ExportFormatId = "mp4" | "prores" | "dcp" | "aaf" | "mov";
 
 export interface FrameJobConfig {
+	/** Unique job identifier. */
 	jobId: string;
+	/** Parent project identifier. */
 	projectId: string;
+	/** Target export format. */
 	format: ExportFormatId;
+	/** Video bitrate in kilobits per second. */
 	bitrateKbps: number;
+	/** Output width in pixels. */
 	width: number;
+	/** Output height in pixels. */
 	height: number;
+	/** Frames per second. */
 	framerate: number;
+	/** Total number of frames to encode. */
 	totalFrames: number;
 }
 
@@ -37,18 +45,28 @@ export type FrameJobStatus =
 	| "cancelled";
 
 export interface FrameJob extends FrameJobConfig {
+	/** Current job status. */
 	status: FrameJobStatus;
+	/** Encoding progress from 0 to 1. */
 	progress: number;
+	/** Buffered frame data ordered by sequence number. */
 	frames: Buffer[]; // ordered by X-Frame-Seq
+	/** Next expected sequence number. */
 	nextSeq: number; // expected next sequence number
+	/** Absolute path to the encoded output file. */
 	outputPath: string | null;
+	/** ISO-8601 job creation timestamp. */
 	createdAt: string;
+	/** Active ffmpeg child process, if encoding. */
 	ffmpeg: ChildProcess | null;
 }
 
 export interface EncodeArgsResult {
+	/** ffmpeg video codec name. */
 	codec: string;
+	/** Pixel format for the output. */
 	pixFmt: string;
+	/** Format-specific extra ffmpeg flags. */
 	extra: string[]; // format-specific flags (preset, crf, profile, color…)
 }
 
@@ -156,8 +174,11 @@ export function deleteFrameJob(jobId: string): boolean {
 }
 
 export interface AppendResult {
+	/** Whether the frame was accepted. */
 	ok: boolean;
+	/** HTTP status code hint. */
 	status: number; // http status hint
+	/** Error description if not ok. */
 	error?: string;
 }
 

@@ -387,6 +387,7 @@ export type CaptionProps = {
 		/** Outline / stroke color for caption text */
 		outlineColor?: string;
 	};
+	/** When true, apply caption styles to all caption elements. */
 	applyToAll?: boolean;
 };
 
@@ -457,15 +458,25 @@ export type ResizeCanvasOptions = {
  * Parameters passed to a canvas element handler when adding an element.
  */
 export type CanvasElementAddParams = {
+	/** The canvas element to add */
 	element: CanvasElement;
+	/** Z-index / layer order */
 	index: number;
+	/** Fabric.js canvas instance */
 	canvas: import("fabric").Canvas;
+	/** Canvas metadata for coordinate transforms */
 	canvasMetadata: CanvasMetadata;
+	/** Seek time for video/frame snap */
 	seekTime?: number;
+	/** Caption styling props */
 	captionProps?: CaptionProps | null;
+	/** Ref map tracking frame effects per element */
 	elementFrameMapRef?: { current: Record<string, FrameEffect | undefined> };
+	/** Returns the frame effect active at the given seek time */
 	getCurrentFrameEffect?: (
+		/** The canvas element to check for active frame effects. */
 		item: CanvasElement,
+		/** Seek time in seconds. */
 		seekTime: number,
 	) => FrameEffect | undefined;
 	/** Used by watermark handler to store props for WATERMARK_UPDATED */
@@ -478,10 +489,15 @@ export type CanvasElementAddParams = {
  * Context passed when updating element state from a Fabric object (e.g. after transform).
  */
 export type CanvasElementUpdateContext = {
+	/** Canvas metadata for coordinate transforms */
 	canvasMetadata: CanvasMetadata;
+	/** Video dimensions in pixels */
 	videoSize: { width: number; height: number };
+	/** Ref map tracking frame effects per element */
 	elementFrameMapRef: { current: Record<string, FrameEffect | undefined> };
+	/** Ref holding current caption styling */
 	captionPropsRef: { current: CaptionProps | null };
+	/** Ref holding current watermark props */
 	watermarkPropsRef: { current: any };
 };
 
@@ -491,8 +507,11 @@ export type CanvasElementUpdateContext = {
  * When operation is WATERMARK_UPDATED, payload is WatermarkUpdatePayload.
  */
 export type CanvasElementUpdateResult = {
+	/** The updated canvas element */
 	element: CanvasElement;
+	/** Emit operation name (e.g. CAPTION_PROPS_UPDATED) */
 	operation?: string;
+	/** Operation payload data */
 	payload?: any;
 };
 
@@ -501,9 +520,13 @@ export type CanvasElementUpdateResult = {
  * so video-editor can apply via setWatermark() and panel can update type/props.
  */
 export type WatermarkUpdatePayload = {
+	/** Position of the watermark on canvas */
 	position: { x: number; y: number };
+	/** Rotation angle in degrees */
 	rotation?: number;
+	/** Opacity value (0-1) */
 	opacity?: number;
+	/** Additional watermark props */
 	props?: Record<string, unknown>;
 };
 
@@ -511,11 +534,17 @@ export type WatermarkUpdatePayload = {
  * Handler for a canvas element type. Register with ElementController for scalable dispatch.
  */
 export type CanvasElementHandler = {
+	/** Human-readable handler name */
 	name: string;
+	/** Creates and adds the element to the canvas */
 	add(params: CanvasElementAddParams): Promise<void>;
+	/** Updates element state from a Fabric.js object after transform */
 	updateFromFabricObject?: (
+		/** The Fabric.js object after transform. */
 		object: any,
+		/** The canvas element model to update. */
 		element: CanvasElement,
+		/** Context for coordinate transforms and refs. */
 		context: CanvasElementUpdateContext,
 	) => CanvasElementUpdateResult | null;
 };

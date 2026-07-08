@@ -13,11 +13,17 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface TimelineStore {
+	/** Whether snapping is enabled. */
 	snappingEnabled: boolean;
+	/** Toggles the snapping preference. */
 	toggleSnapping: () => void;
+	/** Whether ripple editing is enabled. */
 	rippleEditingEnabled: boolean;
+	/** Toggles the ripple editing preference. */
 	toggleRippleEditing: () => void;
+	/** IDs of elements currently expanded in the timeline. */
 	expandedElementIds: Set<string>;
+	/** Toggles the expanded state of an element. */
 	toggleElementExpanded: (elementId: string) => void;
 }
 

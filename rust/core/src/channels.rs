@@ -11,21 +11,28 @@ use std::collections::HashMap;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+/// Supported messaging platforms for inbound editing commands.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum Channel {
+    /// Telegram messaging platform.
     #[serde(rename = "telegram")]
     Telegram,
+    /// Discord messaging platform.
     #[serde(rename = "discord")]
     Discord,
+    /// Slack messaging platform.
     #[serde(rename = "slack")]
     Slack,
+    /// Apple iMessage platform.
     #[serde(rename = "imessage")]
     IMessage,
+    /// Generic webhook integration.
     #[serde(rename = "webhook")]
     Webhook,
 }
 
 impl std::fmt::Display for Channel {
+    // Formats the channel as its lowercase platform name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Channel::Telegram => write!(f, "telegram"),
@@ -40,19 +47,28 @@ impl std::fmt::Display for Channel {
 /// A registered channel that can receive incoming pushes.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelRegistration {
+    /// Unique registration identifier.
     pub id: String,
+    /// Messaging channel platform.
     pub channel: Channel,
+    /// Webhook URL for receiving events.
     pub url: String,
+    /// Secret token for HMAC request validation.
     pub secret: String,
+    /// ISO-8601 timestamp of when the channel was registered.
     pub created_at: String,
 }
 
 /// An incoming event from a registered channel.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelEvent {
+    /// Originating messaging platform.
     pub source: Channel,
+    /// Incoming message text.
     pub message: String,
+    /// Optional URL of a media file attached to the event.
     pub media_url: Option<String>,
+    /// Optional priority hint for the event.
     pub priority: Option<String>,
 }
 
@@ -60,10 +76,15 @@ pub struct ChannelEvent {
 /// resolved command and the editing action taken.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelEventResult {
+    /// Unique identifier for this event result.
     pub event_id: String,
+    /// Resolved command name.
     pub command: String,
+    /// Human-readable description of the action taken.
     pub action: String,
+    /// Whether the command was processed successfully.
     pub success: bool,
+    /// Detailed result message.
     pub detail: String,
 }
 
@@ -128,11 +149,14 @@ fn resolve_command(_source: &Channel, message: &str) -> (String, String) {
 
 // ── Channel Manager ────────────────────────────────────────────────────────
 
+/// Manages registered webhook channels and processes incoming events.
 pub struct ChannelManager {
+    /// Registered channels keyed by registration ID.
     channels: HashMap<String, ChannelRegistration>,
 }
 
 impl ChannelManager {
+    /// Creates an empty channel manager.
     pub fn new() -> Self {
         Self {
             channels: HashMap::new(),
@@ -221,11 +245,13 @@ impl ChannelManager {
 }
 
 impl Default for ChannelManager {
+    // Returns an empty channel manager.
     fn default() -> Self {
         Self::new()
     }
 }
 
+// Returns the current UTC time formatted as an ISO-8601 timestamp.
 fn now_iso() -> String {
     use std::time::SystemTime;
     let dur = SystemTime::now()

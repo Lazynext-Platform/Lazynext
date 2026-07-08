@@ -6,19 +6,26 @@
 
 /// A 3-component vector for positions, rotations, and scale.
 pub struct Vector3 {
+    /// X component.
     pub x: f32,
+    /// Y component.
     pub y: f32,
+    /// Z component.
     pub z: f32,
 }
 
 /// 3D transform with position, Euler rotation (pitch/yaw/roll), and scale.
 pub struct Transform3D {
+    /// Translation offset in 3D space.
     pub position: Vector3,
+    /// Euler rotation angles (pitch, yaw, roll) in degrees.
     pub rotation: Vector3,
+    /// Scale factors along each axis.
     pub scale: Vector3,
 }
 
 impl Default for Transform3D {
+    // Returns the default (identity) 3D transform.
     fn default() -> Self {
         Self::new()
     }
@@ -62,8 +69,11 @@ impl Transform3D {
 
 /// A perspective camera for viewing 3D composited layers.
 pub struct Camera3D {
+    /// Camera position in world space.
     pub position: Vector3,
+    /// Vertical field of view in degrees.
     pub fov_degrees: f32,
+    /// Depth of field focal distance.
     pub depth_of_field: f32,
 }
 

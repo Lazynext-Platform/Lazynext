@@ -29,6 +29,7 @@ pub struct RateLimitConfig {
 }
 
 impl RateLimitConfig {
+    /// Creates a new rate limit config with the given capacity and tokens-per-second refill rate.
     pub const fn new(capacity: u32, refill_per_second: f64) -> Self {
         Self {
             capacity,
@@ -54,11 +55,14 @@ pub mod profiles {
 /// Token bucket state for a single client.
 #[derive(Debug)]
 struct TokenBucket {
+    /// Current number of available tokens.
     tokens: f64,
+    /// Instant of the last refill, used to compute elapsed refill.
     last_refill: Instant,
 }
 
 impl TokenBucket {
+    // Create a full token bucket seeded to the given capacity.
     fn new(capacity: u32) -> Self {
         Self {
             tokens: capacity as f64,
@@ -86,11 +90,14 @@ impl TokenBucket {
 
 /// Thread-safe rate limiter store keyed by client identifier (IP or API key).
 pub struct RateLimiter {
+    /// Per-client token buckets keyed by client identifier.
     buckets: Mutex<HashMap<String, TokenBucket>>,
+    /// Rate limit configuration applied to every bucket.
     config: RateLimitConfig,
 }
 
 impl RateLimiter {
+    /// Creates a new rate limiter with the given config.
     pub fn new(config: RateLimitConfig) -> Self {
         Self {
             buckets: Mutex::new(HashMap::new()),
@@ -136,6 +143,7 @@ fn client_ip(req: &Request) -> String {
     "unknown".to_string()
 }
 
+/// Axum middleware that enforces rate limits per client IP using Redis counters.
 pub async fn rate_limit(
     axum::extract::State(state): axum::extract::State<crate::AppState>,
     req: Request,

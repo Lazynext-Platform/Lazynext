@@ -104,17 +104,25 @@ export type MediaSortKey = "name" | "type" | "duration" | "size";
 export type MediaSortOrder = "asc" | "desc";
 
 interface AssetsPanelStore {
+	/** Currently active tab. */
 	activeTab: Tab;
+	/** Set the active tab. */
 	setActiveTab: (tab: Tab) => void;
+	/** Media ID to highlight after navigation. */
 	highlightMediaId: string | null;
+	/** Jump to the media panel and highlight a media item. */
 	requestRevealMedia: (mediaId: string) => void;
+	/** Clear the highlight state. */
 	clearHighlight: () => void;
-
-	/* Media */
+	/** Media grid/list view mode. */
 	mediaViewMode: MediaViewMode;
+	/** Set the media view mode. */
 	setMediaViewMode: (mode: MediaViewMode) => void;
+	/** Current media sort key. */
 	mediaSortBy: MediaSortKey;
+	/** Current media sort order. */
 	mediaSortOrder: MediaSortOrder;
+	/** Set both media sort key and order. */
 	setMediaSort: (args: { key: MediaSortKey; order: MediaSortOrder }) => void;
 }
 

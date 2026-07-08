@@ -8,10 +8,15 @@
 import { useRef, useCallback } from "react";
 
 interface UseInfiniteScrollOptions {
+	/** Callback invoked when more data should be loaded. */
 	onLoadMore: () => void;
+	/** Whether there is more data to load. */
 	hasMore: boolean;
+	/** Whether data is currently loading. */
 	isLoading: boolean;
+	/** Pixel distance from the bottom to trigger a load. */
 	threshold?: number;
+	/** Whether infinite scroll is active. */
 	enabled?: boolean;
 }
 

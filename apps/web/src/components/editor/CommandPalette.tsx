@@ -39,13 +39,21 @@ import { cn } from "@/utils/ui";
 import { useEditorState } from "./useEditorState";
 
 interface PaletteCommand {
+	/** Unique command identifier. */
 	id: string;
+	/** Display label for the command. */
 	label: string;
+	/** Short description of what the command does. */
 	description: string;
+	/** Category group for organizing commands. */
 	category: string;
+	/** Icon component from lucide-react. */
 	icon: React.ElementType;
+	/** Keyboard shortcut hint (e.g. "Cmd+K"). */
 	shortcut?: string;
+	/** Handler invoked when the command is executed. */
 	action: () => void;
+	/** Search keywords for fuzzy matching. */
 	keywords: string[];
 }
 

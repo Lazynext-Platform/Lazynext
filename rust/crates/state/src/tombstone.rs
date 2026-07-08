@@ -24,10 +24,12 @@ pub struct TombstoneEntry {
 /// Tombstones mark entities as deleted so they stay deleted after merge.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TombstoneMap {
+    /// Map of entity id to its tombstone (deletion) entry.
     inner: HashMap<String, TombstoneEntry>,
 }
 
 impl TombstoneMap {
+    /// Create a new, empty tombstone map.
     pub fn new() -> Self {
         Self {
             inner: HashMap::new(),
@@ -79,10 +81,12 @@ impl TombstoneMap {
         before - self.inner.len()
     }
 
+    /// Number of tombstones currently tracked.
     pub fn len(&self) -> usize {
         self.inner.len()
     }
 
+    /// Whether there are no tombstones.
     pub fn is_empty(&self) -> bool {
         self.inner.is_empty()
     }
@@ -98,6 +102,7 @@ impl TombstoneMap {
 }
 
 impl Default for TombstoneMap {
+    // Returns a new, empty tombstone map.
     fn default() -> Self {
         Self::new()
     }

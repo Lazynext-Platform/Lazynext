@@ -2,12 +2,19 @@
 import type { ElementBounds } from "@/preview/element-bounds";
 
 export interface FreeformPathPoint {
+	/** Unique point identifier. */
 	id: string;
+	/** Anchor X position (0-1 normalized). */
 	x: number;
+	/** Anchor Y position (0-1 normalized). */
 	y: number;
+	/** Incoming control point X offset from anchor. */
 	inX: number;
+	/** Incoming control point Y offset from anchor. */
 	inY: number;
+	/** Outgoing control point X offset from anchor. */
 	outX: number;
+	/** Outgoing control point Y offset from anchor. */
 	outY: number;
 }
 
@@ -246,7 +253,9 @@ export function getFreeformCanvasGeometry({
 }
 
 export interface CanvasPoint {
+	/** X coordinate in canvas space. */
 	x: number;
+	/** Y coordinate in canvas space. */
 	y: number;
 }
 
@@ -290,13 +299,21 @@ function getCanvasPointBounds({ points }: { points: CanvasPoint[] }): {
 }
 
 export interface FreeformCanvasSegment {
+	/** Segment index in the path. */
 	index: number;
+	/** ID of the start point. */
 	startPointId: string;
+	/** ID of the end point. */
 	endPointId: string;
+	/** Start point in canvas coordinates. */
 	start: CanvasPoint;
+	/** Start outgoing handle in canvas coordinates. */
 	startOut: CanvasPoint;
+	/** End incoming handle in canvas coordinates. */
 	endIn: CanvasPoint;
+	/** End point in canvas coordinates. */
 	end: CanvasPoint;
+	/** SVG path data for this segment. */
 	pathData: string;
 }
 

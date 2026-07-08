@@ -6,29 +6,48 @@ import { Command, type CommandResult } from "@/commands";
 // --- Mocks ---
 
 interface MockEditorCore {
+	/** Mock selection subsystem. */
 	selection: {
+		/** Captures the current selection as a snapshot. */
 		getSnapshot: () => MockSnapshot;
+		/** Restores selection from a previously captured snapshot. */
 		restoreSnapshot: (opts: { snapshot: MockSnapshot }) => void;
+		/** Applies a partial selection patch and returns updated snapshot. */
 		applySelectionPatch: (opts: {
+			/** Patch data to merge into the selection. */
 			patch: MockSelectionPatch;
 		}) => MockSnapshot | undefined;
 	};
+	/** Mock scenes subsystem. */
 	scenes: {
+		/** Returns the active scene if one is selected. */
 		getActiveSceneOrNull: () => { tracks: unknown } | null;
 	};
+	/** Mock timeline subsystem. */
 	timeline: {
+		/** Replaces the current tracks with new track data. */
 		updateTracks: (tracks: unknown) => void;
 	};
 }
 
 interface MockSnapshot {
+	/** Selected element IDs in the mock snapshot. */
+	selectedElements: string[];
+}
+
+interface MockSnapshot {
+	/** Selected element IDs in the mock snapshot. */
 	selectedElements: string[];
 }
 
 interface MockSelectionPatch {
+	/** Updated element selection. */
 	selectedElements?: string[];
+	/** Updated keyframe selection. */
 	selectedKeyframes?: unknown[];
+	/** Updated keyframe selection anchor. */
 	keyframeSelectionAnchor?: unknown;
+	/** Updated mask point selection. */
 	selectedMaskPoints?: unknown;
 }
 

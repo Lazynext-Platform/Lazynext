@@ -1,5 +1,6 @@
 {
 	"name": "@lazynext/pre-processing",
+	"description": "Lazynext Pre-Processing — Python FastAPI service for media analysis (transcription, rotoscoping, motion tracking, proxy generation).",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {

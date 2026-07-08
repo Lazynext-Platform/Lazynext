@@ -11,13 +11,18 @@ import type { ProjectRecord } from "./transformers/types";
 import { getProjectId, isRecord } from "./transformers/utils";
 
 export interface StorageMigrationResult {
+	/** Number of projects that were migrated. */
 	migratedCount: number;
 }
 
 export interface MigrationProgress {
+	/** Whether a migration is currently in progress. */
 	isMigrating: boolean;
+	/** Source version being migrated from. */
 	fromVersion: number | null;
+	/** Target version being migrated to. */
 	toVersion: number | null;
+	/** Name of the project currently being migrated. */
 	projectName: string | null;
 }
 

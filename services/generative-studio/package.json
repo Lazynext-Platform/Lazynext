@@ -1,5 +1,6 @@
 {
 	"name": "@lazynext/generative-studio",
+	"description": "Lazynext Generative Studio — Python FastAPI service for AI media generation (video diffusion, dubbing, upscaling, stem splitting).",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {

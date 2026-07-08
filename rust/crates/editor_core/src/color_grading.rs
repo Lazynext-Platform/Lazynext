@@ -9,8 +9,11 @@ use wasm_bindgen::prelude::*;
 /// In-place color grading processor for RGBA frame buffers.
 #[wasm_bindgen]
 pub struct ColorGradingProcessor {
+    /// Contrast multiplier around the 0.5 midpoint.
     contrast: f32,
+    /// Additive brightness offset.
     brightness: f32,
+    /// Saturation multiplier on color difference from luma.
     saturation: f32,
 }
 

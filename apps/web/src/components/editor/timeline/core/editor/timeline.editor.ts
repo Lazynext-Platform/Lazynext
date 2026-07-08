@@ -56,27 +56,43 @@ export type TimelineEditorEvent =
  * Type for timeline operation context
  */
 export interface TimelineOperationContext {
+	/** Identifier for the timeline context. */
 	contextId: string;
+	/** Sets the total timeline duration. */
 	setTotalDuration: (duration: number) => void;
+	/** Sets the current project state in history. */
 	setPresent: (data: ProjectJSON) => void;
+	/** Performs an undo and returns the resulting project. */
 	handleUndo: () => ProjectJSON | null;
+	/** Performs a redo and returns the resulting project. */
 	handleRedo: () => ProjectJSON | null;
+	/** Clears the undo/redo history. */
 	handleResetHistory: () => void;
+	/** Notifies that the change log should be updated. */
 	updateChangeLog: () => void;
+	/** Dispatches a timeline action with an optional payload. */
 	setTimelineAction?: (action: string, payload?: unknown) => void;
 }
 
 export interface TrackUpsertInput {
+	/** Optional existing track ID to update. */
 	id?: string;
+	/** Track name. */
 	name: string;
+	/** Optional track type. */
 	type?: string;
+	/** Optional track language. */
 	language?: string;
+	/** Optional custom track properties. */
 	props?: Record<string, unknown>;
 }
 
 export interface TrackOverlapIssue {
+	/** ID of the overlapping element. */
 	elementId: string;
+	/** ID of the element it overlaps with. */
 	overlapsWithElementId: string;
+	/** ID of the track containing the overlap. */
 	trackId: string;
 }
 

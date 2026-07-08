@@ -10,15 +10,22 @@
 import React from "react";
 
 export interface RemoteCursor {
+	/** Unique peer identifier. */
 	peerId: string;
+	/** Display name of the remote user. */
 	userName: string;
+	/** Color assigned to this user's cursor. */
 	color: string;
+	/** Cursor X position on the canvas. */
 	x: number;
+	/** Cursor Y position on the canvas. */
 	y: number;
+	/** Optional IDs of elements the user has selected. */
 	selection?: string[];
 }
 
 interface CursorsOverlayProps {
+	/** Array of remote cursor positions to render. */
 	cursors: RemoteCursor[];
 }
 

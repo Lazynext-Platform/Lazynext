@@ -18,19 +18,30 @@ import {
 import type { MediaTime } from "@/wasm";
 
 interface UseTimelineZoomProps {
+	/** Ref to the timeline container element. */
 	containerRef: RefObject<HTMLDivElement | null>;
+	/** Minimum allowed zoom level. */
 	minZoom?: number;
+	/** Initial zoom level. */
 	initialZoom?: number;
+	/** Initial horizontal scroll offset. */
 	initialScrollLeft?: number;
+	/** Initial playhead time to restore. */
 	initialPlayheadTime?: MediaTime;
+	/** Ref to the tracks scroll element. */
 	tracksScrollRef: RefObject<HTMLDivElement | null>;
+	/** Ref to the ruler scroll element. */
 	rulerScrollRef: RefObject<HTMLDivElement | null>;
 }
 
 interface UseTimelineZoomReturn {
+	/** Current zoom level. */
 	zoomLevel: number;
+	/** Sets the zoom level. */
 	setZoomLevel: (zoomLevel: number | ((prev: number) => number)) => void;
+	/** Wheel event handler for zooming. */
 	handleWheel: (event: ReactWheelEvent) => void;
+	/** Saves the current scroll position. */
 	saveScrollPosition: () => void;
 }
 

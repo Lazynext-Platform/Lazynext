@@ -25,6 +25,14 @@ Welcome to the Lazynext documentation. Lazynext is an enterprise-grade, multi-pl
 | [**Agent SDK Guide**](agent-sdk-guide.md) | TypeScript and Python SDK quick start, streaming queries, search and slash commands, memory and rules, example use cases |
 | [**CONTRIBUTING.md**](../CONTRIBUTING.md) | Contribution guidelines, code style, commit conventions, PR process, testing requirements |
 
+### Architecture Deep-Dives
+
+| Document | Description |
+|----------|-------------|
+| [**CRDT Collaboration Model**](references/architecture-crdt.md) | LWW registers, vector clocks, tombstones, operation log, convergence guarantees, sync flow |
+| [**GPU Compositor Pipeline**](references/architecture-compositor.md) | FrameDescriptor, render pipeline, blend modes, effects, masks, color management, surface targets |
+| [**System Data Flow**](references/architecture-data-flow.md) | Cross-process map: interactive edits, collaboration, AI copilot, pre-processing, export, persistence |
+
 ---
 
 ## Mastery Framework

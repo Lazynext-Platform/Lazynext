@@ -27,6 +27,7 @@ const HISTORY_KEY = "feedback-history";
 const MAX_HISTORY = 20;
 
 interface FeedbackFormValues {
+	/** Feedback message text. */
 	message: string;
 }
 

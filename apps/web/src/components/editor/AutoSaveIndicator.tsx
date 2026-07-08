@@ -14,6 +14,7 @@ import { cn } from "@/utils/ui";
 type SaveStatus = "saved" | "saving" | "unsaved" | "offline" | "error";
 
 interface AutoSaveIndicatorProps {
+	/** Additional CSS classes. */
 	className?: string;
 }
 

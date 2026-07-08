@@ -3,9 +3,13 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // Types mapped from Rust's lazynext_core::engine
 interface Clip {
+  /** Unique clip identifier. */
   id: string;
+  /** Human-readable clip name. */
   name: string;
+  /** Start frame on the timeline. */
   start: number;
+  /** End frame on the timeline. */
   end: number;
 }
 

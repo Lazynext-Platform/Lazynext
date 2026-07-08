@@ -10,10 +10,15 @@ import type { GroupTrackSection } from "./types";
 
 /** Describes a track's position in the display order and section. */
 export interface TrackPlacement {
+	/** Track identifier. */
 	trackId: string;
+	/** Type of the track. */
 	trackType: TimelineTrack["type"];
+	/** Section the track belongs to. */
 	section: GroupTrackSection;
+	/** Index within the track's section. */
 	sectionIndex: number;
+	/** Index in the overall display order. */
 	displayIndex: number;
 }
 

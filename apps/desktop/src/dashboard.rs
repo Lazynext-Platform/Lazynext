@@ -15,19 +15,29 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use tokio::sync::Mutex;
 
+/// Project dashboard view showing recent projects and create/open actions.
 pub struct Dashboard {
+    /// Application version string.
     pub version: String,
+    /// Shared CRDT NLE state for the project.
     pub nle: Arc<Mutex<NLEState>>,
+    /// Core rendering/editing engine.
     pub engine: Arc<Mutex<CoreEngine>>,
+    /// Tokio runtime handle for blocking async work.
     pub rt_handle: tokio::runtime::Handle,
+    /// Paths of recently opened projects.
     pub recent_projects: Vec<String>,
+    /// Flag set when a recent project should be added.
     pub recent_add_clicked: Rc<Cell<bool>>,
+    /// Path of the recent project pending addition.
     pub recent_add_path: Rc<Cell<Option<String>>>,
+    /// Active UI theme.
     #[allow(dead_code)]
     pub theme: Arc<Theme>,
 }
 
 impl Dashboard {
+    /// Create a new dashboard, loading the list of recent projects from disk.
     pub fn new(
         nle: Arc<Mutex<NLEState>>,
         engine: Arc<Mutex<CoreEngine>>,
@@ -47,6 +57,7 @@ impl Dashboard {
         }
     }
 
+    // Returns the path to the recent-projects JSON file under the user's home directory.
     fn recent_projects_path() -> std::path::PathBuf {
         let home = std::env::var("HOME")
             .or_else(|_| std::env::var("USERPROFILE"))
@@ -56,6 +67,7 @@ impl Dashboard {
             .join("recent_projects.json")
     }
 
+    // Loads up to 5 recent project paths from disk, returning empty on failure.
     fn load_recent_projects() -> Vec<String> {
         let path = Self::recent_projects_path();
         if let Ok(data) = std::fs::read_to_string(&path)
@@ -66,6 +78,7 @@ impl Dashboard {
         Vec::new()
     }
 
+    // Writes the current recent-projects list to disk as JSON.
     fn save_recent_projects(&self) {
         let path = Self::recent_projects_path();
         if let Some(parent) = path.parent() {
@@ -77,6 +90,7 @@ impl Dashboard {
         );
     }
 
+    // Moves a project path to the front of the recent list (capped at 5) and persists it.
     fn add_recent_project(&mut self, path: &str) {
         self.recent_projects.retain(|p| p != path);
         self.recent_projects.insert(0, path.to_string());
@@ -86,6 +100,7 @@ impl Dashboard {
 }
 
 impl Render for Dashboard {
+    // Builds the dashboard view: project list, recent files, and create/open actions.
     fn render(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> impl IntoElement {
         let bg = rgb(0x1a1a1a);
         let accent = rgb(0x00d4df);

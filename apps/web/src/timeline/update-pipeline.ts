@@ -20,24 +20,34 @@ type ElementUpdateField = keyof TimelineElement | string;
 
 /** Context provided to update rules so they can reason about sibling tracks/elements. */
 export interface ElementUpdateContext {
+	/** All tracks in the current scene. */
 	tracks: SceneTracks;
+	/** Identifier of the track being updated. */
 	trackId: string;
 }
 
 interface ElementUpdateRuleResult {
+	/** The element after the rule has been applied. */
 	element: TimelineElement;
+	/** Fields that were modified by this rule. */
 	changedFields?: ElementUpdateField[];
 }
 
 interface ElementUpdateRuleParams {
+	/** The element being updated. */
 	element: TimelineElement;
+	/** Snapshot of the element before any rules were applied. */
 	originalElement: TimelineElement;
+	/** The user-supplied partial update. */
 	patch: Partial<TimelineElement>;
+	/** Context with sibling track/element info. */
 	context: ElementUpdateContext;
 }
 
 interface ElementUpdateRule {
+	/** Field names that trigger this rule when changed. */
 	triggers: ElementUpdateField[];
+	/** Apply the rule and return the updated element. */
 	apply: (params: ElementUpdateRuleParams) => ElementUpdateRuleResult;
 }
 

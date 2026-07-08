@@ -26,11 +26,17 @@ export const metadata: Metadata = {
 };
 
 interface Contributor {
+	/** GitHub user ID. */
 	id: number;
+	/** GitHub username. */
 	login: string;
+	/** Avatar URL. */
 	avatar_url: string;
+	/** GitHub profile URL. */
 	html_url: string;
+	/** Contribution count. */
 	contributions: number;
+	/** Account type (User or Bot). */
 	type: string;
 }
 

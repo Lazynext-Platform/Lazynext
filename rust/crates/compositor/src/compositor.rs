@@ -29,23 +29,36 @@ const MASK_SHADER_SOURCE: &str = include_str!("shaders/mask.wgsl");
 
 /// Options for rendering a frame directly to a surface.
 pub struct RenderFrameOptions<'a, 'surface> {
+    /// The frame descriptor describing layers, effects, and canvas.
     pub frame: &'a FrameDescriptor,
+    /// The target wgpu surface to present the composed frame onto.
     pub surface: &'a wgpu::Surface<'surface>,
 }
 
 /// GPU-accelerated compositor that renders layers, effects, masks, and text
 /// into output textures or surfaces.
 pub struct Compositor {
+    /// Store of GPU textures keyed by ID.
     textures: TextureStore,
+    /// Pool of reusable intermediate render textures.
     texture_pool: TexturePool,
+    /// GPU effect pass pipeline.
     effects: EffectPipeline,
+    /// Mask feathering pipeline.
     masks: MaskFeatherPipeline,
+    /// MSDF text rendering pipeline.
     msdf: MSDFPipeline,
+    /// Bind group layout for layer uniform buffers.
     layer_uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline for the layer transform/color pass.
     layer_pipeline: wgpu::RenderPipeline,
+    /// Bind group layout for blend uniform buffers.
     blend_uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline for the blend pass.
     blend_pipeline: wgpu::RenderPipeline,
+    /// Bind group layout for mask uniform buffers.
     mask_uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline for the mask pass.
     mask_pipeline: wgpu::RenderPipeline,
 }
 
@@ -66,44 +79,73 @@ pub enum CompositorError {
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct LayerUniformBuffer {
+    /// Output resolution in pixels [width, height].
     resolution: [f32; 2],
+    /// Layer center position in pixels.
     center: [f32; 2],
+    /// Layer size in pixels [width, height].
     size: [f32; 2],
+    /// Rotation angle in radians.
     rotation_radians: f32,
+    /// Layer opacity (0.0–1.0).
     opacity: f32,
+    /// Horizontal flip flag (1.0 = flipped).
     flip_x: f32,
+    /// Vertical flip flag (1.0 = flipped).
     flip_y: f32,
+    /// Brightness multiplier.
     brightness: f32,
+    /// Contrast multiplier.
     contrast: f32,
+    /// Saturation multiplier.
     saturation: f32,
+    /// Grayscale amount (0.0–1.0).
     grayscale: f32,
+    /// Pixelate amount.
     pixelate: f32,
+    /// Edge detection amount.
     edge_detect: f32,
+    /// Crop insets [left, top, right, bottom].
     crop: [f32; 4],
+    /// Corner border radius.
     border_radius: f32,
+    /// Sepia amount (0.0–1.0).
     sepia: f32,
+    /// Color invert amount (0.0–1.0).
     invert: f32,
+    /// Hue rotation in degrees.
     hue_rotate: f32,
+    /// RGBA drop shadow color.
     shadow_color: [f32; 4],
+    /// Drop shadow offset distance.
     shadow_distance: f32,
+    /// Drop shadow angle in degrees.
     shadow_angle: f32,
+    /// Drop shadow blur radius.
     shadow_blur: f32,
+    /// Padding for uniform buffer alignment.
     shadow_padding: f32,
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct BlendUniformBuffer {
+    /// Blend mode shader code.
     blend_mode: u32,
+    /// Luma key threshold for color keying.
     luma_key_threshold: f32,
+    /// Luma key tolerance for color keying.
     luma_key_tolerance: f32,
+    /// Padding for uniform buffer alignment.
     _padding: [u32; 1],
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct MaskUniformBuffer {
+    /// Mask inversion flag (1.0 = inverted).
     inverted: f32,
+    /// Padding for uniform buffer alignment.
     _padding: [f32; 3],
 }
 
@@ -426,6 +468,11 @@ impl Compositor {
         Ok(results)
     }
 
+    /// Composites and renders a single frame to the target surface.
+    ///
+    /// Recycles per-frame textures, acquires the surface texture, and encodes
+    /// the layer/blend/effect passes described by `options` into a GPU command
+    /// buffer for submission. Returns a [`CompositorError`] on GPU failure.
     pub fn render_frame(
         &mut self,
         context: &GpuContext,

@@ -21,7 +21,9 @@ import {
 } from "@/services/renderer/gpu-renderer";
 
 interface EditorProviderProps {
+	/** Unique project identifier to load. */
 	projectId: string;
+	/** Child components rendered after project loads. */
 	children: React.ReactNode;
 }
 

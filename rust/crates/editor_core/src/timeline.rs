@@ -7,6 +7,7 @@ use crate::models::Project;
 
 /// Manages timeline composition and drives the real-time preview pipeline.
 pub struct TimelineManager {
+    /// The project whose timeline is being composed.
     project: Project,
 }
 

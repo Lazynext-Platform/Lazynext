@@ -6,6 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
+/// A layer compositing blend mode (17 Porter-Duff / separable modes).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum BlendMode {

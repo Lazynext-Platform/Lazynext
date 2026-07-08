@@ -9,6 +9,7 @@ import type { TimelineElement } from "@/timeline";
 import type { PlacementTimeSpan } from "./types";
 
 interface TrackWithElements {
+	/** Elements currently on the track. */
 	elements: TimelineElement[];
 }
 

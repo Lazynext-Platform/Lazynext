@@ -36,17 +36,21 @@ pub mod wasm_sandbox;
 /// execution to update the actual timeline position.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditorAPI {
+    /// Total timeline duration in seconds.
     pub timeline_duration: f64,
+    /// Current playhead position in seconds.
     pub current_time: f64,
 }
 
 impl Default for EditorAPI {
+    // Returns an editor API with default timeline duration and position.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl EditorAPI {
+    /// Create a new editor API with default timeline duration and position.
     pub fn new() -> Self {
         Self {
             timeline_duration: 60.0,
@@ -61,11 +65,14 @@ impl EditorAPI {
 /// [`EditorAPI`] state. Plugins can query and manipulate the timeline
 /// through injected host functions like `setTime(t)`.
 pub struct PluginRuntime {
+    /// Shared editor timeline state exposed to scripts.
     api: Rc<RefCell<EditorAPI>>,
+    /// The sandboxed Boa JavaScript execution context.
     context: Context,
 }
 
 impl Default for PluginRuntime {
+    // Returns a new plugin runtime with a sandboxed Boa context.
     fn default() -> Self {
         Self::new()
     }

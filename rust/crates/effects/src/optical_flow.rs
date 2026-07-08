@@ -18,7 +18,9 @@
 /// Optical flow vector for a single pixel/block.
 #[derive(Clone, Copy, Debug, Default)]
 pub struct FlowVector {
+    /// Horizontal motion component in pixels.
     pub dx: f32,
+    /// Vertical motion component in pixels.
     pub dy: f32,
 }
 
@@ -38,6 +40,7 @@ pub struct OpticalFlowConfig {
 }
 
 impl Default for OpticalFlowConfig {
+    // Returns the default optical flow configuration.
     fn default() -> Self {
         Self {
             search_radius: 16,
@@ -54,13 +57,16 @@ impl Default for OpticalFlowConfig {
 /// Supports GPU compute (WebGPU Lucas-Kanade), CPU block matching with
 /// sub-pixel refinement, and optional AI-based (RIFE ONNX) flow estimation.
 pub struct OpticalFlowEngine {
+    /// Whether the engine has been initialized.
     pub is_initialized: bool,
+    /// Optical flow computation configuration.
     config: OpticalFlowConfig,
     /// WGSL compute shader source for GPU optical flow
     gpu_compute_shader: Option<String>,
 }
 
 impl Default for OpticalFlowEngine {
+    // Returns an optical flow engine with default configuration.
     fn default() -> Self {
         Self::new()
     }

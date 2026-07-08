@@ -183,21 +183,36 @@ impl TimelineSearch {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SlashCommand {
     /// Open a specific clip for detailed editing
-    Edit { clip_name_or_id: String },
+    Edit {
+        /// Name or ID of the clip to edit.
+        clip_name_or_id: String,
+    },
     /// Export the project with specific settings
     Export {
+        /// Optional export format override.
         format: Option<String>,
+        /// Optional target bitrate in kbps.
         bitrate_kbps: Option<u32>,
     },
     /// Jump to a timestamp or clip
-    Jump { target: String },
+    Jump {
+        /// Timestamp or clip target to jump to.
+        target: String,
+    },
     /// Apply a specific effect to a clip
     Effect {
+        /// Name of the effect to apply.
         effect_name: String,
+        /// Optional clip target for the effect.
         clip_target: Option<String>,
     },
     /// Show A/B comparison of two clips
-    Compare { clip_a: String, clip_b: String },
+    Compare {
+        /// First clip to compare.
+        clip_a: String,
+        /// Second clip to compare.
+        clip_b: String,
+    },
     /// Undo the last operation
     Undo,
     /// Redo the last undone operation
@@ -205,13 +220,18 @@ pub enum SlashCommand {
     /// Run full project analysis
     Analyze,
     /// Toggle agent mode (suggest / auto / full)
-    Agent { mode: Option<String> },
+    Agent {
+        /// Optional agent mode selection.
+        mode: Option<String>,
+    },
 }
 
 /// A parsed slash command with the resolved command type and raw arguments.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ParsedSlashCommand {
+    /// The resolved command type.
     pub command: SlashCommand,
+    /// The original raw command text.
     pub raw_text: String,
 }
 
@@ -276,6 +296,7 @@ impl SlashParser {
         })
     }
 
+    // Parses `format=` and `bitrate=` arguments for the `/export` command.
     fn parse_export_args(args: &str) -> SlashCommand {
         let mut format = None;
         let mut bitrate = None;
@@ -496,6 +517,7 @@ impl ConversationMemory {
 }
 
 impl Default for ConversationMemory {
+    // Returns an empty conversation memory.
     fn default() -> Self {
         Self::new()
     }
@@ -503,8 +525,11 @@ impl Default for ConversationMemory {
 
 #[derive(Serialize, Deserialize)]
 struct MemoryData {
+    /// Recent conversation turns.
     turns: Vec<ConversationTurn>,
+    /// Summaries of older turns.
     summaries: Vec<MemorySummary>,
+    /// Next turn ID to assign.
     next_turn_id: u64,
 }
 
@@ -526,6 +551,7 @@ pub enum ConversationState {
 /// Manages the conversation state machine for multi-turn AI interactions.
 /// Handles turn completion detection, follow-up generation, and interruptions.
 pub struct MultiTurnManager {
+    /// The current conversation state machine state.
     state: ConversationState,
     /// The current session's conversation memory
     memory: ConversationMemory,
@@ -676,6 +702,7 @@ impl MultiTurnManager {
 }
 
 impl Default for MultiTurnManager {
+    // Returns a manager with proactive follow-ups enabled.
     fn default() -> Self {
         Self::new(true)
     }
@@ -722,12 +749,14 @@ pub struct RevisionDiff {
 /// Manages revision snapshots of the project state, enabling named revision
 /// points, diffing, and rollback.
 pub struct RevisionHistory {
+    /// Stored revision snapshots, oldest first.
     snapshots: Vec<RevisionSnapshot>,
     /// Maximum number of snapshots to retain
     max_snapshots: usize,
 }
 
 impl RevisionHistory {
+    /// Creates a new revision history store that retains up to `max_snapshots` snapshots.
     pub fn new(max_snapshots: usize) -> Self {
         Self {
             snapshots: Vec::new(),
@@ -896,6 +925,7 @@ impl RevisionHistory {
 }
 
 impl Default for RevisionHistory {
+    // Returns a revision history retaining up to 100 snapshots.
     fn default() -> Self {
         Self::new(100)
     }

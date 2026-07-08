@@ -34,7 +34,9 @@ pub fn get_highest_insert_index_for_track(tracks: &SceneTracks, track_type: &str
 /// The computed placement for a new track: its insert index and an optional
 /// positional hint ("above" or "below").
 pub struct PreferredNewTrackPlacement {
+    /// Index at which to insert the new track.
     pub insert_index: usize,
+    /// Positional hint relative to the reference track ("above" | "below").
     pub insert_position: Option<String>,
 }
 

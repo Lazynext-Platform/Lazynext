@@ -11,7 +11,9 @@ const DEFAULT_FPS = 30;
 type LegacyMediaType = "image" | "video" | "audio";
 
 export interface V1ToV2Context {
+	/** Legacy tracks keyed by scene ID. */
 	legacyTracksBySceneId: Record<string, unknown[]>;
+	/** Pre-resolved media type for each media ID. */
 	mediaTypesById: Record<string, LegacyMediaType>;
 }
 
@@ -21,106 +23,185 @@ const EMPTY_V1_TO_V2_CONTEXT: V1ToV2Context = {
 };
 
 interface V2Transform {
+	/** Uniform scale factor. */
 	scale: number;
+	/** Pixel position on the canvas. */
 	position: { x: number; y: number };
+	/** Rotation in degrees. */
 	rotate: number;
 }
 
 interface V2VideoElement {
+	/** Unique element identifier. */
 	id: string;
+	/** Display name for the element. */
 	name: string;
+	/** Element type discriminator. */
 	type: "video";
+	/** Backlink to the uploaded media asset. */
 	mediaId: string;
+	/** Whether audio playback is muted. */
 	muted: boolean;
+	/** Whether the element is hidden. */
 	hidden: boolean;
+	/** Spatial transform (scale, position, rotation). */
 	transform: V2Transform;
+	/** Opacity from 0 to 1. */
 	opacity: number;
+	/** Element duration in ticks. */
 	duration: number;
+	/** Start time on the timeline in ticks. */
 	startTime: number;
+	/** Trim-in offset from the source start in ticks. */
 	trimStart: number;
+	/** Trim-out offset from the source end in ticks. */
 	trimEnd: number;
 }
 
 interface V2ImageElement {
+	/** Unique element identifier. */
 	id: string;
+	/** Display name for the element. */
 	name: string;
+	/** Element type discriminator. */
 	type: "image";
+	/** Backlink to the uploaded media asset. */
 	mediaId: string;
+	/** Element duration in ticks. */
 	duration: number;
+	/** Start time on the timeline in ticks. */
 	startTime: number;
+	/** Trim-in offset from the source start in ticks. */
 	trimStart: number;
+	/** Trim-out offset from the source end in ticks. */
 	trimEnd: number;
+	/** Whether the element is hidden. */
 	hidden: boolean;
+	/** Spatial transform (scale, position, rotation). */
 	transform: V2Transform;
+	/** Opacity from 0 to 1. */
 	opacity: number;
 }
 
 interface V2TextElement {
+	/** Unique element identifier. */
 	id: string;
+	/** Display name for the element. */
 	name: string;
+	/** Element type discriminator. */
 	type: "text";
+	/** Rendered text content. */
 	content: string;
+	/** Font size in pixels. */
 	fontSize: number;
+	/** CSS font-family value. */
 	fontFamily: string;
+	/** CSS color value. */
 	color: string;
+	/** Background styling configuration. */
 	background: {
+		/** Whether background is enabled. */
 		enabled: boolean;
+		/** Background fill color. */
 		color: string;
+		/** Corner radius for the background. */
 		cornerRadius: number;
+		/** Horizontal padding. */
 		paddingX: number;
+		/** Vertical padding. */
 		paddingY: number;
+		/** Horizontal offset from text. */
 		offsetX: number;
+		/** Vertical offset from text. */
 		offsetY: number;
 	};
+	/** Horizontal text alignment. */
 	textAlign: "left" | "center" | "right";
+	/** Font weight variant. */
 	fontWeight: "normal" | "bold";
+	/** Font style variant. */
 	fontStyle: "normal" | "italic";
+	/** Text decoration style. */
 	textDecoration: "none" | "underline" | "line-through";
+	/** Whether the element is hidden. */
 	hidden: boolean;
+	/** Spatial transform (scale, position, rotation). */
 	transform: V2Transform;
+	/** Opacity from 0 to 1. */
 	opacity: number;
+	/** Element duration in ticks. */
 	duration: number;
+	/** Start time on the timeline in ticks. */
 	startTime: number;
+	/** Trim-in offset from the source start in ticks. */
 	trimStart: number;
+	/** Trim-out offset from the source end in ticks. */
 	trimEnd: number;
 }
 
 interface V2AudioElement {
+	/** Unique element identifier. */
 	id: string;
+	/** Display name for the element. */
 	name: string;
+	/** Element type discriminator. */
 	type: "audio";
+	/** Origin of the audio clip. */
 	sourceType: "upload";
+	/** Backlink to the uploaded media asset. */
 	mediaId: string;
+	/** Volume level from 0 to 1. */
 	volume: number;
+	/** Element duration in ticks. */
 	duration: number;
+	/** Start time on the timeline in ticks. */
 	startTime: number;
+	/** Trim-in offset from the source start in ticks. */
 	trimStart: number;
+	/** Trim-out offset from the source end in ticks. */
 	trimEnd: number;
 }
 
 interface V2VideoTrack {
+	/** Unique track identifier. */
 	id: string;
+	/** Display name for the track. */
 	name: string;
+	/** Track type discriminator. */
 	type: "video";
+	/** Media elements on this track. */
 	elements: (V2VideoElement | V2ImageElement)[];
+	/** Whether this is the primary video track. */
 	isMain: boolean;
+	/** Whether the track is muted. */
 	muted: boolean;
+	/** Whether the track is hidden. */
 	hidden: boolean;
 }
 
 interface V2TextTrack {
+	/** Unique track identifier. */
 	id: string;
+	/** Display name for the track. */
 	name: string;
+	/** Track type discriminator. */
 	type: "text";
+	/** Text elements on this track. */
 	elements: V2TextElement[];
+	/** Whether the track is hidden. */
 	hidden: boolean;
 }
 
 interface V2AudioTrack {
+	/** Unique track identifier. */
 	id: string;
+	/** Display name for the track. */
 	name: string;
+	/** Track type discriminator. */
 	type: "audio";
+	/** Audio elements on this track. */
 	elements: V2AudioElement[];
+	/** Whether the track is muted. */
 	muted: boolean;
 }
 

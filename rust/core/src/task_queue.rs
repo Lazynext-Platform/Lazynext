@@ -10,21 +10,28 @@ use std::collections::BinaryHeap;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
+/// Current status of a background task.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum TaskStatus {
+    /// Task is waiting to be processed.
     #[serde(rename = "pending")]
     Pending,
+    /// Task is currently being executed.
     #[serde(rename = "running")]
     Running,
+    /// Task completed successfully.
     #[serde(rename = "completed")]
     Completed,
+    /// Task failed during execution.
     #[serde(rename = "failed")]
     Failed,
+    /// Task was cancelled before completion.
     #[serde(rename = "cancelled")]
     Cancelled,
 }
 
 impl std::fmt::Display for TaskStatus {
+    // Formats the status as its lowercase string name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TaskStatus::Pending => write!(f, "pending"),
@@ -36,21 +43,28 @@ impl std::fmt::Display for TaskStatus {
     }
 }
 
+/// Type of background task for prioritizing and routing execution.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub enum TaskType {
+    /// Automatic video export task.
     #[serde(rename = "auto_export")]
     AutoExport,
+    /// Automatic project backup task.
     #[serde(rename = "auto_backup")]
     AutoBackup,
+    /// Cleanup of unused or cached media files.
     #[serde(rename = "media_cleanup")]
     MediaCleanup,
+    /// Generation of lightweight proxy files.
     #[serde(rename = "proxy_generation")]
     ProxyGeneration,
+    /// Regeneration of clip thumbnails.
     #[serde(rename = "thumbnail_regeneration")]
     ThumbnailRegeneration,
 }
 
 impl std::fmt::Display for TaskType {
+    // Formats the task type as its lowercase string name.
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             TaskType::AutoExport => write!(f, "auto_export"),
@@ -65,20 +79,30 @@ impl std::fmt::Display for TaskType {
 /// A single background task with priority and type.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Task {
+    /// Unique task identifier.
     pub id: String,
+    /// Human-readable name of the task.
     pub name: String,
+    /// Serialized task payload (e.g., a project ID or file path).
     pub payload: String,
+    /// Priority of the task (0 = highest, 255 = lowest).
     pub priority: u8, // 0 = highest, 255 = lowest
+    /// Current execution status of the task.
     pub status: TaskStatus,
+    /// ISO-8601 timestamp of when the task was created.
     pub created_at: String,
+    /// Category of the task for routing and prioritization.
     pub task_type: TaskType,
 }
 
 /// Result of processing a single task.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TaskResult {
+    /// Identifier of the processed task.
     pub task_id: String,
+    /// Whether the task completed successfully.
     pub success: bool,
+    /// Human-readable result or error message.
     pub message: String,
 }
 
@@ -86,11 +110,14 @@ pub struct TaskResult {
 
 #[derive(Debug, Clone)]
 struct PrioritizedTask {
+    /// The wrapped task.
     task: Task,
+    /// Monotonic enqueue sequence, used to break priority ties (FIFO).
     enqueue_order: u64,
 }
 
 impl PartialEq for PrioritizedTask {
+    // Returns true if priority and enqueue order are equal.
     fn eq(&self, other: &Self) -> bool {
         self.task.priority == other.task.priority && self.enqueue_order == other.enqueue_order
     }
@@ -99,12 +126,14 @@ impl PartialEq for PrioritizedTask {
 impl Eq for PrioritizedTask {}
 
 impl PartialOrd for PrioritizedTask {
+    // Delegates to the total ordering.
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl Ord for PrioritizedTask {
+    // Orders so that lower priority number and earlier enqueue come first.
     fn cmp(&self, other: &Self) -> Ordering {
         // Reverse: lower priority number = higher priority
         other
@@ -117,13 +146,18 @@ impl Ord for PrioritizedTask {
 
 // ── Task Queue ─────────────────────────────────────────────────────────────
 
+/// Priority-based queue of background tasks backed by a binary heap.
 pub struct TaskQueue {
+    /// Priority heap of pending tasks.
     heap: BinaryHeap<PrioritizedTask>,
+    /// History of every task ever enqueued, with current status.
     all_tasks: Vec<Task>,
+    /// Monotonic counter assigning each task its enqueue order.
     enqueue_counter: u64,
 }
 
 impl TaskQueue {
+    /// Creates an empty task queue.
     pub fn new() -> Self {
         Self {
             heap: BinaryHeap::new(),
@@ -227,6 +261,7 @@ impl TaskQueue {
 
     // ── Internal execution ────────────────────────────────────────────
 
+    // Executes a task based on its type, returning a success result.
     fn execute_task(task: &Task) -> TaskResult {
         let message = match &task.task_type {
             TaskType::AutoExport => {
@@ -297,11 +332,13 @@ impl TaskQueue {
 }
 
 impl Default for TaskQueue {
+    // Returns an empty task queue.
     fn default() -> Self {
         Self::new()
     }
 }
 
+// Returns the current UTC time as an ISO 8601 string.
 fn now_iso() -> String {
     use std::time::SystemTime;
     let dur = SystemTime::now()

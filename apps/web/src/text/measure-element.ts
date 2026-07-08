@@ -16,15 +16,22 @@ import {
 } from "./primitives";
 
 export interface ResolvedTextBackground extends TextBackground {
+	/** Horizontal padding in pixels. */
 	paddingX: number;
+	/** Vertical padding in pixels. */
 	paddingY: number;
+	/** Horizontal offset from text position. */
 	offsetX: number;
+	/** Vertical offset from text position. */
 	offsetY: number;
+	/** Corner radius of the background box. */
 	cornerRadius: number;
 }
 
 export interface MeasuredTextElement extends MeasuredTextLayout {
+	/** Resolved background parameters with animation values applied. */
 	resolvedBackground: ResolvedTextBackground;
+	/** Bounding rectangle of the visual text element. */
 	visualRect: { left: number; top: number; width: number; height: number };
 }
 

@@ -13,9 +13,13 @@ import { useEditor } from "@/editor/use-editor";
 import { storageService } from "@/services/storage/service";
 
 interface StorageContextType {
+	/** Whether storage has been initialized. */
 	isInitialized: boolean;
+	/** Whether initialization is in progress. */
 	isLoading: boolean;
+	/** Whether storage is fully supported. */
 	hasSupport: boolean;
+	/** Initialization error message, if any. */
 	error: string | null;
 }
 
@@ -30,6 +34,7 @@ export function useStorage() {
 }
 
 interface StorageProviderProps {
+	/** Child nodes rendered within the provider. */
 	children: React.ReactNode;
 }
 

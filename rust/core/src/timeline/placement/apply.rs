@@ -9,7 +9,9 @@ use uuid::Uuid;
 /// The result of applying a placement decision: the updated scene tracks
 /// and the ID of the track that received the elements.
 pub struct ApplyPlacementResult {
+    /// Scene tracks after the placement was applied.
     pub updated_tracks: SceneTracks,
+    /// Identifier of the track that received the elements.
     pub target_track_id: String,
 }
 

@@ -326,8 +326,11 @@ function StickerSection({
 
 /** Props for an individual sticker in the browser grid. */
 interface StickerItemProps {
+	/** Sticker data to render. */
 	item: StickerData;
+	/** Whether to cap image size. */
 	shouldCapSize?: boolean;
+	/** Optional container CSS class. */
 	containerClassName?: string;
 }
 

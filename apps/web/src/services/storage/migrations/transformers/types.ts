@@ -7,7 +7,10 @@
 export type ProjectRecord = Record<string, unknown>;
 
 export interface MigrationResult<T> {
+	/** The migrated project. */
 	project: T;
+	/** Whether the migration was skipped. */
 	skipped: boolean;
+	/** Reason if migration was skipped. */
 	reason?: string;
 }

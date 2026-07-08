@@ -27,17 +27,26 @@ import type {
  * the WebGL upload path off the per-frame critical path for static content.
  */
 type RenderedCacheEntry = {
+	/** Discriminant marking a rendered cache entry. */
 	kind: "rendered";
+	/** Persistent backing canvas reused across frames. */
 	canvas: OffscreenCanvas;
+	/** Hash of the rendered content for cache validation. */
 	contentHash: string;
+	/** Texture width in pixels. */
 	width: number;
+	/** Texture height in pixels. */
 	height: number;
 };
 
 type ExternalCacheEntry = {
+	/** Discriminant marking an external cache entry. */
 	kind: "external";
+	/** Source image supplied externally. */
 	source: CanvasImageSource;
+	/** Texture width in pixels. */
 	width: number;
+	/** Texture height in pixels. */
 	height: number;
 };
 

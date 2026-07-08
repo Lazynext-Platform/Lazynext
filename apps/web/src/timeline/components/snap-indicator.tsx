@@ -15,10 +15,15 @@ import {
 } from "@/timeline";
 import { TIMELINE_LAYERS } from "./layers";
 interface SnapIndicatorProps {
+	/** Active snap point or null. */
 	snapPoint: SnapPoint | null;
+	/** Current zoom level. */
 	zoomLevel: number;
+	/** Whether the indicator is visible. */
 	isVisible: boolean;
+	/** Ref to the timeline container. */
 	timelineRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
 }
 

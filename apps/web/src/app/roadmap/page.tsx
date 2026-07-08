@@ -17,13 +17,18 @@ const LAST_UPDATED = "February 25, 2026";
 type StatusType = "complete" | "pending" | "default" | "info";
 
 interface Status {
+	/** Display text for the status badge. */
 	text: string;
+	/** Semantic status variant. */
 	type: StatusType;
 }
 
 interface RoadmapItem {
+	/** Feature title. */
 	title: string;
+	/** Feature description (Markdown). */
 	description: string;
+	/** Current completion status. */
 	status: Status;
 }
 

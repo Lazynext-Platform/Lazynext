@@ -1,5 +1,6 @@
 {
 	"name": "@lazynext/browser-extension",
+	"description": "Lazynext browser extension — Chrome MV3 capture tool that detects videos and sends frames to the timeline.",
 	"version": "0.1.0",
 	"private": true,
 	"type": "module",

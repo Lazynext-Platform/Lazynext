@@ -44,43 +44,66 @@ export type GraphEditorUnavailableReason =
 	| "selected-segment-is-flat";
 
 export interface GraphEditorComponentOption {
+	/** Component identifier key. */
 	key: string;
+	/** Human-readable component label. */
 	label: string;
 }
 
 interface GraphEditorPropertyOption {
+	/** Component identifier key. */
 	key: string;
+	/** Human-readable component label. */
 	label: string;
+	/** Scalar keyframe context for this option. */
 	context: ScalarGraphKeyframeContext;
+	/** All scalar contexts sharing this option. */
 	allContexts: ScalarGraphKeyframeContext[];
 }
 
 export interface GraphEditorResolvedSegment {
+	/** Animation property path of the segment. */
 	propertyPath: SelectedKeyframeRef["propertyPath"];
+	/** Identifier of the segment's leading keyframe. */
 	keyframeId: string;
+	/** Scalar keyframe context for the segment. */
 	context: ScalarGraphKeyframeContext;
+	/** All scalar contexts for the segment. */
 	allContexts: ScalarGraphKeyframeContext[];
+	/** Normalized cubic-bezier curve of the segment. */
 	cubicBezier: NormalizedCubicBezier;
+	/** Reference value span used for Y-axis scaling. */
 	referenceSpanValue: number;
 }
 
 interface GraphEditorBaseSelectionState {
+	/** Available component options for the selection. */
 	componentOptions: GraphEditorComponentOption[];
+	/** Currently active component key, if any. */
 	activeComponentKey: string | null;
+	/** Status or explanation message. */
 	message: string;
 }
 
 export interface GraphEditorUnavailableState extends GraphEditorBaseSelectionState {
+	/** Discriminant marking an unavailable state. */
 	status: "unavailable";
+	/** Reason the graph editor is unavailable. */
 	reason: GraphEditorUnavailableReason;
 }
 
 export interface GraphEditorReadyState extends GraphEditorBaseSelectionState {
+	/** Discriminant marking a ready state. */
 	status: "ready";
+	/** Track containing the edited element. */
 	trackId: string;
+	/** Edited element identifier. */
 	elementId: string;
+	/** The element being edited. */
 	element: TimelineElement;
+	/** Resolved editable segments. */
 	segments: GraphEditorResolvedSegment[];
+	/** Primary segment's normalized cubic-bezier curve. */
 	cubicBezier: NormalizedCubicBezier;
 }
 
@@ -89,7 +112,9 @@ export type GraphEditorSelectionState =
 	| GraphEditorReadyState;
 
 export interface GraphEditorCurvePatch {
+	/** Identifier of the keyframe to patch. */
 	keyframeId: string;
+	/** Curve patch to apply to the keyframe. */
 	patch: ScalarCurveKeyframePatch;
 }
 
@@ -236,9 +261,13 @@ function getReferenceSpanValue({
 }
 
 interface GraphEditorPropertySelection {
+	/** Animation property path. */
 	propertyPath: SelectedKeyframeRef["propertyPath"];
+	/** Identifier of the primary keyframe. */
 	keyframeId: string;
+	/** Identifier of the adjacent secondary keyframe, if any. */
 	secondaryKeyframeId: string | null;
+	/** Available property options. */
 	options: GraphEditorPropertyOption[];
 }
 

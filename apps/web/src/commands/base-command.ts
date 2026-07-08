@@ -3,6 +3,7 @@ import type { EditorSelectionPatch } from "@/selection/editor-selection";
 import type { ElementRef } from "@/timeline/types";
 
 export interface CommandResult {
+	/** Optional selection patch to apply after the command. */
 	selection?: EditorSelectionPatch;
 }
 

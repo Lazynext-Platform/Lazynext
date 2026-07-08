@@ -11,58 +11,91 @@ use sqlx::postgres::{PgPool, PgPoolOptions};
 /// Mirrors the Drizzle `user` table from `apps/web/src/db/schema.ts`.
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct User {
+    /// Unique user identifier.
     pub id: String,
+    /// Email address used for authentication and notifications.
     pub email: String,
+    /// Display name of the user.
     pub name: String,
+    /// Whether the user's email has been verified.
     pub email_verified: bool,
+    /// Avatar image URL, if any.
     pub image: Option<String>,
+    /// User role for RBAC (e.g. "user", "admin").
     pub role: String,
+    /// Dodo Payments customer ID for subscriptions.
     pub dodo_customer_id: Option<String>,
+    /// Remaining AI credits balance.
     pub ai_credits: i32,
+    /// Timestamp of user record creation.
     pub created_at: DateTime<Utc>,
+    /// Timestamp of last user record update.
     pub updated_at: DateTime<Utc>,
 }
 
 /// Mirrors the Drizzle `projects` table.
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Project {
+    /// Unique project identifier.
     pub id: String,
+    /// Owner user ID, if assigned.
     pub user_id: Option<String>,
+    /// Human-readable project name.
     pub name: String,
+    /// Frames per second for the project timeline.
     pub fps: i32,
+    /// Canvas width in pixels.
     pub width: i32,
+    /// Canvas height in pixels.
     pub height: i32,
+    /// Total duration of the project in frames.
     pub duration_frames: i32,
+    /// Serialized project data (tracks, clips, keyframes).
     pub data: Option<serde_json::Value>,
+    /// Timestamp of project creation.
     pub created_at: DateTime<Utc>,
+    /// Timestamp of last project update.
     pub updated_at: DateTime<Utc>,
 }
 
 /// Mirrors the Drizzle `subscriptions` table.
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
 pub struct Subscription {
+    /// Unique subscription identifier.
     pub id: String,
+    /// User ID that owns this subscription.
     pub user_id: String,
+    /// Dodo Payments subscription identifier.
     pub dodo_subscription_id: String,
+    /// Dodo Payments price plan identifier.
     pub dodo_price_id: String,
+    /// UTC timestamp when the current billing period ends.
     pub dodo_current_period_end: DateTime<Utc>,
+    /// Subscription tier (e.g. "free", "pro").
     pub tier: String,
+    /// Timestamp of subscription creation.
     pub created_at: DateTime<Utc>,
+    /// Timestamp of last subscription update.
     pub updated_at: DateTime<Utc>,
 }
 
 /// Lightweight metrics row returned by admin dashboard queries.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AdminMetrics {
+    /// Total number of registered users.
     pub total_users: i64,
+    /// Number of active paid subscriptions.
     pub active_subscriptions: i64,
+    /// Monthly recurring revenue in cents.
     pub monthly_recurring_revenue: i64,
 }
 
 /// PostgreSQL-backed data store with connection pooling, CRUD operations, and dev-mode fallback.
 #[derive(Clone)]
 pub struct DbStore {
+    /// Connection pool, absent when running in dev mode.
     pool: Option<PgPool>,
+    /// Whether the store is running without a database.
     is_dev_mode: bool,
 }
 
@@ -214,6 +247,7 @@ impl DbStore {
         Ok(())
     }
 
+    /// Updates the project data blob and `updated_at` timestamp.
     pub async fn update_project_data(
         &self,
         project_id: &str,

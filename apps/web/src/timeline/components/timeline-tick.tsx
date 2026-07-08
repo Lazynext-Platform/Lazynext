@@ -11,10 +11,15 @@ import { timelineTimeToSnappedPixels } from "@/timeline";
 import { formatRulerLabel } from "@/timeline/ruler-utils";
 
 interface TimelineTickProps {
+	/** Tick time in media time ticks. */
 	time: number;
+	/** Tick time in seconds. */
 	timeInSeconds: number;
+	/** Current zoom level. */
 	zoomLevel: number;
+	/** Project frame rate. */
 	fps: FrameRate;
+	/** Whether to render a label for this tick. */
 	showLabel: boolean;
 }
 

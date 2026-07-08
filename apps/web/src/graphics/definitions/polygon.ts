@@ -5,16 +5,24 @@ import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";
 import type { GraphicDefinition } from "../types";
 
 interface Point {
+	/** X coordinate. */
 	x: number;
+	/** Y coordinate. */
 	y: number;
 }
 
 interface PolygonParams {
+	/** Fill color. */
 	fill: string;
+	/** Stroke color. */
 	stroke: string;
+	/** Stroke width in pixels. */
 	strokeWidth: number;
+	/** Stroke alignment (inner/center/outer). */
 	strokeAlign: GraphicStrokeAlign;
+	/** Number of polygon sides. */
 	sides: number;
+	/** Corner rounding radius. */
 	cornerRadius: number;
 }
 

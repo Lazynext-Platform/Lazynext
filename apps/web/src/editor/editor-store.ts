@@ -14,11 +14,17 @@ import { DEFAULT_CANVAS_PRESETS } from "@/canvas/sizes";
 import type { TCanvasSize } from "@/project/types";
 
 interface EditorState {
+	/** Whether the editor is still initializing. */
 	isInitializing: boolean;
+	/** Whether editor panels have mounted. */
 	isPanelsReady: boolean;
+	/** Available canvas size presets. */
 	canvasPresets: TCanvasSize[];
+	/** Set the initializing flag. */
 	setInitializing: (loading: boolean) => void;
+	/** Set the panels-ready flag. */
 	setPanelsReady: (ready: boolean) => void;
+	/** Run the full editor initialization sequence. */
 	initializeApp: () => Promise<void>;
 }
 

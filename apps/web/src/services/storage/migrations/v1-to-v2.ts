@@ -16,7 +16,9 @@ import {
 import { isRecord } from "./transformers/utils";
 
 interface LegacyTimelineData {
+	/** Legacy track array from v1 storage. */
 	tracks: unknown[];
+	/** ISO timestamp of the last modification. */
 	lastModified: string;
 }
 

@@ -70,19 +70,27 @@ import {
 import { cn } from "@/utils/ui";
 
 type MasksTabProps = {
+	/** Element whose masks are being edited. */
 	element: MaskableElement;
+	/** Track containing the element. */
 	trackId: string;
 };
 
 type MaskItemProps = {
+	/** Track containing the element. */
 	trackId: string;
+	/** Element owning the mask. */
 	elementId: string;
+	/** The mask being displayed. */
 	mask: Mask;
+	/** Returns a preview handler for a mask param key. */
 	previewParam: (key: string) => (value: number | string | boolean) => void;
+	/** Commits pending mask changes. */
 	onCommit: () => void;
 };
 
 type EmptyViewProps = {
+	/** Callback to add a new mask. */
 	onAddMask: () => void;
 };
 

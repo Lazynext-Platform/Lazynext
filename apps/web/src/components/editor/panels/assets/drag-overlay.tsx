@@ -3,9 +3,13 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { UploadIcon } from "@hugeicons/core-free-icons";
 
 interface MediaDragOverlayProps {
+	/** Whether the overlay is visible. */
 	isVisible: boolean;
+	/** Whether media is currently being processed. */
 	isProcessing?: boolean;
+	/** Processing progress percentage. */
 	progress?: number;
+	/** Click handler for the overlay browse button. */
 	onClick?: () => void;
 }
 

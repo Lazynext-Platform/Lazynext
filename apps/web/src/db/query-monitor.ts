@@ -25,13 +25,18 @@
 // ── OpenTelemetry Types (inline to avoid hard dependency) ──────────────
 
 interface OtelSpan {
+	/** Set a single attribute on the span. */
 	setAttribute(key: string, value: string | number | boolean): void;
+	/** End the span. */
 	end(): void;
+	/** Record an exception against the span. */
 	recordException(error: Error): void;
+	/** Set the status code and message of the span. */
 	setStatus(status: { code: number; message: string }): void;
 }
 
 interface OtelTracer {
+	/** Start a new span with an optional set of options. */
 	startSpan(name: string, options?: Record<string, unknown>): OtelSpan;
 }
 
@@ -76,23 +81,39 @@ export interface QueryExecution {
 }
 
 export interface QueryStats {
+	/** Total number of tracked queries. */
 	totalQueries: number;
+	/** Number of queries that exceeded the slow threshold. */
 	slowQueries: number;
+	/** Number of queries that threw an error. */
 	failedQueries: number;
+	/** Average query duration in milliseconds. */
 	averageMs: number;
+	/** Minimum query duration in milliseconds. */
 	minMs: number;
+	/** Maximum query duration in milliseconds. */
 	maxMs: number;
+	/** 50th percentile duration in milliseconds. */
 	p50Ms: number;
+	/** 75th percentile duration in milliseconds. */
 	p75Ms: number;
+	/** 95th percentile duration in milliseconds. */
 	p95Ms: number;
+	/** 99th percentile duration in milliseconds. */
 	p99Ms: number;
 	/** Queries grouped by label */
 	byLabel: Record<string, {
+		/** Number of executions. */
 		count: number;
+		/** Average duration in milliseconds. */
 		averageMs: number;
+		/** Minimum duration in milliseconds. */
 		minMs: number;
+		/** Maximum duration in milliseconds. */
 		maxMs: number;
+		/** 95th percentile duration in milliseconds. */
 		p95Ms: number;
+		/** Number of slow executions. */
 		slowCount: number;
 	}>;
 	/** Recent slow queries */
@@ -102,16 +123,24 @@ export interface QueryStats {
 }
 
 export interface NPlusOneDetection {
+	/** Label of the query pattern flagged. */
 	label: string;
+	/** Number of identical queries observed within the window. */
 	count: number;
+	/** Detection window size in milliseconds. */
 	windowMs: number;
+	/** Timestamp when the pattern was detected. */
 	detectedAt: number;
 }
 
 export interface ExplainAnalyzeResult {
+	/** JSON query plan produced by EXPLAIN ANALYZE. */
 	queryPlan: string;
+	/** Actual execution time in milliseconds. */
 	executionTimeMs: number;
+	/** Query planning time in milliseconds. */
 	planningTimeMs: number;
+	/** Number of rows returned. */
 	rows: number;
 }
 
@@ -150,9 +179,12 @@ function startSpan(name: string): OtelSpan | null {
 // ── N+1 Detector ────────────────────────────────────────────────────────
 
 interface QueryTrace {
+	/** Query label. */
 	label: string;
+	/** Timestamp the query was recorded. */
 	timestamp: number;
-	hash: string; // Normalized query hash for comparison
+	/** Normalized query hash for comparison. */
+	hash: string;
 }
 
 class NPlusOneDetector {

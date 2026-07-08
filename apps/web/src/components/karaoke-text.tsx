@@ -9,12 +9,16 @@ import React from "react";
 import { useWasm } from "@/hooks/use-wasm";
 
 export type Word = {
+	/** The word text. */
 	text: string;
+	/** Start frame number. */
 	startFrame: number;
+	/** End frame number. */
 	endFrame: number;
 };
 
 export type KaraokeTextProps = {
+	/** Array of timed words to render. */
 	words: Word[];
 };
 

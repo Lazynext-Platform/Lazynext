@@ -16,15 +16,22 @@ import { OfflineStorage } from "../services/offline-storage";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface Clip {
+	/** Unique clip identifier. */
 	id: string;
+	/** Clip display name. */
 	name: string;
+	/** Start time in frames. */
 	start: number;
+	/** End time in frames. */
 	end: number;
 }
 
 interface MaskPoint {
+	/** X coordinate. */
 	x: number;
+	/** Y coordinate. */
 	y: number;
+	/** Apple Pencil pressure (0-1). */
 	pressure: number;
 }
 

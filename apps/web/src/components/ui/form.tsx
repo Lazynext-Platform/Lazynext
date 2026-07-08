@@ -22,8 +22,11 @@ import { Label } from "./label";
 const DRAFT_DEBOUNCE_MS = 500;
 
 export interface DraftStorage {
+	/** Retrieve a stored draft by key. */
 	getItem(key: string): string | null;
+	/** Persist a draft under the given key. */
 	setItem(key: string, value: string): void;
+	/** Remove a stored draft. */
 	removeItem(key: string): void;
 }
 
@@ -31,8 +34,11 @@ type FormProps<
 	TFieldValues extends FieldValues = FieldValues,
 	TContext = unknown,
 > = UseFormReturn<TFieldValues, TContext> & {
+	/** Form children to render. */
 	children: React.ReactNode;
+	/** Optional persistence key for draft saving. */
 	persistKey?: string;
+	/** Custom draft storage backend. */
 	storage?: DraftStorage;
 };
 
@@ -113,6 +119,7 @@ type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
 	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > = {
+	/** Field path name. */
 	name: TName;
 };
 
@@ -158,6 +165,7 @@ const useFormField = () => {
 };
 
 type FormItemContextValue = {
+	/** Unique form item identifier. */
 	id: string;
 };
 

@@ -32,6 +32,7 @@ import type { Bookmark, SceneTracks } from "@/timeline";
 // --- Session ---
 
 interface ScrubSession {
+	/** Discriminant marking an active scrubbing session. */
 	kind: "scrubbing";
 	/** True when scrub started from a ruler click (not the playhead handle). */
 	didStartFromRuler: boolean;
@@ -47,28 +48,46 @@ type Session = { kind: "idle" } | ScrubSession;
 
 /** Configuration for the playhead controller, provided by the React host. */
 export interface PlayheadConfig {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Total timeline duration. */
 	duration: MediaTime;
+	/** Returns the active project frame rate. */
 	getActiveProjectFps: () => FrameRate | null;
+	/** Returns whether Shift is currently held. */
 	isShiftHeld: () => boolean;
+	/** Returns whether playback is active. */
 	getIsPlaying: () => boolean;
+	/** Returns the ruler DOM element. */
 	getRulerEl: () => HTMLDivElement | null;
+	/** Returns the ruler scroll container. */
 	getRulerScrollEl: () => HTMLDivElement | null;
+	/** Returns the tracks scroll container. */
 	getTracksScrollEl: () => HTMLDivElement | null;
+	/** Returns the playhead DOM element. */
 	getPlayheadEl: () => HTMLDivElement | null;
+	/** Returns the current scene tracks. */
 	getSceneTracks: () => SceneTracks;
+	/** Returns the current scene bookmarks. */
 	getSceneBookmarks: () => Bookmark[];
+	/** Seeks the playhead to the given time. */
 	seek: (time: MediaTime) => void;
+	/** Sets scrubbing state. */
 	setScrubbing: (isScrubbing: boolean) => void;
+	/** Updates the timeline view state. */
 	setTimelineViewState: (viewState: {
+		/** Current zoom level */
 		zoomLevel: number;
+		/** Horizontal scroll offset */
 		scrollLeft: number;
+		/** Current playhead position */
 		playheadTime: MediaTime;
 	}) => void;
 }
 
 /** Ref wrapper so the controller always reads the latest config. */
 export interface PlayheadConfigRef {
+	/** Latest playhead configuration snapshot. */
 	readonly current: PlayheadConfig;
 }
 

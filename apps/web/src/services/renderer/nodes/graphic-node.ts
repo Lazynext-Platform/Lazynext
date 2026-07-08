@@ -13,11 +13,14 @@ import {
 } from "./visual-node";
 
 export interface GraphicNodeParams extends VisualNodeParams {
+	/** Graphic definition identifier. */
 	definitionId: string;
+	/** Parameter values for the graphic. */
 	params: ParamValues;
 }
 
 export interface ResolvedGraphicNodeState extends ResolvedVisualNodeState {
+	/** Parameter values resolved at the current time. */
 	resolvedParams: ParamValues;
 }
 

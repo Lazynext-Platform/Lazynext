@@ -22,12 +22,19 @@ import type { ExportFormat, ExportQuality } from "@/export";
 import { CanvasRenderer } from "./canvas-renderer";
 
 type ExportParams = {
+	/** Output width in pixels. */
 	width: number;
+	/** Output height in pixels. */
 	height: number;
+	/** Output frame rate. */
 	fps: FrameRate;
+	/** Container/codec output format. */
 	format: ExportFormat;
+	/** Encoding quality preset. */
 	quality: ExportQuality;
+	/** Whether to include an audio track. */
 	shouldIncludeAudio?: boolean;
+	/** Optional audio buffer to encode. */
 	audioBuffer?: AudioBuffer;
 };
 
@@ -39,9 +46,13 @@ const qualityMap = {
 };
 
 export type SceneExporterEvents = {
+	/** Emitted with export progress (0–1). */
 	progress: [progress: number];
+	/** Emitted with the encoded output buffer on completion. */
 	complete: [buffer: ArrayBuffer];
+	/** Emitted with an error when export fails. */
 	error: [error: Error];
+	/** Emitted when the export is cancelled. */
 	cancelled: [];
 };
 

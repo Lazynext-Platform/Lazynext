@@ -8,13 +8,21 @@ import {
 } from "mediabunny";
 
 interface VideoSinkData {
+	/** Mediabunny input instance. */
 	input: Input;
+	/** Canvas sink for frame extraction. */
 	sink: CanvasSink;
+	/** Async frame iterator or null. */
 	iterator: AsyncGenerator<WrappedCanvas, void, unknown> | null;
+	/** Current frame or null. */
 	currentFrame: WrappedCanvas | null;
+	/** Next prefetched frame or null. */
 	nextFrame: WrappedCanvas | null;
+	/** Timestamp of last accessed frame. */
 	lastTime: number;
+	/** Whether a prefetch is in flight. */
 	prefetching: boolean;
+	/** Current prefetch promise or null. */
 	prefetchPromise: Promise<void> | null;
 }
 

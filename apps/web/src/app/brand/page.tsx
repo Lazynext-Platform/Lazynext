@@ -37,17 +37,26 @@ const ALL_ASSETS = () => ASSET_SECTIONS.flatMap((s) => s.assets);
 type AssetTheme = "dark" | "light" | "icon";
 
 interface AssetVariant {
+	/** Asset image source URL. */
 	src: string;
+	/** Background theme. */
 	theme: AssetTheme;
+	/** Human-readable label. */
 	label: string;
+	/** Intrinsic width in pixels. */
 	width: number;
+	/** Intrinsic height in pixels. */
 	height: number;
 }
 
 interface AssetSection {
+	/** Section heading. */
 	title: string;
+	/** Section description. */
 	description: string;
+	/** Number of grid columns. */
 	cols: "1" | "2";
+	/** Asset variants in this section. */
 	assets: AssetVariant[];
 }
 

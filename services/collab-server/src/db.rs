@@ -10,6 +10,7 @@ use std::env;
 
 /// Persistent store for project collaboration states.
 pub struct DbStore {
+    /// PostgreSQL connection pool backing the collaboration state store.
     pool: PgPool,
 }
 

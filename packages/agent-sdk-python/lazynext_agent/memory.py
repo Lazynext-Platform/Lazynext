@@ -30,13 +30,22 @@ class MemoryManager:
         """Store a value under the given key.
 
         Overwrites any existing entry with the same key.
+
+        Args:
+            key: The lookup key.
+            value: Any value to associate with the key.
         """
         self._store[key] = (value, datetime.now(timezone.utc).timestamp())
 
     def recall(self, key: str, default: T | None = None) -> T | None:
         """Retrieve a previously stored value.
 
-        Returns *default* when the key does not exist.
+        Args:
+            key: The key to look up.
+            default: Value returned when the key is absent.
+
+        Returns:
+            The stored value, or ``default`` when the key does not exist.
         """
         entry = self._store.get(key)
         if entry is None:
@@ -46,7 +55,11 @@ class MemoryManager:
     def forget(self, key: str) -> bool:
         """Remove a single key from the store.
 
-        Returns ``True`` if the key existed, ``False`` otherwise.
+        Args:
+            key: The key to remove.
+
+        Returns:
+            ``True`` if the key existed and was removed, ``False`` otherwise.
         """
         if key in self._store:
             del self._store[key]

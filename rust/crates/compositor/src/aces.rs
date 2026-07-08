@@ -9,8 +9,11 @@
 
 /// Configuration for the ACES color pipeline.
 pub struct AcesColorPipeline {
+    /// Whether the ACES color pipeline is active.
     pub is_enabled: bool,
+    /// Input device transform mapping camera colors to ACES AP0.
     pub input_transform: InputDeviceTransform,
+    /// Output device transform mapping ACES AP0 to display colors.
     pub output_transform: OutputDeviceTransform,
 }
 
@@ -49,6 +52,7 @@ pub enum OutputDeviceTransform {
 }
 
 impl Default for AcesColorPipeline {
+    // Returns the default ACES color pipeline.
     fn default() -> Self {
         Self::new()
     }

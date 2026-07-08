@@ -5,14 +5,20 @@ import { MIN_MASK_DIMENSION } from "@/masks/dimensions";
 import type { RectangleMaskParams } from "@/masks/types";
 
 type CenterMaskParams = {
+	/** Normalized X center of the mask (0–1). */
 	centerX: number;
+	/** Normalized Y center of the mask (0–1). */
 	centerY: number;
 };
 
 type SnapGeometryParams = CenterMaskParams & {
+	/** Mask rotation in degrees. */
 	rotation?: number;
+	/** Normalized mask width (0–1). */
 	width?: number;
+	/** Normalized mask height (0–1). */
 	height?: number;
+	/** Mask scale factor. */
 	scale?: number;
 };
 

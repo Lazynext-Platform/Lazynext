@@ -97,8 +97,11 @@ export function syncTimelineFromEngine(_engine: CrdtEngine): void {
  * PropertyUpdate), so we translate before applying.
  */
 export interface OrchestratorPatch {
+	/** CRUD operation type: add, remove, or replace. */
 	op: "add" | "remove" | "replace";
+	/** JSON-pointer path to the target entity. */
 	path: string;
+	/** Data payload for add and replace operations. */
 	value?: Record<string, unknown>;
 }
 

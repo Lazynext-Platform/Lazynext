@@ -41,11 +41,14 @@ pub struct AudioGenerationOptions {
 /// Gracefully degrades when API keys are not configured by returning
 /// descriptive errors instead of panicking.
 pub struct GenerativeModel {
+    /// Whether the model has been initialized.
     pub is_loaded: bool,
+    /// Replicate API token, if configured via environment.
     api_key: Option<String>,
 }
 
 impl Default for GenerativeModel {
+    // Returns a new generative AI model.
     fn default() -> Self {
         Self::new()
     }

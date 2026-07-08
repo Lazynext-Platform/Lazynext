@@ -13,7 +13,9 @@ use wgpu::{Buffer, ComputePipeline, Device, Queue};
 /// color grading.
 #[allow(dead_code)]
 pub struct ColorScopesAnalyzer {
+    /// Compute pipeline that builds the luminance histogram.
     pipeline: ComputePipeline,
+    /// Output buffer holding the histogram buckets.
     buffer: Buffer,
 }
 

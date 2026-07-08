@@ -23,16 +23,24 @@ import {
 } from "lucide-react";
 
 interface Message {
+	/** Message sender role. */
 	role: "system" | "user" | "tool" | "suggestion";
+	/** Message text content. */
 	content: string;
+	/** Tool name for tool messages. */
 	toolName?: string;
+	/** Agent suggestion cards. */
 	suggestions?: AgentSuggestion[];
 }
 
 interface AgentSuggestion {
+	/** Unique suggestion identifier. */
 	id: string;
+	/** Suggestion title. */
 	title: string;
+	/** Suggestion description text. */
 	description: string;
+	/** Suggestion category. */
 	category: string;
 }
 

@@ -10,12 +10,19 @@
 import React from "react";
 
 interface SocialMetaProps {
+	/** Page title for social sharing. */
 	title: string;
+	/** Page description for social sharing. */
 	description: string;
+	/** Canonical URL. */
 	url?: string;
+	/** Open Graph image URL. */
 	image?: string;
+	/** Content type. */
 	type?: "website" | "article";
+	/** Article publish date (ISO 8601). */
 	publishedTime?: string;
+	/** Article author name. */
 	author?: string;
 }
 

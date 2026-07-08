@@ -108,11 +108,17 @@ async function* convertToAsyncIterable(
 }
 
 interface RenderJob {
+	/** Unique job identifier. */
 	id: string;
+	/** Identifier of the project being rendered. */
 	projectId: string;
+	/** Current job status. */
 	status: "queued" | "rendering" | "completed" | "failed";
+	/** Render progress percentage (0–100). */
 	progress: number;
+	/** Output format ('mp4', 'dcp', 'aaf'). */
 	format: string; // 'mp4', 'dcp', 'aaf'
+	/** ISO timestamp of when the job was created. */
 	createdAt: string;
 }
 
@@ -453,28 +459,45 @@ app.get("/api/v1/jobs/:jobId", async (req: Request, res: Response) => {
 // lazy-init worker and static references) ────────────────────────────
 
 interface TimelineClip {
+	/** Unique clip identifier. */
 	id: string;
+	/** Clip type discriminator. */
 	type: string;
+	/** Optional clip name. */
 	name?: string;
+	/** Optional source media URL. */
 	url?: string;
+	/** Start time on the timeline in seconds. */
 	start: number;
+	/** End time on the timeline in seconds. */
 	end: number;
+	/** Optional clip duration in seconds. */
 	duration?: number;
+	/** Optional keyframe animation data. */
 	animations?: Record<string, any>;
 }
 
 interface TimelineTrack {
+	/** Unique track identifier. */
 	id: string;
+	/** Track kind (e.g. video, audio). */
 	kind: string;
+	/** Clips contained in the track. */
 	clips: TimelineClip[];
 }
 
 interface TimelineData {
+	/** Tracks that make up the timeline. */
 	tracks: TimelineTrack[];
+	/** Output width in pixels. */
 	width?: number;
+	/** Output height in pixels. */
 	height?: number;
+	/** Output frame rate. */
 	framerate?: number;
+	/** Total timeline duration in seconds. */
 	duration: number;
+	/** Background color as an RGBA tuple. */
 	bgColor?: [number, number, number, number];
 }
 

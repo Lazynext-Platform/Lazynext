@@ -16,12 +16,19 @@ let producerInstance: Producer | null = null;
 let kafkaConnected = false;
 
 interface KafkaConfig {
+  /** Unique client identifier for the Kafka cluster. */
   clientId: string;
+  /** Comma-separated list of broker addresses. */
   brokers: string[];
+  /** Whether to use SSL/TLS. */
   ssl?: boolean;
+  /** SASL authentication configuration. */
   sasl?: {
+    /** SASL authentication mechanism. */
     mechanism: "plain" | "scram-sha-256" | "scram-sha-512";
+    /** SASL username. */
     username: string;
+    /** SASL password. */
     password: string;
   };
 }

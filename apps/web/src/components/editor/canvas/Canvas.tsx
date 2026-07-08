@@ -8,11 +8,17 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
  */
 
 interface CanvasProps {
+	/** Project data object. */
 	project: any;
+	/** Current frame index. */
 	frame: number;
+	/** Whether to show title/action safe margins. */
 	showSafeMargins?: boolean;
+	/** Whether to show rule-of-thirds grid. */
 	showGrid?: boolean;
+	/** Viewport zoom factor. */
 	zoom?: number;
+	/** Callback when zoom changes. */
 	onZoomChange?: (zoom: number) => void;
 }
 

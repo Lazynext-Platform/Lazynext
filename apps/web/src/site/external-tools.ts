@@ -2,9 +2,13 @@
 import { OcDataBuddyIcon, OcMarbleIcon } from "@/components/icons";
 
 export type ExternalTool = {
+	/** Tool display name. */
 	name: string;
+	/** Tool description text. */
 	description: string;
+	/** Tool URL. */
 	url: string;
+	/** Icon component for the tool. */
 	icon: React.ElementType;
 };
 

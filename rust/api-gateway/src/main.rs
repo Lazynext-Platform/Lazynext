@@ -50,8 +50,11 @@ use rbac::{AuthClaims, WorkspaceRole};
 /// Outbound webhook payload sent when a render completes.
 #[derive(Serialize, utoipa::ToSchema)]
 struct WebhookPayload {
+    /// Type of the event (e.g. "render_complete").
     event_type: String,
+    /// ID of the project the event relates to.
     project_id: String,
+    /// Human-readable message describing the event.
     message: String,
 }
 
@@ -62,16 +65,25 @@ struct WebhookPayload {
 /// in `Arc` for efficient sharing across Axum handlers.
 #[derive(Clone)]
 pub struct AppState {
+    /// The shared NLE engine state.
     nle: Arc<Mutex<NLEState>>,
+    /// The autonomous AI editor.
     editor: Arc<AutonomousEditor>,
+    /// The PostgreSQL-backed database store.
     db: Arc<DbStore>,
+    /// Redis-backed WebSocket state.
     ws_state: Arc<ws::WsState>,
+    /// Scheduler for cron-based editing routines.
     scheduler: Arc<Mutex<RoutineScheduler>>,
+    /// Manager for messaging channel integrations.
     channel_manager: Arc<Mutex<ChannelManager>>,
+    /// Priority queue for background tasks.
     task_queue: Arc<Mutex<TaskQueue>>,
 }
 
 #[tokio::main]
+// Server entry point: initializes tracing, database, NLE state, webhook
+// dispatcher, and router, then serves the API gateway on port 8005.
 async fn main() {
     dotenvy::dotenv().ok();
 
@@ -327,6 +339,7 @@ async fn main() {
         (status = 200, description = "Service is healthy")
     )
 )]
+// Handles the health-check request, reporting service and database status.
 async fn health_handler(State(state): State<AppState>) -> Json<Value> {
     let db_status = if state.db.health_check().await.is_ok() {
         "ok"
@@ -694,13 +707,16 @@ async fn find_user_by_dodo_customer(
 /// Request body for AI video generation.
 #[derive(serde::Deserialize)]
 pub struct GeneratePayload {
+    /// Natural-language prompt describing the video to generate.
     pub prompt: String,
 }
 
 /// Request body for AI text-to-speech synthesis.
 #[derive(serde::Deserialize)]
 pub struct TtsPayload {
+    /// Text to convert to speech.
     pub text: String,
+    /// Optional voice profile ID for speech synthesis.
     pub voice_id: Option<String>,
 }
 
@@ -811,12 +827,19 @@ async fn handle_tts(
 /// Request body for adding a clip to a timeline track.
 #[derive(serde::Deserialize)]
 struct AddClipPayload {
+    /// Target track ID, if specified.
     track_id: Option<String>,
+    /// Kind of track to create if none exist.
     track_kind: Option<String>,
+    /// Optional explicit clip ID.
     clip_id: Option<String>,
+    /// Type of clip (e.g. "video", "audio").
     clip_type: Option<String>,
+    /// Display name for the clip.
     name: Option<String>,
+    /// Start position in frames.
     start: Option<u32>,
+    /// End position in frames.
     end: Option<u32>,
 }
 
@@ -881,7 +904,9 @@ async fn handle_add_clip(
 /// Request body for AI-driven media ingestion.
 #[derive(serde::Deserialize)]
 struct IngestPayload {
+    /// URL of the media to ingest.
     url: Option<String>,
+    /// Source label for the media (e.g. "upload").
     source: Option<String>,
 }
 
@@ -952,8 +977,11 @@ async fn handle_ai_ingest(
 /// Request body for connecting a third-party platform via OAuth.
 #[derive(serde::Deserialize)]
 struct IntegrationPayload {
+    /// Target platform name (e.g. "youtube").
     platform: String,
+    /// OAuth authorization code, if completing the flow.
     code: Option<String>,
+    /// OAuth redirect URI.
     redirect_uri: Option<String>,
 }
 
@@ -1114,6 +1142,7 @@ async fn handle_integration_connect(
 // response. The gateway adds authentication (JWT validated by RBAC
 // middleware) and rate limiting.
 
+// Returns the base URL of the social-publish microservice.
 fn social_publish_url() -> String {
     std::env::var("SOCIAL_PUBLISH_URL").unwrap_or_else(|_| "http://localhost:8007".to_string())
 }
@@ -1215,9 +1244,13 @@ async fn handle_social_schedule(Extension(claims): Extension<AuthClaims>) -> Jso
 /// Request body for creating a scheduled AI editing routine.
 #[derive(serde::Deserialize)]
 struct CreateRoutinePayload {
+    /// Display name for the routine.
     name: String,
+    /// Cron schedule expression.
     cron_expression: String,
+    /// AI editing prompt to execute on each run.
     prompt: String,
+    /// Whether the routine is enabled.
     #[serde(default)]
     enabled: bool,
 }
@@ -1280,6 +1313,7 @@ async fn handle_list_routines(
 /// Path parameter for a routine ID.
 #[derive(serde::Deserialize)]
 struct RoutineIdPath {
+    /// Routine identifier from the path.
     id: String,
 }
 
@@ -1332,8 +1366,11 @@ async fn handle_execute_routine(
 /// Request body for registering a channel webhook.
 #[derive(serde::Deserialize)]
 struct RegisterWebhookPayload {
+    /// Channel type name (e.g. "telegram").
     channel: String,
+    /// Webhook URL to register.
     url: String,
+    /// Shared secret for request validation.
     secret: String,
 }
 
@@ -1413,13 +1450,18 @@ async fn handle_list_channels(
 /// Request body for enqueueing a background task.
 #[derive(serde::Deserialize)]
 struct EnqueueTaskPayload {
+    /// Display name for the task.
     name: String,
+    /// Serialized task payload.
     payload: String,
+    /// Task priority (lower runs first).
     #[serde(default = "default_priority")]
     priority: u8,
+    /// Task type discriminator.
     task_type: String,
 }
 
+// Default task priority when none is supplied.
 fn default_priority() -> u8 {
     100
 }
@@ -1494,6 +1536,7 @@ async fn handle_list_tasks(
 /// Path parameter for a task ID.
 #[derive(serde::Deserialize)]
 struct TaskIdPath {
+    /// Task identifier from the path.
     id: String,
 }
 
@@ -1647,6 +1690,7 @@ fn sanitize_filename(name: &str) -> String {
 /// Query parameters for requesting a presigned upload URL.
 #[derive(serde::Deserialize)]
 struct PresignedUrlQuery {
+    /// Target blob filename for the presigned URL.
     filename: String,
 }
 
@@ -1764,6 +1808,7 @@ async fn handle_stream_ingest(
 /// Request body for finalizing a chunked stream ingest session.
 #[derive(serde::Deserialize, utoipa::ToSchema)]
 struct StreamCompletePayload {
+    /// Identifier of the chunked stream session to finalize.
     session_id: String,
 }
 

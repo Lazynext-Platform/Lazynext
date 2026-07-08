@@ -13,9 +13,13 @@ import { getCumulativeHeightBefore, getTrackHeight } from "./track-layout";
 type TimelineElementRef = { trackId: string; elementId: string };
 
 interface SelectionRectangle {
+	/** Left edge in content pixels. */
 	left: number;
+	/** Top edge in content pixels. */
 	top: number;
+	/** Right edge in content pixels. */
 	right: number;
+	/** Bottom edge in content pixels. */
 	bottom: number;
 }
 

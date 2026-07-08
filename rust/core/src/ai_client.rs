@@ -6,42 +6,54 @@ use serde::{Deserialize, Serialize};
 /// A rotoscoping request containing a video ID and the object to mask.
 #[derive(Serialize)]
 pub struct RotoscopeRequest {
+    /// Identifier of the video to rotoscope.
     pub video_id: String,
+    /// Description of the object to mask.
     pub object_prompt: String,
 }
 
 /// A rotoscoping response with a success flag and optional mask sequence URL.
 #[derive(Deserialize, Debug)]
 pub struct RotoscopeResponse {
+    /// Whether the rotoscoping operation succeeded.
     pub success: bool,
+    /// URL of the generated mask sequence, if any.
     pub mask_sequence_url: Option<String>,
 }
 
 /// A NeRF extraction request containing a video ID.
 #[derive(Serialize)]
 pub struct NeRFRequest {
+    /// Identifier of the video to extract a NeRF from.
     pub video_id: String,
 }
 
 /// A NeRF extraction response with optional mesh and point cloud URLs.
 #[derive(Deserialize, Debug)]
 pub struct NeRFResponse {
+    /// Whether the extraction succeeded.
     pub success: bool,
+    /// URL of the generated mesh, if any.
     pub mesh_url: Option<String>,
+    /// URL of the generated point cloud, if any.
     pub point_cloud_url: Option<String>,
 }
 
 /// A stem separation request with an audio ID and desired stem count.
 #[derive(Serialize)]
 pub struct StemSplitRequest {
+    /// Identifier of the audio to split.
     pub audio_id: String,
+    /// Number of stems to separate into.
     pub stems: u32,
 }
 
 /// A stem separation response with a map of stem name to audio URL.
 #[derive(Deserialize, Debug)]
 pub struct StemSplitResponse {
+    /// Whether the separation succeeded.
     pub success: bool,
+    /// Map of stem name to its audio URL.
     pub stems: std::collections::HashMap<String, String>,
 }
 
@@ -49,12 +61,16 @@ pub struct StemSplitResponse {
 /// and audio stem splitting. Communicates with the pre-processing and
 /// generative studio microservices.
 pub struct AIClient {
+    /// Underlying HTTP client used for all requests.
     client: Client,
+    /// Base URL of the pre-processing microservice.
     pre_processing_url: String,
+    /// Base URL of the generative studio microservice.
     generative_studio_url: String,
 }
 
 impl Default for AIClient {
+    // Returns a client configured with the default service URLs.
     fn default() -> Self {
         Self::new()
     }

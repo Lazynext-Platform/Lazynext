@@ -44,11 +44,17 @@ import type { FrameRate } from "lazynext-wasm";
 // --- Session ---
 
 interface ResizeSession {
+	/** Discriminant marking an active resize session. */
 	kind: "active";
+	/** Side being resized (left or right). */
 	side: ResizeSide;
+	/** Pointer X at resize start. */
 	startX: number;
+	/** Active project frame rate. */
 	fps: FrameRate;
+	/** Elements participating in the group resize. */
 	members: GroupResizeMember[];
+	/** Current computed resize result. */
 	result: GroupResizeResult | null;
 }
 
@@ -58,21 +64,33 @@ type Session = { kind: "idle" } | ResizeSession;
 
 /** Configuration for the element resize controller. */
 export interface ResizeConfig {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Whether snap-to-edge is enabled. */
 	snappingEnabled: boolean;
+	/** Returns whether Shift is currently held. */
 	isShiftHeld: () => boolean;
+	/** Returns the current scene tracks. */
 	getSceneTracks: () => SceneTracks;
+	/** Returns the current playhead time. */
 	getCurrentPlayheadTime: () => MediaTime;
+	/** Returns the active project frame rate. */
 	getActiveProjectFps: () => FrameRate | null;
+	/** Currently selected elements. */
 	selectedElements: ElementRef[];
+	/** Discards any active element preview. */
 	discardPreview: () => void;
+	/** Renders preview element updates. */
 	previewElements: (updates: GroupResizeUpdate[]) => void;
+	/** Commits element resize updates. */
 	commitElements: (updates: GroupResizeUpdate[]) => void;
+	/** Called when the snap point changes. */
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 
 /** Ref wrapper for resize config. */
 export interface ResizeConfigRef {
+	/** Latest resize configuration snapshot. */
 	readonly current: ResizeConfig;
 }
 

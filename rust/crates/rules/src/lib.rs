@@ -86,6 +86,7 @@ pub struct RuleContext {
 /// are treated as global and always match.
 #[derive(Debug, Clone, Default)]
 pub struct RuleSet {
+    /// Loaded rules, kept sorted by ascending priority.
     rules: Vec<Rule>,
 }
 
@@ -205,6 +206,7 @@ impl RuleSet {
     }
 }
 
+// Parses a rule file's YAML frontmatter and markdown body into a `Rule`.
 fn parse_rule_file(content: &str, source: &Path) -> Result<Rule, String> {
     let mut lines_iter = content.lines().enumerate();
     let mut frontmatter_lines = String::new();

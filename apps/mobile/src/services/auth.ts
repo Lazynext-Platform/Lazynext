@@ -13,20 +13,29 @@
 const AUTH_BASE_URL = process.env.EXPO_PUBLIC_AUTH_URL || "http://localhost:3000";
 
 export interface AuthResponse {
+	/** Response payload on success. */
 	data?: Record<string, unknown>;
+	/** Error details on failure. */
 	error?: { message: string; status?: number };
 }
 
 export interface SessionUser {
+	/** Unique user identifier. */
 	id: string;
+	/** User's display name. */
 	name: string;
+	/** User's email address. */
 	email: string;
+	/** Whether the email is verified. */
 	emailVerified: boolean;
+	/** Optional avatar image URL. */
 	image?: string;
 }
 
 export interface Session {
+	/** Session bearer token. */
 	token: string;
+	/** Authenticated user details. */
 	user: SessionUser;
 }
 

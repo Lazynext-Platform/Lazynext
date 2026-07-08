@@ -26,7 +26,9 @@ pub fn can_element_go_on_track(element_type: &str, track_type: &str) -> bool {
 /// The result of validating whether an element type is compatible with a
 /// track type.
 pub struct ValidationResult {
+    /// Whether the element/track combination is valid.
     pub is_valid: bool,
+    /// Description of the incompatibility, if any.
     pub error_message: Option<String>,
 }
 

@@ -12,12 +12,19 @@
 /// with separate attack and release coefficients. Supports sidechain processing
 /// where one signal controls gain reduction applied to another.
 pub struct Compressor {
+    /// Level in dB above which compression begins.
     threshold_db: f64,
+    /// Compression ratio (e.g. 4.0 = 4:1).
     ratio: f64,
+    /// Soft-knee width in dB.
     knee_width_db: f64,
+    /// Envelope smoothing coefficient for the attack phase.
     attack_coeff: f64,
+    /// Envelope smoothing coefficient for the release phase.
     release_coeff: f64,
+    /// Make-up gain as a linear multiplier.
     makeup_gain_linear: f64,
+    /// Current gain-reduction envelope value in dB.
     envelope: f64,
 }
 

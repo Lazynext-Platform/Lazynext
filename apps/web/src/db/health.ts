@@ -29,88 +29,141 @@ import { type Sql } from "postgres";
 export type HealthStatus = "healthy" | "degraded" | "unhealthy";
 
 export interface DbHealthResponse {
+	/** Aggregate health status. */
 	status: HealthStatus;
+	/** ISO-8601 timestamp of the check. */
 	timestamp: string;
+	/** Server uptime details. */
 	uptime: {
+		/** Uptime in seconds. */
 		seconds: number;
+		/** Human-readable uptime string (e.g. "2h 15m 30s"). */
 		human: string;
 	};
+	/** Per-check results. */
 	checks: {
+		/** Database connectivity check result. */
 		connectivity: HealthCheckItem;
+		/** Connection pool check result. */
 		pool: HealthCheckItem & PoolDetails;
+		/** Replication lag check result. */
 		replication: HealthCheckItem & ReplicationDetails;
+		/** Disk space check result. */
 		diskSpace: HealthCheckItem & DiskSpaceDetails;
+		/** Long-running query check result. */
 		longRunningQueries: HealthCheckItem & LongRunningQueryDetails;
+		/** Deadlock detection check result. */
 		deadlocks: HealthCheckItem & DeadlockDetails;
+		/** Migration status check result. */
 		migrations: HealthCheckItem & MigrationDetails;
 	};
+	/** Summary count of checks by status. */
 	summary: {
+		/** Total number of checks performed. */
 		total: number;
+		/** Number of healthy checks. */
 		healthy: number;
+		/** Number of degraded checks. */
 		degraded: number;
+		/** Number of unhealthy checks. */
 		unhealthy: number;
 	};
 }
 
 export interface HealthCheckItem {
+	/** Status for this specific check. */
 	status: HealthStatus;
+	/** Query latency in milliseconds. */
 	latencyMs: number;
+	/** Optional human-readable status detail. */
 	message?: string;
+	/** Error message if the check failed. */
 	error?: string;
 }
 
 export interface PoolDetails {
+	/** Number of active connections. */
 	activeConnections: number;
+	/** Number of idle connections. */
 	idleConnections: number;
+	/** Number of connections waiting for a free slot. */
 	waitingConnections: number;
+	/** Total number of connections in the pool. */
 	totalConnections: number;
+	/** Configured maximum connection count. */
 	maxConnections: number;
+	/** Connection pool utilization as percentage. */
 	utilizationPercent: number;
 }
 
 export interface ReplicationDetails {
+	/** Whether this database is a replica. */
 	isReplica: boolean;
+	/** Replication lag in seconds. */
 	lagSeconds: number;
+	/** Replication lag in bytes. */
 	lagBytes: number;
+	/** Number of connected replicas. */
 	replicaCount: number;
 }
 
 export interface DiskSpaceDetails {
+	/** Human-readable database size (e.g. "256 MB"). */
 	databaseSize: string;
+	/** Database size in bytes. */
 	databaseSizeBytes: number;
+	/** Disk utilization as percentage. */
 	diskUsedPercent: number;
+	/** Free disk space in bytes. */
 	diskFreeBytes: number;
+	/** Number of tables exceeding the bloat threshold. */
 	tablesWithBloat: number;
 }
 
 export interface LongRunningQueryDetails {
+	/** Number of long-running queries detected. */
 	count: number;
+	/** Duration threshold in seconds. */
 	thresholdSeconds: number;
+	/** Details of each long-running query. */
 	queries: Array<{
+		/** Process ID of the query. */
 		pid: number;
+		/** Duration of the query in seconds. */
 		durationSeconds: number;
+		/** Query text or description. */
 		query: string;
+		/** Current query state. */
 		state: string;
 	}>;
 }
 
 export interface DeadlockDetails {
+	/** Number of deadlocks in the last 24 hours. */
 	recentDeadlocks24h: number;
+	/** ISO-8601 timestamp of the most recent deadlock. */
 	lastDeadlockAt: string | null;
 }
 
 export interface MigrationDetails {
+	/** Number of applied migrations. */
 	appliedMigrations: number;
+	/** Hash of the latest applied migration. */
 	latestMigration: string;
+	/** Number of pending migrations. */
 	pendingMigrations: number;
 }
 
 // ── Config ───────────────────────────────────────────────────────────────
 
 export interface HealthCheckConfig {
+	/** Threshold in seconds for flagging a query as long-running. */
 	longQueryThresholdSeconds: number;
+	/** Maximum acceptable replication lag in seconds. */
 	maxAcceptableLagSeconds: number;
+	/** Disk usage percentage that triggers a degraded status. */
 	maxDiskUsagePercent: number;
+	/** Timeout in milliseconds for connectivity checks. */
 	connectivityTimeoutMs: number;
 }
 

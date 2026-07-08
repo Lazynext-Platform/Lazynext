@@ -3,11 +3,17 @@
 import { NextResponse } from "next/server";
 
 interface VitalsPayload {
+	/** Metric name (e.g. LCP, CLS, INP). */
 	name: string;
+	/** Measured metric value. */
 	value: number;
+	/** Performance rating bucket. */
 	rating: string;
+	/** Page path the metric was recorded on. */
 	page: string;
+	/** Change since the last report. */
 	delta?: number;
+	/** Unique metric instance identifier. */
 	id?: string;
 }
 

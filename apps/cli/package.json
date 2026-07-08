@@ -1,5 +1,6 @@
 {
   "name": "@lazynext/cli",
+  "description": "Lazynext CLI — Node wrapper for the headless Rust renderer (scripted/CI exports).",
   "version": "0.1.0",
   "private": true,
   "bin": {

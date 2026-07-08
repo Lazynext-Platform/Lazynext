@@ -95,8 +95,11 @@ enum ServerMessage {
 /// Shared application state: project-room broadcast channels,
 /// peer-to-room mappings, and a database handle.
 struct AppState {
+    /// Broadcast channels per project room for fan-out to connected peers.
     rooms: DashMap<String, tokio::sync::broadcast::Sender<String>>,
+    /// Maps authenticated peer IDs to their current project room.
     peer_rooms: DashMap<String, String>,
+    /// Optional database handle for project state persistence.
     db: Option<Arc<DbStore>>,
 }
 
@@ -122,6 +125,7 @@ fn verify_token(token: &str) -> Result<String, String> {
         .to_string())
 }
 
+// Loads the auth secret from env or Docker secret file, panicking if unset.
 fn get_auth_secret() -> String {
     if let Ok(s) = std::env::var("BETTER_AUTH_SECRET") {
         if !s.is_empty() {
@@ -308,7 +312,9 @@ async fn ws_handler(
 /// Request payload for persisting project state.
 #[derive(Deserialize)]
 struct SaveRequest {
+    /// Identifier of the project to persist.
     project_id: String,
+    /// The serialized CRDT project state to save.
     state: serde_json::Value,
 }
 
@@ -369,6 +375,8 @@ async fn auth_middleware(
     }
 }
 
+// Starts the collab server: sets up tracing, connects to the database, and
+// binds the Axum HTTP/WebSocket router on the configured port.
 #[tokio::main]
 async fn main() {
     let filter = tracing_subscriber::EnvFilter::try_from_default_env()

@@ -13,11 +13,14 @@ import type {
 import type { RippleAdjustment } from "./apply";
 
 interface Interval {
+	/** Interval start time. */
 	startTime: number;
+	/** Interval end time. */
 	endTime: number;
 }
 
 interface ElementSpan extends Interval {
+	/** Identifier of the element the span belongs to. */
 	id: string;
 }
 

@@ -1,3 +1,6 @@
+// Cloudflare Workers config for the Lazynext web app, deployed via OpenNext.
+// `main` points at the OpenNext-built worker; `assets` serves the static
+// bundle and WORKER_SELF_REFERENCE enables the app to call its own routes.
 {
 	"name": "lazynext",
 	"main": ".open-next/worker.js",

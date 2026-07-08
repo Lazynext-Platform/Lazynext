@@ -11,8 +11,11 @@ const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 const AUTH_BASE_URL = process.env.LAZYNEXT_AUTH_URL || "http://localhost:3000/api/auth";
 
 interface Config {
+	/** JWT authentication token. */
 	token?: string;
+	/** Authenticated user profile. */
 	user?: { id: string; name: string; email: string };
+	/** Base URL for the API Gateway. */
 	apiGatewayUrl?: string;
 }
 

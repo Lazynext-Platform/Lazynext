@@ -15,28 +15,48 @@ import { TIMELINE_LAYERS } from "./layers";
 import type { ElementDragView } from "@/timeline";
 
 interface TimelineTrackContentProps {
+	/** The track to render. */
 	track: TimelineTrack;
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Current drag view state. */
 	dragView: ElementDragView;
+	/** Callback when a resize handle drag begins. */
 	onResizeStart: (params: {
+		/** Mouse event that initiated the resize */
 		event: React.MouseEvent;
+		/** Element being resized */
 		element: TimelineElementType;
+		/** Track owning the element */
 		track: TimelineTrack;
+		/** Side being dragged (left or right handle) */
 		side: "left" | "right";
 	}) => void;
+	/** Callback when an element receives mouse down. */
 	onElementMouseDown: (params: {
+		/** Mouse event for the press */
 		event: React.MouseEvent;
+		/** Element receiving the mouse down */
 		element: TimelineElementType;
+		/** Track owning the element */
 		track: TimelineTrack;
 	}) => void;
+	/** Callback when an element is clicked. */
 	onElementClick: (params: {
+		/** Mouse event for the click */
 		event: React.MouseEvent;
+		/** Element that was clicked */
 		element: TimelineElementType;
+		/** Track owning the element */
 		track: TimelineTrack;
 	}) => void;
+	/** Callback when the track background receives mouse down. */
 	onTrackMouseDown?: (event: React.MouseEvent) => void;
+	/** Callback when the track background receives mouse up. */
 	onTrackMouseUp?: (event: React.MouseEvent) => void;
+	/** Returns whether the current click should be ignored. */
 	shouldIgnoreClick?: () => boolean;
+	/** Identifier of the current drop-target element, if any. */
 	targetElementId?: string | null;
 }
 

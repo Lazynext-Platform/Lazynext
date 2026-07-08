@@ -2,8 +2,11 @@
 import type { ElementJSON, ProjectJSON } from "../types";
 
 type CaptionLike = {
+	/** Start time in seconds. */
 	s: number;
+	/** End time in seconds. */
 	e: number;
+	/** Caption text content. */
 	text: string;
 };
 

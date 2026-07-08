@@ -60,6 +60,7 @@ pub enum SdiVideoMode {
 }
 
 impl SdiVideoMode {
+    /// Horizontal resolution in pixels for this video mode.
     pub fn width(&self) -> u32 {
         match self {
             Self::HD720p50 | Self::HD720p5994 | Self::HD720p60 => 1280,
@@ -74,6 +75,7 @@ impl SdiVideoMode {
         }
     }
 
+    /// Vertical resolution in pixels for this video mode.
     pub fn height(&self) -> u32 {
         match self {
             Self::HD720p50 | Self::HD720p5994 | Self::HD720p60 => 720,
@@ -83,6 +85,7 @@ impl SdiVideoMode {
         }
     }
 
+    /// Frame rate in frames per second for this video mode.
     pub fn framerate(&self) -> f64 {
         match self {
             Self::HD1080p2398 | Self::UHD4Kp2398 => 23.976,
@@ -98,6 +101,7 @@ impl SdiVideoMode {
         }
     }
 
+    /// Whether this video mode is interlaced.
     pub fn is_interlaced(&self) -> bool {
         matches!(self, Self::HD1080i50 | Self::HD1080i5994)
     }
@@ -117,6 +121,7 @@ pub enum PixelFormat {
 }
 
 impl PixelFormat {
+    /// Number of bytes per pixel for this pixel format.
     pub fn bytes_per_pixel(&self) -> u32 {
         match self {
             PixelFormat::Yuv8Bit => 2,
@@ -133,14 +138,19 @@ impl PixelFormat {
 /// `IDeckLinkOutput` instance via the Blackmagic C++ SDK.
 #[cfg(not(feature = "decklink-sdk"))]
 pub struct DecklinkEngine {
+    /// Currently configured SDI video mode.
     mode: SdiVideoMode,
+    /// Currently configured output pixel format.
     pixel_format: PixelFormat,
+    /// Number of frames output since start.
     frame_counter: u64,
+    /// Whether output is currently active.
     is_connected: bool,
 }
 
 #[cfg(not(feature = "decklink-sdk"))]
 impl DecklinkEngine {
+    /// Create a new DeckLink engine in software simulation mode.
     pub fn new() -> Self {
         println!("[DeckLink] Initialized in software simulation mode (no SDK).");
         Self {
@@ -236,12 +246,14 @@ impl DecklinkEngine {
 
 #[cfg(not(feature = "decklink-sdk"))]
 impl Default for DecklinkEngine {
+    // Returns a DeckLink engine in software simulation mode.
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl fmt::Debug for DecklinkEngine {
+    // Formats the engine's mode, frame count, and connection state.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("DecklinkEngine")
             .field("mode", &self.mode)

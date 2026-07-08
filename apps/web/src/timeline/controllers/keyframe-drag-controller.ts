@@ -31,15 +31,22 @@ import type { Command } from "@/commands/base-command";
 // --- Session ---
 
 interface PendingSession {
+	/** Discriminator for pending session state. */
 	kind: "pending";
+	/** Keyframe references being targeted by the drag. */
 	keyframeRefs: SelectedKeyframeRef[];
+	/** Initial mouse X coordinate at mousedown. */
 	startMouseX: number;
 }
 
 interface ActiveSession {
+	/** Discriminator for active session state. */
 	kind: "active";
+	/** Keyframe references being dragged. */
 	keyframeRefs: SelectedKeyframeRef[];
+	/** Initial mouse X coordinate at mousedown. */
 	startMouseX: number;
+	/** Cumulative time delta in ticks. */
 	deltaTicks: number;
 }
 
@@ -49,8 +56,11 @@ type Session = { kind: "idle" } | PendingSession | ActiveSession;
 
 /** Publicly readable drag state exposed to React components. */
 export interface KeyframeDragState {
+	/** Whether a drag is currently in progress. */
 	isDragging: boolean;
+	/** Set of keyframe IDs currently being dragged. */
 	draggingKeyframeIds: Set<string>;
+	/** Cumulative time delta in ticks since drag started. */
 	deltaTicks: number;
 }
 
@@ -64,29 +74,56 @@ const IDLE_DRAG_STATE: KeyframeDragState = {
 
 /** Configuration for the keyframe drag controller. */
 export interface KeyframeDragConfig {
+	/** Current zoom level for pixel/time conversion. */
 	zoomLevel: number;
+	/** Returns the current frame rate, or null if unavailable. */
 	getFps: () => FrameRate | null;
+	/** The timeline element being interacted with. */
 	element: TimelineElement;
+	/** Visible start time of the current viewport. */
 	displayedStartTime: MediaTime;
+	/** Currently selected keyframes in the UI. */
 	selectedKeyframes: SelectedKeyframeRef[];
-	isKeyframeSelected: (args: { keyframe: SelectedKeyframeRef }) => boolean;
-	setKeyframeSelection: (args: { keyframes: SelectedKeyframeRef[] }) => void;
-	toggleKeyframeSelection: (args: {
+	/** Predicate: is a given keyframe currently selected? */
+	isKeyframeSelected: (args: {
+		/** Keyframe reference to check. */
+		keyframe: SelectedKeyframeRef;
+	}) => boolean;
+	/** Replace the current keyframe selection. */
+	setKeyframeSelection: (args: {
+		/** Keyframe references to replace selection with. */
 		keyframes: SelectedKeyframeRef[];
+	}) => void;
+	/** Toggle selection state for the given keyframes. */
+	toggleKeyframeSelection: (args: {
+		/** Keyframe references to toggle. */
+		keyframes: SelectedKeyframeRef[];
+		/** Whether a modifier key is held (additive toggle). */
 		isMultiKey: boolean;
 	}) => void;
+	/** Select a range of keyframes (shift-click). */
 	selectKeyframeRange: (args: {
+		/** All keyframes in display order. */
 		orderedKeyframes: SelectedKeyframeRef[];
+		/** Keyframes at the target end of the range. */
 		targetKeyframes: SelectedKeyframeRef[];
+		/** Whether the selection is additive. */
 		isAdditive: boolean;
 	}) => void;
+	/** Execute a command on the undo/redo stack. */
 	executeCommand: (command: Command) => void;
-	seek: (args: { time: MediaTime }) => void;
+	/** Seek the playhead to the given time. */
+	seek: (args: {
+		/** Target time to seek to. */
+		time: MediaTime;
+	}) => void;
+	/** Returns the total duration of the project. */
 	getTotalDuration: () => MediaTime;
 }
 
 /** Ref wrapper so the controller always reads the latest config. */
 export interface KeyframeDragConfigRef {
+	/** Mutable reference to the current config. */
 	readonly current: KeyframeDragConfig;
 }
 

@@ -44,6 +44,10 @@ class DemucsPipeline:
         Args:
             audio_path: Path to the input audio file
             output_dir: Output directory for stems
+
+        Returns:
+            A :class:`DemucsResult` with ``success``, the ``method`` used,
+            the separated stem file paths, and any error message.
         """
         if not os.path.exists(audio_path):
             return DemucsResult(success=False, method="demucs", error=f"Audio file not found: {audio_path}")

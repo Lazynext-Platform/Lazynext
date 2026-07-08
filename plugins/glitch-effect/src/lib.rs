@@ -28,6 +28,7 @@ use lazynext_plugin_api::{VideoEffect, FrameBuffer};
 /// The glitch intensity (0.0–1.0) controls the maximum pixel offset.
 /// The effect varies over time via `sin(time)` for an animated look.
 pub struct CyberGlitchEffect {
+    /// Glitch intensity (0.0–1.0) controlling the maximum pixel offset.
     intensity: f32,
 }
 
@@ -39,14 +40,17 @@ impl CyberGlitchEffect {
 }
 
 impl VideoEffect for CyberGlitchEffect {
+    // Returns the unique plugin identifier.
     fn plugin_id(&self) -> &'static str {
         "com.thirdparty.cyber_glitch"
     }
 
+    // Returns the human-readable plugin name.
     fn name(&self) -> &'static str {
         "Cyber Glitch 2077"
     }
 
+    // Applies the glitch effect to the frame buffer at the given time.
     fn process_frame(&self, frame: &mut FrameBuffer, time: f64) {
         // Third-party developers would write custom pixel manipulation here.
         // For example, shifting RGB channels based on a sine wave.

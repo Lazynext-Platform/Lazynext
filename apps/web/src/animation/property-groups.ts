@@ -15,7 +15,9 @@ import { getKeyframeAtTime } from "./keyframe-query";
 
 /** Reference to a keyframe within an animation property group. */
 export interface GroupKeyframeRef {
+	/** Animation property path. */
 	propertyPath: AnimationPropertyPath;
+	/** Keyframe identifier. */
 	keyframeId: string;
 }
 

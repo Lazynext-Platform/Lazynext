@@ -12,11 +12,14 @@ import { getElementKeyframes } from "@/animation";
 import { KEYFRAME_LANE_HEIGHT_PX } from "./layout";
 
 export interface ExpandedRow {
+	/** Animation property path. */
 	propertyPath: AnimationPath;
+	/** Human-readable lane label. */
 	label: string;
 }
 
 interface PropertyGroupDefinition {
+	/** Returns true when the path belongs to this group. */
 	matchesPath: (path: AnimationPath) => boolean;
 }
 

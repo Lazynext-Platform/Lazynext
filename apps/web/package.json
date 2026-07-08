@@ -1,5 +1,6 @@
 {
 	"name": "@lazynext/web",
+	"description": "Lazynext web app — Next.js 16 editor UI and API shell that runs the Rust NLE core via WebAssembly.",
 	"version": "0.1.0",
 	"private": true,
 	"packageManager": "bun@1.3.14",

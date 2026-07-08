@@ -16,9 +16,14 @@ use masks::MaskFeatherPipeline;
 use serde::Deserialize;
 use wasm_bindgen::{JsCast, JsValue, prelude::wasm_bindgen};
 
+/// Thread-local GPU runtime holding the shared wgpu context and the effect
+/// and mask pipelines built on top of it.
 pub(crate) struct GpuRuntime {
+    /// Shared wgpu device/queue context.
     pub(crate) context: GpuContext,
+    /// Effect-pass pipeline (shaders, LUTs, chroma-key).
     pub(crate) effects: EffectPipeline,
+    /// Mask feathering pipeline.
     pub(crate) masks: MaskFeatherPipeline,
 }
 
@@ -26,6 +31,7 @@ thread_local! {
     static GPU_RUNTIME: RefCell<Option<GpuRuntime>> = const { RefCell::new(None) };
 }
 
+// Installs a panic hook that mirrors the panic message into window.__wasmPanic.
 fn set_panic_hook() {
     static SET_HOOK: std::sync::Once = std::sync::Once::new();
     SET_HOOK.call_once(|| {
@@ -44,6 +50,9 @@ fn set_panic_hook() {
     });
 }
 
+/// Initializes the thread-local GPU runtime (context, effect and mask
+/// pipelines). Idempotent — subsequent calls after the first succeed as
+/// no-ops.
 #[wasm_bindgen(js_name = initializeGpu)]
 pub async fn initialize_gpu() -> Result<(), JsValue> {
     set_panic_hook();
@@ -69,6 +78,8 @@ pub async fn initialize_gpu() -> Result<(), JsValue> {
     Ok(())
 }
 
+/// Runs `action` with a reference to the initialized [`GpuRuntime`],
+/// returning an error if `initializeGpu()` has not been called yet.
 pub(crate) fn with_gpu_runtime<T>(
     action: impl FnOnce(&GpuRuntime) -> Result<T, JsValue>,
 ) -> Result<T, JsValue> {
@@ -83,6 +94,7 @@ pub(crate) fn with_gpu_runtime<T>(
     })
 }
 
+/// Imports an offscreen canvas as a GPU texture of the given size.
 pub(crate) fn import_canvas_texture(
     context: &GpuContext,
     canvas: &wgpu::web_sys::OffscreenCanvas,
@@ -93,6 +105,7 @@ pub(crate) fn import_canvas_texture(
     context.import_offscreen_canvas_texture(canvas, width, height, label)
 }
 
+/// Renders a GPU texture into a freshly created offscreen canvas and returns it.
 pub(crate) fn render_texture_to_canvas(
     context: &GpuContext,
     texture: &wgpu::Texture,
@@ -106,11 +119,13 @@ pub(crate) fn render_texture_to_canvas(
     Ok(canvas)
 }
 
+/// Reads a named property from a JS object, erroring if it is missing.
 pub(crate) fn read_property(object: &Object, name: &str) -> Result<JsValue, JsValue> {
     Reflect::get(object, &JsValue::from_str(name))
         .map_err(|_| JsValue::from_str(&format!("Missing property '{name}'")))
 }
 
+/// Reads a named property and coerces it to an `OffscreenCanvas`.
 pub(crate) fn read_offscreen_canvas_property(
     object: &Object,
     name: &str,
@@ -120,6 +135,7 @@ pub(crate) fn read_offscreen_canvas_property(
         .map_err(|_| JsValue::from_str(&format!("Property '{name}' must be an OffscreenCanvas")))
 }
 
+/// Reads a named numeric property and coerces it to `u32`.
 pub(crate) fn read_u32_property(object: &Object, name: &str) -> Result<u32, JsValue> {
     let value = read_property(object, name)?;
     let Some(number) = value.as_f64() else {
@@ -130,6 +146,7 @@ pub(crate) fn read_u32_property(object: &Object, name: &str) -> Result<u32, JsVa
     Ok(number as u32)
 }
 
+/// Reads a named numeric property and coerces it to `f32`.
 pub(crate) fn read_f32_property(object: &Object, name: &str) -> Result<f32, JsValue> {
     let value = read_property(object, name)?;
     let Some(number) = value.as_f64() else {
@@ -140,6 +157,7 @@ pub(crate) fn read_f32_property(object: &Object, name: &str) -> Result<f32, JsVa
     Ok(number as f32)
 }
 
+/// Reads a named property and deserializes it into `T` via serde.
 pub(crate) fn read_serde_property<T>(object: &Object, name: &str) -> Result<T, JsValue>
 where
     T: for<'de> Deserialize<'de>,
@@ -149,11 +167,19 @@ where
         .map_err(|error| JsValue::from_str(&format!("Invalid property '{name}': {error}")))
 }
 
+/// Returns the wgpu device limits to JavaScript.
+///
+/// Currently returns JS `null`; reserved for surfacing adapter limits to
+/// the web app for capability detection.
 #[wasm_bindgen]
 pub fn get_wgpu_limits() -> JsValue {
     JsValue::NULL
 }
 
+/// Computes a 256-bucket luminance waveform for the scopes UI.
+///
+/// The CPU fallback synthesizes a representative video signal so the scope
+/// is never blank; in production this reads back a GPU-computed histogram.
 #[wasm_bindgen]
 pub fn analyze_waveform() -> Vec<u32> {
     // Generates a synthetic waveform pattern for development/preview.

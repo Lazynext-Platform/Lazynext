@@ -10,9 +10,13 @@ import type { TimelineTrack, DropTarget } from "@/timeline";
 import { TIMELINE_LAYERS } from "./layers";
 
 interface DragLineProps {
+	/** Current drop target, if any. */
 	dropTarget: DropTarget | null;
+	/** Tracks used to compute the line position. */
 	tracks: TimelineTrack[];
+	/** Whether the line is visible. */
 	isVisible: boolean;
+	/** Header height offset in pixels. */
 	headerHeight?: number;
 }
 

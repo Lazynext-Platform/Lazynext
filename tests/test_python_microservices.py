@@ -28,6 +28,8 @@ FAIL = 0
 
 
 def assert_ok(condition, msg):
+    """Tally a single assertion — increments the global PASS/FAIL counters
+    and prints a ✅/❌ line for `msg`."""
     global PASS, FAIL
     if condition:
         PASS += 1
@@ -189,6 +191,8 @@ async def enhance_audio_service_impl(samples: list, sr: int):
 
 
 def main():
+    """Run the full microservices test suite and exit non-zero if any
+    assertion failed."""
     global PASS, FAIL
     print("=" * 60)
     print(" Lazynext Python Microservices Test Suite")

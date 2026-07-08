@@ -13,10 +13,14 @@ use std::env;
 /// provider preferences.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct VideoIntent {
+    /// Natural-language description of the desired edit.
     pub prompt: String,
+    /// Whether the generated plan requires user approval before execution.
     pub require_plan_approval: bool,
+    /// Source media files referenced by the intent.
     #[serde(default)]
     pub source_files: Vec<String>,
+    /// Preferred LLM provider override, if any.
     #[serde(default)]
     pub llm_provider: Option<String>,
 }
@@ -25,21 +29,38 @@ pub struct VideoIntent {
 /// execution, and completion.
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum JobStatus {
+    /// The job has been created but not yet started.
     Pending,
+    /// The job is generating an editing plan.
     Planning,
+    /// The job is applying editing actions.
     Executing,
-    AwaitingApproval { plan: String },
-    Completed { video_url: String },
-    Failed { error: String },
+    /// The job is waiting for user approval of the plan.
+    AwaitingApproval {
+        /// The proposed editing plan.
+        plan: String,
+    },
+    /// The job finished successfully.
+    Completed {
+        /// URL of the rendered output video.
+        video_url: String,
+    },
+    /// The job failed.
+    Failed {
+        /// Description of the failure.
+        error: String,
+    },
 }
 
 /// The autonomous editor engine. Takes a `VideoIntent`, optionally calls an
 /// LLM to produce editing actions, and applies them to the NLE state.
 pub struct AutonomousEditor {
+    /// HTTP client used for LLM and microservice requests.
     client: Client,
 }
 
 impl Default for AutonomousEditor {
+    // Returns an editor with a fresh HTTP client.
     fn default() -> Self {
         Self::new()
     }

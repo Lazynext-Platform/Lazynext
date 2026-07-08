@@ -8,7 +8,9 @@
 import { useEffect, useState, useRef } from "react";
 
 interface UseScrollPositionReturn {
+	/** Current horizontal scroll offset in pixels. */
 	scrollLeft: number;
+	/** Current viewport width in pixels. */
 	viewportWidth: number;
 }
 

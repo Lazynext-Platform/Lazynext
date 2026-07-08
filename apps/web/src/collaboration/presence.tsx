@@ -9,9 +9,13 @@
 import React from "react";
 
 interface CursorPosition {
+	/** X position on the canvas. */
 	x: number;
+	/** Y position on the canvas. */
 	y: number;
+	/** Collaborator user ID. */
 	userId: string;
+	/** Cursor color. */
 	color: string;
 }
 

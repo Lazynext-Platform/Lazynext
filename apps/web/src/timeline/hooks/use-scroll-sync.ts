@@ -8,9 +8,13 @@
 import { useEffect, useRef } from "react";
 
 interface UseScrollSyncProps {
+	/** Ref to the ruler scroll container. */
 	rulerScrollRef?: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the track labels scroll container. */
 	trackLabelsScrollRef?: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the bookmarks scroll container. */
 	bookmarksScrollRef?: React.RefObject<HTMLDivElement | null>;
 }
 

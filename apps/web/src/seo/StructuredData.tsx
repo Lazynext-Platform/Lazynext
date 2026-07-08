@@ -13,6 +13,7 @@
 import React from "react";
 
 interface OrganizationSchemaProps {
+	/** Base URL of the site. */
 	url?: string;
 }
 
@@ -49,6 +50,7 @@ export function OrganizationSchema({
 }
 
 interface SoftwareAppSchemaProps {
+	/** Base URL of the site. */
 	url?: string;
 }
 
@@ -84,7 +86,9 @@ export function SoftwareAppSchema({
 }
 
 interface BreadcrumbSchemaProps {
+	/** Array of breadcrumb items. */
 	items: Array<{ name: string; path: string }>;
+	/** Base URL of the site. */
 	url?: string;
 }
 
@@ -112,6 +116,7 @@ export function BreadcrumbSchema({
 }
 
 interface FAQSchemaProps {
+	/** Array of FAQ question/answer pairs. */
 	questions: Array<{ q: string; a: string }>;
 }
 
@@ -139,11 +144,17 @@ export function FAQSchema({ questions }: FAQSchemaProps) {
 
 // Combined SEO head component
 interface SEOHeadProps {
+	/** Page title. */
 	title?: string;
+	/** Page description. */
 	description?: string;
+	/** Page path (e.g., "/features"). */
 	path?: string;
+	/** Open Graph image URL. */
 	image?: string;
+	/** Content type. */
 	type?: "website" | "article";
+	/** Breadcrumb trail items. */
 	breadcrumbs?: Array<{ name: string; path: string }>;
 }
 

@@ -44,49 +44,76 @@ import { roundFrameTime, type MediaTime } from "@/wasm";
 
 /** Configuration for the drag-drop controller. */
 export interface DragDropConfig {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Returns the timeline container element. */
 	getContainerEl: () => HTMLDivElement | null;
+	/** Returns the timeline header element. */
 	getHeaderEl: () => HTMLElement | null;
+	/** Returns the tracks scroll element. */
 	getTracksScrollEl: () => HTMLDivElement | null;
+	/** Returns the active project's frame rate. */
 	getActiveProjectFps: () => FrameRate | null;
+	/** Returns the active project identifier. */
 	getActiveProjectId: () => string | null;
+	/** Returns the current scene tracks. */
 	getSceneTracks: () => SceneTracks;
+	/** Returns the current playhead time. */
 	getCurrentPlayheadTime: () => MediaTime;
+	/** Returns the available media assets. */
 	getMediaAssets: () => MediaAsset[];
+	/** Active timeline drag source. */
 	dragSource: TimelineDragSource;
+	/** Adds a processed media asset to a project. */
 	addMediaAsset: (args: {
+		/** Target project identifier. */
 		projectId: string;
+		/** Processed media asset to add. */
 		asset: ProcessedMediaAsset;
 	}) => Promise<MediaAsset | null>;
+	/** Executes a timeline command. */
 	executeCommand: (command: Command) => void;
+	/** Inserts an element into a track. */
 	insertElement: (args: {
+		/** Placement mode and track identifier. */
 		placement: { mode: "explicit"; trackId: string };
+		/** Element creation payload. */
 		element: CreateTimelineElement;
 	}) => void;
+	/** Adds an effect to a clip. */
 	addClipEffect: (args: {
+		/** Track containing the target element. */
 		trackId: string;
+		/** Element to receive the effect. */
 		elementId: string;
+		/** Effect type discriminator. */
 		effectType: string;
 	}) => void;
 }
 
 /** Ref wrapper for drag-drop config. */
 export interface DragDropConfigRef {
+	/** Current drag-drop config. */
 	readonly current: DragDropConfig;
 }
 
 // --- State ---
 
 interface DragOverState {
+	/** Discriminant marking an active drag-over state. */
 	kind: "over";
+	/** Current computed drop target, if any. */
 	dropTarget: DropTarget | null;
+	/** Element type being dragged, if known. */
 	elementType: ElementType | null;
 }
 
 type DragDropState = { kind: "idle" } | DragOverState;
 
 interface TimelineCoords {
+	/** Mouse x position in timeline space. */
 	mouseX: number;
+	/** Mouse y position in timeline space. */
 	mouseY: number;
 }
 

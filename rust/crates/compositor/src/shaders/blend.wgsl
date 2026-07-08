@@ -29,18 +29,22 @@ struct BlendUniforms {
 @group(1) @binding(1) var layer_sampler: sampler;
 @group(2) @binding(0) var<uniform> uniforms: BlendUniforms;
 
+// Clamps each RGB channel to the [0, 1] range.
 fn clamp01(color: vec3f) -> vec3f {
     return clamp(color, vec3f(0.0), vec3f(1.0));
 }
 
+// Rec.601 luminance of a color.
 fn lum(c: vec3f) -> f32 {
     return dot(c, vec3f(0.3, 0.59, 0.11));
 }
 
+// Saturation as the range (max channel − min channel).
 fn sat(c: vec3f) -> f32 {
     return max(max(c.r, c.g), c.b) - min(min(c.r, c.g), c.b);
 }
 
+// Clips a color back into gamut while preserving its luminance.
 fn clip_color(c: vec3f) -> vec3f {
     var result = c;
     let l = lum(result);
@@ -55,10 +59,12 @@ fn clip_color(c: vec3f) -> vec3f {
     return result;
 }
 
+// Sets a color's luminance to `l`, then clips it back into gamut.
 fn set_lum(c: vec3f, l: f32) -> vec3f {
     return clip_color(c + (l - lum(c)));
 }
 
+// Rescales a color to the target saturation `target_sat`.
 fn set_sat(color: vec3f, target_sat: f32) -> vec3f {
     var result = color;
     let max_value = max(max(result.r, result.g), result.b);
@@ -71,12 +77,14 @@ fn set_sat(color: vec3f, target_sat: f32) -> vec3f {
     return result;
 }
 
+// Hard Light blend — multiply/screen switched on the layer value.
 fn hard_light(base: vec3f, layer: vec3f) -> vec3f {
     let low = 2.0 * base * layer;
     let high = 1.0 - 2.0 * (1.0 - base) * (1.0 - layer);
     return select(low, high, layer >= vec3f(0.5));
 }
 
+// Per-channel Soft Light blend (W3C compositing formula).
 fn soft_light_channel(base: f32, layer: f32) -> f32 {
     if (layer <= 0.5) {
         return base - (1.0 - 2.0 * layer) * base * (1.0 - base);
@@ -90,6 +98,7 @@ fn soft_light_channel(base: f32, layer: f32) -> f32 {
     return base + (2.0 * layer - 1.0) * (d - base);
 }
 
+// Soft Light blend applied across all three channels.
 fn soft_light(base: vec3f, layer: vec3f) -> vec3f {
     return vec3f(
         soft_light_channel(base.r, layer.r),
@@ -98,6 +107,7 @@ fn soft_light(base: vec3f, layer: vec3f) -> vec3f {
     );
 }
 
+// Color Dodge blend — brightens base toward white driven by layer.
 fn color_dodge(base: vec3f, layer: vec3f) -> vec3f {
     return select(
         min(vec3f(1.0), base / max(vec3f(0.0001), vec3f(1.0) - layer)),
@@ -106,6 +116,7 @@ fn color_dodge(base: vec3f, layer: vec3f) -> vec3f {
     );
 }
 
+// Color Burn blend — darkens base toward black driven by layer.
 fn color_burn(base: vec3f, layer: vec3f) -> vec3f {
     return select(
         vec3f(1.0) - min(vec3f(1.0), (vec3f(1.0) - base) / max(vec3f(0.0001), layer)),
@@ -114,6 +125,8 @@ fn color_burn(base: vec3f, layer: vec3f) -> vec3f {
     );
 }
 
+// Dispatches to the RGB blend function selected by `mode` (see file header
+// for the mode-index table).
 fn blend_rgb(base: vec3f, layer: vec3f, mode: u32) -> vec3f {
     switch mode {
         case 1u { return min(base, layer); }

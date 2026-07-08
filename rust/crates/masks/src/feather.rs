@@ -34,18 +34,26 @@ pub struct ApplyMaskFeatherOptions<'a> {
 /// Uses the Jump Flood Algorithm (JFA) via [`SdfPipeline`] to compute distance
 /// fields, then blends them in a single distance-based feather shader.
 pub struct MaskFeatherPipeline {
+    /// Pipeline that computes signed distance fields via JFA.
     sdf_pipeline: SdfPipeline,
+    /// Bind group layout for the inside-distance texture and sampler.
     inside_texture_bind_group_layout: wgpu::BindGroupLayout,
+    /// Bind group layout for the outside-distance texture and sampler.
     outside_texture_bind_group_layout: wgpu::BindGroupLayout,
+    /// Bind group layout for the distance uniform buffer.
     uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline that blends the distance fields into a feathered mask.
     distance_pipeline: wgpu::RenderPipeline,
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct DistanceUniformBuffer {
+    /// Mask resolution in pixels [width, height].
     resolution: [f32; 2],
+    /// Half the feather radius in pixels.
     feather_half: f32,
+    /// Padding to satisfy uniform buffer alignment.
     _padding: f32,
 }
 

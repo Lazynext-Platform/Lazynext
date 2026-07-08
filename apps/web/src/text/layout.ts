@@ -4,15 +4,22 @@ import { DEFAULTS } from "@/timeline/defaults";
 import type { TextAlign } from "@/text/primitives";
 
 type TextRect = {
+	/** Left edge position. */
 	left: number;
+	/** Top edge position. */
 	top: number;
+	/** Rectangle width. */
 	width: number;
+	/** Rectangle height. */
 	height: number;
 };
 
 export interface TextBlockMeasurement {
+	/** Vertical offset to the visual center. */
 	visualCenterOffset: number;
+	/** Total block height. */
 	height: number;
+	/** Widest line width. */
 	maxWidth: number;
 }
 

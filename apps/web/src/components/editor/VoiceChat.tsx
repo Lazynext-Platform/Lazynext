@@ -9,9 +9,13 @@ import { useEffect, useRef } from "react";
 import { Mic, MicOff, PhoneCall, Users } from "lucide-react";
 
 interface VoiceChatProps {
+	/** Whether voice chat is currently active. */
 	isVoiceActive: boolean;
+	/** Start voice chat. */
 	startVoice: () => void;
+	/** Stop voice chat. */
 	stopVoice: () => void;
+	/** Map of peer ID to their media stream. */
 	peers: { [id: string]: MediaStream };
 }
 

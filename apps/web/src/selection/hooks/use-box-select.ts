@@ -9,10 +9,15 @@ import type {
 } from "@/selection/types";
 
 interface SelectionBoxState<TId> extends BoxSelectionSnapshot<TId> {
+	/** Pointer position at drag start. */
 	startPos: { x: number; y: number };
+	/** Current pointer position. */
 	currentPos: { x: number; y: number };
+	/** Current selection box bounds or null. */
 	bounds: SelectionBoxBounds | null;
+	/** Whether the box is actively dragging. */
 	isActive: boolean;
+	/** Whether additive selection is enabled. */
 	isAdditive: boolean;
 }
 

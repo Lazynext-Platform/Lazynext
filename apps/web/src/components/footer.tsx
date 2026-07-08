@@ -15,7 +15,9 @@ import { capitalizeFirstLetter } from "@/utils/string";
 type Category = "resources" | "company";
 
 interface FooterLink {
+	/** Display text for the link. */
 	label: string;
+	/** Destination URL. */
 	href: string;
 }
 

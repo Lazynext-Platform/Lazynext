@@ -11,8 +11,11 @@ use wasm_bindgen::prelude::*;
 /// WASM-accessible NLE state wrapper providing track/clip CRUD and playback controls.
 #[wasm_bindgen]
 pub struct NLEState {
+    /// The underlying project timeline data.
     project: ProjectData,
+    /// Current playhead frame position.
     frame: i32,
+    /// Whether playback is currently active.
     is_playing: bool,
 }
 

@@ -2,9 +2,13 @@
 import React from "react";
 
 interface QueueItem {
+	/** Unique job identifier. */
 	id: string;
+	/** User who submitted the job. */
 	user: string;
+	/** Current job status. */
 	status: "rendering" | "queued" | "completed" | "failed";
+	/** Render progress percentage (0-100). */
 	progress: number;
 }
 

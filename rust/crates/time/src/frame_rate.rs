@@ -18,47 +18,59 @@ use crate::media_time::TICKS_PER_SECOND;
 #[cfg_attr(feature = "wasm", tsify(from_wasm_abi, into_wasm_abi))]
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, Eq, PartialEq)]
 pub struct FrameRate {
+    /// Frames-per-second numerator (e.g. 30000 for 29.97 fps).
     pub numerator: u32,
+    /// Frames-per-second denominator (e.g. 1001 for 29.97 fps).
     pub denominator: u32,
 }
 
 impl FrameRate {
+    /// 23.976 fps (24000/1001) — NTSC film.
     pub const FPS_23_976: Self = Self {
         numerator: 24_000,
         denominator: 1_001,
     };
+    /// 24 fps — cinema.
     pub const FPS_24: Self = Self {
         numerator: 24,
         denominator: 1,
     };
+    /// 25 fps — PAL.
     pub const FPS_25: Self = Self {
         numerator: 25,
         denominator: 1,
     };
+    /// 29.97 fps (30000/1001) — NTSC.
     pub const FPS_29_97: Self = Self {
         numerator: 30_000,
         denominator: 1_001,
     };
+    /// 30 fps.
     pub const FPS_30: Self = Self {
         numerator: 30,
         denominator: 1,
     };
+    /// 48 fps — high-frame-rate cinema.
     pub const FPS_48: Self = Self {
         numerator: 48,
         denominator: 1,
     };
+    /// 50 fps — PAL double-rate.
     pub const FPS_50: Self = Self {
         numerator: 50,
         denominator: 1,
     };
+    /// 59.94 fps (60000/1001) — NTSC double-rate.
     pub const FPS_59_94: Self = Self {
         numerator: 60_000,
         denominator: 1_001,
     };
+    /// 60 fps.
     pub const FPS_60: Self = Self {
         numerator: 60,
         denominator: 1,
     };
+    /// 120 fps — high-speed capture.
     pub const FPS_120: Self = Self {
         numerator: 120,
         denominator: 1,

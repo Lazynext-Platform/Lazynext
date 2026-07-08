@@ -36,9 +36,13 @@ import { getRaisedProjectFpsForImportedMedia } from "@/fps/utils";
 import type { MediaAsset } from "@/media/types";
 
 export interface MigrationState {
+	/** Whether a migration is in progress. */
 	isMigrating: boolean;
+	/** Version being migrated from, or null. */
 	fromVersion: number | null;
+	/** Version being migrated to, or null. */
 	toVersion: number | null;
+	/** Name of the project being migrated, or null. */
 	projectName: string | null;
 }
 

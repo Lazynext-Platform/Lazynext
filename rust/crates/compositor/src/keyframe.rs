@@ -6,10 +6,14 @@
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BezierCurve {
-    pub p0: f32, // start control point
-    pub p1: f32, // p1 control point
-    pub p2: f32, // p2 control point
-    pub p3: f32, // end control point
+    /// Start control point value.
+    pub p0: f32,
+    /// First intermediate control point value.
+    pub p1: f32,
+    /// Second intermediate control point value.
+    pub p2: f32,
+    /// End control point value.
+    pub p3: f32,
 }
 
 impl BezierCurve {
@@ -70,8 +74,11 @@ impl BezierCurve {
 /// A single keyframe at a given time with a property value and easing curve.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Keyframe {
-    pub time: f32,  // Absolute time in seconds
-    pub value: f32, // Property value
+    /// Absolute time in seconds.
+    pub time: f32,
+    /// Property value at this keyframe.
+    pub value: f32,
+    /// Easing curve for interpolation from this keyframe.
     pub curve: BezierCurve,
 }
 

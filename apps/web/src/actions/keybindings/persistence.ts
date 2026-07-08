@@ -11,7 +11,9 @@ import {
 } from "./persisted-state";
 
 export interface DecodedKeybindingsState {
+	/** Map of shortcut keys to their bound actions. */
 	keybindings: Map<ShortcutKey, TActionWithOptionalArgs>;
+	/** Whether the user has customized the defaults. */
 	isCustomized: boolean;
 }
 

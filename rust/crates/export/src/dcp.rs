@@ -18,6 +18,7 @@ use uuid::Uuid;
 pub struct DCPGenerator;
 
 impl Default for DCPGenerator {
+    // Returns a new DCP generator.
     fn default() -> Self {
         Self::new()
     }
@@ -92,6 +93,7 @@ impl DCPGenerator {
         Ok(())
     }
 
+    // Build the Composition Playlist (CPL) XML for the project's single reel.
     fn generate_cpl(
         &self,
         project: &ProjectData,
@@ -154,6 +156,7 @@ impl DCPGenerator {
         )
     }
 
+    // Build the Packing List (PKL) XML enumerating the given asset ids.
     fn generate_pkl(&self, pkl_id: &Uuid, asset_ids: &[&Uuid]) -> String {
         let mut assets_xml = String::new();
         for id in asset_ids {
@@ -189,6 +192,7 @@ impl DCPGenerator {
         )
     }
 
+    // Build the ASSETMAP XML mapping each asset id to its on-disk file path.
     fn generate_asset_map(&self, files: &[(String, Uuid)]) -> String {
         let mut assets_xml = String::new();
         for (path, uuid) in files {
@@ -227,6 +231,7 @@ impl DCPGenerator {
     }
 }
 
+// Escape XML-reserved characters in a string for safe inclusion in generated XML.
 fn xml_escape(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")

@@ -14,13 +14,16 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[allow(dead_code)]
 pub struct ProxyGenerator {
+    /// Target proxy resolution as `(width, height)`.
     target_resolution: (u32, u32),
+    /// Whether a proxy transcode is currently in progress.
     is_processing: Arc<Mutex<bool>>,
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 impl ProxyGenerator {
+    /// Create a new proxy generator targeting 720p output.
     #[wasm_bindgen(constructor)]
     pub fn new() -> ProxyGenerator {
         ProxyGenerator {

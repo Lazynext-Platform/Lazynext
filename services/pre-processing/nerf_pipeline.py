@@ -75,6 +75,10 @@ class NerfPipeline:
         Args:
             video_path: Path to the input MP4/MOV file
             output_dir: Output directory (default: ./nerf_output/<video_name>)
+
+        Returns:
+            A :class:`NerfResult` with ``success``, the ``method`` used, the
+            exported model path, and any error message.
         """
         if not os.path.exists(video_path):
             return NerfResult(success=False, method=self.config.method,

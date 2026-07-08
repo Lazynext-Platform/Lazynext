@@ -49,10 +49,15 @@ const CHECKERBOARD_STYLE = {
 } as const;
 
 interface ColorPickerContentProps {
+	/** Current color value as a hex string. */
 	value?: string;
+	/** Callback fired continuously as the color changes. */
 	onChange?: (value: string) => void;
+	/** Callback fired when a color change gesture ends. */
 	onChangeEnd?: (value: string) => void;
+	/** Popover side placement. */
 	side?: ComponentProps<typeof PopoverContent>["side"];
+	/** Popover alignment. */
 	align?: ComponentProps<typeof PopoverContent>["align"];
 }
 
@@ -431,11 +436,17 @@ function ColorPickerContent({
 }
 
 interface ColorPickerProps {
+	/** Current color value as a hex string. */
 	value?: string;
+	/** Callback fired continuously as the color changes. */
 	onChange?: (value: string) => void;
+	/** Callback fired when a color change gesture ends. */
 	onChangeEnd?: (value: string) => void;
+	/** Additional CSS classes. */
 	className?: string;
+	/** Popover content side placement. */
 	contentSide?: ComponentProps<typeof PopoverContent>["side"];
+	/** Popover content alignment. */
 	contentAlign?: ComponentProps<typeof PopoverContent>["align"];
 }
 

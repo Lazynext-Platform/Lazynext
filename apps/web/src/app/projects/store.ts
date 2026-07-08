@@ -16,33 +16,72 @@ import type { TProjectSortKey } from "@/project/types";
 export type ProjectsViewMode = "grid" | "list";
 
 interface ProjectsState {
+	/** Current search query. */
 	searchQuery: string;
+	/** Active sort key. */
 	sortKey: TProjectSortKey;
+	/** Sort direction. */
 	sortOrder: "asc" | "desc";
+	/** Active view mode (grid or list). */
 	viewMode: ProjectsViewMode;
+	/** Currently selected project IDs. */
 	selectedProjectIds: string[];
+	/** Last selected project ID for shift-click range. */
 	lastSelectedProjectId: string | null;
+	/** Whether persisted state has been rehydrated. */
 	isHydrated: boolean;
-	setIsHydrated: ({ isHydrated }: { isHydrated: boolean }) => void;
-	setSearchQuery: ({ query }: { query: string }) => void;
-	setSortKey: ({ sortKey }: { sortKey: TProjectSortKey }) => void;
-	setSortOrder: ({ sortOrder }: { sortOrder: "asc" | "desc" }) => void;
+	/** Marks the store as hydrated. */
+	setIsHydrated: ({ isHydrated }: {
+		/** Whether persisted state has been rehydrated. */
+		isHydrated: boolean;
+	}) => void;
+	/** Sets the search query. */
+	setSearchQuery: ({ query }: {
+		/** New search query string. */
+		query: string;
+	}) => void;
+	/** Sets the sort key. */
+	setSortKey: ({ sortKey }: {
+		/** Sort key to apply. */
+		sortKey: TProjectSortKey;
+	}) => void;
+	/** Sets the sort order. */
+	setSortOrder: ({ sortOrder }: {
+		/** Sort direction (ascending or descending). */
+		sortOrder: "asc" | "desc";
+	}) => void;
+	/** Toggles sort order between asc and desc. */
 	toggleSortOrder: () => void;
-	setViewMode: ({ viewMode }: { viewMode: ProjectsViewMode }) => void;
-	setSelectedProjects: ({ projectIds }: { projectIds: string[] }) => void;
+	/** Sets the view mode. */
+	setViewMode: ({ viewMode }: {
+		/** View mode to apply (grid or list). */
+		viewMode: ProjectsViewMode;
+	}) => void;
+	/** Replaces the selected project IDs. */
+	setSelectedProjects: ({ projectIds }: {
+		/** Project IDs to select. */
+		projectIds: string[];
+	}) => void;
+	/** Clears all selected projects. */
 	clearSelectedProjects: () => void;
+	/** Adds or removes a project from the selection. */
 	setProjectSelected: ({
 		projectId,
 		isSelected,
 	}: {
+		/** Project ID to toggle. */
 		projectId: string;
+		/** Whether the project should be selected. */
 		isSelected: boolean;
 	}) => void;
+	/** Shift-click range selection of projects. */
 	selectProjectRange: ({
 		projectId,
 		allProjectIds,
 	}: {
+		/** Project ID at the end of the range. */
 		projectId: string;
+		/** All project IDs for range calculation. */
 		allProjectIds: string[];
 	}) => void;
 }

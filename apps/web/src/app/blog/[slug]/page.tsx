@@ -15,7 +15,9 @@ import { getPosts, getSinglePost, processHtmlContent } from "@/blog/query";
 import type { Author, Post } from "@/blog/types";
 
 type PageProps = {
+	/** Route params resolving to the post slug. */
 	params: Promise<{ slug: string }>;
+	/** Resolved URL search parameters. */
 	searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 

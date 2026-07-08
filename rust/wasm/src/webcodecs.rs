@@ -23,17 +23,20 @@ use wasm_bindgen::prelude::*;
 /// ```
 #[wasm_bindgen]
 pub struct VideoDecoderWrapper {
+    /// The codec string the decoder was initialized with.
     codec: String,
     /// The underlying VideoDecoder instance (stored as JsValue for now;
     /// full web_sys VideoDecoder bindings are being upstreamed).
     decoder: Option<web_sys::VideoDecoder>,
     /// Callback invoked when a decoded frame is ready
     on_frame: Option<js_sys::Function>,
+    /// Number of frames decoded so far.
     frame_count: u32,
 }
 
 #[wasm_bindgen]
 impl VideoDecoderWrapper {
+    /// Create a new decoder wrapper for the given codec and frame callback.
     #[wasm_bindgen(constructor)]
     pub fn new(codec: String, on_frame_cb: Option<js_sys::Function>) -> Self {
         Self {

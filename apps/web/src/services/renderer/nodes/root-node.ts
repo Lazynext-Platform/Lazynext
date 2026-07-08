@@ -2,6 +2,7 @@
 import { BaseNode } from "./base-node";
 
 export type RootNodeParams = {
+	/** Total timeline duration in seconds. */
 	duration: number;
 };
 

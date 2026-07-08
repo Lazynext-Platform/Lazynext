@@ -14,7 +14,9 @@ import type { HugeiconsIconProps } from "@hugeicons/react";
 import { DefinitionRegistry } from "@/params/registry";
 
 export type MaskIconProps = {
+	/** Hugeicons icon reference. */
 	icon: HugeiconsIconProps["icon"];
+	/** Stroke width override. */
 	strokeWidth?: number;
 };
 
@@ -59,17 +61,29 @@ export const BASE_MASK_PARAM_DEFINITIONS: ParamDefinition<
 ];
 
 export interface RegisteredMaskDefinition {
+	/** Mask type discriminator. */
 	type: MaskType;
+	/** Display name. */
 	name: string;
+	/** Feature flags. */
 	features: MaskDefinition["features"];
+	/** Parameter definitions. */
 	params: ParamDefinition<string>[];
+	/** Mask renderer function. */
 	renderer: MaskRenderer<BaseMaskParams>;
+	/** Interaction handler. */
 	interaction: MaskDefinition["interaction"];
+	/** Whether the mask is active given current params. */
+	/** Whether the mask is active given current params. */
 	isActive?(params: BaseMaskParams): boolean;
+	/** Builds default mask data. */
 	buildDefault(context: MaskDefaultContext): RegisteredMaskWithoutId;
+	/** Computes parameter updates. */
 	computeParamUpdate(
+		/** Handle-drag arguments (handle id, delta, current params). */
 		args: MaskParamUpdateArgs<BaseMaskParams>,
 	): Partial<BaseMaskParams>;
+	/** Mask icon configuration. */
 	icon: MaskIconProps;
 }
 
@@ -85,7 +99,9 @@ export class MasksRegistry extends DefinitionRegistry<
 		definition,
 		icon,
 	}: {
+		/** Mask definition to register. */
 		definition: MaskDefinitionForRegistration;
+		/** Icon configuration for the mask. */
 		icon: MaskIconProps;
 	}): void {
 		const withBaseParams: RegisteredMaskDefinition = {

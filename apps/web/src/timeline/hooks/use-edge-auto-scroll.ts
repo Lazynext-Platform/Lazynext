@@ -9,12 +9,19 @@
 import { useEffect, useRef } from "react";
 
 interface UseEdgeAutoScrollParams {
+	/** Whether auto-scroll is active. */
 	isActive: boolean;
+	/** Returns the current mouse client X position. */
 	getMouseClientX: () => number;
+	/** Ref to the ruler scroll container. */
 	rulerScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Ref to the tracks scroll container. */
 	tracksScrollRef: React.RefObject<HTMLDivElement | null>;
+	/** Total content width in pixels. */
 	contentWidth: number;
+	/** Distance from edge to trigger scroll (px). */
 	edgeThreshold?: number;
+	/** Maximum scroll speed in pixels per frame. */
 	maxScrollSpeed?: number;
 }
 

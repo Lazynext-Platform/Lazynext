@@ -27,7 +27,9 @@ type InsertElementPlacement =
 	| { mode: "auto"; trackType?: TrackType; insertIndex?: number };
 
 export interface InsertElementParams {
+	/** The element to create and insert. */
 	element: CreateTimelineElement;
+	/** Placement strategy (explicit track or auto). */
 	placement: InsertElementPlacement;
 }
 

@@ -10,15 +10,21 @@ export type TranscriptionLanguage = LanguageCode | "auto";
 
 /** A single timed segment of transcribed text. */
 export interface TranscriptionSegment {
+	/** Transcribed text for this segment. */
 	text: string;
+	/** Segment start time in seconds. */
 	start: number;
+	/** Segment end time in seconds. */
 	end: number;
 }
 
 /** The full result from a transcription run. */
 export interface TranscriptionResult {
+	/** Full concatenated transcription text. */
 	text: string;
+	/** Individual timed segments. */
 	segments: TranscriptionSegment[];
+	/** Detected or selected language code. */
 	language: string;
 }
 
@@ -32,8 +38,11 @@ export type TranscriptionStatus =
 
 /** Progress of a transcription job (0–1). */
 export interface TranscriptionProgress {
+	/** Current lifecycle status of the job. */
 	status: TranscriptionStatus;
+	/** Progress value in range [0, 1]. */
 	progress: number;
+	/** Optional human-readable status message. */
 	message?: string;
 }
 
@@ -46,15 +55,22 @@ export type TranscriptionModelId =
 
 /** Metadata describing a transcription model. */
 export interface TranscriptionModel {
+	/** Model identifier key. */
 	id: TranscriptionModelId;
+	/** Human-readable model name. */
 	name: string;
+	/** HuggingFace model ID for downloading. */
 	huggingFaceId: string;
+	/** Short description of the model. */
 	description: string;
 }
 
 /** A timestamped caption chunk ready for timeline display. */
 export interface CaptionChunk {
+	/** Caption text content. */
 	text: string;
+	/** Start time in seconds. */
 	startTime: number;
+	/** Duration in seconds. */
 	duration: number;
 }

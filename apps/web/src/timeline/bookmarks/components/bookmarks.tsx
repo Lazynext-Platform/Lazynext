@@ -63,16 +63,26 @@ function seekToBookmarkTime({
 }
 
 interface TimelineBookmarksRowProps {
+	/** Current zoom level. */
 	zoomLevel: number;
+	/** Total dynamic timeline width in pixels. */
 	dynamicTimelineWidth: number;
+	/** Current bookmark drag state. */
 	dragState: BookmarkDragState;
+	/** Mouse-down handler for a bookmark. */
 	onBookmarkMouseDown: (params: {
+		/** The originating mouse event. */
 		event: React.MouseEvent;
+		/** The bookmark being interacted with. */
 		bookmark: Bookmark;
 	}) => void;
+	/** Wheel event handler. */
 	handleWheel: (event: React.WheelEvent) => void;
+	/** Click handler for the timeline content area. */
 	handleTimelineContentClick: (event: React.MouseEvent) => void;
+	/** Mouse-down handler for ruler tracking. */
 	handleRulerTrackingMouseDown: (event: React.MouseEvent) => void;
+	/** Mouse-down handler for the ruler. */
 	handleRulerMouseDown: (event: React.MouseEvent) => void;
 }
 

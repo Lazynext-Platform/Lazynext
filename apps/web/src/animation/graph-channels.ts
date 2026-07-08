@@ -19,7 +19,9 @@ import { isScalarChannel } from "./interpolation";
 
 /** A collection of editable scalar channels with a shared easing mode. */
 export interface EditableScalarChannels {
+	/** Channel easing mode. */
 	easingMode: ChannelEasingMode;
+	/** Editable scalar graph channels. */
 	channels: ScalarGraphChannel[];
 }
 

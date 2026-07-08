@@ -1,5 +1,6 @@
 {
   "name": "@lazynext/mcp-server",
+  "description": "Lazynext MCP server — Node.js Model Context Protocol server exposing NLE tools to AI agents.",
   "version": "0.1.0",
   "private": true,
   "scripts": {

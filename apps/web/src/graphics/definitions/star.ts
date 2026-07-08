@@ -5,11 +5,17 @@ import { STROKE_ALIGN_PARAM, type GraphicStrokeAlign } from "./shared";
 import type { GraphicDefinition } from "../types";
 
 interface StarParams {
+	/** Fill color. */
 	fill: string;
+	/** Stroke color. */
 	stroke: string;
+	/** Stroke width in pixels. */
 	strokeWidth: number;
+	/** Stroke alignment. */
 	strokeAlign: GraphicStrokeAlign;
+	/** Number of star points. */
 	points: number;
+	/** Inner radius depth as a percentage (1-99). */
 	depth: number;
 }
 

@@ -12,12 +12,19 @@ import { Footer } from "@/components/footer";
 import { cn } from "@/utils/ui";
 
 interface BasePageProps {
+	/** Page content rendered inside the layout. */
 	children: React.ReactNode;
+	/** Additional CSS classes for the root section. */
 	className?: string;
+	/** Additional CSS classes for the main content area. */
 	mainClassName?: string;
+	/** Max-width constraint for the container. */
 	maxWidth?: "3xl" | "6xl" | "full";
+	/** Optional page title displayed as an H1. */
 	title?: string;
+	/** Optional description text below the title. */
 	description?: React.ReactNode;
+	/** Optional action slot (e.g. a CTA button). */
 	action?: React.ReactNode;
 }
 

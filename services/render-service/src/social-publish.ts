@@ -24,28 +24,43 @@ import path from "path";
 
 /** Metadata attached to a social media post (caption, hashtags, thumbnail, etc.) */
 interface PlatformMetadata {
+  /** Post caption text. */
   caption?: string;
+  /** Hashtags without the # prefix. */
   hashtags?: string[];
+  /** Video title (primarily for YouTube). */
   title?: string;
+  /** Video description. */
   description?: string;
+  /** Content tags (primarily for YouTube). */
   tags?: string[];
+  /** Custom thumbnail URL. */
   thumbnail?: string;
+  /** Video privacy setting. */
   privacyStatus?: "public" | "private" | "unlisted";
 }
 
 /** Result of a single platform publish attempt. */
 interface PublishResult {
+  /** Platform name. */
   platform: string;
+  /** Whether publishing succeeded. */
   success: boolean;
+  /** URL of the published post. */
   postUrl?: string;
+  /** Platform-specific post identifier. */
   postId?: string;
+  /** Error message on failure. */
   error?: string;
 }
 
 /** OAuth 2.0 token bundle stored per-platform after user authorization. */
 interface OAuthTokens {
+  /** Current OAuth 2.0 access token. */
   accessToken: string;
+  /** Token used to obtain a new access token. */
   refreshToken?: string;
+  /** Unix timestamp (ms) when the access token expires. */
   expiresAt: number;
 }
 

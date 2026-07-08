@@ -25,6 +25,7 @@ struct MSDFUniforms {
 }
 @group(1) @binding(0) var<uniform> uniforms: MSDFUniforms;
 
+// Median of three channels — recovers the signed distance from an MSDF texel.
 fn median(r: f32, g: f32, b: f32) -> f32 {
     return max(min(r, g), min(max(r, g), b));
 }

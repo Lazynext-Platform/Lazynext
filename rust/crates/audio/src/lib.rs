@@ -44,11 +44,14 @@ pub mod sync;
 
 /// Audio engine for real-time and offline DSP processing.
 pub struct AudioEngine {
+    /// Sample rate in Hz for audio processing (e.g. 48000).
     pub sample_rate: u32,
+    /// Number of audio channels (1 = mono, 2 = stereo).
     pub channels: u16,
 }
 
 impl AudioEngine {
+    /// Create a new audio engine for the given sample rate and channel count.
     pub fn new(sample_rate: u32, channels: u16) -> Self {
         Self {
             sample_rate,

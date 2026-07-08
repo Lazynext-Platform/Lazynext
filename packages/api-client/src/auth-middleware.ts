@@ -18,11 +18,17 @@ import { readFileSync } from "fs";
 
 /** Parsed JWT claims extracted by the auth middleware. */
 export interface AuthClaims {
+	/** Subject user ID. */
 	sub: string;
+	/** User email address. */
 	email: string;
+	/** User display name. */
 	name: string;
+	/** User role. */
 	role: string;
+	/** Issued-at timestamp. */
 	iat: number;
+	/** Expiration timestamp. */
 	exp: number;
 }
 

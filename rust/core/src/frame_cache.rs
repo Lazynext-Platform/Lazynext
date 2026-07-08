@@ -12,6 +12,7 @@ use tokio::sync::Mutex;
 /// An `AssetLoader` decorator that caches decoded frames in memory using an LRU cache.
 /// This prevents redundant decoding when scrubbing or looping through the timeline.
 pub struct FrameCacheLoader {
+    /// The wrapped asset loader that decodes frames on a cache miss.
     inner: Arc<dyn AssetLoader>,
     /// Cache key is `(media_id, frame_idx)`. Value is the raw RGBA frame data.
     cache: Arc<Mutex<LruCache<(String, u32), Vec<u8>>>>,
@@ -30,6 +31,7 @@ impl FrameCacheLoader {
 }
 
 impl AssetLoader for FrameCacheLoader {
+    // Returns the cached frame or delegates to the inner loader and caches it.
     fn load_frame(
         &self,
         media_id: &str,

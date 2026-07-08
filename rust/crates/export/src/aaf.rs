@@ -14,6 +14,7 @@ use std::io::Write;
 pub struct AAFExporter;
 
 impl Default for AAFExporter {
+    // Returns a new AAF exporter.
     fn default() -> Self {
         Self::new()
     }
@@ -114,6 +115,7 @@ impl AAFExporter {
     }
 }
 
+// Escapes XML-reserved characters in a string for safe embedding.
 fn xml_escape(s: &str) -> String {
     s.replace('&', "&amp;")
         .replace('<', "&lt;")

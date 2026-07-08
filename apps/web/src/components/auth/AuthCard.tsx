@@ -10,8 +10,11 @@
 import React from "react";
 
 interface AuthCardProps {
+	/** Card heading title. */
 	title: string;
+	/** Card subtitle text. */
 	subtitle: string;
+	/** Form content to render inside the card. */
 	children: React.ReactNode;
 }
 

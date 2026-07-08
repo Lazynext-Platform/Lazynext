@@ -2,7 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 
 interface UseWebRTCOptions {
+	/** WebSocket connection for signalling. */
 	socket: WebSocket | null;
+	/** Project room identifier. */
 	projectId: string;
 }
 

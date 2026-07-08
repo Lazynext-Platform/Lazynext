@@ -7,24 +7,34 @@ import { createElement } from "react";
 import type React from "react";
 
 type ProseProps = React.HTMLAttributes<HTMLElement> & {
+	/** HTML element tag override. */
 	as?: "article";
+	/** Raw HTML string to render. */
 	html: string;
 };
 
 type HastTextNode = {
+	/** Node type discriminator. */
 	type: "text";
+	/** Text content. */
 	value: string;
 };
 
 type HastElementNode = {
+	/** Node type discriminator. */
 	type: "element";
+	/** HTML tag name. */
 	tagName: string;
+	/** HTML properties object. */
 	properties?: Record<string, unknown>;
+	/** Child AST nodes. */
 	children?: HastNode[];
 };
 
 type HastRootNode = {
+	/** Node type discriminator. */
 	type: "root";
+	/** Child AST nodes. */
 	children?: HastNode[];
 };
 

@@ -1,5 +1,6 @@
 {
 	"name": "@lazynext/collab-server",
+	"description": "Lazynext collaboration server — native Rust CRDT sync and WebRTC signaling for real-time multiplayer editing.",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {

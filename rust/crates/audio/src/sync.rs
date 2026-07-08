@@ -8,6 +8,7 @@ use rustfft::{FftPlanner, num_complex::Complex};
 
 /// Synchronizer that aligns two audio tracks by cross-correlation.
 pub struct AudioSynchronizer {
+    /// Sample rate in Hz for audio correlation (e.g. 44100).
     pub sample_rate: u32,
 }
 

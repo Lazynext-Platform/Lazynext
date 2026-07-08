@@ -16,27 +16,40 @@ use std::collections::HashMap;
 /// A VST3 parameter descriptor exposed by a plugin.
 #[derive(Clone, Debug)]
 pub struct VstParameter {
+    /// Numeric parameter identifier.
     pub id: u32,
+    /// Human-readable parameter name.
     pub name: String,
+    /// Unit label for the parameter (e.g. "dB", "%").
     pub label: String,
+    /// Default parameter value.
     pub default_value: f64,
+    /// Minimum allowed parameter value.
     pub min_value: f64,
+    /// Maximum allowed parameter value.
     pub max_value: f64,
 }
 
 /// MIDI event for plugin automation.
 #[derive(Clone, Debug)]
 pub struct MidiEvent {
+    /// Frame offset from the start of the current block.
     pub delta_frames: i32,
+    /// MIDI status byte (message type and channel).
     pub status: u8,
+    /// First data byte (note number or controller number).
     pub data1: u8,
+    /// Second data byte (velocity or controller value).
     pub data2: u8,
 }
 
 /// VST3 plugin host that loads and manages audio effect/instrument plugins.
 pub struct VstHost {
+    /// Filesystem path of the loaded plugin bundle.
     plugin_path: String,
+    /// Whether a plugin is currently loaded.
     is_loaded: bool,
+    /// Display name of the loaded plugin.
     plugin_name: String,
     /// Plugin parameters indexed by ID
     parameters: HashMap<u32, VstParameter>,
@@ -58,6 +71,7 @@ pub struct VstHost {
 }
 
 impl Default for VstHost {
+    // Returns a VST host with default settings.
     fn default() -> Self {
         Self::new()
     }

@@ -16,24 +16,37 @@ import { user, subscriptions, projects } from "@/db/schema";
 import { sql, count, sum } from "drizzle-orm";
 
 export type AdminMetrics = {
+  /** Total number of registered users. */
   totalUsers: number;
+  /** Number of active paid subscriptions. */
   activeSubscriptions: number;
+  /** Estimated monthly recurring revenue. */
   monthlyRecurringRevenue: number;
+  /** Total number of projects. */
   totalProjects: number;
 };
 
 export type SystemStatus = {
+  /** Number of active Rust render nodes, or null if unknown. */
   activeRustNodes: number | null;
+  /** Current FFmpeg queue size, or null if unknown. */
   ffmpegQueueSize: number | null;
+  /** ISO timestamp of when the status was captured. */
   lastUpdated: string;
 };
 
 export type AIProviderMetric = {
+  /** Display name of the AI model. */
   name: string;
+  /** Provider organization name. */
   provider: string;
+  /** Brand color hex code for the provider. */
   colorHex: string;
+  /** Requests per minute, or null if unknown. */
   requestsPerMin: number | null;
+  /** Average latency in milliseconds, or null if unknown. */
   avgLatencyMs: number | null;
+  /** Operational status of the provider. */
   status: "Operational" | "Degraded" | "Failing" | "Local Fast" | "Unknown";
 };
 

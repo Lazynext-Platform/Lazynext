@@ -14,9 +14,13 @@ import {
 } from "@/timeline/controllers/drag-drop-controller";
 
 interface UseTimelineDragDropProps {
+	/** Ref to the timeline container element. */
 	containerRef: RefObject<HTMLDivElement | null>;
+	/** Optional ref to the timeline header element. */
 	headerRef?: RefObject<HTMLElement | null>;
+	/** Optional ref to the tracks scroll container. */
 	tracksScrollRef?: RefObject<HTMLDivElement | null>;
+	/** Current timeline zoom level. */
 	zoomLevel: number;
 }
 

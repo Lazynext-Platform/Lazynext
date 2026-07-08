@@ -49,16 +49,22 @@ use tracing::{debug, info, warn};
 /// Represents a discovered peer on the local network or mesh.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Peer {
+    /// Network address of the peer.
     pub addr: SocketAddr,
+    /// Human-readable name advertised by the peer.
     pub display_name: String,
+    /// Capabilities the peer supports (e.g. "editor", "sync").
     pub capabilities: Vec<String>,
 }
 
 /// CRDT delta message for peer-to-peer sync.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct CrdtSyncMessage {
+    /// Identifier of the peer that sent the message.
     pub sender_id: String,
+    /// CRDT operation carried by the message.
     pub operation: state::operations::CrdtOperation,
+    /// Lamport clock value for causal ordering.
     pub lamport_clock: u64,
 }
 
@@ -70,15 +76,20 @@ pub struct CrdtSyncMessage {
 ///   - WebRTC data channels for NAT traversal
 ///   - libp2p for DHT-based peer routing and relay
 pub struct P2PNetwork {
+    /// Currently known peers in the mesh.
     pub peers: Vec<Peer>,
+    /// Addresses already discovered, used to dedupe peers.
     discovered: HashSet<SocketAddr>,
+    /// Local TCP port advertised to other peers.
     local_port: u16,
+    /// Unique identifier for this peer instance.
     peer_id: String,
     /// UDP broadcast socket for peer discovery
     discovery_socket: Option<tokio::net::UdpSocket>,
 }
 
 impl P2PNetwork {
+    /// Create a new P2P network with a random peer id on the default port.
     pub fn new() -> Self {
         P2PNetwork {
             peers: Vec::new(),
@@ -255,6 +266,7 @@ impl P2PNetwork {
 }
 
 impl Default for P2PNetwork {
+    // Returns a new P2P network with a random peer id.
     fn default() -> Self {
         Self::new()
     }
@@ -262,6 +274,7 @@ impl Default for P2PNetwork {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+// Returns the machine hostname from the environment, or a fallback.
 fn hostname() -> String {
     std::env::var("HOSTNAME")
         .or_else(|_| std::env::var("COMPUTERNAME"))

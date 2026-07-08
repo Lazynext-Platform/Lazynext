@@ -5,20 +5,32 @@ import { Track } from "../core/track/track";
 import { ProjectMetadata } from "../types";
 
 type TimelineStore = {
+	/** Tracks in the timeline. */
 	tracks: Track[];
+	/** Store version number. */
 	version: number;
+	/** Optional background color. */
 	backgroundColor?: string;
+	/** Optional project metadata. */
 	metadata?: ProjectMetadata;
+	/** Map of element id to element. */
 	elementMap: Record<string, TrackElement>;
+	/** Map of track id to track data. */
 	trackMap: Record<string, any>;
+	/** Map of caption properties. */
 	captionProps: Record<string, any>;
 };
 
 export type TimelineTrackData = {
+	/** Tracks in the timeline. */
 	tracks: Track[];
+	/** Data version number. */
 	version: number;
+	/** Optional background color. */
 	backgroundColor?: string;
+	/** Optional watermark. */
 	watermark?: Watermark;
+	/** Optional project metadata. */
 	metadata?: ProjectMetadata;
 };
 

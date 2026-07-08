@@ -20,13 +20,18 @@ const DRAG_SENSITIVITIES = {
 type DragSensitivity = "default" | "slow";
 
 type ScrubRange = {
+	/** Lower bound of this range. */
 	from: number;
+	/** Upper bound of this range. */
 	to: number;
+	/** Pixels per unit step within this range. */
 	pixelsPerUnit: number;
 };
 
 type ScrubClamp = {
+	/** Minimum allowed value. */
 	min?: number;
+	/** Maximum allowed value. */
 	max?: number;
 };
 
@@ -103,16 +108,27 @@ interface NumberFieldProps extends Omit<
 	ComponentProps<"input">,
 	"size" | "type"
 > {
+	/** Optional icon rendered inside the field (scrub handle). */
 	icon?: React.ReactNode;
+	/** Unit suffix displayed after the value. */
 	suffix?: string;
+	/** Additional CSS classes for the suffix element. */
 	suffixClassName?: string;
+	/** Sensitivity multiplier for drag scrubbing. */
 	dragSensitivity?: DragSensitivity;
+	/** Multi-range definition for non-linear scrubbing. */
 	scrubRanges?: readonly ScrubRange[];
+	/** Clamp constraints applied during scrubbing. */
 	scrubClamp?: ScrubClamp;
+	/** Callback fired on each scrub tick with the new value. */
 	onScrub?: (value: number) => void;
+	/** Callback fired when scrubbing ends (pointer up). */
 	onScrubEnd?: () => void;
+	/** Whether the input accepts arithmetic expressions. */
 	allowExpressions?: boolean;
+	/** Callback to reset the field to its default value. */
 	onReset?: () => void;
+	/** Whether the current value matches the default. */
 	isDefault?: boolean;
 }
 

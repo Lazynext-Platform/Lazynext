@@ -11,10 +11,15 @@ use std::collections::HashMap;
 /// A versioned snapshot of the timeline at a point in time.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TimelineSnapshot {
+    /// Name of the branch this snapshot belongs to.
     pub branch_name: String,
+    /// Name of the parent branch, if any.
     pub parent: Option<String>,
+    /// Serialized project state at snapshot time.
     pub state_json: String,
+    /// Lamport clock value when the snapshot was taken.
     pub lamport_clock: u64,
+    /// RFC 3339 timestamp of when the snapshot was created.
     pub created_at: String,
 }
 
@@ -25,7 +30,9 @@ pub struct TimelineSnapshot {
 /// CRDT merge (based on the nearest common ancestor in the operation log)
 /// to resolve conflicts deterministically.
 pub struct MultiverseManager {
+    /// All named branches keyed by branch name.
     realities: HashMap<String, NLEState>,
+    /// Name of the currently checked-out branch.
     current_reality: String,
     /// Snapshots for undo/redo and history navigation.
     history: Vec<TimelineSnapshot>,

@@ -24,7 +24,9 @@ import type { TimelineElement } from "@/timeline";
 export type { ResizeSide };
 
 interface UseTimelineResizeProps {
+	/** Current timeline zoom level. */
 	zoomLevel: number;
+	/** Called when the active snap point changes. */
 	onSnapPointChange?: (snapPoint: SnapPoint | null) => void;
 }
 

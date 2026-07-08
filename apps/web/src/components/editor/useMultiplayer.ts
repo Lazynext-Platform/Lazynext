@@ -2,8 +2,11 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 
 interface MultiplayerHookArgs {
+	/** Project ID for room identification. */
 	projectId: string;
+	/** Client ID for this peer. */
 	clientId: string;
+	/** Callback invoked when a remote delta is received. */
 	onDeltaReceived: (delta: any) => void;
 }
 

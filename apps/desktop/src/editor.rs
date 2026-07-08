@@ -18,47 +18,79 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Instant;
 use tokio::sync::Mutex;
 
+/// A single AI agent edit suggestion presented in the inspector panel.
 #[derive(Clone)]
 pub struct AgentSuggestion {
+    /// Unique identifier of the suggestion.
     #[allow(dead_code)]
     pub id: String,
+    /// Short human-readable title of the suggested edit.
     pub title: String,
+    /// Longer description of what the suggestion does.
     pub description: String,
 }
 
+/// Root editor UI state: viewport, timeline, transport, and AI agent widgets.
 pub struct EditorShell {
+    /// Shared CRDT NLE state for the project.
     pub nle: Arc<Mutex<NLEState>>,
+    /// Core rendering/editing engine.
     pub engine: Arc<Mutex<lazynext_core::engine::CoreEngine>>,
+    /// Tokio runtime handle for blocking async work during render.
     pub rt_handle: tokio::runtime::Handle,
+    /// Last rendered frame, cached for display.
     pub last_frame_data: Option<gpui::ImageSource>,
+    /// Current playhead frame index.
     pub current_frame: u32,
+    /// Whether playback is active.
     pub is_playing: bool,
+    /// Current AI prompt text buffer.
     pub ai_prompt_text: String,
+    /// Flag set when the play button is clicked.
     pub play_clicked: Rc<Cell<bool>>,
+    /// Whether the prompt input is focused.
     pub prompt_focused: Rc<Cell<bool>>,
+    /// Flag set when the prompt area is clicked.
     pub prompt_clicked: Rc<Cell<bool>>,
+    /// Whether the autonomous agent is active.
     pub agent_active: Rc<Cell<bool>>,
+    /// Current AI agent suggestions.
     pub agent_suggestions: Arc<tokio::sync::Mutex<Vec<AgentSuggestion>>>,
+    /// Whether the suggestions panel is expanded.
     pub suggestions_expanded: bool,
+    /// Flag set when the suggestions expand toggle is clicked.
     pub suggestions_expand_clicked: Rc<Cell<bool>>,
+    /// Index of the currently selected suggestion, if any.
     pub selected_suggestion: Option<usize>,
+    /// Flag set when a suggestion is clicked.
     pub suggestion_select_clicked: Rc<Cell<bool>>,
+    /// Index of the suggestion pending selection.
     pub suggestion_select_idx: usize,
+    /// Flag set when the step-back-5-frames button is clicked.
     pub frame_step_back5_clicked: Rc<Cell<bool>>,
+    /// Flag set when the step-back-1-frame button is clicked.
     pub frame_step_back1_clicked: Rc<Cell<bool>>,
+    /// Flag set when the step-forward-1-frame button is clicked.
     pub frame_step_fwd1_clicked: Rc<Cell<bool>>,
+    /// Flag set when the step-forward-5-frames button is clicked.
     pub frame_step_fwd5_clicked: Rc<Cell<bool>>,
+    /// Whether an export is currently in progress.
     pub exporting: Arc<AtomicBool>,
+    /// Timestamp when the current export started, if any.
     pub export_start_time: Option<Instant>,
+    /// Latest error message to display, if any.
     pub error_message: Option<String>,
+    /// Whether the error banner is visible.
     pub show_error: bool,
 }
 
 impl EditorShell {
+    // Toggle the play/pause state of the transport.
     fn toggle_playback(&mut self) {
         self.is_playing = !self.is_playing;
     }
 
+    // Move the playhead by `delta` frames, clamping to frame zero.
     fn step_frame(&mut self, delta: i32) {
         let new_frame = self.current_frame as i32 + delta;
         self.current_frame = if new_frame < 0 { 0 } else { new_frame as u32 };
@@ -70,6 +102,7 @@ impl EditorShell {
 }
 
 impl Render for EditorShell {
+    // Builds the editor view: viewport, timeline, transport, inspector, and AI widgets.
     fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // Process pending play/pause click
         if self.play_clicked.get() {

@@ -25,8 +25,11 @@ import { LineElement } from "../elements/line.element";
 import { EffectElement } from "../elements/effect.element";
 
 export interface SplitResult {
+	/** First element resulting from the split. */
 	firstElement: any;
+	/** Second element resulting from the split. */
 	secondElement: any;
+	/** Whether the split succeeded. */
 	success: boolean;
 }
 

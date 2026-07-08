@@ -13,22 +13,37 @@ use serde::{Deserialize, Serialize};
 #[allow(clippy::large_enum_variant)]
 #[derive(Default)]
 pub enum Easing {
+    /// Constant-rate interpolation between keyframes.
     #[default]
     Linear,
+    /// Holds the previous value until the next keyframe.
     Step,
+    /// Accelerating (slow start) easing curve.
     EaseIn,
+    /// Decelerating (slow end) easing curve.
     EaseOut,
+    /// Accelerating then decelerating easing curve.
     EaseInOut,
+    /// Cubic bezier curve defined by two normalized control points.
     CubicBezier {
+        /// X coordinate of the first control point.
         x1: f64,
+        /// Y coordinate of the first control point.
         y1: f64,
+        /// X coordinate of the second control point.
         x2: f64,
+        /// Y coordinate of the second control point.
         y2: f64,
     },
+    /// Bezier curve defined by absolute handle offsets around each keyframe.
     Bezier {
+        /// Time offset of the outgoing (right) handle.
         right_dt: f64,
+        /// Value offset of the outgoing (right) handle.
         right_dv: f64,
+        /// Time offset of the incoming (left) handle.
         left_dt: f64,
+        /// Value offset of the incoming (left) handle.
         left_dv: f64,
     },
 }
@@ -36,8 +51,11 @@ pub enum Easing {
 /// A single keyframe with a frame position and typed value.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Keyframe<T> {
+    /// Frame position of this keyframe.
     pub frame: u32,
+    /// Value held at this keyframe.
     pub value: T,
+    /// Easing curve applied when interpolating out of this keyframe.
     #[serde(default)]
     pub easing: Easing,
 }
@@ -60,10 +78,12 @@ impl<T> Keyframe<T> {
 /// keyframe evaluation to WASM once this is exposed via the bridge.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ScalarAnimationChannel {
+    /// Keyframes in ascending time order.
     keyframes: Vec<Keyframe<f64>>,
 }
 
 impl ScalarAnimationChannel {
+    /// Create a new, empty animation channel with no keyframes.
     pub fn new() -> Self {
         Self {
             keyframes: Vec::new(),
@@ -193,6 +213,7 @@ impl ScalarAnimationChannel {
 }
 
 impl Default for ScalarAnimationChannel {
+    // Returns a new, empty animation channel.
     fn default() -> Self {
         Self::new()
     }

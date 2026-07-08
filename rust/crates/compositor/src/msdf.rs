@@ -13,32 +13,51 @@ const MSDF_SHADER_SOURCE: &str = include_str!("shaders/msdf.wgsl");
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct MSDFUniformBuffer {
+    /// RGBA fill color for the glyph body.
     color: [f32; 4],
+    /// RGBA glyph outline color.
     outline_color: [f32; 4],
+    /// RGBA drop shadow color.
     shadow_color: [f32; 4],
+    /// Signed distance field pixel range.
     px_range: f32,
+    /// Glyph outline width in distance-field units.
     outline_width: f32,
+    /// XY drop shadow offset.
     shadow_offset: [f32; 2],
+    /// Drop shadow blur radius.
     shadow_blur: f32,
+    /// Padding for uniform buffer alignment.
     _padding: [f32; 3],
 }
 
 /// Options for applying an MSDF text glyph to a render target.
 pub struct ApplyMSDFOptions<'a> {
+    /// The render target texture view to draw MSDF glyphs onto.
     pub target_view: &'a wgpu::TextureView,
+    /// The MSDF atlas texture containing signed distance field glyph data.
     pub msdf_texture: &'a wgpu::Texture,
+    /// RGBA fill color for the glyph body.
     pub color: [f32; 4],
+    /// RGBA color for the glyph outline.
     pub outline_color: [f32; 4],
+    /// RGBA color for the drop shadow.
     pub shadow_color: [f32; 4],
+    /// Signed distance field pixel range for anti-aliasing.
     pub px_range: f32,
+    /// Width of the glyph outline in distance-field units.
     pub outline_width: f32,
+    /// XY offset of the drop shadow in distance-field units.
     pub shadow_offset: [f32; 2],
+    /// Blur radius for the drop shadow.
     pub shadow_blur: f32,
 }
 
 /// GPU pipeline for rendering multi-channel signed distance field text.
 pub struct MSDFPipeline {
+    /// Bind group layout for the MSDF uniform buffer.
     uniform_bind_group_layout: wgpu::BindGroupLayout,
+    /// Render pipeline for MSDF glyph rendering.
     pipeline: wgpu::RenderPipeline,
 }
 

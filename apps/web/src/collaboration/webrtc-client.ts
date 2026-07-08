@@ -33,16 +33,24 @@
 import type { CollaborationSocket } from "./socket";
 
 interface WebRTCConfig {
+  /** STUN server URL. */
   stunServer?: string;
+  /** TURN server URL. */
   turnServer?: string;
+  /** TURN authentication username. */
   turnUsername?: string;
+  /** TURN authentication credential. */
   turnCredential?: string;
 }
 
 interface PeerConnection {
+  /** Underlying RTC peer connection. */
   connection: RTCPeerConnection;
+  /** Data channel for CRDT delta exchange. */
   dataChannel: RTCDataChannel | null;
+  /** Remote peer identifier. */
   peerId: string;
+  /** Current connection state. */
   state: "connecting" | "connected" | "disconnected" | "failed";
 }
 

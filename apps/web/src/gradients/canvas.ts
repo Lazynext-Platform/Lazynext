@@ -12,17 +12,26 @@ type BackgroundLayer =
 	| { type: "gradient"; value: GradientAst };
 
 type LinearPoints = {
+	/** Start X coordinate. */
 	x0: number;
+	/** Start Y coordinate. */
 	y0: number;
+	/** End X coordinate. */
 	x1: number;
+	/** End Y coordinate. */
 	y1: number;
+	/** Gradient line length. */
 	length: number;
 };
 
 type RadialDimensions = {
+	/** Center X coordinate. */
 	cx: number;
+	/** Center Y coordinate. */
 	cy: number;
+	/** Radius along X axis. */
 	rx: number;
+	/** Radius along Y axis. */
 	ry: number;
 };
 
@@ -35,18 +44,44 @@ type Distance =
 	| { type: "px"; value: string }
 	| { type: "em"; value: string };
 
-type Position = { type: "position"; value: { x?: Distance; y?: Distance } };
+type Position = {
+	/** Discriminant for position nodes. */
+	type: "position";
+	/** X and Y distance values. */
+	value: {
+		/** Horizontal offset. */
+		x?: Distance;
+		/** Vertical offset. */
+		y?: Distance;
+	};
+};
 
 type Shape = {
+	/** Discriminant for shape nodes. */
 	type: "shape";
+	/** Circle or ellipse shape kind. */
 	value: "circle" | "ellipse";
+	/** Optional size/extent style. */
 	style?: Distance | { type: "extent-keyword"; value: string } | Position;
+	/** Optional center position. */
 	at?: Position;
 };
 
-type DefaultRadial = { type: "default-radial"; at: Position };
+type DefaultRadial = {
+	/** Discriminant for default radial nodes. */
+	type: "default-radial";
+	/** Center position. */
+	at: Position;
+};
 
-type ExtentKeyword = { type: "extent-keyword"; value: string; at?: Position };
+type ExtentKeyword = {
+	/** Discriminant for extent keyword nodes. */
+	type: "extent-keyword";
+	/** Extent keyword value. */
+	value: string;
+	/** Optional center position. */
+	at?: Position;
+};
 
 type RadialOrientation = Shape | ExtentKeyword | DefaultRadial;
 

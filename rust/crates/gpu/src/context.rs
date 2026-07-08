@@ -20,6 +20,7 @@ struct WebDisplay;
 
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 impl wgpu::rwh::HasDisplayHandle for WebDisplay {
+    // Returns a raw web display handle for surface creation.
     fn display_handle(&self) -> Result<wgpu::rwh::DisplayHandle<'_>, wgpu::rwh::HandleError> {
         let raw = wgpu::rwh::WebDisplayHandle::new();
         Ok(unsafe { wgpu::rwh::DisplayHandle::borrow_raw(raw.into()) })
@@ -28,7 +29,9 @@ impl wgpu::rwh::HasDisplayHandle for WebDisplay {
 
 #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 struct CachedCanvasSurface {
+    /// The wgpu surface bound to the cached WebGL canvas.
     surface: wgpu::Surface<'static>,
+    /// The (width, height) the surface was last configured for.
     size: (u32, u32),
 }
 
@@ -43,27 +46,41 @@ const FULLSCREEN_QUAD_POSITIONS: [[f32; 2]; 6] = [
     [1.0, 1.0],
 ];
 
+/// Owns the wgpu instance, adapter, device, queue, and shared render resources.
 pub struct GpuContext {
+    /// The wgpu instance backing all GPU resources.
     instance: wgpu::Instance,
+    /// The selected GPU adapter.
     adapter: wgpu::Adapter,
+    /// The logical GPU device used to create resources.
     device: wgpu::Device,
+    /// The command queue for GPU submission.
     queue: wgpu::Queue,
+    /// Native texture format (RGBA8 on WebGL, BGRA8 elsewhere).
     texture_format: wgpu::TextureFormat,
+    /// Vertex buffer for the fullscreen quad used by blit/effect passes.
     fullscreen_quad: wgpu::Buffer,
+    /// Sampler for linear (smooth) texture filtering.
     linear_sampler: wgpu::Sampler,
+    /// Sampler for nearest-neighbor (pixel-accurate) texture reads.
     nearest_sampler: wgpu::Sampler,
+    /// Shared bind group layout for texture + sampler bindings.
     texture_sampler_bind_group_layout: wgpu::BindGroupLayout,
+    /// Pre-compiled pipeline that blits a texture to a surface.
     blit_pipeline: wgpu::RenderPipeline,
+    /// Whether the backend supports copying to arbitrary canvas surfaces.
     supports_external_texture_copies: bool,
     /// The HTML canvas that the WebGL context is bound to. Only populated on the WebGL
     /// fallback path. Used by render_texture_via_gl_canvas to output frames on WebGL.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     gl_canvas: Option<web_sys::HtmlCanvasElement>,
+    /// Cached surface for the WebGL canvas, reconfigured only on size change.
     #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     gl_surface: RefCell<Option<CachedCanvasSurface>>,
 }
 
 impl GpuContext {
+    /// Acquire a GPU device and build the shared context (WebGPU with WebGL fallback).
     pub async fn new() -> Result<Self, GpuError> {
         #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
         // ── Device & Adapter Selection ──
@@ -282,6 +299,7 @@ impl GpuContext {
         Ok((gl_instance, adapter, device, queue, canvas))
     }
 
+    // Native: no GL fallback path exists, so this always errors.
     #[cfg(not(all(feature = "wasm", target_arch = "wasm32")))]
     async fn try_gl_fallback()
     -> Result<(wgpu::Instance, wgpu::Adapter, wgpu::Device, wgpu::Queue), GpuError> {

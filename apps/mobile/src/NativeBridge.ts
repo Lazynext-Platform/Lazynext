@@ -5,16 +5,24 @@ import MyModule from "../modules/lazynext-native/src/MyModule";
 
 /** Apple Pencil pressure, tilt, and azimuth state pushed from the native layer. */
 export interface ApplePencilState {
+	/** Pressure value from 0 to 1. */
 	pressure: number;
+	/** Tilt angles. */
 	tilt: { x: number; y: number };
+	/** Azimuth angle in radians. */
 	azimuth: number;
+	/** Altitude angle in radians. */
 	altitude: number;
+	/** Whether the pencil is actively touching. */
 	isActive: boolean;
 }
 
 interface PencilCapabilities {
+	/** Whether Apple Pencil is supported on this device. */
 	supported: boolean;
+	/** Whether pressure sensitivity is available. */
 	pressureSensitive: boolean;
+	/** Whether tilt angle detection is supported. */
 	tiltSupported: boolean;
 }
 

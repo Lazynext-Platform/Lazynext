@@ -3,11 +3,17 @@ import { useEffect, useState, useRef } from "react";
 import { NativeBridge, ApplePencilState } from "../NativeBridge";
 
 interface UseApplePencilResult {
+	/** Current pen pressure. */
 	pressure: number;
+	/** Pen tilt vector. */
 	tilt: { x: number; y: number };
+	/** Pen azimuth angle in radians. */
 	azimuth: number;
+	/** Pen altitude angle in radians. */
 	altitude: number;
+	/** Whether the pencil is currently in contact. */
 	isActive: boolean;
+	/** Whether Apple Pencil is supported on this device. */
 	supported: boolean;
 }
 
