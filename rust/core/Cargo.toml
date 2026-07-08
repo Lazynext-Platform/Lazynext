@@ -7,7 +7,10 @@ repository = "https://github.com/lazynext/lazynext"
 license = "MIT"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+# staticlib: iOS XCFramework (mobile-uniffi CI links liblazynext_core.a)
+# cdylib: Android .so + desktop dynamic loading
+# rlib: consumed by other Rust crates and integration tests
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ffmpeg-next = { version = "8.1.0", optional = true }

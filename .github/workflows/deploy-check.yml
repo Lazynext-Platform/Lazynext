@@ -374,6 +374,7 @@ jobs:
   summary:
     name: "📋 Deployment Readiness Report"
     needs:
+      - gate
       - env-audit
       - docker-build-check
       - security-scan
@@ -404,8 +405,14 @@ jobs:
 
           # Determine overall status
           FAILURES=0
-          for job in env-audit docker-build-check security-scan migration-check api-gateway-check terraform-check e2e-smoke; do
-            RESULT="${{ needs.$job.result }}"
+          for RESULT in \
+            "${{ needs.env-audit.result }}" \
+            "${{ needs.docker-build-check.result }}" \
+            "${{ needs.security-scan.result }}" \
+            "${{ needs.migration-check.result }}" \
+            "${{ needs.api-gateway-check.result }}" \
+            "${{ needs.terraform-check.result }}" \
+            "${{ needs.e2e-smoke.result }}"; do
             if [ "$RESULT" = "failure" ]; then
               FAILURES=$((FAILURES + 1))
             fi

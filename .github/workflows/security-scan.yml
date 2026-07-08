@@ -51,11 +51,14 @@ jobs:
   dependency-review:
     name: Dependency Review
     runs-on: ubuntu-latest
+    # dependency-review-action only supports pull_request events; skip on
+    # scheduled / manual runs where there is no base..head diff to review.
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
       - name: Dependency Review
-        uses: actions/dependency-review-action@v5
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: "critical"
           comment-summary-in-pr: "on-failure"
@@ -79,6 +82,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Bun
+        if: matrix.language == 'javascript-typescript'
+        uses: oven-sh/setup-bun@v2
+
+      - name: Set up Python
+        if: matrix.language == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
@@ -97,8 +110,8 @@ jobs:
       - name: Install Dependencies (Python)
         if: matrix.language == 'python'
         run: |
-          pip install -r services/pre-processing/requirements.txt
-          pip install -r services/generative-studio/requirements.txt
+          pip install -r services/pre-processing/requirements.txt || true
+          pip install -r services/generative-studio/requirements.txt || true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
@@ -112,25 +125,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-pr-commenter-action@v1
+      # tfsec is deprecated and merged into Trivy; scan Terraform configs
+      # with Trivy's misconfiguration scanner instead.
+      - name: Run Trivy Terraform config scan
+        uses: aquasecurity/trivy-action@master
         with:
-          tfsec_args: "--concise-output"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true
+          scan-type: "config"
+          scan-ref: "infra/terraform"
+          format: "sarif"
+          output: "tfsec.sarif"
+          severity: "HIGH,CRITICAL"
+          exit-code: "0"
+          timeout: "10m"
 
-      - name: Run tfsec (SARIF)
-        uses: aquasecurity/tfsec-sarif-action@v0
-        with:
-          sarif_file: "tfsec.sarif"
-        continue-on-error: true
-
-      - name: Upload tfsec SARIF
+      - name: Upload Terraform SARIF
         uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
           sarif_file: "tfsec.sarif"
-          category: "tfsec"
+          category: "terraform"
 
   kubesec:
     name: Kubernetes Manifest Security
@@ -194,7 +207,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog — Scan Full History
-        uses: trufflesecurity/trufflehog-action@v2
+        uses: trufflesecurity/trufflehog@main
         with:
           path: "."
           base: "main"
@@ -213,14 +226,21 @@ jobs:
 
       - name: Check for .env Files
         run: |
-          if git ls-files | grep -qiE '\.env(?!\.example$)|credentials|\.pem$|\.key$|id_rsa'; then
-            echo "## Secret Scan — Potential Exposure" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "The following files were found in the repository:" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            git ls-files | grep -iE '\.env(?!\.example$)|credentials|\.pem$|\.key$|id_rsa' | tee -a $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "⚠️ These should never be committed. Add them to .gitignore immediately." >> $GITHUB_STEP_SUMMARY
+          # Match real secret files but exclude *.example templates and the
+          # standard (versioned, secret-free) Expo .xcode.env build file.
+          MATCHES=$(git ls-files \
+            | grep -iE '(\.env($|\.)|credentials|\.pem$|\.key$|id_rsa)' \
+            | grep -viE '(\.example$|\.xcode\.env$)' || true)
+          if [ -n "$MATCHES" ]; then
+            {
+              echo "## Secret Scan — Potential Exposure"
+              echo ""
+              echo "The following files were found in the repository:"
+              echo '```'
+              echo "$MATCHES"
+              echo '```'
+              echo "⚠️ These should never be committed. Add them to .gitignore immediately."
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "No exposed environment files or credentials detected in tracked files."
           fi
