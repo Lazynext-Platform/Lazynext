@@ -4,6 +4,10 @@ Welcome to the Lazynext documentation. Lazynext is an enterprise-grade, multi-pl
 
 **Quick links**: [User Guide](user-guide.md) · [API Reference](api-reference.md) · [Developer Guide](developer-guide.md) · [MCP Server](mcp-server-guide.md) · [Agent SDK](agent-sdk-guide.md)
 
+> **Documentation site**: This folder is also an [mdBook](https://rust-lang.github.io/mdBook/). Run `mdbook serve docs` (from the repo root) to browse it locally at `http://localhost:3000`, or `mdbook build docs` to render static HTML into `docs/book/`. The site is auto-built and deployed to GitHub Pages on every push to `main` via `.github/workflows/docs-site.yml`. Navigation is defined in [`SUMMARY.md`](SUMMARY.md).
+>
+> The Rust API reference (rustdoc) is generated separately with `cargo doc --workspace --no-deps --open`.
+
 ---
 
 ## For Users
