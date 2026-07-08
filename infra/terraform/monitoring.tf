@@ -91,6 +91,9 @@ resource "azurerm_key_vault_secret" "appinsights_connection_string" {
   key_vault_id = azurerm_key_vault.secrets.id
   content_type = "text/plain"
 
+  # The deployer access policy must exist before secrets can be written.
+  depends_on = [azurerm_key_vault_access_policy.deployer]
+
   lifecycle {
     ignore_changes = [value]
   }
