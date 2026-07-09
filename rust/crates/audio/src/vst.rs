@@ -123,9 +123,17 @@ impl VstHost {
         // Load the VST3 bundle via libloading (non-WASM only)
         #[cfg(not(target_arch = "wasm32"))]
         {
+            // SAFETY: `path` is a caller-supplied path to a VST3 shared library.
+            // Loading native code is inherently unsafe (arbitrary code runs on
+            // load); we only do so on explicit request and retain the handle in
+            // `self._library` so the module stays mapped while in use.
             match unsafe { libloading::Library::new(path) } {
                 Ok(library) => {
                     type GetFactoryFn = unsafe extern "C" fn() -> *mut std::ffi::c_void;
+                    // SAFETY: `GetPluginFactory` is the standard VST3 entry
+                    // symbol. We only resolve the symbol pointer here (we do not
+                    // call it), and `library` outlives this borrow because it is
+                    // moved into `self._library` below on success.
                     match unsafe { library.get::<GetFactoryFn>(b"GetPluginFactory") } {
                         Ok(_get_factory) => {
                             println!("[VST3 Host] VST3 plugin loaded and factory obtained: {name}");

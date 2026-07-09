@@ -23,6 +23,9 @@ impl wgpu::rwh::HasDisplayHandle for WebDisplay {
     // Returns a raw web display handle for surface creation.
     fn display_handle(&self) -> Result<wgpu::rwh::DisplayHandle<'_>, wgpu::rwh::HandleError> {
         let raw = wgpu::rwh::WebDisplayHandle::new();
+        // SAFETY: the web `WebDisplayHandle` carries no pointers or resources
+        // and is valid for the lifetime of the document, so borrowing it as a
+        // raw display handle imposes no lifetime obligations we can violate.
         Ok(unsafe { wgpu::rwh::DisplayHandle::borrow_raw(raw.into()) })
     }
 }

@@ -252,53 +252,7 @@ impl Default for ChannelManager {
 }
 
 // Returns the current UTC time formatted as an ISO-8601 timestamp.
-fn now_iso() -> String {
-    use std::time::SystemTime;
-    let dur = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or_default();
-    let secs = dur.as_secs();
-    let days = secs / 86400;
-    let time_secs = secs % 86400;
-    let hours = time_secs / 3600;
-    let minutes = (time_secs % 3600) / 60;
-    let seconds = time_secs % 60;
-    // Simple year/month/day approximation
-    let mut year = 1970i64;
-    let mut remaining_days = days as i64;
-    loop {
-        let dys = if (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0) {
-            366
-        } else {
-            365
-        };
-        if remaining_days < dys {
-            break;
-        }
-        remaining_days -= dys;
-        year += 1;
-    }
-    let leap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-    let mdays = if leap {
-        [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    } else {
-        [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    };
-    let doy = remaining_days as u64 + 1;
-    let (month, day) = {
-        let mut d = doy;
-        let mut m = 1;
-        for &md in &mdays {
-            if d <= md {
-                break;
-            }
-            d -= md;
-            m += 1;
-        }
-        (m, d)
-    };
-    format!("{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}Z")
-}
+use crate::time_util::now_iso;
 
 #[cfg(test)]
 mod tests {
