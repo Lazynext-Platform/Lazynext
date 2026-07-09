@@ -29,6 +29,9 @@ interface PencilCapabilities {
 type PencilCallback = (state: ApplePencilState) => void;
 type ConnectivityCallback = (isConnected: boolean) => void;
 
+const pencilSubscribers = new Set<PencilCallback>();
+const connectivitySubscribers = new Set<ConnectivityCallback>();
+
 /** Bridge to native module: project CRUD, AI intent processing, chat, clip manipulation, Apple Pencil events, and offline connectivity. */
 export const NativeBridge = {
   /** Fetch the current project metadata, tracks, and clips from the Rust core via native bridge. */
@@ -48,16 +51,6 @@ export const NativeBridge = {
       console.warn("NativeModule fetch error:", e);
       return { name: "Offline", tracks: [] };
     }
-  },
-
-			return {
-				name: data.name || "Lazynext Project",
-				tracks: data.tracks || [],
-			};
-		} catch (e) {
-			console.warn("NativeModule fetch error, falling back:", e);
-			return MOCK_PROJECT;
-		}
 	},
 
   /** Send a natural language editing intent to the Rust Chronos AI copilot for CRDT-based timeline mutation. */
