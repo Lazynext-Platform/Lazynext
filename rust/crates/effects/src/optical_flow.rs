@@ -278,8 +278,17 @@ impl OpticalFlowEngine {
     /// Motion-compensated frame interpolation.
     ///
     /// Generates an intermediate frame at position `blend_factor` (0.0 = frame A, 1.0 = frame B)
-    /// using optical flow to warp pixels along motion trajectories.
-    pub fn interpolate_frames(&self, frame_a: &[u8], frame_b: &[u8], blend_factor: f32) -> Vec<u8> {
+    /// using optical flow to warp pixels along motion trajectories. The caller
+    /// supplies the frame `width`/`height` (in pixels) so interpolation works
+    /// at any resolution.
+    pub fn interpolate_frames(
+        &self,
+        frame_a: &[u8],
+        frame_b: &[u8],
+        blend_factor: f32,
+        width: u32,
+        height: u32,
+    ) -> Vec<u8> {
         if frame_a.len() != frame_b.len() {
             return frame_a.to_vec();
         }
@@ -287,12 +296,16 @@ impl OpticalFlowEngine {
         let len = frame_a.len();
         let mut result = vec![0u8; len];
 
-        // Compute flow from A→B
-        let width = 1920u32; // These should be passed in from context
-        let height = 1080u32;
-
-        // Fast path: simple cross-fade for small frame sizes or when no flow is needed
-        if len < 256 * 256 * 4 || blend_factor == 0.0 || blend_factor == 1.0 {
+        // Fast path: simple cross-fade when there is nothing to warp, or when
+        // the supplied dimensions don't match the buffer (defensive fallback).
+        let expected = (width as usize) * (height as usize) * 4;
+        if len < 256 * 256 * 4
+            || blend_factor == 0.0
+            || blend_factor == 1.0
+            || expected != len
+            || width == 0
+            || height == 0
+        {
             for i in 0..len {
                 let a = frame_a[i] as f32;
                 let b = frame_b[i] as f32;
@@ -410,8 +423,15 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
     /// returns motion-interpolated frames for smooth slow/fast motion.
     ///
     /// Example: speed_ramp(frames, 0.5) doubles the number of frames (50% speed)
-    /// by interpolating between each pair of input frames.
-    pub fn speed_ramp(&self, frames: &[Vec<u8>], speed_multiplier: f32) -> Vec<Vec<u8>> {
+    /// by interpolating between each pair of input frames. `width`/`height`
+    /// describe the pixel dimensions of every frame.
+    pub fn speed_ramp(
+        &self,
+        frames: &[Vec<u8>],
+        speed_multiplier: f32,
+        width: u32,
+        height: u32,
+    ) -> Vec<Vec<u8>> {
         if frames.len() < 2 || speed_multiplier >= 1.0 {
             return frames.to_vec();
         }
@@ -425,7 +445,7 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>) {
 
             for j in 1..=num_interp {
                 let t = j as f32 / (num_interp + 1) as f32;
-                let interp = self.interpolate_frames(&frames[i], &frames[i + 1], t);
+                let interp = self.interpolate_frames(&frames[i], &frames[i + 1], t, width, height);
                 output.push(interp);
             }
         }
@@ -489,7 +509,7 @@ mod tests {
     fn test_interpolate_midpoint() {
         let engine = OpticalFlowEngine::new();
         let (a, b) = make_test_frames();
-        let result = engine.interpolate_frames(&a, &b, 0.5);
+        let result = engine.interpolate_frames(&a, &b, 0.5, 64, 64);
         assert_eq!(result.len(), a.len());
         // Midpoint should be roughly 64
         let mid_val = result[0];
@@ -500,8 +520,22 @@ mod tests {
     fn test_interpolate_frame_a() {
         let engine = OpticalFlowEngine::new();
         let (a, b) = make_test_frames();
-        let result = engine.interpolate_frames(&a, &b, 0.0);
+        let result = engine.interpolate_frames(&a, &b, 0.0, 64, 64);
         assert_eq!(result[0], a[0]);
+    }
+
+    #[test]
+    fn test_interpolate_non_1080p_full_path() {
+        // A 256x256 frame is large enough to exercise the full flow+warp path
+        // (not the small-frame cross-fade fast path) at a non-1920x1080 size.
+        let engine = OpticalFlowEngine::new();
+        let w = 256u32;
+        let h = 256u32;
+        let size = (w * h * 4) as usize;
+        let a = vec![10u8; size];
+        let b = vec![200u8; size];
+        let result = engine.interpolate_frames(&a, &b, 0.5, w, h);
+        assert_eq!(result.len(), size, "output must match the real frame size");
     }
 
     #[test]
@@ -524,7 +558,7 @@ mod tests {
     fn test_speed_ramp_doubles_frames() {
         let engine = OpticalFlowEngine::new();
         let frames: Vec<Vec<u8>> = (0..4).map(|_| vec![100u8; 64]).collect();
-        let result = engine.speed_ramp(&frames, 0.5);
+        let result = engine.speed_ramp(&frames, 0.5, 4, 4);
         // At 50% speed, output should have roughly twice the frames
         assert!(result.len() > frames.len());
     }
