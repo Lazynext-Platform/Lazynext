@@ -63,7 +63,7 @@ Before writing anything in an app, ask: **"Does this belong in `rust/`?"**
 | `services/collab-server` | Rust Axum (port 8004): CRDT sync + WebRTC signaling |
 | `services/analytics-service` | Node.js Bun (port 8006): Event ingestion, Kafka |
 | `services/social-publish` | Node.js Bun (port 8007): Multi-platform publishing |
-| `terraform/` | Azure infrastructure as code |
+| `infra/terraform/` | Azure infrastructure as code |
 | `k8s/` | Kubernetes manifests (optional AKS) |
 | `monitoring/` | Prometheus, Grafana, Loki, Tempo, Alertmanager |
 | `scripts/` | Build, deploy, and automation scripts |
@@ -331,7 +331,7 @@ cd services/render-service && bun test
 1. Create `services/<name>/` with a Dockerfile and health check endpoint (`GET /health`)
 2. Add to `docker-compose.yml` and `docker-compose.dev.yml`
 3. Register in `start-platform.sh`
-4. Add Terraform configuration in `terraform/` for Azure deployment
+4. Add Terraform configuration in `infra/terraform/` for Azure deployment
 5. Add any new environment variables to `.env.example`
 6. Document in `docs/api-reference.md`
 

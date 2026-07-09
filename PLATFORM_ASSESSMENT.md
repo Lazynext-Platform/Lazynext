@@ -3,6 +3,14 @@
 **Date:** 2026-06-30 (revised)
 **Scope:** Entire repository — all 7 formats, Rust crates, microservices, infrastructure
 
+> **⚠️ HISTORICAL BASELINE — NOT THE CURRENT STATUS.**
+> This document is the 2026-06-30 gap-analysis snapshot taken *before* the
+> Feature #09–#36 hardening pass. The **authoritative current status** is
+> [`docs/project-roadmap.md`](docs/project-roadmap.md): 34 of 36 features
+> complete (~95% code-complete; only Azure deployment + external API keys
+> remain). The per-format percentages below are retained as a historical
+> reference for the original gap analysis, not as the present state.
+
 ---
 
 ## The "7 Formats" (Deployment Targets)
@@ -23,7 +31,9 @@ Supporting these are **7 microservices** (pre-processing ~75%, generative-studio
 
 ---
 
-## Overall Platform Completion: **~70%**
+## Overall Platform Completion (2026-06-30 baseline): **~70%**
+
+> Superseded — see `docs/project-roadmap.md` for the current ~95% status.
 
 The platform has progressed significantly since the original assessment (2026-06-28). Major corrections:
 - Desktop app is a **real GPUI application** with Dashboard, Editor, NLEState, CoreEngine, and DeckLink — not a 25-line stub.
@@ -345,7 +355,7 @@ The remaining ~30% is **depth work, not stub-removal**: completing the desktop G
 3. **Monitoring stack** — Full Grafana/Prometheus/Loki/Tempo/Alloy with pre-built dashboards and SLOs
 4. **Azure Terraform** — Full Azure infrastructure with GPU node pool support
 5. **CRDT foundation** — LWW-Register, vector clocks, tombstones, operation-based CRDTs — correct primitives
-6. **CLAUDE.md** — Excellent developer documentation, comprehensive and accurate
+6. **AGENTS.md** — Excellent developer documentation, comprehensive and accurate
 7. **Web app scope** — 1000+ files covering editor, canvas, timeline, effects, masks, collaboration, storage migrations
 8. **CI/CD thoroughness** — Rust fmt/clippy/test, WASM build, Python tests, Node tests, Docker builds, deploys
 9. **Ansible provisioning** — Complete node setup from bare metal to K8s with GPU drivers
