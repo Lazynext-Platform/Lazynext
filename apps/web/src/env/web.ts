@@ -36,6 +36,40 @@ const webEnvSchema = z.object({
 
 export type WebEnv = z.infer<typeof webEnvSchema>;
 
-export const webEnv = process.env.SKIP_ENV_VALIDATION
-	? (process.env as unknown as WebEnv)
-	: webEnvSchema.parse(process.env);
+/**
+ * Validate the web environment.
+ *
+ * - `SKIP_ENV_VALIDATION` bypasses validation entirely (used during builds).
+ * - In production, invalid/missing required config throws (fail-fast) so a
+ *   misconfigured deploy is caught immediately.
+ * - In development/test, validation failures are logged as a warning and the
+ *   raw `process.env` is used, so a missing optional/local var can't crash
+ *   unrelated modules the moment they import `webEnv`.
+ */
+function loadWebEnv(): WebEnv {
+	if (process.env.SKIP_ENV_VALIDATION) {
+		return process.env as unknown as WebEnv;
+	}
+
+	const parsed = webEnvSchema.safeParse(process.env);
+	if (parsed.success) {
+		return parsed.data;
+	}
+
+	const issues = parsed.error.issues
+		.map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`)
+		.join("; ");
+
+	if (process.env.NODE_ENV === "production") {
+		throw new Error(`Invalid web environment configuration: ${issues}`);
+	}
+
+	console.warn(
+		`⚠️  Web env validation failed (continuing in ${
+			process.env.NODE_ENV ?? "unknown"
+		} mode without hard-crash): ${issues}`,
+	);
+	return process.env as unknown as WebEnv;
+}
+
+export const webEnv: WebEnv = loadWebEnv();
