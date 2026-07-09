@@ -175,7 +175,10 @@ impl RuleSet {
 
                 let when_match = match &rule.when {
                     None => true,
-                    Some(conditions) => conditions.iter().any(|(key, val)| match key.as_str() {
+                    // All `when` conditions must hold (AND semantics): a rule
+                    // scoped to `{ mode: ai-editing, task: export }` applies
+                    // only when both match. Unknown keys are ignored.
+                    Some(conditions) => conditions.iter().all(|(key, val)| match key.as_str() {
                         "mode" => ctx.mode.as_deref() == Some(val.as_str()),
                         "editing" => ctx.editing.as_deref() == Some(val.as_str()),
                         "task" => ctx.task.as_deref() == Some(val.as_str()),
@@ -374,6 +377,42 @@ mod tests {
         };
         let applicable = ruleset.get_applicable_rules("any/file.txt", Some(&ctx));
         assert!(applicable.is_empty());
+    }
+
+    #[test]
+    fn test_when_requires_all_conditions() {
+        let dir = setup_rules_dir(&[(
+            "ai-export.md",
+            "---\npaths: \"**\"\npriority: 5\ndescription: \"AI export rules\"\nwhen:\n  mode: \"ai-editing\"\n  task: \"export\"\n---\n\nAI export rules.",
+        )]);
+        let ruleset = RuleSet::load_from_directory(dir.path()).unwrap();
+
+        // Only one of the two conditions matches → rule must NOT apply (AND).
+        let partial = RuleContext {
+            mode: Some("ai-editing".into()),
+            task: Some("preview".into()),
+            ..Default::default()
+        };
+        assert!(
+            ruleset
+                .get_applicable_rules("any/file.txt", Some(&partial))
+                .is_empty(),
+            "a rule with multiple `when` conditions must require ALL of them"
+        );
+
+        // Both conditions match → rule applies.
+        let full = RuleContext {
+            mode: Some("ai-editing".into()),
+            task: Some("export".into()),
+            ..Default::default()
+        };
+        assert_eq!(
+            ruleset
+                .get_applicable_rules("any/file.txt", Some(&full))
+                .len(),
+            1,
+            "rule should apply when every `when` condition matches"
+        );
     }
 
     #[test]

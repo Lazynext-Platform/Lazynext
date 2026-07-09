@@ -539,19 +539,30 @@ impl NLEState {
     /// "audio", "mask", "text", "3d"). Records the operation for undo/redo.
     /// Silently rejects invalid track kinds by logging a warning.
     pub fn add_track(&mut self, id: String, kind: String) {
+        let position = self.data.tracks.len();
+        let snapshot = self.data.clone();
+        let op = CrdtOperation::TrackInsert {
+            track_id: id.clone(),
+            kind: kind.clone(),
+            position,
+        };
+        if self.insert_track_raw(id, kind) {
+            self.apply_and_record(op, snapshot);
+        }
+    }
+
+    /// Insert a track into project data **without** recording undo/op-log
+    /// history. Returns `false` if the kind is invalid. Used by local edits
+    /// (which then record) and by remote CRDT application (which must NOT
+    /// re-record the op locally).
+    fn insert_track_raw(&mut self, id: String, kind: String) -> bool {
         if !VALID_TRACK_KINDS.contains(&kind.as_str()) {
             eprintln!(
                 "[NLE] Warning: ignoring add_track with unknown kind '{}'. Valid kinds: {:?}",
                 kind, VALID_TRACK_KINDS
             );
-            return;
+            return false;
         }
-        let snapshot = self.data.clone();
-        let op = CrdtOperation::TrackInsert {
-            track_id: id.clone(),
-            kind: kind.clone(),
-            position: self.data.tracks.len(),
-        };
         self.data.tracks.push(Track {
             id,
             kind,
@@ -560,7 +571,7 @@ impl NLEState {
             soloed: false,
             locked: false,
         });
-        self.apply_and_record(op, snapshot);
+        true
     }
 
     /// Removes the track at the given index. Returns false if the index is
@@ -698,12 +709,31 @@ impl NLEState {
         start: u32,
         end: u32,
     ) {
+        let snapshot = self.data.clone();
+        if let Some(op) = self.insert_clip_raw(track_idx, id, clip_type, name, start, end) {
+            self.apply_and_record(op, snapshot);
+        }
+    }
+
+    /// Insert a clip into the given track **without** recording undo/op-log
+    /// history. Returns the `ClipInsert` op describing the insertion, or
+    /// `None` if the parameters were rejected. Used by local edits (which then
+    /// record) and by remote CRDT application (which must NOT re-record).
+    fn insert_clip_raw(
+        &mut self,
+        track_idx: usize,
+        id: String,
+        clip_type: String,
+        name: String,
+        start: u32,
+        end: u32,
+    ) -> Option<CrdtOperation> {
         if start >= end {
             eprintln!(
                 "[NLE] Warning: rejecting clip '{}' with invalid range (start={} >= end={})",
                 id, start, end
             );
-            return;
+            return None;
         }
         if track_idx >= self.data.tracks.len() {
             eprintln!(
@@ -712,40 +742,38 @@ impl NLEState {
                 track_idx,
                 self.data.tracks.len()
             );
-            return;
+            return None;
         }
         if !VALID_CLIP_TYPES.contains(&clip_type.as_str()) {
             eprintln!(
                 "[NLE] Warning: rejecting clip '{}' with unknown clip_type '{}'. Valid types: {:?}",
                 id, clip_type, VALID_CLIP_TYPES
             );
-            return;
+            return None;
         }
-        let snapshot = self.data.clone();
-        if let Some(track) = self.data.tracks.get_mut(track_idx) {
-            let op = CrdtOperation::ClipInsert {
-                clip_id: id.clone(),
-                track_id: track.id.clone(),
-                position: track.clips.len(),
-                clip: state::operations::ClipPayload {
-                    id: id.clone(),
-                    clip_type: clip_type.clone(),
-                    name: name.clone(),
-                    start,
-                    end,
-                },
-            };
-            track.clips.push(Clip {
-                id,
-                clip_type,
-                media_id: None,
-                name,
+        let track = self.data.tracks.get_mut(track_idx)?;
+        let op = CrdtOperation::ClipInsert {
+            clip_id: id.clone(),
+            track_id: track.id.clone(),
+            position: track.clips.len(),
+            clip: state::operations::ClipPayload {
+                id: id.clone(),
+                clip_type: clip_type.clone(),
+                name: name.clone(),
                 start,
                 end,
-                animations: HashMap::new(),
-            });
-            self.apply_and_record(op, snapshot);
-        }
+            },
+        };
+        track.clips.push(Clip {
+            id,
+            clip_type,
+            media_id: None,
+            name,
+            start,
+            end,
+            animations: HashMap::new(),
+        });
+        Some(op)
     }
 
     /// Removes a clip by ID from the track at the given index. Returns false
@@ -1098,7 +1126,10 @@ impl NLEState {
                         .iter()
                         .any(|t| t.id == *track_id)
                 {
-                    self.add_track(track_id.clone(), kind.clone());
+                    // Apply without recording: this is a remote op being merged,
+                    // not a local edit — it must not enter the local undo stack
+                    // or be re-appended to the op log (which would echo it back).
+                    self.insert_track_raw(track_id.clone(), kind.clone());
                 }
             }
             CrdtOperation::TrackDelete { track_id } => {
@@ -1118,7 +1149,8 @@ impl NLEState {
                         .iter()
                         .position(|t| t.id == *track_id)
                     {
-                        self.add_clip_to_track(
+                        // Remote merge — apply without recording locally.
+                        self.insert_clip_raw(
                             idx,
                             clip_id.clone(),
                             clip.clip_type.clone(),
@@ -1149,7 +1181,8 @@ impl NLEState {
                         // Remove from old track, add to new track at position
                         let clip_payload = self.find_clip(clip_id);
                         if let Some(payload) = clip_payload {
-                            self.add_clip_to_track(
+                            // Remote merge — apply without recording locally.
+                            self.insert_clip_raw(
                                 to_idx,
                                 clip_id.clone(),
                                 payload.clip_type,

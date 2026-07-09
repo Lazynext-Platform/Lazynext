@@ -88,3 +88,47 @@ fn test_apply_remote_track_insert_idempotent() {
         "Duplicate track insert should be idempotent"
     );
 }
+
+/// Remote operations must apply to state but NOT enter the local undo stack
+/// or op log (otherwise a peer's edit would be locally undoable and echoed
+/// back on the next broadcast).
+#[test]
+fn test_remote_ops_do_not_record_local_history() {
+    let mut state = new_state();
+    let op_log_before = state.op_log.len();
+
+    // Apply a remote track insert + clip insert.
+    state.apply_operation(CrdtOperation::TrackInsert {
+        track_id: "V1".to_string(),
+        kind: "video".to_string(),
+        position: 0,
+    });
+    state.apply_operation(CrdtOperation::ClipInsert {
+        clip_id: "c1".to_string(),
+        track_id: "V1".to_string(),
+        position: 0,
+        clip: ClipPayload {
+            id: "c1".to_string(),
+            clip_type: "video".to_string(),
+            name: "remote.mp4".to_string(),
+            start: 0,
+            end: 50,
+        },
+    });
+
+    // State reflects the remote edits …
+    let data = state.get_project_data();
+    assert!(data.tracks.iter().any(|t| t.id == "V1"));
+    assert!(data.tracks[0].clips.iter().any(|c| c.id == "c1"));
+
+    // … but no local undo entry was created for a remote edit …
+    assert!(!state.undo(), "remote ops must not be locally undoable");
+
+    // … and each remote op is recorded in the merged op log exactly ONCE
+    // (previously add_track/add_clip_to_track double-recorded it).
+    assert_eq!(
+        state.op_log.len(),
+        op_log_before + 2,
+        "each remote op must be logged exactly once (no double-recording)"
+    );
+}
