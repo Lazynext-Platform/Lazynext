@@ -390,14 +390,21 @@ async def generate_avatar_service(req: AvatarRequest):
     source = "gemini-tts"
 
     try:
-        from src.services.audio_gen import _gemini_tts
-        await _gemini_tts(req.script, "en-US")
+        from src.services.audio_gen import _gemini_tts, _safe_slug
+
+        audio_bytes = await _gemini_tts(req.script, "en-US")
+        # Persist the synthesized narration instead of discarding it.
+        # Sanitize the model id so it can't escape /tmp.
+        output_path = f"/tmp/avatar_{_safe_slug(req.avatar_model, 'avatar')}.mp3"
+        with open(output_path, "wb") as audio_file:
+            audio_file.write(audio_bytes)
         return {
             "success": True,
             "avatar_id": req.avatar_model,
             "script": req.script,
             "source": source,
-            "audio_url": "https://cdn.lazynext.ai/avatar/gemini_avatar.mp3",
+            "audio_url": f"file://{output_path}",
+            "bytes": len(audio_bytes),
         }
     except Exception as e:
         print(f"[GenerativeStudio] Avatar generation error: {e}")

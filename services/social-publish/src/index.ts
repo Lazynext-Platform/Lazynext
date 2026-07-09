@@ -46,6 +46,26 @@ function validateVideoPath(inputPath: unknown): string | null {
 	return resolved;
 }
 
+/**
+ * Resolve a publicly-reachable HTTPS URL for a local video file.
+ *
+ * The Instagram Graph API downloads media from a public URL — it cannot read
+ * `file://` paths. Returns:
+ *  - the input unchanged if it is already an `https://` URL,
+ *  - `${PUBLIC_MEDIA_BASE_URL}/<basename>` when that env var (https) is set,
+ *  - otherwise `null` (caller surfaces a clear configuration error).
+ */
+function resolvePublicMediaUrl(videoPath: string): string | null {
+	if (/^https:\/\//i.test(videoPath)) {
+		return videoPath;
+	}
+	const base = process.env.PUBLIC_MEDIA_BASE_URL;
+	if (base && /^https:\/\//i.test(base)) {
+		return `${base.replace(/\/+$/, "")}/${path.basename(videoPath)}`;
+	}
+	return null;
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -471,6 +491,17 @@ async function publishInstagram(
 		};
 	}
 
+	// Instagram downloads media from a public HTTPS URL — file:// is rejected.
+	const publicVideoUrl = resolvePublicMediaUrl(videoPath);
+	if (!publicVideoUrl) {
+		return {
+			platform: "instagram",
+			success: false,
+			error:
+				"Instagram requires a publicly-accessible HTTPS video URL. Set PUBLIC_MEDIA_BASE_URL (https) so rendered files can be served, or pass an https media URL — file:// paths are not supported by the Instagram Graph API.",
+		};
+	}
+
 	// Step 1: Create media container
 	const createResp = await fetchWithRetry(`${INSTAGRAM_API}/${instagramUserId}/media`, {
 		method: "POST",
@@ -480,7 +511,7 @@ async function publishInstagram(
 		},
 		body: new URLSearchParams({
 			media_type: "REELS",
-			video_url: `file://${videoPath}`,
+			video_url: publicVideoUrl,
 			caption: description || "Posted via Lazynext",
 			share_to_feed: "true",
 		}).toString(),
