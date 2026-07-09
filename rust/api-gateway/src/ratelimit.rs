@@ -16,7 +16,7 @@ use axum::{
 };
 use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 /// Configuration for a rate limit bucket.
@@ -173,7 +173,16 @@ pub async fn rate_limit(
         .await
     {
         Ok(c) => c,
-        Err(_) => return Ok(next.run(req).await), // fallback bypass if Redis fails
+        Err(_) => {
+            // Redis unavailable — fall back to in-process token-bucket limiting
+            // instead of bypassing rate limiting entirely (fail-closed).
+            let limiter_key = format!("{}:{}", req.uri().path(), config.capacity);
+            let limiter = get_limiter(&config, &limiter_key);
+            if limiter.check(&ip) {
+                return Ok(next.run(req).await);
+            }
+            return Ok(too_many_requests());
+        }
     };
 
     // Simple Redis counter for rate limiting (reqs per minute)
@@ -193,36 +202,41 @@ pub async fn rate_limit(
     }
 
     if current > config.capacity as i64 {
-        let mut resp = axum::Json(serde_json::json!({
-            "error": "rate_limit_exceeded",
-            "message": "Too many requests. Please slow down.",
-            "retry_after_seconds": 60
-        }))
-        .into_response();
-        *resp.status_mut() = StatusCode::TOO_MANY_REQUESTS;
-        resp.headers_mut()
-            .insert("Retry-After", "60".parse().unwrap());
-        Ok(resp)
+        Ok(too_many_requests())
     } else {
         Ok(next.run(req).await)
     }
 }
 
-/// Get or create a rate limiter for the given config.
-fn get_limiter(config: &RateLimitConfig, key: &str) -> &'static RateLimiter {
+/// Build the standard `429 Too Many Requests` response with a `Retry-After` header.
+fn too_many_requests() -> Response {
+    let mut resp = axum::Json(serde_json::json!({
+        "error": "rate_limit_exceeded",
+        "message": "Too many requests. Please slow down.",
+        "retry_after_seconds": 60
+    }))
+    .into_response();
+    *resp.status_mut() = StatusCode::TOO_MANY_REQUESTS;
+    if let Ok(value) = "60".parse() {
+        resp.headers_mut().insert("Retry-After", value);
+    }
+    resp
+}
+
+/// Get or create a process-local rate limiter for the given config key.
+///
+/// Returns an `Arc<RateLimiter>` so the caller holds a real owned handle —
+/// the limiter uses interior mutability (`Mutex`) and is safe to share and
+/// call concurrently. Limiters live for the duration of the process.
+fn get_limiter(config: &RateLimitConfig, key: &str) -> Arc<RateLimiter> {
     use std::sync::OnceLock;
-    static LIMITERS: OnceLock<Mutex<HashMap<String, RateLimiter>>> = OnceLock::new();
+    static LIMITERS: OnceLock<Mutex<HashMap<String, Arc<RateLimiter>>>> = OnceLock::new();
     let map = LIMITERS.get_or_init(|| Mutex::new(HashMap::new()));
     let mut guard = map.lock().unwrap();
     guard
         .entry(key.to_string())
-        .or_insert_with(|| RateLimiter::new(config.clone()));
-    // Leak the reference to keep it alive for the static lifetime
-    // This is safe because rate limiters live for the duration of the process
-    unsafe {
-        let ptr: *const RateLimiter = guard.get(key).unwrap();
-        &*ptr
-    }
+        .or_insert_with(|| Arc::new(RateLimiter::new(config.clone())))
+        .clone()
 }
 
 #[cfg(test)]
@@ -258,5 +272,20 @@ mod tests {
             bucket.try_consume(&config),
             "Should refill after time passes"
         );
+    }
+
+    #[test]
+    fn test_get_limiter_is_shared_and_enforces_limit() {
+        let config = RateLimitConfig::new(3, 0.0); // no refill
+        let a = get_limiter(&config, "unit-test-key");
+        let b = get_limiter(&config, "unit-test-key");
+        // Same underlying limiter is returned for the same key.
+        assert!(Arc::ptr_eq(&a, &b));
+        // Three requests allowed, fourth denied — and the denial is visible
+        // through the second handle, proving shared state (no dangling copy).
+        assert!(a.check("client-ip"));
+        assert!(a.check("client-ip"));
+        assert!(b.check("client-ip"));
+        assert!(!b.check("client-ip"), "4th request must be rate-limited");
     }
 }
