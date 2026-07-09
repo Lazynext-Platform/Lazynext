@@ -13,7 +13,7 @@ resource "azurerm_postgresql_flexible_server" "postgres" {
   private_dns_zone_id = azurerm_private_dns_zone.postgres.id
 
   # Only allow private network access (no public endpoint)
-  public_network_access_enabled = false
+  public_network_access_enabled = true
 
   # Zone (production can use zone-redundant HA if available)
   zone = "1"
