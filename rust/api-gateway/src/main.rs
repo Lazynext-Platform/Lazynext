@@ -5,13 +5,6 @@
 //! initializes the PostgreSQL store, NLE state, webhook dispatcher, and
 //! Redis-backed WebSocket state.
 
-// Per-item allow attributes replace the previous global blanket suppression.
-// Only dead_code and unused_variables are tolerated globally in the entry point:
-// - dead_code: route stubs for WIP features
-// - unused_variables: Axum handler extractors not always needed in every route
-// All other lint suppressions are scoped to specific handlers below.
-#![allow(dead_code, unused_variables)]
-
 use axum::extract::{Path, State};
 use axum::http::HeaderMap;
 use axum::middleware;
@@ -625,7 +618,7 @@ async fn handle_dodo_webhook(
         "payment_link.failed" | "payment_link.expired" => {
             if let Some(obj) = payload["data"].as_object() {
                 let customer_id = obj["customer_id"].as_str().unwrap_or("");
-                if let Ok(Some(user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
+                if let Ok(Some(_user)) = find_user_by_dodo_customer(&state.db, customer_id).await {
                     tracing::warn!(
                         customer_id = %customer_id,
                         event_type = %event_type,
@@ -1149,7 +1142,7 @@ fn social_publish_url() -> String {
 
 /// POST /api/v1/social/reframe — Proxy auto-reframe to social-publish
 async fn handle_social_reframe(
-    Extension(claims): Extension<AuthClaims>,
+    Extension(_claims): Extension<AuthClaims>,
     Json(payload): Json<Value>,
 ) -> Json<Value> {
     let client = reqwest::Client::new();
@@ -1173,7 +1166,7 @@ async fn handle_social_reframe(
 
 /// POST /api/v1/social/publish — Proxy publish to social-publish
 async fn handle_social_publish(
-    Extension(claims): Extension<AuthClaims>,
+    Extension(_claims): Extension<AuthClaims>,
     Json(payload): Json<Value>,
 ) -> Json<Value> {
     let platform = payload
@@ -1201,7 +1194,7 @@ async fn handle_social_publish(
 
 /// POST /api/v1/social/metadata — Proxy metadata generation to social-publish
 async fn handle_social_metadata(
-    Extension(claims): Extension<AuthClaims>,
+    Extension(_claims): Extension<AuthClaims>,
     Json(payload): Json<Value>,
 ) -> Json<Value> {
     let base = social_publish_url();
@@ -1224,7 +1217,7 @@ async fn handle_social_metadata(
 }
 
 /// GET /api/v1/social/schedule — List scheduled posts from social-publish
-async fn handle_social_schedule(Extension(claims): Extension<AuthClaims>) -> Json<Value> {
+async fn handle_social_schedule(Extension(_claims): Extension<AuthClaims>) -> Json<Value> {
     let base = social_publish_url();
     let client = reqwest::Client::new();
     match client.get(format!("{base}/schedule")).send().await {
@@ -1703,7 +1696,7 @@ struct PresignedUrlQuery {
 /// **Query**: `filename` — the target blob name.
 /// **Returns**: `{ success, url, method, expires_in, headers }`
 async fn handle_get_presigned_url(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     Extension(claims): Extension<AuthClaims>,
     axum::extract::Query(query): axum::extract::Query<PresignedUrlQuery>,
 ) -> Json<Value> {
@@ -1745,7 +1738,7 @@ async fn handle_get_presigned_url(
 
 /// Handler for chunked MediaRecorder streaming from the browser extension
 async fn handle_stream_ingest(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     mut multipart: axum::extract::Multipart,
 ) -> Result<Json<Value>, (axum::http::StatusCode, Json<Value>)> {
     let mut session_id = String::new();
