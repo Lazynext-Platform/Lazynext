@@ -425,24 +425,7 @@ fn doy_to_month_day(doy: u64, leap: bool) -> (u64, u64) {
 }
 
 // Returns the current UTC time as an ISO 8601 string.
-fn now_iso() -> String {
-    #[allow(unused_imports)]
-    use std::time::SystemTime;
-    let now = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)
-        .unwrap_or_default();
-    let secs = now.as_secs();
-    let tc = now_components();
-    format!(
-        "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z",
-        approx_year_and_doy(secs / 86400).0,
-        tc.month,
-        tc.day,
-        tc.hour,
-        tc.minute,
-        secs % 60
-    )
-}
+use crate::time_util::now_iso;
 
 // Resolves the user's home directory, falling back to the current directory.
 fn dirs_fallback() -> PathBuf {

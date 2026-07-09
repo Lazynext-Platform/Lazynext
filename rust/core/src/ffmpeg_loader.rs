@@ -17,6 +17,85 @@ pub fn sanitize_media_path(path: &str) -> String {
     cleaned.to_string()
 }
 
+/// Probe a media file with `ffprobe`, returning `(duration_secs, width, height, asset_type)`.
+///
+/// `asset_type` is one of `"video"`, `"audio"`, `"image"`, or `"unknown"`.
+/// The path is sanitized and passed after a `--` separator to prevent flag
+/// injection. When `ffprobe` is unavailable, the type is guessed from the file
+/// extension and sensible 1920x1080 / 10s defaults are returned.
+pub fn probe_media(path: &str) -> (f64, u32, u32, String) {
+    let sanitized = sanitize_media_path(path);
+    let output = Command::new("ffprobe")
+        .arg("-v")
+        .arg("quiet")
+        .arg("-print_format")
+        .arg("json")
+        .arg("-show_format")
+        .arg("-show_streams")
+        .arg("--")
+        .arg(&sanitized)
+        .output();
+
+    match output {
+        Ok(out) if out.status.success() => {
+            if let Ok(info) = serde_json::from_slice::<serde_json::Value>(&out.stdout) {
+                let duration = info["format"]["duration"]
+                    .as_str()
+                    .and_then(|s| s.parse::<f64>().ok())
+                    .unwrap_or(10.0);
+
+                let mut width: u32 = 0;
+                let mut height: u32 = 0;
+                let mut asset_type = "unknown".to_string();
+
+                if let Some(streams) = info["streams"].as_array() {
+                    for stream in streams {
+                        let codec_type = stream["codec_type"].as_str().unwrap_or("");
+                        match codec_type {
+                            "video" => {
+                                width = stream["width"].as_u64().unwrap_or(0) as u32;
+                                height = stream["height"].as_u64().unwrap_or(0) as u32;
+                                asset_type = "video".to_string();
+                            }
+                            "audio" if asset_type == "unknown" => {
+                                asset_type = "audio".to_string();
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                if width == 0 {
+                    width = 1920;
+                }
+                if height == 0 {
+                    height = 1080;
+                }
+
+                (duration, width, height, asset_type)
+            } else {
+                (10.0, 1920, 1080, "unknown".to_string())
+            }
+        }
+        _ => {
+            // ffprobe not available — guess type from extension
+            let ext = std::path::Path::new(path)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_lowercase();
+            let asset_type = match ext.as_str() {
+                "mp4" | "mov" | "avi" | "mkv" | "webm" | "mxf" => "video",
+                "mp3" | "wav" | "aac" | "flac" | "ogg" | "m4a" => "audio",
+                "png" | "jpg" | "jpeg" | "gif" | "webp" | "tiff" | "bmp" => "image",
+                _ => "unknown",
+            }
+            .to_string();
+            (10.0, 1920, 1080, asset_type)
+        }
+    }
+}
+
 /// An `AssetLoader` that fetches video frames by calling the `ffmpeg` CLI binary.
 pub struct CliFfmpegLoader {
     /// Target frame width in pixels.

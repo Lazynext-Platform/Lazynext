@@ -61,6 +61,7 @@ pub mod ring_buffer_decoder;
 pub mod scheduled_routines;
 pub mod session_portability;
 pub mod task_queue;
+mod time_util;
 pub mod timeline;
 
 pub use auto_memory::AutoMemory;

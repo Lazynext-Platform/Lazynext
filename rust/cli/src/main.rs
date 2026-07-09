@@ -18,7 +18,7 @@
 use clap::Parser;
 use lazynext_core::NLEState;
 use lazynext_core::engine::AssetLoader;
-use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
+use lazynext_core::ffmpeg_loader::{CliFfmpegLoader, probe_media};
 use lazynext_core::nle_state::ProjectData;
 use lazynext_rules::{RuleContext, RuleSet};
 use serde::Serialize;
@@ -830,81 +830,6 @@ fn cmd_ingest(file: &str, project_id: &str) {
         "✅ Ingested '{}' ({}: {}x{} {:.1}s) into project '{}'",
         name, asset_type, width, height, duration, project_id
     );
-}
-
-/// Probe a media file with ffprobe to extract duration, resolution, and type.
-/// Uses `--` separator before the path to prevent flag injection.
-fn probe_media(path: &str) -> (f64, u32, u32, String) {
-    use lazynext_core::ffmpeg_loader::sanitize_media_path;
-    let sanitized = sanitize_media_path(path);
-    let output = std::process::Command::new("ffprobe")
-        .arg("-v")
-        .arg("quiet")
-        .arg("-print_format")
-        .arg("json")
-        .arg("-show_format")
-        .arg("-show_streams")
-        .arg("--")
-        .arg(&sanitized)
-        .output();
-
-    match output {
-        Ok(out) if out.status.success() => {
-            if let Ok(info) = serde_json::from_slice::<serde_json::Value>(&out.stdout) {
-                let duration = info["format"]["duration"]
-                    .as_str()
-                    .and_then(|s| s.parse::<f64>().ok())
-                    .unwrap_or(10.0);
-
-                let mut width: u32 = 0;
-                let mut height: u32 = 0;
-                let mut asset_type = "unknown".to_string();
-
-                if let Some(streams) = info["streams"].as_array() {
-                    for stream in streams {
-                        let codec_type = stream["codec_type"].as_str().unwrap_or("");
-                        match codec_type {
-                            "video" => {
-                                width = stream["width"].as_u64().unwrap_or(0) as u32;
-                                height = stream["height"].as_u64().unwrap_or(0) as u32;
-                                asset_type = "video".to_string();
-                            }
-                            "audio" if asset_type == "unknown" => {
-                                asset_type = "audio".to_string();
-                            }
-                            _ => {}
-                        }
-                    }
-                }
-
-                if width == 0 {
-                    width = 1920;
-                }
-                if height == 0 {
-                    height = 1080;
-                }
-
-                (duration, width, height, asset_type)
-            } else {
-                (10.0, 1920, 1080, "unknown".to_string())
-            }
-        }
-        _ => {
-            let ext = std::path::Path::new(path)
-                .extension()
-                .and_then(|e| e.to_str())
-                .unwrap_or("")
-                .to_lowercase();
-            let asset_type = match ext.as_str() {
-                "mp4" | "mov" | "avi" | "mkv" | "webm" | "mxf" => "video",
-                "mp3" | "wav" | "aac" | "flac" | "ogg" | "m4a" => "audio",
-                "png" | "jpg" | "jpeg" | "gif" | "webp" | "tiff" | "bmp" => "image",
-                _ => "unknown",
-            }
-            .to_string();
-            (10.0, 1920, 1080, asset_type)
-        }
-    }
 }
 
 /// Upload a test pattern texture as fallback when no real media is available.
