@@ -342,10 +342,27 @@ impl NLEState {
         &mut self.data
     }
 
-    /// Sets the canvas dimensions for the project.
+    /// Sets the canvas dimensions for the project. Records the change for
+    /// undo/redo (and peer sync) so a resize can be reverted. No-ops when the
+    /// dimensions are unchanged, to avoid polluting the history.
     pub fn set_dimensions(&mut self, width: u32, height: u32) {
+        if self.data.width == width && self.data.height == height {
+            return;
+        }
+        let snapshot = self.data.clone();
+        let old_value = serde_json::json!({
+            "width": self.data.width,
+            "height": self.data.height,
+        });
         self.data.width = width;
         self.data.height = height;
+        let op = CrdtOperation::PropertyUpdate {
+            target_id: self.data.id.clone(),
+            property: "dimensions".to_string(),
+            old_value: Some(old_value),
+            value: serde_json::json!({ "width": width, "height": height }),
+        };
+        self.apply_and_record(op, snapshot);
     }
 
     /// Replace the entire project data (e.g. when loading from a file).
@@ -990,30 +1007,70 @@ impl NLEState {
 
     /// Removes clips from the given track that fall entirely within the
     /// specified silence regions (start and end times in seconds).
+    ///
+    /// Records the removal for undo/redo (snapshot-based, so a single undo
+    /// restores every removed clip) and emits `ClipDelete` operations to the
+    /// log for peer synchronization. No-ops when nothing is removed.
     pub fn apply_silence_trims(&mut self, track_idx: usize, silence_regions: &[(f64, f64)]) {
         if track_idx >= self.data.tracks.len() {
             return;
         }
 
-        let track = &mut self.data.tracks[track_idx];
-        let clips_before = track.clips.len();
+        let framerate = self.data.framerate as f64;
 
-        for (start_sec, end_sec) in silence_regions {
-            let start_frames = (*start_sec * self.data.framerate as f64) as u32;
-            let end_frames = (*end_sec * self.data.framerate as f64) as u32;
-
-            // Remove clips that fall entirely within silence regions
+        // Identify clips fully contained within a silence region (immutable pass).
+        let removed_ids: Vec<String> = {
+            let track = &self.data.tracks[track_idx];
             track
                 .clips
-                .retain(|clip| !(clip.start >= start_frames && clip.end <= end_frames));
+                .iter()
+                .filter(|clip| {
+                    silence_regions.iter().any(|(start_sec, end_sec)| {
+                        let start_frames = (*start_sec * framerate) as u32;
+                        let end_frames = (*end_sec * framerate) as u32;
+                        clip.start >= start_frames && clip.end <= end_frames
+                    })
+                })
+                .map(|clip| clip.id.clone())
+                .collect()
+        };
+
+        if removed_ids.is_empty() {
+            return;
         }
 
-        let removed = clips_before - track.clips.len();
+        // Snapshot before mutation so undo can restore all removed clips at once.
+        let snapshot = self.data.clone();
+        let track_id = self.data.tracks[track_idx].id.clone();
+
+        let removed_set: std::collections::HashSet<&String> = removed_ids.iter().collect();
+        self.data.tracks[track_idx]
+            .clips
+            .retain(|clip| !removed_set.contains(&clip.id));
+
+        // Emit one ClipDelete per removed clip for peer sync, and a single
+        // snapshot-backed undo entry that restores the entire pre-trim state.
+        self.clock.tick();
+        for clip_id in &removed_ids {
+            self.op_log.push(CrdtOperation::ClipDelete {
+                clip_id: clip_id.clone(),
+                track_id: track_id.clone(),
+            });
+        }
+        self.undo_stack.push((
+            CrdtOperation::ClipDelete {
+                clip_id: removed_ids[0].clone(),
+                track_id,
+            },
+            snapshot,
+        ));
+        self.redo_stack.clear();
+
         println!(
             "🔇 [NLE] Trimmed {} silence regions from track {} — removed {} clip(s)",
             silence_regions.len(),
             track_idx,
-            removed
+            removed_ids.len()
         );
     }
 
