@@ -198,14 +198,16 @@ jobs:
   cargo-audit:
     name: Rust Crate Audit
     runs-on: ubuntu-latest
-    # Advisory-only: new upstream CVEs should surface here without blocking
-    # merges, since fixes often depend on external crate releases.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo install cargo-audit --locked || true
-      - run: cargo audit
+      # Advisory-only: surface upstream CVEs without blocking merges, since
+      # fixes usually depend on external crate releases. The step is allowed
+      # to fail (visible red mark) while the check stays green.
+      - name: cargo audit (advisory-only)
+        run: cargo audit
+        continue-on-error: true
 
   # ── E2E ─────────────────────────────────────────────────────────────────
   e2e:
