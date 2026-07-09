@@ -124,6 +124,18 @@ pub enum CrdtOperation {
 
 impl CrdtOperation {
     /// Generates a compensating operation to undo this operation, if possible.
+    ///
+    /// This is used by the WASM entity-graph CRDT (`crdt_wasm`) for
+    /// entity/property undo, where the needed prior value is available
+    /// (`PropertyUpdate.old_value`) or the inverse is structural
+    /// (`*Insert` → `*Delete`).
+    ///
+    /// Destructive operations (`ClipDelete`, `ClipTrim`, `ClipSplit`,
+    /// `TrackDelete`, `EntityDelete`) return `None` because reversing them
+    /// requires the prior payload/bounds, which these thin operations do not
+    /// carry. The primary NLE undo/redo (`nle_state`) does not rely on this —
+    /// it uses full pre-operation snapshots, which restore every operation
+    /// type exactly.
     pub fn inverse(&self) -> Option<Self> {
         match self {
             CrdtOperation::ClipInsert {

@@ -92,3 +92,52 @@ fn test_merge_skips_clip_on_missing_track() {
         "Clip meant for deleted track should NOT appear on track 0"
     );
 }
+
+/// Test that merging a TrackDelete op tombstones the track so it cannot be
+/// resurrected by a concurrent insert.
+#[test]
+fn test_merge_tombstones_deleted_track() {
+    let mut canon = new_state();
+    canon.add_track("V1".to_string(), "video".to_string());
+    let mut mgr = MultiverseManager::new(canon);
+
+    mgr.branch("alt").expect("branch should create");
+    mgr.checkout("alt").expect("checkout should work");
+
+    // Delete V1 on the branch — records a TrackDelete op in the branch log.
+    let branch = mgr.get_current_mut();
+    branch.remove_track(0);
+
+    mgr.checkout("canon").expect("checkout should work");
+    mgr.merge("alt", "canon").expect("merge should succeed");
+
+    let canon = mgr.get_current();
+    assert!(
+        canon.tombstones.is_deleted("V1"),
+        "Merged TrackDelete should tombstone the track"
+    );
+}
+
+/// Test the current-branch accessors: get_current and try_current agree, and
+/// try_current returns Some for a valid checkout.
+#[test]
+fn test_current_accessors() {
+    let canon = new_state();
+    let mut mgr = MultiverseManager::new(canon);
+
+    assert_eq!(mgr.current_branch(), "canon");
+    assert!(mgr.try_current().is_some(), "canon must be accessible");
+
+    let id_via_get = mgr.get_current().get_project_data().id.clone();
+    let id_via_try = mgr
+        .try_current()
+        .expect("canon present")
+        .get_project_data()
+        .id
+        .clone();
+    assert_eq!(id_via_get, id_via_try);
+
+    // Mutable accessors resolve to the same reality.
+    assert!(mgr.try_current_mut().is_some());
+    let _ = mgr.get_current_mut();
+}

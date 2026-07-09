@@ -9,6 +9,20 @@ import { auth } from "@/auth/server";
 import { headers } from "next/headers";
 import { chatSchema } from "@/lib/validation";
 
+/**
+ * Resolve the internal API key used to authenticate server→gateway calls.
+ * In production this must be configured; in development a fixed dev key is
+ * used so local flows work without extra setup.
+ */
+function getInternalApiKey(): string {
+	const key = process.env.INTERNAL_API_KEY;
+	if (key) return key;
+	if (process.env.NODE_ENV === "production") {
+		throw new Error("INTERNAL_API_KEY must be set in production");
+	}
+	return "lazynext-internal-dev-key";
+}
+
 export async function POST(req: Request) {
 	try {
 		const session = await auth.api.getSession({
@@ -36,6 +50,7 @@ export async function POST(req: Request) {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
+				"X-Internal-API-Key": getInternalApiKey(),
 			},
 			body: JSON.stringify({
 				prompt,

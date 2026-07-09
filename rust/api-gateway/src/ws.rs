@@ -77,7 +77,7 @@ async fn handle_socket(
     state: AppState,
     ws_state: Arc<WsState>,
     project_id: String,
-    claims: AuthClaims,
+    _claims: AuthClaims,
 ) {
     let (mut sender, mut receiver) = socket.split();
     let client = ws_state.redis_client.clone();
