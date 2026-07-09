@@ -17,7 +17,43 @@ class DemucsConfig:
     model_name: str = "htdemucs"
     stems: int = 4 # Options: 2 (vocals/accomp), 4, 6
     output_format: str = "wav" # "wav" or "flac"
-    device: str = "cuda" # "cuda", "cpu", "mps"
+    device: str = "auto" # "auto", "cuda", "cpu", "mps"
+
+
+def _resolve_device(preferred: str) -> str:
+    """Resolve a usable torch device, falling back when the preferred one is
+    unavailable (so a default of 'cuda' does not crash CPU-only hosts)."""
+    try:
+        import torch
+    except Exception:
+        return "cpu"
+
+    def cuda_ok() -> bool:
+        try:
+            return torch.cuda.is_available()
+        except Exception:
+            return False
+
+    def mps_ok() -> bool:
+        backend = getattr(torch.backends, "mps", None)
+        try:
+            return bool(backend) and backend.is_available()
+        except Exception:
+            return False
+
+    if preferred == "cuda" and cuda_ok():
+        return "cuda"
+    if preferred == "mps" and mps_ok():
+        return "mps"
+    if preferred == "cpu":
+        return "cpu"
+    # "auto" (or an unavailable explicit choice) → best available device.
+    if cuda_ok():
+        return "cuda"
+    if mps_ok():
+        return "mps"
+    return "cpu"
+
 
 @dataclass
 class DemucsResult:
@@ -62,45 +98,49 @@ class DemucsPipeline:
             print(f"[Demucs] Starting separation for {audio_path} using model {self.config.model_name}")
             import time
             start_time = time.perf_counter()
-            
+
             # Use native Demucs API instead of subprocess
             from demucs.api import Separator
-            
-            # Configure separation based on requested stems
-            two_stems = "vocals" if self.config.stems <= 2 else None
-            
-            separator = Separator(model=self.config.model_name, device=self.config.device)
-            if two_stems:
-                separator.update_parameter(segment=None, split=True, overlap=0.1) # Simulate two stems config
-            
-            # Load and separate
-            # The separator returns a dictionary mapping track names (e.g., 'vocals', 'drums') to PyTorch tensors.
+
+            device = _resolve_device(self.config.device)
+            print(f"[Demucs] Using device: {device}")
+
+            separator = Separator(model=self.config.model_name, device=device)
+
+            # Load and separate. The separator returns a dict mapping track
+            # names (e.g. 'vocals', 'drums') to PyTorch tensors.
             _, separated = separator.separate_audio_file(audio_path)
-            
+
+            # Two-stem mode: keep 'vocals' and sum the remaining stems into a
+            # single 'accompaniment' track.
+            if self.config.stems <= 2 and "vocals" in separated:
+                accompaniment = None
+                for name, tensor in separated.items():
+                    if name == "vocals":
+                        continue
+                    accompaniment = tensor if accompaniment is None else accompaniment + tensor
+                reduced = {"vocals": separated["vocals"]}
+                if accompaniment is not None:
+                    reduced["accompaniment"] = accompaniment
+                separated = reduced
+
             import torchaudio
             stems_generated = []
-            
+
             for stem_name, stem_tensor in separated.items():
-                if two_stems and stem_name not in ["vocals", "no_vocals"]:
-                    # If we only want two stems and this isn't vocals, Demucs usually sums the rest into "no_vocals"
-                    # depending on the model. This is a simplified handler.
-                    if "no_vocals" not in separated:
-                        # Fallback summing
-                        pass
-                
                 output_path = os.path.join(out_dir, f"{stem_name}.{self.config.output_format}")
-                torchaudio.save(output_path, stem_tensor, sample_rate=separator.samplerate)
+                torchaudio.save(output_path, stem_tensor.cpu(), sample_rate=separator.samplerate)
                 stems_generated.append(output_path)
-            
+
             print(f"[Demucs] Separated {len(stems_generated)} stems in {time.perf_counter() - start_time:.2f}s")
-            
+
             return DemucsResult(
                 success=True,
                 method="demucs_native",
                 output_dir=out_dir,
                 stems_generated=stems_generated
             )
-            
+
         except Exception as e:
             return DemucsResult(
                 success=False,

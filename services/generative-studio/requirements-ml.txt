@@ -1,0 +1,10 @@
+# Optional ML dependencies for stem separation (Demucs).
+#
+# The service degrades gracefully when these are absent — see
+# demucs_pipeline.py (`is_available`) and audio_gen.py, which fall back to
+# Spleeter / librosa HPSS / a clear 503. torch + torchaudio are already
+# installed via the Dockerfile (CPU wheels); demucs pulls them in otherwise.
+#
+# Installed with a non-fatal fallback in the Dockerfile, since ML wheels are
+# not always available for the target Python version.
+demucs>=4.0.0
