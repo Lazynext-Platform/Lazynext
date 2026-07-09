@@ -7,6 +7,7 @@ ElevenLabs is kept only for voice cloning (overdub).
 
 import asyncio
 import os
+import re
 import sys
 import base64
 import httpx
@@ -17,6 +18,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from demucs_pipeline import DemucsPipeline, DemucsConfig
 
 GEMINI_TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize"
+
+
+def _safe_slug(value: str, fallback: str = "output") -> str:
+    """Sanitize a user-supplied identifier for safe use in a filename.
+
+    Strips path separators and any character outside [A-Za-z0-9_-] so values
+    like clip ids or language codes cannot escape the intended directory.
+    """
+    slug = re.sub(r"[^A-Za-z0-9_-]", "_", (value or "").strip())
+    slug = slug.strip("._")
+    return slug or fallback
 
 
 async def _gemini_tts(text: str, language: str = "en-US") -> bytes:
@@ -76,7 +88,10 @@ async def dub_video_service(req: DubRequest):
         audio_bytes = await _gemini_tts(req.text_to_dub, req.target_language)
         # Persist the synthesized audio so the returned URL points at a real
         # file (previously the bytes were generated and then discarded).
-        output_path = f"/tmp/dubbed_{req.clip_id}_{req.target_language}.mp3"
+        # Sanitize user-controlled components to keep the path inside /tmp.
+        safe_clip = _safe_slug(req.clip_id, "clip")
+        safe_lang = _safe_slug(req.target_language, "lang")
+        output_path = f"/tmp/dubbed_{safe_clip}_{safe_lang}.mp3"
         with open(output_path, "wb") as audio_file:
             audio_file.write(audio_bytes)
         return {
