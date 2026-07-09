@@ -46,6 +46,8 @@ use std::net::SocketAddr;
 use tokio::sync::mpsc::Receiver;
 use tracing::{debug, info, warn};
 
+pub mod libp2p_mesh;
+
 /// Represents a discovered peer on the local network or mesh.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Peer {
@@ -262,6 +264,26 @@ impl P2PNetwork {
             "📢 [P2P] Announcing '{}' on port {} (_lazynext._tcp.local)",
             display_name, self.local_port
         );
+    }
+
+    /// Start zero-config peer discovery over libp2p mDNS on a background task.
+    ///
+    /// This is the production discovery path (no hard-coded subnets). Newly
+    /// discovered peers are logged; callers that need the peer stream can use
+    /// [`libp2p_mesh::run_discovery`] directly with a callback.
+    pub fn spawn_mdns_discovery(&self) {
+        tokio::spawn(async move {
+            if let Err(e) = libp2p_mesh::run_discovery(|peer| {
+                info!(
+                    "🔗 [P2P] mDNS peer available: {} @ {}",
+                    peer.peer_id, peer.address
+                );
+            })
+            .await
+            {
+                warn!("[P2P] libp2p mDNS discovery stopped: {e}");
+            }
+        });
     }
 }
 
