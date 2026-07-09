@@ -203,10 +203,24 @@ impl Render for EditorShell {
         });
 
         if let Some(rgba) = frame_data {
-            let image_buffer = image::RgbaImage::from_raw(800, 450, rgba).unwrap();
-            let frame = image::Frame::new(image_buffer);
-            let render_image = gpui::RenderImage::new(vec![frame]);
-            self.last_frame_data = Some(gpui::ImageSource::Render(Arc::new(render_image)));
+            let w = pd.width.max(1);
+            let h = pd.height.max(1);
+            if rgba.len() == (w as usize) * (h as usize) * 4 {
+                if let Some(image_buffer) = image::RgbaImage::from_raw(w, h, rgba) {
+                    let frame = image::Frame::new(image_buffer);
+                    let render_image = gpui::RenderImage::new(vec![frame]);
+                    self.last_frame_data =
+                        Some(gpui::ImageSource::Render(Arc::new(render_image)));
+                }
+            } else {
+                log::warn!(
+                    "Frame buffer size {} does not match project dimensions {}x{} ({} bytes expected)",
+                    rgba.len(),
+                    w,
+                    h,
+                    (w as usize) * (h as usize) * 4
+                );
+            }
         }
 
         // Helper for left toolbar icons
