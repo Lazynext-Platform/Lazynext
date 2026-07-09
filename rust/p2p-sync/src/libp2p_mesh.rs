@@ -112,9 +112,7 @@ mod tests {
     fn discovered_peer_holds_identity_and_address() {
         // Pure construction, no I/O — safe in any environment.
         let peer_id = PeerId::random();
-        let address: Multiaddr = "/ip4/127.0.0.1/tcp/4001"
-            .parse()
-            .expect("valid multiaddr");
+        let address: Multiaddr = "/ip4/127.0.0.1/tcp/4001".parse().expect("valid multiaddr");
         let peer = DiscoveredPeer {
             peer_id,
             address: address.clone(),
