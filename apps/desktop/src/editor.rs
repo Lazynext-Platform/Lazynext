@@ -209,8 +209,7 @@ impl Render for EditorShell {
                 if let Some(image_buffer) = image::RgbaImage::from_raw(w, h, rgba) {
                     let frame = image::Frame::new(image_buffer);
                     let render_image = gpui::RenderImage::new(vec![frame]);
-                    self.last_frame_data =
-                        Some(gpui::ImageSource::Render(Arc::new(render_image)));
+                    self.last_frame_data = Some(gpui::ImageSource::Render(Arc::new(render_image)));
                 }
             } else {
                 log::warn!(

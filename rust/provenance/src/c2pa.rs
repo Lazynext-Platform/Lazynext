@@ -226,8 +226,7 @@ impl C2PASigner {
         };
 
         let key = resolve_signing_key(key_path)?;
-        let mut mac =
-            HmacSha256::new_from_slice(&key).map_err(|e| format!("HMAC init: {e}"))?;
+        let mut mac = HmacSha256::new_from_slice(&key).map_err(|e| format!("HMAC init: {e}"))?;
         mac.update(manifest.content_hash.as_bytes());
         // `verify_slice` is a constant-time comparison.
         let valid = mac.verify_slice(&signature_bytes).is_ok();
