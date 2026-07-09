@@ -44,6 +44,8 @@ export const EditorScreen = () => {
 	const [pendingSyncCount, setPendingSyncCount] = useState(0);
 	const [maskPoints, setMaskPoints] = useState<MaskPoint[]>([]);
 	const [isMaskDrawing, setIsMaskDrawing] = useState(false);
+	const pencil = useApplePencil();
+	const editorAreaRef = useRef<View>(null);
 
 	/** Subscribe to project, offline status, and connectivity changes on mount. */
 	useEffect(() => {

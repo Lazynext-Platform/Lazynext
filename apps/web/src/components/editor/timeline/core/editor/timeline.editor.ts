@@ -435,7 +435,7 @@ export class TimelineEditor {
 			if (error instanceof ValidationError && error.errors?.length > 0) {
 				throw error;
 			} else {
-				throw new Error("ELEMENT_NOT_ADDED");
+				throw new Error("ELEMENT_NOT_ADDED", { cause: error });
 			}
 		}
 	}

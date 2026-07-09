@@ -22,7 +22,7 @@ use lazynext_core::ffmpeg_loader::CliFfmpegLoader;
 use lazynext_core::nle_state::ProjectData;
 use lazynext_rules::{RuleContext, RuleSet};
 use serde::Serialize;
-use std::io::{self, Read};
+use std::io::{self, IsTerminal, Read};
 
 /// Top-level CLI arguments for the Lazynext headless renderer.
 ///
@@ -301,7 +301,7 @@ async fn main() {
 async fn run_pipe_mode(prompt: &str, args: &Args) {
     // Read stdin if available (non-blocking, reads whatever is piped)
     let mut stdin_content = String::new();
-    let stdin_has_data = atty::isnt(atty::Stream::Stdin);
+    let stdin_has_data = !io::stdin().is_terminal();
     if stdin_has_data {
         io::stdin()
             .read_to_string(&mut stdin_content)

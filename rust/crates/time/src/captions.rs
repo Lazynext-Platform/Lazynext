@@ -52,7 +52,7 @@ impl CaptionEncoder {
                 Self::format_srt_timestamp(sub.end_ms)
             )?;
             writeln!(&mut out, "{}", sub.text)?;
-            writeln!(&mut out, "")?;
+            writeln!(&mut out)?;
         }
         Ok(out)
     }
@@ -68,7 +68,7 @@ impl CaptionEncoder {
                 Self::format_vtt_timestamp(sub.end_ms)
             )?;
             writeln!(&mut out, "{}", sub.text)?;
-            writeln!(&mut out, "")?;
+            writeln!(&mut out)?;
         }
         Ok(out)
     }

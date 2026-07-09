@@ -45,9 +45,6 @@ function AuthNavigator() {
 	);
 }
 
-	);
-}
-
 /** Dashboard screen with project stats, quick actions, and AI Copilot prompt input. */
 function DashboardScreen() {
 	const [projectName, setProjectName] = useState("Loading...");
@@ -210,9 +207,6 @@ function DashboardScreen() {
 				</TouchableOpacity>
 			</View>
 		</SafeAreaView>
-	);
-}
-
 	);
 }
 

@@ -138,7 +138,7 @@ impl C2PASigner {
                 .as_ref()
                 .map(|_| self.config.organization.clone() + " CA"),
             signature: self.sign_manifest(&content_hash).ok(),
-            signature_algorithm: "ES256".to_string(),
+            signature_algorithm: "HS256".to_string(),
         };
 
         // Write the sidecar manifest file
@@ -176,80 +176,105 @@ impl C2PASigner {
 
     /// Sign the content hash with the configured private key.
     fn sign_manifest(&self, content_hash: &str) -> Result<String, String> {
-        match (&self.config.cert_path, &self.config.key_path) {
-            (Some(cert), Some(key)) => {
-                // In production:
-                //   let cert_pem = std::fs::read_to_string(cert)?;
-                //   let key_pem = std::fs::read_to_string(key)?;
-                //   let signing_key = p256::SecretKey::from_pem(&key_pem)?;
-                //   let signature = signing_key.sign(content_hash.as_bytes());
-                //   Ok(base64::encode(signature.to_der()))
-                println!("[C2PA] Signing with certificate: {}", cert);
-                // Placeholder: HMAC-based dev signature
-                use hmac::{Hmac, Mac, digest::KeyInit};
-                use sha2::Sha256;
-                type HmacSha256 = Hmac<Sha256>;
-                let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-                    .map_err(|e| format!("HMAC init: {e}"))?;
-                mac.update(content_hash.as_bytes());
-                Ok(hex::encode(mac.finalize().into_bytes()))
-            }
-            _ => {
-                // Development mode: self-sign with HMAC
-                // In production, BETTER_AUTH_SECRET is required; without it we refuse to sign.
-                let secret = std::env::var("BETTER_AUTH_SECRET");
-                match secret {
-                    Ok(s) if s.len() >= 32 => {
-                        use hmac::{Hmac, Mac, digest::KeyInit};
-                        use sha2::Sha256;
-                        type HmacSha256 = Hmac<Sha256>;
-                        let mut mac = HmacSha256::new_from_slice(s.as_bytes())
-                            .map_err(|e| format!("HMAC init: {e}"))?;
-                        mac.update(content_hash.as_bytes());
-                        Ok(hex::encode(mac.finalize().into_bytes()))
-                    }
-                    _ => {
-                        let is_prod = std::env::var("LAZYNEXT_ENV")
-                            .map(|v| v == "production")
-                            .unwrap_or(false)
-                            || std::env::var("NODE_ENV")
-                                .map(|v| v == "production")
-                                .unwrap_or(false);
-                        if is_prod {
-                            Err("FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production for C2PA signing".into())
-                        } else {
-                            let key = "lazynext-dev-signing-key";
-                            use hmac::{Hmac, Mac, digest::KeyInit};
-                            use sha2::Sha256;
-                            type HmacSha256 = Hmac<Sha256>;
-                            let mut mac = HmacSha256::new_from_slice(key.as_bytes())
-                                .map_err(|e| format!("HMAC init: {e}"))?;
-                            mac.update(content_hash.as_bytes());
-                            Ok(hex::encode(mac.finalize().into_bytes()))
-                        }
-                    }
-                }
-            }
+        if let Some(cert) = &self.config.cert_path {
+            // In production:
+            //   let key_pem = std::fs::read_to_string(key)?;
+            //   let signing_key = p256::SecretKey::from_pem(&key_pem)?;
+            //   let signature = signing_key.sign(content_hash.as_bytes());
+            //   Ok(base64::encode(signature.to_der()))
+            println!("[C2PA] Signing with certificate: {}", cert);
         }
+        // Dev signing path: HMAC-SHA256 (HS256) over the content hash.
+        let key = resolve_signing_key(self.config.key_path.as_deref())?;
+        compute_hmac(&key, content_hash)
     }
 
-    /// Verify a C2PA manifest's signature.
+    /// Verify a C2PA manifest's signature using the process signing key.
+    ///
+    /// Recomputes the HMAC-SHA256 over the manifest's content hash and compares
+    /// it in constant time to the stored signature. Returns `Ok(false)` when the
+    /// manifest is unsigned, the signature is malformed, or it does not match —
+    /// so a tampered `content_hash` or forged signature fails verification.
     pub fn verify_manifest(manifest: &C2PAManifest) -> Result<bool, String> {
-        if manifest.signature.is_none() {
+        Self::verify_manifest_with_key(manifest, None)
+    }
+
+    /// Verify a manifest using this signer's configured key material
+    /// (honours an explicit `key_path` when one is set).
+    pub fn verify(&self, manifest: &C2PAManifest) -> Result<bool, String> {
+        Self::verify_manifest_with_key(manifest, self.config.key_path.as_deref())
+    }
+
+    /// Internal verification: recompute the HMAC and constant-time compare.
+    fn verify_manifest_with_key(
+        manifest: &C2PAManifest,
+        key_path: Option<&str>,
+    ) -> Result<bool, String> {
+        use hmac::{Hmac, Mac, digest::KeyInit};
+        use sha2::Sha256;
+        type HmacSha256 = Hmac<Sha256>;
+
+        let Some(signature) = manifest.signature.as_deref() else {
+            return Ok(false);
+        };
+        if manifest.content_hash.is_empty() {
             return Ok(false);
         }
-        // In production:
-        //   - Extract the signing certificate from the manifest
-        //   - Verify the certificate chain against C2PA trust list
-        //   - Verify the signature against the content hash
-        //   - Check timestamps for freshness
+        let signature_bytes = match hex::decode(signature) {
+            Ok(bytes) => bytes,
+            Err(_) => return Ok(false), // malformed signature is simply invalid
+        };
+
+        let key = resolve_signing_key(key_path)?;
+        let mut mac = HmacSha256::new_from_slice(&key).map_err(|e| format!("HMAC init: {e}"))?;
+        mac.update(manifest.content_hash.as_bytes());
+        // `verify_slice` is a constant-time comparison.
+        let valid = mac.verify_slice(&signature_bytes).is_ok();
+
+        let hash_prefix = &manifest.content_hash[..manifest.content_hash.len().min(12)];
         println!(
-            "[C2PA] Verifying manifest for {} (hash: {}...)",
-            manifest.software_agent,
-            &manifest.content_hash[..12]
+            "[C2PA] Verified manifest for {} (hash: {}...) → {}",
+            manifest.software_agent, hash_prefix, valid
         );
-        Ok(true) // Placeholder: assume valid in dev
+        Ok(valid)
     }
+}
+
+/// Resolve the HMAC signing key material.
+///
+/// Priority: explicit key file path → `BETTER_AUTH_SECRET` (≥32 chars) →
+/// dev key (non-production only; production refuses to sign without a secret).
+fn resolve_signing_key(key_path: Option<&str>) -> Result<Vec<u8>, String> {
+    if let Some(key) = key_path {
+        // Dev placeholder: use the key path bytes as HMAC material.
+        return Ok(key.as_bytes().to_vec());
+    }
+    match std::env::var("BETTER_AUTH_SECRET") {
+        Ok(secret) if secret.len() >= 32 => Ok(secret.into_bytes()),
+        _ => {
+            let is_prod = std::env::var("LAZYNEXT_ENV")
+                .map(|v| v == "production")
+                .unwrap_or(false)
+                || std::env::var("NODE_ENV")
+                    .map(|v| v == "production")
+                    .unwrap_or(false);
+            if is_prod {
+                Err("FATAL: BETTER_AUTH_SECRET must be at least 32 chars in production for C2PA signing".into())
+            } else {
+                Ok(b"lazynext-dev-signing-key".to_vec())
+            }
+        }
+    }
+}
+
+/// Compute the HMAC-SHA256 of `content_hash` as a lowercase hex string.
+fn compute_hmac(key: &[u8], content_hash: &str) -> Result<String, String> {
+    use hmac::{Hmac, Mac, digest::KeyInit};
+    use sha2::Sha256;
+    type HmacSha256 = Hmac<Sha256>;
+    let mut mac = HmacSha256::new_from_slice(key).map_err(|e| format!("HMAC init: {e}"))?;
+    mac.update(content_hash.as_bytes());
+    Ok(hex::encode(mac.finalize().into_bytes()))
 }
 
 #[cfg(test)]
@@ -315,5 +340,45 @@ mod tests {
         // Cleanup
         std::fs::remove_file(test_path).ok();
         std::fs::remove_file("/tmp/c2pa_test_output.c2pa.json").ok();
+    }
+
+    #[test]
+    fn test_verify_accepts_valid_and_rejects_tampered() {
+        let signer = C2PASigner::new(C2PAConfig::default());
+        let test_path = "/tmp/c2pa_verify_test.mp4";
+        std::fs::write(test_path, b"authentic content").ok();
+
+        let manifest = signer
+            .sign_render(test_path, &[])
+            .expect("sign should succeed");
+
+        // A genuine, unmodified manifest verifies.
+        assert!(
+            C2PASigner::verify_manifest(&manifest).unwrap(),
+            "valid signature must verify"
+        );
+        assert!(signer.verify(&manifest).unwrap());
+
+        // Tampering with the content hash invalidates the signature.
+        let mut tampered = manifest.clone();
+        tampered.content_hash =
+            "0000000000000000000000000000000000000000000000000000000000000000".to_string();
+        assert!(
+            !C2PASigner::verify_manifest(&tampered).unwrap(),
+            "tampered content hash must fail verification"
+        );
+
+        // A forged/garbage signature is rejected.
+        let mut forged = manifest.clone();
+        forged.signature = Some("deadbeef".to_string());
+        assert!(!C2PASigner::verify_manifest(&forged).unwrap());
+
+        // An unsigned manifest is not valid.
+        let mut unsigned = manifest.clone();
+        unsigned.signature = None;
+        assert!(!C2PASigner::verify_manifest(&unsigned).unwrap());
+
+        std::fs::remove_file(test_path).ok();
+        std::fs::remove_file("/tmp/c2pa_verify_test.c2pa.json").ok();
     }
 }

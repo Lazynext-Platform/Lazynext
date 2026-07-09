@@ -9,6 +9,7 @@ path = "src/time.rs"
 crate-type = ["rlib"]
 
 [dependencies]
+anyhow = "1.0"
 bridge = { version = "0.1.0", path = "../bridge" }
 num-traits = "0.2.19"
 serde = { version = "1", features = ["derive"] }
