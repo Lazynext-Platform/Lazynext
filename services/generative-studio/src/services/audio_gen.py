@@ -74,12 +74,18 @@ async def dub_video_service(req: DubRequest):
 
     try:
         audio_bytes = await _gemini_tts(req.text_to_dub, req.target_language)
+        # Persist the synthesized audio so the returned URL points at a real
+        # file (previously the bytes were generated and then discarded).
+        output_path = f"/tmp/dubbed_{req.clip_id}_{req.target_language}.mp3"
+        with open(output_path, "wb") as audio_file:
+            audio_file.write(audio_bytes)
         return {
             "success": True,
             "clip_id": req.clip_id,
             "language": req.target_language,
             "source": source,
-            "audio_url": f"https://cdn.lazynext.ai/dubbed/{req.clip_id}_{req.target_language}.mp3",
+            "audio_url": f"file://{output_path}",
+            "bytes": len(audio_bytes),
         }
     except HTTPException:
         pass
