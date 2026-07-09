@@ -18,7 +18,12 @@ title = "Lazynext Gitleaks Config"
     '''target/''',
     '''node_modules/''',
     '''vendor/''',
-    '''.terraform/''',
+    '''\.terraform/''',
+    # Example / template files with known placeholder values
+    '''\.env\.example$''',
+    '''\.env\.docker$''',
+    '''\.env\.production\.example$''',
+    '''README\.md$''',
   ]
 
 [[rules]]
