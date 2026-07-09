@@ -15,9 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY services/generative-studio/requirements.txt .
+COPY services/generative-studio/requirements-ml.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir torch torchaudio --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    && (pip install --no-cache-dir -r requirements-ml.txt 2>/dev/null || true)
 
 # ── Runtime ──
 FROM python:3.13-slim AS runner
