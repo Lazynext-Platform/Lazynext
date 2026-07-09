@@ -58,7 +58,7 @@ export default async function EditorPage({
 		<div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground selection:bg-blue-500/30">
 			<EditorStateProvider initialProject={projectJson}>
 				<EditorErrorBoundary section="Editor">
-					<EditorUIClient project={projectJson} projectId={project.id} projectName={project.name} />
+					<EditorUIClient project={projectJson} projectId={project.id} projectName={project.title} />
 				</EditorErrorBoundary>
 			</EditorStateProvider>
 		</div>

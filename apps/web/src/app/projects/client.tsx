@@ -1036,11 +1036,9 @@ function EmptyState() {
 					/>
 					<div className="flex flex-col items-center gap-3">
 						<h3 className="text-lg font-medium">No results found</h3>
-						// eslint-disable-next-line react/jsx-no-comment-textnodes
 						<p className="text-muted-foreground max-w-md">
-							// eslint-disable-next-line react/no-unescaped-entities //
-							eslint-disable-next-line react/no-unescaped-entities Your search
-							for "{searchQuery}" did not return any results.
+							Your search for &quot;{searchQuery}&quot; did not return any
+							results.
 						</p>
 					</div>
 				</div>
