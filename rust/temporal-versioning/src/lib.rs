@@ -191,8 +191,26 @@ impl MultiverseManager {
                     );
                     applied += 1;
                 }
+                state::operations::CrdtOperation::TrackDelete { track_id } => {
+                    // Tombstone the track so it cannot be resurrected by a
+                    // concurrent insert, mirroring ClipDelete semantics.
+                    target_state.op_log.push(op.clone());
+                    target_state.tombstones.mark(
+                        track_id.clone(),
+                        {
+                            let mut vc = state::vector_clock::VectorClock::new();
+                            vc.increment(&target_state.peer_id.clone());
+                            vc
+                        },
+                        target_state.peer_id.clone(),
+                    );
+                    applied += 1;
+                }
                 _ => {
-                    // Other operations pass through
+                    // Non-structural / order-based operations (moves, trims,
+                    // splits, property + entity updates) converge via the
+                    // append-only op log, which is replayed to reconstruct
+                    // state. Appending them here is the CmRDT-correct behavior.
                     target_state.op_log.push(op.clone());
                     applied += 1;
                 }
@@ -210,13 +228,49 @@ impl MultiverseManager {
     }
 
     /// Return a shared reference to the current branch's NLE state.
+    ///
+    /// The manager always holds at least one reality (created in `new`,
+    /// and never removed), so this cannot fail in practice. If the checked-out
+    /// branch key is somehow missing it falls back to `canon`, then to any
+    /// remaining branch, rather than panicking on a stale key.
     pub fn get_current(&self) -> &NLEState {
-        self.realities.get(&self.current_reality).unwrap()
+        self.realities
+            .get(&self.current_reality)
+            .or_else(|| self.realities.get("canon"))
+            .or_else(|| self.realities.values().next())
+            .expect("MultiverseManager always contains at least one reality")
     }
 
     /// Return a mutable reference to the current branch's NLE state.
+    ///
+    /// Self-heals `current_reality` to `canon` (or any remaining branch) if it
+    /// points at a missing key, so it never panics on a stale checkout.
     pub fn get_current_mut(&mut self) -> &mut NLEState {
-        self.realities.get_mut(&self.current_reality).unwrap()
+        if !self.realities.contains_key(&self.current_reality) {
+            let fallback = if self.realities.contains_key("canon") {
+                "canon".to_string()
+            } else {
+                self.realities
+                    .keys()
+                    .next()
+                    .cloned()
+                    .expect("MultiverseManager always contains at least one reality")
+            };
+            self.current_reality = fallback;
+        }
+        self.realities
+            .get_mut(&self.current_reality)
+            .expect("current_reality was just validated to exist")
+    }
+
+    /// Fallible accessor for the current branch's NLE state (no fallback).
+    pub fn try_current(&self) -> Option<&NLEState> {
+        self.realities.get(&self.current_reality)
+    }
+
+    /// Fallible mutable accessor for the current branch's NLE state (no fallback).
+    pub fn try_current_mut(&mut self) -> Option<&mut NLEState> {
+        self.realities.get_mut(&self.current_reality)
     }
 
     /// Return the name of the currently checked-out branch.
