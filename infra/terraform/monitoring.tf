@@ -401,14 +401,9 @@ resource "azurerm_monitor_diagnostic_setting" "container_app" {
   target_resource_id         = local.container_app_ids[each.key]
   log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
 
-  enabled_log {
-    category = "ContainerAppConsoleLogs"
-  }
-
-  enabled_log {
-    category = "ContainerAppSystemLogs"
-  }
-
+  # Container Apps support AllMetrics; ContainerAppConsoleLogs /
+  # ContainerAppSystemLogs are not available as diagnostic-setting
+  # categories for this resource type (the API returns 400).
   enabled_metric {
     category = "AllMetrics"
   }
