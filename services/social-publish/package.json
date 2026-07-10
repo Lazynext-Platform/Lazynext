@@ -7,7 +7,8 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-    "@lazynext/api-client": "workspace:*",
+		"@lazynext/api-client": "workspace:*",
+		"@lazynext/social-publish-core": "workspace:*",
 		"cors": "^2.8.6",
 		"express": "^5.2.1",
 		"uuid": "^14.0.1"

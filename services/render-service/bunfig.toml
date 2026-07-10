@@ -1,0 +1,2 @@
+# Render service test configuration.
+# No preload needed — web-specific DOM/WASM setup not required here.

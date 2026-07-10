@@ -363,7 +363,7 @@ app.get("/api/v1/ltv/:userId", async (req: Request, res: Response) => {
 
 async function start() {
   // Attempt Kafka connection
-  await kafkaProducer.connect();
+  kafkaAvailable = await kafkaProducer.connect();
 
   // Attempt ClickHouse connection check
   if (process.env.CLICKHOUSE_URL) {
@@ -376,7 +376,7 @@ async function start() {
       }
       const resp = await fetch(`${process.env.CLICKHOUSE_URL}?query=SELECT%201`, { headers });
       if (resp.ok) {
-        (clickhouseAvailable as boolean) = true;
+        clickhouseAvailable  = true;
         console.log("[Analytics] ClickHouse connected.");
       }
     } catch {

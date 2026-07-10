@@ -49,25 +49,9 @@ jobs:
           sarif_file: "trivy-results.sarif"
           category: "trivy"
 
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    # dependency-review-action only supports pull_request events; skip on
-    # scheduled / manual runs where there is no base..head diff to review.
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: "critical"
-          comment-summary-in-pr: "on-failure"
-          retry-on-snapshot-warnings: true
-          retry-on-snapshot-warnings-timeout: 120
-          vulnerability-check: true
-          license-check: false
-          allow-dependencies-licenses: "MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, 0BSD, CC0-1.0, Unlicense"
+  # NOTE: Dependency review runs in pr-checks.yml on pull_request events.
+  # It is intentionally omitted here since this workflow only triggers on
+  # schedule + workflow_dispatch, and dependency-review-action requires a PR.
 
   # NOTE: CodeQL analysis is handled by GitHub's *default* code-scanning setup
   # (repo Settings → Code security → Code scanning). A workflow-based

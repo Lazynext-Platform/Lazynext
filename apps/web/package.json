@@ -20,7 +20,7 @@
 		"lint:fix": "eslint src --fix",
 		"postinstall": "test -f ../../rust/wasm/pkg/lazynext_wasm_bg.wasm || echo '⚠️  Run ./build-wasm.sh before starting dev server'",
 		"typecheck": "tsc --noEmit",
-		"format": "prettier src --write",
+		"format": "npx @biomejs/biome format src --write",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:push:local": "cross-env NODE_ENV=development drizzle-kit push --force",

@@ -16,6 +16,12 @@ import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
 import { authMiddleware } from "@lazynext/api-client/auth-middleware";
+import {
+	publishToTikTok,
+	publishToYouTube,
+	publishToInstagram,
+	type PublishResult,
+} from "@lazynext/social-publish-core";
 
 type FetchResponse = globalThis.Response;
 
@@ -95,18 +101,7 @@ interface PublishRequest {
 	privacy?: "public" | "private" | "unlisted";
 }
 
-interface PublishResult {
-	/** Platform the result pertains to. */
-	platform: string;
-	/** Whether the publish succeeded. */
-	success: boolean;
-	/** Identifier of the created post. */
-	postId?: string;
-	/** URL of the created post. */
-	postUrl?: string;
-	/** Error message if the publish failed. */
-	error?: string;
-}
+// PublishResult is imported from @lazynext/social-publish-core.
 
 interface ReframeRequest {
 	/** Path to the source video file. */
@@ -273,37 +268,15 @@ async function publishToPlatform(
 	platform: string,
 	req: PublishRequest,
 ): Promise<PublishResult> {
-	const clientIdKey = platformKey(platform, "CLIENT_ID");
-	const clientSecretKey = platformKey(platform, "CLIENT_SECRET");
-	const tokenKey = platformKey(platform, "OAUTH_TOKEN");
-
-	const accessToken = process.env[tokenKey] || "";
-
-	// Check credentials
-	if (!accessToken) {
-		const clientId = process.env[clientIdKey];
-		const clientSecret = process.env[clientSecretKey];
-
-		if (!clientId || !clientSecret) {
-			return {
-				platform,
-				success: false,
-				error: `${platform} API keys not configured (${clientIdKey} / ${clientSecretKey})`,
-			};
-		}
-	}
-
-	const fileSize = fs.statSync(req.video_path).size;
-
 	switch (platform) {
 		case "tiktok":
-			return publishTikTok(req.video_path, accessToken, fileSize, req.description, req.hashtags);
+			return publishToTikTok(req.video_path, req.description, req.hashtags);
 		case "youtube":
-			return publishYouTube(req.video_path, accessToken, fileSize, req.title, req.description, req.tags);
+			return publishToYouTube(req.video_path, req.title, req.description, req.tags);
 		case "instagram":
-			return publishInstagram(req.video_path, accessToken, fileSize, req.description);
+			return publishToInstagram(req.video_path, req.description);
 		case "twitter":
-			return publishTwitter(req.video_path, accessToken, fileSize, req.description);
+			return publishTwitter(req.video_path, req.description);
 		default:
 			return { platform, success: false, error: `Unsupported platform: ${platform}` };
 	}
@@ -324,238 +297,8 @@ function platformKey(platform: string, suffix: string): string {
 	}
 }
 
-// ── TikTok Publisher ────────────────────────────────────────────────────
-
-/**
- * Publish a video to TikTok via the TikTok Content Posting API (v2).
- * Flow: POST /video/init/ → PUT upload_url → POST /video/publish/.
- * Handles single-chunk uploads for videos up to the platform limit.
- * Gracefully degrades with an informative error if TikTok API keys are not configured.
- */
-async function publishTikTok(
-	videoPath: string,
-	token: string,
-	fileSize: number,
-	description?: string,
-	hashtags?: string[],
-): Promise<PublishResult> {
-	const TIKTOK_API = "https://open.tiktokapis.com/v2";
-	const captionText = [description, hashtags?.map((h) => `#${h}`).join(" ")]
-		.filter(Boolean)
-		.join("\n\n");
-
-	// Step 1: Initialize upload
-	const initResp = await fetchWithRetry(`${TIKTOK_API}/post/publish/video/init/`, {
-		method: "POST",
-		headers: {
-			Authorization: `Bearer ${token}`,
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			post_info: {
-				title: captionText || path.basename(videoPath),
-				privacy_level: "PUBLIC_TO_EVERYONE",
-				disable_duet: false,
-				disable_comment: false,
-				disable_stitch: false,
-			},
-			source_info: {
-				source: "FILE_UPLOAD",
-				video_size: fileSize,
-				chunk_size: fileSize,
-				total_chunk_count: 1,
-			},
-		}),
-	});
-
-	const initData = (await initResp.json()) as unknown as { data: { upload_url: string; publish_id: string } };
-	const { upload_url, publish_id } = initData.data;
-
-	// Step 2: Upload video
-	await fetchWithRetry(upload_url, {
-		method: "PUT",
-		headers: { "Content-Type": "video/mp4" },
-		body: fs.readFileSync(videoPath),
-	});
-
-	return {
-		platform: "tiktok",
-		success: true,
-		postId: publish_id,
-		postUrl: `https://www.tiktok.com/@user/video/${publish_id}`,
-	};
-}
-
-// ── YouTube Publisher ───────────────────────────────────────────────────
-
-/**
- * Publish a video to YouTube via the YouTube Data API v3.
- * Flow: POST /upload/youtube/v3/videos with multipart upload (metadata + video).
- * Supports title, description, tags, and privacy settings.
- * Gracefully degrades with an informative error if Google API keys are not configured.
- */
-async function publishYouTube(
-	videoPath: string,
-	token: string,
-	fileSize: number,
-	title?: string,
-	description?: string,
-	tags?: string[],
-): Promise<PublishResult> {
-	const YOUTUBE_API = "https://www.googleapis.com/upload/youtube/v3";
-	const defaultTitle = path.basename(videoPath, path.extname(videoPath));
-
-	// Step 1: Initialize resumable upload
-	const initResp = await fetchWithRetry(
-		`${YOUTUBE_API}/videos?uploadType=resumable&part=snippet,status`,
-		{
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-				"X-Upload-Content-Length": String(fileSize),
-				"X-Upload-Content-Type": "video/mp4",
-			},
-			body: JSON.stringify({
-				snippet: {
-					title: title || defaultTitle,
-					description: description || "",
-					tags: tags || [],
-				},
-				status: {
-					privacyStatus: "public",
-					selfDeclaredMadeForKids: false,
-				},
-			}),
-		},
-	);
-
-	const uploadUrl = (initResp as unknown as FetchResponse).headers.get("location");
-	if (!uploadUrl) {
-		return { platform: "youtube", success: false, error: "No upload URL returned from YouTube" };
-	}
-
-	// Step 2: Chunked upload
-	const CHUNK_SIZE = 5 * 1024 * 1024;
-	const videoBuffer = fs.readFileSync(videoPath);
-
-	for (let start = 0; start < fileSize; start += CHUNK_SIZE) {
-		const end = Math.min(start + CHUNK_SIZE, fileSize);
-		const chunk = videoBuffer.subarray(start, end);
-
-		const resp = await fetchWithRetry(uploadUrl, {
-			method: "PUT",
-			headers: {
-				"Content-Length": String(chunk.length),
-				"Content-Range": `bytes ${start}-${end - 1}/${fileSize}`,
-			},
-			body: Buffer.from(chunk),
-		});
-
-		if ((resp as unknown as FetchResponse).status === 200 || (resp as unknown as FetchResponse).status === 201) {
-			const data = (await (resp as unknown as FetchResponse).json()) as unknown as { id: string };
-			return {
-				platform: "youtube",
-				success: true,
-				postId: data.id,
-				postUrl: `https://www.youtube.com/watch?v=${data.id}`,
-			};
-		}
-	}
-
-	return { platform: "youtube", success: false, error: "Upload ended without completion" };
-}
-
-// ── Instagram Publisher ─────────────────────────────────────────────────
-
-/**
- * Publish a video to Instagram (Reels/Feed) via the Instagram Graph API.
- * Flow: POST /{ig-user-id}/media with video_url + caption → POST /media_publish.
- * Supports Reels (9:16) and Feed (4:5, 1:1) aspect ratios.
- * Gracefully degrades if Instagram API keys are not configured.
- */
-async function publishInstagram(
-	videoPath: string,
-	token: string,
-	fileSize: number,
-	description?: string,
-): Promise<PublishResult> {
-	const INSTAGRAM_API = "https://graph.instagram.com/v21.0";
-	const instagramUserId = process.env.INSTAGRAM_USER_ID;
-
-	if (!instagramUserId) {
-		return {
-			platform: "instagram",
-			success: false,
-			error: "Instagram user ID not configured (INSTAGRAM_USER_ID)",
-		};
-	}
-
-	// Instagram downloads media from a public HTTPS URL — file:// is rejected.
-	const publicVideoUrl = resolvePublicMediaUrl(videoPath);
-	if (!publicVideoUrl) {
-		return {
-			platform: "instagram",
-			success: false,
-			error:
-				"Instagram requires a publicly-accessible HTTPS video URL. Set PUBLIC_MEDIA_BASE_URL (https) so rendered files can be served, or pass an https media URL — file:// paths are not supported by the Instagram Graph API.",
-		};
-	}
-
-	// Step 1: Create media container
-	const createResp = await fetchWithRetry(`${INSTAGRAM_API}/${instagramUserId}/media`, {
-		method: "POST",
-		headers: {
-			Authorization: `Bearer ${token}`,
-			"Content-Type": "application/x-www-form-urlencoded",
-		},
-		body: new URLSearchParams({
-			media_type: "REELS",
-			video_url: publicVideoUrl,
-			caption: description || "Posted via Lazynext",
-			share_to_feed: "true",
-		}).toString(),
-	});
-
-	const createData = (await (createResp as unknown as FetchResponse).json()) as unknown as { id: string };
-
-	// Step 2: Poll for processing
-	let status = "PROCESSING";
-	let attempts = 0;
-	const maxAttempts = 30;
-
-	while (status !== "FINISHED" && attempts < maxAttempts) {
-		await new Promise((r) => setTimeout(r, 5000));
-		try {
-			const resp = await fetch(
-				`${INSTAGRAM_API}/${createData.id}?fields=status,permalink`,
-				{ headers: { Authorization: `Bearer ${token}` } },
-			);
-			if (resp.ok) {
-				const statusData = (await resp.json()) as { status: string; permalink?: string };
-				status = statusData.status;
-				if (status === "FINISHED") {
-					return {
-						platform: "instagram",
-						success: true,
-						postId: createData.id,
-						postUrl: statusData.permalink || `https://www.instagram.com/p/${createData.id}/`,
-					};
-				}
-				if (status === "ERROR") {
-					return { platform: "instagram", success: false, error: "Instagram media processing failed" };
-				}
-			}
-		} catch { /* poll error — retry */ }
-		attempts++;
-	}
-
-	return {
-		platform: "instagram",
-		success: false,
-		error: status === "PROCESSING" ? "Instagram processing timed out" : `Unexpected status: ${status}`,
-	};
-}
+// TikTok, YouTube, and Instagram publishers are imported from
+// @lazynext/social-publish-core.
 
 // ── Twitter/X Publisher ─────────────────────────────────────────────────
 
@@ -567,12 +310,12 @@ async function publishInstagram(
  */
 async function publishTwitter(
 	videoPath: string,
-	token: string,
-	fileSize: number,
 	description?: string,
 ): Promise<PublishResult> {
+	const token = process.env.TWITTER_OAUTH_TOKEN;
 	const TWITTER_API = "https://api.twitter.com/2";
 	const TWITTER_MEDIA_URL = "https://upload.twitter.com/1.1/media/upload.json";
+	const fileSize = fs.statSync(videoPath).size;
 
 	// Step 1: INIT — initialise media upload
 	const initBody = new URLSearchParams({

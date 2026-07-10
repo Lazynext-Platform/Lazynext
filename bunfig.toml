@@ -1,3 +1,4 @@
-# Bun configuration — test preload for web app test setup.
-[test]
-preload = ["apps/web/setupTests.ts"]
+# Bun workspace configuration.
+# Per-package test preloads are configured in each package's own bunfig.toml.
+[install]
+registry = "https://registry.npmjs.org/"

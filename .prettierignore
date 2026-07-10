@@ -1,7 +1,0 @@
-# Directories and files excluded from Prettier formatting.
-.next
-node_modules
-dist
-build
-target
-rust/wasm/pkg

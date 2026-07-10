@@ -7,7 +7,8 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-    "@lazynext/api-client": "workspace:*",
+		"@lazynext/api-client": "workspace:*",
+		"@lazynext/social-publish-core": "workspace:*",
 		"@azure/identity": "^4.13.1",
 		"@azure/storage-blob": "^12.33.0",
 		"@opentelemetry/api": "^1.9.1",

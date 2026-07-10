@@ -1,0 +1,3 @@
+# Analytics service test configuration.
+[test]
+root = "src"
