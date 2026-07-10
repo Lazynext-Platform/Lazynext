@@ -204,14 +204,22 @@ resource "azurerm_application_gateway" "main" {
     identity_ids = [azurerm_user_assigned_identity.app_gateway.id]
   }
 
+  # TLS certificate sourced from Key Vault (read via the App Gateway's
+  # user-assigned managed identity). The listeners reference this by name.
+  # Import a cert named "ssl-lazynext-<env>" into the Key Vault before apply
+  # (self-signed for dev/demo, or a CA-issued PFX for production).
+  ssl_certificate {
+    name                = "ssl-lazynext-${var.environment}"
+    key_vault_secret_id = "${azurerm_key_vault.secrets.vault_uri}secrets/ssl-lazynext-${var.environment}"
+  }
+
   sku {
-    name     = var.app_gateway_sku_tier
-    tier     = var.app_gateway_sku_tier
-    capacity = var.app_gateway_capacity
+    name = var.app_gateway_sku_tier
+    tier = var.app_gateway_sku_tier
   }
 
   autoscale_configuration {
-    min_capacity = var.app_gateway_capacity
+    min_capacity = 0
     max_capacity = var.environment == "production" ? 10 : 3
   }
 
