@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/auth/client";
 import { toast } from "sonner";
 import Link from "next/link";
+import { friendlyAuthError } from "./auth-errors";
 
 export function SignInForm() {
 	const router = useRouter();
@@ -35,17 +36,13 @@ export function SignInForm() {
 				rememberMe: true,
 			});
 			if (result.error) {
-				toast.error(result.error.message ?? "Invalid email or password");
-			} else {
+				toast.error(friendlyAuthError(result.error, "Invalid email or password"));
+			} else if (result.data) {
 				toast.success("Signed in successfully!");
 				router.push(redirectTo);
 			}
 		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: "Sign in failed — server may be unreachable",
-			);
+			toast.error(friendlyAuthError(err, "Sign in failed"));
 		} finally {
 			setLoading(false);
 		}

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { signUp } from "@/auth/client";
 import { toast } from "sonner";
 import Link from "next/link";
+import { friendlyAuthError } from "./auth-errors";
 
 export function SignUpForm() {
 	const router = useRouter();
@@ -40,17 +41,13 @@ export function SignUpForm() {
 			});
 
 			if (error) {
-				toast.error(error.message ?? "Sign up failed");
-			} else {
+				toast.error(friendlyAuthError(error, "Sign up failed"));
+			} else if (data) {
 				toast.success("Account created successfully!");
 				router.push("/dashboard");
 			}
 		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: "Signup failed — server may be unreachable",
-			);
+			toast.error(friendlyAuthError(err, "Sign up failed"));
 		} finally {
 			setLoading(false);
 		}
