@@ -143,18 +143,18 @@ output "media_cdn_fqdn" {
 # ── Application Gateway / WAF ───────────────────────────────────────────────
 
 output "app_gateway_public_ip" {
-  description = "Application Gateway public IP address"
-  value       = azurerm_public_ip.app_gateway.ip_address
+  description = "Application Gateway public IP address (null when AGW is disabled)"
+  value       = var.enable_application_gateway ? azurerm_public_ip.app_gateway[0].ip_address : null
 }
 
 output "app_gateway_fqdn" {
-  description = "Application Gateway public FQDN"
-  value       = azurerm_public_ip.app_gateway.fqdn
+  description = "Application Gateway public FQDN (null when AGW is disabled)"
+  value       = var.enable_application_gateway ? azurerm_public_ip.app_gateway[0].fqdn : null
 }
 
 output "app_gateway_id" {
-  description = "Application Gateway resource ID"
-  value       = azurerm_application_gateway.main.id
+  description = "Application Gateway resource ID (null when AGW is disabled)"
+  value       = var.enable_application_gateway ? azurerm_application_gateway.main[0].id : null
 }
 
 output "waf_policy_id" {

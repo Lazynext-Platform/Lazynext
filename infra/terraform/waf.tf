@@ -14,6 +14,8 @@ resource "azurerm_subnet" "app_gateway" {
 # ── Public IP for Application Gateway ───────────────────────────────────────
 
 resource "azurerm_public_ip" "app_gateway" {
+  count = var.enable_application_gateway ? 1 : 0
+
   name                = "lazynext-agw-pip-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
@@ -31,6 +33,8 @@ resource "azurerm_public_ip" "app_gateway" {
 # ── User-Assigned Identity for Application Gateway (Key Vault SSL certs) ────
 
 resource "azurerm_user_assigned_identity" "app_gateway" {
+  count = var.enable_application_gateway ? 1 : 0
+
   name                = "lazynext-agw-mi-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
@@ -43,9 +47,11 @@ resource "azurerm_user_assigned_identity" "app_gateway" {
 
 # Grant App Gateway managed identity access to Key Vault for SSL certificates
 resource "azurerm_key_vault_access_policy" "app_gateway" {
+  count = var.enable_application_gateway ? 1 : 0
+
   key_vault_id = azurerm_key_vault.secrets.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_user_assigned_identity.app_gateway.principal_id
+  object_id    = azurerm_user_assigned_identity.app_gateway[0].principal_id
 
   secret_permissions = [
     "Get",
@@ -195,13 +201,15 @@ resource "azurerm_web_application_firewall_policy" "main" {
 # ── Application Gateway v2 ──────────────────────────────────────────────────
 
 resource "azurerm_application_gateway" "main" {
+  count = var.enable_application_gateway ? 1 : 0
+
   name                = "lazynext-agw-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
 
   identity {
     type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.app_gateway.id]
+    identity_ids = [azurerm_user_assigned_identity.app_gateway[0].id]
   }
 
   # TLS certificate sourced from Key Vault (read via the App Gateway's
@@ -237,7 +245,7 @@ resource "azurerm_application_gateway" "main" {
 
   frontend_ip_configuration {
     name                 = "lazynext-agw-feip-public-${var.environment}"
-    public_ip_address_id = azurerm_public_ip.app_gateway.id
+    public_ip_address_id = azurerm_public_ip.app_gateway[0].id
   }
 
   # ── Frontend Ports ────────────────────────────────────────────────────
@@ -585,8 +593,10 @@ resource "azurerm_application_gateway" "main" {
 # ── Diagnostic Settings: Application Gateway → Log Analytics ────────────────
 
 resource "azurerm_monitor_diagnostic_setting" "app_gateway" {
+  count = var.enable_application_gateway ? 1 : 0
+
   name                       = "lazynext-diag-agw-${var.environment}"
-  target_resource_id         = azurerm_application_gateway.main.id
+  target_resource_id         = azurerm_application_gateway.main[0].id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.container_apps.id
 
   enabled_log {
