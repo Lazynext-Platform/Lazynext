@@ -67,6 +67,7 @@ import { AIMagicTools } from "./panels/ai-magic-tools";
 import { VFXCompositor } from "./panels/vfx-compositor";
 import { TextPresets } from "./panels/text-presets";
 import { CollaborationSidebar } from "./panels/collaboration-sidebar";
+import { CollaborationSocket } from "@/collaboration/socket";
 import { MulticamGrid } from "./panels/multicam-grid";
 import { SpeedRamping } from "./panels/speed-ramping";
 import { ExportDelivery } from "./panels/export-delivery";
@@ -611,18 +612,45 @@ export default function EditorClient({ project }: { project: Project }) {
 	// Phase 46: Multiplayer Cursor Simulation
 	useEffect(() => {
 		if (!isMultiplayer) {
-			setTimeout(() => setRemoteCursors([]), 0);
+			setRemoteCursors([]);
 			return;
 		}
 
-		// Real-time collaboration requires the collab-server (port 8004).
-		// Connect to WebSocket for live peer cursors and CRDT sync.
-		console.log(
-			"[EditorClient] Multiplayer mode active. Connect collab-server on port 8004 for real-time collaboration.",
-		);
+		// Real-time collaboration via the CRDT collab server.
+		// The server is deployed at the URL specified by
+		// NEXT_PUBLIC_SYNC_SERVER_URL (defaults to ws://localhost:8004/ws).
+		// Once connected, CRDT deltas sync automatically via the WASM engine,
+		// and remote presence/cursors are broadcast to all peers in the room.
+		const roomId = project.id;
+		const peerId = `peer-${crypto.randomUUID()}`;
+		const socket = new CollaborationSocket(roomId, peerId);
+		socket.connect();
+
+		// Listen for remote peer presence (cursor positions, selections).
+		const unsub = socket.onPresence((update) => {
+			setRemoteCursors((prev) => {
+				const filtered = prev.filter((c) => c.id !== update.peerId);
+				return [
+					...filtered,
+					{
+						id: update.peerId,
+						name: update.userName,
+						color: update.color,
+						x: update.cursorX,
+						y: update.cursorY,
+						role: "editor",
+					},
+				];
+			});
+		});
 
 		setRemoteCursors([]);
-	}, [isMultiplayer]);
+
+		return () => {
+			unsub();
+			socket.disconnect();
+		};
+	}, [isMultiplayer, project.id]);
 
 	useEffect(() => {
 		if (!isBioResponsive) return;
