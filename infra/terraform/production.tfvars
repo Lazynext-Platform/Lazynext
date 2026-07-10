@@ -50,3 +50,6 @@ app_gateway_subnet_prefix = ["10.0.1.0/24"]
 # ── Backup ───────────────────────────────────────────────────────────────
 backup_retention_days = 90
 backup_policy_time    = "02:00"
+
+# Enable Azure Backup Vault for PostgreSQL and Blob storage
+enable_backup = true
