@@ -631,6 +631,18 @@ resource "azurerm_container_app" "api_gateway" {
   }
 }
 
+# Custom domain binding for api.lazynext.com
+# The managed certificate is created via Azure CLI or Portal because
+# azurerm_container_app_environment_certificate only supports PFX uploads,
+# not managed certificates. The certificate exists in the Container Apps
+# Environment and is bound to the API gateway Container App via CLI:
+#   az containerapp hostname bind --hostname api.lazynext.com \
+#     -g lazynext-rg-production -n lazynext-api-gateway-production \
+#     --environment lazynext-capps-env-production \
+#     --certificate <managed-cert-id> --validation-method CNAME
+# After binding, update the DNS CNAME at the domain registrar to point
+# api.lazynext.com → the Container App FQDN (from azurerm_container_app.api_gateway).
+
 # Collab Server (CRDT sync + WebRTC)
 resource "azurerm_container_app" "collab_server" {
   # Azure Container App names must be <= 32 chars; keep short across all envs.
