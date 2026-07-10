@@ -131,4 +131,60 @@ mod tests {
         let peer_id = swarm.local_peer_id().to_string();
         assert!(peer_id.len() > 10, "unexpected peer id: {peer_id}");
     }
+
+    #[tokio::test]
+    // Ignored by default: performs real mDNS multicast on the host network,
+    // which sandboxed CI runners don't allow. Run locally with `--ignored` to
+    // verify two nodes on this machine actually discover each other.
+    #[ignore = "requires host networking (mDNS multicast); run locally with --ignored"]
+    async fn two_nodes_discover_each_other() {
+        use tokio::time::{Duration, timeout};
+
+        let mut a = build_swarm().expect("swarm a");
+        let mut b = build_swarm().expect("swarm b");
+        let a_id = *a.local_peer_id();
+        let b_id = *b.local_peer_id();
+
+        a.listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap())
+            .expect("a listen");
+        b.listen_on("/ip4/0.0.0.0/tcp/0".parse().unwrap())
+            .expect("b listen");
+
+        let mut a_found = false;
+        let mut b_found = false;
+
+        let outcome = timeout(Duration::from_secs(30), async {
+            loop {
+                tokio::select! {
+                    ev = a.select_next_some() => {
+                        if let SwarmEvent::Behaviour(MeshBehaviourEvent::Mdns(
+                            mdns::Event::Discovered(list),
+                        )) = ev
+                            && list.iter().any(|(p, _)| *p == b_id)
+                        {
+                            a_found = true;
+                        }
+                    }
+                    ev = b.select_next_some() => {
+                        if let SwarmEvent::Behaviour(MeshBehaviourEvent::Mdns(
+                            mdns::Event::Discovered(list),
+                        )) = ev
+                            && list.iter().any(|(p, _)| *p == a_id)
+                        {
+                            b_found = true;
+                        }
+                    }
+                }
+                if a_found && b_found {
+                    break;
+                }
+            }
+        })
+        .await;
+
+        assert!(
+            outcome.is_ok(),
+            "two nodes failed to discover each other via mDNS within 30s"
+        );
+    }
 }
