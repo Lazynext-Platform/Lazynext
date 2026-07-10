@@ -21,9 +21,8 @@ COPY apps/web/public/ /app/apps/web/public/
 # Copy WASM package for runtime
 COPY rust/wasm/pkg/ /app/rust/wasm/pkg/
 
-# Copy migrations
-COPY apps/web/drizzle/ /app/apps/web/drizzle/ 2>/dev/null || true
-COPY apps/web/migrations/ /app/apps/web/migrations/ 2>/dev/null || true
+# Copy migration files
+COPY apps/web/drizzle/ /app/apps/web/drizzle/
 
 USER nextjs
 
