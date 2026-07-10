@@ -17,14 +17,12 @@ db_sku_name = "GP_Standard_D2s_v3"
 better_auth_secret = "REPLACE_ME_64_CHAR_BETTER_AUTH_SECRET_MINIMUM_64_CHARACTERS_LONG"
 
 # ── API Keys (placeholder — replace with real keys before production) ───
-openai_api_key        = "sk-placeholder-openai-key-for-production"
-anthropic_api_key     = "sk-ant-placeholder-anthropic-key-for-production"
-gemini_api_key        = "placeholder-gemini-key"
-replicate_api_token   = "r8_placeholder-replicate-token"
-elevenlabs_api_key    = "placeholder-elevenlabs-key"
-stripe_secret_key     = "sk_live_placeholder"
-stripe_webhook_secret = "whsec_placeholder"
-resend_api_key        = "re_placeholder"
+openai_api_key      = "sk-placeholder-openai-key-for-production"
+anthropic_api_key   = "sk-ant-placeholder-anthropic-key-for-production"
+gemini_api_key      = "placeholder-gemini-key"
+replicate_api_token = "r8_placeholder-replicate-token"
+elevenlabs_api_key  = "placeholder-elevenlabs-key"
+resend_api_key      = "re_placeholder"
 
 # ── LLM ──────────────────────────────────────────────────────────────────
 llm_provider = "anthropic"
