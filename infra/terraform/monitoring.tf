@@ -319,7 +319,9 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "response_time_p95" {
 # ── Replica Count Alert: fewer than 1 replica running ───────────────────────
 
 resource "azurerm_monitor_metric_alert" "replica_count" {
-  for_each = local.container_apps
+  for_each = var.environment == "production" ? local.container_apps : {}
+  # The ReplicaCount metric is not exposed by every subscription tier's Container
+  # Apps API. Gate to production so dev/staging plans stay drift-clean.
 
   name                = "lazynext-replica-zero-${each.key}-${var.environment}"
   resource_group_name = azurerm_resource_group.rg.name
@@ -355,13 +357,9 @@ resource "azurerm_monitor_metric_alert" "replica_count" {
 # ── Availability (URL Ping) Test: every 5 min from 3 geographic locations ───
 
 resource "azurerm_application_insights_standard_web_test" "web_app" {
-  for_each = {
-    web               = local.container_app_urls["web"]
-    ai_agents         = local.container_app_urls["ai_agents"]
-    render_service    = local.container_app_urls["render_service"]
-    pre_processing    = local.container_app_urls["pre_processing"]
-    generative_studio = local.container_app_urls["generative_studio"]
-  }
+  for_each = var.environment == "production" ? local.container_apps : {}
+  # Web test geo-locations vary by subscription tier. Gate to production
+  # only so dev/staging plans stay drift-clean.
 
   name                    = "lazynext-ping-${each.key}-${var.environment}"
   resource_group_name     = azurerm_resource_group.rg.name
@@ -377,11 +375,11 @@ resource "azurerm_application_insights_standard_web_test" "web_app" {
     follow_redirects_enabled         = true
   }
 
-  # Test from 3 globally distributed Azure datacenter regions
+  # Test from globally distributed Azure datacenter regions. Note: apac-jp-kaw-azr
+  # is not available on all subscriptions; remove it to avoid plan errors.
   geo_locations = [
     "us-va-ash-azr",   # Virginia, USA
     "emea-gb-db3-azr", # London, UK
-    "apac-jp-kaw-azr", # Kawasaki, Japan
   ]
 
   tags = {

@@ -326,3 +326,15 @@ variable "enable_role_assignments" {
   type        = bool
   default     = false
 }
+
+variable "enable_application_gateway" {
+  description = <<-EOT
+    Whether to provision the Application Gateway (WAF v2) for centralized
+    TLS termination and host-based routing. Requires the WAF_v2 SKU to be
+    available in the target region, which is NOT supported on Azure for
+    Students subscriptions. Set to true only after upgrading to a paid
+    subscription or receiving a SKU exception.
+  EOT
+  type        = bool
+  default     = false
+}
