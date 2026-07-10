@@ -99,17 +99,40 @@ class DemucsPipeline:
             import time
             start_time = time.perf_counter()
 
-            # Use native Demucs API instead of subprocess
-            from demucs.api import Separator
+            import torch
+            from demucs.apply import apply_model
+            from demucs.audio import AudioFile
+            from demucs.pretrained import get_model
 
             device = _resolve_device(self.config.device)
             print(f"[Demucs] Using device: {device}")
 
-            separator = Separator(model=self.config.model_name, device=device)
+            model = get_model(self.config.model_name)
+            model.to(device)
+            model.eval()
 
-            # Load and separate. The separator returns a dict mapping track
-            # names (e.g. 'vocals', 'drums') to PyTorch tensors.
-            _, separated = separator.separate_audio_file(audio_path)
+            # Read the mix at the model's native rate/channel count.
+            wav = AudioFile(audio_path).read(
+                streams=0,
+                samplerate=model.samplerate,
+                channels=model.audio_channels,
+            )
+            # Normalize, separate, then de-normalize (standard demucs recipe).
+            ref = wav.mean(0)
+            wav_norm = (wav - ref.mean()) / (ref.std() + 1e-8)
+            with torch.no_grad():
+                estimates = apply_model(
+                    model,
+                    wav_norm[None],
+                    device=device,
+                    split=True,
+                    overlap=0.25,
+                    progress=False,
+                )[0]
+            estimates = estimates * ref.std() + ref.mean()
+
+            # model.sources -> ['drums', 'bass', 'other', 'vocals'] (htdemucs)
+            separated = dict(zip(model.sources, estimates))
 
             # Two-stem mode: keep 'vocals' and sum the remaining stems into a
             # single 'accompaniment' track.
@@ -124,12 +147,15 @@ class DemucsPipeline:
                     reduced["accompaniment"] = accompaniment
                 separated = reduced
 
-            import torchaudio
             stems_generated = []
+            import soundfile as sf
 
             for stem_name, stem_tensor in separated.items():
                 output_path = os.path.join(out_dir, f"{stem_name}.{self.config.output_format}")
-                torchaudio.save(output_path, stem_tensor.cpu(), sample_rate=separator.samplerate)
+                # Write via soundfile (no torchcodec/torchaudio backend needed).
+                # demucs tensors are [channels, time]; soundfile wants [time, channels].
+                data = stem_tensor.cpu().numpy().T
+                sf.write(output_path, data, model.samplerate)
                 stems_generated.append(output_path)
 
             print(f"[Demucs] Separated {len(stems_generated)} stems in {time.perf_counter() - start_time:.2f}s")
