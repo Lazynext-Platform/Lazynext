@@ -1138,7 +1138,7 @@ export default function Timeline({
 												e.preventDefault();
 											}
 										}}
-										onMouseDown={(e) => {
+										onMouseDown={(e: React.MouseEvent) => {
 											if (
 												activeTool === "slip" &&
 												!track.isLocked &&
@@ -1186,7 +1186,7 @@ export default function Timeline({
 												onSelectClip?.(clip.id);
 											}
 										}}
-										onClick={(e) => {
+										onClick={(e: React.MouseEvent) => {
 											e.stopPropagation();
 											if (!track.isLocked) {
 												if (onClickClip && activeTool === "razor") {
@@ -1204,7 +1204,7 @@ export default function Timeline({
 												}
 											}
 										}}
-										onContextMenu={(e) => {
+										onContextMenu={(e: React.MouseEvent) => {
 											if (!track.isLocked) {
 												onContextMenuClip?.(e, clip.id);
 											}
