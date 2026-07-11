@@ -42,13 +42,17 @@ interface Contributor {
 
 async function getContributors(): Promise<Contributor[]> {
 	try {
+		const headers: Record<string, string> = {
+			Accept: "application/vnd.github.v3+json",
+			"User-Agent": "Lazynext-Web-App",
+		};
+		if (process.env.GITHUB_TOKEN) {
+			headers["Authorization"] = `Bearer ${process.env.GITHUB_TOKEN}`;
+		}
 		const response = await fetch(
 			"https://api.github.com/repos/Lazynext-Corporation/Lazynext/contributors?per_page=100",
 			{
-				headers: {
-					Accept: "application/vnd.github.v3+json",
-					"User-Agent": "Lazynext-Web-App",
-				},
+				headers,
 				next: { revalidate: 600 }, // 10 minutes
 			},
 		);

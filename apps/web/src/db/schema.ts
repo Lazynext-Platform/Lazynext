@@ -77,7 +77,7 @@ export const subscriptions = pgTable("subscriptions", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => user.id),
+    .references(() => user.id, { onDelete: "cascade" }),
   dodoSubscriptionId: text("dodo_subscription_id").notNull(),
   dodoPriceId: text("dodo_price_id").notNull(),
   dodoCurrentPeriodEnd: timestamp("dodo_current_period_end").notNull(),
@@ -90,7 +90,7 @@ export const subscriptions = pgTable("subscriptions", {
 
 export const projects = pgTable("projects", {
   id: text("id").primaryKey(),
-  userId: text("user_id").references(() => user.id),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   fps: integer("fps").notNull().default(60),
   width: integer("width").notNull().default(1920),

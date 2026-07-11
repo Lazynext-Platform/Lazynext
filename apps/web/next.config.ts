@@ -20,7 +20,9 @@ const nextConfig: NextConfig = {
 	},
 
 	compiler: {
-		removeConsole: process.env.NODE_ENV === "production",
+		removeConsole: process.env.NODE_ENV === "production"
+			? { exclude: ["error", "warn"] }
+			: false,
 	},
 	reactStrictMode: true,
 	productionBrowserSourceMaps: false,
@@ -102,7 +104,7 @@ const nextConfig: NextConfig = {
 			...config.resolve,
 			alias: {
 				...(config.resolve?.alias || {}),
-				"lazynext-wasm": "/app/rust/wasm/pkg",
+				"lazynext-wasm": "../../node_modules/lazynext-wasm",
 			},
 		};
 		return config;

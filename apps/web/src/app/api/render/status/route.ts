@@ -16,6 +16,28 @@ const localJobs = new Map<
 	{ progress: number; status: string; createdAt: number }
 >();
 
+const MAX_JOB_AGE_MS = 30 * 60 * 1000; // 30 minute TTL
+const MAX_JOB_ENTRIES = 1000;
+let lastEviction = Date.now();
+
+function evictStaleJobs() {
+	const now = Date.now();
+	if (now - lastEviction < 60_000) return; // evict at most once per minute
+	lastEviction = now;
+	for (const [jobId, job] of localJobs) {
+		if (now - job.createdAt > MAX_JOB_AGE_MS) {
+			localJobs.delete(jobId);
+		}
+	}
+	if (localJobs.size > MAX_JOB_ENTRIES) {
+		const entries = [...localJobs.entries()]
+			.sort((a, b) => a[1].createdAt - b[1].createdAt);
+		for (const [jobId] of entries.slice(0, entries.length - MAX_JOB_ENTRIES)) {
+			localJobs.delete(jobId);
+		}
+	}
+}
+
 export async function GET(request: Request) {
 	try {
 		const session = await auth.api.getSession({
@@ -73,6 +95,7 @@ export async function GET(request: Request) {
 				createdAt: Date.now(),
 			};
 			localJobs.set(jobId, localJob);
+			evictStaleJobs();
 		}
 
 		return NextResponse.json({

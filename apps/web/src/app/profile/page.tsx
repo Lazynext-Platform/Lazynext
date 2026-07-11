@@ -27,7 +27,7 @@ export default function ProfilePage() {
 	const [profile, setProfile] = useState<any>(null);
 
 	useEffect(() => {
-		fetch("http://127.0.0.1:8005/api/v1/user/profile")
+		fetch(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL || "http://127.0.0.1:8005"}/api/v1/user/profile`)
 			.then((res) => res.json())
 			.then((data) => {
 				if (data.success) setProfile(data.profile);
