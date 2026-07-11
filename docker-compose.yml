@@ -164,8 +164,8 @@ services:
   # ── AI Agents (Lazynext AI Copilot + WebSocket Sync) ──────────────
   ai-agents:
     build:
-      context: ./services/ai-agents
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ai-agents/Dockerfile
     ports:
       - "8002:8002"
     environment:
@@ -196,8 +196,8 @@ services:
   # ── Render Service (FFmpeg Render Farm) ───────────────────────
   render-service:
     build:
-      context: ./services/render-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/render-service/Dockerfile
     ports:
       - "8003:8003"
     environment:
@@ -246,8 +246,8 @@ services:
   # ── Pre-Processing (Python: Whisper, SAM2, NeRF) ──────────────
   pre-processing:
     build:
-      context: ./services/pre-processing
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/pre-processing/Dockerfile
     ports:
       - "8000:8000"
     environment:
@@ -273,8 +273,8 @@ services:
   # ── Generative Studio (Python: Diffusion, Dubbing, Upscale) ───
   generative-studio:
     build:
-      context: ./services/generative-studio
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/generative-studio/Dockerfile
     ports:
       - "8001:8001"
     environment:
@@ -300,8 +300,8 @@ services:
   # ── Analytics Service (Node.js/Kafka) ─────────────────────────
   analytics-service:
     build:
-      context: ./services/analytics-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/analytics-service/Dockerfile
     ports:
       - "8006:8006"
     environment:
