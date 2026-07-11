@@ -133,7 +133,7 @@ import {
 	getFrameJob,
 	type ExportFormatId,
 } from "./frame-export";
-const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.replace("http", "redis") || "redis://localhost:6379";
+const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 // ── Lazy Redis / BullMQ initialisation ────────────────────────────────
 // Module-level singletons are populated on first use so tests can import
@@ -671,19 +671,19 @@ function buildFfmpegArgs(
 			args.push("-map", `[${prevLabel}]`);
 		}
 
-		// Audio mixing
-		if (audioClips.length > 0) {
-			const audioInputs: string[] = [];
-			for (const clip of audioClips) {
-				const clipDuration = clip.end - clip.start;
-				args.push(`-i`, clip.url!);
-				args.push("-ss", "0", "-t", String(clipDuration));
-				audioInputs.push(`-i`, clip.url!);
-			}
-			// Mix all audio streams
-			const amixInputs = audioClips.map((_, i) => `[${inputIdx + i}:a]`).join("");
-			args.push("-filter_complex", `${amixInputs}amix=inputs=${audioClips.length}:duration=longest[aout]`);
-			args.push("-map", "[aout]");
+	// Audio mixing
+	if (audioClips.length > 0) {
+		const audioInputs: string[] = [];
+		for (const clip of audioClips) {
+			const clipDuration = clip.end - clip.start;
+			args.push("-i", clip.url!);
+			args.push("-ss", String(clip.start), "-t", String(clipDuration));
+			audioInputs.push(`[${inputIdx++}:a]`);
+		}
+		// Mix all audio streams
+		const amixInputs = audioInputs.join("");
+		args.push("-filter_complex", `${amixInputs}amix=inputs=${audioClips.length}:duration=longest[aout]`);
+		args.push("-map", "[aout]");
 		}
 	} else {
 		// ── Fallback: synthetic test pattern ────────────────────────────

@@ -39,7 +39,7 @@ const PORT = process.env.PORT || 8006;
 // Events are written to SQLite for durability across restarts.
 // The in-memory buffer remains as a hot cache for /api/v1/metrics queries.
 
-const DB_PATH = process.env.ANALYTICS_DB_PATH || path.resolve("analytics.db");
+const DB_PATH = process.env.ANALYTICS_DB_PATH || "/data/analytics.db";
 let db: Database | null;
 
 try {

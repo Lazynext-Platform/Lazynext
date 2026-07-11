@@ -1542,9 +1542,17 @@ async function executeToolCall(
       };
 
     case "edit_via_transcript":
+      const transcriptEditResult: any = await callService(
+          `${PRE_PROCESSING_URL}/edit-transcript`,
+          "POST",
+          args
+      );
+      if (!transcriptEditResult || !transcriptEditResult.success) {
+          return { success: false, error: "Transcript editing failed — pre-processing service returned an error" };
+      }
       return {
           success: true,
-          crdt_patches: [
+          crdt_patches: transcriptEditResult.crdt_patches || [
               {
                   op: "add",
                   path: `/tracks/main/clips/${args.video_id || "input_video"}/trim_history/-`,
@@ -1558,9 +1566,17 @@ async function executeToolCall(
       };
 
     case "remove_filler_words":
+      const fillerResult: any = await callService(
+          `${PRE_PROCESSING_URL}/remove-filler-words`,
+          "POST",
+          args
+      );
+      if (!fillerResult || !fillerResult.success) {
+          return { success: false, error: "Filler word removal failed — pre-processing service returned an error" };
+      }
       return {
           success: true,
-          crdt_patches: [
+          crdt_patches: fillerResult.crdt_patches || [
               {
                   op: "add",
                   path: `/tracks/main/clips/${args.video_id || "input_video"}/effects/-`,
@@ -1585,6 +1601,12 @@ async function executeToolCall(
       };
 
     case "add_sound_effect":
+      const sfxResult: any = await callService(
+          `${PRE_PROCESSING_URL}/search-sfx`,
+          "POST",
+          { query: args.effect_type || "whoosh" }
+      ).catch(() => null);
+      const sfxUrl = sfxResult?.url || `s3://lazynext-assets/sfx/${args.effect_type || "whoosh"}.wav`;
       return {
           success: true,
           crdt_patches: [
@@ -1593,8 +1615,8 @@ async function executeToolCall(
                   path: `/tracks/sfx_track/clips/sfx_${Date.now()}`,
                   value: {
                       type: "AudioClip",
-                      url: `s3://lazynext-assets/sfx/${args.effect_type || "whoosh"}.wav`,
-                      start_time: 0
+                      url: sfxUrl,
+                      start_time: args.start_time || 0
                   }
               }
           ]

@@ -18,8 +18,12 @@ impl DbStore {
     /// Create a new DbStore, connecting to PostgreSQL and ensuring
     /// the `collab_states` table exists.
     pub async fn new() -> Result<Self, sqlx::Error> {
-        let database_url = env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "postgres://lazynext:changeme@localhost:5432/lazynext".to_string());
+        let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
+            if env::var("NODE_ENV").unwrap_or_default() == "production" {
+                panic!("DATABASE_URL must be set in production");
+            }
+            "postgres://lazynext:changeme@localhost:5432/lazynext".to_string()
+        });
 
         let pool = PgPoolOptions::new()
             .max_connections(10)

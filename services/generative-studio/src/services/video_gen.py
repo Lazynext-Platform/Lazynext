@@ -43,7 +43,7 @@ async def generate_video_service(req: DiffusionRequest):
                     "Content-Type": "application/json",
                 }
                 payload = {
-                    "version": "3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438",
+	"version": REPLICATE_SVD_MODEL,
                     "input": {
                         "prompt": req.prompt,
                         "width": req.width,
@@ -115,7 +115,6 @@ async def upscale_video_service(req: UpscaleRequest):
     pipeline = UpscalePipeline(config)
     
     # The pipeline is synchronous, so we run it in a thread pool to avoid blocking the async event loop.
-    import asyncio
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, pipeline.upscale, video_path, output_path)
 
@@ -274,7 +273,7 @@ async def generative_fill_service(req: GenerativeFillRequest):
                         "Content-Type": "application/json",
                     },
                     json={
-                        "version": "c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316",
+	"version": REPLICATE_INPAINT_MODEL,
                         "input": {
                             "video": f"file://{video_path}",
                             "mask": f"file://{mask_path}" if os.path.exists(mask_path) else "center",
