@@ -197,12 +197,14 @@ jobs:
           MODEL_FILTER: ${{ github.event.inputs.model || 'all' }}
           FORCE: ${{ github.event.inputs.force_redownload || 'false' }}
         run: |
+          sudo mkdir -p "${{ env.MODEL_BASE_PATH }}"
           chmod +x scripts/tf-model-download.sh
           MODEL_DIR="${{ env.MODEL_BASE_PATH }}" \
           HF_CACHE="${{ env.HF_HOME }}" \
             bash scripts/tf-model-download.sh \
             --filter "${MODEL_FILTER}" \
             $([[ "${FORCE}" == "true" ]] && echo "--force" || echo "")
+          sudo chmod -R a+rX "${{ env.MODEL_BASE_PATH }}"
 
       - name: Generate Checksums Manifest
         run: |
