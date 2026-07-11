@@ -1,0 +1,68 @@
+# ── Linode Systemd Service Templates ──────────────────────────────
+# Replace CHANGE_ME_* with actual values before deploying.
+# See docker-compose.yml for the database password.
+
+# Web (Next.js) — /etc/systemd/system/lazynext-web.service
+# [Unit] Description=Lazynext Web Server
+# After=network.target docker.service
+# [Service] Type=simple
+# WorkingDirectory=/opt/lazynext/apps/web/.next/standalone
+# Environment=NODE_ENV=production PORT=3000
+# Environment=DATABASE_URL=postgresql://lazynext:CHANGE_ME_DB_PASSWORD@127.0.0.1:5432/lazynext
+# Environment=NEXT_PUBLIC_SITE_URL=https://lazynext.com
+# Environment=BETTER_AUTH_SECRET=CHANGE_ME_BETTER_AUTH_SECRET
+# Environment=RESEND_API_KEY=CHANGE_ME_RESEND_KEY
+# ExecStart=/usr/bin/node apps/web/server.js
+# Restart=always
+
+# API Gateway (Rust) — /etc/systemd/system/lazynext-api-gateway.service
+# [Service] Environment=DATABASE_URL=postgresql://lazynext:CHANGE_ME_DB_PASSWORD@127.0.0.1:5432/lazynext
+# Environment=BETTER_AUTH_SECRET=CHANGE_ME_BETTER_AUTH_SECRET
+# Environment=PORT=8005
+# ExecStart=/usr/local/bin/lazynext_api_gateway
+
+# Collab Server (Rust) — /etc/systemd/system/lazynext-collab.service
+# [Service] Environment=DATABASE_URL=postgresql://lazynext:CHANGE_ME_DB_PASSWORD@127.0.0.1:5432/lazynext
+# Environment=BETTER_AUTH_SECRET=CHANGE_ME_BETTER_AUTH_SECRET
+# Environment=COLLAB_PORT=8004
+# ExecStart=/usr/local/bin/collab-server
+
+# AI Agents — /etc/systemd/system/lazynext-ai-agents.service
+# [Service] WorkingDirectory=/opt/lazynext/services/ai-agents
+# Environment=PORT=8002
+# ExecStart=/root/.bun/bin/bun run src/index.ts
+
+# Render Service — /etc/systemd/system/lazynext-render.service
+# [Service] WorkingDirectory=/opt/lazynext/services/render-service
+# Environment=PORT=8003 REDIS_URL=redis://127.0.0.1:6379
+# Environment=FFMPEG_PATH=/usr/bin/ffmpeg STORAGE_PROVIDER=local
+# ExecStart=/root/.bun/bin/bun run src/index.ts
+
+# Analytics — /etc/systemd/system/lazynext-analytics.service
+# [Service] WorkingDirectory=/opt/lazynext/services/analytics-service
+# Environment=PORT=8006
+# ExecStart=/root/.bun/bin/bun run src/index.ts
+
+# Social Publish — /etc/systemd/system/lazynext-social.service
+# [Service] WorkingDirectory=/opt/lazynext/services/social-publish
+# Environment=PORT=8007
+# ExecStart=/root/.bun/bin/bun run src/index.ts
+
+# Pre-Processing (Python) — /etc/systemd/system/lazynext-preprocess.service
+# [Service] WorkingDirectory=/opt/lazynext/services/pre-processing
+# Environment=BETTER_AUTH_SECRET=CHANGE_ME_BETTER_AUTH_SECRET
+# ExecStart=/opt/lazynext/services/pre-processing/venv/bin/python -m uvicorn src.main:app --host 127.0.0.1 --port 8000
+
+# Generative Studio (Python) — /etc/systemd/system/lazynext-genstudio.service
+# [Service] WorkingDirectory=/opt/lazynext/services/generative-studio
+# Environment=BETTER_AUTH_SECRET=CHANGE_ME_BETTER_AUTH_SECRET
+# ExecStart=/opt/lazynext/services/generative-studio/venv/bin/python -m uvicorn src.main:app --host 127.0.0.1 --port 8001
+
+# Build instructions:
+# 1. Install deps: apt-get install -y build-essential pkg-config libssl-dev python3 python3-pip unzip ffmpeg
+# 2. Install Bun: curl -fsSL https://bun.sh/install | bash
+# 3. Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# 4. Build Rust services: cargo build --release -p lazynext_api_gateway -p collab-server
+# 5. Build web: cd apps/web && bun run build (standalone output)
+# 6. Python venvs: cd services/pre-processing && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt
+# 7. Copy systemd files, run: systemctl daemon-reload && systemctl enable --now lazynext-*
