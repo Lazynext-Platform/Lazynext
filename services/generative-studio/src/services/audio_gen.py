@@ -196,9 +196,8 @@ async def split_stems_service(req: StemSplitRequest):
 
     if not stems_output:
         try:
-            import numpy as np
-            import soundfile as sf
-            import librosa
+	import soundfile as sf
+			import librosa
             if os.path.exists(audio_path):
                 y, sr = librosa.load(audio_path, sr=44100)
                 y_harmonic, y_percussive = librosa.effects.hpss(y)
