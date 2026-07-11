@@ -1,0 +1,18 @@
+[Unit]
+Description=Lazynext AI Agents — Chronos Copilot
+After=network.target lazynext-api-gateway.service lazynext-infra.service
+Requires=lazynext-infra.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lazynext/services/ai-agents
+Environment=PORT=8002
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/root/.bun/bin/bun run src/index.ts
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/lazynext/ai-agents.log
+StandardError=append:/var/log/lazynext/ai-agents-error.log
+
+[Install]
+WantedBy=multi-user.target

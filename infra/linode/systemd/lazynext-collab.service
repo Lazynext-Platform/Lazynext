@@ -1,0 +1,18 @@
+[Unit]
+Description=Lazynext Collaboration Server (Rust WebSocket)
+After=network.target lazynext-infra.service
+Requires=lazynext-infra.service
+
+[Service]
+Type=simple
+Environment=COLLAB_PORT=8004
+Environment=RUST_LOG=info
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/opt/lazynext/target/release/collab-server
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/lazynext/collab.log
+StandardError=append:/var/log/lazynext/collab-error.log
+
+[Install]
+WantedBy=multi-user.target

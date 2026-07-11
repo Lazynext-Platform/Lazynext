@@ -1,0 +1,17 @@
+[Unit]
+Description=Lazynext Analytics Service
+After=network.target lazynext-infra.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lazynext/services/analytics-service
+Environment=PORT=8006
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/root/.bun/bin/bun run src/index.ts
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/lazynext/analytics.log
+StandardError=append:/var/log/lazynext/analytics-error.log
+
+[Install]
+WantedBy=multi-user.target

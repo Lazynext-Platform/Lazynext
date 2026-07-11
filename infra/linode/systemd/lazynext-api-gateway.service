@@ -1,0 +1,19 @@
+[Unit]
+Description=Lazynext API Gateway (Rust Axum)
+After=network.target lazynext-infra.service
+Requires=lazynext-infra.service
+Wants=lazynext-redis.service
+
+[Service]
+Type=simple
+Environment=PORT=8005
+Environment=RUST_LOG=info
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/opt/lazynext/target/release/lazynext_api_gateway
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/lazynext/api-gateway.log
+StandardError=append:/var/log/lazynext/api-gateway-error.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,20 @@
+[Unit]
+Description=Lazynext Generative Studio (Python FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lazynext/services/generative-studio
+Environment=PYTHONUNBUFFERED=1
+Environment=HF_HOME=/tmp/huggingface
+Environment=TRANSFORMERS_CACHE=/tmp/huggingface
+Environment=PORT=8001
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/opt/lazynext/services/generative-studio/venv/bin/python -m uvicorn src.main:app --host 127.0.0.1 --port 8001 --workers 1
+Restart=always
+RestartSec=15
+StandardOutput=append:/var/log/lazynext/genstudio.log
+StandardError=append:/var/log/lazynext/genstudio-error.log
+
+[Install]
+WantedBy=multi-user.target

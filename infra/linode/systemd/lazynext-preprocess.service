@@ -1,0 +1,19 @@
+[Unit]
+Description=Lazynext Pre-Processing ML Service (Python FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lazynext/services/pre-processing
+Environment=PYTHONUNBUFFERED=1
+Environment=NUMBA_CACHE_DIR=/tmp
+Environment=PORT=8000
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/opt/lazynext/services/pre-processing/venv/bin/python -m uvicorn src.main:app --host 127.0.0.1 --port 8000 --workers 1
+Restart=always
+RestartSec=15
+StandardOutput=append:/var/log/lazynext/preprocess.log
+StandardError=append:/var/log/lazynext/preprocess-error.log
+
+[Install]
+WantedBy=multi-user.target

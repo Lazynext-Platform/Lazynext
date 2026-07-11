@@ -1,0 +1,20 @@
+[Unit]
+Description=Lazynext Web Server (Next.js)
+After=network.target lazynext-infra.service
+Requires=lazynext-infra.service
+Wants=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/lazynext/apps/web/.next/standalone
+Environment=NODE_ENV=production
+Environment=PORT=3000
+EnvironmentFile=/opt/lazynext/infra/linode/.env.linode
+ExecStart=/root/.bun/bin/bun run apps/web/server.js
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/lazynext/web.log
+StandardError=append:/var/log/lazynext/web-error.log
+
+[Install]
+WantedBy=multi-user.target

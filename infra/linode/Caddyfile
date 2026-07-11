@@ -1,28 +1,58 @@
+# ── Lazynext Linode — Caddy Reverse Proxy ────────────────────────
+# Deployed at: 192.46.209.127
+# Caddy auto-obtains Let's Encrypt certs for HTTPS.
+# Run: docker compose -f /opt/lazynext/infra/linode/docker-compose.yml up -d caddy
+#
+# ⚠️  Before enabling https:// sections:
+#   1. Point DNS A records at this server:
+#      lazynext.com       → 192.46.209.127
+#      www.lazynext.com   → 192.46.209.127
+#      api.lazynext.com    → 192.46.209.127
+#      collab.lazynext.com → 192.46.209.127
+#   2. Ensure ports 80 and 443 are open
+#   3. Then uncomment the HTTPS sections below
+
+# ── HTTP (port 80) — automatic HTTPS redirect ──
+
 :80 {
     reverse_proxy 127.0.0.1:3000
-    encode gzip
-}
-
-lazynext.com, www.lazynext.com {
-    reverse_proxy 127.0.0.1:3000
-    encode gzip
+    encode gzip zstd
     header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Frame-Options "DENY"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
     }
 }
 
-api.lazynext.com {
-    reverse_proxy 127.0.0.1:8005
-    encode gzip
-}
+# ── HTTPS (port 443) — uncomment once DNS is configured ──
 
-collab.lazynext.com {
-    reverse_proxy 127.0.0.1:8004
-    header {
-        Connection "Upgrade"
-        Upgrade "websocket"
-    }
-}
+# lazynext.com, www.lazynext.com {
+#     reverse_proxy 127.0.0.1:3000
+#     encode gzip zstd
+#     header {
+#         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#         X-Frame-Options "DENY"
+#         X-Content-Type-Options "nosniff"
+#         Referrer-Policy "strict-origin-when-cross-origin"
+#         # CORS for API Gateway subdomain
+#         Access-Control-Allow-Origin "https://lazynext.com"
+#     }
+# }
+
+# api.lazynext.com {
+#     reverse_proxy 127.0.0.1:8005
+#     encode gzip zstd
+#     header {
+#         Access-Control-Allow-Origin "https://lazynext.com"
+#         Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+#         Access-Control-Allow-Headers "Authorization, Content-Type"
+#     }
+# }
+
+# collab.lazynext.com {
+#     reverse_proxy 127.0.0.1:8004
+#     header {
+#         Connection "Upgrade"
+#         Upgrade "websocket"
+#     }
+# }
