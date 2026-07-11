@@ -9,7 +9,7 @@ const webEnvSchema = z.object({
 
 	// Public
 	NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
-	NEXT_PUBLIC_MARBLE_API_URL: z.url(),
+	NEXT_PUBLIC_MARBLE_API_URL: z.url().optional(),
 
 	// Server
 	DATABASE_URL: z
@@ -20,12 +20,12 @@ const webEnvSchema = z.object({
 		),
 
 	BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET must be at least 32 characters"),
-	UPSTASH_REDIS_REST_URL: z.url(),
-	UPSTASH_REDIS_REST_TOKEN: z.string(),
-	MARBLE_WORKSPACE_KEY: z.string(),
-	FREESOUND_CLIENT_ID: z.string(),
-	FREESOUND_API_KEY: z.string(),
-	INTERNAL_API_KEY: z.string().min(16, "INTERNAL_API_KEY must be at least 16 characters"),
+	UPSTASH_REDIS_REST_URL: z.url().optional(),
+	UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+	MARBLE_WORKSPACE_KEY: z.string().optional(),
+	FREESOUND_CLIENT_ID: z.string().optional(),
+	FREESOUND_API_KEY: z.string().optional(),
+	INTERNAL_API_KEY: z.string().optional(),
 	DODO_API_KEY: z.string().optional(),
 	DODO_WEBHOOK_SECRET: z.string().optional(),
 	RESEND_API_KEY: z.string().optional(),

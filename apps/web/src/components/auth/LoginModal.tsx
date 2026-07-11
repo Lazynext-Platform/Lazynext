@@ -12,6 +12,7 @@ import { signIn, signUp } from "@/auth/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
+import { friendlyAuthError } from "./auth-errors";
 
 export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
 	const [isLogin, setIsLogin] = useState(true);
@@ -27,40 +28,40 @@ export function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
 		setIsLoading(true);
 		try {
 			if (isLogin) {
-				const { error } = await signIn.email({
+				const { data, error } = await signIn.email({
 					email,
 					password,
 					rememberMe: true,
 				});
 				if (error) {
-					toast.error(error.message ?? "Invalid email or password");
+					toast.error(friendlyAuthError(error, "Invalid email or password"));
 					return;
 				}
-				toast.success("Signed in successfully!");
+				if (data) {
+					toast.success("Signed in successfully!");
+				}
 			} else {
 				if (password.length < 8) {
 					toast.error("Password must be at least 8 characters");
 					setIsLoading(false);
 					return;
 				}
-				const { error } = await signUp.email({
+				const { data, error } = await signUp.email({
 					email,
 					password,
 					name: name || email.split("@")[0],
 				});
 				if (error) {
-					toast.error(error.message ?? "Sign up failed");
+					toast.error(friendlyAuthError(error, "Sign up failed"));
 					return;
 				}
-				toast.success("Account created successfully!");
+				if (data) {
+					toast.success("Account created successfully!");
+				}
 			}
 			onClose();
 		} catch (err) {
-			toast.error(
-				err instanceof Error
-					? err.message
-					: "Authentication failed — server may be unreachable",
-			);
+			toast.error(friendlyAuthError(err, "Authentication failed"));
 		} finally {
 			setIsLoading(false);
 		}

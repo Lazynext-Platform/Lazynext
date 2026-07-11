@@ -11,6 +11,7 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { toast } from "sonner";
 import Link from "next/link";
 import { requestPasswordReset } from "@/auth/client";
+import { friendlyAuthError } from "@/components/auth/auth-errors";
 
 export default function ForgotPasswordPage() {
 	const [email, setEmail] = useState("");
@@ -29,10 +30,10 @@ export default function ForgotPasswordPage() {
 				setSent(true);
 				toast.success("Reset link sent! Check your email.");
 			} else {
-				toast.error(error.message || "Failed to send reset email");
+				toast.error(friendlyAuthError(error, "Failed to send reset email"));
 			}
-		} catch {
-			toast.error("An error occurred. Please try again.");
+		} catch (err) {
+			toast.error(friendlyAuthError(err, "An error occurred. Please try again."));
 		} finally {
 			setLoading(false);
 		}

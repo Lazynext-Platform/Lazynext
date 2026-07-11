@@ -12,6 +12,7 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { toast } from "sonner";
 import Link from "next/link";
 import { resetPassword } from "@/auth/client";
+import { friendlyAuthError } from "@/components/auth/auth-errors";
 
 function ResetPasswordForm() {
 	const router = useRouter();
@@ -41,10 +42,10 @@ function ResetPasswordForm() {
 				toast.success("Password reset! You can now sign in.");
 				router.push("/sign-in");
 			} else {
-				toast.error(error.message || "Invalid or expired reset token");
+				toast.error(friendlyAuthError(error, "Invalid or expired reset token"));
 			}
-		} catch {
-			toast.error("An error occurred. Please try again.");
+		} catch (err) {
+			toast.error(friendlyAuthError(err, "An error occurred. Please try again."));
 		} finally {
 			setLoading(false);
 		}
