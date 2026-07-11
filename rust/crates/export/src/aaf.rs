@@ -4,6 +4,11 @@
 //! projects between different NLE applications (Avid Media Composer,
 //! DaVinci Resolve, Premiere Pro).
 //!
+//! ⚠️ Current implementation generates XML metadata wrapped in AAF-compatible
+//! XML syntax. For full binary AAF interchange (SMPTE ST 436), a native AAF
+//! SDK (e.g., `aaf2` C++ library via FFI) would be required. The XML path
+//! is sufficient for timeline transfer between modern NLEs.
+//!
 //! Reference: AMWA AAF Specification v1.1
 
 use state::ProjectData;

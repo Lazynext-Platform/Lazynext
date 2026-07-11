@@ -24,7 +24,7 @@
 //! - **texture_pool**: GPU texture allocator with LRU eviction
 //! - **texture_store**: Persistent texture cache indexed by media ID
 //! - **aces**: Academy Color Encoding System transforms
-//! - **keyframe**: GPU-side keyframe interpolation
+//! - **keyframe**: Deprecated — use `lazynext_state::keyframe` instead (GPU-side keyframe interpolation superseded by the state crate's unified keyframe system)
 //! - **lut**: 3D LUT loading, parsing, and GPU application
 //! - **msdf**: Multi-channel signed distance field text rendering
 //! - **stereoscopic**: Side-by-side / top-bottom 3D output

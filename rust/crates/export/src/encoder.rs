@@ -72,6 +72,8 @@ pub enum ExportFormat {
     Aaf,
     /// H.264 video in a MOV container.
     Mov,
+    /// Animated GIF (social media / previews).
+    Gif,
 }
 
 impl ExportFormat {
@@ -86,6 +88,7 @@ impl ExportFormat {
             "mov" => Some(ExportFormat::Mov),
             "mxf" => Some(ExportFormat::Dcp),
             "aaf" => Some(ExportFormat::Aaf),
+            "gif" => Some(ExportFormat::Gif),
             _ => None,
         }
     }
@@ -98,6 +101,7 @@ impl ExportFormat {
             ExportFormat::Dcp => "mxf",
             ExportFormat::Aaf => "aaf",
             ExportFormat::Mov => "mov",
+            ExportFormat::Gif => "gif",
         }
     }
 
@@ -109,6 +113,7 @@ impl ExportFormat {
             ExportFormat::Dcp => "jpeg2000",
             ExportFormat::Aaf => "dnxhd",
             ExportFormat::Mov => "libx264",
+            ExportFormat::Gif => "gif",
         }
     }
 }
@@ -161,6 +166,11 @@ impl ExportEncoder {
             ExportFormat::Aaf => {
                 args.push("-pix_fmt".to_string());
                 args.push("yuv422p".to_string());
+            }
+            ExportFormat::Gif => {
+                // GIF uses a palette; handled via filter_complex in the pipeline
+                args.push("-pix_fmt".to_string());
+                args.push("rgb8".to_string());
             }
         }
 

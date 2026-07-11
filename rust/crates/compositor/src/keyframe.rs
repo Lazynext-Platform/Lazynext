@@ -1,5 +1,10 @@
 //! Keyframe interpolation engine.
 //!
+//! ⚠️ DEPRECATED: This module is superseded by `lazynext_state::keyframe`.
+//! New code should use the unified keyframe system in the state crate.
+//! This module is retained for backward compatibility with existing
+//! compositor internals and will be removed in a future release.
+//!
 //! Defines cubic Bezier easing curves (ease-in, ease-out, ease-in-out,
 //! linear) and an `Interpolator` that computes property values at any
 //! point in time between sorted keyframes.
