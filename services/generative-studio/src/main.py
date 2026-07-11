@@ -11,6 +11,7 @@ from fastapi import FastAPI, Depends
 from src.routes import router
 from src.telemetry import init_telemetry
 from src.auth import get_auth_claims
+import os
 
 app = FastAPI(title="Lazynext Generative Studio")
 init_telemetry(app)
