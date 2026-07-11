@@ -1,7 +1,7 @@
 /** @module Guide popover component for selecting and configuring canvas alignment guides */
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { GUIDE_REGISTRY, getGuideById } from "@/guides";
 import { usePreviewStore } from "@/preview/preview-store";
 import {

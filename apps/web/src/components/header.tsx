@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { signOut } from "@/auth/client";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Button } from "./ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
