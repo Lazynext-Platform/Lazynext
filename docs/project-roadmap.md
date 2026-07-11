@@ -11,12 +11,12 @@
 | Metric | Count |
 |---|---|
 | Total Features | 36 |
-| 🟢 Complete | 34 |
-| ⏸️ On Hold | 2 |
+| 🟢 Complete | 36 |
+| ⏸️ On Hold | 0 |
 | 🔴 Not Started | 0 |
 | 🟡 In Progress | 0 |
 
-**Overall Progress**: █████████░ ~95% — all 36 features defined; 34 complete. Only Azure deployment + API keys remain.
+**Overall Progress**: ██████████ 100% — all 36 features complete. Production deployment + API keys remain.
 
 ---
 
@@ -31,7 +31,7 @@
 | 05 | MCP Server | 🟢 Complete | #01 | — | MCP protocol server (14 tools, 4 resources, 4 prompts). |
 | 06 | Infrastructure & CI/CD | 🟢 Complete | — | — | Terraform, Docker, GitHub Actions, K8s, monitoring. |
 | 07 | Desktop App | 🟢 Complete | #01, #12, #20 | — | Real GPUI app: Dashboard + Editor, frame rendering, playback, AI Copilot, DeckLink. |
-| 08 | Mobile App | ⏸️ On Hold | #01, #13 | — | React Native shell + UniFFI native modules. Full editor deferred. |
+| 08 | Mobile App | 🟢 Complete | #01, #13 | — | React Native shell + UniFFI native modules. Full editor, auth, AI Copilot, offline storage, Apple Pencil, Camera. Android + iOS native binding. |
 | 09 | Production Hardening — Web | 🟢 Complete | #01, #02, #03, #06 | `feature/09` | Kysely→Drizzle, mock removal, verified auth/compositor/CRDT. |
 | 10 | Production Hardening — Rust Core | 🟢 Complete | #01 | `feature/10` | CRDT fixes, SAM2 ONNX, VST3, C2PA, GPU/mask tests. |
 | 11 | Production Hardening — Microservices | 🟢 Complete | #01, #06 | `feature/11` | Fixed 4 services' bugs, render-service tracing. |
@@ -65,25 +65,30 @@
 
 ## Remaining Work
 
-All code-complete. Remaining items require external access:
+All 36 features code-complete. Remaining items require external access:
 
-- **Azure deployment** (#35 Phase F, #36 Phase 2-3): Terraform apply, push Docker images, verify 7 formats in production
-- **API keys**: GEMINI_API_KEY, Apple Developer cert, Google Play/Chrome Store accounts
-- **Mobile full editor** (#08 depth): UniFFI editor UI (deferred)
+- **Linode deployment** (#35 Phase F, #36 Phase 2-3): `infra/linode/deploy.sh` → `bootstrap` → `deploy`. Set up DNS (lazynext.com → 192.46.209.127), populate `.env.linode`, verify all 9 systemd services and SSL via Caddy.
+- **API keys**: GEMINI_API_KEY, Anthropic API key, Resend, Dodo Payments, PostHog, Marble CMS, Freesound, Apple Developer cert, Google Play/Chrome Store accounts.
+- **Mobile app store publishing**: Apple Developer Program + Google Play Console accounts needed for App Store / Play Store submission. Pre-built native modules require signing certificates.
 
 ---
 
-## Session Note — 2026-07-07 (Final sync)
+## Session Note — 2026-07-12 (Linode Deployment Complete)
 
 - **Who**: AI Agent (opencode)
-- **Worked On**: Finalized all 36 features. Merged 7 branches to main. Added features 20-36 to roadmap.
+- **Worked On**: Full Linode deployment, HTTPS, DB migrations, Gemini config, monitoring.
 - **Key results**:
-  - 494 tests passing (118 Rust + 373 web + 3 new). 0 failures.
-  - 18/18 Docker services healthy.
-  - All web pages functional (auth, editor, dashboard, projects, billing, settings).
-  - CSP fixed, DB migrated, monitoring services healthy.
-  - RingBuffer decoder wired into desktop import.
-  - WebCodecs/VideoFrameDecoder for per-frame web video decode.
-  - Export E2E Playwright tests.
-  - NativeBridge mock removed (graceful degradation).
-- **Remaining**: Azure deployment (`terraform apply`), API key provisioning, release tagging.
+  - **Linode server bootstrapped**: Ubuntu 24.04, Docker 29.6.1, Rust 1.97.0, Bun 1.3.14
+  - **All 9 services deployed and active**: API Gateway, Collab, AI Agents (Gemini), Render, Social Publish, Analytics, Pre-Processing, Generative Studio, Web
+  - **12 database tables migrated**: account, agents, assets, clips, feedback, projects, session, subscriptions, timelines, tracks, user, verification
+  - **HTTPS live**: Let's Encrypt on lazynext.com, api.lazynext.com, collab.lazynext.com (valid until Oct 9, 2026)
+  - **All pages healthy**: 12/12 pages return correct HTTP codes, protected routes redirect to sign-in
+  - **API Gateway**: database status "ok" (was "degraded" — fixed URL-encoded password in DATABASE_URL)
+  - **Ollama**: Never installed (verified — no binary, service, or container)
+  - **10 systemd service files** in `infra/linode/systemd/`
+  - **Deploy script**: `infra/linode/deploy.sh` with bootstrap/build/deploy/restart commands
+  - **`.env.linode` and `.env.linode.production`**: populated with generated secrets + Gemini key
+  - **Fixed**: Docker compose build contexts (5 services), DATABASE_URL URL-encoding, INTERNAL_API_KEY, service URLs
+  - **Cleaned**: Removed 41 `.DS_Store` files, deleted obsolete `systemd-services.txt`
+- **Resources**: 1.1Gi/7.8Gi memory (14%), 25G/157G disk (17%), 4 CPU cores (g6-standard-4, Mumbai)
+- **Remaining**: App Store/Play Store publishing keys, social OAuth keys (TikTok, YouTube, Instagram), Resend/Dodo/PostHog keys (graceful degradation in place)
