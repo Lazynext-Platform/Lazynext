@@ -87,7 +87,7 @@ impl GenerativeModel {
 			let status = res.status();
 			let body = res.text().await.unwrap_or_default();
 			return Err(format!(
-				"Video generation returned HTTP {}: {}. Install gradio_client or set HF_TOKEN.",
+				"Video generation returned HTTP {}: {}. Set MODAL_VIDEO_ENDPOINT or deploy Modal endpoint.",
 				status, body
 			));
 		}

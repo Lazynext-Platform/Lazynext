@@ -24,7 +24,7 @@ def test_generate_video_no_key(monkeypatch):
         "num_frames": 24
     })
     assert response.status_code == 503
-    assert "gradio_client" in response.json()["detail"].lower() or "unavailable" in response.json()["detail"].lower()
+    assert "modal" in response.json()["detail"].lower() or "unavailable" in response.json()["detail"].lower()
 
 def test_dub_video_no_key(monkeypatch):
     """/dub returns 503 when dubbing backends/keys are unavailable."""
