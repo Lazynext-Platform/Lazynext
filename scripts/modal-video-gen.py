@@ -1,9 +1,9 @@
 """
-Lazynext Video Generation — Modal GPU Endpoint (CogVideoX-5B)
+Lazynext Video Generation — Modal GPU Endpoint (CogVideoX-2B)
 
 Deploy: modal deploy scripts/modal-video-gen.py
 
-Modal gives $30/month free credits. CogVideoX-5B on A10G GPU.
+Modal gives $30/month free credits. CogVideoX-2B on A10G GPU.
 ~30-45s per video, confirmed working with diffusers.
 """
 
