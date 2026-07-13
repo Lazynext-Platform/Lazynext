@@ -57,7 +57,7 @@ Before writing anything in an app, ask: **"Does this belong in `rust/`?"**
 | `apps/mobile` | React Native + Expo + UniFFI Rust bindings |
 | `apps/browser-extension` | Chrome MV3 extension for video capture + import |
 | `services/pre-processing` | Python FastAPI (port 8000): Whisper, SAM2, NeRF |
-| `services/generative-studio` | Python FastAPI (port 8001): Kling 3.0, Edge TTS, CosyVoice 3, Demucs |
+| `services/generative-studio` | Python FastAPI (port 8001): Kling 3.0, Edge TTS, F5-TTS, Demucs |
 | `services/ai-agents` | Node.js Bun (port 8002): Chronos Copilot, LLM orchestration |
 | `services/render-service` | Node.js Bun (port 8003): FFmpeg render farm, SSE progress |
 | `services/collab-server` | Rust Axum (port 8004): CRDT sync + WebRTC signaling |

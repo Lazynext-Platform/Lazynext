@@ -24,7 +24,7 @@
 ### Infrastructure
 - Deployed full stack to Linode 8GB (192.46.209.127): 10 microservices + PostgreSQL + Redis + MySQL + Caddy
 - Docker Compose analytics services (Umami, Matomo)
-- GPU deployment script for CosyVoice 3 on Linode GPU instances
+- GPU deployment via vast.ai (Linode GPU rejected)
 - Linode GPU support ticket #27091699 created for RTX 4000 Ada
 
 ### Removed

@@ -19,7 +19,7 @@ class DubRequest(BaseModel):
 
 
 class OverdubRequest(BaseModel):
-    """Voice-cloned overdubbing: replace or insert speech via CosyVoice 3."""
+    """Voice-cloned overdubbing: replace or insert speech via F5-TTS."""
     text: str = Field(..., min_length=1, max_length=5000)
     voice_id: str = Field(default="default_voice", min_length=1, max_length=100)
     original_audio_url: str | None = Field(default=None, max_length=4096)

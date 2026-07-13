@@ -63,7 +63,7 @@ gpu_operator_helm_values:
 # ── ML Service Affinity ───────────────────────────────────────────
 ml_services:
   - pre-processing      # Whisper, SAM2, NeRF
-  - generative-studio   # Kling 3.0, Edge TTS, CosyVoice 3, Demucs
+  - generative-studio   # Kling 3.0, Edge TTS, F5-TTS, Demucs
   - whisper-worker
   - sam2-worker
 

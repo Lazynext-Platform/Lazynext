@@ -91,35 +91,8 @@ async def overdub_audio_service(req: OverdubRequest):
     """Generate voice-cloned overdub audio using F5-TTS.
 
     F5-TTS provides zero-shot voice cloning from reference audio.
-    MIT licensed, 300M params, works on CPU (~1-2 min per utterance).
-    Falls back to CosyVoice 3 GPU if COSYVOICE_GPU_URL is set.
     """
-    # Try remote GPU service first (CosyVoice 3)
-    gpu_url = os.getenv("COSYVOICE_GPU_URL", "")
-    if gpu_url:
-        try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(
-                    f"{gpu_url}/clone",
-                    json={
-                        "text": req.text,
-                        "reference_audio_url": req.original_audio_url or "",
-                        "voice_id": req.voice_id or "",
-                    },
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    if data.get("success"):
-                        return {
-                            "success": True,
-                            "source": "cosyvoice3-gpu",
-                            "audio_url": data["audio_url"],
-                        }
-                print(f"[GenerativeStudio] GPU service returned {resp.status_code}")
-        except Exception as e:
-            print(f"[GenerativeStudio] GPU service unreachable: {e}")
-
-    # Local fallback: F5-TTS
+    # Local F5-TTS (works on CPU)
     ref_audio = "/tmp/speaker_reference.wav"
     ref_text = req.voice_id or ""
 

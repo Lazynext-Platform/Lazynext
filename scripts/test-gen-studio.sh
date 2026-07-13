@@ -83,8 +83,8 @@ test_endpoint "Upscale /upscale" POST "/upscale" \
 	'{"video_id":"test_vid","scale":2}' \
 	'"503"\|"success"'
 
-# Overdub (CosyVoice)
-test_endpoint "CosyVoice /overdub" POST "/overdub" \
+# Overdub (F5-TTS)
+test_endpoint "F5-TTS /overdub" POST "/overdub" \
 	'{"text":"test","voice_id":"default"}' \
 	'"503"\|"success"'
 

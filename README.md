@@ -181,7 +181,7 @@ The integrated LLM orchestrator understands your timeline. It accepts natural la
 
 - **Transcript-driven editing** — Delete filler words by editing text; the timeline follows.
 - **Auto B-roll** — "Find B-roll for this segment" pulls from stock or generates via AI.
-- **One-click dubbing** — Translate and voice-clone into any language (Edge TTS + CosyVoice 3).
+- **One-click dubbing** — Translate and voice-clone into any language (Edge TTS + F5-TTS).
 - **Silence removal** — Detect and strip dead air automatically.
 - **Smart reframe** — AI subject tracking auto-crops 16:9 to 9:16 for social.
 - **Color match** — Match the palette of one clip to a reference frame or image.

@@ -9,8 +9,6 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # ── Environment ────────────────────────────────────────────────────
 export BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-dev-secret-change-in-prod}"
 export FAL_KEY="${FAL_KEY:-}"
-export COSYVOICE_MODEL_DIR="${COSYVOICE_MODEL_DIR:-pretrained_models/Fun-CosyVoice3-0.5B-2512}"
-export COSYVOICE_FP16="${COSYVOICE_FP16:-1}"
 export EDGE_TTS_VOICE="${EDGE_TTS_VOICE:-en-US-AvaNeural}"
 export PYTHONUNBUFFERED=1
 
@@ -35,7 +33,6 @@ echo "  Lazynext Generative Studio"
 echo "  http://localhost:8001"
 echo "  Edge TTS: $(python3 -c 'import edge_tts; print("READY")' 2>/dev/null || echo 'MISSING')"
 echo "  Fal.ai:   $([ -n "$FAL_KEY" ] && echo 'CONFIGURED' || echo 'NOT SET')"
-echo "  CosyVoice: $([ -d "$COSYVOICE_MODEL_DIR" ] && echo 'INSTALLED' || echo 'NOT FOUND')"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 cd "$PROJECT_ROOT/services/generative-studio"
