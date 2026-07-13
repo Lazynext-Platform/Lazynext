@@ -3,7 +3,7 @@ Lazynext Video Generation — Modal GPU Endpoint (CogVideoX-2B)
 
 Deploy: modal deploy scripts/modal-video-gen.py
 
-Modal gives $30/month free credits. CogVideoX-2B on A10G GPU.
+Modal gives $30/month free credits. CogVideoX-5B on A10G GPU.
 ~30-45s per video, confirmed working with diffusers.
 """
 
@@ -46,7 +46,7 @@ def generate_video(prompt: str = "a beautiful sunset",
     from diffusers import CogVideoXPipeline
     from diffusers.utils import export_to_video
 
-    model_id = "THUDM/CogVideoX-2b"
+    model_id = "THUDM/CogVideoX-5b"
 
     print(f"[Modal] Loading {model_id}...")
     t0 = time.time()
@@ -58,6 +58,7 @@ def generate_video(prompt: str = "a beautiful sunset",
     pipe.enable_model_cpu_offload()
     pipe.vae.enable_slicing()
     pipe.vae.enable_tiling()
+    pipe.enable_sequential_cpu_offload()
 
     load_time = time.time() - t0
     print(f"[Modal] Loaded in {load_time:.1f}s")

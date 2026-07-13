@@ -1,8 +1,8 @@
 """
-Video generation services: text-to-video via Modal (CogVideoX-2B),
+Video generation services: text-to-video via Modal (CogVideoX-5B),
 upscaling, style transfer, generative fill, and AI avatar generation.
 
-Modal + CogVideoX-2B: $30/mo free credits, ~35s gen, 5 concurrent, A10G GPU.
+Modal + CogVideoX-5B: $30/mo free credits, ~2 min gen, 5 concurrent, A10G GPU.
 RealESRGAN for upscaling, Edge TTS for avatars, OpenCV for effects.
 """
 
