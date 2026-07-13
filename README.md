@@ -181,7 +181,7 @@ The integrated LLM orchestrator understands your timeline. It accepts natural la
 
 - **Transcript-driven editing** — Delete filler words by editing text; the timeline follows.
 - **Auto B-roll** — "Find B-roll for this segment" pulls from stock or generates via AI.
-- **One-click dubbing** — Translate and voice-clone into any language (ElevenLabs integration).
+- **One-click dubbing** — Translate and voice-clone into any language (Edge TTS + CosyVoice 3).
 - **Silence removal** — Detect and strip dead air automatically.
 - **Smart reframe** — AI subject tracking auto-crops 16:9 to 9:16 for social.
 - **Color match** — Match the palette of one clip to a reference frame or image.
@@ -301,8 +301,7 @@ See `.env.example` for the full list. Key variables:
 | `LLM_PROVIDER` | No | `openai`, `anthropic`, `gemini`, or `ollama` |
 | `OPENAI_API_KEY` | No | Whisper + GPT-4o features |
 | `ANTHROPIC_API_KEY` | No | Claude-powered Chronos |
-| `REPLICATE_API_TOKEN` | No | AI video generation |
-| `ELEVENLABS_API_KEY` | No | AI dubbing |
+| `FAL_KEY` | No | Kling 3.0 video generation |
 | `NEXT_PUBLIC_*_URL` | No | Microservice URLs (defaults to localhost) |
 | `UPSTASH_REDIS_URL` | No | Rate limiting (required in production) |
 | `STRIPE_SECRET_KEY` | No | Payments |

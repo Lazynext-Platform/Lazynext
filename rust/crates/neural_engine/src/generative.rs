@@ -1,266 +1,292 @@
 //! Generative AI pipeline for video and audio synthesis via external APIs.
 //!
-//! Provides models for text-to-video generation (Replicate / Stable Video Diffusion)
-//! and text-to-speech synthesis (ElevenLabs), with graceful fallback when API keys
-//! are not configured.
+//! Provides models for text-to-video generation (Fal.ai + Kling 3.0)
+//! and text-to-speech synthesis (delegated to generative-studio service
+//! which uses Edge TTS — free, unlimited, 300+ voices).
 
 use serde::{Deserialize, Serialize};
 
 /// Configuration for AI-powered text-to-video generation.
 ///
-/// Sent to the Replicate API (Stable Video Diffusion) to produce
-/// short video clips from natural-language prompts.
+/// Sent to the Fal.ai API (Kling 3.0) to produce short video clips
+/// from natural-language prompts.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VideoGenerationOptions {
-    /// Natural-language prompt describing the desired video content.
-    pub prompt: String,
-    /// Output video width in pixels.
-    pub width: u32,
-    /// Output video height in pixels.
-    pub height: u32,
-    /// Number of frames to generate.
-    pub num_frames: u32,
-    /// Playback frame rate of the generated video.
-    pub fps: u32,
+	/// Natural-language prompt describing the desired video content.
+	pub prompt: String,
+	/// Output video width in pixels.
+	pub width: u32,
+	/// Output video height in pixels.
+	pub height: u32,
+	/// Number of frames to generate.
+	pub num_frames: u32,
+	/// Playback frame rate of the generated video.
+	pub fps: u32,
 }
 
 /// Configuration for AI-powered text-to-speech synthesis.
 ///
-/// Sent to the ElevenLabs API to convert text into natural-sounding speech.
+/// Delegated to the generative-studio service which uses Edge TTS
+/// (Microsoft) — free, unlimited, no API key required.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioGenerationOptions {
-    /// The text to convert into speech.
-    pub text: String,
-    /// Optional ElevenLabs voice ID; defaults to a built-in voice if `None`.
-    pub voice_id: Option<String>,
+	/// The text to convert into speech.
+	pub text: String,
+	/// Optional voice ID; defaults to a built-in voice if `None`.
+	pub voice_id: Option<String>,
 }
 
 /// Generative AI model that orchestrates text-to-video and text-to-speech
-/// generation via external APIs (Replicate, ElevenLabs).
+/// generation via external APIs (Fal.ai Kling, Edge TTS via generative-studio).
 ///
-/// Gracefully degrades when API keys are not configured by returning
+/// Gracefully degrades when services are not reachable by returning
 /// descriptive errors instead of panicking.
 pub struct GenerativeModel {
-    /// Whether the model has been initialized.
-    pub is_loaded: bool,
-    /// Replicate API token, if configured via environment.
-    api_key: Option<String>,
+	/// Whether the model has been initialized.
+	pub is_loaded: bool,
+	/// Fal.ai API key, if configured via environment.
+	fal_key: Option<String>,
 }
 
 impl Default for GenerativeModel {
-    // Returns a new generative AI model.
-    fn default() -> Self {
-        Self::new()
-    }
+	fn default() -> Self {
+		Self::new()
+	}
 }
 
 impl GenerativeModel {
-    /// Creates a new generative AI model instance.
-    ///
-    /// Reads the `REPLICATE_API_TOKEN` environment variable at construction
-    /// time to determine whether API calls can be made.
-    pub fn new() -> Self {
-        let api_key = std::env::var("REPLICATE_API_TOKEN").ok();
-        println!(
-            "[NeuralEngine] Initializing Generative AI Core. API Key present: {}",
-            api_key.is_some()
-        );
-        Self {
-            is_loaded: true,
-            api_key,
-        }
-    }
+	/// Creates a new generative AI model instance.
+	///
+	/// Reads the `FAL_KEY` environment variable at construction time
+	/// to determine whether Fal.ai API calls can be made.
+	/// Falls back to `FAL_API_KEY` as an alias.
+	pub fn new() -> Self {
+		let fal_key = std::env::var("FAL_KEY")
+			.ok()
+			.or_else(|| std::env::var("FAL_API_KEY").ok());
+		println!(
+			"[NeuralEngine] Initializing Generative AI Core. Fal.ai Key present: {}",
+			fal_key.is_some()
+		);
+		Self {
+			is_loaded: true,
+			fal_key,
+		}
+	}
 
-    /// Generates a video using the Replicate API (Stable Video Diffusion).
-    pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
-        let Some(api_key) = &self.api_key else {
-            println!(
-                "[NeuralEngine] REPLICATE_API_TOKEN not configured — returning empty generation result."
-            );
-            #[cfg(not(target_arch = "wasm32"))]
-            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
-            return Err(
-                "REPLICATE_API_TOKEN not set. Configure an API key to enable AI video generation."
-                    .to_string(),
-            );
-        };
+	/// Returns the configured Fal.ai Kling model ID.
+	/// Configurable via `FAL_VIDEO_MODEL` env var; defaults to Kling 3.0.
+	fn video_model() -> String {
+		std::env::var("FAL_VIDEO_MODEL").unwrap_or_else(|_| {
+			"fal-ai/kling-video/o3/standard/text-to-video".to_string()
+		})
+	}
 
-        println!(
-            "[NeuralEngine] Sending request to Replicate for video: '{}'",
-            options.prompt
-        );
+	/// Generates a video using the Fal.ai Kling API.
+	///
+	/// Submits a text-to-video generation job to Fal.ai's queue and polls
+	/// until the video is ready, then downloads and saves it locally.
+	pub async fn generate_video(&self, options: &VideoGenerationOptions) -> Result<String, String> {
+		let Some(fal_key) = &self.fal_key else {
+			println!(
+				"[NeuralEngine] FAL_KEY not configured — returning empty generation result."
+			);
+			#[cfg(not(target_arch = "wasm32"))]
+			tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+			return Err(
+				"FAL_KEY not set. Configure an API key to enable AI video generation."
+					.to_string(),
+			);
+		};
 
-        let client = reqwest::Client::new();
+		let model_id = Self::video_model();
+		let queue_url = format!("https://queue.fal.run/{}", model_id);
 
-        let payload = serde_json::json!({
-            "version": "3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438", // An Example SVD model
-            "input": {
-                "prompt": options.prompt,
-                "frames": options.num_frames,
-                "fps": options.fps
-            }
-        });
+		println!(
+			"[NeuralEngine] Sending request to Fal.ai ({}) for video: '{}'",
+			model_id, options.prompt
+		);
 
-        let res = client
-            .post("https://api.replicate.com/v1/predictions")
-            .header("Authorization", format!("Token {}", api_key))
-            .json(&payload)
-            .send()
-            .await
-            .map_err(|e| format!("HTTP request failed: {}", e))?;
+		let client = reqwest::Client::new();
 
-        if !res.status().is_success() {
-            return Err(format!("Replicate API returned error: {}", res.status()));
-        }
+		let duration = (options.num_frames as f64 / options.fps as f64).ceil() as u32;
+		let payload = serde_json::json!({
+			"prompt": options.prompt,
+			"duration": duration.to_string(),
+			"aspect_ratio": "16:9"
+		});
 
-        let body: serde_json::Value = res
-            .json()
-            .await
-            .map_err(|e| format!("Failed to parse JSON: {}", e))?;
+		let res = client
+			.post(&queue_url)
+			.header("Authorization", format!("Key {}", fal_key))
+			.header("Content-Type", "application/json")
+			.json(&payload)
+			.send()
+			.await
+			.map_err(|e| format!("Fal.ai request failed: {}", e))?;
 
-        let get_url = body["urls"]["get"].as_str().unwrap_or("");
-        if get_url.is_empty() {
-            return Err("Replicate API response missing urls.get".to_string());
-        }
+		if !res.status().is_success() {
+			let status = res.status();
+			let body = res.text().await.unwrap_or_default();
+			return Err(format!("Fal.ai API returned HTTP {}: {}", status, body));
+		}
 
-        println!("[NeuralEngine] Replicate prediction started. Polling status...");
+		let body: serde_json::Value = res
+			.json()
+			.await
+			.map_err(|e| format!("Failed to parse Fal.ai response: {}", e))?;
 
-        loop {
-            #[cfg(not(target_arch = "wasm32"))]
-            tokio::time::sleep(tokio::time::Duration::from_secs(3)).await;
+		let request_id = body["request_id"].as_str().unwrap_or("");
+		if request_id.is_empty() {
+			return Err("Fal.ai response missing request_id".to_string());
+		}
 
-            let poll_res = client
-                .get(get_url)
-                .header("Authorization", format!("Token {}", api_key))
-                .send()
-                .await
-                .map_err(|e| format!("Poll request failed: {}", e))?;
+		println!(
+			"[NeuralEngine] Fal.ai job submitted (request_id: {}). Polling status...",
+			request_id
+		);
 
-            let poll_body: serde_json::Value = poll_res
-                .json()
-                .await
-                .map_err(|e| format!("Failed to parse poll JSON: {}", e))?;
+		let status_url = format!(
+			"https://queue.fal.run/{}/requests/{}/status",
+			model_id, request_id
+		);
 
-            let status = poll_body["status"].as_str().unwrap_or("unknown");
+		loop {
+			#[cfg(not(target_arch = "wasm32"))]
+			tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
-            if status == "succeeded" {
-                let output = &poll_body["output"];
-                let output_url = if output.is_array() {
-                    output[0].as_str().unwrap_or("")
-                } else if output.is_string() {
-                    output.as_str().unwrap_or("")
-                } else {
-                    return Err("Failed to parse output URL from Replicate response".to_string());
-                };
+			let poll_res = client
+				.get(&status_url)
+				.header("Authorization", format!("Key {}", fal_key))
+				.send()
+				.await
+				.map_err(|e| format!("Fal.ai status poll failed: {}", e))?;
 
-                if output_url.is_empty() {
-                    return Err("Empty output URL returned".to_string());
-                }
+			let poll_body: serde_json::Value = poll_res
+				.json()
+				.await
+				.map_err(|e| format!("Failed to parse Fal.ai status JSON: {}", e))?;
 
-                println!(
-                    "[NeuralEngine] Video generation succeeded. Downloading from {}...",
-                    output_url
-                );
+			let status = poll_body["status"].as_str().unwrap_or("unknown");
 
-                let video_res = client
-                    .get(output_url)
-                    .send()
-                    .await
-                    .map_err(|e| format!("Failed to download generated video: {}", e))?;
+			if status == "COMPLETED" {
+				let video = &poll_body["video"];
+				let output_url = video["url"].as_str().unwrap_or("");
 
-                let video_bytes = video_res
-                    .bytes()
-                    .await
-                    .map_err(|e| format!("Failed to read video bytes: {}", e))?;
+				if output_url.is_empty() {
+					return Err("Empty video URL in Fal.ai response".to_string());
+				}
 
-                let prediction_id = poll_body["id"].as_str().unwrap_or("unknown_id");
-                let output_filename = format!(
-                    "/tmp/generated_{}_{}.mp4",
-                    options.prompt.replace(" ", "_").to_lowercase(),
-                    prediction_id
-                );
+				println!(
+					"[NeuralEngine] Video generation succeeded. Downloading from {}...",
+					output_url
+				);
 
-                std::fs::write(&output_filename, &video_bytes)
-                    .map_err(|e| format!("Failed to write video to disk: {}", e))?;
+				let video_res = client
+					.get(output_url)
+					.send()
+					.await
+					.map_err(|e| format!("Failed to download generated video: {}", e))?;
 
-                return Ok(output_filename);
-            } else if status == "failed" || status == "canceled" {
-                return Err(format!(
-                    "Prediction {}: {}",
-                    status,
-                    poll_body["error"].as_str().unwrap_or("unknown error")
-                ));
-            }
+				let video_bytes = video_res
+					.bytes()
+					.await
+					.map_err(|e| format!("Failed to read video bytes: {}", e))?;
 
-            println!("[NeuralEngine] Prediction status: {}", status);
-        }
-    }
+				let safe_prompt = options
+					.prompt
+					.chars()
+					.take(60)
+					.map(|c| if c.is_alphanumeric() || c == ' ' { c } else { '_' })
+					.collect::<String>()
+					.trim()
+					.replace(' ', "_");
+				let output_filename = format!("/tmp/generated_{}_{}.mp4", safe_prompt, request_id);
 
-    /// Generates text-to-speech using Gemini (Google Cloud Text-to-Speech).
-    /// Falls back to ElevenLabs if GEMINI_API_KEY is not configured.
-    pub async fn generate_tts(&self, options: &AudioGenerationOptions) -> Result<String, String> {
-        let gemini_key = std::env::var("GEMINI_API_KEY").ok();
+				std::fs::write(&output_filename, &video_bytes)
+					.map_err(|e| format!("Failed to write video to disk: {}", e))?;
 
-        if let Some(key) = gemini_key {
-            let tts_payload = serde_json::json!({
-                "input": { "text": &options.text },
-                "voice": { "languageCode": "en-US", "ssmlGender": "NEUTRAL" },
-                "audioConfig": { "audioEncoding": "MP3" }
-            });
+				return Ok(output_filename);
+			} else if status == "FAILED" || status == "CANCELLED" {
+				let error_msg = poll_body["error"]
+					.as_str()
+					.unwrap_or("unknown error");
+				return Err(format!("Fal.ai job {}: {}", status, error_msg));
+			}
 
-            let url = format!(
-                "https://texttospeech.googleapis.com/v1/text:synthesize?key={}",
-                key
-            );
+			println!("[NeuralEngine] Fal.ai job status: {}", status);
+		}
+	}
 
-            let client = reqwest::Client::new();
-            match client.post(&url).json(&tts_payload).send().await {
-                Ok(res) if res.status().is_success() => {
-                    if let Ok(data) = res.json::<serde_json::Value>().await
-                        && let Some(audio_b64) = data["audioContent"].as_str()
-                    {
-                        // Decode base64 manually (no external crate needed)
-                        let audio_bytes = decode_base64(audio_b64)
-                            .map_err(|e| format!("Base64 decode failed: {}", e))?;
-                        let output = "/tmp/tts_output_gemini.mp3".to_string();
-                        std::fs::write(&output, &audio_bytes)
-                            .map_err(|e| format!("Failed to write audio: {}", e))?;
-                        return Ok(output);
-                    }
-                }
-                Ok(res) => {
-                    println!("[NeuralEngine] Gemini TTS error: HTTP {}", res.status());
-                }
-                Err(e) => {
-                    println!("[NeuralEngine] Gemini TTS request failed: {}", e);
-                }
-            }
-        }
+	/// Generates text-to-speech via the generative-studio service (Edge TTS).
+	///
+	/// Delegates to the Python generative-studio service which uses
+	/// Microsoft Edge TTS — free, unlimited, 300+ neural voices across
+	/// 100+ languages. No API key required.
+	pub async fn generate_tts(&self, options: &AudioGenerationOptions) -> Result<String, String> {
+		let tts_url = std::env::var("GENERATIVE_STUDIO_URL")
+			.unwrap_or_else(|_| "http://localhost:8001".to_string());
 
-        Err("TTS unavailable — configure GEMINI_API_KEY".to_string())
-    }
-}
+		let tts_payload = serde_json::json!({
+			"clip_id": "rust_tts",
+			"target_language": "en",
+			"text_to_dub": &options.text,
+		});
 
-/// Decode a base64 string to bytes without external crate.
-fn decode_base64(input: &str) -> Result<Vec<u8>, String> {
-    const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    let input = input.trim_end_matches('=');
-    let mut output = Vec::with_capacity(input.len() * 3 / 4);
-    let mut buffer: u32 = 0;
-    let mut bits = 0;
+		let client = reqwest::Client::new();
+		let res = client
+			.post(format!("{}/dub", tts_url))
+			.json(&tts_payload)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to reach generative-studio TTS service: {}", e))?;
 
-    for c in input.chars() {
-        let val = CHARS
-            .iter()
-            .position(|&x| x as char == c)
-            .ok_or_else(|| format!("Invalid base64 char: {}", c))? as u32;
-        buffer = (buffer << 6) | val;
-        bits += 6;
-        if bits >= 8 {
-            bits -= 8;
-            output.push((buffer >> bits) as u8);
-        }
-    }
+		if !res.status().is_success() {
+			let status = res.status();
+			let body = res.text().await.unwrap_or_default();
+			return Err(format!(
+				"TTS service returned HTTP {}: {}. Ensure generative-studio is running and edge-tts is installed.",
+				status, body
+			));
+		}
 
-    Ok(output)
+		let data: serde_json::Value = res
+			.json()
+			.await
+			.map_err(|e| format!("Failed to parse TTS response: {}", e))?;
+
+		if data["success"].as_bool() != Some(true) {
+			let detail = data["detail"].as_str().unwrap_or("unknown error");
+			return Err(format!("TTS generation failed: {}", detail));
+		}
+
+		let audio_url = data["audio_url"].as_str().unwrap_or("");
+		if audio_url.is_empty() {
+			return Err("Empty audio URL in TTS response".to_string());
+		}
+
+		if let Some(local_path) = audio_url.strip_prefix("file://") {
+			let output = "/tmp/tts_output_edge.mp3".to_string();
+			std::fs::copy(local_path, &output)
+				.map_err(|e| format!("Failed to copy audio file: {}", e))?;
+			return Ok(output);
+		}
+
+		let audio_res = client
+			.get(audio_url)
+			.send()
+			.await
+			.map_err(|e| format!("Failed to download audio: {}", e))?;
+
+		let audio_bytes = audio_res
+			.bytes()
+			.await
+			.map_err(|e| format!("Failed to read audio bytes: {}", e))?;
+
+		let output = "/tmp/tts_output_edge.mp3".to_string();
+		std::fs::write(&output, &audio_bytes)
+			.map_err(|e| format!("Failed to write audio file: {}", e))?;
+
+		Ok(output)
+	}
 }

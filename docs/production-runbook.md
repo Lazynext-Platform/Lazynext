@@ -451,8 +451,7 @@ curl -f http://localhost:3000/api/health
 | `lazynext_openai_api_key` | ai-agents, pre-processing | OpenAI API key |
 | `lazynext_anthropic_api_key` | ai-agents | Anthropic API key |
 | `lazynext_gemini_api_key` | ai-agents | Gemini API key |
-| `lazynext_elevenlabs_api_key` | generative-studio | ElevenLabs API key |
-| `lazynext_replicate_api_token` | pre-processing, generative-studio | Replicate API token |
+| `lazynext_fal_key` | pre-processing, generative-studio | Fal.ai API key |
 | `lazynext_freesound_client_id` | web | Freesound client ID |
 | `lazynext_freesound_api_key` | web | Freesound API key |
 | `lazynext_marble_workspace_key` | web | Marble CMS workspace key |
@@ -477,8 +476,7 @@ echo "${RESEND_API_KEY}" | docker secret create lazynext_resend_api_key -
 echo "${OPENAI_API_KEY}" | docker secret create lazynext_openai_api_key -
 echo "${ANTHROPIC_API_KEY}" | docker secret create lazynext_anthropic_api_key -
 echo "${GEMINI_API_KEY}" | docker secret create lazynext_gemini_api_key -
-echo "${ELEVENLABS_API_KEY}" | docker secret create lazynext_elevenlabs_api_key -
-echo "${REPLICATE_API_TOKEN}" | docker secret create lazynext_replicate_api_token -
+echo "${FAL_KEY}" | docker secret create lazynext_fal_key -
 echo "${CF_DNS_API_TOKEN}" | docker secret create cloudflare_api_token -
 
 # Verify secrets exist

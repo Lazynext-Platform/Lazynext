@@ -20,7 +20,7 @@ better_auth_secret = "REPLACE_ME_64_CHAR_BETTER_AUTH_SECRET_MINIMUM_64_CHARACTER
 openai_api_key      = "sk-placeholder-openai-key-for-production"
 anthropic_api_key   = "sk-ant-placeholder-anthropic-key-for-production"
 gemini_api_key      = "placeholder-gemini-key"
-replicate_api_token = "r8_placeholder-replicate-token"
+fal_key             = "fk_placeholder-fal-key"
 elevenlabs_api_key  = "placeholder-elevenlabs-key"
 resend_api_key      = "re_placeholder"
 

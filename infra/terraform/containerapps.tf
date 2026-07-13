@@ -404,8 +404,8 @@ resource "azurerm_container_app" "pre_processing" {
         secret_name = "openai-api-key"
       }
       env {
-        name        = "REPLICATE_API_TOKEN"
-        secret_name = "replicate-api-token"
+        name        = "FAL_KEY"
+        secret_name = "fal-key"
       }
     }
 
@@ -430,8 +430,8 @@ resource "azurerm_container_app" "pre_processing" {
     value = var.openai_api_key
   }
   secret {
-    name  = "replicate-api-token"
-    value = var.replicate_api_token
+    name  = "fal-key"
+    value = var.fal_key
   }
 
   secret {
@@ -490,12 +490,8 @@ resource "azurerm_container_app" "generative_studio" {
         value = "/tmp/huggingface"
       }
       env {
-        name        = "REPLICATE_API_TOKEN"
-        secret_name = "replicate-api-token"
-      }
-      env {
-        name        = "ELEVENLABS_API_KEY"
-        secret_name = "elevenlabs-api-key"
+        name        = "FAL_KEY"
+        secret_name = "fal-key"
       }
     }
 
@@ -516,12 +512,8 @@ resource "azurerm_container_app" "generative_studio" {
   }
 
   secret {
-    name  = "replicate-api-token"
-    value = var.replicate_api_token
-  }
-  secret {
-    name  = "elevenlabs-api-key"
-    value = var.elevenlabs_api_key
+    name  = "fal-key"
+    value = var.fal_key
   }
 
   secret {

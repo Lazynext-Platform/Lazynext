@@ -35,7 +35,7 @@ rotoscoping, video generation, dubbing, etc.) exceeds 5 minutes over a 1-hour wi
   ```
   Scale up if needed: `az aks nodepool scale --cluster-name lazynext-aks-prod --name gpunp --node-count 2 --resource-group lazynext-rg-prod`
 
-### 2. External API rate limiting (Replicate, ElevenLabs, OpenAI)
+### 2. External API rate limiting (Fal.ai, Edge TTS)
 - **Symptom:** 429 HTTP status codes in logs, latency spikes
 - **Fix:** Check API dashboard on provider's website. Consider enabling
   fallback to local models if API is consistently rate-limited.

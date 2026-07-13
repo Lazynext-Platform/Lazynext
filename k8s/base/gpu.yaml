@@ -291,17 +291,11 @@ spec:
               value: "/models/huggingface"
             - name: TRANSFORMERS_CACHE
               value: "/models/huggingface"
-            - name: REPLICATE_API_TOKEN
+            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: REPLICATE_API_TOKEN
-                  optional: true
-            - name: ELEVENLABS_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: lazynext-secrets
-                  key: ELEVENLABS_API_KEY
+                  key: FAL_KEY
                   optional: true
           livenessProbe:
             httpGet:

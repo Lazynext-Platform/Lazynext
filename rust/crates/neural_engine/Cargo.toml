@@ -1,6 +1,6 @@
 [package]
 name = "neural_engine"
-description = "Neural engine: ONNX inference, generative AI (Replicate/ElevenLabs), graceful cloud fallback"
+description = "Neural engine: ONNX inference, generative AI (Fal.ai Kling/Gemini TTS), graceful cloud fallback"
 version = "0.1.0"
 edition = "2024"
 

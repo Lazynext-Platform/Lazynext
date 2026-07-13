@@ -408,7 +408,7 @@ Generate media content via AI (video, image, audio).
 
 ### `POST /api/v1/ai/tts`
 
-Text-to-speech using ElevenLabs.
+Text-to-speech using Edge TTS.
 
 **Request**:
 ```json
@@ -707,7 +707,7 @@ Generate video from text/image/video using Stable Video Diffusion.
 
 ### `POST /dub`
 
-Dub audio via ElevenLabs with optional lip-sync.
+Dub audio via Edge TTS with optional lip-sync.
 
 **Request**:
 ```json

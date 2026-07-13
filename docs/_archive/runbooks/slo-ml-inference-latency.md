@@ -267,8 +267,8 @@ curl -s http://localhost:8001/admin/metrics | jq '.requests_by_type'
 3. **Enable model offloading**: Set `STABLE_DIFFUSION_ENABLE_MODEL_CPU_OFFLOAD=true` to move unused model components to CPU RAM between inference calls.
 4. **Add a VRAM guard**: If VRAM usage exceeds 90%, reject new inference requests with HTTP 429 (too many requests) until VRAM frees up, rather than letting requests OOM.
 
-### Tactic E — External API degradation (ElevenLabs, HuggingFace)
-1. **Enable local fallback**: Set `ELEVENLABS_FALLBACK=local` to use a locally cached TTS model when the API is slow or unavailable.
+### Tactic E — External API degradation (Gemini TTS, HuggingFace)
+1. **Enable local fallback**: Use locally cached Coqui XTTS v2 model when the API is slow or unavailable.
 2. **Cache model weights**: Ensure all models are pre-cached in the Docker image or on a persistent volume, so HuggingFace outages don't block inference.
 3. **Circuit breaker**: The service should already trip a circuit breaker after 5 consecutive failures to an external API, serving stale results or returning a degraded-mode response.
 

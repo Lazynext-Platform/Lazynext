@@ -96,8 +96,8 @@ The MCP server exposes all editing capabilities as callable tools:
 
 | Tool | Description |
 |------|-------------|
-| `ai_generate_broll` | Generate B-roll footage via AI (Replicate/runway) |
-| `ai_generate_voiceover` | Generate AI voiceover (ElevenLabs) |
+| `ai_generate_broll` | Generate B-roll footage via AI (Fal.ai Kling) |
+| `ai_generate_voiceover` | Generate AI voiceover (Edge TTS) |
 | `ai_filler_removal` | Remove filler words (um, uh, like) from audio |
 | `ai_auto_reframe` | Auto-reframe video for different aspect ratios |
 | `ai_caption` | Generate styled captions from transcript

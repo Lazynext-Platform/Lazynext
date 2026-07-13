@@ -133,7 +133,7 @@ User (type/speak) → Lazynext AI Agent Copilot → LLM (Anthropic/OpenAI/Gemini
 | 3000 | Web App | TypeScript | Next.js 16 frontend + API routes |
 | 3001 | Grafana | — | Observability dashboards |
 | 8000 | Pre-Processing | Python | Whisper, SAM2, NeRF |
-| 8001 | Generative Studio | Python | Stable Diffusion, ElevenLabs, Demucs |
+| 8001 | Generative Studio | Python | Kling 3.0, Edge TTS, CosyVoice 3, Demucs |
 | 8002 | AI Agents | TypeScript | Lazynext AI Agent Copilot, LLM orchestration |
 | 8003 | Render Service | TypeScript | FFmpeg render farm |
 | 8004 | Collab Server | Rust | CRDT sync, WebRTC signaling |

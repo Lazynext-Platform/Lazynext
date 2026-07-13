@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class DiffusionRequest(BaseModel):
-    """Stable Video Diffusion generation request (via Replicate)."""
+    """Text-to-video generation request (via Fal.ai + Kling 3.0)."""
     prompt: str = Field(..., min_length=1, max_length=4000)
     width: int = Field(default=1024, ge=64, le=2048, multiple_of=8)
     height: int = Field(default=576, ge=64, le=2048, multiple_of=8)
@@ -12,14 +12,14 @@ class DiffusionRequest(BaseModel):
 
 
 class DubRequest(BaseModel):
-    """AI dubbing: generate speech in a target language for a clip."""
+    """AI dubbing: generate speech in a target language via Edge TTS."""
     clip_id: str = Field(..., min_length=1, max_length=255)
     target_language: str = Field(..., min_length=1, max_length=50)
     text_to_dub: str = Field(default="This is a placeholder text to dub.", max_length=5000)
 
 
 class OverdubRequest(BaseModel):
-    """Voice-cloned overdubbing: replace or insert speech segments."""
+    """Voice-cloned overdubbing: replace or insert speech via CosyVoice 3."""
     text: str = Field(..., min_length=1, max_length=5000)
     voice_id: str = Field(default="default_voice", min_length=1, max_length=100)
     original_audio_url: str | None = Field(default=None, max_length=4096)
@@ -43,7 +43,7 @@ class GenerativeFillRequest(BaseModel):
 
 
 class AvatarRequest(BaseModel):
-    """Generate a lip-synced digital human avatar from a text script."""
+    """Generate a lip-synced digital human avatar from a text script using Edge TTS."""
     script: str = Field(..., min_length=1, max_length=10000)
     voice_id: str = Field(default="default_avatar_voice", min_length=1, max_length=100)
     avatar_model: str = Field(default="realistic_human_1", min_length=1, max_length=100)

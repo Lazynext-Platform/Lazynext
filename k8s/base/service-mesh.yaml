@@ -816,18 +816,19 @@ spec:
   resolution: DNS
 
 ---
-# Allow mesh workloads to reach Replicate API for ML inference
+# Allow mesh workloads to reach Fal.ai API for Kling video generation
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata:
-  name: replicate-api
+  name: fal-api
   namespace: lazynext
   labels:
     app.kubernetes.io/part-of: lazynext
     app.kubernetes.io/managed-by: kustomize
 spec:
   hosts:
-    - api.replicate.com
+    - api.fal.run
+    - queue.fal.run
   ports:
     - number: 443
       name: https
@@ -856,28 +857,8 @@ spec:
       protocol: HTTPS
   location: MESH_EXTERNAL
   resolution: DNS
-
 ---
-# Allow mesh workloads to reach ElevenLabs for voice synthesis
-apiVersion: networking.istio.io/v1beta1
-kind: ServiceEntry
-metadata:
-  name: elevenlabs-api
-  namespace: lazynext
-  labels:
-    app.kubernetes.io/part-of: lazynext
-    app.kubernetes.io/managed-by: kustomize
-spec:
-  hosts:
-    - api.elevenlabs.io
-  ports:
-    - number: 443
-      name: https
-      protocol: HTTPS
-  location: MESH_EXTERNAL
-  resolution: DNS
-
----
+#
 # Allow outbound to Azure services (Blob Storage, Key Vault, ACR)
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry

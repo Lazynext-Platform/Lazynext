@@ -171,8 +171,7 @@ bun run dev
 | `LLM_PROVIDER` | No | — | `openai`, `anthropic`, or `gemini` |
 | `OPENAI_API_KEY` | No | — | Whisper + GPT-4o features |
 | `ANTHROPIC_API_KEY` | No | — | Claude-powered Lazynext AI Agent |
-| `REPLICATE_API_TOKEN` | No | — | AI video generation |
-| `ELEVENLABS_API_KEY` | No | — | AI dubbing |
+| `FAL_KEY` | No | — | Kling 3.0 video generation |
 | `NEXT_PUBLIC_*_URL` | No | localhost | Microservice URLs |
 | `UPSTASH_REDIS_URL` | No | — | Rate limiting (required in prod) |
 | `STRIPE_SECRET_KEY` | No | — | Payments |

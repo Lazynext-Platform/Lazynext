@@ -168,12 +168,9 @@ spec:
     - secretKey: GEMINI_API_KEY
       remoteRef:
         key: gemini--api--key
-    - secretKey: REPLICATE_API_TOKEN
+    - secretKey: FAL_KEY
       remoteRef:
-        key: replicate--api--token
-    - secretKey: ELEVENLABS_API_KEY
-      remoteRef:
-        key: elevenlabs--api--key
+        key: fal--key
     - secretKey: DODO_API_KEY
       remoteRef:
         key: dodo--api--key

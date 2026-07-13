@@ -1,15 +1,14 @@
 """
-Audio generation services: dubbing via Gemini TTS, voice-cloned overdubbing via ElevenLabs, and stem separation.
+Audio generation services: dubbing via Edge TTS, voice-cloned overdubbing via F5-TTS, and stem separation.
 
-Uses Gemini (Google Cloud Text-to-Speech) for standard dubbing with graceful fallback.
-ElevenLabs is kept only for voice cloning (overdub).
+Uses Edge TTS (Microsoft) for standard dubbing — free, unlimited, 300+ voices across 100+ languages.
+F5-TTS for zero-shot voice cloning — MIT licensed, 300M params, CPU-capable (~1-2 min).
 """
 
 import asyncio
 import os
 import re
 import sys
-import base64
 import httpx
 from fastapi import HTTPException
 from src.models import DubRequest, OverdubRequest, StemSplitRequest
@@ -17,78 +16,54 @@ from src.models import DubRequest, OverdubRequest, StemSplitRequest
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from demucs_pipeline import DemucsPipeline, DemucsConfig
 
-GEMINI_TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize"
-
 
 def _safe_slug(value: str, fallback: str = "output") -> str:
-    """Sanitize a user-supplied identifier for safe use in a filename.
-
-    Strips path separators and any character outside [A-Za-z0-9_-] so values
-    like clip ids or language codes cannot escape the intended directory.
-    """
+    """Sanitize a user-supplied identifier for safe use in a filename."""
     slug = re.sub(r"[^A-Za-z0-9_-]", "_", (value or "").strip())
     slug = slug.strip("._")
     return slug or fallback
 
 
-async def _gemini_tts(text: str, language: str = "en-US") -> bytes:
-    """Generate speech using Gemini (Google Cloud Text-to-Speech)."""
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
+async def _edge_tts(text: str, language: str = "en-US") -> bytes:
+    """Generate speech using Microsoft Edge TTS — free, unlimited, 300+ voices.
+
+    Uses the edge-tts library. No API key required.
+    """
+    try:
+        import edge_tts
+    except ImportError:
         raise HTTPException(
             status_code=503,
-            detail="Gemini API key not configured",
+            detail="Edge TTS not installed. Run: pip install edge-tts",
         )
 
     language_map = {
         "en": "en-US", "hi": "hi-IN", "es": "es-ES", "fr": "fr-FR",
         "de": "de-DE", "ja": "ja-JP", "ko": "ko-KR", "pt": "pt-BR",
-        "zh": "cmn-CN", "ar": "ar-XA", "ru": "ru-RU",
+        "zh": "zh-CN", "ar": "ar-SA", "ru": "ru-RU",
     }
     lang_code = language_map.get(language, "en-US")
+    voice = os.getenv("EDGE_TTS_VOICE", f"{lang_code}-AvaNeural")
 
-    async with httpx.AsyncClient() as client:
-        payload = {
-            "input": {"text": text},
-            "voice": {"languageCode": lang_code, "ssmlGender": "NEUTRAL"},
-            "audioConfig": {"audioEncoding": "MP3"},
-        }
-        response = await client.post(
-            f"{GEMINI_TTS_URL}?key={api_key}",
-            json=payload,
-            timeout=30.0,
-        )
-
-        if response.status_code == 429:
-            raise HTTPException(
-                status_code=429,
-                detail="Gemini TTS quota exceeded — try again later",
-            )
-
-        response.raise_for_status()
-        data = response.json()
-        audio_b64 = data.get("audioContent", "")
-        if audio_b64:
-            return base64.b64decode(audio_b64)
-        raise HTTPException(status_code=500, detail="No audio content returned from Gemini TTS")
+    try:
+        communicate = edge_tts.Communicate(text, voice)
+        audio_data = b""
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio":
+                audio_data += chunk["data"]
+        if not audio_data:
+            raise HTTPException(status_code=500, detail="Edge TTS returned empty audio")
+        return audio_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Edge TTS synthesis failed: {e}")
 
 
 async def dub_video_service(req: DubRequest):
-    """Generate AI-dubbed speech using Gemini TTS. Falls back to ElevenLabs if Gemini fails.
-
-    Args:
-        req: DubRequest with clip_id, target_language, and text_to_dub.
-
-    Returns:
-        dict with success, clip_id, language, source, and audio_url.
-    """
-    source = "gemini-tts"
-
+    """Generate AI-dubbed speech using Microsoft Edge TTS."""
     try:
-        audio_bytes = await _gemini_tts(req.text_to_dub, req.target_language)
-        # Persist the synthesized audio so the returned URL points at a real
-        # file (previously the bytes were generated and then discarded).
-        # Sanitize user-controlled components to keep the path inside /tmp.
+        audio_bytes = await _edge_tts(req.text_to_dub, req.target_language)
         safe_clip = _safe_slug(req.clip_id, "clip")
         safe_lang = _safe_slug(req.target_language, "lang")
         output_path = f"/tmp/dubbed_{safe_clip}_{safe_lang}.mp3"
@@ -98,78 +73,129 @@ async def dub_video_service(req: DubRequest):
             "success": True,
             "clip_id": req.clip_id,
             "language": req.target_language,
-            "source": source,
+            "source": "edge-tts",
             "audio_url": f"file://{output_path}",
             "bytes": len(audio_bytes),
         }
     except HTTPException:
-        pass
+        raise
     except Exception as e:
-        print(f"[GenerativeStudio] Gemini TTS error: {e}")
-
+        print(f"[GenerativeStudio] Edge TTS error: {e}")
     raise HTTPException(
         status_code=503,
-        detail="Dubbing unavailable — configure GEMINI_API_KEY",
+        detail="Dubbing unavailable — install edge-tts: pip install edge-tts",
     )
 
 
 async def overdub_audio_service(req: OverdubRequest):
-    """Generate voice-cloned overdub audio using Coqui TTS (XTTS v2).
+    """Generate voice-cloned overdub audio using F5-TTS.
 
-    Coqui XTTS v2 is the voice cloning engine — free, local, unlimited.
-
-    Args:
-        req: OverdubRequest with text, voice_id, and optional original_audio_url.
-
-    Returns:
-        dict with success, source, and audio_url.
+    F5-TTS provides zero-shot voice cloning from reference audio.
+    MIT licensed, 300M params, works on CPU (~1-2 min per utterance).
+    Falls back to CosyVoice 3 GPU if COSYVOICE_GPU_URL is set.
     """
-    try:
-        from TTS.api import TTS
+    # Try remote GPU service first (CosyVoice 3)
+    gpu_url = os.getenv("COSYVOICE_GPU_URL", "")
+    if gpu_url:
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(
+                    f"{gpu_url}/clone",
+                    json={
+                        "text": req.text,
+                        "reference_audio_url": req.original_audio_url or "",
+                        "voice_id": req.voice_id or "",
+                    },
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    if data.get("success"):
+                        return {
+                            "success": True,
+                            "source": "cosyvoice3-gpu",
+                            "audio_url": data["audio_url"],
+                        }
+                print(f"[GenerativeStudio] GPU service returned {resp.status_code}")
+        except Exception as e:
+            print(f"[GenerativeStudio] GPU service unreachable: {e}")
 
-        # Use XTTS v2 for voice cloning
-        tts = TTS(model_name="tts_models/multilingual/multi-dataset/xtts_v2", progress_bar=False)
+    # Local fallback: F5-TTS
+    ref_audio = "/tmp/speaker_reference.wav"
+    ref_text = req.voice_id or ""
 
-        if req.original_audio_url and req.original_audio_url.startswith("file://"):
-            speaker_wav = req.original_audio_url.replace("file://", "")
-        elif os.path.exists("/tmp/speaker_reference.wav"):
-            speaker_wav = "/tmp/speaker_reference.wav"
-        else:
-            speaker_wav = None
+    if req.original_audio_url and req.original_audio_url.startswith("file://"):
+        ref_audio = req.original_audio_url.replace("file://", "")
 
-        output_path = f"/tmp/overdub_coqui_{hash(req.text)}.wav"
-        tts.tts_to_file(
-            text=req.text,
-            file_path=output_path,
-            speaker_wav=speaker_wav,
-            language="en",
+    if not os.path.exists(ref_audio):
+        for candidate in ["/tmp/speaker_reference.wav", "/tmp/ref_edge.wav",
+            "/tmp/edge_tts_long.mp3", "/tmp/edge_tts_test.mp3"]:
+            if os.path.exists(candidate):
+                ref_audio = candidate
+                break
+
+    # Auto-generate reference with Edge TTS if none exists
+    if not os.path.exists(ref_audio):
+        try:
+            print("[GenerativeStudio] Generating reference audio via Edge TTS...")
+            ref_bytes = await _edge_tts(
+                "Hello, this is a reference voice for cloning. The quick brown fox jumps over the lazy dog.",
+                "en-US"
+            )
+            with open(ref_audio, "wb") as f:
+                f.write(ref_bytes)
+            ref_text = ref_text or "Hello, this is a reference voice for cloning."
+        except Exception as e:
+            print(f"[GenerativeStudio] Failed to generate reference: {e}")
+
+    if not os.path.exists(ref_audio):
+        raise HTTPException(
+            status_code=503,
+            detail="No reference audio found. Provide original_audio_url or place speaker_reference.wav in /tmp/.",
         )
+
+    output_path = f"/tmp/overdub_{hash(req.text)}.wav"
+
+    try:
+        import subprocess
+        cmd = [
+            "f5-tts_infer-cli",
+            "--model", "F5TTS_v1_Base",
+            "--vocoder_name", "vocos",
+            "--ref_audio", ref_audio,
+            "--ref_text", ref_text or "Hello, this is a reference voice.",
+            "--gen_text", req.text,
+            "--output_dir", "/tmp",
+            "--output_file", os.path.basename(output_path),
+            "--remove_silence",
+            "--device", "cpu",
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        if result.returncode != 0:
+            raise HTTPException(status_code=503, detail=f"F5-TTS failed: {result.stderr[-200:]}")
+        if not os.path.exists(output_path):
+            raise HTTPException(status_code=503, detail="F5-TTS completed but no output file")
         return {
             "success": True,
-            "source": "coqui-xtts-v2",
+            "source": "f5-tts",
             "audio_url": f"file://{output_path}",
+            "bytes": os.path.getsize(output_path),
         }
-    except ImportError:
-        print("[GenerativeStudio] Coqui TTS not installed. Run: pip install coqui-tts")
+    except FileNotFoundError:
+        raise HTTPException(status_code=503, detail="F5-TTS not installed. Run: pip install f5-tts")
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"[GenerativeStudio] Coqui TTS error: {e}")
-
-    raise HTTPException(
-        status_code=503,
-        detail="Voice cloning unavailable. Install Coqui TTS: pip install coqui-tts",
-    )
+        raise HTTPException(status_code=503, detail=f"Voice cloning failed: {e}")
 
 
 async def split_stems_service(req: StemSplitRequest):
     """Separate audio into vocal/instrumental stems using Demucs, Spleeter, or librosa."""
-
     audio_path = f"/tmp/{req.audio_id}.wav"
     stems_output = {}
     method = None
 
     config = DemucsConfig(stems=req.stems)
     pipeline = DemucsPipeline(config)
-
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, pipeline.separate, audio_path)
 
@@ -212,5 +238,4 @@ async def split_stems_service(req: StemSplitRequest):
 
     if not stems_output:
         raise HTTPException(status_code=503, detail="Stem separation unavailable")
-
     return {"success": True, "audio_id": req.audio_id, "source": method, "stems": stems_output}

@@ -530,11 +530,11 @@ spec:
                   name: lazynext-secrets
                   key: OPENAI_API_KEY
                   optional: true
-            - name: REPLICATE_API_TOKEN
+            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: REPLICATE_API_TOKEN
+                  key: FAL_KEY
                   optional: true
 ---
 apiVersion: v1
@@ -629,17 +629,11 @@ spec:
           env:
             - name: PYTHONUNBUFFERED
               value: "1"
-            - name: REPLICATE_API_TOKEN
+            - name: FAL_KEY
               valueFrom:
                 secretKeyRef:
                   name: lazynext-secrets
-                  key: REPLICATE_API_TOKEN
-                  optional: true
-            - name: ELEVENLABS_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: lazynext-secrets
-                  key: ELEVENLABS_API_KEY
+                  key: FAL_KEY
                   optional: true
           volumeMounts:
             - name: hf-cache

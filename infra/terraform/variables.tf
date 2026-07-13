@@ -85,15 +85,8 @@ variable "better_auth_secret" {
 # API Keys
 # ─────────────────────────────────────────────────────────────────────────────
 
-variable "replicate_api_token" {
-  description = "API token for Replicate (AI video generation)"
-  type        = string
-  sensitive   = true
-  default     = "UNSET_SECRET"
-}
-
-variable "elevenlabs_api_key" {
-  description = "API key for ElevenLabs (AI dubbing)"
+variable "fal_key" {
+  description = "API key for Fal.ai (Kling 3.0 video generation)"
   type        = string
   sensitive   = true
   default     = "UNSET_SECRET"
